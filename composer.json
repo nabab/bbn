@@ -17,7 +17,7 @@
 		"mustache/mustache": "dev-master"
 	},
 	"autoload": {
-			"psr-0": {"bbn\\lib": "src/"}
+			"psr-0": {"bbn": "src/"}
 	},
 	"minimum-stability": "dev"
 }
