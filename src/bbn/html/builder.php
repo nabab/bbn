@@ -145,6 +145,21 @@ class builder
 						break;
 				}
 			}
+			// Size calculation
+			if ( isset($cfg['options']['maxlength']) && !isset($cfg['options']['size']) ){
+				if ( $cfg['options']['maxlength'] <= 20 ){
+					$cfg['options']['size'] = $cfg['options']['maxlength'];
+				}
+				else if ( $cfg['options']['maxlength'] <= 50 ){
+					$cfg['options']['size'] = 20 + floor( ( $cfg['options']['maxlength'] - 20 ) / 2 );
+				}
+				else if ( $cfg['options']['maxlength'] <= 200 ){
+					$cfg['options']['size'] = floor($cfg['options']['maxlength']/2);
+				}
+				else{
+					$cfg['options']['size'] = 100;
+				}
+			}
 			if ( isset($cfg['options']) ){
 				$cfg['options'] = array_merge($tmp['options'], $cfg['options']);
 			}
@@ -243,7 +258,7 @@ class builder
 		return $st;
 	}
 
-	public function make_from_id($id, $cfg)
+	public function make_field_from_id($id, $cfg)
 	{
 		$tmp = array();
 		$field = '';
@@ -253,7 +268,7 @@ class builder
 		switch ( $id )
 		{
 			case 1:
-			$field = 'datepicker';
+			$tmp['field'] = 'datepicker';
 			break;
 
 			case 2:
@@ -262,7 +277,7 @@ class builder
 			$tmp['options']['type'] = 'text';
 			$tmp['options']['maxlength'] = 50;
 			$tmp['options']['size'] = 25;
-			$tmp['options']['culture'] = $tmp['lang'];
+			$tmp['options']['culture'] = $this->_current['lang'];
 			$tmp['options']['email'] = 1;
 			// param1 === 'yes ? multiple : single
 			break;
@@ -290,9 +305,9 @@ class builder
 			// relation
 			$tmp['tag'] = 'input';
 			$tmp['options']['type'] = 'text';
-			$tmp['options']['number'] = 1;
-			if ( $tmp->db ){
-				$r = $tmp->db->query();
+			if ( isset($cfg['options']['db']) ){
+				$tmp['value'] = $cfg['params'][0].'////'.$cfg['params'][1];
+				//$r = $tmp->db->query();
 			}
 			// Whatever is the primary key of the referred table
 			break;
@@ -334,8 +349,19 @@ class builder
 				break;
 			
 			case 16:
-				$tmp['tag'] = 'input';
-				$tmp['options']['type'] = 'text';
+				$tmp['field'] = 'dropdown';
+				$tmp['options']['data'] = [];
+				$a1 = explode(',', $cfg['params'][0]);
+				$a2 = explode(',', $cfg['params'][1]);
+				foreach ( $a1 as $i => $a ){
+					if ( strpos($a, "'") === 0 ){
+						$a = substr($a, 1, -1);
+					}
+					if ( strpos($a2[$i], "'") === 0 ){
+						$a2[$i] = substr($a2[$i], 1, -1);
+					}
+					array_push($tmp['options']['data'], array('text'=>$a, 'value'=>$a2[$i]));
+				}
 				break;
 			
 			case 18:
@@ -551,6 +577,7 @@ class builder
 			case 673747416:
 			$tmp['tag'] = 'input';
 			$tmp['options']['type'] = 'text';
+			$tmp['options']['maxlength'] = $cfg['params'][0];
 			break;
 			
 			case 743318065:

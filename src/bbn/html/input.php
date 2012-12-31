@@ -121,6 +121,15 @@ class input
 			$this->html .= '<'.$this->tag.' name="'.$this->name.'" id="'.$this->id.'"';
 			if ( $this->tag === 'input' && isset($this->options['type']) ){
 				$this->html .= ' type="'.$this->options['type'].'"';
+				if ( $this->options['type'] === 'text' ){
+					if ( isset($this->options['maxlength']) && ( $this->options['maxlength'] > 0 ) && $this->options['maxlength'] <= 1000 ){
+						$this->html .= ' maxlength="'.$this->options['maxlength'].'"';
+					}
+					if ( isset($this->options['size']) && ( $this->options['size'] > 0 ) && $this->options['size'] <= 100 ){
+						$this->html .= ' size="'.$this->options['size'].'"';
+					}
+				}
+				$this->html .= ' value="'.$this->value.'"';
 			}
 			if ( isset($this->options['title']) ){
 				$this->html .= ' title="'.$this->options['title'].'"';
