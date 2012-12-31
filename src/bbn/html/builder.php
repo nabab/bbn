@@ -96,21 +96,21 @@ class builder
 						$tmp['options']['type'] = 'text';
 						$tmp['options']['maxlength'] = 10;
 						$tmp['options']['size'] = 10;
-						$tmp['options']['culture'] = $tmp['lang'];
+						$tmp['options']['culture'] = $tmp['lang'].'-'.strtoupper($tmp['lang']);
 						break;
 					case 'timepicker':
 						$tmp['tag'] = 'input';
 						$tmp['options']['type'] = 'text';
 						$tmp['options']['maxlength'] = 8;
 						$tmp['options']['size'] = 8;
-						$tmp['options']['culture'] = $tmp['lang'];
+						$tmp['options']['culture'] = $tmp['lang'].'-'.strtoupper($tmp['lang']);
 						break;
 					case 'datetimepicker':
 						$tmp['tag'] = 'input';
 						$tmp['options']['type'] = 'text';
 						$tmp['options']['maxlength'] = 19;
 						$tmp['options']['size'] = 20;
-						$tmp['options']['culture'] = $tmp['lang'];
+						$tmp['options']['culture'] = $tmp['lang'].'-'.strtoupper($tmp['lang']);
 						break;
 					case 'rte':
 						$tmp['tag'] = 'textarea';
@@ -169,7 +169,8 @@ class builder
 				{
 					case 'datepicker':
 						$cfg['script'] = '$("#%s").kendoDatePicker({
-							"format":"yyyy-MM-dd"
+							"format":"yyyy-MM-dd",
+							"culture": "'.(	isset($cfg['options']['culture']) ? $cfg['options']['culture'] : $cfg['lang'].'-'.strtoupper($cfg['lang']) ).'"
 						});';
 						// format
 						// dates
@@ -180,14 +181,16 @@ class builder
 						break;
 					case 'timepicker':
 						$cfg['script'] = '$("#%s").kendoTimePicker({
-							"format":"HH:mm:tt"
+							"format":"HH:mm:tt",
+							"culture": "'.(	isset($cfg['options']['culture']) ? $cfg['options']['culture'] : $cfg['lang'].'-'.strtoupper($cfg['lang']) ).'"
 						});';
 						// format
 						// dates
 						break;
 					case 'datetimepicker':
 						$cfg['script'] = '$("#%s").kendoDateTimePicker({
-							"format":"yyyy-MM-dd hh:mm:ss"
+							"format":"yyyy-MM-dd hh:mm:ss",
+							"culture": "'.(	isset($cfg['options']['culture']) ? $cfg['options']['culture'] : $cfg['lang'].'-'.strtoupper($cfg['lang']) ).'"
 						});';
 						// format
 						// dates
@@ -305,8 +308,8 @@ class builder
 			// relation
 			$tmp['tag'] = 'input';
 			$tmp['options']['type'] = 'text';
-			if ( isset($cfg['options']['db']) ){
-				$tmp['value'] = $cfg['params'][0].'////'.$cfg['params'][1];
+			if ( isset($cfg['options']['db']) && is_object($cfg['options']['db']) ){
+				$cfg['value'] = $cfg['params'][0].'////'.$cfg['params'][1];
 				//$r = $tmp->db->query();
 			}
 			// Whatever is the primary key of the referred table

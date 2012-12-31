@@ -40,7 +40,7 @@ class input
 	 * The controller file (with full path)
 	 * @var null|string
 	 */
-	$label,
+		$label,
 	/**
 	 * The mode of the output (dom, html, json, txt, xml...)
 	 * @var null|string
@@ -118,9 +118,12 @@ class input
 	public function get_html()
 	{
 		if ( empty($this->html) && $this->name ){
+			
 			$this->html .= '<'.$this->tag.' name="'.$this->name.'" id="'.$this->id.'"';
+			
 			if ( $this->tag === 'input' && isset($this->options['type']) ){
 				$this->html .= ' type="'.$this->options['type'].'"';
+				
 				if ( $this->options['type'] === 'text' ){
 					if ( isset($this->options['maxlength']) && ( $this->options['maxlength'] > 0 ) && $this->options['maxlength'] <= 1000 ){
 						$this->html .= ' maxlength="'.$this->options['maxlength'].'"';
@@ -129,11 +132,14 @@ class input
 						$this->html .= ' size="'.$this->options['size'].'"';
 					}
 				}
+				
 				$this->html .= ' value="'.$this->value.'"';
 			}
+			
 			if ( isset($this->options['title']) ){
 				$this->html .= ' title="'.$this->options['title'].'"';
 			}
+			
 			$class = '';
 			if ( isset($this->options['cssclass']) ){
 				$class .= $this->options['cssclass'].' ';
@@ -153,13 +159,17 @@ class input
 			if ( isset($this->options['creditcard']) ){
 				$class .= 'creditcard ';
 			}
+			
 			if ( !empty($class) ){
 				$this->html .= ' class="'.trim($class).'"';
 			}
+			
 			$this->html .= '>';
+			
 			if ( $this->tag === 'select' || $this->tag === 'textarea' ){
 				$this->html .= '</'.$this->tag.'>';
 			}
+			
 			if ( isset($this->options['placeholder']) && strpos($this->options['placeholder'],'%s') !== false ){
 				$this->html = sprintf($this->options['placeholder'], $this->html);
 			}
