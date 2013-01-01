@@ -73,7 +73,7 @@ class query extends \PDOStatement implements actions
 					return parent::execute($args);
 				}
 				catch ( \PDOException $e ){
-					database::error($e,$this->queryString);
+					connection::error($e,$this->queryString);
 				}
 			}
 			else if ( !is_null($args) )
@@ -83,7 +83,7 @@ class query extends \PDOStatement implements actions
 					return eval( 'return parent::execute( $args );' );
 				}
 				catch ( \PDOException $e ){
-					database::error($e,$this->queryString);
+					connection::error($e,$this->queryString);
 				}
 			}
 			else
@@ -101,7 +101,7 @@ class query extends \PDOStatement implements actions
 					return parent::execute();
 				}
 				catch ( \PDOException $e ){
-					database::error($e,$this->queryString);
+					connection::error($e,$this->queryString);
 				}
 			}
 		}
@@ -131,7 +131,7 @@ class query extends \PDOStatement implements actions
 						$this->num = $n + 1;
 				}
 				catch ( \PDOException $e )
-					{ database::error($e,$this->queryString); }
+					{ connection::error($e,$this->queryString); }
 			}
 		}
 		return $this->num;

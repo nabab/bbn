@@ -74,20 +74,26 @@ class builder
 		}
 	}
 	
+	public function get_form($action)
+	{
+		$s = '<form action="'.$action.'" method="post"><fieldset>';
+		foreach ( $this->items as $it ){
+			$s .= $it->get_label_input();
+		}
+		$s .= '</fieldset></form>';
+		return $s;
+	}
+	
 	public function get_input($cfg=array())
 	{
 		return new \bbn\html\input(array_merge($this->_current,$cfg));
-	}
-	
-	public function get_textarea($cfg=array())
-	{
-	
 	}
 	
 	public function make_field($cfg=null)
 	{
 		if ( is_array($cfg) && isset($cfg['name']) ){
 			$tmp = $this->_current;
+			$tmp['id'] = isset($cfg['id']) ? $cfg['id'] : \bbn\str\text::genpwd(20,15);
 			if ( isset($cfg['field']) ) {
 				switch ( $cfg['field'] )
 				{
@@ -168,7 +174,7 @@ class builder
 				switch ( $cfg['field'] )
 				{
 					case 'datepicker':
-						$cfg['script'] = '$("#%s").kendoDatePicker({
+						$cfg['script'] = '$("#'.$cfg['id'].'").kendoDatePicker({
 							"format":"yyyy-MM-dd",
 							"culture": "'.(	isset($cfg['options']['culture']) ? $cfg['options']['culture'] : $cfg['lang'].'-'.strtoupper($cfg['lang']) ).'"
 						});';
@@ -180,7 +186,7 @@ class builder
 						// after
 						break;
 					case 'timepicker':
-						$cfg['script'] = '$("#%s").kendoTimePicker({
+						$cfg['script'] = '$("#'.$cfg['id'].'").kendoTimePicker({
 							"format":"HH:mm:tt",
 							"culture": "'.(	isset($cfg['options']['culture']) ? $cfg['options']['culture'] : $cfg['lang'].'-'.strtoupper($cfg['lang']) ).'"
 						});';
@@ -188,7 +194,7 @@ class builder
 						// dates
 						break;
 					case 'datetimepicker':
-						$cfg['script'] = '$("#%s").kendoDateTimePicker({
+						$cfg['script'] = '$("#'.$cfg['id'].'").kendoDateTimePicker({
 							"format":"yyyy-MM-dd hh:mm:ss",
 							"culture": "'.(	isset($cfg['options']['culture']) ? $cfg['options']['culture'] : $cfg['lang'].'-'.strtoupper($cfg['lang']) ).'"
 						});';
@@ -196,7 +202,7 @@ class builder
 						// dates
 						break;
 					case 'rte':
-						$cfg['script'] = 'CKEDITOR.replace("%s");';
+						$cfg['script'] = 'CKEDITOR.replace("'.$cfg['id'].'");';
 						// autoParagraph: inline = true
 						// autogrow: true|false minheight/maxheight
 						// baseHref: prendre de bbn_sites
@@ -205,11 +211,20 @@ class builder
 						// 
 						break;
 					case 'dropdown':
-						$cfg['script'] = '$("#%s").kendoDropDownList({
+						if ( isset($cfg['options']['sql'], $cfg['options']['db']) ){
+							$cfg['options']['data'] = array();
+							if ( $ds = $cfg['options']['db']->get_irows($cfg['options']['sql']) ){
+								foreach ( $ds as $d ){
+									array_push($cfg['options']['data'], array('value' => $d[0], 'text' => $d[1]));
+								}
+							}
+						}
+						$cfg['script'] = '$("#'.$cfg['id'].'").kendoDropDownList({
 							dataTextField: "text",
 							dataValueField: "value",
 							dataSource: '.json_encode($cfg['options']['data']).'
 						});';
+						unset($cfg['options']['data']);
 						// onchange
 						// dataTextField
 						// dataValueField
@@ -233,16 +248,14 @@ class builder
 		return false;
 	}
 	
-	public function get_form($action)
+	public function get_config()
 	{
-		$s = '<form action="'.$action.'" method="post"><fieldset>';
+		$r = [];
 		foreach ( $this->items as $it ){
-			$s .= $it->get_label_input();
+			$r[] = $it->get_config();
 		}
-		$s .= '</fieldset></form>';
-		return $s;
+		return $r;
 	}
-	
 	public function get_html()
 	{
 		$st = '';
@@ -306,13 +319,25 @@ class builder
 			
 			case 5:
 			// relation
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			if ( isset($cfg['options']['db']) && is_object($cfg['options']['db']) ){
-				$cfg['value'] = $cfg['params'][0].'////'.$cfg['params'][1];
-				//$r = $tmp->db->query();
+			// var_dump($cfg);
+			$tmp['field'] = 'dropdown';
+			if ( isset($cfg['options']['db'],$cfg['params'][0]) && is_object($cfg['options']['db']) ){
+				$p = explode('.', $cfg['params'][0]);
+				if ( count($p) === 2 ){
+					$table = $p[0];
+					$field = $p[1];
+					$select = "`$table`.`$field`";
+					$order = "`$table`.`$field`";
+					if ( isset($cfg['params'][1]) ){
+						$p = explode('.', $cfg['params'][1]);
+						$table = $p[0];
+						$field = $p[1];
+						$select = "CONCAT ($select,' ',`$table`.`$field`)";
+						$order .= ",`$table`.`$field`";
+					}
+					$cfg['options']['sql'] = "SELECT id, $select FROM $table ORDER BY $order LIMIT 100";
+				}
 			}
-			// Whatever is the primary key of the referred table
 			break;
 			
 			case 8:
@@ -365,7 +390,7 @@ class builder
 					}
 					array_push($tmp['options']['data'], array('text'=>$a, 'value'=>$a2[$i]));
 				}
-				break;
+			break;
 			
 			case 18:
 				$tmp['tag'] = 'input';
@@ -618,6 +643,10 @@ class builder
 			$tmp['options']['type'] = 'text';
 			break;
 			
+		}
+		if ( isset($cfg['options'], $tmp['options']) ){
+			
+			$cfg['options'] = array_merge($tmp['options'], $cfg['options']);
 		}
 		$cfg = array_merge($tmp, $cfg);
 		return $this->make_field($cfg, $field);

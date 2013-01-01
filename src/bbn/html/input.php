@@ -50,7 +50,8 @@ class input
 	 * The mode of the output (dom, html, json, txt, xml...)
 	 * @var null|string
 	 */
-	private $options = array(),
+	private $cfg,
+		$options = array(),
 		$html = '',
 		$script;
 	/**
@@ -66,10 +67,11 @@ class input
 		{
 			$mandatory_opt = array();
 			$possible_opt = array("required", "width", "placeholder", "cssclass", "title");
+			$this->cfg = $cfg;
 			$this->tag = strtolower($cfg['tag']);
 			$this->name = $cfg['name'];
-			$this->label = isset($cfg['label']) ? $cfg['label'] : str_replace(']', ')',str_replace('[',' (',str_replace('_', ' ', $cfg['name'])));
 			$this->id = isset($cfg['id']) ? $cfg['id'] : \bbn\str\text::genpwd(20,15);
+			$this->label = isset($cfg['label']) ? $cfg['label'] : str_replace(']', ')',str_replace('[',' (',str_replace('_', ' ', $cfg['name'])));
 			$this->required = isset($cfg['required']) ? $cfg['required'] : false;
 			$this->options = isset($cfg['options']) ? $cfg['options'] : array();
 			$this->script = isset($cfg['script']) ? $cfg['script'] : '';
@@ -107,6 +109,11 @@ class input
 			}
 		}
 	}
+	
+	public function get_config()
+	{
+		return $this->cfg;
+	}
 	public function get_label_input()
 	{
 		$s = $this->get_html();
@@ -119,7 +126,11 @@ class input
 	{
 		if ( empty($this->html) && $this->name ){
 			
-			$this->html .= '<'.$this->tag.' name="'.$this->name.'" id="'.$this->id.'"';
+			$this->html .= '<'.$this->tag.' name="'.$this->name.'"';
+			
+			if ( isset($this->id) ){
+				$this->html .= ' id="'.$this->id.'"';
+			}
 			
 			if ( $this->tag === 'input' && isset($this->options['type']) ){
 				$this->html .= ' type="'.$this->options['type'].'"';
@@ -181,11 +192,13 @@ class input
 	{
 		$r = '';
 		if ( $this->name ){
-			if ( $this->value ){
+			/*
+			if ( $this->value && $this->id ){
 				$r .= '$("#'.$this->id.'").val("'.$this->value.'");';
 			}
+			*/
 			if ( $this->script ){
-				$r .= sprintf($this->script, $this->id);
+				$r .= $this->script;
 			}
 		}
 		return $r;
