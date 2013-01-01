@@ -114,14 +114,50 @@ class input
 	{
 		return $this->cfg;
 	}
+
 	public function get_label_input()
 	{
 		$s = $this->get_html();
 		if ( !empty($s) ){
-			$s = '<label class="appui-form-label">'.$this->label.'</label><div class="appui-form-field">'.$s.'</div>';
+			$s = '<label class="appui-form-label" title="'.str_replace('"','',print_r($this->cfg,true)).'">'.$this->label.'</label><div class="appui-form-field">'.$s.'</div>';
 		}
 		return $s;
 	}
+	
+	public function get_script()
+	{
+		$r = '';
+		if ( $this->name ){
+			
+			if ( $this->id ){
+				$r .= '$("#'.$this->id.'").focus(function(){
+					var $$ = $(this),
+					lab = $(this).prevAll("label").first();
+					if ( lab.length === 0 ){
+						lab = $$.parent().prevAll("label").first();
+					}
+					if ( lab.length === 1 ){
+						var o = $$.parent().offset(), 
+							w = lab.width(),
+							$boum = $(\'<div class="k-tooltip" id="form_tooltip" style="position:absolute">Ceci est un test</div>\')
+								.css({
+									"maxWidth": w,
+									"top": o.top-10,
+									"right": appui.v.width - o.left
+								});
+						$("body").append($boum);
+					}
+				}).blur(function(){
+					$("#form_tooltip").remove();
+				});';
+			}
+			if ( $this->script ){
+				$r .= $this->script;
+			}
+		}
+		return $r;
+	}
+	
 	public function get_html()
 	{
 		if ( empty($this->html) && $this->name ){
@@ -139,6 +175,10 @@ class input
 					if ( isset($this->options['maxlength']) && ( $this->options['maxlength'] > 0 ) && $this->options['maxlength'] <= 1000 ){
 						$this->html .= ' maxlength="'.$this->options['maxlength'].'"';
 					}
+					if ( isset($this->options['minlength']) && ( $this->options['minlength'] > 0 ) && $this->options['minlength'] <= 1000 && ( 
+					( isset($this->options['maxlength']) && $this->options['maxlength'] > $this->options['minlength'] ) || !isset($this->options['maxlength']) ) ){
+						$this->html .= ' minlength="'.$this->options['minlength'].'"';
+					}
 					if ( isset($this->options['size']) && ( $this->options['size'] > 0 ) && $this->options['size'] <= 100 ){
 						$this->html .= ' size="'.$this->options['size'].'"';
 					}
@@ -152,8 +192,13 @@ class input
 			}
 			
 			$class = '';
+			
 			if ( isset($this->options['cssclass']) ){
 				$class .= $this->options['cssclass'].' ';
+			}
+
+			if ( $this->required ){
+				$class .= 'required ';
 			}
 			if ( isset($this->options['email']) ){
 				$class .= 'email ';
@@ -186,22 +231,6 @@ class input
 			}
 		}
 		return $this->html;
-	}
-	
-	public function get_script()
-	{
-		$r = '';
-		if ( $this->name ){
-			/*
-			if ( $this->value && $this->id ){
-				$r .= '$("#'.$this->id.'").val("'.$this->value.'");';
-			}
-			*/
-			if ( $this->script ){
-				$r .= $this->script;
-			}
-		}
-		return $r;
 	}
 	
 }

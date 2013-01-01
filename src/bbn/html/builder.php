@@ -58,6 +58,7 @@ class builder
 			$this->_current[$k] = $v;
 		}
 		$this->items = array();
+		$this->id = \bbn\str\text::genpwd(20,15);
 	}
 	
 	public function set_option($opt_val)
@@ -76,17 +77,44 @@ class builder
 	
 	public function get_form($action)
 	{
-		$s = '<form action="'.$action.'" method="post"><fieldset>';
+		$s = '<form action="'.$action.'" method="post" id="'.$this->id.'"><fieldset>';
 		foreach ( $this->items as $it ){
 			$s .= $it->get_label_input();
 		}
-		$s .= '</fieldset></form>';
+		$s .= '<div class="appui-form-label"> </div><div class="appui-form-field"><input type="submit"></div></fieldset></form>';
 		return $s;
 	}
 	
 	public function get_input($cfg=array())
 	{
 		return new \bbn\html\input(array_merge($this->_current,$cfg));
+	}
+	
+	public function get_config()
+	{
+		$r = [];
+		foreach ( $this->items as $it ){
+			$r[] = $it->get_config();
+		}
+		return $r;
+	}
+	public function get_html()
+	{
+		$st = '';
+		foreach ( $this->items as $it ){
+			$st .= $it->get_html();
+		}
+		return $st;
+	}
+	
+	public function get_script()
+	{
+		$st = '';
+		foreach ( $this->items as $it ){
+			$st .= $it->get_script();
+		}
+		$st .= '$("#'.$this->id.'").validate();';
+		return $st;
 	}
 	
 	public function make_field($cfg=null)
@@ -165,6 +193,9 @@ class builder
 				else{
 					$cfg['options']['size'] = 100;
 				}
+			}
+			if ( isset($cfg['options']['size'], $cfg['options']['minlength']) && $cfg['options']['size'] < $cfg['options']['minlength']){
+				$cfg['options']['size'] = $cfg['options']['minlength'];
 			}
 			if ( isset($cfg['options']) ){
 				$cfg['options'] = array_merge($tmp['options'], $cfg['options']);
@@ -248,32 +279,6 @@ class builder
 		return false;
 	}
 	
-	public function get_config()
-	{
-		$r = [];
-		foreach ( $this->items as $it ){
-			$r[] = $it->get_config();
-		}
-		return $r;
-	}
-	public function get_html()
-	{
-		$st = '';
-		foreach ( $this->items as $it ){
-			$st .= $it->get_html();
-		}
-		return $st;
-	}
-
-	public function get_script()
-	{
-		$st = '';
-		foreach ( $this->items as $it ){
-			$st .= $it->get_script();
-		}
-		return $st;
-	}
-
 	public function make_field_from_id($id, $cfg)
 	{
 		$tmp = array();
@@ -606,6 +611,9 @@ class builder
 			$tmp['tag'] = 'input';
 			$tmp['options']['type'] = 'text';
 			$tmp['options']['maxlength'] = $cfg['params'][0];
+			if ( isset($cfg['params'][1]) ){
+				$tmp['options']['minlength'] = $cfg['params'][1];
+			}
 			break;
 			
 			case 743318065:
@@ -645,7 +653,6 @@ class builder
 			
 		}
 		if ( isset($cfg['options'], $tmp['options']) ){
-			
 			$cfg['options'] = array_merge($tmp['options'], $cfg['options']);
 		}
 		$cfg = array_merge($tmp, $cfg);
