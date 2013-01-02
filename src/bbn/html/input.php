@@ -184,7 +184,7 @@ class input
 					}
 				}
 				
-				$this->html .= ' value="'.$this->value.'"';
+				$this->html .= ' value="'.htmlentities($this->value).'"';
 			}
 			
 			if ( isset($this->options['title']) ){

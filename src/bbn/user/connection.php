@@ -258,7 +258,7 @@ class connection extends \bbn\obj
 	}
 
 	/**
-	 * @return void 
+	 * @return array | false 
 	 */
 	private function _refresh_info()
 	{
@@ -275,7 +275,7 @@ class connection extends \bbn\obj
 	}
 
 	/**
-	 * @return void 
+	 * @return bool 
 	 */
 	public function check_session()
 	{

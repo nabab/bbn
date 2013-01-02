@@ -305,10 +305,7 @@ class builder
 			
 			case 3:
 			// rich text
-			$tmp['tag'] = 'textarea';
-			$tmp['script'] = 'CKEDITOR.replace("%s");';
-			$tmp['options']['rows'] = 6;
-			$tmp['options']['cols'] = 20;
+			$tmp['field'] = 'rte';
 			// Type: Text
 			break;
 			
@@ -347,16 +344,14 @@ class builder
 			
 			case 8:
 			// rich small text
-			$tmp['tag'] = 'textarea';
-			$tmp['script'] = 'CKEDITOR.replace("%s");';
+			$tmp['field'] = 'rte';
 			$tmp['options']['rows'] = 3;
 			$tmp['options']['cols'] = 15;
 			// type Tinytext
 			break;
 
 			case 9:
-			$tmp['tag'] = 'textarea';
-			$tmp['script'] = 'CKEDITOR.replace("%s");';
+			$tmp['field'] = 'rte';
 			$tmp['options']['rows'] = 6;
 			$tmp['options']['cols'] = 20;
 			// type Text

@@ -694,7 +694,7 @@ class mvc
 					unset($this->obj->prescript);
 				}
 				else{
-					$this->obj->prescript = \bbn\str\text::clean($this->obj->prescript,'code');
+					$this->obj->prescript = \JShrink\Minifier::minify($this->obj->prescript);
 				}
 			}
 			if ( isset($this->obj->script) ){
@@ -702,7 +702,7 @@ class mvc
 					unset($this->obj->script);
 				}
 				else{
-					$this->obj->script = \bbn\str\text::clean($this->obj->script,'code');
+					$this->obj->script = \JShrink\Minifier::minify($this->obj->script);
 				}
 			}
 			if ( isset($this->obj->postscript) ){
@@ -710,7 +710,7 @@ class mvc
 					unset($this->obj->postscript);
 				}
 				else{
-					$this->obj->postscript = \bbn\str\text::clean($this->obj->postscript,'code');
+					$this->obj->postscript = \JShrink\Minifier::minify($this->obj->postscript);
 				}
 			}
 			

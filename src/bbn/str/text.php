@@ -133,14 +133,12 @@ class text
 				$chars = array(';','=','+','-','\(','\)','\{','\}','\[','\]',',',':');
 				foreach ( $chars as $char )
 				{
-					/*
 					while ( mb_strpos($st,$char.' ') !== false ){
 						$st = mb_ereg_replace($char.' ',$char,$st);
 					}
 					while ( mb_strpos($st,' '.$char) !== false ){
 						$st = mb_ereg_replace(' '.$char,$char,$st);
 					}
-					*/
 				}
 				$st = mb_ereg_replace('<\?p'.'hp','<?p'.'hp ',$st);
 				$st = mb_ereg_replace('\?'.'>','?'.'> ',$st);
