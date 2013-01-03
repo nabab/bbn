@@ -202,12 +202,17 @@ class connection extends \PDO implements actions
 		if ( is_string($args[0]) )
 		{
 			$statement = trim(array_shift($args));
-			if ( isset($args[0]) && is_array($args[0]) && !array_key_exists(0,$args[0]) )
+			// Case where drivers are arguments
+			if ( isset($args[0]) && is_array($args[0]) && !array_key_exists(0,$args[0]) ){
 				$driver_options = array_shift($args);
-			if ( isset($args[0]) && is_array($args[0]) && array_key_exists(0,$args[0]) )
+			}
+			// Case where values are argument
+			else if ( isset($args[0]) && is_array($args[0]) ){
 				$args = $args[0];
-			if ( !isset($driver_options) )
+			}
+			if ( !isset($driver_options) ){
 				$driver_options = array();
+			}
 			$values = array();
 			$num_values = 0;
 			foreach ( $args as $i => $arg )
@@ -234,8 +239,10 @@ class connection extends \PDO implements actions
 				/* Or looking for question marks */
 				preg_match_all('/(\?)/',$statement,$exp);
 				/* The number of values must match the number of values to bind */
-				if ( $num_values !== count($exp[1]) )
-					die(var_dump('Incorrect arguments count',$driver_options,$statement,$values));
+				if ( $num_values !== count($exp[1]) ){
+					var_dump('Incorrect arguments count (your values: '.$num_values.', in the statement: '.count($exp[1]).')','options',$driver_options,'statement',$statement,'start of values',$values, 'end of values');
+					exit;
+				}
 				foreach ( $exp[1] as $i => $e )
 				{
 					if ( $e == 'u' || ctype_digit($values[$i][0]) )
@@ -534,7 +541,7 @@ class connection extends \PDO implements actions
 	{
 		if ( $sql = $this->get_insert($table, array_keys($values), $ignore) ){
 			try{
-				return $this->query($sql, $values);
+				return $this->query($sql, array_values($values));
 			}
 			catch (\PDOException $e ){
 				self::error($e,$this->last_query);
@@ -545,9 +552,62 @@ class connection extends \PDO implements actions
 	/**
 	 * @return void 
 	 */
-	public function insert_ignore($table, $values, $where=array())
+	public function insert_update($table, array $values)
 	{
-		return $this->insert($table, $values, $where, 1);
+		if ( $sql = $this->get_insert($table, array_keys($values)) ){
+			$sql .= " ON DUPLICATE KEY UPDATE ";
+			$vals = array_values($values);
+			foreach ( $values as $k => $v ){
+				$sql .= "`$k` = ?, ";
+				array_push($vals, $v);
+			}
+			$sql = substr($sql,0,strrpos($sql,','));
+			var_dump($sql);
+			try{
+				return $this->query($sql, $vals);
+			}
+			catch (\PDOException $e ){
+				self::error($e,$this->last_query);
+			}
+		}
+	}
+
+	/**
+	 * @return void 
+	 */
+	public function update($table, array $values, array $where)
+	{
+		if ( $sql = $this->get_update($table, array_keys($values), array_keys($where)) ){
+			try{
+				return $this->query($sql, array_merge(array_values($values), array_values($where)));
+			}
+			catch (\PDOException $e ){
+				self::error($e,$this->last_query);
+			}
+		}
+	}
+
+	/**
+	 * @return void 
+	 */
+	public function delete($table, array $where)
+	{
+		if ( $sql = $this->get_delete($table, array_keys($where)) ){
+			try{
+				return $this->query($sql, array_values($where));
+			}
+			catch (\PDOException $e ){
+				self::error($e,$this->last_query);
+			}
+		}
+	}
+	
+	/**
+	 * @return void 
+	 */
+	public function insert_ignore($table, array $values)
+	{
+		return $this->insert($table, $values, 1);
 	}
 
 	/**
@@ -617,22 +677,49 @@ class connection extends \PDO implements actions
 		}
 		return $r;
 	}
+	
 	/**
 	 * @return string | false
 	 */
 	public function get_create($table)
 	{
-		if ( $r = $this->get_row("SHOW CREATE TABLE $table") ){
+		if ( text::check_name($table) && $r = $this->get_row("SHOW CREATE TABLE $table") ){
 			return $r['Create Table'];
 		}
 		return false;
 	}
+	
+	/**
+	 * @return string | false
+	 */
+	public function get_delete($table, array $where)
+	{
+		if ( text::check_name($table) && ( $m = $this->modelize($table) ) && count($m['fields']) > 0 && count($where) > 0 ){
+			$r = "DELETE FROM $table WHERE 1 ";
+
+			foreach ( $where as $f ){
+				if ( !isset($m['fields'][$f]) ){
+					die("The fields to search for in get_delete don't correspond to the table");
+				}
+				$r .= "\nAND `$f` ";
+				if ( stripos($m['fields'][$f]['type'],'int') !== false ){
+					$r .= "= %u ";
+				}
+				else{
+					$r .= "= %s ";
+				}
+			}
+			return $r;
+		}
+		return false;
+	}
+
 	/**
 	 * @return string
 	 */
 	public function get_select($table, $php=false)
 	{
-		if ( text::check_name($table) && ( $m = $this->modelize($table) ) && count($m['fields_list']) > 0 )
+		if ( text::check_name($table) && ( $m = $this->modelize($table) ) && count($m['fields']) > 0 )
 		{
 			$r = '';
 			if ( $php ){
@@ -640,7 +727,7 @@ class connection extends \PDO implements actions
 			}
 			$r .= "SELECT \n";
 			$i = 0;
-			foreach ( $m['fields_list'] as $f ){
+			foreach ( array_keys($m['fields']) as $f ){
 				$i++;
 				$r .= "`$f`, ";
 				if ( $i % 4 === 0 ){
@@ -682,7 +769,7 @@ class connection extends \PDO implements actions
 		if ( $php ){
 			$r .= '$db->query("';
 		}
-		if ( text::check_name($table) && ( $m = $this->modelize($table) ) && count($m['fields_list']) > 0 )
+		if ( text::check_name($table) && ( $m = $this->modelize($table) ) && count($m['fields']) > 0 )
 		{
 			$r .= "INSERT ";
 			if ( $ignore ){
@@ -690,9 +777,9 @@ class connection extends \PDO implements actions
 			}
 			$r .= "INTO `$table` (\n";
 			$i = 0;
-			foreach ( $m['fields_list'] as $f ){
-				if ( count($fields) === 0 || in_array($f,$fields) ){
-					$r .= "`$f`, ";
+			foreach ( array_keys($m['fields']) as $k ){
+				if ( count($fields) === 0 || in_array($k,$fields) ){
+					$r .= "`$k`, ";
 					$i++;
 					if ( $i % 4 === 0 ){
 						$r .= "\n";
@@ -701,9 +788,9 @@ class connection extends \PDO implements actions
 			}
 			$r = substr($r,0,strrpos($r,',')).")\nVALUES (\n";
 			$i = 0;
-			foreach ( $m['fields'] as $f ){
-				if ( count($fields) === 0 || in_array($f,$fields) ){
-					if ( stripos($f['Type'],'INT') !== false ){
+			foreach ( $m['fields'] as $k => $f ){
+				if ( count($fields) === 0 || in_array($k,$fields) ){
+					if ( stripos($f['type'],'INT') !== false ){
 						$r .= "%u, ";
 					}
 					else{
@@ -719,15 +806,16 @@ class connection extends \PDO implements actions
 			if ( $php ){
 				$r .= "\",\n";
 				$i = 0;
-				foreach ( $m['fields_list'] as $f ){
-					$r .= "\$d['$f'], ";
+				foreach ( array_keys($m['fields']) as $k ){
+					$r .= "\$d['$k'], ";
 					$i++;
 					if ( $i % 4 === 0 ){
 						$r .= "\n";
 					}
 				}
+				$r = substr($r,0,strrpos($r,',')).');';
 			}
-			return substr($r,0,strrpos($r,',')).");";
+			return $r;
 		}
 		return false;
 	}
@@ -735,8 +823,62 @@ class connection extends \PDO implements actions
 	/**
 	 * @return string
 	 */
-	public function get_update($table)
+	public function get_update($table, $fields = array(), $where = array(), $php = false)
 	{
+		$r = '';
+		if ( $php ){
+			$r .= '$db->query("';
+		}
+		if ( text::check_name($table) && ( $m = $this->modelize($table) ) && count($m['fields']) > 0 )
+		{
+			if ( is_string($where) ){
+				$where = array($where);
+			}
+			$r .= "UPDATE `$table` SET ";
+			$i = 0;
+			foreach ( array_keys($m['fields']) as $k ){
+				if ( !in_array($k, $where) && ( count($fields) === 0 || in_array($k,$fields) ) ){
+					$r .= "`$k` = ";
+					if ( stripos($m['fields'][$k]['type'],'int') !== false ){
+						$r .= "%u";
+					}
+					else{
+						$r .= "%s";
+					}
+					$r .= ",\n";
+				}
+			}
+
+			$r = substr($r,0,strrpos($r,','))."\nWHERE 1 ";
+			foreach ( $where as $f ){
+				if ( !isset($m['fields'][$f]) ){
+					die("The fields to search for in get_update don't correspond to the table");
+				}
+				$r .= "\nAND `$f` ";
+				if ( stripos($m['fields'][$f]['type'],'int') !== false ){
+					$r .= "= %u ";
+				}
+				else{
+					$r .= "= %s ";
+				}
+			}
+
+			if ( $php ){
+				$r .= "\",\n";
+				$i = 0;
+				foreach ( array_keys($m['fields']) as $k ){
+					if ( !in_array($k, $where) && ( count($fields) === 0 || in_array($k,$fields) ) ){
+						$r .= "\$d['$k'],\n";
+					}
+				}
+				foreach ( $where as $f ){
+					$r .= "\$d['$f'],\n";
+				}
+				$r = substr($r,0,strrpos($r,',')).');';
+			}
+			return $r;
+		}
+		return false;
 	}
 	
 	/**

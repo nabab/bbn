@@ -14,6 +14,12 @@ namespace bbn\user;
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @version 0.2r89
  */
+if ( !defined('BBN_FINGERPRINT') ){
+	define('BBN_FINGERPRINT', 'define_me');
+}
+if ( !defined('BBN_SESS_NAME') ){
+	define('BBN_SESS_NAME', 'define_me');
+}
 class connection extends \bbn\obj 
 {
 	use \bbn\util\info;
@@ -21,40 +27,15 @@ class connection extends \bbn\obj
 	/**
 	 * @var mixed
 	 */
-	private static $fingerprint=BBN_FINGERPRINT;
+	private static $fingerprint = BBN_FINGERPRINT;
 
-	/**
-	 * @var bool
-	 */
-	private $auth=false;
-
-	/**
-	 * @var mixed
-	 */
-	protected static $db;
-
-	/**
-	 * @var array
-	 */
-	protected static $info=array();
-
-	/**
-	 * @var bool
-	 */
-	protected static $cli=false;
-
-	/**
-	 * @var array
-	 */
-	protected static $cfg=array(
+	protected static $_defaults=array(
 		'fields' => array(
 			'id' => 'id',
 			'user' => 'email',
 			'pass' => 'pass',
 			'sess_id' => 'sess_id',
-			'log_tries' => 'log_tries',
-			'last_attempt' => 'last_attempt',
-			'fingerprint' => 'fingerprint',
+			'info_auth' => 'info_auth',
 			'reset_link' => 'reset_link',
 			'ip' => 'ip',
 			'last_connection' => 'last_connection'
@@ -63,48 +44,33 @@ class connection extends \bbn\obj
 		'table' => 'users',
 		'condition' => "acces > 0",
 		'additional_fields' => array(),
-		'num_attempts' => 3,
-		'session' => 'user'
+		'user_group' => false,
+		'group' => false,
+		'sess_name' => BBN_SESS_NAME,
+		'sess_user' => 'user'
 	);
 
 	/**
-	 * @var mixed
+	 * @var bool
 	 */
-	public $alert;
+	protected
+		/** @var bool */
+		$auth=false,
+		/** @var string */
+		$sql,
+		/** @var \bbn\db\connection */
+		$db,
+		/** @var array */
+		$cfg = array();
 
-	/**
-	 * @var mixed
-	 */
-	public $id;
+	public
+		/** @var mixed */
+		$alert,
+		/** @var int */
+		$id,
+		/** @var mixed */
+		$prev_time;
 
-	/**
-	 * @var mixed
-	 */
-	public $prev_time;
-
-
-	/**
-	 * @return void 
-	 */
-	public static function set_config($cfg)
-	{
-		foreach ( $cfg as $i => $v )
-		{
-			if ( isset(self::$cfg[$i]) )
-			{
-				if ( $i === 'fields' && is_array($v) )
-				{
-					foreach ( $v as $k => $w )
-					{
-						if ( isset(self::$cfg[$i][$k]) )
-							self::$cfg[$i][$k] = $w;
-					}
-				}
-				else
-					self::$cfg[$i] = $v;
-			}
-		}
-	}
 
 	/**
 	 * @return void 
@@ -117,14 +83,37 @@ class connection extends \bbn\obj
 	/**
 	 * @return void 
 	 */
-	public function __construct($credentials=array())
+	public function __construct($cfg, \bbn\db\connection $db, $credentials='')
 	{
-		if ( !isset(self::$db) )
-			self::init();
-		if ( is_array($credentials) && isset($credentials['user'],$credentials['pass']) )
+		$this->db = $db;
+		
+		foreach ( self::$_defaults as $n => $c ){
+			if ( is_array($c) ){
+				$this->cfg[$n] = ( isset($cfg[$n]) && is_array($cfg[$n]) ) ? array_merge($c, $cfg[$n]) : $c;
+			}
+			else{
+				$this->cfg[$n] = isset($cfg[$n]) ? $cfg[$n] : $c;
+			}
+		}
+
+		$query = "SELECT ";
+		foreach ( $this->cfg['fields'] as $n => $col ){
+			$query .= "`$col`, ";
+		}
+		foreach ( $this->cfg['additional_fields'] as $col ){
+			$query .= "`$col`, ";
+		}
+		$this->sql = substr($query,0,-2)."
+			FROM `{$this->cfg['table']}`
+			WHERE 1 ".( !empty($this->cfg['condition']) ? " AND ( {$this->cfg['condition']} ) " : "" );
+		
+		if ( is_array($credentials) && isset($credentials['user'], $cfg['fields'], $credentials['pass']) ){
 			$this->_identify($credentials);
-		else if ( $this->check_session() )
+		}
+		
+		else if ( $this->check_session() ){
 			$this->auth = 1;
+		}
 	}
 
 	/**
@@ -135,78 +124,71 @@ class connection extends \bbn\obj
 		$res = 0;
 		if ( isset($credentials['user'],$credentials['pass']) )
 		{
-			$fields =& self::$cfg['fields'];
-			$query = "SELECT ";
-			foreach ( $fields as $f )
-				$query .= $f.', ';
-			foreach ( self::$cfg['additional_fields'] as $f )
-				$query .= $f.', ';
-			$query = substr($query,0,-2)." FROM ".self::$cfg['table'].
-				" WHERE ".$fields['user']." LIKE '%s' ".
-				( !empty(self::$cfg['condition']) ? " AND ( ".self::$cfg['condition']." ) " : "" ).
-				" LIMIT 1 ";
-			$r = self::$db->query($query,$credentials['user']);
-			if ( $r->count() > 0 )
-			{
+			$cols =& $this->cfg['fields'];
+			$table = $this->cfg['table'];
+			$query = $this->sql."
+				AND `$cols[user]` LIKE ?
+				LIMIT 1 ";
+			$r = $this->db->query($query,$credentials['user']);
+			
+			if ( $r->count() > 0 ){
 				$d = $r->get_row();
+				if ( empty($d['info_auth']) ){
+					$info_auth = new \stdClass();
+					$info_auth->log_tries = 0;
+					$info_auth->last_attempt = 0;
+					$info_auth->fingerprint = self::make_fingerprint();
+				}
+				else{
+					$info_auth = json_decode();
+				}
+
 				$an_hour_ago = time() - 3600;
-				if ( $d[$fields['log_tries']] > 3 && $d[$fields['last_attempt']] > $an_hour_ago )
+				$pass = \bbn\str\text::escape_squote($credentials['pass']);
+				if ( $info_auth->log_tries > 3 && $info_auth->last_attempt > $an_hour_ago ){
 					$res = 4;
-				else if ( $d[$fields['pass']] === eval('return '.self::$cfg['encryption'].'("'.$credentials['pass'].'");') )
-				{
+				}
+				else if ( $d[$cols['pass']] === eval("return {$this->cfg['encryption']}('$pass');") ){
 					$this->auth = 1;
-					/* If the IP and last connection fields exist it updates the table */
-					if ( $fields['last_connection'] && $fields['ip'] )
-						self::$db->query("
-							UPDATE ".self::$cfg['table']."
-							SET ".$fields['last_connection']." = NOW(),
-							".$fields['ip']." = %s
-							WHERE ".$fields['id']." = %u",
-							$_SERVER['REMOTE_ADDR'],
-							$d[$fields['id']]);
 				}
 				else
 				{
-					$log_tries = $d['bbn_log_tries'] + 1;
-					self::$db->query("
-						UPDATE ".self::$cfg['table']."
-						SET ".$fields['log_tries']." = %u,
-						".$fields['last_attempt']." = NOW(),
-						".$fields['ip']." = %s
-						WHERE ".$fields['id']." = %u",
-						$log_tries,
+					$info_auth->log_tries++;
+					$info_auth->last_attempt = time();
+					$this->db->query("
+						UPDATE `$table`
+						SET `$cols[info_auth]` = %s,
+						`$cols[ip]` = %s
+						WHERE `$cols[id]` = %u",
+						json_encode($$info_auth),
 						$_SERVER['REMOTE_ADDR'],
-						$d[$fields['id']]);
+						$d[$cols['id']]);
 				}
 				if ( $this->auth )
 				{
-					$this->id = $d[$fields['id']];
-					$_SESSION[self::$cfg['session']]['appuiUser'] = array(
-						'id' => $this->id,
-						'info' => array()
-					);
-					foreach ( self::$cfg['additional_fields'] as $f )
-						$_SESSION[self::$cfg['session']]['appuiUser']['info'][$f] = $d[$f];
-					$addon1 = $fields['sess_id'] ? " ".$fields['sess_id']." = '".session_id()."'," : '';
-					$addon2 = $fields['ip'] ? " ".$fields['ip']." = '".$_SERVER['REMOTE_ADDR']."'," : '';
-					self::$db->query("
-						UPDATE ".self::$cfg['table']."
-						SET ".$fields['last_attempt']." = NOW(),
+					$this->id = $d[$cols['id']];
+					$addon1 = $cols['sess_id'] ? " ".$cols['sess_id']." = '".session_id()."'," : '';
+					$addon2 = $cols['ip'] ? " ".$cols['ip']." = '".$_SERVER['REMOTE_ADDR']."'," : '';
+					/* If the IP and last connection fields exist it updates the table */
+					$info_auth->log_tries = 0;
+					$info_auth->last_attempt = 0;
+					$info_auth->fingerprint = self::make_fingerprint();
+					$this->db->query("
+						UPDATE `$table`
+						SET `$cols[last_connection]` = NOW(),
 						$addon1
 						$addon2
-						".$fields['fingerprint']." = '%s'
-						WHERE ".$fields['id']." = %u",
-						self::make_fingerprint(),
-						$d['id']);
-					/*
-					\bbn\file\dir::delete($bbn_data_path.'users/'.$_SESSION['id_user']['id'].'/tmp',0);
-					include_once($bbn_core_path.'config/register.php');
-					*/
+						`$cols[info_auth]` = %s
+						WHERE `$cols[id]` = %s",
+						json_encode($info_auth),
+						$this->id);
+					$this->_refresh_info();
 					$res = 1;
 				}
 			}
-			if ( $res != 1 && $res != 4 )
+			if ( $res != 1 && $res != 4 ){
 				$res = 6;
+			}
 		}
 		/*
 		$res
@@ -260,18 +242,23 @@ class connection extends \bbn\obj
 	/**
 	 * @return array | false 
 	 */
-	private function _refresh_info()
+	protected function _refresh_info($search=array())
 	{
-		return ( $this->auth && $this->id ) ?
-			$this->info = 
-				$this->db
-					->query("
-						SELECT *
-						FROM id_users
-						WHERE id = %u",
-						$this->id)
-					->get_row()
-			: false;
+		$s =& $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']];
+		$s = array();
+
+		if ( $this->auth && $this->id ){
+			$d = $this->db->query($this->sql."
+				AND `{$this->cfg['fields']['id']}` = %s",
+				$this->id)->get_row();
+			
+			$s['id'] = $this->id;
+			$s['info'] = array();
+			foreach ( $this->cfg['additional_fields'] as $f ){
+				$s['info'][$f] = $d[$f];
+			}
+		}
+		return $s;
 	}
 
 	/**
@@ -279,35 +266,39 @@ class connection extends \bbn\obj
 	 */
 	public function check_session()
 	{
-		$this->auth = false;
-		if ( isset($_SESSION[self::$cfg['session']]['appuiUser']['id']) )
-		{
-			$f =& self::$cfg['fields'];
-			/* Adding a bbn_change field would allow us to update auytomatically the user's info if something has been changed */
-			$addon1 = $f['sess_id'] ? " AND ".$f['sess_id']." LIKE '".session_id()."'" : '';
-			if ( $id = self::$db->query("
-				SELECT ".$f['id']."
-				FROM ".self::$cfg['table']."
-				WHERE ".$f['id']." = %u
-				$addon1
-				AND ".$f['fingerprint']." LIKE '%s'",
-				$_SESSION[self::$cfg['session']]['appuiUser']['id'],
-				self::make_fingerprint())->fetchColumn() )
+		if ( !isset($this->id) ){
+			$this->auth = false;
+			if ( isset($_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]['id']) )
 			{
-				$this->id = $_SESSION[self::$cfg['session']]['appuiUser']['id'];
-				session_regenerate_id();
-				if ( $f['sess_id'] )
-					self::$db->query("
-						UPDATE ".self::$cfg['table']."
-						SET ".$f['sess_id']." = '%s'
-						WHERE ".$f['id']." = %u",
-						session_id(),
-						$this->id);
-				$this->auth = 1;
-				return 1;
+				$id = $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]['id'];
+				$cols =& $this->cfg['fields'];
+				/* Adding a bbn_change field would allow us to update auytomatically the user's info if something has been changed */
+				$addon1 = $cols['sess_id'] ? " AND ".$cols['sess_id']." LIKE '".session_id()."'" : '';
+				$d = $this->db->query("
+					SELECT `$cols[id]`, `$cols[info_auth]`
+					FROM `{$this->cfg['table']}`
+					WHERE `$cols[id]` = '%s'
+					$addon1",
+					$id)->get_row();
+				$info_auth = json_decode($d[$cols['info_auth']]);
+				
+				if ( $info_auth->fingerprint === self::make_fingerprint() ){
+					
+					$this->id = $id;
+					session_regenerate_id();
+					if ( $cols['sess_id'] )
+						$this->db->query("
+							UPDATE `{$this->cfg['table']}`
+							SET `$cols[sess_id]` = '%s'
+							WHERE `$cols[id]` = %u",
+							session_id(),
+							$this->id);
+					$this->_refresh_info();
+					$this->auth = 1;
+				}
 			}
 		}
-		return false;
+		return $this->auth;
 	}
 
 	/**
@@ -324,8 +315,8 @@ class connection extends \bbn\obj
 	public function logout()
 	{
 		$this->auth = false;
-		if ( isset($_SESSION[self::$cfg['session']]) ){
-			$_SESSION[self::$cfg['session']]['appuiUser'] = false;
+		if ( isset($_SESSION[$this->cfg['sess_name']]) ){
+			$_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']] = false;
 		}
 		session_destroy();
 	}
@@ -337,16 +328,6 @@ class connection extends \bbn\obj
 	{
 		if ( $this->auth )
 		{
-			$users = self::get_users();
-			foreach ( $users as $key => $user )
-			{
-				if ( $user['user'] == $this->user )
-				{
-					$users[$key]['pass'] = sha1($this->pass);
-					if ( self::set_users($users) )
-						return true;
-				}
-			}
 		}
 		return false;
 	}
