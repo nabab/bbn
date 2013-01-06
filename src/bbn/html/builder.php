@@ -36,7 +36,20 @@ class builder
 		'lang' => 'en'
 	),
 	$_current,
-	$items = array();
+	$items = array(),
+	$kendo = array(
+		'Calendar' => array('name','value','min','max','dates','url','culture','footer','format','month','start','depth','animation'),
+		'DatePicker' => array('name','value','footer','format','culture','parseFormats','min','max','start','depth','animation','month','dates','ARIATemplate'),
+		'AutoComplete' => array('name','enable','suggest','template','dataTextField','minLength','delay','height','filter','ignoreCase','highlightFirst','separator','placeholder','animation'),
+		'DropDownList' => array('name','enable','index','autoBind','text','template','delay','height','dataTextField','dataValueField','optionLabel','cascadeFrom','ignoreCase','animation'),
+		'ComboBox' => array('name','enable','index','autoBind','delay','dataTextField','dataValueField','minLength','height','highlightFirst','template','filter','placeholder','suggest','ignoreCase','animation'),
+		'NumericTextBox' => array('name','decimals','min','max','value','step','culture','format','spinners','placeholder','upArrowText','downArrowText'),
+		'TimePicker' => array('name','min','max','format','dates','parseFormats','value','interval','height','animation'),
+		'DateTimePicker' => array('name','value','format','timeFormat','culture','parseFormats','dates','min','max','interval','height','footer','start','depth','animation','month','ARIATemplate'),
+		'Slider' => array('enabled','min','max','smallStep','largeStep','orientation','tickPlacement','tooltip','name','showButtons','increaseButtonTitle','decreaseButtonTitle','dragHandleTitle'),
+		'RangeSlider' => array('enabled','min','max','smallStep','largeStep','orientation','tickPlacement','tooltip','name','leftDragHandleTitle','rightDragHandleTitle'),
+		'Upload' => array('name','enabled','multiple','showFileList','async','localization')
+	);
 		
 
 	public function __construct( array $cfg = null )
@@ -253,6 +266,7 @@ class builder
 						$cfg['script'] = '$("#'.$cfg['id'].'").kendoDropDownList({
 							dataTextField: "text",
 							dataValueField: "value",
+							template: kendo.template($("#dropdown_template").html()),
 							dataSource: '.json_encode($cfg['options']['data']).'
 						});';
 						unset($cfg['options']['data']);

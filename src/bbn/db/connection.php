@@ -625,10 +625,16 @@ class connection extends \PDO implements actions
 		}
 		if ( is_array($tables) ){
 			foreach ( $tables as $t ){
+				$keys = $this->get_keys($t);
 				$r[$t] = array(
 					'fields' => $this->get_fields($t),
-					'keys' => $this->get_keys($t)
+					'keys' => $keys['keys']
 				);
+				foreach ( $r[$t]['fields'] as $i => $f ){
+					if ( isset($keys['cols'][$i]) ){
+						$r[$t]['fields'][$i]['keys'] = $keys['cols'][$i];
+					}
+				}
 			}
 			if ( count($r) === 1 ){
 				return end($r);
@@ -665,14 +671,50 @@ class connection extends \PDO implements actions
 			$rows = $this->get_rows("SHOW COLUMNS FROM $table");
 			$p = 1;
 			foreach ( $rows as $row ){
-				$r[$row['Field']] = array(
+				$f = $row['Field'];
+				$r[$f] = array(
 					'position' => $p++,
-					'type' => $row['Type'],
 					'null' => $row['Null'] === 'NO' ? 0 : 1,
 					'key' => in_array($row['Key'], array('PRI', 'UNI', 'MUL')) ? $row['Key'] : null,
 					'default' => $row['Default'],
-					'extra' => $row['Extra']
+					'extra' => $row['Extra'],
+					'maxlength' => 0
 				);
+				if ( strpos($row['Type'], 'enum') === 0 ){
+					$r[$f]['type'] = 'enum';
+					if ( preg_match_all('/\((.*?)\)/', $row['Type'], $matches) ){
+						$r[$f]['extra'] = $matches[1][0];
+					}
+				}
+				else{
+					if ( strpos($row['Type'], 'unsigned') ){
+						$r[$f]['signed'] = 0;
+						$row['Type'] = str_replace('unsigned','',$row['Type']);
+					}
+					else{
+						$r[$f]['signed'] = 1;
+					}
+					if ( strpos($row['Type'],'text') !== false ){
+						$r[$f]['type'] = 'text';
+					}
+					else if ( strpos($row['Type'],'blob') !== false ){
+						$r[$f]['type'] = 'blob';
+					}
+					else if ( strpos($row['Type'],'int(') !== false ){
+						$r[$f]['type'] = 'int';
+					}
+					else if ( strpos($row['Type'],'char(') !== false ){
+						$r[$f]['type'] = 'varchar';
+					}
+					if ( preg_match_all('/\((.*?)\)/', $row['Type'], $matches) ){
+						$r[$f]['maxlength'] = $matches[1][0];
+					}
+					if ( !isset($r[$f]['type']) && strpos($row['Type'], '(') ){
+						$r[$f]['type'] = substr($row['Type'],0,strpos($row['Type'], '('));
+					}
+					
+				}
+				
 			}
 		}
 		return $r;
@@ -750,13 +792,44 @@ class connection extends \PDO implements actions
 	{
 		if ( text::check_name($table) ){
 			$db = $this->current;
-			return $this->get_rows("
-				SELECT `CONSTRAINT_NAME` as `name`, `COLUMN_NAME` as `column`, `ORDINAL_POSITION` as `position`,
-				`REFERENCED_TABLE_SCHEMA` as `ref_db`, `REFERENCED_TABLE_NAME` as `ref_table`, `REFERENCED_COLUMN_NAME` as `ref_column`
-				FROM `information_schema`.`KEY_COLUMN_USAGE`
-				WHERE `TABLE_SCHEMA` LIKE '$db'
-				AND `TABLE_NAME` LIKE '$table'
-				LIMIT 0 , 30");
+			$b = $this->get_rows("SHOW INDEX FROM `$table`");
+			$keys = array();
+			$cols = array();
+			foreach ( $b as $i => $d ){
+				if ( $a = $this->get_row("
+					SELECT `ORDINAL_POSITION` as `position`,
+					`REFERENCED_TABLE_SCHEMA` as `ref_db`, `REFERENCED_TABLE_NAME` as `ref_table`, `REFERENCED_COLUMN_NAME` as `ref_column`
+					FROM `information_schema`.`KEY_COLUMN_USAGE`
+					WHERE `TABLE_SCHEMA` LIKE '$db'
+					AND `TABLE_NAME` LIKE '$table'
+					AND `COLUMN_NAME` LIKE '$d[Column_name]'
+					AND ( `CONSTRAINT_NAME` LIKE '$d[Key_name]' OR ORDINAL_POSITION = $d[Seq_in_index] )
+					LIMIT 1") ){
+						
+					if ( !isset($keys[$d['Key_name']]) ){
+						$keys[$d['Key_name']] = array(
+							'columns' => array($d['Column_name']),
+							'ref_db' => $a['ref_db'],
+							'ref_table' => $a['ref_table'],
+							'ref_column' => $a['ref_column'],
+							'unique' => $d['Non_unique'] == 1 ? 1 : 0
+						);
+					}
+					else{
+						array_push($keys[$d['Key_name']]['columns'], $d['Column_name']);
+					}
+					if ( !isset($cols[$d['Column_name']]) ){
+						$cols[$d['Column_name']] = array($d['Key_name']);
+					}
+					else{
+						array_push($cols[$d['Column_name']], $d['Key_name']);
+					}
+				}
+				else{
+					die('problem with key '.$d[Key_name].' on '.$d['Column_name']);
+				}
+			}
+			return array('keys'=>$keys, 'cols'=>$cols);
 		}
 	}
 	
