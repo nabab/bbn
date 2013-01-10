@@ -281,9 +281,8 @@ class connection extends \PDO implements actions
 					$this->setAttribute(\PDO::ATTR_STATEMENT_CLASS,array('\bbn\db\query',array(&$this,$sequences,$values)));
 					return $this->prepare($statement, $driver_options);
 				}
-				else if ( $num_values === 0 ){
+				else if ( $num_values === 0 )
 					return $this->exec($statement);
-				}
 				else
 				{
 					$this->setAttribute(\PDO::ATTR_STATEMENT_CLASS,array('\bbn\db\query',array(&$this,$sequences,$values)));
@@ -583,17 +582,7 @@ class connection extends \PDO implements actions
 	 */
 	public function insert_update($table, array $values)
 	{
-		$hash = md5('insert_update'.$table.serialize(array_keys($values)));
-		if ( isset($this->hashes[$hash]) ){
-			$sql = $this->hashes[$hash];
-			if ( $this->queries[$sql]['num_val'] === ( count($values) / 2 ) ){
-				$vals = array_merge(array_values($values),array_values($values));;
-			}
-			else{
-				$vals = array_values($values);
-			}
-		}
-		else if ( $sql = $this->get_insert($table, array_keys($values)) ){
+		if ( $sql = $this->get_insert($table, array_keys($values)) ){
 			$sql .= " ON DUPLICATE KEY UPDATE ";
 			$vals = array_values($values);
 			foreach ( $values as $k => $v ){
@@ -601,16 +590,14 @@ class connection extends \PDO implements actions
 				array_push($vals, $v);
 			}
 			$sql = substr($sql,0,strrpos($sql,','));
-		}
-		if ( $sql ){
+			var_dump($sql);
 			try{
-				return $this->query($sql, $hash, $vals);
+				return $this->query($sql, $vals);
 			}
 			catch (\PDOException $e ){
 				self::error($e,$this->last_query);
 			}
 		}
-		return false;
 	}
 
 	/**
@@ -618,22 +605,14 @@ class connection extends \PDO implements actions
 	 */
 	public function update($table, array $values, array $where)
 	{
-		$hash = md5('insert_update'.$table.serialize(array_keys($values)).serialize(array_keys($where)));
-		if ( isset($this->hashes[$hash]) ){
-			$sql = $this->hashes[$hash];
-		}
-		else{
-			$sql = $this->get_update($table, array_keys($values), array_keys($where));
-		}
-		if ( $sql ){
+		if ( $sql = $this->get_update($table, array_keys($values), array_keys($where)) ){
 			try{
-				return $this->query($sql, $hash, array_merge(array_values($values), array_values($where)));
+				return $this->query($sql, array_merge(array_values($values), array_values($where)));
 			}
 			catch (\PDOException $e ){
 				self::error($e,$this->last_query);
 			}
 		}
-		return false;
 	}
 
 	/**
@@ -641,16 +620,9 @@ class connection extends \PDO implements actions
 	 */
 	public function delete($table, array $where)
 	{
-		$hash = md5('delete'.$table.serialize(array_keys($where)));
-		if ( isset($this->hashes[$hash]) ){
-			$sql = $this->hashes[$hash];
-		}
-		else{
-			$sql = $this->get_delete($table, array_keys($where));
-		}
-		if ( $sql ){
+		if ( $sql = $this->get_delete($table, array_keys($where)) ){
 			try{
-				return $this->query($sql, $hash, array_values($where));
+				return $this->query($sql, array_values($where));
 			}
 			catch (\PDOException $e ){
 				self::error($e,$this->last_query);
@@ -673,15 +645,11 @@ class connection extends \PDO implements actions
 	public function modelize($table='')
 	{
 		$r = array();
-		$tables = false;
 		if ( empty($table) ){
 			$tables = $this->get_tables();
 		}
 		else if ( is_string($table) && text::check_name($table) ){
 			$tables = array($table);
-		}
-		else if ( is_array($table) ){
-			$tables = $table;
 		}
 		if ( is_array($tables) ){
 			foreach ( $tables as $t ){
@@ -749,7 +717,7 @@ class connection extends \PDO implements actions
 				else{
 					if ( strpos($row['Type'], 'unsigned') ){
 						$r[$f]['signed'] = 0;
-						$row['Type'] = trim(str_replace('unsigned','',$row['Type']));
+						$row['Type'] = str_replace('unsigned','',$row['Type']);
 					}
 					else{
 						$r[$f]['signed'] = 1;
@@ -769,8 +737,8 @@ class connection extends \PDO implements actions
 					if ( preg_match_all('/\((.*?)\)/', $row['Type'], $matches) ){
 						$r[$f]['maxlength'] = $matches[1][0];
 					}
-					if ( !isset($r[$f]['type']) ){
-						$r[$f]['type'] = ( strpos($row['Type'], '(') ) ? substr($row['Type'],0,strpos($row['Type'], '(')) : $row['Type'];
+					if ( !isset($r[$f]['type']) && strpos($row['Type'], '(') ){
+						$r[$f]['type'] = substr($row['Type'],0,strpos($row['Type'], '('));
 					}
 					
 				}
@@ -856,33 +824,37 @@ class connection extends \PDO implements actions
 			$keys = array();
 			$cols = array();
 			foreach ( $b as $i => $d ){
-				$a = $this->get_row("
+				if ( $a = $this->get_row("
 					SELECT `ORDINAL_POSITION` as `position`,
 					`REFERENCED_TABLE_SCHEMA` as `ref_db`, `REFERENCED_TABLE_NAME` as `ref_table`, `REFERENCED_COLUMN_NAME` as `ref_column`
 					FROM `information_schema`.`KEY_COLUMN_USAGE`
 					WHERE `TABLE_SCHEMA` LIKE '$db'
 					AND `TABLE_NAME` LIKE '$table'
 					AND `COLUMN_NAME` LIKE '$d[Column_name]'
-					AND ( `CONSTRAINT_NAME` LIKE '$d[Key_name]' OR ORDINAL_POSITION = $d[Seq_in_index] OR 1 )
-					LIMIT 1");
+					AND ( `CONSTRAINT_NAME` LIKE '$d[Key_name]' OR ORDINAL_POSITION = $d[Seq_in_index] )
+					LIMIT 1") ){
 						
-				if ( !isset($keys[$d['Key_name']]) ){
-					$keys[$d['Key_name']] = array(
-						'columns' => array($d['Column_name']),
-						'ref_db' => $a ? $a['ref_db'] : null,
-						'ref_table' => $a ? $a['ref_table'] : null,
-						'ref_column' => $a ? $a['ref_column'] : null,
-						'unique' => $d['Non_unique'] == 1 ? 1 : 0
-					);
+					if ( !isset($keys[$d['Key_name']]) ){
+						$keys[$d['Key_name']] = array(
+							'columns' => array($d['Column_name']),
+							'ref_db' => $a['ref_db'],
+							'ref_table' => $a['ref_table'],
+							'ref_column' => $a['ref_column'],
+							'unique' => $d['Non_unique'] == 1 ? 1 : 0
+						);
+					}
+					else{
+						array_push($keys[$d['Key_name']]['columns'], $d['Column_name']);
+					}
+					if ( !isset($cols[$d['Column_name']]) ){
+						$cols[$d['Column_name']] = array($d['Key_name']);
+					}
+					else{
+						array_push($cols[$d['Column_name']], $d['Key_name']);
+					}
 				}
 				else{
-					array_push($keys[$d['Key_name']]['columns'], $d['Column_name']);
-				}
-				if ( !isset($cols[$d['Column_name']]) ){
-					$cols[$d['Column_name']] = array($d['Key_name']);
-				}
-				else{
-					array_push($cols[$d['Column_name']], $d['Key_name']);
+					die('problem with key '.$d[Key_name].' on '.$d['Column_name']);
 				}
 			}
 			return array('keys'=>$keys, 'cols'=>$cols);
@@ -906,23 +878,8 @@ class connection extends \PDO implements actions
 			}
 			$r .= "INTO `$table` (\n";
 			$i = 0;
-			
-			if ( count($fields) > 0 ){
-				foreach ( $fields as $k ){
-					if ( !isset($m['fields'][$k]) ){
-						die("The column $k doesn't exist in $table");
-					}
-					else{
-						$r .= "`$k`, ";
-						$i++;
-						if ( $i % 4 === 0 ){
-							$r .= "\n";
-						}
-					}
-				}
-			}
-			else{
-				foreach ( array_keys($m['fields']) as $k ){
+			foreach ( array_keys($m['fields']) as $k ){
+				if ( count($fields) === 0 || in_array($k,$fields) ){
 					$r .= "`$k`, ";
 					$i++;
 					if ( $i % 4 === 0 ){
@@ -932,22 +889,8 @@ class connection extends \PDO implements actions
 			}
 			$r = substr($r,0,strrpos($r,',')).")\nVALUES (\n";
 			$i = 0;
-			if ( count($fields) > 0 ){
-				foreach ( $fields as $k ){
-					if ( stripos($m['fields'][$k]['type'],'INT') !== false ){
-						$r .= "%u, ";
-					}
-					else{
-						$r .= "%s, ";
-					}
-					$i++;
-					if ( $i % 4 === 0 ){
-						$r .= "\n";
-					}
-				}
-			}
-			else{
-				foreach ( $m['fields'] as $k => $f ){
+			foreach ( $m['fields'] as $k => $f ){
+				if ( count($fields) === 0 || in_array($k,$fields) ){
 					if ( stripos($f['type'],'INT') !== false ){
 						$r .= "%u, ";
 					}
@@ -994,26 +937,8 @@ class connection extends \PDO implements actions
 			}
 			$r .= "UPDATE `$table` SET ";
 			$i = 0;
-
-			if ( count($fields) > 0 ){
-				foreach ( $fields as $k ){
-					if ( !isset($m['fields'][$k]) ){
-						die("The column $k doesn't exist in $table");
-					}
-					else{
-						$r .= "`$k` = ";
-						if ( stripos($m['fields'][$k]['type'],'int') !== false ){
-							$r .= "%u";
-						}
-						else{
-							$r .= "%s";
-						}
-						$r .= ",\n";
-					}
-				}
-			}
-			else{
-				foreach ( array_keys($m['fields']) as $k ){
+			foreach ( array_keys($m['fields']) as $k ){
+				if ( !in_array($k, $where) && ( count($fields) === 0 || in_array($k,$fields) ) ){
 					$r .= "`$k` = ";
 					if ( stripos($m['fields'][$k]['type'],'int') !== false ){
 						$r .= "%u";

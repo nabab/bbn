@@ -24,7 +24,10 @@ class connection extends \PDO implements actions
 	private $last_query;
 
 	/**
-
+	 * @var array
+	 */
+	private $queries = array();
+	
 	/**
 	 * @var array
 	 */
@@ -103,8 +106,14 @@ class connection extends \PDO implements actions
 		else
 		{
 			@mail('thomas@babna.com','Error DB!',implode("\n",$msg));
-			if ( isset($argv) )
+			if ( isset($argv) ){
 				echo nl2br(implode("\n",$msg));
+			}
+		}
+		$argus = func_get_args();
+		array_splice($argus,0,2);
+		if ( count($argus) > 0 ){
+			var_dump($argus);
 		}
 		die();
 	}
@@ -114,6 +123,7 @@ class connection extends \PDO implements actions
 	 */
 	public function __construct($cfg=array())
 	{
+		die();
 		if ( isset($cfg['user'],$cfg['pass'],$cfg['db']) )
 		{
 			$cfg['engine'] = isset($cfg['engine']) ? $cfg['engine'] : 'mysql';
@@ -180,11 +190,13 @@ class connection extends \PDO implements actions
 				{ self::error($e,"Connection"); }
 		}
 	}
+	
 	/**
 	 * @return void
 	 */
 	public function clear()
 	{
+		$this->queries = array();
 		$this->hashes = array();
 	}
 
@@ -234,6 +246,7 @@ class connection extends \PDO implements actions
 			if ( !isset($driver_options) ){
 				$driver_options = array();
 			}
+
 			$values = array();
 			$num_values = 0;
 			foreach ( $args as $i => $arg )
@@ -244,56 +257,87 @@ class connection extends \PDO implements actions
 					$num_values++;
 				}
 			}
-			/* parse the statement */
-			$sequences = \bbn\db\parser::ParseString($statement)->getArray();
-			if ( $num_values > 0 )
-			{
-				$statement = str_replace("%%",'%',$statement);
-				/* Compatibility with sprintf basic expressions - to be enhanced */
-				if ( preg_match_all('/(%[s|u|d])/',$statement,$exp) )
-				{
-					$statement = str_replace("'%s'",'?',$statement);
-					$statement = str_replace("%s",'?',$statement);
-					$statement = str_replace("%d",'?',$statement);
-					$statement = str_replace("%u",'?',$statement);
-				}
-				/* Or looking for question marks */
-				preg_match_all('/(\?)/',$statement,$exp);
-				/* The number of values must match the number of values to bind */
-				if ( $num_values !== count($exp[1]) ){
-					var_dump('Incorrect arguments count (your values: '.$num_values.', in the statement: '.count($exp[1]).')','options',$driver_options,'statement',$statement,'start of values',$values, 'end of values');
-					exit;
-				}
-				foreach ( $exp[1] as $i => $e )
-				{
-					if ( $e == 'u' || ctype_digit($values[$i][0]) )
+
+			if ( isset($this->queries[$statement]) ){
+				$sequences = $this->queries[$statement]['sequences'];
+				foreach ( $values as $i => $v ){
+					if ( is_null($values[$i][0]) ){
+						array_push($values[$i],'n');
+					}
+					else if ( ctype_digit($values[$i][0]) ){
 						array_push($values[$i],'u');
-					else
+					}
+					else{
 						array_push($values[$i],'s');
+					}
 				}
 			}
-			/* record the last query - adding a full/limited history ? */
+			else{
+				/* parse the statement */
+				$sequences = \bbn\db\parser::ParseString($statement)->getArray();
+				if ( $num_values > 0 )
+				{
+					$statement = str_replace("%%",'%',$statement);
+					/* Compatibility with sprintf basic expressions - to be enhanced */
+					if ( preg_match_all('/(%[s|u|d])/',$statement,$exp) )
+					{
+						$statement = str_replace("'%s'",'?',$statement);
+						$statement = str_replace("%s",'?',$statement);
+						$statement = str_replace("%d",'?',$statement);
+						$statement = str_replace("%u",'?',$statement);
+					}
+					/* Or looking for question marks */
+					preg_match_all('/(\?)/',$statement,$exp);
+					/* The number of values must match the number of values to bind */
+					if ( $num_values !== count($exp[1]) ){
+						var_dump('Incorrect arguments count (your values: '.$num_values.', in the statement: '.count($exp[1]).')','options',$driver_options,'statement',$statement,'start of values',$values, 'end of values');
+						exit;
+					}
+					foreach ( $exp[1] as $i => $e )
+					{
+						if ( is_null($values[$i][0]) ){
+							array_push($values[$i],'n');
+						}
+						else if ( $e == 'u' || ctype_digit($values[$i][0]) ){
+							array_push($values[$i],'u');
+						}
+						else{
+							array_push($values[$i],'s');
+						}
+					}
+				}
+				$this->queries[$statement] = array(
+					'sequences' => $sequences,
+					'num_values' => $num_values
+				);
+				if ( isset($hash) ){
+					$this->hashes[$hash] = $statement;
+				}
+				/* record the last query - adding a full/limited history ? */
+			}
 			$this->last_query = $statement;
 			try
 			{
 				if ( isset($sequences['select']) || isset($sequences['show']) )
 				{
 					$this->setAttribute(\PDO::ATTR_STATEMENT_CLASS,array('\bbn\db\query',array(&$this,$sequences,$values)));
-					return $this->prepare($statement, $driver_options);
-				}
-				else if ( $num_values === 0 ){
-					return $this->exec($statement);
+					if ( !isset($this->queries[$statement]['prepared']) ){
+						$this->queries[$statement]['prepared'] =  $this->prepare($statement, $driver_options);
+					}
+					return $this->queries[$statement]['prepared'];
 				}
 				else
 				{
 					$this->setAttribute(\PDO::ATTR_STATEMENT_CLASS,array('\bbn\db\query',array(&$this,$sequences,$values)));
-					$p = $this->prepare($statement, $driver_options);
-					$r = $p->execute();
+					if ( !isset($this->queries[$statement]['prepared']) ){
+						$this->queries[$statement]['prepared'] = $this->prepare($statement, $driver_options);
+					}
+					$this->queries[$statement]['prepared']->execute();
 					if ( isset($sequences['insert']) )
 						$this->last_insert_id = $this->lastInsertId();
 					if ( isset($sequences['insert']) || isset($sequences['update']) || isset($sequences['delete']) )
-						return $p->rowCount();
-					return $r;
+						return $this->queries[$statement]['prepared']->rowCount();
+					return $this->queries[$statement]['prepared'];
 				}
 			}
 			catch (\PDOException $e )
@@ -570,12 +614,13 @@ class connection extends \PDO implements actions
 		}
 		if ( $sql ){
 			try{
-				return $this->query($sql, array_values($values));
+				return $this->query($sql, $hash, array_values($values));
 			}
 			catch (\PDOException $e ){
 				self::error($e,$this->last_query);
 			}
 		}
+		return false;
 	}
 
 	/**
@@ -856,7 +901,7 @@ class connection extends \PDO implements actions
 			$keys = array();
 			$cols = array();
 			foreach ( $b as $i => $d ){
-				$a = $this->get_row("
+				if ( $a = $this->get_row("
 					SELECT `ORDINAL_POSITION` as `position`,
 					`REFERENCED_TABLE_SCHEMA` as `ref_db`, `REFERENCED_TABLE_NAME` as `ref_table`, `REFERENCED_COLUMN_NAME` as `ref_column`
 					FROM `information_schema`.`KEY_COLUMN_USAGE`
@@ -864,25 +909,29 @@ class connection extends \PDO implements actions
 					AND `TABLE_NAME` LIKE '$table'
 					AND `COLUMN_NAME` LIKE '$d[Column_name]'
 					AND ( `CONSTRAINT_NAME` LIKE '$d[Key_name]' OR ORDINAL_POSITION = $d[Seq_in_index] OR 1 )
-					LIMIT 1");
+					LIMIT 1") ){
 						
-				if ( !isset($keys[$d['Key_name']]) ){
-					$keys[$d['Key_name']] = array(
-						'columns' => array($d['Column_name']),
-						'ref_db' => $a ? $a['ref_db'] : null,
-						'ref_table' => $a ? $a['ref_table'] : null,
-						'ref_column' => $a ? $a['ref_column'] : null,
-						'unique' => $d['Non_unique'] == 1 ? 1 : 0
-					);
+					if ( !isset($keys[$d['Key_name']]) ){
+						$keys[$d['Key_name']] = array(
+							'columns' => array($d['Column_name']),
+							'ref_db' => $a['ref_db'],
+							'ref_table' => $a['ref_table'],
+							'ref_column' => $a['ref_column'],
+							'unique' => $d['Non_unique'] == 1 ? 1 : 0
+						);
+					}
+					else{
+						array_push($keys[$d['Key_name']]['columns'], $d['Column_name']);
+					}
+					if ( !isset($cols[$d['Column_name']]) ){
+						$cols[$d['Column_name']] = array($d['Key_name']);
+					}
+					else{
+						array_push($cols[$d['Column_name']], $d['Key_name']);
+					}
 				}
 				else{
-					array_push($keys[$d['Key_name']]['columns'], $d['Column_name']);
-				}
-				if ( !isset($cols[$d['Column_name']]) ){
-					$cols[$d['Column_name']] = array($d['Key_name']);
-				}
-				else{
-					array_push($cols[$d['Column_name']], $d['Key_name']);
+					die(var_dump('problem with key '.$d['Key_name'].' on '.$table.'.'.$d['Column_name'],$this->last_query));
 				}
 			}
 			return array('keys'=>$keys, 'cols'=>$cols);

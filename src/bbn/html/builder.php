@@ -18,45 +18,54 @@ namespace bbn\html;
 
 class builder
 {
-		
-	private $_defaults = array(
+	const max_values_at_once = 200;
+	private $_defaults = [
 		'tag' => 'input',
 		'cssclass' => false,
 		'placeholder' => false,
 		'script' => false,
-		'options' => array(
+		'options' => [
 			'type' => 'text',
 			'maxlength' => 100,
 			'size' => 30,
 			'db' => false,
 			'cols' => 30,
 			'rows' => 6
-		),
+		],
+		'css' => [],
 		'xhtml' => false,
 		'lang' => 'en'
-	),
+	],
 	$_current,
-	$items = array(),
-	$kendo = array(
-		'Calendar' => array('name','value','min','max','dates','url','culture','footer','format','month','start','depth','animation'),
-		'DatePicker' => array('name','value','footer','format','culture','parseFormats','min','max','start','depth','animation','month','dates','ARIATemplate'),
-		'AutoComplete' => array('name','enable','suggest','template','dataTextField','minLength','delay','height','filter','ignoreCase','highlightFirst','separator','placeholder','animation'),
-		'DropDownList' => array('name','enable','index','autoBind','text','template','delay','height','dataTextField','dataValueField','optionLabel','cascadeFrom','ignoreCase','animation'),
-		'ComboBox' => array('name','enable','index','autoBind','delay','dataTextField','dataValueField','minLength','height','highlightFirst','template','filter','placeholder','suggest','ignoreCase','animation'),
-		'NumericTextBox' => array('name','decimals','min','max','value','step','culture','format','spinners','placeholder','upArrowText','downArrowText'),
-		'TimePicker' => array('name','min','max','format','dates','parseFormats','value','interval','height','animation'),
-		'DateTimePicker' => array('name','value','format','timeFormat','culture','parseFormats','dates','min','max','interval','height','footer','start','depth','animation','month','ARIATemplate'),
-		'Slider' => array('enabled','min','max','smallStep','largeStep','orientation','tickPlacement','tooltip','name','showButtons','increaseButtonTitle','decreaseButtonTitle','dragHandleTitle'),
-		'RangeSlider' => array('enabled','min','max','smallStep','largeStep','orientation','tickPlacement','tooltip','name','leftDragHandleTitle','rightDragHandleTitle'),
-		'Upload' => array('name','enabled','multiple','showFileList','async','localization')
-	);
-		
+	$items = [],
+	$kendo = [
+		'Calendar' => ['name','value','min','max','dates','url','culture','footer','format','month','start','depth','animation'],
+		'DatePicker' => ['name','value','footer','format','culture','parseFormats','min','max','start','depth','animation','month','dates','ARIATemplate'],
+		'AutoComplete' => ['name','enable','suggest','template','dataTextField','minLength','delay','height','filter','ignoreCase','highlightFirst','separator','placeholder','animation'],
+		'DropDownList' => ['name','enable','index','autoBind','text','template','delay','height','dataTextField','dataValueField','optionLabel','cascadeFrom','ignoreCase','animation','dataSource'],
+		'ComboBox' => ['name','enable','index','autoBind','delay','dataTextField','dataValueField','minLength','height','highlightFirst','template','filter','placeholder','suggest','ignoreCase','animation'],
+		'NumericTextBox' => ['name','decimals','min','max','value','step','culture','format','spinners','placeholder','upArrowText','downArrowText'],
+		'TimePicker' => ['name','min','max','format','dates','parseFormats','value','interval','height','animation'],
+		'DateTimePicker' => ['name','value','format','timeFormat','culture','parseFormats','dates','min','max','interval','height','footer','start','depth','animation','month','ARIATemplate'],
+		'Slider' => ['enabled','min','max','smallStep','largeStep','orientation','tickPlacement','tooltip','name','showButtons','increaseButtonTitle','decreaseButtonTitle','dragHandleTitle'],
+		'RangeSlider' => ['enabled','min','max','smallStep','largeStep','orientation','tickPlacement','tooltip','name','leftDragHandleTitle','rightDragHandleTitle'],
+		'Upload' => ['name','enabled','multiple','showFileList','async','localization']
+	];
+	
+	public $global_cfg = [];
 
 	public function __construct( array $cfg = null )
 	{
 		if ( is_array($cfg) ){
 			foreach ( $cfg as $k => $v ){
-				if ( isset($this->_defaults[$k]) ){
+				if ( is_array($v) ){
+					foreach ( $v as $k1 => $v1 ){
+						if ( isset($this->_defaults[$k][$k1]) ){
+							$this->_defaults[$k][$k1] = $v1;
+						}
+					}
+				}
+				else if ( isset($this->_defaults[$k]) ){
 					$this->_defaults[$k] = $v;
 				}
 			}
@@ -70,6 +79,8 @@ class builder
 		foreach ( $this->_defaults as $k => $v ){
 			$this->_current[$k] = $v;
 		}
+		$this->global_cfg['setting'] = $this->_defaults;
+		$this->global_cfg['elements'] = [];
 		$this->items = array();
 		$this->id = \bbn\str\text::genpwd(20,15);
 	}
@@ -133,28 +144,85 @@ class builder
 	public function make_field($cfg=null)
 	{
 		if ( is_array($cfg) && isset($cfg['name']) ){
+			foreach ( $cfg as $k => $v ){
+				if ( isset($this->_current[$k]) ){
+					if ( is_array($v) ){
+						foreach ( $v as $k1 => $v1 ){
+							if ( isset($this->_current[$k][$k1]) && $this->_current[$k][$k1] === $v1 ){
+								unset($cfg[$k][$k1]);
+							}
+						}
+					}
+					else if ( $this->_current[$k] === $v ){
+						unset($cfg[$k]);
+					}
+				}
+			}
+			// Global config creates a var (simplest as possible) to recreate forms and fields
+			array_push($this->global_cfg['elements'], array_filter(array_map(function($a){
+				if ( is_object($a) ){
+					return get_class($a);
+				}
+				else if ( is_array($a) ){
+					foreach($a as $i => $aa ){
+						if ( is_object($aa) ){
+							$a[$i] = get_class($aa);
+						}
+						else if ( is_string($aa) && empty($aa) ){
+							unset($a[$i]);
+						}
+						else if ( is_array($aa) && count($aa) === 0 ){
+							unset($a[$i]);
+						}
+					}
+				}
+				return $a;
+			},$cfg), function($a){
+				return ( is_string($a) && !empty($a) ) || ( is_array($a) && count($a) > 0 ) || ( !is_string($a) && !is_array($a) );
+			}));
+			
 			$tmp = $this->_current;
 			$tmp['id'] = isset($cfg['id']) ? $cfg['id'] : \bbn\str\text::genpwd(20,15);
+			if ( !isset($cfg['options']) ){
+				$cfg['options'] = array();
+			}
+			if ( isset($cfg['options']['sql'], $cfg['options']['db']) && strlen($cfg['options']['sql']) > 5 ){
+				$cfg['options']['dataSource'] = array();
+				$r = $cfg['options']['db']->query($cfg['options']['sql']);
+				$count = $r->count();
+				if ( $count <= self::max_values_at_once ){
+					if ( $ds = $cfg['options']['db']->get_irows($cfg['options']['sql']) ){
+						foreach ( $ds as $d ){
+							array_push($cfg['options']['dataSource'], array('value' => $d[0], 'text' => $d[1]));
+						}
+					}
+				}
+				else{
+					$cfg['field'] = 'autocomplete';
+					//$cfg['options']['dataSource']['']
+				}
+			}
 			if ( isset($cfg['field']) ) {
 				switch ( $cfg['field'] )
 				{
 					case 'datepicker':
 						$tmp['tag'] = 'input';
-						$tmp['options']['type'] = 'text';
+						$tmp['options']['type'] = 'date';
 						$tmp['options']['maxlength'] = 10;
 						$tmp['options']['size'] = 10;
 						$tmp['options']['culture'] = $tmp['lang'].'-'.strtoupper($tmp['lang']);
+						$tmp['options']['format'] = "yyyy-MM-dd";
 						break;
 					case 'timepicker':
 						$tmp['tag'] = 'input';
-						$tmp['options']['type'] = 'text';
+						$tmp['options']['type'] = 'time';
 						$tmp['options']['maxlength'] = 8;
 						$tmp['options']['size'] = 8;
 						$tmp['options']['culture'] = $tmp['lang'].'-'.strtoupper($tmp['lang']);
 						break;
 					case 'datetimepicker':
 						$tmp['tag'] = 'input';
-						$tmp['options']['type'] = 'text';
+						$tmp['options']['type'] = 'datetime';
 						$tmp['options']['maxlength'] = 19;
 						$tmp['options']['size'] = 20;
 						$tmp['options']['culture'] = $tmp['lang'].'-'.strtoupper($tmp['lang']);
@@ -164,10 +232,15 @@ class builder
 						$tmp['options']['rows'] = 6;
 						$tmp['options']['cols'] = 20;
 						break;
-					case 'dropdown':
+					case 'dropdownlist':
 						$tmp['tag'] = 'input';
 						$tmp['options']['type'] = 'text';
-						$tmp['options']['data'] = array();
+						$tmp['options']['dataSource'] = array();
+						$tmp['options']['dataTextField'] = "text";
+						$tmp['options']['dataValueField'] = "value";
+						$tmp['options']['change'] = '';
+						$tmp['options']['size'] = false;
+						$tmp['options']['css']['width'] = 'auto';
 						break;
 					case 'checkbox':
 						$tmp['tag'] = 'input';
@@ -177,6 +250,7 @@ class builder
 					case 'radio':
 						$tmp['tag'] = 'input';
 						$tmp['options']['type'] = 'radio';
+						$tmp['options']['value'] = 1;
 						break;
 					case 'hidden':
 						$tmp['tag'] = 'input';
@@ -186,9 +260,26 @@ class builder
 						$tmp['tag'] = 'input';
 						$tmp['options']['type'] = 'text';
 						break;
-					case 'quantity':
+					case 'numerictextbox':
 						$tmp['tag'] = 'input';
-						$tmp['options']['type'] = 'hidden';
+						$tmp['options']['type'] = 'number';
+						$tmp['options']['min'] = 0;
+						$tmp['options']['max'] = 100;
+						$tmp['options']['format'] = "n";
+						$tmp['options']['decimals'] = 0;
+						$tmp['options']['step'] = 1;
+						$tmp['options']['culture'] = $tmp['lang'].'-'.strtoupper($tmp['lang']);
+						if ( !isset($cfg['options']['max']) && isset($cfg['options']['maxlength']) ){
+							$max = '';
+							$max_length = $cfg['options']['maxlength'];
+							if ( isset($cfg['options']['decimals']) && $cfg['options']['decimals'] > 0 ){
+								$max_length -= ( $cfg['options']['decimals'] + 1 );
+							}
+							for ( $i = 0; $i < $max_length; $i++ ){
+								$max .= '9';
+							}
+							$cfg['options']['max'] = ( (float)$max > (int)$max ) ? (float)$max : (int)$max;
+						}
 						break;
 				}
 			}
@@ -213,39 +304,26 @@ class builder
 			if ( isset($cfg['options']) ){
 				$cfg['options'] = array_merge($tmp['options'], $cfg['options']);
 			}
+			//var_dump($cfg);
 			$cfg = array_merge($tmp, $cfg);
+			//var_dump($cfg);
 			if ( isset($cfg['field']) && !$cfg['script'] ){
-				switch ( $cfg['field'] )
-				{
-					case 'datepicker':
-						$cfg['script'] = '$("#'.$cfg['id'].'").kendoDatePicker({
-							"format":"yyyy-MM-dd",
-							"culture": "'.(	isset($cfg['options']['culture']) ? $cfg['options']['culture'] : $cfg['lang'].'-'.strtoupper($cfg['lang']) ).'"
-						});';
-						// format
-						// dates
-						// start
-						// end
-						// before
-						// after
-						break;
-					case 'timepicker':
-						$cfg['script'] = '$("#'.$cfg['id'].'").kendoTimePicker({
-							"format":"HH:mm:tt",
-							"culture": "'.(	isset($cfg['options']['culture']) ? $cfg['options']['culture'] : $cfg['lang'].'-'.strtoupper($cfg['lang']) ).'"
-						});';
-						// format
-						// dates
-						break;
-					case 'datetimepicker':
-						$cfg['script'] = '$("#'.$cfg['id'].'").kendoDateTimePicker({
-							"format":"yyyy-MM-dd hh:mm:ss",
-							"culture": "'.(	isset($cfg['options']['culture']) ? $cfg['options']['culture'] : $cfg['lang'].'-'.strtoupper($cfg['lang']) ).'"
-						});';
-						// format
-						// dates
-						break;
-					case 'rte':
+				$kkeys = array_keys($this->kendo);
+				if ( ( $i = array_search($cfg['field'], array_map(function($a){return strtolower($a);}, $kkeys)) ) !== false ){
+					$i = $kkeys[$i];
+					$widget_cfg = array();
+					foreach ( $this->kendo[$i] as $o ){
+						if ( isset($cfg['options'][$o]) ){
+							$widget_cfg[$o] = $cfg['options'][$o];
+						}
+					}
+					//var_dump($widget_cfg);
+					$cfg['script'] = '$("#'.$cfg['id'].'").kendo'.$i.'('.json_encode((object)$widget_cfg).');';
+				}
+				else{
+					switch ( $cfg['field'] )
+					{
+						case 'rte':
 						$cfg['script'] = 'CKEDITOR.replace("'.$cfg['id'].'");';
 						// autoParagraph: inline = true
 						// autogrow: true|false minheight/maxheight
@@ -254,36 +332,13 @@ class builder
 						// bodyId
 						// 
 						break;
-					case 'dropdown':
-						if ( isset($cfg['options']['sql'], $cfg['options']['db']) ){
-							$cfg['options']['data'] = array();
-							if ( $ds = $cfg['options']['db']->get_irows($cfg['options']['sql']) ){
-								foreach ( $ds as $d ){
-									array_push($cfg['options']['data'], array('value' => $d[0], 'text' => $d[1]));
-								}
-							}
+
+						case 'text':
+						if ( ( strpos($cfg['name'] , 'tel') === 0 ) || ( strpos($cfg['name'] , 'fax') === 0 ) || strpos($cfg['name'] , 'phone') !== false ){
+							$cfg['script'] = '$("#'.$cfg['id'].'").mask("99 99 99 99 99");';
 						}
-						$cfg['script'] = '$("#'.$cfg['id'].'").kendoDropDownList({
-							dataTextField: "text",
-							dataValueField: "value",
-							template: kendo.template($("#dropdown_template").html()),
-							dataSource: '.json_encode($cfg['options']['data']).'
-						});';
-						unset($cfg['options']['data']);
-						// onchange
-						// dataTextField
-						// dataValueField
 						break;
-					case 'checkbox':
-						break;
-					case 'radio':
-						break;
-					case 'hidden':
-						break;
-					case 'text':
-						break;
-					case 'quantity':
-						break;
+					}
 				}
 			}
 			$t = new \bbn\html\input($cfg);
@@ -293,379 +348,5 @@ class builder
 		return false;
 	}
 	
-	public function make_field_from_id($id, $cfg)
-	{
-		$tmp = array();
-		$field = '';
-		if ( !is_array($cfg) ){
-			$cfg = [];
-		}
-		switch ( $id )
-		{
-			case 1:
-			$tmp['field'] = 'datepicker';
-			break;
-
-			case 2:
-			// email
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			$tmp['options']['maxlength'] = 50;
-			$tmp['options']['size'] = 25;
-			$tmp['options']['culture'] = $this->_current['lang'];
-			$tmp['options']['email'] = 1;
-			// param1 === 'yes ? multiple : single
-			break;
-			
-			case 3:
-			// rich text
-			$tmp['field'] = 'rte';
-			// Type: Text
-			break;
-			
-			case 4:
-			// price (float)
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			$tmp['options']['number'] = 1;
-			$tmp['options']['maxlength'] = 15;
-			$tmp['options']['size'] = 10;
-			// Type float
-			break;
-			
-			case 5:
-			// relation
-			// var_dump($cfg);
-			$tmp['field'] = 'dropdown';
-			if ( isset($cfg['options']['db'],$cfg['params'][0]) && is_object($cfg['options']['db']) ){
-				$p = explode('.', $cfg['params'][0]);
-				if ( count($p) === 2 ){
-					$table = $p[0];
-					$field = $p[1];
-					$select = "`$table`.`$field`";
-					$order = "`$table`.`$field`";
-					if ( isset($cfg['params'][1]) ){
-						$p = explode('.', $cfg['params'][1]);
-						$table = $p[0];
-						$field = $p[1];
-						$select = "CONCAT ($select,' ',`$table`.`$field`)";
-						$order .= ",`$table`.`$field`";
-					}
-					$cfg['options']['sql'] = "SELECT id, $select FROM $table ORDER BY $order LIMIT 100";
-				}
-			}
-			break;
-			
-			case 8:
-			// rich small text
-			$tmp['field'] = 'rte';
-			$tmp['options']['rows'] = 3;
-			$tmp['options']['cols'] = 15;
-			// type Tinytext
-			break;
-
-			case 9:
-			$tmp['field'] = 'rte';
-			$tmp['options']['rows'] = 6;
-			$tmp['options']['cols'] = 20;
-			// type Text
-			break;
-				
-			case 10:
-				// hidden field
-				$tmp['tag'] = 'input';
-				$tmp['options']['type'] = 'hidden';
-				break;
-			
-			case 11:
-				// checkbox
-				$tmp['tag'] = 'input';
-				$tmp['options']['type'] = 'checkbox';
-				// tinyint (0/1)
-				break;
-			
-			case 12:
-				// quantity dropdown
-				// param1 = min
-				// param2 = max
-				break;
-			
-			case 16:
-				$tmp['field'] = 'dropdown';
-				$tmp['options']['data'] = [];
-				$a1 = explode(',', $cfg['params'][0]);
-				$a2 = explode(',', $cfg['params'][1]);
-				foreach ( $a1 as $i => $a ){
-					if ( strpos($a, "'") === 0 ){
-						$a = substr($a, 1, -1);
-					}
-					if ( strpos($a2[$i], "'") === 0 ){
-						$a2[$i] = substr($a2[$i], 1, -1);
-					}
-					array_push($tmp['options']['data'], array('text'=>$a, 'value'=>$a2[$i]));
-				}
-			break;
-			
-			case 18:
-				$tmp['tag'] = 'input';
-				$tmp['options']['type'] = 'text';
-				break;
-			
-			case 20:
-				$tmp['tag'] = 'input';
-				$tmp['options']['type'] = 'text';
-				break;
-			
-			case 24:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 25:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 27:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 28:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 29:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 30:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 32:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 33:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 35:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 36:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-
-			case 39:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-
-			case 40:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 41:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 42:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 46:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 47:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 49:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 50:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 79879:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 367904:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 564643:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 564809:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 657376:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 5345344:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 5391538:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 9085466:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 29098681:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 74682674:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 113051193:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 148751228:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 196779967:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 231858415:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 261368416:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 290886418:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 436730913:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 470057584:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 494886673:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 504909832:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 560916497:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 640910535:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 673747416:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			$tmp['options']['maxlength'] = $cfg['params'][0];
-			if ( isset($cfg['params'][1]) ){
-				$tmp['options']['minlength'] = $cfg['params'][1];
-			}
-			break;
-			
-			case 743318065:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 782446287:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 929232328:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 945255014:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 945255015:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 945255016:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-			case 945255017:
-			$tmp['tag'] = 'input';
-			$tmp['options']['type'] = 'text';
-			break;
-			
-		}
-		if ( isset($cfg['options'], $tmp['options']) ){
-			$cfg['options'] = array_merge($tmp['options'], $cfg['options']);
-		}
-		$cfg = array_merge($tmp, $cfg);
-		return $this->make_field($cfg, $field);
-	}
 }		
 ?>

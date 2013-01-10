@@ -203,7 +203,7 @@ class text
 			$file = substr($file,mb_strrpos($file,'/')+1);
 		if ( mb_strpos($file,'.') !== false )
 		{
-			$p = mb_strpos($file,'.');
+			$p = mb_strrpos($file,'.');
 			$f = mb_substr($file,0,$p);
 			$ext = mb_convert_case(mb_substr($file,$p+1),MB_CASE_LOWER);
 			if ( $ar )

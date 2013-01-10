@@ -155,7 +155,7 @@ class mvc
 	 * @param string | object $parent The parent controller</em>
 	 * @return bool
 	 */
-	public function __construct($db, $parent='')
+	public function __construct($db, $parent='', $data = array())
 	{
 		// The initial call should only have $db as parameter
 		if ( defined('BBN_CUR_PATH') && is_array($parent) ){
@@ -217,9 +217,13 @@ class mvc
 			$this->params =& $parent->params;
 			$this->url =& $parent->url;
 			$this->original_controller =& $parent->original_controller;
+			$this->original_mode =& $parent->original_mode;
 			$this->known_controllers =& $parent->known_controllers;
 			$this->loaded_views =& $parent->loaded_views;
 			$this->ucontrollers =& $parent->ucontrollers;
+			if ( count($data) > 0 ){
+				$this->data = $data;
+			}
 			$path = $db;
 			while ( strpos($path,'/') === 0 ){
 				$path = substr($path,1);
@@ -632,6 +636,20 @@ class mvc
 	}
 
 	/**
+	 * Returns the rendered result from the current mvc if successufully processed
+	 * process() (or check()) must have been called before.
+		*
+	 * @return string|false
+	 */
+	public function get_script()
+	{
+		if ( isset($this->obj->script) ){
+			return $this->obj->script;
+		}
+		return '';
+	}
+
+	/**
 	 * Sets the data. Chainable. Should be useless as $this->data is public. Chainable.
 	 *
 	 * @param array $data
@@ -671,9 +689,9 @@ class mvc
 	 *
 	 * @return void 
 	 */
-	public function add($d)
+	public function add($d,$data=array())
 	{
-		$o = new mvc($d,$this);
+		$o = new mvc($d, $this, $data);
 		if ( $o->check() ){
 			return $o;
 		}
@@ -687,6 +705,9 @@ class mvc
 	 */
 	public function output()
 	{
+		if ( !$this->obj ){
+			$this->obj = new \stdClass();
+		}
 		if ( $this->check() && $this->obj ){
 			
 			if ( isset($this->obj->prescript) ){

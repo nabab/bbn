@@ -119,7 +119,16 @@ class input
 	{
 		$s = $this->get_html();
 		if ( !empty($s) ){
-			$s = '<label class="appui-form-label" title="'.str_replace('"','',print_r($this->cfg,true)).'">'.$this->label.'</label><div class="appui-form-field">'.$s.'</div>';
+			if ( BBN_IS_DEV ){
+				$title = str_replace('"','',print_r($this->cfg,true));
+			}
+			else if ( isset($this->options['title']) ){
+				$title = $this->options['title'];
+			}
+			else{
+				$title = '';
+			}
+			$s = '<label class="appui-form-label" title="'.$title.'">'.$this->label.'</label><div class="appui-form-field">'.$s.'</div>';
 		}
 		return $s;
 	}
@@ -171,7 +180,7 @@ class input
 			if ( $this->tag === 'input' && isset($this->options['type']) ){
 				$this->html .= ' type="'.$this->options['type'].'"';
 				
-				if ( $this->options['type'] === 'text' ){
+				if ( $this->options['type'] === 'text' || $this->options['type'] === 'number' || $this->options['type'] === 'password' || $this->options['type'] === 'email' ){
 					if ( isset($this->options['maxlength']) && ( $this->options['maxlength'] > 0 ) && $this->options['maxlength'] <= 1000 ){
 						$this->html .= ' maxlength="'.$this->options['maxlength'].'"';
 					}
@@ -183,8 +192,21 @@ class input
 						$this->html .= ' size="'.$this->options['size'].'"';
 					}
 				}
-				
-				$this->html .= ' value="'.htmlentities($this->value).'"';
+				if ( $this->options['type'] === 'checkbox' ){
+					if ( !isset($this->options['value']) ){
+						$this->options['value'] = 1;
+					}
+					$this->html .= ' value="'.htmlentities($this->options['value']).'"';
+					if ( $this->value == $this->options['value'] ){
+						$this->html .= ' checked="checked"';
+					}
+				}
+				else if ( $this->options['type'] === 'radio' ){
+					
+				}
+				else{
+					$this->html .= ' value="'.htmlentities($this->value).'"';
+				}
 			}
 			
 			if ( isset($this->options['title']) ){
