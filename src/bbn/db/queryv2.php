@@ -65,47 +65,46 @@ class query extends \PDOStatement implements actions
 	 */
 	public function execute($args=null)
 	{
-		if ( $this->res === null || $args !== null )
-		{
-			$this->res = 1;
-			if ( is_array( $args ) ){
-				try{
-					return parent::execute($args);
-				}
-				catch ( \PDOException $e ){
-					connection::error($e,$this->queryString);
-				}
+		if ( is_array( $args ) ){
+			try{
+				return parent::execute($args);
 			}
-			else if ( !is_null($args) )
-			{
-				$args = func_get_args();
-				try{
-					return eval( 'return parent::execute( $args );' );
-				}
-				catch ( \PDOException $e ){
-					connection::error($e,$this->queryString);
-				}
-			}
-			else
-			{
-				foreach ( $this->values as $i => $v )
-				{
-					if ( $v[1] == 'u' ){
-						$this->bindValue($i+1,$v[0],\PDO::PARAM_INT);
-					}
-					else{
-						$this->bindValue($i+1,$v[0],\PDO::PARAM_STR);
-					}
-				}
-				try{
-					return parent::execute();
-				}
-				catch ( \PDOException $e ){
-					connection::error($e,$this->queryString);
-				}
+			catch ( \PDOException $e ){
+				connection::error($e,$this->queryString,$args);
 			}
 		}
-		return $this->res;
+		else if ( !is_null($args) )
+		{
+			$args = func_get_args();
+			try{
+				return eval( 'return parent::execute( $args );' );
+			}
+			catch ( \PDOException $e ){
+				connection::error($e,$this->queryString,$args);
+			}
+		}
+		else if ( isset($this->values) )
+		{
+			foreach ( $this->values as $i => $v )
+			{
+				if ( $v[1] === 'n' ){
+					$this->bindValue($i+1,$v[0],\PDO::PARAM_NULL);
+				}
+				else if ( $v[1] === 'u' ){
+					$this->bindValue($i+1,$v[0],\PDO::PARAM_INT);
+				}
+				else{
+					$this->bindValue($i+1,$v[0],\PDO::PARAM_STR);
+				}
+			}
+			try{
+				return parent::execute();
+			}
+			catch ( \PDOException $e ){
+				connection::error($e,$this->queryString,$this->values);
+			}
+		}
+		return false;
 	}
 
 	/**

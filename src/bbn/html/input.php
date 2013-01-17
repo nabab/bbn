@@ -40,7 +40,7 @@ class input
 	 * The controller file (with full path)
 	 * @var null|string
 	 */
-	$label,
+		$label,
 	/**
 	 * The mode of the output (dom, html, json, txt, xml...)
 	 * @var null|string
@@ -50,7 +50,8 @@ class input
 	 * The mode of the output (dom, html, json, txt, xml...)
 	 * @var null|string
 	 */
-	private $options = array(),
+	private $cfg,
+		$options = array(),
 		$html = '',
 		$script;
 	/**
@@ -66,10 +67,11 @@ class input
 		{
 			$mandatory_opt = array();
 			$possible_opt = array("required", "width", "placeholder", "cssclass", "title");
+			$this->cfg = $cfg;
 			$this->tag = strtolower($cfg['tag']);
 			$this->name = $cfg['name'];
-			$this->label = isset($cfg['label']) ? $cfg['label'] : str_replace(']', ')',str_replace('[',' (',str_replace('_', ' ', $cfg['name'])));
 			$this->id = isset($cfg['id']) ? $cfg['id'] : \bbn\str\text::genpwd(20,15);
+			$this->label = isset($cfg['label']) ? $cfg['label'] : str_replace(']', ')',str_replace('[',' (',str_replace('_', ' ', $cfg['name'])));
 			$this->required = isset($cfg['required']) ? $cfg['required'] : false;
 			$this->options = isset($cfg['options']) ? $cfg['options'] : array();
 			$this->script = isset($cfg['script']) ? $cfg['script'] : '';
@@ -107,36 +109,118 @@ class input
 			}
 		}
 	}
+	
+	public function get_config()
+	{
+		return $this->cfg;
+	}
+
 	public function get_label_input()
 	{
 		$s = $this->get_html();
 		if ( !empty($s) ){
-			$s = '<label class="appui-form-label">'.$this->label.'</label><div class="appui-form-field">'.$s.'</div>';
+			if ( BBN_IS_DEV ){
+				$title = str_replace('"','',print_r($this->cfg,true));
+			}
+			else if ( isset($this->options['title']) ){
+				$title = $this->options['title'];
+			}
+			else{
+				$title = '';
+			}
+			$s = '<label class="appui-form-label" title="'.$title.'">'.$this->label.'</label><div class="appui-form-field">'.$s.'</div>';
 		}
 		return $s;
 	}
+	
+	public function get_script()
+	{
+		$r = '';
+		if ( $this->name ){
+			
+			if ( $this->id ){
+				$r .= '$("#'.$this->id.'").focus(function(){
+					var $$ = $(this),
+					lab = $(this).prevAll("label").first();
+					if ( lab.length === 0 ){
+						lab = $$.parent().prevAll("label").first();
+					}
+					if ( lab.length === 1 ){
+						var o = $$.parent().offset(), 
+							w = lab.width(),
+							$boum = $(\'<div class="k-tooltip" id="form_tooltip" style="position:absolute">Ceci est un test</div>\')
+								.css({
+									"maxWidth": w,
+									"top": o.top-10,
+									"right": appui.v.width - o.left
+								});
+						$("body").append($boum);
+					}
+				}).blur(function(){
+					$("#form_tooltip").remove();
+				});';
+			}
+			if ( $this->script ){
+				$r .= $this->script;
+			}
+		}
+		return $r;
+	}
+	
 	public function get_html()
 	{
 		if ( empty($this->html) && $this->name ){
-			$this->html .= '<'.$this->tag.' name="'.$this->name.'" id="'.$this->id.'"';
+			
+			$this->html .= '<'.$this->tag.' name="'.$this->name.'"';
+			
+			if ( isset($this->id) ){
+				$this->html .= ' id="'.$this->id.'"';
+			}
+			
 			if ( $this->tag === 'input' && isset($this->options['type']) ){
 				$this->html .= ' type="'.$this->options['type'].'"';
-				if ( $this->options['type'] === 'text' ){
+				
+				if ( $this->options['type'] === 'text' || $this->options['type'] === 'number' || $this->options['type'] === 'password' || $this->options['type'] === 'email' ){
 					if ( isset($this->options['maxlength']) && ( $this->options['maxlength'] > 0 ) && $this->options['maxlength'] <= 1000 ){
 						$this->html .= ' maxlength="'.$this->options['maxlength'].'"';
+					}
+					if ( isset($this->options['minlength']) && ( $this->options['minlength'] > 0 ) && $this->options['minlength'] <= 1000 && ( 
+					( isset($this->options['maxlength']) && $this->options['maxlength'] > $this->options['minlength'] ) || !isset($this->options['maxlength']) ) ){
+						$this->html .= ' minlength="'.$this->options['minlength'].'"';
 					}
 					if ( isset($this->options['size']) && ( $this->options['size'] > 0 ) && $this->options['size'] <= 100 ){
 						$this->html .= ' size="'.$this->options['size'].'"';
 					}
 				}
-				$this->html .= ' value="'.$this->value.'"';
+				if ( $this->options['type'] === 'checkbox' ){
+					if ( !isset($this->options['value']) ){
+						$this->options['value'] = 1;
+					}
+					$this->html .= ' value="'.htmlentities($this->options['value']).'"';
+					if ( $this->value == $this->options['value'] ){
+						$this->html .= ' checked="checked"';
+					}
+				}
+				else if ( $this->options['type'] === 'radio' ){
+					
+				}
+				else{
+					$this->html .= ' value="'.htmlentities($this->value).'"';
+				}
 			}
+			
 			if ( isset($this->options['title']) ){
 				$this->html .= ' title="'.$this->options['title'].'"';
 			}
+			
 			$class = '';
+			
 			if ( isset($this->options['cssclass']) ){
 				$class .= $this->options['cssclass'].' ';
+			}
+
+			if ( $this->required ){
+				$class .= 'required ';
 			}
 			if ( isset($this->options['email']) ){
 				$class .= 'email ';
@@ -153,32 +237,22 @@ class input
 			if ( isset($this->options['creditcard']) ){
 				$class .= 'creditcard ';
 			}
+			
 			if ( !empty($class) ){
 				$this->html .= ' class="'.trim($class).'"';
 			}
+			
 			$this->html .= '>';
+			
 			if ( $this->tag === 'select' || $this->tag === 'textarea' ){
 				$this->html .= '</'.$this->tag.'>';
 			}
+			
 			if ( isset($this->options['placeholder']) && strpos($this->options['placeholder'],'%s') !== false ){
 				$this->html = sprintf($this->options['placeholder'], $this->html);
 			}
 		}
 		return $this->html;
-	}
-	
-	public function get_script()
-	{
-		$r = '';
-		if ( $this->name ){
-			if ( $this->value ){
-				$r .= '$("#'.$this->id.'").val("'.$this->value.'");';
-			}
-			if ( $this->script ){
-				$r .= sprintf($this->script, $this->id);
-			}
-		}
-		return $r;
 	}
 	
 }
