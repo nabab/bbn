@@ -18,45 +18,43 @@ use \bbn\str\text;
  */
 class connection extends \PDO implements actions
 {
+	private
 	/**
 	 * @var mixed
 	 */
-	private $last_query;
-
+		$last_query,
 	/**
 	 * @var array
 	 */
-	private $queries = array();
-	
+		$queries = array(),
 	/**
 	 * @var array
 	 */
-	private $hashes = array();
-
+		$hashes = array(),
 	/**
 	 * @var mixed
 	 */
-	private $last_insert_id;
+		$last_insert_id;
 	
+	public
 	/**
 	 * @var mixed
 	 */
-	public $current;
-	
-	/**
-	 * @var mixed
-	 */
-	private static $timeout;
+		$current;
 
+	private static
+	/**
+	 * @var mixed
+	 */
+		$timeout,
 	/**
 	 * @var string
 	 */
-	private static $line='---------------------------------------------------------------------------------';
-
+		$line='---------------------------------------------------------------------------------',
 	/**
 	 * @var mixed
 	 */
-	private static $l;
+		$l;
 
 
 	/**

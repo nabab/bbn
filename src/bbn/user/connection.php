@@ -107,7 +107,7 @@ class connection extends \bbn\obj
 			FROM `{$this->cfg['table']}`
 			WHERE 1 ".( !empty($this->cfg['condition']) ? " AND ( {$this->cfg['condition']} ) " : "" );
 		
-		if ( is_array($credentials) && isset($credentials['user'], $cfg['fields'], $credentials['pass']) ){
+		if ( is_array($credentials) && isset($credentials['user'], $credentials['pass'], $cfg['fields']) ){
 			$this->_identify($credentials);
 		}
 		
@@ -282,7 +282,7 @@ class connection extends \bbn\obj
 					$id)->get_row();
 				$info_auth = json_decode($d[$cols['info_auth']]);
 				
-				if ( $info_auth->fingerprint === self::make_fingerprint() ){
+				if ( is_object($info_auth) && $info_auth->fingerprint === self::make_fingerprint() ){
 					
 					$this->id = $id;
 					session_regenerate_id();
@@ -293,8 +293,8 @@ class connection extends \bbn\obj
 							WHERE `$cols[id]` = %u",
 							session_id(),
 							$this->id);
-					$this->_refresh_info();
 					$this->auth = 1;
+					$this->_refresh_info();
 				}
 			}
 		}

@@ -113,7 +113,12 @@ class mvc
 	 * @var array
 	 */
 		$params,
-	/**
+	 /**
+		* An array of each argument in the url path (params minus the ones leading to the controller)
+		* @var array
+		*/
+		$arguments,
+	 /**
 	 * List of possible outputs with their according file extension possibilities
 	 * @var array
 	 */
@@ -170,6 +175,7 @@ class mvc
 			$this->post = array();
 			$this->get = array();
 			$this->params = array();
+			$this->arguments = array();
 			if ( count($_POST) > 0 ){
 				foreach ( $_POST as $i => $p ){
 					$this->post[$i] = $p;
@@ -221,6 +227,7 @@ class mvc
 			$this->known_controllers =& $parent->known_controllers;
 			$this->loaded_views =& $parent->loaded_views;
 			$this->ucontrollers =& $parent->ucontrollers;
+			$this->arguments = [];
 			if ( count($data) > 0 ){
 				$this->data = $data;
 			}
@@ -395,6 +402,18 @@ class mvc
 			while ( strlen($fpath) > 0 )
 			{
 				if ( $this->get_controller($fpath) ){
+					if ( strlen($fpath) < strlen($this->path) ){
+						$this->arguments = explode('/',substr($this->path,strlen($fpath)));
+						// Trimming the array
+						while ( empty($this->arguments[0]) ){
+							array_shift($this->arguments);
+						}
+						$t = end($this->arguments);
+						while ( empty($t) ){
+							$t = end($this->arguments);
+							array_pop($this->arguments);
+						}
+					}
 					break;
 				}
 				else{

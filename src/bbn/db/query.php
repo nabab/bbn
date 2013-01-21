@@ -58,6 +58,17 @@ class query extends \PDOStatement implements actions
 			$this->values = $values;
 		}
 	}
+	
+	/**
+	 * @return $this 
+	 */
+	public function init($values)
+	{
+		$this->values = $values;
+		$this->res = null;
+		$this->num = null;
+		return $this;
+	}
 
 	/**
 	 * @param array|null $args
@@ -88,14 +99,22 @@ class query extends \PDOStatement implements actions
 			}
 			else
 			{
+				
 				foreach ( $this->values as $i => $v )
 				{
-					if ( $v[1] == 'u' ){
-						$this->bindValue($i+1,$v[0],\PDO::PARAM_INT);
+					if ( is_int ($v) ){
+						$param = \PDO::PARAM_INT;
+					}
+					else if ( is_bool($v) ){
+						$param = \PDO::PARAM_BOOL;
+					}
+					else if ( is_null($v) ){
+						$param = \PDO::PARAM_NULL;
 					}
 					else{
-						$this->bindValue($i+1,$v[0],\PDO::PARAM_STR);
+						$param = \PDO::PARAM_STR;
 					}
+					$this->bindValue($i+1,$v,$param);
 				}
 				try{
 					return parent::execute();
@@ -105,7 +124,7 @@ class query extends \PDOStatement implements actions
 				}
 			}
 		}
-		return $this->res;
+		return false;
 	}
 
 	/**
@@ -115,7 +134,7 @@ class query extends \PDOStatement implements actions
 	{
 		if ( $this->num === null )
 		{
-			$this->num = false;
+			$this->num = 0;
 			if ( isset($this->sequences['select']) || isset($this->sequences['show']) )
 			{
 				$sql = parser::ParseString($this->queryString)->getCountQuery();
@@ -124,11 +143,13 @@ class query extends \PDOStatement implements actions
 					$q = $this->db->prepare($sql);
 					$q->values = $this->values;
 					if ( $q->execute() )
-						$this->num = $q->fetchColumn();
-					/* In case there is some group by that split the results, we request the full set of results */
+						$this->num = (int)$q->fetchColumn();
+					/* In case there is some group by that split the results, we request the full set of results
 					$n = count($q->fetchAll());
-					if ( $n > $this->num && $this->num > 0 )
+					if ( $n > $this->num && $this->num > 0 ){
 						$this->num = $n + 1;
+					}
+					*/
 				}
 				catch ( \PDOException $e )
 					{ connection::error($e,$this->queryString); }
