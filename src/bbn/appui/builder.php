@@ -25,7 +25,7 @@ namespace bbn\appui;
  * @version 0.2r89
  */
 
-class builder{
+class mapper{
 
 	private $db, $prefix, $admin_db, $client_db;
 	public $schema = false, $auto_update = 1;
@@ -56,7 +56,7 @@ class builder{
 		}
 	}
 	
-	private function check_table($table, $database = false){
+	private function mapper($table, $database = false){
 		if ( $database ){
 			$this->client_db = $database;
 		}
@@ -155,8 +155,7 @@ class builder{
 	 * @param string $table The table's column
 	 * @return \bbn\html\input
 	 */
-	public function get_input_config($table, $column)
-	{
+	public function get_input_config($table, $column){
 		// Looks in the db for columns corresponding to the given table
 		if ( $this->db && \bbn\str\text::check_name($table, $column) && $col = $this->db->get_row("
 				SELECT *
@@ -391,8 +390,7 @@ class builder{
 	 * 
 	 * @return void
 	 */
-	public function create_tables()
-	{
+	public function create_tables(){
 		if ( $this->db ){
 			return $this->db->query("
 SET FOREIGN_KEY_CHECKS=0;
