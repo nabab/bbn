@@ -1,150 +1,367 @@
 <?php
 namespace bbn\appui;
 
-class history extends \bbn\db\connection
+use \bbn\str\text;
+
+class history extends \bbn\db\connection implements \bbn\db\api
 {
 	
-	const ACTIVE_FIELD = 'actif';
+	private $hstructures = array();
+	private
+		$hcol = 'active',
+		$htable,
+		$admin_db,
+		$huser,
+		$prefix = 'bbn_',
+		$primary = 'id';
 	
-	private $h_hashes = array();
 	/**
 	 * @return void 
 	 */
-	public function select($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
+	public function set_hcol($hcol)
 	{
-		$hash = md5('select'.$table.serialize(array_keys($fields)).serialize($where).( $order ? 1 : '0' ).$limit);
-		if ( isset($this->hashes[$hash]) ){
-			$sql = $this->hashes[$hash]['statement'];
+		// Sets the "active" column name 
+		if ( text::check_name($hcol) ){
+			$this->hcol = $hcol;
 		}
-		else{
-			$sql = $this->get_select($table, $fields, array_keys($where), $order, $limit);
+		return $this;
+	}
+	
+ /**
+  * Sets the history table name
+	* @return void 
+	*/
+	public function set_admin_db($db)
+	{
+		// Sets the history table name 
+		if ( text::check_name($db) ){
+			$this->admin_db = $db;
+			$this->htable = $this->admin_db.'.'.$this->prefix.'history';
 		}
-		if ( $sql ){
-			try{
-				if ( count($where) > 0 ){
-					$r = $this->query($sql, $hash, array_values($where));
-				}
-				else{
-					$r = $this->query($sql, $hash);
-				}
-				if ( $r ){
-					return $r->get_objects();
-				}
-			}
-			catch (\PDOException $e ){
-				self::error($e,$this->last_query);
-			}
-		}
+		return $this;
 	}
 	
 	/**
+	 * Sets the user ID that will be used to fill the user_id field
 	 * @return void 
 	 */
-	public function insert($table, array $values, $ignore = false)
+	public function set_huser($huser)
 	{
-		$hash = md5('insert'.$table.serialize(array_keys($values)).$ignore);
-		if ( isset($this->hashes[$hash]) ){
-			$sql = $this->hashes[$hash]['statement'];
+		// Sets the history table name 
+		if ( is_int($huser) ){
+			$this->huser = $huser;
 		}
-		else{
-			$sql = $this->get_insert($table, array_keys($values), $ignore);
-		}
-		if ( $sql ){
-			try{
-				return $this->query($sql, $hash, array_values($values));
-			}
-			catch (\PDOException $e ){
-				self::error($e,$this->last_query);
-			}
-		}
+		return $this;
 	}
-	
-	/**
-	 * @return void 
-	 */
-	public function insert_update($table, array $values)
+
+ /**
+  * This will make the script die if a user has not been configured
+	* @return 1
+	*/
+	private function check_config()
 	{
-		$hash = md5('insert_update'.$table.serialize(array_keys($values)));
-		if ( isset($this->hashes[$hash]) ){
-			$sql = $this->hashes[$hash]['statement'];
-			if ( $this->queries[$sql]['num_val'] === ( count($values) / 2 ) ){
-				$vals = array_merge(array_values($values),array_values($values));;
+		if ( !isset($this->huser) ){
+			die('No user has been configured');
+		}
+		if ( !isset($this->htable) ){
+			if ( in_array($this->prefix.'columns', $this->get_tables()) ){
+				$this->admin_db = $this->current;
+				$this->htable = $this->admin_db.'.'.$this->prefix.'history';
 			}
 			else{
-				$vals = array_values($values);
+				die('No database has been configured');
 			}
 		}
-		else if ( $sql = $this->get_insert($table, array_keys($values)) ){
-			$sql .= " ON DUPLICATE KEY UPDATE ";
-			$vals = array_values($values);
-			foreach ( $values as $k => $v ){
-				$sql .= "`$k` = ?, ";
-				array_push($vals, $v);
-			}
-			$sql = substr($sql,0,strrpos($sql,','));
+		return 1;
+	}
+	
+	public function get_history($table){
+		
+	}
+	
+	
+	/**
+	 * Gets all information about a given table
+	 * @return table full name
+	 */
+	public function get_table_cfg($id){
+		$parts = explode(".", $id);
+		if ( count($parts) === 1 ){
+			array_unshift($parts, $this->current);
 		}
-		if ( $sql ){
-			try{
-				return $this->query($sql, $hash, $vals);
-			}
-			catch (\PDOException $e ){
-				self::error($e,$this->last_query);
+		if ( count($parts) === 2 && \bbn\str\text::check_name($parts[0], $parts[1]) ){
+			$id = implode(".", $parts);
+			if ( !isset($this->hstructures[$id]) ){
+				$this->hstructures[$id] = ['history'=>false, 'fields' => []];
+				$cols = $this->select($this->admin_db.'.'.$this->prefix.'columns',[],['table' =>$this->host.'.'.$id], 'position');
+				$s =& $this->hstructures[$id];
+				foreach ( $cols as $col ){
+					$col = (array) $col;
+					$c = $col['column'];
+					$s['fields'][$c] = $col;
+					$s['fields'][$c]['config'] = (array)json_decode($col['config']);
+					if ( isset($s['fields'][$c]['config']['history']) && $s['fields'][$c]['config']['history'] == 1 ){
+						$s['history'] = 1;
+					}
+					if ( isset($s['fields'][$c]['config']['keys']) ){
+						$s['fields'][$c]['config']['keys'] = (array) $s['fields'][$c]['config']['keys'];
+					}
+				}
 			}
 		}
-		return false;
+	}
+	
+	public function select($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
+	{
+		if ( $this->check_config() ){
+			return call_user_func_array(array($this, 'parent::select'), func_get_args());
+		}
+	}
+	
+	
+	/**
+	 * @return void 
+	 */
+	public function insert($table, array $values, $ignore = false, $date = false)
+	{
+		if ( $this->check_config() ){
+			// This is the arguments that will be passed to the parent function
+			$args = func_get_args();
+			// If date is spcified it has to be removed
+			if ( $date ){
+				array_pop($args);
+			}
+			else{
+				// One single date for all operations
+				$date = date('c');
+			}
+			// Inserting first, historizing after
+			$r = call_user_func_array(array($this, 'parent::insert'), $args);
+			if ( ( $table = $this->get_full_name($table) ) && $table !== $this->htable && $r ){
+				$id = $this->last_id();
+				if ( !isset($this->hstructures[$table]) ){
+					$this->get_table_cfg($table);
+				}
+				if ( $this->hstructures[$table]['history'] ){
+					$this->insert($this->htable, [
+						'operation' => 'INSERT',
+						'line' => $id,
+						'column' => $this->host.'.'.$table.'.'.$this->primary,
+						'old' => '',
+						'last_mod' => $date,
+						'id_user' => $this->huser]);
+				}
+			}
+			return $r;
+		}
 	}
 	
 	/**
 	 * @return void 
 	 */
-	public function update($table, array $values, array $where)
+	public function insert_update($table, array $values, $date = false)
 	{
-		$hash = md5('insert_update'.$table.serialize(array_keys($values)).serialize(array_keys($where)));
-		if ( isset($this->hashes[$hash]) ){
-			$sql = $this->hashes[$hash]['statement'];
-		}
-		else{
-			$sql = $this->get_update($table, array_keys($values), array_keys($where));
-		}
-		if ( $sql ){
-			try{
-				return $this->query($sql, $hash, array_merge(array_values($values), array_values($where)));
+		if ( $this->check_config() ){
+			// This is the arguments that will be passed to the parent function
+			$args = func_get_args();
+			// If date is spcified it has to be removed from the arguments
+			if ( $date ){
+				array_pop($args);
 			}
-			catch (\PDOException $e ){
-				self::error($e,$this->last_query);
+			else{
+				// One single date for all operations
+				$date = date('c');
 			}
+			if ( ( $table = $this->get_full_name($table) ) && $table !== $this->htable ){
+				if ( !isset($this->hstructures[$table]) ){
+					$this->get_table_cfg($table);
+				}
+				$s = $this->hstructures[$table];
+				if ( !$s['history'] ){
+					return call_user_func_array(array($this, 'parent::insert_update'), $args);
+				}
+				$update = false;
+				foreach ( $s['fields'] as $f ){
+					if ( !$update ){
+						if ( isset($f['config']['keys']) ){
+							foreach ( $f['config']['keys'] as $k => $inf ){
+								if ( $inf->unique == 1 ){
+									$has_key = true;
+									$where = [];
+									foreach ( $inf->columns as $col ){
+										if ( !isset($values[$col]) ){
+											$has_key = false;
+											break;
+										}
+										else{
+											$where[$col] = $values[$col];
+										}
+									}
+									if ( $has_key && $update = $this->select($table, [], $where) ){
+										break;
+									}
+								}
+							}
+						}
+					}
+				}
+				if ( $update ){
+					if ( isset($update[0]) ){
+						$update = $update[0];
+					}
+					$update = (array) $update;
+					if ( $r = call_user_func_array(array($this, 'parent::insert_update'), $args) ){
+						foreach ( $values as $c => $v ){
+							if ( $v !== $update[$c] && isset($s['fields'][$c]['config']['history']) ){
+								$this->insert($this->htable, [
+									'operation' => 'UPDATE',
+									'line' => $update[$this->primary],
+									'column' => $this->host.'.'.$table.'.'.$c,
+									'old' => $update[$c],
+									'last_mod' => $date ? $date : date('c'),
+									'id_user' => $this->huser]);
+							}
+						}
+					}
+				}
+				else if ( $r = call_user_func_array(array($this, 'parent::insert_update'), $args) ){
+					$id = $this->last_id();
+					$this->insert($this->htable, [
+						'operation' => 'INSERT',
+						'line' => $id,
+						'column' => $this->host.'.'.$table.'.'.$this->primary,
+						'old' => '',
+						'last_mod' => date('c'),
+						'id_user' => $this->huser]);
+				}
+			}
+			return $r;
 		}
-		return false;
 	}
 	
 	/**
 	 * @return void 
 	 */
-	public function delete($table, array $where)
+	public function update($table, array $values, array $where, $date = false)
 	{
-		$hash = md5('delete'.$table.serialize(array_keys($where)));
-		if ( isset($this->hashes[$hash]) ){
-			$sql = $this->hashes[$hash]['statement'];
-		}
-		else{
-			$sql = $this->get_delete($table, array_keys($where));
-		}
-		if ( $sql ){
-			try{
-				return $this->query($sql, $hash, array_values($where));
+		if ( $this->check_config() ){
+			$r = false;
+			// This is the arguments that will be passed to the parent function
+			$args = func_get_args();
+			// If date is spcified it has to be removed from the arguments
+			if ( $date ){
+				array_pop($args);
 			}
-			catch (\PDOException $e ){
-				self::error($e,$this->last_query);
+			else{
+				// One single date for all operations
+				$date = date('c');
 			}
+			if ( count($values) === 1 && isset($values[$this->hcol]) ){
+				return call_user_func_array(array($this, 'parent::update'), $args);
+			}
+			// No update in the history table
+			if ( ( $table = $this->get_full_name($table) ) && $table !== $this->htable ){
+				if ( !isset($this->hstructures[$table]) ){
+					$this->get_table_cfg($table);
+				}
+				$s = $this->hstructures[$table];
+				if ( !$s['history'] ){
+					return call_user_func_array(array($this, 'parent::update'), $args);
+				}
+				$update = $this->select($table, [], $where);
+				if ( $r = call_user_func_array(array($this, 'parent::update'), $args) ){
+					foreach ( $update as $upd ){
+						$upd = (array) $upd;
+						foreach ( $values as $c => $v ){
+							if ( $v !== $upd[$c] && isset($s['fields'][$c]['config']['history']) ){
+								$this->insert($this->htable, [
+									'operation' => 'UPDATE',
+									'line' => $upd[$this->primary],
+									'column' => $this->host.'.'.$table.'.'.$c,
+									'old' => $upd[$c],
+									'last_mod' => $date ? $date : date('c'),
+									'id_user' => $this->huser]);
+							}
+						}
+					}
+				}
+			}
+			return $r;
 		}
 	}
 	
 	/**
 	 * @return void 
 	 */
-	public function insert_ignore($table, array $values)
+	public function delete($table, array $where, $date = false)
 	{
-		return $this->insert($table, $values, 1);
+		if ( $this->check_config() ){
+			$r = false;
+			// This is the arguments that will be passed to the parent function
+			$args = func_get_args();
+			// If date is specified it has to be removed from the arguments
+			if ( $date ){
+				array_pop($args);
+			}
+			else{
+				// So we only have one single date for all operations
+				$date = date('c');
+			}
+			// If it is the history's table we just don't proceed (no programmatical delete!!)
+			if ( ( $table = $this->get_full_name($table) ) && $table !== $this->htable ){
+				// Grabbing the structure if not already stored in hstructures
+				if ( !isset($this->hstructures[$table]) ){
+					$this->get_table_cfg($table);
+				}
+				$s =& $this->hstructures[$table];
+				// Looking for foreign constraints 
+				$to_check = $this->get_rows("
+					SELECT k.`column` AS id, c1.`column` AS to_change, c2.`column` AS from_change,
+					c1.`null`, t.`table`
+					FROM `{$this->admin_db}`.`{$this->prefix}keys` AS k
+						JOIN `{$this->prefix}columns` AS c1
+							ON c1.`id` LIKE k.`column`
+						JOIN `{$this->prefix}columns` AS c2
+							ON c2.`id` LIKE k.`ref_column`
+						JOIN `{$this->prefix}tables` AS t
+							ON t.`id` LIKE c1.`table`
+					WHERE k.`ref_column` LIKE ?",
+					$this->host.'.'.$table.'.%%');
+				$to_select = [$this->primary];
+				foreach ( $to_check as $c ){
+					array_push($to_select,$c['from_change']);
+				}
+				// Nothing is really deleted, the hcol is just set to 0
+				if ( $r = $this->update($table, [$this->hcol => '0'], $where) ){
+					// The values from the constrained rows that should have been deleted
+					$delete = $this->select($table, array_unique($to_select), $where);
+					// For each value of this key which is deleted (hopefully one)
+					foreach ( $delete as $del ){
+						$del = (array) $del;
+						// For each table having a constrain
+						foreach ( $to_check as $c ){
+							// If it's nullable we set it to null
+							if ( $c['null'] == 1 ){
+								$this->update($c['table'], [ $c['to_change'] => null ], [ $c['to_change'] => $del[$c['from_change']] ]);
+							}
+							// Otherwise we "delete" it on the same manner
+							else{
+								$this->delete($c['table'], [ $c['to_change'] => $del[$c['from_change']] ]);
+							}
+						}
+						// Inserting a new history row for each deleted value
+						$this->insert($this->htable, [
+							'operation' => 'DELETE',
+							'line' => $del[$this->primary],
+							'column' => $this->host.'.'.$table.'.'.$this->hcol,
+							'old' => 1,
+							'last_mod' => $date,
+							'id_user' => $this->huser]);
+					}
+				}
+			}
+			return $r;
+		}
 	}
 }
 ?>

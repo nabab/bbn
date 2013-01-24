@@ -14,6 +14,7 @@ namespace bbn\appui;
  * - bbn_columns
  * - bbn_keys
  * - bbn_forms
+ * - bbn_forms
  * - bbn_fields
  *
  *
@@ -56,15 +57,33 @@ class mapper{
 		}
 	}
 	
-	private function mapper($table, $database = false){
+	private function remapper($table, $database = false){
 		if ( $database ){
 			$this->client_db = $database;
 		}
 		
 	}
 	
+	public function get_table_cfg($id){
+		$parts = explode(".", $id);
+		if ( count($parts) === 1 ){
+			array_unshift($parts, $this->db->current);
+		}
+		if ( count($parts) === 2 ){
+			array_unshift($parts, 'localhost');
+		}
+		if ( count($parts) === 3 && \bbn\str\text::check_name($parts[0], $parts[1], $parts[2]) ){
+			return array_map(function($a){
+				$parts = explode(".", $a->id);
+				$a->host = $parts[0];
+				$a->db = $parts[1];
+				$a->config = json_decode($a->config);
+				return $a;
+			},$this->db->select($this->prefix.'columns',[],['table' =>implode(".", $parts)], 'position'));
+		}
+	}
 	/**
-	 * Generates a whole form for a given table according to its structure and/or form configuration
+	 * Generates a whole form configuration array for a given table according to its structure and/or form configuration
 	 * 
 	 * @param string | integer $table The database's table or the ID of the form
 	 * @return string
@@ -315,24 +334,49 @@ class mapper{
 				}
 			}
 			$this->db->query("DELETE FROM `{$this->admin_db}`.`{$this->prefix}dbs` WHERE `db` LIKE '$db'");
-			$this->db->query("INSERT INTO `{$this->admin_db}`.`{$this->prefix}dbs` (`db`) VALUES ('$db')");
+			$this->db->query("INSERT INTO `{$this->admin_db}`.`{$this->prefix}dbs` (`id`, `db`) VALUES ('{$this->db->host}.$db', '$db')");
 			foreach ( $schema as $t => $vars ){
 				if ( strpos($t, $this->prefix) !== 0 ){
 					$this->db->insert($this->admin_db.'.'.$this->prefix.'tables',[
-						'db' => $db,
+						'id' => 'localhost.'.$db.'.'.$t,
+						'db' => 'localhost.'.$db,
 						'table' => $t
 					]);
 					foreach ( $vars['fields'] as $col => $f ){
+						$config = new \stdClass();
+						if ( strpos($t, 'apst_') === 0 && ( $col !== 'id' && $col !== 'last_mod' && $col !== 'id_user' && $col !== 'history' ) ){
+							$config->history = 1;
+						}
+						if ( isset($f['default']) ){
+							$config->default = $f['default'];
+						}
+						if ( !empty($f['extra']) ){
+							$config->extra = $f['extra'];
+						}
+						if ( isset($f['signed']) && $f['signed'] == 1 ){
+							$config->signed = 1;
+						}
+						if ( isset($f['null']) && $f['null'] == '1' ){
+							$config->null = 1;
+						}
+						if ( isset($f['maxlength']) && $f['maxlength'] > 0 ){
+							$config->maxlength = $f['maxlength'];
+						}
+						if ( isset($f['keys']) ){
+							$config->keys = [];
+							foreach ( $f['keys'] as $key ){
+								$config->keys[$key] = $vars['keys'][$key];
+							}
+						}
 						$this->db->insert($this->admin_db.'.'.$this->prefix.'columns',[
-							'db' => $db,
-							'table' => $t,
+							'id' => 'localhost.'.$db.'.'.$t.'.'.$col,
+							'table' => 'localhost.'.$db.'.'.$t,
 							'column' => $col,
 							'position' => $f['position'],
 							'type' => $f['type'],
 							'null' => $f['null'],
 							'key' => $f['key'],
-							'default' => $f['default'],
-							'extra' => $f['extra']
+							'config' => json_encode($config)
 						]);
 					}
 				}
@@ -343,14 +387,11 @@ class mapper{
 						$pos = 1;
 						foreach ( $arr['columns'] as $c ){
 							$this->db->insert($this->admin_db.'.'.$this->prefix.'keys',[
-								'db' => $db,
-								'table' => $t,
+								'id' => 'localhost.'.$db.'.'.$t.'.'.$c.'.'.$k,
 								'key' => $k,
-								'column' => $c,
+								'column' => 'localhost.'.$db.'.'.$t.'.'.$c,
 								'position' => $pos,
-								'ref_db' => $arr['ref_db'],
-								'ref_table' => $arr['ref_table'],
-								'ref_column' => $arr['ref_column']
+								'ref_column' => is_null($arr['ref_column']) ? null : 'localhost.'.$arr['ref_db'].'.'.$arr['ref_table'].'.'.$arr['ref_column']
 							]);
 							$pos++;
 						}
@@ -393,142 +434,118 @@ class mapper{
 	public function create_tables(){
 		if ( $this->db ){
 			return $this->db->query("
-SET FOREIGN_KEY_CHECKS=0;
-SET SQL_MODE=\"NO_AUTO_VALUE_ON_ZERO\";
-SET time_zone = \"+00:00\";
-
-DROP TABLE IF EXISTS `{$this->prefix}clients`;
-CREATE TABLE IF NOT EXISTS `{$this->prefix}clients` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `nom` varchar(100) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
-
-DROP TABLE IF EXISTS `{$this->prefix}columns`;
-CREATE TABLE IF NOT EXISTS `{$this->prefix}columns` (
-  `db` varchar(50) NOT NULL,
-  `table` varchar(50) NOT NULL,
-  `column` varchar(50) NOT NULL,
-  `position` tinyint(3) unsigned NOT NULL,
-  `type` varchar(50) NOT NULL,
-  `null` tinyint(1) unsigned NOT NULL,
-  `key` varchar(3) DEFAULT NULL,
-  `default` text,
-  `extra` varchar(50) DEFAULT NULL,
-  PRIMARY KEY (`db`,`table`,`column`),
-  KEY `table` (`table`),
-  KEY `column` (`column`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-DROP TABLE IF EXISTS `{$this->prefix}dbs`;
-CREATE TABLE IF NOT EXISTS `{$this->prefix}dbs` (
-  `id_client` int(10) unsigned DEFAULT NULL,
-  `host` varchar(50) NOT NULL DEFAULT 'localhost',
-  `db` varchar(50) NOT NULL,
-  PRIMARY KEY (`host`,`db`),
-  KEY `db` (`db`),
-  KEY `host` (`host`),
-  KEY `id_client` (`id_client`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-DROP TABLE IF EXISTS `{$this->prefix}fields`;
-CREATE TABLE IF NOT EXISTS `{$this->prefix}fields` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `id_form` int(10) unsigned NOT NULL,
-  `table` varchar(50) CHARACTER SET utf8 NOT NULL,
-  `column` varchar(50) CHARACTER SET utf8 NOT NULL,
-  `title` varchar(100) CHARACTER SET utf8 NOT NULL,
-  `position` tinyint(3) unsigned NOT NULL,
-  `configuration` text CHARACTER SET utf8 NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `id_form` (`id_form`),
-  KEY `table` (`table`),
-  KEY `column` (`column`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
-
-DROP TABLE IF EXISTS `{$this->prefix}forms`;
-CREATE TABLE IF NOT EXISTS `{$this->prefix}forms` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `id_project` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `id_project` (`id_project`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
-
-DROP TABLE IF EXISTS `{$this->prefix}keys`;
-CREATE TABLE IF NOT EXISTS `{$this->prefix}keys` (
-  `db` varchar(50) NOT NULL,
-  `table` varchar(50) NOT NULL,
-  `key` varchar(50) NOT NULL,
-  `column` varchar(50) NOT NULL,
-  `position` tinyint(3) unsigned NOT NULL,
-  `ref_db` varchar(50) DEFAULT NULL,
-  `ref_table` varchar(50) DEFAULT NULL,
-  `ref_column` varchar(50) DEFAULT NULL,
-  PRIMARY KEY (`db`,`table`,`key`,`column`),
-  KEY `table` (`table`),
-  KEY `column` (`column`),
-  KEY `ref_db` (`ref_db`),
-  KEY `ref_table` (`ref_table`),
-  KEY `ref_column` (`ref_column`),
-  KEY `{$this->prefix}keys_dbs` (`db`,`table`,`column`),
-  KEY `{$this->prefix}keys_ref_dbs` (`ref_db`,`ref_table`,`ref_column`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-DROP TABLE IF EXISTS `{$this->prefix}projects`;
-CREATE TABLE IF NOT EXISTS `{$this->prefix}projects` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `id_client` int(10) unsigned NOT NULL,
-  `db` varchar(50) CHARACTER SET utf8 DEFAULT NULL,
-  `name` varchar(50) CHARACTER SET utf8 NOT NULL,
-  `config` text CHARACTER SET utf8,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `id_client_2` (`id_client`,`name`),
-  KEY `db` (`db`),
-  KEY `id_client` (`id_client`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
-
-DROP TABLE IF EXISTS `{$this->prefix}tables`;
-CREATE TABLE IF NOT EXISTS `{$this->prefix}tables` (
-  `db` varchar(50) NOT NULL,
-  `table` varchar(50) NOT NULL,
-  PRIMARY KEY (`db`,`table`),
-  KEY `table` (`table`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-ALTER TABLE `{$this->prefix}columns`
-  ADD CONSTRAINT `{$this->prefix}columns_ibfk_4` FOREIGN KEY (`table`) REFERENCES `{$this->prefix}tables` (`table`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `{$this->prefix}columns_ibfk_3` FOREIGN KEY (`db`) REFERENCES `{$this->prefix}dbs` (`db`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `{$this->prefix}columns_tables` FOREIGN KEY (`db`, `table`) REFERENCES `{$this->prefix}tables` (`db`, `table`) ON DELETE CASCADE ON UPDATE CASCADE;
-
-ALTER TABLE `{$this->prefix}dbs`
-  ADD CONSTRAINT `{$this->prefix}dbs_clients` FOREIGN KEY (`id_client`) REFERENCES `{$this->prefix}clients` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
-
-ALTER TABLE `{$this->prefix}fields`
-  ADD CONSTRAINT `{$this->prefix}fields_columns` FOREIGN KEY (`column`) REFERENCES `{$this->prefix}columns` (`column`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `{$this->prefix}fields_forms` FOREIGN KEY (`id_form`) REFERENCES `{$this->prefix}forms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `{$this->prefix}fields_tables` FOREIGN KEY (`table`) REFERENCES `{$this->prefix}tables` (`table`) ON DELETE CASCADE ON UPDATE CASCADE;
-
-ALTER TABLE `{$this->prefix}forms`
-  ADD CONSTRAINT `{$this->prefix}forms_projects` FOREIGN KEY (`id_project`) REFERENCES `{$this->prefix}projects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
-ALTER TABLE `{$this->prefix}keys`
-  ADD CONSTRAINT `{$this->prefix}keys_ibfk_6` FOREIGN KEY (`ref_column`) REFERENCES `{$this->prefix}columns` (`column`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `{$this->prefix}keys_dbs` FOREIGN KEY (`db`, `table`, `column`) REFERENCES `{$this->prefix}columns` (`db`, `table`, `column`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `{$this->prefix}keys_ibfk_1` FOREIGN KEY (`db`) REFERENCES `{$this->prefix}dbs` (`db`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `{$this->prefix}keys_ibfk_2` FOREIGN KEY (`table`) REFERENCES `{$this->prefix}tables` (`table`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `{$this->prefix}keys_ibfk_3` FOREIGN KEY (`column`) REFERENCES `{$this->prefix}columns` (`column`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `{$this->prefix}keys_ibfk_4` FOREIGN KEY (`ref_db`) REFERENCES `{$this->prefix}dbs` (`db`) ON DELETE CASCADE ON UPDATE CASCADE,
-			ADD CONSTRAINT `{$this->prefix}keys_ibfk_5` FOREIGN KEY (`ref_table`) REFERENCES `{$this->prefix}tables` (`table`) ON DELETE CASCADE ON UPDATE CASCADE,
-			ADD CONSTRAINT `{$this->prefix}keys_ref_dbs` FOREIGN KEY (`ref_db`, `ref_table`, `ref_column`) REFERENCES `{$this->prefix}columns` (`db`, `table`, `column`) ON DELETE CASCADE ON UPDATE CASCADE;
+			SET FOREIGN_KEY_CHECKS=0;
+			SET SQL_MODE=\"NO_AUTO_VALUE_ON_ZERO\";
+			SET time_zone = \"+00:00\";
 			
-			ALTER TABLE `{$this->prefix}projects`
-			ADD CONSTRAINT `{$this->prefix}projects_ibfk_1` FOREIGN KEY (`db`) REFERENCES `{$this->prefix}dbs` (`db`) ON DELETE CASCADE ON UPDATE CASCADE,
-			ADD CONSTRAINT `{$this->prefix}projects_clients` FOREIGN KEY (`id_client`) REFERENCES `{$this->prefix}clients` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+			DROP TABLE IF EXISTS `bbn_clients`;
+			CREATE TABLE IF NOT EXISTS `bbn_clients` (
+			`id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+			`nom` varchar(100) NOT NULL,
+			PRIMARY KEY (`id`)
+			) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 			
-			ALTER TABLE `{$this->prefix}tables`
-			ADD CONSTRAINT `{$this->prefix}tables_dbs` FOREIGN KEY (`db`) REFERENCES `{$this->prefix}dbs` (`db`) ON DELETE CASCADE ON UPDATE CASCADE;
+			DROP TABLE IF EXISTS `bbn_columns`;
+			CREATE TABLE IF NOT EXISTS `bbn_columns` (
+			`id` varchar(180) NOT NULL,
+			`table` varchar(130) NOT NULL,
+			`column` varchar(49) NOT NULL,
+			`position` tinyint(3) unsigned NOT NULL,
+			`type` varchar(50) NOT NULL,
+			`null` tinyint(1) unsigned NOT NULL,
+			`key` varchar(3) DEFAULT NULL,
+			`config` text,
+			PRIMARY KEY (`id`),
+			UNIQUE KEY `table` (`table`,`column`),
+			UNIQUE KEY `table_2` (`table`,`position`)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+			
+			DROP TABLE IF EXISTS `bbn_dbs`;
+			CREATE TABLE IF NOT EXISTS `bbn_dbs` (
+			`id` varchar(80) NOT NULL,
+			`id_client` int(10) unsigned DEFAULT NULL,
+			`host` varchar(49) NOT NULL DEFAULT 'localhost',
+			`db` varchar(30) NOT NULL,
+			PRIMARY KEY (`id`),
+			UNIQUE KEY `host_db` (`host`,`db`),
+			KEY `db` (`db`),
+			KEY `id_client` (`id_client`)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+			
+			DROP TABLE IF EXISTS `bbn_fields`;
+			CREATE TABLE IF NOT EXISTS `bbn_fields` (
+			`id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+			`id_form` int(10) unsigned NOT NULL,
+			`column` varchar(180) CHARACTER SET utf8 NOT NULL,
+			`title` varchar(100) CHARACTER SET utf8 NOT NULL,
+			`position` tinyint(3) unsigned NOT NULL,
+			`configuration` text CHARACTER SET utf8 NOT NULL,
+			PRIMARY KEY (`id`),
+			UNIQUE KEY `id_form_column` (`id_form`,`column`),
+			KEY `id_form` (`id_form`),
+			KEY `column` (`column`)
+			) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+			
+			DROP TABLE IF EXISTS `bbn_forms`;
+			CREATE TABLE IF NOT EXISTS `bbn_forms` (
+			`id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+			`id_project` int(10) unsigned NOT NULL,
+			PRIMARY KEY (`id`),
+			KEY `id_project` (`id_project`)
+			) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+			
+			DROP TABLE IF EXISTS `bbn_keys`;
+			CREATE TABLE IF NOT EXISTS `bbn_keys` (
+			`id` varchar(230) NOT NULL,
+			`key` varchar(49) NOT NULL,
+			`column` varchar(180) NOT NULL,
+			`position` tinyint(3) unsigned NOT NULL,
+			`ref_column` varchar(180) DEFAULT NULL,
+			PRIMARY KEY (`id`),
+			UNIQUE KEY `key` (`key`,`column`),
+			KEY `ref_column` (`ref_column`),
+			KEY `column` (`column`)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+			
+			DROP TABLE IF EXISTS `bbn_projects`;
+			CREATE TABLE IF NOT EXISTS `bbn_projects` (
+			`id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+			`id_client` int(10) unsigned NOT NULL,
+			`db` varchar(50) CHARACTER SET utf8 DEFAULT NULL,
+			`name` varchar(50) CHARACTER SET utf8 NOT NULL,
+			`config` text CHARACTER SET utf8,
+			PRIMARY KEY (`id`),
+			UNIQUE KEY `id_client_2` (`id_client`,`name`),
+			KEY `db` (`db`),
+			KEY `id_client` (`id_client`)
+			) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+			
+			DROP TABLE IF EXISTS `bbn_tables`;
+			CREATE TABLE IF NOT EXISTS `bbn_tables` (
+			`id` varchar(130) NOT NULL,
+			`db` varchar(80) NOT NULL,
+			`table` varchar(49) NOT NULL,
+			PRIMARY KEY (`id`),
+			UNIQUE KEY `db_table` (`db`,`table`),
+			KEY `table` (`table`)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+			
+			
+			ALTER TABLE `bbn_columns`
+			ADD CONSTRAINT `bbn_columns_ibfk_1` FOREIGN KEY (`table`) REFERENCES `bbn_tables` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+			
+			ALTER TABLE `bbn_dbs`
+			ADD CONSTRAINT `bbn_dbs_ibfk_1` FOREIGN KEY (`id_client`) REFERENCES `bbn_clients` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+			
+			ALTER TABLE `bbn_keys`
+			ADD CONSTRAINT `bbn_keys_ibfk_2` FOREIGN KEY (`ref_column`) REFERENCES `bbn_columns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+			ADD CONSTRAINT `bbn_keys_ibfk_1` FOREIGN KEY (`column`) REFERENCES `bbn_columns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+			
+			ALTER TABLE `bbn_tables`
+			ADD CONSTRAINT `bbn_tables_ibfk_1` FOREIGN KEY (`db`) REFERENCES `bbn_dbs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 			SET FOREIGN_KEY_CHECKS=1;
+			
+			
 			");
 		}
 	}

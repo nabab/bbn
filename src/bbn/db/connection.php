@@ -16,9 +16,12 @@ use \bbn\str\text;
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @version 0.2r89
  */
-class connection extends \PDO implements actions
+class connection extends \PDO implements actions, api
 {
 	private
+		$max_queries = 100,
+		$hash_contour = '__BBN__';
+	protected
 	/**
 	 * @var mixed
 	 */
@@ -42,6 +45,12 @@ class connection extends \PDO implements actions
 	
 	public
 	/**
+	 * The host of this connection
+	 * @var string
+	 */
+		$host,
+	/**
+	 * The currently selected database
 	 * @var mixed
 	 */
 		$current;
@@ -87,14 +96,13 @@ class connection extends \PDO implements actions
 		array_push($msg,@date('H:i:s d-m-Y').' - Error in the page!');
 		array_push($msg,self::$line);
 		$b = debug_backtrace();
-		foreach ( $b as $c )
-		{
-			if ( isset($c['file']) )
-			{
+		foreach ( $b as $c ){
+			if ( isset($c['file']) ){
 				array_push($msg,'File '.$c['file'].' - Line '.$c['line']);
 				array_push($msg,
 					( isset($c['class']) ?  'Class '.$c['class'].' - ' : '' ).
-					( isset($c['function']) ?  'Function '.$c['function'] : '' )
+					( isset($c['function']) ?  'Function '.$c['function'] : '' )/*.
+					( isset($c['args']) ? 'Arguments: '.substr(print_r($c['args'],1),0,100) : '' )*/
 				);
 			}
 		}
@@ -113,8 +121,10 @@ class connection extends \PDO implements actions
 			if ( isset($argv) ){
 				echo nl2br(implode("\n",$msg));
 			}
+			else{
+				die();
+			}
 		}
-		die();
 	}
 
 	/**
@@ -175,10 +185,17 @@ class connection extends \PDO implements actions
 				{
 					case 'mysql':
 						parent::__construct('mysql:host='.$cfg['host'].';dbname='.$cfg['db'], $cfg['user'], $cfg['pass'],$params);
+						$this->host = $cfg['host'];
 						break;
 					case 'sqlite';
-						if ( defined('BBN_DATA_PATH') && isset($cfg['db']) && is_file(BBN_DATA_PATH.'/db/'.$cfg['db']) ){
-							parent::__construct('sqlite:'.BBN_DATA_PATH.'/db/'.$cfg['db']);
+						if ( defined('BBN_DATA_PATH') && isset($cfg['db']) ){
+							if ( is_file(BBN_DATA_PATH.'db/'.$cfg['db']) ){
+								parent::__construct('sqlite:'.BBN_DATA_PATH.'db/'.$cfg['db']);
+							}
+							else if ( is_file(BBN_DATA_PATH.$cfg['db']) ){
+								parent::__construct('sqlite:'.BBN_DATA_PATH.$cfg['db']);
+							}
+							$this->host = 'localhost';
 						}
 						break;
 				}
@@ -194,6 +211,15 @@ class connection extends \PDO implements actions
 	public function clear()
 	{
 		$this->hashes = array();
+	}
+	
+	protected function make_hash(){
+		$args = func_get_args();
+		$st = '';
+		foreach ( $args as $a ){
+			$st .= (string) $a;
+		}
+		return $this->hash_contour.md5($st).$this->hash_contour;
 	}
 
 	/**
@@ -213,7 +239,53 @@ class connection extends \PDO implements actions
 			return $this->last_insert_id;
 		return false;
 	}
-
+	
+	private function add_query($hash, $statement, $sequences, $placeholders, $options)
+	{
+		$this->queries[$hash] = [
+			'statement' => $statement,
+			'sequences' => $sequences,
+			'placeholders' => $placeholders,
+			'options' => $driver_options
+		];
+		if ( count($this->queries[$hash]) > $this->max_queries ){
+			array_shift($this->queries);
+		}
+	}
+	
+	/**
+	 * @return string | false
+	 */
+	public function change($db)
+	{
+		if ( $this->current !== $db && text::check_name($db) ){
+			$this->query("USE $db");
+			$this->current = $db;
+		}
+		return $this;
+	}
+	
+	/**
+	 * @return string | false
+	 */
+	public function get_full_name($table, $escaped=false)
+	{
+		$table = str_replace("`","",$table);
+		$table = explode(".",$table);
+		if ( count($table) === 2 ){
+			$db = trim($table[0]);
+			$table = trim($table[1]);
+		}
+		else{
+			$db = $this->current;
+			$table = trim($table[0]);
+		}
+		if ( text::check_name($db,$table) ){
+			return $escaped ? "`".$db."`.`".$table."`" : $db.".".$table;
+		}
+		return false;
+	}
+	
 	/**
 	 * @return void
 	 */
@@ -227,9 +299,13 @@ class connection extends \PDO implements actions
 		{
 			// The first argument is the statement
 			$statement = trim(array_shift($args));
-			// Sending a hash as second argument (insert, update, delete functions) will bind it to the statement
-			if ( isset($args[0]) && is_string($args[0]) && ( strlen($args[0]) === 32 ) && strpos($args[0], ' ') === false ){
-				$hash = array_shift($args);
+			$hash = $this->make_hash($statement);
+			// Sending a hash as second argument from statement generating functions will bind it to the statement
+			if ( isset($args[0]) && is_string($args[0]) &&
+			( strlen($args[0]) === ( 32 + 2*strlen($this->hash_contour) ) ) &&
+			( strpos($args[0], $this->hash_contour) === 0 ) &&
+			( substr($args[0],-strlen($this->hash_contour)) === $this->hash_contour ) ){
+				$hash_sent = array_shift($args);
 			}
 			// Case where drivers are arguments
 			if ( isset($args[0]) && is_array($args[0]) && !array_key_exists(0,$args[0]) ){
@@ -251,13 +327,9 @@ class connection extends \PDO implements actions
 					$num_values++;
 				}
 			}
-			if ( isset($hash, $this->hashes[$hash]) ){
-				$statement = $this->hashes[$hash]['statement'];
-				$sequences = $this->hashes[$hash]['sequences'];
-				$num_placeholders = $this->hashes[$hash]['num_placeholders'];
-			}
-			else{
+			if ( !isset($this->queries[$hash]) ){
 				/* parse the statement */
+				//$t1 = microtime();
 				$sequences = \bbn\db\parser::ParseString($statement)->getArray();
 				if ( $num_values > 0 ){
 					$statement = str_replace("%%",'%',$statement);
@@ -271,48 +343,61 @@ class connection extends \PDO implements actions
 				}
 				/* Or looking for question marks */
 				preg_match_all('/(\?)/',$statement,$exp);
-				$num_placeholders = isset($exp[1]) && is_array($exp[1]) ? count($exp[1]) : 0;
-				if ( isset($hash) ){
-					$this->hashes[$hash] = [
-						'statement' => $statement,
-						'sequences' => $sequences,
-						'num_placeholders' => $num_placeholders
-					];
+				$this->queries[$hash] = [
+					'statement' => $statement,
+					'sequences' => $sequences,
+					'placeholders' => isset($exp[1]) && is_array($exp[1]) ? count($exp[1]) : 0,
+					'options' => $driver_options,
+					'exe_time' => 0
+				];
+				if ( isset($hash_sent) ){
+					$this->queries[$hash_sent] = $hash;
 				}
+				//echo ( microtime() - $t1 )."<br>";
+			}
+			else if ( is_string($this->queries[$hash]) ){
+				$hash = $this->queries[$hash];
 			}
 			/* The number of values must match the number of values to bind */
-			if ( $num_values !== $num_placeholders ){
-				var_dump('Incorrect arguments count (your values: '.$num_values.', in the statement: '.$num_placeholders.')','options',$driver_options,'statement',$statement,'start of values',$values, 'end of values');
+			if ( $num_values !== $this->queries[$hash]['placeholders'] ){
+				var_dump('Incorrect arguments count (your values: '.$num_values.', in the statement: '.$this->queries[$hash]['placeholders'].')','options',$driver_options,'statement',$statement,'start of values',$values, 'end of values', func_get_args());
 				exit;
 			}
 			try
 			{
+				$q =& $this->queries[$hash];
+				$t = microtime(1);
 				/* record the last query - adding a full/limited history ? */
-				if ( $this->last_query === $statement && $this->last_prepared && ( isset($sequences['insert']) || isset($sequences['update']) || isset($sequences['delete']) ) ){
+				if ( $this->last_query === $q['statement'] && $this->last_prepared && ( isset($q['sequences']['insert']) || isset($q['sequences']['update']) || isset($q['sequences']['delete']) ) ){
 					$r = $this->last_prepared->init($values)->execute();
+					if ( isset($q['sequences']['insert']) ){
+						$this->last_insert_id = $this->lastInsertId();
+					}
 				}
 				else{
-					$this->last_query = $statement;
-					if ( isset($sequences['select']) || isset($sequences['show']) ){
-						$this->setAttribute(\PDO::ATTR_STATEMENT_CLASS,array('\bbn\db\query',array(&$this,$sequences,$values)));
-						$this->last_prepared = $this->prepare($statement, $driver_options);
+					$this->last_query = $q['statement'];
+					if ( isset($q['sequences']['select']) || isset($q['sequences']['show']) ){
+						$this->setAttribute(\PDO::ATTR_STATEMENT_CLASS,array('\bbn\db\query',array($this,$q['sequences'],$values)));
+						$this->last_prepared = $this->prepare($q['statement'], $driver_options);
+						$q['exe_time'] = microtime(1) - $t;
 						return $this->last_prepared;
 					}
 					else{
 						if ( $num_values === 0 ){
-							$r = $this->exec($statement);
+							$r = $this->exec($q['statement']);
 						}
 						else{
-							$this->setAttribute(\PDO::ATTR_STATEMENT_CLASS,array('\bbn\db\query',array(&$this,$sequences,$values)));
-							$this->last_prepared = $this->prepare($statement, $driver_options);
+							$this->setAttribute(\PDO::ATTR_STATEMENT_CLASS,array('\bbn\db\query',array($this,$q['sequences'],$values)));
+							$this->last_prepared = $this->prepare($q['statement'], $q['options']);
 							$r = $this->last_prepared->execute();
 						}
-						if ( isset($sequences['insert']) ){
+						if ( isset($q['sequences']['insert']) ){
 							$this->last_insert_id = $this->lastInsertId();
 						}
+						$q['exe_time'] = microtime(1) - $t;
 					}
 				}
-				if ( $this->last_prepared && ( isset($sequences['insert']) || isset($sequences['update']) || isset($sequences['delete']) ) ){
+				if ( $this->last_prepared && ( isset($q['sequences']['insert']) || isset($q['sequences']['update']) || isset($q['sequences']['delete']) ) ){
 					return $this->last_prepared->rowCount();
 				}
 				return $r;
@@ -326,33 +411,20 @@ class connection extends \PDO implements actions
 	/**
 	 * @return string | false
 	 */
-	public function change($db)
-	{
-		if ( $this->current !== $db && text::check_name($db) ){
-			$this->query("USE $db");
-			$this->current = $db;
-		}
-		return $this;
-	}
-
-	/**
-	 * @return string | false
-	 */
 	public function get_val($table, $field_to_get, $field_to_check='', $value='')
 	{
-		if ( text::check_name($table, $field_to_get) )
-		{
-			if ( empty($field_to_check) && empty($value) )
+		if ( $table = $this->get_full_name($table,1) && text::check_name($field_to_get) ){
+			if ( empty($field_to_check) && empty($value) ){
 				$s = "
 					SELECT `$field_to_get`
-					FROM `$table`
+					FROM $table
 					LIMIT 1";
-			else if ( text::check_name($field_to_check) )
-			{
+			}
+			else if ( text::check_name($field_to_check) ){
 				$val = is_int($value) ? "%u" : "'%s'";
 				$s = sprintf("
 					SELECT `$field_to_get`
-					FROM `$table`
+					FROM $table
 					WHERE `$field_to_check` = $val
 					LIMIT 1",
 					text::escape_apo($value));
@@ -377,11 +449,11 @@ class connection extends \PDO implements actions
 	 */
 	public function new_id($table, $id_field='id')
 	{
-		if ( text::check_name($table,$id_field) )
+		if ( $table = $this->get_full_name($table,1) && text::check_name($id_field) )
 		{
 			$r = $this->query("
 				SELECT COUNT(*)
-				FROM `$table`
+				FROM $table
 				WHERE `$id_field` = ?
 				LIMIT 1");
 			do
@@ -582,7 +654,7 @@ class connection extends \PDO implements actions
 	 */
 	public function select($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
 	{
-		$hash = md5('select'.$table.serialize(array_keys($fields)).serialize($where).( $order ? 1 : '0' ).$limit);
+		$hash = $this->make_hash('select', $table, serialize(array_keys($fields)), serialize($where), ( $order ? 1 : '0' ), $limit);
 		if ( isset($this->hashes[$hash]) ){
 			$sql = $this->hashes[$hash]['statement'];
 		}
@@ -612,7 +684,7 @@ class connection extends \PDO implements actions
 	 */
 	public function insert($table, array $values, $ignore = false)
 	{
-		$hash = md5('insert'.$table.serialize(array_keys($values)).$ignore);
+		$hash = $this->make_hash('insert', $table, serialize(array_keys($values)), $ignore);
 		if ( isset($this->hashes[$hash]) ){
 			$sql = $this->hashes[$hash]['statement'];
 		}
@@ -634,7 +706,7 @@ class connection extends \PDO implements actions
 	 */
 	public function insert_update($table, array $values)
 	{
-		$hash = md5('insert_update'.$table.serialize(array_keys($values)));
+		$hash = $this->make_hash('insert_update', $table, serialize(array_keys($values)));
 		if ( isset($this->hashes[$hash]) ){
 			$sql = $this->hashes[$hash]['statement'];
 			if ( $this->queries[$sql]['num_val'] === ( count($values) / 2 ) ){
@@ -669,7 +741,7 @@ class connection extends \PDO implements actions
 	 */
 	public function update($table, array $values, array $where)
 	{
-		$hash = md5('insert_update'.$table.serialize(array_keys($values)).serialize(array_keys($where)));
+		$hash = $this->make_hash('insert_update', $table, serialize(array_keys($values)), serialize(array_keys($where)));
 		if ( isset($this->hashes[$hash]) ){
 			$sql = $this->hashes[$hash]['statement'];
 		}
@@ -692,7 +764,7 @@ class connection extends \PDO implements actions
 	 */
 	public function delete($table, array $where)
 	{
-		$hash = md5('delete'.$table.serialize(array_keys($where)));
+		$hash = $this->make_hash('delete', $table, serialize(array_keys($where)));
 		if ( isset($this->hashes[$hash]) ){
 			$sql = $this->hashes[$hash]['statement'];
 		}
@@ -725,19 +797,10 @@ class connection extends \PDO implements actions
 	{
 		$r = array();
 		$tables = false;
-		$table = explode(".",$table);
-		if ( count($table) === 2 ){
-			$db = trim($table[0]);
-			$table = trim($table[1]);
-		}
-		else{
-			$db = $this->current;
-			$table = trim($table[0]);
-		}
 		if ( empty($table) || $table === '*' ){
-			$tables = $this->get_tables($db);
+			$tables = $this->get_tables($this->current);
 		}
-		else if ( is_string($table) && text::check_name($table) ){
+		else if ( is_string($table) && $table = $this->get_full_name($table) ){
 			$tables = array($table);
 		}
 		else if ( is_array($table) ){
@@ -745,9 +808,10 @@ class connection extends \PDO implements actions
 		}
 		if ( is_array($tables) ){
 			foreach ( $tables as $t ){
-				$keys = $this->get_keys($db.'.'.$t);
+				$full = $this->get_full_name($t);
+				$keys = $this->get_keys($full);
 				$r[$t] = array(
-					'fields' => $this->get_fields($db.'.'.$t),
+					'fields' => $this->get_fields($full),
 					'keys' => $keys['keys']
 				);
 				foreach ( $r[$t]['fields'] as $i => $f ){
@@ -798,17 +862,8 @@ class connection extends \PDO implements actions
 	 */
 	public function get_fields($table)
 	{
-		$table = explode(".",$table);
-		if ( count($table) === 2 ){
-			$db = trim($table[0]);
-			$table = trim($table[1]);
-		}
-		else{
-			$db = $this->current;
-			$table = trim($table[0]);
-		}
-		if ( text::check_name($db, $table) ){
-			$rows = $this->get_rows("SHOW COLUMNS FROM `$db`.`$table`");
+		if ( $table = $this->get_full_name($table, 1) ){
+			$rows = $this->get_rows("SHOW COLUMNS FROM $table");
 			$p = 1;
 			foreach ( $rows as $row ){
 				$f = $row['Field'];
@@ -865,16 +920,10 @@ class connection extends \PDO implements actions
 	 */
 	public function get_keys($table)
 	{
-		$table = explode(".",$table);
-		if ( count($table) === 2 ){
-			$db = trim($table[0]);
-			$table = trim($table[1]);
-		}
-		else{
-			$db = $this->current;
-			$table = trim($table[0]);
-		}
-		if ( text::check_name($db, $table) ){
+		if ( $full = $this->get_full_name($table, 1) ){
+			$t = explode(".", $table);
+			$db = $t[0];
+			$table = $t[1];
 			$b = $this->get_rows("SHOW INDEX FROM `$db`.`$table`");
 			$keys = array();
 			$cols = array();
@@ -883,19 +932,23 @@ class connection extends \PDO implements actions
 				SELECT `ORDINAL_POSITION` as `position`,
 				`REFERENCED_TABLE_SCHEMA` as `ref_db`, `REFERENCED_TABLE_NAME` as `ref_table`, `REFERENCED_COLUMN_NAME` as `ref_column`
 				FROM `information_schema`.`KEY_COLUMN_USAGE`
-				WHERE `TABLE_SCHEMA` LIKE '$db'
-				AND `TABLE_NAME` LIKE '$table'
-				AND `COLUMN_NAME` LIKE '$d[Column_name]'
-				AND ( `CONSTRAINT_NAME` LIKE '$d[Key_name]' OR ORDINAL_POSITION = $d[Seq_in_index] OR 1 )
-				LIMIT 1");
-				
+				WHERE `TABLE_SCHEMA` LIKE ?
+				AND `TABLE_NAME` LIKE ?
+				AND `COLUMN_NAME` LIKE ?
+				AND ( `CONSTRAINT_NAME` LIKE ? OR ORDINAL_POSITION = ? OR 1 )
+				LIMIT 1",
+				$db,
+				$table,
+				$d['Column_name'],
+				$d['Key_name'],
+				$d['Seq_in_index']);
 				if ( !isset($keys[$d['Key_name']]) ){
 					$keys[$d['Key_name']] = array(
 					'columns' => array($d['Column_name']),
 					'ref_db' => $a ? $a['ref_db'] : null,
 					'ref_table' => $a ? $a['ref_table'] : null,
 					'ref_column' => $a ? $a['ref_column'] : null,
-					'unique' => $d['Non_unique'] == 1 ? 1 : 0
+					'unique' => $d['Non_unique'] == 0 ? 1 : 0
 					);
 				}
 				else{
@@ -917,16 +970,7 @@ class connection extends \PDO implements actions
 	 */
 	public function get_create($table)
 	{
-		$table = explode(".",$table);
-		if ( count($table) === 2 ){
-			$db = trim($table[0]);
-			$table = trim($table[1]);
-		}
-		else{
-			$db = $this->current;
-			$table = trim($table[0]);
-		}
-		if ( text::check_name($db, $table) && $r = $this->get_row("SHOW CREATE TABLE `$db`.`$table`") ){
+		if ( ( $table = $this->get_full_name($table, 1) ) && $r = $this->get_row("SHOW CREATE TABLE $table") ){
 			return $r['Create Table'];
 		}
 		return false;
@@ -937,17 +981,8 @@ class connection extends \PDO implements actions
 	 */
 	public function get_delete($table, array $where)
 	{
-		$table = explode(".",$table);
-		if ( count($table) === 2 ){
-			$db = trim($table[0]);
-			$table = trim($table[1]);
-		}
-		else{
-			$db = $this->current;
-			$table = trim($table[0]);
-		}
-		if ( text::check_name($db, $table) && ( $m = $this->modelize($table) ) && count($m['fields']) > 0 && count($where) > 0 ){
-			$r = "DELETE FROM `$db`.`$table` WHERE 1 ";
+		if ( ( $table = $this->get_full_name($table, 1) ) && ( $m = $this->modelize($table) ) && count($m['fields']) > 0 && count($where) > 0 ){
+			$r = "DELETE FROM $table WHERE 1 ";
 
 			foreach ( $where as $f ){
 				if ( !isset($m['fields'][$f]) ){
@@ -969,18 +1004,9 @@ class connection extends \PDO implements actions
 	/**
 	 * @return string
 	 */
-	public function get_select($table, $fields = array(), $where = array(), $order = array(), $limit = false, $start = 0, $php = false)
+	public function get_select($table, array $fields = array(), array $where = array(), $order = array(), $limit = false, $start = 0, $php = false)
 	{
-		$table = explode(".",$table);
-		if ( count($table) === 2 ){
-			$db = trim($table[0]);
-			$table = trim($table[1]);
-		}
-		else{
-			$db = $this->current;
-			$table = trim($table[0]);
-		}
-		if ( text::check_name($db, $table) && ( $m = $this->modelize($table) ) && count($m['fields']) > 0 )
+		if ( ( $table = $this->get_full_name($table, 1) )  && ( $m = $this->modelize($table) ) && count($m['fields']) > 0 )
 		{
 			$r = '';
 			if ( $php ){
@@ -1002,7 +1028,7 @@ class connection extends \PDO implements actions
 					$r .= "`$k`,\n";
 				}
 			}
-			$r = substr($r,0,strrpos($r,','))."\nFROM `$db`.`$table`";
+			$r = substr($r,0,strrpos($r,','))."\nFROM $table";
 			if ( count($where) > 0 ){
 				$r .= "\nWHERE 1 ";
 				foreach ( $where as $f ){
@@ -1048,28 +1074,19 @@ class connection extends \PDO implements actions
 	/**
 	 * @return string
 	 */
-	public function get_insert($table, $fields = array(), $ignore = false, $php = false)
+	public function get_insert($table, array $fields = array(), $ignore = false, $php = false)
 	{
 		$r = '';
 		if ( $php ){
 			$r .= '$db->query("';
 		}
-		$table = explode(".",$table);
-		if ( count($table) === 2 ){
-			$db = trim($table[0]);
-			$table = trim($table[1]);
-		}
-		else{
-			$db = $this->current;
-			$table = trim($table[0]);
-		}
-		if ( text::check_name($db, $table) && ( $m = $this->modelize($table) ) && count($m['fields']) > 0 )
+		if ( ( $table = $this->get_full_name($table, 1) )  && ( $m = $this->modelize($table) ) && count($m['fields']) > 0 )
 		{
 			$r .= "INSERT ";
 			if ( $ignore ){
 				$r .= "IGNORE ";
 			}
-			$r .= "INTO `$db`.`$table` (\n";
+			$r .= "INTO $table (\n";
 			$i = 0;
 			
 			if ( count($fields) > 0 ){
@@ -1146,27 +1163,18 @@ class connection extends \PDO implements actions
 	/**
 	 * @return string
 	 */
-	public function get_update($table, $fields = array(), $where = array(), $php = false)
+	public function get_update($table, array $fields = array(), array $where = array(), $php = false)
 	{
 		$r = '';
 		if ( $php ){
 			$r .= '$db->query("';
 		}
-		$table = explode(".",$table);
-		if ( count($table) === 2 ){
-			$db = trim($table[0]);
-			$table = trim($table[1]);
-		}
-		else{
-			$db = $this->current;
-			$table = trim($table[0]);
-		}
-		if ( text::check_name($db, $table) && ( $m = $this->modelize($table) ) && count($m['fields']) > 0 )
+		if ( ( $table = $this->get_full_name($table, 1) ) && ( $m = $this->modelize($table) ) && count($m['fields']) > 0 )
 		{
 			if ( is_string($where) ){
 				$where = array($where);
 			}
-			$r .= "UPDATE `$db`.`$table` SET ";
+			$r .= "UPDATE $table SET ";
 			$i = 0;
 
 			if ( count($fields) > 0 ){
@@ -1234,20 +1242,11 @@ class connection extends \PDO implements actions
 	/**
 	 * @return void 
 	 */
-	public function create_db_index($table, $column, $db='', $sys='mysql')
+	public function create_db_index($table, $column, $sys='mysql')
 	{
-		$table = explode(".",$table);
-		if ( count($table) === 2 ){
-			$db = trim($table[0]);
-			$table = trim($table[1]);
-		}
-		else{
-			$db = $this->current;
-			$table = trim($table[0]);
-		}
-		if ( text::check_name($db, $table, $column) ){
+		if ( ( $table = $this->get_full_name($table, 1) ) && text::check_name($column) ){
 			$this->query("
-			ALTER TABLE `$db`.`$table`
+			ALTER TABLE $table
 			ADD INDEX `$column`");
 		}
 		return $this;
@@ -1258,18 +1257,9 @@ class connection extends \PDO implements actions
 	 */
 	public function delete_db_index($table, $column, $sys='mysql')
 	{
-		$table = explode(".",$table);
-		if ( count($table) === 2 ){
-			$db = trim($table[0]);
-			$table = trim($table[1]);
-		}
-		else{
-			$db = $this->current;
-			$table = trim($table[0]);
-		}
-		if ( text::check_name($db, $table, $column) ){
+		if ( ( $table = $this->get_full_name($table, 1) ) && text::check_name($column) ){
 			$this->query("
-				ALTER TABLE `$db`.`$table`
+				ALTER TABLE $table
 				DROP INDEX `$column`");
 		}
 		return $this;

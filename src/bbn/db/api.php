@@ -62,6 +62,35 @@ interface api
 	 * @return int
 	 */
 	public function insert_ignore($table, array $values);
+	/**
+	 * Fetches a given table and returns an array of a single row text-indexed
+		*
+	 * @params 
+	 * @return false|array
+	 */
+	public function get_select($table, array $fields, array $where, $order, $limit, $start, $php);
 	
+	/**
+	 * Inserts/Updates rows in the a given table
+		*
+	 * @return int
+	 */
+	public function get_insert($table, array $values, $ignore);
+	
+	
+	/**
+	 * Updates rows in the a given table
+		*
+	 * @return int
+	 */
+	public function get_update($table, array $fields, array $where, $php);
+	
+	/**
+	 * Deletes rows in the a given table
+		*
+	 * @return int
+	 */
+	public function get_delete($table, array $where);
+		
 }
 ?>
