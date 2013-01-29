@@ -150,10 +150,19 @@ class history extends \bbn\db\connection implements \bbn\db\api
 						'old' => '',
 						'last_mod' => $date,
 						'id_user' => $this->huser]);
+					$this->last_insert_id = $id;
 				}
 			}
 			return $r;
 		}
+	}
+	
+	/**
+	 * @return void 
+	 */
+	public function insert_ignore($table, array $values, $date = false)
+	{
+		return $this->insert($table, $values, 1, $date);
 	}
 	
 	/**
@@ -233,6 +242,7 @@ class history extends \bbn\db\connection implements \bbn\db\api
 						'old' => '',
 						'last_mod' => date('c'),
 						'id_user' => $this->huser]);
+					$this->last_insert_id = $id;
 				}
 			}
 			return $r;

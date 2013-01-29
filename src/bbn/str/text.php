@@ -351,6 +351,15 @@ class text
 		
 		return true;
 	}
+	
+ /**
+	* Extracts all digits from a string
+	* 
+	* @return bool
+	*/
+	public static function get_numbers($st){
+		return preg_replace("/[^0-9]/", '', $st);
+	}
 
 }
 ?>

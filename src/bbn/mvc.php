@@ -54,6 +54,11 @@ class mvc
 		$mode;
 	public
 	/**
+	 * An external object that can be filled after the object creation and can be used as a global with the function add_inc
+	 * @var stdClass
+	 */
+		$inc,
+	/**
 	 * The data model
 	 * @var null|array
 	 */
@@ -170,6 +175,7 @@ class mvc
 			else{
 				$this->db = false;
 			}
+			$this->inc = new \stdClass();
 			$this->routes = $parent;
 			$this->mustache = new \Mustache_Engine;
 			$this->post = array();
@@ -215,6 +221,7 @@ class mvc
 		}
 		// Another call should have the initial controler and the path to reach as parameters
 		else if ( is_string($db) && is_object($parent) && isset($parent->url, $parent->original_controller) ){
+			$this->inc =& $parent->inc;
 			$this->routes =& $parent->routes;
 			$this->mustache =& $parent->mustache;
 			$this->db =& $parent->db;
@@ -605,7 +612,17 @@ class mvc
 		}
 		return false;
 	}
-
+	
+	/**
+	 * Processes the controller and checks whether it has been routed or not.
+		*
+	 * @return bool 
+	 */
+	public function add_inc($name, $obj)
+	{
+		$this->inc->{$name} = $obj;
+	}
+	
 	/**
 	 * Processes the controller and checks whether it has been routed or not.
 	 *

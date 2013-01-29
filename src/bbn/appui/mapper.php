@@ -61,6 +61,9 @@ class mapper{
 		if ( $database ){
 			$this->client_db = $database;
 		}
+	}
+	
+	public function get_projects($id_client=''){
 		
 	}
 	
@@ -115,7 +118,7 @@ class mapper{
 				$cond = " AND `id` = $table ";
 			}
 			else if ( \bbn\str\text::check_name($database, $table) ){
-				$cond = " AND `{$this->prefix}projects`.`db` LIKE '{$database}' AND `{$this->prefix}fields`.`table` LIKE '$table'";
+				$cond = " AND `{$this->prefix}projects`.`db` LIKE '{$database}' AND `{$this->prefix}fields`.`column` LIKE '$table.%'";
 			}
 			if ( !empty($cond) ){
 				if ( !( $form = $this->db->get_rows("
@@ -179,15 +182,12 @@ class mapper{
 		if ( $this->db && \bbn\str\text::check_name($table, $column) && $col = $this->db->get_row("
 				SELECT *
 				FROM `{$this->admin_db}`.`{$this->prefix}columns`
-				WHERE `db` LIKE '{$this->db->current}'
-				AND `table` LIKE '$table'
-				AND `column` LIKE '$column'")
+				WHERE `column` LIKE '$column'")
 		){
 			if ( !( $keys = $this->db->get_rows("
 				SELECT *
 				FROM `{$this->admin_db}`.`{$this->prefix}keys`
-				WHERE `table` LIKE '$table'
-				AND `column` LIKE '$column'")
+				WHERE `column` LIKE '$column'")
 			) ){
 				$keys = array();
 			}
@@ -232,21 +232,19 @@ class mapper{
 					$primary = $this->db->get_var("
 						SELECT `column`
 						FROM `{$this->admin_db}`.`{$this->prefix}keys`
-						WHERE `db` LIKE '$key[ref_db]'
-						AND `table` LIKE '$key[ref_table]'
+						WHERE `column` LIKE '$key[ref_column]'
 						AND `key` LIKE 'PRIMARY'");
 					$secondary = $this->db->get_var("
 						SELECT `column`
 						FROM `{$this->admin_db}`.`{$this->prefix}columns`
-						WHERE `db` LIKE '$key[ref_db]'
-						AND `table` LIKE '$key[ref_table]'
+						WHERE `column` LIKE '$key[ref_column]'
 						AND `key` IS NULL
 						ORDER BY position
 						LIMIT 1");
 					$cfg['field'] = 'dropdownlist';
 					$cfg['options']['sql'] = "
 						SELECT `$key[ref_table]`.`$primary`, `$key[ref_table]`.`$secondary`
-						FROM `{$this->admin_db}`.`$key[ref_db]`.`$key[ref_table]`";
+						FROM $key[ref_column]";
 					$cfg['options']['db'] = $this->db;
 				}
 				else if ( strpos($col['type'], 'char') !== false ){
@@ -414,7 +412,6 @@ class mapper{
 						$this->db->insert_ignore($this->admin_db.'.'.$this->prefix.'fields',[
 							'id' => $field['id'],
 							'id_form' => $j,
-							'table' => $field['table'],
 							'column' => $field['column'],
 							'title' => $field['title'],
 							'position' => $field['position'],
@@ -443,7 +440,7 @@ class mapper{
 			`id` int(10) unsigned NOT NULL AUTO_INCREMENT,
 			`nom` varchar(100) NOT NULL,
 			PRIMARY KEY (`id`)
-			) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 			
 			DROP TABLE IF EXISTS `bbn_columns`;
 			CREATE TABLE IF NOT EXISTS `bbn_columns` (
@@ -454,6 +451,7 @@ class mapper{
 			`type` varchar(50) NOT NULL,
 			`null` tinyint(1) unsigned NOT NULL,
 			`key` varchar(3) DEFAULT NULL,
+			`default` text,
 			`config` text,
 			PRIMARY KEY (`id`),
 			UNIQUE KEY `table` (`table`,`column`),
@@ -494,6 +492,20 @@ class mapper{
 			KEY `id_project` (`id_project`)
 			) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 			
+			DROP TABLE IF EXISTS `bbn_history`;
+			CREATE TABLE IF NOT EXISTS `bbn_history` (
+			`id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+			`operation` enum('INSERT','UPDATE','DELETE') NOT NULL,
+			`line` int(10) unsigned NOT NULL,
+			`column` varchar(180) NOT NULL,
+			`old` text DEFAULT NULL,
+			`last_mod` datetime NOT NULL,
+			`id_user` int(10) unsigned NOT NULL,
+			PRIMARY KEY (`id`),
+			KEY `id_user` (`id_user`),
+			KEY `column` (`column`)
+			) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=52 ;
+			
 			DROP TABLE IF EXISTS `bbn_keys`;
 			CREATE TABLE IF NOT EXISTS `bbn_keys` (
 			`id` varchar(230) NOT NULL,
@@ -511,14 +523,14 @@ class mapper{
 			CREATE TABLE IF NOT EXISTS `bbn_projects` (
 			`id` int(10) unsigned NOT NULL AUTO_INCREMENT,
 			`id_client` int(10) unsigned NOT NULL,
-			`db` varchar(50) CHARACTER SET utf8 DEFAULT NULL,
+			`db` varchar(80) CHARACTER SET utf8 DEFAULT NULL,
 			`name` varchar(50) CHARACTER SET utf8 NOT NULL,
 			`config` text CHARACTER SET utf8,
 			PRIMARY KEY (`id`),
 			UNIQUE KEY `id_client_2` (`id_client`,`name`),
 			KEY `db` (`db`),
 			KEY `id_client` (`id_client`)
-			) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+			) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 			
 			DROP TABLE IF EXISTS `bbn_tables`;
 			CREATE TABLE IF NOT EXISTS `bbn_tables` (
@@ -537,15 +549,21 @@ class mapper{
 			ALTER TABLE `bbn_dbs`
 			ADD CONSTRAINT `bbn_dbs_ibfk_1` FOREIGN KEY (`id_client`) REFERENCES `bbn_clients` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 			
+			ALTER TABLE `bbn_history`
+			ADD CONSTRAINT `bbn_history_ibfk_1` FOREIGN KEY (`id_user`) REFERENCES `apst_utilisateurs` (`id`) ON UPDATE NO ACTION,
+			ADD CONSTRAINT `bbn_history_ibfk_2` FOREIGN KEY (`column`) REFERENCES `bbn_columns` (`id`) ON UPDATE CASCADE;
+			
 			ALTER TABLE `bbn_keys`
-			ADD CONSTRAINT `bbn_keys_ibfk_2` FOREIGN KEY (`ref_column`) REFERENCES `bbn_columns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-			ADD CONSTRAINT `bbn_keys_ibfk_1` FOREIGN KEY (`column`) REFERENCES `bbn_columns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+			ADD CONSTRAINT `bbn_keys_ibfk_1` FOREIGN KEY (`column`) REFERENCES `bbn_columns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+			ADD CONSTRAINT `bbn_keys_ibfk_2` FOREIGN KEY (`ref_column`) REFERENCES `bbn_columns` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+			
+			ALTER TABLE `bbn_projects`
+			ADD CONSTRAINT `bbn_projects_ibfk_2` FOREIGN KEY (`db`) REFERENCES `bbn_dbs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+			ADD CONSTRAINT `bbn_projects_ibfk_1` FOREIGN KEY (`id_client`) REFERENCES `bbn_clients` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 			
 			ALTER TABLE `bbn_tables`
 			ADD CONSTRAINT `bbn_tables_ibfk_1` FOREIGN KEY (`db`) REFERENCES `bbn_dbs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 			SET FOREIGN_KEY_CHECKS=1;
-			
-			
 			");
 		}
 	}

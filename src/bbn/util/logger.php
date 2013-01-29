@@ -25,7 +25,7 @@ trait logger
 	 * @param string $st
 	 * @return null
 	 */
-	private function report($st)
+	public function report($st)
 	{
 		if ( php_sapi_name() == 'cli' && empty($_SERVER['REMOTE_ADDR']) ){
 			if ( is_string($st) ){
@@ -43,6 +43,7 @@ trait logger
 				array_push($this->reports,print_r($st,true));
 			}
 		}
+		return $this;
 	}
 	/**
 	 * Add information to the $info array
@@ -51,13 +52,20 @@ trait logger
 	 * @param string $file
 	 * @return null
 	 */
-	private function log($st,$file='misc')
+	public function log($st='',$file='misc')
 	{
 		if ( defined('BBN_DATA_PATH') && is_dir(BBN_DATA_PATH.'logs') ){
 			$log_file = BBN_DATA_PATH.'logs/'.$file.'.log';
-			$i = debug_backtrace()[0];
-			$r = "[".date('d/m/Y H:i:s')."]\t".$i['file']." - line ".$i['line']."\n".
-				( is_string($st) ? $st : print_r($st,true) )."\n\n";
+			$r = "[".date('d/m/Y H:i:s')."]\t";
+			if ( empty($st) && count($this->reports) > 0 ){
+				$st = implode("\n\n", $this->reports);
+				$this->reports = [];
+			}
+			else{
+				$i = debug_backtrace()[0];
+				$r .= $i['file']." - line ".$i['line'];
+			}
+			$r .= "\n".( is_string($st) ? $st : print_r($st,true) )."\n\n";
 			$s = ( file_exists($log_file) ) ? filesize($log_file) : 0;
 			if ( $s > 1048576 ){
 				file_put_contents($log_file.'.old',file_get_contents($log_file),FILE_APPEND);
@@ -67,6 +75,7 @@ trait logger
 				file_put_contents($log_file,$r,FILE_APPEND);
 			}
 		}
+		return $this;
 	}
 }
 ?>
