@@ -15,7 +15,7 @@
 	"require": {
 		"php": ">=5.4.0",
 		"mustache/mustache": "dev-master",
-		"tedivm/jshrink": "dev-master"
+		"tedivm/JShrink": "dev-master"
 	},
 	"autoload": {
 			"psr-0": {"bbn": "src/"}
