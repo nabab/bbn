@@ -84,17 +84,23 @@ class history extends \bbn\db\connection implements \bbn\db\api
 	 * Gets all information about a given table
 	 * @return table full name
 	 */
-	public function get_table_cfg($id){
-		$parts = explode(".", $id);
+	public function get_table_cfg($table){
+		$parts = explode(".", $table);
 		if ( count($parts) === 1 ){
 			array_unshift($parts, $this->current);
 		}
-		if ( count($parts) === 2 && \bbn\str\text::check_name($parts[0], $parts[1]) ){
-			$id = implode(".", $parts);
-			if ( !isset($this->hstructures[$id]) ){
-				$this->hstructures[$id] = ['history'=>false, 'fields' => []];
-				$cols = $this->select($this->admin_db.'.'.$this->prefix.'columns',[],['table' =>$this->host.'.'.$id], 'position');
-				$s =& $this->hstructures[$id];
+		if ( parent::get_full_name($table) ){
+			$table = implode(".", $parts);
+			if ( !isset($this->hstructures[$table]) ){
+				if ( !isset($this->structures[$table]) ){
+					parent::modelize($table);
+					if ( !isset($this->structures[$table]['keys']['PRIMARY']['columns']) || count($this->structures[$table]['keys']['PRIMARY']['columns']) !== 1 ){
+						die("You need to have a primary key on a single column in your table $table in order to use the history class");
+					}
+				}
+				$this->hstructures[$table] = ['history'=>false, 'fields' => [], 'primary' => $primary = $this->structures[$table]['keys']['PRIMARY']['columns'][0]];
+				$cols = $this->select($this->admin_db.'.'.$this->prefix.'columns',[],['table' =>$this->host.'.'.$table], 'position');
+				$s =& $this->hstructures[$table];
 				foreach ( $cols as $col ){
 					$col = (array) $col;
 					$c = $col['column'];
@@ -224,7 +230,7 @@ class history extends \bbn\db\connection implements \bbn\db\api
 							if ( $v !== $update[$c] && isset($s['fields'][$c]['config']['history']) ){
 								$this->insert($this->htable, [
 									'operation' => 'UPDATE',
-									'line' => $update[$this->primary],
+									'line' => $update[$s['primary']],
 									'column' => $this->host.'.'.$table.'.'.$c,
 									'old' => $update[$c],
 									'last_mod' => $date ? $date : date('c'),
@@ -278,7 +284,12 @@ class history extends \bbn\db\connection implements \bbn\db\api
 				if ( !$s['history'] ){
 					return call_user_func_array(array($this, 'parent::update'), $args);
 				}
-				$update = $this->select($table, [], $where);
+				$fields = array_keys($values);
+				array_push($fields, $s['primary']);
+				$fields = array_unique($fields);
+
+				$update = $this->select($table, $fields, $where);
+				
 				if ( $r = call_user_func_array(array($this, 'parent::update'), $args) ){
 					foreach ( $update as $upd ){
 						$upd = (array) $upd;
@@ -286,7 +297,7 @@ class history extends \bbn\db\connection implements \bbn\db\api
 							if ( $v !== $upd[$c] && isset($s['fields'][$c]['config']['history']) ){
 								$this->insert($this->htable, [
 									'operation' => 'UPDATE',
-									'line' => $upd[$this->primary],
+									'line' => $upd[$s['primary']],
 									'column' => $this->host.'.'.$table.'.'.$c,
 									'old' => $upd[$c],
 									'last_mod' => $date ? $date : date('c'),
@@ -362,7 +373,7 @@ class history extends \bbn\db\connection implements \bbn\db\api
 						// Inserting a new history row for each deleted value
 						$this->insert($this->htable, [
 							'operation' => 'DELETE',
-							'line' => $del[$this->primary],
+							'line' => $del[$s['primary']],
 							'column' => $this->host.'.'.$table.'.'.$this->hcol,
 							'old' => 1,
 							'last_mod' => $date,

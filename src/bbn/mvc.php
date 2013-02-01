@@ -169,7 +169,7 @@ class mvc
 	{
 		// The initial call should only have $db as parameter
 		if ( defined('BBN_CUR_PATH') && is_array($parent) ){
-			if ( is_object($db) && ( $class = get_class($db) ) && ( $class === 'PDO' || $class === 'bbn\db\connection' ) ){
+			if ( is_object($db) && ( $class = get_class($db) ) && ( $class === 'PDO' || strpos($class, 'bbn\\db\\') !== false ) ){
 				$this->db = $db;
 			}
 			else{

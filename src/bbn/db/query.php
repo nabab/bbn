@@ -289,7 +289,7 @@ class query extends \PDOStatement implements actions
 	/**
 	 * @return void 
 	 */
-	public function get_columns()
+	public function get_by_columns()
 	{
 		if ( isset($this->sequences['select']) || isset($this->sequences['show']) )
 		{

@@ -68,29 +68,5 @@ interface api
 	 * @params 
 	 * @return false|array
 	 */
-	public function get_select($table, array $fields, array $where, $order, $limit, $start, $php);
-	
-	/**
-	 * Inserts/Updates rows in the a given table
-		*
-	 * @return int
-	 */
-	public function get_insert($table, array $values, $ignore);
-	
-	
-	/**
-	 * Updates rows in the a given table
-		*
-	 * @return int
-	 */
-	public function get_update($table, array $fields, array $where, $php);
-	
-	/**
-	 * Deletes rows in the a given table
-		*
-	 * @return int
-	 */
-	public function get_delete($table, array $where);
-		
 }
 ?>

@@ -16,13 +16,13 @@ use \bbn\str\text;
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @version 0.2r89
  */
-class connection extends \PDO implements actions, api
+class connection extends \PDO implements actions, api, engines
 {
-	private
+	protected
+		$history = false,
 		$max_queries = 100,
 		$hash_contour = '__BBN__',
-		$structures = [];
-	protected
+		$structures = [],
 	/**
 	 * @var mixed
 	 */
@@ -42,6 +42,11 @@ class connection extends \PDO implements actions, api
 	
 	public
 	/**
+	 * The ODBC engine of this connection
+	 * @var string
+	 */
+		$engine,
+	/**
 	 * The host of this connection
 	 * @var string
 	 */
@@ -50,9 +55,14 @@ class connection extends \PDO implements actions, api
 	 * The currently selected database
 	 * @var mixed
 	 */
-		$current;
-
-	private static
+		$current,
+	/**
+	 * An array of functions for launching triggers on actions
+	 * @var mixed
+	 */
+		$triggers;
+	
+	protected static
 	/**
 	 * @var mixed
 	 */
@@ -70,7 +80,7 @@ class connection extends \PDO implements actions, api
 	/**
 	 * @return void 
 	 */
-	private static function setTimeout()
+	protected static function setTimeout()
 	{
 		if ( !isset(self::$timeout) )
 		{
@@ -120,7 +130,7 @@ class connection extends \PDO implements actions, api
 			if ( isset($argv) ){
 				echo nl2br(implode("\n",$msg));
 			}
-			else{
+			else if ( !defined("BBN_IS_DEV") || constant("BBN_IS_DEV") === false ){
 				die();
 			}
 		}
@@ -187,26 +197,63 @@ class connection extends \PDO implements actions, api
 						$this->host = $cfg['host'];
 						break;
 					case 'sqlite';
-						if ( defined('BBN_DATA_PATH') && isset($cfg['db']) ){
-							if ( is_file(BBN_DATA_PATH.'db/'.$cfg['db']) ){
-								parent::__construct('sqlite:'.BBN_DATA_PATH.'db/'.$cfg['db']);
-							}
-							else if ( is_file(BBN_DATA_PATH.$cfg['db']) ){
-								parent::__construct('sqlite:'.BBN_DATA_PATH.$cfg['db']);
-							}
+						if ( defined('BBN_DATA_PATH') && isset($cfg['db']) && is_file(BBN_DATA_PATH.'db/'.$cfg['db']) ){
+							parent::__construct('sqlite:'.BBN_DATA_PATH.'db/'.$cfg['db']);
+							$this->host = 'localhost';
+						}
+						else if ( is_file($cfg['db']) ){
+							parent::__construct('sqlite:'.$cfg['db']);
 							$this->host = 'localhost';
 						}
 						break;
 				}
-				$this->current = $cfg['db'];
+				if ( $this->host ){
+					$this->current = $cfg['db'];
+					$this->engine = $cfg['engine'];
+				}
 			}
 			catch (\PDOException $e)
 				{ self::error($e,"Connection"); }
 		}
 	}
-	public function log($st)
+	
+	private function launch_triggers($table, $kind, $moment, $values)
 	{
-		if ( defined('BBN_IS_DEV') && BBN_IS_DEV ){
+		$trig = 1;
+		if ( isset($this->triggers[$kind][$moment][$table]) ){
+			$f =& $this->triggers[$kind][$moment][$table];
+			switch ( $kind ){
+
+				case "insert":
+				case "update":
+				case "delete":
+				case "select":
+				if ( is_function($f) ){
+					if ( !$f($this, $table, $values) ){
+						$trig = false;
+					}
+					break;
+				}
+				
+				case "update":
+				case "select":
+				if ( is_array($f) ){
+					foreach ( $values as $k => $v ){
+						if ( isset($f[$k]) && is_function($f[$k]) && !$f[$v]($this, $table, $v) ){
+							$trig = false;
+							break;
+						}
+					}
+				}
+				break;
+			}
+		}
+		return $trig;
+	}
+	
+	protected function log($st)
+	{
+		if ( defined('BBN_IS_DEV') && defined('BBN_DATA_PATH') && BBN_IS_DEV ){
 			file_put_contents(BBN_DATA_PATH.'logs/db.log', $st."\n\n", FILE_APPEND);
 		}
 	}
@@ -218,7 +265,8 @@ class connection extends \PDO implements actions, api
 		$this->queries = array();
 	}
 	
-	protected function make_hash(){
+	protected function make_hash()
+	{
 		$args = func_get_args();
 		$st = '';
 		foreach ( $args as $a ){
@@ -600,10 +648,10 @@ class connection extends \PDO implements actions, api
 	/**
 	 * @return array | false 
 	 */
-	public function get_columns()
+	public function get_by_columns()
 	{
 		try{
-			return $this->query(func_get_args())->get_columns();
+			return $this->query(func_get_args())->get_by_columns();
 		}
 		catch (\PDOException $e ){
 			self::error($e,$this->last_query);
@@ -697,6 +745,7 @@ class connection extends \PDO implements actions, api
 	 */
 	public function insert($table, array $values, $ignore = false)
 	{
+		$r = false;
 		$hash = $this->make_hash('insert', $table, serialize(array_keys($values)), $ignore);
 		if ( isset($this->queries[$hash]) ){
 			$sql = $this->queries[$this->queries[$hash]]['statement'];
@@ -706,12 +755,18 @@ class connection extends \PDO implements actions, api
 		}
 		if ( $sql ){
 			try{
-				return $this->query($sql, $hash, array_values($values));
+				if ( $this->launch_triggers($table, 'insert', 'before', $values) ){
+					$r = $this->query($sql, $hash, array_values($values));
+					if ( $r ){
+						$this->launch_triggers($table, 'insert', 'after', $values);
+					}
+				}
 			}
 			catch (\PDOException $e ){
 				self::error($e,$this->last_query);
 			}
 		}
+		return $r;
 	}
 	
 	/**
@@ -719,6 +774,7 @@ class connection extends \PDO implements actions, api
 	 */
 	public function insert_update($table, array $values)
 	{
+		$r = false;
 		$hash = $this->make_hash('insert_update', $table, serialize(array_keys($values)));
 		if ( isset($this->queries[$hash]) ){
 			$sql = $this->queries[$this->queries[$hash]]['statement'];
@@ -746,7 +802,7 @@ class connection extends \PDO implements actions, api
 				self::error($e,$this->last_query);
 			}
 		}
-		return false;
+		return $r;
 	}
 
 	/**
@@ -825,7 +881,7 @@ class connection extends \PDO implements actions, api
 				if ( !isset($this->structures[$full]) ){
 					$keys = $this->get_keys($full);
 					$this->structures[$full] = [
-						'fields' => $this->get_fields($full),
+						'fields' => $this->get_columns($full),
 						'keys' => $keys['keys']
 					];
 					foreach ( $this->structures[$full]['fields'] as $i => $f ){
@@ -876,7 +932,7 @@ class connection extends \PDO implements actions, api
 	/**
 	 * @return array | false
 	 */
-	public function get_fields($table)
+	public function get_columns($table)
 	{
 		//var_dump("I get the fields");
 		if ( $table = $this->get_full_name($table, 1) ){

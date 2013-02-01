@@ -54,7 +54,7 @@ interface actions
 	 *
 	 * @return false|array
 	 */
-	public function get_columns();
+	public function get_by_columns();
 
 	/**
 	 * Fetches the database and returns an object of a single row, alias of get_object
