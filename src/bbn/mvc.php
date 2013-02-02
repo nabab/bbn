@@ -614,13 +614,15 @@ class mvc
 	}
 	
 	/**
-	 * Processes the controller and checks whether it has been routed or not.
-		*
+	 * Adds a property to the MVC object inc if it has not been declared.
+	 *
 	 * @return bool 
 	 */
 	public function add_inc($name, $obj)
 	{
-		$this->inc->{$name} = $obj;
+		if ( !isset($this->inc->{$name}) ){
+			$this->inc->{$name} = $obj;
+		}
 	}
 	
 	/**
