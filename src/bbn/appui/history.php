@@ -149,7 +149,7 @@ class history extends \bbn\db\connection implements \bbn\db\api
 					}
 				}
 				$this->hstructures[$table] = ['history'=>false, 'fields' => [], 'primary' => $primary = $this->structures[$table]['keys']['PRIMARY']['columns'][0]];
-				$cols = $this->select($this->admin_db.'.'.$this->prefix.'columns',[],['table' =>$this->host.'.'.$table], 'position');
+				$cols = $this->select_all($this->admin_db.'.'.$this->prefix.'columns',[],['table' =>$this->host.'.'.$table], 'position');
 				$s =& $this->hstructures[$table];
 				foreach ( $cols as $col ){
 					$col = (array) $col;
@@ -262,7 +262,7 @@ class history extends \bbn\db\connection implements \bbn\db\api
 											$where[$col] = $values[$col];
 										}
 									}
-									if ( $has_key && $update = $this->select($table, [], $where) ){
+									if ( $has_key && $update = (array) $this->select($table, [], $where) ){
 										break;
 									}
 								}
@@ -271,10 +271,6 @@ class history extends \bbn\db\connection implements \bbn\db\api
 					}
 				}
 				if ( $update ){
-					if ( isset($update[0]) ){
-						$update = $update[0];
-					}
-					$update = (array) $update;
 					if ( $r = call_user_func_array(array($this, 'parent::insert_update'), $args) ){
 						foreach ( $values as $c => $v ){
 							if ( $v !== $update[$c] && isset($s['fields'][$c]['config']['history']) ){
@@ -338,7 +334,7 @@ class history extends \bbn\db\connection implements \bbn\db\api
 				array_push($fields, $s['primary']);
 				$fields = array_unique($fields);
 
-				$update = $this->select($table, $fields, $where);
+				$update = $this->select_all($table, $fields, $where);
 				
 				if ( $r = call_user_func_array(array($this, 'parent::update'), $args) ){
 					foreach ( $update as $upd ){
@@ -405,7 +401,7 @@ class history extends \bbn\db\connection implements \bbn\db\api
 				// Nothing is really deleted, the hcol is just set to 0
 				if ( $r = $this->update($table, [$this->hcol => '0'], $where) ){
 					// The values from the constrained rows that should have been deleted
-					$delete = $this->select($table, array_unique($to_select), $where);
+					$delete = $this->select_all($table, array_unique($to_select), $where);
 					// For each value of this key which is deleted (hopefully one)
 					foreach ( $delete as $del ){
 						$del = (array) $del;

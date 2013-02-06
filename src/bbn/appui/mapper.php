@@ -84,7 +84,7 @@ class mapper{
 				$a->db = $parts[1];
 				$a->config = json_decode($a->config);
 				return $a;
-			},$this->db->select($this->prefix.'columns',[],['table' =>implode(".", $parts)], 'position'));
+			},$this->db->select_all($this->prefix.'columns',[],['table' =>implode(".", $parts)], 'position'));
 		}
 	}
 	/**
@@ -94,7 +94,7 @@ class mapper{
 	 * @return string
 	 */
 	public function get_form_config($id){
-		$rs = $this->db->select($this->admin_db.".bbn_fields", [], ['id_form' => $id]);
+		$rs = $this->db->select_all($this->admin_db.".bbn_fields", [], ['id_form' => $id]);
 		foreach ( $rs as $i => $r ){
 			$rs[$i]['configuration'] = json_decode($r['configuration']);
 		}

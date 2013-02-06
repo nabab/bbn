@@ -51,7 +51,11 @@ class connection extends \PDO implements actions, api, engines
 	/**
 	 * @var mixed
 	 */
-		$last_insert_id;
+		$last_insert_id,
+	/**
+	 * @var bool
+	 */
+		$triggers_disabled = false;
 	
 	public
 	/**
@@ -150,6 +154,43 @@ class connection extends \PDO implements actions, api, engines
 	}
 
 	/**
+	 * @return bool
+	 */
+	private function launch_triggers($table, $kind, $moment, $values)
+	{
+		$trig = 1;
+		if ( isset($this->triggers[$kind][$moment][$table]) ){
+			$f =& $this->triggers[$kind][$moment][$table];
+			switch ( $kind ){
+				
+				case "insert":
+				case "update":
+				case "delete":
+				case "select":
+				if ( is_function($f) ){
+					if ( !$f($this, $table, $values) ){
+						$trig = false;
+					}
+					break;
+				}
+				
+				case "update":
+				case "select":
+				if ( is_array($f) ){
+					foreach ( $values as $k => $v ){
+						if ( isset($f[$k]) && is_function($f[$k]) && !$f[$k]($this, $table, $v) ){
+							$trig = false;
+							break;
+						}
+					}
+				}
+				break;
+			}
+		}
+		return $trig;
+	}
+	
+	/**
 	 * @return void 
 	 */
 	public function __construct($cfg=array())
@@ -230,46 +271,13 @@ class connection extends \PDO implements actions, api, engines
 		}
 	}
 	
-	private function launch_triggers($table, $kind, $moment, $values)
-	{
-		$trig = 1;
-		if ( isset($this->triggers[$kind][$moment][$table]) ){
-			$f =& $this->triggers[$kind][$moment][$table];
-			switch ( $kind ){
-
-				case "insert":
-				case "update":
-				case "delete":
-				case "select":
-				if ( is_function($f) ){
-					if ( !$f($this, $table, $values) ){
-						$trig = false;
-					}
-					break;
-				}
-				
-				case "update":
-				case "select":
-				if ( is_array($f) ){
-					foreach ( $values as $k => $v ){
-						if ( isset($f[$k]) && is_function($f[$k]) && !$f[$v]($this, $table, $v) ){
-							$trig = false;
-							break;
-						}
-					}
-				}
-				break;
-			}
-		}
-		return $trig;
-	}
-	
 	protected function log($st)
 	{
 		if ( defined('BBN_IS_DEV') && defined('BBN_DATA_PATH') && BBN_IS_DEV ){
 			file_put_contents(BBN_DATA_PATH.'logs/db.log', $st."\n\n", FILE_APPEND);
 		}
 	}
+
 	/**
 	 * @return void
 	 */
@@ -288,7 +296,33 @@ class connection extends \PDO implements actions, api, engines
 		return $this->hash_contour.md5($st).$this->hash_contour;
 	}
 	
-	/**
+ /**
+	* @return bool
+	*/
+	public function set_trigger( $function, $kind, $moment, $table='' )
+	{
+		$r = false;
+		$moment = strtolower($moment);
+		$kind = strtolower($kind);
+		$moments = ['before', 'after'];
+		$kinds = ['select', 'insert', 'update', 'delete'];
+		if ( is_function($function) && in_array($moment, $moments) && in_array($kind, $kinds) ){
+			if ( empty($table) ){
+				$this->triggers[$kind][$moment] = $function;
+				$r = 1;
+			}
+			else{
+				if ( !is_array($this->triggers[$kind][$moment]) ){
+					$this->triggers[$kind][$moment] = [];
+				}
+				$this->triggers[$kind][$moment][$table] = $function;
+				$r = 1;
+			}
+		}
+		return $r;
+	}
+	
+ /**
 	 * @return string 
 	 */
 	public function create($cfg)
@@ -747,7 +781,7 @@ class connection extends \PDO implements actions, api, engines
 	}
 	
 	/**
-	 * @return void 
+	 * @returns a row as an object
 	 */
 	public function select($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
 	{
@@ -759,23 +793,60 @@ class connection extends \PDO implements actions, api, engines
 			$sql = $this->get_select($table, $fields, array_keys($where), $order, $limit);
 		}
 		if ( $sql ){
-			try{
-				if ( count($where) > 0 ){
-					$r = $this->query($sql, $hash, array_values($where));
+			if ( $this->triggers_disabled || $this->launch_triggers($table, 'select', 'before', $fields) ){
+				try{
+					if ( count($where) > 0 ){
+						$r = $this->query($sql, $hash, array_values($where));
+					}
+					else{
+						$r = $this->query($sql, $hash);
+					}
+					if ( $r ){
+						$this->launch_triggers($table, 'select', 'after', $fields);
+						return $r->get_object();
+					}
 				}
-				else{
-					$r = $this->query($sql, $hash);
-				}
-				if ( $r ){
-					return $r->get_objects();
-				}
-			}
-			catch (\PDOException $e ){
-				self::error($e,$this->last_query);
+				catch (\PDOException $e ){
+					self::error($e,$this->last_query);
+	}
 			}
 		}
 	}
-
+	
+	/**
+	 * @returns rows as an array of objects
+	 */
+	public function select_all($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
+	{
+		$hash = $this->make_hash('select', $table, serialize(array_keys($fields)), serialize($where), ( $order ? 1 : '0' ), $limit);
+		if ( isset($this->queries[$hash]) ){
+			$sql = $this->queries[$this->queries[$hash]]['statement'];
+		}
+		else{
+			$sql = $this->get_select($table, $fields, array_keys($where), $order, $limit);
+		}
+		if ( $sql ){
+			if ( $this->triggers_disabled || $this->launch_triggers($table, 'select', 'before', $fields) ){
+				$r = $this->query($sql, $hash, array_values($values));
+				try{
+					if ( count($where) > 0 ){
+						$r = $this->query($sql, $hash, array_values($where));
+					}
+					else{
+						$r = $this->query($sql, $hash);
+					}
+					if ( $r ){
+						$this->launch_triggers($table, 'select', 'after', $fields);
+						return $r->get_objects();
+					}
+				}
+				catch (\PDOException $e ){
+					self::error($e,$this->last_query);
+				}
+			}
+		}
+	}
+	
 	/**
 	 * @return void 
 	 */
@@ -790,16 +861,16 @@ class connection extends \PDO implements actions, api, engines
 			$sql = $this->get_insert($table, array_keys($values), $ignore);
 		}
 		if ( $sql ){
-			try{
-				if ( $this->launch_triggers($table, 'insert', 'before', $values) ){
+			if ( $this->triggers_disabled || $this->launch_triggers($table, 'insert', 'before', $values) ){
+				try{
 					$r = $this->query($sql, $hash, array_values($values));
 					if ( $r ){
 						$this->launch_triggers($table, 'insert', 'after', $values);
 					}
 				}
-			}
-			catch (\PDOException $e ){
-				self::error($e,$this->last_query);
+				catch (\PDOException $e ){
+					self::error($e,$this->last_query);
+				}
 			}
 		}
 		return $r;
@@ -831,11 +902,22 @@ class connection extends \PDO implements actions, api, engines
 			$sql = substr($sql,0,strrpos($sql,','));
 		}
 		if ( $sql ){
-			try{
-				return $this->query($sql, $hash, $vals);
-			}
-			catch (\PDOException $e ){
-				self::error($e,$this->last_query);
+			if ( $this->triggers_disabled || $this->launch_triggers($table, 'insert', 'before', $values) ){
+				try{
+					$last = $this->last_id();
+					$r = $this->query($sql, $hash, $vals);
+					if ( $r ){
+						if ( $last !== $this->last_id() ){
+							$this->launch_triggers($table, 'insert', 'after', $values);
+						}
+						else{
+							$this->launch_triggers($table, 'update', 'after', $values);
+						}
+					}
+				}
+				catch (\PDOException $e ){
+					self::error($e,$this->last_query);
+				}
 			}
 		}
 		return $r;
@@ -846,6 +928,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function update($table, array $values, array $where)
 	{
+		$r = false;
 		$hash = $this->make_hash('insert_update', $table, serialize(array_keys($values)), serialize(array_keys($where)));
 		if ( isset($this->queries[$hash]) ){
 			$sql = $this->queries[$this->queries[$hash]]['statement'];
@@ -854,21 +937,27 @@ class connection extends \PDO implements actions, api, engines
 			$sql = $this->get_update($table, array_keys($values), array_keys($where));
 		}
 		if ( $sql ){
-			try{
-				return $this->query($sql, $hash, array_merge(array_values($values), array_values($where)));
-			}
-			catch (\PDOException $e ){
-				self::error($e,$this->last_query);
+			if ( $this->triggers_disabled || $this->launch_triggers($table, 'update', 'before', $values) ){
+				try{
+					$r = $this->query($sql, $hash, array_merge(array_values($values), array_values($where)));
+					if ( $r ){
+						$this->launch_triggers($table, 'update', 'after', $values);
+					}
+				}
+				catch (\PDOException $e ){
+					self::error($e,$this->last_query);
+				}
 			}
 		}
-		return false;
+		return $r;
 	}
 
 	/**
-	 * @return void 
+	 * @return bool 
 	 */
 	public function delete($table, array $where)
 	{
+		$r = false;
 		$hash = $this->make_hash('delete', $table, serialize(array_keys($where)));
 		if ( isset($this->queries[$hash]) ){
 			$sql = $this->queries[$this->queries[$hash]]['statement'];
@@ -877,13 +966,19 @@ class connection extends \PDO implements actions, api, engines
 			$sql = $this->get_delete($table, array_keys($where));
 		}
 		if ( $sql ){
-			try{
-				return $this->query($sql, $hash, array_values($where));
-			}
-			catch (\PDOException $e ){
-				self::error($e,$this->last_query);
+			if ( $this->triggers_disabled || $this->launch_triggers($table, 'delete', 'before', $where) ){
+				try{
+					$r = $this->query($sql, $hash, array_values($where));
+					if ( $r ){
+						$this->launch_triggers($table, 'delete', 'after', $where);
+					}
+				}
+				catch (\PDOException $e ){
+					self::error($e,$this->last_query);
+				}
 			}
 		}
+		return $r;
 	}
 	
 	/**
