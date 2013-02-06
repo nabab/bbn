@@ -69,10 +69,10 @@ class ftp extends \bbn\obj
 				$this->login = BBN_FTP_LOGIN;
 			}
 			if ( isset($cfg['pass']) ){
-				$this->pass = \bbn\utilities\enc::decrypt($cfg['pass']);
+				$this->pass = \bbn\util\enc::decrypt($cfg['pass']);
 			}
 			else if ( defined('BBN_FTP_PASS') ){
-				$this->pass = \bbn\utilities\enc::decrypt(BBN_FTP_PASS);
+				$this->pass = \bbn\util\enc::decrypt(BBN_FTP_PASS);
 			}
 			if ( isset($this->dir, $this->host, $this->login, $this->pass) ){
 				if ( $this->dir = $this->checkPath($this->dir) )

@@ -5,17 +5,19 @@
 namespace bbn\appui;
 
 /**
- * This class builds special tables and defines databases' structure and according forms in them
+ * This class builds special tables and defines databases' structure and according forms in them.
  * The built tables all have the same prefix (bbn in this example), and are called:
- * - bbn_clients
- * - bbn_projects
- * - bbn_dbs
- * - bbn_tables
- * - bbn_columns
- * - bbn_keys
- * - bbn_forms
- * - bbn_forms
- * - bbn_fields
+ * <ul>
+ * <li>bbn_clients</li>
+ * <li>bbn_projects</li>
+ * <li>bbn_dbs</li>
+ * <li>bbn_tables</li>
+ * <li>bbn_columns</li>
+ * <li>bbn_keys</li>
+ * <li>bbn_forms</li>
+ * <li>bbn_forms</li>
+ * <li>bbn_fields</li>
+ * </ul>
  *
  *
  * @author Thomas Nabet <thomas.nabet@gmail.com>
@@ -29,7 +31,7 @@ namespace bbn\appui;
 class mapper{
 
 	private $db, $prefix, $admin_db, $client_db;
-	public $schema = false, $auto_update = 1;
+	public $schema = false, $auto_update = false;
 
 	/**
 	 * This will call the builder and create the tables if they don't exist in the current database
@@ -98,6 +100,7 @@ class mapper{
 		}
 		return $rs;
 	}
+	
 	public function config_form($table){
 		$table = explode(".",$table);
 		if ( count($table) === 2 ){
@@ -318,7 +321,9 @@ class mapper{
 				$this->db->change($change);
 			}
 			$projects = [];
-			$r1 = $this->db->query("SELECT * FROM `{$this->admin_db}`.`{$this->prefix}projects` WHERE `db` LIKE '$db'");
+			$r1 = $this->db->query("SELECT *
+			FROM `{$this->admin_db}`.`{$this->prefix}projects`
+			WHERE `db` LIKE 'localhost.$db'");
 			while ( $d1 = $r1->get_row() ){
 				$projects[$d1['id']] = $d1;
 				$projects[$d1['id']]['forms'] = [];
@@ -331,8 +336,10 @@ class mapper{
 					$projects[$d1['id']]['forms'][$d2['id']] = $this->get_form_config();
 				}
 			}
+			
 			$this->db->query("DELETE FROM `{$this->admin_db}`.`{$this->prefix}dbs` WHERE `db` LIKE '$db'");
 			$this->db->query("INSERT INTO `{$this->admin_db}`.`{$this->prefix}dbs` (`id`, `db`) VALUES ('{$this->db->host}.$db', '$db')");
+			
 			foreach ( $schema as $t => $vars ){
 				if ( strpos($t, $this->prefix) !== 0 ){
 					$this->db->insert($this->admin_db.'.'.$this->prefix.'tables',[
@@ -340,7 +347,8 @@ class mapper{
 						'db' => 'localhost.'.$db,
 						'table' => $t
 					]);
-					foreach ( $vars['fields'] as $col => $f ){
+			
+			foreach ( $vars['fields'] as $col => $f ){
 						$config = new \stdClass();
 						if ( strpos($t, 'apst_') === 0 && ( $col !== 'id' && $col !== 'last_mod' && $col !== 'id_user' && $col !== 'history' ) ){
 							$config->history = 1;

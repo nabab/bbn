@@ -5,7 +5,7 @@
 namespace bbn\html;
 
 /**
- * This class generates html elements with defined configuration
+ * This class generates html form elements with defined configuration
  *
  *
  * @author Thomas Nabet <thomas.nabet@gmail.com>
@@ -18,7 +18,15 @@ namespace bbn\html;
 
 class builder
 {
+	/**
+	 * The maximum number of values in a dropdown list
+	 * @var int
+	 */
 	const max_values_at_once = 200;
+	/**
+	 * The default field's configuration
+	 * @var array
+	 */
 	private $_defaults = [
 		'tag' => 'input',
 		'cssclass' => false,
@@ -36,8 +44,20 @@ class builder
 		'xhtml' => false,
 		'lang' => 'en'
 	],
+	/**
+	 * The current default configuration
+	 * @var array
+	 */
 	$_current,
+	/**
+	 * The current items registered in the object
+	 * @var array
+	 */
 	$items = [],
+	/**
+	 * Kendo widgets' properties
+	 * @var array
+	 */
 	$kendo = [
 		'Calendar' => ['name','value','min','max','dates','url','culture','footer','format','month','start','depth','animation'],
 		'DatePicker' => ['name','value','footer','format','culture','parseFormats','min','max','start','depth','animation','month','dates','ARIATemplate'],
@@ -52,8 +72,19 @@ class builder
 		'Upload' => ['name','enabled','multiple','showFileList','async','localization']
 	];
 	
+	
+	/**
+	 * This array will hold all the current configuration, i.e. the defaults values (in 'settings' index), and each registered item's configuration too (in 'elements' index)
+	 * @var array
+	 */
 	public $global_cfg = [];
 
+	/**
+	 * This will call the initial build for a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).
+	 *
+	 * @param array $cfg The default config for the elements
+	 */
+	
 	public function __construct( array $cfg = null )
 	{
 		if ( is_array($cfg) ){
@@ -73,6 +104,10 @@ class builder
 		$this->reset();
 	}
 	
+	/**
+	 * Removes all the elements from the items array, and reset the default config
+	 * @return void
+	 */
 	public function reset()
 	{
 		$this->_current = array();
@@ -85,6 +120,11 @@ class builder
 		$this->id = \bbn\str\text::genpwd(20,15);
 	}
 	
+	/**
+	 * Change an option in the current configuration
+	 * @param array | string $opt_val Either an array with the param name and value, or 2 strings in the same order
+	 * @return void
+	 */
 	public function set_option($opt_val)
 	{
 		$args = func_get_args();
@@ -99,6 +139,11 @@ class builder
 		}
 	}
 	
+	/**
+	 * Returns the complete HTML of the current form (with all its elements)
+	 * @param string $action The form's action
+	 * @return void
+	 */
 	public function get_form($action)
 	{
 		$s = '<form action="'.$action.'" method="post" id="'.$this->id.'"><fieldset>';
@@ -109,11 +154,20 @@ class builder
 		return $s;
 	}
 	
+	/**
+	 * Returns an input object according to the combination of passed and default configurations
+	 * @param array $cfg The input's config
+	 * @return \bbn\html\input
+	 */
 	public function get_input($cfg=array())
 	{
 		return new \bbn\html\input(array_merge($this->_current,$cfg));
 	}
 	
+	/**
+	 * Returns an array of the all the current registered inputs' configurations
+	 * @return array
+	 */
 	public function get_config()
 	{
 		$r = [];
@@ -122,6 +176,11 @@ class builder
 		}
 		return $r;
 	}
+	
+	/**
+	 * Returns the HTML string of all the fields (no label, no form)
+	 * @return string
+	 */
 	public function get_html()
 	{
 		$st = '';
@@ -131,6 +190,10 @@ class builder
 		return $st;
 	}
 	
+	/**
+	 * Returns the JavaScript from all the resgistered inputs, including the one for the form
+	 * @return string
+	 */
 	public function get_script()
 	{
 		$st = '';
@@ -141,6 +204,11 @@ class builder
 		return $st;
 	}
 	
+	/**
+	 * Generates a whole input configuration array by combining the passed and default configurations
+	 * @param array $cfg The input's config
+	 * @return array
+	 */
 	public function make_field($cfg=null)
 	{
 		if ( is_array($cfg) && isset($cfg['name']) ){

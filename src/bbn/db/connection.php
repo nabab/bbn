@@ -16,8 +16,21 @@ use \bbn\str\text;
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @version 0.2r89
  */
+
 class connection extends \PDO implements actions, api, engines
 {
+	private
+	/**
+	 * A PHPSQLParser object
+	 * @var \bbn\db\PHPSQLParser
+	 */
+		$parser,
+	/**
+	 * A PHPSQLCreator object
+	 * @var \bbn\db\PHPSQLCreator
+	 */
+		$creator;
+		
 	protected
 		$history = false,
 		$max_queries = 100,
@@ -274,7 +287,29 @@ class connection extends \PDO implements actions, api, engines
 		}
 		return $this->hash_contour.md5($st).$this->hash_contour;
 	}
-
+	
+	/**
+	 * @return string 
+	 */
+	public function create($cfg)
+	{
+		if ( !isset($this->creator) ){
+			$this->creator = new PHPSQLCreator();
+		}
+		return $this->creator->create($cfg);
+	}
+	
+	/**
+	 * @return string 
+	 */
+	public function parse($cfg)
+	{
+		if ( !isset($this->parser) ){
+			$this->parser = new PHPSQLParser();
+		}
+		return $this->parser->parse($cfg);
+	}
+	
 	/**
 	 * @return string 
 	 */
@@ -384,7 +419,8 @@ class connection extends \PDO implements actions, api, engines
 			if ( !isset($this->queries[$hash]) ){
 				/* parse the statement */
 				//$t1 = microtime();
-				$sequences = \bbn\db\parser::ParseString($statement)->getArray();
+				// $sequences = \bbn\db\parser::ParseString($statement)->getArray();
+				$sequences = $this->parse($statement);
 				if ( $num_values > 0 ){
 					$statement = str_replace("%%",'%',$statement);
 					/* Compatibility with sprintf basic expressions - to be enhanced */
@@ -427,11 +463,11 @@ class connection extends \PDO implements actions, api, engines
 			$this->last_query = $q['statement'];
 			try
 			{
-				if ( $q['prepared'] && ( isset($q['sequences']['insert']) || isset($q['sequences']['update']) || isset($q['sequences']['delete']) ) ){
+				if ( $q['prepared'] && ( isset($q['sequences']['INSERT']) || isset($q['sequences']['UPDATE']) || isset($q['sequences']['DELETE']) ) ){
 					$r = $q['prepared']->init($values)->execute();
 				}
 				else{
-					if ( isset($q['sequences']['select']) || isset($q['sequences']['show']) ){
+					if ( isset($q['sequences']['SELECT']) || isset($q['sequences']['SHOW']) || isset($q['sequences']['UNION']) ){
 						if ( !$q['prepared'] ){
 							$this->setAttribute(\PDO::ATTR_STATEMENT_CLASS,array('\bbn\db\query',array($this,$q['sequences'],$values)));
 							$q['prepared'] = $this->prepare($q['statement'], $driver_options);
@@ -458,10 +494,10 @@ class connection extends \PDO implements actions, api, engines
 						}
 					}
 				}
-				if ( isset($q['sequences']['insert']) ){
+				if ( isset($q['sequences']['INSERT']) ){
 					$this->last_insert_id = $this->lastInsertId();
 				}
-				if ( $q['prepared'] && ( isset($q['sequences']['insert']) || isset($q['sequences']['update']) || isset($q['sequences']['delete']) ) ){
+				if ( $q['prepared'] && ( isset($q['sequences']['INSERT']) || isset($q['sequences']['UPDATE']) || isset($q['sequences']['DELETE']) ) ){
 					return $q['prepared']->rowCount();
 				}
 				return $r;
@@ -864,6 +900,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function modelize($table='')
 	{
+		
 		$r = array();
 		$tables = false;
 		if ( empty($table) || $table === '*' ){
@@ -922,7 +959,9 @@ class connection extends \PDO implements actions, api, engines
 			$database = $this->current;
 		}
 		$t2 = array();
-		if ( $t1 = $this->get_irows("SHOW TABLES FROM `$database`") ){
+		$r = $this->query("SHOW TABLES FROM `$database`");
+		$r->init();
+		if ( $t1 = $r->get_irows() ){
 			foreach ( $t1 as $t ){
 				array_push($t2, $t[0]);
 			}

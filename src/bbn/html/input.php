@@ -55,11 +55,10 @@ class input
 		$html = '',
 		$script;
 	/**
-	 * This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).
+	 * This will build a new HTML form element according to the given configuration.
+	 * Only name and tag are mandatory, then other values depending on the tag
 	 *
-	 * @param object | string &$appui The $appui object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books/466565 or html/home)</em>
-	 * @param string | object $parent The parent controller</em>
-	 * @return bool
+	 * @param array $cfg The element configuration
 	 */
 	public function __construct(array $cfg = null)
 	{
@@ -110,11 +109,17 @@ class input
 		}
 	}
 	
+	/**
+	 * Returns the current configuration.
+	 */
 	public function get_config()
 	{
 		return $this->cfg;
 	}
 
+	/**
+	 * Returns a HTML string with a label and input, using the App-UI restyler classes.
+	 */
 	public function get_label_input()
 	{
 		$s = $this->get_html();
@@ -133,6 +138,9 @@ class input
 		return $s;
 	}
 	
+	/**
+	 * Returns the javascript coming with the object.
+	 */
 	public function get_script()
 	{
 		$r = '';
@@ -167,6 +175,9 @@ class input
 		return $r;
 	}
 	
+	/**
+	 * Returns the HTML string for the object.
+	 */
 	public function get_html()
 	{
 		if ( empty($this->html) && $this->name ){

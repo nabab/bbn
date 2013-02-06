@@ -75,10 +75,60 @@ class history extends \bbn\db\connection implements \bbn\db\api
 		return 1;
 	}
 	
-	public function get_history($table){
-		
+	public function get_history($table, $id){
+		$r = [];
+		$args = ['localhost.'.$this->current.'.'.$table.'.%', $id];
+		$q = $this->get_row("
+			SELECT `last_mod`, `id_user`
+			FROM `bbn_history`
+			WHERE `column` LIKE ?
+			AND `line` = ?
+			AND `operation` LIKE 'INSERT'
+			ORDER BY `last_mod` ASC
+			LIMIT 1",
+			$args);
+		if ( $q ){
+			$r['ins'] = [
+				'date' => $q['last_mod'],
+				'user' => $q['id_user']
+			];
+		}
+		$q = $this->get_row("
+			SELECT `last_mod`, `id_user`
+			FROM `bbn_history`
+			WHERE `column` LIKE ?
+			AND `line` = ?
+			AND `operation` LIKE 'UPDATE'
+			ORDER BY `last_mod` DESC
+			LIMIT 1",
+			$args);
+		if ( $q ){
+			$r['upd'] = [
+				'date' => $q['last_mod'],
+				'user' => $q['id_user']
+			];
+		}
+		$q = $this->get_row("
+		SELECT `last_mod`, `id_user`
+		FROM `bbn_history`
+		WHERE `column` LIKE ?
+		AND `line` = ?
+		AND `operation` LIKE 'DELETE'
+		ORDER BY `last_mod` DESC
+		LIMIT 1",
+		$args);
+		if ( $q ){
+			$r['del'] = [
+				'date' => $q['last_mod'],
+				'user' => $q['id_user']
+			];
+		}
+		return $r;
 	}
-	
+		
+	public function get_full_history($table, $id){
+		$r = [];
+	}
 	
 	/**
 	 * Gets all information about a given table

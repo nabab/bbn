@@ -45,6 +45,12 @@ trait logger
 		}
 		return $this;
 	}
+	
+	public function debug($file='misc')
+	{
+		$i = debug_backtrace();
+		$this->log(print_r($i, 1));
+	}
 	/**
 	 * Add information to the $info array
 	 *

@@ -16,7 +16,7 @@ use \bbn\str\text;
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @version 0.2r89
  */
-class mysql extends connection implements actions, api, engines
+class sqlite extends connection implements actions, api, engines
 {
 
 	/**

@@ -62,7 +62,7 @@ class query extends \PDOStatement implements actions
 	/**
 	 * @return $this 
 	 */
-	public function init($values)
+	public function init($values=array())
 	{
 		$this->values = $values;
 		$this->res = null;
@@ -135,24 +135,68 @@ class query extends \PDOStatement implements actions
 		if ( $this->num === null )
 		{
 			$this->num = 0;
-			if ( isset($this->sequences['select']) || isset($this->sequences['show']) )
+			if ( isset($this->sequences['SELECT']) || isset($this->sequences['UNION']) )
 			{
-				$sql = parser::ParseString($this->queryString)->getCountQuery();
-				try
-				{
-					$q = $this->db->prepare($sql);
-					$q->values = $this->values;
-					if ( $q->execute() )
-						$this->num = (int)$q->fetchColumn();
-					/* In case there is some group by that split the results, we request the full set of results
-					$n = count($q->fetchAll());
-					if ( $n > $this->num && $this->num > 0 ){
-						$this->num = $n + 1;
+				$s = $this->sequences;
+				$queries = [];
+				if ( isset($s['UNION']) ){
+					foreach ( $s['UNION'] as $k => $un ){
+						if ( isset($un['SELECT']) ){
+							array_push($queries, $un);
+						}
 					}
-					*/
 				}
-				catch ( \PDOException $e )
+				else{
+					array_push($queries, $s);
+				}
+				$start_value = 0;
+				foreach ( $queries as $qr ){
+					$qr['SELECT'] = [
+						[
+							'expr_type' => 'aggregate_function',
+							'alias' => '',
+							'base_expr' => 'COUNT',
+							'sub_tree' => [
+								[
+									'expr_type' => 'colref',
+									'base_expr' => '*'
+								]
+							]
+						]
+					];
+					if ( isset($qr['LIMIT']) ){
+						unset($qr['LIMIT']);
+					}
+					$num_values = 0;
+					foreach ( $qr as $qr2 ){
+						foreach ( $qr2 as $qr3 ){
+							if ( isset($qr3['base_expr']) && $qr3['base_expr'] === '?' ){
+								$num_values++;
+							}
+						}
+					}
+					$sql = $this->db->create($qr);
+					try
+					{
+						$q = $this->db->prepare($sql);
+						if ( isset($this->values) && count($this->values) > 0 ){
+							$v = $this->values;
+							$q->values = array_splice($v, $start_value, $num_values);
+							$start_value += $num_values;
+						}
+						if ( $q->execute() ){
+							$this->num += (int)$q->fetchColumn();
+						}
+						/* In case there is some group by that split the results, we request the full set of results
+							$n = count($q->fetchAll());
+							if ( $n > $this->num && $this->num > 0 ){
+							$this->num = $n + 1;
+							}
+						 */
+					}
+					catch ( \PDOException $e )
 					{ connection::error($e,$this->queryString); }
+				}
 			}
 		}
 		return $this->num;
@@ -271,7 +315,7 @@ class query extends \PDOStatement implements actions
 	 */
 	public function get_row()
 	{
-		if ( isset($this->sequences['select']) || isset($this->sequences['show']) )
+		if ( isset($this->sequences['SELECT']) || isset($this->sequences['SHOW']) || isset($this->sequences['UNION']) )
 			return $this->fetch(\PDO::FETCH_ASSOC);
 		return false;
 	}
@@ -281,7 +325,7 @@ class query extends \PDOStatement implements actions
 	 */
 	public function get_rows()
 	{
-		if ( isset($this->sequences['select']) || isset($this->sequences['show']) )
+		if ( isset($this->sequences['SELECT']) || isset($this->sequences['SHOW']) || isset($this->sequences['UNION']) )
 			return $this->fetchAll(\PDO::FETCH_ASSOC);
 		return false;
 	}
@@ -291,7 +335,7 @@ class query extends \PDOStatement implements actions
 	 */
 	public function get_by_columns()
 	{
-		if ( isset($this->sequences['select']) || isset($this->sequences['show']) )
+		if ( isset($this->sequences['SELECT']) || isset($this->sequences['SHOW']) || isset($this->sequences['UNION']) )
 		{
 			$r = array();
 			$ds = $this->fetchAll(\PDO::FETCH_ASSOC);
@@ -314,7 +358,7 @@ class query extends \PDOStatement implements actions
 	 */
 	public function get_objects()
 	{
-		if ( isset($this->sequences['select']) || isset($this->sequences['show']) )
+		if ( isset($this->sequences['SELECT']) || isset($this->sequences['SHOW']) || isset($this->sequences['UNION']) )
 			return $this->fetchAll(\PDO::FETCH_OBJ);
 		return false;
 	}
@@ -332,7 +376,7 @@ class query extends \PDOStatement implements actions
 	 */
 	public function get_object()
 	{
-		if ( isset($this->sequences['select']) || isset($this->sequences['show']) )
+		if ( isset($this->sequences['SELECT']) || isset($this->sequences['SHOW']) || isset($this->sequences['UNION']) )
 			return $this->fetch(\PDO::FETCH_OBJ);
 		return false;
 	}
@@ -342,7 +386,7 @@ class query extends \PDOStatement implements actions
 	 */
 	public function get_irow()
 	{
-		if ( isset($this->sequences['select']) || isset($this->sequences['show']) )
+		if ( isset($this->sequences['SELECT']) || isset($this->sequences['SHOW']) )
 			return $this->fetch(\PDO::FETCH_NUM);
 		return false;
 	}
@@ -352,7 +396,7 @@ class query extends \PDOStatement implements actions
 	 */
 	public function get_irows()
 	{
-		if ( isset($this->sequences['select']) || isset($this->sequences['show']) )
+		if ( isset($this->sequences['SELECT']) || isset($this->sequences['SHOW']) )
 			return $this->fetchAll(\PDO::FETCH_NUM);
 		return false;
 	}
