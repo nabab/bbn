@@ -21,13 +21,6 @@ interface engines
 {	
  /**
 	* Fetches the database and returns an array of several arrays of rows text-indexed
-	*
-	* @return void()
-	*/
-	public function __construct($cfg);
-	
- /**
-	* Fetches the database and returns an array of several arrays of rows text-indexed
 	* 
 	* @params string
 	* @return $this
