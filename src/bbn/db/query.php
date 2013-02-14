@@ -49,13 +49,13 @@ class query extends \PDOStatement implements actions
 	 * @param array $values
 	 * @return void 
 	 */
-	protected function __construct($db, $seq, $values=array())
+	protected function __construct($db)
 	{
 		if ( !empty($this->queryString) )
 		{
 			$this->db = $db;
-			$this->sequences = $seq;
-			$this->values = $values;
+			$this->sequences = $this->db->last_params['sequences'];
+			$this->values = $this->db->last_params['values'];
 		}
 	}
 	
@@ -175,7 +175,7 @@ class query extends \PDOStatement implements actions
 							}
 						}
 					}
-					$sql = $this->db->create($qr);
+					$sql = $this->db->create_query($qr);
 					try
 					{
 						$q = $this->db->prepare($sql);

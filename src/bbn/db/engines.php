@@ -21,13 +21,6 @@ interface engines
 {	
  /**
 	* Fetches the database and returns an array of several arrays of rows text-indexed
-	*
-	* @return void()
-	*/
-	public function __construct($cfg);
-	
- /**
-	* Fetches the database and returns an array of several arrays of rows text-indexed
 	* 
 	* @params string
 	* @return $this
@@ -125,7 +118,7 @@ interface engines
 	 * 
 	 * @return false|array
 	 */
-	public function create_db_index($table, $column);
+	public function create_db_index($table, $column, $unique = false, $length = null);
 	
 	/**
 	 * Fetches the database and returns an array of objects 
@@ -134,5 +127,18 @@ interface engines
 	 */
 	public function delete_db_index($table, $column);
 	
+	/**
+	 * Creates a database user
+	 * 
+	 * @return false|array
+	 */
+	public function create_db_user($user, $pass, $db);
+	
+	/**
+	 * Deletes a database user
+	 * 
+	 * @return false|array
+	 */
+	public function delete_db_user($user);
 }
 ?>

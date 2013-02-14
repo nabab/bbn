@@ -320,6 +320,7 @@ class mapper{
 			if ( $change ){
 				$this->db->change($change);
 			}
+      /*
 			$projects = [];
 			$r1 = $this->db->query("SELECT *
 			FROM `{$this->admin_db}`.`{$this->prefix}projects`
@@ -338,18 +339,19 @@ class mapper{
 			}
 			
 			$this->db->query("DELETE FROM `{$this->admin_db}`.`{$this->prefix}dbs` WHERE `db` LIKE '$db'");
-			$this->db->query("INSERT INTO `{$this->admin_db}`.`{$this->prefix}dbs` (`id`, `db`) VALUES ('{$this->db->host}.$db', '$db')");
+       * 
+       */
+			$this->db->query("INSERT IGNORE INTO `{$this->admin_db}`.`{$this->prefix}dbs` (`id`, `db`) VALUES ('{$this->db->host}.$db', '$db')");
 			
 			foreach ( $schema as $t => $vars ){
-				if ( strpos($t, $this->prefix) !== 0 ){
-					$this->db->insert($this->admin_db.'.'.$this->prefix.'tables',[
-						'id' => 'localhost.'.$db.'.'.$t,
+				if ( strpos($t, '.'.$this->prefix) === false ){
+					$this->db->insert_ignore($this->admin_db.'.'.$this->prefix.'tables',[
+						'id' => 'localhost.'.$t,
 						'db' => 'localhost.'.$db,
-						'table' => $t
+						'table' => end(explode('.', $t))
 					]);
-			
-			foreach ( $vars['fields'] as $col => $f ){
-						$config = new \stdClass();
+          foreach ( $vars['fields'] as $col => $f ){
+    				$config = new \stdClass();
 						if ( strpos($t, 'apst_') === 0 && ( $col !== 'id' && $col !== 'last_mod' && $col !== 'id_user' && $col !== 'history' ) ){
 							$config->history = 1;
 						}
@@ -374,9 +376,9 @@ class mapper{
 								$config->keys[$key] = $vars['keys'][$key];
 							}
 						}
-						$this->db->insert($this->admin_db.'.'.$this->prefix.'columns',[
-							'id' => 'localhost.'.$db.'.'.$t.'.'.$col,
-							'table' => 'localhost.'.$db.'.'.$t,
+						$this->db->insert_ignore($this->admin_db.'.'.$this->prefix.'columns',[
+							'id' => 'localhost.'.$t.'.'.$col,
+							'table' => 'localhost.'.$t,
 							'column' => $col,
 							'position' => $f['position'],
 							'type' => $f['type'],
@@ -388,14 +390,14 @@ class mapper{
 				}
 			}
 			foreach ( $schema as $t => $vars ){
-				if ( strpos($t, $this->prefix) !== 0 ){
+				if ( strpos($t, $this->prefix.'.') === false ){
 					foreach ( $vars['keys'] as $k => $arr ){
 						$pos = 1;
 						foreach ( $arr['columns'] as $c ){
-							$this->db->insert($this->admin_db.'.'.$this->prefix.'keys',[
-								'id' => 'localhost.'.$db.'.'.$t.'.'.$c.'.'.$k,
+							$this->db->insert_ignore($this->admin_db.'.'.$this->prefix.'keys',[
+								'id' => 'localhost.'.$t.'.'.$c.'.'.$k,
 								'key' => $k,
-								'column' => 'localhost.'.$db.'.'.$t.'.'.$c,
+								'column' => 'localhost.'.$t.'.'.$c,
 								'position' => $pos,
 								'ref_column' => is_null($arr['ref_column']) ? null : 'localhost.'.$arr['ref_db'].'.'.$arr['ref_table'].'.'.$arr['ref_column']
 							]);
@@ -404,6 +406,7 @@ class mapper{
 					}
 				}
 			}
+      /*
 			foreach ( $projects as $i => $p ){
 				$this->db->insert($this->admin_db.'.'.$this->prefix.'projects',[
 					'id' => $i,
@@ -428,6 +431,8 @@ class mapper{
 					}
 				}
 			}
+       * 
+       */
 		}
 	}
 	

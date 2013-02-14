@@ -69,7 +69,8 @@ class ftp extends \bbn\obj
 				$this->login = BBN_FTP_LOGIN;
 			}
 			if ( isset($cfg['pass']) ){
-				$this->pass = \bbn\util\enc::decrypt($cfg['pass']);
+				// $this->pass = \bbn\util\enc::decrypt($cfg['pass']);
+        $this->pass = $cfg['pass'];
 			}
 			else if ( defined('BBN_FTP_PASS') ){
 				$this->pass = \bbn\util\enc::decrypt(BBN_FTP_PASS);
@@ -121,16 +122,16 @@ class ftp extends \bbn\obj
 				$files = ftp_nlist($this->cn,$path);
 				foreach ( $files as $file )
 				{
-					$ele = array('name' => $file,'num' => 0);
-					if ( @ftp_chdir($this->cn,$path.'/'.$file) )
-					{
+					$ele = array('name' => $file, 'basename' => basename($file), 'num' => 0);
+					if ( @ftp_chdir($this->cn,$path.'/'.$file) ){
 						$num = ftp_nlist($this->cn,'.');
 						$ele['num'] = count($num);
 						$ele['type'] = 'dir';
-						ftp_cdup($this->cn);
+						@ftp_cdup($this->cn);
 					}
-					else
-						$ele['type'] = bbn\str\text::file_ext($file);
+          else{
+            $ele['type'] = \bbn\str\text::file_ext($file);
+          }
 					array_push($res,$ele);
 				}
 			}

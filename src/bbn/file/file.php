@@ -19,12 +19,12 @@ class file extends \bbn\obj
 	/**
 	 * @var int
 	 */
-	protected $size=0;
-
+	protected
+    $size=0,
 	/**
 	 * @var mixed
 	 */
-	protected $ext;
+    $ext;
 
 	/**
 	 * @var mixed
@@ -58,6 +58,8 @@ class file extends \bbn\obj
 
 
 	/**
+   * @todo Fairew la doc!!
+   * @param
 	 * @return void 
 	 */
 	public function __construct($file)

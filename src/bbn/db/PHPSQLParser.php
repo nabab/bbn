@@ -348,6 +348,8 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
                 case 'GRANT':
                 case 'REVOKE':
                 case 'SHOW':
+                // Added by nabab
+                case 'PRAGMA':
                 case 'HANDLER':
                 case 'LOAD':
                 case 'ROLLBACK':

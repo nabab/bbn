@@ -102,13 +102,12 @@ class mysql extends connection implements engines
 	/**
 	 * @return string | false
 	 */
-	public function change($db)
+	public function get_change($db)
 	{
-		if ( $this->current !== $db && text::check_name($db) ){
-			parent::query("USE $db");
-			$this->current = $db;
+		if ( text::check_name($db) ){
+			return "USE $db";
 		}
-		return $this;
+		return false;
 	}
 	
 	/**
