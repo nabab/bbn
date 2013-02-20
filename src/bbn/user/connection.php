@@ -267,8 +267,7 @@ class connection extends \bbn\obj
 	public function check_session()
 	{
 		if ( !isset($this->id) ){
-			$this->auth = false;
-			if ( isset($_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]['id']) )
+			if ( isset($_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]['id']) && $this->auth !== 1 )
 			{
 				$id = $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]['id'];
 				$cols =& $this->cfg['fields'];
@@ -289,7 +288,8 @@ class connection extends \bbn\obj
 					if ( $cols['sess_id'] )
 						$this->db->query("
 							UPDATE `{$this->cfg['table']}`
-							SET `$cols[sess_id]` = '%s'
+							SET `$cols[sess_id]` = '%s',
+              `$cols[last_connection]` = NOW()
 							WHERE `$cols[id]` = %u",
 							session_id(),
 							$this->id);

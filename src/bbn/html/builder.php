@@ -256,8 +256,7 @@ class builder
 			}
 			if ( isset($cfg['options']['sql'], $cfg['options']['db']) && strlen($cfg['options']['sql']) > 5 ){
 				$cfg['options']['dataSource'] = array();
-				$r = $cfg['options']['db']->query($cfg['options']['sql']);
-				$count = $r->count();
+				$count = ( $r = $cfg['options']['db']->query($cfg['options']['sql']) ) ? $r->count() : 0;
 				if ( $count <= self::max_values_at_once ){
 					if ( $ds = $cfg['options']['db']->get_irows($cfg['options']['sql']) ){
 						foreach ( $ds as $d ){

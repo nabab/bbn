@@ -182,10 +182,10 @@ class mapper{
 	 */
 	public function get_input_config($table, $column){
 		// Looks in the db for columns corresponding to the given table
-		if ( $this->db && \bbn\str\text::check_name($table, $column) && $col = $this->db->get_row("
+		if ( $this->db && \bbn\str\text::check_name($column) && ( $table = $this->db->get_full_name($table) ) && $col = $this->db->get_row("
 				SELECT *
 				FROM `{$this->admin_db}`.`{$this->prefix}columns`
-				WHERE `column` LIKE '$column'")
+				WHERE `id` LIKE 'localhost.$table.$column'")
 		){
 			if ( !( $keys = $this->db->get_rows("
 				SELECT *
@@ -223,6 +223,9 @@ class mapper{
 						$cfg['options']['maxlength'] = (int)$m[1];
 					}
 				}
+        else{
+          $cfg['options']['maxlength'] = null;
+        }
 				foreach ( $keys as $key ){
 					if ( $key['key'] === 'PRIMARY' ){
 					}

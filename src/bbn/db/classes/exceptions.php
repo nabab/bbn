@@ -37,7 +37,7 @@
 namespace bbn\db;
 use Exception;
 
-class UnableToCreateSQLException extends Exception {
+class UnableToCreateSQLException extends \Exception {
 
     protected $part;
     protected $partkey;
@@ -69,7 +69,7 @@ class UnableToCreateSQLException extends Exception {
     }
 }
 
-class UnsupportedFeatureException extends Exception {
+class UnsupportedFeatureException extends \Exception {
 
     protected $key;
 
@@ -97,7 +97,7 @@ class InvalidParameterException extends \InvalidArgumentException {
     }
 }
 
-class UnableToCalculatePositionException extends Exception {
+class UnableToCalculatePositionException extends \Exception {
 
     protected $needle;
     protected $haystack;

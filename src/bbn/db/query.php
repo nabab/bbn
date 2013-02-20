@@ -84,7 +84,7 @@ class query extends \PDOStatement implements actions
 					return parent::execute($args);
 				}
 				catch ( \PDOException $e ){
-					connection::error($e,$this->queryString);
+					$this->db->error($e);
 				}
 			}
 			else if ( !is_null($args) )
@@ -94,7 +94,7 @@ class query extends \PDOStatement implements actions
 					return eval( 'return parent::execute( $args );' );
 				}
 				catch ( \PDOException $e ){
-					connection::error($e,$this->queryString);
+					$this->db->error($e);
 				}
 			}
 			else
@@ -120,7 +120,7 @@ class query extends \PDOStatement implements actions
 					return parent::execute();
 				}
 				catch ( \PDOException $e ){
-					connection::error($e,$this->queryString);
+					$this->db->error($e);
 				}
 			}
 		}
@@ -164,6 +164,9 @@ class query extends \PDOStatement implements actions
 							]
 						]
 					];
+					if ( isset($qr['ORDER']) ){
+						unset($qr['ORDER']);
+					}
 					if ( isset($qr['LIMIT']) ){
 						unset($qr['LIMIT']);
 					}
@@ -195,7 +198,7 @@ class query extends \PDOStatement implements actions
 						 */
 					}
 					catch ( \PDOException $e )
-					{ connection::error($e,$this->queryString); }
+					{ $this->db->error($e); }
 				}
 			}
 		}

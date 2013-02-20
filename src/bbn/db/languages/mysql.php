@@ -67,7 +67,8 @@ class mysql implements \bbn\db\engines
 	public function change($db)
 	{
 		if ( ($this->db->current !== $db) && text::check_name($db) ){
-			return $this->db->query("USE $db");
+			$this->db->raw_query("USE `$db`");
+      return 1;
 		}
 		return false;
 	}
@@ -97,13 +98,16 @@ class mysql implements \bbn\db\engines
 	 */
 	public function get_databases()
 	{
-		$x = array_map( function($a){
-      return $a['Database'];
-    }, array_filter($this->db->get_rows("SHOW DATABASES"),function($a){
-			return ( $a['Database'] === 'information_schema' ) || ( $a['Database'] === 'mysql' ) ? false : 1;
-		}));
-		sort($x);
-		return $x;
+    $x = [];
+    if ( $r = $this->db->raw_query("SHOW DATABASES") ){
+      $x = array_map( function($a){
+        return $a['Database'];
+      }, array_filter($r->get_rows("SHOW DATABASES"),function($a){
+        return ( $a['Database'] === 'information_schema' ) || ( $a['Database'] === 'mysql' ) ? false : 1;
+      }));
+      sort($x);
+      return $x;
+    }
 	}
 
 	/**
@@ -115,11 +119,13 @@ class mysql implements \bbn\db\engines
 			$database = $this->db->current;
 		}
 		$t2 = array();
-		if ( $t1 = $this->db->get_irows("SHOW TABLES FROM `$database`") ){
-			foreach ( $t1 as $t ){
-				array_push($t2, $t[0]);
-			}
-		}
+    if ( $r = $this->db->raw_query("SHOW TABLES FROM `$database`") ){
+      if ( $t1 = $r->get_irows() ){
+        foreach ( $t1 as $t ){
+          array_push($t2, $t[0]);
+        }
+      }
+    }
 		return $t2;
 	}
 
@@ -192,44 +198,46 @@ class mysql implements \bbn\db\engines
 			$t = explode(".", $table);
 			$db = $t[0];
 			$table = $t[1];
-			$b = $this->db->get_rows("SHOW INDEX FROM `$db`.`$table`");
-			$keys = array();
-			$cols = array();
-			foreach ( $b as $i => $d ){
-				$a = $this->db->get_row("
-				SELECT `ORDINAL_POSITION` as `position`,
-				`REFERENCED_TABLE_SCHEMA` as `ref_db`, `REFERENCED_TABLE_NAME` as `ref_table`, `REFERENCED_COLUMN_NAME` as `ref_column`
-				FROM `information_schema`.`KEY_COLUMN_USAGE`
-				WHERE `TABLE_SCHEMA` LIKE ?
-				AND `TABLE_NAME` LIKE ?
-				AND `COLUMN_NAME` LIKE ?
-				AND ( `CONSTRAINT_NAME` LIKE ? OR ORDINAL_POSITION = ? OR 1 )
-				LIMIT 1",
-				$db,
-				$table,
-				$d['Column_name'],
-				$d['Key_name'],
-				$d['Seq_in_index']);
-				if ( !isset($keys[$d['Key_name']]) ){
-					$keys[$d['Key_name']] = array(
-					'columns' => array($d['Column_name']),
-					'ref_db' => $a ? $a['ref_db'] : null,
-					'ref_table' => $a ? $a['ref_table'] : null,
-					'ref_column' => $a ? $a['ref_column'] : null,
-					'unique' => $d['Non_unique'] == 0 ? 1 : 0
-					);
-				}
-				else{
-					array_push($keys[$d['Key_name']]['columns'], $d['Column_name']);
-				}
-				if ( !isset($cols[$d['Column_name']]) ){
-					$cols[$d['Column_name']] = array($d['Key_name']);
-				}
-				else{
-					array_push($cols[$d['Column_name']], $d['Key_name']);
-				}
-			}
-			return array('keys'=>$keys, 'cols'=>$cols);
+      if ( $r = $this->db->query("SHOW INDEX FROM `$db`.`$table`") ){
+        $b = $r->get_rows();
+        $keys = array();
+        $cols = array();
+        foreach ( $b as $i => $d ){
+          $a = $this->db->get_row("
+          SELECT `ORDINAL_POSITION` as `position`,
+          `REFERENCED_TABLE_SCHEMA` as `ref_db`, `REFERENCED_TABLE_NAME` as `ref_table`, `REFERENCED_COLUMN_NAME` as `ref_column`
+          FROM `information_schema`.`KEY_COLUMN_USAGE`
+          WHERE `TABLE_SCHEMA` LIKE ?
+          AND `TABLE_NAME` LIKE ?
+          AND `COLUMN_NAME` LIKE ?
+          AND ( `CONSTRAINT_NAME` LIKE ? OR ORDINAL_POSITION = ? OR 1 )
+          LIMIT 1",
+          $db,
+          $table,
+          $d['Column_name'],
+          $d['Key_name'],
+          $d['Seq_in_index']);
+          if ( !isset($keys[$d['Key_name']]) ){
+            $keys[$d['Key_name']] = array(
+            'columns' => array($d['Column_name']),
+            'ref_db' => $a ? $a['ref_db'] : null,
+            'ref_table' => $a ? $a['ref_table'] : null,
+            'ref_column' => $a ? $a['ref_column'] : null,
+            'unique' => $d['Non_unique'] == 0 ? 1 : 0
+            );
+          }
+          else{
+            array_push($keys[$d['Key_name']]['columns'], $d['Column_name']);
+          }
+          if ( !isset($cols[$d['Column_name']]) ){
+            $cols[$d['Column_name']] = array($d['Key_name']);
+          }
+          else{
+            array_push($cols[$d['Column_name']], $d['Key_name']);
+          }
+        }
+        return array('keys'=>$keys, 'cols'=>$cols);
+      }
 		}
 	}
 	
@@ -238,8 +246,8 @@ class mysql implements \bbn\db\engines
 	 */
 	public function get_create($table)
 	{
-		if ( ( $table = $this->get_full_name($table, 1) ) && $r = $this->db->get_row("SHOW CREATE TABLE $table") ){
-			return $r['Create Table'];
+		if ( ( $table = $this->get_full_name($table, 1) ) && $r = $this->db->raw_query("SHOW CREATE TABLE $table") ){
+			return $this->get_row()['Create Table'];
 		}
 		return false;
 	}
@@ -533,7 +541,7 @@ class mysql implements \bbn\db\engines
     }
     $iname = text::cut($iname, 50);
 		if ( ( $table = $this->get_full_name($table, 1) ) ){
-			$this->db->query("
+			$this->db->raw_query("
 			CREATE ".( $unique ? "UNIQUE " : "" )."INDEX `$iname`
       ON $table ( ".implode(", ", $column)." )");
 		}
@@ -546,7 +554,7 @@ class mysql implements \bbn\db\engines
 	public function delete_db_index($table, $column)
 	{
 		if ( ( $table = $this->get_full_name($table, 1) ) && text::check_name($column) ){
-			$this->db->query("
+			$this->db->raw_query("
 				ALTER TABLE $table
 				DROP INDEX `$column`");
 		}
@@ -559,7 +567,7 @@ class mysql implements \bbn\db\engines
 	public function create_db_user($user, $pass, $db)
 	{
 		if ( text::check_name($user, $db) && strpos($pass, "'") === false ){
-			$this->db->query("
+			$this->db->raw_query("
 				GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,INDEX,ALTER
 				ON `$db` . *
 				TO '$user'@'$host'
@@ -573,7 +581,7 @@ class mysql implements \bbn\db\engines
 	public function delete_db_user($user)
 	{
 		if ( text::check_name($user) ){
-			$this->db->query("
+			$this->db->raw_query("
 			REVOKE ALL PRIVILEGES ON *.* 
 			FROM $user");
 			$this->query("DROP USER $user");
@@ -586,7 +594,7 @@ class mysql implements \bbn\db\engines
 	 */
 	public function disable_keys()
 	{
-		$this->db->query("SET FOREIGN_KEY_CHECKS=0;");
+		$this->db->raw_query("SET FOREIGN_KEY_CHECKS=0;");
 		return $this;
 	}
 
@@ -595,7 +603,7 @@ class mysql implements \bbn\db\engines
 	 */
 	public function enable_keys()
 	{
-		$this->db->query("SET FOREIGN_KEY_CHECKS=1;");
+		$this->db->raw_query("SET FOREIGN_KEY_CHECKS=1;");
 		return $this;
 	}
 }

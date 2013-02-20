@@ -64,10 +64,6 @@ class connection extends \PDO implements actions, api, engines
 	/**
 	 * @var mixed
 	 */
-		$last_query,
-	/**
-	 * @var mixed
-	 */
 		$last_prepared,
 	/**
 	 * @var array
@@ -79,6 +75,10 @@ class connection extends \PDO implements actions, api, engines
 		$triggers_disabled = false;
 	
 	public
+	/**
+	 * @var string
+	 */
+		$last_query,
 	/**
 	 * @var mixed
 	 */
@@ -451,7 +451,9 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function change($db)
 	{
-    $this->language->change($db);
+    if ( $this->language->change($db) ){
+      $this->current = $db;
+    }
 		return $this;
 	}
 	
@@ -485,6 +487,18 @@ class connection extends \PDO implements actions, api, engines
 		return $this->language->get_full_name($table, $escaped);
 	}
 	
+	/**
+	 * Execute the parent query function
+	 * @return void
+	 */
+	public function raw_query()
+	{
+    if ( $this->check() ){
+      $args = func_get_args();
+      return call_user_func_array('parent::query', $args);
+    }
+  }
+  
 	/**
 	 * @todo Thomas fais ton taf!!
 	 * @return void
@@ -832,6 +846,26 @@ class connection extends \PDO implements actions, api, engines
 	 *
 	 * @return array | false 
 	 */
+	public function get_array($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
+	{
+    $rows = $this->iselect_all($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0);
+    $r = [];
+    foreach ( $rows as $row ){
+      if ( count($row) === 1 ){
+        array_push($r, $row[0]);
+      }
+      else{
+        $r[$row[0]] = $row[1];
+      }
+    }
+    return $r;
+	}
+
+	/**
+	 * @todo Thomas fais ton taf!!
+	 *
+	 * @return array | false 
+	 */
 	public function get_col_array()
 	{
     if ( $r = $this->get_by_columns(func_get_args()) ){
@@ -903,6 +937,32 @@ class connection extends \PDO implements actions, api, engines
 	}
 	
 	/**
+	 * @returns a row as a numeric array
+	 */
+	public function iselect($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
+	{
+		$hash = $this->make_hash('select', $table, serialize($fields), serialize(array_keys($where)), ( $order ? 1 : '0' ), $limit);
+		if ( isset($this->queries[$hash]) ){
+			$sql = $this->queries[$this->queries[$hash]]['statement'];
+		}
+		else{
+			$sql = $this->language->get_select($table, $fields, array_keys($where), $order, $limit);
+		}
+		if ( $sql && ( $this->triggers_disabled || $this->launch_triggers($table, 'select', 'before', $fields, $where) ) ){
+      if ( count($where) > 0 ){
+        $r = $this->query($sql, $hash, array_values($where));
+      }
+      else{
+        $r = $this->query($sql, $hash);
+      }
+      if ( $r ){
+        $this->launch_triggers($table, 'select', 'after', $fields, $where);
+        return $r->get_irow();
+      }
+		}
+	}
+	
+	/**
 	 * @returns rows as an array of objects
 	 */
 	public function select_all($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
@@ -924,6 +984,32 @@ class connection extends \PDO implements actions, api, engines
       if ( $r ){
         $this->launch_triggers($table, 'select', 'after', $fields, $where);
         return $r->get_objects();
+      }
+		}
+	}
+	
+	/**
+	 * @returns rows as an array of numeric arrays
+	 */
+	public function iselect_all($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
+	{
+		$hash = $this->make_hash('select', $table, serialize($fields), serialize(array_keys($where)), ( $order ? 1 : '0' ), $limit);
+		if ( isset($this->queries[$hash]) ){
+			$sql = $this->queries[$this->queries[$hash]]['statement'];
+		}
+		else{
+			$sql = $this->language->get_select($table, $fields, array_keys($where), $order, $limit);
+		}
+		if ( $sql && ( $this->triggers_disabled || $this->launch_triggers($table, 'select', 'before', $fields, $where) ) ){
+      if ( count($where) > 0 ){
+        $r = $this->query($sql, $hash, array_values($where));
+      }
+      else{
+        $r = $this->query($sql, $hash);
+      }
+      if ( $r ){
+        $this->launch_triggers($table, 'select', 'after', $fields, $where);
+        return $r->get_irows();
       }
 		}
 	}
@@ -1136,7 +1222,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function get_delete($table, array $where)
 	{
-    return call_user_func_array('self::language::get_delete', func_get_args());
+    return $this->language->get_delete($table, $where);
 	}
 
 	/**
@@ -1144,7 +1230,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function get_select($table, array $fields = array(), array $where = array(), $order = array(), $limit = false, $start = 0, $php = false)
 	{
-    return call_user_func_array('self::language::get_select', func_get_args());
+    return $this->language->get_select($table, $fields, $where, $order, $limit, $start, $php);
 	}
 	
 	/**
@@ -1152,7 +1238,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function get_insert($table, array $fields = array(), $ignore = false, $php = false)
 	{
-    return call_user_func_array('self::language::get_insert', func_get_args());
+    return $this->language->get_insert($table, $fields, $ignore, $php);
 	}
 	
 	/**
@@ -1160,7 +1246,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function get_update($table, array $fields = array(), array $where = array(), $php = false)
 	{
-    return call_user_func_array('self::language::get_update', func_get_args());
+    return $this->language->get_update($table, $fields, $where, $php);
 	}
 	
 	/**

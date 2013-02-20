@@ -275,12 +275,14 @@ class history
                   foreach ( $to_check as $c ){
                     // If it's nullable we set it to null
                     if ( $c['null'] == 1 ){
-                      self::$db->update($c['table'], [ $c['to_change'] => null ], [ $c['to_change'] => $del[$c['from_change']] ]);
+                      self::$db->query("
+                        UPDATE `$c[table]`
+                        SET `$c[to_change]` = NULL ]
+                        WHERE `$c[to_change]` = ?",
+                        $del[$c['from_change']]);
                     }
-                    // Otherwise we "delete" it on the same manner
-                    else{
-                      self::$db->delete($c['table'], [ $c['to_change'] => $del[$c['from_change']] ]);
-                    }
+                    // Then we "delete" it on the same manner
+                    self::$db->delete($c['table'], [ $c['to_change'] => $del[$c['from_change']] ], $date);
                   }
                   // Inserting a new history row for each deleted value
                   self::$db->insert(self::$htable, [
