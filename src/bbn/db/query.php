@@ -99,23 +99,24 @@ class query extends \PDOStatement implements actions
 			}
 			else
 			{
-				
-				foreach ( $this->values as $i => $v )
-				{
-					if ( is_int ($v) ){
-						$param = \PDO::PARAM_INT;
-					}
-					else if ( is_bool($v) ){
-						$param = \PDO::PARAM_BOOL;
-					}
-					else if ( is_null($v) ){
-						$param = \PDO::PARAM_NULL;
-					}
-					else{
-						$param = \PDO::PARAM_STR;
-					}
-					$this->bindValue($i+1,$v,$param);
-				}
+				if ( isset($this->values) && is_array($this->values) ){
+          foreach ( $this->values as $i => $v )
+          {
+            if ( is_int ($v) ){
+              $param = \PDO::PARAM_INT;
+            }
+            else if ( is_bool($v) ){
+              $param = \PDO::PARAM_BOOL;
+            }
+            else if ( is_null($v) ){
+              $param = \PDO::PARAM_NULL;
+            }
+            else{
+              $param = \PDO::PARAM_STR;
+            }
+            $this->bindValue($i+1,$v,$param);
+          }
+        }
 				try{
 					return parent::execute();
 				}

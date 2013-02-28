@@ -238,19 +238,23 @@ class connection extends \PDO implements actions, api, engines
     }
     if ( isset($cfg['engine']) ){
       $cls = '\\bbn\\db\\languages\\'.$cfg['engine'];
+      if ( !class_exists($cls) ){
+        die("Sorry the engine class $cfg[engine] does not exist");
+      }
       $this->language = new $cls($this);
       if ( $cfg = $this->language->get_connection($cfg) ){
         try{
           call_user_func_array('parent::__construct', $cfg['args']);
           $this->current = $cfg['db'];
-					$this->engine = $cfg['engine'];
+          $this->engine = $cfg['engine'];
           $this->host = isset($cfg['host']) ? $cfg['host'] : 'localhost';
+          $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
           $this->start_fancy_stuff();
           $this->enable_keys();
-				}
+        }
         catch ( \PDOException $e )
           { $this->error($e); }
-			}
+      }
 		}
 	}
   
@@ -1279,13 +1283,6 @@ class connection extends \PDO implements actions, api, engines
 	public function delete_db_user($user)
 	{
     return $this->language->delete_db_user($user);
-		if ( text::check_name($user) ){
-			$this->query("
-			REVOKE ALL PRIVILEGES ON *.* 
-			FROM $user");
-			$this->query("DROP USER $user");
-		}
-		return $this;
 	}
 	
 }

@@ -22,6 +22,9 @@ class mysql implements \bbn\db\engines
    * 
    */
   public function __construct(\bbn\db\connection $db = null) {
+    if ( !extension_loaded('pdo_mysql') ){
+      die("The SQLite driver for PDO is not installed...");
+    }
     $this->db = $db;
   }
 
@@ -51,7 +54,6 @@ class mysql implements \bbn\db\engines
         $cfg['user'],
         $cfg['pass'],
         [
-          \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
           \PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
           \PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
         ]
@@ -102,7 +104,7 @@ class mysql implements \bbn\db\engines
     if ( $r = $this->db->raw_query("SHOW DATABASES") ){
       $x = array_map( function($a){
         return $a['Database'];
-      }, array_filter($r->get_rows("SHOW DATABASES"),function($a){
+      }, array_filter($r->fetchAll(\PDO::FETCH_ASSOC),function($a){
         return ( $a['Database'] === 'information_schema' ) || ( $a['Database'] === 'mysql' ) ? false : 1;
       }));
       sort($x);
@@ -120,7 +122,7 @@ class mysql implements \bbn\db\engines
 		}
 		$t2 = array();
     if ( $r = $this->db->raw_query("SHOW TABLES FROM `$database`") ){
-      if ( $t1 = $r->get_irows() ){
+      if ( $t1 = $r->fetchAll(\PDO::FETCH_NUM) ){
         foreach ( $t1 as $t ){
           array_push($t2, $t[0]);
         }
@@ -136,53 +138,53 @@ class mysql implements \bbn\db\engines
 	{
     $r = [];
 		if ( $table = $this->get_full_name($table, 1) ){
-			$rows = $this->db->get_rows("SHOW COLUMNS FROM $table");
-			$p = 1;
-			foreach ( $rows as $row ){
-				$f = $row['Field'];
-				$r[$f] = array(
-					'position' => $p++,
-					'null' => $row['Null'] === 'NO' ? 0 : 1,
-					'key' => in_array($row['Key'], array('PRI', 'UNI', 'MUL')) ? $row['Key'] : null,
-					'default' => is_null($row['Default']) && $row['Null'] !== 'NO' ? 'NULL' : $row['Default'],
-					'extra' => $row['Extra'],
-					'maxlength' => 0
-				);
-				if ( strpos($row['Type'], 'enum') === 0 ){
-					$r[$f]['type'] = 'enum';
-					if ( preg_match_all('/\((.*?)\)/', $row['Type'], $matches) ){
-						$r[$f]['extra'] = $matches[1][0];
-					}
-				}
-				else{
-					if ( strpos($row['Type'], 'unsigned') ){
-						$r[$f]['signed'] = 0;
-						$row['Type'] = trim(str_replace('unsigned','',$row['Type']));
-					}
-					else{
-						$r[$f]['signed'] = 1;
-					}
-					if ( strpos($row['Type'],'text') !== false ){
-						$r[$f]['type'] = 'text';
-					}
-					else if ( strpos($row['Type'],'blob') !== false ){
-						$r[$f]['type'] = 'blob';
-					}
-					else if ( strpos($row['Type'],'int(') !== false ){
-						$r[$f]['type'] = 'int';
-					}
-					else if ( strpos($row['Type'],'char(') !== false ){
-						$r[$f]['type'] = 'varchar';
-					}
-					if ( preg_match_all('/\((.*?)\)/', $row['Type'], $matches) ){
-						$r[$f]['maxlength'] = $matches[1][0];
-					}
-					if ( !isset($r[$f]['type']) ){
-						$r[$f]['type'] = ( strpos($row['Type'], '(') ) ? substr($row['Type'],0,strpos($row['Type'], '(')) : $row['Type'];
-					}
-					
-				}
-				
+			if ( $rows = $this->db->get_rows("SHOW COLUMNS FROM $table") ){
+        $p = 1;
+        foreach ( $rows as $row ){
+          $f = $row['Field'];
+          $r[$f] = array(
+            'position' => $p++,
+            'null' => $row['Null'] === 'NO' ? 0 : 1,
+            'key' => in_array($row['Key'], array('PRI', 'UNI', 'MUL')) ? $row['Key'] : null,
+            'default' => is_null($row['Default']) && $row['Null'] !== 'NO' ? 'NULL' : $row['Default'],
+            'extra' => $row['Extra'],
+            'maxlength' => 0
+          );
+          if ( strpos($row['Type'], 'enum') === 0 ){
+            $r[$f]['type'] = 'enum';
+            if ( preg_match_all('/\((.*?)\)/', $row['Type'], $matches) ){
+              $r[$f]['extra'] = $matches[1][0];
+            }
+          }
+          else{
+            if ( strpos($row['Type'], 'unsigned') ){
+              $r[$f]['signed'] = 0;
+              $row['Type'] = trim(str_replace('unsigned','',$row['Type']));
+            }
+            else{
+              $r[$f]['signed'] = 1;
+            }
+            if ( strpos($row['Type'],'text') !== false ){
+              $r[$f]['type'] = 'text';
+            }
+            else if ( strpos($row['Type'],'blob') !== false ){
+              $r[$f]['type'] = 'blob';
+            }
+            else if ( strpos($row['Type'],'int(') !== false ){
+              $r[$f]['type'] = 'int';
+            }
+            else if ( strpos($row['Type'],'char(') !== false ){
+              $r[$f]['type'] = 'varchar';
+            }
+            if ( preg_match_all('/\((.*?)\)/', $row['Type'], $matches) ){
+              $r[$f]['maxlength'] = $matches[1][0];
+            }
+            if ( !isset($r[$f]['type']) ){
+              $r[$f]['type'] = ( strpos($row['Type'], '(') ) ? substr($row['Type'],0,strpos($row['Type'], '(')) : $row['Type'];
+            }
+
+          }
+        }
 			}
 		}
 		return $r;
@@ -247,7 +249,7 @@ class mysql implements \bbn\db\engines
 	public function get_create($table)
 	{
 		if ( ( $table = $this->get_full_name($table, 1) ) && $r = $this->db->raw_query("SHOW CREATE TABLE $table") ){
-			return $this->get_row()['Create Table'];
+			return $r->fetch(\PDO::FETCH_ASSOC)['Create Table'];
 		}
 		return false;
 	}
