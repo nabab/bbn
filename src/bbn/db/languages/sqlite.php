@@ -133,7 +133,7 @@ class sqlite implements \bbn\db\engines
 		$t2 = [];
     if ( ( $r = $this->db->raw_query('
       SELECT "tbl_name"
-      FROM '.$database.'sqlite_master"
+      FROM '.$database.'"sqlite_master"
         WHERE type = \'table\'') ) &&
       $t1 = $r->fetchAll(\PDO::FETCH_NUM) ){
       foreach ( $t1 as $t ){
