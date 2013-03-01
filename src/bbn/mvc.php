@@ -777,7 +777,10 @@ class mvc
 					$this->obj->postscript = \JShrink\Minifier::minify($this->obj->postscript);
 				}
 			}
-			
+      if ( !isset($this->obj->output) ){
+        header('HTTP/1.0 404 Not Found');
+        exit();
+      }			
 			switch ( $this->mode ){
 				
 				case 'json':
@@ -794,15 +797,6 @@ class mvc
 					header('Content-type: application/json; charset=utf-8');
 					echo json_encode($this->obj);
 					break;
-				case 'dom':
-				case 'html':
-				case 'js':
-				case 'text':
-				case 'xml':
-					if ( !isset($this->obj->output) ){
-						header('HTTP/1.0 404 Not Found');
-						exit();
-					}
 				case 'dom':
 				case 'html':
 					if ( !ob_start("ob_gzhandler" ) ){
