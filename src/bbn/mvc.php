@@ -128,7 +128,7 @@ class mvc
 	 * List of possible outputs with their according file extension possibilities
 	 * @var array
 	 */
-		$outputs = array('dom'=>'html','html'=>'html','image'=>'jpg,jpeg,gif,png,svg','json'=>'json','pdf'=>'pdf','text'=>'txt','xml'=>'xml','js'=>'js'),
+		$outputs = array('dom'=>'html','html'=>'html','image'=>'jpg,jpeg,gif,png,svg','json'=>'json','pdf'=>'pdf','text'=>'txt','xml'=>'xml','js'=>'js','css'=>'css,less,sass'),
 
 	/**
 	 * List of possible and existing universal controller. 
@@ -143,6 +143,7 @@ class mvc
 		'pdf' => 1,
 		'text' => 1,
 		'xml' => 1,
+		'css' => 1,
 		'js' => 1
 	);
 	const
@@ -178,7 +179,7 @@ class mvc
 			}
 			$this->inc = new \stdClass();
 			$this->routes = $parent;
-			$this->mustache = new \Mustache_Engine;
+			$this->mustache = false;
 			$this->post = array();
 			$this->get = array();
 			$this->params = array();
@@ -354,6 +355,9 @@ class mvc
 	 */
 	public function render($view, $model)
 	{
+    if ( !$this->mustache ){
+      $this->mustache = new \Mustache_Engine();
+    }
 		return $this->mustache->render($view,$model);
 	}
 
@@ -812,6 +816,10 @@ class mvc
 					break;
 				case 'js':
 					header('Content-type: application/javascript; charset=utf-8');
+					echo $this->obj->output;
+					break;
+				case 'css':
+					header('Content-type: text/css; charset=utf-8');
 					echo $this->obj->output;
 					break;
 				case 'text':
