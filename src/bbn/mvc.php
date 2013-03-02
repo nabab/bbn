@@ -44,6 +44,12 @@ class mvc
 	 */
 		$path,
 	/**
+	 * The checkers files (with full path)
+   * If any they will be checked before the controller
+	 * @var null|string
+	 */
+		$checkers = [],
+	/**
 	 * The controller file (with full path)
 	 * @var null|string
 	 */
@@ -369,8 +375,7 @@ class mvc
 	 */
 	private function get_controller($p)
 	{
-		if ( !$this->controller )
-		{
+		if ( !$this->controller ){
 			if ( !is_string($p) ){
 				return false;
 			}
@@ -384,7 +389,19 @@ class mvc
 				}
 				else if ( is_file(self::cpath.$this->mode.'/'.$p.'.php') ){
 					$this->controller = self::cpath.$this->mode.'/'.$p.'.php';
+          $parts = explode('/', $p);
+          $num = count($parts);
+          $path = self::cpath.$this->mode.'/';
+          if ( $num > 1 ){
+            for ( $i = 0; $i < ( $num - 1 ); $i++ ){
+              if ( is_file($path.$parts[$i].'.php') ){
+                array_push($this->checkers, $path.$parts[$i].'.php');
+              }
+              $path .= $parts[$i].'/';
+            }
+          }
 				}
+        // Is it necessary??
 				else if ( is_dir(self::cpath.$p) && is_file(self::cpath.$p.'/'.$this->mode.'.php') ){
 					$this->controller = self::cpath.$p.'/'.$this->mode.'.php';
 				}
@@ -637,6 +654,12 @@ class mvc
 	 */
 	public function check()
 	{
+    foreach ( $this->checkers as $chk ){
+      // If a checker file returns false, the controller is not processed
+      if ( !include_once(chk) ){
+        return false;
+      }
+    }
 		$this->process();
 		return $this->is_routed;
 	}
