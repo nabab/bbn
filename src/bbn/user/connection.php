@@ -95,17 +95,13 @@ class connection extends \bbn\obj
 				$this->cfg[$n] = isset($cfg[$n]) ? $cfg[$n] : $c;
 			}
 		}
-
-		$query = "SELECT ";
-		foreach ( $this->cfg['fields'] as $n => $col ){
-			$query .= "`$col`, ";
-		}
-		foreach ( $this->cfg['additional_fields'] as $col ){
-			$query .= "`$col`, ";
-		}
-		$this->sql = substr($query,0,-2)."
-			FROM `{$this->cfg['table']}`
-			WHERE 1 ".( !empty($this->cfg['condition']) ? " AND ( {$this->cfg['condition']} ) " : "" );
+		$this->sql = $this->db->get_select(
+            $this->cfg['table'],
+            array_merge($this->cfg['fields'], $this->cfg['additional_fields'])
+            ).
+            PHP_EOL."WHERE 1 ".(
+                    !empty($this->cfg['condition']) ?
+                      " AND ( {$this->cfg['condition']} ) " : "" );
 		
 		if ( is_array($credentials) && isset($credentials['user'], $credentials['pass'], $cfg['fields']) ){
 			$this->_identify($credentials);
@@ -124,10 +120,11 @@ class connection extends \bbn\obj
 		$res = 0;
 		if ( isset($credentials['user'],$credentials['pass']) )
 		{
+      $qte = $this->db->qte;
 			$cols =& $this->cfg['fields'];
-			$table = $this->cfg['table'];
+			$table = $this->db->get_full_name($this->cfg['table'], 1);
 			$query = $this->sql."
-				AND `$cols[user]` LIKE ?
+				AND $qte$cols[user]$qte LIKE ?
 				LIMIT 1 ";
 			$r = $this->db->query($query,$credentials['user']);
 			
@@ -156,11 +153,11 @@ class connection extends \bbn\obj
 					$info_auth->log_tries++;
 					$info_auth->last_attempt = time();
 					$this->db->query("
-						UPDATE `$table`
-						SET `$cols[info_auth]` = %s,
-						`$cols[ip]` = %s
-						WHERE `$cols[id]` = %u",
-						json_encode($$info_auth),
+						UPDATE $table
+						SET $qte$cols[info_auth]$qte = %s,
+						$qte$cols[ip]$qte = %s
+						WHERE $qte$cols[id]$qte = %u",
+						json_encode($info_auth),
 						$_SERVER['REMOTE_ADDR'],
 						$d[$cols['id']]);
 				}
@@ -174,12 +171,12 @@ class connection extends \bbn\obj
 					$info_auth->last_attempt = 0;
 					$info_auth->fingerprint = self::make_fingerprint();
 					$this->db->query("
-						UPDATE `$table`
-						SET `$cols[last_connection]` = NOW(),
+						UPDATE $table
+						SET $qte$cols[last_connection]$qte = NOW(),
 						$addon1
 						$addon2
-						`$cols[info_auth]` = %s
-						WHERE `$cols[id]` = %s",
+						$qte$cols[info_auth]$qte = %s
+						WHERE $qte$cols[id]$qte = %s",
 						json_encode($info_auth),
 						$this->id);
 					$this->_refresh_info();
@@ -244,12 +241,13 @@ class connection extends \bbn\obj
 	 */
 	protected function _refresh_info($search=array())
 	{
+    $qte = $this->db->qte;
 		$s =& $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']];
 		$s = array();
 
 		if ( $this->auth && $this->id ){
 			$d = $this->db->query($this->sql."
-				AND `{$this->cfg['fields']['id']}` = %s",
+				AND $qte{$this->cfg['fields']['id']}$qte = %s",
 				$this->id)->get_row();
 			
 			$s['id'] = $this->id;
@@ -267,16 +265,19 @@ class connection extends \bbn\obj
 	public function check_session()
 	{
 		if ( !isset($this->id) ){
+      $qte = $this->db->qte;
 			if ( isset($_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]['id']) && $this->auth !== 1 )
 			{
 				$id = $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]['id'];
 				$cols =& $this->cfg['fields'];
 				/* Adding a bbn_change field would allow us to update auytomatically the user's info if something has been changed */
 				$addon1 = $cols['sess_id'] ? " AND ".$cols['sess_id']." LIKE '".session_id()."'" : '';
+        $table = $this->db->get_full_name($this->cfg['table'], 1);
+                
 				$d = $this->db->query("
-					SELECT `$cols[id]`, `$cols[info_auth]`
-					FROM `{$this->cfg['table']}`
-					WHERE `$cols[id]` = '%s'
+					SELECT $qte$cols[id]$qte, $qte$cols[info_auth]$qte
+					FROM $table
+					WHERE $qte$cols[id]$qte = '%s'
 					$addon1",
 					$id)->get_row();
 				$info_auth = json_decode($d[$cols['info_auth']]);
@@ -287,10 +288,10 @@ class connection extends \bbn\obj
 					session_regenerate_id();
 					if ( $cols['sess_id'] )
 						$this->db->query("
-							UPDATE `{$this->cfg['table']}`
-							SET `$cols[sess_id]` = '%s',
-              `$cols[last_connection]` = NOW()
-							WHERE `$cols[id]` = %u",
+							UPDATE $table
+							SET $qte$cols[sess_id]$qte = '%s',
+              $qte$cols[last_connection]$qte = NOW()
+							WHERE $qte$cols[id]$qte = %u",
 							session_id(),
 							$this->id);
 					$this->auth = 1;

@@ -76,6 +76,11 @@ class connection extends \PDO implements actions, api, engines
 	
 	public
 	/**
+   * The quote character for table and column names
+	 * @var string
+	 */
+		$qte,
+	/**
 	 * @var string
 	 */
 		$last_query,
@@ -243,6 +248,7 @@ class connection extends \PDO implements actions, api, engines
       }
       $this->language = new $cls($this);
       if ( $cfg = $this->language->get_connection($cfg) ){
+        $this->qte = $this->language->qte;
         try{
           call_user_func_array('parent::__construct', $cfg['args']);
           $this->current = $cfg['db'];

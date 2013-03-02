@@ -18,6 +18,8 @@ use \bbn\str\text;
  */
 class sqlite implements \bbn\db\engines
 {
+  private $db;
+  public $qte = '"';
   /**
    * 
    */
