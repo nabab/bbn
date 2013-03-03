@@ -2,7 +2,7 @@
 /**
  * @package bbn\var
  */
-namespace bbn\var;
+namespace bbn\vars;
 /**
  * Class for using themes and fonts
  *

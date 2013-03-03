@@ -42,7 +42,7 @@ class connection extends \bbn\obj
 		),
 		'encryption' => 'sha1',
 		'table' => 'users',
-		'condition' => "acces > 0",
+		'condition' => '',
 		'additional_fields' => array(),
 		'user_group' => false,
 		'group' => false,
