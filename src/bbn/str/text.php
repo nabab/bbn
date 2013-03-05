@@ -180,12 +180,16 @@ class text
 	/**
 	 * @return void 
 	 */
-	public static function encode_filename($st)
+	public static function encode_filename($st, $maxlength = 50)
 	{
 		$st = self::remove_accents($st);
 		$res = '';
-		for ( $i = 0; ( $i < mb_strlen($st) ) && mb_strlen($res) < 50; $i++ )
-		{
+    
+    if ( !is_int($maxlength) ){
+      $maxlength = mb_strlen($st);
+    }
+    
+		for ( $i = 0; $i < $maxlength; $i++ ){
 			if ( mb_ereg_match('[A-z0-9]',mb_substr($st,$i,1)) )
 				$res .= mb_substr($st,$i,1);
 			else if ( mb_strlen($res) > 0 && mb_substr($res,-1) != '_' && $i < ( mb_strlen($st) - 1 ) )
