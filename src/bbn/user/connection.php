@@ -42,7 +42,7 @@ class connection extends \bbn\obj
 		),
 		'encryption' => 'sha1',
 		'table' => 'users',
-		'condition' => '',
+		'condition' => array(),
 		'additional_fields' => array(),
 		'user_group' => false,
 		'group' => false,
@@ -99,10 +99,10 @@ class connection extends \bbn\obj
             $this->cfg['table'],
             array_merge($this->cfg['fields'], $this->cfg['additional_fields'])
             ).
-            PHP_EOL."WHERE 1 ".(
-                    !empty($this->cfg['condition']) ?
-                      " AND ( {$this->cfg['condition']} ) " : "" );
-		
+            PHP_EOL."WHERE 1 ";
+    foreach ( $this->cfg['condition'] as $col => $cond ){
+      $this->sql .= " AND ( `$col` = `$cond` ) ";
+    }
 		if ( is_array($credentials) && isset($credentials['user'], $credentials['pass'], $cfg['fields']) ){
 			$this->_identify($credentials);
 		}
@@ -246,10 +246,13 @@ class connection extends \bbn\obj
 		$s = array();
 
 		if ( $this->auth && $this->id ){
-			$d = $this->db->query($this->sql."
-				AND $qte{$this->cfg['fields']['id']}$qte = %s",
-				$this->id)->get_row();
-			
+      $args = array($this->id);
+      if ( is_array($this->cfg['condition']) && count($this->cfg['condition']) > 0 ){
+        $args = array_merge(array_values($this->cfg['condition']),$args);
+      }
+      $d = $this->db->get_row($this->sql."
+        AND $qte{$this->cfg['fields']['id']}$qte = ?",
+        $args);
 			$s['id'] = $this->id;
 			$s['info'] = array();
 			foreach ( $this->cfg['additional_fields'] as $f ){

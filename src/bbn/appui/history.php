@@ -163,16 +163,17 @@ class history
     if ( self::check_config() ){
       $table = self::$db->get_full_name($table);
       if ( !isset(self::$hstructures[$table]) ){
-        if ( !isset(self::$db->structures[$table]) ){
+        if ( !isset(self::$db->cache['structures'][$table]) ){
           self::$db->modelize($table);
         }
-        if ( !isset(self::$db->structures[$table]) ){
+        if ( !isset(self::$db->cache['structures'][$table]) ){
           die("The table $table doesn't seem to exist");
         }
-        if ( !isset(self::$db->structures[$table]['keys']['PRIMARY']['columns']) || count(self::$db->structures[$table]['keys']['PRIMARY']['columns']) !== 1 ){
+        if ( !isset(self::$db->cache['structures'][$table]['keys']['PRIMARY']['columns']) || count(self::$db->cache['structures'][$table]['keys']['PRIMARY']['columns']) !== 1 ){
+          die(print_r(self::$db->cache['structures']));
           die("You need to have a primary key on a single column in your table $table in order to use the history class");
         }
-        self::$hstructures[$table] = ['history'=>false, 'fields' => [], 'primary' => $primary = self::$db->structures[$table]['keys']['PRIMARY']['columns'][0]];
+        self::$hstructures[$table] = ['history'=>false, 'fields' => [], 'primary' => $primary = self::$db->cache['structures'][$table]['keys']['PRIMARY']['columns'][0]];
         $cols = self::$db->select_all(self::$admin_db.'.'.self::$prefix.'columns',[],['table' =>self::$db->host.'.'.$table], 'position');
         $s =& self::$hstructures[$table];
         foreach ( $cols as $col ){

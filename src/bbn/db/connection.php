@@ -41,6 +41,11 @@ class connection extends \PDO implements actions, api, engines
 	 */
 		$cfg = false,
 	/**
+	 * APC Cache functions
+	 * @var bool
+	 */
+		$has_apc = false,
+	/**
 	 * If set to false, query will return a regular PDOStatement
    * Use stop_fancy_stuff() to set it to false
    * And use start_fancy_stuff to set it back to true
@@ -87,7 +92,11 @@ class connection extends \PDO implements actions, api, engines
 	/**
 	 * @var mixed
 	 */
-		$structures = [],
+		$cache = [
+        "structures" => [],
+        "tables" => [],
+        "modelized" => []
+    ],
 	/**
 	 * The ODBC engine of this connection
 	 * @var string
@@ -255,6 +264,15 @@ class connection extends \PDO implements actions, api, engines
           $this->engine = $cfg['engine'];
           $this->host = isset($cfg['host']) ? $cfg['host'] : 'localhost';
           $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+          if ( function_exists("apc_add") ){
+            $this->has_apc = 1;
+            if ( !apc_exists("bbn/db/".$this->host) ){
+              apc_store("bbn/db/".$this->host, $this->cache);
+            }
+            else{
+              $this->cache = apc_fetch("bbn/db/".$this->host);
+            }
+          }
           $this->start_fancy_stuff();
           $this->enable_keys();
         }
@@ -273,8 +291,25 @@ class connection extends \PDO implements actions, api, engines
 	protected function log($st)
 	{
 		if ( defined('BBN_IS_DEV') && defined('BBN_DATA_PATH') && BBN_IS_DEV ){
+      if ( !is_string($st) ){
+        $st = print_r($st, 1);
+      }
 			file_put_contents(BBN_DATA_PATH.'logs/db.log', $st."\n\n", FILE_APPEND);
 		}
+	}
+  
+  /**
+	* Saves the cache prop in APC if possible
+	* 
+	* @param
+	* @return
+	*/
+	protected function save_cache()
+	{
+    //$this->log($this->cache);
+    if ( $this->has_apc ){
+      apc_store("bbn/db/".$this->host, $this->cache);
+    }
 	}
 
 	/**
@@ -505,6 +540,7 @@ class connection extends \PDO implements actions, api, engines
 	{
     if ( $this->check() ){
       $args = func_get_args();
+      //$this->log($args);
       return call_user_func_array('parent::query', $args);
     }
   }
@@ -517,6 +553,7 @@ class connection extends \PDO implements actions, api, engines
 	{
     if ( $this->check() ){
       $args = func_get_args();
+      //$this->log($args);
       if ( !$this->fancy ){
         return call_user_func_array('parent::query', $args);
       }
@@ -1144,7 +1181,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function modelize($table='')
 	{
-		$r = array();
+		$r = [];
 		$tables = false;
 		if ( empty($table) || $table === '*' ){
 			$tables = $this->get_tables($this->current);
@@ -1156,22 +1193,34 @@ class connection extends \PDO implements actions, api, engines
 			$tables = $table;
 		}
 		if ( is_array($tables) ){
+      // If we change one value or more there will be to save the cache
+      $change = false;
 			foreach ( $tables as $t ){
 				$full = $this->get_full_name($t);
-				if ( !isset($this->structures[$full]) ){
-					$keys = $this->get_keys($full);
-					$this->structures[$full] = [
-						'fields' => $this->get_columns($full),
-						'keys' => $keys['keys']
-					];
-					foreach ( $this->structures[$full]['fields'] as $i => $f ){
-						if ( isset($keys['cols'][$i]) ){
-							$this->structures[$full]['fields'][$i]['keys'] = $keys['cols'][$i];
-						}
-					}
-				}
-				$r[$full] = $this->structures[$full];
+        if ( !in_array($full, $this->cache['modelized']) ){
+          array_push($this->cache['modelized'], $full);
+          if ( !isset($this->cache['structures'][$full]['fields']) ){
+            $this->cache['structures'][$full] = [];
+          }
+          $cache =& $this->cache['structures'][$full];
+          if ( !isset($cache['fields']) ){
+            $this->get_columns($full);
+          }
+          if ( !isset($cache['keys']) ){
+            $this->get_keys($full);
+          }
+          foreach ( array_keys($cache['fields']) as $i ){
+            if ( isset($cache['cols'][$i]) && !isset($cache['fields'][$i]['keys']) ){
+              $change = 1;
+              $cache['fields'][$i]['keys'] = $cache['cols'][$i];
+            }
+          }
+        }
+				$r[$full] = $this->cache['structures'][$full];
 			}
+      if ( $change ){
+        $this->save_cache();
+      }
 			if ( count($r) === 1 ){
 				return end($r);
 			}
@@ -1185,7 +1234,11 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function get_databases()
 	{
-    return $this->language->get_databases();
+    if ( !isset($this->cache['dbs']) ){
+      $this->cache['dbs'] = $this->language->get_databases();
+      $this->save_cache();
+    }
+    return $this->cache['dbs'];
 	}
 
 	/**
@@ -1193,14 +1246,30 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function get_tables($database='')
 	{
-    return $this->language->get_tables($database);
+    if ( empty($database) ){
+      $database = $this->current;
+    }
+    if ( !isset($this->cache['tables'][$database]) ){
+      $this->cache['tables'][$database] = $this->language->get_tables($database);
+      $this->save_cache();
+    }
+    return $this->cache['tables'][$database];
 	}
+  
 	/**
 	 * @return array | false
 	 */
 	public function get_columns($table)
 	{
-    return $this->language->get_columns($table);
+    $full = $this->get_full_name($table);
+    if ( !isset($this->cache['structures'][$full]) ){
+      $this->cache['structures'][$full] = [];
+    }
+    if ( !isset($this->cache['structures'][$full]['fields']) ){
+      $this->cache['structures'][$full]['fields'] = $this->language->get_columns($full);
+      $this->save_cache();
+    }
+    return $this->cache['structures'][$full]['fields'];
 	}
 	
 	/**
@@ -1208,7 +1277,21 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function get_keys($table)
 	{
-    return $this->language->get_keys($table);
+    $full = $this->get_full_name($table);
+    if ( !isset($this->cache['structures'][$full]) ){
+      $this->cache['structures'][$full] = [];
+    }
+    if ( !isset($this->cache['structures'][$full]['keys']) ){
+      die("Table:$full; ".print_r($this->cache['structures'],1));
+      $keys = $this->language->get_keys($full);
+      $this->cache['structures'][$full]['keys'] = $keys['keys'];
+      $this->cache['structures'][$full]['cols'] = $keys['cols'];
+      $this->save_cache();
+    }
+    return [
+        "keys" => $this->cache['structures'][$full]['keys'],
+        "cols" => $this->cache['structures'][$full]['cols']
+    ];
 	}
 	
 	/**
