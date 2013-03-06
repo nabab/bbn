@@ -1282,7 +1282,6 @@ class connection extends \PDO implements actions, api, engines
       $this->cache['structures'][$full] = [];
     }
     if ( !isset($this->cache['structures'][$full]['keys']) ){
-      die("Table:$full; ".print_r($this->cache['structures'],1));
       $keys = $this->language->get_keys($full);
       $this->cache['structures'][$full]['keys'] = $keys['keys'];
       $this->cache['structures'][$full]['cols'] = $keys['cols'];

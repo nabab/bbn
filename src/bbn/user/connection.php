@@ -288,7 +288,7 @@ class connection extends \bbn\obj
 				if ( is_object($info_auth) && $info_auth->fingerprint === self::make_fingerprint() ){
 					
 					$this->id = $id;
-					session_regenerate_id();
+					session_regenerate_id(true);
 					if ( $cols['sess_id'] )
 						$this->db->query("
 							UPDATE $table
