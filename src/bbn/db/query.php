@@ -221,16 +221,7 @@ class query extends \PDOStatement implements actions
 	public function fetch($fetch_style=\PDO::FETCH_BOTH, $cursor_orientation=\PDO::FETCH_ORI_NEXT, $cursor_offset=0)
 	{
 		$this->execute();
-		$res = parent::fetch( $fetch_style, $cursor_orientation, $cursor_offset );
-		if ( is_array($res) )
-		{
-			foreach ( $res as $i => $r )
-			{
-				if ( is_string($r) && is_numeric($r) )
-					$res[$i] += 0;
-			}
-		}
-		return $res;
+		return parent::fetch( $fetch_style, $cursor_orientation, $cursor_offset );
 	}
 
 	/**

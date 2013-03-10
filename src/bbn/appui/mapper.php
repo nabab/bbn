@@ -32,7 +32,7 @@ class mapper{
 
 	private $db, $prefix, $admin_db, $client_db;
 	public $schema = false, $auto_update = false;
-
+  
 	/**
 	 * This will call the builder and create the tables if they don't exist in the current database
 	 * 
@@ -123,51 +123,51 @@ class mapper{
 			else if ( \bbn\str\text::check_name($database, $table) ){
 				$cond = " AND `{$this->prefix}projects`.`db` LIKE '{$database}' AND `{$this->prefix}fields`.`column` LIKE '$table.%'";
 			}
-			if ( !empty($cond) ){
-				if ( !( $form = $this->db->get_rows("
-					SELECT `{$this->prefix}fields`.*, `{$this->prefix}projects`.`id` AS `id_project`
-					FROM `{$this->admin_db}`.`{$this->prefix}forms`
-						JOIN `{$this->admin_db}`.`{$this->prefix}fields`
-							ON `{$this->prefix}fields`.`id_form` = `{$this->prefix}forms`.`id`
-						JOIN `{$this->admin_db}`.`{$this->prefix}projects`
-							ON `{$this->prefix}projects`.`id` = `{$this->prefix}forms`.`id_project`
-					WHERE 1 $cond 
-					ORDER BY `position`")
-				) ){
-					// Creates the default form configuration
-					$square = new \bbn\appui\square($this->db, "apst_ui");
-					
-					$t = $square->get_table($table);
+			if ( !empty($cond) && !( $form = $this->db->get_rows("
+        SELECT `{$this->prefix}fields`.*, `{$this->prefix}projects`.`id` AS `id_project`
+        FROM `{$this->admin_db}`.`{$this->prefix}forms`
+          JOIN `{$this->admin_db}`.`{$this->prefix}fields`
+            ON `{$this->prefix}fields`.`id_form` = `{$this->prefix}forms`.`id`
+          JOIN `{$this->admin_db}`.`{$this->prefix}projects`
+            ON `{$this->prefix}projects`.`id` = `{$this->prefix}forms`.`id_project`
+        WHERE 1 $cond 
+        ORDER BY `position`")
+      ) ){
+        // Creates the default form configuration
+        $square = new \bbn\appui\square($this->db, "apst_ui");
 
-					$r['title'] = $t->tit;
-					
-					$db_info = $this->db->modelize($table);
-					$i = 0;
-					foreach ( $db_info['fields'] as $name => $c ){
-						$cfg[$i] = $this->get_input_config($table, $name);
-						$cfg[$i]['default'] = $c['default'];
-						if ( isset($c['maxlength']) ){
-							$cfg[$i]['options']['maxlength'] = $c['maxlength'];
-						}
-						if ( isset($t->fields[$name]) ){
-							$info = $t->fields[$name];
-							if ( isset($cfg[$i]['script']) ){
-								unset($cfg[$i]['script']);
-							}
-							if ( isset($cfg[$i]['field']) ){
-								unset($cfg[$i]['field']);
-							}
-							$cfg[$i]['params'] = $info->params;
-							$cfg[$i]['name'] = $info->name;
-							$cfg[$i]['table'] = $table;
-							$cfg[$i]['required'] = $info->mand;
-							$cfg[$i]['label'] = $info->tit.' ('.$info->id_form.')';
-							$cfg[$i]['options'] = array('db' => $this->db);
-							$cfg[$i] = $square->get_config_from_id($info->id_form,$cfg[$i]);
-						}
-						$i++;
-					}
-				}
+        $t = $square->get_table($table);
+
+        $r['title'] = $t->tit;
+
+        $db_info = $this->db->modelize($table);
+        $i = 0;
+        foreach ( $db_info['fields'] as $name => $c ){
+          $cfg[$i] = $this->get_input_config($table, $name);
+          $cfg[$i]['default'] = $c['default'];
+          if ( isset($c['maxlength']) ){
+            $cfg[$i]['options']['maxlength'] = $c['maxlength'];
+          }
+          if ( isset($t->fields[$name]) ){
+            $info = $t->fields[$name];
+            if ( isset($cfg[$i]['script']) ){
+              unset($cfg[$i]['script']);
+            }
+            if ( isset($cfg[$i]['field']) ){
+              unset($cfg[$i]['field']);
+            }
+            if ( is_object($info) ){
+              $cfg[$i]['params'] = $info->params;
+              $cfg[$i]['name'] = $info->name;
+              $cfg[$i]['required'] = $info->mand;
+              $cfg[$i]['label'] = $info->tit.' ('.$info->id_form.')';
+              $cfg[$i] = $square->get_config_from_id($info->id_form,$cfg[$i]);
+            }
+            $cfg[$i]['table'] = $table;
+            $cfg[$i]['options'] = array('db' => $this->db);
+          }
+          $i++;
+        }
 			}
 		}
 		return array('info' => $r, 'cfg' => $cfg);

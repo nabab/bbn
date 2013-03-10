@@ -44,13 +44,18 @@ class square
 		if ( is_int($id) ){
 			$cond = " WHERE bbn_smenus.id = $id ";
 		}
-		else if ( is_string($id) && \bbn\str\text::check_name($id) ){
-			$cond = " WHERE bbn_smenus.bbn_name LIKE '$id' ";
+		else if ( is_string($id) ){
+      if ( strpos($id, '.') ){
+        $id = explode('.', $id)[1];
+      }
+      if ( \bbn\str\text::check_name($id) ){
+  			$cond = " WHERE bbn_smenus.bbn_name LIKE '$id' ";
+      }
 		}
 		if ( $this->change ){
 			$this->db->change('bbn');
 		}
-		if ( $tmp = $this->db->get_row("
+		if ( isset($cond) && $tmp = $this->db->get_row("
 			SELECT *
 			FROM bbn_smenus
 			$cond

@@ -186,23 +186,20 @@ class mvc
 			$this->inc = new \stdClass();
 			$this->routes = $parent;
 			$this->mustache = false;
-			$this->post = array();
-			$this->get = array();
-			$this->params = array();
-			$this->arguments = array();
+			$this->post = [];
+			$this->get = [];
+			$this->params = [];
+			$this->arguments = [];
 			if ( count($_POST) > 0 ){
-				foreach ( $_POST as $i => $p ){
-					$this->post[$i] = $p;
-				}
+				$this->post = $_POST;
 			}
 			if ( count($_GET) > 0 ){
-				foreach ( $_GET as $i => $p ){
-					$this->get[$i] = $p;
-				}
+				$this->get = $_GET;
 			}
-			if ( isset($_SERVER['REDIRECT_URL']) && 
-			( BBN_CUR_PATH === '' || strpos($_SERVER['REDIRECT_URL'],BBN_CUR_PATH) !== false ) ){
-				$tmp = explode('/',substr($_SERVER['REDIRECT_URL'],strlen(BBN_CUR_PATH)));
+			if ( isset($_SERVER['REQUEST_URI']) && 
+			( BBN_CUR_PATH === '' || strpos($_SERVER['REQUEST_URI'],BBN_CUR_PATH) !== false ) ){
+        $url = explode("?", $_SERVER['REQUEST_URI'])[0];
+				$tmp = explode('/', substr($url, strlen(BBN_CUR_PATH)));
 				$num_params = count($tmp);
 				foreach ( $tmp as $t ){
 					if ( !empty($t) ){
@@ -820,6 +817,7 @@ class mvc
 					header('Content-type: application/json; charset=utf-8');
 					echo json_encode($this->obj);
 					break;
+          
 				case 'dom':
 				case 'html':
 					if ( !ob_start("ob_gzhandler" ) ){
@@ -831,22 +829,27 @@ class mvc
 					header('Content-type: text/html; charset=utf-8');
 					echo $this->obj->output;
 					break;
+          
 				case 'js':
 					header('Content-type: application/javascript; charset=utf-8');
 					echo $this->obj->output;
 					break;
+        
 				case 'css':
 					header('Content-type: text/css; charset=utf-8');
 					echo $this->obj->output;
 					break;
+        
 				case 'text':
 					header('Content-type: text/plain; charset=utf-8');
 					echo $this->obj->output;
 					break;
+        
 				case 'xml':
 					header('Content-type: text/xml; charset=utf-8');
 					echo $this->obj->output;
 					break;
+        
 				case 'image':
 					if ( isset($this->obj->img) ){
 						$this->obj->img->display();
@@ -855,6 +858,7 @@ class mvc
 						header('HTTP/1.0 404 Not Found');
 					}
 					break;
+          
 				default:
 					if ( isset($this->obj->file) ){
 						if ( !is_file($this->obj->file) ){
