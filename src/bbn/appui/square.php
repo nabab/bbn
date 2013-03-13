@@ -100,7 +100,7 @@ class square
 				WHERE bbn_fields.bbn_name LIKE '$x[1]'
 				LIMIT 1");
 		}
-		if ( is_int($id) ){
+		if ( is_int($id) || ctype_digit($id) ){
 			$cond = " WHERE bbn_fields.id = $id ";
 			if ( $tmp = $this->db->get_row("SELECT * FROM bbn_fields $cond AND bbn_id_site = %u LIMIT 1",$this->id) ){
 				$f = new \stdClass();
@@ -142,7 +142,7 @@ class square
 		switch ( $id )
 		{
 			case 1:
-			$tmp['field'] = 'datepicker';
+			$tmp['field'] = 'date';
 			break;
 			
 			case 2:
@@ -157,14 +157,14 @@ class square
 			
 			case 3:
 			// rich text
-			$tmp['field'] = 'rte';
+			$tmp['field'] = 'editor';
 			// Type: Text
 			break;
 			
 			case 4:
 			// price (float)
 			$tmp['tag'] = 'input';
-			$tmp['field'] = 'numerictextbox';
+			$tmp['field'] = 'numeric';
 			$tmp['options']['format'] = 'n';
 			$tmp['options']['maxlength'] = 15;
 			$tmp['options']['size'] = 10;
@@ -174,8 +174,9 @@ class square
 			case 5:
 			// relation
 			// var_dump($cfg);
-			$tmp['field'] = 'dropdownlist';
+			$tmp['field'] = 'dropdown';
 			$tmp['options']['type'] = 'number';
+            //die(var_dump($cfg['options']));
 			if ( isset($cfg['options']['db'],$cfg['params'][0]) && is_object($cfg['options']['db']) ){
 				$p = explode('.', $cfg['params'][0]);
 				if ( count($p) === 2 ){
@@ -190,21 +191,24 @@ class square
 						$select = "CONCAT ($select,' ',`$table`.`$field`)";
 						$order .= ",`$table`.`$field`";
 					}
-					$cfg['options']['sql'] = "SELECT id, $select FROM $table ORDER BY $order";
+					$cfg['options']['sql'] = "SELECT id AS value, $select AS label FROM $table ORDER BY $order";
+          if ( isset($cfg['options']['db']) ){
+            $cfg['options']['dataSource'] = $cfg['options']['db']->get_rows($cfg['options']['sql']);
+          }
 				}
 			}
 			break;
 			
 			case 8:
 			// rich small text
-			$tmp['field'] = 'rte';
+			$tmp['field'] = 'editor';
 			$tmp['options']['rows'] = 3;
 			$tmp['options']['cols'] = 15;
 			// type Tinytext
 			break;
 			
 			case 9:
-			$tmp['field'] = 'rte';
+			$tmp['field'] = 'editor';
 			$tmp['options']['rows'] = 6;
 			$tmp['options']['cols'] = 20;
 			// type Text
@@ -225,7 +229,7 @@ class square
 			
 			case 12:
 			if ( count($cfg['params']) === 2 ){
-				$tmp['field'] = 'numerictextbox';
+				$tmp['field'] = 'numeric';
 				$tmp['options']['min'] = $cfg['params'][0];
 				$tmp['options']['max'] = $cfg['params'][1];
 				$tmp['options']['step'] = 1;
@@ -236,7 +240,7 @@ class square
 			case 16:
 			$tmp['tag'] = 'input';
 			$tmp['options']['type'] = 'text';
-			$tmp['field'] = 'dropdownlist';
+			$tmp['field'] = 'dropdown';
 			$tmp['options']['dataSource'] = [];
 			$a1 = explode(',', $cfg['params'][0]);
 			$a2 = explode(',', $cfg['params'][1]);

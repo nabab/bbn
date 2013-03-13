@@ -53,31 +53,74 @@ class builder
 	 * The current items registered in the object
 	 * @var array
 	 */
-	$items = [],
-	/**
-	 * Kendo widgets' properties
-	 * @var array
-	 */
-	$kendo = [
-		'Calendar' => ['name','value','min','max','dates','url','culture','footer','format','month','start','depth','animation'],
-		'DatePicker' => ['name','value','footer','format','culture','parseFormats','min','max','start','depth','animation','month','dates','ARIATemplate'],
-		'AutoComplete' => ['name','enable','suggest','template','dataTextField','minLength','delay','height','filter','ignoreCase','highlightFirst','separator','placeholder','animation'],
-		'DropDownList' => ['name','enable','index','autoBind','text','template','delay','height','dataTextField','dataValueField','optionLabel','cascadeFrom','ignoreCase','animation','dataSource'],
-		'ComboBox' => ['name','enable','index','autoBind','delay','dataTextField','dataValueField','minLength','height','highlightFirst','template','filter','placeholder','suggest','ignoreCase','animation'],
-		'NumericTextBox' => ['name','decimals','min','max','value','step','culture','format','spinners','placeholder','upArrowText','downArrowText'],
-		'TimePicker' => ['name','min','max','format','dates','parseFormats','value','interval','height','animation'],
-		'DateTimePicker' => ['name','value','format','timeFormat','culture','parseFormats','dates','min','max','interval','height','footer','start','depth','animation','month','ARIATemplate'],
-		'Slider' => ['enabled','min','max','smallStep','largeStep','orientation','tickPlacement','tooltip','name','showButtons','increaseButtonTitle','decreaseButtonTitle','dragHandleTitle'],
-		'RangeSlider' => ['enabled','min','max','smallStep','largeStep','orientation','tickPlacement','tooltip','name','leftDragHandleTitle','rightDragHandleTitle'],
-		'Upload' => ['name','enabled','multiple','showFileList','async','localization']
-	];
+	$items = [];
 	
 	
 	/**
 	 * This array will hold all the current configuration, i.e. the defaults values (in 'settings' index), and each registered item's configuration too (in 'elements' index)
 	 * @var array
 	 */
-	public $global_cfg = [];
+	public static
+          $tags = ['input', 'select', 'textarea'], // 'keygen'
+          $types = ['text', 'password', 'radio', 'checkbox', 'hidden', 'file', 'color', 'date', 'datetime', 'email', 'datetime-local', 'email', 'month', 'number', 'range', 'search', 'tel', 'time', 'url', 'week'],
+	/**
+	 * Javascript Widgets' properties
+	 * @var array
+	 */
+          $widgets = [
+		'calendar' => [
+        'fn' => 'kendoCalendar',
+        'opt' =>['name','value','min','max','dates','url','culture','footer','format','month','start','depth','animation']
+    ],
+		'date' => [
+        'fn' => 'kendoDatePicker',
+        'opt' => ['name','value','footer','format','culture','parseFormats','min','max','start','depth','animation','month','dates','ARIATemplate']
+    ],
+    'autocomplete' => [
+        'fn' => 'kendoAutoComplete',
+        'opt' => ['name','enable','suggest','template','dataTextField','minLength','delay','height','filter','ignoreCase','highlightFirst','separator','placeholder','animation']
+    ],
+    'dropdown' => [
+        'fn' => 'kendoDropDownList',
+        'opt' => ['name','enable','index','autoBind','text','template','delay','height','dataTextField','dataValueField','optionLabel','cascadeFrom','ignoreCase','animation','dataSource'],
+    ],
+    'combo' => [
+        'fn' => 'kendoComboBox',
+        'opt' => ['name','enable','index','autoBind','delay','dataTextField','dataValueField','minLength','height','highlightFirst','template','filter','placeholder','suggest','ignoreCase','animation']
+    ],
+    'numeric' => [
+        'fn' => 'kendoNumericTextBox',
+        'opt' => ['name','decimals','min','max','value','step','culture','format','spinners','placeholder','upArrowText','downArrowText']
+    ],
+    'time' => [
+        'fn' => 'kendoTimePicker',
+        'opt' => ['name','min','max','format','dates','parseFormats','value','interval','height','animation']
+    ],
+    'datetime' => [
+        'fn' => 'kendoDateTimePicker',
+        'opt' => ['name','value','format','timeFormat','culture','parseFormats','dates','min','max','interval','height','footer','start','depth','animation','month','ARIATemplate']
+    ],
+    'slider' => [
+        'fn' => 'kendoSlider',
+        'opt' => ['enabled','min','max','smallStep','largeStep','orientation','tickPlacement','tooltip','name','showButtons','increaseButtonTitle','decreaseButtonTitle','dragHandleTitle']
+    ],
+    'rangeslider' => [
+        'fn' => 'kendoRangeSlider',
+        'opt' => ['enabled','min','max','smallStep','largeStep','orientation','tickPlacement','tooltip','name','leftDragHandleTitle','rightDragHandleTitle'],
+    ],
+    'upload' => [
+        'fn' => 'kendoUpload',
+        'opt' => ['name','enabled','multiple','showFileList','async','localization']
+    ],
+    'multivalue' => [
+        'fn' => 'multivalue',
+        'opt' => ['import']
+    ],
+    'editor' => [
+        'fn' => 'ckeditor',
+        'opt' => ["allowedContent", "autoGrow_bottomSpace", "autoGrow_maxHeight", "autoGrow_minHeight", "autoGrow_onStartup", "autoParagraph", "autoUpdateElement", "baseFloatZIndex", "baseHref", "basicEntities", "blockedKeystrokes", "bodyClass", "bodyId", "browserContextMenuOnCtrl", "clipboard_defaultContentType", "colorButton_backStyle", "colorButton_colors", "colorButton_enableMore", "colorButton_foreStyle", "contentsCss", "contentsLangDirection", "contentsLanguage", "coreStyles_bold", "coreStyles_italic", "coreStyles_strike", "coreStyles_subscript", "coreStyles_superscript", "coreStyles_underline", "customConfig", "dataIndentationChars", "defaultLanguage", "devtools_styles", "devtools_textCallback", "dialog_backgroundCoverColor", "dialog_backgroundCoverOpacity", "dialog_buttonsOrder", "dialog_magnetDistance", "dialog_startupFocusTab", "disableNativeSpellChecker", "disableNativeTableHandles", "disableObjectResizing", "disableReadonlyStyling", "div_wrapTable", "docType", "emailProtection", "enableTabKeyTools", "enterMode", "entities", "entities_additional", "entities_greek", "entities_latin", "entities_processNumerical", "extraAllowedContent", "extraPlugins", "filebrowserBrowseUrl", "filebrowserFlashBrowseUrl", "filebrowserFlashUploadUrl", "filebrowserImageBrowseLinkUrl", "filebrowserImageBrowseUrl", "filebrowserImageUploadUrl", "filebrowserUploadUrl", "filebrowserWindowFeatures", "filebrowserWindowHeight", "filebrowserWindowWidth", "fillEmptyBlocks", "find_highlight", "flashAddEmbedTag", "flashConvertOnEdit", "flashEmbedTagOnly", "floatSpaceDockedOffsetX", "floatSpaceDockedOffsetY", "floatSpacePinnedOffsetX", "floatSpacePinnedOffsetY", "fontSize_defaultLabel", "fontSize_sizes", "fontSize_style", "font_defaultLabel", "font_names", "font_style", "forceEnterMode", "forcePasteAsPlainText", "forceSimpleAmpersand", "format_address", "format_div", "format_h1", "format_h2", "format_h3", "format_h4", "format_h5", "format_h6", "format_p", "format_pre", "format_tags", "fullPage", "height", "htmlEncodeOutput", "ignoreEmptyParagraph", "image_previewText", "image_removeLinkByEmptyURL", "indentClasses", "indentOffset", "indentUnit", "justifyClasses", "keystrokes", "language", "linkShowAdvancedTab", "linkShowTargetTab", "magicline_color", "magicline_holdDistance", "magicline_keystrokeNext", "magicline_keystrokePrevious", "magicline_putEverywhere", "magicline_triggerOffset", "menu_groups", "menu_subMenuDelay", "newpage_html", "on", "pasteFromWordCleanupFile", "pasteFromWordNumberedHeadingToList", "pasteFromWordPromptCleanup", "pasteFromWordRemoveFontStyles", "pasteFromWordRemoveStyles", "plugins", "protectedSource", "readOnly", "removeButtons", "removeDialogTabs", "removeFormatAttributes", "removeFormatTags", "removePlugins", "resize_dir", "resize_enabled", "resize_maxHeight", "resize_maxWidth", "resize_minHeight", "resize_minWidth", "scayt_autoStartup", "scayt_contextCommands", "scayt_contextMenuItemsOrder", "scayt_customDictionaryIds", "scayt_customerid", "scayt_maxSuggestions", "scayt_moreSuggestions", "scayt_sLang", "scayt_srcUrl", "scayt_uiTabs", "scayt_userDictionaryName", "sharedSpaces", "shiftEnterMode", "skin", "smiley_columns", "smiley_descriptions", "smiley_images", "smiley_path", "sourceAreaTabSize", "specialChars", "startupFocus", "startupMode", "startupOutlineBlocks", "startupShowBorders", "stylesSet", "stylesheetParser_skipSelectors", "stylesheetParser_validSelectors", "tabIndex", "tabSpaces", "templates", "templates_files", "templates_replaceContent", "toolbar", "toolbarCanCollapse", "toolbarGroupCycling", "toolbarGroups", "toolbarLocation", "toolbarStartupExpanded", "uiColor", "undoStackSize", "useComputedState", "width"]
+    ]
+	];
 
 	/**
 	 * This will call the initial build for a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).
@@ -114,8 +157,6 @@ class builder
 		foreach ( $this->_defaults as $k => $v ){
 			$this->_current[$k] = $v;
 		}
-		$this->global_cfg['setting'] = $this->_defaults;
-		$this->global_cfg['elements'] = [];
 		$this->items = array();
 		$this->id = \bbn\str\text::genpwd(20,15);
 	}
@@ -125,11 +166,11 @@ class builder
 	 * @param array | string $opt_val Either an array with the param name and value, or 2 strings in the same order
 	 * @return void
 	 */
-	public function set_option($opt_val)
+	public function set_option($opt)
 	{
 		$args = func_get_args();
-		if ( is_array($opt_val) && isset($opt_val[0], $this->_defaults[$opt_val[0]]) ){
-			$this->_current[$opt_val[0]] = $opt_val[1];
+		if ( is_array($opt) && isset($opt[0], $this->_defaults[$opt[0]]) ){
+			$this->_current[$opt[0]] = $opt[1];
 		}
 		else if ( isset($args[0], $args[1], $this->_defaults[$args[0]]) ){
 			$this->_current[$args[0]] = $args[1];
@@ -137,31 +178,6 @@ class builder
 		else{
 			throw new InvalidArgumentException('This configuration argument is imaginary... Sorry! :)');
 		}
-	}
-	
-	/**
-	 * Returns the complete HTML of the current form (with all its elements)
-	 * @param string $action The form's action
-	 * @return void
-	 */
-	public function get_form($action)
-	{
-		$s = '<form action="'.$action.'" method="post" id="'.$this->id.'"><fieldset>';
-		foreach ( $this->items as $it ){
-			$s .= $it->get_label_input();
-		}
-		$s .= '<div class="appui-form-label"> </div><div class="appui-form-field"><input type="submit"></div></fieldset></form>';
-		return $s;
-	}
-	
-	/**
-	 * Returns an input object according to the combination of passed and default configurations
-	 * @param array $cfg The input's config
-	 * @return \bbn\html\input
-	 */
-	public function get_input($cfg=array())
-	{
-		return new \bbn\html\input(array_merge($this->_current,$cfg));
 	}
 	
 	/**
@@ -178,38 +194,11 @@ class builder
 	}
 	
 	/**
-	 * Returns the HTML string of all the fields (no label, no form)
-	 * @return string
-	 */
-	public function get_html()
-	{
-		$st = '';
-		foreach ( $this->items as $it ){
-			$st .= $it->get_html();
-		}
-		return $st;
-	}
-	
-	/**
-	 * Returns the JavaScript from all the resgistered inputs, including the one for the form
-	 * @return string
-	 */
-	public function get_script()
-	{
-		$st = '';
-		foreach ( $this->items as $it ){
-			$st .= $it->get_script();
-		}
-		$st .= '$("#'.$this->id.'").validate();';
-		return $st;
-	}
-	
-	/**
 	 * Generates a whole input configuration array by combining the passed and default configurations
 	 * @param array $cfg The input's config
 	 * @return array
 	 */
-	public function make_field($cfg=null)
+	public function get_input($cfg=null)
 	{
 		if ( is_array($cfg) && isset($cfg['name']) ){
 			foreach ( $cfg as $k => $v ){
@@ -226,28 +215,6 @@ class builder
 					}
 				}
 			}
-			// Global config creates a var (simplest as possible) to recreate forms and fields
-			array_push($this->global_cfg['elements'], array_filter(array_map(function($a){
-				if ( is_object($a) ){
-					return get_class($a);
-				}
-				else if ( is_array($a) ){
-					foreach($a as $i => $aa ){
-						if ( is_object($aa) ){
-							$a[$i] = get_class($aa);
-						}
-						else if ( is_string($aa) && empty($aa) ){
-							unset($a[$i]);
-						}
-						else if ( is_array($aa) && count($aa) === 0 ){
-							unset($a[$i]);
-						}
-					}
-				}
-				return $a;
-			},$cfg), function($a){
-				return ( is_string($a) && !empty($a) ) || ( is_array($a) && count($a) > 0 ) || ( !is_string($a) && !is_array($a) );
-			}));
 			
 			$tmp = $this->_current;
 			$tmp['id'] = isset($cfg['id']) ? $cfg['id'] : \bbn\str\text::genpwd(20,15);
@@ -255,7 +222,9 @@ class builder
 				$cfg['options'] = array();
 			}
 			if ( isset($cfg['options']['sql'], $cfg['options']['db']) && strlen($cfg['options']['sql']) > 5 ){
-				$cfg['options']['dataSource'] = array();
+        if ( !isset($cfg['options']['dataSource']) ){
+  				$cfg['options']['dataSource'] = array();
+        }
 				$count = ( $r = $cfg['options']['db']->query($cfg['options']['sql']) ) ? $r->count() : 0;
 				if ( $count <= self::max_values_at_once ){
 					if ( $ds = $cfg['options']['db']->get_irows($cfg['options']['sql']) ){
@@ -272,7 +241,7 @@ class builder
 			if ( isset($cfg['field']) ) {
 				switch ( $cfg['field'] )
 				{
-					case 'datepicker':
+					case 'date':
 						$tmp['tag'] = 'input';
 						$tmp['options']['type'] = 'date';
 						$tmp['options']['maxlength'] = 10;
@@ -280,26 +249,26 @@ class builder
 						$tmp['options']['culture'] = $tmp['lang'].'-'.strtoupper($tmp['lang']);
 						$tmp['options']['format'] = "yyyy-MM-dd";
 						break;
-					case 'timepicker':
+					case 'time':
 						$tmp['tag'] = 'input';
 						$tmp['options']['type'] = 'time';
 						$tmp['options']['maxlength'] = 8;
 						$tmp['options']['size'] = 8;
 						$tmp['options']['culture'] = $tmp['lang'].'-'.strtoupper($tmp['lang']);
 						break;
-					case 'datetimepicker':
+					case 'datetime':
 						$tmp['tag'] = 'input';
 						$tmp['options']['type'] = 'datetime';
 						$tmp['options']['maxlength'] = 19;
 						$tmp['options']['size'] = 20;
 						$tmp['options']['culture'] = $tmp['lang'].'-'.strtoupper($tmp['lang']);
 						break;
-					case 'rte':
-						$tmp['tag'] = 'textarea';
-						$tmp['options']['rows'] = 6;
-						$tmp['options']['cols'] = 20;
+					case 'multivalue':
+						$tmp['tag'] = 'input';
+						$tmp['options']['type'] = 'text';
+						$tmp['options']['size'] = false;
 						break;
-					case 'dropdownlist':
+					case 'dropdown':
 						$tmp['tag'] = 'input';
 						$tmp['options']['type'] = 'text';
 						$tmp['options']['dataSource'] = array();
@@ -327,7 +296,7 @@ class builder
 						$tmp['tag'] = 'input';
 						$tmp['options']['type'] = 'text';
 						break;
-					case 'numerictextbox':
+					case 'numeric':
 						$tmp['tag'] = 'input';
 						$tmp['options']['type'] = 'number';
 						$tmp['options']['min'] = 0;
@@ -347,6 +316,11 @@ class builder
 							}
 							$cfg['options']['max'] = ( (float)$max > (int)$max ) ? (float)$max : (int)$max;
 						}
+						break;
+					case 'editor':
+						$tmp['tag'] = 'textarea';
+            $tmp['options']['cols'] = 80;
+            $tmp['options']['rows'] = 60;
 						break;
 				}
 			}
@@ -375,35 +349,25 @@ class builder
 			$cfg = array_merge($tmp, $cfg);
 			//var_dump($cfg);
 			if ( isset($cfg['field']) && !$cfg['script'] ){
-				$kkeys = array_keys($this->kendo);
-				if ( ( $i = array_search($cfg['field'], array_map(function($a){return strtolower($a);}, $kkeys)) ) !== false ){
-					$i = $kkeys[$i];
+				if ( isset(self::$widgets[strtolower($cfg['field'])]) ){
+          $wid = self::$widgets[strtolower($cfg['field'])];
 					$widget_cfg = array();
-					foreach ( $this->kendo[$i] as $o ){
+					foreach ( $wid['opt'] as $o ){
 						if ( isset($cfg['options'][$o]) ){
 							$widget_cfg[$o] = $cfg['options'][$o];
 						}
 					}
 					//var_dump($widget_cfg);
-					$cfg['script'] = '$("#'.$cfg['id'].'").kendo'.$i.'('.json_encode((object)$widget_cfg).');';
+					$cfg['script'] = '$("#'.$cfg['id'].'").'.$wid['fn'].'('.json_encode((object)$widget_cfg).');';
+          var_dump($cfg['script']);
 				}
 				else{
 					switch ( $cfg['field'] )
 					{
-						case 'rte':
-						$cfg['script'] = 'CKEDITOR.replace("'.$cfg['id'].'");';
-						// autoParagraph: inline = true
-						// autogrow: true|false minheight/maxheight
-						// baseHref: prendre de bbn_sites
-						// bodyClass
-						// bodyId
-						// 
-						break;
-
 						case 'text':
-						if ( ( strpos($cfg['name'] , 'tel') === 0 ) || ( strpos($cfg['name'] , 'fax') === 0 ) || strpos($cfg['name'] , 'phone') !== false ){
-							$cfg['script'] = '$("#'.$cfg['id'].'").mask("99 99 99 99 99");';
-						}
+              if ( ( strpos($cfg['name'] , 'tel') === 0 ) || ( strpos($cfg['name'] , 'fax') === 0 ) || strpos($cfg['name'] , 'phone') !== false ){
+                //$cfg['script'] = '$("#'.$cfg['id'].'").mask("99 99 99 99 99");';
+              }
 						break;
 					}
 				}
@@ -414,6 +378,5 @@ class builder
 		}
 		return false;
 	}
-	
 }		
 ?>

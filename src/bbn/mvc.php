@@ -797,7 +797,7 @@ class mvc
 					$this->obj->postscript = \JShrink\Minifier::minify($this->obj->postscript);
 				}
 			}
-      if ( !isset($this->obj->output) ){
+      if ( count((array)$this->obj) === 0 ){
         header('HTTP/1.0 404 Not Found');
         exit();
       }			

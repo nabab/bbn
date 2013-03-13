@@ -104,6 +104,7 @@ class connection extends \bbn\obj
       $this->sql .= " AND ( `$col` = `$cond` ) ";
     }
 		if ( is_array($credentials) && isset($credentials['user'], $credentials['pass'], $cfg['fields']) ){
+
 			$this->_identify($credentials);
 		}
 		
@@ -137,7 +138,7 @@ class connection extends \bbn\obj
 					$info_auth->fingerprint = self::make_fingerprint();
 				}
 				else{
-					$info_auth = json_decode();
+					$info_auth = json_decode($d['info_auth']);
 				}
 
 				$an_hour_ago = time() - 3600;
@@ -145,7 +146,7 @@ class connection extends \bbn\obj
 				if ( $info_auth->log_tries > 3 && $info_auth->last_attempt > $an_hour_ago ){
 					$res = 4;
 				}
-				else if ( $d[$cols['pass']] === eval("return {$this->cfg['encryption']}('$pass');") ){
+				else if ( $d['pass'] === eval("return {$this->cfg['encryption']}('$pass');") ){
 					$this->auth = 1;
 				}
 				else
@@ -269,8 +270,7 @@ class connection extends \bbn\obj
 	{
 		if ( !isset($this->id) ){
       $qte = $this->db->qte;
-			if ( isset($_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]['id']) && $this->auth !== 1 )
-			{
+			if ( isset($_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]['id']) && $this->auth !== 1 ){
 				$id = $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]['id'];
 				$cols =& $this->cfg['fields'];
 				/* Adding a bbn_change field would allow us to update auytomatically the user's info if something has been changed */

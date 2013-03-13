@@ -234,7 +234,13 @@ class text
 		$mdp = '';
 		for($i=0; $i<$longueur; $i++)
 		{
-			$quoi= mt_rand(1,3);
+      // First caracter a letter
+			if ( $i === 0 ){
+        $quoi= mt_rand(2,3);
+      }
+      else{
+        $quoi= mt_rand(1,3);
+      }
 			switch($quoi)
 			{
 				case 1: 
@@ -252,7 +258,15 @@ class text
 	}
 
 	/**
-	 * @return void 
+	 * @return bool
+	 */
+	public static function is_number($st)
+	{
+    return ( ctype_digit($st) || is_int($st) );
+  }
+  
+  /**
+	 * @return bool
 	 */
 	public static function is_email($email)
 	{

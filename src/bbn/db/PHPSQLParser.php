@@ -38,8 +38,6 @@ namespace bbn\db;
 
 if (!defined('HAVE_PHP_SQL_PARSER')) {
 
-    require_once(dirname(__FILE__) . '/classes/expression-types.php');
-    require_once(dirname(__FILE__) . '/classes/expression-token.php');
     require_once(dirname(__FILE__) . '/classes/parser-utils.php');
     require_once(dirname(__FILE__) . '/classes/lexer.php');
     require_once(dirname(__FILE__) . '/classes/position-calculator.php');
@@ -62,7 +60,7 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
 
         public function parse($sql, $calcPositions = false) {
             #lex the SQL statement
-            $inputArray = $this->splitSQLIntoTokens($sql);
+            $inputArray = $this->split_sql($sql);
 
             #This is the highest level lexical analysis.  This is the part of the
             #code which finds UNION and UNION ALL query parts
@@ -204,7 +202,7 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
 
         #this function splits up a SQL statement into easy to "parse"
         #tokens for the SQL processor
-        private function splitSQLIntoTokens($sql) {
+        private function split_sql($sql) {
             return $this->lexer->split($sql);
         }
 
@@ -224,7 +222,7 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
                 $trim = trim($token); # this removes also \n and \t!
 
                 # if it starts with an "(", it should follow a SELECT
-                if ($trim !== "" && $trim[0] === "(" && $token_category === "") {
+                if ($trim !== "" && $trim[0] == "(" && $token_category == "") {
                     $token_category = 'SELECT';
                 }
 
@@ -255,12 +253,14 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
                 case 'DUPLICATE':
                 case 'VALUES':
                 case 'GROUP':
+                case 'ORDER':
                 case 'HAVING':
                 case 'WHERE':
                 case 'RENAME':
                 case 'CALL':
                 case 'PROCEDURE':
                 case 'FUNCTION':
+                case 'DATABASE':
                 case 'SERVER':
                 case 'LOGFILE':
                 case 'DEFINER':
@@ -290,14 +290,6 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
                     $token_category = $upper;
                     break;
 
-                case 'DATABASE':
-                case 'SCHEMA':
-                    if ($prev_category === 'DROP') {
-                        continue;
-                    }
-                    $token_category = $upper;
-                    break;
-
                 case 'EVENT':
                 # issue 71
                     if ($prev_category === 'DROP' || $prev_category === 'ALTER' || $prev_category === 'CREATE') {
@@ -308,6 +300,13 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
                 case 'DATA':
                 # prevent wrong handling of DATA as keyword
                     if ($prev_category === 'LOAD') {
+                        $token_category = $upper;
+                    }
+                    break;
+
+                case 'PASSWORD':
+                # prevent wrong handling of PASSWORD as keyword
+                    if ($prev_category === 'SET') {
                         $token_category = $upper;
                     }
                     break;
@@ -348,8 +347,6 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
                 case 'GRANT':
                 case 'REVOKE':
                 case 'SHOW':
-                // Added by nabab
-                case 'PRAGMA':
                 case 'HANDLER':
                 case 'LOAD':
                 case 'ROLLBACK':
@@ -409,6 +406,7 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
                 case 'DROP':
                     if ($token_category !== 'ALTER') {
                         $token_category = $upper;
+                        $out[$upper][0] = $upper;
                         continue 2;
                     }
                     break;
@@ -519,7 +517,7 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
                 $out['USING'] = $this->process_from($out['USING']);
             }
             if (!empty($out['UPDATE'])) {
-                $out['UPDATE'] = $this->processUpdate($out['UPDATE']);
+                $out['UPDATE'] = $this->process_from($out['UPDATE']);
             }
             if (!empty($out['GROUP'])) {
                 # set empty array if we have partial SQL statement 
@@ -542,14 +540,14 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
                 $out['SET'] = $this->process_set_list($out['SET'], isset($out['UPDATE']));
             }
             if (!empty($out['DUPLICATE'])) {
-                $out['ON DUPLICATE KEY UPDATE'] = $this->process_set_list($out['DUPLICATE']);
+                $out['ON DUPLICATE KEY UPDATE'] = $this->process_set_list($out['DUPLICATE'], isset($out['UPDATE']));
                 unset($out['DUPLICATE']);
             }
             if (!empty($out['INSERT'])) {
-                $out = $this->processInsert($out);
+                $out = $this->process_insert($out);
             }
             if (!empty($out['REPLACE'])) {
-                $out = $this->processReplace($out);
+                $out = $this->process_insert($out, 'REPLACE');
             }
             if (!empty($out['DELETE'])) {
                 $out = $this->process_delete($out);
@@ -558,50 +556,40 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
                 $out = $this->process_values($out);
             }
             if (!empty($out['INTO'])) {
-                $out = $this->processInto($out);
-            }
-            if (!empty($out['DROP'])) {
-                $out['DROP'] = $this->processDrop($out['DROP']);
+                $out = $this->process_into($out);
             }
             return $out;
         }
 
-        /**
-         *  A SET list is simply a list of key = value expressions separated by comma (,).
-         *  This function produces a list of the key/value expressions.
+        /* A SET list is simply a list of key = value expressions separated by comma (,).
+         This function produces a list of the key/value expressions.
          */
         private function getAssignment($base_expr) {
-            $assignment = $this->process_expr_list($this->splitSQLIntoTokens($base_expr));
-            return array('expr_type' => ExpressionType::EXPRESSION, 'base_expr' => trim($base_expr),
-                         'sub_tree' => $assignment);
+            $assignment = $this->process_expr_list($this->split_sql($base_expr));
+            return array('expr_type' => 'expression', 'base_expr' => trim($base_expr), 'sub_tree' => $assignment);
         }
 
         private function getVariableType($expression) {
             // $expression must contain only upper-case characters
             if ($expression[1] !== "@") {
-                return ExpressionType::USER_VARIABLE;
+                return 'user_variable';
             }
 
             $type = substr($expression, 2, strpos($expression, ".", 2));
 
             switch ($type) {
             case 'GLOBAL':
-                $type = ExpressionType::GLOBAL_VARIABLE;
-                break;
             case 'LOCAL':
-                $type = ExpressionType::LOCAL_VARIABLE;
-                break;
             case 'SESSION':
+                $type = strtolower($type) . '_variable';
+                break;
             default:
-                $type = ExpressionType::SESSION_VARIABLE;
+                $type = 'session_variable';
                 break;
             }
             return $type;
         }
 
-        /**
-         * It can be UPDATE SET or SET alone
-         */
         private function process_set_list($tokens, $isUpdate) {
             $result = array();
             $baseExpr = "";
@@ -616,7 +604,7 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
                 case 'SESSION':
                 case 'GLOBAL':
                     if (!$isUpdate) {
-                        $varType = $this->getVariableType("@@" . $upper . ".");
+                        $varType = strtolower($upper) . '_variable';
                         $baseExpr = "";
                         continue 2;
                     }
@@ -624,8 +612,10 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
 
                 case ',':
                     $assignment = $this->getAssignment($baseExpr);
-                    if (!$isUpdate && $varType !== false) {
-                        $assignment['sub_tree'][0]['expr_type'] = $varType;
+                    if (!$isUpdate) {
+                        if ($varType !== false) {
+                            $assignment['sub_tree'][0]['expr_type'] = $varType;
+                        }
                     }
                     $result[] = $assignment;
                     $baseExpr = "";
@@ -639,8 +629,10 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
 
             if (trim($baseExpr) !== "") {
                 $assignment = $this->getAssignment($baseExpr);
-                if (!$isUpdate && $varType !== false) {
-                    $assignment['sub_tree'][0]['expr_type'] = $varType;
+                if (!$isUpdate) {
+                    if ($varType !== false) {
+                        $assignment['sub_tree'][0]['expr_type'] = $varType;
+                    }
                 }
                 $result[] = $assignment;
             }
@@ -648,10 +640,9 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
             return $result;
         }
 
-        /**
-         * This function processes the LIMIT section.
-         * start,end are set.  If only end is provided in the query
-         * then start is set to 0.
+        /* This function processes the LIMIT section.
+         start,end are set.  If only end is provided in the query
+         then start is set to 0.
          */
         private function process_limit($tokens) {
             $rowcount = "";
@@ -692,32 +683,35 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
             return array('offset' => trim($offset), 'rowcount' => trim($rowcount));
         }
 
-        /**
-         * This function processes the SELECT section.  It splits the clauses at the commas.
-         * Each clause is then processed by process_select_expr() and the results are added to
-         * the expression list.
-         *
-         * Finally, at the end, the epxression list is returned.
+        /* This function processes the SELECT section.  It splits the clauses at the commas.
+         Each clause is then processed by process_select_expr() and the results are added to
+         the expression list.
+        
+         Finally, at the end, the epxression list is returned.
          */
         private function process_select(&$tokens) {
             $expression = "";
-            $expressionList = array();
+            $expr = array();
             foreach ($tokens as $token) {
-                if ($this->isCommaToken($token)) {
-                    $expressionList[] = $this->process_select_expr(trim($expression));
+                if (trim($token) === ',') {
+                    $expr[] = $this->process_select_expr(trim($expression));
                     $expression = "";
                 } else {
                     $expression .= $token;
                 }
             }
             if ($expression) {
-                $expressionList[] = $this->process_select_expr(trim($expression));
+                $expr[] = $this->process_select_expr(trim($expression));
             }
-            return $expressionList;
+            return $expr;
         }
 
-        private function isCommaToken($token) {
-            return (trim($token) === ",");
+        private function revokeEscaping($sql) {
+            $sql = trim($sql);
+            if (($sql[0] === '`') && ($sql[strlen($sql) - 1] === '`')) {
+                $sql = substr($sql, 1, -1);
+            }
+            return str_replace('``', '`', $sql);
         }
 
         private function isWhitespaceToken($token) {
@@ -730,44 +724,43 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
         }
 
         private function isColumnReference($out) {
-            return (isset($out['expr_type']) && $out['expr_type'] === ExpressionType::COLREF);
+            return (isset($out['expr_type']) && $out['expr_type'] === 'colref');
         }
 
         private function isReserved($out) {
-            return (isset($out['expr_type']) && $out['expr_type'] === ExpressionType::RESERVED);
+            return (isset($out['expr_type']) && $out['expr_type'] === 'reserved');
         }
 
         private function isConstant($out) {
-            return (isset($out['expr_type']) && $out['expr_type'] === ExpressionType::CONSTANT);
+            return (isset($out['expr_type']) && $out['expr_type'] === 'const');
         }
 
         private function isAggregateFunction($out) {
-            return (isset($out['expr_type']) && $out['expr_type'] === ExpressionType::AGGREGATE_FUNCTION);
+            return (isset($out['expr_type']) && $out['expr_type'] === 'aggregate_function');
         }
 
         private function isFunction($out) {
-            return (isset($out['expr_type']) && $out['expr_type'] === ExpressionType::SIMPLE_FUNCTION);
+            return (isset($out['expr_type']) && $out['expr_type'] === 'function');
         }
 
         private function isExpression($out) {
-            return (isset($out['expr_type']) && $out['expr_type'] === ExpressionType::EXPRESSION);
+            return (isset($out['expr_type']) && $out['expr_type'] === 'expression');
         }
 
-        private function isBracketExpression($out) {
-            return (isset($out['expr_type']) && $out['expr_type'] === ExpressionType::BRACKET_EXPRESSION);
+        private function isBrackedExpression($out) {
+            return (isset($out['expr_type']) && $out['expr_type'] === 'bracked_expression');
         }
 
         private function isSubQuery($out) {
-            return (isset($out['expr_type']) && $out['expr_type'] === ExpressionType::SUBQUERY);
+            return (isset($out['expr_type']) && $out['expr_type'] === 'subquery');
         }
 
-        /**
-         * This fuction processes each SELECT clause.  We determine what (if any) alias
-         * is provided, and we set the type of expression.
+        /* This fuction processes each SELECT clause.  We determine what (if any) alias
+         is provided, and we set the type of expression.
          */
         private function process_select_expr($expression) {
 
-            $tokens = $this->splitSQLIntoTokens($expression);
+            $tokens = $this->split_sql($expression);
             $token_count = count($tokens);
 
             /* Determine if there is an explicit alias after the AS clause.
@@ -826,7 +819,7 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
 
                 if ($this->isReserved($prev) || $this->isConstant($prev) || $this->isAggregateFunction($prev)
                         || $this->isFunction($prev) || $this->isExpression($prev) || $this->isSubQuery($prev)
-                        || $this->isColumnReference($prev) || $this->isBracketExpression($prev)) {
+                        || $this->isColumnReference($prev) || $this->isBrackedExpression($prev)) {
 
                     $alias = array('as' => false, 'name' => trim($last['base_expr']),
                                    'base_expr' => trim($last['base_expr']));
@@ -844,13 +837,13 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
                 $alias['base_expr'] = trim($alias['base_expr']);
             }
 
-            # TODO: this is always done with $stripped, how we do it twice?
+            # this is always done with $stripped, how we do it twice?
             $processed = $this->process_expr_list($tokens);
 
             # if there is only one part, we copy the expr_type
             # in all other cases we use "expression" as global type
-            $type = ExpressionType::EXPRESSION;
-            if (count($processed) === 1) {
+            $type = 'expression';
+            if (count($processed) == 1) {
                 if (!$this->isSubQuery($processed[0])) {
                     $type = $processed[0]['expr_type'];
                     $base_expr = $processed[0]['base_expr'];
@@ -862,9 +855,6 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
                          'sub_tree' => $processed);
         }
 
-        /**
-         * This method handles the FROM clause.
-         */
         private function process_from(&$tokens) {
 
             $parseInfo = $this->initParseInfoForFrom();
@@ -1012,11 +1002,11 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
 
             # we have a reg_expr, so we have to parse it
             if ($parseInfo['ref_expr'] !== false) {
-                $unparsed = $this->splitSQLIntoTokens($this->removeParenthesisFromStart($parseInfo['ref_expr']));
+                $unparsed = $this->split_sql($this->removeParenthesisFromStart($parseInfo['ref_expr']));
 
                 // here we can get a comma separated list
                 foreach ($unparsed as $k => $v) {
-                    if ($this->isCommaToken($v)) {
+                    if (trim($v) === ',') {
                         $unparsed[$k] = "";
                     }
                 }
@@ -1029,14 +1019,14 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
 
                 if (preg_match("/^\\s*select/i", $parseInfo['expression'])) {
                     $parseInfo['sub_tree'] = $this->parse($parseInfo['expression']);
-                    $res['expr_type'] = ExpressionType::SUBQUERY;
+                    $res['expr_type'] = 'subquery';
                 } else {
-                    $tmp = $this->splitSQLIntoTokens($parseInfo['expression']);
+                    $tmp = $this->split_sql($parseInfo['expression']);
                     $parseInfo['sub_tree'] = $this->process_from($tmp);
-                    $res['expr_type'] = ExpressionType::TABLE_EXPRESSION;
+                    $res['expr_type'] = 'table_expression';
                 }
             } else {
-                $res['expr_type'] = ExpressionType::TABLE;
+                $res['expr_type'] = 'table';
                 $res['table'] = $parseInfo['table'];
             }
 
@@ -1059,7 +1049,7 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
             $parseInfo['expr'] = trim($this->revokeEscaping($parseInfo['expr']));
 
             if (is_numeric($parseInfo['expr'])) {
-                $parseInfo['type'] = ExpressionType::POSITION;
+                $parseInfo['type'] = 'pos';
             } else {
                 #search to see if the expression matches an alias
                 foreach ($select as $clause) {
@@ -1067,12 +1057,12 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
                         continue;
                     }
                     if ($clause['alias']['name'] === $parseInfo['expr']) {
-                        $parseInfo['type'] = ExpressionType::ALIAS;
+                        $parseInfo['type'] = 'alias';
                     }
                 }
             }
 
-            if ($parseInfo['type'] === ExpressionType::EXPRESSION) {
+            if ($parseInfo['type'] === "expression") {
                 $expr = $this->process_select_expr($parseInfo['expr']);
                 $expr['direction'] = $parseInfo['dir'];
                 unset($expr['alias']);
@@ -1084,12 +1074,9 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
         }
 
         private function initParseInfoForOrder() {
-            return array('expr' => "", 'dir' => "ASC", 'type' => ExpressionType::EXPRESSION);
+            return array('expr' => "", 'dir' => "ASC", 'type' => 'expression');
         }
 
-        /**
-         * This method handles the ORDER BY clause
-         */
         private function process_order($tokens, $select) {
             $out = array();
             $parseInfo = $this->initParseInfoForOrder();
@@ -1124,9 +1111,6 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
             return $out;
         }
 
-        /**
-         * This method handles the GROUP BY clause.
-         */
         private function process_group($tokens, $select) {
             $out = array();
             $parseInfo = $this->initParseInfoForOrder();
@@ -1158,21 +1142,75 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
             return $out;
         }
 
-        /**
-         * Some sections are just lists of expressions, like the WHERE and HAVING clauses.  
-         * This function processes these sections.  Recursive.
+        private function removeParenthesisFromStart($token) {
+
+            $parenthesisRemoved = 0;
+
+            $trim = trim($token);
+            if ($trim !== "" && $trim[0] === "(") { // remove only one parenthesis pair now!
+                $parenthesisRemoved++;
+                $trim[0] = " ";
+                $trim = trim($trim);
+            }
+
+            $parenthesis = $parenthesisRemoved;
+            $i = 0;
+            $string = 0;
+            while ($i < strlen($trim)) {
+
+                if ($trim[$i] === "\\") {
+                    $i += 2; # an escape character, the next character is irrelevant
+                    continue;
+                }
+
+                if ($trim[$i] === "'" || $trim[$i] === '"') {
+                    $string++;
+                }
+
+                if (($string % 2 === 0) && ($trim[$i] === "(")) {
+                    $parenthesis++;
+                }
+
+                if (($string % 2 === 0) && ($trim[$i] === ")")) {
+                    if ($parenthesis == $parenthesisRemoved) {
+                        $trim[$i] = " ";
+                        $parenthesisRemoved--;
+                    }
+                    $parenthesis--;
+                }
+                $i++;
+            }
+            return trim($trim);
+        }
+
+        private function initParseInfoExprList($parseInfo = false) {
+            if ($parseInfo === false) {
+                return array('processed' => false, 'expr' => "", 'key' => false, 'token' => false, 'tokenType' => "",
+                             'prevToken' => "", 'prevTokenType' => "", 'trim' => false, 'upper' => false);
+            }
+
+            $expr = $parseInfo['expr'];
+            $expr[] = array('expr_type' => $parseInfo['tokenType'], 'base_expr' => $parseInfo['token'],
+                            'sub_tree' => $parseInfo['processed']);
+
+            return array('processed' => false, 'expr' => $expr, 'key' => false, 'token' => false, 'tokenType' => "",
+                         'prevToken' => $parseInfo['upper'], 'prevTokenType' => $parseInfo['tokenType'],
+                         'trim' => false, 'upper' => false);
+        }
+
+        /* Some sections are just lists of expressions, like the WHERE and HAVING clauses.  This function
+         processes these sections.  Recursive.
          */
         private function process_expr_list($tokens) {
 
-            $resultList = array();
+            $parseInfo = $this->initParseInfoExprList();
             $skip_next = false;
-            $prev = new ExpressionToken();
 
-            foreach ($tokens as $k => $v) {
+            foreach ($tokens as $parseInfo['key'] => $parseInfo['token']) {
 
-                $curr = new ExpressionToken($k, $v);
+                $parseInfo['trim'] = trim($parseInfo['token']);
 
-                if ($curr->isWhitespaceToken()) {
+                if ($parseInfo['trim'] === "") {
                     continue;
                 }
 
@@ -1182,126 +1220,104 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
                     continue;
                 }
 
+                $parseInfo['upper'] = strtoupper($parseInfo['trim']);
+
                 /* is it a subquery?*/
-                if ($curr->isSubQueryToken()) {
+                if (preg_match("/^\\(\\s*SELECT/i", $parseInfo['trim'])) {
+                    #tokenize and parse the subquery.
+                    #we remove the enclosing parenthesis for the tokenizer
+                    $parseInfo['processed'] = $this->parse($this->removeParenthesisFromStart($parseInfo['trim']));
+                    $parseInfo['tokenType'] = 'subquery';
 
-                    $curr->setSubTree($this->parse($this->removeParenthesisFromStart($curr->getTrim())));
-                    $curr->setTokenType(ExpressionType::SUBQUERY);
+                } elseif ($parseInfo['upper'][0] === '(' && substr($parseInfo['upper'], -1) === ')') {
+                    /* is it an inlist (upper is derived from trim!) */
 
-                } elseif ($curr->isEnclosedWithinParenthesis()) {
-                    /* is it an in-list? */
+                    # if we have a colref followed by a parenthesis pair,
+                    # it isn't a colref, it is a user-function
+                    if ($parseInfo['prevTokenType'] === 'colref' || $parseInfo['prevTokenType'] === 'function'
+                            || $parseInfo['prevTokenType'] === 'aggregate_function') {
 
-                    $localTokenList = $this->splitSQLIntoTokens($this->removeParenthesisFromStart($curr->getTrim()));
-
-                    if ($prev->getUpper() === 'IN') {
-
-                        foreach ($localTokenList as $k => $v) {
-                            $tmpToken = new ExpressionToken($k, $v);
-                            if ($tmpToken->isCommaToken()) {
-                                unset($localTokenList[$k]);
+                        $tmptokens = $this->split_sql($this->removeParenthesisFromStart($parseInfo['trim']));
+                        foreach ($tmptokens as $k => $v) {
+                            if (trim($v) == ',') {
+                                unset($tmptokens[$k]);
                             }
                         }
 
-                        $localTokenList = array_values($localTokenList);
-                        $curr->setSubTree($this->process_expr_list($localTokenList));
-                        $curr->setTokenType(ExpressionType::IN_LIST);
+                        $tmptokens = array_values($tmptokens);
+                        $parseInfo['processed'] = $this->process_expr_list($tmptokens);
 
-                    } elseif ($prev->getUpper() === 'AGAINST') {
-
-                        $match_mode = false;
-                        foreach ($localTokenList as $k => $v) {
-
-                            $tmpToken = new ExpressionToken($k, $v);
-                            switch ($tmpToken->getUpper()) {
-                            case 'WITH':
-                                $match_mode = 'WITH QUERY EXPANSION';
-                                break;
-                            case 'IN':
-                                $match_mode = 'IN BOOLEAN MODE';
-                                break;
-
-                            default:
-                            }
-
-                            if ($match_mode !== false) {
-                                unset($localTokenList[$k]);
-                            }
-                        }
-
-                        $tmpToken = $this->process_expr_list($localTokenList);
-
-                        if ($match_mode !== false) {
-                            $match_mode = new ExpressionToken(0, $match_mode);
-                            $match_mode->setTokenType(ExpressionType::MATCH_MODE);
-                            $tmpToken[] = $match_mode->toArray();
-                        }
-
-                        $curr->setSubTree($tmpToken);
-                        $curr->setTokenType(ExpressionType::MATCH_ARGUMENTS);
-                        $prev->setTokenType(ExpressionType::SIMPLE_FUNCTION);
-
-                    } elseif ($prev->isColumnReference() || $prev->isFunction() || $prev->isAggregateFunction()) {
-
-                        # if we have a colref followed by a parenthesis pair,
-                        # it isn't a colref, it is a user-function
-                        foreach ($localTokenList as $k => $v) {
-                            $tmpToken = new ExpressionToken($k, $v);
-                            if ($tmpToken->isCommaToken()) {
-                                unset($localTokenList[$k]);
-                            }
-                        }
-
-                        $localTokenList = array_values($localTokenList);
-                        $curr->setSubTree($this->process_expr_list($localTokenList));
-
-                        $prev->setSubTree($curr->getSubTree());
-                        if ($prev->isColumnReference()) {
-                            $prev->setTokenType(ExpressionType::SIMPLE_FUNCTION);
-                        }
-
-                        array_pop($resultList);
-                        $curr = $prev;
+                        $last = array_pop($parseInfo['expr']);
+                        $parseInfo['token'] = $last['base_expr'];
+                        $parseInfo['tokenType'] = ($parseInfo['prevTokenType'] === 'colref' ? 'function'
+                                : $parseInfo['prevTokenType']);
+                        $parseInfo['prevTokenType'] = $parseInfo['prevToken'] = "";
                     }
 
-                    # we have parenthesis, but it seems to be an expression
-                    if ($curr->isUnspecified()) {
-                        $curr->setSubTree($this->process_expr_list($localTokenList));
-                        $curr->setTokenType(ExpressionType::BRACKET_EXPRESSION);
+                    if ($parseInfo['prevToken'] == 'IN') {
+
+                        $tmptokens = $this->split_sql($this->removeParenthesisFromStart($parseInfo['trim']));
+                        foreach ($tmptokens as $k => $v) {
+                            if (trim($v) == ',') {
+                                unset($tmptokens[$k]);
+                            }
+                        }
+
+                        $tmptokens = array_values($tmptokens);
+                        $parseInfo['processed'] = $this->process_expr_list($tmptokens);
+                        $parseInfo['prevTokenType'] = $parseInfo['prevToken'] = "";
+                        $parseInfo['tokenType'] = "in-list";
                     }
 
-                } elseif ($curr->isVariableToken()) {
+                    if ($parseInfo['prevToken'] == 'AGAINST') {
+
+                        $tmptokens = $this->split_sql($this->removeParenthesisFromStart($parseInfo['trim']));
+                        if (count($tmptokens) > 1) {
+                            $match_mode = implode('', array_slice($tmptokens, 1));
+                            $parseInfo['processed'] = array($list[0], $match_mode);
+                        } else {
+                            $parseInfo['processed'] = $list[0];
+                        }
+
+                        $parseInfo['prevTokenType'] = $parseInfo['prevToken'] = "";
+                        $parseInfo['tokenType'] = "match-arguments";
+                    }
+
+                } elseif ($parseInfo['upper'][0] === '@') {
                     // a variable
-                    $curr->setTokenType($this->getVariableType($curr->getUpper()));
-                    $curr->setSubTree(false);
-
+                    $parseInfo['tokenType'] = $this->getVariableType($parseInfo['upper']);
+                    $parseInfo['processed'] = false;
                 } else {
                     /* it is either an operator, a colref or a constant */
-                    switch ($curr->getUpper()) {
+                    switch ($parseInfo['upper']) {
 
                     case '*':
-                        $curr->setSubTree(false); #no subtree
+                        $parseInfo['processed'] = false; #no subtree
 
-                        # single or first element of expression list -> all-column-alias
-                        if (empty($resultList)) {
-                            $curr->setTokenType(ExpressionType::COLREF);
+                        # last token is colref, const or expression
+                        # it is an operator, in all other cases it is an all-columns-alias
+                        # if the previous colref ends with a dot, the * is the all-columns-alias
+                        if (!is_array($parseInfo['expr'])) {
+                            $parseInfo['tokenType'] = "colref"; # single or first element of select -> *
                             break;
                         }
 
-                        # if the last token is colref, const or expression
-                        # then * is an operator
-                        # but if the previous colref ends with a dot, the * is the all-columns-alias
-                        if (!$prev->isColumnReference() && !$prev->isConstant() && !$prev->isExpression()
-                                && !$prev->isBracketExpression()) {
-                            $curr->setTokenType(ExpressionType::COLREF);
+                        $last = array_pop($parseInfo['expr']);
+                        if ($last['expr_type'] !== 'colref' && $last['expr_type'] !== 'const'
+                                && $last['expr_type'] !== 'expression') {
+                            $parseInfo['expr'][] = $last;
+                            $parseInfo['tokenType'] = "colref";
                             break;
                         }
 
-                        if ($prev->isColumnReference() && $prev->endsWith(".")) {
-                            $prev->addToken('*'); # tablealias dot *
-                            continue 2; # skip the current token
+                        if ($last['expr_type'] === 'colref' && substr($last['base_expr'], -1, 1) === ".") {
+                            $last['base_expr'] .= '*'; # tablealias dot *
+                            $parseInfo['expr'][] = $last;
+                            continue 2;
                         }
 
-                        $curr->setTokenType(ExpressionType::OPERATOR);
+                        $parseInfo['expr'][] = $last;
+                        $parseInfo['tokenType'] = "operator";
                         break;
 
                     case 'AND':
@@ -1337,117 +1353,125 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
                     case 'SOUNDS':
                     case 'XOR':
                     case 'IN':
-                        $curr->setSubTree(false);
-                        $curr->setTokenType(ExpressionType::OPERATOR);
+                        $parseInfo['processed'] = false;
+                        $parseInfo['tokenType'] = "operator";
                         break;
 
                     case 'NULL':
-                        $curr->setSubTree(false);
-                        $curr->setTokenType(ExpressionType::CONSTANT);
+                        $parseInfo['processed'] = false;
+                        $parseInfo['tokenType'] = 'const';
                         break;
 
                     case '-':
                     case '+':
                     // differ between preceding sign and operator
-                        $curr->setSubTree(false);
+                        $parseInfo['processed'] = false;
 
-                        if ($prev->isColumnReference() || $prev->isFunction() || $prev->isAggregateFunction()
-                                || $prev->isConstant() || $prev->isSubQuery() || $prev->isExpression()
-                                || $prev->isBracketExpression()) {
-                            $curr->setTokenType(ExpressionType::OPERATOR);
+                        if ($parseInfo['prevTokenType'] === 'colref' || $parseInfo['prevTokenType'] === 'function'
+                                || $parseInfo['prevTokenType'] === 'aggregate_function'
+                                || $parseInfo['prevTokenType'] === 'const'
+                                || $parseInfo['prevTokenType'] === 'subquery') {
+                            $parseInfo['tokenType'] = "operator";
                         } else {
-                            $curr->setTokenType(ExpressionType::SIGN);
+                            $parseInfo['tokenType'] = "sign";
                         }
                         break;
 
                     default:
-                        $curr->setSubTree(false);
-
-                        switch ($curr->getToken(0)) {
+                        switch ($parseInfo['token'][0]) {
                         case "'":
                         case '"':
-                        # it is a string literal
-                            $curr->setTokenType(ExpressionType::CONSTANT);
+                            $parseInfo['tokenType'] = 'const';
                             break;
                         case '`':
-                        # it is an escaped colum name
-                            $curr->setTokenType(ExpressionType::COLREF);
+                            $parseInfo['tokenType'] = 'colref';
                             break;
 
                         default:
-                            if (is_numeric($curr->getToken())) {
+                            if (is_numeric($parseInfo['token'])) {
+                                $parseInfo['tokenType'] = 'const';
 
-                                if ($prev->isSign()) {
-                                    $prev->addToken($curr->getToken()); # it is a negative numeric constant
-                                    $prev->setTokenType(ExpressionType::CONSTANT);
-                                    continue 3;
-                                    # skip current token
-                                } else {
-                                    $curr->setTokenType(ExpressionType::CONSTANT);
+                                if ($parseInfo['prevTokenType'] === 'sign') {
+                                    array_pop($parseInfo['expr']);
+                                    $parseInfo['token'] = $parseInfo['prevToken'] . $parseInfo['token'];
                                 }
 
                             } else {
-                                $curr->setTokenType(ExpressionType::COLREF);
+                                $parseInfo['tokenType'] = 'colref';
                             }
                             break;
+
                         }
+                        $parseInfo['processed'] = false;
                     }
                 }
 
                 /* is a reserved word? */
-                if (!$curr->isOperator() && !$curr->isInList() && !$curr->isFunction() && !$curr->isAggregateFunction()
-                        && in_array($curr->getUpper(), parent::$reserved)) {
+                if ($parseInfo['tokenType'] !== 'operator' && $parseInfo['tokenType'] !== 'in-list'
+                        && $parseInfo['tokenType'] !== 'function' && $parseInfo['tokenType'] !== 'aggregate_function'
+                        && in_array($parseInfo['upper'], parent::$reserved)) {
 
-                    if (in_array($curr->getUpper(), parent::$aggregateFunctions)) {
-                        $curr->setTokenType(ExpressionType::AGGREGATE_FUNCTION);
+                    switch ($parseInfo['upper']) {
+                    case 'AVG':
+                    case 'SUM':
+                    case 'COUNT':
+                    case 'MIN':
+                    case 'MAX':
+                    case 'STDDEV':
+                    case 'STDDEV_SAMP':
+                    case 'STDDEV_POP':
+                    case 'VARIANCE':
+                    case 'VAR_SAMP':
+                    case 'VAR_POP':
+                    case 'GROUP_CONCAT':
+                    case 'BIT_AND':
+                    case 'BIT_OR':
+                    case 'BIT_XOR':
+                        $parseInfo['tokenType'] = 'aggregate_function';
+                        break;
 
-                    } elseif ($curr->getUpper() === 'NULL') {
-                        // it is a reserved word, but we would like to set it as constant
-                        $curr->setTokenType(ExpressionType::CONSTANT);
+                    case 'NULL':
+                    // it is a reserved word, but we would like to have set it as constant
+                        $parseInfo['tokenType'] = 'const';
+                        break;
 
-                    } else {
-                        if (in_array($curr->getUpper(), parent::$parameterizedFunctions)) {
-                            // issue 60: check functions with parameters 
-                            // -> colref (we check parameters later)
-                            // -> if there is no parameter, we leave the colref
-                            $curr->setTokenType(ExpressionType::COLREF);
-                        } elseif (in_array($curr->getUpper(), parent::$functions)) {
-                            $curr->setTokenType(ExpressionType::SIMPLE_FUNCTION);
+                    default:
+                        if (in_array($parseInfo['upper'], parent::$functions)) {
+                            $parseInfo['tokenType'] = 'function';
                         } else {
-                            $curr->setTokenType(ExpressionType::RESERVED);
+                            $parseInfo['tokenType'] = 'reserved';
                         }
+                        break;
                     }
                 }
 
-                if ($curr->isUnspecified()) {
-                    $curr->setTokenType(ExpressionType::EXPRESSION);
-                    $curr->setSubTree($this->process_expr_list($this->splitSQLIntoTokens($curr->getTrim())));
+                if (!$parseInfo['tokenType']) {
+                    if ($parseInfo['upper'][0] === '(') {
+                        $local_expr = $this->removeParenthesisFromStart($parseInfo['trim']);
+                        $parseInfo['tokenType'] = 'bracket_expression';
+                    } else {
+                        $local_expr = $parseInfo['trim'];
+                        $parseInfo['tokenType'] = 'expression';
+                    }
+                    $parseInfo['processed'] = $this->process_expr_list($this->split_sql($local_expr));
                 }
 
-                $resultList[] = $curr;
-                $prev = $curr;
-
+                $parseInfo = $this->initParseInfoExprList($parseInfo);
             } // end of for-loop
 
-            return $this->toArray($resultList);
+            return (is_array($parseInfo['expr']) ? $parseInfo['expr'] : false);
         }
 
-        /**
-         * This method processes UPDATE statements
-         */
-        private function processUpdate($tokenList) {
-            return $this->process_from($tokenList);
+        private function process_update($tokens) {
+
         }
 
-        /**
-         * This method handles DELETE statements.
-         */
         private function process_delete($tokens) {
             $tables = array();
             $del = $tokens['DELETE'];
 
             foreach ($tokens['DELETE'] as $expression) {
-                if ($expression !== 'DELETE' && trim($expression, ' .*') !== "" && !$this->isCommaToken($expression)) {
+                if ($expression != 'DELETE' && trim($expression, ' .*') != "" && $expression != ',') {
                     $tables[] = trim($expression, '.* ');
                 }
             }
@@ -1462,30 +1486,13 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
             return $tokens;
         }
 
-        /**
-         * This method handles REPLACE statements.
-         */
-        private function processReplace($tokenList) {
-            return $this->processInsert($tokenList, 'REPLACE');
-        }
-
-        /**
-         * This method handles INSERT statements.
-         */
-        private function processInsert($tokenList) {
-            return $this->processInsertOrReplace($tokenList, 'INSERT');
-        }
-
-        /**
-         * This method handles INSERT and REPLACE statements.
-         */
-        private function processInsertOrReplace($tokenList, $token_category) {
+        private function process_insert($tokens, $token_category = 'INSERT') {
             $table = "";
             $cols = array();
 
-            $into = $tokenList['INTO'];
+            $into = $tokens['INTO'];
             foreach ($into as $token) {
-                if ($this->isWhitespaceToken($token))
+                if (trim($token) === "")
                     continue;
                 if ($table === "") {
                     $table = $token;
@@ -1500,50 +1507,46 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
                 $columns = explode(",", $this->removeParenthesisFromStart($cols[0]));
                 $cols = array();
                 foreach ($columns as $k => $v) {
-                    $cols[] = array('expr_type' => ExpressionType::COLREF, 'base_expr' => trim($v));
+                    $cols[] = array('expr_type' => 'colref', 'base_expr' => trim($v));
                 }
             }
 
-            unset($tokenList['INTO']);
-            $tokenList[$token_category][0] = array('table' => $table, 'columns' => $cols, 'base_expr' => $table);
-            return $tokenList;
+            unset($tokens['INTO']);
+            $tokens[$token_category] = array('table' => $table, 'columns' => $cols, 'base_expr' => $table);
+            return $tokens;
         }
 
         private function process_record($unparsed) {
 
             $unparsed = $this->removeParenthesisFromStart($unparsed);
-            $values = $this->splitSQLIntoTokens($unparsed);
+            $values = $this->split_sql($unparsed);
 
             foreach ($values as $k => $v) {
-                if ($this->isCommaToken($v)) {
+                if (trim($v) === ",") {
                     $values[$k] = "";
                 }
             }
             return $this->process_expr_list($values);
         }
 
-        /**
-         * This method handles VALUES parts (from INSERT)
-         */
         private function process_values($tokens) {
 
             $unparsed = "";
             foreach ($tokens['VALUES'] as $k => $v) {
-                if ($this->isWhitespaceToken($v)) {
+                if (trim($v) === "") {
                     continue;
                 }
                 $unparsed .= $v;
             }
 
-            $values = $this->splitSQLIntoTokens($unparsed);
+            $values = $this->split_sql($unparsed);
 
             $parsed = array();
             foreach ($values as $k => $v) {
-                if ($this->isCommaToken($v)) {
+                if (trim($v) === ",") {
                     unset($values[$k]);
                 } else {
-                    $values[$k] = array('expr_type' => ExpressionType::RECORD, 'base_expr' => $v,
-                                        'data' => $this->process_record($v));
+                    $values[$k] = array('expr_type' => 'record', 'base_expr' => $v, 'data' => $this->process_record($v));
                 }
             }
 
@@ -1555,76 +1558,15 @@ if (!defined('HAVE_PHP_SQL_PARSER')) {
          * TODO: This is a dummy function, we cannot parse INTO as part of SELECT
          * at the moment
          */
-        private function processInto($tokenList) {
-            $unparsed = $tokenList['INTO'];
+        private function process_into($tokens) {
+            $unparsed = $tokens['INTO'];
             foreach ($unparsed as $k => $token) {
-                if ($this->isWhitespaceToken($token) || $this->isCommaToken($token)) {
+                if ((trim($token) === "") || (trim($token) === ",")) {
                     unset($unparsed[$k]);
                 }
             }
-            $tokenList['INTO'] = array_values($unparsed);
-            return $tokenList;
-        }
-
-        private function processDrop($tokenList) {
-
-            $skip = false;
-            $warning = true;
-            $base_expr = "";
-            $expr_type = false;
-            $option = false;
-            $resultList = array();
-
-            foreach ($tokenList as $k => $v) {
-                $token = new ExpressionToken($k, $v);
-
-                if ($token->isWhitespaceToken()) {
-                    continue;
-                }
-
-                if ($skip === true) {
-                    $skip = false;
-                    continue;
-                }
-
-                switch ($token->getUpper()) {
-                case 'VIEW':
-                case 'SCHEMA':
-                case 'DATABASE':
-                case 'TABLE':
-                    $expr_type = strtolower($token->getTrim());
-                    break;
-
-                case 'IF':
-                    $warning = false;
-                    $skip = true;
-                    break;
-
-                case 'TEMPORARY':
-                    $expr_type = ExpressionType::TEMPORARY_TABLE;
-                    $skip = true;
-                    break;
-
-                case 'RESTRICT':
-                case 'CASCADE':
-                    $option = $token->getUpper();
-                    break;
-
-                case ',':
-                    $resultList[] = array('expr_type' => $expr_type, 'base_expr' => $base_expr);
-                    $base_expr = "";
-                    break;
-
-                default:
-                    $base_expr .= $token->getToken();
-                }
-            }
-
-            if ($base_expr !== "") {
-                $resultList[] = array('expr_type' => $expr_type, 'base_expr' => $base_expr);
-            }
-
-            return array('option' => $option, 'warning' => $warning, 'object_list' => $resultList);
+            $tokens['INTO'] = array_values($unparsed);
+            return $tokens;
         }
     }
     define('HAVE_PHP_SQL_PARSER', 1);

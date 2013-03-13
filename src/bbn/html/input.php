@@ -62,12 +62,12 @@ class input
 	 */
 	public function __construct(array $cfg = null)
 	{
-		if ( isset($cfg['name'], $cfg['tag']) )
+		if ( isset($cfg['name']) )
 		{
 			$mandatory_opt = array();
 			$possible_opt = array("required", "width", "placeholder", "cssclass", "title");
 			$this->cfg = $cfg;
-			$this->tag = strtolower($cfg['tag']);
+			$this->tag = isset($cfg['tag']) ? strtolower($cfg['tag']) : 'input';
 			$this->name = $cfg['name'];
 			$this->id = isset($cfg['id']) ? $cfg['id'] : \bbn\str\text::genpwd(20,15);
 			$this->label = isset($cfg['label']) ? $cfg['label'] : str_replace(']', ')',str_replace('[',' (',str_replace('_', ' ', $cfg['name'])));
@@ -125,7 +125,15 @@ class input
 		$s = $this->get_html();
 		if ( !empty($s) ){
 			if ( BBN_IS_DEV ){
-				$title = str_replace('"','',print_r($this->cfg,true));
+        $a = $this->cfg;
+				if ( isset($this->cfg['options']) ){
+          foreach ( $a['options'] as $k => $v ){
+            if ( is_object($v) ){
+              $a['options'][$k] = get_class($v);
+            }
+          }
+        }
+        $title = str_replace('"', '', print_r ($a, true));
 			}
 			else if ( isset($this->options['title']) ){
 				$title = $this->options['title'];
@@ -149,7 +157,7 @@ class input
 			if ( $this->id ){
 				$r .= '$("#'.$this->id.'").focus(function(){
 					var $$ = $(this),
-					lab = $(this).prevAll("label").first();
+            lab = $(this).prevAll("label").first();
 					if ( lab.length === 0 ){
 						lab = $$.parent().prevAll("label").first();
 					}
@@ -176,48 +184,70 @@ class input
 	}
 	
 	/**
-	 * Returns the HTML string for the object.
+	 * Returns the corresponding HTML string 
 	 */
 	public function get_html()
 	{
 		if ( empty($this->html) && $this->name ){
 			
+      // TAG
 			$this->html .= '<'.$this->tag.' name="'.$this->name.'"';
 			
+      
+      // ID
 			if ( isset($this->id) ){
 				$this->html .= ' id="'.$this->id.'"';
 			}
 			
-			if ( $this->tag === 'input' && isset($this->options['type']) ){
-				$this->html .= ' type="'.$this->options['type'].'"';
+      $o =& $this->options;
+      
+      // If it's an INPUT tag
+			if ( $this->tag === 'input' && isset($o['type']) ){
+        
+        // TYPE
+				$this->html .= ' type="'.$o['type'].'"';
 				
-				if ( $this->options['type'] === 'text' || $this->options['type'] === 'number' || $this->options['type'] === 'password' || $this->options['type'] === 'email' ){
-					if ( isset($this->options['maxlength']) && ( $this->options['maxlength'] > 0 ) && $this->options['maxlength'] <= 1000 ){
-						$this->html .= ' maxlength="'.$this->options['maxlength'].'"';
+        // Checking the type
+        // @todo The file type is missing but I'm not sure as there's the "file tag"
+        if ( $o['type'] === 'text' || $o['type'] === 'number' || $o['type'] === 'password' || $o['type'] === 'email' ){
+          
+          // Maxlength
+					if ( isset($o['maxlength']) && ($o['maxlength'] > 0) && $o['maxlength'] <= 1000 ){
+						$this->html .= ' maxlength="'.$o['maxlength'].'"';
 					}
-					if ( isset($this->options['minlength']) && ( $this->options['minlength'] > 0 ) && $this->options['minlength'] <= 1000 && ( 
-					( isset($this->options['maxlength']) && $this->options['maxlength'] > $this->options['minlength'] ) || !isset($this->options['maxlength']) ) ){
-						$this->html .= ' minlength="'.$this->options['minlength'].'"';
+          
+          // Minlength
+					if ( isset($o['minlength']) &&
+                  ( $o['minlength'] > 0 ) &&
+                  $o['minlength'] <= 1000 && ( 
+                  // Checking it's not higher than maxlength
+                    ( isset($o['maxlength']) && $o['maxlength'] > $o['minlength'] ) ||
+                    !isset($o['maxlength']) ) ){
+						$this->html .= ' minlength="'.$o['minlength'].'"';
 					}
-					if ( isset($this->options['size']) && ( $this->options['size'] > 0 ) && $this->options['size'] <= 100 ){
-						$this->html .= ' size="'.$this->options['size'].'"';
+          
+          // Size
+					if ( isset($o['size']) && ( $o['size'] > 0 ) && $o['size'] <= 255 ){
+						$this->html .= ' size="'.$o['size'].'"';
 					}
 				}
-				if ( $this->options['type'] === 'checkbox' ){
-					if ( !isset($this->options['value']) ){
-						$this->options['value'] = 1;
+        
+        // Checkbox
+				else if ( $o['type'] === 'checkbox' ){
+          
+          // If no value, giving 1
+					if ( !isset($o['value']) ){
+						$o['value'] = 1;
 					}
-					$this->html .= ' value="'.htmlentities($this->options['value']).'"';
-					if ( $this->value == $this->options['value'] ){
+          
+					if ( $this->value == $o['value'] ){
 						$this->html .= ' checked="checked"';
 					}
 				}
 				else if ( $this->options['type'] === 'radio' ){
 					
 				}
-				else{
-					$this->html .= ' value="'.htmlentities($this->value).'"';
-				}
+        $this->html .= ' value="'.htmlentities($this->value).'"';
 			}
 			
 			if ( isset($this->options['title']) ){
@@ -226,26 +256,26 @@ class input
 			
 			$class = '';
 			
-			if ( isset($this->options['cssclass']) ){
-				$class .= $this->options['cssclass'].' ';
+			if ( isset($o['cssclass']) ){
+				$class .= $o['cssclass'].' ';
 			}
 
 			if ( $this->required ){
 				$class .= 'required ';
 			}
-			if ( isset($this->options['email']) ){
+			if ( isset($o['email']) ){
 				$class .= 'email ';
 			}
-			if ( isset($this->options['url']) ){
+			if ( isset($o['url']) ){
 				$class .= 'url ';
 			}
-			if ( isset($this->options['number']) ){
+			if ( isset($o['number']) ){
 				$class .= 'number ';
 			}
-			if ( isset($this->options['digits']) ){
+			if ( isset($o['digits']) ){
 				$class .= 'digits ';
 			}
-			if ( isset($this->options['creditcard']) ){
+			if ( isset($o['creditcard']) ){
 				$class .= 'creditcard ';
 			}
 			
@@ -259,8 +289,8 @@ class input
 				$this->html .= '</'.$this->tag.'>';
 			}
 			
-			if ( isset($this->options['placeholder']) && strpos($this->options['placeholder'],'%s') !== false ){
-				$this->html = sprintf($this->options['placeholder'], $this->html);
+			if ( isset($o['placeholder']) && strpos($o['placeholder'],'%s') !== false ){
+				$this->html = sprintf($o['placeholder'], $this->html);
 			}
 		}
 		return $this->html;

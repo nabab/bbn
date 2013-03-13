@@ -35,7 +35,6 @@
  * @package bbn\db
  */
 namespace bbn\db;
-use Exception;
 
 class UnableToCreateSQLException extends \Exception {
 

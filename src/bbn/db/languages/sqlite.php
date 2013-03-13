@@ -290,18 +290,23 @@ class sqlite implements \bbn\db\engines
 			}
 			$r .= 'SELECT ';
 			if ( count($fields) > 0 ){
-				foreach ( $fields as $k ){
-					if ( !isset($m['fields'][$k]) ){
-						die("The column $k doesn't exist in $table");
+				foreach ( $fields as $k => $c ){
+					if ( !isset($m['fields'][$c]) ){
+						die("The column $c doesn't exist in $table");
 					}
 					else{
-						$r .= '"'.$k.'",'.PHP_EOL;
+            if ( !is_numeric($k) && \bbn\str\text::check_name($k) ){
+              $r .= '"'.$c.'" AS '.$k.','.PHP_EOL;
+            }
+            else{
+              $r .= '"$c",'.PHP_EOL;
+            }
 					}
 				}
 			}
 			else{
-				foreach ( array_keys($m['fields']) as $k ){
-          $r .= '"'.$k.'",'.PHP_EOL;
+				foreach ( array_keys($m['fields']) as $c ){
+          $r .= '"'.$c.'",'.PHP_EOL;
 				}
 			}
 			$r = substr($r,0,strrpos($r,',')).PHP_EOL.'FROM '.$table;

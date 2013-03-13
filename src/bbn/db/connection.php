@@ -1092,12 +1092,6 @@ class connection extends \PDO implements actions, api, engines
 		$hash = $this->make_hash('insert_update', $table, serialize(array_keys($values)));
 		if ( isset($this->queries[$hash]) ){
 			$sql = $this->queries[$this->queries[$hash]]['statement'];
-			if ( $this->queries[$this->queries[$hash]]['num_val'] === ( count($values) / 2 ) ){
-				$vals = array_merge(array_values($values),array_values($values));;
-			}
-			else{
-				$vals = array_values($values);
-			}
 		}
 		else if ( $sql = $this->language->get_insert($table, array_keys($values)) ){
 			$sql .= " ON DUPLICATE KEY UPDATE ";
@@ -1108,6 +1102,7 @@ class connection extends \PDO implements actions, api, engines
 			}
 			$sql = substr($sql,0,strrpos($sql,','));
 		}
+    $vals = array_merge(array_values($values),array_values($values));;
 		if ( $sql && ( $this->triggers_disabled || $this->launch_triggers($table, 'insert', 'before', $values) ) ){
       $last = $this->last_id();
       $r = $this->query($sql, $hash, $vals);
