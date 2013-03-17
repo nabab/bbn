@@ -33,16 +33,11 @@ class builder
 		'placeholder' => false,
 		'script' => false,
 		'options' => [
-			'type' => 'text',
-			'maxlength' => 100,
-			'size' => 30,
-			'db' => false,
-			'cols' => 30,
-			'rows' => 6
+			'type' => 'text'
 		],
 		'css' => [],
 		'xhtml' => false,
-		'lang' => 'en'
+		'lang' => 'fr'
 	],
 	/**
 	 * The current default configuration
@@ -200,6 +195,7 @@ class builder
 	 */
 	public function get_input($cfg=null)
 	{
+    
 		if ( is_array($cfg) && isset($cfg['name']) ){
 			foreach ( $cfg as $k => $v ){
 				if ( isset($this->_current[$k]) ){
@@ -221,13 +217,16 @@ class builder
 			if ( !isset($cfg['options']) ){
 				$cfg['options'] = array();
 			}
-			if ( isset($cfg['options']['sql'], $cfg['options']['db']) && strlen($cfg['options']['sql']) > 5 ){
+			if ( isset($cfg['options']['sql'], $cfg['options']['db']) && $cfg['options']['db'] && strlen($cfg['options']['sql']) > 5 ){
+        
+        $db =& $cfg['options']['db'];
+        
         if ( !isset($cfg['options']['dataSource']) ){
   				$cfg['options']['dataSource'] = array();
         }
-				$count = ( $r = $cfg['options']['db']->query($cfg['options']['sql']) ) ? $r->count() : 0;
+				$count = ( $r = $db->query($cfg['options']['sql']) ) ? $r->count() : 0;
 				if ( $count <= self::max_values_at_once ){
-					if ( $ds = $cfg['options']['db']->get_irows($cfg['options']['sql']) ){
+					if ( $ds = $db->get_irows($cfg['options']['sql']) ){
 						foreach ( $ds as $d ){
 							array_push($cfg['options']['dataSource'], array('value' => $d[0], 'text' => $d[1]));
 						}
@@ -329,15 +328,6 @@ class builder
 				if ( $cfg['options']['maxlength'] <= 20 ){
 					$cfg['options']['size'] = $cfg['options']['maxlength'];
 				}
-				else if ( $cfg['options']['maxlength'] <= 50 ){
-					$cfg['options']['size'] = 20 + floor( ( $cfg['options']['maxlength'] - 20 ) / 2 );
-				}
-				else if ( $cfg['options']['maxlength'] <= 200 ){
-					$cfg['options']['size'] = floor($cfg['options']['maxlength']/2);
-				}
-				else{
-					$cfg['options']['size'] = 100;
-				}
 			}
 			if ( isset($cfg['options']['size'], $cfg['options']['minlength']) && $cfg['options']['size'] < $cfg['options']['minlength']){
 				$cfg['options']['size'] = $cfg['options']['minlength'];
@@ -359,7 +349,6 @@ class builder
 					}
 					//var_dump($widget_cfg);
 					$cfg['script'] = '$("#'.$cfg['id'].'").'.$wid['fn'].'('.json_encode((object)$widget_cfg).');';
-          var_dump($cfg['script']);
 				}
 				else{
 					switch ( $cfg['field'] )

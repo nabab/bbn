@@ -379,5 +379,19 @@ class text
 		return preg_replace("/[^0-9]/", '', $st);
 	}
 
+  public static function make_readable($o)
+  {
+    if ( is_object($o) ){
+      return get_class($o);
+    }
+    else if ( is_array($o) ){
+      $r = [];
+      foreach ( $o as $k => $v ){
+        $r[$k] = self::make_readable($v);
+      }
+      return $r;
+    }
+    return $o;
+  }
 }
 ?>

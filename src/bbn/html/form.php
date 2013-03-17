@@ -34,10 +34,15 @@ class form
 	 */
           $cfg = [
               'action' => '',
+              'title' => false,
               'method' => 'post',
               'builder' => false,
               'id' => false,
-              'no_form' => false
+              'no_form' => false,
+              'elements' => [],
+              'submit' => 'Envoyer',
+              'icon' => false,
+              'buttonClass' => 'k-button'
           ],
           $opened_fieldset = false;
 	
@@ -51,6 +56,7 @@ class form
           $method,
           $builder,
           $id,
+          $submit,
           $no_form;
 
 	/**
@@ -62,14 +68,25 @@ class form
 	public function __construct( array $cfg = null )
 	{
     if ( $cfg ){
-      foreach ( $cfg as $k => $v ){
-        if ( isset($this->cfg[$k]) ){
+      foreach ( $this->cfg as $k => $v ){
+        if ( isset($cfg[$k]) ){
           $this->$k = $cfg[$k];
+        }
+        else{
+          $this->$k = $v;
         }
       }
 		}
     if ( !$this->builder ){
       $this->builder = new builder();
+    }
+    else if ( is_array($this->builder) ){
+      $this->builder = new builder($this->builder);
+    }
+    foreach ( $this->elements as $i => $e ){
+      if ( is_array($e) && !isset($e['fieldset'], $e['end_fieldset']) ){
+        $this->elements[$i] = $this->builder->get_input($e);
+      }
     }
 	}
 	
@@ -122,14 +139,14 @@ class form
             break;
         }
       }
-      else{
+      else if ( is_object($it) ){
   			$s .= $it->get_label_input();
       }
 		}
     if ( $this->opened_fieldset ){
       $s .= '</fieldset>';
     }
-		$s .= '<div class="appui-form-label"> </div><div class="appui-form-field"><input type="submit"></div></form>';
+		$s .= '<div class="appui-form-label"> </div><button class="appui-form-field '.$this->cfg['buttonClass'].'">'.$this->submit.'</button></form>';
     if ( $with_js ){
       $s .= '<script type="text/javascript">'.$this->get_script().'</script>';
     }
@@ -152,5 +169,31 @@ class form
 		$st .= '$("#'.$this->id.'").validate({errorElement: "em"});';
 		return $st;
 	}
+  
+  public function get_config()
+  {
+    $r = [
+          'action' => $this->action,
+          'method' => $this->method,
+          'builder' => $this->builder,
+          'id' => $this->id,
+          'no_form' => $this->no_form,
+          'elements' => []
+    ];
+    foreach ( $this->elements as $e ){
+      if ( is_object($e) ){
+        array_push($r['elements'], $e->get_config());
+      }
+      else{
+        array_push($r['elements'], $e);
+      }
+    }
+    return $r;
+  }
+  
+  public function show_config()
+  {
+    return \bbn\str\text::make_readable($this->get_config());
+  }
 }		
 ?>

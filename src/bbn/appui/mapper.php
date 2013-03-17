@@ -68,85 +68,134 @@ class mapper{
 		
 	}
 	
-	/**
-	 * Generates a whole form configuration array for a given table according to its structure and/or form configuration
-	 * 
-	 * @param string | integer $table The database's table or the ID of the form
-	 * @return string
-	 */
-	public function config_form($table){
+  public function save_config($cfg)
+  {
+    $copy = $cfg;
+    unset($copy['elements']);
+    $this->db->insert($this->prefix.'forms', [
+        'id_project' => 1,
+        'configuration' => serialize($cfg)
+        ]);
+    $id = $this->db->last_id();
+    if ( isset($cfg['elements']) ){
+      foreach ( $cfg['elements'] as $i => $ele ){
+        $this->db->insert($this->admin_db.'.'.$this->prefix.'fields',[
+            'id_form' => $id,
+            'column' => $this->db->host.'.'.$this->client_db.'.'.$ele['name'],
+            'title' => isset($ele['label']) ? $ele['label'] : null,
+            'position' => $ele['position'],
+            'configuration' => serialize($ele)
+        ]);
+      }
+    }
+  }
+  
+  private function get_table_form($table){
+    
+    if ( $this->db && ($table = $this->db->get_full_name($table)) ){
 
-    $r = [];
-		$cfg = [];
+      $cfg = [];
 
-    if( $this->db ){
-      
-      
-      $table = $this->db->get_full_name($table);
       $table = explode(".",$table);
       if ( count($table) === 2 ){
         $database = trim($table[0]);
+        $this->client_db = $database;
         $table = trim($table[1]);
-      }
-      $this->client_db = $database;
-
-			// Looks in the db for columns corresponding to the given table
-			$cond = '';
-			if ( is_int($table) || ctype_digit($table) ){
-				$cond = " AND `id` = $table ";
-			}
-			else if ( \bbn\str\text::check_name($database, $table) ){
-				$cond = " AND `{$this->prefix}projects`.`db` LIKE '{$database}' AND `{$this->prefix}fields`.`column` LIKE '$table.%'";
-			}
-      
-			if ( !empty($cond) && !( $form = $this->db->get_rows("
-        SELECT `{$this->prefix}fields`.*, `{$this->prefix}projects`.`id` AS `id_project`
-        FROM `{$this->admin_db}`.`{$this->prefix}forms`
-          JOIN `{$this->admin_db}`.`{$this->prefix}fields`
-            ON `{$this->prefix}fields`.`id_form` = `{$this->prefix}forms`.`id`
-          JOIN `{$this->admin_db}`.`{$this->prefix}projects`
-            ON `{$this->prefix}projects`.`id` = `{$this->prefix}forms`.`id_project`
-        WHERE 1 $cond 
-        ORDER BY `position`")
-      ) ){
         // Creates the default form configuration
         $square = new \bbn\appui\square($this->db, "apst_ui");
 
-        $t = $square->get_table($table);
-
-        $r['title'] = $t->tit;
+        if ( $sqt = $square->get_table($table) ){
+          $title = $sqt->tit;
+        }
+        else{
+          $title = false;
+        }
+        
 
         $db_info = $this->db->modelize($table);
         $i = 0;
         foreach ( $db_info['fields'] as $name => $c ){
+          
           $cfg[$i] = $this->config_input($table, $name);
           $cfg[$i]['default'] = $c['default'];
           if ( isset($c['maxlength']) ){
             $cfg[$i]['options']['maxlength'] = $c['maxlength'];
           }
-          if ( isset($t->fields[$name]) ){
-            $info = $t->fields[$name];
-            if ( isset($cfg[$i]['script']) ){
-              unset($cfg[$i]['script']);
-            }
-            if ( isset($cfg[$i]['field']) ){
-              unset($cfg[$i]['field']);
-            }
+          if ( isset($sqt->fields[$name]) ){
+            
+            $info = $sqt->fields[$name];
             if ( is_object($info) ){
               $cfg[$i]['params'] = $info->params;
-              $cfg[$i]['name'] = $info->name;
-              $cfg[$i]['required'] = $info->mand;
-              $cfg[$i]['label'] = $info->tit.' ('.$info->id_form.')';
-              $cfg[$i] = $square->get_config_from_id($info->id_form,$cfg[$i]);
+              $cfg[$i]['required'] = $info->mand == 1 ? 1 : false;
+              $cfg[$i]['label'] = $info->tit;
+              //$cfg[$i] = $square->get_config_from_id($info->id_form,$cfg[$i]);
             }
             $cfg[$i]['table'] = $table;
-            $cfg[$i]['options'] = array('db' => $this->db);
           }
           $i++;
         }
-			}
+      }
+      return [
+          "action" => ".",
+          "title" => $title,
+          "elements" => $cfg,
+          
+      ];
+    }
+  }
+
+
+  /**
+	 * Generates a whole form configuration array for a given table according to its structure and/or form configuration
+	 * 
+	 * @param string | integer $table The database's table or the ID of the form
+	 * @return string
+	 */
+	public function load_config($id, $builder=null){
+
+    if( $this->db ){
+      
+      if ( is_null($builder) ){
+        $builder = new \bbn\html\builder();
+      }
+			// Looks in the db for columns corresponding to the given table
+			$cond = '';
+
+      if ( \bbn\str\text::is_number($id) && $form = $this->db->rselect(
+              $this->admin_db.'.'.$this->prefix.'forms', [], ["id" => $id]) ){
+          
+        $cfg = unserialize($form['configuration']);
+        $fields = $this->db->rselect_all(
+                $this->admin_db.'.'.$this->prefix.'fields', [], ["id_form"=>$id]);
+        foreach ( $fields as $k => $f ){
+          $fields[$k] = unserialize($f['configuration']);
+          $fields[$k]['options'] = (array)$fields[$k]['options'];
+          if ( isset($fields[$k]['options']['db']) ){
+            $fields[$k]['options']['db'] =& $this->db;
+          }
+        }
+        $cfg['elements'] = $fields;
+      }
+      else if ( is_array($id) ){
+        $cfg = $id;
+      }
+      else{
+        return $this->get_table_form($id);
+      } 
+
+      if ( isset($cfg) ){
+        if ( !isset($cfg['builder']) || is_string($cfg['builder']) ){
+          $cfg['builder'] =& $builder;
+        }
+        foreach ( $cfg['elements'] as $k => $f ){
+          if ( isset($cfg['elements'][$k]['options']['db']) && is_string($cfg['elements'][$k]['options']['db']) ){
+            $cfg['elements'][$k]['options']['db'] =& $this->db;
+          }
+        }
+        return $cfg;
+      }
 		}
-		return array('info' => $r, 'cfg' => $cfg);
+		return false;
 	}
 	
 	/**
@@ -157,40 +206,32 @@ class mapper{
 	 * @return \bbn\html\input
 	 */
 	public function config_input($table, $column){
+    
 		// Looks in the db for columns corresponding to the given table
-		if ( $this->db && \bbn\str\text::check_name($column) && ( $table = $this->db->get_full_name($table) ) && $col = $this->db->get_row("
-				SELECT *
-				FROM `{$this->admin_db}`.`{$this->prefix}columns`
-				WHERE `id` LIKE 'localhost.$table.$column'")
-		){
-			if ( !( $keys = $this->db->get_rows("
-				SELECT *
-				FROM `{$this->admin_db}`.`{$this->prefix}keys`
-				WHERE `column` LIKE '$column'")
-			) ){
-				$keys = array();
-			}
-			$cfg = array(
-				'name' => $col['column'],
+		if ( $this->db && \bbn\str\text::check_name($column) && ($table_cfg = $this->db->modelize($table)) && isset($table_cfg['fields'][$column]) ){
+      $col = $table_cfg['fields'][$column];
+			$full_name = explode(".", $this->db->get_full_name($table))[1].'.'.$column;
+      $cfg = array(
+				'name' => $full_name,
 				'position' => $col['position'],
 				'null' => $col['null'] ? 1 : false
 			);
-			
+      
 			if ( strpos($col['type'], 'enum') === 0 ){
-				preg_match('|\(([^\)]+)\)|', $col['type'], $m);
+				preg_match_all("/'((?:[^']|\\\\.)*)'/", $col['extra'], $m);
 				if ( isset($m[1]) ){
 					$cfg['field'] = 'dropdown';
 					$cfg['options']['dataSource'] = [];
-					$data = explode(',', $m[1]);
-					foreach ( $data as $d ){
+					foreach ( $m[1] as $d ){
 						array_push($cfg['options']['dataSource'], ['value' => $d, 'text' => $d]);
 					}
 				}
 			}
-			else{
+			
+      else{
 				$dec = false;
 				$ref = false;
-				if ( preg_match('|\(([0-9,]+)\)|', $col['type'], $m) ){
+				if ( preg_match('|\(([0-9,]+)\)|', $col['extra'], $m) ){
 					if ( strpos($m[1], ',') ){
 						$dec = explode(",", $m[1]);
 						$cfg['options']['maxlength'] = (int)($dec[0] + 1);
@@ -202,32 +243,36 @@ class mapper{
         else{
           $cfg['options']['maxlength'] = null;
         }
-				foreach ( $keys as $key ){
-					if ( $key['key'] === 'PRIMARY' ){
-					}
-					else if ( \bbn\str\text::check_name($key['ref_db'], $key['ref_table'], $key['ref_column']) ){
-						$ref = array('db'=>$key['ref_db'], 'table'=>$key['ref_table'], 'column'=>$key['ref_column']);
-						break;
-					}
-				}
-				if ( $ref ){
-					$primary = $this->db->get_var("
-						SELECT `column`
-						FROM `{$this->admin_db}`.`{$this->prefix}keys`
-						WHERE `column` LIKE '$key[ref_column]'
-						AND `key` LIKE 'PRIMARY'");
-					$secondary = $this->db->get_var("
-						SELECT `column`
-						FROM `{$this->admin_db}`.`{$this->prefix}columns`
-						WHERE `column` LIKE '$key[ref_column]'
-						AND `key` IS NULL
-						ORDER BY position
-						LIMIT 1");
-					$cfg['field'] = 'dropdown';
-					$cfg['options']['sql'] = "
-						SELECT `$key[ref_table]`.`$primary`, `$key[ref_table]`.`$secondary`
-						FROM $key[ref_column]";
+        if ( isset($col['keys']) ){
+          foreach ( $col['keys'] as $k ){
+            $key = $table_cfg['keys'][$k];
+            if ( $k === 'PRIMARY' ){
+            }
+            else if ( \bbn\str\text::check_name($key['ref_db'], $key['ref_table'], $key['ref_column']) ){
+              $ref = [
+                  'db' => $key['ref_db'],
+                  'table' => $key['ref_table'],
+                  'column' => $key['ref_column']
+              ];
+              break;
+            }
+          }
+        }
+				if ( is_array($ref) && $ref_table_cfg = $this->db->modelize($ref['table']) ){
+          // Arguments for select
+          $cols = [$ref['column']];
+          foreach ( $ref_table_cfg['fields'] as $name => $def ){
+            if ( ($def['type'] === 'varchar') || ($def['type'] === 'text') ){
+              $cols = [
+                  "value" => $ref['column'],
+                  "label" => $name
+              ];
+              break;
+            }
+          }
+          $cfg['options']['sql'] = $this->db->get_select($ref['table'], $cols);
 					$cfg['options']['db'] = $this->db;
+					$cfg['field'] = 'dropdown';
 				}
 				else if ( strpos($col['type'], 'char') !== false ){
 					$cfg['field'] = 'text';
@@ -264,16 +309,21 @@ class mapper{
 					$cfg['field'] = 'datetime';
 				}
 				else if ( strpos($col['type'], 'int') !== false ){
-					if ( strpos($col['type'], 'unsigned') ){
-						$cfg['options']['min'] = 0;
-					}
+          if ( $col['maxlength'] == 1 ){
+            $cfg['field'] = 'checkbox';
+          }
 					else{
-						$cfg['options']['min'] = false;
+            if ( strpos($col['type'], 'unsigned') ){
+  						$cfg['options']['min'] = 0;
+            }
+            else{
+              $cfg['options']['min'] = false;
+            }
+            $cfg['field'] = 'numeric';
+            $cfg['options']['decimals'] = 0;
+            $cfg['options']['format'] = 'd';
+            $cfg['options']['type'] = 'number';
 					}
-					$cfg['field'] = 'numeric';
-					$cfg['options']['decimals'] = 0;
-					$cfg['options']['format'] = 'd';
-					$cfg['options']['type'] = 'number';
 				}
 			}
 			return $cfg;
@@ -430,19 +480,16 @@ class mapper{
 	public function create_tables(){
 		if ( $this->db ){
       if ( !in_array($this->prefix.'tables', $this->db->get_tables()) ){
+        $this->db->disable_keys();
         return $this->db->query("
-        SET FOREIGN_KEY_CHECKS=0;
-        SET SQL_MODE=\"NO_AUTO_VALUE_ON_ZERO\";
-        SET time_zone = \"+00:00\";
-
-        #DROP TABLE IF EXISTS `{$this->prefix}clients`;
+        -- DROP TABLE IF EXISTS `{$this->prefix}clients`;
         CREATE TABLE IF NOT EXISTS `{$this->prefix}clients` (
         `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
         `nom` varchar(100) NOT NULL,
         PRIMARY KEY (`id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
-        #DROP TABLE IF EXISTS `{$this->prefix}columns`;
+        -- DROP TABLE IF EXISTS `{$this->prefix}columns`;
         CREATE TABLE IF NOT EXISTS `{$this->prefix}columns` (
         `id` varchar(180) NOT NULL,
         `table` varchar(130) NOT NULL,
@@ -458,7 +505,7 @@ class mapper{
         UNIQUE KEY `table_2` (`table`,`position`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-        #DROP TABLE IF EXISTS `{$this->prefix}dbs`;
+        -- DROP TABLE IF EXISTS `{$this->prefix}dbs`;
         CREATE TABLE IF NOT EXISTS `{$this->prefix}dbs` (
         `id` varchar(80) NOT NULL,
         `id_client` int(10) unsigned DEFAULT NULL,
@@ -470,7 +517,7 @@ class mapper{
         KEY `id_client` (`id_client`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-        #DROP TABLE IF EXISTS `{$this->prefix}fields`;
+        -- DROP TABLE IF EXISTS `{$this->prefix}fields`;
         CREATE TABLE IF NOT EXISTS `{$this->prefix}fields` (
         `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
         `id_form` int(10) unsigned NOT NULL,
@@ -484,15 +531,16 @@ class mapper{
         KEY `column` (`column`)
         ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
-        #DROP TABLE IF EXISTS `{$this->prefix}forms`;
+        -- DROP TABLE IF EXISTS `{$this->prefix}forms`;
         CREATE TABLE IF NOT EXISTS `{$this->prefix}forms` (
         `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
         `id_project` int(10) unsigned NOT NULL,
+        `configuration` text CHARACTER SET utf8 NOT NULL,
         PRIMARY KEY (`id`),
         KEY `id_project` (`id_project`)
         ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
-        #DROP TABLE IF EXISTS `{$this->prefix}history`;
+        -- DROP TABLE IF EXISTS `{$this->prefix}history`;
         CREATE TABLE IF NOT EXISTS `{$this->prefix}history` (
         `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
         `operation` enum('INSERT','UPDATE','DELETE') NOT NULL,
@@ -506,7 +554,7 @@ class mapper{
         KEY `column` (`column`)
         ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=52 ;
 
-        #DROP TABLE IF EXISTS `{$this->prefix}keys`;
+        -- DROP TABLE IF EXISTS `{$this->prefix}keys`;
         CREATE TABLE IF NOT EXISTS `{$this->prefix}keys` (
         `id` varchar(230) NOT NULL,
         `key` varchar(49) NOT NULL,
@@ -519,7 +567,7 @@ class mapper{
         KEY `column` (`column`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-        #DROP TABLE IF EXISTS `{$this->prefix}projects`;
+        -- DROP TABLE IF EXISTS `{$this->prefix}projects`;
         CREATE TABLE IF NOT EXISTS `{$this->prefix}projects` (
         `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
         `id_client` int(10) unsigned NOT NULL,
@@ -532,7 +580,7 @@ class mapper{
         KEY `id_client` (`id_client`)
         ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
-        #DROP TABLE IF EXISTS `{$this->prefix}tables`;
+        -- DROP TABLE IF EXISTS `{$this->prefix}tables`;
         CREATE TABLE IF NOT EXISTS `{$this->prefix}tables` (
         `id` varchar(130) NOT NULL,
         `db` varchar(80) NOT NULL,
@@ -563,8 +611,8 @@ class mapper{
 
         ALTER TABLE `{$this->prefix}tables`
         ADD CONSTRAINT `{$this->prefix}tables_ibfk_1` FOREIGN KEY (`db`) REFERENCES `{$this->prefix}dbs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-        SET FOREIGN_KEY_CHECKS=1;
         ");
+        $this->db->enable_keys();
       }
 		}
 	}

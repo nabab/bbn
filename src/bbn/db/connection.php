@@ -193,7 +193,7 @@ class connection extends \PDO implements actions, api, engines
 				echo implode("\n",$msg);
 			}
 			else if ( !defined("BBN_IS_DEV") || constant("BBN_IS_DEV") !== false ){
-				die();
+				die("Error with the database...");
 			}
 		}
 	}
@@ -645,7 +645,7 @@ class connection extends \PDO implements actions, api, engines
                   $q['exe_time'] = microtime(1) - $t;
                 }
               }
-              else if ( $num_values > 0 ){
+              else{
                 $q['prepared']->init($this->last_params['values']);
               }
               return $q['prepared'];
@@ -957,19 +957,16 @@ class connection extends \PDO implements actions, api, engines
     return false;
 	}
 
-	/**
-	 * @returns a row as an object
-	 */
-	public function select($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
+  private function _sel($table, $fields = array(), $where = array(), $order = false, $limit = 100, $start = 0)
 	{
-		$hash = $this->make_hash('select', $table, serialize($fields), serialize(array_keys($where)), ( $order ? 1 : '0' ), $limit);
+		$hash = $this->make_hash('select', $table, serialize($fields), serialize(array_keys($where)), ( $order ? 1 : '0' ), $limit, $start);
 		if ( isset($this->queries[$hash]) ){
 			$sql = $this->queries[$this->queries[$hash]]['statement'];
 		}
 		else{
 			$sql = $this->language->get_select($table, $fields, array_keys($where), $order, $limit);
 		}
-		if ( $sql && ( $this->triggers_disabled || $this->launch_triggers($table, 'select', 'before', $fields, $where) ) ){
+		if ( $sql && ( $this->triggers_disabled || $this->launch_triggers($table, 'select', 'before', array_values($fields), $where) ) ){
       if ( count($where) > 0 ){
         $r = $this->query($sql, $hash, array_values($where));
       }
@@ -978,9 +975,30 @@ class connection extends \PDO implements actions, api, engines
       }
       if ( $r ){
         $this->launch_triggers($table, 'select', 'after', $fields, $where);
-        return $r->get_object();
       }
+      return $r;
+    }
+  }
+	/**
+	 * @returns a row as an object
+	 */
+	public function select($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
+	{
+    if ( $r = $this->_sel($table, $fields, $where, $order, 1, $start) ){
+      return $r->get_object();
 		}
+    return false;
+	}
+	
+	/**
+	 * @returns a row as an indexed array
+	 */
+	public function rselect($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
+	{
+    if ( $r = $this->_sel($table, $fields, $where, $order, 1, $start) ){
+      return $r->get_row();
+		}
+    return false;
 	}
 	
 	/**
@@ -988,25 +1006,10 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function iselect($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
 	{
-		$hash = $this->make_hash('select', $table, serialize($fields), serialize(array_keys($where)), ( $order ? 1 : '0' ), $limit);
-		if ( isset($this->queries[$hash]) ){
-			$sql = $this->queries[$this->queries[$hash]]['statement'];
+    if ( $r = $this->_sel($table, $fields, $where, $order, 1, $start) ){
+      return $r->get_irow();
 		}
-		else{
-			$sql = $this->language->get_select($table, $fields, array_keys($where), $order, $limit);
-		}
-		if ( $sql && ( $this->triggers_disabled || $this->launch_triggers($table, 'select', 'before', $fields, $where) ) ){
-      if ( count($where) > 0 ){
-        $r = $this->query($sql, $hash, array_values($where));
-      }
-      else{
-        $r = $this->query($sql, $hash);
-      }
-      if ( $r ){
-        $this->launch_triggers($table, 'select', 'after', $fields, $where);
-        return $r->get_irow();
-      }
-		}
+    return false;
 	}
 	
 	/**
@@ -1014,25 +1017,21 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function select_all($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
 	{
-		$hash = $this->make_hash('select', $table, serialize($fields), serialize(array_keys($where)), ( $order ? 1 : '0' ), $limit);
-		if ( isset($this->queries[$hash]) ){
-			$sql = $this->queries[$this->queries[$hash]]['statement'];
-		}
-		else{
-			$sql = $this->language->get_select($table, $fields, array_keys($where), $order, $limit);
-		}
-		if ( $sql && ( $this->triggers_disabled || $this->launch_triggers($table, 'select', 'before', $fields, $where) ) ){
-      if ( count($where) > 0 ){
-        $r = $this->query($sql, $hash, array_values($where));
-      }
-      else{
-        $r = $this->query($sql, $hash);
-      }
-      if ( $r ){
-        $this->launch_triggers($table, 'select', 'after', $fields, $where);
-        return $r->get_objects();
-      }
-		}
+    if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
+      return $r->get_objects();
+    }
+    return false;
+	}
+	
+	/**
+	 * @returns rows as an array of indexed arrays
+	 */
+	public function rselect_all($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
+	{
+    if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
+      return $r->get_rows();
+    }
+    return false;
 	}
 	
 	/**
@@ -1040,25 +1039,10 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function iselect_all($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
 	{
-		$hash = $this->make_hash('select', $table, serialize($fields), serialize(array_keys($where)), ( $order ? 1 : '0' ), $limit);
-		if ( isset($this->queries[$hash]) ){
-			$sql = $this->queries[$this->queries[$hash]]['statement'];
-		}
-		else{
-			$sql = $this->language->get_select($table, $fields, array_keys($where), $order, $limit);
-		}
-		if ( $sql && ( $this->triggers_disabled || $this->launch_triggers($table, 'select', 'before', $fields, $where) ) ){
-      if ( count($where) > 0 ){
-        $r = $this->query($sql, $hash, array_values($where));
-      }
-      else{
-        $r = $this->query($sql, $hash);
-      }
-      if ( $r ){
-        $this->launch_triggers($table, 'select', 'after', $fields, $where);
-        return $r->get_irows();
-      }
-		}
+    if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
+      return $r->get_irows();
+    }
+    return false;
 	}
 	
 	/**

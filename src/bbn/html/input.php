@@ -116,6 +116,11 @@ class input
 	{
 		return $this->cfg;
 	}
+  
+  public function show_config()
+  {
+    return \bbn\str\text::make_readable($this->cfg);
+  }
 
 	/**
 	 * Returns a HTML string with a label and input, using the App-UI restyler classes.
@@ -125,23 +130,17 @@ class input
 		$s = $this->get_html();
 		if ( !empty($s) ){
 			if ( BBN_IS_DEV ){
-        $a = $this->cfg;
-				if ( isset($this->cfg['options']) ){
-          foreach ( $a['options'] as $k => $v ){
-            if ( is_object($v) ){
-              $a['options'][$k] = get_class($v);
-            }
-          }
-        }
-        $title = str_replace('"', '', print_r ($a, true));
+        $title = str_replace('"', '', print_r (\bbn\str\text::make_readable($this->cfg), true));
 			}
 			else if ( isset($this->options['title']) ){
 				$title = $this->options['title'];
 			}
 			else{
-				$title = '';
+				$title = isset($this->label) ? $this->label : '';
 			}
-			$s = '<label class="appui-form-label" title="'.$title.'">'.$this->label.'</label><div class="appui-form-field">'.$s.'</div>';
+      if ( !isset($this->cfg['field']) || $this->cfg['field'] !== 'hidden' ){
+  			$s = '<label class="appui-form-label" title="'.$title.'" for="'.$this->id.'">'.$this->label.'</label><div class="appui-form-field">'.$s.'</div>';
+      }
 		}
 		return $s;
 	}
@@ -153,7 +152,7 @@ class input
 	{
 		$r = '';
 		if ( $this->name ){
-			
+			/*
 			if ( $this->id ){
 				$r .= '$("#'.$this->id.'").focus(function(){
 					var $$ = $(this),
@@ -176,6 +175,28 @@ class input
 					$("#form_tooltip").remove();
 				});';
 			}
+       * 
+       */
+      $r .= '$("#'.$this->id.'")';
+      if ( $this->widget && $this->options ){
+        $r .= '.'.$this->widget.'('.json_encode($this->options).')';
+      }
+      if ( $this->help ){
+        $r .= '.focus(function(){
+          var o = $$.parent().offset(),
+            w = lab.width(),
+            $boum = $(\'<div class="k-tooltip" id="form_tooltip" style="position:absolute">'.\bbn\str\text::escape_squote($this->help).'</div>\')
+              .css({
+                "maxWidth": w,
+                "top": o.top-10,
+                "right": appui.v.width - o.left
+              });
+						$("body").append($boum);
+        }).blur(function(){
+					$("#form_tooltip").remove();
+				})';
+      }
+      $r .= ';';
 			if ( $this->script ){
 				$r .= $this->script;
 			}
@@ -244,14 +265,25 @@ class input
 						$this->html .= ' checked="checked"';
 					}
 				}
-				else if ( $this->options['type'] === 'radio' ){
+				else if ( $o['type'] === 'radio' ){
 					
 				}
         $this->html .= ' value="'.htmlentities($this->value).'"';
 			}
+      else if ( $this->tag === 'textarea' ){
+        $this->html .= ' rows="'.( isset($o['rows']) ? $o['rows'] : 6 ).'"';
+        $this->html .= ' cols="'.( isset($o['cols']) ? $o['cols'] : 6 ).'"';
+      }
 			
-			if ( isset($this->options['title']) ){
-				$this->html .= ' title="'.$this->options['title'].'"';
+			if ( isset($o['title']) ){
+				$this->html .= ' title="'.htmlspecialchars($o['title']).'"';
+			}
+      if ( isset($o['placeholder']) ){
+        $this->html .= ' placeholder="'.htmlspecialchars($o['placeholder']).'"';
+      }
+
+      if ( $this->required ){
+				$this->html .= ' required ';
 			}
 			
 			$class = '';

@@ -235,6 +235,7 @@ class connection extends \bbn\obj
 				$this->error = defined('BBN_LOGIN_FAILED10') ? BBN_LOGIN_FAILED0 : 'problem during user creation';
 				break;
 		}
+    return $res;
 	}
 
 	/**

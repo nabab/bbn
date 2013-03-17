@@ -74,5 +74,6 @@ trait info
 				file_put_contents($log_file,$r,FILE_APPEND);
 		}
 	}
+  
 }
 ?>

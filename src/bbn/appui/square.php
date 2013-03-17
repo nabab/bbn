@@ -101,8 +101,15 @@ class square
 				LIMIT 1");
 		}
 		if ( is_int($id) || ctype_digit($id) ){
-			$cond = " WHERE bbn_fields.id = $id ";
-			if ( $tmp = $this->db->get_row("SELECT * FROM bbn_fields $cond AND bbn_id_site = %u LIMIT 1",$this->id) ){
+			if ( $tmp = $this->db->get_row("
+        SELECT id, bbn_position, bbn_name, bbn_tit, bbn_id_form, bbn_mand
+        FROM bbn_fields
+        WHERE bbn_fields.id = ?
+        AND bbn_id_site = ?
+        LIMIT 1",
+        $id,
+        $this->id) ){
+        
 				$f = new \stdClass();
 				foreach ( $tmp as $k => $v ){
 					if ( substr($k,0,4) === 'bbn_' ){

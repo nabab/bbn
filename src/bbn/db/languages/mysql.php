@@ -210,30 +210,34 @@ class mysql implements \bbn\db\engines
         $cols = array();
         foreach ( $b as $i => $d ){
           $a = $this->db->get_row("
-          SELECT `ORDINAL_POSITION` as `position`,
-          `REFERENCED_TABLE_SCHEMA` as `ref_db`, `REFERENCED_TABLE_NAME` as `ref_table`, `REFERENCED_COLUMN_NAME` as `ref_column`
-          FROM `information_schema`.`KEY_COLUMN_USAGE`
-          WHERE `TABLE_SCHEMA` LIKE ?
-          AND `TABLE_NAME` LIKE ?
-          AND `COLUMN_NAME` LIKE ?
-          AND ( `CONSTRAINT_NAME` LIKE ? OR ORDINAL_POSITION = ? OR 1 )
-          LIMIT 1",
-          $db,
-          $table,
-          $d['Column_name'],
-          $d['Key_name'],
-          $d['Seq_in_index']);
+            SELECT `ORDINAL_POSITION` as `position`,
+            `REFERENCED_TABLE_SCHEMA` as `ref_db`, `REFERENCED_TABLE_NAME` as `ref_table`, `REFERENCED_COLUMN_NAME` as `ref_column`
+            FROM `information_schema`.`KEY_COLUMN_USAGE`
+            WHERE `TABLE_SCHEMA` LIKE ?
+            AND `TABLE_NAME` LIKE ?
+            AND `COLUMN_NAME` LIKE ?
+            AND ( `CONSTRAINT_NAME` LIKE ? OR 
+              ( `REFERENCED_TABLE_NAME` IS NOT NULL OR ORDINAL_POSITION = ? )
+            )
+            ORDER BY `REFERENCED_TABLE_NAME` DESC
+            LIMIT 1",
+            $db,
+            $table,
+            $d['Column_name'],
+            $d['Key_name'],
+            $d['Seq_in_index']);
           if ( !isset($keys[$d['Key_name']]) ){
             $keys[$d['Key_name']] = array(
             'columns' => array($d['Column_name']),
-            'ref_db' => $a ? $a['ref_db'] : null,
-            'ref_table' => $a ? $a['ref_table'] : null,
-            'ref_column' => $a ? $a['ref_column'] : null,
+            'ref_db' => $a && $a['ref_db'] ? $a['ref_db'] : null,
+            'ref_table' => $a && $a['ref_table'] ? $a['ref_table'] : null,
+            'ref_column' => $a && $a['ref_column'] ? $a['ref_column'] : null,
             'unique' => $d['Non_unique'] == 0 ? 1 : 0
             );
           }
           else{
             array_push($keys[$d['Key_name']]['columns'], $d['Column_name']);
+            $keys[$d['Key_name']]['ref_db'] = $keys[$d['Key_name']]['ref_table'] = $keys[$d['Key_name']]['ref_column'] = null;
           }
           if ( !isset($cols[$d['Column_name']]) ){
             $cols[$d['Column_name']] = array($d['Key_name']);

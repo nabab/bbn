@@ -653,7 +653,7 @@ class mvc
 	{
     foreach ( $this->checkers as $chk ){
       // If a checker file returns false, the controller is not processed
-      if ( !include_once(chk) ){
+      if ( !include_once($chk) ){
         return false;
       }
     }
@@ -800,16 +800,26 @@ class mvc
       if ( count((array)$this->obj) === 0 ){
         header('HTTP/1.0 404 Not Found');
         exit();
-      }			
-			switch ( $this->mode ){
-				
-				case 'json':
+      }
+      switch ( $this->mode ){
+        case 'json':
+        case 'js':
+        case 'css':
+        case 'dom':
+        case 'html':
 					if ( !ob_start("ob_gzhandler" ) ){
 						ob_start();
 					}
 					else{
 						header('Content-Encoding: gzip');
 					}
+          break;
+        default:
+          ob_start();
+      }
+			switch ( $this->mode ){
+				
+				case 'json':
 					if ( isset($this->obj->output) ){
 						$this->obj->html = $this->obj->output;
 						unset($this->obj->output);
@@ -820,12 +830,6 @@ class mvc
           
 				case 'dom':
 				case 'html':
-					if ( !ob_start("ob_gzhandler" ) ){
-						ob_start();
-					}
-					else{
-						header('Content-Encoding: gzip');
-					}
 					header('Content-type: text/html; charset=utf-8');
 					echo $this->obj->output;
 					break;

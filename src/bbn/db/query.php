@@ -59,6 +59,22 @@ class query extends \PDOStatement implements actions
 		}
 	}
 	
+  private function repair_type($d){
+    if ( is_array($d) ){
+      foreach ( $d as $k => $v ){
+        $d[$k] = $this->repair_type($v);
+      }
+    }
+    else if ( is_object($d) ){
+      foreach ( $d as $k => $v ){
+        $d->$k = $this->repair_type($v);
+      }
+		}
+    else if ( \bbn\str\text::is_number($d) ){
+      $d = (int)$d;
+    }
+    return $d;
+  }
 	/**
 	 * @return $this 
 	 */
@@ -221,7 +237,7 @@ class query extends \PDOStatement implements actions
 	public function fetch($fetch_style=\PDO::FETCH_BOTH, $cursor_orientation=\PDO::FETCH_ORI_NEXT, $cursor_offset=0)
 	{
 		$this->execute();
-		return parent::fetch( $fetch_style, $cursor_orientation, $cursor_offset );
+		return $this->repair_type(parent::fetch( $fetch_style, $cursor_orientation, $cursor_offset ));
 	}
 
 	/**
@@ -230,27 +246,16 @@ class query extends \PDOStatement implements actions
 	public function fetchAll($fetch_style=\PDO::FETCH_BOTH, $fetch_argument=false, $ctor_args=false)
 	{
 		$this->execute();
-		if ( $ctor_args )
+		if ( $ctor_args ){
 			$res = parent::fetchAll($fetch_style,$fetch_argument,$ctor_args);
-		else if ( $fetch_argument )
+    }
+		else if ( $fetch_argument ){
 			$res = parent::fetchAll($fetch_style,$fetch_argument);
-		else
+    }
+		else{
 			$res = parent::fetchAll($fetch_style);
-		if ( is_array($res) )
-		{
-			foreach ( $res as $i => $rs )
-			{
-				if ( is_array($rs) )
-				{
-					foreach ( $rs as $j => $r )
-					{
-						if ( is_string($r) && is_numeric($r) )
-							$res[$i][$j] += 0;
-					}
-				}
-			}
-		}
-		return $res;
+    }
+    return $this->repair_type($res);
 	}
 
 	/**
@@ -259,8 +264,7 @@ class query extends \PDOStatement implements actions
 	public function fetchColumn($column_number=0)
 	{
 		$this->execute();
-		$r = parent::fetchColumn($column_number);
-		return $r;
+		return $this->repair_type(parent::fetchColumn($column_number));
 	}
 
 	/**
@@ -269,13 +273,7 @@ class query extends \PDOStatement implements actions
 	public function fetchObject($class_name="stdClass", $ctor_args=array())
 	{
 		$this->execute();
-		$res = parent::fetchObject($class_name,$ctor_args);
-		foreach ( $res as $i => $rs )
-		{
-			if ( is_string($res[$i]) && is_numeric($res[$i]) )
-				$res->$i += 0;
-		}
-		return $res;
+		return $this->repair_type(parent::fetchObject($class_name,$ctor_args));
 	}
 
 	/**
