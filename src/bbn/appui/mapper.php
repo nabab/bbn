@@ -81,7 +81,7 @@ class mapper{
       foreach ( $cfg['elements'] as $i => $ele ){
         $this->db->insert($this->admin_db.'.'.$this->prefix.'fields',[
             'id_form' => $id,
-            'column' => $this->db->host.'.'.$this->client_db.'.'.$ele['name'],
+            'column' => $this->db->host.'.'.$this->client_db.'.'.$ele['attr']['name'],
             'title' => isset($ele['label']) ? $ele['label'] : null,
             'position' => $ele['position'],
             'configuration' => serialize($ele)
@@ -119,7 +119,7 @@ class mapper{
           $cfg[$i] = $this->config_input($table, $name);
           $cfg[$i]['default'] = $c['default'];
           if ( isset($c['maxlength']) ){
-            $cfg[$i]['options']['maxlength'] = $c['maxlength'];
+            $cfg[$i]['attr']['maxlength'] = $c['maxlength'];
           }
           if ( isset($sqt->fields[$name]) ){
             
@@ -163,16 +163,12 @@ class mapper{
 
       if ( \bbn\str\text::is_number($id) && $form = $this->db->rselect(
               $this->admin_db.'.'.$this->prefix.'forms', [], ["id" => $id]) ){
-          
+        
         $cfg = unserialize($form['configuration']);
-        $fields = $this->db->rselect_all(
-                $this->admin_db.'.'.$this->prefix.'fields', [], ["id_form"=>$id]);
+        $fields = $this->db->rselect_all($this->admin_db.'.'.$this->prefix.'fields', [], ["id_form"=>$id]);
+        
         foreach ( $fields as $k => $f ){
           $fields[$k] = unserialize($f['configuration']);
-          $fields[$k]['options'] = (array)$fields[$k]['options'];
-          if ( isset($fields[$k]['options']['db']) ){
-            $fields[$k]['options']['db'] =& $this->db;
-          }
         }
         $cfg['elements'] = $fields;
       }
@@ -180,7 +176,7 @@ class mapper{
         $cfg = $id;
       }
       else{
-        return $this->get_table_form($id);
+        $cfg = $this->get_table_form($id);
       } 
 
       if ( isset($cfg) ){
@@ -188,8 +184,8 @@ class mapper{
           $cfg['builder'] =& $builder;
         }
         foreach ( $cfg['elements'] as $k => $f ){
-          if ( isset($cfg['elements'][$k]['options']['db']) && is_string($cfg['elements'][$k]['options']['db']) ){
-            $cfg['elements'][$k]['options']['db'] =& $this->db;
+          if ( isset($cfg['elements'][$k]['data']['db']) && is_string($cfg['elements'][$k]['data']['db']) ){
+            $cfg['elements'][$k]['data']['db'] =& $this->db;
           }
         }
         return $cfg;
@@ -211,38 +207,28 @@ class mapper{
 		if ( $this->db && \bbn\str\text::check_name($column) && ($table_cfg = $this->db->modelize($table)) && isset($table_cfg['fields'][$column]) ){
       $col = $table_cfg['fields'][$column];
 			$full_name = explode(".", $this->db->get_full_name($table))[1].'.'.$column;
-      $cfg = array(
-				'name' => $full_name,
-				'position' => $col['position'],
+      $cfg = [
+        'attr' => [
+          'name' => $full_name,
+        ],
+        'position' => $col['position'],
 				'null' => $col['null'] ? 1 : false
-			);
-      
-			if ( strpos($col['type'], 'enum') === 0 ){
+			];
+
+      if ( strpos($col['type'], 'enum') === 0 ){
 				preg_match_all("/'((?:[^']|\\\\.)*)'/", $col['extra'], $m);
 				if ( isset($m[1]) ){
 					$cfg['field'] = 'dropdown';
-					$cfg['options']['dataSource'] = [];
-					foreach ( $m[1] as $d ){
-						array_push($cfg['options']['dataSource'], ['value' => $d, 'text' => $d]);
-					}
+					$cfg['widget'] = [
+              'options' => [
+                  'dataSource' => $m[1]
+              ]
+          ];
 				}
 			}
-			
       else{
 				$dec = false;
 				$ref = false;
-				if ( preg_match('|\(([0-9,]+)\)|', $col['extra'], $m) ){
-					if ( strpos($m[1], ',') ){
-						$dec = explode(",", $m[1]);
-						$cfg['options']['maxlength'] = (int)($dec[0] + 1);
-					}
-					else{
-						$cfg['options']['maxlength'] = (int)$m[1];
-					}
-				}
-        else{
-          $cfg['options']['maxlength'] = null;
-        }
         if ( isset($col['keys']) ){
           foreach ( $col['keys'] as $k ){
             $key = $table_cfg['keys'][$k];
@@ -270,8 +256,8 @@ class mapper{
               break;
             }
           }
-          $cfg['options']['sql'] = $this->db->get_select($ref['table'], $cols);
-					$cfg['options']['db'] = $this->db;
+          $cfg['data']['sql'] = $this->db->get_select($ref['table'], $cols);
+					$cfg['data']['db'] = $this->db;
 					$cfg['field'] = 'dropdown';
 				}
 				else if ( strpos($col['type'], 'char') !== false ){
@@ -279,19 +265,25 @@ class mapper{
 				}
 				else if ( strpos($col['type'], 'float') !== false ){
 					$cfg['field'] = 'numeric';
-					$cfg['options']['decimals'] = isset($dec[0], $dec[1]) ? $dec[0] - $dec[1] : 0;
-					$cfg['options']['format'] = $cfg['options']['decimals'] > 0 ? 'n' : 'd';
-					$cfg['options']['type'] = 'number';
+          $dec = explode(",", $col['maxlength']);
+          if ( isset($dec[0], $dec[1]) ){
+            $cfg['widget']['options']['decimals'] = (int)$dec[1];
+          }
+          $cfg['attr']['maxlength'] = isset($cfg['widget']['options']['decimals']) ? (int)($col['maxlength'] + 1) : (int)$col['maxlength'];
+					$cfg['widget']['options']['format'] = isset($cfg['widget']['options']['decimals']) ? '#' : 'n';
+					$cfg['attr']['type'] = 'number';
+          $cfg['widget']['options']['step'] = 10/pow(10, $cfg['widget']['options']['decimals']+1);
 					$max = '';
-					$max_length = $cfg['options']['maxlength'];
-					if ( $cfg['options']['decimals'] > 0 ){
-						$max_length -= ( $cfg['options']['decimals'] + 1 );
-					}
+          $max_length = $cfg['attr']['maxlength'];
+          if ( isset($cfg['options']['decimals']) ){
+            $max_length -= $cfg['options']['decimals'];
+          }
 					for ( $i = 0; $i < $max_length; $i++ ){
 						$max .= '9';
 					}
-					$cfg['options']['max'] = ( (float)$max > (int)$max ) ? (float)$max : (int)$max;
-					$cfg['options']['min'] = strpos($col['type'], 'unsigned') ? 0 : - $cfg['options']['max'];
+          $max = (int)$max;
+					$cfg['widget']['options']['max'] = ( (float)$max > (int)$max ) ? (float)$max : (int)$max;
+					$cfg['widget']['options']['min'] = $col['signed'] ? - $cfg['widget']['options']['max'] : 0;
 				}
 				else if ( strpos($col['type'], 'text') !== false ){
 					$cfg['field'] = 'editor';
@@ -314,15 +306,15 @@ class mapper{
           }
 					else{
             if ( strpos($col['type'], 'unsigned') ){
-  						$cfg['options']['min'] = 0;
+  						$cfg['widget']['options']['min'] = 0;
             }
             else{
-              $cfg['options']['min'] = false;
+              $cfg['widget']['options']['min'] = false;
             }
             $cfg['field'] = 'numeric';
-            $cfg['options']['decimals'] = 0;
-            $cfg['options']['format'] = 'd';
-            $cfg['options']['type'] = 'number';
+            $cfg['widget']['options']['decimals'] = 0;
+            $cfg['widget']['options']['format'] = 'd';
+            $cfg['attr']['type'] = 'number';
 					}
 				}
 			}
@@ -404,7 +396,7 @@ class mapper{
 							$config->null = 1;
 						}
 						if ( isset($f['maxlength']) && $f['maxlength'] > 0 ){
-							$config->maxlength = $f['maxlength'];
+							$config->maxlength = (int)$f['maxlength'];
 						}
 						if ( isset($f['keys']) ){
 							$config->keys = [];

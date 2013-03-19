@@ -18,113 +18,175 @@ namespace bbn\html;
  * @todo Stop to rely only on sqlite and offer file-based or any db-based solution.
  * @todo Look into the check function and divide it
  */
-class input
+class input extends element
 {
-	public
+  protected
 	/**
-	 * Is set to null while not routed, then 1 if routing was sucessful, and false otherwise.
-	 * @var null|boolean
-	 */
-		$tag = 'input',
-	/**
-	 * Is set to null while not routed, then 1 if routing was sucessful, and false otherwise.
-	 * @var null|boolean
-	 */
-	 	$id,
-	/**
-	 * The controller file (with full path)
-	 * @var null|string
-	 */
-		$name,
-	/**
-	 * The controller file (with full path)
+	 * The input's label/title
 	 * @var null|string
 	 */
 		$label,
 	/**
-	 * The mode of the output (dom, html, json, txt, xml...)
-	 * @var null|string
+	 * The input's value
+	 * @var mixed
 	 */
-		$value = '';
+		$value = '',
 	/**
-	 * The mode of the output (dom, html, json, txt, xml...)
-	 * @var null|string
+	 * The input's default value
+	 * @var mixed
 	 */
-	private $cfg,
-		$options = array(),
-		$html = '',
-		$script;
+		$default = '';
+  
 	/**
 	 * This will build a new HTML form element according to the given configuration.
 	 * Only name and tag are mandatory, then other values depending on the tag
 	 *
 	 * @param array $cfg The element configuration
 	 */
-	public function __construct(array $cfg = null)
+  protected static
+    $schema = '{
+	"properties":{
+		"attr": {
+			"type":"object",
+			"id": "attr",
+      "description": "Attributes",
+			"required":true,
+			"properties":{
+				"maxlength": {
+					"type":"integer",
+					"id": "maxlength",
+          "description": "Maxlength",
+					"required":false
+				},
+        "name": {
+          "type":"string",
+          "id": "name",
+          "description": "Name",
+          "required":true
+        },
+        "required": {
+          "type": "boolean",
+          "id": "required",
+          "description": "Required",
+          "required":false
+        },
+				"type": {
+					"type":"string",
+					"id": "type",
+          "description": "Input type",
+					"required":false
+				},
+        "value": {
+          "type":"string",
+          "description": "Value",
+          "id": "value",
+          "required":false
+        }
+			}
+		},
+		"default": {
+			"type":"any",
+			"id": "default",
+      "description": "Default value",
+			"required":false
+		},
+		"elements": {
+			"type":"array",
+      "description": "Items",
+			"id": "items",
+			"required":false
+		},
+		"field": {
+			"type":"string",
+			"id": "field",
+      "description": "Shortcut (??) field",
+			"required":false
+		},
+		"label": {
+			"type":"string",
+			"id": "label",
+      "description": "Label",
+			"required":false
+		},
+		"lang": {
+			"type":"string",
+			"id": "lang",
+      "description": "Language",
+			"required":false
+		},
+		"null": {
+			"type":"boolean",
+			"id": "null",
+      "description": "can be null?",
+			"required":false
+		},
+		"params": {
+			"type": ["array","null"],
+			"id": "params",
+			"required":false,
+      "description": "Parameters from BBN"
+		},
+		"placeholder": {
+			"type":"boolean",
+			"id": "placeholder",
+      "description": "Place holder",
+			"required":false
+		},
+		"table": {
+			"type":"string",
+      "description": "Table",
+			"id": "table",
+			"required":false
+		},
+		"tag": {
+      "enum": ["input","select","textarea"]
+		},
+		"value": {
+			"type":"string",
+      "description": "Value",
+			"id": "value",
+			"required":false
+		}
+	}
+}';
+  
+  protected static function _init(){
+    if ( is_string(self::$schema) ){
+      self::$schema = array_merge(parent::$schema, self::$schema);
+      parent::_init();
+    }
+  }
+
+  public function __construct(array $cfg = null)
 	{
-		if ( isset($cfg['name']) )
-		{
-			$mandatory_opt = array();
-			$possible_opt = array("required", "width", "placeholder", "cssclass", "title");
-			$this->cfg = $cfg;
-			$this->tag = isset($cfg['tag']) ? strtolower($cfg['tag']) : 'input';
-			$this->name = $cfg['name'];
-			$this->id = isset($cfg['id']) ? $cfg['id'] : \bbn\str\text::genpwd(20,15);
-			$this->label = isset($cfg['label']) ? $cfg['label'] : str_replace(']', ')',str_replace('[',' (',str_replace('_', ' ', $cfg['name'])));
-			$this->required = isset($cfg['required']) ? $cfg['required'] : false;
-			$this->options = isset($cfg['options']) ? $cfg['options'] : array();
+    parent::__construct($cfg);
+		if ( $this->tag ){
+			$mandatory_attr = array();
+      if ( !isset($this->attr['id']) ){
+  			$this->attr['id'] = \bbn\str\text::genpwd(20,15);
+      }
 			$this->script = isset($cfg['script']) ? $cfg['script'] : '';
 			$this->value = isset($cfg['value']) ? $cfg['value'] : '';
 			switch ( $this->tag )
 			{
 				case "input":
-					array_push($mandatory_opt, "type");
-					array_push($possible_opt, "minlength", "maxlength", "size", "rangelength", "min", "max", "range", "email", "url", "date", "number", "digits", "creditcard", "equalTo");
+					array_push($mandatory_attr, "type");
 					break;
 				case "textarea":
-					array_push($mandatory_opt, "cols", "rows");
-					array_push($possible_opt, "minlength", "maxlength", "rangelength", "height");
+					array_push($mandatory_attr, "cols", "rows");
 					break;
 				case "select":
-					array_push($mandatory_opt, "options");
-					array_push($possible_opt, "multiple");
-					break;
-				case "file":
-					array_push($possible_opt, "multiple", "accept");
+					array_push($mandatory_attr, "attr");
 					break;
 			}
-			foreach ( $mandatory_opt as $m ){
-				if ( isset($cfg['options'][$m]) ){
-					$this->options[$m] = $cfg['options'][$m];
-				}
-				else{
+			foreach ( $mandatory_attr as $m ){
+				if ( !isset($this->attr[$m]) ){
 					die("Argument $m is missing in your config... Sorry!");
-				}
-			}
-			foreach ( $cfg['options'] as $k => $v ){
-				if ( in_array($k, $possible_opt) ){
-					$this->options[$k] = $v;
 				}
 			}
 		}
 	}
 	
-	/**
-	 * Returns the current configuration.
-	 */
-	public function get_config()
-	{
-		return $this->cfg;
-	}
-  
-  public function show_config()
-  {
-    return \bbn\str\text::make_readable($this->cfg);
-  }
-
-	/**
-	 * Returns a HTML string with a label and input, using the App-UI restyler classes.
-	 */
 	public function get_label_input()
 	{
 		$s = $this->get_html();
@@ -132,201 +194,17 @@ class input
 			if ( BBN_IS_DEV ){
         $title = str_replace('"', '', print_r (\bbn\str\text::make_readable($this->cfg), true));
 			}
-			else if ( isset($this->options['title']) ){
-				$title = $this->options['title'];
+			else if ( isset($this->attr['title']) ){
+				$title = $this->attr['title'];
 			}
 			else{
 				$title = isset($this->label) ? $this->label : '';
 			}
       if ( !isset($this->cfg['field']) || $this->cfg['field'] !== 'hidden' ){
-  			$s = '<label class="appui-form-label" title="'.$title.'" for="'.$this->id.'">'.$this->label.'</label><div class="appui-form-field">'.$s.'</div>';
+  			$s = '<label class="appui-form-label" title="'.$title.'" for="'.$this->attr['id'].'">'.$this->label.'</label><div class="appui-form-field">'.$s.'</div>';
       }
 		}
 		return $s;
 	}
-	
-	/**
-	 * Returns the javascript coming with the object.
-	 */
-	public function get_script()
-	{
-		$r = '';
-		if ( $this->name ){
-			/*
-			if ( $this->id ){
-				$r .= '$("#'.$this->id.'").focus(function(){
-					var $$ = $(this),
-            lab = $(this).prevAll("label").first();
-					if ( lab.length === 0 ){
-						lab = $$.parent().prevAll("label").first();
-					}
-					if ( lab.length === 1 ){
-						var o = $$.parent().offset(), 
-							w = lab.width(),
-							$boum = $(\'<div class="k-tooltip" id="form_tooltip" style="position:absolute">Ceci est un test</div>\')
-								.css({
-									"maxWidth": w,
-									"top": o.top-10,
-									"right": appui.v.width - o.left
-								});
-						$("body").append($boum);
-					}
-				}).blur(function(){
-					$("#form_tooltip").remove();
-				});';
-			}
-       * 
-       */
-      $r .= '$("#'.$this->id.'")';
-      if ( $this->widget && $this->options ){
-        $r .= '.'.$this->widget.'('.json_encode($this->options).')';
-      }
-      if ( $this->help ){
-        $r .= '.focus(function(){
-          var o = $$.parent().offset(),
-            w = lab.width(),
-            $boum = $(\'<div class="k-tooltip" id="form_tooltip" style="position:absolute">'.\bbn\str\text::escape_squote($this->help).'</div>\')
-              .css({
-                "maxWidth": w,
-                "top": o.top-10,
-                "right": appui.v.width - o.left
-              });
-						$("body").append($boum);
-        }).blur(function(){
-					$("#form_tooltip").remove();
-				})';
-      }
-      $r .= ';';
-			if ( $this->script ){
-				$r .= $this->script;
-			}
-		}
-		return $r;
-	}
-	
-	/**
-	 * Returns the corresponding HTML string 
-	 */
-	public function get_html()
-	{
-		if ( empty($this->html) && $this->name ){
-			
-      // TAG
-			$this->html .= '<'.$this->tag.' name="'.$this->name.'"';
-			
-      
-      // ID
-			if ( isset($this->id) ){
-				$this->html .= ' id="'.$this->id.'"';
-			}
-			
-      $o =& $this->options;
-      
-      // If it's an INPUT tag
-			if ( $this->tag === 'input' && isset($o['type']) ){
-        
-        // TYPE
-				$this->html .= ' type="'.$o['type'].'"';
-				
-        // Checking the type
-        // @todo The file type is missing but I'm not sure as there's the "file tag"
-        if ( $o['type'] === 'text' || $o['type'] === 'number' || $o['type'] === 'password' || $o['type'] === 'email' ){
-          
-          // Maxlength
-					if ( isset($o['maxlength']) && ($o['maxlength'] > 0) && $o['maxlength'] <= 1000 ){
-						$this->html .= ' maxlength="'.$o['maxlength'].'"';
-					}
-          
-          // Minlength
-					if ( isset($o['minlength']) &&
-                  ( $o['minlength'] > 0 ) &&
-                  $o['minlength'] <= 1000 && ( 
-                  // Checking it's not higher than maxlength
-                    ( isset($o['maxlength']) && $o['maxlength'] > $o['minlength'] ) ||
-                    !isset($o['maxlength']) ) ){
-						$this->html .= ' minlength="'.$o['minlength'].'"';
-					}
-          
-          // Size
-					if ( isset($o['size']) && ( $o['size'] > 0 ) && $o['size'] <= 255 ){
-						$this->html .= ' size="'.$o['size'].'"';
-					}
-				}
-        
-        // Checkbox
-				else if ( $o['type'] === 'checkbox' ){
-          
-          // If no value, giving 1
-					if ( !isset($o['value']) ){
-						$o['value'] = 1;
-					}
-          
-					if ( $this->value == $o['value'] ){
-						$this->html .= ' checked="checked"';
-					}
-				}
-				else if ( $o['type'] === 'radio' ){
-					
-				}
-        $this->html .= ' value="'.htmlentities($this->value).'"';
-			}
-      else if ( $this->tag === 'textarea' ){
-        $this->html .= ' rows="'.( isset($o['rows']) ? $o['rows'] : 6 ).'"';
-        $this->html .= ' cols="'.( isset($o['cols']) ? $o['cols'] : 6 ).'"';
-      }
-			
-			if ( isset($o['title']) ){
-				$this->html .= ' title="'.htmlspecialchars($o['title']).'"';
-			}
-      if ( isset($o['placeholder']) ){
-        $this->html .= ' placeholder="'.htmlspecialchars($o['placeholder']).'"';
-      }
-
-      if ( $this->required ){
-				$this->html .= ' required ';
-			}
-			
-			$class = '';
-			
-			if ( isset($o['cssclass']) ){
-				$class .= $o['cssclass'].' ';
-			}
-
-			if ( $this->required ){
-				$class .= 'required ';
-			}
-			if ( isset($o['email']) ){
-				$class .= 'email ';
-			}
-			if ( isset($o['url']) ){
-				$class .= 'url ';
-			}
-			if ( isset($o['number']) ){
-				$class .= 'number ';
-			}
-			if ( isset($o['digits']) ){
-				$class .= 'digits ';
-			}
-			if ( isset($o['creditcard']) ){
-				$class .= 'creditcard ';
-			}
-			
-			if ( !empty($class) ){
-				$this->html .= ' class="'.trim($class).'"';
-			}
-			
-			$this->html .= '>';
-			
-			if ( $this->tag === 'select' || $this->tag === 'textarea' ){
-				$this->html .= '</'.$this->tag.'>';
-			}
-			
-			if ( isset($o['placeholder']) && strpos($o['placeholder'],'%s') !== false ){
-				$this->html = sprintf($o['placeholder'], $this->html);
-			}
-		}
-		return $this->html;
-	}
-	
 }
 ?>

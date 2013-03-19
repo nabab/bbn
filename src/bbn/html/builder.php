@@ -29,14 +29,10 @@ class builder
 	 */
 	private $_defaults = [
 		'tag' => 'input',
-		'cssclass' => false,
-		'placeholder' => false,
-		'script' => false,
-		'options' => [
-			'type' => 'text'
+		'attr' => [
+			'type' => 'text',
+      'name' => false
 		],
-		'css' => [],
-		'xhtml' => false,
 		'lang' => 'fr'
 	],
 	/**
@@ -182,8 +178,8 @@ class builder
 	public function get_config()
 	{
 		$r = [];
-		foreach ( $this->items as $it ){
-			$r[] = $it->get_config();
+		foreach ( $this->items as $k => $it ){
+			$r[$k] = $it->get_config();
 		}
 		return $r;
 	}
@@ -195,8 +191,8 @@ class builder
 	 */
 	public function get_input($cfg=null)
 	{
-    
-		if ( is_array($cfg) && isset($cfg['name']) ){
+		if ( is_array($cfg) && isset($cfg['attr']['name']) ){
+      /*
 			foreach ( $cfg as $k => $v ){
 				if ( isset($this->_current[$k]) ){
 					if ( is_array($v) ){
@@ -211,25 +207,29 @@ class builder
 					}
 				}
 			}
+       * 
+       */
 			
 			$tmp = $this->_current;
-			$tmp['id'] = isset($cfg['id']) ? $cfg['id'] : \bbn\str\text::genpwd(20,15);
-			if ( !isset($cfg['options']) ){
-				$cfg['options'] = array();
+			$tmp['attr']['id'] = isset($cfg['attr']['id']) ? $cfg['attr']['id'] : \bbn\str\text::genpwd(20,15);
+			if ( !isset($cfg['data']) ){
+				$cfg['data'] = array();
 			}
-			if ( isset($cfg['options']['sql'], $cfg['options']['db']) && $cfg['options']['db'] && strlen($cfg['options']['sql']) > 5 ){
+			if ( isset($cfg['data']['sql'], $cfg['data']['db']) && $cfg['data']['db'] && strlen($cfg['data']['sql']) > 5 ){
         
-        $db =& $cfg['options']['db'];
+        $db =& $cfg['data']['db'];
         
-        if ( !isset($cfg['options']['dataSource']) ){
-  				$cfg['options']['dataSource'] = array();
+        if ( !isset($cfg['widget']['options']['dataSource']) ){
+  				$cfg['widget']['options']['dataSource'] = array();
         }
-				$count = ( $r = $db->query($cfg['options']['sql']) ) ? $r->count() : 0;
+				$count = ( $r = $db->query($cfg['data']['sql']) ) ? $r->count() : 0;
 				if ( $count <= self::max_values_at_once ){
-					if ( $ds = $db->get_irows($cfg['options']['sql']) ){
+					if ( $ds = $db->get_irows($cfg['data']['sql']) ){
 						foreach ( $ds as $d ){
-							array_push($cfg['options']['dataSource'], array('value' => $d[0], 'text' => $d[1]));
+							array_push($cfg['widget']['options']['dataSource'], array('value' => $d[0], 'text' => $d[1]));
 						}
+            $cfg['widget']['options']['dataTextField'] = 'text';
+            $cfg['widget']['options']['dataValueField'] = 'value';
 					}
 				}
 				else{
@@ -237,133 +237,116 @@ class builder
 					//$cfg['options']['dataSource']['']
 				}
 			}
-			if ( isset($cfg['field']) ) {
+			if ( isset($cfg['field']) && isset(self::$widgets[strtolower($cfg['field'])]) ){
+        $wid = self::$widgets[strtolower($cfg['field'])];
+        $tmp['widget'] = [
+            "name" => $wid['fn'],
+            "options" => []
+        ];
 				switch ( $cfg['field'] )
 				{
 					case 'date':
 						$tmp['tag'] = 'input';
-						$tmp['options']['type'] = 'date';
-						$tmp['options']['maxlength'] = 10;
-						$tmp['options']['size'] = 10;
-						$tmp['options']['culture'] = $tmp['lang'].'-'.strtoupper($tmp['lang']);
-						$tmp['options']['format'] = "yyyy-MM-dd";
+						$tmp['attr']['type'] = 'date';
+						$tmp['attr']['maxlength'] = 10;
+						$tmp['attr']['size'] = 10;
+            $tmp['widget']["options"]["culture"] = $tmp['lang'].'-'.strtoupper($tmp['lang']);
+            $tmp['widget']["options"]["format"] = "yyyy-MM-dd";
 						break;
 					case 'time':
 						$tmp['tag'] = 'input';
-						$tmp['options']['type'] = 'time';
-						$tmp['options']['maxlength'] = 8;
-						$tmp['options']['size'] = 8;
-						$tmp['options']['culture'] = $tmp['lang'].'-'.strtoupper($tmp['lang']);
+						$tmp['attr']['type'] = 'time';
+						$tmp['attr']['maxlength'] = 8;
+						$tmp['attr']['size'] = 8;
+            $tmp['widget']["options"]["culture"] = $tmp['lang'].'-'.strtoupper($tmp['lang']);
 						break;
 					case 'datetime':
 						$tmp['tag'] = 'input';
-						$tmp['options']['type'] = 'datetime';
-						$tmp['options']['maxlength'] = 19;
-						$tmp['options']['size'] = 20;
-						$tmp['options']['culture'] = $tmp['lang'].'-'.strtoupper($tmp['lang']);
+						$tmp['attr']['type'] = 'datetime';
+						$tmp['attr']['maxlength'] = 19;
+						$tmp['attr']['size'] = 20;
+            $tmp['widget']["options"]["culture"] = $tmp['lang'].'-'.strtoupper($tmp['lang']);
 						break;
 					case 'multivalue':
 						$tmp['tag'] = 'input';
-						$tmp['options']['type'] = 'text';
-						$tmp['options']['size'] = false;
+						$tmp['attr']['type'] = 'text';
 						break;
 					case 'dropdown':
 						$tmp['tag'] = 'input';
-						$tmp['options']['type'] = 'text';
-						$tmp['options']['dataSource'] = array();
-						$tmp['options']['dataTextField'] = "text";
-						$tmp['options']['dataValueField'] = "value";
-						$tmp['options']['change'] = '';
-						$tmp['options']['size'] = false;
-						$tmp['options']['css']['width'] = 'auto';
+						$tmp['attr']['type'] = 'text';
+						$tmp['widget']['options']['dataSource'] = [];
+						$tmp['css'] = ['width' => 'auto'];
 						break;
 					case 'checkbox':
 						$tmp['tag'] = 'input';
 						$tmp['value'] = 1;
-						$tmp['options']['type'] = 'checkbox';
+						$tmp['attr']['type'] = 'checkbox';
 						break;
 					case 'radio':
 						$tmp['tag'] = 'input';
-						$tmp['options']['type'] = 'radio';
-						$tmp['options']['value'] = 1;
+						$tmp['attr']['type'] = 'radio';
+						$tmp['attr']['value'] = 1;
 						break;
 					case 'hidden':
 						$tmp['tag'] = 'input';
-						$tmp['options']['type'] = 'hidden';
+						$tmp['attr']['type'] = 'hidden';
 						break;
 					case 'text':
 						$tmp['tag'] = 'input';
-						$tmp['options']['type'] = 'text';
+						$tmp['attr']['type'] = 'text';
 						break;
 					case 'numeric':
 						$tmp['tag'] = 'input';
-						$tmp['options']['type'] = 'number';
-						$tmp['options']['min'] = 0;
-						$tmp['options']['max'] = 100;
-						$tmp['options']['format'] = "n";
-						$tmp['options']['decimals'] = 0;
-						$tmp['options']['step'] = 1;
-						$tmp['options']['culture'] = $tmp['lang'].'-'.strtoupper($tmp['lang']);
-						if ( !isset($cfg['options']['max']) && isset($cfg['options']['maxlength']) ){
+						$tmp['attr']['type'] = 'number';
+            $tmp['widget']["options"]["culture"] = $tmp['lang'].'-'.strtoupper($tmp['lang']);
+            $tmp['widget']["options"]["min"] = 0;
+            $tmp['widget']["options"]["max"] = 100;
+            $tmp['widget']["options"]["format"] = "#";
+            $tmp['widget']["options"]["step"] = 1;
+						if ( !isset($cfg['widget']['options']['max']) && isset($cfg['attr']['maxlength']) ){
 							$max = '';
-							$max_length = $cfg['options']['maxlength'];
-							if ( isset($cfg['options']['decimals']) && $cfg['options']['decimals'] > 0 ){
-								$max_length -= ( $cfg['options']['decimals'] + 1 );
+							$max_length = (int)$cfg['attr']['maxlength'];
+							if ( isset($cfg['widget']['options']['decimals']) && $cfg['widget']['options']['decimals'] > 0 ){
+								$max_length -= ( $cfg['widget']['options']['decimals'] + 1 );
 							}
 							for ( $i = 0; $i < $max_length; $i++ ){
 								$max .= '9';
 							}
-							$cfg['options']['max'] = ( (float)$max > (int)$max ) ? (float)$max : (int)$max;
+							$cfg['widget']['options']['max'] = ( (float)$max > (int)$max ) ? (float)$max : (int)$max;
 						}
 						break;
 					case 'editor':
 						$tmp['tag'] = 'textarea';
-            $tmp['options']['cols'] = 80;
-            $tmp['options']['rows'] = 60;
+            $tmp['attr']['cols'] = 80;
+            $tmp['attr']['rows'] = 20;
 						break;
 				}
 			}
 			// Size calculation
-			if ( isset($cfg['options']['maxlength']) && !isset($cfg['options']['size']) ){
-				if ( $cfg['options']['maxlength'] <= 20 ){
-					$cfg['options']['size'] = $cfg['options']['maxlength'];
+			if ( isset($cfg['attr']['maxlength']) && !isset($cfg['attr']['size']) ){
+				if ( $cfg['attr']['maxlength'] <= 20 ){
+					$cfg['attr']['size'] = (int)$cfg['attr']['maxlength'];
 				}
 			}
-			if ( isset($cfg['options']['size'], $cfg['options']['minlength']) && $cfg['options']['size'] < $cfg['options']['minlength']){
-				$cfg['options']['size'] = $cfg['options']['minlength'];
+			if ( isset($cfg['attr']['size'], $cfg['attr']['minlength']) && $cfg['attr']['size'] < $cfg['attr']['minlength']){
+				$cfg['attr']['size'] = (int)$cfg['attr']['minlength'];
 			}
-			if ( isset($cfg['options']) ){
-				$cfg['options'] = array_merge($tmp['options'], $cfg['options']);
+			if ( isset($cfg['attr']) ){
+				$cfg['attr'] = array_merge($tmp['attr'], $cfg['attr']);
 			}
-			//var_dump($cfg);
 			$cfg = array_merge($tmp, $cfg);
-			//var_dump($cfg);
-			if ( isset($cfg['field']) && !$cfg['script'] ){
-				if ( isset(self::$widgets[strtolower($cfg['field'])]) ){
-          $wid = self::$widgets[strtolower($cfg['field'])];
-					$widget_cfg = array();
-					foreach ( $wid['opt'] as $o ){
-						if ( isset($cfg['options'][$o]) ){
-							$widget_cfg[$o] = $cfg['options'][$o];
-						}
-					}
-					//var_dump($widget_cfg);
-					$cfg['script'] = '$("#'.$cfg['id'].'").'.$wid['fn'].'('.json_encode((object)$widget_cfg).');';
-				}
-				else{
-					switch ( $cfg['field'] )
-					{
-						case 'text':
-              if ( ( strpos($cfg['name'] , 'tel') === 0 ) || ( strpos($cfg['name'] , 'fax') === 0 ) || strpos($cfg['name'] , 'phone') !== false ){
-                //$cfg['script'] = '$("#'.$cfg['id'].'").mask("99 99 99 99 99");';
-              }
-						break;
-					}
-				}
+			if ( isset($wid) ){
+        foreach ( $wid['opt'] as $o ){
+          if ( isset($cfg['widget']['options'][$o]) ){
+            $cfg['widget']['options'][$o] = $cfg['widget']['options'][$o];
+          }
+        }
 			}
-			$t = new \bbn\html\input($cfg);
-			array_push($this->items, $t);
-			return $t;
+      if ( is_array($cfg) ){
+        $t = new \bbn\html\input($cfg);
+        array_push($this->items, $t);
+        return $t;
+      }
 		}
 		return false;
 	}
