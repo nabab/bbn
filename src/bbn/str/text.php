@@ -258,11 +258,18 @@ class text
 	}
 
 	/**
+   * @param string $st Can take as many arguments and will return false if one of them is not solely made of digits
 	 * @return bool
 	 */
 	public static function is_number($st)
 	{
-    return ( ctype_digit($st) || is_int($st) );
+    $args = func_get_args();
+    foreach ( $args as $a ){
+      if ( !(ctype_digit($st) || is_int($st)) ){
+        return false;
+      }
+    }
+    return 1;
   }
   
   /**
@@ -392,6 +399,43 @@ class text
       return $r;
     }
     return $o;
+  }
+  
+  public static function export(array $o, $remove_empty=false, $lev=1){
+    $st = '['.PHP_EOL;
+    foreach ( $o as $k => $v ){
+      if ( $remove_empty && ( ( is_string($v) && empty($v) ) || ( is_array($v) && count($v) === 0 ) ) ){
+        continue;
+      }
+      $st .= str_repeat('    ', $lev);
+      if ( !is_int($k) ){
+        $st .= "'".\bbn\str\text::escape_squote($k)."' => ";
+      }
+      if ( is_array($v) ){
+        $st .= self::export($v, $remove_empty, $lev+1);
+      }
+      else if ( is_object($v) ){
+        $st .= self::make_readable($v);
+      }
+      else if ( $v === 0 ){
+        $st .= '0';
+      }
+      else if ( is_null($v) ){
+        $st .= 'null';
+      }
+      else if ( is_bool($v) ){
+        $st .= $v === false ? 'false' : 'true';
+      }
+      else if ( is_int($v) || is_float($v) ){
+        $st .= $v;
+      }
+      else if ( !$remove_empty || !empty($v) ){
+        $st .= "'".\bbn\str\text::escape_squote($v)."'";
+      }
+      $st .= ','.PHP_EOL;
+    }
+    $st .= str_repeat('    ', $lev-1).']';
+    return $st;
   }
 }
 ?>

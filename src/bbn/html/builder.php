@@ -39,12 +39,7 @@ class builder
 	 * The current default configuration
 	 * @var array
 	 */
-	$_current,
-	/**
-	 * The current items registered in the object
-	 * @var array
-	 */
-	$items = [];
+	$_current;
 	
 	
 	/**
@@ -138,17 +133,12 @@ class builder
 		$this->reset();
 	}
 	
-	/**
-	 * Removes all the elements from the items array, and reset the default config
-	 * @return void
-	 */
 	public function reset()
 	{
 		$this->_current = array();
 		foreach ( $this->_defaults as $k => $v ){
 			$this->_current[$k] = $v;
 		}
-		$this->items = array();
 		$this->id = \bbn\str\text::genpwd(20,15);
 	}
 	
@@ -177,11 +167,7 @@ class builder
 	 */
 	public function get_config()
 	{
-		$r = [];
-		foreach ( $this->items as $k => $it ){
-			$r[$k] = $it->get_config();
-		}
-		return $r;
+		return $this->_defaults;
 	}
 	
 	/**
@@ -215,34 +201,15 @@ class builder
 			if ( !isset($cfg['data']) ){
 				$cfg['data'] = array();
 			}
-			if ( isset($cfg['data']['sql'], $cfg['data']['db']) && $cfg['data']['db'] && strlen($cfg['data']['sql']) > 5 ){
-        
-        $db =& $cfg['data']['db'];
-        
-        if ( !isset($cfg['widget']['options']['dataSource']) ){
-  				$cfg['widget']['options']['dataSource'] = array();
+      
+      if ( isset($cfg['field']) ){
+        if ( isset(self::$widgets[strtolower($cfg['field'])]) ){
+          $wid = self::$widgets[strtolower($cfg['field'])];
+          $tmp['widget'] = [
+              "name" => $wid['fn'],
+              "options" => []
+          ];
         }
-				$count = ( $r = $db->query($cfg['data']['sql']) ) ? $r->count() : 0;
-				if ( $count <= self::max_values_at_once ){
-					if ( $ds = $db->get_irows($cfg['data']['sql']) ){
-						foreach ( $ds as $d ){
-							array_push($cfg['widget']['options']['dataSource'], array('value' => $d[0], 'text' => $d[1]));
-						}
-            $cfg['widget']['options']['dataTextField'] = 'text';
-            $cfg['widget']['options']['dataValueField'] = 'value';
-					}
-				}
-				else{
-					$cfg['field'] = 'autocomplete';
-					//$cfg['options']['dataSource']['']
-				}
-			}
-			if ( isset($cfg['field']) && isset(self::$widgets[strtolower($cfg['field'])]) ){
-        $wid = self::$widgets[strtolower($cfg['field'])];
-        $tmp['widget'] = [
-            "name" => $wid['fn'],
-            "options" => []
-        ];
 				switch ( $cfg['field'] )
 				{
 					case 'date':
@@ -294,6 +261,7 @@ class builder
 					case 'text':
 						$tmp['tag'] = 'input';
 						$tmp['attr']['type'] = 'text';
+            $tmp['attr']['class'] = 'k-textbox';
 						break;
 					case 'numeric':
 						$tmp['tag'] = 'input';
@@ -319,32 +287,64 @@ class builder
 						$tmp['tag'] = 'textarea';
             $tmp['attr']['cols'] = 80;
             $tmp['attr']['rows'] = 20;
+            $tmp['widget']['options']['language'] = $tmp['lang'];
+            $tmp['widget']['options']['toolbar'] = 'Custom';
 						break;
 				}
 			}
-			// Size calculation
-			if ( isset($cfg['attr']['maxlength']) && !isset($cfg['attr']['size']) ){
-				if ( $cfg['attr']['maxlength'] <= 20 ){
-					$cfg['attr']['size'] = (int)$cfg['attr']['maxlength'];
+
+      if ( isset($cfg['data']['sql'], $cfg['data']['db']) && $cfg['data']['db'] && strlen($cfg['data']['sql']) > 5 ){
+        
+        $db =& $cfg['data']['db'];
+        
+        if ( !isset($cfg['widget']['options']['dataSource']) ){
+  				$cfg['widget']['options']['dataSource'] = array();
+        }
+				$count = ( $r = $db->query($cfg['data']['sql']) ) ? $r->count() : 0;
+				if ( $count <= self::max_values_at_once ){
+					if ( $ds = $db->get_irows($cfg['data']['sql']) ){
+						foreach ( $ds as $d ){
+							array_push($cfg['widget']['options']['dataSource'], array('value' => $d[0], 'text' => $d[1]));
+						}
+            $cfg['widget']['options']['dataTextField'] = 'text';
+            $cfg['widget']['options']['dataValueField'] = 'value';
+					}
+				}
+				else{
+					$cfg['field'] = 'autocomplete';
+					//$cfg['options']['dataSource']['']
 				}
 			}
-			if ( isset($cfg['attr']['size'], $cfg['attr']['minlength']) && $cfg['attr']['size'] < $cfg['attr']['minlength']){
-				$cfg['attr']['size'] = (int)$cfg['attr']['minlength'];
-			}
-			if ( isset($cfg['attr']) ){
-				$cfg['attr'] = array_merge($tmp['attr'], $cfg['attr']);
-			}
-			$cfg = array_merge($tmp, $cfg);
-			if ( isset($wid) ){
-        foreach ( $wid['opt'] as $o ){
-          if ( isset($cfg['widget']['options'][$o]) ){
-            $cfg['widget']['options'][$o] = $cfg['widget']['options'][$o];
+
+      if ( is_array($cfg) ){
+        // Size calculation
+        if ( isset($cfg['attr']['maxlength']) && !isset($cfg['attr']['size']) ){
+          if ( $cfg['attr']['maxlength'] <= 20 ){
+            $cfg['attr']['size'] = (int)$cfg['attr']['maxlength'];
           }
         }
-			}
-      if ( is_array($cfg) ){
+        if ( isset($cfg['attr']['size'], $cfg['attr']['minlength']) && $cfg['attr']['size'] < $cfg['attr']['minlength']){
+          $cfg['attr']['size'] = (int)$cfg['attr']['minlength'];
+        }
+        
+        
+
+        $cfg = \bbn\tools::merge_arrays($tmp, $cfg);
+        /*
+        if ( isset($wid) ){
+          foreach ( $wid['opt'] as $o ){
+            if ( isset($cfg['widget']['options'][$o]) ){
+              $cfg['widget']['options'][$o] = $cfg['widget']['options'][$o];
+            }
+          }
+        }
+         * 
+         */
+        $cfg = array_filter($cfg, function($a){
+          return !( is_array($a) && count($a) === 0 );
+        });
+
         $t = new \bbn\html\input($cfg);
-        array_push($this->items, $t);
         return $t;
       }
 		}

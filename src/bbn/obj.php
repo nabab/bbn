@@ -74,7 +74,7 @@ class obj
 		if ( $name === 'error' && $name === false )
 			$this->error = $value;
 		else if ( $name === 'log' )
-			array_push($this->log, $value);
+			array_push(\bbn\tools::log, $value);
 	}
 
 	/**

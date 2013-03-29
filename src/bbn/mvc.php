@@ -21,7 +21,7 @@ namespace bbn;
 
 class mvc 
 {
-	use \bbn\util\info;
+  
 	private
 	/**
 	 * Is set to null while not routed, then 1 if routing was sucessful, and false otherwise.
@@ -134,7 +134,7 @@ class mvc
 	 * List of possible outputs with their according file extension possibilities
 	 * @var array
 	 */
-		$outputs = array('dom'=>'html','html'=>'html','image'=>'jpg,jpeg,gif,png,svg','json'=>'json','pdf'=>'pdf','text'=>'txt','xml'=>'xml','js'=>'js','css'=>'css,less,sass'),
+		$outputs = array('dom'=>'html','html'=>'html','image'=>'jpg,jpeg,gif,png,svg','json'=>'json','text'=>'txt','xml'=>'xml','js'=>'js','css'=>'css,less,sass'),
 
 	/**
 	 * List of possible and existing universal controller. 
@@ -146,7 +146,6 @@ class mvc
 		'html' => 1,
 		'image' => 1,
 		'json' => 1,
-		'pdf' => 1,
 		'text' => 1,
 		'xml' => 1,
 		'css' => 1,

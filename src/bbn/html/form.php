@@ -19,7 +19,8 @@ namespace bbn\html;
 class form extends element
 {
   private $opened_fieldset = false;
-	public 
+
+  public 
   /**
 	 * Array with every html element of the form
 	 * @var array
@@ -28,6 +29,7 @@ class form extends element
           $rules = [],
           $builder = false,
           $submit = 'OK',
+          $buttonClass = 'k-button',
           $no_form;
 
 	/**
@@ -37,12 +39,15 @@ class form extends element
 	 */
 	protected function update() {
     parent::update();
+    if ( !$this->builder || is_string($this->builder) ){
+      $this->builder = new builder();
+    }
+    else if ( is_array($this->builder) ){
+      $this->builder = new builder($this->builder);
+    }
     foreach ( $this->elements as $k => $it ){
       if ( is_array($it) && ( isset($it['tag']) || isset($it['field']) ) ){
         $this->elements[$k] = $this->builder->get_input($it);
-      }
-      if ( is_object($it) && method_exists($it, "get_config") ){
-        $this->cfg['elements'] = $it->get_config();
       }
     }
   }
@@ -59,12 +64,6 @@ class form extends element
       if ( !isset($cfg['attr']['method']) ){
         $cfg['attr']['method'] = 'post';
       }
-      if ( !$this->builder || is_string($this->builder) ){
-        $this->builder = new builder();
-      }
-      else if ( is_array($this->builder) ){
-        $this->builder = new builder($this->builder);
-      }
       parent::__construct($cfg);
 		}
 	}
@@ -74,7 +73,7 @@ class form extends element
 	 * @param array $cfg The input's config
 	 * @return \bbn\html\input
 	 */
-	public function input($cfg=[])
+	public function input(array $cfg=null)
 	{
     if ( is_object($this->builder) ){
       array_push($this->elements, $this->builder->get_input($cfg));
@@ -82,9 +81,14 @@ class form extends element
     $this->update();
 	}
 	
-	public function fieldset($title='')
+	public function fieldset($title='', $idx=false)
   {
-    array_push($this->elements, ["fieldset"=>$title]);
+    if ( $idx === false ){
+      array_push($this->elements, ["fieldset"=>$title]);
+    }
+    else{
+      array_splice($this->elements, $idx, 0, [["fieldset"=>$title]]);
+    }
   }
 
  	public function end_fieldset()
@@ -100,10 +104,17 @@ class form extends element
 	public function get_html($with_js = 1)
 	{
 		$html = '';
+    $full_fieldset = false;
     
-		foreach ( $this->elements as $it ){
+		foreach ( $this->elements as $i => $it ){
       if ( is_array($it) ){
         if ( isset($it['fieldset']) ){
+          if ( $i === 0 ){
+            $full_fieldset = 1;
+          }
+          else if ( $full_fieldset === 1 ){
+            $full_fieldset = false;
+          }
           if ( $this->opened_fieldset ){
             $html .= '</fieldset>';
           }
@@ -121,20 +132,24 @@ class form extends element
         }
       }
       else if ( is_object($it) ){
-        $it->attr['data-bind'] = "value: ".$it->attr['name'];
+        if ( isset($it->attr['name']) ){
+          $it->attr['data-bind'] = "value: ".$it->attr['name'];
+        }
   			$html .= $it->get_label_input();
       }
 		}
     
-    if ( $this->opened_fieldset ){
+    if ( $this->opened_fieldset && !$full_fieldset ){
       $html .= '</fieldset>';
     }
-    
 		$html .= '<div class="appui-form-label"> </div>'.
             '<button class="appui-form-field'.
             ( isset($this->cfg['buttonClass']) ? ' '.$this->cfg['buttonClass'] : '' ).
             '">'.$this->submit.'</button>';
     
+    if ( $this->opened_fieldset && $full_fieldset ){
+      $html .= '</fieldset>';
+    }
     $this->content = $html;
     $html = parent::get_html();
     unset($this->content);
@@ -154,9 +169,7 @@ class form extends element
 	{
     $st = parent::get_script();
     if ( isset($this->attr['id']) ){
-      $st .= 'var $f = $("#'.$this->attr['id'].'");
-              kappui.tabstrip.set("'.$this->attr['id'].'", appui.f.formdata("#'.$this->attr['id'].'"), $f);
-              kendo.bind("#'.$this->attr['id'].' *", kappui.tabstrip.obs[1].'.$this->attr['id'].');';
+      $st .= 'kendo.bind("#'.$this->attr['id'].' *", kappui.tabstrip.obs[kappui.tabstrip.selected].info);';
     }
     foreach ( $this->elements as $it ){
       if ( is_object($it) ){
@@ -165,6 +178,7 @@ class form extends element
     }
     return $st;
 	}
+  
   
   public function get_config()
   {

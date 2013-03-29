@@ -170,7 +170,8 @@ class history
           die("The table $table doesn't seem to exist");
         }
         if ( !isset(self::$db->cache['structures'][$table]['keys']['PRIMARY']['columns']) || count(self::$db->cache['structures'][$table]['keys']['PRIMARY']['columns']) !== 1 ){
-          die("You need to have a primary key on a single column in your table $table in order to use the history class");
+          return [];
+          //die("You need to have a primary key on a single column in your table $table in order to use the history class");
         }
         self::$hstructures[$table] = ['history'=>false, 'fields' => [], 'primary' => $primary = self::$db->cache['structures'][$table]['keys']['PRIMARY']['columns'][0]];
         $cols = self::$db->select_all(self::$admin_db.'.'.self::$prefix.'columns',[],['table' =>self::$db->host.'.'.$table], 'position');
@@ -203,7 +204,6 @@ class history
         self::get_table_cfg($table);
       }
       if ( isset(self::$hstructures[$table], self::$hstructures[$table]['history']) && self::$hstructures[$table]['history'] === 1 ){
-        //var_dump("ok", self::$hstructures[$table], $kind);
         $s =& self::$hstructures[$table];
         $date = self::$date ? self::$date : date('c');
         switch ( $kind ){

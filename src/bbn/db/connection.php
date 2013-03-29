@@ -174,28 +174,11 @@ class connection extends \PDO implements actions, api, engines
 			array_push($msg,'Error message: '.$e->getMessage());
 		}
 		array_push($msg,self::$line);
-		array_push($msg, print_r($this->last_params, 1));
+		array_push($msg, $this->last());
 		array_push($msg,self::$line);
-		if ( defined('BBN_IS_DEV') && BBN_IS_DEV ){
-      if ( defined('BBN_DATA_PATH') && is_dir(BBN_DATA_PATH.'logs') ){
-  			file_put_contents(BBN_DATA_PATH.'logs/db.log', implode("\n",$msg)."\n\n", FILE_APPEND);
-      }
-      else{
-        die(nl2br(implode("\n",$msg)));
-      }
-		}
-		else
-		{
-			if ( defined('BBN_ADMIN_EMAIL') ){
-				mail(BBN_ADMIN_EMAIL, 'Error DB!', implode("\n",$msg));
-			}
-			if ( isset($argv) ){
-				echo implode("\n",$msg);
-			}
-			else if ( !defined("BBN_IS_DEV") || constant("BBN_IS_DEV") !== false ){
-				die("Error with the database...");
-			}
-		}
+		array_push($msg, print_r($this->last_params['values'], 1));
+		array_push($msg,self::$line);
+    \bbn\tools::log($msg, 'db');
 	}
 
 	/**
@@ -283,22 +266,6 @@ class connection extends \PDO implements actions, api, engines
 	}
   
   /**
-	* @todo Thomas a toi de jouer!
-	* 
-	* @param
-	* @return
-	*/
-	protected function log($st)
-	{
-		if ( defined('BBN_IS_DEV') && defined('BBN_DATA_PATH') && BBN_IS_DEV ){
-      if ( !is_string($st) ){
-        $st = print_r($st, 1);
-      }
-			file_put_contents(BBN_DATA_PATH.'logs/db.log', $st."\n\n", FILE_APPEND);
-		}
-	}
-  
-  /**
 	* Saves the cache prop in APC if possible
 	* 
 	* @param
@@ -306,7 +273,7 @@ class connection extends \PDO implements actions, api, engines
 	*/
 	protected function save_cache()
 	{
-    //$this->log($this->cache);
+    //\bbn\tools::log($this->cache, 'db');
     if ( $this->has_apc ){
       apc_store("bbn/db/".$this->host, $this->cache);
     }
@@ -343,6 +310,20 @@ class connection extends \PDO implements actions, api, engines
 	{
 		$this->queries = array();
 	}
+  
+  public function col_simple_name($col)
+  {
+    $col = explode(".", $col);
+    if ( count($col) === 0 ){
+      return false;
+    }
+    foreach ( $col as $c ){
+      if ( !\bbn\str\text::check_name($c) ){
+        return false;
+      }
+    }
+    return $c;
+  }
 
   /**
 	* @todo Thomas fais ton taf!!
@@ -540,7 +521,7 @@ class connection extends \PDO implements actions, api, engines
 	{
     if ( $this->check() ){
       $args = func_get_args();
-      //$this->log($args);
+      //\bbn\tools::log($args, 'db');
       return call_user_func_array('parent::query', $args);
     }
   }
@@ -553,17 +534,20 @@ class connection extends \PDO implements actions, api, engines
 	{
     if ( $this->check() ){
       $args = func_get_args();
-      //$this->log($args);
+      //\bbn\tools::log($args, 'db');
       if ( !$this->fancy ){
         return call_user_func_array('parent::query', $args);
       }
       if ( count($args) === 1 && is_array($args[0]) ){
         $args = $args[0];
       }
+      
       if ( is_string($args[0]) ){
+        
         // The first argument is the statement
         $statement = trim(array_shift($args));
         $hash = $this->make_hash($statement);
+        
         // Sending a hash as second argument from statement generating functions will bind it to the statement
         if ( isset($args[0]) && is_string($args[0]) &&
         ( strlen($args[0]) === ( 32 + 2*strlen($this->hash_contour) ) ) &&
@@ -571,12 +555,16 @@ class connection extends \PDO implements actions, api, engines
         ( substr($args[0],-strlen($this->hash_contour)) === $this->hash_contour ) ){
           $hash_sent = array_shift($args);
         }
+
         // Case where drivers are arguments
         if ( isset($args[0]) && is_array($args[0]) && !array_key_exists(0,$args[0]) ){
           $driver_options = array_shift($args);
         }
+
         // Case where values are argument
-        else if ( isset($args[0]) && is_array($args[0]) ){
+        else if ( isset($args[0]) &&
+                is_array($args[0]) &&
+                (count($args) === 1) ){
           $args = $args[0];
         }
         if ( !isset($driver_options) ){
@@ -588,6 +576,9 @@ class connection extends \PDO implements actions, api, engines
           if ( !is_array($arg) ){
             array_push($this->last_params['values'], $arg);
             $num_values++;
+          }
+          else if ( count($arg) >= 3 ){
+            array_push($this->last_params['values'], $arg[2]);
           }
         }
         if ( !isset($this->queries[$hash]) ){
@@ -846,7 +837,7 @@ class connection extends \PDO implements actions, api, engines
     if ( $r = $this->query(func_get_args()) ){
       return $r->get_rows();
 		}
-    return false;
+    return [];
 	}
 
 	/**
@@ -872,7 +863,7 @@ class connection extends \PDO implements actions, api, engines
     if ( $r = $this->query(func_get_args()) ){
       return $r->get_irows();
 		}
-    return false;
+    return [];
 	}
 
 	/**
@@ -888,27 +879,7 @@ class connection extends \PDO implements actions, api, engines
     return false;
 	}
 
-	/**
-	 * @todo Thomas fais ton taf!!
-	 *
-	 * @return array | false 
-	 */
-	public function get_array($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
-	{
-    $rows = $this->iselect_all($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0);
-    $r = [];
-    foreach ( $rows as $row ){
-      if ( count($row) === 1 ){
-        array_push($r, $row[0]);
-      }
-      else{
-        $r[$row[0]] = $row[1];
-      }
-    }
-    return $r;
-	}
-
-	/**
+  /**
 	 * @todo Thomas fais ton taf!!
 	 *
 	 * @return array | false 
@@ -954,27 +925,64 @@ class connection extends \PDO implements actions, api, engines
     if ( $r = $this->query(func_get_args()) ){
       return $r->get_objects();
 		}
-    return false;
+    return [];
 	}
+  
+  public function where_cfg($where)
+  {
+    $r = [
+        'fields' => [],
+        'values' => [],
+        'final' => [],
+        'keypair' => []
+    ];
+    if ( is_array($where) && count($where) > 0 ){
+      foreach ( $where as $k => $w ){
+        // arrays with [ field_name, operator, value]
+        if ( is_numeric($k) && is_array($w) && count($w) >= 3 ){
+          array_push($r['fields'], $w[0]);
+          array_push($r['values'], $w[2]);
+          $r['keypair'][$w[0]] = $w[2];
+          array_push($r['final'], [$w[0], $w[1], $w[2]]);
+        }
+        // arrays with [ field_name => value, field_name => value...] (equal assumed)
+        else if ( is_string($k) ){
+          array_push($r['fields'], $k);
+          array_push($r['values'], $w);
+          $r['keypair'][$k] = $w;
+          array_push($r['final'], [$k, '=', $w]);
+        }
+      }
+    }
+    return $r;
+  }
 
   private function _sel($table, $fields = array(), $where = array(), $order = false, $limit = 100, $start = 0)
 	{
-		$hash = $this->make_hash('select', $table, serialize($fields), serialize(array_keys($where)), ( $order ? 1 : '0' ), $limit, $start);
+    $where = $this->where_cfg($where);
+		$hash = $this->make_hash('select', $table, serialize($fields), $this->get_where($where, $table), serialize($order));
 		if ( isset($this->queries[$hash]) ){
 			$sql = $this->queries[$this->queries[$hash]]['statement'];
 		}
 		else{
-			$sql = $this->language->get_select($table, $fields, array_keys($where), $order, $limit);
+			$sql = $this->language->get_select($table, $fields, $where['final'], $order, $limit);
 		}
-		if ( $sql && ( $this->triggers_disabled || $this->launch_triggers($table, 'select', 'before', array_values($fields), $where) ) ){
-      if ( count($where) > 0 ){
-        $r = $this->query($sql, $hash, array_values($where));
+		if ( $sql && (
+                $this->triggers_disabled ||
+                $this->launch_triggers(
+                        $table,
+                        'select',
+                        'before',
+                        array_values($fields),
+                        $where['keypair']) ) ){
+      if ( count($where['values']) > 0 ){
+        $r = $this->query($sql, $hash, $where['values']);
       }
       else{
         $r = $this->query($sql, $hash);
       }
       if ( $r ){
-        $this->launch_triggers($table, 'select', 'after', $fields, $where);
+        $this->launch_triggers($table, 'select', 'after', $fields, $where['keypair']);
       }
       return $r;
     }
@@ -1020,7 +1028,7 @@ class connection extends \PDO implements actions, api, engines
     if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
       return $r->get_objects();
     }
-    return false;
+    return [];
 	}
 	
 	/**
@@ -1031,7 +1039,7 @@ class connection extends \PDO implements actions, api, engines
     if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
       return $r->get_rows();
     }
-    return false;
+    return [];
 	}
 	
 	/**
@@ -1042,7 +1050,7 @@ class connection extends \PDO implements actions, api, engines
     if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
       return $r->get_irows();
     }
-    return false;
+    return [];
 	}
 	
 	/**
@@ -1105,20 +1113,21 @@ class connection extends \PDO implements actions, api, engines
 	/**
 	 * @return void 
 	 */
-	public function update($table, array $values, array $where)
+	public function update($table, array $val, array $where)
 	{
 		$r = false;
-		$hash = $this->make_hash('insert_update', $table, serialize(array_keys($values)), serialize(array_keys($where)));
+    $where = $this->where_cfg($where);
+		$hash = $this->make_hash('update', $table, serialize(array_keys($val)), $this->get_where($where, $table));
 		if ( isset($this->queries[$hash]) ){
 			$sql = $this->queries[$this->queries[$hash]]['statement'];
 		}
 		else{
-			$sql = $this->language->get_update($table, array_keys($values), array_keys($where));
+			$sql = $this->language->get_update($table, array_keys($val), $where['final']);
 		}
-		if ( $sql && ( $this->triggers_disabled || $this->launch_triggers($table, 'update', 'before', $values, $where) ) ){
-      $r = $this->query($sql, $hash, array_merge(array_values($values), array_values($where)));
+		if ( $sql && ( $this->triggers_disabled || $this->launch_triggers($table, 'update', 'before', $val, $where['keypair']) ) ){
+      $r = $this->query($sql, $hash, array_merge(array_values($val), $where['values']));
       if ( $r ){
-        $this->launch_triggers($table, 'update', 'after', $values, $where);
+        $this->launch_triggers($table, 'update', 'after', $val, $where['keypair']);
       }
 		}
 		return $r;
@@ -1130,17 +1139,18 @@ class connection extends \PDO implements actions, api, engines
 	public function delete($table, array $where)
 	{
 		$r = false;
-		$hash = $this->make_hash('delete', $table, serialize(array_keys($where)));
+    $where = $this->where_cfg($where);
+		$hash = $this->make_hash('delete', $table, $this->get_where($where, $table));
 		if ( isset($this->queries[$hash]) ){
 			$sql = $this->queries[$this->queries[$hash]]['statement'];
 		}
 		else{
-			$sql = $this->language->get_delete($table, array_keys($where));
+			$sql = $this->language->get_delete($table, $where['final']);
 		}
-		if ( $sql && ( $this->triggers_disabled || $this->launch_triggers($table, 'delete', 'before', [], $where) ) ){
-      $r = $this->query($sql, $hash, array_values($where));
+		if ( $sql && ( $this->triggers_disabled || $this->launch_triggers($table, 'delete', 'before', [], $where['keypair']) ) ){
+      $r = $this->query($sql, $hash, $where['values']);
       if ( $r ){
-        $this->launch_triggers($table, 'delete', 'after', [], $where);
+        $this->launch_triggers($table, 'delete', 'after', [], $where['keypair']);
       }
 		}
 		return $r;
@@ -1278,6 +1288,30 @@ class connection extends \PDO implements actions, api, engines
 	public function get_change($db)
 	{
     return $this->language->get_change($db);
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function get_where(array $where, $table='')
+	{
+    return $this->language->get_where($where, $table='');
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function get_order($order, $table='')
+	{
+    return $this->language->get_order($order, $table='');
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function get_limit($limit)
+	{
+    return $this->language->get_limit($limit);
 	}
 	
 	/**

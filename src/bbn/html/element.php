@@ -27,6 +27,7 @@ class element
   public
           $tag = false,
           $attr = array(),
+          $css,
           $script,
           $events,
           $data,
@@ -42,7 +43,6 @@ class element
 	 * @param array $cfg The element configuration
 	 */
   protected static
-          $input_fields = ["input", "textarea", "select"],
           $schema = '{
 	"type":"object",
 	"$schema": "http:\/\/json-schema.org\/draft-03\/schema",
@@ -92,6 +92,22 @@ class element
       "description": "Tag",
 			"required":true
 		},
+		"widget": {
+			"type":["object","array"],
+			"id": "widget",
+      "description": "Widget",
+			"required":false,
+			"properties":{
+				"name": {
+					"type":"string",
+					"required":true
+				},
+				"options": {
+					"type":["object","array"],
+					"required":false
+				}
+			}
+		},
 		"xhtml": {
 			"type":"boolean",
 			"id": "xhtml",
@@ -100,8 +116,9 @@ class element
 		}
 	}
 }',
-    $validator = false,
-    $error;
+          $validator = false,
+          $input_fields = ["input", "textarea", "select"],
+          $error;
   
   protected static function _init(){
     if ( !self::$validator ){
@@ -110,15 +127,29 @@ class element
         self::$schema = json_decode(self::$schema);
       }
     }
+    if ( is_string(static::$schema) ){
+      $tmp = json_decode(static::$schema, 1);
+      static::$schema = \bbn\tools::to_object(
+              \bbn\tools::merge_arrays(\bbn\tools::to_array(self::$schema), $tmp));
+    }
   }
   
-  public static function cast($cfg, $schema=null){
-    if ( is_null($schema) && is_object(self::$schema) ){
-      $schema = self::$schema;
+  protected static function get_schema(){
+    static::_init();
+    return static::$schema;
+  }
+  
+ 	/**
+	 * Returns a config more adequate for the schema
+	 * @return array
+	 */
+  private static function cast($cfg, $schema=null){
+    if ( is_null($schema) && is_object(static::$schema) ){
+      $schema = static::$schema;
     }
     if ( is_object($schema) && is_array($cfg) && isset($schema->properties) ){
       foreach ( $schema->properties as $k => $p ){
-        if ( isset($cfg[$k]) ){
+        if ( isset($cfg[$k]) && is_object($p) ){
           if ( is_string($cfg[$k]) && $p->type === 'integer' ){
             $cfg[$k] = (int)$cfg[$k];
           }
@@ -130,10 +161,10 @@ class element
           }
         }
       }
-      return $cfg;
     }
+    return $cfg;
   }
-  
+
   public static function add_css($css){
     if ( is_string($css) ){
       return ' style="'.\bbn\str\text::escape_dquotes($css).'"';
@@ -158,7 +189,7 @@ class element
       return 1;
     }
     foreach ( self::$validator->getErrors() as $error ) {
-      self::$error .= sprintf("[%s] %s\n",$error['property'], $error['message']);
+      self::$error .= sprintf("[%s] %s in \n",$error['property'], $error['message']);
     }
     return false;
   }
@@ -172,8 +203,20 @@ class element
   {
     $this->cfg = [];
     foreach ( $this as $key => $var ){
-      if ( $key !== 'cfg' ){
-        $this->cfg[$key] = $var;
+      if ( $key !== 'cfg' && !is_null($var) ){
+        if ( is_array($var) ){
+          foreach ( $var as $k => $v ){
+            if ( !isset($this->cfg[$key]) ){
+              $this->cfg[$key] = [];
+            }
+            if ( !is_null($v) ){
+              $this->cfg[$key][$k] = $v;
+            }
+          }
+        }
+        else{
+          $this->cfg[$key] = $var;
+        }
       }
     }
   }
@@ -184,13 +227,13 @@ class element
     if ( is_string($cfg) ){
       $cfg = ["tag" => $cfg];
     }
-    $cfg = self::cast($cfg);
+   $cfg = self::cast($cfg);
 		if ( self::check_config($cfg) ){
       foreach ( $cfg as $key => $val ){
         if ( $key === 'tag' ){
           $this->tag = strtolower($val);
         }
-        else if ( property_exists($this, $key) ){
+        else if ( property_exists(get_called_class(), $key) ){
           $this->$key = $val;
         }
       }
@@ -212,11 +255,15 @@ class element
 		return $this->cfg;
 	}
   
-  public function show_config()
+  public function get_param()
   {
     return \bbn\str\text::make_readable($this->get_config());
   }
-
+  
+  public function show_config()
+  {
+    return \bbn\str\text::export(\bbn\str\text::make_readable($this->get_config()), 1);
+  }
 	
 	/**
 	 * Returns the javascript coming with the object.
@@ -237,19 +284,7 @@ class element
                 ')';
       }
       if ( $this->help ){
-        $r .= '.focus(function(){
-          var o = $$.parent().offset(),
-            w = lab.width(),
-            $boum = $(\'<div class="k-tooltip" id="form_tooltip" style="position:absolute">'.\bbn\str\text::escape_squote($this->help).'</div>\')
-              .css({
-                "maxWidth": w,
-                "top": o.top-10,
-                "right": appui.v.width - o.left
-              });
-						$("body").append($boum);
-        }).blur(function(){
-					$("#form_tooltip").remove();
-				})';
+        // tooltip
       }
       if ( !empty($r) ){
         $r = '$("#'.$this->attr['id'].'")'.$r.';'.PHP_EOL;
@@ -266,10 +301,11 @@ class element
 	 */
 	public function get_html($with_js = 1)
 	{
+    $html = '';
 		if ( $this->tag ){
 			$this->update();
       // TAG
-			$html = '<'.$this->tag;
+			$html .= '<'.$this->tag;
 
       foreach ( $this->attr as $key => $val ){
         if ( is_string($key) ){

@@ -19,6 +19,8 @@ use \bbn\str\text;
 class mysql implements \bbn\db\engines
 {
   private $db;
+	protected static $operators=array('!=','=','<>','<','<=','>','>=','like','clike','slike','not','is','is not', 'in','between');
+
   public $qte = '`';
   /**
    * 
@@ -252,6 +254,104 @@ class mysql implements \bbn\db\engines
 	}
 	
 	/**
+	 * @return string
+	 */
+  public function get_where(array $where, $table='')
+  {
+    if ( !isset($where['final'], $where['keypair'], $where['values'], $where['fields']) ){
+      $where = $this->db->where_cfg($where);
+    }
+    $st = '';
+    
+		if ( count($where['final']) > 0 ){
+      if ( !empty($table) ){
+        $m = $this->db->modelize($table);
+        if ( !$m || count($m['fields']) === 0 ){
+          /*
+           * @todo  check the fields against the table's model
+           */
+          return $st;
+        }
+      }
+      foreach ( $where['final'] as $w ){
+        // 2 parameters, we use equal
+        if ( count($w) >= 3 && in_array(strtolower($w[1]), self::$operators) ){
+          // 4 parameters, it's a SQL function, no escaping no binding
+          if ( isset($w[3]) ){
+            $st .= 'AND `'.$w[0].'` '.$w[1].' '.$w[2].' ';
+          }
+          // 3 parameters, the operator is second item
+          else{
+            $st .= 'AND `'.$w[0].'` '.$w[1].' ? ';
+          }
+        }
+        $st .= PHP_EOL;
+      }
+      if ( !empty($st) ){
+        $st = ' WHERE 1'.PHP_EOL.$st;
+      }
+    }
+    
+    return $st;
+  }
+  
+	/**
+	 * @return string
+	 */
+  public function get_order($order, $table = '') {
+    if ( is_string($order) ){
+      $order = [$order];
+    }
+    $r = '';
+    if ( is_array($order) && count($order) > 0 ){
+      $r .= PHP_EOL . "ORDER BY ";
+      if ( !empty($table) ){
+        $cfg = $this->db->modelize($table);
+      }
+      foreach ( $order as $col => $direction ){
+        if ( is_numeric($col) ){
+          if ( isset($cfg) && isset($cfg['fields'][$direction]) ){
+            $dir = stripos($cfg['fields'][$direction]['type'],'date') !== false ? 'DESC' : 'ASC';
+          }
+          else{
+            $dir = 'ASC';
+          }
+          if ( !isset($cfg) || isset($cfg['fields'][$col])  ){
+            $r .= "`$direction` $dir," . PHP_EOL;
+          }
+        }
+        else if ( !isset($cfg) || isset($cfg['fields'][$col])  ){
+          $r .= "`$col` " . ( strtolower($direction) === 'desc' ? 'DESC' : 'ASC' ) . "," . PHP_EOL;
+        }
+      }
+      $r = substr($r,0,strrpos($r,','));
+    }
+    return $r;
+  }
+  
+	/**
+	 * @return string
+	 */
+  public function get_limit($limit) {
+    if ( is_array($limit) ){
+      $args = $limit;
+    }
+    else{
+      $args = func_get_args();
+      if ( is_array($args[0]) ){
+        $args = $args[0];
+      }
+    }
+    if ( count($args) === 2 && \bbn\str\text::is_number($args[0], $args[1]) ){
+      return " LIMIT $args[1], $args[0]";
+    }
+    if ( \bbn\str\text::is_number($args[0]) ){
+      return " LIMIT $args[0]";
+    }
+    return '';
+  }
+
+    /**
 	 * @return string | false
 	 */
 	public function get_create($table)
@@ -268,21 +368,7 @@ class mysql implements \bbn\db\engines
 	public function get_delete($table, array $where)
 	{
 		if ( ( $table = $this->get_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 && count($where) > 0 ){
-			$r = "DELETE FROM $table WHERE 1 ";
-
-			foreach ( $where as $f ){
-				if ( !isset($m['fields'][$f]) ){
-					die("The fields to search for in get_delete don't correspond to the table");
-				}
-				$r .= "\nAND `$f` ";
-				if ( stripos($m['fields'][$f]['type'],'int') !== false ){
-					$r .= "= %u ";
-				}
-				else{
-					$r .= "= %s ";
-				}
-			}
-			return $r;
+			return "DELETE FROM $table ".$this->db->get_where($where, $table);
 		}
 		return false;
 	}
@@ -321,39 +407,12 @@ class mysql implements \bbn\db\engines
 			}
 			$r = substr($r,0,strrpos($r,','))."\nFROM $table";
 			if ( count($where) > 0 ){
-				$r .= "\nWHERE 1 ";
-				foreach ( $where as $f ){
-					if ( !isset($m['fields'][$f]) ){
-						die("The field $f to search for in get_select don't correspond to the table");
-					}
-					$r .= "\nAND `$f` ";
-					if ( stripos($m['fields'][$f]['type'],'int') !== false ){
-						$r .= "= %u";
-					}
-					else{
-						$r .= "= %s";
-					}
-				}
-			}
-			$directions = ['desc', 'asc'];
-			if ( is_string($order) ){
-				$order = [$order];
-			}
-			if ( is_array($order) && count($order) > 0 ){
-				$r .= "\nORDER BY ";
-				foreach ( $order as $col => $direction ){
-					if ( is_numeric($col) && isset($m['fields'][$direction]) ){
-						$r .= "`$direction` ".( stripos($m['fields'][$direction]['type'],'date') !== false ? 'DESC' : 'ASC' ).",\n";
-					}
-					else if ( isset($m['fields'][$col])  ){
-						$r .= "`$col` ".( strtolower($direction) === 'desc' ? 'DESC' : 'ASC' ).",\n";
-					}
-				}
-				$r = substr($r,0,strrpos($r,','));
-			}
-			if ( $limit && is_numeric($limit) && is_numeric($start) ){
-				$r .= "\nLIMIT $start, $limit";
-			}
+        $r .= $this->get_where($where, $table);
+      }
+      $r .= PHP_EOL . $this->get_order($order, $table);
+      if ( $limit ){
+  			$r .= PHP_EOL . $this->get_limit([$limit, $start]);
+      }
 			if ( $php ){
 				$r .= '")';
 			}
@@ -462,9 +521,6 @@ class mysql implements \bbn\db\engines
 		}
 		if ( ( $table = $this->get_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
 		{
-			if ( is_string($where) ){
-				$where = array($where);
-			}
 			$r .= "UPDATE $table SET ";
 			$i = 0;
 
@@ -474,45 +530,19 @@ class mysql implements \bbn\db\engines
 						die("The column $k doesn't exist in $table");
 					}
 					else{
-						$r .= "`$k` = ";
-						if ( stripos($m['fields'][$k]['type'],'int') !== false ){
-							$r .= "%u";
-						}
-						else{
-							$r .= "%s";
-						}
-						$r .= ",\n";
+						$r .= "`$k` = ?,".PHP_EOL;
 					}
 				}
 			}
 			else{
 				foreach ( array_keys($m['fields']) as $k ){
-					$r .= "`$k` = ";
-					if ( stripos($m['fields'][$k]['type'],'int') !== false ){
-						$r .= "%u";
-					}
-					else{
-						$r .= "%s";
-					}
-					$r .= ",\n";
+					$r .= "`$k` = ?,".PHP_EOL;
 				}
 			}
 
-			$r = substr($r,0,strrpos($r,','))."\nWHERE 1 ";
-			foreach ( $where as $f ){
-				if ( !isset($m['fields'][$f]) ){
-					die("The fields to search for in get_update don't correspond to the table");
-				}
-				$r .= "\nAND `$f` ";
-				if ( stripos($m['fields'][$f]['type'],'int') !== false ){
-					$r .= "= %u ";
-				}
-				else{
-					$r .= "= %s ";
-				}
-			}
+			$r = substr($r,0,strrpos($r,',')).$this->db->get_where($where, $table);
 
-			if ( $php ){
+      if ( $php ){
 				$r .= "\",\n";
 				$i = 0;
 				foreach ( array_keys($m['fields']) as $k ){
@@ -521,7 +551,7 @@ class mysql implements \bbn\db\engines
 					}
 				}
 				foreach ( $where as $f ){
-					$r .= "\$d['$f'],\n";
+					$r .= "\$d['$f[0]'],\n";
 				}
 				$r = substr($r,0,strrpos($r,',')).');';
 			}

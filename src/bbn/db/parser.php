@@ -26,7 +26,7 @@ class parser
 	/**
 	 * @var array
 	 */
-	public static $operators=array('=','<>','<','<=','>','>=','like','clike','slike','not','is','in','between');
+	public static $operators=array('!=','=','<>','<','<=','>','>=','like','clike','slike','not','is','is not', 'in','between');
 
 	/**
 	 * @var array

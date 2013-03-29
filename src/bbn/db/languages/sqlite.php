@@ -14,11 +14,13 @@ use \bbn\str\text;
  * @since Apr 4, 2011, 23:23:55 +0000
  * @category  Database
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @version 0.2r89
+ * @version 0.3
+ * @todo Finishing the get_where method and implement it in all the get functions
  */
 class sqlite implements \bbn\db\engines
 {
   private $db;
+	protected static $operators=array('!=','=','<>','<','<=','>','>=','like','clike','slike','not','is','is not', 'in','between');
   public $qte = '"';
   /**
    * 
@@ -230,6 +232,88 @@ class sqlite implements \bbn\db\engines
 	}
 	
 	/**
+	 * @return string
+	 */
+  public function get_where(array $where, $table='')
+  {
+    $st = '';
+    foreach ( $where as $key => $w ){
+      if ( is_numeric($key) && is_array($w) && isset($w[0], $w[1]) ){
+        // 2 parameters, we use equal
+        if ( count($w) === 2 ){
+          $st .= 'AND "'.$w[0].'" = ? ';
+        }
+        else if ( count($w) >= 3 && in_array (strtolower($w[1]), self::$operators) ){
+          // 4 parameters, it's a SQL function, no escaping no binding
+          if ( isset($w[3]) ){
+            $st .= 'AND "'.$w[0].'" '.$w[1].' '.$w[2].' ';
+          }
+          // 3 parameters, the operator is second item
+          else{
+            $st .= 'AND "'.$w[0].'" '.$w[1].' ? ';
+          }
+        }
+      }
+      else if (is_string($key) ){
+        $st .= 'AND "'.$w[0].'" = ? ';
+      }
+      $st .= PHP_EOL;
+    }
+    if ( !empty($st) ){
+      return ' WHERE 1'.PHP_EOL.$st;
+    }
+    return '';
+  }
+  
+	/**
+	 * @return string
+	 */
+  public function get_order($order, $table = '') {
+    if ( is_string($order) ){
+      $order = [$order];
+    }
+    $r = '';
+    if ( is_array($order) && count($order) > 0 ){
+      $r .= PHP_EOL . "ORDER BY ";
+      if ( !empty($table) ){
+        $cfg = $this->db->modelize($table);
+      }
+      foreach ( $order as $col => $direction ){
+        if ( is_numeric($col) && ( !isset($cfg) || isset($cfg['fields'][$direction]) ) ){
+          $r .= '"' . $direction . '" ' . ( stripos($m['fields'][$direction]['type'],'date') !== false ? 'DESC' : 'ASC' ) . "," . PHP_EOL;
+        }
+        else if ( !isset($cfg) || isset($cfg['fields'][$col])  ){
+          $r .= '"' . $col . '" ' . ( strtolower($direction) === 'desc' ? 'DESC' : 'ASC' ) . "," . PHP_EOL;
+        }
+      }
+      $r = substr($r,0,strrpos($r,','));
+    }
+    return $r;
+  }
+  
+	/**
+	 * @return string
+	 */
+  public function get_limit($limit) {
+    if ( is_array($limit) ){
+      $args = $limit;
+    }
+    else{
+      $args = func_get_args();
+      if ( is_array($args[0]) ){
+        $args = $args[0];
+      }
+    }
+    if ( count($args) === 2 && \bbn\str\text::is_number($args[0], $args[1]) ){
+      return " LIMIT $args[1], $args[0]";
+    }
+    if ( \bbn\str\text::is_number($args[0]) ){
+      return " LIMIT $args[0]";
+    }
+    return '';
+  }
+  
+	/**
 	 * @return string | false
 	 */
 	public function get_create($table)
@@ -311,18 +395,11 @@ class sqlite implements \bbn\db\engines
 			}
 			$r = substr($r,0,strrpos($r,',')).PHP_EOL.'FROM '.$table;
 			if ( count($where) > 0 ){
-				$r .= PHP_EOL.'WHERE 1 ';
-				foreach ( $where as $f ){
-					if ( !isset($m['fields'][$f]) ){
-						die("The field $f to search for in get_select don't correspond to the table");
-					}
-					$r .= PHP_EOL.'AND "'.$f.'" = ? ';
-				}
+				$r .= $this->get_where($where, $table);
 			}
+      $r .= $this->get_order($order, $table);
 			$directions = ['desc', 'asc'];
-			if ( is_string($order) ){
-				$order = [$order];
-			}
+      
 			if ( is_array($order) && count($order) > 0 ){
 				$r .= PHP_EOL.'ORDER BY ';
 				foreach ( $order as $col => $direction ){

@@ -79,6 +79,27 @@ interface engines
 	public function get_keys($table);
 	
  /**
+	* Get a string starting with WHERE with corresponding parameters to $where
+	*
+	* @return false|array
+	*/
+	public function get_where(array $where, $table='');
+	
+ /**
+	* Get a string starting with ORDER BY with corresponding parameters to $order
+	*
+	* @return false|array
+	*/
+	public function get_order($order, $table='');
+	
+ /**
+	* Get a string starting with LIMIT with corresponding parameters to $where
+	*
+	* @return false|array
+	*/
+	public function get_limit($limit);
+	
+ /**
 	* Fetches the database and returns an array of objects 
 	*
 	* @return false|array

@@ -25,17 +25,22 @@ class input extends element
 	 * The input's label/title
 	 * @var null|string
 	 */
-		$label,
+          $label,
 	/**
 	 * The input's value
 	 * @var mixed
 	 */
-		$value = '',
+      		$value = '',
 	/**
 	 * The input's default value
 	 * @var mixed
 	 */
-		$default = '';
+          $default = '',
+          $position,
+          $null,
+          $table,
+          $field,
+          $lang;
   
 	/**
 	 * This will build a new HTML form element according to the given configuration.
@@ -90,12 +95,6 @@ class input extends element
       "description": "Default value",
 			"required":false
 		},
-		"elements": {
-			"type":"array",
-      "description": "Items",
-			"id": "items",
-			"required":false
-		},
 		"field": {
 			"type":"string",
 			"id": "field",
@@ -132,6 +131,12 @@ class input extends element
       "description": "Place holder",
 			"required":false
 		},
+		"position": {
+			"type":"integer",
+			"id": "position",
+      "description": "Position",
+			"required":false
+		},
 		"table": {
 			"type":"string",
       "description": "Table",
@@ -139,7 +144,8 @@ class input extends element
 			"required":false
 		},
 		"tag": {
-      "enum": ["input","select","textarea"]
+      "enum": ["input","select","textarea"],
+			"required":true
 		},
 		"value": {
 			"type":"string",
@@ -150,13 +156,6 @@ class input extends element
 	}
 }';
   
-  protected static function _init(){
-    if ( is_string(self::$schema) ){
-      self::$schema = array_merge(parent::$schema, self::$schema);
-      parent::_init();
-    }
-  }
-
   public function __construct(array $cfg = null)
 	{
     parent::__construct($cfg);
