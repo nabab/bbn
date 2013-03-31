@@ -99,7 +99,7 @@ class history
 	public static function get_history($table, $id){
     if ( self::check_config() ){
       $r = [];
-      $args = ['localhost.'.self::$db->current.'.'.$table.'.%', $id];
+      $args = [self::$db->current.'.'.$table.'.%', $id];
       $q = self::$db->get_row("
         SELECT `last_mod`, `id_user`
         FROM `bbn_history`

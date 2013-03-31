@@ -245,7 +245,7 @@ class connection extends \PDO implements actions, api, engines
           call_user_func_array('parent::__construct', $cfg['args']);
           $this->current = $cfg['db'];
           $this->engine = $cfg['engine'];
-          $this->host = isset($cfg['host']) ? $cfg['host'] : 'localhost';
+          $this->host = isset($cfg['host']) ? $cfg['host'] : '127.0.0.1';
           $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
           if ( function_exists("apc_add") ){
             $this->has_apc = 1;

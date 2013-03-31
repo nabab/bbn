@@ -38,7 +38,51 @@ class mapper{
           $schema = false,
           $auto_update = false;
   
-	/**
+  
+  public static function table_id($table, $db=false){
+    
+    if ( substr_count($table, ".") === 1 ){
+      return $table;
+    }
+    else if ( $db ){
+      return $db.'.'.$table;
+    }
+    else{
+      return $this->client_db.'.'.$table;
+    }
+    
+  }
+
+  public static function col_id($col, $table=false){
+    
+    if ( substr_count($col, ".") === 2 ){
+      return $col;
+    }
+    else if ( substr_count($col, ".") === 1 ){
+      if ( $table ){
+        return self::table_id($table).'.'.self::simple_name($col);
+      }
+      else{
+        return self::simple_name($this->client_db).'.'.$col;
+      }
+    }
+    else if ( $table ){
+      return self::table_id($table).'.'.$col;
+    }
+  }
+  
+  public static function key_id($col, $table=false){
+
+  }
+  
+  public static function simple_name($item){
+    
+    $tmp = explode(".", $item);
+    return array_pop($item);
+  }
+
+  
+  /**
 	 * @param \bbn\db\connection $db A valid database connection
 	 * @param string $prefix
 	 * @return void
@@ -82,27 +126,48 @@ class mapper{
           'class' => $class,
           'configuration' => json_encode($copy)
           ]);
+      
       $id = $this->db->last_id();
+      
       $i = 1;
+      
       foreach ( $cfg['elements'] as $name => $ele ){
+
+        $table = $column = false;
+        if ( !empty($ele['appui']['table']) ){
+          $table = $ele['appui']['table'];
+        }
+        else if ( !empty($ele['table']) ){
+          $table = $ele['table'];
+        }
+        else if ( !empty($cfg['table']) ){
+          $table = $cfg['table'];
+        }
+        
         if ( $class === 'form' ){
+          
+          if ( $table && isset($ele['attr']['name']) ){
+            $column = self::col_id($ele['attr']['name'], $table);
+          }
           $this->db->insert($this->admin_db.'.'.$this->prefix.'fields',[
             'id_obj' => $id,
-            'column' => ( isset($ele['appui']['table'], $ele['attr']['name']) ?
-              $this->db->host . '.' . $ele['appui']['table'] .
-              '.' . $this->db->col_simple_name($ele['attr']['name']) : null ),
+            'column' => ( $column ? $column : null ),
             'title' => isset($ele['label']) ? $ele['label'] : null,
             'position' => isset($ele['position']) ? $ele['position'] : $i,
             'configuration' => json_encode($ele)
           ]);
         }
+        
+        
         else if ( $class === 'grid' ){
+
+          if ( $table && isset($ele['fields']['args'][0]) ){
+            $column = self::col_id($ele['fields']['args'][0], $table);
+          }
+          
           $this->db->insert($this->admin_db.'.'.$this->prefix.'fields',[
             'id_obj' => $id,
-            'column' => ( 
-              isset($ele['fields']['args'][0], $ele['appui']['table']) ? 
-                $this->db->host . '.' . $ele['appui']['table'] . '.' . $this->db->col_simple_name($ele['fields']['args'][0]) : null 
-            ),
+            'column' => ( $column ? $column : null ),
             'title' => isset($ele['columns']['title']) ? $ele['columns']['title'] : null,
             'position' => isset($ele['position']) ? $ele['position'] : $i,
             'configuration' => json_encode($ele)
@@ -652,8 +717,8 @@ EOD;
           $db = $tmp[0];
           $table = $tmp[1];
 					$this->db->insert_update($this->admin_db.'.'.$this->prefix.'tables',[
-						'id' => 'localhost.'.$t,
-						'db' => 'localhost.'.$db,
+						'id' => $t,
+						'db' => $db,
 						'table' => $table
 					]);
           foreach ( $vars['fields'] as $col => $f ){
@@ -683,8 +748,8 @@ EOD;
 							}
 						}
 						$this->db->insert_update($this->admin_db.'.'.$this->prefix.'columns',[
-							'id' => 'localhost.'.$t.'.'.$col,
-							'table' => 'localhost.'.$t,
+							'id' => $t.'.'.$col,
+							'table' => $t,
 							'column' => $col,
 							'position' => $f['position'],
 							'type' => $f['type'],
@@ -701,11 +766,11 @@ EOD;
 						$pos = 1;
 						foreach ( $arr['columns'] as $c ){
 							$this->db->insert_update($this->admin_db.'.'.$this->prefix.'keys',[
-								'id' => 'localhost.'.$t.'.'.$c.'.'.$k,
+								'id' => $t.'.'.$c.'.'.$k,
 								'key' => $k,
-								'column' => 'localhost.'.$t.'.'.$c,
+								'column' => $t.'.'.$c,
 								'position' => $pos,
-								'ref_column' => is_null($arr['ref_column']) ? null : 'localhost.'.$arr['ref_db'].'.'.$arr['ref_table'].'.'.$arr['ref_column']
+								'ref_column' => is_null($arr['ref_column']) ? null : $arr['ref_db'].'.'.$arr['ref_table'].'.'.$arr['ref_column']
 							]);
 							$pos++;
 						}

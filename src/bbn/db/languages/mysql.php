@@ -40,7 +40,7 @@ class mysql implements \bbn\db\engines
   {
     $cfg['engine'] = 'mysql';
     if ( !isset($cfg['host']) ){
-      $cfg['host'] = defined('BBN_DB_HOST') ? BBN_DB_HOST : 'localhost';
+      $cfg['host'] = defined('BBN_DB_HOST') ? BBN_DB_HOST : '127.0.0.1';
     }
     if ( !isset($cfg['user']) && defined('BBN_DB_USER') ){
       $cfg['user'] = defined('BBN_DB_USER') ? BBN_DB_USER : 'root';

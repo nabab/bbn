@@ -430,7 +430,7 @@ class connection
     if ( !function_exists($this->cfg['encryption']) ){
       die("You need the PHP function {$this->cfg['encryption']} to have the user connection class working");
     }
-    return eval("return {$this->cfg['encryption']}('$pass_given');");
+    return eval("return {$this->cfg['encryption']}('$st');");
   }
 
   /**
@@ -445,7 +445,8 @@ class connection
       
       // Table structure
 			$arch =& $this->cfg['arch'];
-      // Query starts with sql defined in __construct
+      
+      // Database Query 
       if ( $d = $this->db->rselect(
               $this->cfg['tables']['users'],
               $this->fields,
