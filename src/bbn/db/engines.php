@@ -27,14 +27,50 @@ interface engines
 	*/
 	public function change($db);
 	
- /**
-	 * Returns the full name of a given table
-	 *
-	 * @params string 
-	 * @params bool
-	 * @return false|array
+	/**
+	 * Returns a database item expression escaped like database, table, column, key names
+	 * 
+	 * @param string $item The item's name (escaped or not)
+	 * @return string | false
 	 */
-	public function get_full_name($table, $escaped=false);
+	public function escape_name($item);
+  
+	/**
+	 * Returns a table's full name i.e. database.table
+	 * 
+	 * @param string $table The table's name (escaped or not)
+	 * @param bool $escaped If set to true the returned string will be escaped
+	 * @return string | false
+	 */
+	public function table_full_name($table, $escaped=false);
+	
+	/**
+	 * Returns a table's simple name i.e. table
+	 * 
+	 * @param string $table The table's name (escaped or not)
+	 * @param bool $escaped If set to true the returned string will be escaped
+	 * @return string | false
+	 */
+  public function table_simple_name($table, $escaped=false);
+  
+	/**
+	 * Returns a column's full name i.e. table.column
+	 * 
+	 * @param string $col The column's name (escaped or not)
+	 * @param string $table The table's name (escaped or not)
+	 * @param bool $escaped If set to true the returned string will be escaped
+	 * @return string | false
+	 */
+  public function col_full_name($col, $table='', $escaped=false);
+
+	/**
+	 * Returns a column's simple name i.e. column
+	 * 
+	 * @param string $col The column's name (escaped or not)
+	 * @param bool $escaped If set to true the returned string will be escaped
+	 * @return string | false
+	 */
+  public function col_simple_name($col, $escaped=false);
 
 	/**
 	 * Fetches the database and returns an array of a single row num-indexed

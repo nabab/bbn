@@ -39,6 +39,11 @@ class mvc
 	 */
 	 	$dest,
 	/**
+	 * The directory of the controller.
+	 * @var null|string
+	 */
+		$dir,
+	/**
 	 * The path to the controller.
 	 * @var null|string
 	 */
@@ -254,7 +259,10 @@ class mvc
 				$this->mode = array_shift($params);
 				$path = implode('/',$params);
 			}
-			else{
+			else if ( $this->original_mode === 'dom' ){
+        $this->mode = 'html';
+      }
+      else {
 				$this->mode = $this->original_mode;
 			}
 		}
@@ -355,12 +363,17 @@ class mvc
 	 * @param array $model The data model to fill the view with
 	 * @return void 
 	 */
-	public function render($view, $model)
+	public function render($view, $model='')
 	{
     if ( !$this->mustache ){
       $this->mustache = new \Mustache_Engine();
     }
-		return $this->mustache->render($view,$model);
+    if ( empty($model) && isset($this->data) ){
+      $model = $this->data;
+    }
+    if ( is_array($model) ){
+  		return $this->mustache->render($view, $model);
+    }
 	}
 
 	/**
@@ -377,6 +390,13 @@ class mvc
 			}
 			if ( isset($this->known_controllers[$this->mode.'/'.$p]) ){
 				$this->dest = $p;
+        $this->dir = dirname($p);
+        if ( $this->dir === '.' ){
+          $this->dir = '';
+        }
+        else{
+          $this->dir .= '/';
+        }
 				$this->controller = $this->known_controllers[$this->mode.'/'.$p];
 			}
 			else{
@@ -405,6 +425,13 @@ class mvc
 					return false;
 				}
 				$this->dest = $p;
+        $this->dir = dirname($p);
+        if ( $this->dir === '.' ){
+          $this->dir = '';
+        }
+        else{
+          $this->dir .= '/';
+        }
 				$this->set_controller($p,$this->controller);
 			}
 		}
@@ -468,6 +495,17 @@ class mvc
 		return $this;
 	}
 
+	public function add_script($script)
+	{
+    if ( is_object($this->obj) ){
+      if ( !isset($this->obj->script) ){
+        $this->obj->script = '';
+      }
+      $this->obj->script .= $script;
+    }
+		return $this;
+	}
+
 	/**
 	 * This will enclose the controller's inclusion
 	 * It can be publicly launched through check()
@@ -481,17 +519,14 @@ class mvc
 			require($this->controller);
 			$output = ob_get_contents();
 			ob_end_clean();
-			if ( isset($this->obj->error) ){
-				die($this->obj->error);
-			}
-			else if ( is_object($this->obj) && !isset($this->obj->output) ){
+			if ( is_object($this->obj) && !isset($this->obj->output) && !empty($output) ){
 				$this->obj->output = $output;
 			}
 			$this->is_controlled = 1;
 		}
 		return $this;
 	}
-
+  
 	/**
 	 * This will launch the controller in a new function.
 	 * It is publicly launched through check().
@@ -517,7 +552,7 @@ class mvc
 	 * @param string $mode
 	 * @return string|false 
 	 */
-	private function get_view($path='', $mode='')
+	public function get_view($path='', $mode='')
 	{
 		if ( $this->mode && !is_null($this->dest) && $this->check_path($path, $this->mode) ){
 			if ( empty($mode) ){
@@ -751,7 +786,7 @@ class mvc
 	 *
 	 * @return void 
 	 */
-	public function add($d,$data=array())
+	public function add($d, $data=array())
 	{
 		$o = new mvc($d, $this, $data);
 		if ( $o->check() ){

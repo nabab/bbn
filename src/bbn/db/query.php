@@ -55,7 +55,7 @@ class query extends \PDOStatement implements actions
 		{
 			$this->db = $db;
 			$this->sequences = $this->db->last_params['sequences'];
-			$this->values = $this->db->last_params['values'];
+			$this->values = isset($this->db->last_params['values']) ? $this->db->last_params['values'] : [];
 		}
 	}
 	
@@ -70,7 +70,11 @@ class query extends \PDOStatement implements actions
         $d->$k = $this->repair_type($v);
       }
 		}
-    else if ( \bbn\str\text::is_number($d) ){
+    else if ( is_string($d) &&
+            \bbn\str\text::is_number($d) &&
+            ( (strpos($d, '0') !== 0) || strlen($d) === 1 ) &&
+            ($d < 2147483647) &&
+            ($d > -2147483647) ){
       $d = (int)$d;
     }
     return $d;

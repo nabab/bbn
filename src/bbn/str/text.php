@@ -22,9 +22,17 @@ class text
 	/**
 	 * @return void 
 	 */
+  public static function cast($st)
+  {
+    if ( is_array($st) || is_object($st) ){
+      return '';
+    }
+    return (string)$st;
+  }
+  
 	public static function escape_dquotes($st)
 	{
-		return mb_ereg_replace('"','\"',$st);
+    return addcslashes(self::cast($st), "\"\\\r\n\t");
 	}
 
 	/**
@@ -56,7 +64,7 @@ class text
 	 */
 	public static function escape_squotes($st)
 	{
-		return mb_ereg_replace("'","\'",$st);
+    return addcslashes(self::cast($st), "'\\\r\n\t");
 	}
 
 	/**
@@ -109,6 +117,7 @@ class text
 		}
 		else
 		{
+      $st = self::cast($st);
 			if ( $mode == 'all' )
 			{
 				$st = mb_ereg_replace("\n",'\n',$st);
@@ -153,6 +162,7 @@ class text
 	 */
 	public static function cut($st, $max)
 	{
+    $st = self::cast($st);
 		$st = mb_ereg_replace('&nbsp;',' ',$st);
 		$st = mb_ereg_replace('\n',' ',$st);
 		$st = strip_tags($st);
@@ -182,7 +192,7 @@ class text
 	 */
 	public static function encode_filename($st, $maxlength = 50)
 	{
-		$st = self::remove_accents($st);
+		$st = self::remove_accents(self::cast($st));
 		$res = '';
     
     if ( !is_int($maxlength) ){
@@ -203,6 +213,7 @@ class text
 	 */
 	public static function file_ext($file, $ar=false)
 	{
+    $file = self::cast($file);
 		if ( mb_strrpos($file,'/') !== false )
 			$file = substr($file,mb_strrpos($file,'/')+1);
 		if ( mb_strpos($file,'.') !== false )
@@ -261,11 +272,17 @@ class text
    * @param string $st Can take as many arguments and will return false if one of them is not solely made of digits
 	 * @return bool
 	 */
-	public static function is_number($st)
+	public static function is_number()
 	{
     $args = func_get_args();
     foreach ( $args as $a ){
-      if ( !(ctype_digit($st) || is_int($st)) ){
+      if ( is_string($a) ){
+        $a = trim($a);
+        if ( substr($a, 0, 1) === '-' ){
+          $a = substr($a, 1);
+        }
+      }
+      if ( !(ctype_digit($a) || is_int($a)) ){
         return false;
       }
     }
@@ -329,6 +346,7 @@ class text
 	 */
 	public static function parse_url($url)
 	{
+    $url = self::cast($url);
 		$r = array('url' => $url,'query' => '','params' => array());
 		if ( strpos($url,'?') > 0 )
 		{
@@ -350,7 +368,7 @@ class text
 	 */
 	public static function remove_accents($st)
 	{
-		$st = trim(mb_ereg_replace('&(.)(tilde|circ|grave|acute|uml|ring|oelig);', '\\1', $st));
+		$st = trim(mb_ereg_replace('&(.)(tilde|circ|grave|acute|uml|ring|oelig);', '\\1', $self::cast(st)));
 		$search = explode(",","ç,æ,œ,á,é,í,ó,ú,à,è,ì,ò,ù,ä,ë,ï,ö,ü,ÿ,â,ê,î,ô,û,å,e,i,ø,u,ą,ń,ł,ź,ę,À,Á,Â,Ã,Ä,Ç,È,É,Ê,Ë,Ì,Í,Î,Ï,Ñ,Ò,Ó,Ô,Õ,Ö,Ù,Ú,Û,Ü,Ý,Ł,Ś");
 		$replace = explode(",","c,ae,oe,a,e,i,o,u,a,e,i,o,u,a,e,i,o,u,y,a,e,i,o,u,a,e,i,o,u,a,n,l,z,e,A,A,A,A,A,C,E,E,E,E,I,I,I,I,N,O,O,O,O,O,U,U,U,U,Y,L,S");
     foreach ( $search as $i => $s )
@@ -368,6 +386,7 @@ class text
 		$args = func_get_args();
 		// Each argument must be a string starting with a letter, and having than one character made of letters, numbers and underscores
 		foreach ( $args as $a ){
+      $a = self::cast($a);
 			$t = preg_match('#[A-z]+[A-z0-9_]*#',$a,$m);
 			if ( $t !== 1 || $m[0] !== $a ){
 				return false;
@@ -383,7 +402,7 @@ class text
 	* @return bool
 	*/
 	public static function get_numbers($st){
-		return preg_replace("/[^0-9]/", '', $st);
+		return preg_replace("/[^0-9]/", '', self::cast($st));
 	}
 
   public static function make_readable($o)

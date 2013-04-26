@@ -2,176 +2,231 @@
 /*
  * 
  */
-
 namespace bbn\api\kendo;
 
-class grid extends object
+class grid // extends object
 {
-
-  protected static $default_config = [
-      'fn' => '\\Kendo\\UI\\Grid',
-      'datasource' => [
-        'fn' => '\\Kendo\\Data\\DataSource',
-        'transport' => [
-          'fn' => '\\Kendo\\Data\\DataSourceTransport',
-          'parameterMap' => 'function(data) {
-                    return kendo.stringify(data);
-                }'
-        ],
-        'batch' => true,
-        'pageSize' => 20,
-        'serverSorting' => true,
-        'serverFiltering' => true,
-        'serverPaging' => true,
-        'schema' => [
-          'fn' => '\\Kendo\\Data\\DataSourceSchema',
-          'model' => [
-            'fn' => '\\Kendo\\Data\\DataSourceSchemaModel',
-            'addField' => [
-              'fn' => '\\Kendo\\Data\\DataSourceSchemaModelField',
-            ]
-          ],
-          'data' => 'data',
-          'errors' => 'errors',
-          'total' => 'total',
-        ]
-
-      ],
-      'addColumn' => [
-          'fn' => '\\Kendo\\UI\\GridColumn'
-      ],
-      'attr' => [
-        'args' => ["class","appui-full-height"]
-      ],
-      'editable' => [
-          'confirmation' => 'Etes vous sur de vouloir supprimer cette entrée?',
-          'mode' => 'popup',
-          //'template' => '<div style="width:1100px"></div>'
-      ],
-      'pageable' => [
-          'messages' => [
-              'display' => "{0} - {1} de {2} éléments",
-              'empty' => "Aucun élément à afficher",
-              'page' => "Page",
-              'of' => "de {0}",
-              'itemsPerPage' => "éléments par page",
-              'first' => "Aller à la première page",
-              'previous' => "Aller à la page précédente",
-              'next' => "Aller à la page suivante",
-              'last' => "Aller à la denière page",
-              'refresh' => "Recharger la liste"
-          ]
-      ],
-      'sortable' => true,
-      'filterable' => [
-          'messages'  => [
-              'info' => "Voir les éléments correspondant aux critères suivants:", // sets the text on top of the filter menu
-              'filter' => "Filtrer", // sets the text for the "Filter" button
-              'clear' => "Enlever les filtres", // sets the text for the "Clear" button
-
-              // when filtering boolean numbers
-              'isTrue' => "est vrai", // sets the text for "isTrue" radio button
-              'isFalse' => "est faux", // sets the text for "isFalse" radio button
-
-              //changes the text of the "And" and "Or" of the filter menu
-              'and' => "et",
-              'or' => "ou bien",
-              'selectValue' => "- Choisir -"
-          ],
-          'operators' => [
-              'string' => [
-                  'contains' => "contient",
-                  'eq' => "est",
-                  'doesnotcontain' => "ne contient pas",
-                  'neq' => "n'est pas",
-                  'startswith' => "commence par",
-                  'endswith' => "se termine par"
-              ],
-              'number' => [
-                  'eq' => "est égal à",
-                  'neq' => "est différent de",
-                  'gte' => "est supérieur ou égal",
-                  'gt' => "est supérieur",
-                  'lte' => "est inférieur ou égal",
-                  'lt' => "est inférieur"
-              ],
-              'date' => [
-                  'eq' => "est",
-                  'neq' => "n'est pas",
-                  'gte' => "est après ou est",
-                  'gt' => "est après",
-                  'lte' => "est avant ou est",
-                  'lt' => "est avant"
-              ],
-              'enums' => [
-                  'eq' => "est",
-                  'neq' => "n'est pas"
-              ],
-          ]
-      ],
-      'resizable' => true,
-      'columnMenu' => [
-          'messages'=> [
-              'sortAscending' => "Trier par ordre croissant",
-              'sortDescending' => "Trier par ordre décroissant",
-              'filter' => "Filtre",
-              'columns' => "Colonnes"
-          ]
-      ],
-      'edit' => 'function(){
-        $(".k-edit-form-container").parent().css({
-          height:"auto",
-          width:720,
-          "max-height":appui.v.height-100
-        }).restyle().data("kendoWindow").title("Formulaire de saisie").center();
-        appui.f.log(arguments);
-       }'
-    ];
   
-  public $original_cfg;
+  private
+          $_insert = false,
+          $_update = false,
+          $_delete = false,
+          $_action_col = false;
   
+  public
+          /** @var \Kendo\UI\Grid Grid Object */
+          $grid,
+          
+          /** @var \Kendo\Data\DataSource DataSource Object */
+          $dataSource,
+          
+          /** @var \Kendo\Data\DataSourceSchema Schema Object */
+          $schema,
+          
+          /** @var \Kendo\Data\DataSourceSchemaModel Schema Model Object */
+          $model,
+          
+          /** @var \Kendo\Data\DataSourceTransport DataSource Transport Object */
+          $transport,
+          $builder;
+          
+          
+    
   public function __construct(array $cfg){
     
-    if ( isset($cfg['id'], $cfg['primary']) ){
-      $this->id = $cfg['id'];
-      $this->original_cfg = $cfg;
+    if ( isset($cfg['primary']) ){
+
+      $this->id = isset($cfg['id']) ? $cfg['id'] : \bbn\str\text::genpwd();
       $this->primary = $cfg['primary'];
-      $this->cfg = self::$default_config;
-      $this->cfg['args'] = [$this->id];
-      $this->cfg['datasource']['schema']['model']['id'] = $this->primary;
+      if ( !isset($cfg['builder']) ){
+        $cfg['builder'] = new \bbn\html\builder();
+      }
+      $this->builder = $cfg['builder'];
+
+      $this->grid = new \kendo\UI\Grid($this->id);
+
+      $this->dataSource = new \Kendo\Data\DataSource();
+      if ( isset($cfg['data']) ){
+        $this->dataSource->data($cfg['data']);
+      }
+
+      $this->schema = new \Kendo\Data\DataSourceSchema();
+      $this->schema->data('data');
+      $this->schema->total('total');
+
+      $this->model = new \Kendo\Data\DataSourceSchemaModel();
+      $this->model->id($cfg['primary']);
+      
+      
+
+      foreach ( $cfg['elements'] as $e ){
+        
+        $field = new \Kendo\Data\DataSourceSchemaModelField($e['attr']['name']);
+        if ( isset($e['attr']['name']) && isset($e['editable']) && $e['editable'] ){
+          if ( isset($e['type']) ){
+            $field->type($e['type']);
+          }
+          if ( isset($e['null']) && $e['null'] ){
+            $field->nullable(true);
+          }
+          if ( isset($e['attr']['readonly']) && $e['attr']['readonly'] ){
+            $field->editable(false);
+          }
+          else{
+            if ( isset($e['validation']) ){
+              $field->validation($e['validation']);
+            }
+          }
+          $this->model->addField($field);
+        }
+        if ( empty($e['editable']) ){
+          $field->editable(false);
+        }
+        if ( !empty($e['default']) ){
+          $field->defaultValue($e['default']);
+        }
+        $col = new \Kendo\UI\GridColumn();
+        if ( !isset($e['field']) || $e['field'] !== 'hidden' ){
+          if ( isset($e['editable']) && $e['editable'] ){
+            /*
+            if ( !isset($e['editor']) ){
+              $input = $this->builder->input($e, 1);
+              $sc = $input->ele_and_script();
+              $e['editor'] = new \Kendo\JavaScriptFunction('function(container, options) {
+                '.$sc[0].'.appendTo(container)'.$sc[1].'
+              }');
+            }
+            $col->editor($e['editor']);
+             * 
+             */
+          }
+          if ( isset($e['raw']) ){
+            $col->encoded(false);
+          }
+          if ( isset($e['data']) ){
+            $col->values($e['data']);
+          }
+          if ( isset($e['label']) ){
+            $col->title($e['label']);
+          }
+          if ( isset($e['attr']['name']) ){
+            $col->field($e['attr']['name']);
+          }
+          if ( isset($e['width']) ){
+            $col->width((int)$e['width']);
+          }
+          if ( isset($e['format']) ){
+            $col->format('{0:'.$e['format'].'}');
+          }
+          if ( isset($e['hidden']) ){
+            $col->hidden(true);
+          }
+          if ( isset($e['template']) ){
+            $col->template($e['template']);
+          }
+          if ( isset($e['editor']) ){
+            $col->editor($e['editor']);
+          }
+          if ( isset($e['encoded']) ){
+            $col->encoded($e['encoded']);
+          }
+          if ( isset($e['commands']) ){
+            foreach ( $e['commands'] as $c ){
+              $col->addCommandItem($c);
+            }
+          }
+
+          if ( count(\bbn\tools::to_array($col)) > 0 ){
+            $this->grid->addColumn($col);
+          }
+        }
+      }
+
+      
       if ( isset($cfg['url']) ){
+
+        $this->transport = new \Kendo\Data\DataSourceTransport();
+
+        $this->transport->parameterMap(new \Kendo\JavaScriptFunction('function(data) {
+                          return kendo.stringify(data);
+                      }'));
+
+
         if ( isset($cfg['all']) ){
           $this->set_all($cfg['url']);
         }
         else{
           if ( isset($cfg['select']) ){
-            $this->set_select($cfg['select'] === 1 ? $cfg['url'] : $cfg['select']);
+            $this->set_select(
+                    ($cfg['select'] === 1) || ($cfg['select'] === 'on') ?
+                        'json/select/'.$cfg['url'] : $cfg['select']);
           }
           if ( isset($cfg['insert']) ){
-            $this->set_insert($cfg['insert'] === 1 ? $cfg['url'] : $cfg['insert']);
+            $this->set_insert(
+                    ($cfg['insert'] === 1) || ($cfg['insert'] === 'on') ?
+                        'json/insert/'.$cfg['url'] : $cfg['insert']);
           }
           if ( isset($cfg['update']) ){
-            $this->set_update($cfg['update'] === 1 ? $cfg['url'] : $cfg['update']);
+            $this->set_update(
+                    ($cfg['update'] === 1) || ($cfg['update'] === 'on') ?
+                        'json/update/'.$cfg['url'] : $cfg['update']);
           }
           if ( isset($cfg['delete']) ){
-            $this->set_delete($cfg['delete'] === 1 ? $cfg['url'] : $cfg['delete']);
+            $this->set_delete(
+                    ($cfg['delete'] === 1) || ($cfg['delete'] === 'on') ?
+                        'json/delete/'.$cfg['url'] : $cfg['delete']);
           }
         }
+        $this->dataSource->transport($this->transport);
       }
-      if ( isset($cfg['elements']) ){
-        foreach ( $cfg['elements'] as $f ){
-          if ( isset($f['fields']) ){
-            $this->add_field($f['fields']);
-          }
-          if ( isset($f['columns']) ){
-            $this->add_column($f['columns']);
-          }
-        }
+      
+      if ( isset($cfg['data']) ){
+        $this->dataSource->data($cfg['data']);
       }
-      //$this->add_table_button(['text' => 'Wooo','name' => 'Wooloo']);
+      
+      $this->schema->model($this->model);
+      
+      $this->dataSource
+              ->schema($this->schema)
+              ->pageSize(20);
+
+      $this->grid
+              ->attr("class","appui-full-height")
+              ->datasource($this->dataSource)
+              ->editable([
+                  'mode' => 'popup',
+                  'confirmation' => i18n\fr::$editable_confirm
+              ])
+              ->filterable([
+                  'messages' => i18n\fr::$filterable_msgs,
+                  'operators' => i18n\fr::$filterable_operators
+              ])
+              ->resizable(true)
+              ->sortable(true)
+              ->groupable([
+                  'messages' => i18n\fr::$groupable_msgs
+              ])
+              ->pageable(['messages' => i18n\fr::$pageable_msgs])
+              ->columnMenu(['messages' => i18n\fr::$colmenu_msgs])
+              ->edit(new \Kendo\JavaScriptFunction('function(){
+                $(".k-edit-form-container").parent().css({
+                  height:"auto",
+                  width:720,
+                  "max-height":appui.v.height-100
+                }).restyle().data("kendoWindow").title("'.\bbn\str\text::escape_dquotes($cfg['description']).'").center();
+               }'));
+
+      
+      $this->cfg['args'] = [$this->id];
+      $this->cfg['datasource']['schema']['model']['id'] = $this->primary;
+
     }
   }
   
+  public function render()
+  {
+    return $this->grid->render();
+  }
   public function add_field($f){
     array_push($this->cfg['datasource']['schema']['model']['addField'], $f);
   }
@@ -187,70 +242,63 @@ class grid extends object
     $this->set_delete($url);
   }
   
-  public function set_data($data){
-    $this->cfg['datasource'] = [
-        'fn' => '\\Kendo\\Data\\DataSource',
-        'data' => $data,
-        'pageSize' => 20,
-    ];
-    $this->cfg['groupable'] = [
-        'messages' => [
-            'empty' => 'Faites glisser l\'entête d\'une colonne ici pour grouper les résultats sur cette colonne'
-        ]
-    ];
+  public function set_detail(\bbn\api\kendo\grid $grid){
+    $g = new grid($grid);
+    $this->grid->detailInit($g->grid);
   }
   
-  public function set_detail($grid){
-    $g = new grid($grid);
-    $this->cfg['detailInit'] = $g->cfg;
-  }
   public function set_insert($url, $with_button=1){
-    $this->cfg['datasource']['transport']['create'] = [
-        'fn' => '\\Kendo\Data\DataSourceTransportCreate',
-        'url' => 'json/insert/'.$url,
-        'contentType' => 'application/json',
-        'type' => 'POST'
-    ];
-    if ( $with_button ){
-      $this->add_table_button(['text' => 'Nouvelle entrée','name' => 'create']);
+    if ( isset($this->transport) ){
+      $this->_insert = 1;
+      $dst = new \Kendo\Data\DataSourceTransportCreate();
+      $dst    ->url($url)
+              ->contentType('application/json')  
+              ->type('POST');
+      $this->transport->create($dst);
+
+      if ( $with_button ){
+        $this->grid->addToolbarItem([
+            'name' => 'create',
+            'text' => i18n\fr::$new_entry
+        ]);
+      }
     }
   }
 
   public function set_select($url){
-    $this->cfg['datasource']['transport']['read'] = [
-        'fn' => '\\Kendo\Data\DataSourceTransportRead',
-        'url' => 'json/select/'.$url,
-        'contentType' => 'application/json',
-        'type' => 'POST'
-    ];
+    if ( isset($this->transport) ){
+      $this->dataSource
+              ->batch(true)
+              ->serverSorting(true)
+              ->serverFiltering(true)
+              ->serverPaging(true);
+      $dst = new \Kendo\Data\DataSourceTransportRead();
+      $dst    ->url($url)
+              ->contentType('application/json')  
+              ->type('POST');
+      $this->transport->read($dst);
+    }
   }
 
   public function set_update($url){
-    $this->cfg['datasource']['transport']['update'] = [
-        'fn' => '\\Kendo\Data\DataSourceTransportUpdate',
-        'url' => 'json/update/'.$url,
-        'contentType' => 'application/json',
-        'type' => 'POST'
-    ];
+    if ( isset($this->transport) ){
+      $this->_update = 1;
+      $dst = new \Kendo\Data\DataSourceTransportUpdate();
+      $dst    ->url($url)
+              ->contentType('application/json')  
+              ->type('POST');
+      $this->transport->update($dst);
+    }
   }
 
   public function set_delete($url){
-    $this->cfg['datasource']['transport']['destroy'] = [
-        'fn' => '\\Kendo\Data\DataSourceTransportDestroy',
-        'url' => 'json/delete/'.$url,
-        'contentType' => 'application/json',
-        'type' => 'POST'
-    ];
-  }
-  
-  public function add_table_button(array $button){
-    if ( !isset($this->cfg['addToolbarItem']) ){
-      $this->cfg['addToolbarItem'] = [
-          'fn' => '\\Kendo\\UI\\GridToolbarItem'
-      ];
-    }
-    if ( (isset($button['name']) && isset($button['text'])) || isset($button['template']) ){
-      array_push($this->cfg['addToolbarItem'], $button);
+    if ( isset($this->transport) ){
+      $this->_delete = 1;
+      $dst = new \Kendo\Data\DataSourceTransportDestroy();
+      $dst    ->url($url)
+              ->contentType('application/json')  
+              ->type('POST');
+      $this->transport->destroy($dst);
     }
   }
   

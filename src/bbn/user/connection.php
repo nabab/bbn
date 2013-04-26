@@ -22,6 +22,7 @@ if ( !defined('BBN_FINGERPRINT') ) {
 if ( !defined('BBN_SESS_NAME') ) {
 	define('BBN_SESS_NAME', 'define_me');
 }
+
 class connection
 {
 
@@ -162,7 +163,9 @@ class connection
           /** @var array */
           $sess_config,
           /** @var array */
-          $user_config;
+          $user_config,
+          /** @var array */
+          $fields;
           
 
 	public
@@ -391,9 +394,28 @@ class connection
         }
         $this->set_session('info', $r);
         $this->user_config = json_decode($d['config']);
+        $this->set_session('config', $this->user_config);
       }
     }
     return $this;
+  }
+  
+  public function update_info(array $d)
+  {
+    if ( $this->check() ){
+      $update = [];
+      foreach ( $d as $key => $val ){
+        if ( ($key !== 'id') && ($key !== 'config') && ($key !== 'auth') && ($key !== 'pass') && in_array($key, $this->fields) ){
+          $update[$key] = $val;
+        }
+      }
+      if ( count($update) > 0 ){
+        return $this->db->update(
+                $this->cfg['tables']['users'],
+                $update,
+                [$this->cfg['arch']['users']['id'] => $this->id]);
+      }
+    }
   }
 
   /*

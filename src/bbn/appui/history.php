@@ -6,16 +6,20 @@ use \bbn\str\text;
 class history
 {
 	
-	private static $db = false,
-    $hstructures = array(),
-		$hcol = 'active',
-		$htable = false,
-		$admin_db = '',
-		$huser = false,
-		$prefix = 'bbn_',
-		$primary = 'id',
-    $date = false,
-    $last_rows = false;
+	private static
+          /**
+           * @var \bbn\db\connection The DB connection
+           */
+          $db = false,
+          $hstructures = array(),
+          $hcol = 'active',
+          $htable = false,
+          $admin_db = '',
+          $huser = false,
+          $prefix = 'bbn_',
+          $primary = 'id',
+          $date = false,
+          $last_rows = false;
 	
 	/**
 	 * @return void 
@@ -99,10 +103,10 @@ class history
 	public static function get_history($table, $id){
     if ( self::check_config() ){
       $r = [];
-      $args = [self::$db->current.'.'.$table.'.%', $id];
+      $args = [self::$db->table_full_name($table).'.%', $id];
       $q = self::$db->get_row("
         SELECT `last_mod`, `id_user`
-        FROM `bbn_history`
+        FROM ".self::$db->escape_name(self::$htable)."
         WHERE `column` LIKE ?
         AND `line` = ?
         AND `operation` LIKE 'INSERT'
@@ -117,7 +121,7 @@ class history
       }
       $q = self::$db->get_row("
         SELECT `last_mod`, `id_user`
-        FROM `bbn_history`
+        FROM ".self::$db->escape_name(self::$htable)."
         WHERE `column` LIKE ?
         AND `line` = ?
         AND `operation` LIKE 'UPDATE'
@@ -132,7 +136,7 @@ class history
       }
       $q = self::$db->get_row("
       SELECT `last_mod`, `id_user`
-      FROM `bbn_history`
+      FROM ".self::$db->escape_name(self::$htable)."
       WHERE `column` LIKE ?
       AND `line` = ?
       AND `operation` LIKE 'DELETE'
@@ -161,7 +165,7 @@ class history
 	 */
 	public static function get_table_cfg($table){
     if ( self::check_config() ){
-      $table = self::$db->get_full_name($table);
+      $table = self::$db->table_full_name($table);
       if ( !isset(self::$hstructures[$table]) ){
         if ( !isset(self::$db->cache['structures'][$table]) ){
           self::$db->modelize($table);
@@ -170,11 +174,10 @@ class history
           die("The table $table doesn't seem to exist");
         }
         if ( !isset(self::$db->cache['structures'][$table]['keys']['PRIMARY']['columns']) || count(self::$db->cache['structures'][$table]['keys']['PRIMARY']['columns']) !== 1 ){
-          return [];
           //die("You need to have a primary key on a single column in your table $table in order to use the history class");
         }
         self::$hstructures[$table] = ['history'=>false, 'fields' => [], 'primary' => $primary = self::$db->cache['structures'][$table]['keys']['PRIMARY']['columns'][0]];
-        $cols = self::$db->select_all(self::$admin_db.'.'.self::$prefix.'columns',[],['table' =>self::$db->host.'.'.$table], 'position');
+        $cols = self::$db->select_all(self::$admin_db.'.'.self::$prefix.'columns',[],['table' => $table], 'position');
         $s =& self::$hstructures[$table];
         foreach ( $cols as $col ){
           $col = (array) $col;
@@ -199,7 +202,7 @@ class history
   public static function trigger($table, $kind, $moment, $values=[], $where=[])
   {
     if ( self::check_config() && self::$htable !== $table ){
-      $table = self::$db->get_full_name($table);
+      $table = self::$db->table_full_name($table);
       if ( !isset(self::$hstructures[$table]) ){
         self::get_table_cfg($table);
       }
@@ -215,7 +218,7 @@ class history
               self::$db->insert(self::$htable, [
                 'operation' => 'INSERT',
                 'line' => $id,
-                'column' => self::$db->host.'.'.$table.'.'.self::$primary,
+                'column' => $table.'.'.self::$primary,
                 'old' => '',
                 'last_mod' => $date,
                 'id_user' => self::$huser
@@ -235,7 +238,7 @@ class history
                     self::$db->insert(self::$htable, [
                       'operation' => 'UPDATE',
                       'line' => $where[$s['primary']],
-                      'column' => self::$db->host.'.'.$table.'.'.$c,
+                      'column' => $table.'.'.$c,
                       'old' => $upd[$c],
                       'last_mod' => $date,
                       'id_user' => self::$huser]);
@@ -259,7 +262,7 @@ class history
                   JOIN `".self::$prefix."tables` AS t
                     ON t.`id` LIKE c1.`table`
                 WHERE k.`ref_column` LIKE ?",
-                self::$db->host.'.'.$table.'.%%');
+                $table.'.%%');
               $to_select = [self::$primary];
               foreach ( $to_check as $c ){
                 array_push($to_select, $c['from_change']);
@@ -288,7 +291,7 @@ class history
                   self::$db->insert(self::$htable, [
                     'operation' => 'DELETE',
                     'line' => $del[$s['primary']],
-                    'column' => self::$db->host.'.'.$table.'.'.self::$hcol,
+                    'column' => $table.'.'.self::$hcol,
                     'old' => 1,
                     'last_mod' => $date,
                     'id_user' => self::$huser]);

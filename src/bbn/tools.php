@@ -154,7 +154,6 @@ class tools
    * Indents a flat JSON string to make it more human-readable.
    *
    * @param string $json The original JSON string to process.
-   *
    * @return string Indented version of the original JSON string.
    */
   public static function indent_json($json) {
@@ -206,6 +205,42 @@ class tools
       }
 
       return $result;
+  }
+  
+  /**
+   * Returns an object or an array cleaned up from all empty values
+   *
+   * @param array|object $arr An object or array to clean
+   * @return string The clean result
+   */
+  public static function remove_empty($arr){
+    foreach ( $arr as $k => $v ){
+      if ( is_object($arr) ){
+        if ( is_array($v) || is_object($v) ){
+          $arr->$k = self::remove_empty($v);
+        }
+        if ( empty($arr->$k) ){
+          unset($arr->$k);
+        }
+      }
+      else{
+        if ( is_array($v) || is_object($v) ){
+          $arr[$k] = self::remove_empty($v);
+        }
+        if ( empty($arr[$k]) ){
+          unset($arr[$k]);
+        }
+      }
+    }
+    return $arr;
+  }
+  
+  public static function to_groups(array $arr, $keyname = 'value', $valname = 'text'){
+    $r = [];
+    foreach ( $arr as $k => $v ){
+      $r[] = [$keyname => $k, $valname => $v];
+    }
+    return $r;
   }
   
 }

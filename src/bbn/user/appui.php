@@ -14,7 +14,7 @@ namespace bbn\user;
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @version 0.2r89
  */
-class appui extends \bbn\user\appui
+class appui extends \bbn\user\connection
 {
 	/**
 	 * @var int

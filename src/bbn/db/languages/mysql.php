@@ -27,7 +27,7 @@ class mysql implements \bbn\db\engines
    */
   public function __construct(\bbn\db\connection $db = null) {
     if ( !extension_loaded('pdo_mysql') ){
-      die("The SQLite driver for PDO is not installed...");
+      die("The MySQL driver for PDO is not installed...");
     }
     $this->db = $db;
   }
@@ -82,24 +82,119 @@ class mysql implements \bbn\db\engines
 	}
 	
 	/**
+	 * Returns a database item expression escaped like database, table, column, key names
+	 * 
+	 * @param string $item The item's name (escaped or not)
 	 * @return string | false
 	 */
-	public function get_full_name($table, $escaped=false)
+	public function escape_name($item)
 	{
-		$mtable = explode(".", str_replace("`", "", $table));
-		if ( count($mtable) === 2 ){
-			$db = trim($mtable[0]);
-			$table = trim($mtable[1]);
-		}
-		else{
-			$db = $this->db->current;
-			$table = trim($mtable[0]);
-		}
-		if ( text::check_name($db,$table) ){
-			return $escaped ? "`".$db."`.`".$table."`" : $db.".".$table;
-		}
+    if ( is_string($item) && ($item = trim($item)) ){
+      $items = explode(".", str_replace("`", "", $item));
+      $r = [];
+      foreach ( $items as $m ){
+        if ( !text::check_name($m) ){
+          return false;
+        }
+        array_push($r, "`".$m."`");
+      }
+      return implode('.', $r);
+    }
 		return false;
 	}
+  
+	/**
+	 * Returns a table's full name i.e. database.table
+	 * 
+	 * @param string $table The table's name (escaped or not)
+	 * @param bool $escaped If set to true the returned string will be escaped
+	 * @return string | false
+	 */
+	public function table_full_name($table, $escaped=false)
+	{
+    if ( is_string($table) && ($table = trim($table)) ){
+      $mtable = explode(".", str_replace("`", "", $table));
+      if ( count($mtable) === 2 ){
+        $db = trim($mtable[0]);
+        $table = trim($mtable[1]);
+      }
+      else{
+        $db = $this->db->current;
+        $table = trim($mtable[0]);
+      }
+      if ( text::check_name($db,$table) ){
+        return $escaped ? "`".$db."`.`".$table."`" : $db.".".$table;
+      }
+    }
+		return false;
+	}
+	
+	/**
+	 * Returns a table's simple name i.e. table
+	 * 
+	 * @param string $table The table's name (escaped or not)
+	 * @param bool $escaped If set to true the returned string will be escaped
+	 * @return string | false
+	 */
+  public function table_simple_name($table, $escaped=false)
+  {
+    if ( is_string($table) && ($table = trim($table)) ){
+      $mtable = explode(".", str_replace("`", "", $table));
+      $table = end($mtable);
+      if ( text::check_name($table) ){
+        return $escaped ? "`".$table."`" : $table;
+      }
+    }
+		return false;
+  }
+  
+	/**
+	 * Returns a column's full name i.e. table.column
+	 * 
+	 * @param string $col The column's name (escaped or not)
+	 * @param string $table The table's name (escaped or not)
+	 * @param bool $escaped If set to true the returned string will be escaped
+	 * @return string | false
+	 */
+  public function col_full_name($col, $table='', $escaped=false)
+  {
+    if ( is_string($col) && ($col = trim($col)) ){
+      $mcol = explode(".", str_replace("`", "", $col));
+      if ( count($mcol) > 1 ){
+        $col = array_pop($mcol);
+        $table = array_pop($mcol);
+        $ok = 1;
+      }
+      else if ( !empty($table) ){
+        $table = $this->table_simple_name($table);
+        $col = end($mcol);
+        $ok = 1;
+      }
+      if ( isset($ok) && text::check_name($table, $col) ){
+        return $escaped ? "`".$table."`.`".$col."`" : $table.".".$col;
+      }
+    }
+		return false;
+  }
+
+	/**
+	 * Returns a column's simple name i.e. column
+	 * 
+	 * @param string $col The column's name (escaped or not)
+	 * @param bool $escaped If set to true the returned string will be escaped
+	 * @return string | false
+	 */
+  public function col_simple_name($col, $escaped=false)
+  {
+    if ( is_string($col) && ($col = trim($col)) ){
+      $mcol = explode(".", str_replace("`", "", $col));
+      $col = end($mcol);
+      if ( text::check_name($col) ){
+        return $escaped ? "`".$col."`" : $col;
+      }
+    }
+    return false;
+  }
 	
 	/**
 	 * @return array | false
@@ -143,7 +238,7 @@ class mysql implements \bbn\db\engines
 	public function get_columns($table)
 	{
     $r = [];
-		if ( $table = $this->get_full_name($table, 1) ){
+		if ( $table = $this->table_full_name($table, 1) ){
 			if ( $rows = $this->db->get_rows("SHOW COLUMNS FROM $table") ){
         $p = 1;
         foreach ( $rows as $row ){
@@ -202,7 +297,7 @@ class mysql implements \bbn\db\engines
 	public function get_keys($table)
 	{
 		//var_dump("I get the keys");
-		if ( $full = $this->get_full_name($table, 1) ){
+		if ( $full = $this->table_full_name($table, 1) ){
 			$t = explode(".", $table);
 			$db = $t[0];
 			$table = $t[1];
@@ -278,11 +373,11 @@ class mysql implements \bbn\db\engines
         if ( count($w) >= 3 && in_array(strtolower($w[1]), self::$operators) ){
           // 4 parameters, it's a SQL function, no escaping no binding
           if ( isset($w[3]) ){
-            $st .= 'AND `'.$w[0].'` '.$w[1].' '.$w[2].' ';
+            $st .= 'AND '.$this->escape_name($w[0]).' '.$w[1].' '.$w[2].' ';
           }
           // 3 parameters, the operator is second item
           else{
-            $st .= 'AND `'.$w[0].'` '.$w[1].' ? ';
+            $st .= 'AND '.$this->escape_name($w[0]).' '.$w[1].' ? ';
           }
         }
         $st .= PHP_EOL;
@@ -317,7 +412,7 @@ class mysql implements \bbn\db\engines
             $dir = 'ASC';
           }
           if ( !isset($cfg) || isset($cfg['fields'][$col])  ){
-            $r .= "`$direction` $dir," . PHP_EOL;
+            $r .= $this->escape_name($direction)." $dir," . PHP_EOL;
           }
         }
         else if ( !isset($cfg) || isset($cfg['fields'][$col])  ){
@@ -356,7 +451,7 @@ class mysql implements \bbn\db\engines
 	 */
 	public function get_create($table)
 	{
-		if ( ( $table = $this->get_full_name($table, 1) ) && $r = $this->db->raw_query("SHOW CREATE TABLE $table") ){
+		if ( ( $table = $this->table_full_name($table, 1) ) && $r = $this->db->raw_query("SHOW CREATE TABLE $table") ){
 			return $r->fetch(\PDO::FETCH_ASSOC)['Create Table'];
 		}
 		return false;
@@ -367,7 +462,7 @@ class mysql implements \bbn\db\engines
 	 */
 	public function get_delete($table, array $where)
 	{
-		if ( ( $table = $this->get_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 && count($where) > 0 ){
+		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 && count($where) > 0 ){
 			return "DELETE FROM $table ".$this->db->get_where($where, $table);
 		}
 		return false;
@@ -378,7 +473,7 @@ class mysql implements \bbn\db\engines
 	 */
 	public function get_select($table, array $fields = array(), array $where = array(), $order = array(), $limit = false, $start = 0, $php = false)
 	{
-		if ( ( $table = $this->get_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
+		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
 		{
 			$r = '';
 			if ( $php ){
@@ -392,10 +487,10 @@ class mysql implements \bbn\db\engines
 					}
 					else{
             if ( !is_numeric($k) && \bbn\str\text::check_name($k) ){
-              $r .= "`$c` AS $k,\n";
+              $r .= $this->escape_name($c)." AS $k,\n";
             }
             else{
-              $r .= "`$c`,\n";
+              $r .= $this->escape_name($c).",\n";
             }
 					}
 				}
@@ -430,7 +525,7 @@ class mysql implements \bbn\db\engines
 		if ( $php ){
 			$r .= '$db->query("';
 		}
-		if ( ( $table = $this->get_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
+		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
 		{
 			$r .= "INSERT ";
 			if ( $ignore ){
@@ -519,7 +614,7 @@ class mysql implements \bbn\db\engines
 		if ( $php ){
 			$r .= '$db->query("';
 		}
-		if ( ( $table = $this->get_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
+		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
 		{
 			$r .= "UPDATE $table SET ";
 			$i = 0;
@@ -585,7 +680,7 @@ class mysql implements \bbn\db\engines
       }
     }
     $iname = text::cut($iname, 50);
-		if ( ( $table = $this->get_full_name($table, 1) ) ){
+		if ( ( $table = $this->table_full_name($table, 1) ) ){
 			$this->db->raw_query("
 			CREATE ".( $unique ? "UNIQUE " : "" )."INDEX `$iname`
       ON $table ( ".implode(", ", $column)." )");
@@ -598,7 +693,7 @@ class mysql implements \bbn\db\engines
 	 */
 	public function delete_db_index($table, $column)
 	{
-		if ( ( $table = $this->get_full_name($table, 1) ) && text::check_name($column) ){
+		if ( ( $table = $this->table_full_name($table, 1) ) && text::check_name($column) ){
 			$this->db->raw_query("
 				ALTER TABLE $table
 				DROP INDEX `$column`");

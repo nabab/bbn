@@ -86,29 +86,124 @@ class sqlite implements \bbn\db\engines
 	}
 	
 	/**
+	 * Returns a database item expression escaped like database, table, column, key names
+	 * 
+	 * @param string $item The item's name (escaped or not)
 	 * @return string | false
 	 */
-	public function get_full_name($table, $escaped=false)
+	public function escape_name($item)
 	{
-		$mtable = explode('.', str_replace('"', '', $table));
-		if ( count($mtable) === 2 ){
-			$db = trim($mtable[0]);
-			$table = trim($mtable[1]);
-		}
-		else{
-			$db = $this->db->current;
-			$table = trim($mtable[0]);
-		}
-		if ( text::check_name($db,$table) ){
-      if ( $db === 'main' ){
-  			return $escaped ? '"'.$table.'"' : $table;
+    if ( is_string($item) && ($item = trim($item)) ){
+      $items = explode('.', str_replace('"', '', $item));
+      $r = [];
+      foreach ( $items as $m ){
+        if ( !text::check_name($m) ){
+          return false;
+        }
+        array_push($r, '"'.$m.'"');
       }
-      else{
-  			return $escaped ? '"'.$db.'"."'.$table.'"' : $db.'.'.$table;
-      }
-		}
+      return implode('.', $r);
+    }
 		return false;
 	}
+
+  /**
+	 * Returns a table's full name i.e. database.table
+	 * 
+	 * @param string $table The table's name (escaped or not)
+	 * @param bool $escaped If set to true the returned string will be escaped
+	 * @return string | false
+	 */
+	public function table_full_name($table, $escaped=false)
+	{
+    if ( is_string($table) && ($table = trim($table)) ){
+      $mtable = explode('.', str_replace('"', '', $table));
+      if ( count($mtable) === 2 ){
+        $db = trim($mtable[0]);
+        $table = trim($mtable[1]);
+      }
+      else{
+        $db = $this->db->current;
+        $table = trim($mtable[0]);
+      }
+      if ( text::check_name($db,$table) ){
+        if ( $db === 'main' ){
+          return $escaped ? '"'.$table.'"' : $table;
+        }
+        else{
+          return $escaped ? '"'.$db.'"."'.$table.'"' : $db.'.'.$table;
+        }
+      }
+    }
+		return false;
+	}
+	
+	/**
+	 * Returns a table's simple name i.e. table
+	 * 
+	 * @param string $table The table's name (escaped or not)
+	 * @param bool $escaped If set to true the returned string will be escaped
+	 * @return string | false
+	 */
+  public function table_simple_name($table, $escaped=false)
+  {
+    if ( is_string($table) && ($table = trim($table)) ){
+      $mtable = explode('.', str_replace('"', '', $table));
+      $table = end($mtable);
+      if ( text::check_name($table) ){
+        return $escaped ? '"'.$table.'"' : $table;
+      }
+    }
+		return false;
+  }
+  
+	/**
+	 * Returns a column's full name i.e. table.column
+	 * 
+	 * @param string $col The column's name (escaped or not)
+	 * @param string $table The table's name (escaped or not)
+	 * @param bool $escaped If set to true the returned string will be escaped
+	 * @return string | false
+	 */
+  public function col_full_name($col, $table='', $escaped=false)
+  {
+    if ( is_string($col) && ($col = trim($col)) ){
+      $mcol = explode('.', str_replace('"', '', $col));
+      if ( !empty($table) ){
+        $table = $this->table_simple_name($table);
+        $col = end($mcol);
+        $ok = 1;
+      }
+      else if ( count($mcol) > 1 ){
+        $col = array_pop($mcol);
+        $table = array_pop($mcol);
+        $ok = 1;
+      }
+      if ( isset($ok) && text::check_name($table, $col) ){
+        return $escaped ? '"'.$table.'"."'.$col.'"' : $table.'.'.$col;
+      }
+    }
+		return false;
+  }
+
+	/**
+	 * Returns a column's simple name i.e. column
+	 * 
+	 * @param string $col The column's name (escaped or not)
+	 * @param bool $escaped If set to true the returned string will be escaped
+	 * @return string | false
+	 */
+  public function col_simple_name($col, $escaped=false)
+  {
+    if ( is_string($col) && ($col = trim($col)) ){
+      $mcol = explode('.', str_replace('"', '', $col));
+      $col = end($mcol);
+      if ( text::check_name($col) ){
+        return $escaped ? '"'.$col.'"' : $col;
+      }
+    }
+    return false;
+  }
 	
 	/**
 	 * @return array | false
@@ -156,7 +251,7 @@ class sqlite implements \bbn\db\engines
 	{
     $r = [];
     
-		if ( ( $table = $this->get_full_name($table, 1) ) ){
+		if ( ( $table = $this->table_full_name($table, 1) ) ){
 
       $p = 1;
       foreach ( $this->db->raw_query('PRAGMA table_info('.$table.')') as $row ){
@@ -200,7 +295,7 @@ class sqlite implements \bbn\db\engines
 	 */
 	public function get_keys($table)
 	{
-		if ( $full = $this->get_full_name($table, 1) ){
+		if ( $full = $this->table_full_name($table, 1) ){
       $keys = array();
       $cols = array();
       $database = $this->db->current === 'main' ? '' : '"'.$this->db->current.'".';
@@ -318,7 +413,7 @@ class sqlite implements \bbn\db\engines
 	 */
 	public function get_create($table)
 	{
-    if ( $table = $this->get_full_name($table) ){
+    if ( $table = $this->table_full_name($table) ){
       if ( strpos($table, '.') ){
         $t = explode('.', $table);
         $database = $t[0];
@@ -341,7 +436,7 @@ class sqlite implements \bbn\db\engines
 	 */
 	public function get_delete($table, array $where, $php = false)
 	{
-		if ( ( $table = $this->get_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 && count($where) > 0 ){
+		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 && count($where) > 0 ){
 			$r = '';
 			if ( $php ){
 				$r .= '$db->query(\'';
@@ -366,7 +461,7 @@ class sqlite implements \bbn\db\engines
 	 */
 	public function get_select($table, array $fields = array(), array $where = array(), $order = array(), $limit = false, $start = 0, $php = false)
 	{
-		if ( ( $table = $this->get_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
+		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
 		{
 			$r = '';
 			if ( $php ){
@@ -436,7 +531,7 @@ class sqlite implements \bbn\db\engines
 		if ( $php ){
 			$r .= '$db->query(\'';
 		}
-		if ( ( $table = $this->get_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 ){
+		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 ){
 			$r .= 'INSERT ';
 			if ( $ignore ){
 				$r .= 'OR IGNORE ';
@@ -514,7 +609,7 @@ class sqlite implements \bbn\db\engines
 		if ( $php ){
 			$r .= '$db->query(\'';
 		}
-		if ( ( $table = $this->get_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 ){
+		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 ){
 			if ( is_string($where) ){
 				$where = array($where);
 			}
@@ -587,7 +682,7 @@ class sqlite implements \bbn\db\engines
       }
     }
     $iname = text::cut($iname, 50);
-		if ( ( $table = $this->get_full_name($table, 1) ) ){
+		if ( ( $table = $this->table_full_name($table, 1) ) ){
 			$this->db->raw_query("
 			CREATE ".( $unique ? "UNIQUE " : "" )."INDEX `$iname`
       ON $table ( ".implode(", ", $column)." )");
@@ -600,7 +695,7 @@ class sqlite implements \bbn\db\engines
 	 */
 	public function delete_db_index($table, $column)
 	{
-		if ( ( $table = $this->get_full_name($table, 1) ) && text::check_name($column) ){
+		if ( ( $table = $this->table_full_name($table, 1) ) && text::check_name($column) ){
 			$this->db->raw_query("
 				ALTER TABLE $table
 				DROP INDEX `$column`");

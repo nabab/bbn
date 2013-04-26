@@ -311,20 +311,67 @@ class connection extends \PDO implements actions, api, engines
 		$this->queries = array();
 	}
   
-  public function col_simple_name($col)
+	/**
+	 * Returns a table's full name i.e. database.table
+	 * 
+	 * @param string $table The table's name (escaped or not)
+	 * @param bool $escaped If set to true the returned string will be escaped
+	 * @return string | false
+	 */
+	public function escape_name($item)
+	{
+		return $this->language->escape_name($item);
+	}
+
+  /**
+	 * Returns a table's full name i.e. database.table
+	 * 
+	 * @param string $table The table's name (escaped or not)
+	 * @param bool $escaped If set to true the returned string will be escaped
+	 * @return string | false
+	 */
+	public function table_full_name($table, $escaped=false)
+	{
+		return $this->language->table_full_name($table, $escaped);
+	}
+	
+	/**
+	 * Returns a table's simple name i.e. table
+	 * 
+	 * @param string $table The table's name (escaped or not)
+	 * @param bool $escaped If set to true the returned string will be escaped
+	 * @return string | false
+	 */
+  public function table_simple_name($table, $escaped=false)
   {
-    $col = explode(".", $col);
-    if ( count($col) === 0 ){
-      return false;
-    }
-    foreach ( $col as $c ){
-      if ( !\bbn\str\text::check_name($c) ){
-        return false;
-      }
-    }
-    return $c;
+    return $this->language->table_full_name($table, $escaped);
+  }
+  
+	/**
+	 * Returns a column's full name i.e. table.column
+	 * 
+	 * @param string $col The column's name (escaped or not)
+	 * @param string $table The table's name (escaped or not)
+	 * @param bool $escaped If set to true the returned string will be escaped
+	 * @return string | false
+	 */
+  public function col_full_name($col, $table='', $escaped=false)
+  {
+    return $this->language->col_full_name($table, $escaped);
   }
 
+	/**
+	 * Returns a column's simple name i.e. column
+	 * 
+	 * @param string $col The column's name (escaped or not)
+	 * @param bool $escaped If set to true the returned string will be escaped
+	 * @return string | false
+	 */
+  public function col_simple_name($col, $escaped=false)
+  {
+    return $this->language->col_simple_name($col, $escaped);
+  }
+  
   /**
 	* @todo Thomas fais ton taf!!
 	* @return
@@ -502,18 +549,6 @@ class connection extends \PDO implements actions, api, engines
 	}
 	
 	/**
-	 * @todo Thomas faut bosser maintenant!!
-	 * 
-	 * @param $table
-	 * @param $escaped
-	 * @return string | false
-	 */
-	public function get_full_name($table, $escaped=false)
-	{
-		return $this->language->get_full_name($table, $escaped);
-	}
-	
-	/**
 	 * Execute the parent query function
 	 * @return void
 	 */
@@ -655,7 +690,7 @@ class connection extends \PDO implements actions, api, engines
             }
           }
           if ( isset($q['sequences']['INSERT']) ){
-            $this->last_insert_id = $this->lastInsertId();
+            $this->last_insert_id = (int)$this->lastInsertId();
           }
           if ( $q['prepared'] && ( isset($q['sequences']['INSERT']) || isset($q['sequences']['UPDATE']) || isset($q['sequences']['DELETE']) || isset($q['sequences']['DROP']) ) ){
             return $q['prepared']->rowCount();
@@ -722,7 +757,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function new_id($table, $id_field='id', $min = 11111, $max = 499998999)
 	{
-		if ( ( $max > $min ) && text::check_name($id_field) && $table = $this->get_full_name($table,1) ){
+		if ( ( $max > $min ) && text::check_name($id_field) && $table = $this->table_full_name($table,1) ){
 			$id = mt_rand($min, $max);
 			while ( $this->select($table, [$id_field], [$id_field => $id]) ){
 				$id = mt_rand($min, $max);
@@ -1185,7 +1220,7 @@ class connection extends \PDO implements actions, api, engines
       // If we change one value or more there will be to save the cache
       $change = false;
 			foreach ( $tables as $t ){
-				$full = $this->get_full_name($t);
+				$full = $this->table_full_name($t);
         if ( !in_array($full, $this->cache['modelized']) ){
           array_push($this->cache['modelized'], $full);
           if ( !isset($this->cache['structures'][$full]['fields']) ){
@@ -1250,7 +1285,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function get_columns($table)
 	{
-    $full = $this->get_full_name($table);
+    $full = $this->table_full_name($table);
     if ( !isset($this->cache['structures'][$full]) ){
       $this->cache['structures'][$full] = [];
     }
@@ -1266,7 +1301,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function get_keys($table)
 	{
-    $full = $this->get_full_name($table);
+    $full = $this->table_full_name($table);
     if ( !isset($this->cache['structures'][$full]) ){
       $this->cache['structures'][$full] = [];
     }

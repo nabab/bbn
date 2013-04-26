@@ -1,0 +1,22 @@
+<?php
+return [
+    'Aqua',
+    'Black',
+    'Blue',
+    'Fuchsia',
+    'Gray',
+    'Green',
+    'inherit',
+    'Lime',
+    'Maroon',
+    'Navy',
+    'Olive',
+    'Purple',
+    'Red',
+    'Silver',
+    'Teal',
+    'transparent',
+    'White',
+    'Yellow',
+];
+?>

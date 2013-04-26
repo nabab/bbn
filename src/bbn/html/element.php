@@ -1,48 +1,80 @@
 <?php
+/**
+ * @package bbn\html
+ */
 namespace bbn\html;
 /**
- * Model View Controller Class
+ * Creates DOM elements
+ * 
+ * Depends on JsonSchema\Validator
  *
  *
- * This class will route a request to the according model and/or view through its controller.
- * A model and a view can be automatically associated if located in the same directory branch with the same name than the controller in their respective locations
- * A view can be directly imported in the controller through this very class
+ * This class will create a DOM element.
  *
  * @author Thomas Nabet <thomas.nabet@gmail.com>
  * @copyright BBN Solutions
- * @since Apr 4, 2011, 23:23:55 +0000
- * @category  MVC
+ * @since Apr 2, 2013, 23:23:55 +0000
+ * @category  HTML
+ * @package bbn\html
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @version 0.2r89
- * @todo Merge the output objects and combine JS strings.
- * @todo Stop to rely only on sqlite and offer file-based or any db-based solution.
- * @todo Look into the check function and divide it
+ * @version 0.3
+ * @todo Tooltips
  */
 class element
 {
 	protected
+          /** @var array The element's configuration */
           $cfg,
+          
+          /** @var string The element's textNode */
+          $text = '',
+
+          /** @var string|array The element's content (can be an array of elements) */
           $content;
   
   public
+          /** @var string The element's tag */
           $tag = false,
-          $attr = array(),
-          $css,
-          $script,
+          
+          /** @var string The element's tag */
+          $attr = [],
+          
+          /** @var array The element's attributes */
+          $css = [],
+          
+          /** @var array Styles */
+          $script = '',
+          
+          /** @var string JavaScript code which should be executed */
           $events,
+
+          /** @var array The element's data */
           $data,
+          
+          /** @var array Widget's configuration */
           $widget,
-          $help;
+          
+          /** @var string Help for tooltip */
+          $help,
+          
+          /** @var bool XHTML tag ending, false by default */
+          $xhtml = false;
 
   public static 
-          $self_closing_tags = ["area", "base", "hr", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"];
-	/**
-	 * This will build a new HTML form element according to the given configuration.
-	 * Only name and tag are mandatory, then other values depending on the tag
-	 *
-	 * @param array $cfg The element configuration
-	 */
+          /** @var array List of known HTML self-closing tags */
+          $self_closing_tags = ["area", "base", "hr", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"],
+          
+          /** @var array List of known inputs */
+          $input_fields = ["input", "textarea", "select"];
+
   protected static
+          /** @var bool|object The JSON validator object. Will be generated only once */
+          $validator = false,
+          
+          /** @var string last error */
+          $error,
+
+          /** @var string JSON schema of the configuration */
           $schema = '{
 	"type":"object",
 	"$schema": "http:\/\/json-schema.org\/draft-03\/schema",
@@ -56,17 +88,17 @@ class element
 			"required":false,
 			"properties":{}
 		},
+    "content": {
+			"type":["array","string","null"],
+			"id": "content",
+			"required":false,
+      "description": "Css properties"
+		},
     "css": {
 			"type":["object","null"],
 			"id": "css",
 			"required":false,
       "description": "Css properties"
-		},
-		"field": {
-			"type":"string",
-			"id": "field",
-      "description": "Shortcut (??) field",
-			"required":false
 		},
 		"events": {
 			"type":"object",
@@ -92,6 +124,12 @@ class element
       "description": "Tag",
 			"required":true
 		},
+		"text": {
+			"type":"string",
+			"id": "text",
+      "description": "Text",
+			"required":false
+		},
 		"widget": {
 			"type":["object","array"],
 			"id": "widget",
@@ -115,12 +153,19 @@ class element
 			"required":false
 		}
 	}
-}',
-          $validator = false,
-          $input_fields = ["input", "textarea", "select"],
-          $error;
+}';
   
-  protected static function _init(){
+	/**
+	 * This creates a unique JSON schema validator object
+   * And for each type of class generates the according JSON schema
+   * By combining this root classs element schema
+   * And the child class' schema
+   * The schema has then to be called static::$schema and not self::$schema
+	 *
+	 * @return void 
+	 */
+  
+  private static function _init(){
     if ( !self::$validator ){
       self::$validator = new \JsonSchema\Validator();
       if ( is_string(self::$schema) ){
@@ -130,26 +175,32 @@ class element
     if ( is_string(static::$schema) ){
       $tmp = json_decode(static::$schema, 1);
       static::$schema = \bbn\tools::to_object(
-              \bbn\tools::merge_arrays(\bbn\tools::to_array(self::$schema), $tmp));
+              \bbn\tools::merge_arrays(
+                      \bbn\tools::to_array(self::$schema),
+                      \bbn\tools::to_array($tmp)
+              )
+      );
     }
   }
   
-  protected static function get_schema(){
-    static::_init();
-    return static::$schema;
-  }
-  
  	/**
-	 * Returns a config more adequate for the schema
+	 * Returns a config more adequate for the schema:
+   * converts the types according to the schema
+   * 
+   * @param array $cfg Configuration
+   * @param object $schema JSON Schema
 	 * @return array
 	 */
-  private static function cast($cfg, $schema=null){
+  private static function cast(array $cfg, $schema=null){
     if ( is_null($schema) && is_object(static::$schema) ){
       $schema = static::$schema;
     }
     if ( is_object($schema) && is_array($cfg) && isset($schema->properties) ){
       foreach ( $schema->properties as $k => $p ){
-        if ( isset($cfg[$k]) && is_object($p) ){
+        if ( empty($cfg[$k]) ){
+          unset($cfg[$k]);
+        }
+        else if ( is_object($p) ){
           if ( is_string($cfg[$k]) && $p->type === 'integer' ){
             $cfg[$k] = (int)$cfg[$k];
           }
@@ -165,7 +216,56 @@ class element
     return $cfg;
   }
 
-  public static function add_css($css){
+	/**
+	 * Returns the current schema
+	 *
+	 * @return object
+	 */
+  protected static function get_schema(){
+    return static::$schema;
+  }
+  
+	/**
+	 * Confront the JSON schema object with the current configuration
+	 *
+   * @param array $cfg Configuration
+	 * @return bool
+	 */
+  public static function check_config($cfg){
+    if ( !is_array($cfg) ){
+      self::$error = "The configuration is not a valid array";
+      return false;
+    }
+    self::$validator->check(\bbn\tools::to_object($cfg), static::$schema);
+    self::$error = '';
+    if ( self::$validator->isValid() ){
+      return 1;
+    }
+    foreach ( self::$validator->getErrors() as $error ) {
+      self::$error .= sprintf("[%s] %s",$error['property'], $error['message']);
+      var_dump($cfg);
+    }
+    return false;
+  }
+  
+	/**
+	 * Returns the current error(s)
+	 *
+	 * @return string
+	 */
+  public static function get_error()
+  {
+    return self::$error;
+  }
+
+  
+	/**
+	 * Generates style string for a HTML tag
+	 *
+   * @param array|string $css CSS properties/values array
+	 * @return string
+	 */
+  public static function css_to_string($css){
     if ( is_string($css) ){
       return ' style="'.\bbn\str\text::escape_dquotes($css).'"';
     }
@@ -177,28 +277,103 @@ class element
       return ' style="'.\bbn\str\text::escape_dquotes($st).'"';
     }
   }
-
-  public static function check_config($cfg){
-    if ( !is_array($cfg) ){
-      self::$error = "The configuration is not a valid array";
-      return false;
+  
+  public function css(array $cfg){
+    foreach ( $cfg as $i => $k ){
+      if ( !\bbn\str\text::is_number($i) ){
+        $this->css[$i] = $k;
+      }
     }
-    self::$validator->check(json_decode(json_encode($cfg)), self::$schema);
-    self::$error = '';
-    if ( self::$validator->isValid() ){
-      return 1;
-    }
-    foreach ( self::$validator->getErrors() as $error ) {
-      self::$error .= sprintf("[%s] %s in \n",$error['property'], $error['message']);
-    }
-    return false;
+    $this->update();
+    return $this;
   }
   
-  public static function get_error()
-  {
-    return self::$error;
+  public function add_class($class){
+    if ( !isset($this->attr['class']) ){
+      $this->attr['class'] = $class;
+    }
+    else{
+      $cls = explode(" ", $this->attr['class']);
+      if ( !in_array($class, $cls) ){
+        $this->attr['class'] .= ' '.$class;
+      }
+    }
+    $this->update();
+    return $this;
   }
 
+	/**
+	 * @return \bbn\html\element
+	 */
+  public function __construct($cfg)
+	{
+    self::_init();
+    if ( is_string($cfg) && !empty($cfg) ){
+      // Looking for classes, IDs, or name (|) in the string
+      preg_match_all("/([\\.|\\||#]{1})([A-z0-9-]+)/", $cfg, $m);
+      $classes = [];
+      $id = false;
+      $name = false;
+      if ( isset($m[0], $m[1], $m[2]) && count($m[0]) > 0 ){
+        foreach ( $m[1] as $k => $v ){
+          if ( $v === '.' ){
+            array_push($classes, $m[2][$k]);
+          }
+          else if ( $v === '#' ){
+            $id = $m[2][$k];
+          }
+          else if ( $v === '|' ){
+            $name = $m[2][$k];
+          }
+        }
+      }
+      // Looking for the tag (mandatory)
+      preg_match_all("/^([A-z0-9-]+)/", $cfg, $n);
+      if ( isset($n[0]) && count($n[0]) > 0 ){
+        $cfg = ['tag' => $n[0][0]];
+        if ( (count($classes) > 0) || $id || $name ){
+          $cfg['attr'] = [];
+          if ( count($classes) > 0 ){
+            $cfg['attr']['class'] = implode(" ", $classes);
+          }
+          if ( $id ){
+            $cfg['attr']['id'] = $id;
+          }
+          if ( $name ){
+            $cfg['attr']['name'] = $name;
+          }
+        }
+      }
+    }
+    $cfg = self::cast($cfg);
+		if ( self::check_config($cfg) ){
+      foreach ( $cfg as $key => $val ){
+        if ( $key === 'tag' ){
+          $this->tag = strtolower($val);
+        }
+        else if ( property_exists(get_called_class(), $key) ){
+          $this->$key = $val;
+        }
+      }
+      $this->update();
+    }
+    else{
+      $err[] = self::get_error();
+      if ( isset($cfg['tag']) ){
+        $err[] = 'Tag: '.$cfg['tag'];
+      }
+      if ( isset($cfg['name']) ){
+        $err[] = 'Name: '.$cfg['name'];
+      }
+      var_dump($err);
+    }
+	}
+	
+	/**
+   * Sets the configuration property according to the current configuration
+   * 
+	 * @return \bbn\html\element
+	 */
   protected function update()
   {
     $this->cfg = [];
@@ -219,87 +394,213 @@ class element
         }
       }
     }
+    return $this;
   }
   
-  public function __construct(array $cfg = null)
-	{
-    self::_init();
-    if ( is_string($cfg) ){
-      $cfg = ["tag" => $cfg];
-    }
-   $cfg = self::cast($cfg);
-		if ( self::check_config($cfg) ){
-      foreach ( $cfg as $key => $val ){
-        if ( $key === 'tag' ){
-          $this->tag = strtolower($val);
+  /**
+   * Add an element to the content, or a string if it's one
+   * 
+   * @param string|\bbn\html\element $ele
+   */
+  public function append($ele)
+  {
+    $args = func_get_args();
+    foreach ( $args as $ele ){
+      if ( !isset($this->content) ){
+        if ( is_array($ele) && isset($ele[0]) ){
+          $this->content = $ele;
         }
-        else if ( property_exists(get_called_class(), $key) ){
-          $this->$key = $val;
+        else{
+          $this->content = is_object($ele) ? [$ele] : $ele;
         }
       }
-      $this->update();
+      else if ( is_array($this->content) ){
+        if ( is_array($ele) ){
+          array_merge($this->content, $ele);
+        }
+        else{
+          array_push($this->content, $ele);
+        }
+      }
+      else if ( is_string($this->content) ){
+        if ( is_array($ele) ){
+          foreach ( $ele as $e ){
+            $this->content .= $e->html();
+          }
+        }
+        else{
+          $this->content .= is_object($ele) ? $ele->html() : $ele;
+        }
+      }
     }
-    else{
-      var_dump("Error".
-              ( isset($cfg['name']) ? " in ".$cfg['name'] : '' ).
-              " !".self::get_error());
-    }
-	}
-	
+    return $this;
+  }
 	/**
 	 * Returns the current configuration.
+   * 
+   * @return array Current configuration
 	 */
 	public function get_config()
 	{
     $this->update();
-		return $this->cfg;
+		$tmp = \bbn\tools::remove_empty($this->cfg);
+    if ( isset($tmp['content']) && is_array($tmp['content']) ){
+      foreach ( $tmp['content'] as $i => $c ){
+        if ( is_object($c) ){
+          if (method_exists($c, 'get_config') ){
+            $tmp['content'][$i] = $c->get_config();
+          }
+        }
+      }
+    }
+    return $tmp;
 	}
   
+	/**
+	 * Returns the current configuration  HOW???
+   * 
+   * @return array Current configuration
+	 */
   public function get_param()
   {
     return \bbn\str\text::make_readable($this->get_config());
   }
   
+	/**
+	 * Returns the current configuration for PHP
+   * 
+   * @return array Current configuration
+	 */
   public function show_config()
   {
     return \bbn\str\text::export(\bbn\str\text::make_readable($this->get_config()), 1);
   }
 	
 	/**
-	 * Returns the javascript coming with the object.
+	 * Returns the javascript coming with the object
+   * 
+   * @return string javascript string
 	 */
-	public function get_script()
+	public function script($with_ele=1)
 	{
     $this->update();
 		$r = '';
 		if ( isset($this->attr['id']) ){
       if ( isset($this->cfg['events']) ){
         foreach ( $this->cfg['events'] as $event => $fn ){
-          $r .= '.'.$event.'(function(e){'.$fn.'})';
+          $r .= '.'.$event.'('.
+                  ( strpos($fn, 'function') === 0 ? $fn : 'function(e){'.$fn.'}' ).
+                  ')';
         }
       }
       if ( isset($this->cfg['widget'], $this->cfg['widget']['name']) ){
-        $r .= '.'.$this->cfg['widget']['name'].'('.
-                ( isset($this->cfg['widget']['options']) ? json_encode($this->cfg['widget']['options']) : '' ).
-                ')';
+        $r .= '.'.$this->cfg['widget']['name'].'(';
+        if ( isset($this->cfg['widget']['options']) ){
+          $r .= '{';
+          foreach ( $this->cfg['widget']['options'] as $n => $o ){
+            $r .= '"'.$n.'":';
+            if ( is_string($o) ){
+              $o = trim($o);
+              if ( (strpos($o, 'function(') === 0) ){
+                $r .= $o;
+              }
+              else{
+                $r .= '"'.\bbn\str\text::escape_dquotes($o).'"';
+              }
+            }
+            else if ( is_bool($o) ){
+              $r .= $o ? 'true' : 'false';
+            }
+            else{
+              $r .= json_encode($o);
+            }
+            $r .= ',';
+          }
+          $r .= '}';
+        }
+        $r .= ')';
       }
-      if ( $this->help ){
+      if ( !empty($this->help) ){
         // tooltip
       }
       if ( !empty($r) ){
-        $r = '$("#'.$this->attr['id'].'")'.$r.';'.PHP_EOL;
+        if ( $with_ele ){
+          $r = '$("#'.$this->attr['id'].'")'.$r.';'.PHP_EOL;
+        }
+        else{
+          $r = $r.';'.PHP_EOL;
+        }
       }
 		}
-    if ( $this->script ){
+    if ( !empty($this->script) ){
       $r .= $this->script.PHP_EOL;
+    }
+    if ( is_array($this->content) ){
+      foreach ( $this->content as $c ){
+        if ( is_array($c) ){
+          $c = new \bbn\html\element($c);
+        }
+        if (is_object($c) && method_exists($c, 'script') ){
+          $r .= $c->script();
+        }
+      }
     }
 		return $r;
 	}
 	
+  public function attr($arr)
+  {
+    $args = func_get_args();
+    if ( is_array($arr) ){
+      foreach ( $arr as $k => $v ){
+        if ( $k === 'class' ){
+          $this->add_class($v);
+        }
+        else{
+          $this->attr[$k] = $v;
+        }
+      }
+    }
+    else if ( (count($args) === 2) && is_string($args[0]) && is_string($args[1]) ){
+      if ( $args[0] === 'class' ){
+        $this->add_class($args[1]);
+      }
+      else{
+        $this->attr[$args[0]] = $args[1];
+      }
+    }
+    else if ( is_string($arr) && isset($this->attr[$arr]) ){
+      return $this->attr[$arr];
+    }
+    return $this;
+  }
+  
+  public function text($txt=null)
+  {
+    if ( !is_null($txt) ){
+      $this->text = strip_tags($txt);
+      return $this;
+    }
+    return $this->text;
+  }
+  
+  public function content($c=null)
+  {
+    if ( is_null($c) ){
+      return $this->content;
+    }
+    else if ( is_array($c) || is_string($c) ){
+      $this->content = $c;
+      return $this;
+    }
+  }
 	/**
-	 * Returns the corresponding HTML string 
+	 * Returns the corresponding HTML string
+   * 
+   * @param bool $with_js Includes the javascript
+   * @return string HTML string
 	 */
-	public function get_html($with_js = 1)
+	public function html($with_js = 1)
 	{
     $html = '';
 		if ( $this->tag ){
@@ -320,17 +621,33 @@ class element
         }
       }
 			
-      if ( isset($this->css) ){
-				$html .= self::add_css($this->css);
+      if ( count($this->css) > 0 ){
+				$html .= self::css_to_string($this->css);
 			}
-
+      if ( $this->xhtml ){
+        $html .= ' /';
+      }
       $html .= '>';
+
 			
 			if ( !in_array($this->tag, self::$self_closing_tags) ){
+
+        if ( isset($this->text) ){
+          $html .= $this->text;
+        }
+        
         if ( isset($this->content) ){
           // @todo: Add the ability to imbricate elements
           if ( is_string($this->content) ){
             $html .= $this->content;
+          }
+          else if ( is_array($this->content) ){
+            foreach ( $this->content as $c ){
+              if ( is_array($c) ){
+                $c = new \bbn\html\element($c);
+              }
+              $html .= $c->html($with_js);
+            }
           }
         }
 				$html .= '</'.$this->tag.'>';
@@ -339,9 +656,21 @@ class element
 			if ( isset($this->placeholder) && strpos($this->placeholder,'%s') !== false ){
 				$html = sprintf($this->placeholder, $html);
 			}
+      
 		}
 		return $html;
 	}
+  
+  public function ele_and_script()
+  {
+    return ['$(\''.\bbn\str\text::escape_squotes($this->html()).'\')',$this->script(false)];
+  }
 	
+  public function make_empty()
+  {
+    $this->content = null;
+    $this->html = '';
+    $this->script = '';
+  }
 }
 ?>

@@ -60,7 +60,6 @@ class grid extends object
       'columnMenu' => true,
       'edit' => 'function(){
         $(".k-edit-form-container").parent().css({height:"auto",maxWidth:appui.v.width-200,maxHeight:appui.v.height-100,textAlign:"center"}).restyle().data("kendoWindow").title("Modification").center();
-        appui.f.log(arguments);
        }'
     ];
   

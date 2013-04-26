@@ -28,6 +28,46 @@ namespace bbn\appui;
  */
 
 class mapper{
+  
+  public static
+          $types = [
+              'date' => [
+                  'field' => 'date',
+                  'type' => 'date'
+              ],
+              'datetime' => [
+                  'field' => 'datetime',
+                  'type' => 'date'
+              ],
+              'decimal' => [
+                  'field' => 'numeric',
+                  'type' => 'number'
+              ],
+              'enum' => [
+                  'field' => 'dropdown',
+                  'type' => 'string'
+              ],
+              'float' => [
+                  'field' => 'numeric',
+                  'type' => 'number'
+              ],
+              'int' => [
+                  'field' => 'numeric',
+                  'type' => 'number'
+              ],
+              'text' => [
+                  'field' => 'editor',
+                  'type' => 'string'
+              ],
+              'time' => [
+                  'field' => 'time',
+                  'type' => 'date'
+              ],
+              'varchar' => [
+                  'field' => 'text',
+                  'type' => 'string'
+              ],
+          ];
 
   private 
           $db,
@@ -38,8 +78,14 @@ class mapper{
           $schema = false,
           $auto_update = false;
   
-  
-  public static function table_id($table, $db=false){
+  /**
+   * Returns the ID of a table (db.table)
+   * 
+   * @param string $table The database table
+   * @param bool|string $db The database
+   * @return string
+   */
+  public function table_id($table, $db=false){
     
     if ( substr_count($table, ".") === 1 ){
       return $table;
@@ -53,35 +99,42 @@ class mapper{
     
   }
 
-  public static function col_id($col, $table=false){
+  /**
+   * Returns the ID of a column (db.table.column)
+   * 
+   * @param string $col The table's column (can include the table)
+   * @param type $table The table
+   * @return string
+   */
+  public function col_id($col, $table=false){
     
     if ( substr_count($col, ".") === 2 ){
       return $col;
     }
     else if ( substr_count($col, ".") === 1 ){
       if ( $table ){
-        return self::table_id($table).'.'.self::simple_name($col);
+        return $this->table_id($table).'.'.$this->simple_name($col);
       }
       else{
-        return self::simple_name($this->client_db).'.'.$col;
+        return $this->simple_name($this->client_db).'.'.$col;
       }
     }
     else if ( $table ){
-      return self::table_id($table).'.'.$col;
+      return $this->table_id($table).'.'.$col;
     }
   }
   
-  public static function key_id($col, $table=false){
-
-  }
-  
+  /**
+   * Returns the simplest name of a DB item (table/column/key)
+   * 
+   * @param string $item
+   * @return string
+   */
   public static function simple_name($item){
-    
     $tmp = explode(".", $item);
-    return array_pop($item);
+    return array_pop($tmp);
   }
 
-  
   /**
 	 * @param \bbn\db\connection $db A valid database connection
 	 * @param string $prefix
@@ -112,20 +165,28 @@ class mapper{
     }
 	}
 	
-	public function get_projects($id_client=''){
-		
-	}
-  
-  public function save_config(array $cfg, $class = 'grid')
+  /**
+   * Saves the given configuration in the database and returns the new ID
+   * 
+   * @param array $cfg
+   * @param string $class
+   * @return int|false
+   */
+  public function save_config(array $cfg, $description, $class = 'grid')
   {
     if ( isset($cfg['elements']) ){
       $copy = $cfg;
       unset($copy['elements']);
-      $this->db->insert($this->prefix.'objects', [
+      $obj_param = [
           'id_project' => 1,
           'class' => $class,
+          'description' => $description,
           'configuration' => json_encode($copy)
-          ]);
+      ];
+      if ( isset($cfg['table']) ){
+        $obj_param['table'] = $cfg['table'];
+      }
+      $this->db->insert($this->prefix.'objects', $obj_param);
       
       $id = $this->db->last_id();
       
@@ -144,35 +205,16 @@ class mapper{
           $table = $cfg['table'];
         }
         
-        if ( $class === 'form' ){
-          
-          if ( $table && isset($ele['attr']['name']) ){
-            $column = self::col_id($ele['attr']['name'], $table);
-          }
-          $this->db->insert($this->admin_db.'.'.$this->prefix.'fields',[
-            'id_obj' => $id,
-            'column' => ( $column ? $column : null ),
-            'title' => isset($ele['label']) ? $ele['label'] : null,
-            'position' => isset($ele['position']) ? $ele['position'] : $i,
-            'configuration' => json_encode($ele)
-          ]);
+        if ( $table && isset($ele['attr']['name']) ){
+          $column = $this->col_id($ele['attr']['name'], $table);
         }
-        
-        
-        else if ( $class === 'grid' ){
-
-          if ( $table && isset($ele['fields']['args'][0]) ){
-            $column = self::col_id($ele['fields']['args'][0], $table);
-          }
-          
-          $this->db->insert($this->admin_db.'.'.$this->prefix.'fields',[
-            'id_obj' => $id,
-            'column' => ( $column ? $column : null ),
-            'title' => isset($ele['columns']['title']) ? $ele['columns']['title'] : null,
-            'position' => isset($ele['position']) ? $ele['position'] : $i,
-            'configuration' => json_encode($ele)
-          ]);
-        }
+        $this->db->insert($this->admin_db.'.'.$this->prefix.'fields',[
+          'id_obj' => $id,
+          'column' => ( $column ? $column : null ),
+          'title' => isset($ele['label']) ? $ele['label'] : null,
+          'position' => $i,
+          'configuration' => json_encode($ele)
+        ]);
         $i++;
       }
       return $id;
@@ -187,10 +229,23 @@ class mapper{
                       $this->admin_db . '.' . $this->prefix . 'objects',
                       [],
                       ["id" => $id]) ){
-        $cfg = \bbn\tools::to_array(json_decode($obj['configuration']));
+        $cfg = json_decode($obj['configuration'], 1);
         $cfg['class'] = $obj['class'];
+        
         if ( empty($cfg['url']) ){
           $cfg['url'] = $id;
+        }
+        if ( empty($cfg['select']) && \bbn\str\text::is_number($cfg['url']) ){
+          $cfg['select'] = 'json/select/'.implode("/", $params);
+        }
+        if ( empty($cfg['insert'])  && \bbn\str\text::is_number($cfg['url']) ){
+          $cfg['insert'] = 'json/insert/'.implode("/", $params);
+        }
+        if ( empty($cfg['update']) && \bbn\str\text::is_number($cfg['url']) ){
+          $cfg['update'] = 'json/update/'.implode("/", $params);
+        }
+        if ( empty($cfg['delete']) && \bbn\str\text::is_number($cfg['url']) ){
+          $cfg['delete'] = 'json/delete/'.implode("/", $params);
         }
         if ( !empty($obj['description']) ){
           $cfg['description'] = $obj['description'];
@@ -205,7 +260,18 @@ class mapper{
                 ["position" => "asc"]);
         
         foreach ( $fields as $k => $f ){
-          $fields[$k] = \bbn\tools::to_array(json_decode($f['configuration']));
+          $fields[$k] = json_decode($f['configuration'], 1);
+          if ( isset($fields[$k]['sql']) ){
+            if ( count($params) === 3 ){
+              $fields[$k]['data'] = $this->db->get_rows($fields[$k]['sql'], $params[2]);
+            }
+            else{
+              $fields[$k]['data'] = $this->db->get_rows($fields[$k]['sql']);
+            }
+          }
+          if ( !is_null($f['column']) ){
+            $fields[$k]['column'] = $f['column'];
+          }
         }
         $cfg['elements'] = $fields;
       }
@@ -214,7 +280,12 @@ class mapper{
       }
       else{
         if ( $class === 'form' ){
-          $cfg = $this->get_default_form_config($id);
+          if ( is_object($params) ){
+            $cfg = $this->get_default_form_config($id, $params);
+          }
+          else {
+            $cfg = $this->get_default_form_config($id);
+          }
         }
         else{
           $cfg = $this->get_default_grid_config($id, $params);
@@ -224,49 +295,24 @@ class mapper{
     }
   }
 	
-  /**
-	 * Generates a whole form configuration array for a given table according to its structure and/or form configuration
-	 * 
-	 * @param string | integer $table The database's table or the ID of the form
-	 * @return string
-	 */
-	public function load_form_config($id, $builder=null){
-
-    if ( is_null($builder) ){
-      $builder = new \bbn\html\builder();
-    }
-
-    if ( $cfg = $this->load_config($id) ){
-      if ( !isset($cfg['builder']) || is_string($cfg['builder']) ){
-        $cfg['builder'] =& $builder;
-      }
-      foreach ( $cfg['elements'] as $k => $f ){
-        if ( isset($cfg['elements'][$k]['data']['db']) && is_string($cfg['elements'][$k]['data']['db']) ){
-          $cfg['elements'][$k]['data']['db'] =& $this->db;
-        }
-      }
-      return $cfg;
-    }
-		return false;
-	}
-  
   private function get_default_grid_config($table, $params=[]){
 		if ( $this->db &&
             ($cfg = $this->db->modelize($table)) &&
             isset($cfg['keys']['PRIMARY']) &&
             count($cfg['keys']['PRIMARY']['columns']) === 1 &&
-            ($table = $this->db->get_full_name($table)) ){
+            ($table = $this->db->table_full_name($table)) ){
 
       $id = \bbn\str\text::genpwd();
-      
       $full_cfg = [
           'id'=>$id,
+          'table' => $table,
+          'description' => null,
           'url' => implode("/", $params),
           'primary' => $cfg['keys']['PRIMARY']['columns'][0],
-          'select' => 1,
-          'insert' => 1,
-          'update' => 1,
-          'delete' => 1,
+          'select' => 'json/select/'.$table,
+          'insert' => 'json/insert/'.$table,
+          'update' => 'json/update/'.$table,
+          'delete' => 'json/delete/'.$table,
           'elements' => []
       ];
       
@@ -287,43 +333,33 @@ class mapper{
       foreach ( $cfg['fields'] as $name => $f ){
 
         $r = $this->get_default_col_config($table, $name, $where, $params);
-        $full_cfg['elements'][$i] = [];
-        $grid_cfg =& $full_cfg['elements'][$i];
+        $full_cfg['elements'][$i] = $this->get_default_col_config($table, $name, $where, $params);
         
-        if ( count($r['appui']) > 0 ){
-          $grid_cfg['appui'] = $r['appui'];
-          $grid_cfg['appui']['table'] = $table;
-        }
-        else{
-          $grid_cfg['appui'] = [
-              'table' => $table
-          ];
-        }
+        $full_cfg['elements'][$i]['table'] = $table;
 
-        if ( isset($r['addField']) ){
-          $grid_cfg['fields'] = $r['addField'];
-        }
-        if ( isset($r['addColumn']) ){
-          if ( $f['key'] !== 'PRI' ){
-            if ( $i >= $limit ){
-              $r['addColumn']['hidden'] = true;
-            }
-            $grid_cfg['columns'] = $r['addColumn'];
-          }
+        if ( ($f['key'] === 'PRI') || ($i >= $limit) ){
+          $full_cfg['elements'][$i]['hidden'] = 1;
         }
         $i++;
       }
-      array_push($full_cfg['elements'], ['columns' => [
-          'addCommandItem' => [['name' => 'edit', 'text' => 'Mod.'], ['name' => 'destroy', 'text' => 'Suppr.']],
-          'title' => '&nbsp;',
+      array_push($full_cfg['elements'], [
+          'attr' => [
+              'name' => 'id'
+          ],
+          'commands' => [
+              ['name' => 'edit', 'text' => 'Mod.'],
+              ['name' => 'destroy', 'text' => 'Suppr.']
+          ],
+          'label' => 'Actions',
           'width' => 160
-      ]]);
+      ]);
       
       //die(print_r($full_cfg));
 
       return $full_cfg;
     }
   }
+  
   
   private function get_default_col_config($table, $column, $where=[], $params=[]){
     
@@ -333,161 +369,166 @@ class mapper{
             isset($cfg['fields'][$column]) ){
 
       $f = $cfg['fields'][$column];
-      $r = [
-          'appui' => []
-      ];
       
       $values = false;
-      $type = 'string';
-      switch ( $f['type'] ){
-        case 'float':
-          $type = 'number';
-          break;
-        case 'text':
-          $type = 'text';
-          break;
-        case 'enum':
-          $type = 'text';
-          break;
-        case 'date':
-        case 'datetime':
-        case 'time':
-          $type = $f['type'];
-          break;
-        case 'int':
-          $type = $f['maxlength'] == 1 ? 'boolean' : 'number';
-          break;
-      }
 
-      $r['addField'] = [
-        'args' => [$column],
-        'type' => $type,
-        'editable' => $f['key'] === 'PRI' ? false : true,
-
-      ];
-      if ( $f['null'] ){
-        $r['addField']['nullable'] = true;
-      }
-      if ( ($f['key'] !== 'PRI') && ($type !== 'boolean') ){
-        $r['addField']['validation'] = [
-            'fn' => '\\Kendo\\Data\\DataSourceSchemaModelFieldValidation',
-            'required' => true              
-        ];
-        if ( $type === 'number' && !isset($f['keys']) ){
-          $r['addField']['validation']['min'] = $f['signed'] ? (int)str_repeat('4', (int)$f['maxlength']) : 0;
-          $r['addField']['validation']['max'] = $f['signed'] ? (int)str_repeat('4', (int)$f['maxlength']) : (int)str_repeat('9', (int)$f['maxlength']);
+      if ( isset(self::$types[$f['type']])){
+        $type = self::$types[$f['type']]['type'];
+        $field = self::$types[$f['type']]['field'];
+        if ( ($type === 'number') && isset($f['maxlength']) && $f['maxlength'] == 1 ){
+          $type = 'boolean';
+          $field = 'checkbox';
         }
-      }
+        $r = [
+            'attr' => [
+                'name' => $column,
+            ],
+            'label' => (ucwords(str_replace('_', ' ', $column))),
+            'type' => $type,
+            'menu' => true,
+            'editable' => $f['key'] === 'PRI' ? false : true,
+        ];
+        if ( $type === 'boolean' ){
+          $r['template'] = "#= $column ? 'Oui' : 'Non' #";
+        }
+        if ( $f['null'] ){
+          $r['null'] = true;
+        }
+        if ( ($f['key'] !== 'PRI') && ($type !== 'boolean') ){
+          $r['validation'] = [
+              'required' => true              
+          ];
+          if ( $type === 'number' && !isset($f['keys']) ){
+            $r['validation']['min'] = $f['signed'] ? (int)str_repeat('4', (int)$f['maxlength']) : 0;
+            $r['validation']['max'] = $f['signed'] ? (int)str_repeat('4', (int)$f['maxlength']) : (int)str_repeat('9', (int)$f['maxlength']);
+          }
+        }
 
 
-      $r['addColumn'] = [
-          'field' => $column,
-          'title' => (ucwords(str_replace('_', ' ', $column))),
-          'menu' => true
-      ];
-      if ( $type === 'boolean' ){
-        $r['addColumn']['template'] = "#= $column ? 'Oui' : 'Non' #";
-      }
-      // Foreign keys
-      if ( isset($f['keys']) && ($type === 'number') && count($f['keys']) > 0 ){
-        foreach ( $f['keys'] as $k ){
-          //var_dump($k, $cfg['keys']);
-          if ( isset($cfg['keys'][$k]['ref_column']) ){
-            $foreign_fields = [];
-            $foreign_all = $this->db->modelize($cfg['keys'][$k]['ref_table']);
-            /* @var $foreign_all array */
-            foreach ( $foreign_all['fields'] as $n2 => $f2 ){
-              if ( $f2['type'] === 'varchar' ){
-                $foreign_fields['text'] = $n2;
+        
+
+
+        if ( strpos($f['type'], 'enum') === 0 ){
+          preg_match_all("/'((?:[^']|\\\\.)*)'/", $f['extra'], $m);
+          if ( isset($m[1]) ){
+            $r['field'] = 'dropdown';
+            $r['data'] = $m[1];
+          }
+        }
+        else{
+          $dec = false;
+          $ref = false;
+          if ( isset($f['keys']) ){
+            foreach ( $f['keys'] as $k ){
+              $key = $cfg['keys'][$k];
+              if ( ($k === 'PRIMARY') ){
+                $r['field'] = 'hidden';
+                $r['hidden'] = 1;
+              }
+              else if ( \bbn\str\text::check_name($key['ref_db'], $key['ref_table'], $key['ref_column']) ){
+                $ref = [
+                    'db' => $key['ref_db'],
+                    'table' => $key['ref_table'],
+                    'column' => $key['ref_column']
+                ];
                 break;
               }
             }
-            $foreign_fields['value'] = $cfg['keys'][$k]['ref_column'];
-            $cond = [];
-            foreach ( $where as $w ){
-              if ( isset($foreign_all['fields'][$w[0]]) ){
-                array_push($cond, $w);
+          }
+          if ( is_array($ref) && $ref_table_cfg = $this->db->modelize($ref['table']) ){
+            // Arguments for select
+            $cols = [$ref['column']];
+            foreach ( $ref_table_cfg['fields'] as $name => $def ){
+              if ( ($def['type'] === 'varchar') || ($def['type'] === 'text') ){
+                $cols = [
+                    "value" => $ref['column'],
+                    "text" => $name
+                ];
+                break;
               }
             }
+            $r['sql'] = $this->db->get_select($ref['table'], $cols);
+            $r['field'] = 'dropdown';
+            $r['widget'] = [];
+            $r['widget']['options'] = [];
+            $r['widget']['options']['dataTextField'] = 'text';
+            $r['widget']['options']['dataValueField'] = 'value';
 
-            if ( ($q = $this->db->query(
-                    $this->db->get_select(
-                            $cfg['keys'][$k]['ref_table'],
-                            $foreign_fields,
-                            $cond), array_map(function($a){
-                              return is_array($a) ? end($a) : $a;
-                            }, $cond))) && $q->count() < 200 ){
-              $values = $q->get_rows();
+          }
+          else if ( strpos($f['type'], 'char') !== false ){
+            $r['field'] = 'text';
+          }
+          else if ( strpos($f['type'], 'float') !== false ){
+            $r['field'] = 'numeric';
+            $dec = explode(",", $f['maxlength']);
+            if ( isset($dec[0], $dec[1]) ){
+              $r['widget']['options']['decimals'] = (int)$dec[1];
+            }
+          }
+          else if ( strpos($f['type'], 'text') !== false ){
+            $r['field'] = 'editor';
+            $r['raw'] = true;
+          }
+          else if ( $f['type'] === 'datetime' ){
+            $r['field'] = 'datetime';
+          }
+          else if ( $f['type'] === 'date' ){
+            $r['field'] = 'date';
+          }
+          else if ( $f['type'] === 'time' ){
+            $r['field'] = 'time';
+          }
+          else if ( $f['type'] === 'timestamp' ){
+            $r['field'] = 'datetime';
+          }
+          else if ( strpos($f['type'], 'int') !== false ){
+            if ( $f['maxlength'] == 1 ){
+              $r['field'] = 'checkbox';
             }
             else{
-              $r['appui']['sql'] = $this->db->get_select(
-                      $cfg['keys'][$k]['ref_table'],
-                      $foreign_fields,
-                      [$cfg['keys'][$k]['ref_column']=>1]);
-              $url = $params;
-              array_unshift($url, 'key');
-              array_push($url, $k);
-              $r['addColumn']['editor'] = \bbn\str\text::clean(sprintf(<<<'EOD'
-                function(container, options) {
-                  var ele = $('<input name="%s">');
-                  ele.appendTo(container).kendoAutoComplete({
-                    minLength: 3,
-                    filter: "contains",
-                    placeholder: "Recherche",
-                    dataTextField: "text",
-                    dataSource: {
-                      serverFiltering: true,
-                      serverPaging: true,
-                      pageSize: 20,
-                      transport: {
-                        read: {
-                          dataType: "json",
-                          type: "POST",
-                          url: "%s",
-                          data: {
-                            model: "text",
-                            
-                          }
-                        }
-                      }
-                    },
-                  });
-                }
-EOD
-                    , $column,
-                      implode("/", $url)), 'code');
-              
+              $r['field'] = 'numeric';
+              $r['attr']['type'] = 'number';
             }
-            $r['addField']['type'] = 'string';
-            break;
+          }
+          if ( $r['field'] === 'numeric' ){
+            $r['attr']['maxlength'] = isset($r['widget']['options']['decimals']) ? (int)($f['maxlength'] + 1) : (int)$f['maxlength'];
+            $r['widget']['options']['format'] = isset($r['widget']['options']['decimals']) ? '#' : 'n';
+            $r['format'] = $r['widget']['options']['format'];
+            $r['attr']['type'] = 'number';
+            $r['widget']['options']['step'] = 10/pow(10, isset($r['widget']['options']['decimals']) ? $r['widget']['options']['decimals']+1 : 1);
+            $max = '';
+            $max_length = $r['attr']['maxlength'];
+            if ( isset($r['options']['decimals']) ){
+              $max_length -= $r['options']['decimals'];
+            }
+            for ( $i = 0; $i < $max_length; $i++ ){
+              $max .= '9';
+            }
+            $max = (int)$max;
+            $r['widget']['options']['max'] = ( (float)$max > (int)$max ) ? (float)$max : (int)$max;
+            $r['widget']['options']['min'] = $f['signed'] ? - $r['widget']['options']['max'] : 0;
           }
         }
+
+
+
+
+
+
+
+
+
+
+        return $r;
       }
-      else if ( $f['type'] === 'text' ){
-        $r['addColumn']['editor'] = <<<'EOD'
-          function(container, options) {
-            var ele = $('<textarea name="' + options.field + '" style="min-width:500px"></textatarea');
-            ele.appendTo(container).kendoEditor({});
-          }
-EOD;
-      }
-      if ( $values ){
-        $r['addColumn']['values'] = $values;
-      }
-      else if ( ($f['type'] === 'int') && ($type === 'number') ){
-        $r['addColumn']['format'] = '0';
-      }
-      return $r;
     }
   }
 
   private function get_default_form_config($table){
     
-    if ( $this->db && ($table = $this->db->get_full_name($table)) ){
+    if ( $this->db && ($full_table = $this->db->table_full_name($table)) ){
 
-      $cfg = [];
-
-      $table = explode(".",$table);
+      $table = explode(".",$full_table);
       if ( count($table) === 2 ){
         $database = trim($table[0]);
         $this->client_db = $database;
@@ -502,7 +543,6 @@ EOD;
           $title = false;
         }
         
-
         $db_info = $this->db->modelize($table);
         $i = 0;
         foreach ( $db_info['fields'] as $name => $c ){
@@ -516,12 +556,11 @@ EOD;
             
             $info = $sqt->fields[$name];
             if ( is_object($info) ){
-              $cfg[$i]['params'] = $info->params;
               $cfg[$i]['required'] = $info->mand == 1 ? 1 : false;
               $cfg[$i]['label'] = $info->tit;
               //$cfg[$i] = $square->get_config_from_id($info->id_form,$cfg[$i]);
             }
-            $cfg[$i]['table'] = $table;
+            $cfg[$i]['table'] = $full_table;
           }
           $i++;
         }
@@ -531,6 +570,7 @@ EOD;
             "action" => ".",
             "title" => $title,
           ],
+          "table" => $table,
           "elements" => $cfg
       ];
     }
@@ -546,14 +586,15 @@ EOD;
 	private function get_default_field_config($table, $column){
     
 		// Looks in the db for columns corresponding to the given table
-		if ( $this->db && \bbn\str\text::check_name($column) && ($table_cfg = $this->db->modelize($table)) && isset($table_cfg['fields'][$column]) ){
+		if ( $this->db && \bbn\str\text::check_name($column) &&
+            ($table_cfg = $this->db->modelize($table)) &&
+            isset($table_cfg['fields'][$column]) ){
       $col = $table_cfg['fields'][$column];
-			$full_name = explode(".", $this->db->get_full_name($table))[1].'.'.$column;
+			$full_name = explode(".", $this->db->table_full_name($table))[1].'.'.$column;
       $cfg = [
         'attr' => [
           'name' => $full_name,
         ],
-        'position' => $col['position'],
 				'null' => $col['null'] ? 1 : false
 			];
 
@@ -561,11 +602,7 @@ EOD;
 				preg_match_all("/'((?:[^']|\\\\.)*)'/", $col['extra'], $m);
 				if ( isset($m[1]) ){
 					$cfg['field'] = 'dropdown';
-					$cfg['widget'] = [
-              'options' => [
-                  'dataSource' => $m[1]
-              ]
-          ];
+					$cfg['data'] = $m[1];
 				}
 			}
       else{
@@ -574,7 +611,9 @@ EOD;
         if ( isset($col['keys']) ){
           foreach ( $col['keys'] as $k ){
             $key = $table_cfg['keys'][$k];
-            if ( $k === 'PRIMARY' ){
+            if ( ($k === 'PRIMARY') ){
+              $cfg['field'] = 'hidden';
+              $cfg['hidden'] = 1;
             }
             else if ( \bbn\str\text::check_name($key['ref_db'], $key['ref_table'], $key['ref_column']) ){
               $ref = [
@@ -593,7 +632,7 @@ EOD;
             if ( ($def['type'] === 'varchar') || ($def['type'] === 'text') ){
               $cols = [
                   "value" => $ref['column'],
-                  "label" => $name
+                  "text" => $name
               ];
               break;
             }
@@ -646,7 +685,7 @@ EOD;
           if ( $col['maxlength'] == 1 ){
             $cfg['field'] = 'checkbox';
           }
-					else{
+					else if ( !isset($cfg['field']) ){
             if ( strpos($col['type'], 'unsigned') ){
   						$cfg['widget']['options']['min'] = 0;
             }

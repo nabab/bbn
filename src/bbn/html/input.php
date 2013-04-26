@@ -1,62 +1,62 @@
 <?php
+/**
+ * @package bbn\html
+ */
 namespace bbn\html;
 /**
- * Model View Controller Class
+ * HTML Class creating a form INPUT
  *
- *
- * This class will route a request to the according model and/or view through its controller.
- * A model and a view can be automatically associated if located in the same directory branch with the same name than the controller in their respective locations
- * A view can be directly imported in the controller through this very class
  *
  * @author Thomas Nabet <thomas.nabet@gmail.com>
  * @copyright BBN Solutions
- * @since Apr 4, 2011, 23:23:55 +0000
+ * @since Apr 2, 2013, 21:27:42 +0000
  * @category  MVC
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @version 0.2r89
- * @todo Merge the output objects and combine JS strings.
- * @todo Stop to rely only on sqlite and offer file-based or any db-based solution.
- * @todo Look into the check function and divide it
+ * @version 0.4
+ * @todo ???
  */
 class input extends element
 {
   protected
-	/**
-	 * The input's label/title
-	 * @var null|string
-	 */
+          /** @var null|string The input's label/title */
           $label,
-	/**
-	 * The input's value
-	 * @var mixed
-	 */
+          
+          /** @var mixed The input's value */
       		$value = '',
-	/**
-	 * The input's default value
-	 * @var mixed
-	 */
+          
+          /** @var mixed The input's default value */
           $default = '',
-          $position,
+          
+          /** @var bool Can the input's value be null */
           $null,
+
+          /** @var string The corresponding DB table??? */
           $table,
+          
+          /** @var string The field shortcut */
           $field,
+
+          /** @var string The language */
           $lang;
   
 	/**
-	 * This will build a new HTML form element according to the given configuration.
-	 * Only name and tag are mandatory, then other values depending on the tag
-	 *
-	 * @param array $cfg The element configuration
+	 * @param array $cfg The JSON schema configuration (combined with element::$schema)
 	 */
   protected static
     $schema = '{
 	"properties":{
 		"attr": {
-			"type":"object",
+			"type":"array",
 			"id": "attr",
       "description": "Attributes",
 			"required":true,
 			"properties":{
+				"maxlength": {
+					"type":"string",
+					"id": "id",
+          "description": "ID",
+					"required":false
+				},
 				"maxlength": {
 					"type":"integer",
 					"id": "maxlength",
@@ -125,17 +125,11 @@ class input extends element
 			"required":false,
       "description": "Parameters from BBN"
 		},
-		"placeholder": {
-			"type":"boolean",
-			"id": "placeholder",
-      "description": "Place holder",
-			"required":false
-		},
-		"position": {
-			"type":"integer",
-			"id": "position",
-      "description": "Position",
-			"required":false
+		"sql": {
+			"type": ["string"],
+			"id": "sql",
+			"required":false,
+      "description": "SQL request"
 		},
 		"table": {
 			"type":"string",
@@ -143,29 +137,41 @@ class input extends element
 			"id": "table",
 			"required":false
 		},
-		"tag": {
-      "enum": ["input","select","textarea"],
-			"required":true
-		},
-		"value": {
-			"type":"string",
-      "description": "Value",
-			"id": "value",
-			"required":false
-		}
 	}
 }';
   
-  public function __construct(array $cfg = null)
+	/**
+	 * This will build a new HTML form element according to the given configuration.
+	 * Only name and tag are mandatory, then other values depending on the tag
+   * 
+   * @param array $cfg The configuration
+   * @return self
+	 */
+  public function __construct($cfg)
 	{
+    
+    if ( is_string($cfg) ){
+      $cfg = [
+          'field' => 'text',
+          'attr' => [
+              'name' => $cfg
+          ]
+      ];
+    }
+    
     parent::__construct($cfg);
+    
 		if ( $this->tag ){
+      
 			$mandatory_attr = array();
+      
       if ( !isset($this->attr['id']) ){
   			$this->attr['id'] = \bbn\str\text::genpwd(20,15);
       }
+      
 			$this->script = isset($cfg['script']) ? $cfg['script'] : '';
 			$this->value = isset($cfg['value']) ? $cfg['value'] : '';
+      
 			switch ( $this->tag )
 			{
 				case "input":
@@ -178,25 +184,32 @@ class input extends element
 					array_push($mandatory_attr, "attr");
 					break;
 			}
+      
 			foreach ( $mandatory_attr as $m ){
 				if ( !isset($this->attr[$m]) ){
 					die("Argument $m is missing in your config... Sorry!");
 				}
 			}
 		}
+    return $this;
 	}
 	
-	public function get_label_input()
+	/**
+	 * Returns the element with its label and inside a div
+   * 
+   * @return string
+	 */
+	public function html_with_label($with_script=1)
 	{
-		$s = $this->get_html();
-		if ( !empty($s) ){
+		$s = $this->html();
+    if ( !empty($s) ){
 			if ( BBN_IS_DEV ){
         $title = str_replace('"', '', print_r (\bbn\str\text::make_readable($this->cfg), true));
 			}
 			else if ( isset($this->attr['title']) ){
 				$title = $this->attr['title'];
 			}
-			else{
+      else{
 				$title = isset($this->label) ? $this->label : '';
 			}
       if ( !isset($this->cfg['field']) || $this->cfg['field'] !== 'hidden' ){
