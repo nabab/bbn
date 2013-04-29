@@ -203,7 +203,7 @@ class query extends \PDOStatement implements actions
 					try
 					{
 						$q = $this->db->prepare($sql);
-						if ( isset($this->values) && count($this->values) > 0 ){
+						if ( !empty($this->values) && is_array($this->values) && count($this->values) > 0 ){
 							$v = $this->values;
 							$q->values = array_splice($v, $start_value, $num_values);
 							$start_value += $num_values;

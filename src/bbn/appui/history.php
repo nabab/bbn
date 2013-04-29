@@ -99,6 +99,35 @@ class history
 		}
     return 1;
 	}
+  
+  public function get_all_history($table, $start=0, $limit=20){
+    $r = [];
+    if ( \bbn\str\text::check_name($table) && is_int($start) && is_int($limit) ){
+      $r = self::$db->get_rows("
+        SELECT DISTINCT(`line`)
+        FROM ".self::$db->escape_name(self::$htable)."
+        WHERE `column` LIKE ?
+        ORDER BY last_mod DESC
+        LIMIT $start, $limit",
+        self::$db->table_full_name($table).'.%');
+    }
+    return $r;
+  }
+  
+  public function get_mod_history($table, $start=0, $limit=20){
+    $r = [];
+    if ( \bbn\str\text::check_name($table) && is_int($start) && is_int($limit) ){
+      $r = self::$db->get_rows("
+        SELECT DISTINCT(`line`)
+        FROM ".self::$db->escape_name(self::$htable)."
+        WHERE `column` LIKE ?
+        AND ( `operation` LIKE 'INSERT' OR `operation` LIKE 'UPDATE' )
+        ORDER BY last_mod DESC
+        LIMIT $start, $limit",
+        self::$db->table_full_name($table).'.%');
+    }
+    return $r;
+  }
 	
 	public static function get_history($table, $id){
     if ( self::check_config() ){

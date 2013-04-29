@@ -747,9 +747,9 @@ class mapper{
        */
 			$this->db->raw_query("
         INSERT IGNORE INTO `{$this->admin_db}`.`{$this->prefix}dbs`
-        (`id`, `db`)
+        (`id`, `host`, `db`)
         VALUES
-        ('{$this->db->host}.$db', '$db')");
+        ('$db', '{$this->db->host}', '$db')");
 			foreach ( $schema as $t => $vars ){
 				if ( strpos($t, '.'.$this->prefix) === false ){
           $tmp = explode(".", $t);

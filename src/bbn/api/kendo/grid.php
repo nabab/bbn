@@ -43,7 +43,7 @@ class grid // extends object
       }
       $this->builder = $cfg['builder'];
 
-      $this->grid = new \kendo\UI\Grid($this->id);
+      $this->grid = new \Kendo\UI\Grid($this->id);
 
       $this->dataSource = new \Kendo\Data\DataSource();
       if ( isset($cfg['data']) ){
@@ -58,32 +58,33 @@ class grid // extends object
       $this->model->id($cfg['primary']);
       
       
-
       foreach ( $cfg['elements'] as $e ){
         
-        $field = new \Kendo\Data\DataSourceSchemaModelField($e['attr']['name']);
-        if ( isset($e['attr']['name']) && isset($e['editable']) && $e['editable'] ){
-          if ( isset($e['type']) ){
-            $field->type($e['type']);
+        if ( isset($e['attr']['name']) ){
+          $field = new \Kendo\Data\DataSourceSchemaModelField($e['attr']['name']);
+          if ( isset($e['attr']['name']) && isset($e['editable']) && $e['editable'] ){
+            if ( isset($e['type']) ){
+              $field->type($e['type']);
+            }
+            if ( isset($e['null']) && $e['null'] ){
+              $field->nullable(true);
+            }
+            if ( isset($e['attr']['readonly']) && $e['attr']['readonly'] ){
+              $field->editable(false);
+            }
+            else{
+              if ( isset($e['validation']) ){
+                $field->validation($e['validation']);
+              }
+            }
+            $this->model->addField($field);
           }
-          if ( isset($e['null']) && $e['null'] ){
-            $field->nullable(true);
-          }
-          if ( isset($e['attr']['readonly']) && $e['attr']['readonly'] ){
+          if ( empty($e['editable']) ){
             $field->editable(false);
           }
-          else{
-            if ( isset($e['validation']) ){
-              $field->validation($e['validation']);
-            }
+          if ( !empty($e['default']) ){
+            $field->defaultValue($e['default']);
           }
-          $this->model->addField($field);
-        }
-        if ( empty($e['editable']) ){
-          $field->editable(false);
-        }
-        if ( !empty($e['default']) ){
-          $field->defaultValue($e['default']);
         }
         $col = new \Kendo\UI\GridColumn();
         if ( !isset($e['field']) || $e['field'] !== 'hidden' ){
@@ -146,11 +147,6 @@ class grid // extends object
       if ( isset($cfg['url']) ){
 
         $this->transport = new \Kendo\Data\DataSourceTransport();
-
-        $this->transport->parameterMap(new \Kendo\JavaScriptFunction('function(data) {
-                          return kendo.stringify(data);
-                      }'));
-
 
         if ( isset($cfg['all']) ){
           $this->set_all($cfg['url']);
@@ -252,7 +248,6 @@ class grid // extends object
       $this->_insert = 1;
       $dst = new \Kendo\Data\DataSourceTransportCreate();
       $dst    ->url($url)
-              ->contentType('application/json')  
               ->type('POST');
       $this->transport->create($dst);
 
@@ -274,7 +269,6 @@ class grid // extends object
               ->serverPaging(true);
       $dst = new \Kendo\Data\DataSourceTransportRead();
       $dst    ->url($url)
-              ->contentType('application/json')  
               ->type('POST');
       $this->transport->read($dst);
     }
@@ -285,7 +279,6 @@ class grid // extends object
       $this->_update = 1;
       $dst = new \Kendo\Data\DataSourceTransportUpdate();
       $dst    ->url($url)
-              ->contentType('application/json')  
               ->type('POST');
       $this->transport->update($dst);
     }
@@ -296,7 +289,6 @@ class grid // extends object
       $this->_delete = 1;
       $dst = new \Kendo\Data\DataSourceTransportDestroy();
       $dst    ->url($url)
-              ->contentType('application/json')  
               ->type('POST');
       $this->transport->destroy($dst);
     }

@@ -19,7 +19,9 @@ use \bbn\str\text;
 class mysql implements \bbn\db\engines
 {
   private $db;
-	protected static $operators=array('!=','=','<>','<','<=','>','>=','like','clike','slike','not','is','is not', 'in','between');
+	public static
+          $operators=['!=','=','<>','<','<=','>','>=','like','clike','slike','not','is','is not', 'in','between'],
+          $numeric_types=['integer', 'int', 'smallint', 'tinyint', 'mediumint', 'bigint', 'decimal', 'numeric', 'float', 'double'];
 
   public $qte = '`';
   /**
@@ -249,6 +251,7 @@ class mysql implements \bbn\db\engines
             'key' => in_array($row['Key'], array('PRI', 'UNI', 'MUL')) ? $row['Key'] : null,
             'default' => is_null($row['Default']) && $row['Null'] !== 'NO' ? 'NULL' : $row['Default'],
             'extra' => $row['Extra'],
+            'signed' => 0,
             'maxlength' => 0
           );
           if ( strpos($row['Type'], 'enum') === 0 ){
@@ -258,12 +261,15 @@ class mysql implements \bbn\db\engines
             }
           }
           else{
-            if ( strpos($row['Type'], 'unsigned') ){
-              $r[$f]['signed'] = 0;
-              $row['Type'] = trim(str_replace('unsigned','',$row['Type']));
-            }
-            else{
-              $r[$f]['signed'] = 1;
+            preg_match_all('/(.*?)\(/', $row['Type'], $real_type);
+            if ( isset($real_type[1][0]) &&
+                    in_array($real_type[1][0], self::$numeric_types) ){
+              if ( strpos($row['Type'], 'unsigned') ){
+                $row['Type'] = trim(str_replace('unsigned','',$row['Type']));
+              }
+              else{
+                $r[$f]['signed'] = 1;
+              }
             }
             if ( strpos($row['Type'],'text') !== false ){
               $r[$f]['type'] = 'text';
