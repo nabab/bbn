@@ -57,7 +57,7 @@ class image extends \bbn\file\file
 	public function __construct($file)
 	{
 		parent::__construct($file);
-		if ( !in_array($this->get_extension(),\bbn\image::$allowed_extensions) )
+		if ( !in_array($this->get_extension(),\bbn\file\image::$allowed_extensions) )
 		{
 			$this->name = false;
 			$this->path = false;
@@ -79,8 +79,8 @@ class image extends \bbn\file\file
 			{
 				if ( $r = exif_imagetype($this->file) )
 				{
-					if ( array_key_exists($r,\bbn\image::$allowed_extensions) )
-						$this->ext = \bbn\image::$allowed_extensions[$r];
+					if ( array_key_exists($r,\bbn\file\image::$allowed_extensions) )
+						$this->ext = \bbn\file\image::$allowed_extensions[$r];
 					else
 						$this->ext = false;
 				}

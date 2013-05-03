@@ -466,10 +466,18 @@ class mysql implements \bbn\db\engines
 	/**
 	 * @return string | false
 	 */
-	public function get_delete($table, array $where)
+	public function get_delete($table, array $where, $ignore = false, $php = false)
 	{
 		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 && count($where) > 0 ){
-			return "DELETE FROM $table ".$this->db->get_where($where, $table);
+			$r = '';
+			if ( $php ){
+				$r .= '$db->query("';
+			}
+			$r .= "DELETE ".( $ignore ? "IGNORE " : "" ).
+              "FROM $table ".$this->db->get_where($where, $table);
+			if ( $php ){
+				$r .= '");';
+			}
 		}
 		return false;
 	}
@@ -515,7 +523,7 @@ class mysql implements \bbn\db\engines
   			$r .= PHP_EOL . $this->get_limit([$limit, $start]);
       }
 			if ( $php ){
-				$r .= '")';
+				$r .= '");';
 			}
 			return $r;
 		}

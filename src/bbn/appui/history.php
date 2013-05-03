@@ -132,12 +132,12 @@ class history
 	public static function get_history($table, $id){
     if ( self::check_config() ){
       $r = [];
-      $args = [self::$db->table_full_name($table).'.%', $id];
+      $args = [$id, self::$db->table_full_name($table).'.%'];
       $q = self::$db->get_row("
         SELECT `last_mod`, `id_user`
         FROM ".self::$db->escape_name(self::$htable)."
-        WHERE `column` LIKE ?
-        AND `line` = ?
+        WHERE `line` = ?
+        AND `column` LIKE ?
         AND `operation` LIKE 'INSERT'
         ORDER BY `last_mod` ASC
         LIMIT 1",

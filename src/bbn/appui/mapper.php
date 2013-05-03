@@ -728,7 +728,7 @@ class mapper{
 			$projects = [];
 			$r1 = $this->db->query("SELECT *
 			FROM `{$this->admin_db}`.`{$this->prefix}projects`
-			WHERE `db` LIKE 'localhost.$db'");
+			WHERE `db` LIKE '$db'");
 			while ( $d1 = $r1->get_row() ){
 				$projects[$d1['id']] = $d1;
 				$projects[$d1['id']]['forms'] = [];
@@ -741,10 +741,11 @@ class mapper{
 					$projects[$d1['id']]['forms'][$d2['id']] = $this->get_form_config();
 				}
 			}
-			
-			$this->db->query("DELETE FROM `{$this->admin_db}`.`{$this->prefix}dbs` WHERE `db` LIKE '$db'");
-       * 
-       */
+			*/
+      var_dump($this->db->query("DELETE IGNORE FROM `{$this->prefix}dbs` WHERE id LIKE '{$db}.%'"));
+      var_dump($this->db->query("DELETE IGNORE FROM `{$this->prefix}tables` WHERE id LIKE '{$db}.%'"));
+      var_dump($this->db->query("DELETE IGNORE FROM `{$this->prefix}columns` WHERE id LIKE '{$db}.%'"));
+      var_dump($this->db->query("DELETE IGNORE FROM `{$this->prefix}keys` WHERE id LIKE '{$db}.%'"));
 			$this->db->raw_query("
         INSERT IGNORE INTO `{$this->admin_db}`.`{$this->prefix}dbs`
         (`id`, `host`, `db`)
@@ -762,7 +763,7 @@ class mapper{
 					]);
           foreach ( $vars['fields'] as $col => $f ){
     				$config = new \stdClass();
-						if ( strpos($t, 'apst_') === 0 && ( $col !== 'id' && $col !== 'last_mod' && $col !== 'id_user' && $col !== 'history' ) ){
+						if ( strpos($t, 'apst_') === 0 ){
 							$config->history = 1;
 						}
 						if ( isset($f['default']) ){

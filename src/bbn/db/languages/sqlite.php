@@ -434,14 +434,14 @@ class sqlite implements \bbn\db\engines
 	/**
 	 * @return string | false
 	 */
-	public function get_delete($table, array $where, $php = false)
+	public function get_delete($table, array $where, $ignore = false, $php = false)
 	{
 		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 && count($where) > 0 ){
 			$r = '';
 			if ( $php ){
 				$r .= '$db->query(\'';
 			}
-			$r .= 'DELETE FROM '.$table.' WHERE 1 ';
+			$r .= 'DELETE '.( $ignore ? 'OR IGNORE ' : '' ).'FROM '.$table.' WHERE 1 ';
 			foreach ( $where as $f ){
 				if ( !isset($m['fields'][$f]) ){
 					die("The fields to search for in get_delete don't correspond to the table");
@@ -449,7 +449,7 @@ class sqlite implements \bbn\db\engines
 				$r .= PHP_EOL.'AND "'.$f.'" = ? ';
 			}
 			if ( $php ){
-				$r .= '\')';
+				$r .= '\');';
 			}
 			return $r;
 		}
@@ -515,7 +515,7 @@ class sqlite implements \bbn\db\engines
 				$r .= PHP_EOL.'LIMIT '.$start.', '.$limit;
 			}
 			if ( $php ){
-				$r .= '\')';
+				$r .= '\');';
 			}
 			return $r;
 		}

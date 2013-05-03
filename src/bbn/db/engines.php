@@ -147,7 +147,7 @@ interface engines
 	 * 
 	 * @return false|array
 	 */
-	public function get_delete($table, array $where);
+	public function get_delete($table, array $where, $ignore = false, $php = false);
 	
 	/**
 	 * Fetches the database and returns an array of objects 

@@ -187,7 +187,7 @@ class connection extends \PDO implements actions, api, engines
 	 * @param $table
 	 * @param $kind
 	 * @param $moment
-	 * @param $ values
+	 * @param $values
 	 * @param $where
 	 * @return bool
 	 */
@@ -1171,16 +1171,16 @@ class connection extends \PDO implements actions, api, engines
 	/**
 	 * @return bool 
 	 */
-	public function delete($table, array $where)
+	public function delete($table, array $where, $ignore = false)
 	{
 		$r = false;
     $where = $this->where_cfg($where);
-		$hash = $this->make_hash('delete', $table, $this->get_where($where, $table));
+		$hash = $this->make_hash('delete', $table, $this->get_where($where, $table), $ignore);
 		if ( isset($this->queries[$hash]) ){
 			$sql = $this->queries[$this->queries[$hash]]['statement'];
 		}
 		else{
-			$sql = $this->language->get_delete($table, $where['final']);
+			$sql = $this->language->get_delete($table, $where['final'], $ignore);
 		}
 		if ( $sql && ( $this->triggers_disabled || $this->launch_triggers($table, 'delete', 'before', [], $where['keypair']) ) ){
       $r = $this->query($sql, $hash, $where['values']);
@@ -1191,6 +1191,14 @@ class connection extends \PDO implements actions, api, engines
 		return $r;
 	}
 	
+	/**
+	 * @return void 
+	 */
+	public function delete_ignore($table, array $where)
+	{
+    return $this->delete($table, $where, 1);
+  }
+  
 	/**
 	 * @return void 
 	 */
@@ -1360,9 +1368,9 @@ class connection extends \PDO implements actions, api, engines
 	/**
 	 * @return string | false
 	 */
-	public function get_delete($table, array $where)
+	public function get_delete($table, array $where, $ignore = false, $php = false)
 	{
-    return $this->language->get_delete($table, $where);
+    return $this->language->get_delete($table, $where, $ignore, $php);
 	}
 
 	/**
