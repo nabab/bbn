@@ -23,7 +23,9 @@ class image extends \bbn\file\file
 	/**
 	 * @var array
 	 */
-	protected static $allowed_extensions=array('jpg','gif','jpeg','png','svg');
+	protected static
+          $allowed_extensions = array('jpg','gif','jpeg','png','svg'),
+          $max_width = 5000;
 
 	/**
 	 * @var bool
@@ -123,7 +125,7 @@ class image extends \bbn\file\file
 		/* For images as string - to implement 
 		if ( class_exists('\Imagick') )
 		{
-			$this->img = new Imagick();
+			$this->img = new \Imagick();
 			$this->img->readImageBlob(base64_decode($this->file));
 		}
 		else if ( function_exists('imagecreatefromstring') )
@@ -133,8 +135,8 @@ class image extends \bbn\file\file
 			if ( !$this->img ){
 				if ( class_exists('\Imagick') ){
 					try{
-						$this->img = new Imagick($this->file);
-						$this->img->setInterlaceScheme(Imagick::INTERLACE_PLANE);
+						$this->img = new \Imagick($this->file);
+						$this->img->setInterlaceScheme(\Imagick::INTERLACE_PLANE);
 						$this->w = $this->img->getImageWidth();
 						$this->h = $this->img->getImageHeight();
 					}
@@ -186,7 +188,7 @@ class image extends \bbn\file\file
 				$this->img->destroy();
 			}
 			else{
-				call_user_func('image'.$this->ext2,$this->img);
+				call_user_func('image'.$this->ext2, $this->img);
 				imagedestroy($this->img);
 			}
 		}
@@ -202,13 +204,17 @@ class image extends \bbn\file\file
 			if ( !$dest ){
 				$dest = $this->file;
 			}
-			if ( class_exists('\Imagick') && !$this->img->writeImage($dest) ){
-				$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
-					BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
-			}
-			else if ( function_exists('image'.$this->ext2) && !call_user_func('image'.$this->ext2,$this->img,$dest) ){
-				$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
-					BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+			if ( class_exists('\Imagick') ){
+        if ( !$this->img->writeImage($dest) ){
+          $this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+            BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+        }
+      }
+			else if ( function_exists('image'.$this->ext2) ){
+        if ( !call_user_func('image'.$this->ext2, $this->img, $dest) ){
+          $this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+            BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+        }
 			}
 		}
 		return $this;
@@ -270,7 +276,7 @@ class image extends \bbn\file\file
 						$x = floor(($w2-$w)/2);
 					}
 					if ( class_exists('\Imagick') ){
-						$res = $this->img->resizeImage($w2,$h2,Imagick::FILTER_LANCZOS,1);
+						$res = $this->img->resizeImage($w2,$h2,\Imagick::FILTER_LANCZOS,1);
 					}
 					else{
 						$image = imagecreatetruecolor($w2,$h2);
@@ -290,7 +296,7 @@ class image extends \bbn\file\file
 					$w2 = $w;
 					$h2 = $h;
 					if ( class_exists('\Imagick') ){
-						$res = $this->img->resizeImage($w2,$h2,Imagick::FILTER_LANCZOS,1);
+						$res = $this->img->resizeImage($w2,$h2,\Imagick::FILTER_LANCZOS,1);
 					}
 					else{
 						$image = imagecreatetruecolor($w2,$h2);
@@ -318,7 +324,7 @@ class image extends \bbn\file\file
 				}
 				if ( isset($w2,$h2) ){
 					if ( class_exists('\Imagick') ){
-						$res = $this->img->resizeImage($w2,$h2,Imagick::FILTER_LANCZOS,1);
+						$res = $this->img->resizeImage($w2,$h2,\Imagick::FILTER_LANCZOS,1);
 					}
 					else{
 						$image = imagecreatetruecolor($w2,$h2);
@@ -349,7 +355,7 @@ class image extends \bbn\file\file
 	public function autoresize($w=BBN_MAX_WIDTH, $h=BBN_MAX_HEIGHT)
 	{
 		if ( !$w ){
-			$w = defined('BBN_MAX_WIDTH') ? BBN_MAX_WIDTH : 5000;
+			$w = defined('BBN_MAX_WIDTH') ? BBN_MAX_WIDTH : self::$max_width;
 		}
 		if ( $this->test() && is_numeric($w) && is_numeric($h) )
 		{
@@ -416,7 +422,7 @@ class image extends \bbn\file\file
 		if ( $this->test() )
 		{
 			if ( class_exists('\Imagick') ){
-				if ( $this->img->rotateImage(new ImagickPixel(),$angle) )
+				if ( $this->img->rotateImage(new \ImagickPixel(),$angle) )
 					$ok = 1;
 			}
 			else if ( function_exists('imagerotate') )
@@ -600,7 +606,7 @@ class image extends \bbn\file\file
 		{
 			if ( class_exists('\Imagick') )
 			{
-				if ( !$this->img->polaroidImage(new ImagickDraw(),0) ){
+				if ( !$this->img->polaroidImage(new \ImagickDraw(),0) ){
 					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}

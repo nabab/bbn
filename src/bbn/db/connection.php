@@ -846,7 +846,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function get_var()
 	{
-    return $this->get_one(func_get_args());
+    return call_user_func_array([$this, "get_one"], func_get_args());
   }
 
 	/**
