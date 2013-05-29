@@ -1398,6 +1398,44 @@ class connection extends \PDO implements actions, api, engines
 	}
 	
 	/**
+	 * @return string
+	 */
+	public function get_column_values($table, $field,  array $where = array(), $limit = false, $start = 0, $php = false)
+	{
+    return $this->language->get_column_values($table, $field, $where, $limit, $start, $php);
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function get_values_count($table, $field,  array $where = array(), $limit = false, $start = 0, $php = false)
+	{
+    return $this->language->get_values_count($table, $field, $where, $limit, $start, $php);
+	}
+  
+  /**
+   * @return array | false
+   */
+  public function get_field_values($table, $field,  array $where = array(), $limit = false, $start = 0)
+  {
+    if ( $r = $this->language->get_column_values($table, $field, $where, $limit, $start) ){
+      if ( $d = $this->get_by_columns($r) ){
+        return $d[$field];
+      }
+    }
+  }
+	
+  /**
+   * @return array | false
+   */
+	public function count_field_values($table, $field,  array $where = array(), $limit = false, $start = 0)
+	{
+    if ( $r = $this->language->get_values_count($table, $field, $where, $limit, $start) ){
+      return $this->get_rows($r);
+    }
+	}
+
+  /**
 	 * @return void 
 	 */
 	public function create_db_index($table, $column, $unique = false, $length = null)

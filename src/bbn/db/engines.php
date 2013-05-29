@@ -171,6 +171,20 @@ interface engines
 	public function get_update($table, array $fields = array(), array $where = array(), $php = false);
 	
 	/**
+	* Return an array of each values of the field $field in the table $table
+	* 
+	* @return false|array
+	*/
+	public function get_column_values($table, $field, array $where = array(), $limit, $start, $php = false);
+	
+	/**
+	* Return an array of double values arrays: each value of the field $field in the table $table and the number of instances
+	* 
+	* @return false|array
+	*/
+	public function get_values_count($table, $field, array $where = array(), $limit, $start, $php = false);
+	
+	/**
 	 * Fetches the database and returns an array of objects 
 	 * 
 	 * @return false|array

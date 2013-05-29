@@ -658,6 +658,71 @@ class sqlite implements \bbn\db\engines
 	}
 	
 	/**
+	* Return an array of each values of the field $field in the table $table
+	* 
+	* @return false|array
+	*/
+	public function get_column_values($table, $field,  array $where = array(), $limit = false, $start = 0, $php = false)
+  {
+		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
+		{
+			$r = '';
+			if ( $php ){
+  			$r .= '$db->query(\'';
+			}
+      if ( !isset($m['fields'][$field]) ){
+        die("The column $field doesn't exist in $table");
+      }
+			$r .= 'SELECT DISTINCT "'.$field.'" FROM '.$table;
+			if ( count($where) > 0 ){
+        $r .= PHP_EOL . $this->get_where($where, $table);
+      }
+      $r .= PHP_EOL . 'ORDER BY "'.$field.'"';
+      if ( $limit ){
+  			$r .= PHP_EOL . $this->get_limit([$limit, $start]);
+      }
+			if ( $php ){
+				$r .= '\');';
+			}
+			return $r;
+		}
+		return false;
+  }
+	
+	/**
+	* Return an array of double values arrays: each value of the field $field in the table $table and the number of instances
+	* 
+	* @return false|array
+	*/
+	public function get_values_count($table, $field, array $where = array(), $limit, $start, $php = false)
+  {
+		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
+		{
+			$r = '';
+			if ( $php ){
+        $r .= '$db->query(\'';
+			}
+      if ( !isset($m['fields'][$field]) ){
+        die("The column $field doesn't exist in $table");
+      }
+			$r .= 'SELECT COUNT(*) AS num, "'.$field.'" AS val FROM '.$table;
+			if ( count($where) > 0 ){
+        $r .= PHP_EOL . $this->get_where($where, $table);
+      }
+      $r .= PHP_EOL . 'GROUP BY "'.$field.'"';
+      $r .= PHP_EOL . 'ORDER BY "'.$field.'"';
+      if ( $limit ){
+  			$r .= PHP_EOL . $this->get_limit([$limit, $start]);
+      }
+			if ( $php ){
+				$r .= '\');';
+			}
+			return $r;
+		}
+		return false;
+  }
+	
+	/**
 	 * @return void 
 	 */
 	public function create_db_index($table, $column, $unique = false, $length = null)

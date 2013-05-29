@@ -260,19 +260,37 @@ class history
               self::$last_rows = self::$db->select_all($table, array_keys($values), $where);
             }
             else if ( $moment === 'after' ){
-              foreach ( self::$last_rows as $upd ){
-                $upd = (array) $upd;
-                foreach ( $values as $c => $v ){
-                  if ( ( $v !== $upd[$c] ) && ( $c !== self::$hcol ) && isset($s['fields'][$c]['config']['history']) ){
-                    self::$db->insert(self::$htable, [
-                      'operation' => 'UPDATE',
-                      'line' => $where[$s['primary']],
-                      'column' => $table.'.'.$c,
-                      'old' => $upd[$c],
-                      'last_mod' => $date,
-                      'id_user' => self::$huser]);
+              if ( is_array(self::$last_rows) ){
+                foreach ( self::$last_rows as $upd ){
+                  $upd = (array) $upd;
+                  foreach ( $values as $c => $v ){
+                    if ( !isset($upd[$c]) ){
+                      $upd[$c] = null;
+                    }
+                    if ( ( $v !== $upd[$c] ) && ( $c !== self::$hcol ) && isset($s['fields'][$c]['config']['history']) ){
+                      self::$db->insert(self::$htable, [
+                        'operation' => 'UPDATE',
+                        'line' => $where[$s['primary']],
+                        'column' => $table.'.'.$c,
+                        'old' => $upd[$c],
+                        'last_mod' => $date,
+                        'id_user' => self::$huser]);
+                    }
                   }
                 }
+              }
+              // insert_update case
+              else{
+                $id = self::$db->last_id();
+                self::$db->insert(self::$htable, [
+                  'operation' => 'INSERT',
+                  'line' => $id,
+                  'column' => $table.'.'.self::$primary,
+                  'old' => '',
+                  'last_mod' => $date,
+                  'id_user' => self::$huser
+                ]);
+                self::$db->last_insert_id = $id;
               }
               self::$last_rows = false;
             }
