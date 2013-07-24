@@ -393,7 +393,8 @@ class connection
           }
         }
         $this->set_session('info', $r);
-        $this->user_config = json_decode($d['config']);
+        $this->user_config = empty($d['config']) ?
+                        ['log_tries' => 0] : json_decode($d['config'], true);
         $this->set_session('config', $this->user_config);
       }
     }
@@ -464,7 +465,6 @@ class connection
       $this->close_session();
     }
 		if ( isset($credentials['user'],$credentials['pass']) ) {
-      
       // Table structure
 			$arch =& $this->cfg['arch'];
       
@@ -484,7 +484,6 @@ class connection
         if ( !$this->check_attempts() ){
           return self::set_error(4);
         }
-        
         if ( $this->_check_password($credentials['pass'], $d['pass']) ){
           $this->auth = 1;
           $this->_login();
@@ -607,7 +606,7 @@ class connection
     if ( !isset($this->user_config) ){
       return false;
     }
-    if ( isset($this->user_cfg->num_attempts) && $this->user_cfg->num_attempts > $this->cfg['max_attempts'] ){
+    if ( isset($this->user_config->num_attempts) && $this->user_config->num_attempts > $this->cfg['max_attempts'] ){
       return false;
     }
     return true;

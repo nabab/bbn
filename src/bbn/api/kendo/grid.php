@@ -191,19 +191,13 @@ class grid // extends object
               ->datasource($this->dataSource)
               ->editable([
                   'mode' => 'popup',
-                  'confirmation' => i18n\fr::$editable_confirm
               ])
-              ->filterable([
-                  'messages' => i18n\fr::$filterable_msgs,
-                  'operators' => i18n\fr::$filterable_operators
-              ])
+              ->filterable(true)
               ->resizable(true)
               ->sortable(true)
-              ->groupable([
-                  'messages' => i18n\fr::$groupable_msgs
-              ])
-              ->pageable(['messages' => i18n\fr::$pageable_msgs])
-              ->columnMenu(['messages' => i18n\fr::$colmenu_msgs])
+              ->groupable(true)
+              ->pageable(true)
+              ->columnMenu(true)
               ->edit(new \Kendo\JavaScriptFunction('function(){
                 $(".k-edit-form-container").parent().css({
                   height:"auto",

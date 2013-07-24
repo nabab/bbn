@@ -186,7 +186,7 @@ class mapper{
       if ( isset($cfg['table']) ){
         $obj_param['table'] = $cfg['table'];
       }
-      $this->db->insert($this->prefix.'objects', $obj_param);
+      $this->db->insert($this->admin_db.'.'.$this->prefix.'objects', $obj_param);
       
       $id = $this->db->last_id();
       
@@ -742,10 +742,10 @@ class mapper{
 				}
 			}
 			*/
-      var_dump($this->db->query("DELETE IGNORE FROM `{$this->prefix}dbs` WHERE id LIKE '{$db}.%'"));
-      var_dump($this->db->query("DELETE IGNORE FROM `{$this->prefix}tables` WHERE id LIKE '{$db}.%'"));
-      var_dump($this->db->query("DELETE IGNORE FROM `{$this->prefix}columns` WHERE id LIKE '{$db}.%'"));
-      var_dump($this->db->query("DELETE IGNORE FROM `{$this->prefix}keys` WHERE id LIKE '{$db}.%'"));
+      $this->db->query("DELETE IGNORE FROM `{$this->prefix}dbs` WHERE id LIKE '{$db}.%'");
+      $this->db->query("DELETE IGNORE FROM `{$this->prefix}tables` WHERE id LIKE '{$db}.%'");
+      $this->db->query("DELETE IGNORE FROM `{$this->prefix}columns` WHERE id LIKE '{$db}.%'");
+      $this->db->query("DELETE IGNORE FROM `{$this->prefix}keys` WHERE id LIKE '{$db}.%'");
 			$this->db->raw_query("
         INSERT IGNORE INTO `{$this->admin_db}`.`{$this->prefix}dbs`
         (`id`, `host`, `db`)

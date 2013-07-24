@@ -518,7 +518,7 @@ class builder
         }
         else if ( is_array($cfg['data']) && (count($cfg['data']) > 0) ){
           if ( isset($cfg['data'][0]) ){
-            $cfg['widget']['options']['dataSource'] = ['data' => $cfg['data']];
+            $cfg['widget']['options']['dataSource'] = $cfg['data'];
           }
           else{
             $cfg['widget']['options']['dataSource'] = [];

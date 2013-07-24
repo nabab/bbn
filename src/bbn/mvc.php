@@ -371,9 +371,17 @@ class mvc
     if ( empty($model) && isset($this->data) ){
       $model = $this->data;
     }
-    if ( is_array($model) ){
-  		return $this->mustache->render($view, $model);
+    if ( !is_array($model) ){
+      $model = [];
     }
+    /*
+     * Why the F*** this??
+    array_walk($model, function(&$a){
+      $a = ( is_array($a) || is_object($a) ) ? json_encode($a) : $a;
+    });
+     */
+    
+    return $this->mustache->render($view, $model);
 	}
 
 	/**
@@ -400,8 +408,15 @@ class mvc
 				$this->controller = $this->known_controllers[$this->mode.'/'.$p];
 			}
 			else{
-				if ( isset($this->routes[$this->mode][$p]) && is_file(self::cpath.$this->mode.'/'.$this->routes[$this->mode][$p].'.php') ){
-					$this->controller = self::cpath.$this->mode.'/'.$this->routes[$this->mode][$p].'.php';
+				if ( isset($this->routes[$this->mode][$p]) ){
+          if ( is_array($this->routes[$this->mode][$p]) &&
+                      is_file(self::cpath.$this->mode.'/'.$this->routes[$this->mode][$p][0].'.php') ){
+            $this->controller = self::cpath.$this->mode.'/'.array_shift($this->routes[$this->mode][$p]).'.php';
+            $this->arguments = $this->routes[$this->mode][$p];
+          }
+          else if ( is_file(self::cpath.$this->mode.'/'.$this->routes[$this->mode][$p].'.php') ){
+  					$this->controller = self::cpath.$this->mode.'/'.$this->routes[$this->mode][$p].'.php';
+          }
 				}
 				else if ( is_file(self::cpath.$this->mode.'/'.$p.'.php') ){
 					$this->controller = self::cpath.$this->mode.'/'.$p.'.php';

@@ -478,6 +478,7 @@ class mysql implements \bbn\db\engines
 			if ( $php ){
 				$r .= '");';
 			}
+      return $r;
 		}
 		return false;
 	}

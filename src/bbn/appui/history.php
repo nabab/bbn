@@ -57,10 +57,10 @@ class history
 	public static function set_date($date)
 	{
 		// Sets the "active" column name 
-		if ( !is_int($date) ){
+		if ( !\bbn\str\text::is_number($date) ){
       $date = strtotime($date);
     }
-		self::$date = $date;
+		self::$date = date('Y-m-d H:i:s', $date);
 	}
 	
  /**
@@ -83,7 +83,7 @@ class history
 	public static function set_huser($huser)
 	{
 		// Sets the history table name 
-		if ( is_int($huser) ){
+		if ( \bbn\str\text::is_number($huser) ){
 			self::$huser = $huser;
 		}
 	}
@@ -127,6 +127,38 @@ class history
         self::$db->table_full_name($table).'.%');
     }
     return $r;
+  }
+  
+  public static function get_row_back($table, array $columns, array $where, $when){
+    if ( !is_int($when) ){
+      $when = strtotime($when);
+    }
+    $when = (int) $when;
+    if ( \bbn\str\text::check_name($table) && ($when > 0) && (count($where) === 1) ){
+      $r = [];
+      $when = date('Y-m-d H:i:s', $when);
+      if ( count($columns) === 0 ){
+        $columns = array_keys(self::$db->get_columns($table));
+      }
+      foreach ( $columns as $col ){
+        $fc = self::$db->current.'.'.self::$db->col_full_name($col, $table);
+        if ( !($r[$col] = self::$db->get_one("
+          SELECT old
+          FROM bbn_history
+          WHERE `column` LIKE ?
+          AND `line` = ?
+          AND `operation` LIKE 'UPDATE'
+          AND last_mod >= ?
+          ORDER BY last_mod ASC",
+          $fc,
+          end($where),
+          $when)) ){
+          $r[$col] = self::$db->get_val($table, $col, $where);
+        }
+      }
+      return $r;
+    }
+    return false;
   }
 	
 	public static function get_history($table, $id){
@@ -237,7 +269,7 @@ class history
       }
       if ( isset(self::$hstructures[$table], self::$hstructures[$table]['history']) && self::$hstructures[$table]['history'] === 1 ){
         $s =& self::$hstructures[$table];
-        $date = self::$date ? self::$date : date('c');
+        $date = self::$date ? self::$date : date('Y-m-d H:i:s');
         switch ( $kind ){
           case 'select':
             break;
@@ -257,12 +289,11 @@ class history
             break;
           case 'update':
             if ( $moment === 'before' ){
-              self::$last_rows = self::$db->select_all($table, array_keys($values), $where);
+              self::$last_rows = self::$db->rselect_all($table, array_keys($values), $where);
             }
             else if ( $moment === 'after' ){
               if ( is_array(self::$last_rows) ){
                 foreach ( self::$last_rows as $upd ){
-                  $upd = (array) $upd;
                   foreach ( $values as $c => $v ){
                     if ( !isset($upd[$c]) ){
                       $upd[$c] = null;
@@ -327,7 +358,7 @@ class history
                     if ( $c['null'] == 1 ){
                       self::$db->query("
                         UPDATE `$c[table]`
-                        SET `$c[to_change]` = NULL ]
+                        SET `$c[to_change]` = NULL
                         WHERE `$c[to_change]` = ?",
                         $del[$c['from_change']]);
                     }

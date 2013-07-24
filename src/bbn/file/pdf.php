@@ -21,7 +21,7 @@ class pdf
   private static $default_cfg = [
       'mode' => 'utf-8-s',
       'format' => 'A4',
-      'size' => 0,
+      'size' => 8,
       'font' => 'times',
       'mgl' => 15,
       'mgr' => 15,
@@ -30,13 +30,28 @@ class pdf
       'mgh' => 10,
       'mgf' => 10,
       'orientation' => 'P',
-      'head' => '<table width="100%" border="0">
-	<tr>
-		<td width="40%" style="vertical-align:top; font-size:0.8em; color:#666">Your logo here</td>
-		<td width="60%">&nbsp;</td>
-	</tr>
-</table>',
-      'foot' => '<div align="center" style="text-align:justify; color:#666; font-size:0.8em">Your<br>Adress<br>Here</div>',
+      'head' => <<<EOF
+<html>
+  <head>
+    <title>PDF Doc</title>
+  </head>
+  <body>
+    <table width="100%" border="0">
+      <tr>
+        <td width="40%" style="vertical-align:top; font-size:0.8em; color:#666">Your logo here</td>
+        <td width="60%">&nbsp;</td>
+      </tr>
+    </table>
+EOF
+      ,
+      'foot' => <<<EOF
+    <div align="center" style="text-align:justify; color:#666; font-size:0.8em">
+      Your<br>Adress<br>Here
+    </div>
+  </body>
+</html>
+EOF
+      ,
       'title_tpl' => '<div style="background-color:#DDD; text-align:center; font-size:large; font-weight:bold; border-bottom-color:#000; border-width:3px; padding:20px; border-style:solid; text-transform:uppercase; margin-bottom:30px">%s</div>',
       'text_tpl' => '<div style="text-align:justify; margin-top:30px; margin-bottom:30px">%s</div>',
       'signature' => '<div style="text-align:right">Your signing here</div>'
@@ -132,6 +147,12 @@ class pdf
 		}
 		return $this;
 	}
+  
+  public function add_css($file)
+  {
+    $this->pdf->WriteHTML(file_get_contents($file), 1);
+    return $this;
+  }
 
   public function show()
 	{
@@ -141,6 +162,7 @@ class pdf
       die();
 		}
 	}
+  
 	public function makeAttachment()
 	{
 		if ( $this->check() )

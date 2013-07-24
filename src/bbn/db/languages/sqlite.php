@@ -229,6 +229,9 @@ class sqlite implements \bbn\db\engines
 		if ( empty($database) || !text::check_name($database) ){
 			$database = $this->db->current === 'main' ? '' : '"'.$this->db->current.'".';
 		}
+    else if ( $database === 'main' ){
+      $database = '';
+    }
 		$t2 = [];
     if ( ( $r = $this->db->raw_query('
       SELECT "tbl_name"
@@ -488,29 +491,11 @@ class sqlite implements \bbn\db\engines
           $r .= '"'.$c.'",'.PHP_EOL;
 				}
 			}
-			$r = substr($r,0,strrpos($r,',')).PHP_EOL.'FROM '.$table;
+			$r = substr($r,0,strrpos($r,',')).PHP_EOL.'FROM '.$table.PHP_EOL;
 			if ( count($where) > 0 ){
-				$r .= $this->get_where($where, $table);
+				$r .= $this->get_where($where, $table).PHP_EOL;
 			}
       $r .= $this->get_order($order, $table);
-			$directions = ['desc', 'asc'];
-      
-			if ( is_array($order) && count($order) > 0 ){
-				$r .= PHP_EOL.'ORDER BY ';
-				foreach ( $order as $col => $direction ){
-					if ( is_numeric($col) && isset($m['fields'][$direction]) ){
-						$r .= '"'.$direction.'"'.
-                    ( stripos($m['fields'][$direction]['type'],'date') !== false ? 'DESC' : 'ASC' ).
-                    ','.PHP_EOL;
-					}
-					else if ( isset($m['fields'][$col])  ){
-						$r .= '"'.$col.'" '.
-                    ( strtolower($direction) === 'desc' ? 'DESC' : 'ASC' ).
-                    ','.PHP_EOL;
-					}
-				}
-				$r = substr($r,0,strrpos($r,','));
-			}
 			if ( $limit && is_numeric($limit) && is_numeric($start) ){
 				$r .= PHP_EOL.'LIMIT '.$start.', '.$limit;
 			}

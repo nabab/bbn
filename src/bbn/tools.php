@@ -213,7 +213,7 @@ class tools
    * @param array|object $arr An object or array to clean
    * @return string The clean result
    */
-  public static function remove_empty($arr){
+  public static function remove_empty($arr, $remove_space=false){
     foreach ( $arr as $k => $v ){
       if ( is_object($arr) ){
         if ( is_array($v) || is_object($v) ){
@@ -226,6 +226,9 @@ class tools
       else{
         if ( is_array($v) || is_object($v) ){
           $arr[$k] = self::remove_empty($v);
+        }
+        else if ( $remove_space ){
+          $arr[$k] = trim($arr[$k]);
         }
         if ( empty($arr[$k]) ){
           unset($arr[$k]);
@@ -243,5 +246,22 @@ class tools
     return $r;
   }
   
+  public static function dump(){
+    $args = func_get_args();
+    foreach ( $args as $a ){
+      $r = $a;
+      if ( is_null($a) ){
+        $r = 'NULL';
+      }
+      else if ( !$a ){
+        $r = '0';
+      }
+      else if ( is_object($a) || is_array($a) ){
+        $r = \bbn\str\text::export($a);
+      }
+      echo '<p style="white-space:pre">'.$r.'</p>';
+    }
+  }
+
 }
 ?>
