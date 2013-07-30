@@ -63,6 +63,14 @@ class history
 		self::$date = date('Y-m-d H:i:s', $date);
 	}
 	
+	/**
+	 * @return void 
+	 */
+	public static function unset_date()
+	{
+		self::$date = false;
+	}
+	
  /**
   * Sets the history table name
 	* @return void 
@@ -256,6 +264,13 @@ class history
     }
 	}
 	
+  public static function add($table, $operation, $date, $values=[], $where=[])
+  {
+    if ( self::check_config() && self::$htable !== $table ){
+      
+    }
+  }
+  
 	/**
 	 * Gets all information about a given table
 	 * @return table full name

@@ -43,19 +43,20 @@ class sqlite implements \bbn\db\engines
       $cfg['db'] = BBN_DATABASE;
     }
     if ( isset($cfg['db']) && strlen($cfg['db']) > 1 ){
-      if ( defined("BBN_DATA_PATH") && is_dir(BBN_DATA_PATH.'db') && strpos($cfg['db'], "/") === false ){
+      if ( is_file($cfg['db']) ){
+        $pathinfo = pathinfo($cfg['db']);
+        $cfg['host'] = $pathinfo['dirname'].DIRECTORY_SEPARATOR;
+        $cfg['db'] = $pathinfo['basename'];
+      }
+      else if ( defined("BBN_DATA_PATH") && is_dir(BBN_DATA_PATH.'db') && strpos($cfg['db'], "/") === false ){
         $cfg['host'] = BBN_DATA_PATH.'db'.DIRECTORY_SEPARATOR;
         if ( !is_file(BBN_DATA_PATH.'db'.DIRECTORY_SEPARATOR.$cfg['db']) && strpos($cfg['db'], ".") === false ){
           $cfg['db'] .= '.sqlite';
         }
       }
-      else {
+      else{
         $pathinfo = pathinfo($cfg['db']);
-        if ( is_file($cfg['db']) ){
-          $cfg['host'] = $pathinfo['dirname'].DIRECTORY_SEPARATOR;
-          $cfg['db'] = $pathinfo['basename'];
-        }
-        else if ( is_writable($pathinfo['dirname']) ){
+        if ( is_writable($pathinfo['dirname']) ){
           $cfg['host'] = $pathinfo['dirname'].DIRECTORY_SEPARATOR;
           $cfg['db'] = isset($pathinfo['extension']) ? $pathinfo['basename'] : $pathinfo['basename'].'.sqlite';
         }
@@ -257,37 +258,38 @@ class sqlite implements \bbn\db\engines
 		if ( ( $table = $this->table_full_name($table, 1) ) ){
 
       $p = 1;
-      foreach ( $this->db->raw_query('PRAGMA table_info('.$table.')') as $row ){
-        $f = $row['name'];
-        $r[$f] = array(
-          'position' => $p++,
-          'null' => $row['notnull'] == 0 ? 1 : 0,
-          'key' => $row['pk'] == 1 ? 'PRI' : null,
-          'default' => $row['dflt_value'],
-          'extra' => null,
-          'maxlength' => null,
-          'signed' => 1
-        );
-        $type = strtolower($row['type']);
-        if ( strpos($type, 'blob') !== false ){
-          $r[$f]['type'] = 'BLOB';
+      if ( $rows = $this->db->get_rows('PRAGMA table_info('.$table.')') ){
+        foreach ( $rows as $row ){
+          $f = $row['name'];
+          $r[$f] = array(
+            'position' => $p++,
+            'null' => $row['notnull'] == 0 ? 1 : 0,
+            'key' => $row['pk'] == 1 ? 'PRI' : null,
+            'default' => $row['dflt_value'],
+            'extra' => null,
+            'maxlength' => null,
+            'signed' => 1
+          );
+          $type = strtolower($row['type']);
+          if ( strpos($type, 'blob') !== false ){
+            $r[$f]['type'] = 'BLOB';
+          }
+          else if ( ( strpos($type, 'int') !== false ) || ( strpos($type, 'bool') !== false ) || ( strpos($type, 'timestamp') !== false ) ){
+            $r[$f]['type'] = 'INTEGER';
+          }
+          else if ( ( strpos($type, 'floa') !== false ) || ( strpos($type, 'doub') !== false ) || ( strpos($type, 'real') !== false ) ){
+            $r[$f]['type'] = 'REAL';
+          }
+          else if ( ( strpos($type, 'char') !== false ) || ( strpos($type, 'text') !== false ) ){
+            $r[$f]['type'] = 'TEXT';
+          }
+          if ( preg_match_all('/\((.*?)\)/', $row['type'], $matches) ){
+            $r[$f]['maxlength'] = $matches[1][0];
+          }
+          if ( !isset($r[$f]['type']) ){
+            $r[$f]['type'] = 'TEXT';
+          }
         }
-        else if ( ( strpos($type, 'int') !== false ) || ( strpos($type, 'bool') !== false ) || ( strpos($type, 'timestamp') !== false ) ){
-          $r[$f]['type'] = 'INTEGER';
-        }
-        else if ( ( strpos($type, 'floa') !== false ) || ( strpos($type, 'doub') !== false ) || ( strpos($type, 'real') !== false ) ){
-          $r[$f]['type'] = 'REAL';
-        }
-        else if ( ( strpos($type, 'char') !== false ) || ( strpos($type, 'text') !== false ) ){
-          $r[$f]['type'] = 'TEXT';
-        }
-        if ( preg_match_all('/\((.*?)\)/', $row['type'], $matches) ){
-          $r[$f]['maxlength'] = $matches[1][0];
-        }
-        if ( !isset($r[$f]['type']) ){
-          $r[$f]['type'] = 'TEXT';
-        }
-
       }
 		}
 		return $r;
@@ -302,26 +304,30 @@ class sqlite implements \bbn\db\engines
       $keys = array();
       $cols = array();
       $database = $this->db->current === 'main' ? '' : '"'.$this->db->current.'".';
-      foreach ( $this->db->raw_query('PRAGMA index_list('.$table.')') as $d ){
-        foreach ( $this->db->raw_query('PRAGMA index_info('.$database.'"'.$d['name'].'")') as $d2 ){
-          $a = false;
-          if ( !isset($keys[$d['name']]) ){
-            $keys[$d['name']] = array(
-            'columns' => array($d2['name']),
-            'ref_db' => $a ? $a['ref_db'] : null,
-            'ref_table' => $a ? $a['ref_table'] : null,
-            'ref_column' => $a ? $a['ref_column'] : null,
-            'unique' => $d['unique'] == 1 ? 1 : 0
-            );
-          }
-          else{
-            array_push($keys[$d['name']]['columns'], $d2['name']);
-          }
-          if ( !isset($cols[$d2['name']]) ){
-            $cols[$d2['name']] = array($d['name']);
-          }
-          else{
-            array_push($cols[$d2['name']], $d['name']);
+      if ( $indexes = $this->db->get_rows('PRAGMA index_list('.$table.')') ){
+        foreach ( $indexes as $d ){
+          if ( $fields = $this->db->get_rows('PRAGMA index_info('.$database.'"'.$d['name'].'")') ){
+            foreach ( $fields as $d2 ){
+              $a = false;
+              if ( !isset($keys[$d['name']]) ){
+                $keys[$d['name']] = array(
+                'columns' => array($d2['name']),
+                'ref_db' => $a ? $a['ref_db'] : null,
+                'ref_table' => $a ? $a['ref_table'] : null,
+                'ref_column' => $a ? $a['ref_column'] : null,
+                'unique' => $d['unique'] == 1 ? 1 : 0
+                );
+              }
+              else{
+                array_push($keys[$d['name']]['columns'], $d2['name']);
+              }
+              if ( !isset($cols[$d2['name']]) ){
+                $cols[$d2['name']] = array($d['name']);
+              }
+              else{
+                array_push($cols[$d2['name']], $d['name']);
+              }
+            }
           }
         }
       }
@@ -352,8 +358,8 @@ class sqlite implements \bbn\db\engines
           }
         }
       }
-      else if (is_string($key) ){
-        $st .= 'AND "'.$w[0].'" = ? ';
+      else if ( is_string($key) ){
+        $st .= 'AND "'.$key.'" = ? ';
       }
       $st .= PHP_EOL;
     }
@@ -590,39 +596,31 @@ class sqlite implements \bbn\db\engines
 	 */
 	public function get_update($table, array $fields = array(), array $where = array(), $php = false)
 	{
-		$r = '';
-		if ( $php ){
-			$r .= '$db->query(\'';
-		}
-		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 ){
-			if ( is_string($where) ){
-				$where = array($where);
-			}
-			$r .= 'UPDATE '.$table.' SET ';
-			$i = 0;
+		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
+		{
+      $r = '';
+      if ( $php ){
+        $r .= '$db->query(\'';
+      }
+			$r .= "UPDATE $table SET ";
+
 			if ( count($fields) > 0 ){
 				foreach ( $fields as $k ){
 					if ( !isset($m['fields'][$k]) ){
 						die("The column $k doesn't exist in $table");
 					}
 					else{
-						$r .= '"'.$k.'" = ?,'.PHP_EOL;
+						$r .= "`$k` = ?,".PHP_EOL;
 					}
 				}
 			}
 			else{
 				foreach ( array_keys($m['fields']) as $k ){
-					$r .= '"'.$k.'" = ?,'.PHP_EOL;
+					$r .= "`$k` = ?,".PHP_EOL;
 				}
 			}
 
-			$r = substr($r,0,strrpos($r,',')).PHP_EOL.'WHERE 1 ';
-			foreach ( $where as $f ){
-				if ( !isset($m['fields'][$f]) ){
-					die("The fields to search for in get_update don't correspond to the table");
-				}
-				$r .= PHP_EOL.'AND "'.$f.'" = ?';
-			}
+			$r = substr($r,0,strrpos($r,',')).$this->db->get_where($where, $table);
 
 			if ( $php ){
 				$r .= '\','.PHP_EOL;

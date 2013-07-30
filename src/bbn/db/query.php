@@ -17,6 +17,7 @@ namespace bbn\db;
  */
 class query extends \PDOStatement implements actions
 {
+  private static $return_sequences = ["SELECT", "SHOW", "PRAGMA", "UNION"];
 	/**
 	 * @var mixed
 	 */
@@ -58,6 +59,15 @@ class query extends \PDOStatement implements actions
 			$this->values = isset($this->db->last_params['values']) ? $this->db->last_params['values'] : [];
 		}
 	}
+  
+  private function does_return(){
+    foreach ( self::$return_sequences as $rs ){
+      if ( isset($this->sequences[$rs]) ){
+        return true;
+      }
+    }
+    return false;
+  }
 	
   private function repair_type($d){
     if ( is_array($d) ){
@@ -312,8 +322,9 @@ class query extends \PDOStatement implements actions
 	 */
 	public function get_row()
 	{
-		if ( isset($this->sequences['SELECT']) || isset($this->sequences['SHOW']) || isset($this->sequences['UNION']) )
+		if ( $this->does_return() ){
 			return $this->fetch(\PDO::FETCH_ASSOC);
+    }
 		return false;
 	}
 
@@ -322,8 +333,9 @@ class query extends \PDOStatement implements actions
 	 */
 	public function get_rows()
 	{
-		if ( isset($this->sequences['SELECT']) || isset($this->sequences['SHOW']) || isset($this->sequences['UNION']) )
+		if ( $this->does_return() ){
 			return $this->fetchAll(\PDO::FETCH_ASSOC);
+    }
 		return false;
 	}
 
@@ -332,7 +344,7 @@ class query extends \PDOStatement implements actions
 	 */
 	public function get_by_columns()
 	{
-		if ( isset($this->sequences['SELECT']) || isset($this->sequences['SHOW']) || isset($this->sequences['UNION']) )
+		if ( $this->does_return() )
 		{
 			$r = array();
 			$ds = $this->fetchAll(\PDO::FETCH_ASSOC);
@@ -355,7 +367,7 @@ class query extends \PDOStatement implements actions
 	 */
 	public function get_objects()
 	{
-		if ( isset($this->sequences['SELECT']) || isset($this->sequences['SHOW']) || isset($this->sequences['UNION']) )
+		if ( $this->does_return() )
 			return $this->fetchAll(\PDO::FETCH_OBJ);
 		return false;
 	}
@@ -373,7 +385,7 @@ class query extends \PDOStatement implements actions
 	 */
 	public function get_object()
 	{
-		if ( isset($this->sequences['SELECT']) || isset($this->sequences['SHOW']) || isset($this->sequences['UNION']) )
+		if ( $this->does_return() )
 			return $this->fetch(\PDO::FETCH_OBJ);
 		return false;
 	}

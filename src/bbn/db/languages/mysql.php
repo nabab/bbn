@@ -302,7 +302,6 @@ class mysql implements \bbn\db\engines
 	 */
 	public function get_keys($table)
 	{
-		//var_dump("I get the keys");
 		if ( $full = $this->table_full_name($table, 1) ){
 			$t = explode(".", $table);
 			$db = $t[0];
@@ -625,12 +624,11 @@ class mysql implements \bbn\db\engines
 	 */
 	public function get_update($table, array $fields = array(), array $where = array(), $php = false)
 	{
-		$r = '';
-		if ( $php ){
-			$r .= '$db->query("';
-		}
-		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
-		{
+		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 ){
+      $r = '';
+      if ( $php ){
+        $r .= '$db->query("';
+      }
 			$r .= "UPDATE $table SET ";
 			$i = 0;
 

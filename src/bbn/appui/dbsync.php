@@ -6,7 +6,7 @@ use \bbn\str\text;
 class dbsync
 {
 	
-	private static
+	public static
           /**
            * @var \bbn\db\connection The DB connection
            */
@@ -14,7 +14,11 @@ class dbsync
           $dbs = false,
           $tables = [],
           $dbs_table = 'dbsync',
-          $actions_triggered = ['insert', 'update', 'delete'],
+          $actions_triggered = ['insert', 'update', 'delete'];
+  
+  protected static $methods = array();
+
+  private static
           $default_cfg = [
             'engine' => 'sqlite',
             'host' => 'localhost',
@@ -23,19 +27,36 @@ class dbsync
           $disabled = false;
 	
   
+  final public static function __callStatic($name, $arguments)
+  {
+    if ( ($name === 'cbf1') || ($name === 'cbf2') ){
+      return call_user_func_array(self::$methods[$name], $arguments);
+    }
+  }
+
+  final public static function addMethod($name, $fn)
+  {
+    self::$methods[$name] = \Closure::bind($fn, NULL, __CLASS__);
+  }
+
+  final protected static function protectedMethod()
+  {
+    echo __METHOD__ . " was called" . PHP_EOL;
+  }
+
   private static function define($dbs, $dbs_table='')
   {
     if ( empty($dbs) ){
       $dbs = self::$default_cfg;
     }
-    if ( is_string($dbs) ){
-      $dbs = [ 
-        'engine' => 'sqlite',
-        'host' => 'localhost',
-        'db' => $dbs
-      ];
+    else if ( is_string($dbs) ){
+      $db = $dbs;
+      $dbs = self::$default_cfg;
+      $dbs['db'] = $db;
     }
-    self::$dbs = $dbs;
+    if ( !self::$dbs ){
+      self::$dbs = $dbs;
+    }
     if ( !empty($dbs_table) ){
       self::$dbs_table = $dbs_table;
     }
@@ -66,9 +87,8 @@ class dbsync
     if ( is_array(self::$dbs) ){
       self::$dbs = new \bbn\db\connection(self::$dbs);
     }
-    self::$dbs->clear_cache();
     if ( (self::$dbs->engine === 'sqlite') && !in_array(self::$dbs_table, self::$dbs->get_tables()) ){
-      self::$dbs->query('CREATE TABLE "dbsync" ("id" INTEGER PRIMARY KEY  NOT NULL ,"db" TEXT NOT NULL ,"table" TEXT NOT NULL ,"date" DATETIME NOT NULL,"action" TEXT NOT NULL ,"where" TEXT,"values" TEXT,"state" INTEGER NOT NULL DEFAULT (0) );');
+      self::$dbs->query('CREATE TABLE "dbsync" ("id" INTEGER PRIMARY KEY  NOT NULL ,"db" TEXT NOT NULL ,"tab" TEXT NOT NULL ,"moment" DATETIME NOT NULL,"action" TEXT NOT NULL ,"rows" TEXT,"vals" TEXT,"state" INTEGER NOT NULL DEFAULT (0) );');
     }
   }
 	/**
@@ -100,14 +120,24 @@ class dbsync
     if ( !self::$disabled && ($moment === 'after') && self::check() && in_array($table, self::$tables) && in_array($kind, self::$actions_triggered) ){
       self::$dbs->insert(self::$dbs_table, [
         'db' => self::$db->current,
-        'table' => $table,
+        'tab' => $table,
         'action' => $kind,
-        'date' => date('Y-m-d H:i:s'),
-        'where' => json_encode($where),
-        'values' => json_encode($values)
+        'moment' => date('Y-m-d H:i:s'),
+        'rows' => json_encode($where),
+        'vals' => json_encode($values)
       ]);
     }
     return 1;
+  }
+  
+  public static function callback1(\Closure $f)
+  {
+    self::addMethod('cbf1', $f);
+  }
+  
+  public static function callback2(\Closure $f)
+  {
+    self::addMethod('cbf2', $f);
   }
   
   public static function sync(\bbn\db\connection $db, $dbs='', $dbs_table=''){
@@ -119,14 +149,61 @@ class dbsync
                     self::$dbs_table, [], [
                       ['db', '!=', self::$db->current],
                       ['state', '<', "2"]
-                    ],['date' => 'DESC']),
+                    ],[
+                      'rows' => 'ASC',
+                      'moment' => 'ASC'
+                      ]),
             self::$db->current,
             2);
+    $todo = [];
+    
     while ( $d = $r->get_row() ){
-      var_dump($d);
+      if ( isset(self::$methods['cbf1']) ){
+        self::cbf1($d);
+      }
+      switch ( $d['action'] ){
+        case "insert":
+          \bbn\tools::dump(self::$db->insert($d['tab'], json_decode($d['vals'], 1)));
+          break;
+        case "update":
+          /*
+          // If it has been deleted before by the current db user
+          $is_deleted = self::$dbs->rselect(self::$dbs_table, [], [
+            ['db', '=', self::$db->current],
+            ['tab', '=', $d['tab']],
+            ['action', '=', 'delete'],
+            ['rows', '=', $d['rows']],
+            ['state', '=', 1]
+          ]);
+                          
+          $other_updates = self::$dbs->get_rows(
+                  self::$dbs->get_select(
+                          self::$dbs_table, [], [
+                            ['db', '=', self::$db->current],
+                            ['tab', '=', $d['tab']],
+                            ['action', '=', 'update'],
+                            ['rows', '=', $d['rows']],
+                            ['state', '=', 1]]
+                  ),
+                  self::$db->current,
+                  $d['tab'],
+                  'update',
+                  $d['rows'],
+                  1);
+           * 
+           */
+          \bbn\tools::dump(self::$db->update($d['tab'], json_decode($d['vals'], 1), json_decode($d['rows'], 1)));
+          break;
+        case "delete":
+          \bbn\tools::dump(self::$db->delete($d['tab'], json_decode($d['rows'], 1)));
+          break;
+      }
+      if ( isset(self::$methods['cbf1']) ){
+        self::cbf2($d);
+      }
+      self::$dbs->update(self::$dbs_table, ["state" => 3], ["id" => $d['id']]);
     }
     self::enable();
   }
-	
 }
 ?>

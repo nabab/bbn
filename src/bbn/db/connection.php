@@ -76,6 +76,10 @@ class connection extends \PDO implements actions, api, engines
 	 */
 		$hash_contour = '__BBN__',
 	/**
+	 * @var string
+	 */
+		$cache_name,
+	/**
 	 * @var mixed
 	 */
 		$last_prepared,
@@ -204,12 +208,12 @@ class connection extends \PDO implements actions, api, engines
 		if ( method_exists($e, "getMessage") ){
 			array_push($msg,'Error message: '.$e->getMessage());
 		}
-		array_push($msg,self::$line);
+		array_push($msg, self::$line);
 		array_push($msg, $this->last());
-		array_push($msg,self::$line);
+		array_push($msg, self::$line);
 		array_push($msg, print_r($this->last_params['values'], 1));
-		array_push($msg,self::$line);
-    \bbn\tools::log($msg, 'db');
+		array_push($msg, self::$line);
+    $this->log($msg);
     if ( $this->on_error === 'die' ){
       die(implode('<br>', $msg));
     }
@@ -292,14 +296,16 @@ class connection extends \PDO implements actions, api, engines
           $this->engine = $cfg['engine'];
           $this->host = isset($cfg['host']) ? $cfg['host'] : '127.0.0.1';
           $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+          $this->cache_name = "bbn/db/".$this->engine."/".md5($this->host);
           if ( function_exists("apc_add") ){
             $this->has_apc = 1;
-            if ( !apc_exists("bbn/db/".$this->host) ){
+            if ( !apc_exists($this->cache_name) ){
+              $this->log("apc non exist ".$this->cache_name);
               $this->cache = $this->default_cache;
-              apc_store("bbn/db/".$this->host, $this->cache);
+              apc_store($this->cache_name, $this->cache);
             }
             else{
-              $this->cache = apc_fetch("bbn/db/".$this->host);
+              $this->cache = apc_fetch($this->cache_name);
             }
           }
           $this->start_fancy_stuff();
@@ -307,12 +313,19 @@ class connection extends \PDO implements actions, api, engines
           $this->enable_keys();
         }
         catch ( \PDOException $e ){
-          $this->error($e);
+          $this->log($e);
+          die();
         }
       }
 		}
 	}
   
+  public function log($st){
+    $args = func_get_args();
+    foreach ( $args as $a ){
+      \bbn\tools::log($a, 'db');
+    }
+  }
   /**
    * Changes the error mode
    * Modes: stop (default), die, continue
@@ -331,9 +344,8 @@ class connection extends \PDO implements actions, api, engines
 	*/
 	protected function save_cache()
 	{
-    //\bbn\tools::log($this->cache, 'db');
     if ( $this->has_apc ){
-      apc_store("bbn/db/".$this->host, $this->cache);
+      apc_store($this->cache_name, $this->cache);
     }
 	}
 
@@ -344,10 +356,9 @@ class connection extends \PDO implements actions, api, engines
 	*/
 	public function clear_cache()
 	{
-    //\bbn\tools::log($this->cache, 'db');
     if ( $this->has_apc ){
       $this->cache = $this->default_cache;
-      apc_store("bbn/db/".$this->host, $this->cache);
+      apc_store($this->cache_name, $this->cache);
     }
 	}
 
@@ -637,7 +648,6 @@ class connection extends \PDO implements actions, api, engines
 	{
     if ( $this->check() ){
       $args = func_get_args();
-      //\bbn\tools::log($args, 'db');
       return call_user_func_array('parent::query', $args);
     }
   }
@@ -720,6 +730,18 @@ class connection extends \PDO implements actions, api, engines
               $this->queries[$hash_sent] = $hash;
             }
           }
+          else if ( $this->engine === 'sqlite' && strpos($statement, 'PRAGMA') === 0 ){
+            $sequences = ['PRAGMA' => $statement];
+            $this->add_query(
+                    $hash,
+                    $statement,
+                    $sequences,
+                    0,
+                    $driver_options);
+            if ( isset($hash_sent) ){
+              $this->queries[$hash_sent] = $hash;
+            }
+          }
           else{
             die("Impossible to parse the query $statement");
           }
@@ -774,8 +796,15 @@ class connection extends \PDO implements actions, api, engines
               else{
                 $q['prepared']->init($this->last_params['values']);
               }
-              return $q['prepared'];
             }
+          }
+        }
+        catch (\PDOException $e ){
+          $this->error($e);
+        }
+        if ( self::$errorState ){
+          if ( !isset($r) ){
+            return $q['prepared'];
           }
           if ( isset($q['sequences']['INSERT']) ){
             $this->last_insert_id = (int)$this->lastInsertId();
@@ -785,8 +814,6 @@ class connection extends \PDO implements actions, api, engines
           }
           return $r;
         }
-        catch (\PDOException $e )
-          { $this->error($e); }
       }
     }
 		return false;
@@ -1190,8 +1217,7 @@ class connection extends \PDO implements actions, api, engines
 			$sql = $this->language->get_insert($table, array_keys($values), $ignore);
 		}
 		if ( $sql && ( $this->triggers_disabled || $this->trigger($table, 'insert', 'before', $values) ) ){
-      $r = $this->query($sql, $hash, array_values($values));
-      if ( $r ){
+      if ( $r = $this->query($sql, $hash, array_values($values)) ){
         $this->trigger($table, 'insert', 'after', $values);
       }
 		}
