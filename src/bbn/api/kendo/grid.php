@@ -184,7 +184,7 @@ class grid // extends object
       
       $this->dataSource
               ->schema($this->schema)
-              ->pageSize(20);
+              ->pageSize(50);
 
       $this->grid
               ->attr("class","appui-full-height")

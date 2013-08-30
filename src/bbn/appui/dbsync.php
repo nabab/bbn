@@ -19,6 +19,7 @@ class dbsync
   protected static $methods = array();
 
   private static
+          $has_history = false,
           $default_cfg = [
             'engine' => 'sqlite',
             'host' => 'localhost',
@@ -75,17 +76,25 @@ class dbsync
     if ( count(self::$tables) === 0 ){
       self::$tables = self::$db->get_tables();
     }
-    self::$db->set_trigger(
+    if ( is_array(self::$tables) ){
+      foreach ( self::$tables as $i => $t ){
+        self::$tables[$i] = self::$db->table_full_name($t);
+      }
+      self::$db->set_trigger(
             '\\bbn\\appui\\dbsync::trigger',
             self::$actions_triggered,
             'after',
-            $tables);
+            self::$tables);
+    }
 	}
   
   public static function first_call()
   {
     if ( is_array(self::$dbs) ){
       self::$dbs = new \bbn\db\connection(self::$dbs);
+    }
+    if ( \bbn\appui\history::$is_used ){
+      self::$has_history = 1;
     }
     if ( (self::$dbs->engine === 'sqlite') && !in_array(self::$dbs_table, self::$dbs->get_tables()) ){
       self::$dbs->query('CREATE TABLE "dbsync" ("id" INTEGER PRIMARY KEY  NOT NULL ,"db" TEXT NOT NULL ,"tab" TEXT NOT NULL ,"moment" DATETIME NOT NULL,"action" TEXT NOT NULL ,"rows" TEXT,"vals" TEXT,"state" INTEGER NOT NULL DEFAULT (0) );');
@@ -117,10 +126,21 @@ class dbsync
   public static function trigger($table, $kind, $moment, array $values=[], array $where=[])
   {
     self::first_call();
+    $stable = self::$db->table_simple_name($table);
     if ( !self::$disabled && ($moment === 'after') && self::check() && in_array($table, self::$tables) && in_array($kind, self::$actions_triggered) ){
+      if ( ($kind === 'update') && self::$has_history && isset($values[\bbn\appui\history::$hcol]) ){
+        if ( $values[\bbn\appui\history::$hcol] == 0 ){
+          $kind = 'delete';
+          $values = [];
+        }
+        else{
+          $kind = 'insert';
+          $values = self::$db->get_row(self::$db->get_insert($table, [], $where));
+        }
+      }
       self::$dbs->insert(self::$dbs_table, [
         'db' => self::$db->current,
-        'tab' => $table,
+        'tab' => $stable,
         'action' => $kind,
         'moment' => date('Y-m-d H:i:s'),
         'rows' => json_encode($where),

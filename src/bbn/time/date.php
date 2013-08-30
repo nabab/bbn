@@ -41,11 +41,17 @@ class date
 			$end_today = $start_today + ( 24 * 3600 );
 			$is_today = ( $idate >= $start_today && $idate < $end_today ) ? 1 : false;
 			$only_date = ( $h['tm_hour'] + $h['tm_min'] + $h['tm_sec'] == 0 ) ? 1 : false;
-			if ( $mode == 'idate' )
+			if ( $mode === 'idate' )
 				$date_ok = $idate;
-			else if ( $mode == 'dbdate' )
+			else if ( $mode === 'dbdate' )
 				$date_ok = date('Y-m-d H:i:s',$idate);
-			else if ( $mode == 'wsdate' || $mode == 's' )
+      else if ( $mode === 'm' ){
+        $date_ok = $is_windows ? strftime("%m", $idate) : strftime("%B", $idate);
+      }
+      else if ( $mode === 'my' ){
+        $date_ok = $is_windows ? strftime("%m %Y", $idate) : strftime("%B %Y", $idate);
+      }
+			else if ( $mode === 'wsdate' || $mode === 's' )
 			{
 				if ( $is_today && !$only_date )
 					$date_ok = strftime('%H:%M',$idate);

@@ -232,19 +232,13 @@ class connection extends \PDO implements actions, api, engines
 	private function trigger($table, $kind, $moment, $values, $where = [])
 	{
 		$trig = 1;
-		if ( isset($this->triggers[$kind][$moment]) ){
+		if ( !empty($this->triggers[$kind][$moment]) ){
+      $table = $this->table_full_name($table);
+
       // Specific to a table
       if ( isset($this->triggers[$kind][$moment][$table]) ){
-        foreach ( $this->triggers[$kind][$moment][$table] as $f ){
-          if (is_callable($f) ){
-            if ( !call_user_func_array($f, [$table, $kind, $moment, $values, $where]) ){
-              $trig = false;
-            }
-          }
-        }
-      }
-      if ( isset($this->triggers[$kind][$moment]['-']) ){
-        foreach ( $this->triggers[$kind][$moment]['-'] as $f ){
+
+        foreach ( $this->triggers[$kind][$moment][$table] as $i => $f ){
           if (is_callable($f) ){
             if ( !call_user_func_array($f, [$table, $kind, $moment, $values, $where]) ){
               $trig = false;
@@ -427,7 +421,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
   public function table_simple_name($table, $escaped=false)
   {
-    return $this->language->table_full_name($table, $escaped);
+    return $this->language->table_simple_name($table, $escaped);
   }
   
 	/**
@@ -478,7 +472,7 @@ class connection extends \PDO implements actions, api, engines
 	* @param table
 	* @return \bbn\db\connection
 	*/
-	public function set_trigger($function, $kind='', $moment='', $tables='-' )
+	public function set_trigger($function, $kind='', $moment='', $tables='*' )
 	{
     if ( is_callable($function) ){
       $kinds = ['select', 'insert', 'update', 'delete'];
@@ -509,23 +503,19 @@ class connection extends \PDO implements actions, api, engines
         if ( in_array($k, $kinds) ){
           foreach ( $moment as $m ){
             if ( in_array($m, $moments) && isset($this->triggers[$k][$m]) ){
-              if ( empty($tables) || ($tables === '-') ){
-                if ( !isset($this->triggers[$k][$m]['-']) ){
-                  $this->triggers[$k][$m]['-'] = [];
-                }
-                array_push($this->triggers[$k][$m]['-'], $function);
+              if ( $tables === '*' ){
+                $tables = $this->get_tables();
               }
-              else{
-                if ( !is_array($tables) ){
-                  $tables = [$tables];
-                }
-                if ( is_array($tables) ){
-                  foreach ( $tables as $table ){
-                    if ( !isset($this->triggers[$k][$m][$table]) ){
-                      $this->triggers[$k][$m][$table] = [];
-                    }
-                    array_push($this->triggers[$k][$m][$table], $function);
+              else if ( \bbn\str\text::check_name($tables) ){
+                $tables = [$tables];
+              }
+              if ( is_array($tables) ){
+                foreach ( $tables as $table ){
+                  $t = $this->table_full_name($table);
+                  if ( !isset($this->triggers[$k][$m][$t]) ){
+                    $this->triggers[$k][$m][$t] = [];
                   }
+                  array_push($this->triggers[$k][$m][$t], $function);
                 }
               }
             }

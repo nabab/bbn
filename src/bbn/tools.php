@@ -84,7 +84,19 @@ class tools
       }
 		}
 	}
-  
+  public static function merge_objects($o1, $o2){
+    $args = func_get_args();
+    if ( count($args) > 2 ){
+      for ( $i = count($args) - 1; $i > 1; $i-- ){
+        $args[$i-1] = self::merge_arrays($args[$i-1], $args[$i]);
+      }
+      $o2 = $args[1];
+    }
+    $a1 = self::to_array($o1);
+    $a2 = self::to_array($o2);
+    $res = self::merge_arrays($a1, $a2);
+    return self::to_object($res);
+  }
  	/**
 	 * Removes all the elements from the items array, and reset the default config
 	 * @return void
@@ -246,8 +258,9 @@ class tools
     return $r;
   }
   
-  public static function dump(){
+  public static function get_dump(){
     $args = func_get_args();
+    $st = '';
     foreach ( $args as $a ){
       $r = $a;
       if ( is_null($a) ){
@@ -259,9 +272,66 @@ class tools
       else if ( is_object($a) || is_array($a) ){
         $r = \bbn\str\text::export($a);
       }
-      echo '<p style="white-space:pre">'.$r.'</p>';
+      $st .= $r;
     }
+    return $st;
+  }
+  
+  public static function dump(){
+    echo call_user_func_array('self::get_dump', func_get_args());
+    
+  }
+  
+  public static function hdump(){
+    $args = func_get_args();
+    echo '<p style="white-space:pre">'.call_user_func_array('self::get_dump', func_get_args()).'</p>';
+    
   }
 
+  public static function build_options($values, $selected='', $empty_label=false){
+    if ( is_array($values) )
+    {
+      $r = '';
+      if ( $empty_label !== false ){
+        $r .= '<option value="">'.$empty_label.'</option>';
+      }
+      foreach ( $values as $k => $v )
+      {
+        if ( is_array($v) && count($v) == 2 )
+        {
+          $value = $v[0];
+          $title = $v[1];
+        }
+        else if ( !isset($values[0]) ){
+          $value = $k;
+          $title = $v;
+        }
+        else if ( is_string($v) )
+          $value = $title = $v;
+        if ( isset($value,$title) ){
+          $r .= '<option value="'.$value.'"'.
+                  ( $value == $selected ? ' selected="selected"' : '').
+                  '>'.$title.'</option>';
+        }
+        unset($value,$title);
+      }
+      return $r;
+    }
+  }
+  
+  public static function to_keypair($arr, $protected=1){
+    $num = count($arr);
+    $res = [];
+    if ( ($num % 2) === 0 ){
+      $i = 0;
+      while ( isset($arr[$i]) ){
+        if ( !$protected || preg_match('/[0-9A-z\-_]+/', $arr[$i]) ){
+          $res[$arr[$i]] = $arr[$i+1];
+        }
+        $i += 2;
+      }
+    }
+    return $res;
+  }
 }
 ?>

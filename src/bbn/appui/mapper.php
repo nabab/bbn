@@ -235,17 +235,34 @@ class mapper{
         if ( empty($cfg['url']) ){
           $cfg['url'] = $id;
         }
+        /*
         if ( empty($cfg['select']) && \bbn\str\text::is_number($cfg['url']) ){
-          $cfg['select'] = 'json/select/'.implode("/", $params);
+          $cfg['select'] = 'json/select/'.$id."/".implode("/", $params);
         }
         if ( empty($cfg['insert'])  && \bbn\str\text::is_number($cfg['url']) ){
-          $cfg['insert'] = 'json/insert/'.implode("/", $params);
+          $cfg['insert'] = 'json/insert/'.$id."/".implode("/", $params);
         }
         if ( empty($cfg['update']) && \bbn\str\text::is_number($cfg['url']) ){
-          $cfg['update'] = 'json/update/'.implode("/", $params);
+          $cfg['update'] = 'json/update/'.$id."/".implode("/", $params);
         }
         if ( empty($cfg['delete']) && \bbn\str\text::is_number($cfg['url']) ){
-          $cfg['delete'] = 'json/delete/'.implode("/", $params);
+          $cfg['delete'] = 'json/delete/'.$id."/".implode("/", $params);
+        }
+         * 
+         */
+        if ( count($params) > 0 ){
+          if ( isset($cfg['select']) ){
+            $cfg['select'] .= "/".implode("/", $params);
+          }
+          if ( isset($cfg['insert']) ){
+            $cfg['insert'] .= "/".implode("/", $params);
+          }
+          if ( isset($cfg['update']) ){
+            $cfg['update'] .= "/".implode("/", $params);
+          }
+          if ( isset($cfg['delete']) ){
+            $cfg['delete'] .= "/".implode("/", $params);
+          }
         }
         if ( !empty($obj['description']) ){
           $cfg['description'] = $obj['description'];
@@ -262,7 +279,7 @@ class mapper{
         foreach ( $fields as $k => $f ){
           $fields[$k] = json_decode($f['configuration'], 1);
           if ( isset($fields[$k]['sql']) ){
-            if ( count($params) === 3 ){
+            if ( (count($params) % 2) === 0 && isset($chplouif) ){
               $fields[$k]['data'] = $this->db->get_rows($fields[$k]['sql'], $params[2]);
             }
             else{
@@ -751,6 +768,12 @@ class mapper{
         (`id`, `host`, `db`)
         VALUES
         ('$db', '{$this->db->host}', '$db')");
+        
+      $has_history = false;
+      if ( \bbn\appui\history::$is_used && isset($schema[\bbn\appui\history::$htable]) ){
+        $has_history = 1;
+      }
+      
 			foreach ( $schema as $t => $vars ){
 				if ( strpos($t, '.'.$this->prefix) === false ){
           $tmp = explode(".", $t);
@@ -763,7 +786,7 @@ class mapper{
 					]);
           foreach ( $vars['fields'] as $col => $f ){
     				$config = new \stdClass();
-						if ( strpos($t, 'apst_') === 0 ){
+						if ( $has_history && array_key_exists(\bbn\appui\history::$hcol, $vars['fields']) && ($col !== \bbn\appui\history::$hcol) ){
 							$config->history = 1;
 						}
 						if ( isset($f['default']) ){

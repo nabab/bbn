@@ -435,7 +435,13 @@ class text
           $st .= self::export($v, $remove_empty, $lev+1);
         }
         else if ( is_object($v) ){
-          $st .= "Object ". get_class($v);
+          $cls = get_class($v);
+          if ( $cls === 'stdClass' ){
+            $st .= self::export($v, $remove_empty, $lev+1);
+          }
+          else{
+            $st .= "Object $cls";
+          }
         }
         else if ( $v === 0 ){
           $st .= '0';

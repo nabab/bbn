@@ -63,7 +63,12 @@ class mvc
 	 * The mode of the output (dom, html, json, txt, xml...)
 	 * @var null|string
 	 */
-		$mode;
+		$mode,
+	/**
+	 * Determines if it is sent through the command line
+	 * @var boolean
+	 */
+		$cli;
 	public
 	/**
 	 * An external object that can be filled after the object creation and can be used as a global with the function add_inc
@@ -74,7 +79,7 @@ class mvc
 	 * The data model
 	 * @var null|array
 	 */
-		$data,
+		$data = [],
 	/**
 	 * The output object
 	 * @var null|object
@@ -99,12 +104,12 @@ class mvc
 	 * The list of used controllers with their corresponding request, so we don't have to look for them again.
 	 * @var array
 	 */
-		$known_controllers = array(),
+		$known_controllers = [],
 	/**
 	 * The list of views which have been loaded. We keep their content in an array to not have to include the file again. This is useful for loops.
 	 * @var array
 	 */
-		$loaded_views = array(),
+		$loaded_views = [],
 	/**
 	 * Mustage templating engine.
 	 * @var object
@@ -119,43 +124,43 @@ class mvc
 	 * $_POST array
 	 * @var array
 	 */
-		$post,
+		$post = [],
 	/**
 	 * $_GET array
 	 * @var array
 	 */
-		$get,
+		$get = [],
 	/**
 	 * An array of each path bit in the url
 	 * @var array
 	 */
-		$params,
+		$params = [],
 	 /**
 		* An array of each argument in the url path (params minus the ones leading to the controller)
 		* @var array
 		*/
-		$arguments,
+		$arguments = [],
 	 /**
 	 * List of possible outputs with their according file extension possibilities
 	 * @var array
 	 */
-		$outputs = array('dom'=>'html','html'=>'html','image'=>'jpg,jpeg,gif,png,svg','json'=>'json','text'=>'txt','xml'=>'xml','js'=>'js','css'=>'css,less,sass'),
+		$outputs = ['dom'=>'html','html'=>'html','image'=>'jpg,jpeg,gif,png,svg','json'=>'json','text'=>'txt','xml'=>'xml','js'=>'js','css'=>'css,less,sass'],
 
 	/**
 	 * List of possible and existing universal controller. 
 	 * First every item is set to one, then if a universal controller is needed, self::universal_controller() will look for it and sets the according array element to the file name if it's found and to false otherwise.
 	 * @var array
 	 */
-		$ucontrollers = array(
-		'dom' => 1,
-		'html' => 1,
-		'image' => 1,
-		'json' => 1,
-		'text' => 1,
-		'xml' => 1,
-		'css' => 1,
-		'js' => 1
-	);
+		$ucontrollers = [
+      'dom' => 1,
+      'html' => 1,
+      'image' => 1,
+      'json' => 1,
+      'text' => 1,
+      'xml' => 1,
+      'css' => 1,
+      'js' => 1
+    ];
 	const
 	/**
 	 * Path to the controllers.
@@ -177,7 +182,7 @@ class mvc
 	 * @param string | object $parent The parent controller</em>
 	 * @return bool
 	 */
-	public function __construct($db, $parent='', $data = array())
+	public function __construct($db, $parent='', $data = [])
 	{
 		// The initial call should only have $db as parameter
 		if ( defined('BBN_CUR_PATH') && is_array($parent) ){
@@ -189,11 +194,8 @@ class mvc
 			}
 			$this->inc = new \stdClass();
 			$this->routes = $parent;
+      $this->cli = (php_sapi_name() === 'cli');
 			$this->mustache = false;
-			$this->post = [];
-			$this->get = [];
-			$this->params = [];
-			$this->arguments = [];
 			if ( count($_POST) > 0 ){
 				$this->post = $_POST;
 			}
@@ -224,6 +226,9 @@ class mvc
 			else{
 				$this->original_mode = 'dom';
 			}
+      if ( $this->cli ){
+        $this->original_mode = 'cli';
+      }
 			$this->url = implode('/',$this->params);
 			$this->mode = $this->original_mode;
 			$path = $this->url;
@@ -233,6 +238,7 @@ class mvc
 			$this->inc =& $parent->inc;
 			$this->routes =& $parent->routes;
 			$this->mustache =& $parent->mustache;
+			$this->cli =& $parent->cli;
 			$this->db =& $parent->db;
 			$this->post =& $parent->post;
 			$this->get =& $parent->get;
@@ -244,20 +250,23 @@ class mvc
 			$this->loaded_views =& $parent->loaded_views;
 			$this->ucontrollers =& $parent->ucontrollers;
 			$this->arguments = [];
-			if ( count($data) > 0 ){
+			if ( $this->has_data($data) ){
 				$this->data = $data;
 			}
 			$path = $db;
-			while ( strpos($path,'/') === 0 ){
-				$path = substr($path,1);
+			while ( strpos($path, '/') === 0 ){
+				$path = substr($path, 1);
 			}
-			while ( substr($path,-1) === '/' ){
-				$path = substr($path,0,-1);
+			while ( substr($path, -1) === '/' ){
+				$path = substr($path, 0, -1);
 			}
-			$params = explode('/',$path);
-			if ( isset($params[0]) && isset($this->outputs[$params[0]]) ){
+			$params = explode('/', $path);
+      if ( $this->cli ){
+        $this->mode = 'cron';
+      }
+			else if ( isset($params[0]) && isset($this->outputs[$params[0]]) ){
 				$this->mode = array_shift($params);
-				$path = implode('/',$params);
+				$path = implode('/', $params);
 			}
 			else if ( $this->original_mode === 'dom' ){
         $this->mode = 'html';
@@ -346,14 +355,19 @@ class mvc
 	 * @param file $f The actual controller file ($this->controller)
 	 * @return void 
 	 */
-	private function set_controller($c, $f)
+	private function set_controller($c)
 	{
-		if ( !isset($this->known_controllers[$this->mode.'/'.$c]) ){
-			$this->known_controllers[$this->mode.'/'.$c] = $f;
-		}
-		if ( is_null($this->original_controller) && !empty($c) ){
-			$this->original_controller = $this->mode.'/'.$c;
-		}
+    if ( $this->controller && $this->mode ){
+      if ( !isset($this->known_controllers[$this->mode.'/'.$c]) ){
+        $this->known_controllers[$this->mode.'/'.$c] = [
+          'path' => $this->controller,
+          'args' => $this->arguments
+        ];
+      }
+      if ( is_null($this->original_controller) ){
+        $this->original_controller = $this->mode.'/'.$c;
+      }
+    }
 	}
 
 	/**
@@ -368,7 +382,7 @@ class mvc
     if ( !$this->mustache ){
       $this->mustache = new \Mustache_Engine();
     }
-    if ( empty($model) && isset($this->data) ){
+    if ( empty($model) && $this->has_data() ){
       $model = $this->data;
     }
     if ( !is_array($model) ){
@@ -384,6 +398,16 @@ class mvc
     return $this->mustache->render($view, $model);
 	}
 
+	/**
+	 * Returns true if called from CLI/Cron, false otherwise
+	 *
+	 * @return boolean 
+	 */
+	private function is_cli()
+  {
+    return $this->cli;
+  }
+  
 	/**
 	 * This looks for a given controller in the file system if it has not been already done and returns it if it finds it, false otherwise.
 	 *
@@ -405,7 +429,8 @@ class mvc
         else{
           $this->dir .= '/';
         }
-				$this->controller = $this->known_controllers[$this->mode.'/'.$p];
+				$this->controller = $this->known_controllers[$this->mode.'/'.$p]['path'];
+        $this->arguments = $this->known_controllers[$this->mode.'/'.$p]['args']; 
 			}
 			else{
 				if ( isset($this->routes[$this->mode][$p]) ){
@@ -447,7 +472,7 @@ class mvc
         else{
           $this->dir .= '/';
         }
-				$this->set_controller($p,$this->controller);
+				$this->set_controller($p);
 			}
 		}
 		return 1;
@@ -466,11 +491,19 @@ class mvc
 			$this->is_routed = 1;
 			$this->path = $path;
 			$fpath = $path;
-			while ( strlen($fpath) > 0 )
-			{
+      
+      // We go through each path, starting by the longest until it's empty
+			while ( strlen($fpath) > 0 ){
 				if ( $this->get_controller($fpath) ){
 					if ( strlen($fpath) < strlen($this->path) ){
-						$this->arguments = explode('/',substr($this->path,strlen($fpath)));
+            $this->arguments = [];
+            $args = explode('/', substr($this->path,strlen($fpath)));
+            foreach ( $args as $a ){
+              if ( \bbn\str\text::is_number($a) ){
+                $a = (int)$a;
+              }
+              array_push($this->arguments, $a);
+            }
 						// Trimming the array
 						while ( empty($this->arguments[0]) ){
 							array_shift($this->arguments);
@@ -553,7 +586,7 @@ class mvc
 		if ( $this->controller && is_null($this->is_controlled) ){
 			$this->obj = new \stdClass();
 			$this->control();
-			if ( $this->data && is_array($this->data) && isset($this->obj->output) ){
+			if ( $this->has_data() && isset($this->obj->output) ){
 				$this->obj->output = $this->render($this->obj->output,$this->data);
 			}
 		}
@@ -627,7 +660,7 @@ class mvc
 				}
 				if ( isset($bbn_php) ){
 					$args = array();
-					if ( isset($this->data) && count($this->data) > 0 ){
+					if ( $this->has_data() ){
 						foreach ( (array)$this->data as $key => $val ){
 							$$key = $val;
 							array_push($args, '$'.$key);
@@ -657,9 +690,6 @@ class mvc
 				}
 				else if ( is_string($a) && $this->check_path($a) ){
 					$path = $a;
-				}
-				else if ( is_object($a) && ( $class = get_class($a) ) && ( $class === 'PDO' || $class === 'bbn\db\connection' ) ){
-					$db = $a;
 				}
 			}
 			if ( !isset($path) ){
@@ -728,9 +758,12 @@ class mvc
 	 *
 	 * @return bool
 	 */
-	public function has_data()
+	public function has_data($data=null)
 	{
-		return ( isset($this->data) && is_array($this->data) ) ? 1 : false;
+    if ( is_null($data) ){
+      $data = $this->data;
+    }
+		return ( is_array($data) && (count($data) > 0) ) ? 1 : false;
 	}
 
 	/**
@@ -781,16 +814,9 @@ class mvc
 	public function add_data(array $data)
 	{
 		$ar = func_get_args();
-		foreach ( $ar as $d )
-		{
-			if ( is_array($d) )
-			{
-				if ( !is_array($this->data) ){
-					$this->data = $d;
-				}
-				else{
-					$this->data = array_merge($this->data,$d);
-				}
+		foreach ( $ar as $d ){
+			if ( is_array($d) ){
+        $this->data = $this->has_data() ? array_merge($this->data,$d) : $d;
 			}
 		}
 		return $this;
@@ -822,6 +848,9 @@ class mvc
 		}
 		if ( $this->check() && $this->obj ){
 			
+      if ( $this->cli ){
+        die(isset($this->obj->output) ? $this->obj->output : "no output");
+      }
 			if ( isset($this->obj->prescript) ){
 				if ( empty($this->obj->prescript) ){
 					unset($this->obj->prescript);

@@ -12,8 +12,6 @@ class history
            */
           $db = false,
           $hstructures = array(),
-          $hcol = 'active',
-          $htable = false,
           $admin_db = '',
           $huser = false,
           $prefix = 'bbn_',
@@ -21,6 +19,10 @@ class history
           $date = false,
           $last_rows = false;
 	
+  public static
+          $htable = false,
+          $hcol = 'active',
+          $is_used = false;
 	/**
 	 * @return void 
 	 */
@@ -38,6 +40,7 @@ class history
       self::$admin_db = self::$db->current;
     }
 		self::$htable = self::$admin_db.'.'.self::$prefix.'history';
+    self::$is_used = 1;
 	}
 	
 	/**
