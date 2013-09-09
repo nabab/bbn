@@ -112,13 +112,13 @@ class tools
     $keys = array_unique(array_merge(array_keys($a1), array_keys($a2)));
     $r = [];
     foreach ( $keys as $k ) {
-      if ( !isset($a1[$k]) && !isset($a2[$k]) ){
+      if ( !array_key_exists($k, $a1) && !array_key_exists($k, $a2) ){
         continue;
       }
-      else if ( !isset($a2[$k]) ){
+      else if ( !array_key_exists($k, $a2) ){
         $r[$k] = $a1[$k];
       }
-      else if ( !isset($a1[$k]) || !is_array($a2[$k]) || !is_array($a1[$k]) || is_numeric(key($a2[$k])) ){
+      else if ( !array_key_exists($k, $a1) || !is_array($a2[$k]) || !is_array($a1[$k]) || is_numeric(key($a2[$k])) ){
         $r[$k] = $a2[$k];
       }
       else{
@@ -333,5 +333,28 @@ class tools
     }
     return $res;
   }
+  
+  public static function max_with_key($array, $key) {
+    if (!is_array($array) || count($array) == 0) return false;
+    $max = $array[0][$key];
+    foreach($array as $a) {
+      if($a[$key] > $max) {
+        $max = $a[$key];
+      }
+    }
+    return $max;
+  }
+
+  public static function min_with_key($array, $key) {
+    if (!is_array($array) || count($array) == 0) return false;
+    $min = $array[0][$key];
+    foreach($array as $a) {
+      if($a[$key] < $min) {
+        $min = $a[$key];
+      }
+    }
+    return $min;
+  }
+  
 }
 ?>

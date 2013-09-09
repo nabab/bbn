@@ -74,6 +74,15 @@ class date
 			return $date_ok;
 		}
 	}
+  
+  public static function monthpicker_options($val='')
+  {
+    $arr = [];
+    for ( $i = 1; $i <= 12; $i++ ){
+      $arr[$i] = $is_windows ? strftime("%m", strtotime("2012-$i-01")) : strftime("%B", strtotime("2012-$i-01"));
+    }
+    return \bbn\tools::build_options($arr, $val);
+  }
 
 }
 ?>

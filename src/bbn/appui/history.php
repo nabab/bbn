@@ -146,7 +146,6 @@ class history
     }
     $when = (int) $when;
     if ( \bbn\str\text::check_name($table) && ($when > 0) && (count($where) === 1) ){
-      $r = [];
       $when = date('Y-m-d H:i:s', $when);
       if ( count($columns) === 0 ){
         $columns = array_keys(self::$db->get_columns($table));
@@ -158,7 +157,7 @@ class history
           FROM bbn_history
           WHERE `column` LIKE ?
           AND `line` = ?
-          AND `operation` LIKE 'UPDATE'
+          AND ( `operation` LIKE 'UPDATE' OR `operation` LIKE 'DELETE' OR `operation` LIKE 'RESTORE')
           AND last_mod >= ?
           ORDER BY last_mod ASC",
           $fc,

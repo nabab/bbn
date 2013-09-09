@@ -9,4 +9,4 @@ return [
         'name' => 'json_editor',
     ],
 ];
-?>
+ 

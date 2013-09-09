@@ -6,4 +6,4 @@ return [
         'class' => 'k-textbox',
     ],
 ];
-?>
+ 

@@ -1506,7 +1506,13 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function get_column_values($table, $field,  array $where = array(), $limit = false, $start = 0, $php = false)
 	{
-    return $this->language->get_column_values($table, $field, $where, $limit, $start, $php);
+    $r = [];
+    if ( $rows = $this->get_irows($this->language->get_column_values($table, $field, $where, $limit, $start, false)) ){
+      foreach ( $rows as $row ){
+        array_push($r, $row[0]);
+      }
+    }
+    return $r;
 	}
 	
 	/**
