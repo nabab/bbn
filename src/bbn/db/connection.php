@@ -294,7 +294,6 @@ class connection extends \PDO implements actions, api, engines
           if ( function_exists("apc_add") ){
             $this->has_apc = 1;
             if ( !apc_exists($this->cache_name) ){
-              $this->log("apc non exist ".$this->cache_name);
               $this->cache = $this->default_cache;
               apc_store($this->cache_name, $this->cache);
             }
