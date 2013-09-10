@@ -157,7 +157,7 @@ class history
           FROM bbn_history
           WHERE `column` LIKE ?
           AND `line` = ?
-          AND ( `operation` LIKE 'UPDATE' OR `operation` LIKE 'DELETE' OR `operation` LIKE 'RESTORE')
+          AND ( `operation` LIKE 'UPDATE' OR `operation` LIKE 'DELETE')
           AND last_mod >= ?
           ORDER BY last_mod ASC",
           $fc,
@@ -281,12 +281,19 @@ class history
   {
     if ( self::check_config() && self::$htable !== $table ){
       $table = self::$db->table_full_name($table);
+      
       if ( !isset(self::$hstructures[$table]) ){
         self::get_table_cfg($table);
       }
+      
       if ( isset(self::$hstructures[$table], self::$hstructures[$table]['history']) && self::$hstructures[$table]['history'] === 1 ){
         $s =& self::$hstructures[$table];
         $date = self::$date ? self::$date : date('Y-m-d H:i:s');
+        
+        if ( (count($values) === 1) && (array_keys($values)[0] === self::$hcol) ){
+          $kind = array_values($values)[0] === 1 ? 'restore' : 'delete';
+        }
+          
         switch ( $kind ){
           case 'select':
             break;
@@ -302,6 +309,18 @@ class history
                 'id_user' => self::$huser
               ]);
               self::$db->last_insert_id = $id;
+            }
+            break;
+          case 'restore':
+            if ( $moment === 'after' ){
+              self::$db->insert(self::$htable, [
+                'operation' => 'RESTORE',
+                'line' => $where[$s['primary']],
+                'column' => $table.'.'.self::$hcol,
+                'old' => '0',
+                'last_mod' => $date,
+                'id_user' => self::$huser
+              ]);
             }
             break;
           case 'update':
@@ -346,27 +365,39 @@ class history
           case 'delete':
             if ( $moment === 'before' ){
               // Looking for foreign constraints 
-              $to_check = self::$db->get_rows("
-                SELECT k.`column` AS id, c1.`column` AS to_change, c2.`column` AS from_change,
-                c1.`null`, t.`table`
-                FROM `".self::$admin_db."`.`".self::$prefix."keys` AS k
-                  JOIN `".self::$prefix."columns` AS c1
-                    ON c1.`id` LIKE k.`column`
-                  JOIN `".self::$prefix."columns` AS c2
-                    ON c2.`id` LIKE k.`ref_column`
-                  JOIN `".self::$prefix."tables` AS t
-                    ON t.`id` LIKE c1.`table`
-                WHERE k.`ref_column` LIKE ?",
-                $table.'.%%');
-              $to_select = [self::$primary];
-              foreach ( $to_check as $c ){
-                array_push($to_select, $c['from_change']);
-              }
               // Nothing is really deleted, the hcol is just set to 0
-              if ( $r = self::$db->update($table, [self::$hcol => '0'], $where) ){
+              if ( self::$db->query(
+                      self::$db->get_update(
+                              $table,
+                              [self::$hcol],
+                              $where),
+                      0, array_values($where)[0]) ){
+                self::$db->insert(self::$htable, [
+                  'operation' => 'DELETE',
+                  'line' => $where[$s['primary']],
+                  'column' => $table.'.'.self::$hcol,
+                  'old' => 1,
+                  'last_mod' => $date,
+                  'id_user' => self::$huser]);
+                /* For each value of this key which is deleted (hopefully one)
+                $to_check = self::$db->get_rows("
+                  SELECT k.`column` AS id, c1.`column` AS to_change, c2.`column` AS from_change,
+                  c1.`null`, t.`table`
+                  FROM `".self::$admin_db."`.`".self::$prefix."keys` AS k
+                    JOIN `".self::$prefix."columns` AS c1
+                      ON c1.`id` LIKE k.`column`
+                    JOIN `".self::$prefix."columns` AS c2
+                      ON c2.`id` LIKE k.`ref_column`
+                    JOIN `".self::$prefix."tables` AS t
+                      ON t.`id` LIKE c1.`table`
+                  WHERE k.`ref_column` LIKE ?",
+                  $table.'.%%');
+                $to_select = [self::$primary];
+                foreach ( $to_check as $c ){
+                  array_push($to_select, $c['from_change']);
+                }
                 // The values from the constrained rows that should have been deleted
                 $delete = self::$db->select_all($table, array_unique($to_select), $where);
-                // For each value of this key which is deleted (hopefully one)
                 foreach ( $delete as $del ){
                   $del = (array) $del;
                   // For each table having a constrain
@@ -391,8 +422,10 @@ class history
                     'last_mod' => $date,
                     'id_user' => self::$huser]);
                 }
+                 * 
+                 */
+                return false;
               }
-              return false;
             }
             break;
         }
