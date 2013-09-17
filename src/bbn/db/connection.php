@@ -1019,18 +1019,16 @@ class connection extends \PDO implements actions, api, engines
 	}
 
   /**
-	 * @todo Thomas fais ton taf!!
+	 * Returns a single numeric array (one column)
 	 *
 	 * @return array | false 
 	 */
 	public function get_col_array()
 	{
-    if ( $r = $this->get_by_columns(func_get_args()) ){
-      return array_values(array_map(function($a){
-        return current($a);
-      }, $r));
+    if ( $r = call_user_func_array([$this, 'get_by_columns'], func_get_args()) ){
+      return array_values(current($r));
 		}
-    return false;
+    return [];
 	}
 
 	/**
@@ -1138,6 +1136,20 @@ class connection extends \PDO implements actions, api, engines
 	}
 	
 	/**
+	 * @returns a single value
+	 */
+	public function select_one($table, $field, $where = array(), $order = false, $limit = 500, $start = 0)
+	{
+    if ( $r = $this->_sel($table, [$field], $where, $order, 1, $start) ){
+      if ( $res = $r->get_row() ){
+        return $res[$field];
+      }
+      
+		}
+    return false;
+	}
+
+  /**
 	 * @returns a row as an indexed array
 	 */
 	public function rselect($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)

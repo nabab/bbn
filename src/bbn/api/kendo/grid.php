@@ -133,10 +133,12 @@ class grid // extends object
           }
           if ( isset($e['commands']) ){
             foreach ( $e['commands'] as $c ){
+              if ( isset($c['click']) ){
+                $c['click'] = new \Kendo\JavaScriptFunction($c['click']);
+              }
               $col->addCommandItem($c);
             }
           }
-
           if ( count(\bbn\tools::to_array($col)) > 0 ){
             $this->grid->addColumn($col);
           }

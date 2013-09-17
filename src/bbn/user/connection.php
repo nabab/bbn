@@ -34,113 +34,118 @@ class connection
 	protected static
           /** @var array */
           $errors = [
-              0 => 'login failed',
-              2 => 'password sent',
-              3 => 'no email such as',
-              4 => 'too many attempts',
-              5 => 'impossible to create the user',
-              6 => 'wrong user and/or password',
-              7 => 'different passwords',
-              8 => 'less than 5 mn between emailing password',
-              9 => 'user already exists',
-              10 => 'problem during user creation'
+            0 => 'login failed',
+            2 => 'password sent',
+            3 => 'no email such as',
+            4 => 'too many attempts',
+            5 => 'impossible to create the user',
+            6 => 'wrong user and/or password',
+            7 => 'different passwords',
+            8 => 'less than 5 mn between emailing password',
+            9 => 'user already exists',
+            10 => 'problem during user creation'
           ],
           /** @var array */
           $_defaults = [
-              'tables' => [
-                  'users' => 'bbn_users',
-                  'sessions' => 'bbn_users_sessions',
-                  'hotlinks' => 'bbn_users_hotlinks',
-                  'groups' => 'bbn_users_groups',
-                  'usergroups' => 'bbn_users_usergroups'
+            'tables' => [
+              'groups' => 'bbn_users_groups',
+              'hotlinks' => 'bbn_users_hotlinks',
+              'passwords' => 'bbn_users_passwords',
+              'sessions' => 'bbn_users_sessions',
+              'usergroups' => 'bbn_users_usergroups',
+              'users' => 'bbn_users',
+            ],
+            'arch' => [
+              'groups' => [
+                'id' => 'id',
+                'group' => 'group',
+                'config' => 'config'
               ],
-              'arch' => [
-                  'users' => [
-                      'id' => 'id',
-                      'email' => 'email',
-                      'login' => 'email',
-                      'pass' => 'pass',
-                      'config' => 'config',
-                      'status' => 'status'
-                  ],
-                  'sessions' => [
-                      'id_user' => 'id_user',
-                      'sess_id' => 'sess_id',
-                      'ip_address' => 'ip_address',
-                      'user_agent' => 'user_agent',
-                      'auth' => 'auth',
-                      'opened' => 'opened',
-                      'last_activity' => 'last_activity',
-                      'config' => 'config',
-                  ],
-                  'hotlinks' => [
-                      'id' => 'id',
-                      'id_user' => 'id_user',
-                      'magic_string' => 'magic_string',
-                      'expire' => 'expire'
-                  ],
-                  'groups' => [
-                      'id' => 'id',
-                      'group' => 'group',
-                      'config' => 'config'
-                  ],
-                  'usergroups' => [
-                      'id_group' => 'id_group',
-                      'id_user' => 'id_user',
-                  ]
+              'hotlinks' => [
+                'id' => 'id',
+                'id_user' => 'id_user',
+                'magic_string' => 'magic_string',
+                'expire' => 'expire'
               ],
-              /*
-               * Password saving encryption
-               * @var string 
-               */
-              'encryption' => 'sha1',
-              /*
-               * Additional conditions when querying the users' table
-               * @var array
-               */
-              'conditions' => [],
-              /*
-               * Additional fields to select from the users' table
-               * They will become property 
-               * Their names mustn't interfere with existing properties
-               * @var array 
-               */
-              'additional_fields' => [],
-              /*
-               * The session name
-               * @var string 
-               */
-              'sess_name' => BBN_SESS_NAME,
-              /*
-               * In the session array the index on which user info will be stored
-               * i.e. the default storage will be $_SESSION[BBN_SESS_NAME]['user']
-               */
-              'sess_user' => 'user',
-              /*
-               * length in minutes of the session regeneration (can be doubled)
-               * @var integer 
-               */
-              'sess_length' => 5,
-              /*
-               * Number of times a user can try to log in in the period retry_length
-               * @var integer 
-               */
-              'max_attempts' => 5,
-              /*
-               * User ban's length in minutes after max attempts is reached
-               * @var integer 
-               */
-              'retry_length' => 5,
-              /*
-               * Sets if the groups features should be in used
-               * @var bool
-               */
-              'groups' => false,
-              /*
-               * Sets if the hotlinks features should be in used
-               * @var bool
-               */
-              'hotlinks' => false
+              'passwords' => [
+                'id_user' => 'id_user',
+                'pass' => 'pass',
+                'added' => 'added',
+              ],
+              'sessions' => [
+                'id_user' => 'id_user',
+                'sess_id' => 'sess_id',
+                'ip_address' => 'ip_address',
+                'user_agent' => 'user_agent',
+                'auth' => 'auth',
+                'opened' => 'opened',
+                'last_activity' => 'last_activity',
+                'config' => 'config',
+              ],
+              'usergroups' => [
+                'id_group' => 'id_group',
+                'id_user' => 'id_user',
+              ],
+              'users' => [
+                'id' => 'id',
+                'email' => 'email',
+                'login' => 'email',
+                'config' => 'config',
+                'status' => 'status'
+              ],
+            ],
+            /*
+             * Password saving encryption
+             * @var string 
+             */
+            'encryption' => 'sha1',
+            /*
+             * Additional conditions when querying the users' table
+             * @var array
+             */
+            'conditions' => [],
+            /*
+             * Additional fields to select from the users' table
+             * They will become property 
+             * Their names mustn't interfere with existing properties
+             * @var array 
+             */
+            'additional_fields' => [],
+            /*
+             * The session name
+             * @var string 
+             */
+            'sess_name' => BBN_SESS_NAME,
+            /*
+             * In the session array the index on which user info will be stored
+             * i.e. the default storage will be $_SESSION[BBN_SESS_NAME]['user']
+             */
+            'sess_user' => 'user',
+            /*
+             * length in minutes of the session regeneration (can be doubled)
+             * @var integer 
+             */
+            'sess_length' => 5,
+            /*
+             * Number of times a user can try to log in in the period retry_length
+             * @var integer 
+             */
+            'max_attempts' => 5,
+            /*
+             * User ban's length in minutes after max attempts is reached
+             * @var integer 
+             */
+            'retry_length' => 5,
+            /*
+             * Sets if the groups features should be in used
+             * @var bool
+             */
+            'groups' => false,
+            /*
+             * Sets if the hotlinks features should be in used
+             * @var bool
+             */
+            'hotlinks' => false
           ];
   
 	protected
@@ -206,73 +211,84 @@ class connection
     $cfg = \bbn\tools\merge_arrays($cfg, self::$_defaults);
     // @todo!!!
     $sql = "
-      CREATE TABLE IF NOT EXISTS {$cfg['tables']['users']} (
-        {$cfg['users']['id']} int(10) unsigned NOT NULL AUTO_INCREMENT,
-        {$cfg['users']['email']} varchar(100) NOT NULL,
-        {$cfg['users']['login']} varchar(35) NOT NULL,
-        {$cfg['users']['pass']} varchar(64) NOT NULL,
-        {$cfg['users']['config']} text NOT NULL,
-        PRIMARY KEY ({$cfg['users']['id']}),
-        UNIQUE KEY {$cfg['users']['email']} ({$cfg['users']['email']})
+      CREATE TABLE IF NOT EXISTS {$this->db->quote($cfg['tables']['users'])} (
+        {$this->db->quote($cfg['users']['id'])} int(10) unsigned NOT NULL AUTO_INCREMENT,
+        {$this->db->quote($cfg['users']['email'])} varchar(100) NOT NULL,".
+        ( $cfg['users']['login'] !== $cfg['users']['email'] ? "
+                {$this->db->quote($cfg['users']['login'])} varchar(35) NOT NULL," : "" )."
+        {$this->db->quote($cfg['users']['config'])} text NOT NULL,
+        PRIMARY KEY ({$this->db->quote($cfg['users']['id'])}),
+        UNIQUE KEY {$this->db->quote($cfg['users']['email'])} ({$this->db->quote($cfg['users']['email'])})
       ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
-      CREATE TABLE IF NOT EXISTS {$cfg['tables']['groups']} (
-        {$cfg['groups']['id']} int(10) unsigned NOT NULL AUTO_INCREMENT,
-        {$cfg['groups']['group']} varchar(100) NOT NULL,
-        {$cfg['groups']['config']} text NOT NULL,
-        PRIMARY KEY ({$cfg['groups']['id']})
+      CREATE TABLE IF NOT EXISTS {$this->db->quote($cfg['tables']['groups'])} (
+        {$this->db->quote($cfg['groups']['id'])} int(10) unsigned NOT NULL AUTO_INCREMENT,
+        {$this->db->quote($cfg['groups']['group'])} varchar(100) NOT NULL,
+        {$this->db->quote($cfg['groups']['config'])} text NOT NULL,
+        PRIMARY KEY ({$this->db->quote($cfg['groups']['id'])})
       ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
-      CREATE TABLE IF NOT EXISTS apst_users_hotlinks (
-        {$cfg['groups']['id']} int(10) unsigned NOT NULL AUTO_INCREMENT,
-        magic_string varchar(64) NOT NULL,
-        id_user int(10) unsigned NOT NULL,
-        expire datetime NOT NULL,
-        PRIMARY KEY (id),
-        KEY id_user (id_user)
+      CREATE TABLE IF NOT EXISTS {$this->db->quote($cfg['tables']['hotlinks'])} (
+        {$this->db->quote($cfg['hotlinks']['id'])} int(10) unsigned NOT NULL AUTO_INCREMENT,
+        {$this->db->quote($cfg['hotlinks']['magic_string'])} varchar(64) NOT NULL,
+        {$this->db->quote($cfg['hotlinks']['id_user'])} int(10) unsigned NOT NULL,
+        {$this->db->quote($cfg['hotlinks']['expire'])} datetime NOT NULL,
+        PRIMARY KEY ({$this->db->quote($cfg['hotlinks']['id'])}),
+        KEY {$this->db->quote($cfg['hotlinks']['id_user'])} ({$this->db->quote($cfg['hotlinks']['id_user'])})
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-      CREATE TABLE IF NOT EXISTS apst_users_mdp (
-        id_user int(10) unsigned NOT NULL,
-        mdp varchar(128) NOT NULL,
-        added datetime NOT NULL,
-        KEY id_user (id_user)
+      CREATE TABLE IF NOT EXISTS {$this->db->quote($cfg['tables']['passwords'])} (
+        {$this->db->quote($cfg['passwords']['id_user'])} int(10) unsigned NOT NULL,
+        {$this->db->quote($cfg['passwords']['pass'])} varchar(128) NOT NULL,
+        {$this->db->quote($cfg['passwords']['added'])} datetime NOT NULL,
+        KEY {$this->db->quote($cfg['passwords']['id_user'])} ({$this->db->quote($cfg['passwords']['id_user'])})
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-      CREATE TABLE IF NOT EXISTS apst_users_sessions (
-        id_user int(10) unsigned NOT NULL,
-        sess_id varchar(128) NOT NULL,
-        ip_address varchar(15),
-        user_agent varchar(255),
-        auth int(1) unsigned NOT NULL,
-        opened int(1) unsigned NOT NULL,
-        last_activity datetime NOT NULL,
-        config text NOT NULL,
-        PRIMARY KEY (id_user,sess_id)
+      CREATE TABLE IF NOT EXISTS {$this->db->quote($cfg['tables']['sessions'])} (
+        {$this->db->quote($cfg['sessions']['id_user'])} int(10) unsigned NOT NULL,
+        {$this->db->quote($cfg['sessions']['sess_id'])} varchar(128) NOT NULL,
+        {$this->db->quote($cfg['sessions']['ip_address'])} varchar(15),
+        {$this->db->quote($cfg['sessions']['user_agent'])} varchar(255),
+        {$this->db->quote($cfg['sessions']['auth'])} int(1) unsigned NOT NULL,
+        {$this->db->quote($cfg['sessions']['opened'])} int(1) unsigned NOT NULL,
+        {$this->db->quote($cfg['sessions']['last_activity'])} datetime NOT NULL,
+        {$this->db->quote($cfg['sessions']['config'])} text NOT NULL,
+        PRIMARY KEY ({$this->db->quote($cfg['sessions']['id_user'])}, {$this->db->quote($cfg['sessions']['sess_id'])})
+        KEY {$this->db->quote($cfg['sessions']['id_user'])} ({$this->db->quote($cfg['sessions']['id_user'])}),
+        KEY {$this->db->quote($cfg['sessions']['sess_id'])} ({$this->db->quote($cfg['sessions']['sess_id'])})
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-      CREATE TABLE IF NOT EXISTS apst_users_usergroups (
-        id_groupe int(10) unsigned NOT NULL,
-        id_utilisateur int(10) unsigned NOT NULL,
-        actif tinyint(1) unsigned NOT NULL DEFAULT '1',
-        PRIMARY KEY (id_groupe,id_utilisateur),
-        KEY id_groupe (id_groupe),
-        KEY id_utilisateur (id_utilisateur)
+      CREATE TABLE IF NOT EXISTS {$this->db->quote($cfg['tables']['usergroups'])} (
+        {$this->db->quote($cfg['usergroups']['id_group'])} int(10) unsigned NOT NULL,
+        {$this->db->quote($cfg['usergroups']['id_user'])} int(10) unsigned NOT NULL,
+        PRIMARY KEY ({$this->db->quote($cfg['usergroups']['id_group'])}, {$this->db->quote($cfg['usergroups']['id_user'])}),
+        KEY {$this->db->quote($cfg['usergroups']['id_group'])} ({$this->db->quote($cfg['usergroups']['id_group'])}),
+        KEY {$this->db->quote($cfg['usergroups']['id_user'])} ({$this->db->quote($cfg['usergroups']['id_user'])})
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-      ALTER TABLE `apst_users_hotlinks`
-        ADD CONSTRAINT apst_users_hotlinks_ibfk_1 FOREIGN KEY (id_user) REFERENCES apst_users (id) ON DELETE CASCADE ON UPDATE NO ACTION;
+      ALTER TABLE {$this->db->quote($cfg['tables']['hotlinks'])}
+        ADD FOREIGN KEY ({$this->db->quote($cfg['hotlinks']['id_user'])})
+          REFERENCES {$this->db->quote($cfg['tables']['users'])} ({$this->db->quote($cfg['users']['id'])})
+            ON DELETE CASCADE ON UPDATE NO ACTION;
 
-      ALTER TABLE `apst_users_mdp`
-        ADD CONSTRAINT apst_users_mdp_ibfk_1 FOREIGN KEY (id_user) REFERENCES apst_users (id) ON DELETE CASCADE ON UPDATE NO ACTION;
+      ALTER TABLE {$this->db->quote($cfg['tables']['passwords'])}
+        ADD FOREIGN KEY ({$this->db->quote($cfg['passwords']['id_user'])})
+          REFERENCES {$this->db->quote($cfg['tables']['users'])} ({$this->db->quote($cfg['users']['id'])})
+            ON DELETE CASCADE ON UPDATE NO ACTION;
 
-      ALTER TABLE `apst_users_sessions`
-        ADD CONSTRAINT apst_users_sessions_ibfk_1 FOREIGN KEY (id_user) REFERENCES apst_users (id) ON DELETE CASCADE ON UPDATE NO ACTION;
+      ALTER TABLE {$this->db->quote($cfg['tables']['sessions'])}
+        ADD FOREIGN KEY ({$this->db->quote($cfg['sessions']['id_user'])})
+          REFERENCES {$this->db->quote($cfg['tables']['users'])} ({$this->db->quote($cfg['users']['id'])})
+            ON DELETE CASCADE ON UPDATE NO ACTION;
 
-      ALTER TABLE `apst_users_usergroups`
-        ADD CONSTRAINT apst_users_usergroups_ibfk_1 FOREIGN KEY (id_groupe) REFERENCES apst_users_groups (id) ON DELETE CASCADE ON UPDATE NO ACTION,
-        ADD CONSTRAINT apst_users_usergroups_ibfk_10 FOREIGN KEY (id_utilisateur) REFERENCES apst_users (id) ON DELETE CASCADE ON UPDATE NO ACTION;";
+      ALTER TABLE {$this->db->quote($cfg['tables']['usergroups'])}
+        ADD FOREIGN KEY ({$this->db->quote($cfg['usergroups']['id_group'])})
+          REFERENCES {$this->db->quote($cfg['tables']['groups'])} ({$this->db->quote($cfg['groups']['id'])})
+            ON DELETE CASCADE ON UPDATE NO ACTION,
+        ADD FOREIGN KEY ({$this->db->quote($cfg['usergroups']['id_user'])})
+          REFERENCES {$this->db->quote($cfg['tables']['users'])} ({$this->db->quote($cfg['users']['id'])})
+            ON DELETE CASCADE ON UPDATE NO ACTION;";
       $db->raw_query($sql);
    }
 
@@ -288,8 +304,7 @@ class connection
     $this->user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
     $this->ip_address = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
 
-    $cfg = \bbn\tools::merge_arrays($cfg, self::$_defaults);
-    
+    $this->cfg = \bbn\tools::merge_arrays(self::$_defaults, $cfg);
     // As we'll give the object the properties of these additional field they should not conflict with existing ones
     foreach ( $this->cfg['additional_fields'] as $f ){
       if ( property_exists($this, $f) ) {
@@ -484,7 +499,13 @@ class connection
         if ( !$this->check_attempts() ){
           return self::set_error(4);
         }
-        if ( $this->_check_password($credentials['pass'], $d['pass']) ){
+        $pass = $this->db->select_one(
+                $this->cfg['tables']['passwords'],
+                $arch['passwords']['pass'],
+                [$arch['passwords']['id_user'] => $this->id],
+                [$arch['passwords']['pass'] => 'DESC'],
+                1);
+        if ( $this->_check_password($credentials['pass'], $pass) ){
           $this->auth = 1;
           $this->_login();
         }

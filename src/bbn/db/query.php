@@ -344,16 +344,14 @@ class query extends \PDOStatement implements actions
 	 */
 	public function get_by_columns()
 	{
-		if ( $this->does_return() )
-		{
-			$r = array();
+		if ( $this->does_return() ){
+			$r = [];
 			$ds = $this->fetchAll(\PDO::FETCH_ASSOC);
-			foreach ( $ds as $d )
-			{
-				foreach ( $d as $k => $v )
-				{
-					if ( !isset($r[$k]) )
-						$r[$k] = array();
+			foreach ( $ds as $d ){
+				foreach ( $d as $k => $v ){
+					if ( !isset($r[$k]) ){
+						$r[$k] = [];
+          }
 					array_push($r[$k],$v);
 				}
 			}
