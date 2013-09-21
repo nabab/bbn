@@ -879,7 +879,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function fetch($query)
 	{
-    if ( $r = $this->query(func_get_args()) ){
+    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       return $r->fetch();
 		}
     return false;
@@ -893,7 +893,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function fetchAll($query)
 	{
-    if ( $r = $this->query(func_get_args()) ){
+    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       return $r->fetchAll();
 		}
     return false;
@@ -910,7 +910,7 @@ class connection extends \PDO implements actions, api, engines
     if ( !is_int($num) ){
       $num = 0;
     }
-    if ( $r = $this->query(func_get_args()) ){
+    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       return $r->fetchColumn($num);
 		}
     return false;
@@ -924,7 +924,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function fetchObject($query)
 	{
-    if ( $r = $this->query(func_get_args()) ){
+    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       return $r->fetchObject();
 		}
     return false;
@@ -937,7 +937,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function get_one()
 	{
-    if ( $r = $this->query(func_get_args()) ){
+    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       return $r->fetchColumn(0);
 		}
     return false;
@@ -954,56 +954,88 @@ class connection extends \PDO implements actions, api, engines
   }
 
 	/**
-	 * @todo Thomas fais ton taf!!
+	 * Returns a row as an array indexed with the fields' names
+	 * Same arguments as query
 	 *
 	 * @return array | false
 	 */
 	public function get_row()
 	{
-    if ( $r = $this->query(func_get_args()) ){
+    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       return $r->get_row();
 		}
     return false;
 	}
 
 	/**
-	 * @todo Thomas fais ton taf!!
-	 *
+	 * Returns an array of rows as arrays indexed with the fields' names
+	 * Same arguments as query
 	 * @return array | false
 	 */
 	public function get_rows()
 	{
-    if ( $r = $this->query(func_get_args()) ){
+    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       return $r->get_rows();
 		}
     return [];
 	}
 
 	/**
-	 * @todo Thomas fais ton taf!!
+	 * Returns a row as a numeric indexed array
+   * Same arguments as query
 	 *
 	 * @return array | false
 	 */
 	public function get_irow()
 	{
-    if ( $r = $this->query(func_get_args()) ){
+    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       return $r->get_irow();
 		}
     return false;
 	}
 
 	/**
-	 * @todo Thomas fais ton taf!!
+	 * Returns an array of numeric indexed rows
+   * Same arguments as query
 	 *
-	 * @return array | false
+	 * @return array
 	 */
 	public function get_irows()
 	{
-    if ( $r = $this->query(func_get_args()) ){
+    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       return $r->get_irows();
 		}
     return [];
 	}
+  
+	/**
+	 * Returns an array with the first field as index and either the second field as value f there is only 2 fields or with an array of the different fields as value if there are more
+   * Same arguments as query
+	 *
+	 * @return array|false
+	 */
+  public function get_key_val()
+  {
+    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
+      $rows = $r->get_rows();
+      if ( count($rows) > 0 ){
+        // At least 2 columns
+        if ( count($rows[0]) > 1 ){
+          $cols = array_keys($rows[0]);
+          $idx = array_shift($cols);
+          $num_cols = count($cols);
+          $res = [];
+          foreach ( $rows as $d ){
+            $index = $d[$idx];
+            unset($d[$idx]);
+            $res[$index] = $num_cols > 1 ? $d : $d[$cols[0]];
+          }
+          return $res;
+        }
+      }
+		}
+    return false;
+  }
 
 	/**
 	 * @todo Thomas fais ton taf!!
@@ -1012,7 +1044,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function get_by_columns()
 	{
-    if ( $r = $this->query(func_get_args()) ){
+    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       return $r->get_by_columns();
 		}
     return false;
@@ -1048,7 +1080,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function get_object()
 	{
-    if ( $r = $this->query(func_get_args()) ){
+    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       return $r->get_object();
 		}
     return false;
@@ -1059,7 +1091,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function get_objects()
 	{
-    if ( $r = $this->query(func_get_args()) ){
+    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       return $r->get_objects();
 		}
     return [];
@@ -1210,19 +1242,30 @@ class connection extends \PDO implements actions, api, engines
 	public function insert($table, array $values, $ignore = false)
 	{
 		$r = false;
-		$hash = $this->make_hash('insert', $table, serialize(array_keys($values)), $ignore);
+    $keys = array_keys($values);
+    if ( isset($keys[0]) && ($keys[0] === 0) ){
+      $keys = array_keys($values[0]);
+    }
+    else{
+      $values = [$values];
+    }
+		$hash = $this->make_hash('insert', $table, serialize($keys), $ignore);
 		if ( isset($this->queries[$hash]) ){
 			$sql = $this->queries[$this->queries[$hash]]['statement'];
 		}
 		else{
-			$sql = $this->language->get_insert($table, array_keys($values), $ignore);
+			$sql = $this->language->get_insert($table, $keys, $ignore);
 		}
-		if ( $sql && ( $this->triggers_disabled || $this->trigger($table, 'insert', 'before', $values) ) ){
-      if ( $r = $this->query($sql, $hash, array_values($values)) ){
-        $this->trigger($table, 'insert', 'after', $values);
+    $affected = 0;
+    foreach ( $values as $vals ){
+      if ( $sql && ( $this->triggers_disabled || $this->trigger($table, 'insert', 'before', $vals) ) ){
+        if ( $r = $this->query($sql, $hash, array_values($vals)) ){
+          $affected += $r;
+          $this->trigger($table, 'insert', 'after', $vals);
+        }
       }
-		}
-		return $r;
+    }
+		return $affected;
 	}
 	
 	/**

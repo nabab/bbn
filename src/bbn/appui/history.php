@@ -245,9 +245,13 @@ class history
           die("The table $table doesn't seem to exist");
         }
         if ( !isset(self::$db->cache['structures'][$table]['keys']['PRIMARY']['columns']) || count(self::$db->cache['structures'][$table]['keys']['PRIMARY']['columns']) !== 1 ){
-          //die("You need to have a primary key on a single column in your table $table in order to use the history class");
+          die("You need to have a primary key on a single column in your table $table in order to use the history class");
         }
-        self::$hstructures[$table] = ['history'=>false, 'fields' => [], 'primary' => $primary = self::$db->cache['structures'][$table]['keys']['PRIMARY']['columns'][0]];
+
+        self::$hstructures[$table] = [
+          'history'=>false,
+          'fields' => [],
+          'primary' => self::$db->cache['structures'][$table]['keys']['PRIMARY']['columns'][0]];
         $cols = self::$db->select_all(self::$admin_db.'.'.self::$prefix.'columns',[],['table' => $table], 'position');
         $s =& self::$hstructures[$table];
         foreach ( $cols as $col ){
@@ -303,7 +307,7 @@ class history
               self::$db->insert(self::$htable, [
                 'operation' => 'INSERT',
                 'line' => $id,
-                'column' => $table.'.'.self::$primary,
+                'column' => $table.'.'.$s['primary'],
                 'old' => '',
                 'last_mod' => $date,
                 'id_user' => self::$huser
@@ -352,7 +356,7 @@ class history
                 self::$db->insert(self::$htable, [
                   'operation' => 'INSERT',
                   'line' => $id,
-                  'column' => $table.'.'.self::$primary,
+                  'column' => $table.'.'.$s['primary'],
                   'old' => '',
                   'last_mod' => $date,
                   'id_user' => self::$huser
