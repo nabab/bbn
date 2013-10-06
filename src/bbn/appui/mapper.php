@@ -825,19 +825,25 @@ class mapper{
 			}
 			foreach ( $schema as $t => $vars ){
 				if ( strpos($t, '.'.$this->prefix) === false ){
-					foreach ( $vars['keys'] as $k => $arr ){
-						$pos = 1;
-						foreach ( $arr['columns'] as $c ){
-							$this->db->insert_update($this->admin_db.'.'.$this->prefix.'keys',[
-								'id' => $t.'.'.$c.'.'.$k,
-								'key' => $k,
-								'column' => $t.'.'.$c,
-								'position' => $pos,
-								'ref_column' => is_null($arr['ref_column']) ? null : $arr['ref_db'].'.'.$arr['ref_table'].'.'.$arr['ref_column']
-							]);
-							$pos++;
-						}
-					}
+          if (is_array($vars['keys']) ){
+            foreach ( $vars['keys'] as $k => $arr ){
+              $pos = 1;
+              foreach ( $arr['columns'] as $c ){
+                $this->db->insert_update($this->admin_db.'.'.$this->prefix.'keys',[
+                  'id' => $t.'.'.$c.'.'.$k,
+                  'key' => $k,
+                  'column' => $t.'.'.$c,
+                  'position' => $pos,
+                  'ref_column' => is_null($arr['ref_column']) ? null : $arr['ref_db'].'.'.$arr['ref_table'].'.'.$arr['ref_column']
+                ]);
+                $pos++;
+              }
+            }
+          }
+          else{
+            \bbn\tools::log($t);
+            \bbn\tools::log($vars['keys']);
+          }
 				}
 			}
       /*

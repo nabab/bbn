@@ -27,6 +27,8 @@ class timer
 	}
 
 	/**
+   * Starts a timer for a given key
+   * 
 	 * @return void 
 	 */
 	public function start($key='default')
@@ -43,7 +45,23 @@ class timer
     }
   }
   
+  /**
+   * Returns true is the timer has started for the given key
+   * 
+	 * @return bool
+	 */
+  public function has_started($key)
+  {
+    if ( isset($this->measures[$key]) ){
+      return isset($this->measures[$key]['start']);
+    }
+    return false;
+  }
+  
+  
 	/**
+   * Stops a timer for a given key
+   * 
 	 * @return void 
 	 */
   public function stop($key='default')
@@ -64,10 +82,13 @@ class timer
   public function result($key='default')
   {
     if ( isset($this->measures[$key]) ){
+      if ( $this->has_started($key) ){
+        $this->stop($key);
+      }
       return [
         'num' => $this->measures[$key]['num'],
-        'total' => $this->measures[$key]['sum'],
-        'average' => $this->measures[$key]['sum'] / $this->measures[$key]['num']
+        'total' => number_format($this->measures[$key]['sum'], 10),
+        'average' => number_format($this->measures[$key]['sum'] / $this->measures[$key]['num'], 10)
       ];
     }
   }

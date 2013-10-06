@@ -92,7 +92,7 @@ class sqlite implements \bbn\db\engines
 	 * @param string $item The item's name (escaped or not)
 	 * @return string | false
 	 */
-	public function escape_name($item)
+	public function escape($item)
 	{
     if ( is_string($item) && ($item = trim($item)) ){
       $items = explode('.', str_replace('"', '', $item));
@@ -483,8 +483,8 @@ class sqlite implements \bbn\db\engines
 						die("The column $c doesn't exist in $table");
 					}
 					else{
-            if ( !is_numeric($k) && \bbn\str\text::check_name($k) ){
-              $r .= '"'.$c.'" AS '.$k.','.PHP_EOL;
+            if ( !is_numeric($k) && \bbn\str\text::check_name($k) && ($k !== $c) ){
+              $r .= '"'.$c.'" AS "'.$k.'",'.PHP_EOL;
             }
             else{
               $r .= '"$c",'.PHP_EOL;

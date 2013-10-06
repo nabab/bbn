@@ -89,7 +89,7 @@ class mysql implements \bbn\db\engines
 	 * @param string $item The item's name (escaped or not)
 	 * @return string | false
 	 */
-	public function escape_name($item)
+	public function escape($item)
 	{
     if ( is_string($item) && ($item = trim($item)) ){
       $items = explode(".", str_replace("`", "", $item));
@@ -378,11 +378,11 @@ class mysql implements \bbn\db\engines
         if ( count($w) >= 3 && in_array(strtolower($w[1]), self::$operators) ){
           // 4 parameters, it's a SQL function, no escaping no binding
           if ( isset($w[3]) ){
-            $st .= 'AND '.$this->escape_name($w[0]).' '.$w[1].' '.$w[2].' ';
+            $st .= 'AND '.$this->escape($w[0]).' '.$w[1].' '.$w[2].' ';
           }
           // 3 parameters, the operator is second item
           else{
-            $st .= 'AND '.$this->escape_name($w[0]).' '.$w[1].' ? ';
+            $st .= 'AND '.$this->escape($w[0]).' '.$w[1].' ? ';
           }
         }
         $st .= PHP_EOL;
@@ -417,7 +417,7 @@ class mysql implements \bbn\db\engines
             $dir = 'ASC';
           }
           if ( !isset($cfg) || isset($cfg['fields'][$col])  ){
-            $r .= $this->escape_name($direction)." $dir," . PHP_EOL;
+            $r .= $this->escape($direction)." $dir," . PHP_EOL;
           }
         }
         else if ( !isset($cfg) || isset($cfg['fields'][$col])  ){
@@ -500,11 +500,11 @@ class mysql implements \bbn\db\engines
 						die("The column $c doesn't exist in $table");
 					}
 					else{
-            if ( !is_numeric($k) && \bbn\str\text::check_name($k) ){
-              $r .= $this->escape_name($c)." AS $k,\n";
+            if ( !is_numeric($k) && \bbn\str\text::check_name($k) && ($k !== $c) ){
+              $r .= "{$this->escape($c)} AS {$this->escape($k)},".PHP_EOL;
             }
             else{
-              $r .= $this->escape_name($c).",\n";
+              $r .= $this->escape($c).",".PHP_EOL;
             }
 					}
 				}
@@ -539,8 +539,7 @@ class mysql implements \bbn\db\engines
 		if ( $php ){
 			$r .= '$db->query("';
 		}
-		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
-		{
+		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 ){
 			$r .= "INSERT ";
 			if ( $ignore ){
 				$r .= "IGNORE ";

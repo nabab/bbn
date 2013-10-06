@@ -272,9 +272,9 @@ class tools
       else if ( is_object($a) || is_array($a) ){
         $r = \bbn\str\text::export($a);
       }
-      $st .= $r;
+      $st .= $r.PHP_EOL;
     }
-    return $st;
+    return PHP_EOL.$st.PHP_EOL;
   }
   
   public static function dump(){

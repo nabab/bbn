@@ -17,10 +17,10 @@ namespace bbn\user;
  * @todo Implement APC Cache for session requests' results?
  */
 if ( !defined('BBN_FINGERPRINT') ) {
-	define('BBN_FINGERPRINT', 'define_me');
+	define('BBN_FINGERPRINT', 'define_me!!');
 }
 if ( !defined('BBN_SESS_NAME') ) {
-	define('BBN_SESS_NAME', 'define_me');
+	define('BBN_SESS_NAME', 'define_me!!!!');
 }
 
 class connection
@@ -149,6 +149,10 @@ class connection
           ];
   
 	protected
+          /** @var array */
+          $groups = [],
+          /** @var array */
+          $permissions = [],
           /** @var string */
           $user_agent,
           /** @var string */
@@ -157,8 +161,6 @@ class connection
           $auth = false,
           /** @var string */
           $sql,
-          /** @var \bbn\db\connection */
-          $db,
           /** @var int */
           $id,
           /** @var mixed */
@@ -174,16 +176,34 @@ class connection
           
 
 	public
-		/** @var mixed */
-		$prev_time;
+          /** @var \bbn\db\connection */
+          $db,
+          /** @var mixed */
+          $prev_time;
 
 
 	/**
 	 * @return string
 	 */
-  private static function _make_fingerprint()
+  public static function make_fingerprint()
   {
     return \bbn\str\text::genpwd(32, 16);
+  }
+  
+	/**
+   * Creates a magic string which will be used for hotlinks
+   * The hash is stored in the database
+   * The key is sent to the user
+   * 
+	 * @return array
+	 */
+  public static function make_magic_string()
+  {
+    $key = self::make_fingerprint();
+    return [
+      'key' => $key,
+      'hash' => hash('sha256', $key)
+    ];
   }
   
 	/**
@@ -204,95 +224,9 @@ class connection
     }
   }
   
-	/**
-	 * @return void 
-	 */
-  protected static function create_tables($cfg, \bbn\db\connection $db) {
-    $cfg = \bbn\tools\merge_arrays($cfg, self::$_defaults);
-    // @todo!!!
-    $sql = "
-      CREATE TABLE IF NOT EXISTS {$this->db->quote($cfg['tables']['users'])} (
-        {$this->db->quote($cfg['users']['id'])} int(10) unsigned NOT NULL AUTO_INCREMENT,
-        {$this->db->quote($cfg['users']['email'])} varchar(100) NOT NULL,".
-        ( $cfg['users']['login'] !== $cfg['users']['email'] ? "
-                {$this->db->quote($cfg['users']['login'])} varchar(35) NOT NULL," : "" )."
-        {$this->db->quote($cfg['users']['config'])} text NOT NULL,
-        PRIMARY KEY ({$this->db->quote($cfg['users']['id'])}),
-        UNIQUE KEY {$this->db->quote($cfg['users']['email'])} ({$this->db->quote($cfg['users']['email'])})
-      ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
-
-      CREATE TABLE IF NOT EXISTS {$this->db->quote($cfg['tables']['groups'])} (
-        {$this->db->quote($cfg['groups']['id'])} int(10) unsigned NOT NULL AUTO_INCREMENT,
-        {$this->db->quote($cfg['groups']['group'])} varchar(100) NOT NULL,
-        {$this->db->quote($cfg['groups']['config'])} text NOT NULL,
-        PRIMARY KEY ({$this->db->quote($cfg['groups']['id'])})
-      ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
-
-      CREATE TABLE IF NOT EXISTS {$this->db->quote($cfg['tables']['hotlinks'])} (
-        {$this->db->quote($cfg['hotlinks']['id'])} int(10) unsigned NOT NULL AUTO_INCREMENT,
-        {$this->db->quote($cfg['hotlinks']['magic_string'])} varchar(64) NOT NULL,
-        {$this->db->quote($cfg['hotlinks']['id_user'])} int(10) unsigned NOT NULL,
-        {$this->db->quote($cfg['hotlinks']['expire'])} datetime NOT NULL,
-        PRIMARY KEY ({$this->db->quote($cfg['hotlinks']['id'])}),
-        KEY {$this->db->quote($cfg['hotlinks']['id_user'])} ({$this->db->quote($cfg['hotlinks']['id_user'])})
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-      CREATE TABLE IF NOT EXISTS {$this->db->quote($cfg['tables']['passwords'])} (
-        {$this->db->quote($cfg['passwords']['id_user'])} int(10) unsigned NOT NULL,
-        {$this->db->quote($cfg['passwords']['pass'])} varchar(128) NOT NULL,
-        {$this->db->quote($cfg['passwords']['added'])} datetime NOT NULL,
-        KEY {$this->db->quote($cfg['passwords']['id_user'])} ({$this->db->quote($cfg['passwords']['id_user'])})
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-      CREATE TABLE IF NOT EXISTS {$this->db->quote($cfg['tables']['sessions'])} (
-        {$this->db->quote($cfg['sessions']['id_user'])} int(10) unsigned NOT NULL,
-        {$this->db->quote($cfg['sessions']['sess_id'])} varchar(128) NOT NULL,
-        {$this->db->quote($cfg['sessions']['ip_address'])} varchar(15),
-        {$this->db->quote($cfg['sessions']['user_agent'])} varchar(255),
-        {$this->db->quote($cfg['sessions']['auth'])} int(1) unsigned NOT NULL,
-        {$this->db->quote($cfg['sessions']['opened'])} int(1) unsigned NOT NULL,
-        {$this->db->quote($cfg['sessions']['last_activity'])} datetime NOT NULL,
-        {$this->db->quote($cfg['sessions']['config'])} text NOT NULL,
-        PRIMARY KEY ({$this->db->quote($cfg['sessions']['id_user'])}, {$this->db->quote($cfg['sessions']['sess_id'])})
-        KEY {$this->db->quote($cfg['sessions']['id_user'])} ({$this->db->quote($cfg['sessions']['id_user'])}),
-        KEY {$this->db->quote($cfg['sessions']['sess_id'])} ({$this->db->quote($cfg['sessions']['sess_id'])})
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-      CREATE TABLE IF NOT EXISTS {$this->db->quote($cfg['tables']['usergroups'])} (
-        {$this->db->quote($cfg['usergroups']['id_group'])} int(10) unsigned NOT NULL,
-        {$this->db->quote($cfg['usergroups']['id_user'])} int(10) unsigned NOT NULL,
-        PRIMARY KEY ({$this->db->quote($cfg['usergroups']['id_group'])}, {$this->db->quote($cfg['usergroups']['id_user'])}),
-        KEY {$this->db->quote($cfg['usergroups']['id_group'])} ({$this->db->quote($cfg['usergroups']['id_group'])}),
-        KEY {$this->db->quote($cfg['usergroups']['id_user'])} ({$this->db->quote($cfg['usergroups']['id_user'])})
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-      ALTER TABLE {$this->db->quote($cfg['tables']['hotlinks'])}
-        ADD FOREIGN KEY ({$this->db->quote($cfg['hotlinks']['id_user'])})
-          REFERENCES {$this->db->quote($cfg['tables']['users'])} ({$this->db->quote($cfg['users']['id'])})
-            ON DELETE CASCADE ON UPDATE NO ACTION;
-
-      ALTER TABLE {$this->db->quote($cfg['tables']['passwords'])}
-        ADD FOREIGN KEY ({$this->db->quote($cfg['passwords']['id_user'])})
-          REFERENCES {$this->db->quote($cfg['tables']['users'])} ({$this->db->quote($cfg['users']['id'])})
-            ON DELETE CASCADE ON UPDATE NO ACTION;
-
-      ALTER TABLE {$this->db->quote($cfg['tables']['sessions'])}
-        ADD FOREIGN KEY ({$this->db->quote($cfg['sessions']['id_user'])})
-          REFERENCES {$this->db->quote($cfg['tables']['users'])} ({$this->db->quote($cfg['users']['id'])})
-            ON DELETE CASCADE ON UPDATE NO ACTION;
-
-      ALTER TABLE {$this->db->quote($cfg['tables']['usergroups'])}
-        ADD FOREIGN KEY ({$this->db->quote($cfg['usergroups']['id_group'])})
-          REFERENCES {$this->db->quote($cfg['tables']['groups'])} ({$this->db->quote($cfg['groups']['id'])})
-            ON DELETE CASCADE ON UPDATE NO ACTION,
-        ADD FOREIGN KEY ({$this->db->quote($cfg['usergroups']['id_user'])})
-          REFERENCES {$this->db->quote($cfg['tables']['users'])} ({$this->db->quote($cfg['users']['id'])})
-            ON DELETE CASCADE ON UPDATE NO ACTION;";
-      $db->raw_query($sql);
-   }
-
-
+  public function get_config(){
+    return $this->cfg;
+  }
   
   /**
 	 * @return \bbn\user\connection 
@@ -352,7 +286,7 @@ class connection
         $_SESSION[$this->cfg['sess_name']] = [];
       }
 
-      $fingerprint = self::_make_fingerprint();
+      $fingerprint = self::make_fingerprint();
       
       $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']] = [
           'id' => $this->id,
@@ -383,11 +317,12 @@ class connection
   }
 
   /**
-	 * @return string|false 
-	 */
-  
-  /*
-   * return \bbn\user\connection
+   * Gathers all the information about a user and puts it in the session
+   * The user's table data can be sent as argument if it has already been fetched
+   * 
+   * @param array $d The user's table data
+   * 
+   * @return \bbn\user\connection
    */
   private function _user_info(array $d=null){
     if ( $this->id ){
@@ -397,6 +332,7 @@ class connection
               $this->fields,
               \bbn\tools::merge_arrays(
                     $this->cfg['conditions'],
+                    [$this->cfg['arch']['users']['status'] => 1],
                     [$this->cfg['arch']['users']['id'] => $this->id]));
       }
       if ( is_array($d) ){
@@ -411,11 +347,67 @@ class connection
         $this->user_config = empty($d['config']) ?
                         ['log_tries' => 0] : json_decode($d['config'], true);
         $this->set_session('config', $this->user_config);
+        // Groups
+        $this->permissions = [];
+        $this->groups = $this->db->get_col_array("
+          SELECT {$this->cfg['arch']['usergroups']['id_group']}
+          FROM {$this->cfg['tables']['usergroups']}
+          WHERE {$this->cfg['arch']['usergroups']['id_user']} = ?",
+          $this->id);
+        foreach ( $this->groups as $gr ){
+          $this->permissions = array_merge(
+                  json_decode(
+                          $this->db->get_val(
+                                  $this->cfg['tables']['groups'],
+                                  $this->cfg['arch']['groups']['config'],
+                                  $this->cfg['arch']['groups']['id'],
+                                  $gr), 1), $this->permissions);
+          
+        }
+        $this->set_session('permissions', $this->permissions);
+        $this->set_session('groups', $this->groups);
       }
     }
     return $this;
   }
   
+  /**
+   * Checks if the user has the given permission
+   * 
+   * @param string $name The name of the permission
+   * 
+   * @return bool
+   */
+  public function has_permission($name){
+    if ( isset($this->permissions['is_admin']) && $this->permissions['is_admin'] ){
+      return 1;
+    }
+    if ( isset($this->permissions[$name]) && $this->permissions[$name] ){
+      return 1;
+    }
+    return false;
+  }
+  
+  /**
+   * Checks if the user has the given permission and dies otherwise
+   * 
+   * @param string $name The name of the permission
+   * 
+   * @return void
+   */
+  public function check_permission($name){
+    if ( !$this->has_permission($name) ){
+      die("You don't have the requested permission ($name)");
+    }
+  }
+  
+  /**
+   * Changes the data in the user's table 
+   * 
+   * @param array $d The new data
+   * 
+   * @return bool
+   */
   public function update_info(array $d)
   {
     if ( $this->check() ){
@@ -432,6 +424,7 @@ class connection
                 [$this->cfg['arch']['users']['id'] => $this->id]);
       }
     }
+    return false;
   }
 
   /*
@@ -489,6 +482,7 @@ class connection
               $this->fields,
               \bbn\tools::merge_arrays(
                     $this->cfg['conditions'],
+                    [$arch['users']['status'] => 1],
                     [$arch['users']['login'] => $credentials['user']])
               ) ){
 
@@ -609,16 +603,6 @@ class connection
     return $this;
   }
   
-  protected function find_sessions($id_user=null)
-  {
-    return $this->db->get_rows("
-      SELECT *
-      FROM {$this->db['cfg']['tables']['sessions']}
-      WHERE {$this->db['cfg']['arch']['sessions']['id_user']} = ?
-        AND {$this->db['cfg']['arch']['sessions']['last_activity']} > DATE_SUB(NOW, INTERVAL {$this->db['cfg']['sess_length']} MINUTES)
-      ", $id_user);
-  }
-
   /*
    * @return bool
    */
@@ -740,7 +724,7 @@ class connection
   }
 
 	/**
-	 * @return void 
+	 * @return boolean
 	 */
 	public function check()
 	{
@@ -769,14 +753,15 @@ class connection
               $this->cfg['fields']['id'],
               $this->id);
       if ( $this->_check_password($old_pass, $stored_pass) ){
-        return $this->db->update(
-                $this->cfg['tables']['users'],
-                [$this->cfg['fields']['pass'] => $this->_crypt($new_pass)],
-                [$this->cfg['fields']['id'] => $this->id]);
+        return $this->db->insert(
+                $this->cfg['tables']['passwords'], [
+                  $this->cfg['fields']['pass'] => $this->_crypt($new_pass),
+                  $this->cfg['fields']['id_user'] => $this->id,
+                  $this->cfg['fields']['added'] => date('Y-m-d H:i:s')], [
+                    $this->cfg['fields']['id'] => $this->id]);
       }
 		}
 		return false;
 	}
 
 }
-?>

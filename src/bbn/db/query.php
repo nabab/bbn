@@ -340,12 +340,12 @@ class query extends \PDOStatement implements actions
 	}
 
 	/**
-	 * @return void 
+	 * @return array 
 	 */
 	public function get_by_columns()
 	{
+    $r = [];
 		if ( $this->does_return() ){
-			$r = [];
 			$ds = $this->fetchAll(\PDO::FETCH_ASSOC);
 			foreach ( $ds as $d ){
 				foreach ( $d as $k => $v ){
@@ -355,9 +355,8 @@ class query extends \PDOStatement implements actions
 					array_push($r[$k],$v);
 				}
 			}
-			return $r;
-		}
-		return false;
+    }
+    return $r;
 	}
 
 	/**

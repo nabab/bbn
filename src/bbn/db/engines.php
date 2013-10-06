@@ -33,7 +33,7 @@ interface engines
 	 * @param string $item The item's name (escaped or not)
 	 * @return string | false
 	 */
-	public function escape_name($item);
+	public function escape($item);
   
 	/**
 	 * Returns a table's full name i.e. database.table

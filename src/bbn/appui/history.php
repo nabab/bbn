@@ -99,24 +99,12 @@ class history
 		}
 	}
 
- /**
-  * This will make the script die if a user has not been configured
-	* @return 1
-	*/
-	private static function check_config()
-	{
-		if ( !isset(self::$huser, self::$htable, self::$db) ){
-      die('One of the key elements has not been configured in history (user? database?)');
-		}
-    return 1;
-	}
-  
   public function get_all_history($table, $start=0, $limit=20){
     $r = [];
     if ( \bbn\str\text::check_name($table) && is_int($start) && is_int($limit) ){
       $r = self::$db->get_rows("
         SELECT DISTINCT(`line`)
-        FROM ".self::$db->escape_name(self::$htable)."
+        FROM ".self::$db->escape(self::$htable)."
         WHERE `column` LIKE ?
         ORDER BY last_mod DESC
         LIMIT $start, $limit",
@@ -130,7 +118,7 @@ class history
     if ( \bbn\str\text::check_name($table) && is_int($start) && is_int($limit) ){
       $r = self::$db->get_rows("
         SELECT DISTINCT(`line`)
-        FROM ".self::$db->escape_name(self::$htable)."
+        FROM ".self::$db->escape(self::$htable)."
         WHERE `column` LIKE ?
         AND ( `operation` LIKE 'INSERT' OR `operation` LIKE 'UPDATE' )
         ORDER BY last_mod DESC
@@ -172,12 +160,12 @@ class history
   }
 	
 	public static function get_history($table, $id){
-    if ( self::check_config() ){
+    if ( self::check($table) ){
       $r = [];
       $args = [$id, self::$db->table_full_name($table).'.%'];
       $q = self::$db->get_row("
         SELECT `last_mod`, `id_user`
-        FROM ".self::$db->escape_name(self::$htable)."
+        FROM ".self::$db->escape(self::$htable)."
         WHERE `line` = ?
         AND `column` LIKE ?
         AND `operation` LIKE 'INSERT'
@@ -192,7 +180,7 @@ class history
       }
       $q = self::$db->get_row("
         SELECT `last_mod`, `id_user`
-        FROM ".self::$db->escape_name(self::$htable)."
+        FROM ".self::$db->escape(self::$htable)."
         WHERE `column` LIKE ?
         AND `line` = ?
         AND `operation` LIKE 'UPDATE'
@@ -207,7 +195,7 @@ class history
       }
       $q = self::$db->get_row("
       SELECT `last_mod`, `id_user`
-      FROM ".self::$db->escape_name(self::$htable)."
+      FROM ".self::$db->escape(self::$htable)."
       WHERE `column` LIKE ?
       AND `line` = ?
       AND `operation` LIKE 'DELETE'
@@ -225,7 +213,7 @@ class history
 	}
 		
 	public static function get_full_history($table, $id){
-    if ( self::check_config() ){
+    if ( self::check($table) ){
       $r = [];
     }
 	}
@@ -235,23 +223,27 @@ class history
 	 * @return table full name
 	 */
 	public static function get_table_cfg($table){
-    if ( self::check_config() ){
+    if ( self::check($table) ){
       $table = self::$db->table_full_name($table);
-      if ( !isset(self::$hstructures[$table]) ){
+      if ( isset(self::$hstructures[$table]) ){
+        return self::$hstructures[$table];
+      }
+      else{
         if ( !isset(self::$db->cache['structures'][$table]) ){
           self::$db->modelize($table);
         }
         if ( !isset(self::$db->cache['structures'][$table]) ){
           die("The table $table doesn't seem to exist");
         }
-        if ( !isset(self::$db->cache['structures'][$table]['keys']['PRIMARY']['columns']) || count(self::$db->cache['structures'][$table]['keys']['PRIMARY']['columns']) !== 1 ){
-          die("You need to have a primary key on a single column in your table $table in order to use the history class");
-        }
 
         self::$hstructures[$table] = [
           'history'=>false,
-          'fields' => [],
-          'primary' => self::$db->cache['structures'][$table]['keys']['PRIMARY']['columns'][0]];
+          'fields' => []
+        ];
+        $s =& self::$hstructures[$table];
+        if ( isset(self::$db->cache['structures'][$table]['keys']['PRIMARY']) && count(self::$db->cache['structures'][$table]['keys']['PRIMARY']['columns']) === 1 ){
+          $s['primary'] = self::$db->cache['structures'][$table]['keys']['PRIMARY']['columns'][0];
+        }
         $cols = self::$db->select_all(self::$admin_db.'.'.self::$prefix.'columns',[],['table' => $table], 'position');
         $s =& self::$hstructures[$table];
         foreach ( $cols as $col ){
@@ -266,32 +258,65 @@ class history
             $s['fields'][$c]['config']['keys'] = (array) $s['fields'][$c]['config']['keys'];
           }
         }
+        return self::$hstructures[$table];
       }
     }
 	}
 	
   public static function add($table, $operation, $date, $values=[], $where=[])
   {
-    if ( self::check_config() && self::$htable !== $table ){
+    if ( self::check($table) ){
       
     }
   }
   
+ /**
+  * This checks if the table is not part of the system's tables and makes the script die if a user has not been configured
+  * 
+	* @return 1
+	*/
+  private static function check($table=null){
+    if ( !empty($table) ){
+      if ( strpos($table, '.') ){
+        $ts = explode('.', $table);
+        $table = end($ts);
+      }
+      if ( strpos($table, self::$prefix) === 0 ){
+        return false;
+      }
+    }
+		if ( !isset(self::$huser, self::$htable, self::$db) ){
+      die('One of the key elements has not been configured in history (user? database?)');
+		}
+    return 1;
+  }
+  
 	/**
-	 * Gets all information about a given table
-	 * @return table full name
+	 * The function used by the \bbn\db\connection trigger
+   * This will basically execute the history query if it's configured for.
+   * 
+   * @param string $table The table for which the history is called
+   * @param string $kind The type of action: select|update|insert|delete
+   * @param string $moment The moment according to the db action: before|after
+   * @param array $values key/value array of fields names and fields values selected/inserted/updated
+   * @param array $where key/value array of fields names and fields values identifying the row
+   * 
+   * @return bool returns true
 	 */
   public static function trigger($table, $kind, $moment, $values=[], $where=[])
   {
-    if ( self::check_config() && self::$htable !== $table ){
+    if ( self::check($table) ){
       $table = self::$db->table_full_name($table);
       
       if ( !isset(self::$hstructures[$table]) ){
         self::get_table_cfg($table);
       }
-      
-      if ( isset(self::$hstructures[$table], self::$hstructures[$table]['history']) && self::$hstructures[$table]['history'] === 1 ){
+      if ( isset(self::$hstructures[$table], self::$hstructures[$table]['history']) && self::$hstructures[$table]['history'] ){
         $s =& self::$hstructures[$table];
+        if ( !isset($s['primary']) ){
+          die("You need to have a primary key on a single column in your table $table in order to use the history class");
+        }
+
         $date = self::$date ? self::$date : date('Y-m-d H:i:s');
         
         if ( (count($values) === 1) && (array_keys($values)[0] === self::$hcol) ){

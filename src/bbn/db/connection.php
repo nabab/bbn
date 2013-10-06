@@ -220,7 +220,7 @@ class connection extends \PDO implements actions, api, engines
 	}
 
 	/**
-	 * @todo Thomas fais ton taf!!
+	 * Launches a function before or after 
 	 * 
 	 * @param $table
 	 * @param $kind
@@ -239,7 +239,7 @@ class connection extends \PDO implements actions, api, engines
       if ( isset($this->triggers[$kind][$moment][$table]) ){
 
         foreach ( $this->triggers[$kind][$moment][$table] as $i => $f ){
-          if (is_callable($f) ){
+          if ( is_callable($f) ){
             if ( !call_user_func_array($f, [$table, $kind, $moment, $values, $where]) ){
               $trig = false;
             }
@@ -251,7 +251,7 @@ class connection extends \PDO implements actions, api, engines
 	}
 	
   /**
-   * Checks if the database if in a state ready to query
+   * Checks if the database is in a state ready to query
    * 
    * @return bool 
    */
@@ -388,15 +388,14 @@ class connection extends \PDO implements actions, api, engines
 	}
   
 	/**
-	 * Returns a table's full name i.e. database.table
+	 * Escape names with the appropriate quotes (db, tables, columns, keys...)
 	 * 
 	 * @param string $table The table's name (escaped or not)
-	 * @param bool $escaped If set to true the returned string will be escaped
-	 * @return string | false
+	 * @return string
 	 */
-	public function escape_name($item)
+	public function escape($item)
 	{
-		return $this->language->escape_name($item);
+		return $this->language->escape($item);
 	}
 
   /**
@@ -463,12 +462,12 @@ class connection extends \PDO implements actions, api, engines
 	}
 	
  /**
-  * @todo Thomas c'est a toi!!
+  * Apply a function each time the methods $kind are used 
 	*
-	* @param $function
-	* @param $kind
-	* @param $moment
-	* @param table
+	* @param callable $function
+	* @param string $kind select|insert|update|delete
+	* @param string $moment before|after
+  * @param string|array table database's table(s) name(s)
 	* @return \bbn\db\connection
 	*/
 	public function set_trigger($function, $kind='', $moment='', $tables='*' )
@@ -526,8 +525,10 @@ class connection extends \PDO implements actions, api, engines
 	}
 	
  /**
-   * @todo Thomas fais ton taf!!
+   * Returns a SQL query based on a configuration (??)
+   * @todo Check the configuration format
 	 *
+   * @param array $cfg Description
 	 * @return string 
 	 */
 	public function create_query($cfg)
@@ -539,10 +540,10 @@ class connection extends \PDO implements actions, api, engines
 	}
 	
 	/**
-	 * @todo Thomas fais ton taf!!
+	 * Parses a SQL query and returns an array
 	 *
-	 * @param $cfg
-	 * @return string 
+	 * @param string $cfg
+	 * @return array 
 	 */
 	public function parse_query($cfg)
 	{
@@ -553,7 +554,7 @@ class connection extends \PDO implements actions, api, engines
 	}
 	
 	/**
-	 * @todo Thomas fais ton taf!!
+	 * Returns the last statement used by a query for this connection
 	 * @return string 
 	 */
 	public function last()
@@ -562,8 +563,8 @@ class connection extends \PDO implements actions, api, engines
 	}
 
 	/**
-	 * @todo Thomas fais ton taf!!
-	 * @return string 
+	 * Returns the last inserted ID
+	 * @return int
 	 */
 	public function last_id()
 	{
@@ -573,13 +574,13 @@ class connection extends \PDO implements actions, api, engines
 		return false;
 	}
 	/**
-	 * @todo Thomas fais ton taf!!
+	 * Adds the specs of a query to the $queries object
 	 *
-	 * @param $hash
-	 * @param $ statement
-	 * @param $ sequences
-	 * @param $placeholders
-	 * @param $ options
+	 * @param string $hash
+	 * @param string $statement
+	 * @param array $sequences
+	 * @param array $placeholders
+	 * @param array $options
 	 */	 
 	private function add_query($hash, $statement, $sequences, $placeholders, $options)
 	{
@@ -598,10 +599,10 @@ class connection extends \PDO implements actions, api, engines
 	}
 	
 	/**
-	 * @todo Thomas fais ton taf!!
+	 * Use the given database
 	 * 
-	 * @param $db
-	 * @return string | false
+	 * @param string $db
+	 * @return \bbn\db\connection
 	 */
 	public function change($db)
 	{
@@ -612,7 +613,9 @@ class connection extends \PDO implements actions, api, engines
 	}
 	
 	/**
-	 * @return database chainable 
+   * Disable foreign keys constraints
+   * 
+	 * @return \bbn\db\connection
 	 */
 	public function disable_keys()
 	{
@@ -621,7 +624,9 @@ class connection extends \PDO implements actions, api, engines
 	}
 
 	/**
-	 * @return database chainable
+   * Enable foreign keys constraints
+   * 
+	 * @return \bbn\db\connection
 	 */
 	public function enable_keys()
 	{
@@ -630,8 +635,9 @@ class connection extends \PDO implements actions, api, engines
 	}
 	
 	/**
-	 * Execute the parent query function
-	 * @return void
+	 * Executes the original PDO query function
+   * 
+	 * @return \PDO::query
 	 */
 	public function raw_query()
 	{
@@ -642,8 +648,9 @@ class connection extends \PDO implements actions, api, engines
   }
   
 	/**
-	 * Executes a query or return a query object in Selection case
-	 * @return void
+	 * Executes a writing statement and returns the number of affected rows or returns a query object for the reading statement
+   * 
+	 * @return int|\bbn\db\query
 	 */
 	public function query()
 	{
@@ -809,12 +816,12 @@ class connection extends \PDO implements actions, api, engines
 	}
 
 	/**
-	 * @todo Thomas fais ton taf!!
+	 * Returns a single value from a request based on arguments
 	 * 
-	 * @param $table
-	 * @param $field_to_get
-	 * @param $field_to_check
-	 * @param $ value
+	 * @param string $table 
+	 * @param string $field_to_get
+	 * @param string|array $field_to_check
+	 * @param string $value
 	 * @return string | false
 	 */
 	public function get_val($table, $field_to_get, $field_to_check='', $value='')
@@ -835,12 +842,12 @@ class connection extends \PDO implements actions, api, engines
 	}
 
 	/**
-	 * @todo Thomas fais ton taf!!
+	 * Returns a single value from a request based on arguments
 	 *
-	 * @param $table
-	 * @param $ field
-	 * @param $id
-	 * @return string | false 
+	 * @param string $table
+	 * @param string $field
+	 * @param string $id
+	 * @return string|false
 	 */
 	public function val_by_id($table, $field, $id, $col='id')
 	{
@@ -851,12 +858,12 @@ class connection extends \PDO implements actions, api, engines
 	}
 
 	/**
-	 * @todo Thomas fais ton taf!!
+	 * Returns an integer candidate for being a new ID in the given table
 	 *
-	 * @param $table
-	 * @param $id_field
-	 * @param $min
-	 * @param $max
+	 * @param string $table
+	 * @param string $id_field
+	 * @param int $min
+	 * @param int $max
 	 * @return int | false
 	 */
 	public function new_id($table, $id_field='id', $min = 11111, $max = 499998999)
@@ -872,10 +879,10 @@ class connection extends \PDO implements actions, api, engines
 	}
 
 	/**
-	 * @todo Thomas fais ton taf!!
+	 * Transposition of the original fetch method, but with the query included. It returns an arra or false if no result
 	 *
-	 * @param $query
-	 * @return array | false
+	 * @param string $query
+	 * @return array|false
 	 */
 	public function fetch($query)
 	{
@@ -886,9 +893,9 @@ class connection extends \PDO implements actions, api, engines
 	}
 
 	/**
-	 * @todo Thomas fais ton taf!!
+	 * Transposition of the original fetchAll method, but with the query included. It returns an arra or false if no result
 	 *
-	 * @param $query
+	 * @param string $query
 	 * @return array | false
 	 */
 	public function fetchAll($query)
@@ -900,7 +907,7 @@ class connection extends \PDO implements actions, api, engines
 	}
 
 	/**
-	 * \PDOStatement::fetchColumn
+	 * Transposition of the original fetchColumn method, but with the query included. It returns an arra or false if no result
 	 *
 	 * @param $query
 	 * @return string | false
@@ -917,7 +924,7 @@ class connection extends \PDO implements actions, api, engines
 	}
 
 	/**
-	 * \PDOStatement::fetchObject
+	 * Transposition of the original fetchColumn method, but with the query included. It returns an arra or false if no result
 	 *
 	 * @param $query
 	 * @return stdClass 
@@ -1038,9 +1045,9 @@ class connection extends \PDO implements actions, api, engines
   }
 
 	/**
-	 * @todo Thomas fais ton taf!!
+	 * Returns an array indexed on the columns in which are all the values
 	 *
-	 * @return array | false 
+	 * @return array
 	 */
 	public function get_by_columns()
 	{
