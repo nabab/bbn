@@ -206,6 +206,12 @@ class connection
     ];
   }
   
+  protected static function is_magic_string($key, $hash)
+  {
+    return ( hash('sha256', $key) === $hash );
+  }
+  
+  
 	/**
 	 * @return string
 	 */
@@ -722,6 +728,30 @@ class connection
       return $this->id;
     }
   }
+  
+  public function expire_hotlink($id){
+    return $this->db->update($this->cfg['tables']['hotlinks'],
+            [$this->cfg['arch']['hotlinks']['expire'] => date('Y-m-d H:i:s')],
+            [$this->cfg['arch']['hotlinks']['id'] => $id]);
+  }
+
+  public function check_magic_string($id, $key)
+  {
+    if ( $val = $this->db->rselect($this->cfg['tables']['hotlinks'], [
+      $this->cfg['arch']['hotlinks']['magic_string'],
+      $this->cfg['arch']['hotlinks']['id_user'],
+      ],[
+        $this->cfg['arch']['hotlinks']['id'] => $id
+            ]) ){
+      if ( self::is_magic_string($key, $val[$this->cfg['arch']['hotlinks']['magic_string']]) ){
+        $this->id = $val['id_user'];
+        $this->_user_info();
+        $this->auth = 1;
+        $this->_login();
+        return $this->id;
+      }
+    }
+  }
 
 	/**
 	 * @return boolean
@@ -745,23 +775,32 @@ class connection
 	 */
 	public function set_password($old_pass, $new_pass)
 	{
-		if ( $this->auth )
-		{
-      $stored_pass = $this->db->get_val(
-              $this->cfg['tables']['users'],
-              $this->cfg['fields']['pass'],
-              $this->cfg['fields']['id'],
-              $this->id);
+		if ( $this->auth ){
+      $stored_pass = $this->db->select_one(
+              $this->cfg['tables']['passwords'],
+              $this->cfg['arch']['passwords']['pass'],
+              [$this->cfg['arch']['passwords']['id_user'] => $this->id],
+              [$this->cfg['arch']['passwords']['added'] => 'DESC']);
       if ( $this->_check_password($old_pass, $stored_pass) ){
-        return $this->db->insert(
-                $this->cfg['tables']['passwords'], [
-                  $this->cfg['fields']['pass'] => $this->_crypt($new_pass),
-                  $this->cfg['fields']['id_user'] => $this->id,
-                  $this->cfg['fields']['added'] => date('Y-m-d H:i:s')], [
-                    $this->cfg['fields']['id'] => $this->id]);
+        return $this->force_password($new_pass);
       }
 		}
 		return false;
 	}
 
+  	/**
+	 * @return boolean 
+	 */
+	public function force_password($pass)
+	{
+		if ( $this->auth )
+		{
+      return $this->db->insert(
+              $this->cfg['tables']['passwords'], [
+                $this->cfg['arch']['passwords']['pass'] => $this->_crypt($pass),
+                $this->cfg['arch']['passwords']['id_user'] => $this->id,
+                $this->cfg['arch']['passwords']['added'] => date('Y-m-d H:i:s')]);
+		}
+		return false;
+	}
 }

@@ -197,10 +197,14 @@ class mvc
       $this->cli = (php_sapi_name() === 'cli');
 			$this->mustache = false;
 			if ( count($_POST) > 0 ){
-				$this->post = $_POST;
+        $this->post = array_map(function($a){
+          return \bbn\str\text::correct_types($a);
+        }, $_POST);
 			}
 			if ( count($_GET) > 0 ){
-				$this->get = $_GET;
+				$this->get = array_map(function($a){
+          return \bbn\str\text::correct_types($a);
+        }, $_GET);
 			}
 			if ( isset($_SERVER['REQUEST_URI']) && 
 			( BBN_CUR_PATH === '' || strpos($_SERVER['REQUEST_URI'],BBN_CUR_PATH) !== false ) ){

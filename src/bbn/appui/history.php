@@ -228,24 +228,21 @@ class history
       if ( isset(self::$hstructures[$table]) ){
         return self::$hstructures[$table];
       }
-      else{
-        if ( !isset(self::$db->cache['structures'][$table]) ){
-          self::$db->modelize($table);
-        }
-        if ( !isset(self::$db->cache['structures'][$table]) ){
-          die("The table $table doesn't seem to exist");
-        }
-
+      else if ( $cfg = self::$db->modelize($table) ){
         self::$hstructures[$table] = [
           'history'=>false,
           'fields' => []
         ];
         $s =& self::$hstructures[$table];
-        if ( isset(self::$db->cache['structures'][$table]['keys']['PRIMARY']) && count(self::$db->cache['structures'][$table]['keys']['PRIMARY']['columns']) === 1 ){
-          $s['primary'] = self::$db->cache['structures'][$table]['keys']['PRIMARY']['columns'][0];
+        if ( isset($cfg['keys']['PRIMARY']) && 
+                (count($cfg['keys']['PRIMARY']['columns']) === 1) ){
+          $s['primary'] = $cfg['keys']['PRIMARY']['columns'][0];
         }
-        $cols = self::$db->select_all(self::$admin_db.'.'.self::$prefix.'columns',[],['table' => $table], 'position');
-        $s =& self::$hstructures[$table];
+        $cols = self::$db->select_all(
+                self::$admin_db.'.'.self::$prefix.'columns',
+                [],
+                ['table' => $table],
+                'position');
         foreach ( $cols as $col ){
           $col = (array) $col;
           $c = $col['column'];
@@ -261,6 +258,7 @@ class history
         return self::$hstructures[$table];
       }
     }
+    return false;
 	}
 	
   public static function add($table, $operation, $date, $values=[], $where=[])

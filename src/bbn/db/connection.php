@@ -46,14 +46,9 @@ class connection extends \PDO implements actions, api, engines
 	 */
 		$has_apc = false,
 	/**
-	 * Default Cache Structure
-	 * @var array
+	 * @var mixed
 	 */
-		$default_cache = [
-      "structures" => [],
-      "tables" => [],
-      "modelized" => []
-    ],
+		$cache = [],
 	/**
 	 * If set to false, query will return a regular PDOStatement
    * Use stop_fancy_stuff() to set it to false
@@ -61,12 +56,16 @@ class connection extends \PDO implements actions, api, engines
 	 * @var bool
 	 */
     $fancy = 1;
-		
+  
 	protected
 	/**
 	 * @var mixed
 	 */
 		$language = false,
+	/**
+	 * @var integer
+	 */
+		$cache_renewal = 600,
 	/**
 	 * @var mixed
 	 */
@@ -74,11 +73,11 @@ class connection extends \PDO implements actions, api, engines
 	/**
 	 * @var mixed
 	 */
-		$hash_contour = '__BBN__',
+		$last_insert_id,
 	/**
-	 * @var string
+	 * @var mixed
 	 */
-		$cache_name,
+		$hash_contour = '__BBN__',
 	/**
 	 * @var mixed
 	 */
@@ -111,10 +110,6 @@ class connection extends \PDO implements actions, api, engines
 	 */
 		$last_query,
 	/**
-	 * @var mixed
-	 */
-		$cache,
-	/**
 	 * The ODBC engine of this connection
 	 * @var string
 	 */
@@ -129,10 +124,6 @@ class connection extends \PDO implements actions, api, engines
 	 * @var mixed
 	 */
 		$current,
-	/**
-	 * @var mixed
-	 */
-		$last_insert_id,
 	/**
 	 * An array of functions for launching triggers on actions
 	 * @var mixed
@@ -175,6 +166,81 @@ class connection extends \PDO implements actions, api, engines
   {
     self::$errorState = 0;
   }
+  
+  private function _cache_name($item, $mode){
+    switch ( $mode ){
+      case 'columns':
+        if ( $this->has_apc ){
+          return "bbn/db/".$this->engine."/".$this->host."/".$item;
+        }
+        break;
+      case 'tables':
+        if ( $this->has_apc ){
+          return "bbn/db/".$this->engine."/".$this->host."/".$item;
+        }
+        break;
+      case 'databases':
+        if ( $this->has_apc ){
+          return "bbn/db/".$this->engine."/".$this->host;
+        }
+        break;
+    }
+    return false;
+  }
+  
+  /**
+	 * Returns the table's structure's array, either from the cache or from _modelize()
+	 *
+	 * @param string $table The table from which the structure is seeked
+	 * @return array|false
+	 */
+  private function _get_cache($item, $mode='columns'){
+    if ( !isset($this->cache[$item]) ){
+      if ( $this->has_apc && ($cache_name = $this->_cache_name($item, $mode)) ){
+        if ( apc_exists($cache_name) ){
+          $tmp = apc_fetch($cache_name);
+          if ( $tmp['time'] > (time() - $this->cache_renewal) ){
+            $this->cache[$item] = $tmp['data'];
+          }
+          else{
+            apc_delete($cache_name);
+          }
+        }
+      }
+      if ( !isset($this->cache[$item]) ){
+        switch ( $mode ){
+          case 'columns':
+            $keys = $this->language->get_keys($item);
+            $cols = $this->language->get_columns($item);
+            if ( is_array($keys) && is_array($cols) ){
+              $tmp = [
+                'keys' => $keys['keys'],
+                'cols' => $keys['cols'],
+                'fields' => $cols
+              ];
+            }
+            break;
+          case 'tables':
+            $tmp = $this->language->get_tables($item);
+            break;
+          case 'databases':
+            $tmp = $this->language->get_databases();
+            break;
+        }
+        if ( $tmp ){
+          $this->cache[$item] = $tmp;
+          if ( $this->has_apc ){
+            apc_store($cache_name, [
+              'data' => $this->cache[$item],
+              'time' => time()
+            ]);
+          }
+        }
+      }
+    }
+    return isset($this->cache[$item]) ? $this->cache[$item] : false;
+  }
+	
   /**
 	 * @todo Thomas fais ton taf!!
 	 *
@@ -229,7 +295,7 @@ class connection extends \PDO implements actions, api, engines
 	 * @param $where
 	 * @return bool
 	 */
-	private function trigger($table, $kind, $moment, $values, $where = [])
+	private function _trigger($table, $kind, $moment, $values, $where = [])
 	{
 		$trig = 1;
 		if ( !empty($this->triggers[$kind][$moment]) ){
@@ -290,16 +356,8 @@ class connection extends \PDO implements actions, api, engines
           $this->engine = $cfg['engine'];
           $this->host = isset($cfg['host']) ? $cfg['host'] : '127.0.0.1';
           $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-          $this->cache_name = "bbn/db/".$this->engine."/".md5($this->host);
           if ( function_exists("apc_add") ){
             $this->has_apc = 1;
-            if ( !apc_exists($this->cache_name) ){
-              $this->cache = $this->default_cache;
-              apc_store($this->cache_name, $this->cache);
-            }
-            else{
-              $this->cache = apc_fetch($this->cache_name);
-            }
           }
           $this->start_fancy_stuff();
           // SQLite has not keys enabled by default
@@ -331,28 +389,31 @@ class connection extends \PDO implements actions, api, engines
   }
   
   /**
-	* Saves the cache prop in APC if possible
+	* Delete a specific item from the cache
 	* 
 	* @return \bbn\db\connection
 	*/
-	protected function save_cache()
+	public function clear_cache($item, $mode)
 	{
     if ( $this->has_apc ){
-      apc_store($this->cache_name, $this->cache);
+      $cache_name = $this->_cache_name($item, $mode);
+      if ( apc_exists($cache_name) ){
+        apc_delete($cache_name);
+      }
     }
+    return $this;
 	}
-
+  
   /**
-	* Saves the cache prop in APC if possible
+	* @todo clear_all_cache() with $this->language->get_databases etc...
 	* 
 	* @return \bbn\db\connection
 	*/
-	public function clear_cache()
+	public function clear_all_cache()
 	{
-    if ( $this->has_apc ){
-      $this->cache = $this->default_cache;
-      apc_store($this->cache_name, $this->cache);
-    }
+    apc_clear_cache();
+    apc_clear_cache("user");
+    return $this;
 	}
 
 	/**
@@ -763,7 +824,8 @@ class connection extends \PDO implements actions, api, engines
         }
         $this->last_query = $q['statement'];
         if ( isset($q['sequences']['DROP']) || isset($q['sequences']['CREATE']) || isset($q['sequences']['ALTER']) ){
-          $this->clear_cache();
+          // A voir
+          //$this->clear_cache();
         }
         try{
           if ( $q['prepared'] && ( isset($q['sequences']['INSERT']) || isset($q['sequences']['UPDATE']) || isset($q['sequences']['DELETE']) || isset($q['sequences']['DROP']) || isset($q['sequences']['ALTER']) || isset($q['sequences']['CREATE']) ) ){
@@ -851,10 +913,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function val_by_id($table, $field, $id, $col='id')
 	{
-    if ( $s = $this->select($table, [$field], [$col => $id]) ){
-      return $s->$col;
-    }
-    return false;
+    return $this->select_one($table, $field, [$col => $id]);
 	}
 
 	/**
@@ -1145,7 +1204,7 @@ class connection extends \PDO implements actions, api, engines
 		}
 		if ( $sql && (
                 $this->triggers_disabled ||
-                $this->trigger(
+                $this->_trigger(
                         $table,
                         'select',
                         'before',
@@ -1158,7 +1217,7 @@ class connection extends \PDO implements actions, api, engines
         $r = $this->query($sql, $hash);
       }
       if ( $r ){
-        $this->trigger($table, 'select', 'after', $fields, $where['keypair']);
+        $this->_trigger($table, 'select', 'after', $fields, $where['keypair']);
       }
       return $r;
     }
@@ -1265,10 +1324,10 @@ class connection extends \PDO implements actions, api, engines
 		}
     $affected = 0;
     foreach ( $values as $vals ){
-      if ( $sql && ( $this->triggers_disabled || $this->trigger($table, 'insert', 'before', $vals) ) ){
+      if ( $sql && ( $this->triggers_disabled || $this->_trigger($table, 'insert', 'before', $vals) ) ){
         if ( $r = $this->query($sql, $hash, array_values($vals)) ){
           $affected += $r;
-          $this->trigger($table, 'insert', 'after', $vals);
+          $this->_trigger($table, 'insert', 'after', $vals);
         }
       }
     }
@@ -1295,15 +1354,15 @@ class connection extends \PDO implements actions, api, engines
 			$sql = substr($sql,0,strrpos($sql,','));
 		}
     $vals = array_merge(array_values($values),array_values($values));
-		if ( $sql && ( $this->triggers_disabled || $this->trigger($table, 'insert', 'before', $values) ) ){
+		if ( $sql && ( $this->triggers_disabled || $this->_trigger($table, 'insert', 'before', $values) ) ){
       $last = $this->last_id();
       $r = $this->query($sql, $hash, $vals);
       if ( $r ){
         if ( $last !== $this->last_id() ){
-          $this->trigger($table, 'insert', 'after', $values);
+          $this->_trigger($table, 'insert', 'after', $values);
         }
         else{
-          $this->trigger($table, 'update', 'after', $values, $values);
+          $this->_trigger($table, 'update', 'after', $values, $values);
         }
       }
 		}
@@ -1324,10 +1383,10 @@ class connection extends \PDO implements actions, api, engines
 		else{
 			$sql = $this->language->get_update($table, array_keys($val), $where['final']);
 		}
-		if ( $sql && ( $this->triggers_disabled || $this->trigger($table, 'update', 'before', $val, $where['keypair']) ) ){
+		if ( $sql && ( $this->triggers_disabled || $this->_trigger($table, 'update', 'before', $val, $where['keypair']) ) ){
       $r = $this->query($sql, $hash, array_merge(array_values($val), $where['values']));
       if ( $r ){
-        $this->trigger($table, 'update', 'after', $val, $where['keypair']);
+        $this->_trigger($table, 'update', 'after', $val, $where['keypair']);
       }
 		}
 		return $r;
@@ -1347,10 +1406,10 @@ class connection extends \PDO implements actions, api, engines
 		else{
 			$sql = $this->language->get_delete($table, $where['final'], $ignore);
 		}
-		if ( $sql && ( $this->triggers_disabled || $this->trigger($table, 'delete', 'before', [], $where['keypair']) ) ){
+		if ( $sql && ( $this->triggers_disabled || $this->_trigger($table, 'delete', 'before', [], $where['keypair']) ) ){
       $r = $this->query($sql, $hash, $where['values']);
       if ( $r ){
-        $this->trigger($table, 'delete', 'after', [], $where['keypair']);
+        $this->_trigger($table, 'delete', 'after', [], $where['keypair']);
       }
 		}
 		return $r;
@@ -1390,34 +1449,10 @@ class connection extends \PDO implements actions, api, engines
 			$tables = $table;
 		}
 		if ( is_array($tables) ){
-      // If we change one value or more there will be to save the cache
-      $change = false;
 			foreach ( $tables as $t ){
-				$full = $this->table_full_name($t);
-        if ( !in_array($full, $this->cache['modelized']) ){
-          array_push($this->cache['modelized'], $full);
-          if ( !isset($this->cache['structures'][$full]['fields']) ){
-            $this->cache['structures'][$full] = [];
-          }
-          $cache =& $this->cache['structures'][$full];
-          if ( !isset($cache['fields']) ){
-            $this->get_columns($full);
-          }
-          if ( !isset($cache['keys']) ){
-            $this->get_keys($full);
-          }
-          foreach ( array_keys($cache['fields']) as $i ){
-            if ( isset($cache['cols'][$i]) && !isset($cache['fields'][$i]['keys']) ){
-              $change = 1;
-              $cache['fields'][$i]['keys'] = $cache['cols'][$i];
-            }
-          }
-        }
-				$r[$full] = $this->cache['structures'][$full];
+        $full = $this->table_full_name($t);
+				$r[$full] = $this->_get_cache($full);
 			}
-      if ( $change ){
-        $this->save_cache();
-      }
 			if ( count($r) === 1 ){
 				return end($r);
 			}
@@ -1431,11 +1466,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function get_databases()
 	{
-    if ( !isset($this->cache['dbs']) ){
-      $this->cache['dbs'] = $this->language->get_databases();
-      $this->save_cache();
-    }
-    return $this->cache['dbs'];
+    return $this->_get_cache('', 'databases');
 	}
 
 	/**
@@ -1446,11 +1477,7 @@ class connection extends \PDO implements actions, api, engines
     if ( empty($database) ){
       $database = $this->current;
     }
-    if ( !isset($this->cache['tables'][$database]) ){
-      $this->cache['tables'][$database] = $this->language->get_tables($database);
-      $this->save_cache();
-    }
-    return $this->cache['tables'][$database];
+    return $this->_get_cache($database, 'tables');
 	}
   
 	/**
@@ -1458,15 +1485,10 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function get_columns($table)
 	{
-    $full = $this->table_full_name($table);
-    if ( !isset($this->cache['structures'][$full]) ){
-      $this->cache['structures'][$full] = [];
+    if ( $tmp = $this->_get_cache($table) ){
+      return $tmp['columns'];
     }
-    if ( !isset($this->cache['structures'][$full]['fields']) ){
-      $this->cache['structures'][$full]['fields'] = $this->language->get_columns($full);
-      $this->save_cache();
-    }
-    return $this->cache['structures'][$full]['fields'];
+    return false;
 	}
 	
 	/**
@@ -1474,20 +1496,13 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function get_keys($table)
 	{
-    $full = $this->table_full_name($table);
-    if ( !isset($this->cache['structures'][$full]) ){
-      $this->cache['structures'][$full] = [];
+    if ( $tmp = $this->_get_cache($table) ){
+      return [
+        "keys" => $tmp['keys'],
+        "cols" => $tmp['cols']
+      ];
     }
-    if ( !isset($this->cache['structures'][$full]['keys']) ){
-      $keys = $this->language->get_keys($full);
-      $this->cache['structures'][$full]['keys'] = $keys['keys'];
-      $this->cache['structures'][$full]['cols'] = $keys['cols'];
-      $this->save_cache();
-    }
-    return [
-        "keys" => $this->cache['structures'][$full]['keys'],
-        "cols" => $this->cache['structures'][$full]['cols']
-    ];
+    return false;
 	}
 	
 	/**

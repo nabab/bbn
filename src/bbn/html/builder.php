@@ -411,7 +411,7 @@ class builder
       array_push($label['content'], $tmp);
       
       $label_content = [
-          'tag' => 'label',
+          'tag' => 'div',
           'css' => [
               'display' => 'block',
               'position' => 'absolute',

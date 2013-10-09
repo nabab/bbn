@@ -269,7 +269,7 @@ class text
 	}
 
 	/**
-   * @param string $st Can take as many arguments and will return false if one of them is not solely made of digits
+   * @param mixed $st Can take as many arguments and will return false if one of them is not a number
 	 * @return bool
 	 */
 	public static function is_number()
@@ -277,16 +277,77 @@ class text
     $args = func_get_args();
     foreach ( $args as $a ){
       if ( is_string($a) ){
-        $a = trim($a);
-        if ( substr($a, 0, 1) === '-' ){
-          $a = substr($a, 1);
+        if ( !preg_match('/^-?(?:\d+|\d*\.\d+)$/', $a) ){
+          return false;
         }
       }
-      if ( !(ctype_digit($a) || is_int($a)) ){
+      else if ( !is_int($a) && !is_float($a) ) {
         return false;
       }
     }
     return 1;
+  }
+  
+	/**
+   * @param mixed $st Can take as many arguments and will return false if one of them is not an integer or the string of an integer
+	 * @return bool
+	 */
+	public static function is_integer()
+	{
+    $args = func_get_args();
+    foreach ( $args as $a ){
+      if ( is_string($a) ){
+        if ( !preg_match('/^-?(\d+)$/', $a) ){
+          return false;
+        }
+      }
+      else if ( !is_int($a) ) {
+        return false;
+      }
+    }
+    return 1;
+  }
+  
+	/**
+   * @param mixed $st Can take as many arguments and will return false if one of them is not a decimal or the string of a decimal (float)
+	 * @return bool
+	 */
+	public static function is_decimal()
+	{
+    $args = func_get_args();
+    foreach ( $args as $a ){
+      if ( is_string($a) ){
+        if ( !preg_match('/^-?(\d*\.\d+)$/', $a) ){
+          return false;
+        }
+      }
+      else if ( !is_float($a) ) {
+        return false;
+      }
+    }
+    return 1;
+  }
+  
+	/**
+   * @param string $st Converts string variables into int or float if it looks like it and returns the argument anyway
+	 * @return mixed
+	 */
+  public static function correct_types($st)
+  {
+    if ( is_string($st) ){
+      if ( self::is_integer($st) ){
+        return (int)$st;
+      }
+      else if ( self::is_decimal($st) ){
+        return (float)$st;
+      }
+    }
+    else if ( is_array($st) ){
+      foreach ( $st as $k => $v ){
+        $st[$k] = self::correct_types($v);
+      }
+    }
+    return $st;
   }
   
   /**
