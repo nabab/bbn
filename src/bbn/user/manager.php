@@ -210,10 +210,11 @@ EOD
     if ( $id_user && (
             !isset($cfg[$this->cfg['arch']['users']['email']]) ||
             \bbn\str\text::is_email($cfg[$this->cfg['arch']['users']['email']]) 
-          ) && $this->db->update(
-                  $this->cfg['tables']['users'],
-                  $cfg,
-                  [$this->cfg['arch']['users']['id'] => $id_user]) ){
+          ) ){
+      $this->db->update(
+        $this->cfg['tables']['users'],
+        $cfg,
+        [$this->cfg['arch']['users']['id'] => $id_user]);
       return $cfg;
     }
 		return false;
