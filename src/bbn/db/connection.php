@@ -22,7 +22,7 @@ class connection extends \PDO implements actions, api, engines
 	private
 	/**
 	 * A PHPSQLParser object
-	 * @var \bbn\db\PHPSQLParser
+	 * @var \PHPSQLParser
 	 */
 		$parser,
 	/**
@@ -607,7 +607,7 @@ class connection extends \PDO implements actions, api, engines
 	public function create_query($cfg)
 	{
 		if ( !isset($this->creator) ){
-			$this->creator = new PHPSQLCreator();
+			$this->creator = new \PHPSQL\Creator();
 		}
 		return $this->creator->create($cfg);
 	}
@@ -621,7 +621,7 @@ class connection extends \PDO implements actions, api, engines
 	public function parse_query($cfg)
 	{
 		if ( !isset($this->parser) ){
-			$this->parser = new PHPSQLParser();
+			$this->parser = new \PHPSQL\Parser();
 		}
 		return $this->parser->parse($cfg);
 	}
