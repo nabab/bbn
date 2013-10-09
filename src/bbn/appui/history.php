@@ -335,7 +335,7 @@ class history
                 'last_mod' => $date,
                 'id_user' => self::$huser
               ]);
-              self::$db->last_insert_id = $id;
+              self::$db->set_last_insert_id($id);
             }
             break;
           case 'restore':
@@ -384,7 +384,7 @@ class history
                   'last_mod' => $date,
                   'id_user' => self::$huser
                 ]);
-                self::$db->last_insert_id = $id;
+                self::$db->set_last_insert_id($id);
               }
               self::$last_rows = false;
             }

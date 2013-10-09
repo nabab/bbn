@@ -458,7 +458,19 @@ class connection extends \PDO implements actions, api, engines
 	{
 		return $this->language->escape($item);
 	}
-
+  
+	/**
+	 * Changes the value of last_insert_id (used by history)
+	 * 
+	 * @param int $id The last ID inserted
+	 * @return \bbn\db\connection
+	 */
+	public function set_last_insert_id($id)
+	{
+		$this->language->escape($item);
+    return $this;
+	}
+  
   /**
 	 * Returns a table's full name i.e. database.table
 	 * 
