@@ -349,10 +349,10 @@ class text
         $st[$k] = self::correct_types($v);
       }
     }
-    else if ( is_object($d) ){
-      $vs = get_object_vars($d);
+    else if ( is_object($st) ){
+      $vs = get_object_vars($st);
       foreach ( $vs as $k => $v ){
-        $d->$k = self::correct_types($v);
+        $st->$k = self::correct_types($v);
       }
 		}
     return $st;

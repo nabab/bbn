@@ -69,26 +69,6 @@ class query extends \PDOStatement implements actions
     return false;
   }
 	
-  private function repair_type($d){
-    if ( is_array($d) ){
-      foreach ( $d as $k => $v ){
-        $d[$k] = $this->repair_type($v);
-      }
-    }
-    else if ( is_object($d) ){
-      foreach ( $d as $k => $v ){
-        $d->$k = $this->repair_type($v);
-      }
-		}
-    else if ( is_string($d) &&
-            \bbn\str\text::is_number($d) &&
-            ( (strpos($d, '0') !== 0) || strlen($d) === 1 ) &&
-            ($d < 2147483647) &&
-            ($d > -2147483647) ){
-      $d = (int)$d;
-    }
-    return $d;
-  }
 	/**
 	 * @return $this 
 	 */
@@ -251,7 +231,7 @@ class query extends \PDOStatement implements actions
 	public function fetch($fetch_style=\PDO::FETCH_BOTH, $cursor_orientation=\PDO::FETCH_ORI_NEXT, $cursor_offset=0)
 	{
 		$this->execute();
-		return $this->repair_type(parent::fetch( $fetch_style, $cursor_orientation, $cursor_offset ));
+		return \bbn\str\text::correct_types(parent::fetch( $fetch_style, $cursor_orientation, $cursor_offset ));
 	}
 
 	/**
@@ -269,7 +249,7 @@ class query extends \PDOStatement implements actions
 		else{
 			$res = parent::fetchAll($fetch_style);
     }
-    return $this->repair_type($res);
+    return \bbn\str\text::correct_types($res);
 	}
 
 	/**
@@ -278,7 +258,7 @@ class query extends \PDOStatement implements actions
 	public function fetchColumn($column_number=0)
 	{
 		$this->execute();
-		return $this->repair_type(parent::fetchColumn($column_number));
+		return \bbn\str\text::correct_types(parent::fetchColumn($column_number));
 	}
 
 	/**
@@ -287,7 +267,7 @@ class query extends \PDOStatement implements actions
 	public function fetchObject($class_name="stdClass", $ctor_args=array())
 	{
 		$this->execute();
-		return $this->repair_type(parent::fetchObject($class_name,$ctor_args));
+		return \bbn\str\text::correct_types(parent::fetchObject($class_name,$ctor_args));
 	}
 
 	/**
