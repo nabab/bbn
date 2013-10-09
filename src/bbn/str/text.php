@@ -339,7 +339,9 @@ class text
         return (int)$st;
       }
       else if ( self::is_decimal($st) ){
-        return (float)$st;
+        if ( substr($st, -1) !== '0' ){
+          return (float)$st;
+        }
       }
     }
     else if ( is_array($st) ){
@@ -347,6 +349,12 @@ class text
         $st[$k] = self::correct_types($v);
       }
     }
+    else if ( is_object($d) ){
+      $vs = get_object_vars($d);
+      foreach ( $vs as $k => $v ){
+        $d->$k = self::correct_types($v);
+      }
+		}
     return $st;
   }
   
