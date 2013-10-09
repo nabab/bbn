@@ -7,7 +7,7 @@ Check out the [Documentation](http://doc.babna.com).
 
 This library includes:
 
-* a Database class, working with mySQL and SQLite: supports database analysis and supports plenty of return modes
+* a Database class, working with mySQL and SQLite: supports database analysis and plenty of return methods
 * a History class allowing to store each change done in the database and revert them
 * files, images, and PDF files manipulation classes
 * HTML generation classes
