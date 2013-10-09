@@ -335,13 +335,11 @@ class text
   public static function correct_types($st)
   {
     if ( is_string($st) ){
-      if ( self::is_integer($st) ){
+      if ( self::is_integer($st) && ((substr($st, 0, 1) !== '0') || ($st === '0')) ){
         return (int)$st;
       }
-      else if ( self::is_decimal($st) ){
-        if ( substr($st, -1) !== '0' ){
-          return (float)$st;
-        }
+      else if ( self::is_decimal($st) && (substr($st, -1) !== '0') && (substr($st, 0, 1) !== '0') ){
+        return (float)$st;
       }
     }
     else if ( is_array($st) ){

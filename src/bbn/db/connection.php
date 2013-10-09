@@ -65,7 +65,7 @@ class connection extends \PDO implements actions, api, engines
 	/**
 	 * @var integer
 	 */
-		$cache_renewal = 600,
+		$cache_renewal = 10,
 	/**
 	 * @var mixed
 	 */
@@ -226,6 +226,9 @@ class connection extends \PDO implements actions, api, engines
           case 'databases':
             $tmp = $this->language->get_databases();
             break;
+        }
+        if ( !isset($tmp) ){
+          die("Erreur avec la table $item ou le mode $mode");
         }
         if ( $tmp ){
           $this->cache[$item] = $tmp;
@@ -1498,7 +1501,7 @@ class connection extends \PDO implements actions, api, engines
 	public function get_columns($table)
 	{
     if ( $tmp = $this->_get_cache($table) ){
-      return $tmp['columns'];
+      return $tmp;
     }
     return false;
 	}

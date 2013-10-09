@@ -296,61 +296,63 @@ class mysql implements \bbn\db\engines
 		}
 		return $r;
 	}
-	
+
 	/**
 	 * @return string
 	 */
 	public function get_keys($table)
 	{
-		if ( $full = $this->table_full_name($table, 1) ){
-			$t = explode(".", $table);
+    $r = [];
+		if ( $full = $this->table_full_name($table) ){
+			$t = explode(".", $full);
 			$db = $t[0];
 			$table = $t[1];
-      if ( $r = $this->db->query("SHOW INDEX FROM `$db`.`$table`") ){
-        $b = $r->get_rows();
-        $keys = array();
-        $cols = array();
-        foreach ( $b as $i => $d ){
-          $a = $this->db->get_row("
-            SELECT `ORDINAL_POSITION` as `position`,
-            `REFERENCED_TABLE_SCHEMA` as `ref_db`, `REFERENCED_TABLE_NAME` as `ref_table`, `REFERENCED_COLUMN_NAME` as `ref_column`
-            FROM `information_schema`.`KEY_COLUMN_USAGE`
-            WHERE `TABLE_SCHEMA` LIKE ?
-            AND `TABLE_NAME` LIKE ?
-            AND `COLUMN_NAME` LIKE ?
-            AND ( `CONSTRAINT_NAME` LIKE ? OR 
-              ( `REFERENCED_TABLE_NAME` IS NOT NULL OR ORDINAL_POSITION = ? )
-            )
-            ORDER BY `REFERENCED_TABLE_NAME` DESC
-            LIMIT 1",
-            $db,
-            $table,
-            $d['Column_name'],
-            $d['Key_name'],
-            $d['Seq_in_index']);
-          if ( !isset($keys[$d['Key_name']]) ){
-            $keys[$d['Key_name']] = array(
-            'columns' => array($d['Column_name']),
-            'ref_db' => $a && $a['ref_db'] ? $a['ref_db'] : null,
-            'ref_table' => $a && $a['ref_table'] ? $a['ref_table'] : null,
-            'ref_column' => $a && $a['ref_column'] ? $a['ref_column'] : null,
-            'unique' => $d['Non_unique'] == 0 ? 1 : 0
-            );
-          }
-          else{
-            array_push($keys[$d['Key_name']]['columns'], $d['Column_name']);
-            $keys[$d['Key_name']]['ref_db'] = $keys[$d['Key_name']]['ref_table'] = $keys[$d['Key_name']]['ref_column'] = null;
-          }
-          if ( !isset($cols[$d['Column_name']]) ){
-            $cols[$d['Column_name']] = array($d['Key_name']);
-          }
-          else{
-            array_push($cols[$d['Column_name']], $d['Key_name']);
-          }
+      $r = [];
+      $b = $this->db->get_rows("SHOW INDEX FROM ".$this->table_full_name($full, 1));
+      $keys = [];
+      $cols = [];
+      foreach ( $b as $i => $d ){
+        $a = $this->db->get_row("
+          SELECT `ORDINAL_POSITION` as `position`,
+          `REFERENCED_TABLE_SCHEMA` as `ref_db`, `REFERENCED_TABLE_NAME` as `ref_table`, `REFERENCED_COLUMN_NAME` as `ref_column`
+          FROM `information_schema`.`KEY_COLUMN_USAGE`
+          WHERE `TABLE_SCHEMA` LIKE ?
+          AND `TABLE_NAME` LIKE ?
+          AND `COLUMN_NAME` LIKE ?
+          AND ( `CONSTRAINT_NAME` LIKE ? OR 
+            ( `REFERENCED_TABLE_NAME` IS NOT NULL OR ORDINAL_POSITION = ? )
+          )
+          ORDER BY `REFERENCED_TABLE_NAME` DESC
+          LIMIT 1",
+          $db,
+          $table,
+          $d['Column_name'],
+          $d['Key_name'],
+          $d['Seq_in_index']);
+        if ( !isset($keys[$d['Key_name']]) ){
+          $keys[$d['Key_name']] = array(
+          'columns' => array($d['Column_name']),
+          'ref_db' => $a && $a['ref_db'] ? $a['ref_db'] : null,
+          'ref_table' => $a && $a['ref_table'] ? $a['ref_table'] : null,
+          'ref_column' => $a && $a['ref_column'] ? $a['ref_column'] : null,
+          'unique' => $d['Non_unique'] == 0 ? 1 : 0
+          );
         }
-        return array('keys'=>$keys, 'cols'=>$cols);
+        else{
+          array_push($keys[$d['Key_name']]['columns'], $d['Column_name']);
+          $keys[$d['Key_name']]['ref_db'] = $keys[$d['Key_name']]['ref_table'] = $keys[$d['Key_name']]['ref_column'] = null;
+        }
+        if ( !isset($cols[$d['Column_name']]) ){
+          $cols[$d['Column_name']] = array($d['Key_name']);
+        }
+        else{
+          array_push($cols[$d['Column_name']], $d['Key_name']);
+        }
       }
-		}
+      $r['keys'] = $keys;
+      $r['cols'] = $cols;
+    }
+    return $r;
 	}
 	
 	/**

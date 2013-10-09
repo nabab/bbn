@@ -300,9 +300,11 @@ class sqlite implements \bbn\db\engines
 	 */
 	public function get_keys($table)
 	{
-		if ( $full = $this->table_full_name($table, 1) ){
-      $keys = array();
-      $cols = array();
+    $r = [];
+		if ( $full = $this->table_full_name($table) ){
+      $r = [];
+      $keys = [];
+      $cols = [];
       $database = $this->db->current === 'main' ? '' : '"'.$this->db->current.'".';
       if ( $indexes = $this->db->get_rows('PRAGMA index_list('.$table.')') ){
         foreach ( $indexes as $d ){
@@ -331,8 +333,10 @@ class sqlite implements \bbn\db\engines
           }
         }
       }
-      return array('keys'=>$keys, 'cols'=>$cols);
+      $r['keys'] = $keys;
+      $r['cols'] = $cols;
 		}
+    return $r;
 	}
 	
 	/**
