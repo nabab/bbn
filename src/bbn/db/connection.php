@@ -467,7 +467,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function set_last_insert_id($id)
 	{
-		$this->language->escape($item);
+		$this->last_insert_id = $id;
     return $this;
 	}
   
