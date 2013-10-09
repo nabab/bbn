@@ -15,6 +15,7 @@
 	"require": {
 		"php": ">=5.4.0",
 		"mustache/mustache": "dev-master",
+		"soundintheory/php-sql-parser": "dev-master",
 		"tedivm/JShrink": "*"
 	},
 	"autoload": {
