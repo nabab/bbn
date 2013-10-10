@@ -16,6 +16,14 @@
 		"php": ">=5.4.0",
 		"mustache/mustache": "dev-master",
 		"soundintheory/php-sql-parser": "dev-master",
+    "mpdf/mpdf": "dev-master",
+    "squizlabs/php_codesniffer": "1.*",
+    "natxet/CssMin": "dev-master",
+    "sunra/php-simple-html-dom-parser": "dev-master",
+    "leafo/lessphp": "0.3.*@dev",
+    "richthegeek/phpsass": "dev-master",
+    "justinrainbow/json-schema": "dev-master",
+    "coffeescript/coffeescript": "dev-master",
 		"tedivm/JShrink": "*"
 	},
 	"autoload": {
