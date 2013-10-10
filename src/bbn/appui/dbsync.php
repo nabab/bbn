@@ -13,8 +13,7 @@ class dbsync
           $db = false,
           $dbs = false,
           $tables = [],
-          $dbs_table = 'dbsync',
-          $actions_triggered = ['insert', 'update', 'delete'];
+          $dbs_table = 'dbsync';
   
   protected static $methods = array();
 
@@ -82,7 +81,12 @@ class dbsync
       }
       self::$db->set_trigger(
             '\\bbn\\appui\\dbsync::trigger',
-            self::$actions_triggered,
+            ['delete'],
+            'before',
+            self::$tables);
+      self::$db->set_trigger(
+            '\\bbn\\appui\\dbsync::trigger',
+            ['update', 'insert'],
             'after',
             self::$tables);
     }
@@ -125,17 +129,36 @@ class dbsync
 	 */
   public static function trigger($table, $kind, $moment, array $values=[], array $where=[])
   {
+    var_dump($table, $kind, $moment);
     self::first_call();
     $stable = self::$db->table_simple_name($table);
-    if ( !self::$disabled && ($moment === 'after') && self::check() && in_array($table, self::$tables) && in_array($kind, self::$actions_triggered) ){
-      if ( ($kind === 'update') && self::$has_history && isset($values[\bbn\appui\history::$hcol]) ){
-        if ( $values[\bbn\appui\history::$hcol] == 0 ){
-          $kind = 'delete';
-          $values = [];
+    if ( !self::$disabled && self::check() && in_array($table, self::$tables) ){
+      if ( $moment === 'before' ){
+        if ( $kind === 'delete' ){
+          \bbn\tools::dump(self::$db->count($table, $where), self::$db->select($table, [], $where), self::$db->count($table, $where), self::$db->get_primary($table));
+          $values = self::$db->select($table, [], $where);
         }
-        else{
-          $kind = 'insert';
-          $values = self::$db->get_row(self::$db->get_insert($table, [], $where));
+        else if ( $kind === 'insert' ){
+          /*
+          \bbn\tools::dump(self::$db->count($table, $where), self::$db->select($table, [], $where), self::$db->count($table, $where), self::$db->get_primary($table));
+          $values = self::$db->select($table, [], $where);
+           * 
+           */
+        }
+      }
+      else if ( $moment === 'after' ){
+        if ( ($kind === 'update') && self::$has_history && isset($values[\bbn\appui\history::$hcol]) ){
+          if ( $values[\bbn\appui\history::$hcol] === 0 ){
+            $kind = 'delete';
+            $values = self::$db->select($table, [], $where);
+          }
+          else{
+            $kind = 'insert';
+            $values = self::$db->select($table, [], $where);
+          }
+        }
+        else if ( $kind === 'insert' ){
+          $values = self::$db->select($table, [], $values);
         }
       }
       self::$dbs->insert(self::$dbs_table, [
@@ -160,21 +183,25 @@ class dbsync
     self::addMethod('cbf2', $f);
   }
   
+  // Looking at the rows from the other DB with status = 0 and setting them to 1
+  // Comparing the new rows with the ones from this DB
+  // Deleting the rows from this DB which have status = 1
   public static function sync(\bbn\db\connection $db, $dbs='', $dbs_table=''){
     self::define($dbs, $dbs_table);
     self::first_call();
     self::disable();
+    
     $r = self::$dbs->query(
-            self::$dbs->get_select(
-                    self::$dbs_table, [], [
-                      ['db', '!=', self::$db->current],
-                      ['state', '<', "2"]
-                    ],[
-                      'rows' => 'ASC',
-                      'moment' => 'ASC'
-                      ]),
-            self::$db->current,
-            2);
+      self::$dbs->get_select(
+        self::$dbs_table, [], [
+          ['db', '!=', self::$db->current],
+          ['state', '=', "0"]
+        ],[
+          'rows' => 'ASC',
+          'moment' => 'ASC'
+        ]),
+        self::$db->current,
+        2);
     $todo = [];
     
     while ( $d = $r->get_row() ){
@@ -183,19 +210,18 @@ class dbsync
       }
       switch ( $d['action'] ){
         case "insert":
-          \bbn\tools::dump(self::$db->insert($d['tab'], json_decode($d['vals'], 1)));
+          self::$db->insert($d['tab'], json_decode($d['vals'], 1));
           break;
         case "update":
-          /*
-          // If it has been deleted before by the current db user
+          // If it has been deleted after by the current db user
           $is_deleted = self::$dbs->rselect(self::$dbs_table, [], [
             ['db', '=', self::$db->current],
             ['tab', '=', $d['tab']],
             ['action', '=', 'delete'],
             ['rows', '=', $d['rows']],
-            ['state', '=', 1]
+            ['moment', '>', $d['moment']]
           ]);
-                          
+          // We undelete 
           $other_updates = self::$dbs->get_rows(
                   self::$dbs->get_select(
                           self::$dbs_table, [], [
@@ -210,18 +236,16 @@ class dbsync
                   'update',
                   $d['rows'],
                   1);
-           * 
-           */
           \bbn\tools::dump(self::$db->update($d['tab'], json_decode($d['vals'], 1), json_decode($d['rows'], 1)));
           break;
         case "delete":
           \bbn\tools::dump(self::$db->delete($d['tab'], json_decode($d['rows'], 1)));
           break;
       }
-      if ( isset(self::$methods['cbf1']) ){
+      if ( isset(self::$methods['cbf2']) ){
         self::cbf2($d);
       }
-      self::$dbs->update(self::$dbs_table, ["state" => 3], ["id" => $d['id']]);
+      self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
     }
     self::enable();
   }

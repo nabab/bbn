@@ -393,7 +393,7 @@ class history
             if ( $moment === 'before' ){
               // Looking for foreign constraints 
               // Nothing is really deleted, the hcol is just set to 0
-              if ( self::$db->query(
+              if ( $r = self::$db->query(
                       self::$db->get_update(
                               $table,
                               [self::$hcol],
@@ -406,6 +406,7 @@ class history
                   'old' => 1,
                   'last_mod' => $date,
                   'id_user' => self::$huser]);
+                return ['trig' => false, 'value' => $r];
                 /* For each value of this key which is deleted (hopefully one)
                 $to_check = self::$db->get_rows("
                   SELECT k.`column` AS id, c1.`column` AS to_change, c2.`column` AS from_change,
@@ -451,7 +452,6 @@ class history
                 }
                  * 
                  */
-                return false;
               }
             }
             break;

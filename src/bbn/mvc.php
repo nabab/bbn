@@ -196,27 +196,48 @@ class mvc
 			$this->routes = $parent;
       $this->cli = (php_sapi_name() === 'cli');
 			$this->mustache = false;
-			if ( count($_POST) > 0 ){
-        $this->post = array_map(function($a){
-          return \bbn\str\text::correct_types($a);
-        }, $_POST);
-			}
-			if ( count($_GET) > 0 ){
-				$this->get = array_map(function($a){
-          return \bbn\str\text::correct_types($a);
-        }, $_GET);
-			}
-			if ( isset($_SERVER['REQUEST_URI']) && 
-			( BBN_CUR_PATH === '' || strpos($_SERVER['REQUEST_URI'],BBN_CUR_PATH) !== false ) ){
-        $url = explode("?", $_SERVER['REQUEST_URI'])[0];
-				$tmp = explode('/', substr($url, strlen(BBN_CUR_PATH)));
-				$num_params = count($tmp);
-				foreach ( $tmp as $t ){
-					if ( !empty($t) ){
-						array_push($this->params,$t);
-					}
-				}
-			}
+      // When using CLI a first parameter can be used as route,
+      // a second JSON encoded can be used as $this->post
+      if ( $this->cli ){
+        global $argv;
+        if ( isset($argv[1]) ){
+          $tmp = explode('/', $argv[1]);
+          $num_params = count($tmp);
+          foreach ( $tmp as $t ){
+            if ( !empty($t) ){
+              array_push($this->params,$t);
+            }
+          }
+          if ( isset($argv[2]) && json_decode($argv[2]) ){
+            $this->post = array_map(function($a){
+              return \bbn\str\text::correct_types($a);
+            }, json_decode($argv[2], 1));
+          }
+        }
+      }
+      else{
+        if ( count($_POST) > 0 ){
+          $this->post = array_map(function($a){
+            return \bbn\str\text::correct_types($a);
+          }, $_POST);
+        }
+        if ( count($_GET) > 0 ){
+          $this->get = array_map(function($a){
+            return \bbn\str\text::correct_types($a);
+          }, $_GET);
+        }
+        if ( isset($_SERVER['REQUEST_URI']) && 
+        ( BBN_CUR_PATH === '' || strpos($_SERVER['REQUEST_URI'],BBN_CUR_PATH) !== false ) ){
+          $url = explode("?", $_SERVER['REQUEST_URI'])[0];
+          $tmp = explode('/', substr($url, strlen(BBN_CUR_PATH)));
+          $num_params = count($tmp);
+          foreach ( $tmp as $t ){
+            if ( !empty($t) ){
+              array_push($this->params,$t);
+            }
+          }
+        }
+      }
 			// If an available mode starts the URL params, it will be picked up
 			if ( count($this->params) > 0 && isset($this->outputs[$this->params[0]]) ){
 				$this->original_mode = $this->params[0];
