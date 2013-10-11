@@ -26,7 +26,7 @@ interface api
 	 * @params 
 	 * @return false|array
 	 */
-	public function select($table, $fields, $where, $order, $limit, $start);
+	public function select($table, $fields, $where, $order, $start);
 
 	/**
 	 * Inserts/Updates rows in the a given table

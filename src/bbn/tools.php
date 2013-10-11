@@ -356,5 +356,20 @@ class tools
     return $min;
   }
   
+  public static function debug($file=''){
+    $debug = array_map(function($a){
+      if ( isset($a['object']) ){
+        unset($a['object']);
+      }
+      return $a;
+    }, debug_backtrace());
+    if ( empty($file) ){
+      self::hdump($debug);
+    }
+    else{
+      self::log($debug, $file);
+    }
+  }
+  
 }
 ?>

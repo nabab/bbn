@@ -192,7 +192,7 @@ class connection extends \PDO implements actions, api, engines
 	 * Returns the table's structure's array, either from the cache or from _modelize()
 	 *
 	 * @param string $table The table from which the structure is seeked
-	 * @return array|false
+	 * @return array | false
 	 */
   private function _get_cache($item, $mode='columns'){
     if ( !isset($this->cache[$item]) ){
@@ -244,6 +244,96 @@ class connection extends \PDO implements actions, api, engines
     return isset($this->cache[$item]) ? $this->cache[$item] : false;
   }
 	
+  /**
+   * 
+   * @param string $type insert, insert_update, update, delete
+   * @param string $table the table name
+   * @param array | string $columns or Where string for delete case
+   * @param string | bool $arg4 Where string or ignore
+   * @return string A SQL statement or false
+   */
+  private function _statement($type, $table, array $keypairs=[], $arg4=[])
+  {
+    switch ( $type ){
+      case 'insert':
+        $hash = $this->make_hash('insert', $table, serialize($keypairs), $arg4);
+        if ( isset($this->queries[$hash]) ){
+          $sql = $this->queries[$this->queries[$hash]]['statement'];
+        }
+        else{
+          $sql = $this->language->get_insert($table, $keypairs, $arg4);
+        }
+        break;
+      case 'insert_update':
+        $hash = $this->make_hash('insert_update', $table, serialize($keypairs));
+        if ( isset($this->queries[$hash]) ){
+          $sql = $this->queries[$this->queries[$hash]]['statement'];
+        }
+        else if ( $sql = $this->language->get_insert($table, $keypairs) ){
+          $sql .= " ON DUPLICATE KEY UPDATE ";
+          foreach ( $keypairs as $c ){
+            $sql .= $this->escape($c)." = ?, ";
+          }
+          $sql = substr($sql,0,strrpos($sql,','));
+        }
+        break;
+      case 'update':
+        $hash = $this->make_hash('update', $table, serialize($keypairs), serialize($arg4['unique']));
+        if ( isset($this->queries[$hash]) ){
+          $sql = $this->queries[$this->queries[$hash]]['statement'];
+        }
+        else{
+          $sql = $this->language->get_update($table, $keypairs, $arg4['final']);
+        }
+        break;
+      case 'delete':
+        $hash = $this->make_hash('delete', $table, serialize($keypairs['unique']), $arg4);
+        if ( isset($this->queries[$hash]) ){
+          $sql = $this->queries[$this->queries[$hash]]['statement'];
+        }
+        else{
+          $sql = $this->language->get_delete($table, $keypairs['final']);
+        }
+        break;
+    }
+    return isset($sql, $hash) ? ['sql' => $sql, 'hash' => $hash] : false;
+  }
+  
+	/**
+	 * @returns a selection query
+	 */
+  private function _sel($table, $fields = array(), $where = array(), $order = false, $limit = 100, $start = 0)
+	{
+    $where = $this->where_cfg($where);
+		$hash = $this->make_hash('select', $table, serialize($fields), $this->get_where($where, $table), serialize($order));
+		if ( isset($this->queries[$hash]) ){
+			$sql = $this->queries[$this->queries[$hash]]['statement'];
+		}
+		else{
+			$sql = $this->language->get_select($table, $fields, $where['final'], $order, $limit);
+		}
+    $values = array_values($fields);
+		if ( $sql && (
+                $this->triggers_disabled ||
+                $this->_trigger(
+                        $table,
+                        'select',
+                        'before',
+                        $values,
+                        $where['keypair']) ) ){
+      if ( count($where['values']) > 0 ){
+        $r = $this->query($sql, $hash, $where['values']);
+      }
+      else{
+        $r = $this->query($sql, $hash);
+      }
+      if ( $r ){
+        $this->_trigger($table, 'select', 'after', $fields, $where['keypair']);
+      }
+      return $r;
+    }
+  }
+  
   /**
 	 * @todo Thomas fais ton taf!!
 	 *
@@ -298,7 +388,7 @@ class connection extends \PDO implements actions, api, engines
 	 * @param $where
 	 * @return bool
 	 */
-	private function _trigger($table, $kind, $moment, $values, $where = [])
+	private function _trigger($table, $kind, $moment, $values, $where=[])
 	{
 		$trig = 1;
 		if ( !empty($this->triggers[$kind][$moment]) ){
@@ -606,7 +696,7 @@ class connection extends \PDO implements actions, api, engines
   
   /** @todo: working only on mysql */
   public function has_id_increment($table){
-    if ( $model = $this->db->modelize($table) ){
+    if ( $model = $this->modelize($table) ){
       if ( isset($model['keys']['PRIMARY']) && 
               (count($model['keys']['PRIMARY']['columns']) === 1) &&
               ($model['fields'][$model['keys']['PRIMARY']['columns'][0]]['extra'] === 'auto_increment') ){
@@ -1184,6 +1274,7 @@ class connection extends \PDO implements actions, api, engines
 	}
 
 	/**
+	 * @todo Thomas fais ton taf!!
 	 * @return void 
 	 */
 	public function get_objects()
@@ -1194,15 +1285,22 @@ class connection extends \PDO implements actions, api, engines
     return [];
 	}
   
+  /**
+	 * @todo Thomas fais ton taf!!
+   * @param type $where
+   * @return type
+   */
   public function where_cfg($where)
   {
     $r = [
         'fields' => [],
         'values' => [],
         'final' => [],
-        'keypair' => []
+        'keypair' => [],
+        'unique' => []
     ];
     if ( is_array($where) && count($where) > 0 ){
+      $i = 0;
       foreach ( $where as $k => $w ){
         // arrays with [ field_name, operator, value]
         if ( is_numeric($k) && is_array($w) && count($w) >= 3 ){
@@ -1218,64 +1316,48 @@ class connection extends \PDO implements actions, api, engines
           $r['keypair'][$k] = $w;
           array_push($r['final'], [$k, '=', $w]);
         }
+        array_push($r['unique'], [$r['final'][$i][0], $r['final'][$i][1]]);
+        $i++;
       }
     }
     return $r;
   }
   
-  public function count($table, $where = array()){
+  /**
+   * Returns the number of records in the table corresponding to the $where parameter (non mandatory)
+   * 
+   * @param string $table
+   * @param array $where
+   * @return int
+   */
+  public function count($table, array $where = []){
+    var_dump($where);
     $where_arr = $this->where_cfg($where);
     $where = $this->get_where($where_arr, $table);
-    $hash = $this->make_hash('count', $table, $where);
-		if ( isset($this->queries[$hash]) ){
-			$sql = $this->queries[$this->queries[$hash]]['statement'];
-		}
-		else{
-			$sql = "SELECT COUNT(*) FROM ".$this->table_full_name($table, 1).$where;
-		}
-    if ( count($where_arr['values']) > 0 ){
-      $r = $this->query($sql, $hash, $where_arr['values']);
-    }
-    else{
-      $r = $this->query($sql, $hash);
-    }
-    return $r->fetchColumn();
-  }
-
-  private function _sel($table, $fields = array(), $where = array(), $order = false, $limit = 100, $start = 0)
-	{
-    $where = $this->where_cfg($where);
-		$hash = $this->make_hash('select', $table, serialize($fields), $this->get_where($where, $table), serialize($order));
-		if ( isset($this->queries[$hash]) ){
-			$sql = $this->queries[$this->queries[$hash]]['statement'];
-		}
-		else{
-			$sql = $this->language->get_select($table, $fields, $where['final'], $order, $limit);
-		}
-		if ( $sql && (
-                $this->triggers_disabled ||
-                $this->_trigger(
-                        $table,
-                        'select',
-                        'before',
-                        array_values($fields),
-                        $where['keypair']) ) ){
-      if ( count($where['values']) > 0 ){
-        $r = $this->query($sql, $hash, $where['values']);
+    if ($table = $this->table_full_name($table, 1) ){
+			$sql = "SELECT COUNT(*) FROM ".$table.$where;
+		  if ( count($where_arr['values']) > 0 ){
+        die(var_dump($where_arr));
+        return call_user_func_array([$this, "get_one"], array_merge([$sql], $where_arr['values']));
       }
       else{
-        $r = $this->query($sql, $hash);
+        return $this->get_one($sql);
       }
-      if ( $r ){
-        $this->_trigger($table, 'select', 'after', $fields, $where['keypair']);
-      }
-      return $r;
     }
+    return false;
   }
-	/**
-	 * @returns a row as an object
-	 */
-	public function select($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
+
+  /**
+   * return a row as an object
+   * 
+   * @param string $table
+   * @param array $fields
+   * @param array $where
+   * @param string|array $order
+   * @param int $start
+   * @return array
+   */
+	public function select($table, $fields = array(), $where = array(), $order = false, $start = 0)
 	{
     if ( $r = $this->_sel($table, $fields, $where, $order, 1, $start) ){
       return $r->get_object();
@@ -1283,10 +1365,17 @@ class connection extends \PDO implements actions, api, engines
     return false;
 	}
 	
-	/**
-	 * @returns a single value
-	 */
-	public function select_one($table, $field, $where = array(), $order = false, $limit = 500, $start = 0)
+  /**
+   * return a single value
+   * 
+   * @param string $table
+   * @param string $field
+   * @param array $where
+   * @param string|array $order
+   * @param int $start
+   * @return array
+   */
+	public function select_one($table, $field, $where = array(), $order = false, $start = 0)
 	{
     if ( $r = $this->_sel($table, [$field], $where, $order, 1, $start) ){
       if ( $res = $r->get_row() ){
@@ -1298,9 +1387,16 @@ class connection extends \PDO implements actions, api, engines
 	}
 
   /**
-	 * @returns a row as an indexed array
-	 */
-	public function rselect($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
+   * return a row as an indexed array
+   * 
+   * @param string $table
+   * @param array $fields
+   * @param array $where
+   * @param string|array $order
+   * @param int $start
+   * @return array
+   */
+	public function rselect($table, $fields = array(), $where = array(), $order = false, $start = 0)
 	{
     if ( $r = $this->_sel($table, $fields, $where, $order, 1, $start) ){
       return $r->get_row();
@@ -1308,10 +1404,17 @@ class connection extends \PDO implements actions, api, engines
     return false;
 	}
 	
-	/**
-	 * @returns a row as a numeric array
-	 */
-	public function iselect($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
+  /**
+   * return a row as a numeric array
+   * 
+   * @param string $table
+   * @param array $fields
+   * @param array $where
+   * @param string|array $order
+   * @param int $start
+   * @return array
+   */
+	public function iselect($table, $fields = array(), $where = array(), $order = false, $start = 0)
 	{
     if ( $r = $this->_sel($table, $fields, $where, $order, 1, $start) ){
       return $r->get_irow();
@@ -1319,9 +1422,17 @@ class connection extends \PDO implements actions, api, engines
     return false;
 	}
 	
-	/**
-	 * @returns rows as an array of objects
-	 */
+  /**
+   * return table's rows as an array of objects
+   * 
+   * @param string $table
+   * @param array $fields
+   * @param array $where
+   * @param string|array $order
+   * @param int $limit
+   * @param int $start
+   * @return array
+   */
 	public function select_all($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
 	{
     if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
@@ -1330,9 +1441,17 @@ class connection extends \PDO implements actions, api, engines
     return [];
 	}
 	
-	/**
-	 * @returns rows as an array of indexed arrays
-	 */
+  /**
+   * return table's rows as an array of indexed arrays
+   * 
+   * @param string $table
+   * @param array $fields
+   * @param array $where
+   * @param string|array $order
+   * @param int $limit
+   * @param int $start
+   * @return array
+   */
 	public function rselect_all($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
 	{
     if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
@@ -1341,9 +1460,17 @@ class connection extends \PDO implements actions, api, engines
     return [];
 	}
 	
-	/**
-	 * @returns rows as an array of numeric arrays
-	 */
+  /**
+   * return table's rows as an array of numeric arrays
+   * 
+   * @param string $table
+   * @param array $fields
+   * @param array $where
+   * @param string|array $order
+   * @param int $limit
+   * @param int $start
+   * @return array
+   */
 	public function iselect_all($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
 	{
     if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
@@ -1352,12 +1479,18 @@ class connection extends \PDO implements actions, api, engines
     return [];
 	}
 	
-	/**
-	 * @return void 
-	 */
+  /**
+   * Inserts row(s) in a table
+   * 
+   * @param string $table
+   * @param array $values
+   * @param bool $ignore
+   * @return int Num affected rows
+   */
 	public function insert($table, array $values, $ignore = false)
 	{
 		$r = false;
+    $trig = 1;
     $keys = array_keys($values);
     if ( isset($keys[0]) && ($keys[0] === 0) ){
       $keys = array_keys($values[0]);
@@ -1365,104 +1498,155 @@ class connection extends \PDO implements actions, api, engines
     else{
       $values = [$values];
     }
-		$hash = $this->make_hash('insert', $table, serialize($keys), $ignore);
-		if ( isset($this->queries[$hash]) ){
-			$sql = $this->queries[$this->queries[$hash]]['statement'];
-		}
-		else{
-			$sql = $this->language->get_insert($table, $keys, $ignore);
-		}
     $affected = 0;
-    foreach ( $values as $vals ){
-      if ( $sql && ( $this->triggers_disabled || ($trig = $this->_trigger($table, 'insert', 'before', $vals)) ) ){
-        if ( !is_array($trig) ){
-          $trig = ['trig' => $trig];
-        }
-        if ( $trig['trig'] ){
-          if ( $r = $this->query($sql, $hash, array_values($vals)) ){
+    if ( $sql = $this->_statement('insert', $table, $keys, $ignore) ){
+      foreach ( $values as $i => $vals ){
+        if ( $this->triggers_disabled ){
+          if ( $r = $this->query($sql['sql'], $sql['hash'], array_values($vals)) ){
             $affected += $r;
-            $this->_trigger($table, 'insert', 'after', $vals);
           }
         }
-        if ( isset($trig['value']) ){
-          $affected = $trig['value'];
+        else{
+          // in case the trigger is called, values might be changed by the callback.
+          // In this case, they will be sent back in the result array as 'values'
+          // Then  the SQL statement needs to be rebuilt
+          $trig = $this->_trigger($table, 'insert', 'before', $vals);
+          if ( !is_array($trig) ){
+            $trig = ['trig' => $trig];
+          }
+          if ( $trig['trig'] ){
+            if ( isset($trig['values']) ){
+              $vals = $trig['values'];
+              if ( !($sql = $this->_statement('insert', $table, array_keys($vals), $ignore)) ){
+                die($this->log(
+                        "Problem with the values returned by the callback function(s)",
+                        $table,
+                        $vals));
+              }
+            }
+            if ( $r = $this->query($sql['sql'], $sql['hash'], array_values($vals)) ){
+              $affected += $r;
+              $this->_trigger($table, 'insert', 'after', $vals);
+            }
+            if ( isset($trig['value']) ){
+              if ( \bbn\str\text::is_integer($trig['value']) ){
+                $affected += $trig['value'];
+              }
+              else{
+                $affected = $trig['value'];
+              }
+            }
+          }
         }
       }
     }
 		return $affected;
 	}
-	
+
 	/**
 	 * @return void 
 	 */
 	public function insert_update($table, array $values)
 	{
 		$r = false;
-		$hash = $this->make_hash('insert_update', $table, serialize(array_keys($values)));
-		if ( isset($this->queries[$hash]) ){
-			$sql = $this->queries[$this->queries[$hash]]['statement'];
-		}
-		else if ( $sql = $this->language->get_insert($table, array_keys($values)) ){
-			$sql .= " ON DUPLICATE KEY UPDATE ";
-			$vals = array_values($values);
-			foreach ( $values as $k => $v ){
-				$sql .= "`$k` = ?, ";
-				array_push($vals, $v);
-			}
-			$sql = substr($sql,0,strrpos($sql,','));
-		}
-    $vals = array_merge(array_values($values),array_values($values));
-		if ( $sql && ( $this->triggers_disabled || ($trig = $this->_trigger($table, 'insert', 'before', $values)) ) ){
-      if ( !is_array($trig) ){
-        $trig = ['trig' => $trig];
-      }
-      if ( $trig['trig'] ){
+    // Twice the arguments
+		if ( $sql = $this->_statement('insert_update', $table, array_keys($values)) ){
+      if ( $this->triggers_disabled ){
+        $vals = array_merge(array_values($values),array_values($values));
         $last = $this->last_id();
-        $r = $this->query($sql, $hash, $vals);
+        $r = $this->query($sql['sql'], $sql['hash'], $vals);
         if ( $r ){
           if ( $last !== $this->last_id() ){
             $this->_trigger($table, 'insert', 'after', $values);
           }
           else{
-            $this->_trigger($table, 'update', 'after', $values, $values);
+            /** @todo There is a flaw here: $values is only partly the where, it should be only the primary and/or the unique keys */
+            $keys = $this->get_keys($table);
+            $upd = [];
+            foreach ( $keys as $k ){
+              if ( isset($values[$k]) ){
+                $upd[$k] = $values[$k];
+              }
+            }
+            $this->_trigger($table, 'update', 'after', $values, $upd);
           }
         }
       }
-      if ( isset($trig['value']) ){
-        $r = $trig['value'];
+      else{
+        $trig = $this->_trigger($table, 'insert', 'before', $values);
+        if ( !is_array($trig) ){
+          $trig = ['trig' => $trig];
+        }
+        if ( $trig['trig'] ){
+          if ( isset($trig['values']) ){
+            $values = $trig['values'];
+            if ( !($sql = $this->_statement('insert_update', $table, array_keys($values))) ){
+              die($this->log(
+                      "Problem with the values returned by the callback function(s)",
+                      $table, $values)
+              );
+            }
+          }
+          $vals = array_merge(array_values($values),array_values($values));
+          $last = $this->last_id();
+          $r = $this->query($sql['sql'], $sql['hash'], $vals);
+          if ( $r ){
+            if ( $last !== $this->last_id() ){
+              $this->_trigger($table, 'insert', 'after', $values);
+            }
+            else{
+              $this->_trigger($table, 'update', 'after', $values, $values);
+            }
+          }
+        }
+        if ( isset($trig['value']) ){
+          $r = $trig['value'];
+        }
       }
 		}
 		return $r;
 	}
 
-	/**
-	 * @return void 
-	 */
-	public function update($table, array $val, array $where)
+  /**
+   * 
+   * @param string $table
+   * @param array $values
+   * @param array $where
+   * @return type
+   */
+	public function update($table, array $values, array $where)
 	{
 		$r = false;
+    $trig = 1;
     $where = $this->where_cfg($where);
-		$hash = $this->make_hash('update', $table, serialize(array_keys($val)), $this->get_where($where, $table));
-		if ( isset($this->queries[$hash]) ){
-			$sql = $this->queries[$this->queries[$hash]]['statement'];
-		}
-		else{
-			$sql = $this->language->get_update($table, array_keys($val), $where['final']);
-		}
-		if ( $sql && ( $this->triggers_disabled || ($trig = $this->_trigger($table, 'update', 'before', $val, $where['keypair'])) ) ){
-      if ( !is_array($trig) ){
-        $trig = ['trig' => $trig];
+    if ( $sql = $this->_statement('update', $table, array_keys($values), $where) ){
+  		if ( $this->triggers_disabled ){
+        $r = $this->query($sql['sql'], $sql['hash'], array_merge(array_values($values), $where['values']));
       }
-      if ( $trig['trig'] ){
-        $r = $this->query($sql, $hash, array_merge(array_values($val), $where['values']));
-        if ( $r ){
-          $this->_trigger($table, 'update', 'after', $val, $where['keypair']);
+      else if ( $trig = $this->_trigger($table, 'update', 'before', $values, $where['keypair']) ){
+        if ( !is_array($trig) ){
+          $trig = ['trig' => $trig];
+        }
+        if ( $trig['trig'] ){
+          if ( isset($trig['values']) ){
+            $values = $trig['values'];
+            if ( !($sql = $this->_statement('update', $table, array_keys($values), $where)) ){
+              die($this->log(
+                      "Problem with the values returned by the callback function(s)",
+                      $table, $values)
+              );
+            }
+          }
+          $r = $this->query($sql['sql'], $sql['hash'], array_merge(array_values($values), $where['values']));
+          if ( $r ){
+            $this->_trigger($table, 'update', 'after', $values, $where['keypair']);
+          }
+        }
+        if ( isset($trig['value']) ){
+          $r = $trig['value'];
         }
       }
 		}
-    if ( isset($trig['value']) ){
-      $r = $trig['value'];
-    }
 		return $r;
 	}
 
@@ -1472,23 +1656,21 @@ class connection extends \PDO implements actions, api, engines
 	public function delete($table, array $where, $ignore = false)
 	{
 		$r = false;
+    $trig = 1;
     $where = $this->where_cfg($where);
-		$hash = $this->make_hash('delete', $table, $this->get_where($where, $table), $ignore);
-		if ( isset($this->queries[$hash]) ){
-			$sql = $this->queries[$this->queries[$hash]]['statement'];
-		}
-		else{
-			$sql = $this->language->get_delete($table, $where['final'], $ignore);
-		}
-		if ( $sql && ( $this->triggers_disabled || ($trig = $this->_trigger($table, 'delete', 'before', [], $where['keypair'])) ) ){
-      var_dump("trig", $trig);
-      if ( !is_array($trig) ){
-        $trig = ['trig' => $trig];
+    if ( $sql = $this->_statement('delete', $table, $where, $ignore) ){
+      if ( $this->triggers_disabled ){
+        $r = $this->query($sql['sql'], $sql['hash'], $where['values']);
       }
-      if ( $trig['trig'] ){
-        $r = $this->query($sql, $hash, $where['values']);
-        if ( $r ){
-          $this->_trigger($table, 'delete', 'after', [], $where['keypair']);
+      else if ( $trig = $this->_trigger($table, 'delete', 'before', [], $where['keypair']) ){
+        if ( !is_array($trig) ){
+          $trig = ['trig' => $trig];
+        }
+        if ( $trig['trig'] ){
+          $r = $this->query($sql['sql'], $sql['hash'], $where['values']);
+          if ( $r ){
+            $this->_trigger($table, 'delete', 'after', [], $where['keypair']);
+          }
         }
       }
       if ( isset($trig['value']) ){
@@ -1498,17 +1680,23 @@ class connection extends \PDO implements actions, api, engines
 		return $r;
 	}
 	
-	/**
-	 * @return void 
-	 */
+  /**
+   * 
+   * @param type $table
+   * @param array $where
+   * @return type
+   */
 	public function delete_ignore($table, array $where)
 	{
     return $this->delete($table, $where, 1);
   }
   
-	/**
-	 * @return void 
-	 */
+  /**
+   * 
+   * @param type $table
+   * @param array $values
+   * @return type
+   */
 	public function insert_ignore($table, array $values)
 	{
 		return $this->insert($table, $values, 1);
@@ -1569,7 +1757,7 @@ class connection extends \PDO implements actions, api, engines
 	public function get_columns($table)
 	{
     if ( $tmp = $this->_get_cache($table) ){
-      return $tmp;
+      return $tmp['fields'];
     }
     return false;
 	}
@@ -1606,6 +1794,35 @@ class connection extends \PDO implements actions, api, engines
     }
     return [];
 	}
+	
+	/**
+	 * @return array | false
+	 */
+	public function get_unique_primary($table)
+	{
+    if ( ($keys = $this->get_keys($table)) &&
+            isset($keys['keys']['PRIMARY']) &&
+            (count($keys['keys']['PRIMARY']['columns']) === 1) ){
+      return $keys['keys']['PRIMARY']['columns'][0];
+    }
+    return false;
+	}
+  
+  /**
+   * @return array
+   */
+  public function get_unique_keys($table)
+  {
+    $fields = [];
+    if ( $ks = $this->db->get_keys($table) ){
+      foreach ( $ks['keys'] as $k ){
+        if ( $k['unique'] === 1 ){
+          $fields = array_merge($fields, $k['columns']);
+        }
+      }
+    }
+    return $fields;
+  }
 	
 	/**
 	 * @return string
@@ -1647,10 +1864,18 @@ class connection extends \PDO implements actions, api, engines
     return $this->language->get_delete($table, $where, $ignore, $php);
 	}
 
-	/**
-	 * @return string
-	 */
-	public function get_select($table, array $fields = array(), array $where = array(), $order = array(), $limit = false, $start = 0, $php = false)
+  /**
+   * 
+   * @param string $table
+   * @param array $fields
+   * @param array $where
+   * @param string | array $order
+   * @param type $limit
+   * @param type $start
+   * @param type $php
+   * @return string
+   */
+	public function get_select($table, array $fields = [], array $where = [], $order = [], $limit = false, $start = 0, $php = false)
 	{
     return $this->language->get_select($table, $fields, $where, $order, $limit, $start, $php);
 	}

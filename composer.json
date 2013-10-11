@@ -27,7 +27,6 @@
 		"tedivm/JShrink": "*"
 	},
 	"autoload": {
-			"psr-0": {"bbn": "src/"}
+	  "psr-0": {"bbn": "src/"}
 	}
 }
-

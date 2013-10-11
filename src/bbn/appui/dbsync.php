@@ -81,7 +81,7 @@ class dbsync
       }
       self::$db->set_trigger(
             '\\bbn\\appui\\dbsync::trigger',
-            ['delete'],
+            ['delete', 'insert'],
             'before',
             self::$tables);
       self::$db->set_trigger(
@@ -129,21 +129,21 @@ class dbsync
 	 */
   public static function trigger($table, $kind, $moment, array $values=[], array $where=[])
   {
-    var_dump($table, $kind, $moment);
     self::first_call();
+    $res = ['trig' => 1];
     $stable = self::$db->table_simple_name($table);
     if ( !self::$disabled && self::check() && in_array($table, self::$tables) ){
       if ( $moment === 'before' ){
         if ( $kind === 'delete' ){
-          \bbn\tools::dump(self::$db->count($table, $where), self::$db->select($table, [], $where), self::$db->count($table, $where), self::$db->get_primary($table));
           $values = self::$db->select($table, [], $where);
         }
         else if ( $kind === 'insert' ){
-          /*
-          \bbn\tools::dump(self::$db->count($table, $where), self::$db->select($table, [], $where), self::$db->count($table, $where), self::$db->get_primary($table));
-          $values = self::$db->select($table, [], $where);
-           * 
-           */
+          if ( self::$db->has_id_increment($table) && 
+                  ($pri = self::$db->get_unique_primary($table)) &&
+                  !isset($values[$pri]) ){
+            $values[$pri] = self::$db->new_id($table);
+            $res['values'] = $values;
+          }
         }
       }
       else if ( $moment === 'after' ){
@@ -170,7 +170,7 @@ class dbsync
         'vals' => json_encode($values)
       ]);
     }
-    return 1;
+    return $res;
   }
   
   public static function callback1(\Closure $f)
@@ -214,7 +214,7 @@ class dbsync
           break;
         case "update":
           // If it has been deleted after by the current db user
-          $is_deleted = self::$dbs->rselect(self::$dbs_table, [], [
+          $is_deleted = self::$dbs->count(self::$dbs_table, [
             ['db', '=', self::$db->current],
             ['tab', '=', $d['tab']],
             ['action', '=', 'delete'],
