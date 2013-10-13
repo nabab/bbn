@@ -20,7 +20,7 @@ use \bbn\str\text;
 class sqlite implements \bbn\db\engines
 {
   private $db;
-	public static $operators=array('!=','=','<>','<','<=','>','>=','like','clike','slike','not','is','is not', 'in','between');
+	public static $operators=array('!=','=','<>','<','<=','>','>=','like','clike','slike','not','is','is not', 'in','between','not like');
   public $qte = '"';
   /**
    * 
@@ -342,40 +342,6 @@ class sqlite implements \bbn\db\engines
 	/**
 	 * @return string
 	 */
-  public function get_where(array $where, $table='')
-  {
-    $st = '';
-    foreach ( $where as $key => $w ){
-      if ( is_numeric($key) && is_array($w) && isset($w[0], $w[1]) ){
-        // 2 parameters, we use equal
-        if ( count($w) === 2 ){
-          $st .= 'AND "'.$w[0].'" = ? ';
-        }
-        else if ( count($w) >= 3 && in_array (strtolower($w[1]), self::$operators) ){
-          // 4 parameters, it's a SQL function, no escaping no binding
-          if ( isset($w[3]) ){
-            $st .= 'AND "'.$w[0].'" '.$w[1].' '.$w[2].' ';
-          }
-          // 3 parameters, the operator is second item
-          else{
-            $st .= 'AND "'.$w[0].'" '.$w[1].' ? ';
-          }
-        }
-      }
-      else if ( is_string($key) ){
-        $st .= 'AND "'.$key.'" = ? ';
-      }
-      $st .= PHP_EOL;
-    }
-    if ( !empty($st) ){
-      return ' WHERE 1'.PHP_EOL.$st;
-    }
-    return '';
-  }
-  
-	/**
-	 * @return string
-	 */
   public function get_order($order, $table = '') {
     if ( is_string($order) ){
       $order = [$order];
@@ -454,13 +420,8 @@ class sqlite implements \bbn\db\engines
 			if ( $php ){
 				$r .= '$db->query(\'';
 			}
-			$r .= 'DELETE '.( $ignore ? 'OR IGNORE ' : '' ).'FROM '.$table.' WHERE 1 ';
-			foreach ( $where as $f ){
-				if ( !isset($m['fields'][$f]) ){
-					die("The fields to search for in get_delete don't correspond to the table");
-				}
-				$r .= PHP_EOL.'AND "'.$f.'" = ? ';
-			}
+			$r .= 'DELETE '.( $ignore ? 'OR IGNORE ' : '' ).
+              'FROM '.$table.$this->db->get_where($where, $table);
 			if ( $php ){
 				$r .= '\');';
 			}
@@ -480,7 +441,7 @@ class sqlite implements \bbn\db\engines
 			if ( $php ){
 				$r .= '$db->query(\'';
 			}
-			$r .= 'SELECT ';
+			$r .= 'SELECT '.PHP_EOL;
 			if ( count($fields) > 0 ){
 				foreach ( $fields as $k => $c ){
 					if ( !isset($m['fields'][$c]) ){
@@ -488,27 +449,27 @@ class sqlite implements \bbn\db\engines
 					}
 					else{
             if ( !is_numeric($k) && \bbn\str\text::check_name($k) && ($k !== $c) ){
-              $r .= '"'.$c.'" AS "'.$k.'",'.PHP_EOL;
+              $r .= "{$this->escape($c)} AS {$this->escape($k)},".PHP_EOL;
             }
             else{
-              $r .= '"$c",'.PHP_EOL;
+              $r .= $this->escape($c).",".PHP_EOL;
             }
 					}
 				}
 			}
 			else{
 				foreach ( array_keys($m['fields']) as $c ){
-          $r .= '"'.$c.'",'.PHP_EOL;
+					$r .= "`$c`,".PHP_EOL;
 				}
 			}
-			$r = substr($r,0,strrpos($r,',')).PHP_EOL.'FROM '.$table.PHP_EOL;
+			$r = substr($r,0,strrpos($r,',')).PHP_EOL."FROM $table";
 			if ( count($where) > 0 ){
-				$r .= $this->get_where($where, $table).PHP_EOL;
-			}
-      $r .= $this->get_order($order, $table);
-			if ( $limit && is_numeric($limit) && is_numeric($start) ){
-				$r .= PHP_EOL.'LIMIT '.$start.', '.$limit;
-			}
+        $r .= $this->db->get_where($where, $table);
+      }
+      $r .= PHP_EOL . $this->get_order($order, $table);
+      if ( $limit ){
+  			$r .= PHP_EOL . $this->get_limit([$limit, $start]);
+      }
 			if ( $php ){
 				$r .= '\');';
 			}
@@ -662,7 +623,7 @@ class sqlite implements \bbn\db\engines
       }
 			$r .= 'SELECT DISTINCT "'.$field.'" FROM '.$table;
 			if ( count($where) > 0 ){
-        $r .= PHP_EOL . $this->get_where($where, $table);
+        $r .= PHP_EOL . $this->db->get_where($where, $table);
       }
       $r .= PHP_EOL . 'ORDER BY "'.$field.'"';
       if ( $limit ){
@@ -694,7 +655,7 @@ class sqlite implements \bbn\db\engines
       }
 			$r .= 'SELECT COUNT(*) AS num, "'.$field.'" AS val FROM '.$table;
 			if ( count($where) > 0 ){
-        $r .= PHP_EOL . $this->get_where($where, $table);
+        $r .= PHP_EOL . $this->db->get_where($where, $table);
       }
       $r .= PHP_EOL . 'GROUP BY "'.$field.'"';
       $r .= PHP_EOL . 'ORDER BY "'.$field.'"';

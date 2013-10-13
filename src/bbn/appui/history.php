@@ -325,7 +325,12 @@ class history
           case 'select':
             break;
           case 'insert':
-            if ( $moment === 'after' ){
+            if ( $moment === 'before' && isset($values[$s['primary']]) ){
+              if ( self::$db->select_one($table, self::$hcol, [$s['primary'] => $values[$s['primary']]]) === 0 ){
+                self::$db->update($table, [self::$hcol=1], [$s['primary'] => $values[$s['primary']]]);
+              }
+            }
+            else if ( $moment === 'after' ){
               $id = self::$db->last_id();
               self::$db->insert(self::$htable, [
                 'operation' => 'INSERT',

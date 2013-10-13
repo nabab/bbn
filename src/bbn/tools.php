@@ -72,7 +72,10 @@ class tools
 				$r .= $st;
       }
 			$r .= "\n\n";
-
+      
+      if ( php_sapi_name() === 'cli' ){
+        echo $r;
+      }
       $s = ( file_exists($log_file) ) ? filesize($log_file) : 0;
 			if ( $s > 1048576 )
 			{

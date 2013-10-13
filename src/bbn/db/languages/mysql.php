@@ -358,48 +358,6 @@ class mysql implements \bbn\db\engines
 	/**
 	 * @return string
 	 */
-  public function get_where(array $where, $table='')
-  {
-    if ( !isset($where['final'], $where['keypair'], $where['values'], $where['fields']) ){
-      $where = $this->db->where_cfg($where);
-    }
-    $st = '';
-    
-		if ( count($where['final']) > 0 ){
-      if ( !empty($table) ){
-        $m = $this->db->modelize($table);
-        if ( !$m || count($m['fields']) === 0 ){
-          /*
-           * @todo  check the fields against the table's model
-           */
-          return $st;
-        }
-      }
-      foreach ( $where['final'] as $w ){
-        // 2 parameters, we use equal
-        if ( count($w) >= 3 && in_array(strtolower($w[1]), self::$operators) ){
-          // 4 parameters, it's a SQL function, no escaping no binding
-          if ( isset($w[3]) ){
-            $st .= 'AND '.$this->escape($w[0]).' '.$w[1].' '.$w[2].' ';
-          }
-          // 3 parameters, the operator is second item
-          else{
-            $st .= 'AND '.$this->escape($w[0]).' '.$w[1].' ? ';
-          }
-        }
-        $st .= PHP_EOL;
-      }
-      if ( !empty($st) ){
-        $st = ' WHERE 1'.PHP_EOL.$st;
-      }
-    }
-    
-    return $st;
-  }
-  
-	/**
-	 * @return string
-	 */
   public function get_order($order, $table = '') {
     if ( is_string($order) ){
       $order = [$order];
@@ -518,7 +476,7 @@ class mysql implements \bbn\db\engines
 			}
 			$r = substr($r,0,strrpos($r,','))."\nFROM $table";
 			if ( count($where) > 0 ){
-        $r .= $this->get_where($where, $table);
+        $r .= $this->db->get_where($where, $table);
       }
       $r .= PHP_EOL . $this->get_order($order, $table);
       if ( $limit ){
@@ -687,7 +645,7 @@ class mysql implements \bbn\db\engines
       }
 			$r .= "SELECT DISTINCT `$field` FROM $table";
 			if ( count($where) > 0 ){
-        $r .= PHP_EOL . $this->get_where($where, $table);
+        $r .= PHP_EOL . $this->db->get_where($where, $table);
       }
       $r .= PHP_EOL . "ORDER BY `$field`";
       if ( $limit ){
@@ -719,7 +677,7 @@ class mysql implements \bbn\db\engines
       }
 			$r .= "SELECT COUNT(*) AS num, `$field` AS val FROM $table";
 			if ( count($where) > 0 ){
-        $r .= PHP_EOL . $this->get_where($where, $table);
+        $r .= PHP_EOL . $this->db->get_where($where, $table);
       }
       $r .= PHP_EOL . "GROUP BY `$field`";
       $r .= PHP_EOL . "ORDER BY `$field`";

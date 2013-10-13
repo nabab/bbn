@@ -1316,7 +1316,12 @@ class connection extends \PDO implements actions, api, engines
           $r['keypair'][$k] = $w;
           array_push($r['final'], [$k, '=', $w]);
         }
-        array_push($r['unique'], [$r['final'][$i][0], $r['final'][$i][1]]);
+        if ( isset($r['final'][$i]) ){
+          array_push($r['unique'], [$r['final'][$i][0], $r['final'][$i][1]]);
+        }
+        else{
+          $this->log("Incorrect where", $where);
+        }
         $i++;
       }
     }
@@ -1331,13 +1336,11 @@ class connection extends \PDO implements actions, api, engines
    * @return int
    */
   public function count($table, array $where = []){
-    var_dump($where);
     $where_arr = $this->where_cfg($where);
     $where = $this->get_where($where_arr, $table);
     if ($table = $this->table_full_name($table, 1) ){
 			$sql = "SELECT COUNT(*) FROM ".$table.$where;
 		  if ( count($where_arr['values']) > 0 ){
-        die(var_dump($where_arr));
         return call_user_func_array([$this, "get_one"], array_merge([$sql], $where_arr['values']));
       }
       else{
@@ -1433,7 +1436,7 @@ class connection extends \PDO implements actions, api, engines
    * @param int $start
    * @return array
    */
-	public function select_all($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
+	public function select_all($table, $fields = array(), $where = array(), $order = false, $limit = 100000, $start = 0)
 	{
     if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
       return $r->get_objects();
@@ -1452,7 +1455,7 @@ class connection extends \PDO implements actions, api, engines
    * @param int $start
    * @return array
    */
-	public function rselect_all($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
+	public function rselect_all($table, $fields = array(), $where = array(), $order = false, $limit = 100000, $start = 0)
 	{
     if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
       return $r->get_rows();
@@ -1471,7 +1474,7 @@ class connection extends \PDO implements actions, api, engines
    * @param int $start
    * @return array
    */
-	public function iselect_all($table, $fields = array(), $where = array(), $order = false, $limit = 500, $start = 0)
+	public function iselect_all($table, $fields = array(), $where = array(), $order = false, $limit = 100000, $start = 0)
 	{
     if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
       return $r->get_irows();
@@ -1824,13 +1827,49 @@ class connection extends \PDO implements actions, api, engines
     return $fields;
   }
 	
-	/**
-	 * @return string
-	 */
-	public function get_where(array $where, $table='')
-	{
-    return $this->language->get_where($where, $table='');
-	}
+/**
+	* Get a string starting with WHERE with corresponding parameters to $where
+	*
+	* @return string
+	*/
+  public function get_where(array $where, $table='')
+  {
+    if ( !isset($where['final'], $where['keypair'], $where['values'], $where['fields']) ){
+      $where = $this->where_cfg($where);
+    }
+    $st = '';
+    
+		if ( count($where['final']) > 0 ){
+      if ( !empty($table) ){
+        $m = $this->modelize($table);
+        if ( !$m || count($m['fields']) === 0 ){
+          /*
+           * @todo  check the fields against the table's model
+           */
+          return $st;
+        }
+      }
+      foreach ( $where['final'] as $w ){
+        // 2 parameters, we use equal
+      if ( count($w) >= 3 && in_array(strtolower($w[1]), eval('return \\bbn\\db\\languages\\'.$this->engine.'::$operators;')) ){
+          // 4 parameters, it's a SQL function, no escaping no binding
+          if ( isset($w[3]) ){
+            $st .= 'AND '.$this->escape($w[0]).' '.$w[1].' '.$w[2].' ';
+          }
+          // 3 parameters, the operator is second item
+          else{
+            $st .= 'AND '.$this->escape($w[0]).' '.$w[1].' ? ';
+          }
+        }
+        $st .= PHP_EOL;
+      }
+      if ( !empty($st) ){
+        $st = ' WHERE 1'.PHP_EOL.$st;
+      }
+    }
+    
+    return $st;
+  }
 	
 	/**
 	 * @return string

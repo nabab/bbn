@@ -44,6 +44,13 @@ class dbsync
     echo __METHOD__ . " was called" . PHP_EOL;
   }
 
+  private static function log(){
+    $args = func_get_args();
+    foreach ( $args as $a ){
+      \bbn\tools::log($a, 'dbsync');
+    }
+  }
+  
   private static function define($dbs, $dbs_table='')
   {
     if ( empty($dbs) ){
@@ -61,6 +68,7 @@ class dbsync
       self::$dbs_table = $dbs_table;
     }
     if ( !\bbn\str\text::check_name(self::$dbs_table) ){
+      self::log("Table name not allowed", self::$dbs_table);
       die("Table name not allowed");
     }
   }
@@ -143,6 +151,7 @@ class dbsync
                   !isset($values[$pri]) ){
             $values[$pri] = self::$db->new_id($table);
             $res['values'] = $values;
+            return $res;
           }
         }
       }
@@ -185,63 +194,146 @@ class dbsync
   
   // Looking at the rows from the other DB with status = 0 and setting them to 1
   // Comparing the new rows with the ones from this DB
-  // Deleting the rows from this DB which have status = 1
+  // Deleting the rows from this DB which have state = 1
   public static function sync(\bbn\db\connection $db, $dbs='', $dbs_table=''){
     self::define($dbs, $dbs_table);
     self::first_call();
     self::disable();
+
+    $start = ( $test = self::$dbs->get_one("
+      SELECT MIN(moment)
+      FROM ".self::$dbs->escape(self::$dbs_table)."
+      WHERE db NOT LIKE ?
+      AND state = 0",
+      self::$db->current) ) ? $test : date('Y-m-d H:i:s');
+    // Deleting the entries prior to this sync we produced and have been seen by the twin process
+    self::$dbs->delete(self::$dbs_table, [
+      ['db', 'LIKE', self::$db->current],
+      ['state', '=', 1],
+      ['moment', '<', $start]
+    ]);
     
-    $r = self::$dbs->query(
-      self::$dbs->get_select(
-        self::$dbs_table, [], [
-          ['db', '!=', self::$db->current],
-          ['state', '=', "0"]
-        ],[
-          'rows' => 'ASC',
-          'moment' => 'ASC'
-        ]),
-        self::$db->current,
-        2);
-    $todo = [];
-    
-    while ( $d = $r->get_row() ){
+    // Selecting the entries inserted
+    $ds = self::$dbs->rselect_all(self::$dbs_table, ['tab', 'rows', 'moment'], [
+      ['db', 'NOT LIKE', self::$db->current],
+      ['state', '=', 0],
+      ['rows', 'NOT LIKE', '[]'],
+      ['action', 'LIKE', 'insert']
+    ], [
+      'moment' => 'ASC',
+    ]);
+    // They just have to be inserted
+    foreach ( $ds as $i => $d ){
       if ( isset(self::$methods['cbf1']) ){
         self::cbf1($d);
       }
-      switch ( $d['action'] ){
-        case "insert":
-          self::$db->insert($d['tab'], json_decode($d['vals'], 1));
-          break;
-        case "update":
-          // If it has been deleted after by the current db user
-          $is_deleted = self::$dbs->count(self::$dbs_table, [
-            ['db', '=', self::$db->current],
-            ['tab', '=', $d['tab']],
-            ['action', '=', 'delete'],
-            ['rows', '=', $d['rows']],
-            ['moment', '>', $d['moment']]
-          ]);
-          // We undelete 
-          $other_updates = self::$dbs->get_rows(
-                  self::$dbs->get_select(
-                          self::$dbs_table, [], [
-                            ['db', '=', self::$db->current],
-                            ['tab', '=', $d['tab']],
-                            ['action', '=', 'update'],
-                            ['rows', '=', $d['rows']],
-                            ['state', '=', 1]]
-                  ),
-                  self::$db->current,
-                  $d['tab'],
-                  'update',
-                  $d['rows'],
-                  1);
-          \bbn\tools::dump(self::$db->update($d['tab'], json_decode($d['vals'], 1), json_decode($d['rows'], 1)));
-          break;
-        case "delete":
-          \bbn\tools::dump(self::$db->delete($d['tab'], json_decode($d['rows'], 1)));
-          break;
+      if ( self::$db->insert($d['tab'], json_decode($d['vals'], 1)) ){
+        if ( isset(self::$methods['cbf2']) ){
+          self::cbf2($d);
+        }
+        self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
       }
+      else{
+        self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
+        self::log("Problem while syncing, check data with status 5 and ID ".$d['id']);
+      }
+    }
+
+    // Selecting the entries modified and deleted in the twin DB,
+    // ordered by table and rows (so the same go together)
+    $ds = self::$dbs->rselect_all(self::$dbs_table, ['tab', 'rows', 'moment'], [
+      ['db', 'NOT LIKE', self::$db->current],
+      ['state', '=', 0],
+      ['rows', 'NOT LIKE', '[]'],
+      ['action', 'NOT LIKE', 'insert']
+    ], [
+      'tab' => 'ASC',
+      'rows' => 'ASC',
+      'moment' => 'ASC',
+    ]);
+    foreach ( $ds as $i => $d ){
+      // Executing the first callback
+      if ( isset(self::$methods['cbf1']) ){
+        self::cbf1($d);
+      }
+      // Proceeding to the actions: delete is before
+      if ( $d['action'] === 'delete' ){
+        if ( self::$db->delete($d['tab'], json_decode($d['rows'], 1)) ){
+          $deleted = 1;
+        }
+        else{
+          self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
+          self::log("Problem while syncing, check data with status 5 and ID ".$d['id']);
+        }
+      }
+      // Checking if there is another change done to this record and when in the twin DB
+      $next_time = (
+              isset($ds[$i+1]) &&
+              ($ds[$i+1]['tab'] === $d['tab']) &&
+              ($ds[$i+1]['rows'] === $d['rows'])
+            ) ? $ds[$i+1]['moment'] : date('Y-m-d H:i:s');
+      // Looking for the actions done on this specific record in our database
+      // between the twin change and the next (or now if there is no other change)
+      $each = self::$dbs->rselect_all(self::$dbs_table, 
+        ['id', 'moment', 'action', 'vals'], [
+          ['db', 'LIKE', self::$db->current],
+          ['tab', 'LIKE', $d['tab']],
+          ['rows', 'LIKE', $d['rows']],
+          ['moment', '>=', $d['moment']],
+          ['moment', '<', $next_time],
+        ]);
+      if ( count($each) > 0 ){
+        self::log("Conflict!", $d);
+        foreach ( $each as $i => $e ){
+          // If it's deleted locally and updated on the twin we restore
+          if ( $e['action'] === 'delete' ){
+            if ( $d['action'] === 'update' ){
+              if ( !(self::$db->insert_update(
+                      $d['tab'], 
+                      \bbn\tools::merge_arrays(
+                              json_decode($e['vals'], 1),
+                              json_decode($d['vals'], 1)
+                      )
+              )) ){
+                self::log("insert_update number 1 had a problem");
+              }
+            }
+          }
+          // If it's updated locally and deleted in the twin we restore
+          else if ( $e['action'] === 'update' ){
+            if ( $d['action'] === 'delete' ){
+              if ( !(self::$db->insert_update(
+                      $d['tab'], 
+                      \bbn\tools::merge_arrays(
+                              json_decode($d['vals'], 1),
+                              json_decode($e['vals'], 1)
+                      )
+              )) ){
+                self::log("insert_update had a problem");
+              }
+            }
+          // If it's updated locally and in the twin we merge the values for the update
+            else if ( $d['action'] === 'update' ){
+              $d['vals'] = json_encode(
+                      \bbn\tools::merge_arrays(
+                              json_decode($d['vals'], 1),
+                              json_decode($e['vals'], 1)
+                      ));
+            }
+          }
+        }
+      }
+      // Proceeding to the actions update is after in case we needed to restore
+      if ( $d['action'] === 'update' ){
+        if ( self::$db->update($d['tab'], json_decode($d['vals'], 1), json_decode($d['rows'], 1)) ){
+          $updated = 1;
+        }
+        else{
+          self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
+          self::log("Problem while syncing, check data with status 5 and ID ".$d['id']);
+        }
+      }
+      // Callback number 2
       if ( isset(self::$methods['cbf2']) ){
         self::cbf2($d);
       }
