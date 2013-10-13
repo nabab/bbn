@@ -207,17 +207,16 @@ class dbsync
       AND state = 0",
       self::$db->current) ) ? $test : date('Y-m-d H:i:s');
     // Deleting the entries prior to this sync we produced and have been seen by the twin process
-    self::$dbs->delete(self::$dbs_table, [
+    self::log("Num delete: ".self::$dbs->delete(self::$dbs_table, [
       ['db', 'LIKE', self::$db->current],
       ['state', '=', 1],
       ['moment', '<', $start]
-    ]);
+    ]));
     
     // Selecting the entries inserted
-    $ds = self::$dbs->rselect_all(self::$dbs_table, ['tab', 'rows', 'moment'], [
+    $ds = self::$dbs->rselect_all(self::$dbs_table, ['id', 'tab', 'vals', 'moment'], [
       ['db', 'NOT LIKE', self::$db->current],
       ['state', '=', 0],
-      ['rows', 'NOT LIKE', '[]'],
       ['action', 'LIKE', 'insert']
     ], [
       'moment' => 'ASC',
@@ -241,7 +240,7 @@ class dbsync
 
     // Selecting the entries modified and deleted in the twin DB,
     // ordered by table and rows (so the same go together)
-    $ds = self::$dbs->rselect_all(self::$dbs_table, ['tab', 'rows', 'moment'], [
+    $ds = self::$dbs->rselect_all(self::$dbs_table, ['id', 'tab', 'action', 'rows', 'vals', 'moment'], [
       ['db', 'NOT LIKE', self::$db->current],
       ['state', '=', 0],
       ['rows', 'NOT LIKE', '[]'],
@@ -259,7 +258,7 @@ class dbsync
       // Proceeding to the actions: delete is before
       if ( $d['action'] === 'delete' ){
         if ( self::$db->delete($d['tab'], json_decode($d['rows'], 1)) ){
-          $deleted = 1;
+          self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
         }
         else{
           self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
@@ -326,7 +325,8 @@ class dbsync
       // Proceeding to the actions update is after in case we needed to restore
       if ( $d['action'] === 'update' ){
         if ( self::$db->update($d['tab'], json_decode($d['vals'], 1), json_decode($d['rows'], 1)) ){
-          $updated = 1;
+          self::log("Entrée: modifiée: ".$d['rows']);
+          self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
         }
         else{
           self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
@@ -337,7 +337,6 @@ class dbsync
       if ( isset(self::$methods['cbf2']) ){
         self::cbf2($d);
       }
-      self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
     }
     self::enable();
   }
