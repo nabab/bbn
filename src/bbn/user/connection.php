@@ -456,11 +456,7 @@ class connection
   
   private function _check_password($pass_given, $pass_stored)
   {
-    $pass_given = \bbn\str\text::escape_squote($pass_given);
-    if ( $this->_crypt($pass_given) ===  $pass_stored ) {
-      return 1;
-    }
-    return false;
+    return ($this->_crypt($pass_given) ===  $pass_stored);
   }
   
   private function _crypt($st){
@@ -503,7 +499,7 @@ class connection
                 $this->cfg['tables']['passwords'],
                 $arch['passwords']['pass'],
                 [$arch['passwords']['id_user'] => $this->id],
-                [$arch['passwords']['pass'] => 'DESC'],
+                [$arch['passwords']['added'] => 'DESC'],
                 1);
         if ( $this->_check_password($credentials['pass'], $pass) ){
           $this->auth = 1;

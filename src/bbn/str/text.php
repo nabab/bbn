@@ -338,7 +338,7 @@ class text
       if ( self::is_integer($st) && ((substr($st, 0, 1) !== '0') || ($st === '0')) ){
         return (int)$st;
       }
-      else if ( self::is_decimal($st) && (substr($st, -1) !== '0') && (substr($st, 0, 1) !== '0') ){
+      else if ( self::is_decimal($st) && (substr($st, 0, 1) !== '0') ){
         return (float)$st;
       }
     }

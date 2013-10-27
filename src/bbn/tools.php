@@ -287,7 +287,7 @@ class tools
   
   public static function hdump(){
     $args = func_get_args();
-    echo '<p style="white-space:pre">'.call_user_func_array('self::get_dump', func_get_args()).'</p>';
+    echo '<p style="white-space:pre">'.htmlentities(call_user_func_array('self::get_dump', func_get_args())).'</p>';
     
   }
 
