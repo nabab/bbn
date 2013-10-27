@@ -325,7 +325,6 @@ class dbsync
       // Proceeding to the actions update is after in case we needed to restore
       if ( $d['action'] === 'update' ){
         if ( self::$db->update($d['tab'], json_decode($d['vals'], 1), json_decode($d['rows'], 1)) ){
-          self::log("Entrée: modifiée: ".$d['rows']);
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
         }
         else{
