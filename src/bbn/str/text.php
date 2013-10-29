@@ -30,6 +30,14 @@ class text
     return (string)$st;
   }
   
+  public static function is_json($st){
+    if ( empty($st) ){
+      return false;
+    }
+    json_decode($string);
+    return (json_last_error() == JSON_ERROR_NONE);
+  }
+  
 	public static function escape_dquotes($st)
 	{
     return addcslashes(self::cast($st), "\"\\\r\n\t");
