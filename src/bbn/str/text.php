@@ -336,7 +336,10 @@ class text
   {
     if ( is_string($st) ){
       if ( self::is_integer($st) && ((substr($st, 0, 1) !== '0') || ($st === '0')) ){
-        return (int)$st;
+        $tmp = (int)$st;
+        if ( $tmp !== PHP_INT_MAX ){
+          return $tmp;
+        }
       }
       else if ( self::is_decimal($st) && (substr($st, 0, 1) !== '0') ){
         return (float)$st;

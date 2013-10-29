@@ -1205,20 +1205,18 @@ class connection extends \PDO implements actions, api, engines
   {
     if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       $rows = $r->get_rows();
-      if ( count($rows) > 0 ){
-        // At least 2 columns
-        if ( count($rows[0]) > 1 ){
-          $cols = array_keys($rows[0]);
-          $idx = array_shift($cols);
-          $num_cols = count($cols);
-          $res = [];
-          foreach ( $rows as $d ){
-            $index = $d[$idx];
-            unset($d[$idx]);
-            $res[$index] = $num_cols > 1 ? $d : $d[$cols[0]];
-          }
-          return $res;
+      // At least 2 columns
+      if ( (count($rows) > 0) && (count($rows[0]) > 1) ){
+        $cols = array_keys($rows[0]);
+        $idx = array_shift($cols);
+        $num_cols = count($cols);
+        $res = [];
+        foreach ( $rows as $d ){
+          $index = $d[$idx];
+          unset($d[$idx]);
+          $res[$index] = $num_cols > 1 ? $d : $d[$cols[0]];
         }
+        return $res;
       }
 		}
     return false;
@@ -1941,7 +1939,8 @@ class connection extends \PDO implements actions, api, engines
 	public function get_column_values($table, $field,  array $where = array(), $limit = false, $start = 0, $php = false)
 	{
     $r = [];
-    if ( $rows = $this->get_irows($this->language->get_column_values($table, $field, $where, $limit, $start, false)) ){
+    $where = $this->where_cfg($where);
+    if ( $rows = $this->get_irows($this->language->get_column_values($table, $field, $where, $limit, $start, false), $where['values']) ){
       foreach ( $rows as $row ){
         array_push($r, $row[0]);
       }
