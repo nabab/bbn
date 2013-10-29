@@ -30,14 +30,6 @@ class text
     return (string)$st;
   }
   
-  public static function is_json($st){
-    if ( empty($st) ){
-      return false;
-    }
-    json_decode($string);
-    return (json_last_error() == JSON_ERROR_NONE);
-  }
-  
 	public static function escape_dquotes($st)
 	{
     return addcslashes(self::cast($st), "\"\\\r\n\t");
@@ -276,7 +268,20 @@ class text
 		return $mdp;
 	}
 
-	/**
+  /**
+   * @param string $st
+   * @return bool
+	 */
+  public static function is_json($st){
+    if ( is_string($st) && !empty($st) && 
+            ( (substr($st, 0, 1) === '{') || (substr($st, 0, 1) === '[') )){
+      json_decode($st);
+      return (json_last_error() == JSON_ERROR_NONE);
+    }
+    return false;
+  }
+
+  /**
    * @param mixed $st Can take as many arguments and will return false if one of them is not a number
 	 * @return bool
 	 */
