@@ -504,14 +504,19 @@ class text
   }
   
   public static function export($o, $remove_empty=false, $lev=1){
+    $st = '';
+    if ( is_object($o) && ($cls = get_class($o)) && ($cls !== 'stdClass') ){
+      $st .= "Object ".get_class($o).PHP_EOL;
+    }
     if ( is_object($o) || is_array($o) ){
-      $st = '['.PHP_EOL;
+      $is_assoc = (bool)( !is_array($o) || \bbn\tools::is_assoc($o) );
+      $st .= '['.PHP_EOL;
       foreach ( $o as $k => $v ){
         if ( $remove_empty && ( ( is_string($v) && empty($v) ) || ( is_array($v) && count($v) === 0 ) ) ){
           continue;
         }
         $st .= str_repeat('    ', $lev);
-        if ( !is_int($k) ){
+        if ( $is_assoc ){
           $st .= "'".\bbn\str\text::escape_squote($k)."' => ";
         }
         if ( is_array($v) ){

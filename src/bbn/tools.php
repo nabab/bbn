@@ -261,6 +261,15 @@ class tools
     return $r;
   }
   
+  public static function is_assoc(array $r){
+    $keys = array_keys($r);
+    for ( $i = 0; $i < count($r); $i++ ){
+      if ( !isset($r[$i]) ){
+        return true;
+      }
+    }
+  }
+  
   public static function get_dump(){
     $args = func_get_args();
     $st = '';
