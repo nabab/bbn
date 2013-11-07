@@ -28,25 +28,23 @@ class connection
 
 	private static
           /** @var string */
-          $fingerprint = BBN_FINGERPRINT,
-          $error = false;
+          $fingerprint = BBN_FINGERPRINT;
 
 	protected static
           /** @var array */
-          $errors = [
-            0 => 'login failed',
-            2 => 'password sent',
-            3 => 'no email such as',
-            4 => 'too many attempts',
-            5 => 'impossible to create the user',
-            6 => 'wrong user and/or password',
-            7 => 'different passwords',
-            8 => 'less than 5 mn between emailing password',
-            9 => 'user already exists',
-            10 => 'problem during user creation'
-          ],
-          /** @var array */
           $_defaults = [
+            'errors' => [
+              0 => 'login failed',
+              2 => 'password sent',
+              3 => 'no email such as',
+              4 => 'too many attempts',
+              5 => 'impossible to create the user',
+              6 => 'wrong user and/or password',
+              7 => 'different passwords',
+              8 => 'less than 5 mn between emailing password',
+              9 => 'user already exists',
+              10 => 'problem during user creation'
+            ],
             'tables' => [
               'groups' => 'bbn_users_groups',
               'hotlinks' => 'bbn_users_hotlinks',
@@ -149,6 +147,8 @@ class connection
           ];
   
 	protected
+          /** @var string */
+          $error = null,
           /** @var array */
           $groups = [],
           /** @var array */
@@ -213,21 +213,11 @@ class connection
   
   
 	/**
-	 * @return string
-	 */
-  protected static function set_error($err){
-    self::$error = $err;
-    return self::get_error($err);
-  }
-  
-	/**
-   * @param int $id Error Code
 	 * @return string 
 	 */
-  protected static function get_error($id){
-    if ( isset(self::$errors[$id]) ){
-      return self::$errors[$id];
-    }
+  public function get_error(){
+    return ( !is_null($this->error) && isset($this->cfg['errors'][$this->error]) ) ?
+              $this->cfg['errors'][$this->error] : false;
   }
   
   public function get_config(){
@@ -493,7 +483,7 @@ class connection
         
        // Canceling authentication if num_attempts > max_attempts
         if ( !$this->check_attempts() ){
-          return self::set_error(4);
+          $this->error = 4;
         }
         $pass = $this->db->select_one(
                 $this->cfg['tables']['passwords'],
@@ -507,11 +497,11 @@ class connection
         }
         else{
           $this->record_attempt();
-          return self::set_error(6);
+          $this->error = 6;
         }
       }
       else{
-        return self::set_error(6);
+        $this->error = 6;
       }
     }
     return $this->auth;
@@ -747,6 +737,14 @@ class connection
         return $this->id;
       }
     }
+  }
+  
+	/**
+	 * @return boolean
+	 */
+  public function is_admin()
+  {
+    return $this->has_permission("admin");
   }
 
 	/**

@@ -24,12 +24,15 @@ class date
 	public static function format($date='', $mode='wdate')
 	{
 		/* Formatting: idate is the timestamp, and date[0] and date[1] the SQL date and time */
-		if ( empty($date) )
+		if ( empty($date) ){
 			$idate = time();
-		else if ( is_numeric($date) )
+    }
+		else if ( is_numeric($date) ){
 			$idate = $date;
-		else 
+    }
+		else{
 			$idate = strtotime($date);
+    }
 		$is_windows = strtoupper(substr(PHP_OS, 0, 3)) == 'WIN' ? true : false;
 		if ( $idate )
 		{
@@ -39,7 +42,7 @@ class date
 			$d = mktime($h['tm_hour'],$h['tm_min'],$h['tm_sec'],$h['tm_mon']+1,$h['tm_mday'],$h['tm_year']+1900) - $t;
 			$start_today = mktime(0,0,0) + $d;
 			$end_today = $start_today + ( 24 * 3600 );
-			$is_today = ( $idate >= $start_today && $idate < $end_today ) ? 1 : false;
+			$is_today = ( ($idate >= $start_today) && ($idate < $end_today) ) ? 1 : false;
 			$only_date = ( $h['tm_hour'] + $h['tm_min'] + $h['tm_sec'] == 0 ) ? 1 : false;
 			if ( $mode === 'idate' )
 				$date_ok = $idate;
@@ -68,8 +71,9 @@ class date
 			else /*  wdate */
 			{
 				$date_ok = $is_windows ? utf8_encode(strftime('%A %#d %B %Y',$idate)) : strftime('%A %e %B %Y',$idate);
-				if ( !$only_date )
+				if ( !$only_date && ($mode !== 'notime') ){
 					$date_ok .= ', '.strftime('%H:%M',$idate);
+        }
 			}
 			return $date_ok;
 		}

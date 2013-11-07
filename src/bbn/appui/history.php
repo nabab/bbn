@@ -63,6 +63,11 @@ class history
 		if ( !\bbn\str\text::is_number($date) ){
       $date = strtotime($date);
     }
+    $t = time();
+    // Impossible to write history in the future
+    if ( $t < $date ){
+      $date = $t;
+    }
 		self::$date = date('Y-m-d H:i:s', $date);
 	}
 	

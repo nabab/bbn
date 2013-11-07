@@ -461,7 +461,7 @@ class connection extends \PDO implements actions, api, engines
           $this->enable_keys();
         }
         catch ( \PDOException $e ){
-          $this->log($e);
+          \bbn\tools::log("Impossible to create the connection for ".$cfg['engine']."/".$cfg['db'], 'db');
           die();
         }
       }
@@ -880,8 +880,9 @@ class connection extends \PDO implements actions, api, engines
             array_push($this->last_params['values'], $arg);
             $num_values++;
           }
-          else if ( count($arg) >= 3 ){
+          else if ( isset($arg[2]) ){
             array_push($this->last_params['values'], $arg[2]);
+            $num_values++;
           }
         }
         if ( !isset($this->queries[$hash]) ){
