@@ -204,5 +204,12 @@ interface engines
 	 * @return false|array
 	 */
 	public function delete_db_user($user);
+  
+	/**
+	 * Returns an array of queries to recreate the user(s)
+	 * 
+	 * @return array
+	 */
+  public function get_users($user='', $host='');
 }
 ?>

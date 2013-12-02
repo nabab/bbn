@@ -2010,6 +2010,14 @@ class connection extends \PDO implements actions, api, engines
 	{
     return $this->language->delete_db_user($user);
 	}
-	
+
+ 	/**
+	 * @return void 
+	 */
+	public function get_users($user='', $host='')
+	{
+    return $this->language->get_users($user, $host);
+	}
+
 }
 ?>

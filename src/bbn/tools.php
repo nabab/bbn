@@ -60,7 +60,10 @@ class tools
 	{
 		if ( defined('BBN_DATA_PATH') ){
 			$log_file = BBN_DATA_PATH.'logs/'.$file.'.log';
-			$i = debug_backtrace()[0];
+      $backtrace = array_filter(debug_backtrace(), function($a){
+        return $a['function'] === 'log';
+      });
+      $i = end($backtrace);
 			$r = "[".date('d/m/Y H:i:s')."]\t".$i['file']." - line ".$i['line']."\n";
 			if ( is_object($st) ){
         $r .= get_class($st);
@@ -276,7 +279,19 @@ class tools
     foreach ( $args as $a ){
       $r = $a;
       if ( is_null($a) ){
-        $r = 'NULL';
+        $r = 'null';
+      }
+      else if ( $a === false ){
+        $r = 'false';
+      }
+      else if ( $a === true ){
+        $r = 'true';
+      }
+      else if ( $a === 0 ){
+        $r = '0';
+      }
+      else if ( $a === '' ){
+        $r = '""';
       }
       else if ( !$a ){
         $r = '0';

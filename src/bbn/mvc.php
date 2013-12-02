@@ -315,7 +315,10 @@ class mvc
 	{
 		$ar = func_get_args();
 		foreach ( $ar as $a ){
-			if ( strpos($a,'./') !== false || strpos($a,'../') !== false || strpos($a,'/') === 0 ){
+			if ( !is_string($a) ||
+              (strpos($a,'./') !== false) ||
+              (strpos($a,'../') !== false) ||
+              (strpos($a,'/') === 0) ){
 				die("The path $p is not an acceptable value");
 			}
 		}

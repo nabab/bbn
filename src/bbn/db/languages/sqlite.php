@@ -612,7 +612,7 @@ class sqlite implements \bbn\db\engines
 	*/
 	public function get_column_values($table, $field,  array $where = array(), $limit = false, $start = 0, $php = false)
   {
-		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
+		if ( text::check_name($field) && ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
 		{
 			$r = '';
 			if ( $php ){
@@ -749,5 +749,10 @@ class sqlite implements \bbn\db\engines
 		$this->db->raw_query("PRAGMA foreign_keys = ON;");
 		return $this;
 	}
+  
+  public function get_users($user='', $host='')
+  {
+    return [];
+  }
 }
 ?>

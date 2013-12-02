@@ -634,7 +634,7 @@ class mysql implements \bbn\db\engines
 	*/
 	public function get_column_values($table, $field,  array $where = array(), $limit = false, $start = 0, $php = false)
   {
-		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
+		if ( text::check_name($field) && ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
 		{
 			$r = '';
 			if ( $php ){
@@ -783,5 +783,29 @@ class mysql implements \bbn\db\engines
 		$this->db->raw_query("SET FOREIGN_KEY_CHECKS=1;");
 		return $this;
 	}
+  
+  public function get_users($user='', $host='')
+  {
+    $cond = '';
+    if ( !empty($user) && \bbn\str\text::check_name($user) ){
+      $cond .= " AND  user LIKE '$user' ";
+    }
+    if ( !empty($host) && \bbn\str\text::check_name($host) ){
+      $cond .= " AND  host LIKE '$host' ";
+    }
+    $us = $this->db->get_rows("
+      SELECT DISTINCT host, user
+      FROM mysql.user
+      WHERE 1
+      $cond");
+    $q = [];
+    foreach ( $us as $u ){
+      $gs = $this->db->get_col_array("SHOW GRANTS FOR '$u[user]'@'$u[host]'");
+      foreach ( $gs as $g ){
+        array_push($q, $g);
+      }
+    }
+    return $q;
+  }
 }
 ?>

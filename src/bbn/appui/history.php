@@ -17,7 +17,8 @@ class history
           $prefix = 'bbn_',
           $primary = 'id',
           $date = false,
-          $last_rows = false;
+          $last_rows = false,
+          $ok = false;
 	
   public static
           $htable = false,
@@ -40,7 +41,29 @@ class history
       self::$admin_db = self::$db->current;
     }
 		self::$htable = self::$admin_db.'.'.self::$prefix.'history';
+    self::$ok = 1;
     self::$is_used = 1;
+	}
+  
+	/**
+	 * @return void 
+	 */
+  public static function is_init(){
+    return self::$ok;
+  }
+	
+	/**
+	 * @return void 
+	 */
+	public static function delete($table, $id)
+	{
+		// Sets the "active" column name 
+		if ( self::is_init() && text::check_name($table) && \bbn\str\text::is_integer($id) ){
+      self::$db->query("
+        DELETE FROM ".self::$db->escape(self::$htable)."
+        WHERE ".self::$db->escape('column')." LIKE '".self::$db->table_full_name($table).".%'
+        AND ".self::$db->escape('line')." = $id");
+		}
 	}
 	
 	/**
@@ -122,11 +145,12 @@ class history
     $r = [];
     if ( \bbn\str\text::check_name($table) && is_int($start) && is_int($limit) ){
       $r = self::$db->get_rows("
-        SELECT DISTINCT(`line`)
+        SELECT DISTINCT(".self::$db->escape('line').")
         FROM ".self::$db->escape(self::$htable)."
-        WHERE `column` LIKE ?
-        AND ( `operation` LIKE 'INSERT' OR `operation` LIKE 'UPDATE' )
-        ORDER BY last_mod DESC
+        WHERE ".self::$db->escape('column')." LIKE ?
+        AND ( ".self::$db->escape('operation')." LIKE 'INSERT'
+                OR ".self::$db->escape('operation')." LIKE 'UPDATE' )
+        ORDER BY ".self::$db->escape('last_mod')." DESC
         LIMIT $start, $limit",
         self::$db->table_full_name($table).'.%');
     }
@@ -166,52 +190,29 @@ class history
 	
 	public static function get_history($table, $id){
     if ( self::check($table) ){
+      $pat = [
+        'ins' => 'INSERT',
+        'upd' => 'UPDATE',
+        'del' => 'DELETE'
+      ];
       $r = [];
-      $args = [$id, self::$db->table_full_name($table).'.%'];
-      $q = self::$db->get_row("
-        SELECT `last_mod`, `id_user`
-        FROM ".self::$db->escape(self::$htable)."
-        WHERE `line` = ?
-        AND `column` LIKE ?
-        AND `operation` LIKE 'INSERT'
-        ORDER BY `last_mod` ASC
-        LIMIT 1",
-        $args);
-      if ( $q ){
-        $r['ins'] = [
-          'date' => $q['last_mod'],
-          'user' => $q['id_user']
-        ];
-      }
-      $q = self::$db->get_row("
-        SELECT `last_mod`, `id_user`
-        FROM ".self::$db->escape(self::$htable)."
-        WHERE `column` LIKE ?
-        AND `line` = ?
-        AND `operation` LIKE 'UPDATE'
-        ORDER BY `last_mod` DESC
-        LIMIT 1",
-        $args);
-      if ( $q ){
-        $r['upd'] = [
-          'date' => $q['last_mod'],
-          'user' => $q['id_user']
-        ];
-      }
-      $q = self::$db->get_row("
-      SELECT `last_mod`, `id_user`
-      FROM ".self::$db->escape(self::$htable)."
-      WHERE `column` LIKE ?
-      AND `line` = ?
-      AND `operation` LIKE 'DELETE'
-      ORDER BY `last_mod` DESC
-      LIMIT 1",
-      $args);
-      if ( $q ){
-        $r['del'] = [
-          'date' => $q['last_mod'],
-          'user' => $q['id_user']
-        ];
+      $table = self::$db->table_full_name($table);
+      foreach ( $pat as $k => $p ){
+        if ( $q = self::$db->rselect(
+          self::$htable,
+          [
+            'date' => 'last_mod',
+            'user' => 'id_user'
+          ],[
+            ['line', '=', $id],
+            ['column', 'LIKE', "$table.%"],
+            ['operation', 'LIKE', $p]
+          ],[
+            'last_mod' => 'desc'
+          ]
+        ) ){
+          $r[$k] = $q;
+        }
       }
       return $r;
     }
@@ -341,7 +342,7 @@ class history
                 'operation' => 'INSERT',
                 'line' => $id,
                 'column' => $table.'.'.$s['primary'],
-                'old' => '',
+                'old' => null,
                 'last_mod' => $date,
                 'id_user' => self::$huser
               ]);
@@ -472,4 +473,3 @@ class history
   }
 	
 }
-?>
