@@ -17,6 +17,15 @@ namespace bbn\time;
  */
 class date 
 {
+  
+  public static function validate($date, $format = 'Y-m-d H:i:s'){
+    $d = \DateTime::createFromFormat($format, $date);
+    return $d && $d->format($format) == $date;
+  }
+  
+  public static function validateSQL($date){
+    return self::validate($date, 'Y-m-d H:i:s') || self::validate($date, 'Y-m-d');
+  }
 
 	/**
 	 * @return void 

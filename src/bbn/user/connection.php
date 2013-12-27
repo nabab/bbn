@@ -431,7 +431,7 @@ class connection
       if ( is_null($d) ){
         $d = $this->db->rselect(
             $this->cfg['tables']['sessions'],
-            [],
+            $this->cfg['arch']['sessions'],
             [
                 $this->cfg['arch']['sessions']['sess_id'] => session_id(),
                 $this->cfg['arch']['sessions']['id_user'] => $this->id

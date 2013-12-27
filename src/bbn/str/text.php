@@ -30,6 +30,27 @@ class text
     return (string)$st;
   }
   
+  public static function change_case($st, $case = 'uc')
+  {
+    if ( is_string($st) ){
+      $case = strtolower($case);
+      switch ( $case ){
+        case "lower":
+          $case = MB_CASE_LOWER;
+          break;
+        case "upper":
+          $case = MB_CASE_UPPER;
+          break;
+        default:
+          $case = MB_CASE_TITLE;
+      }
+      if ( !empty($st) ){
+        $st = mb_convert_case($st, $case);
+      }
+    }
+    return $st;
+  }
+  
 	public static function escape_dquotes($st)
 	{
     return addcslashes(self::cast($st), "\"\\\r\n\t");
@@ -166,7 +187,7 @@ class text
 		$st = mb_ereg_replace('&nbsp;',' ',$st);
 		$st = mb_ereg_replace('\n',' ',$st);
 		$st = strip_tags($st);
-		$st = html_entity_decode($st,ENT_QUOTES,'UTF-8');
+		$st = html_entity_decode($st, ENT_QUOTES, 'UTF-8');
 		$st = self::clean($st);
 		if ( mb_strlen($st) >= $max )
 		{

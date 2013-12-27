@@ -18,6 +18,30 @@ class dir extends \bbn\obj
 {
 
 	/**
+	 * Checks if a file is in a directory
+   * Accepts unlimited arguments
+	 *
+	 * Returns false or the first corresponding file
+	 *
+	 * @param string $dir
+	 * @return array|false 
+	 */
+	public static function has_file($dir)
+	{
+    $as = func_get_args();
+    array_shift($as);
+    $files = self::get_files($dir);
+    foreach ( $files as $f ){
+      foreach ( $as as $a ){
+        if ( basename($f) === $a ){
+          return $a;
+        }
+      }
+    }
+		return false;
+	}
+
+	/**
 	 * Returns an array of directories in a directory.
 	 *
 	 * It will return the full path ie including the original directory's path.
