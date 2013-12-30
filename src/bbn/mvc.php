@@ -399,6 +399,26 @@ class mvc
 	}
 
 	/**
+	 * This returns the current controller's file's name.
+	 *
+	 * @return string 
+	 */
+	public function say_controller()
+	{
+    return $this->controller ? $this->controller : false;
+  }
+  
+	/**
+	 * This returns the current controller's file's name.
+	 *
+	 * @return string 
+	 */
+	public function say_dir()
+	{
+    return $this->controller ? dirname($this->controller) : false;
+  }
+  
+	/**
 	 * This directly renders content with arbitrary values using the existing Mustache engine.
 	 *
 	 * @param string $view The view to be rendered
@@ -571,6 +591,33 @@ class mvc
 		return $this;
 	}
 
+	/**
+	 * This will include a file from within the controller's path. Chainable
+	 *
+	 * @param string $file_name If .php is ommited it will be added
+	 * @return void 
+	 */
+	public function incl($file_name)
+	{
+    if ( $this->is_controlled ){
+      $d = $this->say_dir().'/';
+      if ( substr($file_name, -4) !== 'php' ){
+        $file_name .= '.php';
+      }
+      if ( (strpos($file_name, '..') === false) && file_exists($d.$file_name) ){
+        include_once($d.$file_name);
+      }
+    }
+		return $this;
+	}
+
+
+	/**
+	 * This will add the given string to the script property, and create it if needed. Chainable
+	 *
+	 * @param string $script The javascript chain to add
+	 * @return void 
+	 */
 	public function add_script($script)
 	{
     if ( is_object($this->obj) ){
