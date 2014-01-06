@@ -154,11 +154,11 @@ EOF
     return $this;
   }
 
-  public function show()
+  public function show($file='MyPDF.pdf')
 	{
 		if ( $this->check() )
 		{
-			$this->pdf->Output();
+			$this->pdf->Output($file, "I");
       die();
 		}
 	}

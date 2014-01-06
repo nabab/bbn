@@ -17,6 +17,13 @@ namespace bbn\time;
  */
 class date 
 {
+  private static $windows = null;
+  public static function is_windows(){
+    if ( is_null(self::$windows) ){
+      self::$windows = strtoupper(substr(PHP_OS, 0, 3)) == 'WIN' ? true : false;
+    }
+    return self::$windows;
+  }
   
   public static function validate($date, $format = 'Y-m-d H:i:s'){
     $d = \DateTime::createFromFormat($format, $date);
@@ -92,9 +99,13 @@ class date
   {
     $arr = [];
     for ( $i = 1; $i <= 12; $i++ ){
-      $arr[$i] = $is_windows ? strftime("%m", strtotime("2012-$i-01")) : strftime("%B", strtotime("2012-$i-01"));
+      $arr[$i] = self::month_name($i);
     }
     return \bbn\tools::build_options($arr, $val);
+  }
+  
+  public static function month_name($m){
+    return self::is_windows() ? strftime("%m", strtotime("2012-$m-01")) : strftime("%B", strtotime("2012-$m-01"));
   }
 
 }
