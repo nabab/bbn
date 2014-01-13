@@ -85,7 +85,7 @@ class connection extends \PDO implements actions, api, engines
 	/**
 	 * @var array
 	 */
-		$queries = array(),
+		$queries = [],
 	/**
 	 * @var string
    * Possible values:
@@ -302,7 +302,7 @@ class connection extends \PDO implements actions, api, engines
 	/**
 	 * @returns a selection query
 	 */
-  private function _sel($table, $fields = array(), $where = array(), $order = false, $limit = 100, $start = 0)
+  private function _sel($table, $fields = [], $where = [], $order = false, $limit = 100, $start = 0)
 	{
     $where = $this->where_cfg($where);
 		$hash = $this->make_hash('select', $table, serialize($fields), $this->get_where($where, $table), serialize($order));
@@ -431,7 +431,7 @@ class connection extends \PDO implements actions, api, engines
 	 * @param $cfg
 	 * @return void 
 	 */
-	public function __construct($cfg=array())
+	public function __construct($cfg=[])
 	{
     if ( !isset($cfg['engine']) && defined('BBN_DB_ENGINE') ){
       $cfg['engine'] = BBN_DB_ENGINE;
@@ -542,7 +542,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function clear()
 	{
-		$this->queries = array();
+		$this->queries = [];
 	}
   
 	/**
@@ -1222,6 +1222,22 @@ class connection extends \PDO implements actions, api, engines
 		}
     return false;
   }
+  
+	/**
+	 * Returns an array with the first field as index and either the second field as value f there is only 2 fields or with an array of the different fields as value if there are more
+   * Same arguments as select_all
+	 *
+	 * @return array|false
+	 */
+  public function select_all_by_keys($table, $fields = [], $where = [], $order = false, $start = 0)
+  {
+    if ( $sql = $this->get_select($table, $fields, $where, $order, $start) ){
+      $where = $this->where_cfg($where);
+      $params = (count($where['values']) > 0) ? [$sql, $where['values']] : [$sql];
+      return call_user_func_array([$this, 'get_key_val'], $params);
+		}
+    return false;
+  }
 
 	/**
 	 * Returns an array indexed on the columns in which are all the values
@@ -1237,7 +1253,7 @@ class connection extends \PDO implements actions, api, engines
 	}
 
   /**
-	 * Returns a single numeric array (one column)
+	 * Returns the result of a query as a single numeric array for one single column values
 	 *
 	 * @return array | false 
 	 */
@@ -1359,7 +1375,7 @@ class connection extends \PDO implements actions, api, engines
    * @param int $start
    * @return array
    */
-	public function select($table, $fields = array(), $where = array(), $order = false, $start = 0)
+	public function select($table, $fields = [], $where = [], $order = false, $start = 0)
 	{
     if ( $r = $this->_sel($table, $fields, $where, $order, 1, $start) ){
       return $r->get_object();
@@ -1377,7 +1393,7 @@ class connection extends \PDO implements actions, api, engines
    * @param int $start
    * @return array
    */
-	public function select_one($table, $field, $where = array(), $order = false, $start = 0)
+	public function select_one($table, $field, $where = [], $order = false, $start = 0)
 	{
     if ( $r = $this->_sel($table, [$field], $where, $order, 1, $start) ){
       if ( $res = $r->get_row() ){
@@ -1398,7 +1414,7 @@ class connection extends \PDO implements actions, api, engines
    * @param int $start
    * @return array
    */
-	public function rselect($table, $fields = array(), $where = array(), $order = false, $start = 0)
+	public function rselect($table, $fields = [], $where = [], $order = false, $start = 0)
 	{
     if ( $r = $this->_sel($table, $fields, $where, $order, 1, $start) ){
       return $r->get_row();
@@ -1416,7 +1432,7 @@ class connection extends \PDO implements actions, api, engines
    * @param int $start
    * @return array
    */
-	public function iselect($table, $fields = array(), $where = array(), $order = false, $start = 0)
+	public function iselect($table, $fields = [], $where = [], $order = false, $start = 0)
 	{
     if ( $r = $this->_sel($table, $fields, $where, $order, 1, $start) ){
       return $r->get_irow();
@@ -1435,7 +1451,7 @@ class connection extends \PDO implements actions, api, engines
    * @param int $start
    * @return array
    */
-	public function select_all($table, $fields = array(), $where = array(), $order = false, $limit = 100000, $start = 0)
+	public function select_all($table, $fields = [], $where = [], $order = false, $limit = 100000, $start = 0)
 	{
     if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
       return $r->get_objects();
@@ -1454,7 +1470,7 @@ class connection extends \PDO implements actions, api, engines
    * @param int $start
    * @return array
    */
-	public function rselect_all($table, $fields = array(), $where = array(), $order = false, $limit = 100000, $start = 0)
+	public function rselect_all($table, $fields = [], $where = [], $order = false, $limit = 100000, $start = 0)
 	{
     if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
       return $r->get_rows();
@@ -1473,7 +1489,7 @@ class connection extends \PDO implements actions, api, engines
    * @param int $start
    * @return array
    */
-	public function iselect_all($table, $fields = array(), $where = array(), $order = false, $limit = 100000, $start = 0)
+	public function iselect_all($table, $fields = [], $where = [], $order = false, $limit = 100000, $start = 0)
 	{
     if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
       return $r->get_irows();
@@ -1921,23 +1937,27 @@ class connection extends \PDO implements actions, api, engines
 	/**
 	 * @return string
 	 */
-	public function get_insert($table, array $fields = array(), $ignore = false, $php = false)
+	public function get_insert($table, array $fields = [], $ignore = false, $php = false)
 	{
     return $this->language->get_insert($table, $fields, $ignore, $php);
 	}
 	
 	/**
+   * Returns the string of an update query
+   * 
 	 * @return string
 	 */
-	public function get_update($table, array $fields = array(), array $where = array(), $php = false)
+	public function get_update($table, array $fields = [], array $where = [], $php = false)
 	{
     return $this->language->get_update($table, $fields, $where, $php);
 	}
 	
 	/**
-	 * @return string
+   * Returns a single numeric-indexed array with the values of the unique column $field from the $table $table
+   * 
+	 * @return array
 	 */
-	public function get_column_values($table, $field,  array $where = array(), $limit = false, $start = 0, $php = false)
+	public function get_column_values($table, $field,  array $where = [], $limit = false, $start = 0, $php = false)
 	{
     $r = [];
     $where = $this->where_cfg($where);
@@ -1952,7 +1972,7 @@ class connection extends \PDO implements actions, api, engines
 	/**
 	 * @return string
 	 */
-	public function get_values_count($table, $field,  array $where = array(), $limit = false, $start = 0, $php = false)
+	public function get_values_count($table, $field,  array $where = [], $limit = false, $start = 0, $php = false)
 	{
     return $this->language->get_values_count($table, $field, $where, $limit, $start, $php);
 	}
@@ -1960,7 +1980,7 @@ class connection extends \PDO implements actions, api, engines
   /**
    * @return array | false
    */
-  public function get_field_values($table, $field,  array $where = array(), $limit = false, $start = 0)
+  public function get_field_values($table, $field,  array $where = [], $limit = false, $start = 0)
   {
     if ( $r = $this->language->get_column_values($table, $field, $where, $limit, $start) ){
       if ( $d = $this->get_by_columns($r) ){
@@ -1972,7 +1992,7 @@ class connection extends \PDO implements actions, api, engines
   /**
    * @return array | false
    */
-	public function count_field_values($table, $field,  array $where = array(), $limit = false, $start = 0)
+	public function count_field_values($table, $field,  array $where = [], $limit = false, $start = 0)
 	{
     if ( $r = $this->language->get_values_count($table, $field, $where, $limit, $start) ){
       return $this->get_rows($r);

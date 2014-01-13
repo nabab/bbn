@@ -156,6 +156,7 @@ class dbsync
         }
       }
       else if ( $moment === 'after' ){
+        // Case where we actually delete or restore through the $hcol column
         if ( ($kind === 'update') && self::$has_history && isset($values[\bbn\appui\history::$hcol]) ){
           if ( $values[\bbn\appui\history::$hcol] === 0 ){
             $kind = 'delete';
@@ -166,9 +167,11 @@ class dbsync
             $values = self::$db->select($table, [], $where);
           }
         }
+        /*
         else if ( $kind === 'insert' ){
           $values = self::$db->select($table, [], $values);
         }
+         */
       }
       self::$dbs->insert(self::$dbs_table, [
         'db' => self::$db->current,
@@ -199,6 +202,16 @@ class dbsync
     self::define($dbs, $dbs_table);
     self::first_call();
     self::disable();
+    
+    $to_log = [
+      'deleted_sync' => 0,
+      'deleted_real' => 0,
+      'updated_sync' => 0,
+      'updated_real' => 0,
+      'inserted_sync' => 0,
+      'inserted_real' => 0,
+      'problems' => 0
+    ];
 
     $start = ( $test = self::$dbs->get_one("
       SELECT MIN(moment)
@@ -207,11 +220,11 @@ class dbsync
       AND state = 0",
       self::$db->current) ) ? $test : date('Y-m-d H:i:s');
     // Deleting the entries prior to this sync we produced and have been seen by the twin process
-    self::log("Num delete: ".self::$dbs->delete(self::$dbs_table, [
+    $to_log['deleted_sync'] = self::$dbs->delete(self::$dbs_table, [
       ['db', 'LIKE', self::$db->current],
       ['state', '=', 1],
       ['moment', '<', $start]
-    ]));
+    ]);
     
     // Selecting the entries inserted
     $ds = self::$dbs->rselect_all(self::$dbs_table, ['id', 'tab', 'vals', 'moment'], [
@@ -230,9 +243,11 @@ class dbsync
         if ( isset(self::$methods['cbf2']) ){
           self::cbf2($d);
         }
+        $to_log['inserted_sync']++;
         self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
       }
       else{
+        $to_log['problems']++;
         self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
         self::log("Problem while syncing, check data with status 5 and ID ".$d['id']);
       }
@@ -259,10 +274,12 @@ class dbsync
       if ( $d['action'] === 'delete' ){
         if ( self::$db->delete($d['tab'], json_decode($d['rows'], 1)) ){
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
+          $to_log['delete_real']++;
         }
         else{
           self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
           self::log("Problem while syncing, check data with status 5 and ID ".$d['id']);
+          $to_log['problems']++;
         }
       }
       // Checking if there is another change done to this record and when in the twin DB
@@ -326,15 +343,23 @@ class dbsync
       if ( $d['action'] === 'update' ){
         if ( self::$db->update($d['tab'], json_decode($d['vals'], 1), json_decode($d['rows'], 1)) ){
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
+          $to_log['update_real']++;
         }
         else{
           self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
           self::log("Problem while syncing, check data with status 5 and ID ".$d['id']);
+          $to_log['problems']++;
         }
       }
       // Callback number 2
       if ( isset(self::$methods['cbf2']) ){
         self::cbf2($d);
+      }
+    }
+    
+    foreach ( $to_log as $k => $v ){
+      if ( $v > 0 ){
+        self::log($k.': '.$v);
       }
     }
     self::enable();

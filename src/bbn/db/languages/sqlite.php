@@ -353,11 +353,19 @@ class sqlite implements \bbn\db\engines
         $cfg = $this->db->modelize($table);
       }
       foreach ( $order as $col => $direction ){
-        if ( is_numeric($col) && ( !isset($cfg) || isset($cfg['fields'][$direction]) ) ){
-          $r .= '"' . $direction . '" ' . ( stripos($m['fields'][$direction]['type'],'date') !== false ? 'DESC' : 'ASC' ) . "," . PHP_EOL;
+        if ( is_numeric($col) ){
+          if ( isset($cfg, $cfg['fields'][$direction]) ){
+            $dir = stripos($cfg['fields'][$direction]['type'],'date') !== false ? 'DESC' : 'ASC';
+          }
+          else{
+            $dir = 'ASC';
+          }
+          if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($direction)])  ){
+            $r .= $this->escape($direction)." $dir," . PHP_EOL;
+          }
         }
-        else if ( !isset($cfg) || isset($cfg['fields'][$col])  ){
-          $r .= '"' . $col . '" ' . ( strtolower($direction) === 'desc' ? 'DESC' : 'ASC' ) . "," . PHP_EOL;
+        else if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($col)])  ){
+          $r .= "`$col` " . ( strtolower($direction) === 'desc' ? 'DESC' : 'ASC' ) . "," . PHP_EOL;
         }
       }
       $r = substr($r,0,strrpos($r,','));

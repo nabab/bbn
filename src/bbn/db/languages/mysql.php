@@ -38,7 +38,7 @@ class mysql implements \bbn\db\engines
   /**
 	 * @return void 
 	 */
-  public function get_connection($cfg=array())
+  public function get_connection($cfg=[])
   {
     $cfg['engine'] = 'mysql';
     if ( !isset($cfg['host']) ){
@@ -223,7 +223,7 @@ class mysql implements \bbn\db\engines
 		if ( empty($database) || !text::check_name($database) ){
 			$database = $this->db->current;
 		}
-		$t2 = array();
+		$t2 = [];
     if ( $r = $this->db->raw_query("SHOW TABLES FROM `$database`") ){
       if ( $t1 = $r->fetchAll(\PDO::FETCH_NUM) ){
         foreach ( $t1 as $t ){
@@ -370,17 +370,17 @@ class mysql implements \bbn\db\engines
       }
       foreach ( $order as $col => $direction ){
         if ( is_numeric($col) ){
-          if ( isset($cfg) && isset($cfg['fields'][$direction]) ){
+          if ( isset($cfg, $cfg['fields'][$direction]) ){
             $dir = stripos($cfg['fields'][$direction]['type'],'date') !== false ? 'DESC' : 'ASC';
           }
           else{
             $dir = 'ASC';
           }
-          if ( !isset($cfg) || isset($cfg['fields'][$col])  ){
+          if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($direction)])  ){
             $r .= $this->escape($direction)." $dir," . PHP_EOL;
           }
         }
-        else if ( !isset($cfg) || isset($cfg['fields'][$col])  ){
+        else if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($col)])  ){
           $r .= "`$col` " . ( strtolower($direction) === 'desc' ? 'DESC' : 'ASC' ) . "," . PHP_EOL;
         }
       }
@@ -445,7 +445,7 @@ class mysql implements \bbn\db\engines
 	/**
 	 * @return string
 	 */
-	public function get_select($table, array $fields = array(), array $where = array(), $order = array(), $limit = false, $start = 0, $php = false)
+	public function get_select($table, array $fields = [], array $where = [], $order = [], $limit = false, $start = 0, $php = false)
 	{
 		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
 		{
@@ -493,7 +493,7 @@ class mysql implements \bbn\db\engines
 	/**
 	 * @return string
 	 */
-	public function get_insert($table, array $fields = array(), $ignore = false, $php = false)
+	public function get_insert($table, array $fields = [], $ignore = false, $php = false)
 	{
 		$r = '';
 		if ( $php ){
@@ -581,7 +581,7 @@ class mysql implements \bbn\db\engines
 	/**
 	 * @return string
 	 */
-	public function get_update($table, array $fields = array(), array $where = array(), $php = false)
+	public function get_update($table, array $fields = [], array $where = [], $php = false)
 	{
 		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 ){
       $r = '';
@@ -632,7 +632,7 @@ class mysql implements \bbn\db\engines
 	* 
 	* @return false|array
 	*/
-	public function get_column_values($table, $field,  array $where = array(), $limit = false, $start = 0, $php = false)
+	public function get_column_values($table, $field,  array $where = [], $limit = false, $start = 0, $php = false)
   {
 		if ( text::check_name($field) && ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
 		{
@@ -664,7 +664,7 @@ class mysql implements \bbn\db\engines
 	* 
 	* @return false|array
 	*/
-	public function get_values_count($table, $field, array $where = array(), $limit, $start, $php = false)
+	public function get_values_count($table, $field, array $where = [], $limit, $start, $php = false)
   {
 		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
 		{

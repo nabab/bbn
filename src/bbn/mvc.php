@@ -599,13 +599,13 @@ class mvc
 	 */
 	public function incl($file_name)
 	{
-    if ( $this->is_controlled ){
+    if ( $this->is_routed ){
       $d = $this->say_dir().'/';
       if ( substr($file_name, -4) !== 'php' ){
         $file_name .= '.php';
       }
       if ( (strpos($file_name, '..') === false) && file_exists($d.$file_name) ){
-        include_once($d.$file_name);
+        include($d.$file_name);
       }
     }
 		return $this;

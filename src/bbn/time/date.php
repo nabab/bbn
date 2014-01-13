@@ -75,7 +75,7 @@ class date
 				if ( $is_today && !$only_date )
 					$date_ok = strftime('%H:%M',$idate);
 				else
-					$date_ok = $is_windows ? strftime('%d/%m/%y',$idate) : strftime('%D',$idate);
+					$date_ok = $is_windows ? strftime('%d/%m/%y',$idate) : strftime('%x',$idate);
 			}
 			else if ( $mode == 'r' )
 			{
