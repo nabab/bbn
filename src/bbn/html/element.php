@@ -172,14 +172,11 @@ class element
         self::$schema = json_decode(self::$schema);
       }
     }
-    if ( is_string(static::$schema) ){
-      $tmp = json_decode(static::$schema, 1);
-      static::$schema = \bbn\tools::to_object(
-              \bbn\tools::merge_arrays(
-                      \bbn\tools::to_array(self::$schema),
-                      \bbn\tools::to_array($tmp)
-              )
-      );
+    if ( !empty(static::$schema) ){
+      static::$schema = \bbn\tools::merge_objects(self::$schema, \bbn\tools::to_object(static::$schema));
+    }
+    else{
+      static::$schema = self::$schema;
     }
   }
   

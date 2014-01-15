@@ -371,7 +371,7 @@ class text
     if ( is_string($st) ){
       if ( self::is_integer($st) && ((substr($st, 0, 1) !== '0') || ($st === '0')) ){
         $tmp = (int)$st;
-        if ( $tmp !== PHP_INT_MAX ){
+        if ( ($tmp < PHP_INT_MAX) && ($tmp > -PHP_INT_MAX) ){
           return $tmp;
         }
       }

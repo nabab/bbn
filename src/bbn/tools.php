@@ -138,7 +138,13 @@ class tools
    * Makes an object of an array
    * @return false|object
    */
-  public static function to_object(array $ar){
+  public static function to_object($ar){
+    if ( is_string($ar) ){
+      return json_decode($ar);
+    }
+    if (is_object($ar) ){
+      $ar = self::to_array($ar);
+    }
     if ( count($ar) === 0 ){
       return new \stdClass();
     }
@@ -153,6 +159,9 @@ class tools
    * @return false|object
    */
   public static function to_array($obj){
+    if ( is_string($obj) ){
+      return json_decode($obj, 1);
+    }
     if ( is_object($obj) || is_array($obj) ){
       foreach ( $obj as $i => $o ){
         if ( is_array($o) || is_object($o) ){
