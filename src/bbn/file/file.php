@@ -92,10 +92,12 @@ class file extends \bbn\obj
 			}
 		}
 		$this->get_extension();
-		if ( is_string($file) && is_file($file) )
-			$this->file = $file;
-		else
+		if ( is_string($file) && is_file($file) ){
+      $this->file = $file;
+    }
+		else{
 			$this->make();
+    }
 		return $this;
 	}
 
@@ -140,25 +142,24 @@ class file extends \bbn\obj
 	 */
 	protected function make()
 	{
-		if ( !$this->file && strpos($this->path,'http://') === 0 )
-		{
+		if ( !$this->file && strpos($this->path,'http://') === 0 ){
 			$d = getcwd();
 			chdir(__DIR__);
 			chdir('../tmp');
 			$f = tempnam('.','image');
-			try
-			{
+			try{
 				$c = file_get_contents($this->path.$this->name);
-				if ( file_put_contents($f,$c) )
-				{
-					if ( substr($this->name,-1) == '/' )
+				if ( file_put_contents($f,$c) ){
+					if ( substr($this->name,-1) == '/' ){
 						$this->name = substr($this->name,0,-1);
+          }
 					chmod($f,0777);
 					$this->file = $f;
 					$this->path = getcwd();
 				}
-				else
+				else{
 					$this->error = 'Impossible to get the file '.$this->path.$this->name;
+        }
 			}
 			catch ( Error $e )
 				{ $this->error = 'Impossible to get the file '.$this->path.$this->name; }
@@ -172,19 +173,21 @@ class file extends \bbn\obj
 	 */
 	public function download()
 	{
-		if ( $this->file )
-		{
-			if ( $handle = @fopen($this->file,"r") )
-			{
-				$buffer = '';
-				while (!feof($handle))
-					$buffer .= fgets($handle, 4096);
-				header('Content-Type: application/octet-stream');
-				header('Content-Length: '.$this->size);
+		if ( $this->file ){
+      if ( !$this->size ){
+        $this->get_size();
+      }
+			if ( $this->size && ($handle = fopen($this->file, "r")) ){
+        header("Content-type: application/octet-stream");
 				header('Content-Disposition: attachment; filename="'.$this->name.'"');
-				echo $buffer;
-				die();
+        while ( !feof($handle) ){
+          echo fread($handle, 65536);
+        }
+        fclose($handle);
 			}
+      else{
+        die("Impossible to read the file ".$this->name);
+      }
 		}
 		return $this;
 	}
@@ -194,8 +197,9 @@ class file extends \bbn\obj
 	 */
 	public function get_hash()
 	{
-		if ( $this->file )
+		if ( $this->file ){
 			return md5_file($this->file);
+    }
 		return '';
 	}
 
@@ -204,8 +208,9 @@ class file extends \bbn\obj
 	 */
 	public function delete()
 	{
-		if ( $this->file )
+		if ( $this->file ){
 			unlink($this->file);
+    }
 		$this->file = false;
 		return $this;
 	}
@@ -216,30 +221,30 @@ class file extends \bbn\obj
 	public function save($dest='./')
 	{
 		$new_name = false;
-		if ( substr($dest,-1) === '/' )
-		{
-			if ( is_dir($dest) )
+		if ( substr($dest,-1) === '/' ){
+			if ( is_dir($dest) ){
 				$new_name = 0;
+      }
 		}
-		else if ( is_dir($dest) )
-		{
+		else if ( is_dir($dest) ){
 			$dest .= '/';
 			$new_name = 0;
 		}
-		else if ( is_dir(substr($dest,0,strrpos($dest,'/'))) )
+		else if ( is_dir(substr($dest,0,strrpos($dest,'/'))) ){
 			$new_name = 1;
-		if ( $new_name !== false )
-		{
-			if ( $new_name === 0 )
+    }
+		if ( $new_name !== false ){
+			if ( $new_name === 0 ){
 				$dest .= $this->name;
-			if ( isset($_FILES) )
-			{
+      }
+			if ( isset($_FILES) ){
 				move_uploaded_file($this->file,$dest);
 				$this->file = $dest;
 				$this->uploaded = 1;
 			}
-			else
+			else{
 				copy($this->file,$dest);
+      }
 		}
 		return $this;
 	}

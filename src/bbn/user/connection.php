@@ -737,6 +737,7 @@ class connection
         return $this->id;
       }
     }
+    return false;
   }
   
 	/**

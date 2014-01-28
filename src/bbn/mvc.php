@@ -970,6 +970,15 @@ class mvc
         default:
           ob_start();
       }
+      if ( !isset($this->obj->output) && isset($this->obj->file) ){
+        if ( is_file($this->obj->file) ){
+          $this->obj->file = new \bbn\file\file($this->obj->file);
+          $this->mode = '';
+        }
+        else if ( is_object($this->obj->file) ){
+          $this->mode = '';
+        }
+      }
 			switch ( $this->mode ){
 				
 				case 'json':
@@ -1017,18 +1026,14 @@ class mvc
 					break;
           
 				default:
-					if ( isset($this->obj->file) ){
-						if ( !is_file($this->obj->file) ){
-							unset($this->obj->file);
-						}
-					}
-					if ( !isset($this->obj->file) ){
+          //die(\bbn\tools::dump($this->obj->file, method_exists($this->obj->file, 'download')));
+					if ( isset($this->obj->file) && is_object($this->obj->file) && method_exists($this->obj->file, 'download') ){
+            $this->obj->file->download();
+          }
+          else{
 						header('HTTP/1.0 404 Not Found');
 						exit();
 					}
-					header("X-Sendfile: ".$this->obj->file);
-					header("Content-type: application/octet-stream");
-					header('Content-Disposition: attachment; filename="' . basename($this->obj->file) . '"');
 			}
 		}
 	}

@@ -64,17 +64,8 @@ class tools
         return $a['function'] === 'log';
       });
       $i = end($backtrace);
-			$r = "[".date('d/m/Y H:i:s')."]\t".$i['file']." - line ".$i['line']."\n";
-			if ( is_object($st) ){
-        $r .= get_class($st);
-      }
-      else if ( is_array($st) ){
-				$r .= print_r($st,true);
-      }
-			else{
-				$r .= $st;
-      }
-			$r .= "\n\n";
+			$r = "[".date('d/m/Y H:i:s')."]\t".$i['file']." - line ".$i['line'].
+              self::get_dump($st).PHP_EOL;
       
       if ( php_sapi_name() === 'cli' ){
         echo $r;
@@ -313,15 +304,17 @@ class tools
     return PHP_EOL.$st.PHP_EOL;
   }
   
+  public static function get_hdump(){
+    return '<p style="white-space:pre">'.htmlentities(call_user_func_array('self::get_dump', func_get_args())).'</p>';
+  }
+  
   public static function dump(){
     echo call_user_func_array('self::get_dump', func_get_args());
     
   }
   
   public static function hdump(){
-    $args = func_get_args();
-    echo '<p style="white-space:pre">'.htmlentities(call_user_func_array('self::get_dump', func_get_args())).'</p>';
-    
+    echo call_user_func_array('self::get_hdump', func_get_args());
   }
 
   public static function build_options($values, $selected='', $empty_label=false){

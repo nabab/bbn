@@ -45,7 +45,7 @@ class ftp extends \bbn\obj
 	/**
 	 * @var mixed
 	 */
-	public $alert;
+	public $error;
 
 
 	/**
@@ -144,6 +144,9 @@ class ftp extends \bbn\obj
 	 */
 	public function checkPath($path)
 	{
+    if ( empty($path) ){
+      return '/';
+    }
 		$new = explode('../',$path);
 		$nnew = count($new);
 		if ( $nnew > 1 )

@@ -18,13 +18,31 @@ class history
           $primary = 'id',
           $date = false,
           $last_rows = false,
-          $ok = false;
+          $ok = false,
+          $enabled = true;
 	
   public static
           $htable = false,
           $hcol = 'active',
           $is_used = false;
+  
 	/**
+	 * @return void 
+	 */
+  public static function disable()
+  {
+    self::$enabled = false;
+  }
+
+	/**
+	 * @return void 
+	 */
+  public static function enable()
+  {
+    self::$enabled = 1;
+  }
+
+  /**
 	 * @return void 
 	 */
 	public static function init(\bbn\db\connection $db, $cfg = [])
@@ -309,7 +327,7 @@ class history
 	 */
   public static function trigger($table, $kind, $moment, $values=[], $where=[])
   {
-    if ( self::check($table) ){
+    if ( self::$enabled && self::check($table) ){
       $table = self::$db->table_full_name($table);
       
       if ( !isset(self::$hstructures[$table]) ){

@@ -249,7 +249,7 @@ class dbsync
       else{
         $to_log['problems']++;
         self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
-        self::log("Problem while syncing, check data with status 5 and ID ".$d['id']);
+        self::log("Problem while syncing (insert), check data with status 5 and ID ".$d['id']);
       }
     }
 
@@ -278,7 +278,7 @@ class dbsync
         }
         else{
           self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
-          self::log("Problem while syncing, check data with status 5 and ID ".$d['id']);
+          self::log("Problem while syncing (delete), check data with status 5 and ID ".$d['id']);
           $to_log['problems']++;
         }
       }
@@ -347,7 +347,7 @@ class dbsync
         }
         else{
           self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
-          self::log("Problem while syncing, check data with status 5 and ID ".$d['id']);
+          self::log("Problem while syncing (update), check data with status 5 and ID ".$d['id']);
           $to_log['problems']++;
         }
       }
