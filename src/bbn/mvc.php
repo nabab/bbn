@@ -117,7 +117,7 @@ class mvc
 	 	$mustache,
 	/**
 	 * Database object
-	 * @var object
+	 * @var \bbn\db\connection
 	 */
 		$db,
 	/**
