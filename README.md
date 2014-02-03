@@ -33,7 +33,6 @@ $db = new \bbn\db\connection($cfg);
   "my_table_name", // table
   ["field1", "field2"], // columns
   ["id" => 25] // WHERE
-  ));
 ));
 
 \bbn\tools::dump($this->db->rselect_all(
