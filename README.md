@@ -27,16 +27,16 @@ $db = new \bbn\db\connection($cfg);
 
 \bbn\tools::hdump($this->db->modelize("my_table_name"));
 
-\bbn\tools::dump(($this->db->get_rows("SELECT * FROM my_table_name WHERE status = ?", $var));
+\bbn\tools::dump($this->db->get_rows("SELECT * FROM my_table_name WHERE status = ?", $var));
 
-\bbn\tools::hdump(($this->db->select(
+\bbn\tools::hdump($this->db->select(
   "my_table_name", // table
   ["field1", "field2"], // columns
   ["id" => 25] // WHERE
   ));
 ));
 
-\bbn\tools::dump(($this->db->rselect_all(
+\bbn\tools::dump($this->db->rselect_all(
   "my_table_name", // table
   [], // all columns
   [["id", "<", 25], ["name", "LIKE", "tri%"]], // WHERE
@@ -45,5 +45,5 @@ $db = new \bbn\db\connection($cfg);
   20 // START 
 ));
 
-\bbn\tools::hdump(($this->db->get_col_array("SELECT id FROM mytable WHERE name LIKE ?", "tri%"));
+\bbn\tools::hdump($this->db->get_col_array("SELECT id FROM mytable WHERE name LIKE ?", "tri%"));
 ```
