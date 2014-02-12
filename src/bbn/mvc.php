@@ -69,6 +69,7 @@ class mvc
 	 * @var boolean
 	 */
 		$cli;
+  
 	public
 	/**
 	 * An external object that can be filled after the object creation and can be used as a global with the function add_inc
@@ -111,25 +112,25 @@ class mvc
 	 */
 		$loaded_views = [],
 	/**
-	 * Mustage templating engine.
-	 * @var object
+	 * @var object Mustachee templating engine
 	 */
 	 	$mustache,
 	/**
-	 * Database object
-	 * @var \bbn\db\connection
+	 * @var \bbn\db\connection Database object
 	 */
 		$db,
 	/**
-	 * $_POST array
-	 * @var array
+	 * @var array $_POST
 	 */
 		$post = [],
 	/**
-	 * $_GET array
-	 * @var array
+	 * @var array $_GET
 	 */
 		$get = [],
+	/**
+	 * @var array $_FILES
+	 */
+		$files = [],
 	/**
 	 * An array of each path bit in the url
 	 * @var array
@@ -225,6 +226,25 @@ class mvc
           $this->get = array_map(function($a){
             return \bbn\str\text::correct_types($a);
           }, $_GET);
+        }
+        if ( count($_FILES) > 0 ){
+          foreach ( $_FILES as $n => $f ){
+            if ( is_array($f['name']) ){
+              $this->files[$n] = [];
+              foreach ( $f['name'] as $i => $v ){
+                array_push($this->files[$n], [
+                  'name' => $v,
+                  'tmp_name' => $f['tmp_name'][$i],
+                  'type' => $f['type'][$i],
+                  'error' => $f['error'][$i],
+                  'size' => $f['size'][$i],
+                ]);
+              }
+            }
+            else{
+              $this->files[$n] = $f;
+            }
+          }
         }
         if ( isset($_SERVER['REQUEST_URI']) && 
         ( BBN_CUR_PATH === '' || strpos($_SERVER['REQUEST_URI'],BBN_CUR_PATH) !== false ) ){
@@ -669,6 +689,26 @@ class mvc
 	}
 
 	/**
+	 * This will get a javascript view encapsulated in an anonymous function.
+	 *
+	 * @param string $path
+	 * @param string $mode
+	 * @return string|false 
+	 */
+	public function get_js($path='')
+	{
+    if ( $r = $this->get_view($path, 'js') ){
+      return '
+<script>
+(function($){
+'.$r.'
+})(jQuery);
+</script>';
+    }
+		return false;
+  }
+
+	/**
 	 * This will get a view.
 	 *
 	 * @param string $path
@@ -970,7 +1010,7 @@ class mvc
         default:
           ob_start();
       }
-      if ( !isset($this->obj->output) && isset($this->obj->file) ){
+      if ( empty($this->obj->output) && !empty($this->obj->file) ){
         if ( is_file($this->obj->file) ){
           $this->obj->file = new \bbn\file\file($this->obj->file);
           $this->mode = '';

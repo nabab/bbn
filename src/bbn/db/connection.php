@@ -982,7 +982,7 @@ class connection extends \PDO implements actions, api, engines
         catch (\PDOException $e ){
           $this->error($e);
         }
-        if ( self::$errorState ){
+        if ( $this->check() ){
           if ( !isset($r) ){
             return $q['prepared'];
           }

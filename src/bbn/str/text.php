@@ -211,7 +211,57 @@ class text
 	/**
 	 * @return void 
 	 */
-	public static function encode_filename($st, $maxlength = 50)
+	public static function encode_filename($st, $maxlength = 50, $extension = '')
+	{
+		$st = self::remove_accents(self::cast($st));
+		$res = '';
+    
+    $args = func_get_args();
+    foreach ( $args as $i => $a ){
+      if ( $i > 0 ){
+        if ( is_string($a) ){
+          $extension = $a;
+        }
+        else if ( is_int($a) ){
+          $maxlength = $a;
+        }
+      }
+    }
+
+    if ( !is_int($maxlength) ){
+      $maxlength = mb_strlen($st);
+    }
+    
+    if ( !empty($extension) &&
+            (self::file_ext($st) === self::change_case($extension, 'lower')) ){
+      $st = substr($st, 0, -(strlen($extension)+1));
+    }
+    
+		for ( $i = 0; $i < $maxlength; $i++ ){
+			if ( mb_ereg_match('[A-z0-9]',mb_substr($st,$i,1)) ){
+				$res .= mb_substr($st,$i,1);
+      }
+			else if ( (mb_strlen($res) > 0) &&
+              (mb_substr($res,-1) != '_') &&
+              ($i < ( mb_strlen($st) - 1 )) ){
+				$res .= '_';
+      }
+		}
+    if ( substr($res, -1) === '_' ){
+      $res = substr($res, 0, -1);
+    }
+    
+    if ( !empty($extension) ){
+      $res .= '.'.$extension;
+    }
+      
+		return $res;
+	}
+
+	/**
+	 * @return void 
+	 */
+	public static function encode_dbname($st, $maxlength = 50)
 	{
 		$st = self::remove_accents(self::cast($st));
 		$res = '';
@@ -221,11 +271,18 @@ class text
     }
     
 		for ( $i = 0; $i < $maxlength; $i++ ){
-			if ( mb_ereg_match('[A-z0-9]',mb_substr($st,$i,1)) )
+			if ( mb_ereg_match('[A-z0-9]',mb_substr($st,$i,1)) ){
 				$res .= mb_substr($st,$i,1);
-			else if ( mb_strlen($res) > 0 && mb_substr($res,-1) != '_' && $i < ( mb_strlen($st) - 1 ) )
+      }
+			else if ( (mb_strlen($res) > 0) &&
+              (mb_substr($res,-1) != '_') &&
+              ($i < ( mb_strlen($st) - 1 )) ){
 				$res .= '_';
+      }
 		}
+    if ( substr($res, -1) === '_' ){
+      $res = substr($res, 0, -1);
+    }
 		return $res;
 	}
 
