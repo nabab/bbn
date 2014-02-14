@@ -126,7 +126,7 @@ interface engines
 	*
 	* @return false|array
 	*/
-	public function get_limit($limit);
+	public function get_limit($limit, $start = 0);
 	
  /**
 	* Fetches the database and returns an array of objects 

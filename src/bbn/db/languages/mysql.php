@@ -392,7 +392,7 @@ class mysql implements \bbn\db\engines
 	/**
 	 * @return string
 	 */
-  public function get_limit($limit) {
+  public function get_limit($limit, $start = 0) {
     if ( is_array($limit) ){
       $args = $limit;
     }

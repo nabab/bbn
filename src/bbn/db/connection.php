@@ -19,6 +19,11 @@ use \bbn\str\text;
 
 class connection extends \PDO implements actions, api, engines
 {
+  const E_CONTINUE = 'continue',
+          E_DIE = 'die',
+          E_STOP_ALL = 'stop_all',
+          E_STOP = 'stop';
+  
 	private
 	/**
 	 * A PHPSQLParser object
@@ -55,11 +60,16 @@ class connection extends \PDO implements actions, api, engines
    * And use start_fancy_stuff to set it back to true
 	 * @var bool
 	 */
-    $fancy = 1;
+    $fancy = 1,
+	/**
+	 * Error state of the current connection
+	 * @var bool
+	 */
+    $has_error = false;
   
 	protected
 	/**
-	 * @var mixed
+	 * @var \bbn\db\languages\mysql Can be other driver
 	 */
 		$language = false,
 	/**
@@ -93,7 +103,7 @@ class connection extends \PDO implements actions, api, engines
    *      die: the script will die with the error
    *      continue: the script and further queries will be executed
 	 */
-		$on_error = 'stop',
+		$on_error = self::E_STOP,
 	/**
 	 * @var bool
 	 */
@@ -152,19 +162,25 @@ class connection extends \PDO implements actions, api, engines
 	 */
     $last_params = ['sequences' => false, 'values' => false];
 	
+  private static 
+	/**
+	 * Error state of the current connection
+	 * @var bool
+	 */
+    $has_error_all = false;
+	/**
+	 * @var int
+	 */
+
 	protected static
 	/**
 	 * @var string
 	 */
-		$line='---------------------------------------------------------------------------------',
-	/**
-	 * @var int
-	 */
-		$errorState = 1;
-
-  private static function hasErrorState()
+		$line='---------------------------------------------------------------------------------';
+  
+  private static function has_error()
   {
-    self::$errorState = 0;
+    self::$has_error_all = true;
   }
   
   private function _cache_name($item, $mode){
@@ -343,7 +359,8 @@ class connection extends \PDO implements actions, api, engines
 	 */
 	public function error($e)
 	{
-    self::hasErrorState();
+    $this->has_error = true;
+    self::has_error();
 		$msg = [
       self::$line,
       date('H:i:s d-m-Y').' - Error in the page!',
@@ -373,7 +390,7 @@ class connection extends \PDO implements actions, api, engines
 		array_push($msg, print_r($this->last_params['values'], 1));
 		array_push($msg, self::$line);
     $this->log($msg);
-    if ( $this->on_error === 'die' ){
+    if ( $this->on_error === self::E_DIE ){
       die(implode('<br>', $msg));
     }
 	}
@@ -420,7 +437,16 @@ class connection extends \PDO implements actions, api, engines
    */
   public function check()
   {
-    if ( isset($this->current) && ( (self::$errorState === 1) || ($this->on_error === 'continue') ) ){
+    if ( isset($this->current) ){
+      if ( $this->on_error === self::E_CONTINUE ){
+        return 1;
+      }
+      if ( self::$has_error_all && ($this->on_error !== self::E_STOP_ALL) ){
+        return false;
+      }
+      if ( $this->has_error && ($this->on_error !== self::E_STOP) ){
+        return false;
+      }
       return 1;
     }
     return false;
@@ -474,9 +500,10 @@ class connection extends \PDO implements actions, api, engines
       \bbn\tools::log($a, 'db');
     }
   }
+
   /**
    * Changes the error mode
-   * Modes: stop (default), die, continue
+   * Modes: @see const
    * 
    * @param string $mode
    * @return \bbn\db\connection
@@ -485,6 +512,15 @@ class connection extends \PDO implements actions, api, engines
     $this->on_error = $mode;
   }
   
+  /**
+   * Gets the error mode
+   * 
+   * @return string
+	 */
+  public function get_error_mode(){
+    return $this->on_error;
+  }
+
   /**
 	* Delete a specific item from the cache
 	* 
@@ -816,6 +852,29 @@ class connection extends \PDO implements actions, api, engines
 		return $this;
 	}
 	
+	/**
+	 * Executes the original PDO query function
+   * 
+	 * @return \PDO::query
+	 */
+	public function stat($table, $column, $where = [], $order = [], $limit = 0, $start = 0)
+	{
+    if ( $this->check() ){
+      $where = $this->where_cfg($where);
+      $sql = 'SELECT COUNT(*) AS '.$this->qte.'num'.$this->qte.', '.
+              $this->col_simple_name($column, 1).PHP_EOL.
+              'FROM '.$this->table_full_name($table, 1).PHP_EOL.
+              'GROUP BY '.$this->col_simple_name($column, 1).PHP_EOL.
+              $this->get_where($where).PHP_EOL.
+              ( empty($order) ? 
+                      'ORDER BY '.$this->qte.'num'.$this->qte.' DESC'
+                      : $this->get_order($order)
+              ).PHP_EOL.
+              $this->get_order($limit, $start);
+      return $this->get_rows($sql, $where['final']);
+    }
+  }
+  
 	/**
 	 * Executes the original PDO query function
    * 
@@ -1897,9 +1956,9 @@ class connection extends \PDO implements actions, api, engines
 	/**
 	 * @return string
 	 */
-	public function get_limit($limit)
+	public function get_limit($limit, $start = 0)
 	{
-    return $this->language->get_limit($limit);
+    return $this->language->get_limit($limit, $start);
 	}
 	
 	/**

@@ -212,6 +212,11 @@ class dbsync
       'inserted_real' => 0,
       'problems' => 0
     ];
+    
+    $mode_db = self::$db->get_error_mode();
+    $mode_dbs = self::$dbs->get_error_mode();
+    self::$db->set_error_mode("continue");
+    self::$dbs->set_error_mode("continue");
 
     $start = ( $test = self::$dbs->get_one("
       SELECT MIN(moment)
@@ -362,6 +367,8 @@ class dbsync
         self::log($k.': '.$v);
       }
     }
+    self::$db->set_error_mode($mode_db);
+    self::$dbs->set_error_mode($mode_dbs);
     self::enable();
   }
 }
