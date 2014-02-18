@@ -42,10 +42,13 @@ class svn
     if ( $this->pass ){
       $st .= ' --password '.$this->pass;
     }
-    return $st;
+    return $st.' --xml 2>&1';
   }
   
   private function parseCMD($st){
+    if ( !mb_detect_encoding($st) ){
+      $st = utf8_encode($st);
+    }
     $tmp = explode("\n", $st);
     $res = [];
     foreach ( $tmp as $t ){
@@ -84,7 +87,7 @@ class svn
 		}
 	}
   
-  public function version($path='.')
+  public function info($path='.')
   {
     if ( $this->has_svn ){
       $this->auth();
@@ -95,7 +98,57 @@ class svn
       system("svn info ".$this->args());
       $st = ob_get_contents();
       ob_end_clean();
+      \bbn\tools::hdump($st);
       return $this->parseCMD($st);
+    }
+  }
+  
+  public function last()
+  {
+    if ( $this->has_svn ){
+      $this->auth();
+      return svn_status($path, SVN_NON_RECURSIVE|SVN_ALL);
+    }
+    else{
+      ob_start();
+      header('Content-Type: text/plain; charset=UTF-8');
+      print(shell_exec("svn info --xml ".$this->args()));
+      $st = ob_get_contents();
+      ob_end_clean();
+      $log = new \SimpleXMLElement($st);
+      if ( isset($log->entry['revision']) ){
+        return (int)$log->entry['revision'];
+      }
+    }
+    
+  }
+  
+  public function log($path='.', $num = 5)
+  {
+    if ( $this->has_svn ){
+      $this->auth();
+      return svn_status($path, SVN_NON_RECURSIVE|SVN_ALL);
+    }
+    else{
+      if ( !$num ){
+        $num = $this->last();
+      }
+      ob_start();
+      header('Content-Type: text/plain; charset=UTF-8');
+      print(shell_exec("svn log -l $num ".$this->args()));
+      $st = ob_get_contents();
+      ob_end_clean();
+      $log = new \SimpleXMLElement($st);
+      $r = [];
+      //\bbn\tools::hdump($st);
+      foreach ( $log->logentry as $l ){
+        $r[(int)$l['revision']] = [
+          'author' => (string)$l->author,
+          'date' => date('Y-m-d H:i:s', strtotime($l->date)),
+          'msg' => (string)$l->msg
+        ];
+      }
+      return $r;
     }
   }
 }

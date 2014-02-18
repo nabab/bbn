@@ -117,8 +117,7 @@ class dir extends \bbn\obj
 	public static function delete($dir, $full=1)
 	{
     $dir = self::clean($dir);
-		if ( is_dir($dir) )
-		{
+		if ( is_dir($dir) ){
 			$files = scandir($dir);
 			foreach ( $files as $file ) 
 			{
@@ -130,10 +129,14 @@ class dir extends \bbn\obj
 						unlink($dir.'/'.$file);
 				}
 			}
-			if ( $full === 1 )
-				rmdir($dir);
+			if ( $full === 1 ){
+				return rmdir($dir);
+      }
 			return true;
 		}
+    else if ( is_file($dir) ){
+      return unlink($dir);
+    }
 		return false;
 	}
 
@@ -145,7 +148,6 @@ class dir extends \bbn\obj
 	 */
 	public static function create_path($dir)
 	{
-    \bbn\tools::hdump($dir);
     if ( !is_dir(dirname($dir)) ){
       if ( !self::create_path(dirname($dir)) ){
         return false;
@@ -157,4 +159,48 @@ class dir extends \bbn\obj
     return 1;
 	}
 
+	/**
+	 * Moves a file or directory to a new location
+   * 
+	 * @param string $orig The file to be moved
+   * @param string $dest The full name of the destination (including basename)
+   * @param mixed $st If $st === true it will be copied over if the destination already exists, otherwise $st will be used to rename the new file in case of conflict
+   * @param int $length The number of characters to use for the revision number; will be zerofilled
+	 * @return string the (new or not) name of the destination or false
+	 */
+	public static function move($orig, $dest, $st = '_v', $length = 0)
+	{
+    if ( file_exists($orig) && self::create_path(dirname($dest)) ){
+      if ( file_exists($dest) ){
+        if ( $st === true ){
+          self::delete($dest);
+        }
+        else{
+          $i = 1;
+          while ( $i ){
+            $dir = dirname($dest).'/';
+            $file_name = \bbn\str\text::file_ext($dest);
+            $file = $file_name[0].$st;
+            if ( $length > 0 ){
+              $len = strlen($i);
+              if ( $len > $length ){
+                return false;
+              }
+              $file .= str_repeat('0', $length - $len);
+            }
+            $file .= $i.'.'.$file_name[1];
+            $i++;
+            if ( !file_exists($dir.$file) ){
+              $dest = $dir.$file;
+              $i = false;
+            }
+          }
+        }
+      }
+      if ( rename($orig, $dest) ){
+        return basename($dest);
+      }
+    }
+    return false;
+	}
 }

@@ -342,7 +342,7 @@ class sqlite implements \bbn\db\engines
 	/**
 	 * @return string
 	 */
-  public function get_order($order, $table = '') {
+  public function get_order($order, $table = '', $aliases = []) {
     if ( is_string($order) ){
       $order = [$order];
     }
@@ -360,11 +360,11 @@ class sqlite implements \bbn\db\engines
           else{
             $dir = 'ASC';
           }
-          if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($direction)])  ){
+          if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($direction)]) || in_array($this->col_simple_name($direction), $aliases) ){
             $r .= $this->escape($direction)." $dir," . PHP_EOL;
           }
         }
-        else if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($col)])  ){
+        else if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($col)]) || in_array($this->col_simple_name($col), $aliases) ){
           $r .= "`$col` " . ( strtolower($direction) === 'desc' ? 'DESC' : 'ASC' ) . "," . PHP_EOL;
         }
       }
@@ -449,6 +449,7 @@ class sqlite implements \bbn\db\engines
 			if ( $php ){
 				$r .= '$db->query(\'';
 			}
+      $aliases = [];
 			$r .= 'SELECT '.PHP_EOL;
 			if ( count($fields) > 0 ){
 				foreach ( $fields as $k => $c ){
@@ -457,6 +458,7 @@ class sqlite implements \bbn\db\engines
 					}
 					else{
             if ( !is_numeric($k) && \bbn\str\text::check_name($k) && ($k !== $c) ){
+              array_push($aliases, $k);
               $r .= "{$this->escape($c)} AS {$this->escape($k)},".PHP_EOL;
             }
             else{
@@ -472,9 +474,9 @@ class sqlite implements \bbn\db\engines
 			}
 			$r = substr($r,0,strrpos($r,',')).PHP_EOL."FROM $table";
 			if ( count($where) > 0 ){
-        $r .= $this->db->get_where($where, $table);
+        $r .= $this->db->get_where($where, $table, $aliases);
       }
-      $r .= PHP_EOL . $this->get_order($order, $table);
+      $r .= PHP_EOL . $this->get_order($order, $table, $aliases);
       if ( $limit ){
   			$r .= PHP_EOL . $this->get_limit([$limit, $start]);
       }

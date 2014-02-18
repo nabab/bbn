@@ -557,6 +557,24 @@ class text
 		return true;
 	}
 	
+	/**
+	 * Checks if a string comply with SQL naming convention
+	 * 
+	 * @return bool
+	 */
+	public static function has_slash(){
+
+		$args = func_get_args();
+		// Each argument must be a string starting with a letter, and having than one character made of letters, numbers and underscores
+		foreach ( $args as $a ){
+      if ( (strpos($a, '/') !== false) || (strpos($a, '\\') !== false) ){
+        return 1;
+			}
+		}
+		
+		return false;
+	}
+	
  /**
 	* Extracts all digits from a string
 	* 

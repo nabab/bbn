@@ -287,6 +287,7 @@ class mvc
 			$this->db =& $parent->db;
 			$this->post =& $parent->post;
 			$this->get =& $parent->get;
+			$this->files =& $parent->files;
 			$this->params =& $parent->params;
 			$this->url =& $parent->url;
 			$this->original_controller =& $parent->original_controller;
@@ -1018,6 +1019,10 @@ class mvc
         else if ( is_object($this->obj->file) ){
           $this->mode = '';
         }
+      }
+      if ( (empty($this->obj->output) && empty($this->obj->file) && ($this->mode !== 'json')) ||
+              (($this->mode === 'json') && empty($this->obj)) ){
+        $this->mode = '';
       }
 			switch ( $this->mode ){
 				

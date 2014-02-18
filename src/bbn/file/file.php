@@ -243,7 +243,7 @@ class file extends \bbn\obj
 				$this->uploaded = 1;
 			}
 			else{
-				copy($this->file,$dest);
+				copy($this->file, $dest);
       }
 		}
 		return $this;

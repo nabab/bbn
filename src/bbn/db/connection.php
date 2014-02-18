@@ -75,7 +75,7 @@ class connection extends \PDO implements actions, api, engines
 	/**
 	 * @var integer
 	 */
-		$cache_renewal = 10,
+		$cache_renewal = 3600,
 	/**
 	 * @var mixed
 	 */
@@ -215,7 +215,7 @@ class connection extends \PDO implements actions, api, engines
       if ( $this->has_apc && ($cache_name = $this->_cache_name($item, $mode)) ){
         if ( apc_exists($cache_name) ){
           $tmp = apc_fetch($cache_name);
-          if ( $tmp['time'] > (time() - $this->cache_renewal) ){
+          if ( !$this->cache_renewal || ($tmp['time'] > (time() - $this->cache_renewal)) ){
             $this->cache[$item] = $tmp['data'];
           }
           else{
@@ -454,7 +454,7 @@ class connection extends \PDO implements actions, api, engines
 	/**
 	 * @todo Thomas fais ton taf!!
 	 *
-	 * @param $cfg
+	 * @param $cfg Mandatory: engine, db Optional: cache_length Other: see engine class
 	 * @return void 
 	 */
 	public function __construct($cfg=[])
@@ -481,6 +481,9 @@ class connection extends \PDO implements actions, api, engines
           $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
           if ( function_exists("apc_add") ){
             $this->has_apc = 1;
+          }
+          if ( isset($cfg['cache_length']) ){
+            $this->cache_renewal = (int)$cfg['cache_length'];
           }
           $this->start_fancy_stuff();
           // SQLite has not keys enabled by default
@@ -1006,7 +1009,7 @@ class connection extends \PDO implements actions, api, engines
         $this->last_query = $q['statement'];
         if ( isset($q['sequences']['DROP']) || isset($q['sequences']['CREATE']) || isset($q['sequences']['ALTER']) ){
           // A voir
-          //$this->clear_cache();
+          $this->clear_cache();
         }
         try{
           if ( $q['prepared'] && ( isset($q['sequences']['INSERT']) || isset($q['sequences']['UPDATE']) || isset($q['sequences']['DELETE']) || isset($q['sequences']['DROP']) || isset($q['sequences']['ALTER']) || isset($q['sequences']['CREATE']) ) ){
@@ -1510,7 +1513,7 @@ class connection extends \PDO implements actions, api, engines
    * @param int $start
    * @return array
    */
-	public function select_all($table, $fields = [], $where = [], $order = false, $limit = 100000, $start = 0)
+	public function select_all($table, $fields = [], $where = [], $order = false, $limit = 0, $start = 0)
 	{
     if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
       return $r->get_objects();
@@ -1529,7 +1532,7 @@ class connection extends \PDO implements actions, api, engines
    * @param int $start
    * @return array
    */
-	public function rselect_all($table, $fields = [], $where = [], $order = false, $limit = 100000, $start = 0)
+	public function rselect_all($table, $fields = [], $where = [], $order = false, $limit = 0, $start = 0)
 	{
     if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
       return $r->get_rows();
@@ -1548,7 +1551,7 @@ class connection extends \PDO implements actions, api, engines
    * @param int $start
    * @return array
    */
-	public function iselect_all($table, $fields = [], $where = [], $order = false, $limit = 100000, $start = 0)
+	public function iselect_all($table, $fields = [], $where = [], $order = false, $limit = 0, $start = 0)
 	{
     if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
       return $r->get_irows();
@@ -1906,7 +1909,7 @@ class connection extends \PDO implements actions, api, engines
 	*
 	* @return string
 	*/
-  public function get_where(array $where, $table='')
+  public function get_where(array $where, $table='', $aliases = [])
   {
     if ( !isset($where['final'], $where['keypair'], $where['values'], $where['fields']) ){
       $where = $this->where_cfg($where);
@@ -1918,14 +1921,15 @@ class connection extends \PDO implements actions, api, engines
         $m = $this->modelize($table);
         if ( !$m || count($m['fields']) === 0 ){
           /*
-           * @todo  check the fields against the table's model
+           * @todo  check the fields against the table's model and the aliases
            */
           return $st;
         }
       }
+      $operators = eval('return \\bbn\\db\\languages\\'.$this->engine.'::$operators;');
       foreach ( $where['final'] as $w ){
         // 2 parameters, we use equal
-      if ( count($w) >= 3 && in_array(strtolower($w[1]), eval('return \\bbn\\db\\languages\\'.$this->engine.'::$operators;')) ){
+        if ( count($w) >= 3 && in_array(strtolower($w[1]), $operators) ){
           // 4 parameters, it's a SQL function, no escaping no binding
           if ( isset($w[3]) ){
             $st .= 'AND '.$this->escape($w[0]).' '.$w[1].' '.$w[2].' ';

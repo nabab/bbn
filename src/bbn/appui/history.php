@@ -113,6 +113,14 @@ class history
 	}
 	
 	/**
+	 * @return date 
+	 */
+	public static function get_date()
+	{
+		return self::$date;
+	}
+	
+	/**
 	 * @return void 
 	 */
 	public static function unset_date()
