@@ -1009,7 +1009,7 @@ class connection extends \PDO implements actions, api, engines
         $this->last_query = $q['statement'];
         if ( isset($q['sequences']['DROP']) || isset($q['sequences']['CREATE']) || isset($q['sequences']['ALTER']) ){
           // A voir
-          $this->clear_cache();
+          //$this->clear_cache();
         }
         try{
           if ( $q['prepared'] && ( isset($q['sequences']['INSERT']) || isset($q['sequences']['UPDATE']) || isset($q['sequences']['DELETE']) || isset($q['sequences']['DROP']) || isset($q['sequences']['ALTER']) || isset($q['sequences']['CREATE']) ) ){

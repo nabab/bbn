@@ -30,7 +30,28 @@ class obj
 	protected $log=array();
 
 
+
 	/**
+	 * Checks whether the error property has been set (so an error happened).
+	 * @return bool
+	 */
+	public function test()
+	{
+		if ( $this->error )
+			return false;
+		return true;
+	}
+  
+  public function log()
+  {
+    $ar = func_get_args();
+    $cn = \bbn\str\text::encode_filename(get_class($this));
+    foreach ( $ar as $a ){
+      \bbn\tools::log($a, $cn);
+    }
+  }
+
+  /**
 	 * @param string $name
 	 * @param array $arguments
 	 * @return void 
@@ -73,19 +94,10 @@ class obj
 	{
 		if ( $name === 'error' && $name === false )
 			$this->error = $value;
-		else if ( $name === 'log' )
+		/*
+     * else if ( $name === 'log' )
 			array_push(\bbn\tools::log, $value);
-	}
-
-	/**
-	 * Checks whether the error property has been set (so an error happened).
-	 * @return bool
-	 */
-	public function test()
-	{
-		if ( $this->error )
-			return false;
-		return true;
+     */
 	}
 }
 ?>
