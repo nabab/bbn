@@ -613,7 +613,7 @@ class text
         }
         $st .= str_repeat('    ', $lev);
         if ( $is_assoc ){
-          $st .= "'".\bbn\str\text::escape_squote($k)."' => ";
+          $st .= ( is_string($k) ? "'".\bbn\str\text::escape_squote($k)."'" : $k ). " => ";
         }
         if ( is_array($v) ){
           $st .= self::export($v, $remove_empty, $lev+1);

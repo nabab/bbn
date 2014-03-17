@@ -263,8 +263,8 @@ class mvc
 				$this->original_mode = $this->params[0];
 				array_shift($this->params);
 			}
-			// Otherwise in the case there's a POST we'll throw back JSON
-			else if ( count($this->post) > 0 ){
+			// Otherwise in the case there's a "appui" POST we'll throw back JSON
+			else if ( isset($this->post['appui']) ){
 				$this->original_mode = 'json';
 			}
 			// Otherwise we'll return a whole DOM (HTML page)

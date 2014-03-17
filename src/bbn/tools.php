@@ -266,11 +266,13 @@ class tools
   
   public static function is_assoc(array $r){
     $keys = array_keys($r);
-    for ( $i = 0; $i < count($r); $i++ ){
-      if ( !isset($r[$i]) ){
-        return true;
+    $c = count($keys);
+    for ( $i = 0; $i < $c; $i++ ){
+      if ( $keys[$i] !== $i ){
+        return 1;
       }
     }
+    return false;
   }
   
   public static function get_dump(){

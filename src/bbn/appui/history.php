@@ -153,32 +153,37 @@ class history
 		}
 	}
 
-  public function get_all_history($table, $start=0, $limit=20){
+  public function get_all_history($table, $start=0, $limit=20, $dir=false){
     $r = [];
     if ( \bbn\str\text::check_name($table) && is_int($start) && is_int($limit) ){
       $r = self::$db->get_rows("
         SELECT DISTINCT(`line`)
         FROM ".self::$db->escape(self::$htable)."
         WHERE `column` LIKE ?
-        ORDER BY last_mod DESC
+        ORDER BY last_mod ".(
+                is_string($dir) &&
+                        (\bbn\str\text::change_case($dir, 'lower') === 'asc') ?
+                  'ASC' : 'DESC' )."
         LIMIT $start, $limit",
         self::$db->table_full_name($table).'.%');
     }
     return $r;
   }
   
-  public function get_mod_history($table, $start=0, $limit=20){
+  public function get_last_modified_lines($table, $start=0, $limit=20){
     $r = [];
     if ( \bbn\str\text::check_name($table) && is_int($start) && is_int($limit) ){
       $r = self::$db->get_rows("
         SELECT DISTINCT(".self::$db->escape('line').")
         FROM ".self::$db->escape(self::$htable)."
         WHERE ".self::$db->escape('column')." LIKE ?
-        AND ( ".self::$db->escape('operation')." LIKE 'INSERT'
-                OR ".self::$db->escape('operation')." LIKE 'UPDATE' )
+        AND ( ".self::$db->escape('operation')." LIKE ?
+                OR ".self::$db->escape('operation')." LIKE ? )
         ORDER BY ".self::$db->escape('last_mod')." DESC
         LIMIT $start, $limit",
-        self::$db->table_full_name($table).'.%');
+        self::$db->table_full_name($table).'.%',
+        'INSERT',
+        'UPDATE');
     }
     return $r;
   }
@@ -344,6 +349,7 @@ class history
       if ( isset(self::$hstructures[$table], self::$hstructures[$table]['history']) && self::$hstructures[$table]['history'] ){
         $s =& self::$hstructures[$table];
         if ( !isset($s['primary']) ){
+          \bbn\tools::dump($s);
           die("You need to have a primary key on a single column in your table $table in order to use the history class");
         }
 
