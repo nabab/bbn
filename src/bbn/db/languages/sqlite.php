@@ -20,7 +20,7 @@ use \bbn\str\text;
 class sqlite implements \bbn\db\engines
 {
   private $db;
-	public static $operators=array('!=','=','<>','<','<=','>','>=','like','clike','slike','not','is','is not', 'in','between','not like');
+	public static $operators=array('!=','=','<>','<','<=','>','>=','like','clike','slike','not','is','is not', 'in','between', 'not like');
   public $qte = '"';
   /**
    * 

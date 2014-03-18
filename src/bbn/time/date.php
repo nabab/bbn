@@ -18,11 +18,37 @@ namespace bbn\time;
 class date 
 {
   private static $windows = null;
+  
   public static function is_windows(){
     if ( is_null(self::$windows) ){
       self::$windows = strtoupper(substr(PHP_OS, 0, 3)) == 'WIN' ? true : false;
     }
     return self::$windows;
+  }
+  
+  public static function last_day_of_month($date, $format = false){
+    if ( $date ){
+      $m = false;
+      if ( \bbn\str\text::is_number($date) ){
+        if ( $date <= 12 ){
+          $m = $date;
+          $y = date('Y');
+        }
+        else{
+          $m = (int)date('m', $date);
+          $y = date('Y', $date);
+        }
+      }
+      else if ( $d = strtotime($date) ){
+        $m = (int)date('m', $d);
+        $y = date('Y', $d);
+      }
+      if ( $m ){
+        $r = mktime(0, 0, -1, $m+1, 1, $y);
+        return $format ? date($format, $r) : $r;
+      }
+    }
+    
   }
   
   public static function validate($date, $format = 'Y-m-d H:i:s'){

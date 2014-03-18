@@ -218,6 +218,51 @@ class history
     }
     return false;
   }
+  
+  public static function get_first_date($table, $id, $column = null){
+    if ( $column ){
+      if ( $d = self::$db->select_one(
+              self::$htable,
+              'last_mod', [
+                ['column', 'LIKE', self::$db->col_full_name($column, $table)],
+                ['line', '=', $id]
+              ],
+              ['last_mod' => 'ASC']) ){
+        return $d;
+      }
+    }
+    return self::$db->select_one(
+            self::$htable,
+            'last_mod', [
+              ['column', 'LIKE', self::$db->table_full_name($table).'.%'],
+              ['line', '=', $id],
+              ['operation', 'LIKE', 'INSERT']
+            ],
+            ['last_mod' => 'ASC']);
+  }
+  
+  public static function get_last_date($table, $id, $column = null){
+    if ( $column ){
+      if ( $d = self::$db->select_one(
+              self::$htable,
+              'last_mod', [
+                ['column', 'LIKE', self::$db->col_full_name($column, $table)],
+                ['line', '=', $id]
+              ],
+              ['last_mod' => 'DESC']) ){
+        return $d;
+      }
+      return self::get_first_date($table, $id);
+    }
+    return self::$db->select_one(
+            self::$htable,
+            'last_mod', [
+              ['column', 'LIKE', self::$db->table_full_name($table).'.%'],
+              ['line', '=', $id],
+              ['operation', 'NOT LIKE', 'DELETE']
+            ],
+            ['last_mod' => 'DESC']);
+  }
 	
 	public static function get_history($table, $id){
     if ( self::check($table) ){

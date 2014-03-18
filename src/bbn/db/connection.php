@@ -321,12 +321,12 @@ class connection extends \PDO implements actions, api, engines
   private function _sel($table, $fields = [], $where = [], $order = false, $limit = 100, $start = 0)
 	{
     $where = $this->where_cfg($where);
-		$hash = $this->make_hash('select', $table, serialize($fields), $this->get_where($where, $table), serialize($order));
+		$hash = $this->make_hash('select', $table, serialize($fields), serialize($this->get_where($where, $table)), serialize($order), $limit, $start);
 		if ( isset($this->queries[$hash]) ){
 			$sql = $this->queries[$this->queries[$hash]]['statement'];
 		}
 		else{
-			$sql = $this->language->get_select($table, $fields, $where['final'], $order, $limit);
+			$sql = $this->language->get_select($table, $fields, $where['final'], $order, $limit, $start);
 		}
     $values = array_values($fields);
 		if ( $sql && (
@@ -1081,7 +1081,7 @@ class connection extends \PDO implements actions, api, engines
     else{
       $where = [];
     }
-    if ( $s = $this->select($table, [$field_to_get], $where, false, 1)){
+    if ( $s = $this->select($table, [$field_to_get], $where)){
       return $s->$field_to_get;
     }
     return false;

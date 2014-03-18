@@ -148,6 +148,9 @@ class dir extends \bbn\obj
 	 */
 	public static function create_path($dir)
 	{
+    if ( !$dir || !is_string($dir) ){
+      return false;
+    }
     if ( !is_dir(dirname($dir)) ){
       if ( !self::create_path(dirname($dir)) ){
         return false;

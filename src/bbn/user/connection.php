@@ -351,14 +351,13 @@ class connection
           WHERE {$this->cfg['arch']['usergroups']['id_user']} = ?",
           $this->id);
         foreach ( $this->groups as $gr ){
-          $this->permissions = array_merge(
-                  json_decode(
-                          $this->db->get_val(
-                                  $this->cfg['tables']['groups'],
-                                  $this->cfg['arch']['groups']['config'],
-                                  $this->cfg['arch']['groups']['id'],
-                                  $gr), 1), $this->permissions);
-          
+          if ( $p = $this->db->get_val(
+            $this->cfg['tables']['groups'],
+            $this->cfg['arch']['groups']['config'],
+            $this->cfg['arch']['groups']['id'],
+            $gr) ){
+            $this->permissions = array_merge(json_decode($p, 1), $this->permissions);
+          }
         }
         $this->set_session('permissions', $this->permissions);
         $this->set_session('groups', $this->groups);
@@ -489,8 +488,7 @@ class connection
                 $this->cfg['tables']['passwords'],
                 $arch['passwords']['pass'],
                 [$arch['passwords']['id_user'] => $this->id],
-                [$arch['passwords']['added'] => 'DESC'],
-                1);
+                [$arch['passwords']['added'] => 'DESC']);
         if ( $this->_check_password($credentials['pass'], $pass) ){
           $this->auth = 1;
           $this->_login();

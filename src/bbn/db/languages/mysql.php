@@ -20,7 +20,7 @@ class mysql implements \bbn\db\engines
 {
   private $db;
 	public static
-          $operators=['!=','=','<>','<','<=','>','>=','like','clike','slike','not','is','is not', 'in','between'],
+          $operators=['!=','=','<>','<','<=','>','>=','like','clike','slike','not','is','is not', 'in','between', 'not like'],
           $numeric_types=['integer', 'int', 'smallint', 'tinyint', 'mediumint', 'bigint', 'decimal', 'numeric', 'float', 'double'];
 
   public $qte = '`';
