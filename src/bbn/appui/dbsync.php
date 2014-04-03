@@ -251,6 +251,9 @@ class dbsync
         $to_log['inserted_sync']++;
         self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
       }
+      else if ( self::$db->select($d['tab'], [], json_decode($d['vals'], 1)) ){
+        self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
+      }
       else{
         $to_log['problems']++;
         self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
@@ -280,6 +283,9 @@ class dbsync
         if ( self::$db->delete($d['tab'], json_decode($d['rows'], 1)) ){
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
           $to_log['delete_real']++;
+        }
+        else if ( !self::$db->select($d['tab'], [], json_decode($d['rows'], 1)) ){
+          self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
         }
         else{
           self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
@@ -349,6 +355,9 @@ class dbsync
         if ( self::$db->update($d['tab'], json_decode($d['vals'], 1), json_decode($d['rows'], 1)) ){
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
           $to_log['updated_real']++;
+        }
+        else if ( self::$db->select($d['tab'], [], \bbn\tools::merge_arrays(json_decode($d['rows'], 1), json_decode($d['vals'], 1))) ){
+          self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
         }
         else{
           self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
