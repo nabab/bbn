@@ -348,7 +348,7 @@ class dbsync
       if ( $d['action'] === 'update' ){
         if ( self::$db->update($d['tab'], json_decode($d['vals'], 1), json_decode($d['rows'], 1)) ){
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
-          $to_log['update_real']++;
+          $to_log['updated_real']++;
         }
         else{
           self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);

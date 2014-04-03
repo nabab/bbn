@@ -30,7 +30,7 @@ class text
     return (string)$st;
   }
   
-  public static function change_case($st, $case = 'uc')
+  public static function change_case($st, $case = false)
   {
     if ( is_string($st) ){
       $case = strtolower($case);
@@ -387,12 +387,7 @@ class text
 	{
     $args = func_get_args();
     foreach ( $args as $a ){
-      if ( is_string($a) ){
-        if ( !preg_match('/^-?(\d+)$/', $a) ){
-          return false;
-        }
-      }
-      else if ( !is_int($a) ) {
+      if ( !preg_match('/^-?(\d+)$/', (string)$a) ){
         return false;
       }
     }

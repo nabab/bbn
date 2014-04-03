@@ -146,18 +146,27 @@ class dir extends \bbn\obj
 	 * @param string $dir
 	 * @return bool 
 	 */
-	public static function create_path($dir)
+	public static function create_path($dir, $chmod=false)
 	{
     if ( !$dir || !is_string($dir) ){
       return false;
     }
     if ( !is_dir(dirname($dir)) ){
-      if ( !self::create_path(dirname($dir)) ){
+      if ( !self::create_path(dirname($dir, $chmod)) ){
         return false;
       }
     }
     if ( !is_dir($dir) ){
-      return mkdir($dir);
+      $ok = mkdir($dir);
+      if ( $chmod ){
+        if ( $chmod === 'parent' ){
+          chmod($dir, substr(sprintf('%o', fileperms(dirname($dir))), -4));
+        }
+        else if ( strlen($chmod) === 4 ){
+          chmod($dir, $chmod);
+        }
+      }
+      return $ok;
     }
     return 1;
 	}

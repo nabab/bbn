@@ -51,6 +51,11 @@ class connection extends \PDO implements actions, api, engines
 	 */
 		$has_apc = false,
 	/**
+	 * Unique string identifier for current connection
+	 * @var bool
+	 */
+		$hash,
+	/**
 	 * @var mixed
 	 */
 		$cache = [],
@@ -320,6 +325,16 @@ class connection extends \PDO implements actions, api, engines
 	 */
   private function _sel($table, $fields = [], $where = [], $order = false, $limit = 100, $start = 0)
 	{
+    // Automatically select non deleted if history is enabled
+    if ( class_exists('\\bbn\\appui\\history', false) && \bbn\appui\history::has_history($this) ){
+      $hcol = \bbn\appui\history::$hcol;
+      if ( !isset($where[$hcol]) ){
+        $cols = array_keys($this->get_columns($table));
+        if ( in_array($hcol, $cols) ){
+          $where[$hcol] = 1;
+        }
+      }
+    }
     $where = $this->where_cfg($where);
 		$hash = $this->make_hash('select', $table, serialize($fields), serialize($this->get_where($where, $table)), serialize($order), $limit, $start);
 		if ( isset($this->queries[$hash]) ){
@@ -478,6 +493,7 @@ class connection extends \PDO implements actions, api, engines
           $this->current = $cfg['db'];
           $this->engine = $cfg['engine'];
           $this->host = isset($cfg['host']) ? $cfg['host'] : '127.0.0.1';
+          $this->hash = $this->make_hash($cfg['args']);
           $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
           if ( function_exists("apc_add") ){
             $this->has_apc = 1;
@@ -663,12 +679,20 @@ class connection extends \PDO implements actions, api, engines
 	protected function make_hash()
 	{
 		$args = func_get_args();
+    if ( (count($args) === 1) && is_array($args[0]) ){
+      $args = $args[0];
+    }
 		$st = '';
 		foreach ( $args as $a ){
-			$st .= (string) $a;
+			$st .= serialize($a);
 		}
 		return $this->hash_contour.md5($st).$this->hash_contour;
 	}
+  
+  public function get_hash()
+  {
+    return $this->hash;
+  }
 	
  /**
   * Apply a function each time the methods $kind are used 

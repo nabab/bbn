@@ -569,7 +569,7 @@ class mvc
 				if ( $this->get_controller($fpath) ){
 					if ( strlen($fpath) < strlen($this->path) ){
             $this->arguments = [];
-            $args = explode('/', substr($this->path,strlen($fpath)));
+            $args = explode('/', substr($this->path, strlen($fpath)));
             foreach ( $args as $a ){
               if ( \bbn\str\text::is_number($a) ){
                 $a = (int)$a;
@@ -582,8 +582,8 @@ class mvc
 						}
 						$t = end($this->arguments);
 						while ( empty($t) ){
-							$t = end($this->arguments);
 							array_pop($this->arguments);
+							$t = end($this->arguments);
 						}
 					}
 					break;

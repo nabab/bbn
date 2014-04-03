@@ -7,10 +7,10 @@ class history
 {
 	
 	private static
-          /**
-           * @var \bbn\db\connection The DB connection
-           */
+          /* @var \bbn\db\connection The DB connection */
           $db = false,
+          /* @var array A collection of the  */
+          $dbs = [],
           $hstructures = array(),
           $admin_db = '',
           $huser = false,
@@ -42,25 +42,37 @@ class history
     self::$enabled = 1;
   }
 
+	/**
+	 * @return bool
+	 */
+  public static function is_enabled()
+  {
+    return self::$enabled === 1;
+  }
+
   /**
 	 * @return void 
 	 */
 	public static function init(\bbn\db\connection $db, $cfg = [])
 	{
-    self::$db = $db;
-    self::$db->set_trigger('\\bbn\\appui\\history::trigger');
-    $vars = get_class_vars('\\bbn\\appui\\history');
-    foreach ( $cfg as $cf_name => $cf_value ){
-      if ( array_key_exists($cf_name, $vars) ){
-        self::$$cf_name = $cf_value;
+    $hash = $db->get_hash();
+    if ( !in_array($hash, self::$dbs) ){
+      array_push(self::$dbs, $hash);
+      self::$db = $db;
+      self::$db->set_trigger('\\bbn\\appui\\history::trigger');
+      $vars = get_class_vars('\\bbn\\appui\\history');
+      foreach ( $cfg as $cf_name => $cf_value ){
+        if ( array_key_exists($cf_name, $vars) ){
+          self::$$cf_name = $cf_value;
+        }
       }
+      if ( !self::$admin_db ){
+        self::$admin_db = self::$db->current;
+      }
+      self::$htable = self::$admin_db.'.'.self::$prefix.'history';
+      self::$ok = 1;
+      self::$is_used = 1;
     }
-    if ( !self::$admin_db ){
-      self::$admin_db = self::$db->current;
-    }
-		self::$htable = self::$admin_db.'.'.self::$prefix.'history';
-    self::$ok = 1;
-    self::$is_used = 1;
 	}
   
 	/**
@@ -68,6 +80,14 @@ class history
 	 */
   public static function is_init(){
     return self::$ok;
+  }
+	
+	/**
+	 * @return bool
+	 */
+  public static function has_history($db){
+    $hash = $db->get_hash();
+    return in_array($hash, self::$dbs);
   }
 	
 	/**
@@ -85,13 +105,26 @@ class history
 	}
 	
 	/**
+   * Sets the "active" column name 
+   * 
 	 * @return void 
 	 */
 	public static function set_hcol($hcol)
 	{
-		// Sets the "active" column name 
 		if ( text::check_name($hcol) ){
 			self::$hcol = $hcol;
+		}
+	}
+	
+	/**
+   * Gets the "active" column name 
+   * 
+	 * @return string the "active" column name 
+	 */
+	public static function get_hcol()
+	{
+		if ( text::check_name(self::$hcol) ){
+			self::$hcol = self::$hcol;
 		}
 	}
 	
@@ -100,13 +133,15 @@ class history
 	 */
 	public static function set_date($date)
 	{
-		// Sets the "active" column name 
+		// Sets the current date
 		if ( !\bbn\str\text::is_number($date) ){
-      $date = strtotime($date);
+      if ( !($date = strtotime($date)) ){
+        return false;
+      }
     }
     $t = time();
     // Impossible to write history in the future
-    if ( $t < $date ){
+    if ( $date > $t ){
       $date = $t;
     }
 		self::$date = date('Y-m-d H:i:s', $date);
@@ -151,6 +186,15 @@ class history
 		if ( \bbn\str\text::is_number($huser) ){
 			self::$huser = $huser;
 		}
+	}
+
+	/**
+	 * Gets the user ID that is being used to fill the user_id field
+	 * @return int
+	 */
+	public static function get_huser()
+	{
+		return self::$huser;
 	}
 
   public function get_all_history($table, $start=0, $limit=20, $dir=false){
