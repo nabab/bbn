@@ -378,7 +378,7 @@ class connection extends \PDO implements actions, api, engines
     self::has_error();
 		$msg = [
       self::$line,
-      date('H:i:s d-m-Y').' - Error in the page!',
+      'Error in the page!',
       self::$line
     ];
 		$b = debug_backtrace();
@@ -386,8 +386,8 @@ class connection extends \PDO implements actions, api, engines
 			if ( isset($c['file']) ){
 				array_push($msg,'File '.$c['file'].' - Line '.$c['line']);
 				array_push($msg,
-					( isset($c['class']) ?  'Class '.$c['class'].' - ' : '' ).
-					( isset($c['function']) ?  'Function '.$c['function'] : '' )/*.
+					( isset($c['class']) ?  '  Class '.$c['class'].' - ' : '' ).
+					( isset($c['function']) ?  '  Function '.$c['function'] : '' )/*.
 					( isset($c['args']) ? 'Arguments: '.substr(print_r($c['args'],1),0,100) : '' )*/
 				);
 			}
@@ -396,15 +396,20 @@ class connection extends \PDO implements actions, api, engines
     if ( is_string($e) ){
       array_push($msg,'Error message: '.$e);
     }
-		if ( method_exists($e, "getMessage") ){
+		else if ( method_exists($e, "getMessage") ){
 			array_push($msg,'Error message: '.$e->getMessage());
 		}
 		array_push($msg, self::$line);
 		array_push($msg, $this->last());
 		array_push($msg, self::$line);
-		array_push($msg, print_r($this->last_params['values'], 1));
-		array_push($msg, self::$line);
-    $this->log($msg);
+    if ( $this->last_params['values'] ){
+      array_push($msg, self::$line);
+      array_push($msg, 'Parameters');
+      array_push($msg, self::$line);
+      array_push($msg, \bbn\tools::get_dump($this->last_params['values']));
+      array_push($msg, self::$line);
+    }
+    $this->log(implode(PHP_EOL, $msg));
     if ( $this->on_error === self::E_DIE ){
       die(implode('<br>', $msg));
     }

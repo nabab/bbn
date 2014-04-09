@@ -28,9 +28,7 @@ class obj
 	 * @var array
 	 */
 	protected $log=array();
-
-
-
+  
 	/**
 	 * Checks whether the error property has been set (so an error happened).
 	 * @return bool
@@ -50,7 +48,7 @@ class obj
       \bbn\tools::log($a, $cn);
     }
   }
-
+  
   /**
 	 * @param string $name
 	 * @param array $arguments
@@ -58,6 +56,7 @@ class obj
 	 */
 	public function __call($name, $arguments)
 	{
+    $this->log(["Wrong method used: $name with arguments:", $arguments]);
 		return $this;
 	}
 
@@ -65,22 +64,21 @@ class obj
 	 * @param string $name
 	 * @param array $arguments
 	 * @return void 
-	 */
 	public static function __callStatic($name, $arguments)
 	{
+    $this->log(["Wrong static method used: $name with arguments:", $arguments]);
 		return false;
 	}
+	 */
 
 	/**
 	 * get property from delegate link.
 	 *
 	 * @param string $name
 	 * @return void 
-	 */
 	public function __get($name)
 	{
-		if ( isset($this->$name) )
-			return $this->$name;
+		return ($name === 'error') && isset($this->error) ? $this->error : false;
 	}
 
 	/**
@@ -89,15 +87,14 @@ class obj
 	 * @param string $name
 	 * @param mixed $value
 	 * @return void 
-	 */
 	public function __set($name, $value)
 	{
-		if ( $name === 'error' && $name === false )
+		if ( $name === 'error' ){
 			$this->error = $value;
+    }
 		/*
      * else if ( $name === 'log' )
 			array_push(\bbn\tools::log, $value);
-     */
 	}
+	 */
 }
-?>

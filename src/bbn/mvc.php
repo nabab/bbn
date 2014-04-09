@@ -19,7 +19,7 @@ namespace bbn;
  * @todo Look into the check function and divide it
  */
 
-class mvc 
+class mvc extends obj
 {
   
 	private
@@ -1069,7 +1069,9 @@ class mvc
 						$this->obj->img->display();
 					}
 					else{
+            $this->log("Impossible to display the following image: ".$this->obj->img->name);
 						header('HTTP/1.0 404 Not Found');
+            
 					}
 					break;
           
@@ -1079,6 +1081,7 @@ class mvc
             $this->obj->file->download();
           }
           else{
+            $this->log("Impossible to display the following controller", $this);
 						header('HTTP/1.0 404 Not Found');
 						exit();
 					}

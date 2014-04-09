@@ -106,21 +106,26 @@ class tools
       }
       $a2 = $args[1];
     }
-    $keys = array_unique(array_merge(array_keys($a1), array_keys($a2)));
-    $r = [];
-    foreach ( $keys as $k ) {
-      if ( !array_key_exists($k, $a1) && !array_key_exists($k, $a2) ){
-        continue;
+    if ( self::is_assoc($a1) && self::is_assoc($a2) ){
+      $keys = array_unique(array_merge(array_keys($a1), array_keys($a2)));
+      $r = [];
+      foreach ( $keys as $k ) {
+        if ( !array_key_exists($k, $a1) && !array_key_exists($k, $a2) ){
+          continue;
+        }
+        else if ( !array_key_exists($k, $a2) ){
+          $r[$k] = $a1[$k];
+        }
+        else if ( !array_key_exists($k, $a1) || !is_array($a2[$k]) || !is_array($a1[$k]) || is_numeric(key($a2[$k])) ){
+          $r[$k] = $a2[$k];
+        }
+        else{
+          $r[$k] = self::merge_arrays($a1[$k], $a2[$k]);
+        }
       }
-      else if ( !array_key_exists($k, $a2) ){
-        $r[$k] = $a1[$k];
-      }
-      else if ( !array_key_exists($k, $a1) || !is_array($a2[$k]) || !is_array($a1[$k]) || is_numeric(key($a2[$k])) ){
-        $r[$k] = $a2[$k];
-      }
-      else{
-        $r[$k] = self::merge_arrays($a1[$k], $a2[$k]);
-      }
+    }
+    else{
+      $r = array_merge($a1, $a2);
     }
     return $r;
   }
