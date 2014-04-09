@@ -387,16 +387,11 @@ class text
 	{
     $args = func_get_args();
     foreach ( $args as $a ){
-      if ( is_string($a) ){
-        if ( !preg_match('/^-?(\d+)$/', $a) ){
-          return false;
-        }
-      }
-      else if ( !is_int($a) ){
+      if ( !preg_match('/^-?(\d+)$/', (string)$a) ){
         return false;
       }
     }
-    return 1;
+    return true;
   }
   
 	/**
@@ -416,7 +411,7 @@ class text
         return false;
       }
     }
-    return 1;
+    return true;
   }
   
 	/**
@@ -432,7 +427,7 @@ class text
           return $tmp;
         }
       }
-      else if ( self::is_decimal($st) && (substr($st, 0, 1) !== '0') ){
+      else if ( self::is_decimal($st) && (substr($st, -1) !== '0') ){
         return (float)$st;
       }
     }
@@ -651,4 +646,3 @@ class text
   }
 
 }
-?>
