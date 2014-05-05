@@ -367,6 +367,15 @@ class connection
   }
   
   /**
+   * Returns all the current user's permissions
+   * 
+   * @return array
+   */
+  public function get_permissions(){
+    return $this->permissions;
+  }
+  
+  /**
    * Checks if the user has the given permission
    * 
    * @param string $name The name of the permission

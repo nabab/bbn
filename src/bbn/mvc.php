@@ -248,12 +248,12 @@ class mvc extends obj
         }
         if ( isset($_SERVER['REQUEST_URI']) && 
         ( BBN_CUR_PATH === '' || strpos($_SERVER['REQUEST_URI'],BBN_CUR_PATH) !== false ) ){
-          $url = explode("?", $_SERVER['REQUEST_URI'])[0];
+          $url = explode("?", urldecode($_SERVER['REQUEST_URI']))[0];
           $tmp = explode('/', substr($url, strlen(BBN_CUR_PATH)));
           $num_params = count($tmp);
           foreach ( $tmp as $t ){
             if ( !empty($t) ){
-              array_push($this->params,$t);
+              array_push($this->params, $t);
             }
           }
         }
@@ -341,7 +341,6 @@ class mvc extends obj
 		foreach ( $ar as $a ){
 			if ( !is_string($a) ||
               (strpos($a,'./') !== false) ||
-              (strpos($a,'../') !== false) ||
               (strpos($a,'/') === 0) ){
 				die("The path $p is not an acceptable value");
 			}
@@ -625,7 +624,7 @@ class mvc extends obj
 	{
     if ( $this->is_routed ){
       $d = $this->say_dir().'/';
-      if ( substr($file_name, -4) !== 'php' ){
+      if ( substr($file_name, -4) !== '.php' ){
         $file_name .= '.php';
       }
       if ( (strpos($file_name, '..') === false) && file_exists($d.$file_name) ){
@@ -693,7 +692,7 @@ class mvc extends obj
 	}
 
 	/**
-	 * This will get a javascript view encapsulated in an anonymous function.
+	 * This will get a javascript view encapsulated in an anonymous function for embedding in HTML.
 	 *
 	 * @param string $path
 	 * @param string $mode
@@ -710,6 +709,22 @@ class mvc extends obj
 </script>';
     }
 		return false;
+  }
+
+	/**
+	 * This will add a javascript view to $this->obj->script
+   * Chainable
+	 *
+	 * @param string $path
+	 * @param string $mode
+	 * @return string|false 
+	 */
+	public function add_js($path='', $data=false)
+	{
+    if ( $r = $this->get_view($path, 'js') ){
+      $this->add_script($this->render($r, $data ? $data : $this->data));
+    }
+		return $this;
   }
 
 	/**
@@ -750,6 +765,20 @@ class mvc extends obj
 				}
 			}
 		}
+		return false;
+	}
+
+	/**
+	 * This will get a the content of a file located within the data path
+	 *
+	 * @param string $file_name
+	 * @return string|false 
+	 */
+	public function get_content($file_name)
+	{
+		if ( $this->check_path($file_name) && defined('BBN_DATA_PATH') && is_file(BBN_DATA_PATH.$file_name) ){
+      return file_get_contents(BBN_DATA_PATH.$file_name);
+    }
 		return false;
 	}
 

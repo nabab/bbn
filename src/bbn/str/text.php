@@ -387,7 +387,12 @@ class text
 	{
     $args = func_get_args();
     foreach ( $args as $a ){
-      if ( !preg_match('/^-?(\d+)$/', (string)$a) ){
+      if ( is_string($a) ){
+        if ( !preg_match('/^-?(\d+)$/', (string)$a) ){
+          return false;
+        }
+      }
+      else if ( !is_int($a) ){
         return false;
       }
     }
@@ -427,6 +432,7 @@ class text
           return $tmp;
         }
       }
+      // If it's a decimal, not ending with a zero
       else if ( self::is_decimal($st) && (substr($st, -1) !== '0') ){
         return (float)$st;
       }

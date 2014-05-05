@@ -45,6 +45,11 @@ class dir extends \bbn\obj
     }
 		return 1;
 	}
+  
+  public static function cur($dir)
+  {
+    return strpos($dir, './') === 0 ? substr($dir, 2) : $dir;
+  }
 
 	/**
 	 * Returns an array of directories in a directory.
@@ -57,15 +62,15 @@ class dir extends \bbn\obj
 	public static function get_dirs($dir)
 	{
     $dir = self::clean($dir);
-		if ( is_dir($dir) )
-		{
-			$dirs = array();
+		if ( is_dir($dir) ){
+			$dirs = [];
 			$fs = scandir($dir);
-			foreach ( $fs as $f )
-			{
-				if ( $f !== '.' && $f !== '..' && is_dir($dir.'/'.$f) )
-					array_push($dirs,$dir.'/'.$f);
+			foreach ( $fs as $f ){
+				if ( $f !== '.' && $f !== '..' && is_dir($dir.'/'.$f) ){
+					array_push($dirs, self::cur($dir.'/').$f);
+        }
 			}
+      natcasesort($dirs);
 			return $dirs;
 		}
 		return false;
@@ -84,22 +89,20 @@ class dir extends \bbn\obj
 	public static function get_files($dir, $including_dirs=false)
 	{
     $dir = self::clean($dir);
-		if ( is_dir($dir) )
-		{
-			if ( substr($dir,-1) === '/' )
-				$dir = substr($dir,0,-1);
+		if ( is_dir($dir) ){
 			$files = [];
 			$fs = scandir($dir);
-			foreach ( $fs as $f )
-			{
-				if ( $f !== '.' && $f !== '..' )
-				{
-					if ( is_file($dir.'/'.$f) )
-						array_push($files,$dir.'/'.$f);
-					else if ( $including_dirs )
-						array_push($files,$dir.'/'.$f);
+			foreach ( $fs as $f ){
+				if ( $f !== '.' && $f !== '..' ){
+					if ( $including_dirs ){
+						array_push($files, self::cur($dir.'/').$f);
+          }
+					else if ( is_file($dir.'/'.$f) ){
+						array_push($files, self::cur($dir.'/').$f);
+          }
 				}
 			}
+      natcasesort($files);
 			return $files;
 		}
 		return false;
@@ -152,11 +155,11 @@ class dir extends \bbn\obj
       return false;
     }
     if ( !is_dir(dirname($dir)) ){
-      if ( !self::create_path(dirname($dir, $chmod)) ){
+      if ( !self::create_path(dirname($dir), $chmod) ){
         return false;
       }
     }
-    if ( !is_dir($dir) ){
+    if ( $dir && !is_dir($dir) ){
       $ok = mkdir($dir);
       if ( $chmod ){
         if ( $chmod === 'parent' ){
