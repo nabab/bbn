@@ -70,7 +70,7 @@ class dir extends \bbn\obj
 					array_push($dirs, self::cur($dir.'/').$f);
         }
 			}
-      natcasesort($dirs);
+      \bbn\tools::sort($dirs);
 			return $dirs;
 		}
 		return false;
@@ -102,7 +102,7 @@ class dir extends \bbn\obj
           }
 				}
 			}
-      natcasesort($files);
+      \bbn\tools::sort($files);
 			return $files;
 		}
 		return false;
@@ -147,6 +147,7 @@ class dir extends \bbn\obj
 	 * Creates all the directories from the path taht don't exist
 	 *
 	 * @param string $dir
+	 * @param int $chmod
 	 * @return bool 
 	 */
 	public static function create_path($dir, $chmod=false)
@@ -160,14 +161,14 @@ class dir extends \bbn\obj
       }
     }
     if ( $dir && !is_dir($dir) ){
-      $ok = mkdir($dir);
       if ( $chmod ){
         if ( $chmod === 'parent' ){
-          chmod($dir, substr(sprintf('%o', fileperms(dirname($dir))), -4));
+          $chmod = substr(sprintf('%o', fileperms(dirname($dir))), -4);
         }
-        else if ( strlen($chmod) === 4 ){
-          chmod($dir, $chmod);
-        }
+        $ok = mkdir($dir, $chmod);
+      }
+      else{
+        $ok = mkdir($dir);
       }
       return $ok;
     }

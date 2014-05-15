@@ -407,5 +407,13 @@ class tools
     }
   }
   
+  public static function sort(&$ar){
+    usort($ar, function($a, $b){
+      $a = str_replace('.', '0', str_replace('_', '1', \bbn\str\text::change_case($a, 'lower')));
+      $b = str_replace('.', '0', str_replace('_', '1', \bbn\str\text::change_case($b, 'lower')));
+      return strcmp($a, $b);
+    });
+  }
+  
 }
 ?>
