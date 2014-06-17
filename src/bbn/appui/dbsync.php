@@ -282,7 +282,7 @@ class dbsync
       if ( $d['action'] === 'delete' ){
         if ( self::$db->delete($d['tab'], json_decode($d['rows'], 1)) ){
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
-          $to_log['delete_real']++;
+          $to_log['deleted_real']++;
         }
         else if ( !self::$db->select($d['tab'], [], json_decode($d['rows'], 1)) ){
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);

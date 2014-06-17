@@ -331,6 +331,7 @@ class tools
       if ( $empty_label !== false ){
         $r .= '<option value="">'.$empty_label.'</option>';
       }
+      $is_assoc = self::is_assoc($values);
       foreach ( $values as $k => $v )
       {
         if ( is_array($v) && count($v) == 2 )
@@ -338,12 +339,13 @@ class tools
           $value = $v[0];
           $title = $v[1];
         }
-        else if ( !isset($values[0]) ){
+        else if ( !isset($values[0]) && $is_assoc ){
           $value = $k;
           $title = $v;
         }
-        else if ( is_string($v) )
+        else {
           $value = $title = $v;
+        }
         if ( isset($value,$title) ){
           $r .= '<option value="'.$value.'"'.
                   ( $value == $selected ? ' selected="selected"' : '').

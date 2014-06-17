@@ -116,7 +116,11 @@ class mysql implements \bbn\db\engines
 	{
     if ( is_string($table) && ($table = trim($table)) ){
       $mtable = explode(".", str_replace("`", "", $table));
-      if ( count($mtable) === 2 ){
+      if ( count($mtable) === 3 ){
+        $db = trim($mtable[0]);
+        $table = trim($mtable[1]);
+      }
+      else if ( count($mtable) === 2 ){
         $db = trim($mtable[0]);
         $table = trim($mtable[1]);
       }
@@ -142,7 +146,17 @@ class mysql implements \bbn\db\engines
   {
     if ( is_string($table) && ($table = trim($table)) ){
       $mtable = explode(".", str_replace("`", "", $table));
-      $table = end($mtable);
+      switch ( count($mtable) ){
+        case 1:
+          $table = $mtable[0];
+          break;
+        case 2:
+          $table = $mtable[1];
+          break;
+        case 3:
+          $table = $mtable[1];
+          break;
+      }
       if ( text::check_name($table) ){
         return $escaped ? "`".$table."`" : $table;
       }

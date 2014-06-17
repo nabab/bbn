@@ -855,7 +855,7 @@ class mvc extends obj
 					function() use ($db, $last_model_file, $data)
 					{
 						$r = include($last_model_file);
-						return $r ? $r : array();
+						return is_array($r) ? $r : array();
 					}
 				);
 			}
