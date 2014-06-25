@@ -346,7 +346,7 @@ class mvc extends obj
 			if ( !is_string($a) ||
               (strpos($a,'./') !== false) ||
               (strpos($a,'/') === 0) ){
-				die("The path $p is not an acceptable value");
+				die("The path $a is not an acceptable value");
 			}
 		}
 		return 1;
@@ -689,7 +689,7 @@ class mvc extends obj
 			$this->obj = new \stdClass();
 			$this->control();
 			if ( $this->has_data() && isset($this->obj->output) ){
-				$this->obj->output = $this->render($this->obj->output,$this->data);
+				$this->obj->output = $this->render($this->obj->output, $this->data);
 			}
 		}
 		return $this;
@@ -723,10 +723,19 @@ class mvc extends obj
 	 * @param string $mode
 	 * @return string|false 
 	 */
-	public function add_js($path='', $data=false)
+	public function add_js()
 	{
-    if ( $r = $this->get_view($path, 'js') ){
-      $this->add_script($this->render($r, $data ? $data : $this->data));
+    $args = func_get_args();
+    foreach ( $args as $a ){
+      if ( is_array($a) ){
+        $data = $a;
+      }
+      else if ( is_string($a) ){
+        $path = $a;
+      }
+    }
+    if ( $r = $this->get_view(isset($path) ? $path : '', 'js') ){
+      $this->add_script($this->render($r, isset($data) ? $data : $this->data));
     }
 		return $this;
   }
