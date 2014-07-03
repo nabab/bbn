@@ -49,7 +49,18 @@ class tools
 				array_push(self::$info,print_r($st,true));
 		}
 	}
-	/**
+
+  /**
+	 * Tells whether the current system from which PHP is executed is Windows or not
+	 *
+	 * @return bool
+	 */
+  public static function is_windows()
+  {
+    return strtoupper(substr(PHP_OS, 0, 3)) == 'WIN';
+  }
+  
+  /**
 	 * Add information to the $info array
 	 *
 	 * @param string $st

@@ -21,7 +21,7 @@ class date
   
   public static function is_windows(){
     if ( is_null(self::$windows) ){
-      self::$windows = strtoupper(substr(PHP_OS, 0, 3)) == 'WIN' ? true : false;
+      self::$windows = \bbn\tools::is_windows();
     }
     return self::$windows;
   }

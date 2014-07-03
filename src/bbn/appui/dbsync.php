@@ -244,14 +244,19 @@ class dbsync
       if ( isset(self::$methods['cbf1']) ){
         self::cbf1($d);
       }
-      if ( self::$db->insert($d['tab'], json_decode($d['vals'], 1)) ){
+      $vals = json_decode($d['vals'], 1);
+      if ( !is_array($vals) ){
+        $to_log['problems']++;
+        self::log("Hey, look urgently at the row $d[id]!");
+      }
+      else if ( self::$db->insert($d['tab'], $vals) ){
         if ( isset(self::$methods['cbf2']) ){
           self::cbf2($d);
         }
         $to_log['inserted_sync']++;
         self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
       }
-      else if ( self::$db->select($d['tab'], [], json_decode($d['vals'], 1)) ){
+      else if ( self::$db->select($d['tab'], [], $vals) ){
         self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
       }
       else{

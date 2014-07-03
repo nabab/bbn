@@ -43,7 +43,7 @@ class obj
   public function log()
   {
     $ar = func_get_args();
-    $cn = \bbn\str\text::encode_filename(get_class($this));
+    $cn = \bbn\str\text::encode_filename(str_replace('\\', '_', get_class($this)));
     foreach ( $ar as $a ){
       \bbn\tools::log($a, $cn);
     }
