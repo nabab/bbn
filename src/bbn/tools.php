@@ -82,6 +82,7 @@ class tools
       }
 		}
 	}
+  
   public static function merge_objects($o1, $o2){
     $args = func_get_args();
     if ( count($args) > 2 ){
@@ -427,6 +428,28 @@ class tools
   public static function is_windows()
   {
     return strtoupper(substr(PHP_OS, 0, 3)) == 'WIN';
+  }
+  
+  public static function curl($url, $param = false, $method = false){
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    if (is_object($param) ){
+      $param = self::to_array($param);
+    }
+    if ( is_array($param) && (count($param) > 0) ){
+      if ( $method === 'post' ){
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($param));
+      }
+      else{
+        curl_setopt($ch, CURLOPT_URL, $url.'?'.http_build_query($param));
+      }
+    }
+    else{
+      curl_setopt($ch, CURLOPT_URL, $url);
+    }
+    return curl_exec($ch);
   }
 }
 ?>
