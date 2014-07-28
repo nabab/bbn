@@ -195,11 +195,13 @@ class environment{
         return \bbn\str\text::correct_types($a);
       }, $_POST);
     }
+    
     if ( count($_GET) > 0 ){
       $this->get = array_map(function($a){
         return \bbn\str\text::correct_types($a);
       }, $_GET);
     }
+    
     if ( count($_FILES) > 0 ){
       foreach ( $_FILES as $n => $f ){
         if ( is_array($f['name']) ){
@@ -219,8 +221,11 @@ class environment{
         }
       }
     }
-    if ( isset($_SERVER['REQUEST_URI']) && 
-    ( BBN_CUR_PATH === '' || strpos($_SERVER['REQUEST_URI'],BBN_CUR_PATH) !== false ) ){
+    
+    if ( isset($_SERVER['REQUEST_URI']) && (
+            BBN_CUR_PATH === '' ||
+            strpos($_SERVER['REQUEST_URI'],BBN_CUR_PATH) !== false
+            ) ){
       $url = explode("?", urldecode($_SERVER['REQUEST_URI']))[0];
       $tmp = explode('/', substr($url, strlen(BBN_CUR_PATH)));
       $num_params = count($tmp);
@@ -230,16 +235,20 @@ class environment{
         }
       }
     }
+    
     if ( is_object($db) && ( $class = get_class($db) ) && ( $class === 'PDO' || strpos($class, 'bbn\\db\\') !== false ) ){
       $this->db = $db;
     }
     else{
       $this->db = false;
     }
+    
+    /** @property \stdClass $inc An object which properties will store another object accessible throughout controllers and models */
     $this->inc = new \stdClass();
     $this->routes = $parent;
     $this->cli = (php_sapi_name() === 'cli');
     $this->mustache = false;
+    
     // When using CLI a first parameter can be used as route,
     // a second JSON encoded can be used as $this->post
     if ( $this->cli ){
@@ -259,6 +268,7 @@ class environment{
         }
       }
     }
+    
     // If an available mode starts the URL params, it will be picked up
     if ( count($this->params) > 0 && isset($this->outputs[$this->params[0]]) ){
       $this->original_mode = $this->params[0];
@@ -287,46 +297,45 @@ class environment{
     $path = $this->url;
 
     $this->inc =& $parent->inc;
-			$this->routes =& $parent->routes;
-			$this->mustache =& $parent->mustache;
-			$this->cli =& $parent->cli;
-			$this->db =& $parent->db;
-			$this->post =& $parent->post;
-			$this->get =& $parent->get;
-			$this->files =& $parent->files;
-			$this->params =& $parent->params;
-			$this->url =& $parent->url;
-			$this->original_controller =& $parent->original_controller;
-			$this->original_mode =& $parent->original_mode;
-			$this->known_controllers =& $parent->known_controllers;
-			$this->loaded_views =& $parent->loaded_views;
-			$this->ucontrollers =& $parent->ucontrollers;
-			$this->arguments = [];
-			if ( $this->has_data($data) ){
-				$this->data = $data;
-			}
-			$path = $db;
-			while ( strpos($path, '/') === 0 ){
-				$path = substr($path, 1);
-			}
-			while ( substr($path, -1) === '/' ){
-				$path = substr($path, 0, -1);
-			}
-			$params = explode('/', $path);
-      if ( $this->cli ){
-        $this->mode = 'cron';
-      }
-			else if ( isset($params[0]) && isset($this->outputs[$params[0]]) ){
-				$this->mode = array_shift($params);
-				$path = implode('/', $params);
-			}
-			else if ( $this->original_mode === 'dom' ){
-        $this->mode = 'html';
-      }
-      else {
-				$this->mode = $this->original_mode;
-			}
-		}
+    $this->routes =& $parent->routes;
+    $this->mustache =& $parent->mustache;
+    $this->cli =& $parent->cli;
+    $this->db =& $parent->db;
+    $this->post =& $parent->post;
+    $this->get =& $parent->get;
+    $this->files =& $parent->files;
+    $this->params =& $parent->params;
+    $this->url =& $parent->url;
+    $this->original_controller =& $parent->original_controller;
+    $this->original_mode =& $parent->original_mode;
+    $this->known_controllers =& $parent->known_controllers;
+    $this->loaded_views =& $parent->loaded_views;
+    $this->ucontrollers =& $parent->ucontrollers;
+    $this->arguments = [];
+    if ( $this->has_data($data) ){
+      $this->data = $data;
+    }
+    $path = $db;
+    while ( strpos($path, '/') === 0 ){
+      $path = substr($path, 1);
+    }
+    while ( substr($path, -1) === '/' ){
+      $path = substr($path, 0, -1);
+    }
+    $params = explode('/', $path);
+    if ( $this->cli ){
+      $this->mode = 'cron';
+    }
+    else if ( isset($params[0]) && isset($this->outputs[$params[0]]) ){
+      $this->mode = array_shift($params);
+      $path = implode('/', $params);
+    }
+    else if ( $this->original_mode === 'dom' ){
+      $this->mode = 'html';
+    }
+    else {
+      $this->mode = $this->original_mode;
+    }
 		if ( isset($path) ){
 			$this->route($path);
 		}
@@ -674,144 +683,6 @@ class environment{
 	}
 
 	/**
-	 * This will get a javascript view encapsulated in an anonymous function for embedding in HTML.
-	 *
-	 * @param string $path
-	 * @param string $mode
-	 * @return string|false 
-	 */
-	public function get_js($path='')
-	{
-    if ( $r = $this->get_view($path, 'js') ){
-      return '
-<script>
-(function($){
-'.$r.'
-})(jQuery);
-</script>';
-    }
-		return false;
-  }
-
-	/**
-	 * This will get a view.
-	 *
-	 * @param string $path
-	 * @param string $mode
-	 * @return string|false 
-	 */
-	public function get_view($path='', $mode='')
-	{
-		if ( $this->mode && !is_null($this->dest) && $this->check_path($path, $this->mode) ){
-			if ( empty($mode) ){
-				$mode = $this->mode;
-			}
-			if ( empty($path) ){
-				$path = $this->dest;
-			}
-			if ( isset($this->outputs[$mode]) ){
-				$ext = explode(',',$this->outputs[$mode]);
-				/* First we look into the loaded_views if it isn't there already */
-				foreach ( $ext as $e ){
-					$file1 = $mode.'/'.$path.'.'.$e;
-					$t = explode('/',$path);
-					$file2 = $mode.'/'.$path.'/'.array_pop($t).'.'.$e;
-					if ( isset($this->loaded_views[$file1]) ){
-						return $this->loaded_views[$file1];
-					}
-					else if ( isset($this->loaded_views[$file2]) ){
-						return $this->loaded_views[$file2];
-					}
-					else if ( is_file(self::vpath.$file1) ){
-						return $this->add_view($file1);
-					}
-					else if ( is_file(self::vpath.$file2) ){
-						return $this->add_view($file2);
-					}
-				}
-			}
-		}
-		return false;
-	}
-
-  /**
-	 * This will get a PHP template view
-	 *
-	 * @param string $path
-	 * @param string $mode
-	 * @return string|false 
-	 */
-	private function get_php($path='', $mode='')
-	{
-		if ( $this->mode && !is_null($this->dest) && $this->check_path($path, $this->mode) ){
-			if ( empty($mode) ){
-				$mode = $this->mode;
-			}
-			if ( empty($path) ){
-				$path = $this->dest;
-			}
-			if ( isset($this->outputs[$mode]) ){
-				$file = $mode.'/'.$path.'.php';
-				if ( isset($this->loaded_phps[$file]) ){
-					$bbn_php = $this->loaded_phps[$file];
-				}
-				else if ( is_file(self::vpath.$file) ){
-					$bbn_php = $this->add_php($file);
-				}
-				if ( isset($bbn_php) ){
-					$args = array();
-					if ( $this->has_data() ){
-						foreach ( (array)$this->data as $key => $val ){
-							$$key = $val;
-							array_push($args, '$'.$key);
-						}
-					}
-					return eval('return call_user_func(function() use ('.implode(',', $args).'){ ?>'.$bbn_php.' <?php });');
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * This will get the model. There is no order for the arguments.
-	 *
-	 * @params string path to the model
-	 * @params array data to send to the model
-	 * @return array|false A data model 
-	 */
-	private function get_model()
-	{
-		if ( $this->dest ){
-			$args = func_get_args();
-			foreach ( $args as $a ){
-				if ( is_array($a) ){
-					$d = $a;
-				}
-				else if ( is_string($a) && $this->check_path($a) ){
-					$path = $a;
-				}
-			}
-			if ( !isset($path) ){
-				$path = $this->dest;
-			}
-			if ( strpos($path,'..') === false && is_file(self::mpath.$path.'.php') ){
-				$db = isset($db) ? $db : $this->db;
-				$last_model_file = self::mpath.$path.'.php';
-				$data = isset($d) ? $d : $this->data;
-				return call_user_func(
-					function() use ($db, $last_model_file, $data)
-					{
-						$r = include($last_model_file);
-						return is_array($r) ? $r : array();
-					}
-				);
-			}
-		}
-		return false;
-	}
-	
-	/**
 	 * Adds a property to the MVC object inc if it has not been declared.
 	 *
 	 * @return bool 
@@ -876,62 +747,6 @@ class environment{
 	{
 		if ( isset($this->obj->output) ){
 			return $this->obj->output;
-		}
-		return false;
-	}
-
-	/**
-	 * Returns the rendered result from the current mvc if successufully processed
-	 * process() (or check()) must have been called before.
-		*
-	 * @return string|false
-	 */
-	public function get_script()
-	{
-		if ( isset($this->obj->script) ){
-			return $this->obj->script;
-		}
-		return '';
-	}
-
-	/**
-	 * Sets the data. Chainable. Should be useless as $this->data is public. Chainable.
-	 *
-	 * @param array $data
-	 * @return void 
-	 */
-	public function set_data(array $data)
-	{
-		$this->data = $data;
-		return $this;
-	}
-
-	/**
-	 * Merges the existing data if there is with this one. Chainable.
-	 *
-	 * @return void 
-	 */
-	public function add_data(array $data)
-	{
-		$ar = func_get_args();
-		foreach ( $ar as $d ){
-			if ( is_array($d) ){
-        $this->data = $this->has_data() ? array_merge($this->data,$d) : $d;
-			}
-		}
-		return $this;
-	}
-
-	/**
-	 * Merges the existing data if there is with this one. Chainable.
-	 *
-	 * @return void 
-	 */
-	public function add($d, $data=array())
-	{
-		$o = new mvc($d, $this, $data);
-		if ( $o->check() ){
-			return $o;
 		}
 		return false;
 	}

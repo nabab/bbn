@@ -104,7 +104,7 @@ class mysql implements \bbn\db\engines
     }
 		return false;
 	}
-  
+	
 	/**
 	 * Returns a table's full name i.e. database.table
 	 * 

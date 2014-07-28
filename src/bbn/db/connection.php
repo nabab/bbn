@@ -617,6 +617,22 @@ class connection extends \PDO implements actions, api, engines
 	}
   
 	/**
+	 * Returns a value string ready to be put inside quotes, with quotes and percent escaped
+	 * 
+	 * @param string $value The string to escape
+	 * @return string | false
+	 */
+	public function escape_value($value, $esc = "'")
+	{
+    if ( is_string($value) ){
+      return str_replace('%', '\\%', $esc === '"' ? 
+              \bbn\str\text::escape_dquotes($value) :
+              \bbn\str\text::escape_squotes($value));
+    }
+		return $value;
+	}
+  
+	/**
 	 * Changes the value of last_insert_id (used by history)
 	 * 
 	 * @param int $id The last ID inserted
