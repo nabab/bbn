@@ -201,14 +201,9 @@ class mvc extends obj
       // a second JSON encoded can be used as $this->post
       if ( $this->cli ){
         global $argv;
+        // Controller called with CLI through arguments
         if ( isset($argv[1]) ){
-          $tmp = explode('/', $argv[1]);
-          $num_params = count($tmp);
-          foreach ( $tmp as $t ){
-            if ( !empty($t) ){
-              array_push($this->params,$t);
-            }
-          }
+          $this->set_params($argv[1]);
           if ( isset($argv[2]) && json_decode($argv[2]) ){
             $this->post = array_map(function($a){
               return \bbn\str\text::correct_types($a);
@@ -249,13 +244,7 @@ class mvc extends obj
         if ( isset($_SERVER['REQUEST_URI']) && 
         ( BBN_CUR_PATH === '' || strpos($_SERVER['REQUEST_URI'],BBN_CUR_PATH) !== false ) ){
           $url = explode("?", urldecode($_SERVER['REQUEST_URI']))[0];
-          $tmp = explode('/', substr($url, strlen(BBN_CUR_PATH)));
-          $num_params = count($tmp);
-          foreach ( $tmp as $t ){
-            if ( !empty($t) ){
-              array_push($this->params, $t);
-            }
-          }
+          $this->set_params(substr($url, strlen(BBN_CUR_PATH)));
         }
       }
 			// If an available mode starts the URL params, it will be picked up
@@ -332,6 +321,18 @@ class mvc extends obj
 			$this->route($path);
 		}
 	}
+  
+  private function set_params($path)
+  {
+    $this->params = [];
+    $tmp = explode('/', $path);
+    $num_params = count($tmp);
+    foreach ( $tmp as $t ){
+      if ( !empty($t) ){
+        array_push($this->params, $t);
+      }
+    }
+  }
 
 	/**
 	 * This checks whether an argument used for getting controller, view or model - which are files - doesn't contain malicious content.
@@ -478,7 +479,7 @@ class mvc extends obj
 	 *
 	 * @return boolean 
 	 */
-	private function is_cli()
+	public function is_cli()
   {
     return $this->cli;
   }

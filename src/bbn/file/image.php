@@ -123,7 +123,7 @@ class image extends \bbn\file\file
 	{
 		parent::make();
 		/* For images as string - to implement 
-		if ( class_exists('\Imagick') )
+		if ( class_exists('\\Imagick') )
 		{
 			$this->img = new \Imagick();
 			$this->img->readImageBlob(base64_decode($this->file));
@@ -133,7 +133,7 @@ class image extends \bbn\file\file
 		*/
 		if ( $this->file ){
 			if ( !$this->img ){
-				if ( class_exists('\Imagick') ){
+				if ( class_exists('\\Imagick') ){
 					try{
 						$this->img = new \Imagick($this->file);
 						$this->img->setInterlaceScheme(\Imagick::INTERLACE_PLANE);
@@ -182,7 +182,7 @@ class image extends \bbn\file\file
 			if ( !headers_sent() ){
 				header('Content-Type: image/'.$this->ext2);
 			}
-			if ( class_exists('\Imagick') ){
+			if ( class_exists('\\Imagick') ){
 				echo $this->img;
 				$this->img->clear();
 				$this->img->destroy();
@@ -204,7 +204,7 @@ class image extends \bbn\file\file
 			if ( !$dest ){
 				$dest = $this->file;
 			}
-			if ( class_exists('\Imagick') ){
+			if ( class_exists('\\Imagick') ){
         if ( !$this->img->writeImage($dest) ){
           $this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
             BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
@@ -275,7 +275,7 @@ class image extends \bbn\file\file
 						$y = 0;
 						$x = floor(($w2-$w)/2);
 					}
-					if ( class_exists('\Imagick') ){
+					if ( class_exists('\\Imagick') ){
 						$res = $this->img->resizeImage($w2,$h2,\Imagick::FILTER_LANCZOS,1);
 					}
 					else{
@@ -295,7 +295,7 @@ class image extends \bbn\file\file
 				else{
 					$w2 = $w;
 					$h2 = $h;
-					if ( class_exists('\Imagick') ){
+					if ( class_exists('\\Imagick') ){
 						$res = $this->img->resizeImage($w2,$h2,\Imagick::FILTER_LANCZOS,1);
 					}
 					else{
@@ -323,7 +323,7 @@ class image extends \bbn\file\file
 					}
 				}
 				if ( isset($w2,$h2) ){
-					if ( class_exists('\Imagick') ){
+					if ( class_exists('\\Imagick') ){
 						$res = $this->img->resizeImage($w2,$h2,\Imagick::FILTER_LANCZOS,1);
 					}
 					else{
@@ -392,7 +392,7 @@ class image extends \bbn\file\file
 			if ( $h + $y > $this->h ){
 				return false;
 			}
-			if ( class_exists('\Imagick') ){
+			if ( class_exists('\\Imagick') ){
 				if ( !$this->img->cropImage($w,$h,$x,$y) ){
 					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
@@ -421,7 +421,7 @@ class image extends \bbn\file\file
 		$ok = false;
 		if ( $this->test() )
 		{
-			if ( class_exists('\Imagick') ){
+			if ( class_exists('\\Imagick') ){
 				if ( $this->img->rotateImage(new \ImagickPixel(),$angle) )
 					$ok = 1;
 			}
@@ -458,7 +458,7 @@ class image extends \bbn\file\file
 	{
 		if ( $this->test() )
 		{
-			if ( class_exists('\Imagick') )
+			if ( class_exists('\\Imagick') )
 			{
 				if ( $mode == 'v' )
 				{
@@ -500,7 +500,7 @@ class image extends \bbn\file\file
 	{
 		if ( $this->test() )
 		{
-			if ( class_exists('\Imagick') )
+			if ( class_exists('\\Imagick') )
 			{
 				$p = ( $val == '-' ) ? 90 : 110;
 				if ( !$this->img->modulateImage($p,100,100) ){
@@ -527,7 +527,7 @@ class image extends \bbn\file\file
 	{
 		if ( $this->test() )
 		{
-			if ( class_exists('\Imagick') )
+			if ( class_exists('\\Imagick') )
 			{
 				$p = ( $val == '-' ) ? 0 : 1;
 				if ( !$this->img->contrastImage($p) ){
@@ -554,7 +554,7 @@ class image extends \bbn\file\file
 	{
 		if ( $this->test() )
 		{
-			if ( class_exists('\Imagick') )
+			if ( class_exists('\\Imagick') )
 			{
 				if ( !$this->img->modulateImage(100,0,100) ){
 					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
@@ -579,7 +579,7 @@ class image extends \bbn\file\file
 	{
 		if ( $this->test() )
 		{
-			if ( class_exists('\Imagick') )
+			if ( class_exists('\\Imagick') )
 			{
 				if ( !$this->img->negateImage(false) ){
 					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
@@ -604,7 +604,7 @@ class image extends \bbn\file\file
 	{
 		if ( $this->test() )
 		{
-			if ( class_exists('\Imagick') )
+			if ( class_exists('\\Imagick') )
 			{
 				if ( !$this->img->polaroidImage(new \ImagickDraw(),0) ){
 					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
@@ -622,7 +622,7 @@ class image extends \bbn\file\file
 	{
 		if ( $this->test() )
 		{
-			if ( class_exists('\Imagick') )
+			if ( class_exists('\\Imagick') )
 				$m = $this->img;
 			else
 			{

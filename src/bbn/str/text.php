@@ -528,6 +528,18 @@ class text
 	/**
 	 * @return void 
 	 */
+	public static function parse_path($path)
+	{
+    $path = str_replace('\\', '/', self::cast($path));
+    if ( strpos($path, '../') !== false ){
+      return '';
+    }
+		return $path;
+	}
+
+	/**
+	 * @return void 
+	 */
 	public static function remove_accents($st)
 	{
 		$st = trim(mb_ereg_replace('&(.)(tilde|circ|grave|acute|uml|ring|oelig);', '\\1', self::cast($st)));

@@ -33,8 +33,8 @@ class cron extends \bbn\obj{
 	
   public function __construct(\bbn\mvc $mvc, $cfg = []) {
     if ( is_array($cfg) ){
-      $this->mvc = $mvc;
-      if ( !isset($mvc->db) || (get_class($mvc->db) !== '\\bbn\\db\\connection') ){
+      $this->mvc =& $mvc;
+      if ( empty($mvc->db) ){
         die("Database mandatory in \\bbn\\appui\\cron !");
       }
       $this->db =& $mvc->db;
@@ -56,19 +56,62 @@ class cron extends \bbn\obj{
     return false;
   }
   
-  public function get_next($id_cron = null, $start = 0){
-    if ( $this->check() && is_int($start) ){
-      $data = $this->db->get_row("
+  public function start($id_cron){
+    if ( $this->check() && $this->db->insert($this->jtable, [
+      'id_cron' => $id_cron,
+      'start' => date('Y-m-d H:i:s')
+    ]) ){
+      return $this->db->last_id ();
+    }
+    return false;
+  }
+  
+  public function get_article($id){
+    if ( $this->check() ){
+      $data = $this->db->rselect($this->jtable, [], ['id' => $id]);
+      $data['cfg'] = json_decode($data['cfg'], 1);
+      return $data;
+    }
+  }
+  
+  public function get_cron($id){
+    if ( $this->check() ){
+      $data = $this->db->rselect($this->table, [], ['id' => $id]);
+      $data['cfg'] = json_decode($data['cfg'], 1);
+      return $data;
+    }
+  }
+  
+  public function finish($id){
+    if ( ($article = $this->get_article($id)) && ($cron = $this->get_cron($article['id_cron'])) ){
+      $date = time();
+      $this->db->update($this->jtable, [
+          'finish' => date('Y-m-d H:i:s', $date)
+        ], [
+          'id' => $id
+        ]);
+      $this->db->update($this->table, [
+        'next' => date('Y-m-d H:i:s', $date + $cron['cfg']['latency'])
+      ], [
+        'id' => $cron['id']
+      ]);
+      return 1;
+    }
+    return false;
+  }
+  
+  public function get_next($id_cron = null){
+    if ( $this->check() && ($data = $this->db->get_row("
         SELECT *
         FROM {$this->table}
-        WHERE next < NOW()".
+        WHERE active = 1 
+        AND next < NOW()".
         ( is_int($id_cron) ? " AND id_cron = $id_cron" : "" )."
         ORDER BY next ASC
-        LIMIT $start, 1");
+        LIMIT 1")) ){
       // Dans cfg: timeout, et soit: latency, minute, hour, day of month, day of week, date
       $data['cfg'] = json_decode($data['cfg'], 1);
-      
-      
+      return $data;
     }
   }
   
@@ -83,9 +126,46 @@ class cron extends \bbn\obj{
     }
   }
   
-  public function run($cfg){
-    if ( $this->check() && is_array($cfg) && isset($cfg['id'], $cfg['file'])){
-      $this->db->insert()
+  private function get_runner($id_cron){
+    if ( $this->check() && is_int($id_cron) ){
+      $d = $this->db->get_row("
+        SELECT *
+        FROM {$this->jtable}
+        WHERE id_cron = ?
+        AND finish IS NULL",
+        $id_cron);
+      $d['cfg'] = json_decode($d['cfg'], 1);
     }
+  }
+  
+  private function get_latency($id_journal){
+    if ( $this->check() && is_int($id_journal) ){
+      
+    }
+  }
+  
+  public function run($id_cron = null){
+    if ( ($cron = $this->get_next($id_cron)) ){
+      $ok  = 1;
+      if ( is_running($cron['id_cron']) ){
+        $runner = $this->get_runner($cron['id_cron']);
+        $start = strtotime($runner['start']);
+        $timeout = $runner['cfg']['timeout'];
+        if ( ($start + $timeout) > time() ){
+          $this->alert();
+        }
+        $ok = false;
+      }
+      if ( $ok ){
+        $meth = ['post', 'get', 'files'];
+        foreach ( $meth as $m ){
+          if ( isset($cron['cfg'][$m]) ){
+            $this->mvc->{$m} = $cron['cfg'][$m];
+          }
+        }
+        $this->mvc->reroute($cron['cfg']['file']);
+      }
+    }
+    die("non che niente");
   }
 }
