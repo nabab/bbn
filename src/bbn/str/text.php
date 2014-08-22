@@ -624,7 +624,7 @@ class text
         if ( $remove_empty && ( ( is_string($v) && empty($v) ) || ( is_array($v) && count($v) === 0 ) ) ){
           continue;
         }
-        $st .= str_repeat('    ', $lev);
+        $st .= str_repeat('  ', $lev);
         if ( $is_assoc ){
           $st .= ( is_string($k) ? "'".\bbn\str\text::escape_squote($k)."'" : $k ). " => ";
         }
@@ -657,8 +657,8 @@ class text
         }
         $st .= ','.PHP_EOL;
       }
-      $st .= str_repeat('    ', $lev-1).']';
-      return $st;
+      $st .= str_repeat('  ', $lev-1).']';
+      return preg_replace('/\\],\\s+\\[/', "], [", $st);
     }
     return $o;
   }

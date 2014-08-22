@@ -314,7 +314,7 @@ class tools
   }
   
   public static function get_hdump(){
-    return '<p style="white-space:pre">'.htmlentities(call_user_func_array('self::get_dump', func_get_args())).'</p>';
+    return '<p>'.nl2br(str_replace(" ", "&nbsp;", htmlentities(call_user_func_array('self::get_dump', func_get_args()))), false).'</p>';
   }
   
   public static function dump(){

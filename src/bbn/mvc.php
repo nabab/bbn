@@ -700,7 +700,6 @@ class mvc extends obj
 	 * This will get a javascript view encapsulated in an anonymous function for embedding in HTML.
 	 *
 	 * @param string $path
-	 * @param string $mode
 	 * @return string|false 
 	 */
 	public function get_js($path='')
@@ -712,6 +711,20 @@ class mvc extends obj
 '.$r.'
 })(jQuery);
 </script>';
+    }
+		return false;
+  }
+
+	/**
+	 * This will get a CSS view encapsulated in a scoped style tag.
+	 *
+	 * @param string $path
+	 * @return string|false 
+	 */
+	public function get_css($path='')
+	{
+    if ( $r = $this->get_view($path, 'css') ){
+      return '<style scoped>'.\CssMin::minify($r).'</style>';
     }
 		return false;
   }
