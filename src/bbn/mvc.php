@@ -437,6 +437,16 @@ class mvc extends obj
   }
   
 	/**
+	 * This returns the current controller's path.
+	 *
+	 * @return string 
+	 */
+	public function say_path()
+	{
+    return $this->controller ? substr($this->controller, strlen(self::cpath.$this->mode.'/'), -4) : false;
+  }
+  
+	/**
 	 * This returns the current controller's file's name.
 	 *
 	 * @return string 

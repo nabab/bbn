@@ -1939,7 +1939,7 @@ class connection extends \PDO implements actions, api, engines
   public function get_unique_keys($table)
   {
     $fields = [];
-    if ( $ks = $this->db->get_keys($table) ){
+    if ( $ks = $this->get_keys($table) ){
       foreach ( $ks['keys'] as $k ){
         if ( $k['unique'] === 1 ){
           $fields = array_merge($fields, $k['columns']);
