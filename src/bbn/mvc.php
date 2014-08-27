@@ -427,7 +427,7 @@ class mvc extends obj
 	}
 
 	/**
-	 * This returns the current controller's file's name.
+	 * Returns the current controller's file's name.
 	 *
 	 * @return string 
 	 */
@@ -437,7 +437,7 @@ class mvc extends obj
   }
   
 	/**
-	 * This returns the current controller's path.
+	 * Returns the current controller's path.
 	 *
 	 * @return string 
 	 */
@@ -447,7 +447,17 @@ class mvc extends obj
   }
   
 	/**
-	 * This returns the current controller's file's name.
+	 * Returns the current controller's route, i.e as demanded by the client.
+	 *
+	 * @return string 
+	 */
+	public function say_route()
+	{
+    return $this->path;
+  }
+  
+	/**
+	 * Returns the current controller's file's name.
 	 *
 	 * @return string 
 	 */
