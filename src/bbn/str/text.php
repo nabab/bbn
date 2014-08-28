@@ -16,11 +16,14 @@ namespace bbn\str;
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @version 0.2r89
  */
-class text 
+class text
 {
 
 	/**
-	 * @return void 
+   * Converts any type of variable to a string.
+   * 
+   * @param mixed $st The item to cast.
+	 * @return string  
 	 */
   public static function cast($st)
   {
@@ -30,34 +33,49 @@ class text
     return (string)$st;
   }
   
+	/**
+   * Converts the case of a string.
+   * 
+   * @param mixed $st The item to convert.
+   * @param mixed $case The case to convert to ("lower" or "upper"), default being title case.
+	 * @return string 
+	 */
   public static function change_case($st, $case = false)
   {
-    if ( is_string($st) ){
-      $case = strtolower($case);
-      switch ( $case ){
-        case "lower":
-          $case = MB_CASE_LOWER;
-          break;
-        case "upper":
-          $case = MB_CASE_UPPER;
-          break;
-        default:
-          $case = MB_CASE_TITLE;
-      }
-      if ( !empty($st) ){
-        $st = mb_convert_case($st, $case);
-      }
+    $st = self::cast($st);
+    $case = strtolower($case);
+    switch ( $case ){
+      case "lower":
+        $case = MB_CASE_LOWER;
+        break;
+      case "upper":
+        $case = MB_CASE_UPPER;
+        break;
+      default:
+        $case = MB_CASE_TITLE;
+    }
+    if ( !empty($st) ){
+      $st = mb_convert_case($st, $case);
     }
     return $st;
   }
   
+  /**
+   * Escape string in double quotes.
+   * 
+   * @param string $st The string to escape.
+	 * @return string 
+	 */
 	public static function escape_dquotes($st)
 	{
     return addcslashes(self::cast($st), "\"\\\r\n\t");
 	}
 
 	/**
-	 * @return void 
+   * Synonym of "escape_dquotes".
+   * 
+   * @param string $st The string to escape.
+	 * @return string 
 	 */
 	public static function escape_dquote($st)
 	{
@@ -65,7 +83,10 @@ class text
 	}
 
 	/**
-	 * @return void 
+   * Synonym of "escape_dquotes".
+   * 
+   * @param string $st The string to escape.
+	 * @return string 
 	 */
 	public static function escape_quote($st)
 	{
@@ -73,47 +94,66 @@ class text
 	}
 
 	/**
-	 * @return void 
+   * Synonym of "escape_dquotes".
+   * 
+   * @param string $st The string to escape.
+	 * @return string 
 	 */
 	public static function escape_quotes($st)
 	{
 		return self::escape_dquotes($st);
 	}
 
-	/**
-	 * @return void 
+  /**
+   * Escape string in quotes.
+   * 
+   * @param string $st The string to escape.
+	 * @return string 
 	 */
 	public static function escape_squotes($st)
 	{
     return addcslashes(self::cast($st), "'\\\r\n\t");
 	}
 
-	/**
-	 * @return void 
+  /**
+   * Synonym of "escape_squotes".
+   * 
+   * @param string $st The string to escape.
+	 * @return string 
 	 */
 	public static function escape($st)
 	{
 		return self::escape_squotes($st);
 	}
 
-	/**
-	 * @return void 
+  /**
+   * Synonym of "escape_squotes".
+   * 
+   * @param string $st The string to escape.
+	 * @return string 
 	 */
 	public static function escape_apo($st)
 	{
 		return self::escape_squotes($st);
 	}
 
-	/**
-	 * @return void 
+  /**
+   * Synonym of "escape_squotes".
+   * 
+   * @param string $st The string to escape.
+	 * @return string 
 	 */
 	public static function escape_squote($st)
 	{
 		return self::escape_squotes($st);
 	}
 
-	/**
-	 * @return void 
+  /**
+   * Returns a string expunged of several types of character depending of configuration. 
+   * 
+   * @param mixed $st The item to be.
+   * @param string $mode A selection of configuration: "all" (default), "2n1", "html", "code".
+	 * @return string 
 	 */
 	public static function clean($st, $mode='all')
 	{
@@ -178,10 +218,14 @@ class text
 		}
 	}
 
-	/**
-	 * @return void 
+  /**
+   * Cut a string (HTML and PHP tags stripped) to maximum lenght inserted.
+   * 
+   * @param string $st The string to be cut.
+   * @param integer $max The maximum string lenght.
+	 * @return string 
 	 */
-	public static function cut($st, $max)
+	public static function cut($st, $max = 15)
 	{
     $st = self::cast($st);
 		$st = mb_ereg_replace('&nbsp;',' ',$st);
@@ -191,25 +235,27 @@ class text
 		$st = self::clean($st);
 		if ( mb_strlen($st) >= $max )
 		{
-			$chars = array(' ','.','/','\\');
-			$ends = array();
-			$st = mb_substr($st,0,$max);
-			foreach ( $chars as $char )
-			{
-				$end = mb_strrpos($st,$char);
-				if ( $end !== false )
-					array_push($ends,$end);
-			}
-			if ( count($ends) > 0 )
-				$st = mb_substr($st,0,max($ends)).'...';
-			else
-				$st = mb_substr($st,0,-3).'...';
+      // Chars forbidden to finish the string with
+			$chars = [' ', '.'];
+      // Final chars
+			$ends = [];
+      // The string gets cut at $max
+			$st = mb_substr($st, 0, $max);
+      while ( in_array(substr($st, -1), $chars) ){
+        $st = substr($st, 0, -1);
+      }
+      $st .= '...';
 		}
 		return $st;
 	}
 
-	/**
-	 * @return void 
+  /**
+   * Returns a correct type name for file.
+   * 
+   * @param string $st The name as string.
+   * @param integer $maxlength The maximum filename length (without extension), default: "50".
+   * @param string $extension The extension of file.
+	 * @return string 
 	 */
 	public static function encode_filename($st, $maxlength = 50, $extension = '')
 	{
@@ -258,8 +304,12 @@ class text
 		return $res;
 	}
 
-	/**
-	 * @return void 
+  /**
+   * Returns a correct type name for database.
+   * 
+   * @param string $st The name as string.
+   * @param integer $maxlength The maximum length, default: "50".
+	 * @return string 
 	 */
 	public static function encode_dbname($st, $maxlength = 50)
 	{
@@ -286,8 +336,12 @@ class text
 		return $res;
 	}
 
-	/**
-	 * @return void 
+  /**
+   * Returns the file extension.
+   * 
+   * @param string $file The file path.
+   * @param boolean $ar If "true" returns also the file path, default: "false".
+	 * @return string|array 
 	 */
 	public static function file_ext($file, $ar=false)
 	{
@@ -311,7 +365,11 @@ class text
 	}
 
 	/**
-	 * @return void 
+   * Returns a random password.
+   * 
+   * @param integer $int_max Maximum characters of password, default: "12".
+   * @param integer $int_min Minimum characters of password, default: "6".
+	 * @return string 
 	 */
 	public static function genpwd($int_max=12, $int_min=6)
 	{
@@ -347,7 +405,9 @@ class text
 	}
 
   /**
-   * @param string $st
+   * Checks if the string is a json string.
+   * 
+   * @param string $st The string.
    * @return bool
 	 */
   public static function is_json($st){
@@ -360,7 +420,10 @@ class text
   }
 
   /**
-   * @param mixed $st Can take as many arguments and will return false if one of them is not a number
+   * Checks if the item is a number.
+   * Can take as many arguments and will return false if one of them is not a number.
+   * 
+   * @param mixed $st The item to be tested.
 	 * @return bool
 	 */
 	public static function is_number()
@@ -380,7 +443,10 @@ class text
   }
   
 	/**
-   * @param mixed $st Can take as many arguments and will return false if one of them is not an integer or the string of an integer
+   * Checks if the item is a integer.
+   * Can take as many arguments and will return false if one of them is not an integer or the string of an integer.
+   * 
+   * @param mixed $st The item to be tested.
 	 * @return bool
 	 */
 	public static function is_integer()
@@ -400,7 +466,10 @@ class text
   }
   
 	/**
-   * @param mixed $st Can take as many arguments and will return false if one of them is not a decimal or the string of a decimal (float)
+   * Checks if the item is a decimal.
+   * Can take as many arguments and will return false if one of them is not a decimal or the string of a decimal (float).
+   * 
+   * @param mixed $st The item to be tested.
 	 * @return bool
 	 */
 	public static function is_decimal()
@@ -420,7 +489,9 @@ class text
   }
   
 	/**
-   * @param string $st Converts string variables into int or float if it looks like it and returns the argument anyway
+   * Converts string variable into int or float if it looks like it and returns the argument anyway.
+   * 
+   * @param string $st The string.
 	 * @return mixed
 	 */
   public static function correct_types($st)
@@ -452,12 +523,16 @@ class text
   }
   
   /**
-	 * @return bool
+   * Checks if the string is a correct type of e-mail address.
+   * 
+   * @param string $email E-mail address.
+	 * @return boolean
 	 */
 	public static function is_email($email)
 	{
-		if ( function_exists('filter_var') )
-			return filter_var($email,FILTER_VALIDATE_EMAIL);
+		if ( function_exists('filter_var') ){
+			return filter_var($email,FILTER_VALIDATE_EMAIL) ? true : false;
+    }
 		else
 		{
 			$isValid = true;
@@ -504,12 +579,15 @@ class text
 	}
 
 	/**
+   * Returns an array containing any of the various components of the URL that are present.
+   * 
+   * @param string $url The url.
 	 * @return void 
 	 */
 	public static function parse_url($url)
 	{
     $url = self::cast($url);
-		$r = array('url' => $url,'query' => '','params' => array());
+		$r = \bbn\tools::merge_arrays(parse_url($url), ['url' => $url,'query' => '','params' => []]);
 		if ( strpos($url,'?') > 0 )
 		{
 			$p = explode('?',$url);
@@ -526,7 +604,10 @@ class text
 	}
 
 	/**
-	 * @return void 
+   * 
+   * 
+   * @param string $path The path.
+	 * @return string 
 	 */
 	public static function parse_path($path)
 	{
@@ -624,7 +705,7 @@ class text
         if ( $remove_empty && ( ( is_string($v) && empty($v) ) || ( is_array($v) && count($v) === 0 ) ) ){
           continue;
         }
-        $st .= str_repeat('  ', $lev);
+        $st .= str_repeat('    ', $lev);
         if ( $is_assoc ){
           $st .= ( is_string($k) ? "'".\bbn\str\text::escape_squote($k)."'" : $k ). " => ";
         }
@@ -657,8 +738,8 @@ class text
         }
         $st .= ','.PHP_EOL;
       }
-      $st .= str_repeat('  ', $lev-1).']';
-      return preg_replace('/\\],\\s+\\[/', "], [", $st);
+      $st .= str_repeat('    ', $lev-1).']';
+      return $st;
     }
     return $o;
   }
