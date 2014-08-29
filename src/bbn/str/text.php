@@ -408,7 +408,7 @@ class text
    * Checks if the string is a json string.
    * 
    * @param string $st The string.
-   * @return bool
+   * @return boolean
 	 */
   public static function is_json($st){
     if ( is_string($st) && !empty($st) && 
@@ -424,7 +424,7 @@ class text
    * Can take as many arguments and will return false if one of them is not a number.
    * 
    * @param mixed $st The item to be tested.
-	 * @return bool
+	 * @return boolean
 	 */
 	public static function is_number()
 	{
@@ -447,7 +447,7 @@ class text
    * Can take as many arguments and will return false if one of them is not an integer or the string of an integer.
    * 
    * @param mixed $st The item to be tested.
-	 * @return bool
+	 * @return boolean
 	 */
 	public static function is_integer()
 	{
@@ -470,7 +470,7 @@ class text
    * Can take as many arguments and will return false if one of them is not a decimal or the string of a decimal (float).
    * 
    * @param mixed $st The item to be tested.
-	 * @return bool
+	 * @return boolean
 	 */
 	public static function is_decimal()
 	{
@@ -582,7 +582,7 @@ class text
    * Returns an array containing any of the various components of the URL that are present.
    * 
    * @param string $url The url.
-	 * @return void 
+	 * @return array 
 	 */
 	public static function parse_url($url)
 	{
@@ -604,7 +604,7 @@ class text
 	}
 
 	/**
-   * 
+   * Replace backslash with slash in a path string.
    * 
    * @param string $path The path.
 	 * @return string 
@@ -619,7 +619,10 @@ class text
 	}
 
 	/**
-	 * @return void 
+   * Replaces accented characters with their character without accent.
+   * 
+   * @param string $st The string.
+	 * @return string 
 	 */
 	public static function remove_accents($st)
 	{
@@ -632,9 +635,9 @@ class text
 	}
 	
 	/**
-	 * Checks if a string comply with SQL naming convention
+	 * Checks if a string comply with SQL naming convention.
 	 * 
-	 * @return bool
+	 * @return boolean
 	 */
 	public static function check_name(){
 
@@ -651,10 +654,11 @@ class text
 		return true;
 	}
 	
-	/**
-	 * Checks if a string comply with SQL naming convention
-	 * 
-	 * @return bool
+  /**
+   * Checks if a string comply with SQL naming convention.
+   * Returns "true" if slash or backslash are present.
+   * 
+   * @return boolean
 	 */
 	public static function has_slash(){
 
@@ -669,21 +673,35 @@ class text
 		return false;
 	}
 	
- /**
-	* Extracts all digits from a string
-	* 
-	* @return bool
-	*/
+  /**
+   * Extracts all digits from a string.
+   * 
+   * @param string $st The string.
+   * @return string
+   */
 	public static function get_numbers($st){
 		return preg_replace("/[^0-9]/", '', self::cast($st));
 	}
 
+  /**
+   * returns the argumented value, replacing non standard objects (not stdClass) by their class name.
+   * 
+   * @param mixed $o The item.
+   * @return mixed
+   */
   public static function make_readable($o)
   {
+    $is_array = false;
     if ( is_object($o) ){
-      return get_class($o);
+      $class = get_class($o);
+      if ( $class === 'stdClass' ){
+        $is_array = 1;
+      }
+      else{
+        return $class;
+      }
     }
-    else if ( is_array($o) ){
+    if ( is_array($o) || $is_array ){
       $r = [];
       foreach ( $o as $k => $v ){
         $r[$k] = self::make_readable($v);
@@ -692,7 +710,15 @@ class text
     }
     return $o;
   }
-  
+
+  /**
+   * Returns a variable in a fashion that is directly usable by PHP.
+   * 
+   * @param mixed $o The item to be.
+   * @param boolean $remove_empty Default: "false".
+   * @param integer $lev Default: "1".
+   * @return mixed
+   */
   public static function export($o, $remove_empty=false, $lev=1){
     $st = '';
     if ( is_object($o) && ($cls = get_class($o)) && ($cls !== 'stdClass') ){

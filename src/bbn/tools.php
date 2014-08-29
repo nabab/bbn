@@ -22,9 +22,9 @@ namespace bbn;
 class tools
 {
 	/**
-	 * Add information to the $info array
+	 * Add information to the $info array.
 	 *
-	 * @param string $st
+	 * @param string $st The information to be added.
 	 * @return null
 	 */
 	public static function report($st)
@@ -51,10 +51,10 @@ class tools
 	}
   
   /**
-	 * Add information to the $info array
+	 * Save the logs to a file.
 	 *
-	 * @param string $st
-	 * @param string $file
+	 * @param string $st Text to save.
+	 * @param string $file Filename, , default: "misc".
 	 * @return null
 	 */
 	public static function log($st, $file='misc')
@@ -83,6 +83,13 @@ class tools
 		}
 	}
   
+ 	/**
+	 * Returns an object as merge of two objects.
+   * 
+   * @param object $o1 The first object to merge.
+   * @param object $o2 The second object to merge.
+	 * @return object The merged object.
+	 */  
   public static function merge_objects($o1, $o2){
     $args = func_get_args();
     if ( count($args) > 2 ){
@@ -97,8 +104,11 @@ class tools
     return self::to_object($res);
   }
  	/**
-	 * Removes all the elements from the items array, and reset the default config
-	 * @return void
+   * Returns an array as merge of two arrays.
+	 * 
+   * @param array $a1 The first array to merge.
+   * @param array $a2 The second array to merge.
+   * @return array The merged array.
 	 */
   public static function merge_arrays(array $a1, array $a2) {
     $args = func_get_args();
@@ -132,8 +142,10 @@ class tools
     return $r;
   }
   
-  /*
-   * Makes an object of an array
+  /**
+   * Makes an object of an array.
+   * 
+   * @param array $ar The array to trasform.
    * @return false|object
    */
   public static function to_object($ar){
@@ -152,8 +164,10 @@ class tools
     return false;
   }
 
-  /*
-   * Makes an object of an array
+  /**
+   * Makes an object of an array.
+   * 
+   * @param object $obj The object to trasform.
    * @return false|object
    */
   public static function to_array($obj){
@@ -233,10 +247,11 @@ class tools
   }
   
   /**
-   * Returns an object or an array cleaned up from all empty values
+   * Returns an object or an array cleaned up from all empty values.
    *
-   * @param array|object $arr An object or array to clean
-   * @return string The clean result
+   * @param array|object $arr An object or array to clean.
+   * @param boolean $remove_space If "true" the spaces are removed, default: "false".
+   * @return string The clean result.
    */
   public static function remove_empty($arr, $remove_space=false){
     foreach ( $arr as $k => $v ){
@@ -262,7 +277,15 @@ class tools
     }
     return $arr;
   }
-  
+
+  /**
+   * Returns an array containing an array for each element highlighting the index with an alias (keyname) and the value with an alias (valname).
+   *
+   * @param array $arr The original array.
+   * @param string $keyname Alias for index, default: "value".
+   * @param string $valname Alias for value, default: "text".
+   * @return array Groups array.
+   */
   public static function to_groups(array $arr, $keyname = 'value', $valname = 'text'){
     $r = [];
     foreach ( $arr as $k => $v ){
@@ -271,6 +294,12 @@ class tools
     return $r;
   }
   
+  /**
+   * Exports variable in fashion immediately re-importable in PHP. 
+   *
+   * @param array $r The array to be.
+   * @return boolean
+   */
   public static function is_assoc(array $r){
     $keys = array_keys($r);
     $c = count($keys);
@@ -282,6 +311,11 @@ class tools
     return false;
   }
   
+  /**
+   * 
+   *
+   * @return string
+   */
   public static function get_dump(){
     $args = func_get_args();
     $st = '';
@@ -313,19 +347,40 @@ class tools
     return PHP_EOL.$st.PHP_EOL;
   }
   
+  /**
+   * Returns callback value as html code.
+   *
+   * @return string
+   */
   public static function get_hdump(){
     return '<p>'.nl2br(str_replace(" ", "&nbsp;", htmlentities(call_user_func_array('self::get_dump', func_get_args()))), false).'</p>';
   }
-  
+
+  /**
+   * 
+   *
+   */
   public static function dump(){
     echo call_user_func_array('self::get_dump', func_get_args());
     
   }
   
+  /**
+   * 
+   *
+   */
   public static function hdump(){
     echo call_user_func_array('self::get_hdump', func_get_args());
   }
 
+  /**
+   * Returns HTML code for creating the <option> tag.
+   *
+   * @param array $values An array with one or plus values.
+   * @param string $select The value to indicate how selected, default: "".
+   * @param string $empty_label Label for empty value, default: "false".
+   * @return string The HTML code.
+   */  
   public static function build_options($values, $selected='', $empty_label=false){
     if ( is_array($values) )
     {
@@ -359,15 +414,23 @@ class tools
     }
   }
   
-  public static function to_keypair($arr, $protected=1){
+  /**
+   * Converts a numeric array to an associative one, using the values alternatively as key or value.
+   *
+   * @param array $arr must contain an even number of values.
+   * @param boolean $protected if false no index protection will be performed, default: "1".
+   * @return array|false
+   */ 
+  public static function to_keypair($arr, $protected = 1){
     $num = count($arr);
     $res = [];
     if ( ($num % 2) === 0 ){
       $i = 0;
       while ( isset($arr[$i]) ){
-        if ( !$protected || preg_match('/[0-9A-z\-_]+/', $arr[$i]) ){
-          $res[$arr[$i]] = $arr[$i+1];
+        if ( !is_string($arr[$i]) || ( !$protected && !preg_match('/[0-9A-z\-_]+/8', \bbn\str\text::cast($arr[$i])) ) ){
+          return false;
         }
+        $res[$arr[$i]] = $arr[$i+1];
         $i += 2;
       }
     }
