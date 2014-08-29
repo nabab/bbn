@@ -145,7 +145,7 @@ class mvc extends obj
 	 * List of possible outputs with their according file extension possibilities
 	 * @var array
 	 */
-		$outputs = ['dom'=>'html','html'=>'html','image'=>'jpg,jpeg,gif,png,svg','json'=>'json','text'=>'txt','xml'=>'xml','js'=>'js','css'=>'css,less,sass'],
+		$outputs = ['dom'=>'html','html'=>'html','image'=>'jpg,jpeg,gif,png,svg','json'=>'json','text'=>'txt','xml'=>'xml','js'=>'js','css'=>'css','less'=>'less'],
 
 	/**
 	 * List of possible and existing universal controller. 
@@ -750,6 +750,26 @@ class mvc extends obj
   }
 
 	/**
+	 * This will get and compile a LESS view encapsulated in a scoped style tag.
+	 *
+	 * @param string $path
+	 * @return string|false 
+	 */
+	public function get_less($path='')
+	{
+    if ( !isset($this->less) ){
+      if ( !class_exists('lessc') ){
+        die("No less class, check composer");
+      }
+      $this->less = new \lessc();
+    }
+    if ( $r = $this->get_view($path, 'less') ){
+      return '<style scoped>'.\CssMin::minify($this->less->compile($r)).'</style>';
+    }
+		return false;
+  }
+
+	/**
 	 * This will add a javascript view to $this->obj->script
    * Chainable
 	 *
@@ -1127,6 +1147,11 @@ class mvc extends obj
         
 				case 'css':
 					header('Content-type: text/css; charset=utf-8');
+					echo $this->obj->output;
+					break;
+        
+				case 'less':
+					header('Content-type: text/x-less; charset=utf-8');
 					echo $this->obj->output;
 					break;
         

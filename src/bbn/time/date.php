@@ -89,7 +89,7 @@ class date
 			if ( $mode === 'idate' )
 				$date_ok = $idate;
 			else if ( $mode === 'dbdate' )
-				$date_ok = date('Y-m-d H:i:s',$idate);
+				$date_ok = date('Y-m-d H:i:s', $idate);
       else if ( $mode === 'm' ){
         $date_ok = $is_windows ? strftime("%m", $idate) : strftime("%B", $idate);
       }
@@ -99,22 +99,25 @@ class date
 			else if ( $mode === 'wsdate' || $mode === 's' )
 			{
 				if ( $is_today && !$only_date )
-					$date_ok = strftime('%H:%M',$idate);
+					$date_ok = strftime('%H:%M', $idate);
 				else
-					$date_ok = $is_windows ? strftime('%d/%m/%y',$idate) : strftime('%x',$idate);
+					$date_ok = $is_windows ? strftime('%d/%m/%y', $idate) : strftime('%x', $idate);
 			}
 			else if ( $mode == 'r' )
 			{
 				if ( $is_today && !$only_date )
-					$date_ok = strftime('%R',$idate);
+					$date_ok = strftime('%R', $idate);
 				else
-					$date_ok = $is_windows ? utf8_encode(strftime('%#d %b %Y',$idate)) : strftime('%e %b %Y',$idate);
+					$date_ok = $is_windows ? utf8_encode(strftime('%#d %b %Y', $idate)) : strftime('%e %b %Y',$idate);
+			}
+			else if ( $mode == 'js' ){
+        $date_ok = date('D M d Y H:i:s O', $idate);
 			}
 			else /*  wdate */
 			{
-				$date_ok = $is_windows ? utf8_encode(strftime('%A %#d %B %Y',$idate)) : strftime('%A %e %B %Y',$idate);
+				$date_ok = $is_windows ? utf8_encode(strftime('%A %#d %B %Y', $idate)) : strftime('%A %e %B %Y', $idate);
 				if ( !$only_date && ($mode !== 'notime') ){
-					$date_ok .= ', '.strftime('%H:%M',$idate);
+					$date_ok .= ', '.strftime('%H:%M', $idate);
         }
 			}
 			return $date_ok;
