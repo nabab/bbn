@@ -102,17 +102,22 @@ class file extends \bbn\obj
 	}
 
 	/**
-	 * @return void 
+   * Returns the filesize.
+   * 
+	 * @return integer  
 	 */
 	public function get_size()
 	{
-		if ( $this->file && $this->size === 0 )
+		if ( $this->file && $this->size === 0 ){
 			$this->size = filesize($this->file);
+    }
 		return $this->size;
 	}
 
 	/**
-	 * @return void 
+   * Returns the extension name of the file.
+   * 
+	 * @return string 
 	 */
 	public function get_extension()
 	{
@@ -169,7 +174,8 @@ class file extends \bbn\obj
 	}
 
 	/**
-	 * @return void 
+   * 
+	 * @return 
 	 */
 	public function download()
 	{
@@ -193,7 +199,9 @@ class file extends \bbn\obj
 	}
 
 	/**
-	 * @return void 
+	 * Returns the hash of the file.
+   * 
+   * @return string 
 	 */
 	public function get_hash()
 	{
@@ -204,7 +212,8 @@ class file extends \bbn\obj
 	}
 
 	/**
-	 * @return void 
+   * Deletes the file.
+   *  
 	 */
 	public function delete()
 	{

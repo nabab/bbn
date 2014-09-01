@@ -71,7 +71,9 @@ class image extends \bbn\file\file
 	}
 
 	/**
-	 * @return void 
+   * Returns the file image extension.
+   * 
+	 * @return string 
 	 */
 	public function get_extension()
 	{
@@ -102,7 +104,9 @@ class image extends \bbn\file\file
 	}
 
 	/**
-	 * @return void 
+   * Tests if the object is a image.
+   * 
+	 * @return boolean 
 	 */
 	public function test()
 	{
@@ -174,7 +178,8 @@ class image extends \bbn\file\file
 	}
 
 	/**
-	 * @return void 
+   * Sends the image with Content-Type.
+   *  
 	 */
 	public function display()
 	{
@@ -221,7 +226,9 @@ class image extends \bbn\file\file
 	}
 
 	/**
-	 * @return void 
+   * Returns the file image width.
+   * 
+	 * @return integer 
 	 */
 	public function get_width()
 	{
@@ -234,7 +241,9 @@ class image extends \bbn\file\file
 	}
 
 	/**
-	 * @return void 
+   * Returns the file image height.
+   * 
+	 * @return integer 
 	 */
 	public function get_height()
 	{
@@ -247,7 +256,17 @@ class image extends \bbn\file\file
 	}
 
 	/**
-	 * @return void 
+   * Resize the image.
+   * 
+   * @param integer $w The new width.
+   * @param integer $h The new height.
+   * @param boolean $crop If cropping the image.
+   * @param integer $max_w The maximum value for new width.
+   * @param integer $max_h The maximum valure for new height.
+   * 
+	 * @return image  
+   * 
+   * @todo transparent background.
 	 */
 	public function resize($w=false, $h=false, $crop=false, $max_w=false, $max_h=false)
 	{
@@ -350,7 +369,12 @@ class image extends \bbn\file\file
 	}
 
 	/**
-	 * @return void 
+   * Resizes the image with constant values.
+   * 
+   * @param integer $w BBN_MAX_WIDTH
+   * @param integer $h BBN_MAX_HEIGHT
+   * @return image 
+   * @todo BBN_MAX_WIDTH and BBN_MAX_HEIGHT
 	 */
 	public function autoresize($w=BBN_MAX_WIDTH, $h=BBN_MAX_HEIGHT)
 	{
@@ -374,7 +398,16 @@ class image extends \bbn\file\file
 	}
 
 	/**
-	 * @return void 
+   * Returns a crop of the image.
+   * 
+   * @param integer $w Width
+   * @param integer $h Height
+   * @param integer $x X coordinate
+   * @param integer $y Y coordinate
+   * 
+	 * @return image
+   * 
+   * @todo transparent background.
 	 */
 	public function crop($w, $h, $x, $y)
 	{
@@ -414,23 +447,28 @@ class image extends \bbn\file\file
 	}
 
 	/**
-	 * @return void 
+   * Rotates the image.
+   * 
+   * @param integer $angle The angle of rotation.
+	 * @return image 
+   * @todo bug on rotation.
 	 */
 	public function rotate($angle)
 	{
 		$ok = false;
 		if ( $this->test() )
 		{
-			if ( class_exists('\\Imagick') ){
+			if ( class_exists('\\Imagick') )
+      {
 				if ( $this->img->rotateImage(new \ImagickPixel(),$angle) )
+        {
 					$ok = 1;
+        }
 			}
 			else if ( function_exists('imagerotate') )
 			{
-				if ( $this->img = imagerotate($this->img,$angle,0) )
+				if ( $this->img = imagerotate($this->img, $angle, 0) )
 				{
-					if ( imagealphablending($this->img,true) )
-						imagesavealpha($this->img,true);
 					$ok = 1;
 				}
 			}
@@ -452,9 +490,12 @@ class image extends \bbn\file\file
 	}
 
 	/**
-	 * @return void 
+   * Flips the image.
+   * 
+   * @param string $mode Vertical ("v") or Horizontal ("h") flip, default: "v".
+	 * @return image 
 	 */
-	public function flip($mode='v')
+public function flip($mode='v')
 	{
 		if ( $this->test() )
 		{
@@ -476,25 +517,23 @@ class image extends \bbn\file\file
 			{
 				$w = imagesx($this->img);
 				$h = imagesy($this->img);
-				$img = imagecreatetruecolor($w,$h);
-				if ( $mode == 'v' )
-				{
-					for ( $y = 0; $y < $h; $y++ )
-						imagecopy($img, $this->img, 0, $y, 0, $h - $y - 1, $w, 1);
+				if ( $mode == 'v' ){
+					imageflip($this->img, IMG_FLIP_VERTICAL);
 				}
-				else
-				{
-					for ( $x = 0; $x < $w; $x++ )
-						imagecopy($img, $this->img, $x, 0, $w - $x - 1, 0, 1, $h);
+				else{
+					imageflip($this->img, IMG_FLIP_HORIZONTAL);
 				}
-				$this->img = $img;
 			}
 		}
 		return $this;
 	}
-
+  
 	/**
-	 * @return void 
+   * Adjusts the image brightness.
+   * 
+   * @param string $val The value "+" (default) increases the brightness, the value ("-") reduces it.
+   *  
+	 * @return image 
 	 */
 	public function brightness($val='+')
 	{
@@ -521,7 +560,10 @@ class image extends \bbn\file\file
 	}
 
 	/**
-	 * @return void 
+   *  Adjusts the image contrast.
+   * 
+   * @param string $val The value "+" (default), increases the contrast, the value ("-") reduces it.
+	 * @return image
 	 */
 	public function contrast($val='+')
 	{
@@ -548,7 +590,9 @@ class image extends \bbn\file\file
 	}
 
 	/**
-	 * @return void 
+   * Converts the color image to grayscale.
+   * 
+	 * @return image 
 	 */
 	public function grayscale()
 	{
@@ -573,7 +617,9 @@ class image extends \bbn\file\file
 	}
 
 	/**
-	 * @return void 
+   * Converts the color image to negative.
+   *  
+	 * @return image
 	 */
 	public function negate()
 	{
@@ -598,7 +644,9 @@ class image extends \bbn\file\file
 	}
 
 	/**
-	 * @return void 
+   * Converts the color image to polaroid filter.
+   * 
+	 * @return image 
 	 */
 	public function polaroid()
 	{
@@ -616,7 +664,9 @@ class image extends \bbn\file\file
 	}
 
 	/**
-	 * @return void 
+   * Returns the image as string.
+   * 
+	 * @return string 
 	 */
 	public function toString()
 	{
