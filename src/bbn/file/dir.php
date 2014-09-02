@@ -16,6 +16,17 @@ namespace bbn\file;
  */
 class dir extends \bbn\obj 
 {
+	/**
+	 * Replaces backslash with slash and deletes whitespace from the beginning and end of a directory path.
+	 *
+   * <code>
+   * \bbn\file\dir::clean($path = "C:\Documents\Test");
+   * </code>
+   * 
+	 * @param string $dir The directory path.
+   * 
+	 * @return string 
+	 */
   public static function clean($dir){
     $new = trim(str_replace('\\', '/', $dir));
     if ( substr($new, -1) === '/' ){
@@ -30,7 +41,12 @@ class dir extends \bbn\obj
 	 *
 	 * Returns false or the first corresponding file
 	 *
-	 * @param string $dir
+   * <code>
+   * \bbn\file\dir::has_file($path = "C:\Documents\Test", "test.txt");
+   * </code>
+   * 
+	 * @param string $dir The directory path.
+   * 
 	 * @return array|false 
 	 */
 	public static function has_file($dir)
@@ -45,7 +61,19 @@ class dir extends \bbn\obj
     }
 		return 1;
 	}
-  
+
+	/**
+	 * If the directory starts with './' returns the path without './' else returns the complete path.
+	 *
+   * <code>
+   * \bbn\file\dir::cur($path = "C:\Documents\Test");
+   * \bbn\file\dir::cur($path1 = "./testdir");
+   * </code>
+   * 
+	 * @param string $dir The directory path.
+   * 
+	 * @return string 
+	 */
   public static function cur($dir)
   {
     return strpos($dir, './') === 0 ? substr($dir, 2) : $dir;
@@ -56,7 +84,12 @@ class dir extends \bbn\obj
 	 *
 	 * It will return the full path ie including the original directory's path.
 	 *
-	 * @param string $dir
+   * <code>
+   * \bbn\file\dir::get_dirs($path = "C:\Documents\Test");
+   * </code>
+   * 
+	 * @param string $dir The directory path.
+   * 
 	 * @return array|false 
 	 */
 	public static function get_dirs($dir)
@@ -82,8 +115,14 @@ class dir extends \bbn\obj
 	 * It returns the full path ie including the original directory's path.
 	 * If including_dirs is set to true it will also return the folders included in the path.
 	 *
-	 * @param string $dir
-	 * @param bool $including_dirs
+   * <code>
+   * \bbn\file\dir::get_files($path = "C:\Documents\Test");
+   * \bbn\file\dir::get_files($path = "C:\Documents\Test", "true");
+   * </code>
+   * 
+	 * @param string $dir The directory path.
+	 * @param bool $including_dirs If set to true it will also return the folders included in the path.
+   * 
 	 * @return array|false 
 	 */
 	public static function get_files($dir, $including_dirs=false)
@@ -109,12 +148,18 @@ class dir extends \bbn\obj
 	}
 
 	/**
-	 * Deletes all the content from a directory
+	 * Deletes all the content from a directory.
 	 *
-	 * If the $full param is set to true, it will also delete the directory itself
+	 * If the $full param is set to true, it will also delete the directory itself.
 	 *
-	 * @param string $dir
-	 * @param bool $full
+   * <code>
+   * \bbn\file\dir::delete($path = "C:\Documents\Test");
+   * \bbn\file\dir::delete($path = "C:\Documents\Test", 0);
+   * </code>
+   * 
+	 * @param string $dir The directory path.
+	 * @param bool $full If set to true, it will also delete the directory itself. Default: "1".
+   * 
 	 * @return bool 
 	 */
 	public static function delete($dir, $full=1)
@@ -146,8 +191,13 @@ class dir extends \bbn\obj
 	/**
 	 * Creates all the directories from the path taht don't exist
 	 *
-	 * @param string $dir
+   * <code>
+   * \bbn\file\dir::create_path($path = "C:\Documents\Test\New")
+   * </code>
+   * 
+	 * @param string $dir The directory path.
 	 * @param int $chmod
+   * 
 	 * @return bool 
 	 */
 	public static function create_path($dir, $chmod=false)
@@ -178,10 +228,15 @@ class dir extends \bbn\obj
 	/**
 	 * Moves a file or directory to a new location
    * 
+   * <code>
+   * \bbn\file\dir::move($path = "C:\Documents\Test\Old", $path = "C:\Documents\Test\New");
+   * </code>
+   * 
 	 * @param string $orig The file to be moved
    * @param string $dest The full name of the destination (including basename)
    * @param mixed $st If $st === true it will be copied over if the destination already exists, otherwise $st will be used to rename the new file in case of conflict
    * @param int $length The number of characters to use for the revision number; will be zerofilled
+   * 
 	 * @return string the (new or not) name of the destination or false
 	 */
 	public static function move($orig, $dest, $st = '_v', $length = 0)
@@ -195,16 +250,19 @@ class dir extends \bbn\obj
           $i = 1;
           while ( $i ){
             $dir = dirname($dest).'/';
-            $file_name = \bbn\str\text::file_ext($dest);
+            $file_name = \bbn\str\text::file_ext($dest, 1);
             $file = $file_name[0].$st;
             if ( $length > 0 ){
-              $len = strlen($i);
+              $len = strlen(\bbn\str\text::cast($i));
               if ( $len > $length ){
                 return false;
               }
               $file .= str_repeat('0', $length - $len);
             }
-            $file .= $i.'.'.$file_name[1];
+            $file .= \bbn\str\text::cast($i);
+            if ( !empty($file_name[1]) ){
+              $file .= '.'.$file_name[1];
+            }
             $i++;
             if ( !file_exists($dir.$file) ){
               $dest = $dir.$file;
