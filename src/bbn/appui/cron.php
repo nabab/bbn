@@ -20,7 +20,7 @@ namespace bbn\appui;
 
 class cron extends \bbn\obj{
   
-	private 
+	private
           /* @var \bbn\db\connection The DB connection */
           $db = false,
           /* @var string The tables' prefix (the tables will be called ?cron and ?journal) */
@@ -44,24 +44,15 @@ class cron extends \bbn\obj{
           $this->{$cf_name} = $cf_value;
         }
       }
+      $this->timer = new \bbn\util\timer();
       $this->table = $this->prefix.'cron';
-      $this->jtable = $this->prefix.'journal';
+      $this->jtable = $this->prefix.'cron_journal';
     }
   }
   
   public function check(){
-    if ( $this->table ){
+    if ( $this->table && $this->db ){
       return 1;
-    }
-    return false;
-  }
-  
-  public function start($id_cron){
-    if ( $this->check() && $this->db->insert($this->jtable, [
-      'id_cron' => $id_cron,
-      'start' => date('Y-m-d H:i:s')
-    ]) ){
-      return $this->db->last_id ();
     }
     return false;
   }
@@ -82,20 +73,75 @@ class cron extends \bbn\obj{
     }
   }
   
-  public function finish($id){
-    if ( ($article = $this->get_article($id)) && ($cron = $this->get_cron($article['id_cron'])) ){
+  public function start($id_cron){
+    if ( $this->check() && $this->db->insert($this->jtable, [
+      'id_cron' => $id_cron,
+      'start' => date('Y-m-d H:i:s')
+    ]) ){
+      return $this->db->last_id ();
+    }
+    return false;
+  }
+  
+  public function finish($id, $res = ''){
+    if ( ($article = $this->get_article($id)) &&
+            ($cron = $this->get_cron($article['id_cron'])) ){
       $date = time();
       $this->db->update($this->jtable, [
-          'finish' => date('Y-m-d H:i:s', $date)
+          'finish' => date('Y-m-d H:i:s', $date),
+          'res' => $res
         ], [
           'id' => $id
         ]);
       $this->db->update($this->table, [
-        'next' => date('Y-m-d H:i:s', $date + $cron['cfg']['latency'])
+        'prev' => $article['start'],
+        'next' => date('Y-m-d H:i:s', $this->get_next_date($cron['cfg']['frequency']))
       ], [
         'id' => $cron['id']
       ]);
       return 1;
+    }
+    return false;
+  }
+  
+  public function get_next_date($frequency, $timestamp = false){
+    if ( is_string($frequency) && (strlen($frequency) >= 2) ){
+      if ( !$timestamp ){
+        $timestamp = time();
+      }
+      $letter = \bbn\str\text::change_case(substr($frequency, 0, 1), 'lower');
+      $number = (int)substr($frequency, 1);
+      if ( $number > 0 ){
+        switch ( $letter ){
+          case 'i':
+            $unit = 60;
+            break;
+          case 'h':
+            $unit = 3600;
+            break;
+          case 'd':
+            $unit = 24*3600;
+            break;
+          case 'w':
+            $unit = 7*24*3600;
+            break;
+        }
+        if ( isset($unit) ){
+          $r = $timestamp + ($unit * $number);
+        }
+        if ( $letter === 'm' ){
+          $r = mktime(date('H', $timestamp), date('i', $timestamp), date('s', $timestamp), date('n', $timestamp)+$number, date('j', $timestamp), date('Y', $timestamp));
+        }
+        if ( $letter === 'y' ){
+          $r = mktime(date('H', $timestamp), date('i', $timestamp), date('s', $timestamp), date('n', $timestamp)+$number, date('j', $timestamp), date('Y', $timestamp));
+        }
+        if ( isset($r) ){
+          if ( $r < time() ){
+            return $this->get_next_date($frequency, $r);
+          }
+          return $r;
+        }
+      }
     }
     return false;
   }
@@ -117,7 +163,7 @@ class cron extends \bbn\obj{
   
   public function is_running($id_cron){
     if ( $this->check() && is_int($id_cron) ){
-      return $this->db->get_value("
+      return $this->db->get_one("
         SELECT COUNT(*)
         FROM {$this->jtable}
         WHERE id_cron = ?
@@ -147,8 +193,8 @@ class cron extends \bbn\obj{
   public function run($id_cron = null){
     if ( ($cron = $this->get_next($id_cron)) ){
       $ok  = 1;
-      if ( is_running($cron['id_cron']) ){
-        $runner = $this->get_runner($cron['id_cron']);
+      if ( $this->is_running($cron['id']) ){
+        $runner = $this->get_runner($cron['id']);
         $start = strtotime($runner['start']);
         $timeout = $runner['cfg']['timeout'];
         if ( ($start + $timeout) > time() ){
@@ -157,15 +203,23 @@ class cron extends \bbn\obj{
         $ok = false;
       }
       if ( $ok ){
-        $meth = ['post', 'get', 'files'];
-        foreach ( $meth as $m ){
-          if ( isset($cron['cfg'][$m]) ){
-            $this->mvc->{$m} = $cron['cfg'][$m];
-          }
-        }
-        $this->mvc->reroute($cron['cfg']['file']);
+        $id = $this->start($cron['id']);
+        $this->timer->start();
+        $output = $this->_exec($cron['file'], $cron['cfg']);
+        $this->finish($id, $output);
+        \bbn\tools::dump("Execution of ".$cron['file']." (Journal ID: $id) in ".$this->timer->stop()." secs", $output);
+        return 1;
       }
     }
-    die("non che niente");
+  }
+  
+  private function _exec($file, $data=[]){
+    $this->mvc->data = $data;
+    $this->obj = new \stdClass();
+    ob_start();
+    $this->mvc->incl($file, false);
+    $output = ob_get_contents();
+    ob_end_clean();
+    return $output;
   }
 }

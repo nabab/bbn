@@ -326,10 +326,10 @@ class mapper{
           'description' => null,
           'url' => implode("/", $params),
           'primary' => $cfg['keys']['PRIMARY']['columns'][0],
-          'select' => 'json/select/'.$table,
-          'insert' => 'json/insert/'.$table,
-          'update' => 'json/update/'.$table,
-          'delete' => 'json/delete/'.$table,
+          'select' => 'select/'.$table,
+          'insert' => 'insert/'.$table,
+          'update' => 'update/'.$table,
+          'delete' => 'delete/'.$table,
           'elements' => []
       ];
       
@@ -412,9 +412,10 @@ class mapper{
           $r['null'] = true;
         }
         if ( ($f['key'] !== 'PRI') && ($type !== 'boolean') ){
-          $r['validation'] = [
-              'required' => true              
-          ];
+          $r['validation'] = [];
+          if ( empty($r['null']) ){
+            $r['validation']['required'] = true;
+          }
           if ( $type === 'number' && !isset($f['keys']) ){
             $r['validation']['min'] = $f['signed'] ? (int)str_repeat('4', (int)$f['maxlength']) : 0;
             $r['validation']['max'] = $f['signed'] ? (int)str_repeat('4', (int)$f['maxlength']) : (int)str_repeat('9', (int)$f['maxlength']);
@@ -775,7 +776,7 @@ class mapper{
       }
       
 			foreach ( $schema as $t => $vars ){
-				if ( strpos($t, '.'.$this->prefix) === false ){
+				if ( 1 || strpos($t, '.'.$this->prefix) === false ){
           $tmp = explode(".", $t);
           $db = $tmp[0];
           $table = $tmp[1];
@@ -824,7 +825,7 @@ class mapper{
 				}
 			}
 			foreach ( $schema as $t => $vars ){
-				if ( strpos($t, '.'.$this->prefix) === false ){
+				if ( 1 || strpos($t, '.'.$this->prefix) === false ){
           if (is_array($vars['keys']) ){
             foreach ( $vars['keys'] as $k => $arr ){
               $pos = 1;

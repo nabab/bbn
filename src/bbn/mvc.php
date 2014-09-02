@@ -529,6 +529,9 @@ class mvc extends obj
         $this->arguments = $this->known_controllers[$this->mode.'/'.$p]['args']; 
 			}
 			else{
+        if ( is_file(self::cpath.$this->mode.'.php') ){
+          array_push($this->checkers, self::cpath.$this->mode.'.php');
+        }
 				if ( isset($this->routes[$this->mode][$p]) ){
           if ( is_array($this->routes[$this->mode][$p]) &&
                       is_file(self::cpath.$this->mode.'/'.$this->routes[$this->mode][$p][0].'.php') ){
@@ -629,13 +632,15 @@ class mvc extends obj
 	 * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
 	 * @return void 
 	 */
-	public function reroute($path='')
+	public function reroute($path='', $check = 1)
 	{
 		$this->is_routed = false;
 		$this->controller = false;
 		$this->is_controlled = null;
 		$this->route($path);
-		$this->check();
+    if ( $check ){
+  		$this->check();
+    }
 		return $this;
 	}
 
@@ -1062,7 +1067,7 @@ class mvc extends obj
 			$this->obj = new \stdClass();
 		}
 		if ( $this->check() && $this->obj ){
-			
+
       if ( $this->cli ){
         die(isset($this->obj->output) ? $this->obj->output : "no output");
       }
@@ -1190,4 +1195,3 @@ class mvc extends obj
 		}
 	}
 }
-?>
