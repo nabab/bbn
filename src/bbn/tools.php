@@ -348,7 +348,6 @@ class tools
   }
   
   /**
-   * Returns callback value as html code.
    *
    * @return string
    */
@@ -437,6 +436,13 @@ class tools
     return $res;
   }
   
+  /**
+   * Returns the maximum value of an index of a multidimensional array. 
+   *
+   * @param array $arr A multidimensional array. 
+   * @param mixed $key The index where to search.
+   * @return mixed
+   */   
   public static function max_with_key($array, $key) {
     if (!is_array($array) || count($array) == 0) return false;
     $max = $array[0][$key];
@@ -448,6 +454,13 @@ class tools
     return $max;
   }
 
+  /**
+   * Returns the minimum value of an index of a multidimensional array. 
+   *
+   * @param array $arr A multidimensional array. 
+   * @param mixed $key The index where to search.
+   * @return mixed
+   */ 
   public static function min_with_key($array, $key) {
     if (!is_array($array) || count($array) == 0) return false;
     $min = $array[0][$key];
@@ -459,6 +472,10 @@ class tools
     return $min;
   }
   
+  /**
+   *
+   *
+   */ 
   public static function debug($file=''){
     $debug = array_map(function($a){
       if ( isset($a['object']) ){
@@ -474,6 +491,10 @@ class tools
     }
   }
   
+  /**
+   * 
+   * 
+   */ 
   public static function sort(&$ar){
     usort($ar, function($a, $b){
       $a = str_replace('.', '0', str_replace('_', '1', \bbn\str\text::change_case($a, 'lower')));
@@ -493,6 +514,10 @@ class tools
     return strtoupper(substr(PHP_OS, 0, 3)) == 'WIN';
   }
   
+  /**
+   *
+   *
+   */ 
   public static function curl($url, $param = false, $method = false){
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
