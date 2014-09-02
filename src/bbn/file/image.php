@@ -73,6 +73,10 @@ class image extends \bbn\file\file
 	/**
    * Returns the file image extension.
    * 
+   * <code>
+   * $img->get_extension();
+   * </code>
+   * 
 	 * @return string 
 	 */
 	public function get_extension()
@@ -105,6 +109,10 @@ class image extends \bbn\file\file
 
 	/**
    * Tests if the object is a image.
+   * 
+   * <code>
+   * $img->test();
+   * </code>
    * 
 	 * @return boolean 
 	 */
@@ -228,6 +236,10 @@ class image extends \bbn\file\file
 	/**
    * Returns the file image width.
    * 
+   * <code>
+   * $img->get_width();
+   * </code>
+   * 
 	 * @return integer 
 	 */
 	public function get_width()
@@ -242,6 +254,10 @@ class image extends \bbn\file\file
 
 	/**
    * Returns the file image height.
+   * 
+   * <code>
+   * $img->get_height();
+   * </code>
    * 
 	 * @return integer 
 	 */
@@ -258,15 +274,17 @@ class image extends \bbn\file\file
 	/**
    * Resize the image.
    * 
+   * <code>
+   * echo '<img src="'.$img->resize(150, 150)->toString().'" alt="">';
+   * </code>
+   * 
    * @param integer $w The new width.
    * @param integer $h The new height.
    * @param boolean $crop If cropping the image.
    * @param integer $max_w The maximum value for new width.
    * @param integer $max_h The maximum valure for new height.
    * 
-	 * @return image  
-   * 
-   * @todo transparent background.
+	 * @return image 
 	 */
 	public function resize($w=false, $h=false, $crop=false, $max_w=false, $max_h=false)
 	{
@@ -299,7 +317,12 @@ class image extends \bbn\file\file
 					}
 					else{
 						$image = imagecreatetruecolor($w2,$h2);
-						$res = imagecopyresampled($image,$this->img,0,0,0,0,$w2,$h2,$this->w,$this->h);
+            if ( $this->ext == 'png' || $this->ext == 'gif' || $this->ext == 'svg' ){
+              imageColorAllocateAlpha($image, 0, 0, 0, 127);
+              imagealphablending($image, false);
+              imagesavealpha($image, true);
+            }
+            $res = imagecopyresampled($image,$this->img,0,0,0,0,$w2,$h2,$this->w,$this->h);
 						$this->img = $image;
 					}
 					if ( $res === true ){
@@ -319,6 +342,11 @@ class image extends \bbn\file\file
 					}
 					else{
 						$image = imagecreatetruecolor($w2,$h2);
+            if ( $this->ext == 'png' || $this->ext == 'gif' || $this->ext == 'svg' ){
+              imageColorAllocateAlpha($image, 0, 0, 0, 127);
+              imagealphablending($image, false);
+              imagesavealpha($image, true);
+            }
 						$res = imagecopyresampled($image,$this->img,0,0,0,0,$w2,$h2,$this->w,$this->h);
 						$this->img = $image;
 					}
@@ -347,6 +375,11 @@ class image extends \bbn\file\file
 					}
 					else{
 						$image = imagecreatetruecolor($w2,$h2);
+            if ( $this->ext == 'png' || $this->ext == 'gif' || $this->ext == 'svg' ){
+              imageColorAllocateAlpha($image, 0, 0, 0, 127);
+              imagealphablending($image, false);
+              imagesavealpha($image, true);
+            }
 						$res = imagecopyresampled($image,$this->img,0,0,0,0,$w2,$h2,$this->w,$this->h);
 						$this->img = $image;
 					}
@@ -373,7 +406,9 @@ class image extends \bbn\file\file
    * 
    * @param integer $w BBN_MAX_WIDTH
    * @param integer $h BBN_MAX_HEIGHT
-   * @return image 
+   * 
+   * @return image
+   *  
    * @todo BBN_MAX_WIDTH and BBN_MAX_HEIGHT
 	 */
 	public function autoresize($w=BBN_MAX_WIDTH, $h=BBN_MAX_HEIGHT)
@@ -400,14 +435,16 @@ class image extends \bbn\file\file
 	/**
    * Returns a crop of the image.
    * 
+   * <code>
+   * echo '<img src="'.$img->crop(150, 150, 300, 300)->toString().'" alt="">';
+   * </code>
+   * 
    * @param integer $w Width
    * @param integer $h Height
    * @param integer $x X coordinate
    * @param integer $y Y coordinate
    * 
 	 * @return image
-   * 
-   * @todo transparent background.
 	 */
 	public function crop($w, $h, $x, $y)
 	{
@@ -434,6 +471,11 @@ class image extends \bbn\file\file
 			else
 			{
 				$img = imagecreatetruecolor($w,$h);
+        if ( $this->ext == 'png' || $this->ext == 'gif' || $this->ext == 'svg' ){
+          imageColorAllocateAlpha($img, 0, 0, 0, 127);
+          imagealphablending($img, false);
+          imagesavealpha($img, true);
+        }
 				if ( imagecopyresampled($img,$this->img,0,0,$x,$y,$w,$h,$w,$h) ){
 					$this->img = $img;
 				}
@@ -449,33 +491,35 @@ class image extends \bbn\file\file
 	/**
    * Rotates the image.
    * 
+   * <code>
+   * echo '<img src="'.$img->rotate(90)->toString().'" alt="">';
+   * </code>
+   * 
    * @param integer $angle The angle of rotation.
+   * 
 	 * @return image 
-   * @todo bug on rotation.
 	 */
 	public function rotate($angle)
 	{
 		$ok = false;
-		if ( $this->test() )
-		{
-			if ( class_exists('\\Imagick') )
-      {
-				if ( $this->img->rotateImage(new \ImagickPixel(),$angle) )
-        {
+		if ( $this->test() ){
+			if ( class_exists('\\Imagick') ){
+				if ( $this->img->rotateImage(new \ImagickPixel(),$angle) ){
 					$ok = 1;
         }
 			}
-			else if ( function_exists('imagerotate') )
-			{
-				if ( $this->img = imagerotate($this->img, $angle, 0) )
-				{
+			else if ( function_exists('imagerotate') ){
+				if ( $this->img = imagerotate($this->img, $angle, 0) ){
+          if ( $this->ext == 'png' || $this->ext == 'gif' || $this->ext == 'svg' ){
+            imageColorAllocateAlpha($this->img, 0, 0, 0, 127);
+            imagealphablending($this->img, false);
+            imagesavealpha($this->img, true);
+          }
 					$ok = 1;
 				}
 			}
-			if ( $ok )
-			{
-				if ( $angle == 90 || $angle == 270 )
-				{
+			if ( $ok ){
+				if ( $angle == 90 || $angle == 270 ){
 					$h = $this->h;
 					$this->h = $this->w;
 					$this->w = $h;
@@ -484,7 +528,7 @@ class image extends \bbn\file\file
 			else{
 				$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
 					BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
-			}
+			} 
 		}
 		return $this;
 	}
@@ -492,7 +536,12 @@ class image extends \bbn\file\file
 	/**
    * Flips the image.
    * 
+   * <code>
+   * echo '<img src="'.$img->flip()->toString().'" alt="">';
+   * </code>
+   * 
    * @param string $mode Vertical ("v") or Horizontal ("h") flip, default: "v".
+   * 
 	 * @return image 
 	 */
 public function flip($mode='v')
@@ -531,6 +580,10 @@ public function flip($mode='v')
 	/**
    * Adjusts the image brightness.
    * 
+   * <code>
+   * echo '<img src="'.$img->brightness()->toString().'" alt="">';
+   * </code>
+   * 
    * @param string $val The value "+" (default) increases the brightness, the value ("-") reduces it.
    *  
 	 * @return image 
@@ -562,7 +615,12 @@ public function flip($mode='v')
 	/**
    *  Adjusts the image contrast.
    * 
+   * <code>
+   * echo '<img src="'.$img->contrast()->toString().'" alt="">';
+   * </code>
+   * 
    * @param string $val The value "+" (default), increases the contrast, the value ("-") reduces it.
+   * 
 	 * @return image
 	 */
 	public function contrast($val='+')
@@ -592,6 +650,10 @@ public function flip($mode='v')
 	/**
    * Converts the color image to grayscale.
    * 
+   * <code>
+   * echo '<img src="'.$img->grayscale()->toString().'" alt="">';
+   * </code>
+   * 
 	 * @return image 
 	 */
 	public function grayscale()
@@ -618,6 +680,10 @@ public function flip($mode='v')
 
 	/**
    * Converts the color image to negative.
+   * 
+   * <code>
+   * echo '<img src="'.$img->negate()->toString().'" alt="">';
+   * </code>
    *  
 	 * @return image
 	 */
@@ -646,7 +712,13 @@ public function flip($mode='v')
 	/**
    * Converts the color image to polaroid filter.
    * 
+   * <code>
+   * echo '<img src="'.$img->polaroid()->toString().'" alt="">';
+   * </code>
+   * 
 	 * @return image 
+   * 
+   * @todo Transparency of png files.
 	 */
 	public function polaroid()
 	{
@@ -654,7 +726,7 @@ public function flip($mode='v')
 		{
 			if ( class_exists('\\Imagick') )
 			{
-				if ( !$this->img->polaroidImage(new \ImagickDraw(),0) ){
+				if ( !$this->img->polaroidImage(new \ImagickDraw(), 0) ){
 					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
@@ -665,6 +737,10 @@ public function flip($mode='v')
 
 	/**
    * Returns the image as string.
+   * 
+   * <code>
+   * echo '<img src="'.$img->toString().'" alt="">';
+   * </code>
    * 
 	 * @return string 
 	 */
