@@ -383,9 +383,6 @@ class connection
    * @return bool
    */
   public function has_permission($name){
-    if ( isset($this->permissions['is_admin']) && $this->permissions['is_admin'] ){
-      return 1;
-    }
     if ( isset($this->permissions[$name]) && $this->permissions[$name] ){
       return 1;
     }
@@ -753,6 +750,14 @@ class connection
   public function is_admin()
   {
     return $this->has_permission("admin");
+  }
+
+	/**
+	 * @return boolean
+	 */
+  public function is_allowed($perm)
+  {
+    return ( $this->has_permission("admin") || $this->has_permission($perm) );
   }
 
 	/**
