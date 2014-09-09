@@ -25,6 +25,7 @@ class tools
 	 * Add information to the $info array.
 	 *
 	 * @param string $st The information to be added.
+   * 
 	 * @return null
 	 */
 	public static function report($st)
@@ -53,8 +54,13 @@ class tools
   /**
 	 * Save the logs to a file.
 	 *
+   * <code>
+   * \bbn\tools::log('My text','FileName');
+   * </code>
+   * 
 	 * @param string $st Text to save.
 	 * @param string $file Filename, , default: "misc".
+   * 
 	 * @return null
 	 */
 	public static function log($st, $file='misc')
@@ -86,8 +92,14 @@ class tools
  	/**
 	 * Returns an object as merge of two objects.
    * 
+   * <code>
+   * \bbn\tools::merge_objects(\bbn\tools::to_object([1, 'Test']), \bbn\tools::to_object([2, 'Example']));
+   * //Returns [1, 'Test', 2, 'Example']
+   * </code>
+   * 
    * @param object $o1 The first object to merge.
    * @param object $o2 The second object to merge.
+   * 
 	 * @return object The merged object.
 	 */  
   public static function merge_objects($o1, $o2){
@@ -106,8 +118,14 @@ class tools
  	/**
    * Returns an array as merge of two arrays.
 	 * 
+   * <code>
+   * \bbn\tools::merge_arrays([1, 'Test'], [2, 'Example']);
+   * //Returns [1, 'Test', 2, 'Example']
+   * </code>
+   * 
    * @param array $a1 The first array to merge.
    * @param array $a2 The second array to merge.
+   * 
    * @return array The merged array.
 	 */
   public static function merge_arrays(array $a1, array $a2) {
@@ -145,7 +163,13 @@ class tools
   /**
    * Makes an object of an array.
    * 
+   * <code>
+   * \bbn\tools::to_object([[1, 'Test'], [2, 'Example']]);
+   * //Returns [[1, 'Test'], [2, 'Example']]
+   * </code>
+   * 
    * @param array $ar The array to trasform.
+   * 
    * @return false|object
    */
   public static function to_object($ar){
@@ -167,7 +191,26 @@ class tools
   /**
    * Makes an object of an array.
    * 
+   * <code>
+   * $file = new \bbn\file\file("C:/logs/test.log");
+   * echo \bbn\tools::to_array($file);
+   * //Returns [
+   *     '*size' => 0,
+   *     '*ext' => 'log',
+   *     '*hash' => null,
+   *     'path' => 'C:/logs/',
+   *     'name' => 'test.log',
+   *     'file' => 'C:/logs/test.log',
+   *     'title' => 'test',
+   *     'uploaded' => 0,
+   *     '*error' => null,
+   *     '*log' => [
+   *     ],
+   * ]
+   * </code>
+   * 
    * @param object $obj The object to trasform.
+   * 
    * @return false|object
    */
   public static function to_array($obj){
@@ -191,8 +234,20 @@ class tools
 
   /**
    * Indents a flat JSON string to make it more human-readable.
+   * 
+   * <code>
+   * \bbn\tools::indent_json('{"firstName": "John", "lastName": "Smith", "age": 25}');
+   * //Returns 
+   * {
+   *   "firstName": "John",
+   *    "lastName": "Smith",
+   *    "isAlive": true,
+   *    "age": 25
+   * }
+   * </code>
    *
    * @param string $json The original JSON string to process.
+   * 
    * @return string Indented version of the original JSON string.
    */
   public static function indent_json($json) {
@@ -249,8 +304,14 @@ class tools
   /**
    * Returns an object or an array cleaned up from all empty values.
    *
+   * <code>
+   * \bbn\tools::remove_empty(['Pippo', 'Pluto', '', 'Paperino', ' ']); //Returns [0 => 'Pippo', 1 => 'Pluto', 3 => 'Paperino', 4 => ' ']
+   * \bbn\tools::remove_empty(['Pippo', 'Pluto', '', 'Paperino', ' '], 1)); //Returns [0 => 'Pippo', 1 => 'Pluto', 3 => 'Paperino']
+   * </code>
+   * 
    * @param array|object $arr An object or array to clean.
    * @param boolean $remove_space If "true" the spaces are removed, default: "false".
+   * 
    * @return string The clean result.
    */
   public static function remove_empty($arr, $remove_space=false){
@@ -281,9 +342,15 @@ class tools
   /**
    * Returns an array containing an array for each element highlighting the index with an alias (keyname) and the value with an alias (valname).
    *
+   * <code>
+   * \bbn\tools::to_groups(['Pippo', 'Pluto', 'Paperino']); 
+   * //Returns [['value' => 0, 'text' => 'Pippo'], ['value' => 1, 'text' => 'Pluto'], ['value' => 2, 'text' => 'Paperino']]
+   * </code>
+   * 
    * @param array $arr The original array.
    * @param string $keyname Alias for index, default: "value".
    * @param string $valname Alias for value, default: "text".
+   * 
    * @return array Groups array.
    */
   public static function to_groups(array $arr, $keyname = 'value', $valname = 'text'){
