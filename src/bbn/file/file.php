@@ -104,6 +104,11 @@ class file extends \bbn\obj
 	/**
    * Returns the filesize.
    * 
+   * <code>
+   * $file = new \bbn\file\file("C:/Test/file.txt");
+   * echo $file->get_size(); //Returns 314
+   * </code>
+   * 
 	 * @return integer  
 	 */
 	public function get_size()
@@ -116,6 +121,11 @@ class file extends \bbn\obj
 
 	/**
    * Returns the extension name of the file.
+   * 
+   * <code>
+   * $file = new \bbn\file\file("C:/Test/file.txt");
+   * echo $file->get_extension(); //Returns "txt"
+   * </code>
    * 
 	 * @return string 
 	 */
@@ -201,6 +211,11 @@ class file extends \bbn\obj
 	/**
 	 * Returns the hash of the file.
    * 
+   * <code>
+   * $file = new \bbn\file\file("C:/Test/file.txt");
+   * echo $file->get_hash(); //Returns "9a388aa36a85adbd9c8c2b59aa2a736c"
+   * </code>
+   * 
    * @return string 
 	 */
 	public function get_hash()
@@ -213,6 +228,11 @@ class file extends \bbn\obj
 
 	/**
    * Deletes the file.
+   * 
+   * <code>
+   * $file = new \bbn\file\file("C:/Test/file.txt");
+   * $file->delete(); //Deletes the file
+   * </code>
    *  
 	 */
 	public function delete()
