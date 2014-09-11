@@ -189,6 +189,38 @@ class dir extends \bbn\obj
 	}
 
 	/**
+	 * Scans all the content from a directory, including the subdirectories
+	 *
+   * <code>
+   * \bbn\file\dir::scan("/home/me");
+   * \bbn\file\dir::delete("C:\Documents\Test");
+   * </code>
+   * 
+	 * @param string $dir The directory path.
+	 * @param string $type The type of item to return ('file', 'dir', default is both)
+   * 
+	 * @return array
+	 */
+	public static function scan($dir, $type = null)
+	{
+    $dirs = self::get_dirs($dir);
+    $files = self::get_files($dir);
+    if ( $type && (strpos($type, 'file') === 0) ){
+      $all = $files;
+    }
+    else if ( $type && ((strpos($type, 'dir') === 0) || (strpos($type, 'fold') === 0)) ){
+      $all = $dirs;
+    }
+    else{
+      $all = array_merge($dirs, $files);
+    }
+    foreach ( $dirs as $d ){
+      $all = array_merge($all, self::scan($d, $type));
+    }
+    return $all;
+	}
+
+	/**
 	 * Creates all the directories from the path taht don't exist
 	 *
    * <code>

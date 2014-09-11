@@ -210,7 +210,8 @@ class dbsync
       'updated_real' => 0,
       'inserted_sync' => 0,
       'inserted_real' => 0,
-      'problems' => 0
+      'num_problems' => 0,
+      'problems' => []
     ];
     
     $mode_db = self::$db->get_error_mode();
@@ -246,8 +247,8 @@ class dbsync
       }
       $vals = json_decode($d['vals'], 1);
       if ( !is_array($vals) ){
-        $to_log['problems']++;
-        self::log("Hey, look urgently at the row $d[id]!");
+        $to_log['num_problems']++;
+        array_push($to_log['problems'], "Hey, look urgently at the row $d[id]!");
       }
       else if ( self::$db->insert($d['tab'], $vals) ){
         if ( isset(self::$methods['cbf2']) ){
@@ -260,9 +261,9 @@ class dbsync
         self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
       }
       else{
-        $to_log['problems']++;
+        $to_log['num_problems']++;
+        array_push($to_log['problems'], "Problem while syncing (insert), check data with status 5 and ID ".$d['id']);
         self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
-        self::log("Problem while syncing (insert), check data with status 5 and ID ".$d['id']);
       }
     }
 
@@ -294,8 +295,8 @@ class dbsync
         }
         else{
           self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
-          self::log("Problem while syncing (delete), check data with status 5 and ID ".$d['id']);
-          $to_log['problems']++;
+          $to_log['num_problems']++;
+          array_push($to_log['problems'], "Problem while syncing (delete), check data with status 5 and ID ".$d['id']);
         }
       }
       // Checking if there is another change done to this record and when in the twin DB
@@ -315,7 +316,8 @@ class dbsync
           ['moment', '<', $next_time],
         ]);
       if ( count($each) > 0 ){
-        self::log("Conflict!", $d);
+        $to_log['num_problems']++;
+        array_push($to_log['problems'], "Conflict!", $d);
         foreach ( $each as $i => $e ){
           // If it's deleted locally and updated on the twin we restore
           if ( $e['action'] === 'delete' ){
@@ -327,7 +329,8 @@ class dbsync
                               json_decode($d['vals'], 1)
                       )
               )) ){
-                self::log("insert_update number 1 had a problem");
+                $to_log['num_problems']++;
+                array_push($to_log['problems'], "insert_update number 1 had a problem");
               }
             }
           }
@@ -341,7 +344,8 @@ class dbsync
                               json_decode($e['vals'], 1)
                       )
               )) ){
-                self::log("insert_update had a problem");
+                $to_log['num_problems']++;
+                array_push($to_log['problems'], "insert_update had a problem");
               }
             }
           // If it's updated locally and in the twin we merge the values for the update
@@ -366,8 +370,8 @@ class dbsync
         }
         else{
           self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
-          self::log("Problem while syncing (update), check data with status 5 and ID ".$d['id']);
-          $to_log['problems']++;
+          $to_log['num_problems']++;
+          array_push($to_log['problems'], "Problem while syncing (update), check data with status 5 and ID ".$d['id']);
         }
       }
       // Callback number 2
@@ -376,14 +380,16 @@ class dbsync
       }
     }
     
+    $res = [];
     foreach ( $to_log as $k => $v ){
-      if ( $v > 0 ){
-        self::log($k.': '.$v);
+      if ( !empty($v) ){
+        $res[$k] = $v;
       }
     }
     self::$db->set_error_mode($mode_db);
     self::$dbs->set_error_mode($mode_dbs);
     self::enable();
+    return $res;
   }
 }
 ?>

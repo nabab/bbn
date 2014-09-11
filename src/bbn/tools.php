@@ -29,24 +29,25 @@ class tools
 	 */
 	public static function report($st)
 	{
-		if ( !isset(self::$cli) )
-		{
+		if ( !isset(self::$cli) ){
 			global $argv;
 			self::$cli = isset($argv) ? 1 : false;
 		}
-		if ( self::$cli )
-		{
-			if ( is_string($st) )
+		if ( self::$cli ){
+			if ( is_string($st) ){
 				echo $st."\n";
-			else
+      }
+			else{
 				var_dump($st)."\n";
+      }
 		}
-		else
-		{
-			if ( is_string($st) )
+		else{
+			if ( is_string($st) ){
 				array_push(self::$info,$st);
-			else
+      }
+			else{
 				array_push(self::$info,print_r($st,true));
+      }
 		}
 	}
   
@@ -69,7 +70,7 @@ class tools
               self::get_dump($st).PHP_EOL;
       
       if ( php_sapi_name() === 'cli' ){
-        echo $r;
+        echo self::get_dump($st).PHP_EOL;
       }
       $s = ( file_exists($log_file) ) ? filesize($log_file) : 0;
 			if ( $s > 1048576 )

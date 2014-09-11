@@ -71,12 +71,22 @@ EOD
   public function find_sessions($id_user=null, $minutes = 5)
   {
     if ( is_int($minutes) ){
-      return $this->db->get_rows("
-        SELECT *
-        FROM `{$this->cfg['tables']['sessions']}`
-        WHERE `{$this->cfg['arch']['sessions']['id_user']}` = ?
-          AND {$this->cfg['arch']['sessions']['last_activity']} > DATE_SUB(NOW(), INTERVAL {$this->cfg['sess_length']} MINUTE)
-        ", $id_user);
+      if ( is_null($id_user) ){
+        return $this->db->get_rows("
+          SELECT *
+          FROM `{$this->cfg['tables']['sessions']}`
+          WHERE `{$this->cfg['arch']['sessions']['last_activity']}` > DATE_SUB(?, INTERVAL {$this->cfg['sess_length']} MINUTE)",
+          date('Y-m-d H:i:s'));
+      }
+      else{
+        return $this->db->get_rows("
+          SELECT *
+          FROM `{$this->cfg['tables']['sessions']}`
+          WHERE `{$this->cfg['arch']['sessions']['id_user']}` = ?
+            AND `{$this->cfg['arch']['sessions']['last_activity']}` > DATE_SUB(?, INTERVAL {$this->cfg['sess_length']} MINUTE)",
+          $id_user,
+          date('Y-m-d H:i:s'));
+      }
     }
     else{
       die("Forbidden to enter anything else than integer as $minutes in \bbn\user\manager\find_sessions()");

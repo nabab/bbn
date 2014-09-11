@@ -526,39 +526,26 @@ class mvc extends obj
           $this->dir .= '/';
         }
 				$this->controller = $this->known_controllers[$this->mode.'/'.$p]['path'];
-        $this->arguments = $this->known_controllers[$this->mode.'/'.$p]['args']; 
+        if ( isset($this->known_controllers[$this->mode.'/'.$p]['args']) ){
+          $this->arguments = $this->known_controllers[$this->mode.'/'.$p]['args'];
+        }
 			}
 			else{
-        if ( is_file(self::cpath.$this->mode.'.php') ){
-          array_push($this->checkers, self::cpath.$this->mode.'.php');
-        }
 				if ( isset($this->routes[$this->mode][$p]) ){
-          if ( is_array($this->routes[$this->mode][$p]) &&
-                      is_file(self::cpath.$this->mode.'/'.$this->routes[$this->mode][$p][0].'.php') ){
-            $this->controller = self::cpath.$this->mode.'/'.array_shift($this->routes[$this->mode][$p]).'.php';
-            $this->arguments = $this->routes[$this->mode][$p];
-          }
-          else if ( is_file(self::cpath.$this->mode.'/'.$this->routes[$this->mode][$p].'.php') ){
-  					$this->controller = self::cpath.$this->mode.'/'.$this->routes[$this->mode][$p].'.php';
-          }
+          $p = is_array($this->routes[$this->mode][$p]) ? $this->routes[$this->mode][$p][0] : $this->routes[$this->mode][$p];
 				}
-				else if ( is_file(self::cpath.$this->mode.'/'.$p.'.php') ){
+				if ( is_file(self::cpath.$this->mode.'/'.$p.'.php') ){
 					$this->controller = self::cpath.$this->mode.'/'.$p.'.php';
           $parts = explode('/', $p);
           $num = count($parts);
           $path = self::cpath.$this->mode.'/';
-          if ( $num > 1 ){
-            for ( $i = 0; $i < ( $num - 1 ); $i++ ){
-              if ( is_file($path.$parts[$i].'.php') ){
-                array_push($this->checkers, $path.$parts[$i].'.php');
-              }
-              $path .= $parts[$i].'/';
+          // if the current directory of the controller, or any directory above it in the controllers' filesystem, has a file called _ctrl.php, it will be executed and expected to return a non false value in order to authorize the loading of the controller
+          foreach ( $parts as $pt ){
+            if ( is_file($path.'_ctrl.php') ){
+              array_push($this->checkers, $path.'_ctrl.php');
             }
+            $path .= $pt.'/';
           }
-				}
-        // Is it necessary??
-				else if ( is_dir(self::cpath.$p) && is_file(self::cpath.$p.'/'.$this->mode.'.php') ){
-					$this->controller = self::cpath.$p.'/'.$this->mode.'.php';
 				}
 				else{
 					return false;

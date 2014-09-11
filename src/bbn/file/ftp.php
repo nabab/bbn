@@ -113,30 +113,67 @@ class ftp extends \bbn\obj
 	 */
 	public function listFiles($path='.')
 	{
-		$res = false;
-		if ( $this->cn )
-		{
-			if ( @ftp_chdir($this->cn,$path) )
-			{
-				$res = array();
-				$files = ftp_nlist($this->cn,$path);
-				foreach ( $files as $file )
-				{
-					$ele = array('name' => $file, 'basename' => basename($file), 'num' => 0);
-					if ( @ftp_chdir($this->cn,$path.'/'.$file) ){
-						$num = ftp_nlist($this->cn,'.');
-						$ele['num'] = count($num);
-						$ele['type'] = 'dir';
-						@ftp_cdup($this->cn);
-					}
-          else{
-            $ele['type'] = \bbn\str\text::file_ext($file);
-          }
-					array_push($res,$ele);
-				}
-			}
-		}
-		return $res;
+		$res = [];
+		if ( $this->cn &&
+            @ftp_chdir($this->cn, $path) &&
+            ($files = ftp_nlist($this->cn, $path)) ){
+      foreach ( $files as $file )
+      {
+        $ele = [
+          'name' => $file,
+          'basename' => basename($file),
+        ];
+        if ( @ftp_chdir($this->cn, $path.'/'.$ele['basename']) ){
+          $num = ftp_nlist($this->cn, '.');
+          $ele['num'] = count($num);
+          $ele['type'] = 'dir';
+          @ftp_cdup($this->cn);
+        }
+        else{
+          $ele['type'] = \bbn\str\text::file_ext($file);
+        }
+        array_push($res,$ele);
+      }
+      return $res;
+    }
+		return false;
+	}
+
+	/**
+	 * Scans all the content from a directory, including the subdirectories
+	 *
+   * <code>
+   * \bbn\file\dir::scan("/home/me");
+   * \bbn\file\dir::delete("C:\Documents\Test");
+   * </code>
+   * 
+	 * @param string $dir The directory path.
+	 * @param string $type The type of item to return ('file', 'dir', default is both)
+   * 
+	 * @return array
+	 */
+	public function scan($dir, $type = null, &$res = []){
+    if ( $dirs = $this->listFiles($dir) ){
+      foreach ( $dirs as $d ){
+        if ( $type &&
+                (strpos($type, 'file') === 0) &&
+                !isset($d['num']) ){
+          array_push($res, $d['name']);
+        }
+        else if ( $type &&
+                ((strpos($type, 'dir') === 0) || (strpos($type, 'fold') === 0)) &&
+                isset($d['num']) ){
+          array_push($res, $d['name']);
+        }
+        else{
+          array_push($res, $d['name']);
+        }
+        if ( isset($d['num']) ){
+          $this->scan($d['name'], $type, $res);
+        }
+      }
+    }
+    return $res;
 	}
 
 	/**
@@ -197,29 +234,27 @@ class ftp extends \bbn\obj
 	}
 
 	/**
-	 * @return void 
+	 * @return false|string
 	 */
-	public function checkFilePath($file)
-	{
-		$slash = strrpos($file,'/');
-		if ( $slash !== false )
-		{
-			if ( $dir = $this->checkPath(substr($file,0,$slash)) )
-				return $dir.substr($file,$slash);
+	public function checkFilePath($file){
+		$slash = strrpos($file, '/');
+		if ( ($slash !== false) &&
+                ($dir = $this->checkPath(substr($file, 0, $slash))) ){
+      return $dir.substr($file, $slash);
 		}
-		else
+		else if ( $slash === false ){
 			return $this->path.$file;
+    }
 		return false;
 	}
 
 	/**
-	 * @return void 
+	 * @return boolean
 	 */
-	public function cdDir($dir)
-	{
+	public function cdDir($dir){
 		if ( $dir = $this->checkPath($dir) )
 		{
-			if ( @ftp_chdir($this->cn,$dir) )
+			if ( @ftp_chdir($this->cn, $dir) )
 			{
 				$this->path = $dir;
 				return true;
@@ -231,8 +266,7 @@ class ftp extends \bbn\obj
 	/**
 	 * @return void 
 	 */
-	public function checkDir($dir, $create=0)
-	{
+	public function checkDir($dir, $create=0){
 		if ( $dir = $this->checkPath($dir) )
 		{
 			$path = $this->path;
@@ -252,17 +286,16 @@ class ftp extends \bbn\obj
 	}
 
 	/**
-	 * @return void 
+	 * @return false|string 
 	 */
-	public function mkDir($dir)
-	{
+	public function mkDir($dir){
 		if ( $dir = $this->checkPath($dir) ){
 			if ( $this->checkDir($dir) ){
 				$this->error = defined('BBN_DIRECTORY_EXISTS') ?
 					BBN_DIRECTORY_EXISTS : 'The directory exists';
 				return $this->error;
 			}
-			else if ( ftp_mkdir($this->cn,$dir) ){
+			else if ( ftp_mkdir($this->cn, $dir) ){
 				$this->error = defined('BBN_DIRECTORY_CREATED') ?
 					BBN_DIRECTORY_CREATED : 'The directory has been created';
 				return $this->error;
@@ -272,15 +305,42 @@ class ftp extends \bbn\obj
 	}
 
 	/**
-	 * @return void 
+   * Deletes a file from the server
+   * 
+	 * @return boolean
 	 */
-	public function delete($item)
-	{
+	public function delete($item){
 		self::log('delete:'.$item);
-		if ( $this->checkFilePath($item) )
-		{
-			if ( ftp_delete($this->cn,$item) )
-				return true;
+		if ( $this->checkFilePath($item) &&
+            ftp_delete($this->cn,$item) ){
+      return true;
+		}
+		return false;
+	}
+
+	/**
+   * Puts a file on the server
+   * 
+	 * @return boolean
+	 */
+	public function put($src, $dest){
+		if ( file_exists($src) &&
+            ($dest = $this->checkFilePath($dest)) &&
+            ftp_put($this->cn,$dest,$src,FTP_BINARY) ){
+      return true;
+		}
+		return false;
+	}
+
+	/**
+   * Gets a file from the server
+   * 
+	 * @return boolean
+	 */
+	public function get($src, $dest){
+		if ( $src = $this->checkFilePath($src) &&
+            ftp_get($this->cn, $dest, $src, FTP_BINARY) ){
+      return true;
 		}
 		return false;
 	}
@@ -288,36 +348,8 @@ class ftp extends \bbn\obj
 	/**
 	 * @return void 
 	 */
-	public function put($src, $dest)
-	{
-		if ( file_exists($src) && $dest = $this->checkFilePath($dest) )
-		{
-			if ( ftp_put($this->cn,$dest,$src,FTP_BINARY) )
-				return true;
-		}
-		return false;
-	}
-
-	/**
-	 * @return void 
-	 */
-	public function get($src, $dest)
-	{
-		if ( $src = $this->checkFilePath($src) )
-		{
-			if ( ftp_get($this->cn,$dest,$src,FTP_BINARY) )
-				return true;
-		}
-		return false;
-	}
-
-	/**
-	 * @return void 
-	 */
-	public function close()
-	{
+	public function close(){
 		ftp_close($this->cn);
 	}
 
 }
-?>

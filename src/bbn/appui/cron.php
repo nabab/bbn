@@ -29,7 +29,8 @@ class cron extends \bbn\obj{
           $date = false,
           $last_rows = false,
           $ok = false,
-          $enabled = true;
+          $enabled = true,
+          $timeout = 50;
 	
   public function __construct(\bbn\mvc $mvc, $cfg = []) {
     if ( is_array($cfg) ){
@@ -78,6 +79,7 @@ class cron extends \bbn\obj{
       'id_cron' => $id_cron,
       'start' => date('Y-m-d H:i:s')
     ]) ){
+      $this->timer->start('cron_'.$id_cron);
       return $this->db->last_id ();
     }
     return false;
@@ -86,20 +88,21 @@ class cron extends \bbn\obj{
   public function finish($id, $res = ''){
     if ( ($article = $this->get_article($id)) &&
             ($cron = $this->get_cron($article['id_cron'])) ){
-      $date = time();
+      $time = $this->timer->stop('cron_'.$article['id_cron']);
       $this->db->update($this->jtable, [
-          'finish' => date('Y-m-d H:i:s', $date),
-          'res' => $res
-        ], [
-          'id' => $id
-        ]);
+        'finish' => date('Y-m-d H:i:s'),
+        'duration' => $time,
+        'res' => $res
+      ], [
+        'id' => $id
+      ]);
       $this->db->update($this->table, [
         'prev' => $article['start'],
         'next' => date('Y-m-d H:i:s', $this->get_next_date($cron['cfg']['frequency']))
       ], [
         'id' => $cron['id']
       ]);
-      return 1;
+      return $time;
     }
     return false;
   }
@@ -151,10 +154,11 @@ class cron extends \bbn\obj{
         SELECT *
         FROM {$this->table}
         WHERE active = 1 
-        AND next < NOW()".
+        AND next < ?".
         ( is_int($id_cron) ? " AND id_cron = $id_cron" : "" )."
         ORDER BY next ASC
-        LIMIT 1")) ){
+        LIMIT 1",
+        date('Y-m-d H:i:s'))) ){
       // Dans cfg: timeout, et soit: latency, minute, hour, day of month, day of week, date
       $data['cfg'] = json_decode($data['cfg'], 1);
       return $data;
@@ -198,16 +202,16 @@ class cron extends \bbn\obj{
         $start = strtotime($runner['start']);
         $timeout = $runner['cfg']['timeout'];
         if ( ($start + $timeout) > time() ){
+          
           $this->alert();
         }
         $ok = false;
       }
       if ( $ok ){
         $id = $this->start($cron['id']);
-        $this->timer->start();
         $output = $this->_exec($cron['file'], $cron['cfg']);
-        $this->finish($id, $output);
-        \bbn\tools::dump("Execution of ".$cron['file']." (Journal ID: $id) in ".$this->timer->stop()." secs", $output);
+        $time = $this->finish($id, $output);
+        \bbn\tools::dump("Execution of ".$cron['file']." (Journal ID: $id) in $time secs", $output);
         return 1;
       }
     }

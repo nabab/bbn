@@ -725,15 +725,16 @@ class text
       $st .= "Object ".get_class($o).PHP_EOL;
     }
     if ( is_object($o) || is_array($o) ){
-      $is_assoc = (bool)( !is_array($o) || \bbn\tools::is_assoc($o) );
-      $st .= '['.PHP_EOL;
+      $is_assoc = (is_object($o) || \bbn\tools::is_assoc($o));
+      $st .= $is_assoc ? '{' : '[';
+      $st .= PHP_EOL;
       foreach ( $o as $k => $v ){
         if ( $remove_empty && ( ( is_string($v) && empty($v) ) || ( is_array($v) && count($v) === 0 ) ) ){
           continue;
         }
         $st .= str_repeat('    ', $lev);
         if ( $is_assoc ){
-          $st .= ( is_string($k) ? "'".\bbn\str\text::escape_squote($k)."'" : $k ). " => ";
+          $st .= ( is_string($k) ? "'".\bbn\str\text::escape_squote($k)."'" : $k ). ": ";
         }
         if ( is_array($v) ){
           $st .= self::export($v, $remove_empty, $lev+1);
@@ -764,7 +765,8 @@ class text
         }
         $st .= ','.PHP_EOL;
       }
-      $st .= str_repeat('    ', $lev-1).']';
+      $st .= str_repeat('    ', $lev-1);
+      $st .= $is_assoc ? '}' : ']';
       return $st;
     }
     return $o;

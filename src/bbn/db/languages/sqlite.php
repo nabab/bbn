@@ -361,11 +361,11 @@ class sqlite implements \bbn\db\engines
             $dir = 'ASC';
           }
           if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($direction)]) || in_array($this->col_simple_name($direction), $aliases) ){
-            $r .= $this->escape($direction)." $dir," . PHP_EOL;
+            $r .= $this->escape($direction)." COLLATE NOCASE $dir," . PHP_EOL;
           }
         }
         else if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($col)]) || in_array($this->col_simple_name($col), $aliases) ){
-          $r .= "`$col` " . ( strtolower($direction) === 'desc' ? 'DESC' : 'ASC' ) . "," . PHP_EOL;
+          $r .= "`$col` COLLATE NOCASE " . ( strtolower($direction) === 'desc' ? 'DESC' : 'ASC' ) . "," . PHP_EOL;
         }
       }
       $r = substr($r,0,strrpos($r,','));
