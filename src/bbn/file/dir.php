@@ -205,6 +205,7 @@ class dir extends \bbn\obj
 	{
     $dirs = self::get_dirs($dir);
     $files = self::get_files($dir);
+    $all = [];
     if ( $type && (strpos($type, 'file') === 0) ){
       $all = $files;
     }
@@ -215,7 +216,7 @@ class dir extends \bbn\obj
       $all = array_merge($dirs, $files);
     }
     foreach ( $dirs as $d ){
-      $all = array_merge($all, self::scan($d, $type));
+      $all = array_merge(is_array($all) ? $all : [], self::scan($d, $type));
     }
     return $all;
 	}
