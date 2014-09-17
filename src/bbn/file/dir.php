@@ -225,7 +225,8 @@ class dir extends \bbn\obj
 	 * Creates all the directories from the path taht don't exist
 	 *
    * <code>
-   * \bbn\file\dir::create_path($path = "C:\Documents\Test\New")
+   * \bbn\file\dir::create_path("C:\Documents\Test\New")
+   * \bbn\file\dir::create_path("../my/path")
    * </code>
    * 
 	 * @param string $dir The directory path.
@@ -253,7 +254,10 @@ class dir extends \bbn\obj
       else{
         $ok = mkdir($dir);
       }
-      return $ok;
+      if ( !$ok ){
+        return false;
+      }
+      return $dir;
     }
     return 1;
 	}
