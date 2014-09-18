@@ -153,7 +153,7 @@ class file extends \bbn\obj
 	}
 
 	/**
-	 * @return void 
+	 * @return
 	 */
 	protected function make()
 	{
@@ -184,7 +184,6 @@ class file extends \bbn\obj
 	}
 
 	/**
-   * 
 	 * @return 
 	 */
 	public function download()

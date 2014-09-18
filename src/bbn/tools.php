@@ -93,8 +93,20 @@ class tools
 	 * Returns an object as merge of two objects.
    * 
    * <code>
-   * \bbn\tools::merge_objects(\bbn\tools::to_object([1, 'Test']), \bbn\tools::to_object([2, 'Example']));
-   * //Returns [1, 'Test', 2, 'Example']
+   * class A {
+   *  public $a = 10;
+   *  public $b = 20;
+   * };
+   * 
+   * class B {
+   *  public $c = 30; 
+   *  public $d = 40;
+   * };
+   * 
+   * $obj1 = new A;
+   * $obj2 = new B;
+   * 
+   * \bbn\tools::merge_objects($obj1, $obj2); //Returns {'a': 10, 'b': 20, 'c': 30, 'd': 40}
    * </code>
    * 
    * @param object $o1 The first object to merge.
@@ -119,8 +131,7 @@ class tools
    * Returns an array as merge of two arrays.
 	 * 
    * <code>
-   * \bbn\tools::merge_arrays([1, 'Test'], [2, 'Example']);
-   * //Returns [1, 'Test', 2, 'Example']
+   * \bbn\tools::merge_arrays([1, 'Test'], [2, 'Example']); //Returns [1, 'Test', 2, 'Example']
    * </code>
    * 
    * @param array $a1 The first array to merge.
@@ -164,8 +175,7 @@ class tools
    * Makes an object of an array.
    * 
    * <code>
-   * \bbn\tools::to_object([[1, 'Test'], [2, 'Example']]);
-   * //Returns [[1, 'Test'], [2, 'Example']]
+   * \bbn\tools::to_object([[1, 'Test'], [2, 'Example']]); //Returns {[1, 'Test'], [2, 'Example']}
    * </code>
    * 
    * @param array $ar The array to trasform.
@@ -189,7 +199,7 @@ class tools
   }
 
   /**
-   * Makes an object of an array.
+   * Makes an array of an object.
    * 
    * <code>
    * $file = new \bbn\file\file("C:/logs/test.log");
@@ -237,13 +247,7 @@ class tools
    * 
    * <code>
    * \bbn\tools::indent_json('{"firstName": "John", "lastName": "Smith", "age": 25}');
-   * //Returns 
-   * {
-   *   "firstName": "John",
-   *    "lastName": "Smith",
-   *    "isAlive": true,
-   *    "age": 25
-   * }
+   * //Returns {"firstName": "John", "lastName": "Smith", "isAlive": true, "age": 25}
    * </code>
    *
    * @param string $json The original JSON string to process.
@@ -379,8 +383,6 @@ class tools
   }
   
   /**
-   * 
-   *
    * @return string
    */
   public static function get_dump(){
@@ -415,7 +417,6 @@ class tools
   }
   
   /**
-   *
    * @return string
    */
   public static function get_hdump(){
@@ -442,9 +443,16 @@ class tools
   /**
    * Returns HTML code for creating the <option> tag.
    *
+   * <code>
+   * \bbn\tools::build_options(['yes', 'no']); //Returns "<option value="yes">yes</option><option value="no">no</option>"
+   * \bbn\tools::build_options(['yes', 'no'], 'no'); //Returns "<option value="yes">yes</option><option value="no" selected="selected">no</option>"
+   * \bbn\tools::build_options(['yes', 'no'], 'no', 'LabelForEmpty'); //Returns "<option value="">LabelForEmpty</option><option value="yes">yes</option><option value="no" selected="selected">no</option>"
+   * </code>
+   * 
    * @param array $values An array with one or plus values.
    * @param string $select The value to indicate how selected, default: "".
    * @param string $empty_label Label for empty value, default: "false".
+   * 
    * @return string The HTML code.
    */  
   public static function build_options($values, $selected='', $empty_label=false){
@@ -483,8 +491,13 @@ class tools
   /**
    * Converts a numeric array to an associative one, using the values alternatively as key or value.
    *
+   * <code>
+   * \bbn\tools::to_keypair(['Test', 'TestFile', 'Example', 'ExampleFile']); //Returns ['Test' => 'TestFile', 'Example' => 'ExampleFile']
+   * </code>
+   * 
    * @param array $arr must contain an even number of values.
    * @param boolean $protected if false no index protection will be performed, default: "1".
+   * 
    * @return array|false
    */ 
   public static function to_keypair($arr, $protected = 1){
@@ -506,8 +519,18 @@ class tools
   /**
    * Returns the maximum value of an index of a multidimensional array. 
    *
+   * <code>
+   * \bbn\tools::max_with_key([
+   *  ['v' => 1, 'name' => 'test1'],
+   *  ['v' => 8, 'name' => 'test2'],
+   *  ['v' => 45, 'name' => 'test3'],
+   *  ['v' => 2, 'name' => 'test4']
+   * ], 'v'); //Returns 45 
+   * </code>
+   * 
    * @param array $arr A multidimensional array. 
    * @param mixed $key The index where to search.
+   * 
    * @return mixed
    */   
   public static function max_with_key($array, $key) {
@@ -524,8 +547,18 @@ class tools
   /**
    * Returns the minimum value of an index of a multidimensional array. 
    *
+   * <code>
+   * \bbn\tools::max_with_key([
+   *  ['v' => 1, 'name' => 'test1'],
+   *  ['v' => 8, 'name' => 'test2'],
+   *  ['v' => 45, 'name' => 'test3'],
+   *  ['v' => 2, 'name' => 'test4']
+   * ], 'v'); //Returns  1 
+   * </code>
+   * 
    * @param array $arr A multidimensional array. 
    * @param mixed $key The index where to search.
+   * 
    * @return mixed
    */ 
   public static function min_with_key($array, $key) {
