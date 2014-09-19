@@ -326,10 +326,10 @@ class mapper{
           'description' => null,
           'url' => implode("/", $params),
           'primary' => $cfg['keys']['PRIMARY']['columns'][0],
-          'select' => 'select/'.$table,
-          'insert' => 'insert/'.$table,
-          'update' => 'update/'.$table,
-          'delete' => 'delete/'.$table,
+          'select' => 'json/select/'.$table,
+          'insert' => 'json/insert/'.$table,
+          'update' => 'json/update/'.$table,
+          'delete' => 'json/delete/'.$table,
           'elements' => []
       ];
       
@@ -776,7 +776,7 @@ class mapper{
       }
       
 			foreach ( $schema as $t => $vars ){
-				if ( 1 || strpos($t, '.'.$this->prefix) === false ){
+				if ( strpos($t, '.'.$this->prefix) === false ){
           $tmp = explode(".", $t);
           $db = $tmp[0];
           $table = $tmp[1];
@@ -825,7 +825,7 @@ class mapper{
 				}
 			}
 			foreach ( $schema as $t => $vars ){
-				if ( 1 || strpos($t, '.'.$this->prefix) === false ){
+				if ( strpos($t, '.'.$this->prefix) === false ){
           if (is_array($vars['keys']) ){
             foreach ( $vars['keys'] as $k => $arr ){
               $pos = 1;

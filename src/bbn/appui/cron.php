@@ -59,11 +59,11 @@ class cron extends \bbn\obj{
   }
   
   public function get_article($id){
-    if ( $this->check() ){
-      $data = $this->db->rselect($this->jtable, [], ['id' => $id]);
+    if ( $this->check() && ($data = $this->db->rselect($this->jtable, [], ['id' => $id])) ){
       $data['cfg'] = json_decode($data['cfg'], 1);
       return $data;
     }
+    return false;
   }
   
   public function get_cron($id){

@@ -20,7 +20,8 @@ class dir extends \bbn\obj
 	 * Replaces backslash with slash and deletes whitespace from the beginning and end of a directory path.
 	 *
    * <code>
-   * \bbn\file\dir::clean($path = "C:\Documents\Test");
+   * \bbn\file\dir::clean("C:\Documents\Test"); //Returns "C:/Documents/Test"
+   * \bbn\file\dir::clean(" ..\Documents\Test "); //Returns "../Documents/Test"
    * </code>
    * 
 	 * @param string $dir The directory path.
@@ -36,18 +37,16 @@ class dir extends \bbn\obj
   }
 
 	/**
-	 * Checks if a file is in a directory
-   * Accepts unlimited arguments
-	 *
-	 * Returns false or the first corresponding file
+	 * Checks if a file is in a directory.
+   * Accepts unlimited arguments.
 	 *
    * <code>
-   * \bbn\file\dir::has_file($path = "C:\Documents\Test", "test.txt");
+   * \bbn\file\dir::has_file("C:\Documents\Test", "test.txt");
    * </code>
    * 
 	 * @param string $dir The directory path.
    * 
-	 * @return array|false 
+	 * @return boolean 
 	 */
 	public static function has_file($dir)
 	{
@@ -66,8 +65,8 @@ class dir extends \bbn\obj
 	 * If the directory starts with './' returns the path without './' else returns the complete path.
 	 *
    * <code>
-   * \bbn\file\dir::cur($path = "C:\Documents\Test");
-   * \bbn\file\dir::cur($path1 = "./testdir");
+   * \bbn\file\dir::cur("C:\Documents\Test"); //Returns "C:\Documents\Test"
+   * \bbn\file\dir::cur("./testdir"); //Returns "testdir"
    * </code>
    * 
 	 * @param string $dir The directory path.
@@ -85,7 +84,8 @@ class dir extends \bbn\obj
 	 * It will return the full path ie including the original directory's path.
 	 *
    * <code>
-   * \bbn\file\dir::get_dirs($path = "C:\Documents\Test");
+   * \bbn\file\dir::get_dirs("C:\Docs\Test");
+   * //Returns ['C:/DocsTest/test1', 'C:/DocsTest/test2', 'C:/DocsTest/test3']
    * </code>
    * 
 	 * @param string $dir The directory path.
@@ -116,12 +116,12 @@ class dir extends \bbn\obj
 	 * If including_dirs is set to true it will also return the folders included in the path.
 	 *
    * <code>
-   * \bbn\file\dir::get_files($path = "C:\Documents\Test");
-   * \bbn\file\dir::get_files($path = "C:\Documents\Test", "true");
+   * \bbn\file\dir::get_files("C:\Docs\Test"); //Returns ['C:/DocsTest/file.txt', 'C:/DocsTest/file.doc']
+   * \bbn\file\dir::get_files("C:\Docs\Test", 1); //Returns ['C:/DocsTest/test1', 'C:/DocsTest/test2', 'C:/DocsTest/file.txt', 'C:/DocsTest/file.doc']
    * </code>
    * 
 	 * @param string $dir The directory path.
-	 * @param bool $including_dirs If set to true it will also return the folders included in the path.
+	 * @param boolean $including_dirs If set to true it will also return the folders included in the path.
    * 
 	 * @return array|false 
 	 */
@@ -153,14 +153,14 @@ class dir extends \bbn\obj
 	 * If the $full param is set to true, it will also delete the directory itself.
 	 *
    * <code>
-   * \bbn\file\dir::delete($path = "C:\Documents\Test");
-   * \bbn\file\dir::delete($path = "C:\Documents\Test", 0);
+   * \bbn\file\dir::delete("C:\Documents\Test"); //Deletes "C:\Documents\Test" and subdirectories
+   * \bbn\file\dir::delete("C:\Documents\Test", 0); //Deletes "C:\Documents\Test"
    * </code>
    * 
 	 * @param string $dir The directory path.
-	 * @param bool $full If set to true, it will also delete the directory itself. Default: "1".
+	 * @param boolean $full If set to true, it will also delete the directory itself. Default: "1".
    * 
-	 * @return bool 
+	 * @return boolean 
 	 */
 	public static function delete($dir, $full=1)
 	{
@@ -226,13 +226,12 @@ class dir extends \bbn\obj
 	 *
    * <code>
    * \bbn\file\dir::create_path("C:\Documents\Test\New")
-   * \bbn\file\dir::create_path("../my/path")
    * </code>
    * 
 	 * @param string $dir The directory path.
 	 * @param int $chmod
    * 
-	 * @return bool 
+	 * @return boolean
 	 */
 	public static function create_path($dir, $chmod=false)
 	{
@@ -266,7 +265,7 @@ class dir extends \bbn\obj
 	 * Moves a file or directory to a new location
    * 
    * <code>
-   * \bbn\file\dir::move($path = "C:\Documents\Test\Old", $path = "C:\Documents\Test\New");
+   * \bbn\file\dir::move("C:\Documents\Test\Old", "C:\Documents\Test\New");
    * </code>
    * 
 	 * @param string $orig The file to be moved

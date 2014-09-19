@@ -24,7 +24,8 @@ class dbsync
             'host' => 'localhost',
             'db' => 'dbsync'
           ],
-          $disabled = false;
+          $disabled = false,
+          $max_retry = 5;
 	
   
   final public static function __callStatic($name, $arguments)
@@ -148,7 +149,7 @@ class dbsync
         else if ( $kind === 'insert' ){
           if ( self::$db->has_id_increment($table) && 
                   ($pri = self::$db->get_unique_primary($table)) &&
-                  !isset($values[$pri]) ){
+                  empty($values[$pri]) ){
             $values[$pri] = self::$db->new_id($table);
             $res['values'] = $values;
             return $res;
@@ -198,10 +199,19 @@ class dbsync
   // Looking at the rows from the other DB with status = 0 and setting them to 1
   // Comparing the new rows with the ones from this DB
   // Deleting the rows from this DB which have state = 1
-  public static function sync(\bbn\db\connection $db, $dbs='', $dbs_table=''){
-    self::define($dbs, $dbs_table);
-    self::first_call();
-    self::disable();
+  public static function sync(\bbn\db\connection $db, $dbs='', $dbs_table='', $num_try = 0){
+
+    if ( !$num_try ){
+      self::define($dbs, $dbs_table);
+      self::first_call();
+      self::disable();
+      $mode_db = self::$db->get_error_mode();
+      $mode_dbs = self::$dbs->get_error_mode();
+      self::$db->set_error_mode("continue");
+      self::$dbs->set_error_mode("continue");
+    }
+    
+    $num_try++;
     
     $to_log = [
       'deleted_sync' => 0,
@@ -214,10 +224,8 @@ class dbsync
       'problems' => []
     ];
     
-    $mode_db = self::$db->get_error_mode();
-    $mode_dbs = self::$dbs->get_error_mode();
-    self::$db->set_error_mode("continue");
-    self::$dbs->set_error_mode("continue");
+    
+    $retry = false;
 
     $start = ( $test = self::$dbs->get_one("
       SELECT MIN(moment)
@@ -239,6 +247,7 @@ class dbsync
       ['action', 'LIKE', 'insert']
     ], [
       'moment' => 'ASC',
+      'id' => 'ASC'
     ]);
     // They just have to be inserted
     foreach ( $ds as $i => $d ){
@@ -261,11 +270,15 @@ class dbsync
         self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
       }
       else{
-        $to_log['num_problems']++;
-        array_push($to_log['problems'], "Problem while syncing (insert), check data with status 5 and ID ".$d['id']);
-        self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
+        if ( $num_try > self::$max_retry ){
+          $to_log['num_problems']++;
+          array_push($to_log['problems'], "Problem while syncing (insert), check data with status 5 and ID ".$d['id']);
+          self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
+        }
+        $retry = 1;
       }
     }
+    
 
     // Selecting the entries modified and deleted in the twin DB,
     // ordered by table and rows (so the same go together)
@@ -278,6 +291,7 @@ class dbsync
       'tab' => 'ASC',
       'rows' => 'ASC',
       'moment' => 'ASC',
+      'id' => 'ASC'
     ]);
     foreach ( $ds as $i => $d ){
       // Executing the first callback
@@ -294,9 +308,12 @@ class dbsync
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
         }
         else{
-          self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
-          $to_log['num_problems']++;
-          array_push($to_log['problems'], "Problem while syncing (delete), check data with status 5 and ID ".$d['id']);
+          if ( $num_try > self::$max_retry ){
+            self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
+            $to_log['num_problems']++;
+            array_push($to_log['problems'], "Problem while syncing (delete), check data with status 5 and ID ".$d['id']);
+          }
+          $retry = 1;
         }
       }
       // Checking if there is another change done to this record and when in the twin DB
@@ -369,9 +386,12 @@ class dbsync
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
         }
         else{
-          self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
-          $to_log['num_problems']++;
-          array_push($to_log['problems'], "Problem while syncing (update), check data with status 5 and ID ".$d['id']);
+          if ( $num_try > self::$max_retry ){
+            self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
+            $to_log['num_problems']++;
+            array_push($to_log['problems'], "Problem while syncing (update), check data with status 5 and ID ".$d['id']);
+          }
+          $retry = 1;
         }
       }
       // Callback number 2
@@ -380,15 +400,21 @@ class dbsync
       }
     }
     
+    
     $res = [];
     foreach ( $to_log as $k => $v ){
       if ( !empty($v) ){
         $res[$k] = $v;
       }
     }
-    self::$db->set_error_mode($mode_db);
-    self::$dbs->set_error_mode($mode_dbs);
-    self::enable();
+    if ( $retry && ( $num_try <= self::$max_retry ) ){
+      $res = \bbn\tools::merge_arrays($res, self::sync($db, $dbs, $dbs_table, $num_try));
+    }
+    else{
+      self::$db->set_error_mode($mode_db);
+      self::$dbs->set_error_mode($mode_dbs);
+      self::enable();
+    }
     return $res;
   }
 }

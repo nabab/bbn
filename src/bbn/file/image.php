@@ -74,7 +74,8 @@ class image extends \bbn\file\file
    * Returns the file image extension.
    * 
    * <code>
-   * $img->get_extension();
+   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img->get_extension(); //Returns "jpg"
    * </code>
    * 
 	 * @return string 
@@ -111,7 +112,8 @@ class image extends \bbn\file\file
    * Tests if the object is a image.
    * 
    * <code>
-   * $img->test();
+   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img->test(); //Returns "true"
    * </code>
    * 
 	 * @return boolean 
@@ -237,7 +239,8 @@ class image extends \bbn\file\file
    * Returns the file image width.
    * 
    * <code>
-   * $img->get_width();
+   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img->get_width(); //Returns "512"
    * </code>
    * 
 	 * @return integer 
@@ -256,7 +259,8 @@ class image extends \bbn\file\file
    * Returns the file image height.
    * 
    * <code>
-   * $img->get_height();
+   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img->get_height(); //Returns "512"
    * </code>
    * 
 	 * @return integer 
@@ -275,7 +279,9 @@ class image extends \bbn\file\file
    * Resize the image.
    * 
    * <code>
-   * echo '<img src="'.$img->resize(150, 150)->toString().'" alt="">';
+   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img->resize(150, 150); //Resizes image  150x150px
+   * $img->resize(0, 150, 1); //Resizes and cuts the image 
    * </code>
    * 
    * @param integer $w The new width.
@@ -284,7 +290,7 @@ class image extends \bbn\file\file
    * @param integer $max_w The maximum value for new width.
    * @param integer $max_h The maximum valure for new height.
    * 
-	 * @return image 
+	 * @return object 
 	 */
 	public function resize($w=false, $h=false, $crop=false, $max_w=false, $max_h=false)
 	{
@@ -407,7 +413,7 @@ class image extends \bbn\file\file
    * @param integer $w BBN_MAX_WIDTH
    * @param integer $h BBN_MAX_HEIGHT
    * 
-   * @return image
+   * @return object
    *  
    * @todo BBN_MAX_WIDTH and BBN_MAX_HEIGHT
 	 */
@@ -436,7 +442,8 @@ class image extends \bbn\file\file
    * Returns a crop of the image.
    * 
    * <code>
-   * echo '<img src="'.$img->crop(150, 150, 300, 300)->toString().'" alt="">';
+   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img->crop(150, 150, 300, 300)';
    * </code>
    * 
    * @param integer $w Width
@@ -444,7 +451,7 @@ class image extends \bbn\file\file
    * @param integer $x X coordinate
    * @param integer $y Y coordinate
    * 
-	 * @return image
+	 * @return object
 	 */
 	public function crop($w, $h, $x, $y)
 	{
@@ -492,12 +499,13 @@ class image extends \bbn\file\file
    * Rotates the image.
    * 
    * <code>
-   * echo '<img src="'.$img->rotate(90)->toString().'" alt="">';
+   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img->rotate(90); //Rotates the image 90°
    * </code>
    * 
    * @param integer $angle The angle of rotation.
    * 
-	 * @return image 
+	 * @return object 
 	 */
 	public function rotate($angle)
 	{
@@ -537,12 +545,14 @@ class image extends \bbn\file\file
    * Flips the image.
    * 
    * <code>
-   * echo '<img src="'.$img->flip()->toString().'" alt="">';
+   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img->flip(); //Vertical flipping
+   * $img->flip(); //Horizontal flipping
    * </code>
    * 
    * @param string $mode Vertical ("v") or Horizontal ("h") flip, default: "v".
    * 
-	 * @return image 
+	 * @return object 
 	 */
 public function flip($mode='v')
 	{
@@ -581,12 +591,14 @@ public function flip($mode='v')
    * Adjusts the image brightness.
    * 
    * <code>
-   * echo '<img src="'.$img->brightness()->toString().'" alt="">';
+   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img->brightness(); //Increases the brightness
+   * $img->brightness("-"); //Reduces the brightness
    * </code>
    * 
    * @param string $val The value "+" (default) increases the brightness, the value ("-") reduces it.
    *  
-	 * @return image 
+	 * @return object 
 	 */
 	public function brightness($val='+')
 	{
@@ -616,12 +628,14 @@ public function flip($mode='v')
    *  Adjusts the image contrast.
    * 
    * <code>
-   * echo '<img src="'.$img->contrast()->toString().'" alt="">';
+   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img->contrast(); //Increases the contrast
+   * $img->contrast(); //Reduces the contrast
    * </code>
    * 
    * @param string $val The value "+" (default), increases the contrast, the value ("-") reduces it.
    * 
-	 * @return image
+	 * @return object
 	 */
 	public function contrast($val='+')
 	{
@@ -651,10 +665,11 @@ public function flip($mode='v')
    * Converts the color image to grayscale.
    * 
    * <code>
-   * echo '<img src="'.$img->grayscale()->toString().'" alt="">';
+   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img->grayscale();
    * </code>
    * 
-	 * @return image 
+	 * @return object
 	 */
 	public function grayscale()
 	{
@@ -682,10 +697,11 @@ public function flip($mode='v')
    * Converts the color image to negative.
    * 
    * <code>
-   * echo '<img src="'.$img->negate()->toString().'" alt="">';
+   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img->negate();
    * </code>
    *  
-	 * @return image
+	 * @return object
 	 */
 	public function negate()
 	{
@@ -713,10 +729,11 @@ public function flip($mode='v')
    * Converts the color image to polaroid filter.
    * 
    * <code>
-   * echo '<img src="'.$img->polaroid()->toString().'" alt="">';
+   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img->polaroid();
    * </code>
    * 
-	 * @return image 
+	 * @return object
    * 
    * @todo Transparency of png files.
 	 */
@@ -739,7 +756,8 @@ public function flip($mode='v')
    * Returns the image as string.
    * 
    * <code>
-   * echo '<img src="'.$img->toString().'" alt="">';
+   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img->toString();
    * </code>
    * 
 	 * @return string 
