@@ -280,7 +280,7 @@ class text
    * </code>
    * 
    * @param string $st The string to be cut.
-   * @param integer $max The maximum string lenght.
+   * @param int $max The maximum string lenght.
    * 
 	 * @return string 
 	 */
@@ -317,7 +317,7 @@ class text
    * </code>
    * 
    * @param string $st The name as string.
-   * @param integer $maxlength The maximum filename length (without extension), default: "50".
+   * @param int $maxlength The maximum filename length (without extension), default: "50".
    * @param string $extension The extension of file.
    * 
 	 * @return string 
@@ -377,7 +377,7 @@ class text
    * </code>
    * 
    * @param string $st The name as string.
-   * @param integer $maxlength The maximum length, default: "50".
+   * @param int $maxlength The maximum length, default: "50".
    * 
 	 * @return string 
 	 */
@@ -415,7 +415,7 @@ class text
    * </code>
    * 
    * @param string $file The file path.
-   * @param boolean $ar If "true" returns also the file path, default: "false".
+   * @param bool $ar If "true" returns also the file path, default: "false".
    * 
 	 * @return string|array 
 	 */
@@ -448,8 +448,8 @@ class text
    * \bbn\str\text::genpwd(6, 4); //Returns "dDEtxY"
    * </code>
    * 
-   * @param integer $int_max Maximum characters of password, default: "12".
-   * @param integer $int_min Minimum characters of password, default: "6".
+   * @param int $int_max Maximum characters of password, default: "12".
+   * @param int $int_min Minimum characters of password, default: "6".
    * 
 	 * @return string 
 	 */
@@ -495,7 +495,7 @@ class text
    * 
    * @param string $st The string.
    * 
-   * @return boolean
+   * @return bool
 	 */
   public static function is_json($st){
     if ( is_string($st) && !empty($st) && 
@@ -518,7 +518,7 @@ class text
    * 
    * @param mixed $st The item to be tested.
    * 
-	 * @return boolean
+	 * @return bool
 	 */
 	public static function is_number()
 	{
@@ -548,7 +548,7 @@ class text
    * 
    * @param mixed $st The item to be tested.
    * 
-	 * @return boolean
+	 * @return bool
 	 */
 	public static function is_integer()
 	{
@@ -578,7 +578,7 @@ class text
    * 
    * @param mixed $st The item to be tested.
    * 
-	 * @return boolean
+	 * @return bool
 	 */
 	public static function is_decimal()
 	{
@@ -649,7 +649,7 @@ class text
    * 
    * @param string $email E-mail address.
    * 
-	 * @return boolean
+	 * @return bool
 	 */
 	public static function is_email($email)
 	{
@@ -794,7 +794,7 @@ class text
    * \bbn\str\text::check_name("PÃ ul"); //Returns false
    * </code>
 	 * 
-	 * @return boolean
+	 * @return bool
 	 */
 	public static function check_name(){
 
@@ -821,7 +821,7 @@ class text
    * \bbn\str\text::has_slash("Paul\\"); //Returns true
    * </code>
    * 
-   * @return boolean
+   * @return bool
 	 */
 	public static function has_slash(){
 
@@ -884,8 +884,8 @@ class text
    * Returns a variable in a fashion that is directly usable by PHP.
    * 
    * @param mixed $o The item to be.
-   * @param boolean $remove_empty Default: "false".
-   * @param integer $lev Default: "1".
+   * @param bool $remove_empty Default: "false".
+   * @param int $lev Default: "1".
    * 
    * @return mixed
    */

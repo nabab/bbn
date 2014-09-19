@@ -315,7 +315,7 @@ class tools
    * </code>
    * 
    * @param array|object $arr An object or array to clean.
-   * @param boolean $remove_space If "true" the spaces are removed, default: "false".
+   * @param bool $remove_space If "true" the spaces are removed, default: "false".
    * 
    * @return string The clean result.
    */
@@ -370,7 +370,7 @@ class tools
    * Exports variable in fashion immediately re-importable in PHP. 
    *
    * @param array $r The array to be.
-   * @return boolean
+   * @return bool
    */
   public static function is_assoc(array $r){
     $keys = array_keys($r);
@@ -497,7 +497,7 @@ class tools
    * </code>
    * 
    * @param array $arr must contain an even number of values.
-   * @param boolean $protected if false no index protection will be performed, default: "1".
+   * @param bool $protected if false no index protection will be performed, default: "1".
    * 
    * @return array|false
    */ 

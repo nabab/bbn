@@ -109,7 +109,7 @@ class file extends \bbn\obj
    * echo $file->get_size(); //Returns 314
    * </code>
    * 
-	 * @return integer  
+	 * @return int  
 	 */
 	public function get_size()
 	{

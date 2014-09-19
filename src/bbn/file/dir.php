@@ -46,7 +46,7 @@ class dir extends \bbn\obj
    * 
 	 * @param string $dir The directory path.
    * 
-	 * @return boolean 
+	 * @return bool 
 	 */
 	public static function has_file($dir)
 	{
@@ -121,7 +121,7 @@ class dir extends \bbn\obj
    * </code>
    * 
 	 * @param string $dir The directory path.
-	 * @param boolean $including_dirs If set to true it will also return the folders included in the path.
+	 * @param bool $including_dirs If set to true it will also return the folders included in the path.
    * 
 	 * @return array|false 
 	 */
@@ -158,9 +158,9 @@ class dir extends \bbn\obj
    * </code>
    * 
 	 * @param string $dir The directory path.
-	 * @param boolean $full If set to true, it will also delete the directory itself. Default: "1".
+	 * @param bool $full If set to true, it will also delete the directory itself. Default: "1".
    * 
-	 * @return boolean 
+	 * @return bool 
 	 */
 	public static function delete($dir, $full=1)
 	{
@@ -231,7 +231,7 @@ class dir extends \bbn\obj
 	 * @param string $dir The directory path.
 	 * @param int $chmod
    * 
-	 * @return boolean
+	 * @return bool
 	 */
 	public static function create_path($dir, $chmod=false)
 	{
