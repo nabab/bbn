@@ -103,7 +103,9 @@ class dir extends \bbn\obj
 					array_push($dirs, self::cur($dir.'/').$f);
         }
 			}
-      \bbn\tools::sort($dirs);
+      if ( !empty($dirs) ){
+        \bbn\tools::sort($dirs);
+      }
 			return $dirs;
 		}
 		return false;
@@ -141,7 +143,9 @@ class dir extends \bbn\obj
           }
 				}
 			}
-      \bbn\tools::sort($files);
+      if ( count($files) > 0 ){
+        \bbn\tools::sort($files);
+      }
 			return $files;
 		}
 		return false;
@@ -203,20 +207,25 @@ class dir extends \bbn\obj
 	 */
 	public static function scan($dir, $type = null)
 	{
-    $dirs = self::get_dirs($dir);
-    $files = self::get_files($dir);
     $all = [];
-    if ( $type && (strpos($type, 'file') === 0) ){
-      $all = $files;
-    }
-    else if ( $type && ((strpos($type, 'dir') === 0) || (strpos($type, 'fold') === 0)) ){
-      $all = $dirs;
-    }
-    else{
-      $all = array_merge($dirs, $files);
-    }
-    foreach ( $dirs as $d ){
-      $all = array_merge(is_array($all) ? $all : [], self::scan($d, $type));
+    $dir = self::clean($dir);
+    $dirs = self::get_dirs($dir);
+    if ( is_array($dirs) ){
+      if ( $type && (strpos($type, 'file') === 0) ){
+        $all = self::get_files($dir);
+      }
+      else if ( $type && ((strpos($type, 'dir') === 0) || (strpos($type, 'fold') === 0)) ){
+        $all = $dirs;
+      }
+      else{
+        $files = self::get_files($dir);
+        if ( is_array($files) ){
+          $all = array_merge($dirs, $files);
+        }
+      }
+      foreach ( $dirs as $d ){
+        $all = array_merge(is_array($all) ? $all : [], self::scan($d, $type));
+      }
     }
     return $all;
 	}
@@ -231,7 +240,7 @@ class dir extends \bbn\obj
 	 * @param string $dir The directory path.
 	 * @param int $chmod
    * 
-	 * @return boolean
+	 * @return string|false
 	 */
 	public static function create_path($dir, $chmod=false)
 	{
@@ -243,7 +252,7 @@ class dir extends \bbn\obj
         return false;
       }
     }
-    if ( $dir && !is_dir($dir) ){
+    if ( !is_dir($dir) ){
       if ( $chmod ){
         if ( $chmod === 'parent' ){
           $chmod = substr(sprintf('%o', fileperms(dirname($dir))), -4);
@@ -256,9 +265,8 @@ class dir extends \bbn\obj
       if ( !$ok ){
         return false;
       }
-      return $dir;
     }
-    return 1;
+    return $dir;
 	}
 
 	/**
