@@ -257,7 +257,9 @@ class dir extends \bbn\obj
         if ( $chmod === 'parent' ){
           $chmod = substr(sprintf('%o', fileperms(dirname($dir))), -4);
         }
-        $ok = mkdir($dir, $chmod);
+        // Attention mkdir($dir, $chmod) doesn't work!
+        $ok = mkdir($dir);
+        chmod($dir, $chmod);
       }
       else{
         $ok = mkdir($dir);
