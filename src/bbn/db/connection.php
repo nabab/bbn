@@ -828,7 +828,7 @@ class connection extends \PDO implements actions, api, engines
    * 
    * @param string $table The table name.
    * 
-   * @return boolean
+   * @return bool
    * 
    * @todo: working only on mysql
    */
@@ -893,7 +893,7 @@ class connection extends \PDO implements actions, api, engines
    * $this->db->last_id();
    * </code>
    * 
-	 * @return integer
+	 * @return int
 	 */
 	public function last_id()
 	{
@@ -979,8 +979,8 @@ class connection extends \PDO implements actions, api, engines
    * @param string $column The field name.
    * @param array $where The "where" condition.
    * @param array $order The "order" condition.
-   * @param integer $limit The "limit" condition.
-   * @param integer $start The "start" condition.
+   * @param int $limit The "limit" condition.
+   * @param int $start The "start" condition.
    * 
 	 * @return array
 	 */
@@ -1244,10 +1244,10 @@ class connection extends \PDO implements actions, api, engines
 	 *
 	 * @param string $table The table name.
 	 * @param string $id_field The id field name, default: 'id'.
-	 * @param integer $min The minimum value for new id.
-	 * @param integer $max The maximum value for new id.
+	 * @param int $min The minimum value for new id.
+	 * @param int $max The maximum value for new id.
    * 
-	 * @return integer | false
+	 * @return int | false
 	 */
 	public function new_id($table, $id_field='id', $min = 11111, $max = 499998999)
 	{
@@ -1628,7 +1628,7 @@ class connection extends \PDO implements actions, api, engines
    * @param string $table The table name.
    * @param array $where The "where" condition.
    * 
-   * @return integer
+   * @return int
    */
   public function count($table, array $where = []){
     $where_arr = $this->where_cfg($where);
@@ -1887,7 +1887,7 @@ class connection extends \PDO implements actions, api, engines
    * @param array $values The values to insert.
    * @param bool $ignore If true, controls if the row is already existing and ignores it.
    * 
-   * @return integer Number affected rows.
+   * @return int Number affected rows.
    */
 	public function insert($table, array $values, $ignore = false)
 	{
@@ -1961,7 +1961,7 @@ class connection extends \PDO implements actions, api, engines
    * @param string $table The table name.
    * @param array $values The values to insert.
    * 
-	 * @return integer The number of rows inserted or updated. 
+	 * @return int The number of rows inserted or updated. 
 	 */
 	public function insert_update($table, array $values)
 	{
@@ -2042,7 +2042,7 @@ class connection extends \PDO implements actions, api, engines
    * @param array $values The new value(s).
    * @param array $where The "where" condition.
    * 
-   * @return integer The number of rows updated.
+   * @return int The number of rows updated.
    */
 	public function update($table, array $values, array $where)
 	{
@@ -2089,9 +2089,9 @@ class connection extends \PDO implements actions, api, engines
    * 
    * @param string $table The table name.
    * @param array $where The "where" condition.
-   * @param boolean $ignore default: false.
+   * @param bool $ignore default: false.
    * 
-	 * @return integer The number of rows deleted.
+	 * @return int The number of rows deleted.
 	 */
 	public function delete($table, array $where, $ignore = false)
 	{
@@ -2133,7 +2133,7 @@ class connection extends \PDO implements actions, api, engines
    * @param string $table The table name.
    * @param array $where The "where" condition.
    * 
-   * @return integer The number of rows deleted.
+   * @return int The number of rows deleted.
    */
 	public function delete_ignore($table, array $where)
 	{
@@ -2156,7 +2156,7 @@ class connection extends \PDO implements actions, api, engines
    * @param string $table The table name.
    * @param array $values The row(s) values.
    * 
-   * @return integer The number of rows inserted.
+   * @return int The number of rows inserted.
    */
 	public function insert_ignore($table, array $values)
 	{
@@ -2422,8 +2422,8 @@ class connection extends \PDO implements actions, api, engines
    * $this->db->get_limit('5', '2');
    * </code>
    * 
-   * @param integer $limit The "limit" condition.
-   * @param integer $start The "start" condition, default: 0.
+   * @param int $limit The "limit" condition.
+   * @param int $start The "start" condition, default: 0.
    * 
 	 * @return string
 	 */
@@ -2457,8 +2457,8 @@ class connection extends \PDO implements actions, api, engines
    * 
    * @param string $table The table name.
    * @param array $where The "where" condition.
-   * @param boolean $ignore If true inserts the "ignore" condition , default: false.
-   * @param boolean $php default: false.
+   * @param bool $ignore If true inserts the "ignore" condition , default: false.
+   * @param bool $php default: false.
    * 
 	 * @return string | false
 	 */
@@ -2478,9 +2478,9 @@ class connection extends \PDO implements actions, api, engines
    * @param array $fields The fields name.
    * @param array $where The "where" condition.
    * @param string | array $order The "order" condition.
-   * @param integer $limit The "limit" condition, default: false.
-   * @param integer $start The "start" condition, default: 0.
-   * @param boolean $php default: false.
+   * @param int $limit The "limit" condition, default: false.
+   * @param int $start The "start" condition, default: 0.
+   * @param bool $php default: false.
    * 
    * @return string
    */
@@ -2498,8 +2498,8 @@ class connection extends \PDO implements actions, api, engines
    * 
    * @param string $table The table name.
    * @param array $fields The fields name.
-   * @param boolean $ignore If true inserts the "ignore" condition, default: false.
-   * @param boolean $php default: false.
+   * @param bool $ignore If true inserts the "ignore" condition, default: false.
+   * @param bool $php default: false.
    * 
 	 * @return string
 	 */
@@ -2518,7 +2518,7 @@ class connection extends \PDO implements actions, api, engines
    * @param string $table The table name.
    * @param array $fields The fields name.
    * @param array $where The "where" condition.
-   * @param boolean $php default: false.
+   * @param bool $php default: false.
    * 
 	 * @return string
 	 */
@@ -2537,9 +2537,9 @@ class connection extends \PDO implements actions, api, engines
    * @param string $table The table name.
    * @param string $field The field name.
    * @param array $where The "where" condition.
-   * @param integer $limit The "limit" condition, default: false.
-   * @param integer $start The "start" condition, default: 0.
-   * @param boolean $php dafault: false.
+   * @param int $limit The "limit" condition, default: false.
+   * @param int $start The "start" condition, default: 0.
+   * @param bool $php dafault: false.
    * 
 	 * @return array
 	 */
@@ -2566,9 +2566,9 @@ class connection extends \PDO implements actions, api, engines
    * @param string $table The table name.
    * @param string $field The field name.
    * @param array $where The "where" condition.
-   * @param integer $limit The "limit" condition, dafault: false.
-   * @param integer $start The "start" condition, dafault: 0.
-   * @param boolean $php default: false.
+   * @param int $limit The "limit" condition, dafault: false.
+   * @param int $start The "start" condition, dafault: 0.
+   * @param bool $php default: false.
    * 
 	 * @return string
 	 */
@@ -2587,8 +2587,8 @@ class connection extends \PDO implements actions, api, engines
    * @param string $table The table name.
    * @param string $field The field name.
    * @param array $where The "where" condition.
-   * @param integer $limit The "limit" condition, default: false.
-   * @param integer $start The "start" condition, default: 0.
+   * @param int $limit The "limit" condition, default: false.
+   * @param int $start The "start" condition, default: 0.
    * 
    * @return array | false
    */
@@ -2611,8 +2611,8 @@ class connection extends \PDO implements actions, api, engines
    * @param string $table The table name.
    * @param string $field The field name.
    * @param array $where The "where" condition.
-   * @param integer $limit The "limit" condition, default: false.
-   * @param integer $start The "start" condition, default: 0.
+   * @param int $limit The "limit" condition, default: false.
+   * @param int $start The "start" condition, default: 0.
    * 
    * @return array | false
    */

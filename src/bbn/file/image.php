@@ -290,7 +290,7 @@ class image extends \bbn\file\file
    * @param integer $max_w The maximum value for new width.
    * @param integer $max_h The maximum valure for new height.
    * 
-	 * @return object 
+	 * @return \bbn\file\image 
 	 */
 	public function resize($w=false, $h=false, $crop=false, $max_w=false, $max_h=false)
 	{
@@ -413,7 +413,7 @@ class image extends \bbn\file\file
    * @param integer $w BBN_MAX_WIDTH
    * @param integer $h BBN_MAX_HEIGHT
    * 
-   * @return object
+   * @return \bbn\file\image
    *  
    * @todo BBN_MAX_WIDTH and BBN_MAX_HEIGHT
 	 */
@@ -451,7 +451,7 @@ class image extends \bbn\file\file
    * @param integer $x X coordinate
    * @param integer $y Y coordinate
    * 
-	 * @return object
+	 * @return \bbn\file\image
 	 */
 	public function crop($w, $h, $x, $y)
 	{
@@ -505,7 +505,7 @@ class image extends \bbn\file\file
    * 
    * @param integer $angle The angle of rotation.
    * 
-	 * @return object 
+	 * @return \bbn\file\image 
 	 */
 	public function rotate($angle)
 	{
@@ -552,7 +552,7 @@ class image extends \bbn\file\file
    * 
    * @param string $mode Vertical ("v") or Horizontal ("h") flip, default: "v".
    * 
-	 * @return object 
+	 * @return \bbn\file\image 
 	 */
 public function flip($mode='v')
 	{
@@ -598,7 +598,7 @@ public function flip($mode='v')
    * 
    * @param string $val The value "+" (default) increases the brightness, the value ("-") reduces it.
    *  
-	 * @return object 
+	 * @return \bbn\file\image 
 	 */
 	public function brightness($val='+')
 	{
@@ -635,7 +635,7 @@ public function flip($mode='v')
    * 
    * @param string $val The value "+" (default), increases the contrast, the value ("-") reduces it.
    * 
-	 * @return object
+	 * @return \bbn\file\image
 	 */
 	public function contrast($val='+')
 	{
@@ -669,7 +669,7 @@ public function flip($mode='v')
    * $img->grayscale();
    * </code>
    * 
-	 * @return object
+	 * @return \bbn\file\image
 	 */
 	public function grayscale()
 	{
@@ -701,7 +701,7 @@ public function flip($mode='v')
    * $img->negate();
    * </code>
    *  
-	 * @return object
+	 * @return \bbn\file\image
 	 */
 	public function negate()
 	{
@@ -733,7 +733,7 @@ public function flip($mode='v')
    * $img->polaroid();
    * </code>
    * 
-	 * @return object
+	 * @return \bbn\file\image
    * 
    * @todo Transparency of png files.
 	 */
