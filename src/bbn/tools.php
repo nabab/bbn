@@ -406,6 +406,9 @@ class tools
       else if ( $a === '' ){
         $r = '""';
       }
+      else if ( $a === [] ){
+        $r = '[]';
+      }
       else if ( !$a ){
         $r = '0';
       }

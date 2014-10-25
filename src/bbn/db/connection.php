@@ -2619,7 +2619,8 @@ class connection extends \PDO implements actions, api, engines
 	public function count_field_values($table, $field,  array $where = [], $limit = false, $start = 0)
 	{
     if ( $r = $this->language->get_values_count($table, $field, $where, $limit, $start) ){
-      return $this->get_rows($r);
+      $where = $this->where_cfg($where);
+      return $this->get_rows($r, $where['values']);
     }
 	}
 

@@ -133,8 +133,15 @@ class dir extends \bbn\obj
 		if ( is_dir($dir) ){
 			$files = [];
 			$fs = scandir($dir);
+      //$encodings = ['UTF-8', 'WINDOWS-1252', 'ISO-8859-1', 'ISO-8859-15'];
 			foreach ( $fs as $f ){
 				if ( $f !== '.' && $f !== '..' ){
+          /*
+          $enc = mb_detect_encoding($f, $encodings);
+          if ( $enc !== 'UTF-8' ){
+            $f = html_entity_decode(htmlentities($f, ENT_QUOTES, $enc), ENT_QUOTES , 'UTF-8');
+          }
+          */
 					if ( $including_dirs ){
 						array_push($files, self::cur($dir.'/').$f);
           }

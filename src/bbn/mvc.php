@@ -909,8 +909,9 @@ class mvc extends obj
 				return call_user_func(
 					function() use ($db, $last_model_file, $data)
 					{
-						$r = include($last_model_file);
-						return is_array($r) ? $r : array();
+						//$r = include($last_model_file);
+						//return is_array($r) ? $r : array();
+            return include($last_model_file);
 					}
 				);
 			}
