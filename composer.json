@@ -1,33 +1,33 @@
 {
   "name": "bbn/bbn",
-	"description": "Light MVC framework for PHP 5.4",
-	"keywords": ["database","mvc"],
-	"homepage": "https://github.com/nabab/bbn",
-	"license": "MIT",
-	"authors": [
-		{
-			"name": "Thomas Nabet",
-			"email": "thomas.nabet@gmail.com",
-			"homepage": "http://babna.com",
-			"role": "Developer"
-		}
-	],
-	"require": {
-		"php": ">=5.4.0",
-		"zordius/lightncandy": "dev-master",
-		"soundintheory/php-sql-parser": "dev-master",
-		"mustache/mustache": "dev-master",
-		"mpdf/mpdf": "dev-master",
-		"squizlabs/php_codesniffer": "1.*",
-		"natxet/CssMin": "dev-master",
-		"sunra/php-simple-html-dom-parser": "dev-master",
-		"leafo/lessphp": "0.3.*@dev",
-		"richthegeek/phpsass": "dev-master",
-		"justinrainbow/json-schema": "dev-master",
-		"coffeescript/coffeescript": "dev-master",
-		"tedivm/JShrink": "*"
-	},
-	"autoload": {
-	  "psr-0": {"bbn": "src/"}
-	}
+  "description": "Light MVC framework for PHP 5.4",
+  "keywords": ["database","mvc"],
+  "homepage": "https://github.com/nabab/bbn",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Thomas Nabet",
+      "email": "thomas.nabet@gmail.com",
+      "homepage": "http://babna.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=5.4.0",
+    "zordius/lightncandy": "dev-master",
+    "greenlion/php-sql-parser": "dev-trunk",
+    "mustache/mustache": "dev-master",
+    "mpdf/mpdf": "dev-master",
+    "squizlabs/php_codesniffer": "1.*",
+    "natxet/CssMin": "dev-master",
+    "sunra/php-simple-html-dom-parser": "dev-master",
+    "leafo/lessphp": "0.3.*@dev",
+    "richthegeek/phpsass": "dev-master",
+    "justinrainbow/json-schema": "dev-master",
+    "coffeescript/coffeescript": "dev-master",
+    "tedivm/JShrink": "*"
+  },
+  "autoload": {
+    "psr-0": {"bbn": "src/"}
+  }
 }
