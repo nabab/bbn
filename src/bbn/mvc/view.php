@@ -460,7 +460,11 @@ class view{
     });
      */
 
-    $tmpl = \LightnCandy::compile($view);
+    $tmpl = \LightnCandy::compile($view, [
+      'flags' => \LightnCandy::FLAG_MUSTACHELOOKUP |
+        \LightnCandy::FLAG_HANDLEBARS |
+        \LightnCandy::FLAG_ERROR_LOG
+    ]);
     $rndr = \LightnCandy::prepare($tmpl);
     return $rndr($model);
 	}
