@@ -112,10 +112,6 @@ class mvc extends obj
 	 */
 		$loaded_views = [],
 	/**
-	 * @var object Mustachee templating engine
-	 */
-	 	$mustache,
-	/**
 	 * @var \bbn\db\connection Database object
 	 */
 		$db,
@@ -196,7 +192,6 @@ class mvc extends obj
 			$this->inc = new \stdClass();
 			$this->routes = $parent;
       $this->cli = (php_sapi_name() === 'cli');
-			$this->mustache = false;
       // When using CLI a first parameter can be used as route,
       // a second JSON encoded can be used as $this->post
       if ( $this->cli ){
@@ -278,7 +273,6 @@ class mvc extends obj
 		else if ( is_string($db) && is_object($parent) && isset($parent->url, $parent->original_controller) ){
 			$this->inc =& $parent->inc;
 			$this->routes =& $parent->routes;
-			$this->mustache =& $parent->mustache;
 			$this->cli =& $parent->cli;
 			$this->db =& $parent->db;
 			$this->post =& $parent->post;
@@ -475,9 +469,6 @@ class mvc extends obj
 	 */
 	public function render($view, $model='')
 	{
-    if ( !$this->mustache ){
-      $this->mustache = new \Mustache_Engine();
-    }
     if ( empty($model) && $this->has_data() ){
       $model = $this->data;
     }
@@ -491,7 +482,9 @@ class mvc extends obj
     });
      */
     
-    return $this->mustache->render($view, $model);
+    $tmpl = \LightnCandy::compile($view);
+    $rndr = \LightnCandy::prepare($tmpl);
+    return $rndr($model);
 	}
 
 	/**

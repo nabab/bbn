@@ -16,7 +16,6 @@
     "php": ">=5.4.0",
     "zordius/lightncandy": "dev-master",
     "greenlion/php-sql-parser": "dev-trunk",
-    "mustache/mustache": "dev-master",
     "mpdf/mpdf": "dev-master",
     "squizlabs/php_codesniffer": "1.*",
     "natxet/CssMin": "dev-master",
