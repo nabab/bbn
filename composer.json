@@ -20,7 +20,7 @@
   ],
   "require": {
     "php": ">=5.4.0",
-    "nabab/phpfastcache": "dev-bugfix",
+    "phpfastcache/phpfastcache": "dev-Stable-Version-1.x",
     "zordius/lightncandy": "dev-master",
     "greenlion/php-sql-parser": "dev-trunk",
     "mpdf/mpdf": "dev-master",
