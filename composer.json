@@ -20,18 +20,18 @@
   ],
   "require": {
     "php": ">=5.4.0",
-    "phpfastcache/phpfastcache": "dev-bugfix",
+    "nabab/phpfastcache": "dev-bugfix",
     "zordius/lightncandy": "dev-master",
     "greenlion/php-sql-parser": "dev-trunk",
     "mpdf/mpdf": "dev-master",
-    "squizlabs/php_codesniffer": "1.*",
+    "squizlabs/php_codesniffer": "dev-master",
     "natxet/CssMin": "dev-master",
     "sunra/php-simple-html-dom-parser": "dev-master",
-    "leafo/lessphp": "0.3.*@dev",
+    "leafo/lessphp": "0.4.0",
     "richthegeek/phpsass": "dev-master",
     "justinrainbow/json-schema": "dev-master",
     "coffeescript/coffeescript": "dev-master",
-    "tedivm/JShrink": "*"
+    "tedivm/jshrink": "dev-master"
   },
   "autoload": {
     "psr-0": {"bbn": "src/"}
