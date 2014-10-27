@@ -14,7 +14,7 @@ namespace bbn\user;
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @version 0.2r89
  * @todo Groups and hotlinks features
- * @todo Implement APC Cache for session requests' results?
+ * @todo Implement Cache for session requests' results?
  */
 if ( !defined('BBN_FINGERPRINT') ) {
 	define('BBN_FINGERPRINT', 'define_me!!');

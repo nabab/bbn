@@ -231,13 +231,10 @@ class connection extends \PDO implements actions, api, engines
         if ( !isset($tmp) ){
           die("Erreur avec la table $item ou le mode $mode");
         }
-        if ( $tmp ){
-          $this->cache[$item] = $tmp;
-          $this->cacher->set($cache_name, [
-            'data' => $this->cache[$item],
-            'time' => time()
-          ], $this->cache_renewal);
-        }
+      }
+      if ( $tmp ){
+        $this->cache[$item] = $tmp;
+        $this->cacher->set($cache_name, $this->cache[$item], $this->cache_renewal);
       }
     }
     return isset($this->cache[$item]) ? $this->cache[$item] : false;
@@ -534,11 +531,9 @@ class connection extends \PDO implements actions, api, engines
 	*/
 	public function clear_cache($item, $mode)
 	{
-    if ( $this->has_apc ){
-      $cache_name = $this->_cache_name($item, $mode);
-      if ( apc_exists($cache_name) ){
-        apc_delete($cache_name);
-      }
+    $cache_name = $this->_cache_name($item, $mode);
+    if ( $this->cacher->isExisting($cache_name) ){
+      $this->cacher->delete($cache_name);
     }
     return $this;
 	}
@@ -550,10 +545,7 @@ class connection extends \PDO implements actions, api, engines
 	*/
 	public function clear_all_cache()
 	{
-    if ( $this->has_apc ) {
-      apc_clear_cache();
-      apc_clear_cache("user");
-    }
+    $this->cacher->clean();
     return $this;
 	}
 
