@@ -46,11 +46,6 @@ class connection extends \PDO implements actions, api, engines
 	 */
 		$cfg = false,
 	/**
-	 * APC Cache functions
-	 * @var bool
-	 */
-		$has_apc = false,
-	/**
 	 * Unique string identifier for current connection
 	 * @var bool
 	 */
@@ -191,19 +186,13 @@ class connection extends \PDO implements actions, api, engines
   private function _cache_name($item, $mode){
     switch ( $mode ){
       case 'columns':
-        if ( $this->has_apc ){
-          return "bbn/db/".$this->engine."/".$this->host."/".$item;
-        }
+        return "bbn/db/".$this->engine."/".$this->host."/".$item;
         break;
       case 'tables':
-        if ( $this->has_apc ){
-          return "bbn/db/".$this->engine."/".$this->host."/".$item;
-        }
+        return "bbn/db/".$this->engine."/".$this->host."/".$item;
         break;
       case 'databases':
-        if ( $this->has_apc ){
-          return "bbn/db/".$this->engine."/".$this->host;
-        }
+        return "bbn/db/".$this->engine."/".$this->host;
         break;
     }
     return false;
@@ -217,18 +206,9 @@ class connection extends \PDO implements actions, api, engines
 	 */
   private function _get_cache($item, $mode='columns'){
     if ( !isset($this->cache[$item]) ){
-      if ( $this->has_apc && ($cache_name = $this->_cache_name($item, $mode)) ){
-        if ( apc_exists($cache_name) ){
-          $tmp = apc_fetch($cache_name);
-          if ( !$this->cache_renewal || ($tmp['time'] > (time() - $this->cache_renewal)) ){
-            $this->cache[$item] = $tmp['data'];
-          }
-          else{
-            apc_delete($cache_name);
-          }
-        }
-      }
-      if ( !isset($this->cache[$item]) ){
+      $cache_name = $this->_cache_name($item, $mode);
+      $tmp = $this->cacher->get($cache_name);
+      if ( !$tmp ){
         switch ( $mode ){
           case 'columns':
             $keys = $this->language->get_keys($item);
@@ -253,12 +233,10 @@ class connection extends \PDO implements actions, api, engines
         }
         if ( $tmp ){
           $this->cache[$item] = $tmp;
-          if ( $this->has_apc ){
-            apc_store($cache_name, [
-              'data' => $this->cache[$item],
-              'time' => time()
-            ]);
-          }
+          $this->cacher->set($cache_name, [
+            'data' => $this->cache[$item],
+            'time' => time()
+          ], $this->cache_renewal);
         }
       }
     }
@@ -500,10 +478,8 @@ class connection extends \PDO implements actions, api, engines
           $this->host = isset($cfg['host']) ? $cfg['host'] : '127.0.0.1';
           $this->hash = $this->make_hash($cfg['args']);
           $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-          if ( function_exists("apc_add") ){
-            $this->has_apc = 1;
-          }
-          if ( isset($cfg['cache_length']) ){
+          $this->cacher = new \phpFastCache();
+          if ( !empty($cfg['cache_length']) ){
             $this->cache_renewal = (int)$cfg['cache_length'];
           }
           $this->start_fancy_stuff();
