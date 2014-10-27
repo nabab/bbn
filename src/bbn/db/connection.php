@@ -574,8 +574,10 @@ class connection extends \PDO implements actions, api, engines
 	*/
 	public function clear_all_cache()
 	{
-    apc_clear_cache();
-    apc_clear_cache("user");
+    if ( $this->has_apc ) {
+      apc_clear_cache();
+      apc_clear_cache("user");
+    }
     return $this;
 	}
 

@@ -728,12 +728,13 @@ class mapper{
 	 * @return void
 	 */
 	public function update($db=''){
-    apc_clear_cache();
-    apc_clear_cache("user");
 		if ( empty($db) ){
 			$db = $this->db->current;
 		}
 		if ( \bbn\str\text::check_name($db) ){
+
+      $this->db->clear_all_cache();
+
 			$change = $this->db->current === $db ? false : $this->db->current;
 			if ( $change ){
 				$this->db->change($db);
@@ -776,7 +777,7 @@ class mapper{
       }
       
 			foreach ( $schema as $t => $vars ){
-				if ( strpos($t, '.'.$this->prefix) === false ){
+				if ( (strpos($t, '.'.$this->prefix) === false) && isset($vars['fields']) ){
           $tmp = explode(".", $t);
           $db = $tmp[0];
           $table = $tmp[1];
@@ -825,27 +826,21 @@ class mapper{
 				}
 			}
 			foreach ( $schema as $t => $vars ){
-				if ( strpos($t, '.'.$this->prefix) === false ){
-          if (is_array($vars['keys']) ){
-            foreach ( $vars['keys'] as $k => $arr ){
-              $pos = 1;
-              foreach ( $arr['columns'] as $c ){
-                $this->db->insert_update($this->admin_db.'.'.$this->prefix.'keys',[
-                  'id' => $t.'.'.$c.'.'.$k,
-                  'key' => $k,
-                  'column' => $t.'.'.$c,
-                  'position' => $pos,
-                  'ref_column' => is_null($arr['ref_column']) ? null : $arr['ref_db'].'.'.$arr['ref_table'].'.'.$arr['ref_column']
-                ]);
-                $pos++;
-              }
+				if ( (strpos($t, '.'.$this->prefix) === false) && is_array($vars['keys']) ){
+          foreach ( $vars['keys'] as $k => $arr ){
+            $pos = 1;
+            foreach ( $arr['columns'] as $c ){
+              $this->db->insert_update($this->admin_db.'.'.$this->prefix.'keys',[
+                'id' => $t.'.'.$c.'.'.$k,
+                'key' => $k,
+                'column' => $t.'.'.$c,
+                'position' => $pos,
+                'ref_column' => is_null($arr['ref_column']) ? null : $arr['ref_db'].'.'.$arr['ref_table'].'.'.$arr['ref_column']
+              ]);
+              $pos++;
             }
           }
-          else{
-            \bbn\tools::log($t);
-            \bbn\tools::log($vars['keys']);
-          }
-				}
+        }
 			}
       /*
 			foreach ( $projects as $i => $p ){
