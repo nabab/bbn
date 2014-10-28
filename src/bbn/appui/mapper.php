@@ -826,7 +826,7 @@ class mapper{
 				}
 			}
 			foreach ( $schema as $t => $vars ){
-				if ( (strpos($t, '.'.$this->prefix) === false) && is_array($vars['keys']) ){
+				if ( (strpos($t, '.'.$this->prefix) === false) && isset($vars['keys']) && is_array($vars['keys']) ){
           foreach ( $vars['keys'] as $k => $arr ){
             $pos = 1;
             foreach ( $arr['columns'] as $c ){
