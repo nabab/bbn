@@ -382,8 +382,11 @@ class connection
    * 
    * @return bool
    */
-  public function has_permission($name){
+  public function has_permission($name, $check_admin=1){
     if ( isset($this->permissions[$name]) && $this->permissions[$name] ){
+      return 1;
+    }
+    else if ( $check_admin && $this->is_admin() ){
       return 1;
     }
     return false;
@@ -459,6 +462,10 @@ class connection
       die("You need the PHP function {$this->cfg['encryption']} to have the user connection class working");
     }
     return eval("return {$this->cfg['encryption']}('$st');");
+  }
+
+  public function get_password($st){
+    return $this->_crypt($st);
   }
 
   /**
