@@ -197,7 +197,7 @@ class history
 		return self::$huser;
 	}
 
-  public function get_all_history($table, $start=0, $limit=20, $dir=false){
+  public static function get_all_history($table, $start=0, $limit=20, $dir=false){
     $r = [];
     if ( \bbn\str\text::check_name($table) && is_int($start) && is_int($limit) ){
       $r = self::$db->get_rows("
@@ -214,7 +214,7 @@ class history
     return $r;
   }
   
-  public function get_last_modified_lines($table, $start=0, $limit=20){
+  public static function get_last_modified_lines($table, $start=0, $limit=20){
     $r = [];
     if ( \bbn\str\text::check_name($table) && is_int($start) && is_int($limit) ){
       $r = self::$db->get_rows("
@@ -247,13 +247,18 @@ class history
         if ( !($r[$col] = self::$db->get_one("
           SELECT old
           FROM bbn_history
-          WHERE `column` LIKE ?
-          AND `line` = ?
-          AND ( `operation` LIKE 'UPDATE' OR `operation` LIKE 'DELETE')
+          WHERE ".self::$db->escape('column')." LIKE ?
+          AND ".self::$db->escape('line')." = ?
+          AND (
+            ".self::$db->escape('operation')." LIKE ?
+            OR ".self::$db->escape('operation')." LIKE ?
+          )
           AND last_mod >= ?
           ORDER BY last_mod ASC",
           $fc,
           end($where),
+          "UPDATE",
+          "DELETE",
           $when)) ){
           $r[$col] = self::$db->get_val($table, $col, $where);
         }
@@ -264,16 +269,14 @@ class history
   }
   
   public static function get_first_date($table, $id, $column = null){
-    if ( $column ){
-      if ( $d = self::$db->select_one(
+    if ( is_string($column) ){
+      return self::$db->select_one(
               self::$htable,
               'last_mod', [
-                ['column', 'LIKE', self::$db->col_full_name($column, $table)],
+                ['column', 'LIKE', self::$db->table_full_name($table).".".$column],
                 ['line', '=', $id]
               ],
-              ['last_mod' => 'ASC']) ){
-        return $d;
-      }
+              ['last_mod' => 'ASC']);
     }
     return self::$db->select_one(
             self::$htable,
@@ -286,17 +289,14 @@ class history
   }
   
   public static function get_last_date($table, $id, $column = null){
-    if ( $column ){
-      if ( $d = self::$db->select_one(
+    if ( is_string($column) ){
+      return self::$db->select_one(
               self::$htable,
               'last_mod', [
-                ['column', 'LIKE', self::$db->col_full_name($column, $table)],
+                ['column', 'LIKE', self::$db->table_full_name($table).".".$column],
                 ['line', '=', $id]
               ],
-              ['last_mod' => 'DESC']) ){
-        return $d;
-      }
-      return self::get_first_date($table, $id);
+              ['last_mod' => 'DESC']);
     }
     return self::$db->select_one(
             self::$htable,

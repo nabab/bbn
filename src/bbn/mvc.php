@@ -487,7 +487,7 @@ class mvc extends obj
                  \LightnCandy::FLAG_HANDLEBARS |
                  \LightnCandy::FLAG_ERROR_LOG
     ]);
-    $rndr = \LightnCandy::prepare($tmpl);
+    $rndr = \LightnCandy::prepare($tmpl, BBN_DATA_PATH.'tmp');
     return $rndr($model);
 	}
 
