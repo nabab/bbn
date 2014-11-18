@@ -386,7 +386,7 @@ class connection
     if ( isset($this->permissions[$name]) && $this->permissions[$name] ){
       return 1;
     }
-    else if ( $check_admin && $this->is_admin() ){
+    else if ( $check_admin && isset($this->permissions["admin"]) && $this->permissions["admin"] ){
       return 1;
     }
     return false;
