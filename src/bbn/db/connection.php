@@ -300,17 +300,7 @@ class connection extends \PDO implements actions, api, engines
 	 */
   private function _sel($table, $fields = [], $where = [], $order = false, $limit = 100, $start = 0)
 	{
-    // Automatically select non deleted if history is enabled
-    if ( class_exists('\\bbn\\appui\\history', false) && \bbn\appui\history::has_history($this) ){
-      $hcol = \bbn\appui\history::$hcol;
-      if ( !isset($where[$hcol]) ){
-        $cols = array_keys($this->get_columns($table));
-        if ( in_array($hcol, $cols) ){
-          $where[$hcol] = 1;
-        }
-      }
-    }
-    $where = $this->where_cfg($where);
+    $where = $this->where_cfg($where, $table);
 		$hash = $this->make_hash('select', $table, serialize($fields), serialize($this->get_where($where, $table)), serialize($order), $limit, $start);
 		if ( isset($this->queries[$hash]) ){
 			$sql = $this->queries[$this->queries[$hash]]['statement'];
@@ -957,7 +947,7 @@ class connection extends \PDO implements actions, api, engines
 	public function stat($table, $column, $where = [], $order = [], $limit = 0, $start = 0)
 	{
     if ( $this->check() ){
-      $where = $this->where_cfg($where);
+      $where = $this->where_cfg($where, $table);
       $sql = 'SELECT COUNT(*) AS '.$this->qte.'num'.$this->qte.', '.
               $this->col_simple_name($column, 1).PHP_EOL.
               'FROM '.$this->table_full_name($table, 1).PHP_EOL.
@@ -1456,7 +1446,7 @@ class connection extends \PDO implements actions, api, engines
   public function select_all_by_keys($table, $fields = [], $where = [], $order = false, $start = 0)
   {
     if ( $sql = $this->get_select($table, $fields, $where, $order, $start) ){
-      $where = $this->where_cfg($where);
+      $where = $this->where_cfg($where, $table);
       $params = (count($where['values']) > 0) ? [$sql, $where['values']] : [$sql];
       return call_user_func_array([$this, 'get_key_val'], $params);
 		}
@@ -1547,7 +1537,7 @@ class connection extends \PDO implements actions, api, engines
    * @param type $where
    * @return type
    */
-  public function where_cfg($where)
+  public function where_cfg($where, $table = '')
   {
     $r = [
         'fields' => [],
@@ -1556,6 +1546,7 @@ class connection extends \PDO implements actions, api, engines
         'keypair' => [],
         'unique' => []
     ];
+
     if ( is_array($where) && count($where) > 0 ){
       $i = 0;
       foreach ( $where as $k => $w ){
@@ -1582,6 +1573,24 @@ class connection extends \PDO implements actions, api, engines
         $i++;
       }
     }
+    // Automatically select non deleted if history is enabled
+    if ( !empty($table) &&
+      class_exists('\\bbn\\appui\\history', false) &&
+      \bbn\appui\history::has_history($this)
+    ){
+      $hcol = \bbn\appui\history::$hcol;
+      if ( !in_array($hcol, $r['fields']) ){
+        $cols = array_keys($this->get_columns($table));
+        if ( in_array($hcol, $cols) ){
+          array_push($r['fields'], $hcol);
+          array_push($r['values'], 1);
+          array_push($r['final'], [$hcol, '=', 1]);
+          array_push($r['unique'], [$hcol, '=']);
+          $r['keypair'][$hcol] = 1;
+        }
+      }
+    }
+
     return $r;
   }
   
@@ -1601,7 +1610,7 @@ class connection extends \PDO implements actions, api, engines
    * @return int
    */
   public function count($table, array $where = []){
-    $where_arr = $this->where_cfg($where);
+    $where_arr = $this->where_cfg($where, $table);
     $where = $this->get_where($where_arr, $table);
     if ($table = $this->table_full_name($table, 1) ){
 			$sql = "SELECT COUNT(*) FROM ".$table.$where;
@@ -2018,7 +2027,7 @@ class connection extends \PDO implements actions, api, engines
 	{
 		$r = false;
     $trig = 1;
-    $where = $this->where_cfg($where);
+    $where = $this->where_cfg($where, $table);
     if ( $sql = $this->_statement('update', $table, array_keys($values), $where) ){
   		if ( $this->triggers_disabled ){
         $r = $this->query($sql['sql'], $sql['hash'], array_merge(array_values($values), $where['values']));
@@ -2067,7 +2076,7 @@ class connection extends \PDO implements actions, api, engines
 	{
 		$r = false;
     $trig = 1;
-    $where = $this->where_cfg($where);
+    $where = $this->where_cfg($where, $table);
     if ( $sql = $this->_statement('delete', $table, $where, $ignore) ){
       if ( $this->triggers_disabled ){
         $r = $this->query($sql['sql'], $sql['hash'], $where['values']);
@@ -2331,10 +2340,10 @@ class connection extends \PDO implements actions, api, engines
   public function get_where(array $where, $table='', $aliases = [])
   {
     if ( !isset($where['final'], $where['keypair'], $where['values'], $where['fields']) ){
-      $where = $this->where_cfg($where);
+      $where = $this->where_cfg($where, $table);
     }
     $st = '';
-    
+
 		if ( count($where['final']) > 0 ){
       if ( !empty($table) ){
         $m = $this->modelize($table);
@@ -2516,8 +2525,11 @@ class connection extends \PDO implements actions, api, engines
 	public function get_column_values($table, $field,  array $where = [], $limit = false, $start = 0, $php = false)
 	{
     $r = [];
-    $where = $this->where_cfg($where);
-    if ( $rows = $this->get_irows($this->language->get_column_values($table, $field, $where, $limit, $start, false), $where['values']) ){
+    $where = $this->where_cfg($where, $table);
+    if ( $rows = $this->get_irows(
+      $this->language->get_column_values($table, $field, $where, $limit, $start, false),
+      $where['values'])
+    ){
       foreach ( $rows as $row ){
         array_push($r, $row[0]);
       }
@@ -2589,7 +2601,7 @@ class connection extends \PDO implements actions, api, engines
 	public function count_field_values($table, $field,  array $where = [], $limit = false, $start = 0)
 	{
     if ( $r = $this->language->get_values_count($table, $field, $where, $limit, $start) ){
-      $where = $this->where_cfg($where);
+      $where = $this->where_cfg($where, $table);
       return $this->get_rows($r, $where['values']);
     }
 	}

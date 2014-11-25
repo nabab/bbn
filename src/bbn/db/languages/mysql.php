@@ -662,11 +662,9 @@ class mysql implements \bbn\db\engines
       if ( !isset($m['fields'][$field]) ){
         die("The column $field doesn't exist in $table");
       }
-			$r .= "SELECT DISTINCT `$field` FROM $table";
-			if ( count($where) > 0 ){
-        $r .= PHP_EOL . $this->db->get_where($where, $table);
-      }
-      $r .= PHP_EOL . "ORDER BY `$field`";
+			$r .= "SELECT DISTINCT `$field` FROM $table".PHP_EOL.
+        $this->db->get_where($where, $table).PHP_EOL.
+        "ORDER BY `$field`";
       if ( $limit ){
   			$r .= PHP_EOL . $this->get_limit([$limit, $start]);
       }
