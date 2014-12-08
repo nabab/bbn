@@ -52,6 +52,27 @@ class image extends \bbn\file\file
 	 */
 	protected $img;
 
+  public static function pdf2jpg($pdf, $jpg='', $num=0){
+    if ( class_exists('\\Imagick') ) {
+      $img = new \Imagick();
+      $img->setResolution(200, 200);
+      try {
+        $img->readImage($pdf);
+        $img->setIteratorIndex($num);
+        $img->setImageFormat('jpg');
+      }
+      catch(Exception $e){
+        die("GhostScript is necessary to use PDF with Imagick");
+      }
+      if (empty($jpg)) {
+        $jpg = substr($pdf, 0, -3) . 'jpg';
+      }
+      if ($img->writeImage($jpg)) {
+        return $jpg;
+      }
+    }
+    return false;
+  }
 
 	/**
 	 * @return void 

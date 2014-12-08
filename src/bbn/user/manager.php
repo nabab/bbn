@@ -98,7 +98,7 @@ EOD
    * @param object|false $mailer A mail object with the send method
    * 
 	 */
-  public function __construct($obj, $mailer=false)
+  public function __construct(\bbn\user\connection &$obj, $mailer=false)
   {
     if ( is_object($obj) && method_exists($obj, 'get_config') ){
       if ( is_object($mailer) && method_exists($mailer, 'send') ){
@@ -116,7 +116,7 @@ EOD
       $this->cfg['tables']['groups'], [
         'id' => $this->cfg['arch']['groups']['id'],
         'group' => $this->cfg['arch']['groups']['group'],
-        'config' => $this->cfg['arch']['groups']['config']
+        'cfg' => $this->cfg['arch']['groups']['cfg']
       ]);
   }
   
@@ -177,7 +177,7 @@ EOD
     $fields = array_unique(array_merge(array_values($this->cfg['arch']['users']), $this->cfg['additional_fields']));
     foreach ( $fields as $f ){
       $cfg[$this->cfg['arch']['users']['status']] = 1;
-      $cfg[$this->cfg['arch']['users']['config']] = '{}';
+      $cfg[$this->cfg['arch']['users']['cfg']] = '{}';
       if ( !isset($cfg[$f]) && ($f !== $this->cfg['arch']['users']['id']) ){
         die("Field $f empty!");
       }
@@ -335,7 +335,7 @@ EOD
         {$this->db->escape($this->cfg['users']['email'])} varchar(100) NOT NULL,".
         ( $this->cfg['users']['login'] !== $this->cfg['users']['email'] ? "
                 {$this->db->escape($this->cfg['users']['login'])} varchar(35) NOT NULL," : "" )."
-        {$this->db->escape($this->cfg['users']['config'])} text NOT NULL,
+        {$this->db->escape($this->cfg['users']['cfg'])} text NOT NULL,
         PRIMARY KEY ({$this->db->escape($this->cfg['users']['id'])}),
         UNIQUE KEY {$this->db->escape($this->cfg['users']['email'])} ({$this->db->escape($this->cfg['users']['email'])})
       ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
@@ -343,7 +343,7 @@ EOD
       CREATE TABLE IF NOT EXISTS {$this->db->escape($this->cfg['tables']['groups'])} (
         {$this->db->escape($this->cfg['groups']['id'])} int(10) unsigned NOT NULL AUTO_INCREMENT,
         {$this->db->escape($this->cfg['groups']['group'])} varchar(100) NOT NULL,
-        {$this->db->escape($this->cfg['groups']['config'])} text NOT NULL,
+        {$this->db->escape($this->cfg['groups']['cfg'])} text NOT NULL,
         PRIMARY KEY ({$this->db->escape($this->cfg['groups']['id'])})
       ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
@@ -371,7 +371,7 @@ EOD
         {$this->db->escape($this->cfg['sessions']['auth'])} int(1) unsigned NOT NULL,
         {$this->db->escape($this->cfg['sessions']['opened'])} int(1) unsigned NOT NULL,
         {$this->db->escape($this->cfg['sessions']['last_activity'])} datetime NOT NULL,
-        {$this->db->escape($this->cfg['sessions']['config'])} text NOT NULL,
+        {$this->db->escape($this->cfg['sessions']['cfg'])} text NOT NULL,
         PRIMARY KEY ({$this->db->escape($this->cfg['sessions']['id_user'])}, {$this->db->escape($this->cfg['sessions']['sess_id'])})
         KEY {$this->db->escape($this->cfg['sessions']['id_user'])} ({$this->db->escape($this->cfg['sessions']['id_user'])}),
         KEY {$this->db->escape($this->cfg['sessions']['sess_id'])} ({$this->db->escape($this->cfg['sessions']['sess_id'])})

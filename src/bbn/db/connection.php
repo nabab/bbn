@@ -1209,19 +1209,36 @@ class connection extends \PDO implements actions, api, engines
    * 
 	 * @return int | false
 	 */
-	public function new_id($table, $id_field='id', $min = 11111, $max = 499998999)
-	{
-		if ( ( $max > $min ) && text::check_name($id_field) && $table = $this->table_full_name($table,1) ){
-			$id = mt_rand($min, $max);
-			while ( $this->select($table, [$id_field], [$id_field => $id]) ){
-				$id = mt_rand($min, $max);
-			}
-			return $id;
-		}
-		return false;
-	}
+  public function new_id($table, $min = 1)
+  {
+    $tab = $this->modelize($table);
+    if ( count($tab['keys']['PRIMARY']['columns']) !== 1 ) {
+      die("Error! Unique numeric primary key doesn't exist");
+    }
+    else if (
+      ($id_field = $tab['keys']['PRIMARY']['columns'][0]) &&
+      ($maxlength = $tab['fields'][$id_field]['maxlength'] )&&
+      ($maxlength > 1)
+    ){
+      $max = pow(10, $maxlength) - 1;
+      if ( $max >= mt_getrandmax() ){
+        $max = mt_getrandmax();
+      }
+      if (($max > 1) && $table = $this->table_full_name($table, 1)) {
+        do {
+          $id = mt_rand(1, $max);
+          if ( strpos($tab['fields'][$id_field]['type'], 'char') !== false ){
+            $id = substr(md5('bbn'.$id), 0, mt_rand(1, $maxlength));
+          }
+        }
+        while ( $this->select($table, [$id_field], [$id_field => $id]) );
+        return $id;
+      }
+      return false;
+    }
+  }
 
-	/**
+  /**
 	 * Transposition of the original fetch method, but with the query included. It returns an arra or false if no result
 	 *
 	 * @param string $query

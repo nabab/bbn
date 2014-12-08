@@ -80,9 +80,9 @@ class date
 		{
 			/* Getting the time difference */
 			$t = time();
-			$h = localtime($t,1);
-			$d = mktime($h['tm_hour'],$h['tm_min'],$h['tm_sec'],$h['tm_mon']+1,$h['tm_mday'],$h['tm_year']+1900) - $t;
-			$start_today = mktime(0,0,0) + $d;
+      //if ( ($date('h') == 0) && ($date('i') == 0) && ($date('s', $ida) == 0) ){
+			$h = localtime($idate, 1);
+			$start_today = mktime(0, 0, 0);
 			$end_today = $start_today + ( 24 * 3600 );
 			$is_today = ( ($idate >= $start_today) && ($idate < $end_today) ) ? 1 : false;
 			$only_date = ( $h['tm_hour'] + $h['tm_min'] + $h['tm_sec'] == 0 ) ? 1 : false;

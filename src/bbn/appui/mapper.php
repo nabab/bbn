@@ -476,7 +476,7 @@ class mapper{
           else if ( strpos($f['type'], 'char') !== false ){
             $r['field'] = 'text';
           }
-          else if ( strpos($f['type'], 'float') !== false ){
+          else if ( (strpos($f['type'], 'float') !== false) || (strpos($f['type'], 'decimal') !== false) ){
             $r['field'] = 'numeric';
             $dec = explode(",", $f['maxlength']);
             if ( isset($dec[0], $dec[1]) ){
@@ -507,6 +507,9 @@ class mapper{
               $r['field'] = 'numeric';
               $r['attr']['type'] = 'number';
             }
+          }
+          else {
+            var_dump($f['type']);
           }
           if ( $r['field'] === 'numeric' ){
             $r['attr']['maxlength'] = isset($r['widget']['options']['decimals']) ? (int)($f['maxlength'] + 1) : (int)$f['maxlength'];
@@ -761,6 +764,7 @@ class mapper{
 				}
 			}
 			*/
+      $this->db->disable_keys();
       $this->db->query("DELETE IGNORE FROM `{$this->prefix}dbs` WHERE id LIKE '{$db}.%'");
       $this->db->query("DELETE IGNORE FROM `{$this->prefix}tables` WHERE id LIKE '{$db}.%'");
       $this->db->query("DELETE IGNORE FROM `{$this->prefix}columns` WHERE id LIKE '{$db}.%'");
@@ -770,7 +774,6 @@ class mapper{
         (`id`, `host`, `db`)
         VALUES
         ('$db', '{$this->db->host}', '$db')");
-        
       $has_history = false;
       if ( \bbn\appui\history::$is_used && isset($schema[\bbn\appui\history::$htable]) ){
         $has_history = 1;
@@ -869,6 +872,7 @@ class mapper{
 			}
        * 
        */
+      $this->db->enable_keys();
 		}
 	}
 	

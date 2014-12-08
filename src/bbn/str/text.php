@@ -345,15 +345,14 @@ class text
       $maxlength = mb_strlen($st);
     }
     
-    if ( !is_null($extension) &&
+    if ( $extension &&
             (self::file_ext($st) === self::change_case($extension, 'lower')) ){
       $st = substr($st, 0, -(strlen($extension)+1));
     }
-    else{
-      $extension = self::file_ext($st);
+    else if ( $extension = self::file_ext($st) ){
+      $st = substr($st, 0, -(strlen($extension)+1));
     }
     
-    $st = substr($st, 0, -(strlen($extension)+1));
 		for ( $i = 0; $i < $maxlength; $i++ ){
 			if ( mb_ereg_match('[A-z0-9\\-_.,]',mb_substr($st,$i,1)) ){
 				$res .= mb_substr($st,$i,1);
@@ -367,8 +366,9 @@ class text
     if ( substr($res, -1) === '_' ){
       $res = substr($res, 0, -1);
     }
-    
-    $res .= '.'.$extension;
+    if ( $extension ) {
+      $res .= '.' . $extension;
+    }
       
 		return $res;
 	}
@@ -900,7 +900,8 @@ class text
     }
     if ( is_object($o) || is_array($o) ){
       $is_assoc = (is_object($o) || \bbn\tools::is_assoc($o));
-      $st .= $is_assoc ? '{' : '[';
+      //$st .= $is_assoc ? '{' : '[';
+      $st .= '[';
       $st .= PHP_EOL;
       foreach ( $o as $k => $v ){
         if ( $remove_empty && ( ( is_string($v) && empty($v) ) || ( is_array($v) && count($v) === 0 ) ) ){
@@ -908,7 +909,7 @@ class text
         }
         $st .= str_repeat('    ', $lev);
         if ( $is_assoc ){
-          $st .= ( is_string($k) ? "'".\bbn\str\text::escape_squote($k)."'" : $k ). ": ";
+          $st .= ( is_string($k) ? "'".\bbn\str\text::escape_squote($k)."'" : $k ). " => ";
         }
         if ( is_array($v) ){
           $st .= self::export($v, $remove_empty, $lev+1);
@@ -940,7 +941,8 @@ class text
         $st .= ','.PHP_EOL;
       }
       $st .= str_repeat('    ', $lev-1);
-      $st .= $is_assoc ? '}' : ']';
+      //$st .= $is_assoc ? '}' : ']';
+      $st .= ']';
       return $st;
     }
     return $o;

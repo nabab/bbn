@@ -57,7 +57,7 @@ class connection
               'groups' => [
                 'id' => 'id',
                 'group' => 'group',
-                'config' => 'config'
+                'cfg' => 'cfg'
               ],
               'hotlinks' => [
                 'id' => 'id',
@@ -78,7 +78,7 @@ class connection
                 'auth' => 'auth',
                 'opened' => 'opened',
                 'last_activity' => 'last_activity',
-                'config' => 'config',
+                'cfg' => 'cfg',
               ],
               'usergroups' => [
                 'id_group' => 'id_group',
@@ -88,7 +88,7 @@ class connection
                 'id' => 'id',
                 'email' => 'email',
                 'login' => 'email',
-                'config' => 'config',
+                'cfg' => 'cfg',
                 'status' => 'status'
               ],
             ],
@@ -168,9 +168,9 @@ class connection
           /** @var array */
           $cfg = [],
           /** @var array */
-          $sess_config,
+          $sess_cfg,
           /** @var array */
-          $user_config,
+          $user_cfg,
           /** @var array */
           $fields;
           
@@ -238,7 +238,7 @@ class connection
     // As we'll give the object the properties of these additional field they should not conflict with existing ones
     foreach ( $this->cfg['additional_fields'] as $f ){
       if ( property_exists($this, $f) ) {
-        die("Wrong configuration: the column's name $f is illegal!");
+        die("Wrong cfguration: the column's name $f is illegal!");
       }
     }
     
@@ -283,16 +283,19 @@ class connection
       }
 
       $fingerprint = self::make_fingerprint();
-      
-      $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']] = [
-          'id' => $this->id,
-          'fingerprint' => $fingerprint
+
+      if ( !isset($_SESSION[$this->cfg['sess_name']], $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]) ){
+        $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']] = [
+            'id' => $this->id,
+            'fingerprint' => $fingerprint
+        ];
+      }
+
+      $this->sess_cfg = [
+        'fingerprint' => $this->get_print($fingerprint),
+        'last_renew' => time()
       ];
-      
-      $this->sess_config = new \stdClass();
-      $this->sess_config->fingerprint = $this->get_print($fingerprint);
-      $this->sess_config->last_renew = time();
-      
+
       $this->save_session();
       
       $this->auth = 1;
@@ -334,15 +337,15 @@ class connection
       if ( is_array($d) ){
         $r = [];
         foreach ( $d as $key => $val ){
-          if ( ($key !== 'id') && ($key !== 'config') && ($key !== 'auth') && ($key !== 'pass') ){
+          if ( ($key !== 'id') && ($key !== 'cfg') && ($key !== 'auth') && ($key !== 'pass') ){
             $this->$key = $val;
             $r[$key] = $val;
           }
         }
         $this->set_session('info', $r);
-        $this->user_config = empty($d['config']) ?
-                        ['log_tries' => 0] : json_decode($d['config'], true);
-        $this->set_session('config', $this->user_config);
+        $this->user_cfg = empty($d['cfg']) ?
+                        ['log_tries' => 0] : json_decode($d['cfg'], true);
+        $this->set_session('cfg', $this->user_cfg);
         // Groups
         $this->permissions = [];
         $this->groups = $this->db->get_col_array("
@@ -353,7 +356,7 @@ class connection
         foreach ( $this->groups as $gr ){
           if ( $p = $this->db->get_val(
             $this->cfg['tables']['groups'],
-            $this->cfg['arch']['groups']['config'],
+            $this->cfg['arch']['groups']['cfg'],
             $this->cfg['arch']['groups']['id'],
             $gr) ){
             $this->permissions = array_merge(json_decode($p, 1), $this->permissions);
@@ -383,6 +386,9 @@ class connection
    * @return bool
    */
   public function has_permission($name, $check_admin=1){
+    if ( !is_string($name) ){
+      throw new \InvalidArgumentException('Has permission have a string as argument');
+    }
     if ( isset($this->permissions[$name]) && $this->permissions[$name] ){
       return 1;
     }
@@ -417,7 +423,7 @@ class connection
     if ( $this->check() ){
       $update = [];
       foreach ( $d as $key => $val ){
-        if ( ($key !== 'id') && ($key !== 'config') && ($key !== 'auth') && ($key !== 'pass') && in_array($key, $this->fields) ){
+        if ( ($key !== 'id') && ($key !== 'cfg') && ($key !== 'auth') && ($key !== 'pass') && in_array($key, $this->fields) ){
           $update[$key] = $val;
         }
       }
@@ -446,7 +452,7 @@ class connection
             ]);
       }
       if ( is_array($d) ){
-        $this->sess_config = json_decode($d['config']);
+        $this->sess_cfg = json_decode($d['cfg'], 1);
       }
     }
     return $this;
@@ -529,7 +535,7 @@ class connection
 	/**
 	 * @return \bbn\user\connection 
 	 */
-  protected function set_session($attr){
+  public function set_session($attr){
     if ( isset($_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]) ){
       $s =& $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']];
       $args = func_get_args();
@@ -548,7 +554,7 @@ class connection
 	/**
 	 * @return mixed
 	 */
-  protected function get_session($attr){
+  public function get_session($attr){
     if ( $this->has_session($attr) ){
       return $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']][$attr];
     }
@@ -557,7 +563,7 @@ class connection
 	/**
 	 * @return bool
 	 */
-  protected function has_session($attr){
+  public function has_session($attr){
     return ( 
             is_string($attr) && 
             isset($_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']][$attr])
@@ -567,7 +573,7 @@ class connection
   /**
 	 * @return \bbn\user\connection 
 	 */
-  protected function save_session() {
+  public function save_session() {
     $p =& $this->cfg['arch']['sessions'];
     $this->db->insert_update($this->cfg['tables']['sessions'], [
       $p['id_user'] => $this->id,
@@ -577,7 +583,7 @@ class connection
       $p['auth'] => $this->auth ? 1 : 0,
       $p['opened'] => 1,
       $p['last_activity'] => date('Y-m-d H:i:s'),
-      $p['config'] => json_encode($this->sess_config)
+      $p['cfg'] => json_encode($this->sess_cfg)
     ]);
     return $this;
   }
@@ -585,7 +591,7 @@ class connection
   /**
 	 * @return \bbn\user\connection 
 	 */
-  protected function close_session() {
+  public function close_session() {
     $p =& $this->cfg['arch']['sessions'];
     $this->db->update($this->cfg['tables']['sessions'], [
         $p['ip_address'] => $this->ip_address,
@@ -593,15 +599,15 @@ class connection
         $p['auth'] => $this->auth ? 1 : 0,
         $p['opened'] => 0,
         $p['last_activity'] => date('Y-m-d H:i:s'),
-        $p['config'] => json_encode($this->sess_config)
+        $p['cfg'] => json_encode($this->sess_cfg)
       ],[
         $p['id_user'] => $this->id,
         $p['sess_id'] => session_id()
       ]);
     $this->auth = false;
     $this->id = null;
-    $this->user_config = null;
-    $this->sess_config = null;
+    $this->user_cfg = null;
+    $this->sess_cfg = null;
 		$_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']] = [];
     return $this;
   }
@@ -609,12 +615,12 @@ class connection
   /*
    * @return bool
    */
-  protected function check_attempts()
+  public function check_attempts()
   {
-    if ( !isset($this->user_config) ){
+    if ( !isset($this->user_cfg) ){
       return false;
     }
-    if ( isset($this->user_config->num_attempts) && $this->user_config->num_attempts > $this->cfg['max_attempts'] ){
+    if ( isset($this->user_cfg['num_attempts']) && $this->user_cfg['num_attempts'] > $this->cfg['max_attempts'] ){
       return false;
     }
     return true;
@@ -623,12 +629,12 @@ class connection
   /*
    * return \bbn\user\connection
    */
-  protected function save_config()
+  public function save_config()
   {
     if ( $this->check() ){
       $this->db->update(
           $this->cfg['tables']['users'],
-          [$this->cfg['arch']['users']['config'] => json_encode($this->user_config)],
+          [$this->cfg['arch']['users']['cfg'] => json_encode($this->user_cfg)],
           [$this->cfg['arch']['users']['id'] => $this->id]);
     }
     return $this;
@@ -637,16 +643,19 @@ class connection
   /*
    * return \bbn\user\connection
    */
-  protected function set_config($attr, $type='user')
+  public function set_config($attr, $type='user')
   {
-    if ( isset($this->{$type.'_cfg'}) ){
+    $prop = $type === 'sess' ? 'sess_cfg' : 'user_cfg';
+    if ( isset($this->{$prop}) ){
       $args = func_get_args();
       if ( (count($args) === 2) && is_string($attr) ){
         $attr = [$args[0] => $args[1]];
+        $type = 'user';
       }
       foreach ( $attr as $key => $val ){
+        //\bbn\tools::dump($key, $val);
         if ( is_string($key) ){
-          $this->{$type.'_cfg'}->$key = $val;
+          $this->{$prop}[$key] = $val;
         }
       }
     }
@@ -656,7 +665,7 @@ class connection
   /*
    * return \bbn\user\connection
    */
-  protected function unset_config($attr, $type='user')
+  public function unset_cfg($attr, $type='user')
   {
     if ( isset($this->{$type.'_cfg'}) ){
       $args = func_get_args();
@@ -665,7 +674,7 @@ class connection
       }
       foreach ( $attr as $val ){
         if ( isset($key) ){
-          unset($this->{$type.'_cfg'}->$key);
+          unset($this->{$type.'_cfg'}[$key]);
         }
       }
     }
@@ -677,16 +686,16 @@ class connection
    */
   protected function record_attempt()
   {
-    $this->user_config['attempts'] = isset($this->user_config['attempts']) ?
-            $this->user_config['attempts']+1 : 1;
-    $this->set_config(['attempts'=>$this->user_config['attempts']], "user");
+    $this->user_cfg['num_attempts'] = isset($this->user_cfg['num_attempts']) ?
+            $this->user_cfg['num_attempts']+1 : 1;
+    $this->set_cfg(['num_attempts' => $this->user_cfg['num_attempts']], "user");
     return $this;
   }
 
   /**
 	 * @return \bbn\user\connection
 	 */
-	protected function refresh_info()
+	public function refresh_info()
 	{
     if ( $this->check() ){
       $this->_user_info();
@@ -701,6 +710,7 @@ class connection
 	public function check_session()
 	{
     // If this->id is set it means we've already looked it up
+       // \bbn\tools::hdump($this->sess_cfg, $this->has_session('fingerprint'), $this->get_print($this->get_session('fingerprint')), $this->sess_cfg['fingerprint']);
 		if ( !$this->id ) {
       
       // The user ID must be in the session
@@ -708,8 +718,9 @@ class connection
         $this->id = $this->get_session('id');
         
         $this->_sess_info();
-        
-        if ( isset($this->sess_config->fingerprint) && $this->has_session('fingerprint') && $this->get_print($this->get_session('fingerprint')) === $this->sess_config->fingerprint ){
+
+        if ( isset($this->sess_cfg['fingerprint']) && $this->has_session('fingerprint') &&
+          ($this->get_print($this->get_session('fingerprint')) === $this->sess_cfg['fingerprint']) ){
           $this->auth = 1;
           $this->_user_info()->save_session();
           

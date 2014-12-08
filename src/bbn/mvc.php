@@ -475,20 +475,7 @@ class mvc extends obj
     if ( !is_array($model) ){
       $model = [];
     }
-    /*
-     * Why the F*** this??
-    array_walk($model, function(&$a){
-      $a = ( is_array($a) || is_object($a) ) ? json_encode($a) : $a;
-    });
-     */
-    
-    $tmpl = \LightnCandy::compile($view, [
-      'flags' => \LightnCandy::FLAG_MUSTACHELOOKUP |
-                 \LightnCandy::FLAG_HANDLEBARS |
-                 \LightnCandy::FLAG_ERROR_LOG
-    ]);
-    $rndr = \LightnCandy::prepare($tmpl, BBN_DATA_PATH.'tmp');
-    return $rndr($model);
+    return \bbn\tpl::render($view, $model);
 	}
 
 	/**
