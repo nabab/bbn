@@ -87,7 +87,7 @@ class history
 	 */
   public static function has_history($db){
     $hash = $db->get_hash();
-    return in_array($hash, self::$dbs);
+    return in_array($hash, self::$dbs) && self::$enabled;
   }
 	
 	/**

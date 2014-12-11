@@ -52,23 +52,39 @@ class image extends \bbn\file\file
 	 */
 	protected $img;
 
+  /**
+   * Converts pdf file to jpg image(s).
+   *
+   * <code>
+   * \bbn\file\image::pdf2jpg("C:\test\file.pdf"); //Converts the first page of pdf to "C:\test\file.jpg"
+   * \bbn\file\image::pdf2jpg("C:\test\file.pdf", '', 'all'); //Converts all pages of pdf to "C:\test" with filename "file-0.jpg", "file-1.jpg", "file-2.jpg", ecc
+   * \bbn\file\image::pdf2jpg("C:\test\file.pdf", "C:\test2\file.jpg", 2); //Converts the third page of pdf to "C:\test2\file.jpg"
+   * </code>
+   *
+   * @param $pdf The path of pdf file to convert
+   * @param $jpg The destination filename. If empty is used the same path of pdf. Default: empty.
+   * @param $num The index page of pdf file to convert. If set 'all' all pages to convert. Default: 0(first page).
+   * @return string
+   */
   public static function pdf2jpg($pdf, $jpg='', $num=0){
     if ( class_exists('\\Imagick') ) {
       $img = new \Imagick();
       $img->setResolution(200, 200);
-      try {
-        $img->readImage($pdf);
-        $img->setIteratorIndex($num);
-        $img->setImageFormat('jpg');
-      }
-      catch(Exception $e){
-        die("GhostScript is necessary to use PDF with Imagick");
-      }
-      if (empty($jpg)) {
+      $img->readImage($pdf);
+      $img->setImageFormat('jpg');
+      if ( empty($jpg) ) {
         $jpg = substr($pdf, 0, -3) . 'jpg';
       }
-      if ($img->writeImage($jpg)) {
-        return $jpg;
+      if ( $num !== 'all' ) {
+        $img->setIteratorIndex($num);
+        if ( $img->writeImage($jpg) ) {
+          return $jpg;
+        }
+      }
+      else{
+        if ( $img->writeImages($jpg, 1) ) {
+          return $jpg;
+        }
       }
     }
     return false;

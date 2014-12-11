@@ -323,7 +323,7 @@ class connection extends \PDO implements actions, api, engines
       else{
         $r = $this->query($sql, $hash);
       }
-      if ( $r ){
+      if ( !$this->triggers_disabled && $r ){
         $this->_trigger($table, 'select', 'after', $fields, $where['keypair']);
       }
       return $r;
@@ -414,7 +414,27 @@ class connection extends \PDO implements actions, api, engines
 		}
 		return $trig;
 	}
-	
+
+  /**
+   * Enable the triggers' functions
+   *
+   * @return \bbn\db\connection
+   */
+  public function enable_trigger(){
+    $this->triggers_disabled = false;
+    return $this;
+  }
+
+  /**
+   * Disable the triggers' functions
+   *
+   * @return \bbn\db\connection
+   */
+  public function disable_trigger(){
+    $this->triggers_disabled = true;
+    return $this;
+  }
+
   /**
    * Checks if the database is in a state ready to query
    * 
@@ -1592,6 +1612,7 @@ class connection extends \PDO implements actions, api, engines
     }
     // Automatically select non deleted if history is enabled
     if ( !empty($table) &&
+      !$this->triggers_disabled &&
       class_exists('\\bbn\\appui\\history', false) &&
       \bbn\appui\history::has_history($this)
     ){
