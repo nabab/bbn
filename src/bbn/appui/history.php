@@ -438,8 +438,7 @@ class history
       if ( isset(self::$hstructures[$table], self::$hstructures[$table]['history']) && self::$hstructures[$table]['history'] ){
         $s =& self::$hstructures[$table];
         if ( !isset($s['primary']) ){
-          \bbn\tools::dump($s);
-          die("You need to have a primary key on a single column in your table $table in order to use the history class");
+          die(\bbn\tools::dump("You need to have a primary key on a single column in your table $table in order to use the history class", $s));
         }
 
         $date = self::$date ? self::$date : date('Y-m-d H:i:s');
@@ -525,12 +524,13 @@ class history
             if ( $moment === 'before' ){
               // Looking for foreign constraints 
               // Nothing is really deleted, the hcol is just set to 0
+              $values = array_values($where);
+              array_unshift($values, 0);
               if ( $r = self::$db->query(
                       self::$db->get_update(
-                              $table,
-                              [self::$hcol],
-                              $where),
-                      0, array_values($where)[0]) ){
+                        $table,
+                        [self::$hcol],
+                        $where), $values) ){
                 self::$db->insert(self::$htable, [
                   'operation' => 'DELETE',
                   'line' => $where[$s['primary']],

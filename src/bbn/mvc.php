@@ -475,7 +475,10 @@ class mvc extends obj
     if ( !is_array($model) ){
       $model = [];
     }
-    return \bbn\tpl::render($view, $model);
+    if ( is_string($view) ) {
+      return \bbn\tpl::render($view, $model);
+    }
+    die(\bbn\tools::hdump("Problem with the template", $view));
 	}
 
 	/**
