@@ -220,7 +220,7 @@ class connection
               $this->cfg['errors'][$this->error] : false;
   }
   
-  public function get_config(){
+  public function get_cfg(){
     return $this->cfg;
   }
   
@@ -629,7 +629,7 @@ class connection
   /*
    * return \bbn\user\connection
    */
-  public function save_config()
+  public function save_cfg()
   {
     if ( $this->check() ){
       $this->db->update(
@@ -643,7 +643,7 @@ class connection
   /*
    * return \bbn\user\connection
    */
-  public function set_config($attr, $type='user')
+  public function set_cfg($attr, $type='user')
   {
     $prop = $type === 'sess' ? 'sess_cfg' : 'user_cfg';
     if ( isset($this->{$prop}) ){

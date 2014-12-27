@@ -47,7 +47,7 @@ class appui extends \bbn\user\connection
 	 */
 	public function __construct($cfg=array())
 	{
-		self::set_config(array(
+		self::set_cfg(array(
 			'fields' => array(
 				'id' => 'id',
 				'user' => 'bbn_login',

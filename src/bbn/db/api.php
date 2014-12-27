@@ -23,10 +23,46 @@ interface api
 	/**
 	 * Fetches a given table and returns an array of a single row text-indexed
 	 *
-	 * @params 
+	 * @params
 	 * @return false|array
 	 */
 	public function select($table, $fields, $where, $order, $start);
+
+	/**
+	 * Fetches a given table and returns an array of a single row text-indexed
+	 *
+	 * @params
+	 * @return false|array
+	 */
+	public function select_all($table, $fields, $where, $order, $start, $limit);
+
+	/**
+	 * Fetches a given table and returns an array of a single row text-indexed
+	 *
+	 * @params
+	 * @return false|array
+	 */
+	public function rselect($table, $fields, $where, $order, $start);
+
+	/**
+	 * Fetches a given table and returns an array of a single row text-indexed
+	 *
+	 * @params
+	 * @return false|array
+	 */
+	public function rselect_all($table, $fields, $where, $order, $start, $limit);
+
+	/**
+	 * Fetches a given table and returns an array of a single row text-indexed
+	 *
+	 * @param string $table The table name.
+	 * @param string $field The fields name.
+	 * @param array $where  The "where" condition.
+	 * @param string|array $order The "order" condition, default: false.
+	 * @param int $start The "start" condition, default: 0.
+	 * @return false|array
+	 */
+	public function select_one($table, $field, $where, $order, $start);
 
 	/**
 	 * Inserts/Updates rows in the a given table

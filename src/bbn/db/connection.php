@@ -1710,7 +1710,7 @@ class connection extends \PDO implements actions, api, engines
    * </code>
    * 
    * @param string $table The table name.
-   * @param string|array $field The fields name.
+   * @param string $field The fields name.
    * @param array $where  The "where" condition.
    * @param string|array $order The "order" condition, default: false.
    * @param int $start The "start" condition, default: 0.

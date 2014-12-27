@@ -594,19 +594,52 @@ class tools
       self::log($debug, $file);
     }
   }
-  
+
   /**
-   * 
-   * 
-   */ 
+   *
+   *
+   */
   public static function sort(&$ar){
     usort($ar, function($a, $b){
-      $a = str_replace('.', '0', str_replace('_', '1', \bbn\str\text::change_case($a, 'lower')));
-      $b = str_replace('.', '0', str_replace('_', '1', \bbn\str\text::change_case($b, 'lower')));
-      return strcmp($a, $b);
+      if ( !\bbn\str\text::is_number($a, $b) ) {
+        $a = str_replace('.', '0', str_replace('_', '1', \bbn\str\text::change_case($a, 'lower')));
+        $b = str_replace('.', '0', str_replace('_', '1', \bbn\str\text::change_case($b, 'lower')));
+        return strcmp($a, $b);
+      }
+      if ( $a > $b ){
+        return 1;
+      }
+      else if ($a == $b){
+        return 0;
+      }
+      return -1;
     });
   }
-  
+
+  /**
+   *
+   *
+   */
+  public static function sort_by(&$ar, $key){
+    usort($ar, function($a, $b) use($key){
+      if ( !isset($a[$key], $b[$key]) ){
+        die("The key $key doesn't exist");
+      }
+      if ( !\bbn\str\text::is_number($a[$key], $b[$key]) ) {
+        $a[$key] = str_replace('.', '0', str_replace('_', '1', \bbn\str\text::change_case($a[$key], 'lower')));
+        $b[$key] = str_replace('.', '0', str_replace('_', '1', \bbn\str\text::change_case($b[$key], 'lower')));
+        return strcmp($a[$key], $b[$key]);
+      }
+      if ( $a[$key] > $b[$key] ){
+        return 1;
+      }
+      else if ($a[$key] == $b[$key]){
+        return 0;
+      }
+      return -1;
+    });
+  }
+
 
   /**
 	 * Tells whether the current system from which PHP is executed is Windows or not
