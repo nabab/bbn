@@ -85,7 +85,7 @@ class date
 			$start_today = mktime(0, 0, 0);
 			$end_today = $start_today + ( 24 * 3600 );
 			$is_today = ( ($idate >= $start_today) && ($idate < $end_today) ) ? 1 : false;
-			$only_date = ( $h['tm_hour'] + $h['tm_min'] + $h['tm_sec'] == 0 ) ? 1 : false;
+			$only_date = ($mode === 'date') || ( $h['tm_hour'] + $h['tm_min'] + $h['tm_sec'] == 0 ) ? 1 : false;
 			if ( $mode === 'idate' )
 				$date_ok = $idate;
 			else if ( $mode === 'dbdate' )

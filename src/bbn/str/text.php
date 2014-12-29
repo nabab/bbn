@@ -309,7 +309,7 @@ class text
 	}
 
   /**
-   * Returns a correct type name for file.
+   * Returns a cross-platform filename for file.
    * 
    * <code>
    * \bbn\str\text::encode_filename('test file/,1', 15, 'txt'); //Returns 
@@ -374,7 +374,7 @@ class text
 	}
 
   /**
-   * Returns a correct type name for database.
+   * Returns a corrected string for database naming.
    * 
    * <code>
    * \bbn\str\text::encode_dbname('my.database_name ? test  :,; !plus'); //Returns  "my_database_name_test_plus"
@@ -789,15 +789,15 @@ class text
 			$st = mb_ereg_replace($s, $replace[$i], $st);
    	return $st;
 	}
-	
+
 	/**
 	 * Checks if a string comply with SQL naming convention.
-   * 
-   * <code>
-   * \bbn\str\text::check_name("Paul"); //Returns true
-   * \bbn\str\text::check_name("PÃ ul"); //Returns false
-   * </code>
-	 * 
+	 *
+	 * <code>
+	 * \bbn\str\text::check_name("Paul"); //Returns true
+	 * \bbn\str\text::check_name("PÃ ul"); //Returns false
+	 * </code>
+	 *
 	 * @return bool
 	 */
 	public static function check_name(){
@@ -805,17 +805,39 @@ class text
 		$args = func_get_args();
 		// Each argument must be a string starting with a letter, and having than one character made of letters, numbers and underscores
 		foreach ( $args as $a ){
-      $a = self::cast($a);
+			$a = self::cast($a);
 			$t = preg_match('#[A-z]+[A-z0-9_]*#',$a,$m);
 			if ( $t !== 1 || $m[0] !== $a ){
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
-  /**
+	/**
+	 * Checks if a string doesn't contain a filesystem path
+	 *
+	 * <code>
+	 * \bbn\str\text::check_name("Paul"); //Returns true
+	 * \bbn\str\text::check_name("PA/ul"); //Returns false
+	 * </code>
+	 *
+	 * @return bool
+	 */
+	public static function check_filename(){
+
+		$args = func_get_args();
+		// Each argument must be a string starting with a letter, and having than one character made of letters, numbers and underscores
+		foreach ( $args as $a ){
+			if ( !is_string($a) || (strpos($a, '/') !== false) || (strpos($a, '\\') !== false) ){
+				return false;
+			}
+		}
+		return true;
+	}
+
+
+	/**
    * Checks if a string comply with SQL naming convention.
    * Returns "true" if slash or backslash are present.
    * 

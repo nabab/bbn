@@ -330,4 +330,24 @@ class dir extends \bbn\obj
     }
     return false;
 	}
+
+  public static function copy($src, $dst) {
+    if ( is_file($src) ){
+      return copy($src, $dst);
+    }
+    else if ( is_dir($src) && \bbn\file\dir::create_path($dst) ){
+      $files = \bbn\file\dir::get_files($src);
+      $dirs = \bbn\file\dir::get_dirs($src);
+      foreach ( $files as $f ){
+        copy($f, $dst.basename($f));
+      }
+      foreach ( $dirs as $f ){
+        self::copy($f, $dst.basename($f));
+      }
+      return 1;
+    }
+    else{
+      return false;
+    }
+  }
 }
