@@ -46,3 +46,7 @@ $db = new \bbn\db\connection($cfg);
 
 \bbn\tools::hdump($db->get_var("SELECT id FROM mytable WHERE name LIKE ?", "tri%"));
 ```
+
+
+[![API DOCS](http://apigenerator.org/badge.png)](http://<user>.github.io/<repo>/)
+
