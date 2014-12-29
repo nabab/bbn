@@ -15,7 +15,7 @@ namespace bbn\html;
  * @version 0.4
  * @todo ???
  */
-class input extends element
+class button extends element
 {
   protected
           /** @var null|string The input's label/title */

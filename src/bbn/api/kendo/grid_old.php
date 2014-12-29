@@ -5,7 +5,7 @@
 
 namespace bbn\api\kendo;
 
-class grid extends object
+class grid_old extends object
 {
 
   protected static $default_config = [
