@@ -48,5 +48,5 @@ $db = new \bbn\db\connection($cfg);
 ```
 
 
-[![API DOCS](http://apigenerator.org/badge.png)](http://<user>.github.io/<repo>/)
+[![API DOCS](http://apigenerator.org/badge.png)](http://nabab.github.io/<repo>/)
 
