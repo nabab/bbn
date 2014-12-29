@@ -12,4 +12,4 @@ php: false
 deprecated: true
 # useful for developers AND users to know
 todo: true
-src-path: ./src/bbn
+src-path: /src/bbn
