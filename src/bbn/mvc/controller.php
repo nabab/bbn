@@ -21,6 +21,7 @@ namespace bbn\mvc;
 
 class controller{
 
+	use common;
 
 	private
 		/**
@@ -224,37 +225,6 @@ class controller{
 		if ( isset($path) ){
 			$this->route($path);
 		}
-	}
-
-	private function set_params($path)
-	{
-		$this->params = [];
-		$tmp = explode('/', $path);
-		$num_params = count($tmp);
-		foreach ( $tmp as $t ){
-			if ( !empty($t) ){
-				array_push($this->params, $t);
-			}
-		}
-	}
-
-	/**
-	 * This checks whether an argument used for getting controller, view or model - which are files - doesn't contain malicious content.
-	 *
-	 * @param string $p The request path <em>(e.g books/466565 or html/home)</em>
-	 * @return bool
-	 */
-	private function check_path()
-	{
-		$ar = func_get_args();
-		foreach ( $ar as $a ){
-			if ( !is_string($a) ||
-				(strpos($a,'./') !== false) ||
-				(strpos($a,'/') === 0) ){
-				die("The path $a is not an acceptable value");
-			}
-		}
-		return 1;
 	}
 
 	/**
@@ -477,6 +447,9 @@ class controller{
 
 			// We go through each path, starting by the longest until it's empty
 			while ( strlen($fpath) > 0 ){
+				if ( isset($this->routes[$this->mode][$p]) ){
+					$p = is_array($this->routes[$this->mode][$p]) ? $this->routes[$this->mode][$p][0] : $this->routes[$this->mode][$p];
+				}
 				if ( $this->get_controller($fpath) ){
 					if ( strlen($fpath) < strlen($this->path) ){
 						$this->arguments = [];
@@ -518,14 +491,7 @@ class controller{
 	 */
 	public function reroute($path='', $check = 1)
 	{
-		$this->is_routed = false;
-		$this->controller = false;
-		$this->is_controlled = null;
-		$this->route($path);
-		if ( $check ){
-			$this->check();
-		}
-		return $this;
+		return $this->mvc->reroute($path, $check);
 	}
 
 	/**

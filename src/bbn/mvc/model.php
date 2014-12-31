@@ -21,6 +21,8 @@ namespace bbn;
 
 class model extends obj{
 
+	use common;
+
 	private
 		/**
 		 * @var \bbn\db\connection Database object
@@ -82,25 +84,6 @@ class model extends obj{
 		if ( $this->check_path() && file_exists($path.'.php') ){
 			$this->inc = $inc;
 		}
-	}
-
-	/**
-	 * This checks whether an argument used for getting controller, view or model - which are files - doesn't contain malicious content.
-	 *
-	 * @param string $p The request path <em>(e.g books/466565 or html/home)</em>
-	 * @return bool
-	 */
-	private function check_path()
-	{
-		$ar = func_get_args();
-		foreach ( $ar as $a ){
-			if ( !is_string($a) ||
-				(strpos($a,'./') !== false) ||
-				(strpos($a,'/') === 0) ){
-				die("The path $a is not an acceptable value");
-			}
-		}
-		return 1;
 	}
 
 	/**

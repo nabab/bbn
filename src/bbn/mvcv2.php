@@ -1,5 +1,7 @@
 <?php
 namespace bbn;
+use bbn\mvc\api;
+
 /**
  * Model View Controller Class
  *
@@ -19,7 +21,9 @@ namespace bbn;
  * @todo Look into the check function and divide it
  */
 
-class mvcv2 extends obj{
+class mvcv2 extends obj implements api{
+
+	use mvc\common;
   
 	private
 		/**
@@ -42,6 +46,11 @@ class mvcv2 extends obj{
 		 * @var array
 		 */
 		$loaded_views = [],
+		/**
+		 * The list of views which have been loaded. We keep their content in an array to not have to include the file again. This is useful for loops.
+		 * @var array
+		 */
+		$params = [],
 		/**
 		 * @var \bbn\db\connection Database object
 		 */
@@ -119,10 +128,9 @@ class mvcv2 extends obj{
 	 * @param string | object $parent The parent controller</em>
 	 * @return bool
 	 */
-	public function __construct($db, $parent='', $data = [])
-	{
+	public function __construct($db = null, $routes = []){
 		// The initial call should only have $db as parameter
-		if ( defined('BBN_CUR_PATH') && is_array($parent) ){
+		if ( defined('BBN_CUR_PATH') ){
 			if ( is_object($db) && ( $class = get_class($db) ) && ( $class === 'PDO' || strpos($class, 'bbn\\db\\') !== false ) ){
 				$this->db = $db;
 			}
@@ -130,7 +138,7 @@ class mvcv2 extends obj{
 				$this->db = false;
 			}
 			$this->inc = new \stdClass();
-			$this->routes = $parent;
+			$this->routes = $routes;
       $this->cli = (php_sapi_name() === 'cli');
       // When using CLI a first parameter can be used as route,
       // a second JSON encoded can be used as $this->post
@@ -182,11 +190,11 @@ class mvcv2 extends obj{
           $this->set_params(substr($url, strlen(BBN_CUR_PATH)));
         }
       }
-			// If an available mode starts the URL params, it will be picked up
-			if ( count($this->params) > 0 && isset($this->outputs[$this->params[0]]) ){
-				$this->original_mode = $this->params[0];
-				array_shift($this->params);
+
+			if ( $this->cli ){
+				$this->original_mode = 'cli';
 			}
+			// @todo
 			// Otherwise in the case there's a "appui" POST we'll throw back JSON
 			else if ( isset($this->post['appui']) && isset($this->outputs[$this->post['appui']]) ){
 				$this->original_mode = $this->post['appui'];
@@ -202,35 +210,88 @@ class mvcv2 extends obj{
 			else{
 				$this->original_mode = 'dom';
 			}
-      if ( $this->cli ){
-        $this->original_mode = 'cli';
-      }
 			$this->url = implode('/',$this->params);
-			$this->mode = $this->original_mode;
 			$path = $this->url;
 		}
 		if ( isset($path) ){
 			$this->route($path);
 		}
 	}
-  
+
+	public function get_params(){
+		return $this->params;
+	}
+
 	/**
-	 * This checks whether an argument used for getting controller, view or model - which are files - doesn't contain malicious content.
+	 * This will fetch the route to the controller for a given path. Chainable
 	 *
-	 * @param string $p The request path <em>(e.g books/466565 or html/home)</em>
-	 * @return bool
+	 * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
+	 * @return void
 	 */
-	private function check_path()
+	private function route($path='')
 	{
-		$ar = func_get_args();
-		foreach ( $ar as $a ){
-			if ( !is_string($a) ||
-              (strpos($a,'./') !== false) ||
-              (strpos($a,'/') === 0) ){
-				die("The path $a is not an acceptable value");
+		if ( !$this->is_routed && self::check_path($path) )
+		{
+			$this->is_routed = 1;
+			$original =
+			$fpath = $path;
+
+			// We go through each path, starting by the longest until it's empty
+			while ( strlen($fpath) > 0 ){
+				if ( isset($this->routes[$fpath]) ){
+					$s1 = strlen($path);
+					$s2 = strlen($fpath);
+					$add = $s1 !== $s2 ? substr($path, $s2) : '';
+					$this->path = (is_array($this->routes[$fpath]) ? $this->routes[$fpath][0] :
+						$this->routes[$fpath]).$add;
+				}
+				else{
+					$fpath = strpos($fpath,'/') === false ? '' : substr($this->path,0,strrpos($fpath,'/'));
+				}
+			}
+			if ( !isset($this->path) ) {
+				$this->path = $path;
+			}
+
+			die($this->path);
+
+			if ( !$this->controller ){
+				$this->get_controller('default');
 			}
 		}
-		return 1;
+		return $this;
+	}
+
+	/**
+	 * This will reroute a controller to another one seemlessly. Chainable
+	 *
+	 * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
+	 * @return void
+	 */
+	public function reroute($path='', $check = 1)
+	{
+		$this->is_routed = false;
+		$this->controller = false;
+		$this->is_controlled = null;
+		$this->route($path);
+		if ( $check ){
+			$this->check();
+		}
+		return $this;
+	}
+
+
+
+	private function set_params($path)
+	{
+		$this->params = [];
+		$tmp = explode('/', $path);
+		$num_params = count($tmp);
+		foreach ( $tmp as $t ){
+			if ( !empty($t) ){
+				array_push($this->params, $t);
+			}
+		}
 	}
 
 	/**
