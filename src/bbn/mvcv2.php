@@ -19,7 +19,7 @@ namespace bbn;
  * @todo Look into the check function and divide it
  */
 
-class new_mvc extends obj{
+class mvcv2 extends obj{
   
 	private
 		/**
