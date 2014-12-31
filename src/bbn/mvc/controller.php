@@ -581,7 +581,7 @@ class controller implements api{
 	 * @param string $mode
 	 * @return string|false
 	 */
-	public function get_view($path='', $mode='')
+	public function get_view($path, $data=[])
 	{
 		if ( $this->mode && !is_null($this->dest) && $this->check_path($path, $this->mode) ){
 			if ( empty($mode) ){
@@ -675,7 +675,7 @@ class controller implements api{
 	 * @params array data to send to the model
 	 * @return array|false A data model
 	 */
-	private function get_model()
+	public function get_model($path, $data=[])
 	{
 		if ( $this->dest ){
 			$args = func_get_args();

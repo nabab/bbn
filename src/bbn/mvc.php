@@ -191,10 +191,10 @@ class mvc extends obj
 			}
 			$this->inc = new \stdClass();
 			$this->routes = $parent;
-      $this->cli = (php_sapi_name() === 'cli');
+      $this->is_cli() = (php_sapi_name() === 'cli');
       // When using CLI a first parameter can be used as route,
       // a second JSON encoded can be used as $this->post
-      if ( $this->cli ){
+      if ( $this->is_cli() ){
         global $argv;
         // Controller called with CLI through arguments
         if ( isset($argv[1]) ){
@@ -262,7 +262,7 @@ class mvc extends obj
 			else{
 				$this->original_mode = 'dom';
 			}
-      if ( $this->cli ){
+      if ( $this->is_cli() ){
         $this->original_mode = 'cli';
       }
 			$this->url = implode('/',$this->params);
@@ -273,7 +273,7 @@ class mvc extends obj
 		else if ( is_string($db) && is_object($parent) && isset($parent->url, $parent->original_controller) ){
 			$this->inc =& $parent->inc;
 			$this->routes =& $parent->routes;
-			$this->cli =& $parent->cli;
+			$this->is_cli() =& $parent->cli;
 			$this->db =& $parent->db;
 			$this->post =& $parent->post;
 			$this->get =& $parent->get;
@@ -297,7 +297,7 @@ class mvc extends obj
 				$path = substr($path, 0, -1);
 			}
 			$params = explode('/', $path);
-      if ( $this->cli ){
+      if ( $this->is_cli() ){
         $this->mode = 'cron';
       }
 			else if ( isset($params[0]) && isset($this->outputs[$params[0]]) ){
@@ -488,7 +488,7 @@ class mvc extends obj
 	 */
 	public function is_cli()
   {
-    return $this->cli;
+    return $this->is_cli();
   }
   
 	/**
@@ -1043,7 +1043,7 @@ class mvc extends obj
 		}
 		if ( $this->check() && $this->obj ){
 
-      if ( $this->cli ){
+      if ( $this->is_cli() ){
         die(isset($this->obj->output) ? $this->obj->output : "no output");
       }
 			if ( isset($this->obj->prescript) ){

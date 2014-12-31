@@ -242,11 +242,11 @@ class environment{
     /** @property \stdClass $inc An object which properties will store another object accessible throughout controllers and models */
     $this->inc = new \stdClass();
     $this->routes = $parent;
-    $this->cli = (php_sapi_name() === 'cli');
+    $this->is_cli() = (php_sapi_name() === 'cli');
 
     // When using CLI a first parameter can be used as route,
     // a second JSON encoded can be used as $this->post
-    if ( $this->cli ){
+    if ( $this->is_cli() ){
       global $argv;
       if ( isset($argv[1]) ){
         $tmp = explode('/', $argv[1]);
@@ -284,7 +284,7 @@ class environment{
     else{
       $this->original_mode = 'dom';
     }
-    if ( $this->cli ){
+    if ( $this->is_cli() ){
       $this->original_mode = 'cli';
     }
     $this->url = implode('/',$this->params);
@@ -293,7 +293,7 @@ class environment{
 
     $this->inc =& $parent->inc;
     $this->routes =& $parent->routes;
-    $this->cli =& $parent->cli;
+    $this->is_cli() =& $parent->cli;
     $this->db =& $parent->db;
     $this->post =& $parent->post;
     $this->get =& $parent->get;
@@ -317,7 +317,7 @@ class environment{
       $path = substr($path, 0, -1);
     }
     $params = explode('/', $path);
-    if ( $this->cli ){
+    if ( $this->is_cli() ){
       $this->mode = 'cron';
     }
     else if ( isset($params[0]) && isset($this->outputs[$params[0]]) ){
@@ -502,7 +502,7 @@ class environment{
 	 */
 	private function is_cli()
   {
-    return $this->cli;
+    return $this->is_cli();
   }
   
 	/**
@@ -760,7 +760,7 @@ class environment{
 		}
 		if ( $this->check() && $this->obj ){
 			
-      if ( $this->cli ){
+      if ( $this->is_cli() ){
         die(isset($this->obj->output) ? $this->obj->output : "no output");
       }
 			if ( isset($this->obj->prescript) ){
