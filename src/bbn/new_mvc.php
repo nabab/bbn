@@ -19,55 +19,37 @@ namespace bbn;
  * @todo Look into the check function and divide it
  */
 
-class new_mvc extends obj
-{
+class new_mvc extends obj{
   
 	private
-	/**
-	 * Is set to null while not routed, then 1 if routing was sucessful, and false otherwise.
-	 * @var null|boolean
-	 */
+		/**
+		 * Is set to null while not routed, then 1 if routing was sucessful, and false otherwise.
+		 * @var null|boolean
+		 */
 		$is_routed,
-	/**
-	 * Is set to null while not controled, then 1 if controller was found, and false otherwise.
-	 * @var null|boolean
-	 */
-		$is_controlled,
-	/**
-	 * The name of the controller.
-	 * @var null|string
-	 */
-	 	$dest,
-	/**
-	 * The directory of the controller.
-	 * @var null|string
-	 */
-		$dir,
-	/**
-	 * The path to the controller.
-	 * @var null|string
-	 */
-		$path,
-	/**
-	 * The checkers files (with full path)
-   * If any they will be checked before the controller
-	 * @var null|string
-	 */
-		$checkers = [],
-	/**
-	 * The controller file (with full path)
-	 * @var null|string
-	 */
-		$controller,
-	/**
-	 * The mode of the output (dom, html, json, txt, xml...)
-	 * @var null|string
-	 */
-		$mode,
-	/**
-	 * Determines if it is sent through the command line
-	 * @var boolean
-	 */
+		/**
+		 * The first controller to be called at the top of the script.
+		 * @var null|string
+		 */
+		$original_controller,
+		/**
+		 * The list of used controllers with their corresponding request, so we don't have to look for them again.
+		 * @var array
+		 */
+		$known_controllers = [],
+		/**
+		 * The list of views which have been loaded. We keep their content in an array to not have to include the file again. This is useful for loops.
+		 * @var array
+		 */
+		$loaded_views = [],
+		/**
+		 * @var \bbn\db\connection Database object
+		 */
+		$db,
+		/**
+		 * Determines if it is sent through the command line
+		 * @var boolean
+		 */
 		$cli;
   
 	public
@@ -97,25 +79,6 @@ class new_mvc extends obj
 	 */
 		$url,
 	/**
-	 * The first controller to be called at the top of the script.
-	 * @var null|string
-	 */
-		$original_controller,
-	/**
-	 * The list of used controllers with their corresponding request, so we don't have to look for them again.
-	 * @var array
-	 */
-		$known_controllers = [],
-	/**
-	 * The list of views which have been loaded. We keep their content in an array to not have to include the file again. This is useful for loops.
-	 * @var array
-	 */
-		$loaded_views = [],
-	/**
-	 * @var \bbn\db\connection Database object
-	 */
-		$db,
-	/**
 	 * @var array $_POST
 	 */
 		$post = [],
@@ -127,16 +90,6 @@ class new_mvc extends obj
 	 * @var array $_FILES
 	 */
 		$files = [],
-	/**
-	 * An array of each path bit in the url
-	 * @var array
-	 */
-		$params = [],
-	 /**
-		* An array of each argument in the url path (params minus the ones leading to the controller)
-		* @var array
-		*/
-		$arguments = [],
 	 /**
 	 * List of possible outputs with their according file extension possibilities
 	 * @var array
@@ -158,19 +111,6 @@ class new_mvc extends obj
       'css' => 1,
       'js' => 1
     ];
-	const
-	/**
-	 * Path to the controllers.
-	 */
-		cpath = 'mvc/controllers/',
-	/**
-	 * Path to the models.
-	 */
-		mpath = 'mvc/models/',
-	/**
-	 * Path to the views.
-	 */
-		vpath = 'mvc/views/';
 
 	/**
 	 * This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).
@@ -269,65 +209,11 @@ class new_mvc extends obj
 			$this->mode = $this->original_mode;
 			$path = $this->url;
 		}
-		// Another call should have the initial controler and the path to reach as parameters
-		else if ( is_string($db) && is_object($parent) && isset($parent->url, $parent->original_controller) ){
-			$this->inc =& $parent->inc;
-			$this->routes =& $parent->routes;
-			$this->cli =& $parent->cli;
-			$this->db =& $parent->db;
-			$this->post =& $parent->post;
-			$this->get =& $parent->get;
-			$this->files =& $parent->files;
-			$this->params =& $parent->params;
-			$this->url =& $parent->url;
-			$this->original_controller =& $parent->original_controller;
-			$this->original_mode =& $parent->original_mode;
-			$this->known_controllers =& $parent->known_controllers;
-			$this->loaded_views =& $parent->loaded_views;
-			$this->ucontrollers =& $parent->ucontrollers;
-			$this->arguments = [];
-			if ( $this->has_data($data) ){
-				$this->data = $data;
-			}
-			$path = $db;
-			while ( strpos($path, '/') === 0 ){
-				$path = substr($path, 1);
-			}
-			while ( substr($path, -1) === '/' ){
-				$path = substr($path, 0, -1);
-			}
-			$params = explode('/', $path);
-      if ( $this->cli ){
-        $this->mode = 'cron';
-      }
-			else if ( isset($params[0]) && isset($this->outputs[$params[0]]) ){
-				$this->mode = array_shift($params);
-				$path = implode('/', $params);
-			}
-			else if ( $this->original_mode === 'dom' ){
-        $this->mode = 'html';
-      }
-      else {
-				$this->mode = $this->original_mode;
-			}
-		}
 		if ( isset($path) ){
 			$this->route($path);
 		}
 	}
   
-  private function set_params($path)
-  {
-    $this->params = [];
-    $tmp = explode('/', $path);
-    $num_params = count($tmp);
-    foreach ( $tmp as $t ){
-      if ( !empty($t) ){
-        array_push($this->params, $t);
-      }
-    }
-  }
-
 	/**
 	 * This checks whether an argument used for getting controller, view or model - which are files - doesn't contain malicious content.
 	 *
@@ -421,46 +307,6 @@ class new_mvc extends obj
 	}
 
 	/**
-	 * Returns the current controller's file's name.
-	 *
-	 * @return string 
-	 */
-	public function say_controller()
-	{
-    return $this->controller ? $this->controller : false;
-  }
-  
-	/**
-	 * Returns the current controller's path.
-	 *
-	 * @return string 
-	 */
-	public function say_path()
-	{
-    return $this->controller ? substr($this->controller, strlen(self::cpath.$this->mode.'/'), -4) : false;
-  }
-  
-	/**
-	 * Returns the current controller's route, i.e as demanded by the client.
-	 *
-	 * @return string 
-	 */
-	public function say_route()
-	{
-    return $this->path;
-  }
-  
-	/**
-	 * Returns the current controller's file's name.
-	 *
-	 * @return string 
-	 */
-	public function say_dir()
-	{
-    return $this->controller ? dirname($this->controller) : false;
-  }
-  
-	/**
 	 * This directly renders content with arbitrary values using the existing Mustache engine.
 	 *
 	 * @param string $view The view to be rendered
@@ -552,55 +398,6 @@ class new_mvc extends obj
 	}
 
 	/**
-	 * This will fetch the route to the controller for a given path. Chainable
-	 *
-	 * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
-	 * @return void 
-	 */
-	private function route($path='')
-	{
-		if ( !$this->is_routed && self::check_path($path) )
-		{
-			$this->is_routed = 1;
-			$this->path = $path;
-			$fpath = $path;
-      
-      // We go through each path, starting by the longest until it's empty
-			while ( strlen($fpath) > 0 ){
-				if ( $this->get_controller($fpath) ){
-					if ( strlen($fpath) < strlen($this->path) ){
-            $this->arguments = [];
-            $args = explode('/', substr($this->path, strlen($fpath)));
-            foreach ( $args as $a ){
-              if ( \bbn\str\text::is_number($a) ){
-                $a = (int)$a;
-              }
-              array_push($this->arguments, $a);
-            }
-						// Trimming the array
-						while ( empty($this->arguments[0]) ){
-							array_shift($this->arguments);
-						}
-						$t = end($this->arguments);
-						while ( empty($t) ){
-							array_pop($this->arguments);
-							$t = end($this->arguments);
-						}
-					}
-					break;
-				}
-				else{
-					$fpath = strpos($fpath,'/') === false ? '' : substr($this->path,0,strrpos($fpath,'/'));
-				}
-			}
-			if ( !$this->controller ){
-				$this->get_controller('default');
-			}
-		}
-		return $this;
-	}
-
-	/**
 	 * This will reroute a controller to another one seemlessly. Chainable
 	 *
 	 * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
@@ -619,27 +416,6 @@ class new_mvc extends obj
 	}
 
 	/**
-	 * This will include a file from within the controller's path. Chainable
-	 *
-	 * @param string $file_name If .php is ommited it will be added
-	 * @return void 
-	 */
-	public function incl($file_name)
-	{
-    if ( $this->is_routed ){
-      $d = $this->say_dir().'/';
-      if ( substr($file_name, -4) !== '.php' ){
-        $file_name .= '.php';
-      }
-      if ( (strpos($file_name, '..') === false) && file_exists($d.$file_name) ){
-        include($d.$file_name);
-      }
-    }
-		return $this;
-	}
-
-
-	/**
 	 * This will add the given string to the script property, and create it if needed. Chainable
 	 *
 	 * @param string $script The javascript chain to add
@@ -653,45 +429,6 @@ class new_mvc extends obj
       }
       $this->obj->script .= $script;
     }
-		return $this;
-	}
-
-	/**
-	 * This will enclose the controller's inclusion
-	 * It can be publicly launched through check()
-	 *
-	 * @return void 
-	 */
-	private function control()
-	{
-		if ( $this->controller && is_null($this->is_controlled) ){
-			ob_start();
-			require($this->controller);
-			$output = ob_get_contents();
-			ob_end_clean();
-			if ( is_object($this->obj) && !isset($this->obj->output) && !empty($output) ){
-				$this->obj->output = $output;
-			}
-			$this->is_controlled = 1;
-		}
-		return $this;
-	}
-  
-	/**
-	 * This will launch the controller in a new function.
-	 * It is publicly launched through check().
-	 *
-	 * @return void 
-	 */
-	private function process()
-	{
-		if ( $this->controller && is_null($this->is_controlled) ){
-			$this->obj = new \stdClass();
-			$this->control();
-			if ( $this->has_data() && isset($this->obj->output) ){
-				$this->obj->output = $this->render($this->obj->output, $this->data);
-			}
-		}
 		return $this;
 	}
 
@@ -811,20 +548,6 @@ class new_mvc extends obj
 				}
 			}
 		}
-		return false;
-	}
-
-	/**
-	 * This will get a the content of a file located within the data path
-	 *
-	 * @param string $file_name
-	 * @return string|false 
-	 */
-	public function get_content($file_name)
-	{
-		if ( $this->check_path($file_name) && defined('BBN_DATA_PATH') && is_file(BBN_DATA_PATH.$file_name) ){
-      return file_get_contents(BBN_DATA_PATH.$file_name);
-    }
 		return false;
 	}
 
@@ -949,19 +672,6 @@ class new_mvc extends obj
 	}
 
 	/**
-	 * Checks if data exists
-	 *
-	 * @return bool
-	 */
-	public function has_data($data=null)
-	{
-    if ( is_null($data) ){
-      $data = $this->data;
-    }
-		return ( is_array($data) && (count($data) > 0) ) ? 1 : false;
-	}
-
-	/**
 	 * Returns the rendered result from the current mvc if successufully processed
 	 * process() (or check()) must have been called before.
 	 *
@@ -987,18 +697,6 @@ class new_mvc extends obj
 			return $this->obj->script;
 		}
 		return '';
-	}
-
-	/**
-	 * Sets the data. Chainable. Should be useless as $this->data is public. Chainable.
-	 *
-	 * @param array $data
-	 * @return void 
-	 */
-	public function set_data(array $data)
-	{
-		$this->data = $data;
-		return $this;
 	}
 
 	/**

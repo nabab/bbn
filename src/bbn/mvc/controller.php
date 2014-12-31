@@ -24,6 +24,11 @@ class controller{
 
 	private
 		/**
+		 * The MVC class from which the controller is called
+		 * @var \bbn\new_mvc
+		 */
+		$mvc,
+		/**
 		 * Is set to null while not routed, then 1 if routing was sucessful, and false otherwise.
 		 * @var null|boolean
 		 */
@@ -97,25 +102,6 @@ class controller{
 		 */
 		$url,
 		/**
-		 * The first controller to be called at the top of the script.
-		 * @var null|string
-		 */
-		$original_controller,
-		/**
-		 * The list of used controllers with their corresponding request, so we don't have to look for them again.
-		 * @var array
-		 */
-		$known_controllers = [],
-		/**
-		 * The list of views which have been loaded. We keep their content in an array to not have to include the file again. This is useful for loops.
-		 * @var array
-		 */
-		$loaded_views = [],
-		/**
-		 * @var \bbn\db\connection Database object
-		 */
-		$db,
-		/**
 		 * @var array $_POST
 		 */
 		$post = [],
@@ -136,41 +122,12 @@ class controller{
 		 * An array of each argument in the url path (params minus the ones leading to the controller)
 		 * @var array
 		 */
-		$arguments = [],
-		/**
-		 * List of possible outputs with their according file extension possibilities
-		 * @var array
-		 */
-		$outputs = ['dom'=>'html','html'=>'html','image'=>'jpg,jpeg,gif,png,svg','json'=>'json','text'=>'txt','xml'=>'xml','js'=>'js','css'=>'css','less'=>'less'],
-
-		/**
-		 * List of possible and existing universal controller.
-		 * First every item is set to one, then if a universal controller is needed, self::universal_controller() will look for it and sets the according array element to the file name if it's found and to false otherwise.
-		 * @var array
-		 */
-		$ucontrollers = [
-		'dom' => 1,
-		'html' => 1,
-		'image' => 1,
-		'json' => 1,
-		'text' => 1,
-		'xml' => 1,
-		'css' => 1,
-		'js' => 1
-	];
+		$arguments = [];
 	const
 		/**
 		 * Path to the controllers.
 		 */
-		cpath = 'mvc/controllers/',
-		/**
-		 * Path to the models.
-		 */
-		mpath = 'mvc/models/',
-		/**
-		 * Path to the views.
-		 */
-		vpath = 'mvc/views/';
+		cpath = 'mvc/controllers/';
 
 	/**
 	 * This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).
@@ -179,16 +136,11 @@ class controller{
 	 * @param string | object $parent The parent controller</em>
 	 * @return bool
 	 */
-	public function __construct($db, $parent='', $data = [])
+	public function __construct(\bbn\new_mvc $mvc, $path='', $data = [])
 	{
 		// The initial call should only have $db as parameter
-		if ( defined('BBN_CUR_PATH') && is_array($parent) ){
-			if ( is_object($db) && ( $class = get_class($db) ) && ( $class === 'PDO' || strpos($class, 'bbn\\db\\') !== false ) ){
-				$this->db = $db;
-			}
-			else{
-				$this->db = false;
-			}
+		if ( defined('BBN_CUR_PATH') ){
+			$this->mvc =& $mvc;
 			$this->inc = new \stdClass();
 			$this->routes = $parent;
 			$this->cli = (php_sapi_name() === 'cli');
@@ -268,48 +220,6 @@ class controller{
 			$this->url = implode('/',$this->params);
 			$this->mode = $this->original_mode;
 			$path = $this->url;
-		}
-		// Another call should have the initial controler and the path to reach as parameters
-		else if ( is_string($db) && is_object($parent) && isset($parent->url, $parent->original_controller) ){
-			$this->inc =& $parent->inc;
-			$this->routes =& $parent->routes;
-			$this->cli =& $parent->cli;
-			$this->db =& $parent->db;
-			$this->post =& $parent->post;
-			$this->get =& $parent->get;
-			$this->files =& $parent->files;
-			$this->params =& $parent->params;
-			$this->url =& $parent->url;
-			$this->original_controller =& $parent->original_controller;
-			$this->original_mode =& $parent->original_mode;
-			$this->known_controllers =& $parent->known_controllers;
-			$this->loaded_views =& $parent->loaded_views;
-			$this->ucontrollers =& $parent->ucontrollers;
-			$this->arguments = [];
-			if ( $this->has_data($data) ){
-				$this->data = $data;
-			}
-			$path = $db;
-			while ( strpos($path, '/') === 0 ){
-				$path = substr($path, 1);
-			}
-			while ( substr($path, -1) === '/' ){
-				$path = substr($path, 0, -1);
-			}
-			$params = explode('/', $path);
-			if ( $this->cli ){
-				$this->mode = 'cron';
-			}
-			else if ( isset($params[0]) && isset($this->outputs[$params[0]]) ){
-				$this->mode = array_shift($params);
-				$path = implode('/', $params);
-			}
-			else if ( $this->original_mode === 'dom' ){
-				$this->mode = 'html';
-			}
-			else {
-				$this->mode = $this->original_mode;
-			}
 		}
 		if ( isset($path) ){
 			$this->route($path);
