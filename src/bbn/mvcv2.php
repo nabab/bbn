@@ -1,6 +1,5 @@
 <?php
 namespace bbn;
-use bbn\mvc\api;
 
 /**
  * Model View Controller Class
@@ -21,7 +20,7 @@ use bbn\mvc\api;
  * @todo Look into the check function and divide it
  */
 
-class mvcv2 extends obj implements api{
+class mvcv2 extends obj implements \bbn\mvc\api{
 
 	use mvc\common;
   
@@ -51,6 +50,11 @@ class mvcv2 extends obj implements api{
 		 * @var array
 		 */
 		$params = [],
+		/**
+		 * The path sent to the main controller.
+		 * @var null|string
+		 */
+		$path,
 		/**
 		 * @var \bbn\db\connection Database object
 		 */
@@ -222,6 +226,18 @@ class mvcv2 extends obj implements api{
 		return $this->params;
 	}
 
+	public function get_post(){
+		return $this->post;
+	}
+
+	public function get_get(){
+		return $this->get;
+	}
+
+	public function get_files(){
+		return $this->files;
+	}
+
 	/**
 	 * This will fetch the route to the controller for a given path. Chainable
 	 *
@@ -253,34 +269,10 @@ class mvcv2 extends obj implements api{
 				$this->path = $path;
 			}
 
-			die($this->path);
-
-			if ( !$this->controller ){
-				$this->get_controller('default');
-			}
+			$this->controller = new \bbn\mvc\controller($this, $this->path);
 		}
 		return $this;
 	}
-
-	/**
-	 * This will reroute a controller to another one seemlessly. Chainable
-	 *
-	 * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
-	 * @return void
-	 */
-	public function reroute($path='', $check = 1)
-	{
-		$this->is_routed = false;
-		$this->controller = false;
-		$this->is_controlled = null;
-		$this->route($path);
-		if ( $check ){
-			$this->check();
-		}
-		return $this;
-	}
-
-
 
 	private function set_params($path)
 	{
@@ -578,77 +570,14 @@ class mvcv2 extends obj implements api{
 	 * @param string $mode
 	 * @return string|false 
 	 */
-	public function get_view($path='', $mode='')
+	public function get_view($path, $data)
 	{
-		if ( $this->mode && !is_null($this->dest) && $this->check_path($path, $this->mode) ){
-			if ( empty($mode) ){
-				$mode = $this->mode;
-			}
-			if ( empty($path) ){
-				$path = $this->dest;
-			}
-			if ( isset($this->outputs[$mode]) ){
-				$ext = explode(',',$this->outputs[$mode]);
-				/* First we look into the loaded_views if it isn't there already */
-				foreach ( $ext as $e ){
-					$file1 = $mode.'/'.$path.'.'.$e;
-					$t = explode('/',$path);
-					$file2 = $mode.'/'.$path.'/'.array_pop($t).'.'.$e;
-					if ( isset($this->loaded_views[$file1]) ){
-						return $this->loaded_views[$file1];
-					}
-					else if ( isset($this->loaded_views[$file2]) ){
-						return $this->loaded_views[$file2];
-					}
-					else if ( is_file(self::vpath.$file1) ){
-						return $this->add_view($file1);
-					}
-					else if ( is_file(self::vpath.$file2) ){
-						return $this->add_view($file2);
-					}
-				}
-			}
+		if ( isset($this->loaded_views[$path]) ){
+			return $this->loaded_views[$path];
 		}
-		return false;
-	}
-
-	/**
-	 * This will get a PHP template view
-	 *
-	 * @param string $path
-	 * @param string $mode
-	 * @return string|false 
-	 */
-	private function get_php($path='', $mode='')
-	{
-		if ( $this->mode && !is_null($this->dest) && $this->check_path($path, $this->mode) ){
-			if ( empty($mode) ){
-				$mode = $this->mode;
-			}
-			if ( empty($path) ){
-				$path = $this->dest;
-			}
-			if ( isset($this->outputs[$mode]) ){
-				$file = $mode.'/'.$path.'.php';
-				if ( isset($this->loaded_phps[$file]) ){
-					$bbn_php = $this->loaded_phps[$file];
-				}
-				else if ( is_file(self::vpath.$file) ){
-					$bbn_php = $this->add_php($file);
-				}
-				if ( isset($bbn_php) ){
-					$args = array();
-					if ( $this->has_data() ){
-						foreach ( (array)$this->data as $key => $val ){
-							$$key = $val;
-							array_push($args, '$'.$key);
-						}
-					}
-					return eval('return call_user_func(function() use ('.implode(',', $args).'){ ?>'.$bbn_php.' <?php });');
-				}
-			}
-		}
-		return false;
+		$view = new \bbn\mvc\view($path, $data);
+		$this->loaded_views[$path] = $view;
+		return $this->get();
 	}
 
 	/**
@@ -658,36 +587,10 @@ class mvcv2 extends obj implements api{
 	 * @params array data to send to the model
 	 * @return array|false A data model 
 	 */
-	private function get_model()
+	public function get_model($path, $data)
 	{
-		if ( $this->dest ){
-			$args = func_get_args();
-			foreach ( $args as $a ){
-				if ( is_array($a) ){
-					$d = $a;
-				}
-				else if ( is_string($a) && $this->check_path($a) ){
-					$path = $a;
-				}
-			}
-			if ( !isset($path) ){
-				$path = $this->dest;
-			}
-			if ( strpos($path,'..') === false && is_file(self::mpath.$path.'.php') ){
-				$db = isset($db) ? $db : $this->db;
-				$last_model_file = self::mpath.$path.'.php';
-				$data = isset($d) ? $d : $this->data;
-				return call_user_func(
-					function() use ($db, $last_model_file, $data)
-					{
-						//$r = include($last_model_file);
-						//return is_array($r) ? $r : array();
-            return include($last_model_file);
-					}
-				);
-			}
-		}
-		return false;
+		$model = new \bbn\mvc\model($this->db, $path, $data);
+		return $model->get();
 	}
 	
 	/**

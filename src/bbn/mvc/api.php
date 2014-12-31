@@ -13,4 +13,10 @@ interface api {
 
   function reroute($path='', $check = 1);
 
+  function get_model($path, $data);
+
+  function get_view($path, $data);
+
+  function is_cli();
+
 }

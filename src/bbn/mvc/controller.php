@@ -19,7 +19,7 @@
 
 namespace bbn\mvc;
 
-class controller{
+class controller implements api{
 
 	use common;
 
@@ -140,90 +140,17 @@ class controller{
 	public function __construct(\bbn\mvcv2 $mvc, $path='', $data = [])
 	{
 		// The initial call should only have $db as parameter
-		if ( defined('BBN_CUR_PATH') ){
+		if ( defined('BBN_CUR_PATH') ) {
 			$this->mvc =& $mvc;
-			$this->inc = new \stdClass();
-			$this->routes = $parent;
-			$this->cli = (php_sapi_name() === 'cli');
+			$this->path = $path;
+			$this->data = is_array($data) ? $data : [];
 			// When using CLI a first parameter can be used as route,
 			// a second JSON encoded can be used as $this->post
-			if ( $this->cli ){
-				global $argv;
-				// Controller called with CLI through arguments
-				if ( isset($argv[1]) ){
-					$this->set_params($argv[1]);
-					if ( isset($argv[2]) && json_decode($argv[2]) ){
-						$this->post = array_map(function($a){
-							return \bbn\str\text::correct_types($a);
-						}, json_decode($argv[2], 1));
-					}
-				}
-			}
-			else{
-				if ( count($_POST) > 0 ){
-					$this->post = array_map(function($a){
-						return \bbn\str\text::correct_types($a);
-					}, $_POST);
-				}
-				if ( count($_GET) > 0 ){
-					$this->get = array_map(function($a){
-						return \bbn\str\text::correct_types($a);
-					}, $_GET);
-				}
-				if ( count($_FILES) > 0 ){
-					foreach ( $_FILES as $n => $f ){
-						if ( is_array($f['name']) ){
-							$this->files[$n] = [];
-							foreach ( $f['name'] as $i => $v ){
-								array_push($this->files[$n], [
-									'name' => $v,
-									'tmp_name' => $f['tmp_name'][$i],
-									'type' => $f['type'][$i],
-									'error' => $f['error'][$i],
-									'size' => $f['size'][$i],
-								]);
-							}
-						}
-						else{
-							$this->files[$n] = $f;
-						}
-					}
-				}
-				if ( isset($_SERVER['REQUEST_URI']) &&
-					( BBN_CUR_PATH === '' || strpos($_SERVER['REQUEST_URI'],BBN_CUR_PATH) !== false ) ){
-					$url = explode("?", urldecode($_SERVER['REQUEST_URI']))[0];
-					$this->set_params(substr($url, strlen(BBN_CUR_PATH)));
-				}
-			}
-			// If an available mode starts the URL params, it will be picked up
-			if ( count($this->params) > 0 && isset($this->outputs[$this->params[0]]) ){
-				$this->original_mode = $this->params[0];
-				array_shift($this->params);
-			}
-			// Otherwise in the case there's a "appui" POST we'll throw back JSON
-			else if ( isset($this->post['appui']) && isset($this->outputs[$this->post['appui']]) ){
-				$this->original_mode = $this->post['appui'];
-				unset($this->post['appui']);
-			}
-			else if ( count($this->post) > 0 ){
-				if ( isset($this->post['appui']) ){
-					unset($this->post['appui']);
-				}
-				$this->original_mode = 'json';
-			}
-			// Otherwise we'll return a whole DOM (HTML page)
-			else{
-				$this->original_mode = 'dom';
-			}
-			if ( $this->cli ){
-				$this->original_mode = 'cli';
-			}
-			$this->url = implode('/',$this->params);
-			$this->mode = $this->original_mode;
-			$path = $this->url;
-		}
-		if ( isset($path) ){
-			$this->route($path);
+			$this->post = $this->mvc->get_post();
+			$this->get = $this->mvc->get_get();
+			$this->files = $this->mvc->get_files();
+
+			$this->route();
 		}
 	}
 
@@ -368,7 +295,7 @@ class controller{
 	 */
 	public function is_cli()
 	{
-		return $this->cli;
+		return $this->mvc->is_cli();
 	}
 
 	/**
@@ -447,9 +374,6 @@ class controller{
 
 			// We go through each path, starting by the longest until it's empty
 			while ( strlen($fpath) > 0 ){
-				if ( isset($this->routes[$this->mode][$p]) ){
-					$p = is_array($this->routes[$this->mode][$p]) ? $this->routes[$this->mode][$p][0] : $this->routes[$this->mode][$p];
-				}
 				if ( $this->get_controller($fpath) ){
 					if ( strlen($fpath) < strlen($this->path) ){
 						$this->arguments = [];
@@ -477,6 +401,7 @@ class controller{
 				}
 			}
 			if ( !$this->controller ){
+				die(\bbn\tools::hdump($this));
 				$this->get_controller('default');
 			}
 		}
@@ -919,7 +844,7 @@ class controller{
 		}
 		if ( $this->check() && $this->obj ){
 
-			if ( $this->cli ){
+			if ( $this->is_cli() ){
 				die(isset($this->obj->output) ? $this->obj->output : "no output");
 			}
 			if ( isset($this->obj->prescript) ){

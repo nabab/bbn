@@ -113,7 +113,7 @@ class model extends obj{
 	 */
 	public function is_cli()
 	{
-		return $this->cli;
+		return $this->is_cli();
 	}
 
 	/**
