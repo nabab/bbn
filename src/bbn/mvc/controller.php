@@ -25,7 +25,7 @@ class controller{
 	private
 		/**
 		 * The MVC class from which the controller is called
-		 * @var \bbn\new_mvc
+		 * @var \bbn\mvcv2
 		 */
 		$mvc,
 		/**
@@ -136,7 +136,7 @@ class controller{
 	 * @param string | object $parent The parent controller</em>
 	 * @return bool
 	 */
-	public function __construct(\bbn\new_mvc $mvc, $path='', $data = [])
+	public function __construct(\bbn\mvcv2 $mvc, $path='', $data = [])
 	{
 		// The initial call should only have $db as parameter
 		if ( defined('BBN_CUR_PATH') ){
