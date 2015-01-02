@@ -212,19 +212,22 @@ class controller implements api{
 	 * @param file $f The actual controller file ($this->controller)
 	 * @return void
 	 */
-	private function set_controller($c)
+	private function set_controller($p)
 	{
 		if ( $this->controller && $this->mode ){
-			if ( !isset($this->known_controllers[$this->mode.'/'.$c]) ){
-				$this->known_controllers[$this->mode.'/'.$c] = [
-					'path' => $this->controller,
-					'args' => $this->arguments
-				];
+			$this->dest = $p;
+			$this->dir = dirname($p);
+			if ( $this->dir === '.' ){
+				$this->dir = '';
 			}
-			if ( is_null($this->original_controller) ){
-				$this->original_controller = $this->mode.'/'.$c;
+			else{
+				$this->dir .= '/';
 			}
 		}
+	}
+
+	public function exists(){
+		return $this->dest;
 	}
 
 	/**
@@ -310,47 +313,17 @@ class controller implements api{
 			if ( !is_string($p) ){
 				return false;
 			}
-			if ( isset($this->known_controllers[$this->mode.'/'.$p]) ){
-				$this->dest = $p;
-				$this->dir = dirname($p);
-				if ( $this->dir === '.' ){
-					$this->dir = '';
-				}
-				else{
-					$this->dir .= '/';
-				}
-				$this->controller = $this->known_controllers[$this->mode.'/'.$p]['path'];
-				if ( isset($this->known_controllers[$this->mode.'/'.$p]['args']) ){
-					$this->arguments = $this->known_controllers[$this->mode.'/'.$p]['args'];
-				}
-			}
-			else{
-				if ( isset($this->routes[$this->mode][$p]) ){
-					$p = is_array($this->routes[$this->mode][$p]) ? $this->routes[$this->mode][$p][0] : $this->routes[$this->mode][$p];
-				}
-				if ( is_file(self::cpath.$this->mode.'/'.$p.'.php') ){
-					$this->controller = self::cpath.$this->mode.'/'.$p.'.php';
-					$parts = explode('/', $p);
-					$num = count($parts);
-					$path = self::cpath.$this->mode.'/';
-					// if the current directory of the controller, or any directory above it in the controllers' filesystem, has a file called _ctrl.php, it will be executed and expected to return a non false value in order to authorize the loading of the controller
-					foreach ( $parts as $pt ){
-						if ( is_file($path.'_ctrl.php') ){
-							array_push($this->checkers, $path.'_ctrl.php');
-						}
-						$path .= $pt.'/';
+			if ( is_file(self::cpath.$this->mode.'/'.$p.'.php') ){
+				$this->controller = self::cpath.$this->mode.'/'.$p.'.php';
+				$parts = explode('/', $p);
+				$num = count($parts);
+				$path = self::cpath.$this->mode.'/';
+				// if the current directory of the controller, or any directory above it in the controllers' filesystem, has a file called _ctrl.php, it will be executed and expected to return a non false value in order to authorize the loading of the controller
+				foreach ( $parts as $pt ){
+					if ( is_file($path.'_ctrl.php') ){
+						array_push($this->checkers, $path.'_ctrl.php');
 					}
-				}
-				else{
-					return false;
-				}
-				$this->dest = $p;
-				$this->dir = dirname($p);
-				if ( $this->dir === '.' ){
-					$this->dir = '';
-				}
-				else{
-					$this->dir .= '/';
+					$path .= $pt.'/';
 				}
 				$this->set_controller($p);
 			}
@@ -358,19 +331,20 @@ class controller implements api{
 		return 1;
 	}
 
+
+
 	/**
 	 * This will fetch the route to the controller for a given path. Chainable
 	 *
 	 * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
 	 * @return void
 	 */
-	private function route($path='')
+	private function route()
 	{
-		if ( !$this->is_routed && self::check_path($path) )
+		if ( !$this->is_routed && self::check_path($this->path) )
 		{
 			$this->is_routed = 1;
-			$this->path = $path;
-			$fpath = $path;
+			$fpath = $this->path;
 
 			// We go through each path, starting by the longest until it's empty
 			while ( strlen($fpath) > 0 ){
@@ -403,6 +377,7 @@ class controller implements api{
 			if ( !$this->controller ){
 				$this->get_controller('default');
 			}
+			die(\bbn\tools::hdump($this->arguments));
 		}
 		return $this;
 	}

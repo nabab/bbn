@@ -272,6 +272,9 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 			}
 
 			$this->controller = new \bbn\mvc\controller($this, $this->path);
+			if ( !$this->controller->exists() && isset($this->routes['default']) ){
+				$this->controller = new \bbn\mvc\controller($this, $this->routes['default']);
+			}
 		}
 		return $this;
 	}
@@ -390,66 +393,6 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 	public function is_cli()
 	{
 		return $this->cli;
-	}
-
-	/**
-	 * This looks for a given controller in the file system if it has not been already done and returns it if it finds it, false otherwise.
-	 *
-	 * @param string $p
-	 * @return void
-	 */
-	private function get_controller($p)
-	{
-		if ( !$this->controller ){
-			if ( !is_string($p) ){
-				return false;
-			}
-			if ( isset($this->known_controllers[$this->mode.'/'.$p]) ){
-				$this->dest = $p;
-				$this->dir = dirname($p);
-				if ( $this->dir === '.' ){
-					$this->dir = '';
-				}
-				else{
-					$this->dir .= '/';
-				}
-				$this->controller = $this->known_controllers[$this->mode.'/'.$p]['path'];
-				if ( isset($this->known_controllers[$this->mode.'/'.$p]['args']) ){
-					$this->arguments = $this->known_controllers[$this->mode.'/'.$p]['args'];
-				}
-			}
-			else{
-				if ( isset($this->routes[$this->mode][$p]) ){
-					$p = is_array($this->routes[$this->mode][$p]) ? $this->routes[$this->mode][$p][0] : $this->routes[$this->mode][$p];
-				}
-				if ( is_file(self::cpath.$this->mode.'/'.$p.'.php') ){
-					$this->controller = self::cpath.$this->mode.'/'.$p.'.php';
-					$parts = explode('/', $p);
-					$num = count($parts);
-					$path = self::cpath.$this->mode.'/';
-					// if the current directory of the controller, or any directory above it in the controllers' filesystem, has a file called _ctrl.php, it will be executed and expected to return a non false value in order to authorize the loading of the controller
-					foreach ( $parts as $pt ){
-						if ( is_file($path.'_ctrl.php') ){
-							array_push($this->checkers, $path.'_ctrl.php');
-						}
-						$path .= $pt.'/';
-					}
-				}
-				else{
-					return false;
-				}
-				$this->dest = $p;
-				$this->dir = dirname($p);
-				if ( $this->dir === '.' ){
-					$this->dir = '';
-				}
-				else{
-					$this->dir .= '/';
-				}
-				$this->set_controller($p);
-			}
-		}
-		return 1;
 	}
 
 	/**
