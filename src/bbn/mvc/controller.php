@@ -401,7 +401,6 @@ class controller implements api{
 				}
 			}
 			if ( !$this->controller ){
-				die(\bbn\tools::hdump($this));
 				$this->get_controller('default');
 			}
 		}

@@ -249,12 +249,14 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 		if ( !$this->is_routed && self::check_path($path) )
 		{
 			$this->is_routed = 1;
-			$original =
 			$fpath = $path;
 
 			// We go through each path, starting by the longest until it's empty
 			while ( strlen($fpath) > 0 ){
-				if ( isset($this->routes[$fpath]) ){
+				if ( isset($this->known_controllers[$path]) ){
+
+				}
+				else if ( isset($this->routes[$fpath]) ){
 					$s1 = strlen($path);
 					$s2 = strlen($fpath);
 					$add = $s1 !== $s2 ? substr($path, $s2) : '';
