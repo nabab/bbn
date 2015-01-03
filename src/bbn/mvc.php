@@ -21,7 +21,7 @@ namespace bbn;
 
 class mvc extends obj
 {
-  
+
 	private
 	/**
 	 * Is set to null while not routed, then 1 if routing was sucessful, and false otherwise.
@@ -69,7 +69,7 @@ class mvc extends obj
 	 * @var boolean
 	 */
 		$cli;
-  
+
 	public
 	/**
 	 * An external object that can be filled after the object creation and can be used as a global with the function add_inc
@@ -144,7 +144,7 @@ class mvc extends obj
 		$outputs = ['dom'=>'html','html'=>'html','image'=>'jpg,jpeg,gif,png,svg','json'=>'json','text'=>'txt','xml'=>'xml','js'=>'js','css'=>'css','less'=>'less'],
 
 	/**
-	 * List of possible and existing universal controller. 
+	 * List of possible and existing universal controller.
 	 * First every item is set to one, then if a universal controller is needed, self::universal_controller() will look for it and sets the according array element to the file name if it's found and to false otherwise.
 	 * @var array
 	 */
@@ -191,7 +191,7 @@ class mvc extends obj
 			}
 			$this->inc = new \stdClass();
 			$this->routes = $parent;
-      $this->is_cli() = (php_sapi_name() === 'cli');
+      $this->is_cli = (php_sapi_name() === 'cli');
       // When using CLI a first parameter can be used as route,
       // a second JSON encoded can be used as $this->post
       if ( $this->is_cli() ){
@@ -236,7 +236,7 @@ class mvc extends obj
             }
           }
         }
-        if ( isset($_SERVER['REQUEST_URI']) && 
+        if ( isset($_SERVER['REQUEST_URI']) &&
         ( BBN_CUR_PATH === '' || strpos($_SERVER['REQUEST_URI'],BBN_CUR_PATH) !== false ) ){
           $url = explode("?", urldecode($_SERVER['REQUEST_URI']))[0];
           $this->set_params(substr($url, strlen(BBN_CUR_PATH)));
@@ -273,7 +273,7 @@ class mvc extends obj
 		else if ( is_string($db) && is_object($parent) && isset($parent->url, $parent->original_controller) ){
 			$this->inc =& $parent->inc;
 			$this->routes =& $parent->routes;
-			$this->is_cli() =& $parent->cli;
+			$this->is_cli =& $parent->cli;
 			$this->db =& $parent->db;
 			$this->post =& $parent->post;
 			$this->get =& $parent->get;
@@ -315,7 +315,7 @@ class mvc extends obj
 			$this->route($path);
 		}
 	}
-  
+
   private function set_params($path)
   {
     $this->params = [];
@@ -385,7 +385,7 @@ class mvc extends obj
 	 * This fetches the universal controller for the according mode if it exists.
 	 *
 	 * @param string $c The mode (dom, html, json, txt, xml...)
-	 * @return string controller full name 
+	 * @return string controller full name
 	 */
 	private function universal_controller($c)
 	{
@@ -401,9 +401,9 @@ class mvc extends obj
 	/**
 	 * Adds the newly found controller to the known controllers array, and sets the original controller if it has not been set yet
 	 *
-	 * @param string $c The name of the request or how set by the controller 
+	 * @param string $c The name of the request or how set by the controller
 	 * @param file $f The actual controller file ($this->controller)
-	 * @return void 
+	 * @return void
 	 */
 	private function set_controller($c)
 	{
@@ -423,49 +423,49 @@ class mvc extends obj
 	/**
 	 * Returns the current controller's file's name.
 	 *
-	 * @return string 
+	 * @return string
 	 */
 	public function say_controller()
 	{
     return $this->controller ? $this->controller : false;
   }
-  
+
 	/**
 	 * Returns the current controller's path.
 	 *
-	 * @return string 
+	 * @return string
 	 */
 	public function say_path()
 	{
     return $this->controller ? substr($this->controller, strlen(self::cpath.$this->mode.'/'), -4) : false;
   }
-  
+
 	/**
 	 * Returns the current controller's route, i.e as demanded by the client.
 	 *
-	 * @return string 
+	 * @return string
 	 */
 	public function say_route()
 	{
     return $this->path;
   }
-  
+
 	/**
 	 * Returns the current controller's file's name.
 	 *
-	 * @return string 
+	 * @return string
 	 */
 	public function say_dir()
 	{
     return $this->controller ? dirname($this->controller) : false;
   }
-  
+
 	/**
 	 * This directly renders content with arbitrary values using the existing Mustache engine.
 	 *
 	 * @param string $view The view to be rendered
 	 * @param array $model The data model to fill the view with
-	 * @return void 
+	 * @return void
 	 */
 	public function render($view, $model='')
 	{
@@ -484,18 +484,18 @@ class mvc extends obj
 	/**
 	 * Returns true if called from CLI/Cron, false otherwise
 	 *
-	 * @return boolean 
+	 * @return boolean
 	 */
 	public function is_cli()
   {
-    return $this->is_cli();
+    return $this->is_cli;
   }
-  
+
 	/**
 	 * This looks for a given controller in the file system if it has not been already done and returns it if it finds it, false otherwise.
 	 *
 	 * @param string $p
-	 * @return void 
+	 * @return void
 	 */
 	private function get_controller($p)
 	{
@@ -555,7 +555,7 @@ class mvc extends obj
 	 * This will fetch the route to the controller for a given path. Chainable
 	 *
 	 * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
-	 * @return void 
+	 * @return void
 	 */
 	private function route($path='')
 	{
@@ -564,7 +564,7 @@ class mvc extends obj
 			$this->is_routed = 1;
 			$this->path = $path;
 			$fpath = $path;
-      
+
       // We go through each path, starting by the longest until it's empty
 			while ( strlen($fpath) > 0 ){
 				if ( $this->get_controller($fpath) ){
@@ -604,7 +604,7 @@ class mvc extends obj
 	 * This will reroute a controller to another one seemlessly. Chainable
 	 *
 	 * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
-	 * @return void 
+	 * @return void
 	 */
 	public function reroute($path='', $check = 1)
 	{
@@ -622,7 +622,7 @@ class mvc extends obj
 	 * This will include a file from within the controller's path. Chainable
 	 *
 	 * @param string $file_name If .php is ommited it will be added
-	 * @return void 
+	 * @return void
 	 */
 	public function incl($file_name)
 	{
@@ -643,7 +643,7 @@ class mvc extends obj
 	 * This will add the given string to the script property, and create it if needed. Chainable
 	 *
 	 * @param string $script The javascript chain to add
-	 * @return void 
+	 * @return void
 	 */
 	public function add_script($script)
 	{
@@ -660,7 +660,7 @@ class mvc extends obj
 	 * This will enclose the controller's inclusion
 	 * It can be publicly launched through check()
 	 *
-	 * @return void 
+	 * @return void
 	 */
 	private function control()
 	{
@@ -676,12 +676,12 @@ class mvc extends obj
 		}
 		return $this;
 	}
-  
+
 	/**
 	 * This will launch the controller in a new function.
 	 * It is publicly launched through check().
 	 *
-	 * @return void 
+	 * @return void
 	 */
 	private function process()
 	{
@@ -699,7 +699,7 @@ class mvc extends obj
 	 * This will get a javascript view encapsulated in an anonymous function for embedding in HTML.
 	 *
 	 * @param string $path
-	 * @return string|false 
+	 * @return string|false
 	 */
 	public function get_js($path='')
 	{
@@ -718,7 +718,7 @@ class mvc extends obj
 	 * This will get a CSS view encapsulated in a scoped style tag.
 	 *
 	 * @param string $path
-	 * @return string|false 
+	 * @return string|false
 	 */
 	public function get_css($path='')
 	{
@@ -732,7 +732,7 @@ class mvc extends obj
 	 * This will get and compile a LESS view encapsulated in a scoped style tag.
 	 *
 	 * @param string $path
-	 * @return string|false 
+	 * @return string|false
 	 */
 	public function get_less($path='')
 	{
@@ -754,7 +754,7 @@ class mvc extends obj
 	 *
 	 * @param string $path
 	 * @param string $mode
-	 * @return string|false 
+	 * @return string|false
 	 */
 	public function add_js()
 	{
@@ -778,7 +778,7 @@ class mvc extends obj
 	 *
 	 * @param string $path
 	 * @param string $mode
-	 * @return string|false 
+	 * @return string|false
 	 */
 	public function get_view($path='', $mode='')
 	{
@@ -818,7 +818,7 @@ class mvc extends obj
 	 * This will get a the content of a file located within the data path
 	 *
 	 * @param string $file_name
-	 * @return string|false 
+	 * @return string|false
 	 */
 	public function get_content($file_name)
 	{
@@ -833,7 +833,7 @@ class mvc extends obj
 	 *
 	 * @param string $path
 	 * @param string $mode
-	 * @return string|false 
+	 * @return string|false
 	 */
 	private function get_php($path='', $mode='')
 	{
@@ -872,7 +872,7 @@ class mvc extends obj
 	 *
 	 * @params string path to the model
 	 * @params array data to send to the model
-	 * @return array|false A data model 
+	 * @return array|false A data model
 	 */
 	private function get_model()
 	{
@@ -905,11 +905,11 @@ class mvc extends obj
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Adds a property to the MVC object inc if it has not been declared.
 	 *
-	 * @return bool 
+	 * @return bool
 	 */
 	public function add_inc($name, $obj)
 	{
@@ -917,11 +917,11 @@ class mvc extends obj
 			$this->inc->{$name} = $obj;
 		}
 	}
-	
+
 	/**
 	 * Processes the controller and checks whether it has been routed or not.
 	 *
-	 * @return bool 
+	 * @return bool
 	 */
 	public function check()
 	{
@@ -938,7 +938,7 @@ class mvc extends obj
 	/**
 	 * Returns the output object.
 	 *
-	 * @return object|false 
+	 * @return object|false
 	 */
 	public function get()
 	{
@@ -993,7 +993,7 @@ class mvc extends obj
 	 * Sets the data. Chainable. Should be useless as $this->data is public. Chainable.
 	 *
 	 * @param array $data
-	 * @return void 
+	 * @return void
 	 */
 	public function set_data(array $data)
 	{
@@ -1004,7 +1004,7 @@ class mvc extends obj
 	/**
 	 * Merges the existing data if there is with this one. Chainable.
 	 *
-	 * @return void 
+	 * @return void
 	 */
 	public function add_data(array $data)
 	{
@@ -1020,7 +1020,7 @@ class mvc extends obj
 	/**
 	 * Merges the existing data if there is with this one. Chainable.
 	 *
-	 * @return void 
+	 * @return void
 	 */
 	public function add($d, $data=array())
 	{
@@ -1034,7 +1034,7 @@ class mvc extends obj
 	/**
 	 * Outputs the result.
 	 *
-	 * @return void 
+	 * @return void
 	 */
 	public function output()
 	{
@@ -1104,7 +1104,7 @@ class mvc extends obj
         $this->mode = '';
       }
 			switch ( $this->mode ){
-				
+
 				case 'json':
 					if ( isset($this->obj->output) ){
 						$this->obj->html = $this->obj->output;
@@ -1113,38 +1113,38 @@ class mvc extends obj
 					header('Content-type: application/json; charset=utf-8');
 					echo json_encode($this->obj);
 					break;
-          
+
 				case 'dom':
 				case 'html':
 					header('Content-type: text/html; charset=utf-8');
 					echo $this->obj->output;
 					break;
-          
+
 				case 'js':
 					header('Content-type: application/javascript; charset=utf-8');
 					echo $this->obj->output;
 					break;
-        
+
 				case 'css':
 					header('Content-type: text/css; charset=utf-8');
 					echo $this->obj->output;
 					break;
-        
+
 				case 'less':
 					header('Content-type: text/x-less; charset=utf-8');
 					echo $this->obj->output;
 					break;
-        
+
 				case 'text':
 					header('Content-type: text/plain; charset=utf-8');
 					echo $this->obj->output;
 					break;
-        
+
 				case 'xml':
 					header('Content-type: text/xml; charset=utf-8');
 					echo $this->obj->output;
 					break;
-        
+
 				case 'image':
 					if ( isset($this->obj->img) ){
 						$this->obj->img->display();
@@ -1152,10 +1152,10 @@ class mvc extends obj
 					else{
             $this->log("Impossible to display the following image: ".$this->obj->img->name);
 						header('HTTP/1.0 404 Not Found');
-            
+
 					}
 					break;
-          
+
 				default:
           //die(\bbn\tools::dump($this->obj->file, method_exists($this->obj->file, 'download')));
 					if ( isset($this->obj->file) && is_object($this->obj->file) && method_exists($this->obj->file, 'download') ){

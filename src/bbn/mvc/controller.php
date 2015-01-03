@@ -66,11 +66,6 @@ class controller implements api{
 		 */
 		$controller,
 		/**
-		 * The mode of the output (dom, html, json, txt, xml...)
-		 * @var null|string
-		 */
-		$mode,
-		/**
 		 * Determines if it is sent through the command line
 		 * @var boolean
 		 */
@@ -149,6 +144,7 @@ class controller implements api{
 			$this->post = $this->mvc->get_post();
 			$this->get = $this->mvc->get_get();
 			$this->files = $this->mvc->get_files();
+			$this->params = $this->mvc->get_params();
 
 			$this->route();
 		}
@@ -214,7 +210,7 @@ class controller implements api{
 	 */
 	private function set_controller($p)
 	{
-		if ( $this->controller && $this->mode ){
+		if ( $this->controller ){
 			$this->dest = $p;
 			$this->dir = dirname($p);
 			if ( $this->dir === '.' ){
@@ -247,7 +243,7 @@ class controller implements api{
 	 */
 	public function say_path()
 	{
-		return $this->controller ? substr($this->controller, strlen(self::cpath.$this->mode.'/'), -4) : false;
+		return $this->controller ? substr($this->controller, strlen(self::cpath), -4) : false;
 	}
 
 	/**
@@ -313,11 +309,10 @@ class controller implements api{
 			if ( !is_string($p) ){
 				return false;
 			}
-			if ( is_file(self::cpath.$this->mode.'/'.$p.'.php') ){
-				$this->controller = self::cpath.$this->mode.'/'.$p.'.php';
+			if ( is_file(self::cpath.$p.'.php') ){
+				$this->controller = self::cpath.$p.'.php';
 				$parts = explode('/', $p);
-				$num = count($parts);
-				$path = self::cpath.$this->mode.'/';
+				$path = self::cpath;
 				// if the current directory of the controller, or any directory above it in the controllers' filesystem, has a file called _ctrl.php, it will be executed and expected to return a non false value in order to authorize the loading of the controller
 				foreach ( $parts as $pt ){
 					if ( is_file($path.'_ctrl.php') ){
@@ -326,7 +321,9 @@ class controller implements api{
 					$path .= $pt.'/';
 				}
 				$this->set_controller($p);
+				return 1;
 			}
+			return false;
 		}
 		return 1;
 	}
@@ -374,10 +371,6 @@ class controller implements api{
 					$fpath = strpos($fpath,'/') === false ? '' : substr($this->path,0,strrpos($fpath,'/'));
 				}
 			}
-			if ( !$this->controller ){
-				$this->get_controller('default');
-			}
-			die(\bbn\tools::hdump($this->arguments));
 		}
 		return $this;
 	}
@@ -568,9 +561,9 @@ class controller implements api{
 				$ext = explode(',',$this->outputs[$mode]);
 				/* First we look into the loaded_views if it isn't there already */
 				foreach ( $ext as $e ){
-					$file1 = $mode.'/'.$path.'.'.$e;
+					$file1 = $path.'.'.$e;
 					$t = explode('/',$path);
-					$file2 = $mode.'/'.$path.'/'.array_pop($t).'.'.$e;
+					$file2 = $path.'/'.array_pop($t).'.'.$e;
 					if ( isset($this->loaded_views[$file1]) ){
 						return $this->loaded_views[$file1];
 					}
@@ -620,7 +613,7 @@ class controller implements api{
 				$path = $this->dest;
 			}
 			if ( isset($this->outputs[$mode]) ){
-				$file = $mode.'/'.$path.'.php';
+				$file = $path.'.php';
 				if ( isset($this->loaded_phps[$file]) ){
 					$bbn_php = $this->loaded_phps[$file];
 				}
@@ -750,6 +743,14 @@ class controller implements api{
 		return false;
 	}
 
+	public function get_mode(){
+		return $this->mvc->get_mode();
+	}
+
+	public function set_mode($mode){
+		return $this->mvc->set_mode($mode);
+	}
+
 	/**
 	 * Returns the rendered result from the current mvc if successufully processed
 	 * process() (or check()) must have been called before.
@@ -806,142 +807,8 @@ class controller implements api{
 		return false;
 	}
 
-	/**
-	 * Outputs the result.
-	 *
-	 * @return void
-	 */
-	public function output()
-	{
-		if ( !$this->obj ){
-			$this->obj = new \stdClass();
-		}
-		if ( $this->check() && $this->obj ){
-
-			if ( $this->is_cli() ){
-				die(isset($this->obj->output) ? $this->obj->output : "no output");
-			}
-			if ( isset($this->obj->prescript) ){
-				if ( empty($this->obj->prescript) ){
-					unset($this->obj->prescript);
-				}
-				else{
-					$this->obj->prescript = \JShrink\Minifier::minify($this->obj->prescript);
-				}
-			}
-			if ( isset($this->obj->script) ){
-				if ( empty($this->obj->script) ){
-					unset($this->obj->script);
-				}
-				else{
-					$this->obj->script = \JShrink\Minifier::minify($this->obj->script);
-				}
-			}
-			if ( isset($this->obj->postscript) ){
-				if ( empty($this->obj->postscript) ){
-					unset($this->obj->postscript);
-				}
-				else{
-					$this->obj->postscript = \JShrink\Minifier::minify($this->obj->postscript);
-				}
-			}
-			if ( count((array)$this->obj) === 0 ){
-				header('HTTP/1.0 404 Not Found');
-				exit();
-			}
-			switch ( $this->mode ){
-				case 'json':
-				case 'js':
-				case 'css':
-				case 'dom':
-				case 'html':
-					if ( !ob_start("ob_gzhandler" ) ){
-						ob_start();
-					}
-					else{
-						header('Content-Encoding: gzip');
-					}
-					break;
-				default:
-					ob_start();
-			}
-			if ( empty($this->obj->output) && !empty($this->obj->file) ){
-				if ( is_file($this->obj->file) ){
-					$this->obj->file = new \bbn\file\file($this->obj->file);
-					$this->mode = '';
-				}
-				else if ( is_object($this->obj->file) ){
-					$this->mode = '';
-				}
-			}
-			if ( (empty($this->obj->output) && empty($this->obj->file) && ($this->mode !== 'json')) ||
-				(($this->mode === 'json') && empty($this->obj)) ){
-				$this->mode = '';
-			}
-			switch ( $this->mode ){
-
-				case 'json':
-					if ( isset($this->obj->output) ){
-						$this->obj->html = $this->obj->output;
-						unset($this->obj->output);
-					}
-					header('Content-type: application/json; charset=utf-8');
-					echo json_encode($this->obj);
-					break;
-
-				case 'dom':
-				case 'html':
-					header('Content-type: text/html; charset=utf-8');
-					echo $this->obj->output;
-					break;
-
-				case 'js':
-					header('Content-type: application/javascript; charset=utf-8');
-					echo $this->obj->output;
-					break;
-
-				case 'css':
-					header('Content-type: text/css; charset=utf-8');
-					echo $this->obj->output;
-					break;
-
-				case 'less':
-					header('Content-type: text/x-less; charset=utf-8');
-					echo $this->obj->output;
-					break;
-
-				case 'text':
-					header('Content-type: text/plain; charset=utf-8');
-					echo $this->obj->output;
-					break;
-
-				case 'xml':
-					header('Content-type: text/xml; charset=utf-8');
-					echo $this->obj->output;
-					break;
-
-				case 'image':
-					if ( isset($this->obj->img) ){
-						$this->obj->img->display();
-					}
-					else{
-						$this->log("Impossible to display the following image: ".$this->obj->img->name);
-						header('HTTP/1.0 404 Not Found');
-
-					}
-					break;
-
-				default:
-					//die(\bbn\tools::dump($this->obj->file, method_exists($this->obj->file, 'download')));
-					if ( isset($this->obj->file) && is_object($this->obj->file) && method_exists($this->obj->file, 'download') ){
-						$this->obj->file->download();
-					}
-					else{
-						$this->log("Impossible to display the following controller", $this);
-						header('HTTP/1.0 404 Not Found');
-						exit();
-					}
-			}
-		}
+	public function get_result(){
+		return $this->obj;
 	}
+
 }

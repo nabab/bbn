@@ -60,6 +60,11 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 		 */
 		$db,
 		/**
+		 * The mode of the output (dom, html, json, txt, xml...)
+		 * @var null|string
+		 */
+		$mode,
+		/**
 		 * Determines if it is sent through the command line
 		 * @var boolean
 		 */
@@ -236,6 +241,17 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 
 	public function get_files(){
 		return $this->files;
+	}
+
+	public function get_mode(){
+		return $this->mode;
+	}
+
+	public function set_mode($mode){
+		if ( isset($this->outputs[$mode]) ) {
+			$this->mode = $mode;
+		}
+		return $this->mode;
 	}
 
 	/**
@@ -557,14 +573,7 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 	 */
 	public function check()
 	{
-		foreach ( $this->checkers as $chk ){
-			// If a checker file returns false, the controller is not processed
-			if ( !include_once($chk) ){
-				return false;
-			}
-		}
-		$this->process();
-		return $this->is_routed;
+		return $this->controller->check();
 	}
 
 	/**
@@ -645,6 +654,7 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 	 */
 	public function output()
 	{
+		$this->obj = $this->controller->get_result();
 		if ( !$this->obj ){
 			$this->obj = new \stdClass();
 		}
@@ -721,12 +731,6 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 					echo json_encode($this->obj);
 					break;
 
-				case 'dom':
-				case 'html':
-					header('Content-type: text/html; charset=utf-8');
-					echo $this->obj->output;
-					break;
-
 				case 'js':
 					header('Content-type: application/javascript; charset=utf-8');
 					echo $this->obj->output;
@@ -763,8 +767,7 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 					}
 					break;
 
-				default:
-					//die(\bbn\tools::dump($this->obj->file, method_exists($this->obj->file, 'download')));
+				case 'file':
 					if ( isset($this->obj->file) && is_object($this->obj->file) && method_exists($this->obj->file, 'download') ){
 						$this->obj->file->download();
 					}
@@ -773,6 +776,13 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 						header('HTTP/1.0 404 Not Found');
 						exit();
 					}
+					break;
+
+				default:
+					header('Content-type: text/html; charset=utf-8');
+					//die(var_dump("mode:".$this->mode));
+					echo $this->obj->output;
+
 			}
 		}
 	}
