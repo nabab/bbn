@@ -5,9 +5,9 @@ namespace bbn;
  * Model View Controller Class
  *
  *
- * This class will route a request to the according model and/or view through its controller.
- * A model and a view can be automatically associated if located in the same directory branch with the same name than the controller in their respective locations
- * A view can be directly imported in the controller through this very class
+ * This class, called once per request, holds the environment's variables
+ * and routes each request to its according controller, then acts as a
+ * link between the controller and models and views it uses
  *
  * @author Thomas Nabet <thomas.nabet@gmail.com>
  * @copyright BBN Solutions
@@ -16,25 +16,24 @@ namespace bbn;
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @version 0.2r89
  * @todo Merge the output objects and combine JS strings.
- * @todo Stop to rely only on sqlite and offer file-based or any db-based solution.
+ * @todo Stop to rely only on sqlite and offer file-based or any db-based solution for routes
  * @todo Look into the check function and divide it
  */
 
-class mvcv2 extends obj implements \bbn\mvc\api{
+if ( !defined("BBN_DEFAULT_MODE") ){
+	define("BBN_DEFAULT_MODE", "json");
+}
+
+class mvcv2 implements \bbn\mvc\api{
 
 	use mvc\common;
 
 	private
 		/**
-		 * Is set to null while not routed, then 1 if routing was sucessful, and false otherwise.
+		 * Is set to null while not routed, then 1 if routing was successful, and false otherwise.
 		 * @var null|boolean
 		 */
 		$is_routed,
-		/**
-		 * The first controller to be called at the top of the script.
-		 * @var null|string
-		 */
-		$original_controller,
 		/**
 		 * The list of used controllers with their corresponding request, so we don't have to look for them again.
 		 * @var array
@@ -60,37 +59,10 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 		 */
 		$db,
 		/**
-		 * The mode of the output (dom, html, json, txt, xml...)
+		 * The mode of the output (doc, html, json, txt, xml...)
 		 * @var null|string
 		 */
 		$mode,
-		/**
-		 * Determines if it is sent through the command line
-		 * @var boolean
-		 */
-		$cli;
-
-	public
-		/**
-		 * An external object that can be filled after the object creation and can be used as a global with the function add_inc
-		 * @var stdClass
-		 */
-		$inc,
-		/**
-		 * The data model
-		 * @var null|array
-		 */
-		$data = [],
-		/**
-		 * The output object
-		 * @var null|object
-		 */
-		$obj,
-		/**
-		 * The file extension of the view
-		 * @var null|string
-		 */
-		$ext,
 		/**
 		 * The request sent to the server to get the actual controller.
 		 * @var null|string
@@ -112,15 +84,31 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 		 * List of possible outputs with their according file extension possibilities
 		 * @var array
 		 */
-		$outputs = ['dom'=>'html','html'=>'html','image'=>'jpg,jpeg,gif,png,svg','json'=>'json','text'=>'txt','xml'=>'xml','js'=>'js','css'=>'css','less'=>'less'],
+		$outputs = ['doc'=>'html','html'=>'html','image'=>'jpg,jpeg,gif,png,svg','json'=>'json','text'=>'txt','xml'=>'xml','js'=>'js','css'=>'css','less'=>'less'],
+		/**
+		 * Determines if it is sent through the command line
+		 * @var boolean
+		 */
+		$cli;
 
+	public
+		/**
+		 * An external object that can be filled after the object creation and can be used as a global with the function add_inc
+		 * @var stdClass
+		 */
+		$inc,
+		/**
+		 * The output object
+		 * @var null|object
+		 */
+		$obj,
 		/**
 		 * List of possible and existing universal controller.
 		 * First every item is set to one, then if a universal controller is needed, self::universal_controller() will look for it and sets the according array element to the file name if it's found and to false otherwise.
 		 * @var array
 		 */
 		$ucontrollers = [
-		'dom' => 1,
+		'doc' => 1,
 		'html' => 1,
 		'image' => 1,
 		'json' => 1,
@@ -130,15 +118,17 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 		'js' => 1
 	];
 
+	// These strings are forbidden to use in URL
+	private static $reserved = ['index', '_private', '_common', '_htaccess'];
+
 	/**
-	 * This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).
+	 * This should be called only once from within the app
 	 *
-	 * @param object | string $db The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books/466565 or html/home)</em>
-	 * @param string | object $parent The parent controller</em>
-	 * @return bool
+	 * @param object | string $db The database object if there is
+	 * @param array $routes An array of routes usually defined in /_appui/current/config/routes.php</em>
 	 */
 	public function __construct($db = null, $routes = []){
-		// The initial call should only have $db as parameter
+		// Correspond to the path after the URL to the application's public root (set to '/' for a domain's root)
 		if ( defined('BBN_CUR_PATH') ){
 			if ( is_object($db) && ( $class = get_class($db) ) && ( $class === 'PDO' || strpos($class, 'bbn\\db\\') !== false ) ){
 				$this->db = $db;
@@ -152,8 +142,8 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 			// When using CLI a first parameter can be used as route,
 			// a second JSON encoded can be used as $this->post
 			if ( $this->cli ){
+				$this->mode = 'cli';
 				global $argv;
-				// Controller called with CLI through arguments
 				if ( isset($argv[1]) ){
 					$this->set_params($argv[1]);
 					if ( isset($argv[2]) && json_decode($argv[2]) ){
@@ -163,18 +153,28 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 					}
 				}
 			}
+			// Non CLI request
 			else{
+				// Data are "normalized" i.e. types are changed through str\text::correct_types
+				// If data is post as in the appui SPA framework, mode is assumed to be BBN_DEFAULT_MODE, json by default
 				if ( count($_POST) > 0 ){
 					$this->post = array_map(function($a){
 						return \bbn\str\text::correct_types($a);
 					}, $_POST);
+					$this->mode = BBN_DEFAULT_MODE;
+				}
+				// If no post, assuming to be in an HTML document
+				else{
+					$this->mode = 'doc';
 				}
 				if ( count($_GET) > 0 ){
 					$this->get = array_map(function($a){
 						return \bbn\str\text::correct_types($a);
 					}, $_GET);
 				}
+				// Rebuilding the $_FILES array into $this->files in a more logical structure
 				if ( count($_FILES) > 0 ){
+					$this->mode = 'file';
 					foreach ( $_FILES as $n => $f ){
 						if ( is_array($f['name']) ){
 							$this->files[$n] = [];
@@ -199,32 +199,14 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 					$this->set_params(substr($url, strlen(BBN_CUR_PATH)));
 				}
 			}
-
-			if ( $this->cli ){
-				$this->original_mode = 'cli';
-			}
-			// @todo
-			// Otherwise in the case there's a "appui" POST we'll throw back JSON
-			else if ( isset($this->post['appui']) && isset($this->outputs[$this->post['appui']]) ){
-				$this->original_mode = $this->post['appui'];
-				unset($this->post['appui']);
-			}
-			else if ( count($this->post) > 0 ){
-				if ( isset($this->post['appui']) ){
-					unset($this->post['appui']);
-				}
-				$this->original_mode = 'json';
-			}
-			// Otherwise we'll return a whole DOM (HTML page)
-			else{
-				$this->original_mode = 'dom';
-			}
 			$this->url = implode('/',$this->params);
 			$path = $this->url;
-		}
-		if ( isset($path) ){
 			$this->route($path);
 		}
+	}
+
+	public function get_url(){
+		return $this->url;
 	}
 
 	public function get_params(){
@@ -247,8 +229,14 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 		return $this->mode;
 	}
 
+	/**
+	 * Change the output mode (content-type)
+	 *
+	 * @param $mode
+	 * @return string $this->mode
+	 */
 	public function set_mode($mode){
-		if ( isset($this->outputs[$mode]) ) {
+		if ( isset($this->outputs[$mode]) && ($this->mode !== 'cli') ) {
 			$this->mode = $mode;
 		}
 		return $this->mode;
@@ -262,14 +250,13 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 	 */
 	private function route($path='')
 	{
-		if ( !$this->is_routed && self::check_path($path) )
-		{
+		if ( !$this->is_routed && self::check_path($path) ){
 			$this->is_routed = 1;
 			$fpath = $path;
 
 			// We go through each path, starting by the longest until it's empty
 			while ( strlen($fpath) > 0 ){
-				if ( isset($this->known_controllers[$path]) ){
+				if ( isset($this->known_controllers[$fpath]) ){
 
 				}
 				else if ( isset($this->routes[$fpath]) ){
@@ -288,8 +275,17 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 			}
 
 			$this->controller = new \bbn\mvc\controller($this, $this->path);
-			if ( !$this->controller->exists() && isset($this->routes['default']) ){
-				$this->controller = new \bbn\mvc\controller($this, $this->routes['default']);
+			if ( !$this->controller->exists() ){
+				if ( isset($this->routes['default']) ) {
+					$this->controller = new \bbn\mvc\controller($this, $this->routes['default'] . '/' . $this->path);
+				}
+				else {
+					$this->controller = new \bbn\mvc\controller($this, '404');
+					if ( !$this->controller->exists() ){
+						header('HTTP/1.0 404 Not Found');
+						exit();
+					}
+				}
 			}
 		}
 		return $this;
@@ -302,103 +298,13 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 		$num_params = count($tmp);
 		foreach ( $tmp as $t ){
 			if ( !empty($t) ){
+				if ( in_array($t, self::$reserved) ){
+					die("The controller you are asking for contains one of the following reserved strings: ".
+						implode(", ", self::$reserved));
+				}
 				array_push($this->params, $t);
 			}
 		}
-	}
-
-	/**
-	 * This function gets the content of a view file and adds it to the loaded_views array.
-	 *
-	 * @param string $p The full path to the view file
-	 * @return string The content of the view
-	 */
-	private function add_view($p)
-	{
-		if ( !isset($this->loaded_views[$p]) && is_file(self::vpath.$p) ){
-			$this->loaded_views[$p] = file_get_contents(self::vpath.$p);
-		}
-		if ( !isset($this->loaded_views[$p]) ){
-			die("The view $p doesn't exist");
-		}
-		return $this->loaded_views[$p];
-	}
-
-	/**
-	 * This function gets the source of a PHP template file and adds it to the loaded_phps array.
-	 *
-	 * @param string $p The full path to the PHP file without the extension
-	 * @return string The source of the template
-	 */
-	private function add_php($p)
-	{
-		if ( !isset($this->loaded_phps[$p]) && is_file(self::vpath.$p) ){
-			$this->loaded_phps[$p] = file_get_contents(self::vpath.$p);
-		}
-		if ( !isset($this->loaded_phps[$p]) ){
-			die("The template $p doesn't exist");
-		}
-		return $this->loaded_phps[$p];
-	}
-
-	/**
-	 * This fetches the universal controller for the according mode if it exists.
-	 *
-	 * @param string $c The mode (dom, html, json, txt, xml...)
-	 * @return string controller full name
-	 */
-	private function universal_controller($c)
-	{
-		if ( !isset($this->ucontrollers[$c]) ){
-			return false;
-		}
-		if ( $this->ucontrollers[$c] === 1 ){
-			$this->ucontrollers[$c] = is_file(self::cpath.$c.'.php') ? self::cpath.$c.'.php' : false;
-		}
-		return $this->ucontrollers[$c];
-	}
-
-	/**
-	 * Adds the newly found controller to the known controllers array, and sets the original controller if it has not been set yet
-	 *
-	 * @param string $c The name of the request or how set by the controller
-	 * @param file $f The actual controller file ($this->controller)
-	 * @return void
-	 */
-	private function set_controller($c)
-	{
-		if ( $this->controller && $this->mode ){
-			if ( !isset($this->known_controllers[$this->mode.'/'.$c]) ){
-				$this->known_controllers[$this->mode.'/'.$c] = [
-					'path' => $this->controller,
-					'args' => $this->arguments
-				];
-			}
-			if ( is_null($this->original_controller) ){
-				$this->original_controller = $this->mode.'/'.$c;
-			}
-		}
-	}
-
-	/**
-	 * This directly renders content with arbitrary values using the existing Mustache engine.
-	 *
-	 * @param string $view The view to be rendered
-	 * @param array $model The data model to fill the view with
-	 * @return void
-	 */
-	public function render($view, $model='')
-	{
-		if ( empty($model) && $this->has_data() ){
-			$model = $this->data;
-		}
-		if ( !is_array($model) ){
-			$model = [];
-		}
-		if ( is_string($view) ) {
-			return \bbn\tpl::render($view, $model);
-		}
-		die(\bbn\tools::hdump("Problem with the template", $view));
 	}
 
 	/**
@@ -430,115 +336,26 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 	}
 
 	/**
-	 * This will add the given string to the script property, and create it if needed. Chainable
-	 *
-	 * @param string $script The javascript chain to add
-	 * @return void
-	 */
-	public function add_script($script)
-	{
-		if ( is_object($this->obj) ){
-			if ( !isset($this->obj->script) ){
-				$this->obj->script = '';
-			}
-			$this->obj->script .= $script;
-		}
-		return $this;
-	}
-
-	/**
-	 * This will get a javascript view encapsulated in an anonymous function for embedding in HTML.
-	 *
-	 * @param string $path
-	 * @return string|false
-	 */
-	public function get_js($path='')
-	{
-		if ( $r = $this->get_view($path, 'js') ){
-			return '
-<script>
-(function($){
-'.$r.'
-})(jQuery);
-</script>';
-		}
-		return false;
-	}
-
-	/**
-	 * This will get a CSS view encapsulated in a scoped style tag.
-	 *
-	 * @param string $path
-	 * @return string|false
-	 */
-	public function get_css($path='')
-	{
-		if ( $r = $this->get_view($path, 'css') ){
-			return '<style scoped>'.\CssMin::minify($r).'</style>';
-		}
-		return false;
-	}
-
-	/**
-	 * This will get and compile a LESS view encapsulated in a scoped style tag.
-	 *
-	 * @param string $path
-	 * @return string|false
-	 */
-	public function get_less($path='')
-	{
-		if ( !isset($this->less) ){
-			if ( !class_exists('lessc') ){
-				die("No less class, check composer");
-			}
-			$this->less = new \lessc();
-		}
-		if ( $r = $this->get_view($path, 'less') ){
-			return '<style scoped>'.\CssMin::minify($this->less->compile($r)).'</style>';
-		}
-		return false;
-	}
-
-	/**
-	 * This will add a javascript view to $this->obj->script
-	 * Chainable
-	 *
-	 * @param string $path
-	 * @param string $mode
-	 * @return string|false
-	 */
-	public function add_js()
-	{
-		$args = func_get_args();
-		foreach ( $args as $a ){
-			if ( is_array($a) ){
-				$data = $a;
-			}
-			else if ( is_string($a) ){
-				$path = $a;
-			}
-		}
-		if ( $r = $this->get_view(isset($path) ? $path : '', 'js') ){
-			$this->add_script($this->render($r, isset($data) ? $data : $this->data));
-		}
-		return $this;
-	}
-
-	/**
 	 * This will get a view.
 	 *
 	 * @param string $path
 	 * @param string $mode
 	 * @return string|false
 	 */
-	public function get_view($path, $data=[])
+	public function get_view($path='', $data=null, $mode='html')
 	{
+		$path = $path.'/'.basename($path).'.'.$mode;
 		if ( isset($this->loaded_views[$path]) ){
-			return $this->loaded_views[$path];
+			$this->loaded_views[$path];
 		}
-		$view = new \bbn\mvc\view($path, $data);
-		$this->loaded_views[$path] = $view;
-		return $this->get();
+		else {
+			$view = new \bbn\mvc\view($path);
+			$this->loaded_views[$path] = $view;
+		}
+		if ( $view->check() ) {
+			return is_array($data) ? $view->get($data) : $view->get();
+		}
+		return '';
 	}
 
 	/**
@@ -548,10 +365,10 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 	 * @params array data to send to the model
 	 * @return array|false A data model
 	 */
-	public function get_model($path, $data=[])
+	public function get_model($path, array $data=null)
 	{
-		$model = new \bbn\mvc\model($this->db, $path, $data);
-		return $model->get();
+		$model = new mvc\model($path, $this->db, $this->inc);
+		return $model->get($data);
 	}
 
 	/**
@@ -567,84 +384,14 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 	}
 
 	/**
-	 * Processes the controller and checks whether it has been routed or not.
-	 *
-	 * @return bool
-	 */
-	public function check()
-	{
-		return $this->controller->check();
-	}
-
-	/**
-	 * Returns the output object.
-	 *
-	 * @return object|false
-	 */
-	public function get()
-	{
-		if ( $this->check() ){
-			return $this->obj;
-		}
-		return false;
-	}
-
-	/**
 	 * Returns the rendered result from the current mvc if successufully processed
 	 * process() (or check()) must have been called before.
 	 *
 	 * @return string|false
 	 */
-	public function get_rendered()
+	public function process()
 	{
-		if ( isset($this->obj->output) ){
-			return $this->obj->output;
-		}
-		return false;
-	}
-
-	/**
-	 * Returns the rendered result from the current mvc if successufully processed
-	 * process() (or check()) must have been called before.
-	 *
-	 * @return string|false
-	 */
-	public function get_script()
-	{
-		if ( isset($this->obj->script) ){
-			return $this->obj->script;
-		}
-		return '';
-	}
-
-	/**
-	 * Merges the existing data if there is with this one. Chainable.
-	 *
-	 * @return void
-	 */
-	public function add_data(array $data)
-	{
-		$ar = func_get_args();
-		foreach ( $ar as $d ){
-			if ( is_array($d) ){
-				$this->data = $this->has_data() ? array_merge($this->data,$d) : $d;
-			}
-		}
-		return $this;
-	}
-
-	/**
-	 * Merges the existing data if there is with this one. Chainable.
-	 *
-	 * @return void
-	 */
-	public function add($d, $data=array())
-	{
-		$o = new mvc($d, $this, $data);
-		if ( $o->check() ){
-			return $o;
-		}
-		return false;
+		return $this->controller->process();
 	}
 
 	/**
@@ -695,7 +442,7 @@ class mvcv2 extends obj implements \bbn\mvc\api{
 				case 'json':
 				case 'js':
 				case 'css':
-				case 'dom':
+				case 'doc':
 				case 'html':
 					if ( !ob_start("ob_gzhandler" ) ){
 						ob_start();

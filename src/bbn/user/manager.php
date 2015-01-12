@@ -26,27 +26,24 @@ class manager
             'creation' => [
               'subject' => "Account created",
               'link' => "",
-              'text' => <<<'EOD'
+              'text' => "
 A new user has been created for you.<br>
 Please click the link below in order to activate your account:<br>
-%1$s
-EOD
+%1\$s"
             ],
             'password' => [
               'subject' => "Password change",
               'link' => "",
-              'text' => <<<'EOD'
+              'text' => "
 You can click the following link to change your password:<br>
-%1$s
-EOD
+%1\$s"
             ],
             'hotlink' => [
               'subject' => "Hotlink",
               'link' => "",
-              'text' => <<<'EOD'
+              'text' => "
 You can click the following link to access directly your account:<br>
-%1$s
-EOD
+%1\$s"
             ]
           ],
           // 1 day
@@ -190,7 +187,7 @@ EOD
     if ( \bbn\str\text::is_email($cfg[$this->cfg['arch']['users']['email']]) &&
             $this->db->insert($this->cfg['tables']['users'], $cfg) ){
       $cfg[$this->cfg['arch']['users']['id']] = $this->db->last_id();
-      
+
       // Envoi d'un lien
       $this->make_hotlink($cfg[$this->cfg['arch']['users']['id']], 'creation');
       return $cfg;

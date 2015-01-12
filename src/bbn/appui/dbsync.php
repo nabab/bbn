@@ -52,7 +52,7 @@ class dbsync
     }
   }
   
-  private static function define($dbs, $dbs_table='')
+  private static function def($dbs, $dbs_table='')
   {
     if ( empty($dbs) ){
       $dbs = self::$default_cfg;
@@ -79,7 +79,7 @@ class dbsync
 	public static function init(\bbn\db\connection $db, $dbs='', $tables=[], $dbs_table='')
 	{
     self::$db = $db;
-    self::define($dbs, $dbs_table);
+    self::def($dbs, $dbs_table);
     self::$tables = $tables;
     if ( count(self::$tables) === 0 ){
       self::$tables = self::$db->get_tables();
@@ -202,7 +202,7 @@ class dbsync
   public static function sync(\bbn\db\connection $db, $dbs='', $dbs_table='', $num_try = 0){
 
     if ( !$num_try ){
-      self::define($dbs, $dbs_table);
+      self::def($dbs, $dbs_table);
       self::first_call();
       self::disable();
       $mode_db = self::$db->get_error_mode();

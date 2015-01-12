@@ -24,10 +24,26 @@ trait common {
       if ( !is_string($a) ||
         (strpos($a,'./') !== false) ||
         (strpos($a,'/') === 0) ){
-        die("The path $a is not an acceptable value");
+        $this->error("The path $a is not an acceptable value");
       }
     }
     return 1;
+  }
+
+  private function error($msg){
+    $msg = "Error from ".get_class($this).": ".$msg;
+    \bbn\tools::log($msg, 'mvc');
+    die($msg);
+  }
+
+  /**
+   * Checks whether a corresponding file has been found or not.
+   *
+   * @return bool
+   */
+  public function check()
+  {
+    return is_string($this->path);
   }
 
 }

@@ -970,4 +970,11 @@ class text
     return $o;
   }
 
+	public static function replace_once($search, $replace, $subject){
+		$pos = strpos($subject, $search);
+		if ($pos !== false) {
+			return substr_replace($subject, $replace, $pos, strlen($search));
+		}
+		return $subject;
+	}
 }

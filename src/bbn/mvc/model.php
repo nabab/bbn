@@ -1,5 +1,5 @@
 <?php
-namespace bbn;
+namespace bbn\mvc;
 /**
  * Model View Controller Class
  *
@@ -19,7 +19,7 @@ namespace bbn;
  * @todo Look into the check function and divide it
  */
 
-class model extends obj{
+class model{
 
 	use common;
 
@@ -59,18 +59,13 @@ class model extends obj{
 		 * The request sent to the server to get the actual controller.
 		 * @var null|string
 		 */
-		$url,
-		/**
-		 * The first controller to be called at the top of the script.
-		 * @var null|string
-		 */
-		$original_controller;
+		$url;
 
 	const
 		/**
 		 * Path to the models.
 		 */
-		mpath = 'mvc/models/';
+		root = 'mvc/models/';
 
 	/**
 	 * This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).
@@ -79,79 +74,16 @@ class model extends obj{
 	 * @param string | object $parent The parent controller</em>
 	 * @return bool
 	 */
-	public function __construct($path, $db, $inc, $data = [])
+	public function __construct($path, \bbn\db\connection $db=null, \stdClass $inc=null)
 	{
-		if ( $this->check_path() && file_exists($path.'.php') ){
+		if ( $this->check_path() && file_exists(self::root.$path.'.php') ){
 			$this->inc = $inc;
+			$this->db = $db;
+			$this->path = $path;
 		}
-	}
-
-	/**
-	 * Returns the current controller's path.
-	 *
-	 * @return string
-	 */
-	public function say_path()
-	{
-		return $this->controller ? substr($this->controller, strlen(self::cpath.$this->mode.'/'), -4) : false;
-	}
-
-	/**
-	 * Returns the current controller's file's name.
-	 *
-	 * @return string
-	 */
-	public function say_dir()
-	{
-		return $this->controller ? dirname($this->controller) : false;
-	}
-
-	/**
-	 * Returns true if called from CLI/Cron, false otherwise
-	 *
-	 * @return boolean
-	 */
-	public function is_cli()
-	{
-		return $this->is_cli();
-	}
-
-	/**
-	 * This will include a file from within the controller's path. Chainable
-	 *
-	 * @param string $file_name If .php is ommited it will be added
-	 * @return void
-	 */
-	public function incl($file_name)
-	{
-		if ( $this->is_routed ){
-			$d = $this->say_dir().'/';
-			if ( substr($file_name, -4) !== '.php' ){
-				$file_name .= '.php';
-			}
-			if ( (strpos($file_name, '..') === false) && file_exists($d.$file_name) ){
-				include($d.$file_name);
-			}
+		else{
+			$this->error("The model $path doesn't exist");
 		}
-		return $this;
-	}
-
-	/**
-	 * This will launch the controller in a new function.
-	 * It is publicly launched through check().
-	 *
-	 * @return void
-	 */
-	private function process()
-	{
-		if ( $this->controller && is_null($this->is_controlled) ){
-			$this->obj = new \stdClass();
-			$this->control();
-			if ( $this->has_data() && isset($this->obj->output) ){
-				$this->obj->output = $this->render($this->obj->output, $this->data);
-			}
-		}
-		return $this;
 	}
 
 	/**
@@ -168,6 +100,23 @@ class model extends obj{
 		return false;
 	}
 
+	public function get(array $data=null){
+		$db = isset($db) ? $db : $this->db;
+		$file = self::root.$this->path.'.php';
+		if ( is_null($data) ){
+			$data = [];
+		}
+		$this->data = $data;
+		return call_user_func(
+			function() use ($db, $file, $data)
+			{
+				//$r = include($last_model_file);
+				//return is_array($r) ? $r : array();
+				return include($file);
+			}
+		);
+	}
+
 	/**
 	 * This will get the model. There is no order for the arguments.
 	 *
@@ -175,79 +124,25 @@ class model extends obj{
 	 * @params array data to send to the model
 	 * @return array|false A data model
 	 */
-	private function get_model()
+	private function get_model($path, $data=[])
 	{
-		if ( $this->dest ){
-			$args = func_get_args();
-			foreach ( $args as $a ){
-				if ( is_array($a) ){
-					$d = $a;
-				}
-				else if ( is_string($a) && $this->check_path($a) ){
-					$path = $a;
-				}
-			}
-			if ( !isset($path) ){
-				$path = $this->dest;
-			}
-			if ( strpos($path,'..') === false && is_file(self::mpath.$path.'.php') ){
-				$db = isset($db) ? $db : $this->db;
-				$last_model_file = self::mpath.$path.'.php';
-				$data = isset($d) ? $d : $this->data;
-				return call_user_func(
-					function() use ($db, $last_model_file, $data)
-					{
-						//$r = include($last_model_file);
-						//return is_array($r) ? $r : array();
-						return include($last_model_file);
-					}
-				);
-			}
+		if ( $this->check() ) {
+			$model = new \bbn\mvc\model($this->db, $path);
+			return $model->get($data);
 		}
-		return false;
 	}
 
 	/**
-	 * Processes the controller and checks whether it has been routed or not.
+	 * Checks if data exists or if a specific index exists in the data
 	 *
 	 * @return bool
 	 */
-	public function check()
+	public function has_data($idx=null)
 	{
-		foreach ( $this->checkers as $chk ){
-			// If a checker file returns false, the controller is not processed
-			if ( !include_once($chk) ){
-				return false;
-			}
+		if ( is_null($idx) ){
+			return ( is_array($this->data) && !empty($this->data) );
 		}
-		$this->process();
-		return $this->is_routed;
-	}
-
-	/**
-	 * Returns the output object.
-	 *
-	 * @return object|false
-	 */
-	public function get()
-	{
-		if ( $this->check() ){
-			return $this->obj;
-		}
-		return false;
-	}
-
-	/**
-	 * Checks if data exists
-	 *
-	 * @return bool
-	 */
-	public function has_data($data=null)
-	{
-		if ( is_null($data) ){
-			$data = $this->data;
-		}
-		return ( is_array($data) && (count($data) > 0) ) ? 1 : false;
+		return ( is_array($this->data) && isset($this->data[$idx]) );
 	}
 
 	/**
