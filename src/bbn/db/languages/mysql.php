@@ -600,14 +600,18 @@ class mysql implements \bbn\db\engines
 	/**
 	 * @return string
 	 */
-	public function get_update($table, array $fields = [], array $where = [], $php = false)
+	public function get_update($table, array $fields = [], array $where = [], $ignore = false, $php = false)
 	{
 		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 ){
       $r = '';
       if ( $php ){
         $r .= '$db->query("';
       }
-			$r .= "UPDATE $table SET ";
+			$r .= "UPDATE ";
+      if ( $ignore ){
+        $r .= "IGNORE ";
+      }
+      $r .= "$table SET ";
 			$i = 0;
 
 			if ( count($fields) > 0 ){

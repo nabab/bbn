@@ -287,7 +287,8 @@ class connection
       if ( !isset($_SESSION[$this->cfg['sess_name']], $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]) ){
         $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']] = [
             'id' => $this->id,
-            'fingerprint' => $fingerprint
+            'fingerprint' => $fingerprint,
+            'tokens' => []
         ];
       }
 
@@ -786,14 +787,43 @@ class connection
 		return $this->auth;
 	}
 
-	/**
-	 * @return void 
-	 */
-	public function logout()
-	{
+  /**
+   * @return void
+   */
+  public function logout()
+  {
     $this->close_session();
-		session_destroy();
-	}
+    session_destroy();
+  }
+
+  /**
+   * @return void
+   */
+  public function get_token($st)
+  {
+    if ( $this->auth ){
+      $s =& $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']];
+      if ( isset($s['tokens']) ) {
+        $s['tokens'][$st] = \bbn\str\text::genpwd();
+        return $s['tokens'][$st];
+      }
+    }
+    return false;
+  }
+
+  /**
+   * @return void
+   */
+  public function check_token($st, $token)
+  {
+    if ( $this->auth ){
+      $s =& $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']];
+      if ( isset($s['tokens'], $s['tokens'][$st]) ) {
+        return $s['tokens'][$st] === $token;
+      }
+    }
+    return false;
+  }
 
 	/**
 	 * @return void 

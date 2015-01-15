@@ -248,7 +248,7 @@ class connection extends \PDO implements actions, api, engines
    * @param string | bool $arg4 Where string or ignore
    * @return string A SQL statement or false
    */
-  private function _statement($type, $table, array $keypairs=[], $arg4=[])
+  private function _statement($type, $table, array $keypairs=[], $arg4=[], $arg5=false)
   {
     switch ( $type ){
       case 'insert':
@@ -2058,15 +2058,16 @@ class connection extends \PDO implements actions, api, engines
    * @param string $table The table name.
    * @param array $values The new value(s).
    * @param array $where The "where" condition.
-   * 
+   * @param boolean $ignore If IGNORE should be added to the statement
+   *
    * @return int The number of rows updated.
    */
-	public function update($table, array $values, array $where)
+	public function update($table, array $values, array $where, $ignore=false)
 	{
 		$r = false;
     $trig = 1;
     $where = $this->where_cfg($where, $table);
-    if ( $sql = $this->_statement('update', $table, array_keys($values), $where) ){
+    if ( $sql = $this->_statement('update', $table, array_keys($values), $where, $ignore) ){
   		if ( $this->triggers_disabled ){
         $r = $this->query($sql['sql'], $sql['hash'], array_merge(array_values($values), $where['values']));
       }
@@ -2077,7 +2078,7 @@ class connection extends \PDO implements actions, api, engines
         if ( $trig['trig'] ){
           if ( isset($trig['values']) ){
             $values = $trig['values'];
-            if ( !($sql = $this->_statement('update', $table, array_keys($values), $where)) ){
+            if ( !($sql = $this->_statement('update', $table, array_keys($values), $where, $ignore)) ){
               die($this->log(
                       "Problem with the values returned by the callback function(s)",
                       $table, $values)
@@ -2097,7 +2098,27 @@ class connection extends \PDO implements actions, api, engines
 		return $r;
 	}
 
-	/**
+  /**
+   * If exist delete row(s) in a table, else ignore.
+   *
+   * <code>
+   * $this->db->delete_ignore(
+   *  "table_users",
+   *  ['id' => '20']
+   * );
+   * </code>
+   *
+   * @param string $table The table name.
+   * @param array $where The "where" condition.
+   *
+   * @return int The number of rows deleted.
+   */
+  public function update_ignore($table, array $values, array $where)
+  {
+    return $this->update($table, $values, $where, 1);
+  }
+
+  /**
    * Deletes row(s) in a table.
    * 
    * <code>
@@ -2539,9 +2560,9 @@ class connection extends \PDO implements actions, api, engines
    * 
 	 * @return string
 	 */
-	public function get_update($table, array $fields = [], array $where = [], $php = false)
+	public function get_update($table, array $fields = [], array $where = [], $ignore = false, $php = false)
 	{
-    return $this->language->get_update($table, $fields, $where, $php);
+    return $this->language->get_update($table, $fields, $where, $ignore, $php);
 	}
 	
 	/**

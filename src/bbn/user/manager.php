@@ -299,9 +299,15 @@ You can click the following link to access directly your account:<br>
    * @return \bbn\user\manager
 	 */
 	public function deactivate($id_user){
-    $this->db->update($this->cfg['tables']['users'], [
-      $this->cfg['arch']['users']['status'] => 0
-    ], [
+    $update = [
+      $this->cfg['arch']['users']['status'] => 0,
+      $this->cfg['arch']['users']['email'] => null
+    ];
+    if ( $this->cfg['arch']['users']['email'] !== $this->cfg['arch']['users']['login'] ){
+      $update[$this->cfg['arch']['users']['login']] = null;
+    }
+
+    $this->db->update($this->cfg['tables']['users'], $update, [
       $this->cfg['arch']['users']['id'] => $id_user
     ]);
     return $this;

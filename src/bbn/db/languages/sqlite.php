@@ -569,7 +569,7 @@ class sqlite implements \bbn\db\engines
 	/**
 	 * @return string
 	 */
-	public function get_update($table, array $fields = array(), array $where = array(), $php = false)
+	public function get_update($table, array $fields = array(), array $where = array(), $ignore = false, $php = false)
 	{
 		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
 		{
@@ -577,7 +577,11 @@ class sqlite implements \bbn\db\engines
       if ( $php ){
         $r .= '$db->query(\'';
       }
-			$r .= "UPDATE $table SET ";
+      $r .= "UPDATE ";
+      if ( $ignore ){
+        $r .= "OR IGNORE ";
+      }
+      $r .= "$table SET ";
 
 			if ( count($fields) > 0 ){
 				foreach ( $fields as $k ){

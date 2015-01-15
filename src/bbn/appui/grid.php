@@ -85,17 +85,16 @@ class grid extends \bbn\obj{
   }
   
   public function get_field($f){
-    if ( is_array($f) && isset($f['field']) ){
-      if ( empty($this->fields) ){
-        return $this->db->col_simple_name($f['field'], 1);
-      }
-      else if ( in_array($f['field'], $this->fields) ){
-        $idx = array_search($f['field'], $this->fields);
-        $field = is_string($idx) ? $idx : $f['field'];
-        return ( $this->table && !in_array($idx, $this->additional_fields) ) ?
-                $this->db->col_full_name($field, $this->table, 1) :
-                $this->db->col_simple_name($field, 1);
-      }
+    if ( is_array($f) && isset($f['field']) ) {
+      $f = $f['field'];
+    }
+    if ( empty($this->fields) ){
+      return $this->db->col_simple_name($f, 1);
+    }
+    if ( is_string($f) && (in_array($f, $this->fields) || in_array($f, $this->additional_fields)) ){
+      return ( $this->table && !in_array($f, $this->additional_fields) ) ?
+              $this->db->col_full_name($f, $this->table, 1) :
+              $this->db->col_simple_name($f, 1);
     }
     return false;
   }
