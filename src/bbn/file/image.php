@@ -73,8 +73,12 @@ class image extends \bbn\file\file
       $img->readImage($pdf);
       $img->setImageFormat('jpg');
       if ( empty($jpg) ) {
+				$dir = dirname($pdf);
+				if ( !empty($dir) ){
+					$dir .= '/';
+				}
 				$f = \bbn\str\text::file_ext($pdf, 1);
-        $jpg = $f[0].'.jpg';
+        $jpg = $dir.$f[0].'.jpg';
       }
       if ( $num !== 'all' ) {
         $img->setIteratorIndex($num);
@@ -87,8 +91,12 @@ class image extends \bbn\file\file
 					$i = 0;
 					$r = [];
 					$f = \bbn\str\text::file_ext($jpg, 1);
-					while ( file_exists($f[0].'-'.$i.'.'.$f[1]) ){
-						array_push($r, $f[0].'-'.$i.'.'.$f[1]);
+					$dir = dirname($jpg);
+					if ( !empty($dir) ){
+						$dir .= '/';
+					}
+					while ( file_exists($dir.$f[0].'-'.$i.'.'.$f[1]) ){
+						array_push($r, $dir.$f[0].'-'.$i.'.'.$f[1]);
 						$i++;
 					}
           return $r;
