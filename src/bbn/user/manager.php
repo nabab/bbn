@@ -149,7 +149,7 @@ You can click the following link to access directly your account:<br>
       ORDER BY {$this->db->escape($this->cfg['tables']['users'].'.'.$this->cfg['arch']['users']['login'])}";
     return $this->db->get_rows($sql);
   }
-  
+
   public function get_user($id){
     if ( is_string($id) ){
       $where = [$this->cfg['arch']['users']['login'] => $id];
@@ -158,12 +158,24 @@ You can click the following link to access directly your account:<br>
       $where = [$this->cfg['arch']['users']['id'] => $id];
     }
     return $this->db->rselect(
-            $this->cfg['tables']['users'],
-            array_merge($this->cfg['arch']['users'], $this->cfg['additional_fields']),
-            $where);
+      $this->cfg['tables']['users'],
+      array_merge($this->cfg['arch']['users'], $this->cfg['additional_fields']),
+      $where);
   }
-  
-	/**
+
+  public function get_users($group_id){
+    if ( \bbn\str\text::is_integer($group_id) ) {
+      return $this->db->get_col_array("
+        SELECT " . $this->cfg['tables']['users'] . "." . $this->cfg['arch']['users']['id'] . "
+        FROM " . $this->cfg['tables']['users'] . "
+          JOIN " . $this->cfg['tables']['usergroups'] . "
+            ON " . $this->cfg['tables']['usergroups'] . "." . $this->cfg['arch']['usergroups']['id'] . " = ?
+        WHERE  " . $this->cfg['tables']['users'] . "." . $this->cfg['arch']['users']['status'] . " = 1",
+        $group_id);
+    }
+  }
+
+  /**
    * Creates a new user and returns its configuration (with the new ID)
    * 
    * @param array $cfg A configuration array

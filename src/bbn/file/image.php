@@ -64,7 +64,7 @@ class image extends \bbn\file\file
    * @param $pdf The path of pdf file to convert
    * @param $jpg The destination filename. If empty is used the same path of pdf. Default: empty.
    * @param $num The index page of pdf file to convert. If set 'all' all pages to convert. Default: 0(first page).
-   * @return string
+   * @return string|array
    */
   public static function pdf2jpg($pdf, $jpg='', $num=0){
     if ( class_exists('\\Imagick') ) {
@@ -73,7 +73,8 @@ class image extends \bbn\file\file
       $img->readImage($pdf);
       $img->setImageFormat('jpg');
       if ( empty($jpg) ) {
-        $jpg = substr($pdf, 0, -3) . 'jpg';
+				$f = \bbn\str\text::file_ext($pdf, 1);
+        $jpg = $f[0].'.jpg';
       }
       if ( $num !== 'all' ) {
         $img->setIteratorIndex($num);
@@ -83,7 +84,14 @@ class image extends \bbn\file\file
       }
       else{
         if ( $img->writeImages($jpg, 1) ) {
-          return $jpg;
+					$i = 0;
+					$r = [];
+					$f = \bbn\str\text::file_ext($jpg, 1);
+					while ( file_exists($f[0].'-'.$i.'.'.$f[1]) ){
+						array_push($r, $f[0].'-'.$i.'.'.$f[1]);
+						$i++;
+					}
+          return $r;
         }
       }
     }

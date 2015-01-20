@@ -67,6 +67,9 @@ class tools
 	public static function log($st, $file='misc')
 	{
 		if ( defined('BBN_DATA_PATH') ){
+      if ( !is_string($file) ){
+        $file = 'misc';
+      }
 			$log_file = BBN_DATA_PATH.'logs/'.$file.'.log';
       $backtrace = array_filter(debug_backtrace(), function($a){
         return $a['function'] === 'log';

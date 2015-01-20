@@ -1215,20 +1215,20 @@ class connection extends \PDO implements actions, api, engines
     return $this->select_one($table, $field, [$col => $id]);
 	}
 
-	/**
-	 * Returns an integer candidate for being a new ID in the given table.
-   * 
+  /**
+   * Returns an integer candidate for being a new ID in the given table.
+   *
    * <code>
    * $this->db->new_id("table_users");
    * </code>
-	 *
-	 * @param string $table The table name.
-	 * @param string $id_field The id field name, default: 'id'.
-	 * @param int $min The minimum value for new id.
-	 * @param int $max The maximum value for new id.
-   * 
-	 * @return int | false
-	 */
+   *
+   * @param string $table The table name.
+   * @param string $id_field The id field name, default: 'id'.
+   * @param int $min The minimum value for new id.
+   * @param int $max The maximum value for new id.
+   *
+   * @return int | false
+   */
   public function new_id($table, $min = 1)
   {
     $tab = $this->modelize($table);
@@ -1256,6 +1256,30 @@ class connection extends \PDO implements actions, api, engines
       }
       return false;
     }
+  }
+
+  /**
+   * Returns the integer which will be next incremented ID in the given table.
+   *
+   * <code>
+   * $this->db->next_id("table_users");
+   * </code>
+   *
+   * @param string $table The table name.
+   *
+   * @return int | false
+   */
+  public function next_id($table)
+  {
+    $tab = $this->modelize($table);
+    if ( count($tab['keys']['PRIMARY']['columns']) !== 1 ) {
+      die("Error! Unique numeric primary key doesn't exist");
+    }
+    if ( $id_field = $tab['keys']['PRIMARY']['columns'][0] ){
+      $cur = (int)$this->select_one($table, $id_field, [], ['id' => 'DESC']);
+      return $cur+1;
+    }
+    return false;
   }
 
   /**

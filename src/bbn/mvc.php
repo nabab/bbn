@@ -191,7 +191,7 @@ class mvc extends obj
 			}
 			$this->inc = new \stdClass();
 			$this->routes = $parent;
-      $this->is_cli = (php_sapi_name() === 'cli');
+      $this->cli = (php_sapi_name() === 'cli');
       // When using CLI a first parameter can be used as route,
       // a second JSON encoded can be used as $this->post
       if ( $this->is_cli() ){
@@ -273,7 +273,7 @@ class mvc extends obj
 		else if ( is_string($db) && is_object($parent) && isset($parent->url, $parent->original_controller) ){
 			$this->inc =& $parent->inc;
 			$this->routes =& $parent->routes;
-			$this->is_cli =& $parent->cli;
+			$this->cli =& $parent->cli;
 			$this->db =& $parent->db;
 			$this->post =& $parent->post;
 			$this->get =& $parent->get;
@@ -488,7 +488,7 @@ class mvc extends obj
 	 */
 	public function is_cli()
   {
-    return $this->is_cli;
+    return $this->cli;
   }
 
 	/**
