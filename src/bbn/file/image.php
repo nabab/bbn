@@ -52,7 +52,43 @@ class image extends \bbn\file\file
 	 */
 	protected $img;
 
-  /**
+/**
+ * Converts one or more jpg image(s) to one pdf file.
+ *
+ * <code>
+ * \bbn\file\image::jpg2pdf(["C:\test\image1.jpg", "C:\test\image1.jpg"], "C:\test\combined.pdf"); //Converts two jpg image to one pdf file"
+ * \bbn\file\image::jpg2pdf(["C:\test\image.jpg"], "C:\test\image.pdf"); //Converts jpg image to pdf
+ * </code>
+ *
+ * @param array $jpg The path of jpg file(s) to convert
+ * @param string $pdf The destination pdf filename..
+ * @return string|array
+ */
+public static function jpg2pdf($jpg, $pdf){
+ if ( class_exists('\\Imagick') ) {
+  if ( is_array($jpg) ) {
+   $img = new \Imagick();
+   $img->setResolution(200, 200);
+   if ( count($jpg) === 1 ){
+    $img->readImage($jpg[0]);
+   }
+   else {
+    $img->readImages($jpg);
+   }
+   $img->setImageFormat('pdf');
+   if ( count($jpg) === 1 ){
+    $img->writeImage($pdf);
+   }
+   else {
+    $img->writeImages($pdf, 1);
+   }
+   return $pdf;
+  }
+ }
+ return false;
+}
+  
+/**
    * Converts pdf file to jpg image(s).
    *
    * <code>
