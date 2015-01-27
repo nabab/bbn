@@ -144,7 +144,7 @@ class task {
         $text .= "<p>Le statut a été changé de $info[status] à $status</p>";
       }
       if ( !empty($text) ) {
-        $subject = 'Modification du bug ' . $this->data['title'];
+        $subject = "Modification du bug $info[title]";
         $text = $pretext . $text . "<p><em>Rendez-vous dans l'interface APST pour répondre</em></p>";
         $this->_email($id, $subject, $text);
         return $id;
