@@ -124,6 +124,16 @@ You can click the following link to access directly your account:<br>
         'text' => $this->cfg['arch']['groups']['group'],
       ]);
   }
+
+  public function get_email($id){
+    if ( \bbn\str\text::is_integer($id) ){
+      $email = $this->db->select_one($this->cfg['tables']['users'], $this->cfg['arch']['users']['email'], [$this->cfg['arch']['users']['id'] => $id]);
+      if ( $email && \bbn\str\text::is_email($email) ){
+        return $email;
+      }
+    }
+    return false;
+  }
   
   public function get_list(){
     
@@ -166,11 +176,12 @@ You can click the following link to access directly your account:<br>
   public function get_users($group_id){
     if ( \bbn\str\text::is_integer($group_id) ) {
       return $this->db->get_col_array("
-        SELECT " . $this->cfg['tables']['users'] . "." . $this->cfg['arch']['users']['id'] . "
-        FROM " . $this->cfg['tables']['users'] . "
-          JOIN " . $this->cfg['tables']['usergroups'] . "
-            ON " . $this->cfg['tables']['usergroups'] . "." . $this->cfg['arch']['usergroups']['id'] . " = ?
-        WHERE  " . $this->cfg['tables']['users'] . "." . $this->cfg['arch']['users']['status'] . " = 1",
+        SELECT DISTINCT(".$this->cfg['arch']['usergroups']['id_user'].")
+        FROM ".$this->cfg['tables']['usergroups']." AS g
+          JOIN ".$this->cfg['tables']['users']." AS u
+            ON u.".$this->cfg['arch']['users']['id']." = g.id_user
+            AND u.".$this->cfg['arch']['users']['status']." = 1
+        WHERE  ".$this->cfg['arch']['usergroups']['id_group']." = ?",
         $group_id);
     }
   }

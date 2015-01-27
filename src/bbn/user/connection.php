@@ -799,6 +799,17 @@ class connection
   /**
    * @return void
    */
+  public function get_name()
+  {
+    if ( $this->auth ){
+      return $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]['login'];
+    }
+    return false;
+  }
+
+  /**
+   * @return void
+   */
   public function get_token($st)
   {
     if ( $this->auth ){
