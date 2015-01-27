@@ -89,13 +89,18 @@ class cron extends \bbn\obj{
     if ( ($article = $this->get_article($id)) &&
             ($cron = $this->get_cron($article['id_cron'])) ){
       $time = $this->timer->stop('cron_'.$article['id_cron']);
-      $this->db->update($this->jtable, [
-        'finish' => date('Y-m-d H:i:s'),
-        'duration' => $time,
-        'res' => $res
-      ], [
-        'id' => $id
-      ]);
+      if ( !empty($res) ) {
+        $this->db->update($this->jtable, [
+          'finish' => date('Y-m-d H:i:s'),
+          'duration' => $time,
+          'res' => $res
+        ], [
+          'id' => $id
+        ]);
+      }
+      else{
+        $this->db->delete($this->jtable, ['id' => $id]);
+      }
       $this->db->update($this->table, [
         'prev' => $article['start'],
         'next' => date('Y-m-d H:i:s', $this->get_next_date($cron['cfg']['frequency']))
