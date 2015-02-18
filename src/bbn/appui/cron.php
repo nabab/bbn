@@ -160,8 +160,8 @@ class cron extends \bbn\obj{
         FROM {$this->table}
         WHERE active = 1 
         AND next < ?".
-        ( is_int($id_cron) ? " AND id_cron = $id_cron" : "" )."
-        ORDER BY next ASC
+        ( is_int($id_cron) ? " AND `id_cron` = $id_cron" : "" )."
+        ORDER BY `priority` ASC, `next` ASC
         LIMIT 1",
         date('Y-m-d H:i:s'))) ){
       // Dans cfg: timeout, et soit: latency, minute, hour, day of month, day of week, date
@@ -192,13 +192,7 @@ class cron extends \bbn\obj{
       $d['cfg'] = json_decode($d['cfg'], 1);
     }
   }
-  
-  private function get_latency($id_journal){
-    if ( $this->check() && is_int($id_journal) ){
-      
-    }
-  }
-  
+
   public function run($id_cron = null){
     if ( ($cron = $this->get_next($id_cron)) ){
       $ok  = 1;
@@ -207,7 +201,6 @@ class cron extends \bbn\obj{
         $start = strtotime($runner['start']);
         $timeout = $runner['cfg']['timeout'];
         if ( ($start + $timeout) > time() ){
-          
           $this->alert();
         }
         $ok = false;
@@ -217,11 +210,20 @@ class cron extends \bbn\obj{
         $output = $this->_exec($cron['file'], $cron['cfg']);
         $time = $this->finish($id, $output);
         \bbn\tools::dump("Execution of ".$cron['file']." (Journal ID: $id) in $time secs", $output);
-        return 1;
+        return $time;
       }
     }
+    return false;
   }
-  
+
+  public function run_all(){
+    $time = 0;
+    while ( ($time < $this->timeout) && ($ctx = $this->run()) ){
+      $time += $ctx;
+    }
+    return $time;
+  }
+
   private function _exec($file, $data=[]){
     $this->mvc->data = $data;
     $this->obj = new \stdClass();
