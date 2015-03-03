@@ -1508,8 +1508,13 @@ class connection extends \PDO implements actions, api, engines
   {
     if ( $sql = $this->get_select($table, $fields, $where, $order, $start) ){
       $where = $this->where_cfg($where, $table);
-      $params = (count($where['values']) > 0) ? [$sql, $where['values']] : [$sql];
-      return call_user_func_array([$this, 'get_key_val'], $params);
+      if ( count($where['values']) > 0 ){
+        $sql .= $this->get_where($where, $table);
+        return $this->get_key_val($sql, $where['values']);
+      }
+      else {
+        return $this->get_key_val($sql);
+      }
 		}
     return false;
   }
@@ -1535,7 +1540,7 @@ class connection extends \PDO implements actions, api, engines
 	 * Returns the result of a query as a single numeric array for one single column values.
    * 
    * <code>
-   * $this->db->get_col_array("SELECT name, surname FROM table_users WHERE name LIKE ?", 'b%');
+   * $this->db->get_col_array("SELECT CONCAT(name, ' ', surname) AS n FROM table_users WHERE name LIKE ?", 'b%');
    * </code>
 	 *
 	 * @return array | false 
