@@ -494,9 +494,7 @@ class mysql implements \bbn\db\engines
 				}
 			}
 			$r = substr($r,0,strrpos($r,','))."\nFROM $table";
-			if ( count($where) > 0 ){
-        $r .= $this->db->get_where($where, $table, $aliases);
-      }
+			$r .= $this->db->get_where($where, $table, $aliases);
       $r .= PHP_EOL . $this->get_order($order, $table, $aliases);
       if ( $limit ){
   			$r .= PHP_EOL . $this->get_limit([$limit, $start]);
