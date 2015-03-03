@@ -1509,7 +1509,6 @@ class connection extends \PDO implements actions, api, engines
     if ( $sql = $this->get_select($table, $fields, $where, $order, $start) ){
       $where = $this->where_cfg($where, $table);
       if ( count($where['values']) > 0 ){
-        $sql .= $this->get_where($where, $table);
         return $this->get_key_val($sql, $where['values']);
       }
       else {
