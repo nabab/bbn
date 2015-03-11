@@ -85,11 +85,12 @@ class task {
     return false;
   }
 
-  public function insert($title, $text){
+  public function insert($title, $text, $target = false){
     $date = date('Y-m-d H:i:s');
     if ( $this->db->insert('bbn_bugs', [
       'title' => $title,
       'id_user' => $this->id_user,
+      'target_date' => empty($target) ? null : $target,
       'creation_date' => $date
     ]) ){
       $id = $this->db->last_id();
@@ -116,13 +117,15 @@ class task {
     }
   }
 
-  public function update($id, $title, $status, $priority){
+  public function update($id, $title, $status, $priority, $target = null){
     if ( $info = $this->info($id) ){
+      die(\bbn\tools::dump($target));
       $date = date('Y-m-d H:i:s');
       $pretext = "<p>{$this->user} a procédé aux changements suivants concernant le bug<br> <strong>$title</strong>:</p>";
       $text = '';
       if ( $this->db->update("bbn_bugs", [
         'title' => $title,
+        'target_date' => empty($target) ? null : $target,
         'priority' => $priority
       ], [
         'id' => $id
@@ -132,6 +135,13 @@ class task {
         }
         if ( $title !== $info['title'] ){
           $text .= "<p> L'ancien titre était $info[title]</p>";
+        }
+        if ( $target !== $info['target_date'] ){
+          $text .= "<p> L'objectif est passé de ".
+            ( empty($info['target_date']) ? "non défini" : \bbn\time\date::format($info['target_date']) ).
+            " à ".
+            ( empty($target) ? "non défini" : \bbn\time\date::format($target) ).
+            "</p>";
         }
       }
       if ( $status !== $info['status'] ){

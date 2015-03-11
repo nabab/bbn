@@ -17,7 +17,7 @@
     "phpfastcache/phpfastcache": "dev-Stable-Version-1.x",
     "zordius/lightncandy": "dev-master",
     "greenlion/php-sql-parser": "dev-trunk",
-    "mpdf/mpdf": "dev-master",
+    "mpdf/mpdf": "5.7.4",
     "squizlabs/php_codesniffer": "dev-master",
     "natxet/CssMin": "dev-master",
     "sunra/php-simple-html-dom-parser": "dev-master",

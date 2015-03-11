@@ -115,7 +115,6 @@ EOF
 		if ( $this->check() ){
       
       $cfg = $this->get_config($cfg);
-      
       $this->pdf->defHTMLHeaderByName('head', $cfg['head']);
       $this->pdf->defHTMLFooterByName('foot', $cfg['foot']);
 
@@ -142,6 +141,7 @@ EOF
 				$this->pdf->WriteHTML($html.$this->cfg['signature']);
       }
 			else{
+        //die(var_dump($html, $cfg['head'], $cfg['foot']));
 				$this->pdf->WriteHTML($html);
       }
 		}
