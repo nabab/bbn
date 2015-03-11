@@ -119,7 +119,6 @@ class task {
 
   public function update($id, $title, $status, $priority, $target = null){
     if ( $info = $this->info($id) ){
-      die(\bbn\tools::dump($target));
       $date = date('Y-m-d H:i:s');
       $pretext = "<p>{$this->user} a procédé aux changements suivants concernant le bug<br> <strong>$title</strong>:</p>";
       $text = '';
