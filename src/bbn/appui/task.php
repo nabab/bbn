@@ -172,13 +172,13 @@ class task {
 
   public function up($id){
     if ( $info = $this->info($id) ){
-      return $this->update($id, $info['title'], $info['status'], $info['priority']-1);
+      return $this->update($id, $info['title'], $info['status'], $info['priority']-1, $info['target_date']);
     }
   }
 
   public function down($id){
     if ( $info = $this->info($id) ){
-      return $this->update($id, $info['title'], $info['status'], $info['priority']+1);
+      return $this->update($id, $info['title'], $info['status'], $info['priority']+1, $info['target_date']);
     }
   }
 
