@@ -219,11 +219,22 @@ class connection
     return ( !is_null($this->error) && isset($this->cfg['errors'][$this->error]) ) ?
               $this->cfg['errors'][$this->error] : false;
   }
-  
-  public function get_cfg(){
-    return $this->cfg;
+
+  public function get_cfg($attr = ''){
+    if ( $this->check() ){
+      if ( !$this->user_cfg ){
+        $this->user_cfg = $this->get_session('cfg');
+      }
+      return empty($attr) ? $this->user_cfg : $this->user_cfg[$attr];
+    }
   }
-  
+
+  public function get_class_cfg(){
+    if ( $this->check() ){
+      return $this->cfg;
+    }
+  }
+
   /**
 	 * @return \bbn\user\connection 
 	 */
@@ -238,7 +249,7 @@ class connection
     // As we'll give the object the properties of these additional field they should not conflict with existing ones
     foreach ( $this->cfg['additional_fields'] as $f ){
       if ( property_exists($this, $f) ) {
-        die("Wrong cfguration: the column's name $f is illegal!");
+        die("Wrong configuration: the column's name $f is illegal!");
       }
     }
     
@@ -651,7 +662,7 @@ class connection
       $args = func_get_args();
       if ( (count($args) === 2) && is_string($attr) ){
         $attr = [$args[0] => $args[1]];
-        $type = 'user';
+        $prop = 'user_cfg';
       }
       foreach ( $attr as $key => $val ){
         //\bbn\tools::dump($key, $val);

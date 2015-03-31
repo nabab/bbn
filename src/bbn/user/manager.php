@@ -97,12 +97,12 @@ You can click the following link to access directly your account:<br>
 	 */
   public function __construct(\bbn\user\connection &$obj, $mailer=false)
   {
-    if ( is_object($obj) && method_exists($obj, 'get_cfg') ){
+    if ( is_object($obj) && method_exists($obj, 'get_class_cfg') ){
       if ( is_object($mailer) && method_exists($mailer, 'send') ){
         $this->mailer = $mailer;
       }
       $this->usrcls = $obj;
-      $this->cfg = $this->usrcls->get_cfg();
+      $this->cfg = $this->usrcls->get_class_cfg();
       $this->db =& $this->usrcls->db;
       self::set_permissions();
     }
