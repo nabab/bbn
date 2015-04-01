@@ -2428,10 +2428,9 @@ class connection extends \PDO implements actions, api, engines
   public function get_where(array $where, $table='', $aliases = [])
   {
     if ( !isset($where['final'], $where['keypair'], $where['values'], $where['fields']) ){
-      $where = $this->where_cfg($where, $table);
+      $where = $this->where_cfg($where, $table, $aliases);
     }
     $st = '';
-      $where = $this->where_cfg($where, $table, $aliases);
 		if ( count($where['final']) > 0 ){
       if ( !empty($table) ){
         $m = $this->modelize($table);
