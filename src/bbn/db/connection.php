@@ -1645,8 +1645,7 @@ class connection extends \PDO implements actions, api, engines
       \bbn\appui\history::has_history($this)
     ){
       $hcol = \bbn\appui\history::$hcol;
-      if ( !in_array($this->col_simple_name($hcol), $r['fields']) &&
-        !in_array($this->col_full_name($hcol, $table), $r['fields']) ){
+      if ( !in_array($hcol, $r['fields']) ){
         $cols = array_keys($this->get_columns($table));
         if ( in_array($hcol, $cols) ){
           array_push($r['fields'], $hcol);
@@ -2431,7 +2430,7 @@ class connection extends \PDO implements actions, api, engines
       $where = $this->where_cfg($where, $table);
     }
     $st = '';
-      $where = $this->where_cfg($where, $table, $aliases);
+
 		if ( count($where['final']) > 0 ){
       if ( !empty($table) ){
         $m = $this->modelize($table);
