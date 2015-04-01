@@ -88,8 +88,9 @@ class cron extends \bbn\obj{
   public function finish($id, $res = ''){
     if ( ($article = $this->get_article($id)) &&
             ($cron = $this->get_cron($article['id_cron'])) ){
-      $time = $this->timer->stop('cron_'.$article['id_cron']);
+      $time = $this->timer->has_started('cron_'.$article['id_cron']) ? $this->timer->stop('cron_'.$article['id_cron']): 0;
       if ( !empty($res) ) {
+        \bbn\tools::hdump($id, $res);
         $this->db->update($this->jtable, [
           'finish' => date('Y-m-d H:i:s'),
           'duration' => $time,
@@ -190,22 +191,25 @@ class cron extends \bbn\obj{
         AND finish IS NULL",
         $id_cron);
       $d['cfg'] = json_decode($d['cfg'], 1);
+      return $d;
     }
   }
 
   public function run($id_cron = null){
     if ( ($cron = $this->get_next($id_cron)) ){
-      $ok  = 1;
       if ( $this->is_running($cron['id']) ){
-        $runner = $this->get_runner($cron['id']);
-        $start = strtotime($runner['start']);
-        $timeout = $runner['cfg']['timeout'];
-        if ( ($start + $timeout) > time() ){
-          $this->alert();
+        if ( $this->is_timeout($cron['id']) ){
+          $r = $this->get_runner($cron['id']);
+          $this->finish($r['id'], "error");
+          $mail = new \apst\mail();
+          $mail->send([
+            'to' => BBN_ADMIN_EMAIL,
+            'subject' => 'CRON FAILURE',
+            'text' => "Id: ".$cron['id']." - File: ".$cron['file']." - Desc: ".$cron['description']." - Start: ".$r['start']
+          ]);
         }
-        $ok = false;
       }
-      if ( $ok ){
+      else {
         $id = $this->start($cron['id']);
         $output = $this->_exec($cron['file'], $cron['cfg']);
         $time = $this->finish($id, $output);
@@ -222,6 +226,17 @@ class cron extends \bbn\obj{
       $time += $ctx;
     }
     return $time;
+  }
+
+  public function is_timeout($id_cron){
+    if ( $this->check() && is_int($id_cron) && $this->is_running($id_cron)){
+      $c = $this->get_cron($id_cron);
+      $r = $this->get_runner($id_cron);
+      if ( (strtotime($r['start']) + $c['cfg']['timeout']) < time() ){
+        return true;
+      }
+    }
+    return false;
   }
 
   private function _exec($file, $data=[]){
