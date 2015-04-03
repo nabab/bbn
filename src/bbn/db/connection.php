@@ -2457,7 +2457,7 @@ class connection extends \PDO implements actions, api, engines
         $st .= PHP_EOL;
       }
       if ( !empty($st) ){
-        $st = ' WHERE 1'.PHP_EOL.$st;
+        $st = ' WHERE 1 '.PHP_EOL.$st;
       }
     }
     

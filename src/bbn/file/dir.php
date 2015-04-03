@@ -339,10 +339,10 @@ class dir extends \bbn\obj
       $files = \bbn\file\dir::get_files($src);
       $dirs = \bbn\file\dir::get_dirs($src);
       foreach ( $files as $f ){
-        copy($f, $dst.basename($f));
+        copy($f, $dst.'/'.basename($f));
       }
       foreach ( $dirs as $f ){
-        self::copy($f, $dst.basename($f));
+        self::copy($f, $dst.'/'.basename($f));
       }
       return 1;
     }
