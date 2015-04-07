@@ -166,6 +166,7 @@ class grid extends \bbn\obj{
               $res .= "NOT LIKE ? ";
               $f['value'] = '%'.$f['value'].'%';
               break;
+
             }
           }
         }

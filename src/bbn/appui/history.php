@@ -7,7 +7,7 @@ class history
 {
 	
 	private static
-          /* @var \bbn\db\connection The DB connection */
+          /* @var \bbn\db\connection  The DB connection */
           $db = false,
           /* @var array A collection of the  */
           $dbs = [],
@@ -221,17 +221,61 @@ class history
         SELECT DISTINCT(".self::$db->escape('line').")
         FROM ".self::$db->escape(self::$htable)."
         WHERE ".self::$db->escape('column')." LIKE ?
-        AND ( ".self::$db->escape('operation')." LIKE ?
-                OR ".self::$db->escape('operation')." LIKE ? )
+        AND ( ".self::$db->escape('operation')." LIKE 'INSERT'
+                OR ".self::$db->escape('operation')." LIKE 'UPDATE' )
         ORDER BY ".self::$db->escape('last_mod')." DESC
         LIMIT $start, $limit",
-        self::$db->table_full_name($table).'.%',
-        'INSERT',
-        'UPDATE');
+        self::$db->table_full_name($table).'.%');
     }
     return $r;
   }
-  
+
+  public static function get_next_update($table, $date, $id, $column=''){
+    if ( \bbn\str\text::check_name($table) &&
+      \bbn\time\date::validateSQL($date) &&
+      is_int($id) &&
+      (empty($column) || \bbn\str\text::check_name($column))
+    ){
+      $table = self::$db->table_full_name($table).'.'.( empty($column) ? '%' : $column );
+      return self::$db->get_row("
+        SELECT *
+        FROM ".self::$db->escape(self::$htable)."
+        WHERE ".self::$db->escape('column')." LIKE ?
+        AND ".self::$db->escape('line')." = ?
+        AND ".self::$db->escape('operation')." LIKE 'UPDATE'
+        AND ".self::$db->escape('last_mod')." > ?
+        ORDER BY ".self::$db->escape('last_mod')." ASC
+        LIMIT 1",
+        $table,
+        $id,
+        $date);
+    }
+    return false;
+  }
+
+  public static function get_prev_update($table, $date, $id, $column=''){
+    if ( \bbn\str\text::check_name($table) &&
+      \bbn\time\date::validateSQL($date) &&
+      is_int($id) &&
+      (empty($column) || \bbn\str\text::check_name($column))
+    ){
+      $table = self::$db->table_full_name($table).'.'.( empty($column) ? '%' : $column );
+      return self::$db->get_row("
+        SELECT *
+        FROM ".self::$db->escape(self::$htable)."
+        WHERE ".self::$db->escape('column')." LIKE ?
+        AND ".self::$db->escape('line')." = ?
+        AND ".self::$db->escape('operation')." LIKE 'UPDATE'
+        AND ".self::$db->escape('last_mod')." < ?
+        ORDER BY ".self::$db->escape('last_mod')." DESC
+        LIMIT 1",
+        $table,
+        $id,
+        $date);
+    }
+    return false;
+  }
+
   public static function get_row_back($table, array $columns, array $where, $when){
     if ( !is_int($when) ){
       $when = strtotime($when);
@@ -250,15 +294,14 @@ class history
           WHERE ".self::$db->escape('column')." LIKE ?
           AND ".self::$db->escape('line')." = ?
           AND (
-            ".self::$db->escape('operation')." LIKE ?
-            OR ".self::$db->escape('operation')." LIKE ?
+            ".self::$db->escape('operation')." LIKE 'UPDATE'
+            OR ".self::$db->escape('operation')." LIKE 'INSERT'
           )
           AND last_mod >= ?
-          ORDER BY last_mod ASC",
+          ORDER BY last_mod ASC
+          LIMIT 1",
           $fc,
           end($where),
-          "UPDATE",
-          "DELETE",
           $when)) ){
           $r[$col] = self::$db->get_val($table, $col, $where);
         }
