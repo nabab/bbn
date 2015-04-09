@@ -205,7 +205,7 @@ class cron extends \bbn\obj{
           $mail->send([
             'to' => BBN_ADMIN_EMAIL,
             'subject' => 'CRON FAILURE',
-            'text' => "Id: ".$cron['id']." - File: ".$cron['file']." - Desc: ".$cron['description']." - Start: ".$r['start']." - Server: ".(!empty('BBN_IS_DEV') ? 'Dev' : 'Prod')
+            'text' => "Id: ".$cron['id']." - File: ".$cron['file']." - Desc: ".$cron['description']." - Start: ".$r['start']." - Server: ".(!empty(BBN_IS_DEV) ? 'Dev' : 'Prod')
           ]);
         }
       }
