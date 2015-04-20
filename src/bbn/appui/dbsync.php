@@ -95,7 +95,7 @@ class dbsync
             self::$tables);
       self::$db->set_trigger(
             '\\bbn\\appui\\dbsync::trigger',
-            ['update', 'insert'],
+            ['delete', 'update', 'insert'],
             'after',
             self::$tables);
     }
@@ -159,7 +159,7 @@ class dbsync
       else if ( $moment === 'after' ){
         // Case where we actually delete or restore through the $hcol column
         if ( ($kind === 'update') && self::$has_history && isset($values[\bbn\appui\history::$hcol]) ){
-          if ( $values[\bbn\appui\history::$hcol] === 0 ){
+          if ( !$values[\bbn\appui\history::$hcol] ){
             $kind = 'delete';
             $values = self::$db->select($table, [], $where);
           }
@@ -173,15 +173,15 @@ class dbsync
           $values = self::$db->select($table, [], $values);
         }
          */
+        self::$dbs->insert(self::$dbs_table, [
+          'db' => self::$db->current,
+          'tab' => $stable,
+          'action' => $kind,
+          'moment' => date('Y-m-d H:i:s'),
+          'rows' => json_encode($where),
+          'vals' => empty($values) ? '[]' : json_encode($values)
+        ]);
       }
-      self::$dbs->insert(self::$dbs_table, [
-        'db' => self::$db->current,
-        'tab' => $stable,
-        'action' => $kind,
-        'moment' => date('Y-m-d H:i:s'),
-        'rows' => json_encode($where),
-        'vals' => json_encode($values)
-      ]);
     }
     return $res;
   }

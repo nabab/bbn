@@ -806,7 +806,7 @@ class text
 		// Each argument must be a string starting with a letter, and having than one character made of letters, numbers and underscores
 		foreach ( $args as $a ){
 			$a = self::cast($a);
-			$t = preg_match('#[A-z0-9_]*#',$a,$m);
+			$t = preg_match('#[A-z0-9_]+#',$a,$m);
 			if ( $t !== 1 || $m[0] !== $a ){
 				return false;
 			}

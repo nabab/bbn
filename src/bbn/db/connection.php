@@ -634,8 +634,14 @@ class connection extends \PDO implements actions, api, engines
 	 * @param int $id The last ID inserted
 	 * @return \bbn\db\connection
 	 */
-	public function set_last_insert_id($id)
+	public function set_last_insert_id($id='')
 	{
+    if ( $id === '' ){
+      $id = $this->lastInsertId();
+      if ( is_string($id) && \bbn\str\text::is_integer($id) ){
+        $id = (int)$id;
+      }
+    }
 		$this->last_insert_id = $id;
     return $this;
 	}
@@ -1153,10 +1159,11 @@ class connection extends \PDO implements actions, api, engines
             return $q['prepared'];
           }
           if ( isset($q['sequences']['INSERT']) ){
-            $this->last_insert_id = (int)$this->lastInsertId();
+            $this->set_last_insert_id();
           }
           if ( $q['prepared'] && ( isset($q['sequences']['INSERT']) || isset($q['sequences']['UPDATE']) || isset($q['sequences']['DELETE']) || isset($q['sequences']['DROP']) ) ){
-            return $q['prepared']->rowCount();
+            $n = $q['prepared']->rowCount();
+            return $n;
           }
           return $r;
         }
@@ -2009,31 +2016,14 @@ class connection extends \PDO implements actions, api, engines
    * 
 	 * @return int The number of rows inserted or updated. 
 	 */
-	public function insert_update($table, array $values)
-	{
+	public function insert_update($table, array $values){
 		$r = false;
     // Twice the arguments
+    $table = $this->table_full_name($table);
 		if ( $sql = $this->_statement('insert_update', $table, array_keys($values)) ){
+      $vals = array_merge(array_values($values),array_values($values));
       if ( $this->triggers_disabled ){
-        $vals = array_merge(array_values($values),array_values($values));
-        $last = $this->last_id();
         $r = $this->query($sql['sql'], $sql['hash'], $vals);
-        if ( $r ){
-          if ( $last !== $this->last_id() ){
-            $this->_trigger($table, 'insert', 'after', $values);
-          }
-          else{
-            /** @todo There is a flaw here: $values is only partly the where, it should be only the primary and/or the unique keys */
-            $keys = $this->get_keys($table);
-            $upd = [];
-            foreach ( $keys as $k ){
-              if ( isset($values[$k]) ){
-                $upd[$k] = $values[$k];
-              }
-            }
-            $this->_trigger($table, 'update', 'after', $values, $upd);
-          }
-        }
       }
       else{
         $trig = $this->_trigger($table, 'insert', 'before', $values);
@@ -2043,22 +2033,32 @@ class connection extends \PDO implements actions, api, engines
         if ( $trig['trig'] ){
           if ( isset($trig['values']) ){
             $values = $trig['values'];
-            if ( !($sql = $this->_statement('insert_update', $table, array_keys($values))) ){
-              die($this->log(
-                      "Problem with the values returned by the callback function(s)",
-                      $table, $values)
-              );
+          }
+          if ( isset($this->triggers['insert']['after'][$table]) || isset($this->triggers['update']['after'][$table]) ){
+            $update = false;
+            $where = [];
+            if ( $tmp = $this->get_keys($table) ){
+              foreach ( $tmp['keys'] as $t ){
+                if ( $t['unique'] ){
+                  foreach ( $t['columns'] as $tc ){
+                    if ( isset($values[$tc]) ){
+                      $where[$tc] = $values[$tc];
+                    }
+                  }
+                }
+              }
+              if ( (count($where) > 0) && $this->count($table, $where) === 1 ){
+                $update = 1;
+              }
             }
           }
-          $vals = array_merge(array_values($values),array_values($values));
-          $last = $this->last_id();
           $r = $this->query($sql['sql'], $sql['hash'], $vals);
-          if ( $r ){
-            if ( $last !== $this->last_id() ){
+          if ( $r && (isset($this->triggers['insert']['after'][$table]) || isset($this->triggers['update']['after'][$table])) ){
+            if ( !$update ){
               $this->_trigger($table, 'insert', 'after', $values);
             }
             else{
-              $this->_trigger($table, 'update', 'after', $values, $values);
+              $this->_trigger($table, 'update', 'after', array_diff_key($values, $where), $where);
             }
           }
         }
