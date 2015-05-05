@@ -22,7 +22,7 @@ namespace bbn\user;
  *    'email' => 'xxx@xx.xx',
  *    ...
  *  ],
- *  'data' => [],
+ *  'cfg' => [],
  *  'properties' => [],
  *  'permissions' => []
  * ]
@@ -161,9 +161,6 @@ class connection
           ];
 
   private
-          /** @var array Contains the configuration of the class as the combination of defaults and constructor config */
-          $cfg,
-          /** @var integer Timestamp from the last refresh of information from the database */
           $last_refresh;
   
 	protected
@@ -185,6 +182,8 @@ class connection
           $id,
           /** @var mixed */
           $alert,
+          /** @var array The class' config */
+          $cfg = [],
           /** @var array The current user's session's config (fingerprint, last_renew) */
           $sess_cfg,
           /** @var array The current user configuration (i.e. preferences) */
@@ -208,6 +207,22 @@ class connection
     return \bbn\str\text::genpwd(32, 16);
   }
   
+	/**
+   * Creates a magic string which will be used for hotlinks
+   * The hash is stored in the database
+   * The key is sent to the user
+   *
+	 * @return array
+	 */
+  public static function make_magic_string()
+  {
+    $key = self::make_fingerprint();
+    return [
+      'key' => $key,
+      'hash' => hash('sha256', $key)
+    ];
+  }
+
   /**
    * Checks the correspondance between a key and a hash
    *
@@ -363,19 +378,10 @@ class connection
             $r[$key] = $val;
           }
         }
-        /*
         $this->set_session('info', $r);
-
         $this->user_cfg = empty($d['cfg']) ?
                         ['log_tries' => 0] : json_decode($d['cfg'], true);
-        */
-        $this->set_info($r);
-        if ( empty($d['cfg']) ){
-          $this->set_info(['log_tries' => 0]);
-        }
-        else {
-          $this->set_cfg(json_decode($d['cfg'], true));
-        }
+        $this->set_session('cfg', $this->user_cfg);
         // Groups
         $this->permissions = [];
         $this->groups = $this->db->get_col_array("
@@ -571,13 +577,10 @@ class connection
    * @return bool
    */
   public function check_attempts(){
-    //if ( !isset($this->user_cfg) ){
-    $info = $this->get_info();
-    if ( empty($info) ){
+    if ( !isset($this->user_cfg) ){
       return false;
     }
-    //if ( isset($this->user_cfg['log_tries']) && ($this->user_cfg['log_tries'] > $this->cfg['max_attempts']) ){
-    if ( isset($info['log_tries']) && ($info['log_tries'] > $this->cfg['max_attempts']) ){
+    if ( isset($this->user_cfg['log_tries']) && ($this->user_cfg['log_tries'] > $this->cfg['max_attempts']) ){
       return false;
     }
     return true;
@@ -589,16 +592,11 @@ class connection
    * @return \bbn\user\connection
    */
   protected function record_attempt(){
-    //if ( isset($this->user_cfg) ){
-    $info = $this->get_info();
-    if ( !empty($info) ){
-      /*
+    if ( isset($this->user_cfg) ){
       $this->user_cfg['log_tries'] = isset($this->user_cfg['log_tries']) ?
         $this->user_cfg['log_tries']+1 : 1;
-      $this->set_session('log_tries', $this->user_cfg['log_tries']);
-      */
-      $this->set_info(['log_tries' => isset($info['log_tries']) ? $info['log_tries']+1 : 1]);
       $this->save_cfg();
+      $this->set_session('log_tries', $this->user_cfg['log_tries']);
     }
     return $this;
   }
@@ -1008,12 +1006,8 @@ class connection
     ]);
     $this->auth = false;
     $this->id = null;
-    //$this->user_cfg = null;
-    $this->unset_info();
-    $this->unset_cfg();
-    $this->unset_properties();
-    $this->unset_permissions();
-    //$this->sess_cfg = null;
+    $this->user_cfg = null;
+    $this->sess_cfg = null;
     $this->delete_session();
     return $this;
   }
@@ -1092,7 +1086,7 @@ class connection
    *
    * @return \bbn\user\connection
    */
-  public function unset_cfg($attr=false, $type='user'){
+  public function unset_cfg($attr, $type='user'){
     $type = $type === 'sess' ? 'sess_cfg' : 'user_cfg';
     // Possible to pass either a single property's name or a group of properties in an array
     if ( is_string($attr) ){
@@ -1125,19 +1119,13 @@ class connection
 
   /**
    * Unsets the given properties from session
-   * If you give an empty array it resets 'properties'
    *
    * @param string|array $attr
    *
    * @return \bbn\user\connection
    */
-  public function unset_properties($attr=false){
-    if ( empty($attr) ){
-      $this->set_session(['properties' => []]);
-    }
-    else {
-      $this->unset_session($attr, 'properties');
-    }
+  public function unset_properties($attr){
+    $this->unset_session($attr, 'properties');
     return $this;
   }
 
@@ -1149,137 +1137,6 @@ class connection
   public function get_properties(){
     return $this->get_session('properties');
   }
-
-  /**
-   * Sets the given info to session
-   *
-   * @param string|array $attr
-   *
-   * @return \bbn\user\connection
-   */
-  public function set_info($attr){
-    $args = func_get_args();
-    if ( (count($args) === 2) && is_string($attr) ){
-      $attr = [$args[0] => $args[1]];
-    }
-    $this->set_session($attr, 'info');
-    return $this;
-  }
-
-  /**
-   * Unsets the given info from session
-   * If you give an empty array it resets 'info'
-   *
-   * @param string|array $attrs
-   *
-   * @return \bbn\user\connection
-   */
-  public function unset_info($attr=false){
-    if ( empty($attr) ){
-      $this->set_session(['info' => []]);
-    }
-    else {
-      $this->unset_session($attr, 'info');
-    }
-    return $this;
-  }
-
-  /**
-   * Gets info from session
-   *
-   * @return array
-   */
-  public function get_info(){
-    return $this->get_session('info');
-  }
-
-  /**
-   * Sets the given auth to session
-   *
-   * @param string|array $attr
-   *
-   * @return \bbn\user\connection
-   */
-  public function set_auth2($attr){
-    $args = func_get_args();
-    if ( (count($args) === 2) && is_string($attr) ){
-      $attr = [$args[0] => $args[1]];
-    }
-    $this->set_session($attr, 'auth');
-    return $this;
-  }
-
-  /**
-   * Unsets the given auth from session
-   * If you give an empty array it resets 'auth'
-   *
-   * @param string|array $attrs
-   *
-   * @return \bbn\user\connection
-   */
-  public function unset_auth($attr=false){
-    if ( empty($attr) ){
-      $this->set_session(['auth' => []]);
-    }
-    else {
-      $this->unset_session($attr, 'auth');
-    }
-    return $this;
-  }
-
-  /**
-   * Gets auth from session
-   *
-   * @return array
-   */
-  public function get_auth(){
-    return $this->get_session('auth');
-  }
-
-  /**
-   * Sets the given permissions to session
-   *
-   * @param string|array $attr
-   *
-   * @return \bbn\user\connection
-   */
-  public function set_permissions($attr){
-    $args = func_get_args();
-    if ( (count($args) === 2) && is_string($attr) ){
-      $attr = [$args[0] => $args[1]];
-    }
-    $this->set_session($attr, 'permissions');
-    return $this;
-  }
-
-  /**
-   * Unsets the given permissions from session
-   * If you give an empty array it resets 'permissions'
-   *
-   * @param string|array $attrs
-   *
-   * @return \bbn\user\connection
-   */
-  public function unset_permissions($attr=false){
-    if ( empty($attr) ){
-      $this->set_session(['permissions' => []]);
-    }
-    else {
-      $this->unset_session($attr, 'permissions');
-    }
-    return $this;
-  }
-
-  /**
-   * Gets permissions from session
-   *
-   * @return array
-   */
-  public function get_permissions2(){
-    return $this->get_session('permissions');
-  }
-
-
 
 }
 

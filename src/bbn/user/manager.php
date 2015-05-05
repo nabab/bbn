@@ -64,7 +64,23 @@ You can click the following link to access directly your account:<br>
   public static function get_permissions(){
     return self::$permissions;
   }
-  
+
+  /**
+   * Creates a magic string which will be used for hotlinks
+   * The hash is stored in the database
+   * The key is sent to the user
+   *
+   * @return array
+   */
+  private static function make_magic_string()
+  {
+    $key = self::make_fingerprint();
+    return [
+      'key' => $key,
+      'hash' => hash('sha256', $key)
+    ];
+  }
+
   public function find_sessions($id_user=null, $minutes = 5)
   {
     if ( is_int($minutes) ){
@@ -276,7 +292,7 @@ You can click the following link to access directly your account:<br>
         [$hl['id_user'], '=', $id_user],
         [$hl['expire'], '>', date('Y-m-d H:i:s')]
       ]);
-      $magic = $this->usrcls->make_magic_string();
+      $magic = self::make_magic_string();
       // Create hotlink
       $this->db->insert($this->cfg['tables']['hotlinks'], [
         $hl['magic_string'] => $magic['hash'],

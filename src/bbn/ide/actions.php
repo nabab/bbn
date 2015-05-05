@@ -19,7 +19,7 @@ class actions {
       // The rest of the path
       $path = implode('/', $args);
       // Gives the config array of each directory, indexed on the dir's name
-      $directories = new \bbn\ide\directories($this->db);
+      $directories = new directories($this->db);
       $cfg = $directories->dirs();
       if ( isset($cfg[$dir]) ){
         $dirs =& $cfg[$dir];
@@ -63,7 +63,7 @@ class actions {
   }
 
   public function delete($data){
-    $directories = new \bbn\ide\directories($this->db);
+    $directories = new directories($this->db);
     $cfg = $directories->dirs();
     if ( isset($data['dir'], $data['name'], $data['path'], $data['type'], $cfg[$data['dir']]) &&
       (strpos($data['path'], '../') === false) && \bbn\str\text::check_filename($data['name']) ) {
@@ -132,7 +132,7 @@ class actions {
       (strpos($data['src'], '../') === false) &&
       (strpos($data['path'], '../') === false) &&
       \bbn\str\text::check_filename($data['name']) ){
-      $directories = new \bbn\ide\directories($this->db);
+      $directories = new directories($this->db);
       $dirs = $directories->dirs();
       if ( isset($dirs[$data['dir']]) ){
         $cfg =& $dirs[$data['dir']];
@@ -197,7 +197,7 @@ class actions {
   }
 
   public function insert($data){
-    $directories = new \bbn\ide\directories($this->db);
+    $directories = new directories($this->db);
     $dirs = $directories->dirs();
     if ( isset($data['dir'], $data['name'], $data['path'], $data['type'], $dirs[$data['dir']]) &&
       (strpos($data['path'], '../') === false) &&
@@ -248,7 +248,7 @@ class actions {
     if ( isset($data['dir'], $data['spath'], $data['dpath']) &&
       (strpos($data['dpath'], '../') === false) &&
       (strpos($data['spath'], '../') === false) ){
-      $directories = new \bbn\ide\directories($this->db);
+      $directories = new directories($this->db);
       $dirs = $directories->dirs();
       if ( isset($dirs[$data['dir']]) ){
         $cfg =& $dirs[$data['dir']];
@@ -322,7 +322,7 @@ class actions {
     if ( isset($data['dir'], $data['name'], $data['path']) &&
       (strpos($data['path'], '../') === false) &&
       \bbn\str\text::check_filename($data['name']) ){
-      $directories = new \bbn\ide\directories($this->db);
+      $directories = new directories($this->db);
       $dirs = $directories->dirs();
       if ( isset($dirs[$data['dir']]) ){
         $cfg =& $dirs[$data['dir']];
@@ -405,6 +405,103 @@ class actions {
       }
     }
     return ['data' => "Tab is not in session."];
+  }
+
+  public function export($data){
+    if ( isset($data['dir'], $data['name'], $data['path'], $data['type']) ){
+      $directories = new directories($this->db);
+      $dirs = $directories->dirs();
+      //$root_dest = BBN_DATA_PATH.'users/'.$_SESSION[BBN_SESS_NAME]['user']['id'].'/ide/exported/';
+      $root_dest = BBN_USER_PATH.'tmp/'.\bbn\str\text::genpwd().'/';
+      if ( isset($dirs[$data['dir']]) ){
+        if ( $data['dir'] === 'controllers' ){
+          foreach ( $dirs['controllers']['files'] as $f ) {
+            $dest = $root_dest.$data['name'].'/'.str_replace(BBN_APP_PATH, '', $f['path']);
+            if ( $data['type'] === 'file' ) {
+              $ext = \bbn\str\text::file_ext($data['path']);
+              $path = substr($data['path'], 0, strrpos($data['path'], $ext));
+              $file = $f['path'].$path.$f['ext'];
+              if ( file_exists($file) ){
+                if ( !\bbn\file\dir::create_path($dest) ){
+                  return $this->error("Impossible to create the path $dest");
+                }
+                if ( !\bbn\file\dir::copy($file, $dest.$data['name'].'.'.$f['ext']) ){
+                  return $this->error('Impossible to export the file '.$data['name'].'.'.$f['ext']);
+                }
+              }
+            }
+            else {
+              $dir = $f['path'].$data['name'];
+              if ( file_exists($dir) ){
+                if ( !\bbn\file\dir::copy($dir, $dest.$data['name']) ){
+                  return $this->error('Impossible to export the folder '.$data['name']);
+                }
+              }
+            }
+          }
+        }
+        else {
+          $ext = \bbn\str\text::file_ext($data['path']);
+          $dir = false;
+          foreach ( $dirs[$data['dir']]['files'] as $f ){
+            if ( $ext === $f['ext'] ){
+              $dir = $f['root'];
+            }
+          }
+          if ( !$dir ){
+            $dir = $dirs[$data['dir']]['files'][0]['path'];
+          }
+          $dest = $root_dest.$data['name'].'/'.$data['path'];
+          if ( $data['type'] === 'file' ) {
+            if ( !\bbn\file\dir::create_path(substr($dest, 0, strrpos($dest, '/') + 1)) ){
+              return $this->error('Impossible to create the path ' . substr($dest, 0, strrpos($dest, '/') + 1));
+            }
+          }
+          if ( !\bbn\file\dir::copy($dir.$data['path'], $dest) ){
+            return $this->error('Impossible to export the file or folder '.$data['name']);
+          }
+        }
+        // Create zip file
+        if ( class_exists('\\ZipArchive') ) {
+          $dest = ( $data['dir'] === 'controllers' ) ? $root_dest.$data['name'].'/mvc/' : $dest;
+          $filezip = BBN_USER_PATH.'tmp/'.$data['name'].'.zip';
+          $zip = new \ZipArchive();
+          if ( $err = $zip->open($filezip, \ZipArchive::OVERWRITE) ) {
+            if ( file_exists($dest) ){
+              if ( ($data['type'] === 'dir') || ($data['dir'] === 'controllers') ){
+                // Create recursive directory iterator
+                $files = \bbn\file\dir::scan($dest);
+                foreach ($files as $file) {
+                  // Add current file to archive
+                  if ( ($file !== $root_dest.$data['name']) &&
+                    is_file($file) &&
+                    !$zip->addFile($file, str_replace($root_dest.$data['name'].'/', '', $file))
+                  ){
+                    return $this->error("Impossible to add $file");
+                  }
+                }
+              }
+              else {
+                if ( !$zip->addFile($dest, $data['path']) ){
+                  return $this->error("Impossible to add $dest");
+                }
+              }
+              if ( $zip->close() ) {
+                if ( !\bbn\file\dir::delete($root_dest, 1) ) {
+                  return $this->error("Impossible to delete the directory $root_dest");
+                }
+                return $filezip;
+              }
+              return $this->error("Impossible to close the zip file $filezip");
+            }
+            return $this->error("The path does not exist: $dest");
+          }
+          return $this->error("Impossible to create $filezip ($err)");
+        }
+        return $this->error("ZipArchive class non-existent");
+      }
+    }
+    return $this->error();
   }
 
   // Error

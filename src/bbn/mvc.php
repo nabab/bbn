@@ -1160,6 +1160,9 @@ class mvc extends obj
           //die(\bbn\tools::dump($this->obj->file, method_exists($this->obj->file, 'download')));
 					if ( isset($this->obj->file) && is_object($this->obj->file) && method_exists($this->obj->file, 'download') ){
             $this->obj->file->download();
+            if ( $this->delete_file ){
+              $this->obj->file->delete();
+            }
           }
           else{
             $this->log("Impossible to display the following controller", $this);

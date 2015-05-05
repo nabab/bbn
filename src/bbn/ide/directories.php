@@ -57,6 +57,10 @@ class directories {
       foreach ( $files as $i => $f ){
         $f = (array)$f;
         $f['path'] = $d['root_path'].$f['path'];
+        if ( !empty($f['default']) ){
+          $d['def'] = $f['url'];
+        }
+
         $files[!empty($f['title']) ? $f['title'] : $i] = $f;
         if ( !empty($f['title']) ){
           unset($files[$i]);
