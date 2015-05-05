@@ -1483,7 +1483,7 @@ class connection extends \PDO implements actions, api, engines
         return $res;
       }
 		}
-    return false;
+    return [];
   }
   
 	/**

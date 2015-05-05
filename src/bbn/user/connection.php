@@ -4,28 +4,7 @@
  */
 namespace bbn\user;
 /**
- * A user authentication and session management Class
- *
- * The user session will have the following structure:
- *
- * [
- *  'id' => x,
- *  'salt' => 'xxxxx',
- *  'auth' => [
- *    'fingerprint' => 'xxx',
- *    'last_renew' => 123456789
- *  ],
- *  'info' => [
- *    'log_tries' => 0,
- *    'last_attempt' => 123456789,
- *    'login' => 'xxx',
- *    'email' => 'xxx@xx.xx',
- *    ...
- *  ],
- *  'data' => [],
- *  'properties' => [],
- *  'permissions' => []
- * ]
+ * A user authentication Class
  *
  *
  * @author Thomas Nabet <thomas.nabet@gmail.com>
@@ -37,12 +16,22 @@ namespace bbn\user;
  * @todo Groups and hotlinks features
  * @todo Implement Cache for session requests' results?
  */
+if ( !defined('BBN_FINGERPRINT') ) {
+	define('BBN_FINGERPRINT', 'define_me!!');
+}
+if ( !defined('BBN_SESS_NAME') ) {
+	define('BBN_SESS_NAME', 'define_me!!!!');
+}
 
 class connection
 {
 
+	private static
+          /** @var string */
+          $fingerprint = BBN_FINGERPRINT;
+
 	protected static
-          /** @var array Contains the error messages and the architecture of the database */
+          /** @var array */
           $_defaults = [
             'errors' => [
               0 => 'login failed',
@@ -99,12 +88,13 @@ class connection
                 'id' => 'id',
                 'email' => 'email',
                 'login' => 'email',
-                'cfg' => 'cfg'
+                'cfg' => 'cfg',
+                'status' => 'status'
               ],
             ],
             /*
              * Password saving encryption
-             * @var string
+             * @var string 
              */
             'encryption' => 'sha1',
             /*
@@ -114,34 +104,34 @@ class connection
             'conditions' => [],
             /*
              * Additional fields to select from the users' table
-             * They will become property
+             * They will become property 
              * Their names mustn't interfere with existing properties
-             * @var array
+             * @var array 
              */
             'additional_fields' => [],
             /*
              * The session name
-             * @var string
+             * @var string 
              */
-            'sess_name' => false,
+            'sess_name' => BBN_SESS_NAME,
             /*
              * In the session array the index on which user info will be stored
              * i.e. the default storage will be $_SESSION[BBN_SESS_NAME]['user']
              */
             'sess_user' => 'user',
             /*
-             * length in minutes of the session regeneration
-             * @var integer
+             * length in minutes of the session regeneration (can be doubled)
+             * @var integer 
              */
             'sess_length' => 5,
             /*
-             * Number of times a user can try to log in during the period retry_length
-             * @var integer
+             * Number of times a user can try to log in in the period retry_length
+             * @var integer 
              */
             'max_attempts' => 5,
-            /*0
+            /*
              * User ban's length in minutes after max attempts is reached
-             * @var integer
+             * @var integer 
              */
             'retry_length' => 5,
             /*
@@ -153,18 +143,8 @@ class connection
              * Sets if the hotlinks features should be in used
              * @var bool
              */
-            'hotlinks' => false,
-            /*
-             *
-             */
-            'refresh_delay' => 300
+            'hotlinks' => false
           ];
-
-  private
-          /** @var array Contains the configuration of the class as the combination of defaults and constructor config */
-          $cfg,
-          /** @var integer Timestamp from the last refresh of information from the database */
-          $last_refresh;
   
 	protected
           /** @var string */
@@ -185,11 +165,13 @@ class connection
           $id,
           /** @var mixed */
           $alert,
-          /** @var array The current user's session's config (fingerprint, last_renew) */
+          /** @var array */
+          $cfg = [],
+          /** @var array */
           $sess_cfg,
-          /** @var array The current user configuration (i.e. preferences) */
+          /** @var array */
           $user_cfg,
-          /** @var array The list of fields to get from the users table */
+          /** @var array */
           $fields;
           
 
@@ -201,69 +183,84 @@ class connection
 
 
 	/**
-	 * @return string Makes a random string between 16 and 32 chars
+	 * @return string
 	 */
   public static function make_fingerprint()
   {
     return \bbn\str\text::genpwd(32, 16);
   }
   
-  /**
-   * Checks the correspondance between a key and a hash
-   *
-   * @param string $key
-   * @param string $hash
-   *
-   * @return bool
-   */
+	/**
+   * Creates a magic string which will be used for hotlinks
+   * The hash is stored in the database
+   * The key is sent to the user
+   * 
+	 * @return array
+	 */
+  public static function make_magic_string()
+  {
+    $key = self::make_fingerprint();
+    return [
+      'key' => $key,
+      'hash' => hash('sha256', $key)
+    ];
+  }
+  
   protected static function is_magic_string($key, $hash)
   {
     return ( hash('sha256', $key) === $hash );
   }
+  
+  
+	/**
+	 * @return string 
+	 */
+  public function get_error(){
+    return ( !is_null($this->error) && isset($this->cfg['errors'][$this->error]) ) ?
+              $this->cfg['errors'][$this->error] : false;
+  }
 
-  /**
-   * Sets the session name in the default config if constant BBN_SESS_NAME is defined
-   *
-   * @return void
-   */
-  private static function init(){
-    if ( defined('BBN_SESS_NAME') ){
-      self::$_defaults['sess_name'] = BBN_SESS_NAME;
+  public function get_cfg($attr = ''){
+    if ( $this->check() ){
+      if ( !$this->user_cfg ){
+        $this->user_cfg = $this->get_session('cfg');
+      }
+      return empty($attr) ? $this->user_cfg : $this->user_cfg[$attr];
     }
   }
-  
+
+  public function get_class_cfg(){
+    if ( $this->check() ){
+      return $this->cfg;
+    }
+  }
+
   /**
-   * @param \bbn\db\connection $db
-   * @param array $cfg
-   * @param array|string $credentials
-   *
-	 * @return \bbn\user\connection
+	 * @return \bbn\user\connection 
 	 */
 	public function __construct(\bbn\db\connection $db, array $cfg, $credentials='')
 	{
-    self::init();
-
 		$this->db = $db;
 		
     $this->user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
-    $this->ip_address = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
+    $this->ip_address = 'boo'; //isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
 
-    /** The class configuration is the result of a merge between the class' default values and the configuration sent to the constructor */
     $this->cfg = \bbn\tools::merge_arrays(self::$_defaults, $cfg);
-
-    // As we'll give the object the properties of these additional fields they should not conflict with existing ones
+    // As we'll give the object the properties of these additional field they should not conflict with existing ones
     foreach ( $this->cfg['additional_fields'] as $f ){
       if ( property_exists($this, $f) ) {
         die("Wrong configuration: the column's name $f is illegal!");
       }
     }
     
-    // The selection comprises the defined fields of the users table
-    // Plus a bunch of user-defined additional fields in the same table
+    /*
+     * The selection comprises the defined fields of the users table
+     * Plus a bunch of user-defined additional fields in the same table
+     */
     $this->fields = \bbn\tools::merge_arrays($this->cfg['arch']['users'], $this->cfg['additional_fields']);
 
     // Case where the user logs in
-    // Allowing the use of a simple array [user, pass]
+    // Allowing the use of a simple array [user, pass] 
     if ( isset($credentials[0], $credentials[1]) ) {
       $credentials['user'] = $credentials[0];
       $credentials['pass'] = $credentials[1];
@@ -273,57 +270,38 @@ class connection
     if ( isset($credentials['user'], $credentials['pass']) ) {
       $this->_identify($credentials);
     }
+
     // Otherwise the session is checked
 		else {
       $this->check_session();
 		}
-    if ( $err = $this->get_error() ){
-      die($err);
-    }
-
+    
     return $this;
 	}
-
-
-  /**
-   * Gets the message corresponding to an error code if the error property is not null
-   *
-   * @return string|false
-   */
-  public function get_error(){
-    return ( !is_null($this->error) && isset($this->cfg['errors'][$this->error]) ) ?
-      $this->cfg['errors'][$this->error] : false;
-  }
-
-  /**
-   * Gets the class configuration i.e. error messages and database structure
-   *
-   * @return array
-   */
-  public function get_class_cfg(){
-    return $this->cfg;
-  }
-
-  /**
-   * Sets a new identified session with its proper fingerprint (after $this->auth has been set to true)
-   *
-	 * @return \bbn\user\connection
+  
+	/**
+	 * @return \bbn\user\connection 
 	 */
 	private function _init_session()
   {
     if ( $this->check() ){
+      if ( session_id() == '' ){
+        session_start();
+      }
 
-      $this->delete_session(false);
+      if ( !isset($_SESSION[$this->cfg['sess_name']]) ){
+        $_SESSION[$this->cfg['sess_name']] = [];
+      }
 
       $fingerprint = self::make_fingerprint();
 
-      $s = $this->get_full_session();
-
-      $this->set_session([
-        'id' => $this->id,
-        'fingerprint' => $fingerprint,
-        'tokens' => []
-      ]);
+      if ( !isset($_SESSION[$this->cfg['sess_name']], $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]) ){
+        $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']] = [
+            'id' => $this->id,
+            'fingerprint' => $fingerprint,
+            'tokens' => []
+        ];
+      }
 
       $this->sess_cfg = [
         'fingerprint' => $this->get_print($fingerprint),
@@ -331,11 +309,24 @@ class connection
       ];
 
       $this->save_session();
-
+      
+      $this->auth = 1;
+      
     }
     return $this;
   }
   
+	/**
+	 * @return \bbn\user\connection 
+	 */
+	private function _login()
+  {
+    if ( $this->check() ){
+      $this->_init_session()->save_session();
+    }
+    return $this;
+  }
+
   /**
    * Gathers all the information about a user and puts it in the session
    * The user's table data can be sent as argument if it has already been fetched
@@ -345,14 +336,14 @@ class connection
    * @return \bbn\user\connection
    */
   private function _user_info(array $d=null){
-    // $this->id must be defined i.e. user must be identified but doesn't have to be yet authenticated
-    if ( !empty($this->id) ){
+    if ( $this->id ){
       if ( is_null($d) ){
         $d = $this->db->rselect(
               $this->cfg['tables']['users'],
               $this->fields,
               \bbn\tools::merge_arrays(
                     $this->cfg['conditions'],
+                    [$this->cfg['arch']['users']['status'] => 1],
                     [$this->cfg['arch']['users']['id'] => $this->id]));
       }
       if ( is_array($d) ){
@@ -363,19 +354,10 @@ class connection
             $r[$key] = $val;
           }
         }
-        /*
         $this->set_session('info', $r);
-
         $this->user_cfg = empty($d['cfg']) ?
                         ['log_tries' => 0] : json_decode($d['cfg'], true);
-        */
-        $this->set_info($r);
-        if ( empty($d['cfg']) ){
-          $this->set_info(['log_tries' => 0]);
-        }
-        else {
-          $this->set_cfg(json_decode($d['cfg'], true));
-        }
+        $this->set_session('cfg', $this->user_cfg);
         // Groups
         $this->permissions = [];
         $this->groups = $this->db->get_col_array("
@@ -396,12 +378,53 @@ class connection
         $this->set_session('groups', $this->groups);
       }
     }
-    $this->last_refresh = time();
     return $this;
   }
-
+  
   /**
-   * Changes the corresponding columns' values in the user's table
+   * Returns all the current user's permissions
+   * 
+   * @return array
+   */
+  public function get_permissions(){
+    return $this->permissions;
+  }
+  
+  /**
+   * Checks if the user has the given permission
+   * 
+   * @param string $name The name of the permission
+   * 
+   * @return bool
+   */
+  public function has_permission($name, $check_admin=1){
+    if ( !is_string($name) ){
+      throw new \InvalidArgumentException('Has permission have a string as argument');
+    }
+    if ( isset($this->permissions[$name]) && $this->permissions[$name] ){
+      return 1;
+    }
+    else if ( $check_admin && isset($this->permissions["admin"]) && $this->permissions["admin"] ){
+      return 1;
+    }
+    return false;
+  }
+  
+  /**
+   * Checks if the user has the given permission and dies otherwise
+   * 
+   * @param string $name The name of the permission
+   * 
+   * @return void
+   */
+  public function check_permission($name){
+    if ( !$this->has_permission($name) ){
+      die("You don't have the requested permission ($name)");
+    }
+  }
+  
+  /**
+   * Changes the data in the user's table 
    * 
    * @param array $d The new data
    * 
@@ -411,9 +434,8 @@ class connection
   {
     if ( $this->check() ){
       $update = [];
-      $cols = $this->cfg['arch']['users'];
       foreach ( $d as $key => $val ){
-        if ( ($key !== $cols['id']) && ($key !== $cols['cfg']) && in_array($key, $this->fields) ){
+        if ( ($key !== 'id') && ($key !== 'cfg') && ($key !== 'auth') && ($key !== 'pass') && in_array($key, $this->fields) ){
           $update[$key] = $val;
         }
       }
@@ -427,14 +449,11 @@ class connection
     return false;
   }
 
-  /**
-   * Returns the sessions' table's content for the current session
-   *
-   * @return \bbn\user\connection
+  /*
+   * return \bbn\user\connection
    */
   private function _sess_info(array $d=null){
-    // $this->id must be defined i.e. user must be identified but doesn't have to be yet authenticated
-    if ( !empty($this->id) ){
+    if ( $this->id ){
       if ( is_null($d) ){
         $d = $this->db->rselect(
             $this->cfg['tables']['sessions'],
@@ -450,44 +469,25 @@ class connection
     }
     return $this;
   }
-
-
-  /**
-   * Checks if the password given corresponds to the password stored once encrypted
-   *
-   * @param string $pass_given
-   * @param string $pass_stored
-   *
-   * @return bool
-   */
+  
   private function _check_password($pass_given, $pass_stored)
   {
-    return ($this->crypt($pass_given) ===  $pass_stored);
+    return ($this->_crypt($pass_given) ===  $pass_stored);
   }
-
-  /**
-   * Encrypt a string with the encryption algorithm chosen in the class' config
-   *
-   * @param string $st
-   *
-   * @return string
-   */
-  public function crypt($st){
+  
+  private function _crypt($st){
     if ( !function_exists($this->cfg['encryption']) ){
       die("You need the PHP function {$this->cfg['encryption']} to have the user connection class working");
     }
-    if ( empty($st) || !is_string($st) ){
-      die("You need to provide a non empty string in order to crypt it");
-    }
-    return $this->cfg['encryption']($st);
+    return eval("return {$this->cfg['encryption']}('$st');");
+  }
+
+  public function get_password($st){
+    return $this->_crypt($st);
   }
 
   /**
-   * Identify a user inside the users' table and returns its authentication status according to his credentials
-   *
-   * @param array $credentials (with 2 values or with user and pass keys)
-   *
-	 * @return bool
+	 * @return mixed
 	 */
 	private function _identify($credentials)
 	{
@@ -504,32 +504,29 @@ class connection
               $this->fields,
               \bbn\tools::merge_arrays(
                     $this->cfg['conditions'],
+                    [$arch['users']['status'] => 1],
                     [$arch['users']['login'] => $credentials['user']])
               ) ){
 
         $this->id = $d['id'];
         $this->_user_info($d);
-
+        
        // Canceling authentication if num_attempts > max_attempts
         if ( !$this->check_attempts() ){
           $this->error = 4;
         }
-        else if ( $pass = $this->db->select_one(
-            $this->cfg['tables']['passwords'],
-            $arch['passwords']['pass'],
-            [$arch['passwords']['id_user'] => $this->id],
-            [$arch['passwords']['added'] => 'DESC'])
-        ){
-          if ($this->_check_password($credentials['pass'], $pass)) {
-            // From this point the user is considered identified
-            $this->auth = 1;
-            $this->_init_session();
-          }
-          else {
-            // Wrong combination user/pass, adding attempt
-            $this->record_attempt();
-            $this->error = 6;
-          }
+        $pass = $this->db->select_one(
+                $this->cfg['tables']['passwords'],
+                $arch['passwords']['pass'],
+                [$arch['passwords']['id_user'] => $this->id],
+                [$arch['passwords']['added'] => 'DESC']);
+        if ( $this->_check_password($credentials['pass'], $pass) ){
+          $this->auth = 1;
+          $this->_login();
+        }
+        else{
+          $this->record_attempt();
+          $this->error = 6;
         }
       }
       else{
@@ -539,11 +536,6 @@ class connection
     return $this->auth;
 	}
 
-  /**
-   * Creates a string based on the session fingerprint, the user agent and the IP address provided that the user has a session fingerprint
-   *
-   * @return string|bool
-   */
   protected function get_print()
 	{
     if ( ($fp = $this->get_session('fingerprint')) ){
@@ -551,55 +543,164 @@ class connection
     }
     return false;
 	}
-
-  /**
-   * Returns the whole app's session
-   *
-   * @return false|array
-   */
-  public function get_full_session()
-  {
-    if ( !isset($this->cfg) ){
-      return false;
+  
+	/**
+	 * @return \bbn\user\connection 
+	 */
+  public function set_session($attr){
+    if ( isset($_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]) ){
+      $s =& $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']];
+      $args = func_get_args();
+      if ( (count($args) === 2) && is_string($args[0]) ){
+        $attr = [$args[0] => $args[1]];
+      }
+      foreach ( $attr as $key => $val ){
+        if ( is_string($key) ){
+          $s[$key]  = $val;
+        }
+      }
     }
-    return $this->cfg['sess_name'] ? $_SESSION[$this->cfg['sess_name']] : $_SESSION;
+    return $this;
+  }
+
+	/**
+	 * @return mixed
+	 */
+  public function get_session($attr){
+    if ( $this->has_session($attr) ){
+      return $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']][$attr];
+    }
+  }
+
+	/**
+	 * @return bool
+	 */
+  public function has_session($attr){
+    return ( 
+            is_string($attr) && 
+            isset($_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']][$attr])
+           );
   }
 
   /**
-   * Checks if the number of login attempts has gone over the config value max_attempts
-   *
+	 * @return \bbn\user\connection 
+	 */
+  public function save_session() {
+    $p =& $this->cfg['arch']['sessions'];
+    $this->db->insert_update($this->cfg['tables']['sessions'], [
+      $p['id_user'] => $this->id,
+      $p['sess_id'] => session_id(),
+      $p['ip_address'] => $this->ip_address,
+      $p['user_agent'] => $this->user_agent,
+      $p['auth'] => $this->auth ? 1 : 0,
+      $p['opened'] => 1,
+      $p['last_activity'] => date('Y-m-d H:i:s'),
+      $p['cfg'] => json_encode($this->sess_cfg)
+    ]);
+    return $this;
+  }
+
+  /**
+	 * @return \bbn\user\connection 
+	 */
+  public function close_session() {
+    $p =& $this->cfg['arch']['sessions'];
+    $this->db->update($this->cfg['tables']['sessions'], [
+        $p['ip_address'] => $this->ip_address,
+        $p['user_agent'] => $this->user_agent,
+        $p['auth'] => $this->auth ? 1 : 0,
+        $p['opened'] => 0,
+        $p['last_activity'] => date('Y-m-d H:i:s'),
+        $p['cfg'] => json_encode($this->sess_cfg)
+      ],[
+        $p['id_user'] => $this->id,
+        $p['sess_id'] => session_id()
+      ]);
+    $this->auth = false;
+    $this->id = null;
+    $this->user_cfg = null;
+    $this->sess_cfg = null;
+		$_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']] = [];
+    return $this;
+  }
+  
+  /*
    * @return bool
    */
-  public function check_attempts(){
-    //if ( !isset($this->user_cfg) ){
-    $info = $this->get_info();
-    if ( empty($info) ){
+  public function check_attempts()
+  {
+    if ( !isset($this->user_cfg) ){
       return false;
     }
-    //if ( isset($this->user_cfg['log_tries']) && ($this->user_cfg['log_tries'] > $this->cfg['max_attempts']) ){
-    if ( isset($info['log_tries']) && ($info['log_tries'] > $this->cfg['max_attempts']) ){
+    if ( isset($this->user_cfg['num_attempts']) && $this->user_cfg['num_attempts'] > $this->cfg['max_attempts'] ){
       return false;
     }
     return true;
   }
-
-  /**
-   * Adds one to the user configuration
-   *
-   * @return \bbn\user\connection
+  
+  /*
+   * return \bbn\user\connection
    */
-  protected function record_attempt(){
-    //if ( isset($this->user_cfg) ){
-    $info = $this->get_info();
-    if ( !empty($info) ){
-      /*
-      $this->user_cfg['log_tries'] = isset($this->user_cfg['log_tries']) ?
-        $this->user_cfg['log_tries']+1 : 1;
-      $this->set_session('log_tries', $this->user_cfg['log_tries']);
-      */
-      $this->set_info(['log_tries' => isset($info['log_tries']) ? $info['log_tries']+1 : 1]);
-      $this->save_cfg();
+  public function save_cfg()
+  {
+    if ( $this->check() ){
+      $this->db->update(
+          $this->cfg['tables']['users'],
+          [$this->cfg['arch']['users']['cfg'] => json_encode($this->user_cfg)],
+          [$this->cfg['arch']['users']['id'] => $this->id]);
     }
+    return $this;
+  }
+  
+  /*
+   * return \bbn\user\connection
+   */
+  public function set_cfg($attr, $type='user')
+  {
+    $prop = $type === 'sess' ? 'sess_cfg' : 'user_cfg';
+    if ( isset($this->{$prop}) ){
+      $args = func_get_args();
+      if ( (count($args) === 2) && is_string($attr) ){
+        $attr = [$args[0] => $args[1]];
+        $prop = 'user_cfg';
+      }
+      foreach ( $attr as $key => $val ){
+        //\bbn\tools::dump($key, $val);
+        if ( is_string($key) ){
+          $this->{$prop}[$key] = $val;
+        }
+      }
+    }
+    return $this;
+  }
+
+  /*
+   * return \bbn\user\connection
+   */
+  public function unset_cfg($attr, $type='user')
+  {
+    if ( isset($this->{$type.'_cfg'}) ){
+      $args = func_get_args();
+      if ( is_string($attr) ){
+        $attr = [$attr];
+      }
+      foreach ( $attr as $val ){
+        if ( isset($key) ){
+          unset($this->{$type.'_cfg'}[$key]);
+        }
+      }
+    }
+    return $this;
+  }
+  
+  /*
+   * return \bbn\user\connection
+   */
+  protected function record_attempt()
+  {
+    $this->user_cfg['num_attempts'] = isset($this->user_cfg['num_attempts']) ?
+            $this->user_cfg['num_attempts']+1 : 1;
+    $this->set_cfg(['num_attempts' => $this->user_cfg['num_attempts']], "user");
     return $this;
   }
 
@@ -621,8 +722,8 @@ class connection
 	public function check_session()
 	{
     // If this->id is set it means we've already looked it up
-    //\bbn\tools::hdump($this->sess_cfg, $this->has_session('fingerprint'), $this->get_print($this->get_session('fingerprint')), $this->sess_cfg['fingerprint']);
-		if ( empty($this->id) ) {
+       // \bbn\tools::hdump($this->sess_cfg, $this->has_session('fingerprint'), $this->get_print($this->get_session('fingerprint')), $this->sess_cfg['fingerprint']);
+		if ( !$this->id ) {
       
       // The user ID must be in the session
 			if ( $this->has_session('id') ) {
@@ -630,13 +731,11 @@ class connection
         
         $this->_sess_info();
 
-        if ( !empty($this->sess_cfg['fingerprint']) && $this->has_session('fingerprint') &&
+        if ( isset($this->sess_cfg['fingerprint']) && $this->has_session('fingerprint') &&
           ($this->get_print($this->get_session('fingerprint')) === $this->sess_cfg['fingerprint']) ){
           $this->auth = 1;
-          if ( (time() - $this->last_refresh) > $this->cfg['refresh_delay'] ) {
-            $this->_user_info();
-          }
-          $this->save_session();
+          $this->_user_info()->save_session();
+          
         }
 			}
 		}
@@ -646,7 +745,7 @@ class connection
   public function get_id()
   {
     if ( $this->check() ) {
-      return isset($this->id) ? $this->id : false;
+      return $this->id;
     }
   }
   
@@ -655,7 +754,6 @@ class connection
             [$this->cfg['arch']['hotlinks']['expire'] => date('Y-m-d H:i:s')],
             [$this->cfg['arch']['hotlinks']['id'] => $id]);
   }
-
 
   public function check_magic_string($id, $key)
   {
@@ -669,7 +767,7 @@ class connection
         $this->id = $val['id_user'];
         $this->_user_info();
         $this->auth = 1;
-        $this->_init_session();
+        $this->_login();
         return $this->id;
       }
     }
@@ -776,510 +874,10 @@ class connection
 		{
       return $this->db->insert(
               $this->cfg['tables']['passwords'], [
-                $this->cfg['arch']['passwords']['pass'] => $this->crypt($pass),
+                $this->cfg['arch']['passwords']['pass'] => $this->_crypt($pass),
                 $this->cfg['arch']['passwords']['id_user'] => $this->id,
                 $this->cfg['arch']['passwords']['added'] => date('Y-m-d H:i:s')]);
 		}
 		return false;
 	}
-
-  /**
-   * Returns all the current user's permissions
-   *
-   * @return array
-   */
-  public function get_permissions(){
-    return $this->permissions;
-  }
-
-  /**
-   * Checks if the user has the given permission
-   *
-   * @param string $name The name of the permission
-   *
-   * @return bool
-   */
-  public function has_permission($name, $check_admin=1){
-    if ( !is_string($name) ){
-      throw new \InvalidArgumentException('Has permission have a string as argument');
-    }
-    if ( isset($this->permissions[$name]) && $this->permissions[$name] ){
-      return 1;
-    }
-    else if ( $check_admin && !empty($this->permissions["admin"]) ){
-      return 1;
-    }
-    return false;
-  }
-
-  /**
-   * Checks if the user has the given permission and dies otherwise
-   *
-   * @param string $name The name of the permission
-   *
-   * @return void
-   */
-  public function check_permission($name){
-    if ( !$this->has_permission($name) ){
-      die("You don't have the requested permission ($name)");
-    }
-  }
-
-  /**
-   * Sets the given indexes of the session to their respective values. If 2 parameters are given and the first is a string, the first one will be considered as the index and the second as the value
-   *
-   * @param array $attr
-   *
-   * @return \bbn\user\connection
-   */
-  public function set_auth($attr){
-    if ( $this->cfg['sess_name'] ){
-      $s =& $_SESSION[$this->cfg['sess_name']];
-    }
-    else{
-      $s =& $_SESSION;
-    }
-    if ( !isset($s[$this->cfg['sess_user']]) ){
-      $s[$this->cfg['sess_user']] = [];
-    }
-    if ( isset($s[$this->cfg['sess_user']]) ){
-      $su =& $s[$this->cfg['sess_user']];
-      $args = func_get_args();
-      if ( (count($args) === 2) && is_string($args[0]) ){
-        $attr = [$args[0] => $args[1]];
-      }
-      foreach ( $attr as $key => $val ){
-        if ( is_string($key) ){
-          $su[$key]  = $val;
-        }
-      }
-    }
-    return $this;
-  }
-
-  /**
-   * Sets the given indexes of the session to their respective values.
-   *
-   * @param array $attr
-   * @param mixed $type
-   *
-   * @return \bbn\user\connection
-   */
-  public function set_session(array $attr, $type = false){
-    if ( $this->cfg['sess_name'] ){
-      $s =& $_SESSION[$this->cfg['sess_name']];
-    }
-    else{
-      $s =& $_SESSION;
-    }
-    if ( $type && is_string($type) ){
-      if ( !isset($s[$type]) ){
-        $s[$type] = [];
-      }
-      $s =& $s[$type];
-    }
-    foreach ( $attr as $key => $val ){
-      if ( is_string($key) ){
-        $s[$key] = $val;
-      }
-    }
-    return $this;
-  }
-
-  /**
-   * Delete the given indexes from the session
-   *
-   * @param array|string $attr
-   * @param mixed $type
-   *
-   * @return \bbn\user\connection
-   */
-  public function unset_session($attr, $type = false){
-    if ( $this->cfg['sess_name'] ){
-      $s =& $_SESSION[$this->cfg['sess_name']];
-    }
-    else{
-      $s =& $_SESSION;
-    }
-    if ( $type && is_string($type) ){
-      $s =& $s[$type];
-    }
-    if ( !is_array($attr) ){
-      $attr = [$attr];
-    }
-    foreach ( $attr as $key ){
-      if ( is_string($key) && isset($s[$key]) ){
-        unset($s[$key]);
-      }
-    }
-    return $this;
-  }
-
-  /**
-   * Resets the session information if they are not defined or if $force is true
-   *
-   * @return false|\bbn\user\connection
-   */
-  public function delete_session($force=1){
-    if (!isset($this->cfg)) {
-      return false;
-    }
-    if ( $this->cfg['sess_name'] ) {
-      if ( empty($_SESSION[$this->cfg['sess_name']]) || $force ) {
-        $_SESSION[$this->cfg['sess_name']] = [];
-      }
-    }
-    else if ( empty($_SESSION) || $force ){
-      $_SESSION = [];
-    }
-    return $this;
-  }
-
-  /**
-   * Returns a given property of the session
-   *
-   * @param string $attr The property name
-   *
-   * @return mixed
-   */
-  public function get_session($attr){
-    if ( $this->has_session($attr) ){
-      $s = $this->get_full_session();
-      return $s[$this->cfg['sess_user']][$attr];
-    }
-  }
-
-  /**
-   * Checks if the given property exists in the app's session
-   *
-   * @return bool
-   */
-  public function has_session($attr){
-    $s = $this->get_full_session();
-    return (
-      is_string($attr) &&
-      isset($s[$this->cfg['sess_user']][$attr])
-    );
-  }
-
-  /**
-   * Saves the session state in the database
-   *
-   * @return \bbn\user\connection
-   */
-  public function save_session() {
-
-    // Sessions' table structure
-    $p =& $this->cfg['arch']['sessions'];
-
-    $this->db->insert_update($this->cfg['tables']['sessions'], [
-      $p['id_user'] => $this->id,
-      $p['sess_id'] => session_id(),
-      $p['ip_address'] => $this->ip_address,
-      $p['user_agent'] => $this->user_agent,
-      $p['auth'] => $this->auth ? 1 : 0,
-      $p['opened'] => 1,
-      $p['last_activity'] => date('Y-m-d H:i:s'),
-      $p['cfg'] => json_encode($this->sess_cfg)
-    ]);
-    return $this;
-  }
-
-  /**
-   * Destroys the session information and saves the session's new state
-   *
-   * @return \bbn\user\connection
-   */
-  public function close_session() {
-
-    // The sessions table's architecture
-    $p =& $this->cfg['arch']['sessions'];
-
-    $this->db->update($this->cfg['tables']['sessions'], [
-      $p['ip_address'] => $this->ip_address,
-      $p['user_agent'] => $this->user_agent,
-      $p['auth'] => $this->auth ? 1 : 0,
-      $p['opened'] => 0,
-      $p['last_activity'] => date('Y-m-d H:i:s'),
-      $p['cfg'] => json_encode($this->sess_cfg)
-    ],[
-      $p['id_user'] => $this->id,
-      $p['sess_id'] => session_id()
-    ]);
-    $this->auth = false;
-    $this->id = null;
-    //$this->user_cfg = null;
-    $this->unset_info();
-    $this->unset_cfg();
-    $this->unset_properties();
-    $this->unset_permissions();
-    //$this->sess_cfg = null;
-    $this->delete_session();
-    return $this;
-  }
-
-  /**
-   * Gets the user's configuration, whole if $attr is empty, only the corresponding property otherwise
-   *
-   * @return array|string|false
-   */
-  public function get_cfg($attr = ''){
-    if ( $this->check() ){
-      $s = $this->get_full_session();
-      return $s[$this->cfg['sess_user']];
-      /*
-      if ( !$this->user_cfg ){
-        $this->user_cfg = $this->get_session('cfg');
-      }
-      if ( empty($attr) ){
-        return $this->user_cfg;
-      }
-      else if ( isset($this->user_cfg[$attr]) ){
-        return $this->user_cfg[$attr];
-      }
-      */
-    }
-    return false;
-  }
-
-  /**
-   * Writes in the database the user's configuration (only if authenticated)
-   *
-   * @return \bbn\user\connection
-   */
-  public function save_cfg()
-  {
-    if ( $this->check() ){
-      $this->db->update(
-        $this->cfg['tables']['users'],
-        [$this->cfg['arch']['users']['cfg'] => json_encode($this->user_cfg)],
-        [$this->cfg['arch']['users']['id'] => $this->id]);
-    }
-    return $this;
-  }
-
-  /**
-   * Sets one or more properties of either the session or the user's configuration
-   *
-   * @param array|string $attr Attribute's name or properties' indexed array of values
-   * @param string|mixed $type Attribute's value or type of the config affected
-   *
-   * @return \bbn\user\connection
-   */
-  public function set_cfg($attr, $type='user')
-  {
-    $type = $type === 'sess' ? 'sess_cfg' : 'user_cfg';
-    // Possible to pass 2 arguments property's name/value
-    $args = func_get_args();
-    if ( (count($args) === 2) && is_string($attr) ){
-      $attr = [$args[0] => $args[1]];
-      $type = 'user_cfg';
-    }
-    foreach ( $attr as $prop => $val ){
-      // $this->auth can't be modified through this method
-      if ( ($prop !== 'auth') && is_string($prop) ){
-        $this->{$type}[$prop] = $val;
-      }
-    }
-    return $this;
-  }
-
-  /**
-   * Unsets a given property of either the session or the user's configuration as definde by $type
-   *
-   * @param string|array $attr the property's name
-   * @param string $type the configuration's type (user or sess)
-   *
-   * @return \bbn\user\connection
-   */
-  public function unset_cfg($attr=false, $type='user'){
-    $type = $type === 'sess' ? 'sess_cfg' : 'user_cfg';
-    // Possible to pass either a single property's name or a group of properties in an array
-    if ( is_string($attr) ){
-      $attr = [$attr];
-      $type = 'user_cfg';
-    }
-    foreach ( $attr as $prop ){
-      if ( ($prop !== 'auth') && isset($this->{$type}[$prop]) ){
-        unset($this->{$type}[$prop]);
-      }
-    }
-    return $this;
-  }
-
-  /**
-   * Sets the given properties to session
-   *
-   * @param string|array $attr
-   *
-   * @return \bbn\user\connection
-   */
-  public function set_properties($attr){
-    $args = func_get_args();
-    if ( (count($args) === 2) && is_string($attr) ){
-      $attr = [$args[0] => $args[1]];
-    }
-    $this->set_session($attr, 'properties');
-    return $this;
-  }
-
-  /**
-   * Unsets the given properties from session
-   * If you give an empty array it resets 'properties'
-   *
-   * @param string|array $attr
-   *
-   * @return \bbn\user\connection
-   */
-  public function unset_properties($attr=false){
-    if ( empty($attr) ){
-      $this->set_session(['properties' => []]);
-    }
-    else {
-      $this->unset_session($attr, 'properties');
-    }
-    return $this;
-  }
-
-  /**
-   * Gets properties from session
-   *
-   * @return array
-   */
-  public function get_properties(){
-    return $this->get_session('properties');
-  }
-
-  /**
-   * Sets the given info to session
-   *
-   * @param string|array $attr
-   *
-   * @return \bbn\user\connection
-   */
-  public function set_info($attr){
-    $args = func_get_args();
-    if ( (count($args) === 2) && is_string($attr) ){
-      $attr = [$args[0] => $args[1]];
-    }
-    $this->set_session($attr, 'info');
-    return $this;
-  }
-
-  /**
-   * Unsets the given info from session
-   * If you give an empty array it resets 'info'
-   *
-   * @param string|array $attrs
-   *
-   * @return \bbn\user\connection
-   */
-  public function unset_info($attr=false){
-    if ( empty($attr) ){
-      $this->set_session(['info' => []]);
-    }
-    else {
-      $this->unset_session($attr, 'info');
-    }
-    return $this;
-  }
-
-  /**
-   * Gets info from session
-   *
-   * @return array
-   */
-  public function get_info(){
-    return $this->get_session('info');
-  }
-
-  /**
-   * Sets the given auth to session
-   *
-   * @param string|array $attr
-   *
-   * @return \bbn\user\connection
-   */
-  public function set_auth2($attr){
-    $args = func_get_args();
-    if ( (count($args) === 2) && is_string($attr) ){
-      $attr = [$args[0] => $args[1]];
-    }
-    $this->set_session($attr, 'auth');
-    return $this;
-  }
-
-  /**
-   * Unsets the given auth from session
-   * If you give an empty array it resets 'auth'
-   *
-   * @param string|array $attrs
-   *
-   * @return \bbn\user\connection
-   */
-  public function unset_auth($attr=false){
-    if ( empty($attr) ){
-      $this->set_session(['auth' => []]);
-    }
-    else {
-      $this->unset_session($attr, 'auth');
-    }
-    return $this;
-  }
-
-  /**
-   * Gets auth from session
-   *
-   * @return array
-   */
-  public function get_auth(){
-    return $this->get_session('auth');
-  }
-
-  /**
-   * Sets the given permissions to session
-   *
-   * @param string|array $attr
-   *
-   * @return \bbn\user\connection
-   */
-  public function set_permissions($attr){
-    $args = func_get_args();
-    if ( (count($args) === 2) && is_string($attr) ){
-      $attr = [$args[0] => $args[1]];
-    }
-    $this->set_session($attr, 'permissions');
-    return $this;
-  }
-
-  /**
-   * Unsets the given permissions from session
-   * If you give an empty array it resets 'permissions'
-   *
-   * @param string|array $attrs
-   *
-   * @return \bbn\user\connection
-   */
-  public function unset_permissions($attr=false){
-    if ( empty($attr) ){
-      $this->set_session(['permissions' => []]);
-    }
-    else {
-      $this->unset_session($attr, 'permissions');
-    }
-    return $this;
-  }
-
-  /**
-   * Gets permissions from session
-   *
-   * @return array
-   */
-  public function get_permissions2(){
-    return $this->get_session('permissions');
-  }
-
-
-
 }
-
