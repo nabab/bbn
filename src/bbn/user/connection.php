@@ -497,8 +497,8 @@ class connection
 		if ( isset($credentials['user'],$credentials['pass']) ) {
       // Table structure
 			$arch =& $this->cfg['arch'];
-      
-      // Database Query 
+
+      // Database Query
       if ( $d = $this->db->rselect(
               $this->cfg['tables']['users'],
               $this->fields,

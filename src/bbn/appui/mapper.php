@@ -1002,7 +1002,7 @@ class mapper{
         ADD CONSTRAINT `{$this->prefix}dbs_ibfk_1` FOREIGN KEY (`id_client`) REFERENCES `{$this->prefix}clients` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
         ALTER TABLE `{$this->prefix}history`
-        ADD CONSTRAINT `{$this->prefix}history_ibfk_1` FOREIGN KEY (`id_user`) REFERENCES `apst_utilisateurs` (`id`) ON UPDATE NO ACTION,
+        ADD CONSTRAINT `{$this->prefix}history_ibfk_1` FOREIGN KEY (`id_user`) REFERENCES `{$this->prefix}users` (`id`) ON UPDATE NO ACTION,
         ADD CONSTRAINT `{$this->prefix}history_ibfk_2` FOREIGN KEY (`column`) REFERENCES `{$this->prefix}columns` (`id`) ON UPDATE CASCADE;
 
         ALTER TABLE `{$this->prefix}keys`
