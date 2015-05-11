@@ -267,7 +267,7 @@ class mvcv2 implements \bbn\mvc\api{
 				else if ( isset($this->routes[$fpath]) ){
 					$s1 = strlen($path);
 					$s2 = strlen($fpath);
-					$add = $s1 !== $s2 ? substr($path, $s2) : '';
+					$add = ($s1 !== $s2) ? substr($path, $s2) : '';
 					$this->path = (is_array($this->routes[$fpath]) ? $this->routes[$fpath][0] :
 							$this->routes[$fpath]).$add;
 				}

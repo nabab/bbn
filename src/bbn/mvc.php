@@ -24,7 +24,7 @@ class mvc extends obj
 
 	private
 	/**
-	 * Is set to null while not routed, then 1 if routing was sucessful, and false otherwise.
+	 * Is set to null while not routed, then 1 if routing was successful, and false otherwise.
 	 * @var null|boolean
 	 */
 		$is_routed,
@@ -49,7 +49,7 @@ class mvc extends obj
      */
     $path,
     /**
-     * A path to be prepended to all views and models paths
+     * A path to be prepended to all views and models paths not starting with /
      * @var null|string
      */
     $prepath,
@@ -780,16 +780,16 @@ class mvc extends obj
 			if ( empty($path) ){
 				$path = $this->dest;
 			}
-      if ( $this->prepath ){
+      if ( $this->prepath && (strpos($path, '/') !== 0) ){
         $path = $this->prepath.$path;
       }
 			if ( isset($this->outputs[$mode]) ){
 				$ext = explode(',',$this->outputs[$mode]);
 				/* First we look into the loaded_views if it isn't there already */
 				foreach ( $ext as $e ){
-					$file1 = $mode.'/'.$path.'.'.$e;
+					$file1 = \bbn\str\text::parse_path($mode.'/'.$path.'.'.$e);
 					$t = explode('/',$path);
-					$file2 = $mode.'/'.$path.'/'.array_pop($t).'.'.$e;
+					$file2 = \bbn\str\text::parse_path($mode.'/'.$path.'/'.array_pop($t).'.'.$e);
 					if ( isset($this->loaded_views[$file1]) ){
 						return $this->loaded_views[$file1];
 					}

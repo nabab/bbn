@@ -763,6 +763,9 @@ class text
 	public static function parse_path($path)
 	{
     $path = str_replace('\\', '/', self::cast($path));
+    while ( strpos($path, '//') !== false ) {
+      $path = str_replace('//', '/', $path);
+    }
     if ( strpos($path, '../') !== false ){
       return '';
     }
