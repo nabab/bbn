@@ -43,11 +43,16 @@ class mvc extends obj
 	 * @var null|string
 	 */
 		$dir,
-	/**
-	 * The path to the controller.
-	 * @var null|string
-	 */
-		$path,
+    /**
+     * The path to the controller.
+     * @var null|string
+     */
+    $path,
+    /**
+     * A path to be prepended to all views and models paths
+     * @var null|string
+     */
+    $prepath,
 	/**
 	 * The checkers files (with full path)
    * If any they will be checked before the controller
@@ -141,23 +146,17 @@ class mvc extends obj
 	 * List of possible outputs with their according file extension possibilities
 	 * @var array
 	 */
-		$outputs = ['dom'=>'html','html'=>'html','image'=>'jpg,jpeg,gif,png,svg','json'=>'json','text'=>'txt','xml'=>'xml','js'=>'js','css'=>'css','less'=>'less'],
-
-	/**
-	 * List of possible and existing universal controller.
-	 * First every item is set to one, then if a universal controller is needed, self::universal_controller() will look for it and sets the according array element to the file name if it's found and to false otherwise.
-	 * @var array
-	 */
-		$ucontrollers = [
-      'dom' => 1,
-      'html' => 1,
-      'image' => 1,
-      'json' => 1,
-      'text' => 1,
-      'xml' => 1,
-      'css' => 1,
-      'js' => 1
+		$outputs = [
+      'dom'=>'html',
+      'html'=>'html',
+      'image'=>'jpg,jpeg,gif,png,svg',
+      'json'=>'json','text'=>'txt',
+      'xml'=>'xml',
+      'js'=>'js',
+      'css'=>'css',
+      'less'=>'less'
     ];
+
 	const
 	/**
 	 * Path to the controllers.
@@ -172,13 +171,13 @@ class mvc extends obj
 	 */
 		vpath = 'mvc/views/';
 
-	/**
-	 * This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).
-	 *
-	 * @param object | string $db The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books/466565 or html/home)</em>
-	 * @param string | object $parent The parent controller</em>
-	 * @return bool
-	 */
+  /**
+   * This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).
+   *
+   * @param object | string $db The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books/466565 or html/home)</em>
+   * @param string | object $parent The parent controller</em>
+   * @param array $data
+   */
 	public function __construct($db, $parent='', $data = [])
 	{
 		// The initial call should only have $db as parameter
@@ -284,7 +283,6 @@ class mvc extends obj
 			$this->original_mode =& $parent->original_mode;
 			$this->known_controllers =& $parent->known_controllers;
 			$this->loaded_views =& $parent->loaded_views;
-			$this->ucontrollers =& $parent->ucontrollers;
 			$this->arguments = [];
 			if ( $this->has_data($data) ){
 				$this->data = $data;
@@ -379,23 +377,6 @@ class mvc extends obj
 			die("The template $p doesn't exist");
 		}
 		return $this->loaded_phps[$p];
-	}
-
-	/**
-	 * This fetches the universal controller for the according mode if it exists.
-	 *
-	 * @param string $c The mode (dom, html, json, txt, xml...)
-	 * @return string controller full name
-	 */
-	private function universal_controller($c)
-	{
-		if ( !isset($this->ucontrollers[$c]) ){
-			return false;
-		}
-		if ( $this->ucontrollers[$c] === 1 ){
-			$this->ucontrollers[$c] = is_file(self::cpath.$c.'.php') ? self::cpath.$c.'.php' : false;
-		}
-		return $this->ucontrollers[$c];
 	}
 
 	/**
@@ -550,6 +531,16 @@ class mvc extends obj
 		}
 		return 1;
 	}
+
+  public function add_prepath($path){
+    if ( $this->check_path($path) ){
+      $this->prepath = $path;
+      if ( substr($this->prepath, -1) !== '/' ){
+        $this->prepath = $this->prepath.'/';
+      }
+    }
+    return $this;
+  }
 
 	/**
 	 * This will fetch the route to the controller for a given path. Chainable
@@ -789,6 +780,9 @@ class mvc extends obj
 			if ( empty($path) ){
 				$path = $this->dest;
 			}
+      if ( $this->prepath ){
+        $path = $this->prepath.$path;
+      }
 			if ( isset($this->outputs[$mode]) ){
 				$ext = explode(',',$this->outputs[$mode]);
 				/* First we look into the loaded_views if it isn't there already */
@@ -889,7 +883,10 @@ class mvc extends obj
 			if ( !isset($path) ){
 				$path = $this->dest;
 			}
-			if ( strpos($path,'..') === false && is_file(self::mpath.$path.'.php') ){
+      if ( $this->prepath ){
+        $path = $this->prepath.$path;
+      }
+			if ( $this->check_path($path) && is_file(self::mpath.$path.'.php') ){
 				$db = isset($db) ? $db : $this->db;
 				$last_model_file = self::mpath.$path.'.php';
 				$data = isset($d) ? $d : $this->data;

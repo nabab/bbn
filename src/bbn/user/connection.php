@@ -880,4 +880,5 @@ class connection
 		}
 		return false;
 	}
+
 }

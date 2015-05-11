@@ -143,7 +143,6 @@ class controller implements api{
 			$this->get = $this->mvc->get_get();
 			$this->files = $this->mvc->get_files();
 			$this->params = $this->mvc->get_params();
-
 			$this->route();
 		}
 	}
@@ -163,23 +162,6 @@ class controller implements api{
 			die("The view $p doesn't exist");
 		}
 		return $this->loaded_views[$p];
-	}
-
-	/**
-	 * This fetches the universal controller for the according mode if it exists.
-	 *
-	 * @param string $c The mode (doc, html, json, txt, xml...)
-	 * @return string controller full name
-	 */
-	private function universal_controller($c)
-	{
-		if ( !isset($this->ucontrollers[$c]) ){
-			return false;
-		}
-		if ( $this->ucontrollers[$c] === 1 ){
-			$this->ucontrollers[$c] = is_file(self::root.$c.'.php') ? self::root.$c.'.php' : false;
-		}
-		return $this->ucontrollers[$c];
 	}
 
 	/**
@@ -204,7 +186,7 @@ class controller implements api{
 	}
 
 	public function exists(){
-		return $this->dest;
+		return !empty($this->dest);
 	}
 
 	/**
@@ -321,9 +303,11 @@ class controller implements api{
 	 */
 	private function route()
 	{
-		if ( !$this->is_routed && self::check_path($this->path) )
-		{
+		if ( !$this->is_routed && self::check_path($this->path) ){
+      // This function is executed only once
 			$this->is_routed = 1;
+      // Checking which directory must be checked
+      if ( $this->mode)
 			$fpath = $this->path;
 			// This var will allow to go through the loop once even if the path is empty and to check
 			// for indexes files

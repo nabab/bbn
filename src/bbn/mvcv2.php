@@ -29,11 +29,16 @@ class mvcv2 implements \bbn\mvc\api{
 	use mvc\common;
 
 	private
-		/**
-		 * Is set to null while not routed, then 1 if routing was successful, and false otherwise.
-		 * @var null|boolean
-		 */
-		$is_routed,
+    /**
+     * Is set to null while not routed, then 1 if routing was successful, and false otherwise.
+     * @var null|boolean
+     */
+    $is_routed,
+    /**
+     * The current controller
+     * @var null|\bbn\mvc\controller
+     */
+    $controller,
 		/**
 		 * The list of used controllers with their corresponding request, so we don't have to look for them again.
 		 * @var array
@@ -84,7 +89,16 @@ class mvcv2 implements \bbn\mvc\api{
 		 * List of possible outputs with their according file extension possibilities
 		 * @var array
 		 */
-		$outputs = ['doc'=>'html','html'=>'html','image'=>'jpg,jpeg,gif,png,svg','json'=>'json','text'=>'txt','xml'=>'xml','js'=>'js','css'=>'css','less'=>'less'],
+    $outputs = [
+      'dom'=>'html',
+      'html'=>'html',
+      'image'=>'jpg,jpeg,gif,png,svg',
+      'json'=>'json','text'=>'txt',
+      'xml'=>'xml',
+      'js'=>'js',
+      'css'=>'css',
+      'less'=>'less'
+    ],
 		/**
 		 * Determines if it is sent through the command line
 		 * @var boolean
@@ -101,22 +115,7 @@ class mvcv2 implements \bbn\mvc\api{
 		 * The output object
 		 * @var null|object
 		 */
-		$obj,
-		/**
-		 * List of possible and existing universal controller.
-		 * First every item is set to one, then if a universal controller is needed, self::universal_controller() will look for it and sets the according array element to the file name if it's found and to false otherwise.
-		 * @var array
-		 */
-		$ucontrollers = [
-		'doc' => 1,
-		'html' => 1,
-		'image' => 1,
-		'json' => 1,
-		'text' => 1,
-		'xml' => 1,
-		'css' => 1,
-		'js' => 1
-	];
+		$obj;
 
 	// These strings are forbidden to use in URL
 	private static $reserved = ['index', '_private', '_common', '_htaccess'];
@@ -242,7 +241,13 @@ class mvcv2 implements \bbn\mvc\api{
 		return $this->mode;
 	}
 
-	/**
+  public function get_db(){
+    if ( $this->check() ){
+      return $this->db;
+    }
+  }
+
+  /**
 	 * This will fetch the route to the controller for a given path. Chainable
 	 *
 	 * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
@@ -391,7 +396,9 @@ class mvcv2 implements \bbn\mvc\api{
 	 */
 	public function process()
 	{
-		return $this->controller->process();
+    if ( $this->check() && $this->controller ) {
+      return $this->controller->process();
+    }
 	}
 
 	/**
