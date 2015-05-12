@@ -21,7 +21,7 @@ namespace bbn;
  */
 
 if ( !defined("BBN_DEFAULT_MODE") ){
-	define("BBN_DEFAULT_MODE", "json");
+	define("BBN_DEFAULT_MODE", 'content');
 }
 
 class mvcv2 implements \bbn\mvc\api{
@@ -90,14 +90,14 @@ class mvcv2 implements \bbn\mvc\api{
 		 * @var array
 		 */
     $outputs = [
-      'dom'=>'html',
-      'html'=>'html',
-      'image'=>'jpg,jpeg,gif,png,svg',
-      'json'=>'json','text'=>'txt',
-      'xml'=>'xml',
-      'js'=>'js',
-      'css'=>'css',
-      'less'=>'less'
+      'container' => 'html',
+      'content' => 'json',
+      'image' => 'jpg,jpeg,gif,png,svg',
+      'json' => 'json','text'=>'txt',
+      'xml' => 'xml',
+      'js' => 'js',
+      'css' => 'css',
+      'less' => 'less'
     ],
 		/**
 		 * Determines if it is sent through the command line
@@ -160,12 +160,12 @@ class mvcv2 implements \bbn\mvc\api{
 					$this->post = array_map(function($a){
 						return \bbn\str\text::correct_types($a);
 					}, $_POST);
-					$this->mode = BBN_DEFAULT_MODE;
 				}
+        $this->set_mode(BBN_DEFAULT_MODE);
 				// If no post, assuming to be in an HTML document
-				else{
-					$this->mode = 'doc';
-				}
+        if ( isset($this->post['appui']) ){
+          $this->set_mode($this->post['appui']);
+        }
 				if ( count($_GET) > 0 ){
 					$this->get = array_map(function($a){
 						return \bbn\str\text::correct_types($a);
@@ -258,6 +258,8 @@ class mvcv2 implements \bbn\mvc\api{
 		if ( !$this->is_routed && self::check_path($path) ){
 			$this->is_routed = 1;
 			$fpath = $path;
+
+      if ( count($this->post) )
 
 			// We go through each path, starting by the longest until it's empty
 			while ( strlen($fpath) > 0 ){

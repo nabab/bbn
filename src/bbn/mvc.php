@@ -780,7 +780,7 @@ class mvc extends obj
 			if ( empty($path) ){
 				$path = $this->dest;
 			}
-      if ( $this->prepath && (strpos($path, '/') !== 0) ){
+      else if ( $this->prepath && (strpos($path, '/') !== 0) ){
         $path = $this->prepath.$path;
       }
 			if ( isset($this->outputs[$mode]) ){
@@ -883,7 +883,7 @@ class mvc extends obj
 			if ( !isset($path) ){
 				$path = $this->dest;
 			}
-      if ( $this->prepath ){
+      else if ( $this->prepath && (strpos($path, '/') !== 0) ){
         $path = $this->prepath.$path;
       }
 			if ( $this->check_path($path) && is_file(self::mpath.$path.'.php') ){
@@ -924,7 +924,7 @@ class mvc extends obj
 	{
     foreach ( $this->checkers as $chk ){
       // If a checker file returns false, the controller is not processed
-      if ( !include_once($chk) ){
+      if ( !include($chk) ){
         return false;
       }
     }

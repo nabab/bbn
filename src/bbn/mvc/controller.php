@@ -73,16 +73,6 @@ class controller implements api{
 		 */
 		$data = [],
 		/**
-		 * The file extension of the view
-		 * @var null|string
-		 */
-		$ext,
-		/**
-		 * The request sent to the server to get the actual controller.
-		 * @var null|string
-		 */
-		$url,
-		/**
 		 * @var array $_POST
 		 */
 		$post = [],
@@ -134,9 +124,10 @@ class controller implements api{
 	{
 		// The initial call should only have $db as parameter
 		if ( defined('BBN_CUR_PATH') ) {
-			$this->mvc =& $mvc;
+			$this->mvc = $mvc;
 			$this->path = $path;
 			$this->data = is_array($data) ? $data : [];
+      die(var_dump("aaa", $mvc->get_mode()));
 			// When using CLI a first parameter can be used as route,
 			// a second JSON encoded can be used as $this->post
 			$this->post = $this->mvc->get_post();
@@ -307,7 +298,6 @@ class controller implements api{
       // This function is executed only once
 			$this->is_routed = 1;
       // Checking which directory must be checked
-      if ( $this->mode)
 			$fpath = $this->path;
 			// This var will allow to go through the loop once even if the path is empty and to check
 			// for indexes files

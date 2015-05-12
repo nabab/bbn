@@ -111,7 +111,7 @@ You can click the following link to access directly your account:<br>
    * @param object|false $mailer A mail object with the send method
    * 
 	 */
-  public function __construct(\bbn\user\connection &$obj, $mailer=false)
+  public function __construct(\bbn\user\connection $obj, $mailer=false)
   {
     if ( is_object($obj) && method_exists($obj, 'get_class_cfg') ){
       if ( is_object($mailer) && method_exists($mailer, 'send') ){
