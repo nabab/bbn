@@ -127,7 +127,7 @@ class controller implements api{
 			$this->mvc = $mvc;
 			$this->path = $path;
 			$this->data = is_array($data) ? $data : [];
-      die(var_dump("aaa", $mvc->get_mode()));
+      $this->mode = $this->mvc->get_mode();
 			// When using CLI a first parameter can be used as route,
 			// a second JSON encoded can be used as $this->post
 			$this->post = $this->mvc->get_post();
@@ -263,16 +263,16 @@ class controller implements api{
 			if ( !is_string($p) ){
 				return false;
 			}
-			if ( is_file(self::root.$p.'.php') ){
-				$this->controller = self::root.$p.'.php';
+			if ( is_file(self::root.$this->mode.'/'.$p.'.php') ){
+				$this->controller = self::root.$this->mode.'/'.$p.'.php';
 			}
 			if ( $this->controller ){
 				// if the current directory of the controller, or any directory above it in the controllers' filesystem, has a file called _htaccess.php, it will be executed and expected to return a non false value in order to authorize the loading of the controller
 				$parts = explode('/', $this->controller);
 				$path = self::root;
 				foreach ( $parts as $pt ){
-					if ( is_file($path.'_htaccess.php') ){
-						array_push($this->checkers, $path.'/_htaccess.php');
+					if ( is_file($path.'_ctrl.php') ){
+						array_push($this->checkers, $path.'/_ctrl.php');
 					}
 					$path .= $pt.'/';
 				}
@@ -428,8 +428,7 @@ class controller implements api{
 	 *
 	 * @return void
 	 */
-	public function process()
-	{
+	public function process(){
 		if ( $this->controller && is_null($this->is_controlled) ){
 			$this->obj = new \stdClass();
 			$this->control();
@@ -667,7 +666,7 @@ class controller implements api{
 	}
 
 	public function get_mode(){
-		return $this->mvc->get_mode();
+		return $this->mode;
 	}
 
 	public function set_mode($mode){

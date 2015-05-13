@@ -21,6 +21,7 @@ trait common {
   {
     $ar = func_get_args();
     foreach ( $ar as $a ){
+      $a = \bbn\str\text::parse_path($a);
       if ( !is_string($a) ||
         (strpos($a,'./') !== false) ||
         (strpos($a,'/') === 0) ){

@@ -40,55 +40,45 @@ class mvcv2 implements \bbn\mvc\api{
      */
     $controller,
 		/**
-		 * The list of used controllers with their corresponding request, so we don't have to look for them again.
-		 * @var array
-		 */
-		$known_controllers = [],
 		/**
 		 * The list of views which have been loaded. We keep their content in an array to not have to include the file again. This is useful for loops.
 		 * @var array
 		 */
 		$loaded_views = [],
+    /**
+     * @var \bbn\db\connection Database object
+     */
+    $db,
+    /**
+     * @var \bbn\mvc\environment Environment object
+     */
+    $env,
+    /**
+     * @var \bbn\mvc\router Database object
+     */
+    $router;
+
+	public
 		/**
-		 * The list of views which have been loaded. We keep their content in an array to not have to include the file again. This is useful for loops.
-		 * @var array
+		 * An external object that can be filled after the object creation and can be used as a global with the function add_inc
+		 * @var stdClass
 		 */
-		$params = [],
+		$inc,
+    // Same
+    $o,
 		/**
-		 * The path sent to the main controller.
-		 * @var null|string
+		 * The output object
+		 * @var null|object
 		 */
-		$path,
-		/**
-		 * @var \bbn\db\connection Database object
-		 */
-		$db,
-		/**
-		 * The mode of the output (doc, html, json, txt, xml...)
-		 * @var null|string
-		 */
-		$mode,
-		/**
-		 * The request sent to the server to get the actual controller.
-		 * @var null|string
-		 */
-		$url,
-		/**
-		 * @var array $_POST
-		 */
-		$post = [],
-		/**
-		 * @var array $_GET
-		 */
-		$get = [],
-		/**
-		 * @var array $_FILES
-		 */
-		$files = [],
-		/**
-		 * List of possible outputs with their according file extension possibilities
-		 * @var array
-		 */
+		$obj;
+
+	// These strings are forbidden to use in URL
+	public static
+    $reserved = ['index', '_private', '_common', '_htaccess'],
+    /**
+     * List of possible outputs with their according file extension possibilities
+     * @var array
+     */
     $outputs = [
       'container' => 'html',
       'content' => 'json',
@@ -98,27 +88,7 @@ class mvcv2 implements \bbn\mvc\api{
       'js' => 'js',
       'css' => 'css',
       'less' => 'less'
-    ],
-		/**
-		 * Determines if it is sent through the command line
-		 * @var boolean
-		 */
-		$cli;
-
-	public
-		/**
-		 * An external object that can be filled after the object creation and can be used as a global with the function add_inc
-		 * @var stdClass
-		 */
-		$inc,
-		/**
-		 * The output object
-		 * @var null|object
-		 */
-		$obj;
-
-	// These strings are forbidden to use in URL
-	private static $reserved = ['index', '_private', '_common', '_htaccess'];
+    ];
 
 	/**
 	 * This should be called only once from within the app
@@ -129,6 +99,7 @@ class mvcv2 implements \bbn\mvc\api{
 	public function __construct($db = null, $routes = []){
 		// Correspond to the path after the URL to the application's public root (set to '/' for a domain's root)
 		if ( defined('BBN_CUR_PATH') ){
+      $this->env = new \bbn\mvc\environment();
 			if ( is_object($db) && ( $class = get_class($db) ) && ( $class === 'PDO' || strpos($class, 'bbn\\db\\') !== false ) ){
 				$this->db = $db;
 			}
@@ -136,109 +107,38 @@ class mvcv2 implements \bbn\mvc\api{
 				$this->db = false;
 			}
 			$this->inc = new \stdClass();
-			$this->routes = $routes;
-			$this->cli = (php_sapi_name() === 'cli');
-			// When using CLI a first parameter can be used as route,
-			// a second JSON encoded can be used as $this->post
-			if ( $this->cli ){
-				$this->mode = 'cli';
-				global $argv;
-				if ( isset($argv[1]) ){
-					$this->set_params($argv[1]);
-					if ( isset($argv[2]) && json_decode($argv[2]) ){
-						$this->post = array_map(function($a){
-							return \bbn\str\text::correct_types($a);
-						}, json_decode($argv[2], 1));
-					}
-				}
-			}
-			// Non CLI request
-			else{
-				// Data are "normalized" i.e. types are changed through str\text::correct_types
-				// If data is post as in the appui SPA framework, mode is assumed to be BBN_DEFAULT_MODE, json by default
-				if ( count($_POST) > 0 ){
-					$this->post = array_map(function($a){
-						return \bbn\str\text::correct_types($a);
-					}, $_POST);
-				}
-        $this->set_mode(BBN_DEFAULT_MODE);
-				// If no post, assuming to be in an HTML document
-        if ( isset($this->post['appui']) ){
-          $this->set_mode($this->post['appui']);
-        }
-				if ( count($_GET) > 0 ){
-					$this->get = array_map(function($a){
-						return \bbn\str\text::correct_types($a);
-					}, $_GET);
-				}
-				// Rebuilding the $_FILES array into $this->files in a more logical structure
-				if ( count($_FILES) > 0 ){
-					$this->mode = 'file';
-					foreach ( $_FILES as $n => $f ){
-						if ( is_array($f['name']) ){
-							$this->files[$n] = [];
-							foreach ( $f['name'] as $i => $v ){
-								array_push($this->files[$n], [
-									'name' => $v,
-									'tmp_name' => $f['tmp_name'][$i],
-									'type' => $f['type'][$i],
-									'error' => $f['error'][$i],
-									'size' => $f['size'][$i],
-								]);
-							}
-						}
-						else{
-							$this->files[$n] = $f;
-						}
-					}
-				}
-				if ( isset($_SERVER['REQUEST_URI']) &&
-					( BBN_CUR_PATH === '' || strpos($_SERVER['REQUEST_URI'],BBN_CUR_PATH) !== false ) ){
-					$url = explode("?", urldecode($_SERVER['REQUEST_URI']))[0];
-					$this->set_params(substr($url, strlen(BBN_CUR_PATH)));
-				}
-			}
-			$this->url = implode('/',$this->params);
-			$path = $this->url;
-			$this->route($path);
+      $this->o = $this->inc;
+      $this->route();
+      die(var_dump($this->env));
 		}
 	}
 
+  public function route($routes=[]){
+    $this->router = new \bbn\mvc\router($this, $routes);
+  }
+
 	public function get_url(){
-		return $this->url;
+		return $this->env->get_url();
 	}
 
 	public function get_params(){
-		return $this->params;
+		return $this->env->get_params();
 	}
 
 	public function get_post(){
-		return $this->post;
+		return $this->env->get_post();
 	}
 
 	public function get_get(){
-		return $this->get;
+		return $this->env->get_get();
 	}
 
 	public function get_files(){
-		return $this->files;
+		return $this->env->get_files();
 	}
 
 	public function get_mode(){
-		return $this->mode;
-	}
-
-	/**
-	 * Change the output mode (content-type)
-	 *
-	 * @param $mode
-	 * @return string $this->mode
-	 */
-	public function set_mode($mode){
-		if ( isset($this->outputs[$mode]) && ($this->mode !== 'cli') ) {
-			$this->mode = $mode;
-		}
-		return $this->mode;
+		return $this->env->get_mode();
 	}
 
   public function get_db(){
@@ -247,81 +147,8 @@ class mvcv2 implements \bbn\mvc\api{
     }
   }
 
-  /**
-	 * This will fetch the route to the controller for a given path. Chainable
-	 *
-	 * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
-	 * @return void
-	 */
-	private function route($path='')
-	{
-		if ( !$this->is_routed && self::check_path($path) ){
-			$this->is_routed = 1;
-			$fpath = $path;
-
-      if ( count($this->post) )
-
-			// We go through each path, starting by the longest until it's empty
-			while ( strlen($fpath) > 0 ){
-				if ( isset($this->known_controllers[$fpath]) ){
-
-				}
-				else if ( isset($this->routes[$fpath]) ){
-					$s1 = strlen($path);
-					$s2 = strlen($fpath);
-					$add = ($s1 !== $s2) ? substr($path, $s2) : '';
-					$this->path = (is_array($this->routes[$fpath]) ? $this->routes[$fpath][0] :
-							$this->routes[$fpath]).$add;
-				}
-				else{
-					$fpath = strpos($fpath,'/') === false ? '' : substr($this->path,0,strrpos($fpath,'/'));
-				}
-			}
-			if ( !isset($this->path) ) {
-				$this->path = $path;
-			}
-
-			$this->controller = new \bbn\mvc\controller($this, $this->path);
-			if ( !$this->controller->exists() ){
-				if ( isset($this->routes['default']) ) {
-					$this->controller = new \bbn\mvc\controller($this, $this->routes['default'] . '/' . $this->path);
-				}
-				else {
-					$this->controller = new \bbn\mvc\controller($this, '404');
-					if ( !$this->controller->exists() ){
-						header('HTTP/1.0 404 Not Found');
-						exit();
-					}
-				}
-			}
-		}
-		return $this;
-	}
-
-	private function set_params($path)
-	{
-		$this->params = [];
-		$tmp = explode('/', $path);
-		$num_params = count($tmp);
-		foreach ( $tmp as $t ){
-			if ( !empty($t) ){
-				if ( in_array($t, self::$reserved) ){
-					die("The controller you are asking for contains one of the following reserved strings: ".
-						implode(", ", self::$reserved));
-				}
-				array_push($this->params, $t);
-			}
-		}
-	}
-
-	/**
-	 * Returns true if called from CLI/Cron, false otherwise
-	 *
-	 * @return boolean
-	 */
-	public function is_cli()
-	{
-		return $this->cli;
+	public function is_cli(){
+		return $this->env->is_cli();
 	}
 
 	/**

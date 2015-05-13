@@ -156,9 +156,7 @@ class mapper{
 				$this->prefix .= '_';
 			}
 			// If there's no client table we presume none exist and we create the schemas
-			if ( !in_array($this->prefix.'clients', $this->db->get_tables()) ){
-				$this->create_tables();
-			}
+			$this->create_tables();
 		}
     else{
       throw new Exception;
@@ -780,7 +778,7 @@ class mapper{
       }
       
 			foreach ( $schema as $t => $vars ){
-				if ( (strpos($t, '.'.$this->prefix) === false) && isset($vars['fields']) ){
+				if ( isset($vars['fields']) ){
           $tmp = explode(".", $t);
           $db = $tmp[0];
           $table = $tmp[1];
@@ -829,7 +827,7 @@ class mapper{
 				}
 			}
 			foreach ( $schema as $t => $vars ){
-				if ( (strpos($t, '.'.$this->prefix) === false) && isset($vars['keys']) && is_array($vars['keys']) ){
+				if ( isset($vars['keys']) && is_array($vars['keys']) ){
           foreach ( $vars['keys'] as $k => $arr ){
             $pos = 1;
             foreach ( $arr['columns'] as $c ){
