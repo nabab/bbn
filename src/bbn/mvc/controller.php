@@ -284,64 +284,6 @@ class controller implements api{
 		return 1;
 	}
 
-
-
-	/**
-	 * This will fetch the route to the controller for a given path. Chainable
-	 *
-	 * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
-	 * @return void
-	 */
-	private function route()
-	{
-		if ( !$this->is_routed && self::check_path($this->path) ){
-      // This function is executed only once
-			$this->is_routed = 1;
-      // Checking which directory must be checked
-			$fpath = $this->path;
-			// This var will allow to go through the loop once even if the path is empty and to check
-			// for indexes files
-			$index = null;
-
-			// We go through each path, starting by the longest until it's empty
-			while ( is_null($index) || (strlen($fpath) > 0) ){
-				if ( $index === false ){
-					$index = 1;
-				}
-				else{
-					$fpath = empty($fpath) ? 'index' : $fpath.'/index';
-					$index = false;
-				}
-				if ( $this->get_controller($fpath) ){
-					if ( strlen($fpath) < strlen($this->path) ){
-						$this->arguments = [];
-						$args = explode('/', substr($this->path, strlen($fpath)));
-						foreach ( $args as $a ){
-							if ( \bbn\str\text::is_number($a) ){
-								$a = (int)$a;
-							}
-							array_push($this->arguments, $a);
-						}
-						// Trimming the array
-						while ( empty($this->arguments[0]) ){
-							array_shift($this->arguments);
-						}
-						$t = end($this->arguments);
-						while ( empty($t) ){
-							array_pop($this->arguments);
-							$t = end($this->arguments);
-						}
-					}
-					break;
-				}
-				else{
-					$fpath = strpos($fpath,'/') === false ? '' : substr($this->path,0,strrpos($fpath,'/'));
-				}
-			}
-		}
-		return $this;
-	}
-
 	/**
 	 * This will reroute a controller to another one seemlessly. Chainable
 	 *

@@ -37,14 +37,4 @@ trait common {
     die($msg);
   }
 
-  /**
-   * Checks whether a corresponding file has been found or not.
-   *
-   * @return bool
-   */
-  public function check()
-  {
-    return is_string($this->path);
-  }
-
 }

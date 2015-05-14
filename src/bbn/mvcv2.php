@@ -30,11 +30,6 @@ class mvcv2 implements \bbn\mvc\api{
 
 	private
     /**
-     * Is set to null while not routed, then 1 if routing was successful, and false otherwise.
-     * @var null|boolean
-     */
-    $is_routed,
-    /**
      * The current controller
      * @var null|\bbn\mvc\controller
      */
@@ -81,13 +76,14 @@ class mvcv2 implements \bbn\mvc\api{
      */
     $outputs = [
       'container' => 'html',
-      'content' => 'json',
+      'content' => 'json'/*,
       'image' => 'jpg,jpeg,gif,png,svg',
-      'json' => 'json','text'=>'txt',
+      'json' => 'json',
+      'text'=>'txt',
       'xml' => 'xml',
       'js' => 'js',
       'css' => 'css',
-      'less' => 'less'
+      'less' => 'less'*/
     ];
 
 	/**
@@ -108,13 +104,30 @@ class mvcv2 implements \bbn\mvc\api{
 			}
 			$this->inc = new \stdClass();
       $this->o = $this->inc;
-      $this->route();
-      die(var_dump($this->env));
+      $this->router = new \bbn\mvc\router($this, $routes);
 		}
 	}
 
-  public function route($routes=[]){
-    $this->router = new \bbn\mvc\router($this, $routes);
+  /**
+   * Checks whether a corresponding file has been found or not.
+   *
+   * @return bool
+   */
+  public function check()
+  {
+    return is_object($this->router);
+  }
+
+  public function route(){
+    if ( $this->check() ){
+      $this->path = $this->router->route();
+      return $this->path;
+    }
+  }
+
+  public function add_routes(array $routes){
+    $this->routes = \bbn\tools::merge_arrays($this->routes, $routes);
+    return $this;
   }
 
 	public function get_url(){
@@ -225,8 +238,10 @@ class mvcv2 implements \bbn\mvc\api{
 	 */
 	public function process()
 	{
-    if ( $this->check() && $this->controller ) {
-      return $this->controller->process();
+    var_dump("path", $this->path, $this->check());
+    if ( $this->check() && $this->path ) {
+      $ctrl = new \bbn\mvc\controller($this);
+      return $ctrl->process();
     }
 	}
 
