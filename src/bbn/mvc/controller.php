@@ -1,25 +1,6 @@
 <?php
 
-/* 
- * Copyright (C) 2014 BBN
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 namespace bbn\mvc;
-
-use bbn\model;
 
 class controller implements api{
 
@@ -31,11 +12,6 @@ class controller implements api{
 		 * @var \bbn\mvcv2
 		 */
 		$mvc,
-		/**
-		 * Is set to null while not routed, then 1 if routing was sucessful, and false otherwise.
-		 * @var null|boolean
-		 */
-		$is_routed,
 		/**
 		 * Is set to null while not controled, then 1 if controller was found, and false otherwise.
 		 * @var null|boolean
@@ -52,10 +28,10 @@ class controller implements api{
 		 */
 		$dir,
 		/**
-		 * The path to the controller.
+		 * The full path to the controller's file.
 		 * @var null|string
 		 */
-		$path,
+		$file,
 		/**
 		 * The checkers files (with full path)
 		 * If any they will be checked before the controller
@@ -71,29 +47,7 @@ class controller implements api{
 		 * The data model
 		 * @var null|array
 		 */
-		$data = [],
-		/**
-		 * @var array $_POST
-		 */
-		$post = [],
-		/**
-		 * @var array $_GET
-		 */
-		$get = [],
-		/**
-		 * @var array $_FILES
-		 */
-		$files = [],
-		/**
-		 * An array of each path bit in the url
-		 * @var array
-		 */
-		$params = [],
-		/**
-		 * An array of each argument in the url path (params minus the ones leading to the controller)
-		 * @var array
-		 */
-		$arguments = [];
+		$data = [];
 
 	public
 		/**
@@ -120,12 +74,12 @@ class controller implements api{
 	 * @param string | object $parent The parent controller</em>
 	 * @return bool
 	 */
-	public function __construct(\bbn\mvcv2 $mvc, $path='', $data = [])
-	{
+	public function __construct(\bbn\mvcv2 $mvc, array $path, $data = false){
 		// The initial call should only have $db as parameter
-		if ( defined('BBN_CUR_PATH') ) {
+		if ( defined('BBN_CUR_PATH') && isset($path['path']) ) {
 			$this->mvc = $mvc;
-			$this->path = $path;
+			$this->file = $path['path'];
+      $this->checkers = $path['checkers'];
 			$this->data = is_array($data) ? $data : [];
       $this->mode = $this->mvc->get_mode();
 			// When using CLI a first parameter can be used as route,
@@ -134,25 +88,7 @@ class controller implements api{
 			$this->get = $this->mvc->get_get();
 			$this->files = $this->mvc->get_files();
 			$this->params = $this->mvc->get_params();
-			$this->route();
 		}
-	}
-
-	/**
-	 * This function gets the content of a view file and adds it to the loaded_views array.
-	 *
-	 * @param string $p The full path to the view file
-	 * @return string The content of the view
-	 */
-	private function add_view($p)
-	{
-		if ( !isset($this->loaded_views[$p]) && is_file(self::vpath.$p) ){
-			$this->loaded_views[$p] = file_get_contents(self::vpath.$p);
-		}
-		if ( !isset($this->loaded_views[$p]) ){
-			die("The view $p doesn't exist");
-		}
-		return $this->loaded_views[$p];
 	}
 
 	/**
@@ -341,7 +277,7 @@ class controller implements api{
 	 */
 	private function control()
 	{
-		if ( $this->controller && is_null($this->is_controlled) ){
+		if ( $this->file && is_null($this->is_controlled) ){
 			ob_start();
 			foreach ( $this->checkers as $chk ){
 				// If a checker file returns false, the controller is not processed
@@ -351,7 +287,7 @@ class controller implements api{
 				}
 			}
 			$x = function() {
-				require($this->controller);
+				require($this->file);
 			};
 			$x();
 			$output = ob_get_contents();
@@ -371,7 +307,7 @@ class controller implements api{
 	 * @return void
 	 */
 	public function process(){
-		if ( $this->controller && is_null($this->is_controlled) ){
+		if ( is_null($this->is_controlled) ){
 			$this->obj = new \stdClass();
 			$this->control();
 			if ( $this->has_data() && isset($this->obj->output) ){
@@ -389,15 +325,7 @@ class controller implements api{
 	 */
 	public function get_js($path='', array $data=null)
 	{
-		if ( $r = $this->get_view($path, $data, 'js') ){
-			return '
-<script>
-(function($){
-'.$r.'
-})(jQuery);
-</script>';
-		}
-		return false;
+    return $this->get_view($path, $data, 'js');
 	}
 
 	/**
@@ -408,10 +336,7 @@ class controller implements api{
 	 */
 	public function get_css($path='')
 	{
-		if ( $r = $this->get_view($path, 'css') ){
-			return '<style scoped>'.\CssMin::minify($r).'</style>';
-		}
-		return false;
+    return $this->get_view($path, $data, 'css');
 	}
 
 	/**
@@ -422,16 +347,7 @@ class controller implements api{
 	 */
 	public function get_less($path='')
 	{
-		if ( !isset($this->less) ){
-			if ( !class_exists('lessc') ){
-				die("No less class, check composer");
-			}
-			$this->less = new \lessc();
-		}
-		if ( $r = $this->get_view($path, 'less') ){
-			return '<style scoped>'.\CssMin::minify($this->less->compile($r)).'</style>';
-		}
-		return false;
+    return $this->get_view($path, $data, 'less');
 	}
 
 	/**
@@ -574,10 +490,7 @@ class controller implements api{
 	 */
 	public function get()
 	{
-		if ( $this->check() ){
-			return $this->obj;
-		}
-		return false;
+    return $this->obj;
 	}
 
 	/**
@@ -646,12 +559,11 @@ class controller implements api{
 	 *
 	 * @return void
 	 */
-	public function add_data(array $data)
-	{
+	public function add_data(array $data){
 		$ar = func_get_args();
 		foreach ( $ar as $d ){
 			if ( is_array($d) ){
-				$this->data = $this->has_data() ? array_merge($this->data,$d) : $d;
+				$this->data = $this->has_data() ? array_merge($this->data, $d) : $d;
 			}
 		}
 		return $this;

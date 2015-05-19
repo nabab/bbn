@@ -25,7 +25,8 @@
     "richthegeek/phpsass": "dev-master",
     "justinrainbow/json-schema": "dev-master",
     "coffeescript/coffeescript": "dev-master",
-    "tedivm/jshrink": "dev-master"
+    "tedivm/jshrink": "dev-master",
+    "phpdocumentor/reflection-docblock": "2.0.4"
   },
   "autoload": {
     "psr-0": {"bbn": "src/"}

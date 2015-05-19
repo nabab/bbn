@@ -28,19 +28,30 @@ class view{
 		 * The path to the controller.
 		 * @var null|string
 		 */
-		$path,
+		$file,
 		/**
 		 * The content the view file.
 		 * @var null|string
 		 */
 		$content;
 
-	public
+	public static
 		/**
 		 * List of possible outputs with their according file extension possibilities
 		 * @var array
 		 */
-		$outputs = ['dom'=>'html','html'=>'html','image'=>'jpg,jpeg,gif,png,svg','json'=>'json','text'=>'txt','xml'=>'xml','js'=>'js','css'=>'css','less'=>'less'];
+    $outputs = [
+      'container' => 'html',
+      'content' => 'json',
+      'image' => ['jpg','jpeg','gif','png','svg'],
+      'json' => 'json',
+      'text'=>'txt',
+      'xml' => 'xml',
+      'js' => ['js', 'coffee'],
+      'css' => ['css', 'less'],
+      'scss' => ['scss', 'css'],
+      'less' => ['less', 'css']
+    ];
 
 	const
 		/**
@@ -55,12 +66,26 @@ class view{
 	 * @param string | object $parent The parent controller</em>
 	 * @return bool
 	 */
-	public function __construct($path)
+	public function __construct($path, $type)
 	{
-		if ( $this->check_path($path) && is_file(self::root.$path) ){
-			$this->path = $path;
-		}
+    if ( $this->check_path($path) && isset(self::$outputs[$type]) ) {
+      $exts = is_array(self::$outputs[$type]) ? self::$outputs[$type] : [self::$outputs[$type]];
+      foreach ( $exts as $ext ){
+        $file = self::root.$type.'/'.$path.'.'.$ext;
+        if ( is_file($file) ){
+          $this->ext = $ext;
+          $this->file = $file;
+          return $this;
+        }
+      }
+    }
+    $this->error("File not found: $path of type $type");
+
 	}
+
+  public function check(){
+    return !empty($this->file);
+  }
 
 	/**
 	 * Processes the controller and checks whether it has been routed or not.
@@ -71,18 +96,29 @@ class view{
 	{
 		if ( $this->check() ) {
 			if ( is_null($this->content) ) {
-				$this->content = file_get_contents(self::root.$this->path);
-			}
-			else{
-				$this->error("File not found: ".$this->path);
+				$this->content = file_get_contents($this->file);
 			}
 			if ( empty($this->content) ){
 				return '';
 			}
-			if ( is_array($data)) {
-				return \bbn\tpl::render($this->content, $data);
-			}
-			return $this->content;
+      $res = is_array($data) ? \bbn\tpl::render($this->content, $data) : $this->content;
+      switch ( $this->ext ){
+        case 'js':
+          break;
+        case 'coffee':
+          break;
+        case 'css':
+          break;
+        case 'less':
+          break;
+        case 'scss':
+          break;
+        case 'css':
+          break;
+        case 'html':
+          break;
+      }
+			return $res;
 		}
 		return false;
 	}

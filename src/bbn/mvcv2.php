@@ -28,18 +28,19 @@ class mvcv2 implements \bbn\mvc\api{
 
 	use mvc\common;
 
+  private static
+    /**
+     * The list of views which have been loaded. We keep their content in an array to not have to include the file again. This is useful for loops.
+     * @var array
+     */
+    $loaded_views = [];
+
 	private
     /**
      * The current controller
      * @var null|\bbn\mvc\controller
      */
     $controller,
-		/**
-		/**
-		 * The list of views which have been loaded. We keep their content in an array to not have to include the file again. This is useful for loops.
-		 * @var array
-		 */
-		$loaded_views = [],
     /**
      * @var \bbn\db\connection Database object
      */
@@ -69,22 +70,21 @@ class mvcv2 implements \bbn\mvc\api{
 
 	// These strings are forbidden to use in URL
 	public static
-    $reserved = ['index', '_private', '_common', '_htaccess'],
-    /**
-     * List of possible outputs with their according file extension possibilities
-     * @var array
-     */
-    $outputs = [
-      'container' => 'html',
-      'content' => 'json'/*,
-      'image' => 'jpg,jpeg,gif,png,svg',
-      'json' => 'json',
-      'text'=>'txt',
-      'xml' => 'xml',
-      'js' => 'js',
-      'css' => 'css',
-      'less' => 'less'*/
-    ];
+    $reserved = ['index', '_private', '_common', '_htaccess'];
+
+  /**
+   * This function gets the content of a view file and adds it to the loaded_views array.
+   *
+   * @param string $p The full path to the view file
+   * @return string The content of the view
+   */
+  public static function add_view($path, \bbn\mvc\view $view)
+  {
+    if ( !isset(self::$loaded_views[$path]) ){
+      self::$loaded_views[$path] = $view;
+    }
+    return self::$loaded_views[$path];
+  }
 
 	/**
 	 * This should be called only once from within the app
@@ -196,7 +196,7 @@ class mvcv2 implements \bbn\mvc\api{
 			$this->loaded_views[$path];
 		}
 		else {
-			$view = new \bbn\mvc\view($path);
+			$view = new \bbn\mvc\view($path, $mode);
 			$this->loaded_views[$path] = $view;
 		}
 		if ( $view->check() ) {
@@ -236,152 +236,20 @@ class mvcv2 implements \bbn\mvc\api{
 	 *
 	 * @return string|false
 	 */
-	public function process()
+	public function process($route)
 	{
-    var_dump("path", $this->path, $this->check());
-    if ( $this->check() && $this->path ) {
-      $ctrl = new \bbn\mvc\controller($this);
-      return $ctrl->process();
+    if ( $this->check() ) {
+      $this->controller = new \bbn\mvc\controller($this, $route);
+
+      return $this->controller->process();
     }
 	}
 
-	/**
-	 * Outputs the result.
-	 *
-	 * @return void
-	 */
-	public function output()
-	{
-		$this->obj = $this->controller->get_result();
-		if ( !$this->obj ){
-			$this->obj = new \stdClass();
-		}
-		if ( $this->check() && $this->obj ){
-
-			if ( $this->cli ){
-				die(isset($this->obj->output) ? $this->obj->output : "no output");
-			}
-			if ( isset($this->obj->prescript) ){
-				if ( empty($this->obj->prescript) ){
-					unset($this->obj->prescript);
-				}
-				else{
-					$this->obj->prescript = \JShrink\Minifier::minify($this->obj->prescript);
-				}
-			}
-			if ( isset($this->obj->script) ){
-				if ( empty($this->obj->script) ){
-					unset($this->obj->script);
-				}
-				else{
-					$this->obj->script = \JShrink\Minifier::minify($this->obj->script);
-				}
-			}
-			if ( isset($this->obj->postscript) ){
-				if ( empty($this->obj->postscript) ){
-					unset($this->obj->postscript);
-				}
-				else{
-					$this->obj->postscript = \JShrink\Minifier::minify($this->obj->postscript);
-				}
-			}
-			if ( count((array)$this->obj) === 0 ){
-				header('HTTP/1.0 404 Not Found');
-				exit();
-			}
-			switch ( $this->mode ){
-				case 'json':
-				case 'js':
-				case 'css':
-				case 'doc':
-				case 'html':
-					if ( !ob_start("ob_gzhandler" ) ){
-						ob_start();
-					}
-					else{
-						header('Content-Encoding: gzip');
-					}
-					break;
-				default:
-					ob_start();
-			}
-			if ( empty($this->obj->output) && !empty($this->obj->file) ){
-				if ( is_file($this->obj->file) ){
-					$this->obj->file = new \bbn\file\file($this->obj->file);
-					$this->mode = '';
-				}
-				else if ( is_object($this->obj->file) ){
-					$this->mode = '';
-				}
-			}
-			if ( (empty($this->obj->output) && empty($this->obj->file) && ($this->mode !== 'json')) ||
-				(($this->mode === 'json') && empty($this->obj)) ){
-				$this->mode = '';
-			}
-			switch ( $this->mode ){
-
-				case 'json':
-					if ( isset($this->obj->output) ){
-						$this->obj->html = $this->obj->output;
-						unset($this->obj->output);
-					}
-					header('Content-type: application/json; charset=utf-8');
-					echo json_encode($this->obj);
-					break;
-
-				case 'js':
-					header('Content-type: application/javascript; charset=utf-8');
-					echo $this->obj->output;
-					break;
-
-				case 'css':
-					header('Content-type: text/css; charset=utf-8');
-					echo $this->obj->output;
-					break;
-
-				case 'less':
-					header('Content-type: text/x-less; charset=utf-8');
-					echo $this->obj->output;
-					break;
-
-				case 'text':
-					header('Content-type: text/plain; charset=utf-8');
-					echo $this->obj->output;
-					break;
-
-				case 'xml':
-					header('Content-type: text/xml; charset=utf-8');
-					echo $this->obj->output;
-					break;
-
-				case 'image':
-					if ( isset($this->obj->img) ){
-						$this->obj->img->display();
-					}
-					else{
-						$this->log("Impossible to display the following image: ".$this->obj->img->name);
-						header('HTTP/1.0 404 Not Found');
-
-					}
-					break;
-
-				case 'file':
-					if ( isset($this->obj->file) && is_object($this->obj->file) && method_exists($this->obj->file, 'download') ){
-						$this->obj->file->download();
-					}
-					else{
-						$this->log("Impossible to display the following controller", $this);
-						header('HTTP/1.0 404 Not Found');
-						exit();
-					}
-					break;
-
-				default:
-					header('Content-type: text/html; charset=utf-8');
-					//die(var_dump("mode:".$this->mode));
-					echo $this->obj->output;
-
-			}
-		}
-	}
+  public function output(\stdClass $obj){
+    if ( $this->is_cli() ){
+      die(isset($obj->output) ? $obj->output : "no output");
+    }
+    $output = new \bbn\mvc\output($obj, $this->get_mode());
+    $output->run();
+  }
 }

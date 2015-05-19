@@ -69,7 +69,7 @@ class environment {
    * @return string $this->mode
    */
   private function set_mode($mode){
-    if ( isset(\bbn\mvcv2::$outputs[$mode]) && ($this->mode !== 'cli') ) {
+    if ( isset(\bbn\mvc\view::$outputs[$mode]) && ($this->mode !== 'cli') ) {
       $this->mode = $mode;
     }
     return $this->mode;
