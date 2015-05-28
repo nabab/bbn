@@ -45,11 +45,16 @@ class controller implements api{
 		$checkers = [];
 
   public
-		/**
-		 * The data model
-		 * @var null|array
-		 */
-		$data = [],
+    /**
+     * The db connection if accepted by the mvc class
+     * @var null|\bbn\db\connection
+     */
+    $db,
+    /**
+     * The data model
+     * @var null|array
+     */
+    $data = [],
 		/**
 		 * The output object
 		 * @var null|object
@@ -82,6 +87,7 @@ class controller implements api{
 			$this->data = is_array($data) ? $data : [];
 			// When using CLI a first parameter can be used as route,
 			// a second JSON encoded can be used as $this->post
+      $this->db = $this->mvc->get_db();
       $this->inc = $this->mvc->inc;
       $this->post = $this->mvc->get_post();
 			$this->get = $this->mvc->get_get();

@@ -279,9 +279,6 @@ class mvc implements \bbn\mvc\api{
     if ( $this->check() ) {
       $this->obj = new \stdClass();
       $this->controller = new \bbn\mvc\controller($this, $this->info, $this->data, $this->obj);
-      if ( $this->db && self::$db_in_controller ){
-        $this->controller->db = $this->db;
-      }
       $this->controller->process();
     }
 	}
@@ -297,6 +294,12 @@ class mvc implements \bbn\mvc\api{
       }
       $output = new \bbn\mvc\output($obj, $this->get_mode());
       $output->run();
+    }
+  }
+
+  public function get_db(){
+    if ( self::$db_in_controller && $this->db ){
+      return $this->db;
     }
   }
 }
