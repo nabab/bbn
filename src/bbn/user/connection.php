@@ -225,7 +225,13 @@ class connection
       if ( !$this->user_cfg ){
         $this->user_cfg = $this->get_session('cfg');
       }
-      return empty($attr) ? $this->user_cfg : $this->user_cfg[$attr];
+      if ( empty($attr) ){
+        return $this->user_cfg;
+      }
+      if ( isset($this->user_cfg[$attr]) ){
+        return $this->user_cfg[$attr];
+      }
+      return false;
     }
   }
 
