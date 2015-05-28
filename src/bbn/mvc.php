@@ -213,7 +213,7 @@ class mvc implements \bbn\mvc\api{
 		return $this;
 	}
 
-	/**
+  /**
 	 * This will get a view.
 	 *
 	 * @param string $path
@@ -300,6 +300,12 @@ class mvc implements \bbn\mvc\api{
   public function get_db(){
     if ( self::$db_in_controller && $this->db ){
       return $this->db;
+    }
+  }
+
+  public function set_prepath($path){
+    if ( $this->check() ){
+      return $this->router->set_prepath($path);
     }
   }
 }

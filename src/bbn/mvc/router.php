@@ -49,6 +49,7 @@ class router {
     ];
 
   private
+    $prepath,
     /**
      * The list of known external controllers routes.
      * @var array
@@ -167,10 +168,23 @@ class router {
     return $this;
   }
 
+  public function set_prepath($path){
+    if ( $this->check_path($path) ){
+      $this->prepath = $path;
+      if ( substr($this->prepath, -1) !== '/' ){
+        $this->prepath = $this->prepath.'/';
+      }
+    }
+    return $this;
+  }
+
   public function route($path, $mode){
     if ( self::is_mode($mode) ) {
       $root = $this->get_root($mode);
       $path = $this->parse($path);
+      if ( $this->prepath && (strpos($path, '/') !== 0) ){
+        $path = $this->prepath.$path;
+      }
 
       if (in_array($mode, self::$controllers)) {
         $tmp = $path ? $path : '.';
