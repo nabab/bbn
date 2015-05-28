@@ -3,19 +3,17 @@
  * 
  */
 namespace bbn\api\kendo;
-
 class template // extends object
 {
-  private $mvc;
-  
-  public function __construct(\bbn\mvc $mvc) {
-    $this->mvc = $mvc;
+  private $ctrl;
+
+  public function __construct(\bbn\mvc\controller $ctrl) {
+    $this->ctrl = $ctrl;
   }
-  
+
   public function get($id){
-    if ( $html = $this->mvc->get_view("kendo/".$id, "html") ){
+    if ( $html = $this->ctrl->get_view("kendo/".$id, "html") ){
       return '<script id="tpl-'.$id.'" type="text/x-kendo-template">'.$html.'</script>';
     }
   }
 }
-?>

@@ -24,40 +24,21 @@ class view{
 	use common;
 
 	private
-		/**
-		 * The path to the controller.
-		 * @var null|string
-		 */
-		$file,
+    /**
+     * The full path to the view file
+     * @var null|string
+     */
+    $file,
+    /**
+     * The file's extension
+     * @var null|string
+     */
+    $ext,
 		/**
 		 * The content the view file.
 		 * @var null|string
 		 */
 		$content;
-
-	public static
-		/**
-		 * List of possible outputs with their according file extension possibilities
-		 * @var array
-		 */
-    $outputs = [
-      'container' => 'html',
-      'content' => 'json',
-      'image' => ['jpg','jpeg','gif','png','svg'],
-      'json' => 'json',
-      'text'=>'txt',
-      'xml' => 'xml',
-      'js' => ['js', 'coffee'],
-      'css' => ['css', 'less'],
-      'scss' => ['scss', 'css'],
-      'less' => ['less', 'css']
-    ];
-
-	const
-		/**
-		 * Path to the views.
-		 */
-		root = 'mvc/views/';
 
 	/**
 	 * This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).
@@ -66,21 +47,12 @@ class view{
 	 * @param string | object $parent The parent controller</em>
 	 * @return bool
 	 */
-	public function __construct($path, $type)
+	public function __construct(array $info)
 	{
-    if ( $this->check_path($path) && isset(self::$outputs[$type]) ) {
-      $exts = is_array(self::$outputs[$type]) ? self::$outputs[$type] : [self::$outputs[$type]];
-      foreach ( $exts as $ext ){
-        $file = self::root.$type.'/'.$path.'.'.$ext;
-        if ( is_file($file) ){
-          $this->ext = $ext;
-          $this->file = $file;
-          return $this;
-        }
-      }
+    if ( router::is_mode($info['mode']) ){
+      $this->ext = $info['ext'];
+      $this->file = $info['file'];
     }
-    $this->error("File not found: $path of type $type");
-
 	}
 
   public function check(){

@@ -8,7 +8,6 @@
 
 namespace bbn\mvc;
 
-
 class environment {
 
   private
@@ -52,7 +51,7 @@ class environment {
       $tmp = explode('/', \bbn\str\text::parse_path($path));
       foreach ( $tmp as $t ) {
         if ( !empty($t) ) {
-          if ( in_array($t, \bbn\mvcv2::$reserved) ){
+          if ( in_array($t, \bbn\mvc::$reserved) ){
             die("The controller you are asking for contains one of the following reserved strings: " .
               implode(", ", self::$reserved));
           }
@@ -69,7 +68,7 @@ class environment {
    * @return string $this->mode
    */
   private function set_mode($mode){
-    if ( isset(\bbn\mvc\view::$outputs[$mode]) && ($this->mode !== 'cli') ) {
+    if ( router::is_mode($mode) ) {
       $this->mode = $mode;
     }
     return $this->mode;
@@ -130,7 +129,6 @@ class environment {
   public function get_get(){
     if ( is_null($this->get) ){
       $this->get = [];
-      // Otherwise the type is sent via the appui variable
       if ( count($_GET) > 0 ){
         $this->get = array_map(function($a){
           return \bbn\str\text::correct_types($a);
@@ -149,16 +147,19 @@ class environment {
         $this->post = array_map(function($a){
           return \bbn\str\text::correct_types($a);
         }, $_POST);
-        if ( isset($this->post['appui']) ){
+        /** @todo Remove the json parameter from the appui.js functions */
+        if ( isset($this->post['appui']) && ($this->post['appui'] !== 'json') ){
           $this->set_mode($this->post['appui']);
+          unset($this->post['appui']);
         }
         else {
+          unset($this->post['appui']);
           $this->set_mode(BBN_DEFAULT_MODE);
         }
       }
-      // If no post, assuming to be a container
+      // If no post, assuming to be a DOM document
       else{
-        $this->set_mode('container');
+        $this->set_mode('dom');
       }
       if ( isset($_SERVER['REQUEST_URI']) &&
         ( BBN_CUR_PATH === '' || strpos($_SERVER['REQUEST_URI'],BBN_CUR_PATH) !== false ) ){

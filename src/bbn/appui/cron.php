@@ -32,13 +32,10 @@ class cron extends \bbn\obj{
           $enabled = true,
           $timeout = 50;
 	
-  public function __construct(\bbn\mvc $mvc, $cfg = []) {
+  public function __construct(\bbn\mvc\controller $ctrl, $cfg = []) {
     if ( is_array($cfg) ){
-      $this->mvc =& $mvc;
-      if ( empty($mvc->db) ){
-        die("Database mandatory in \\bbn\\appui\\cron !");
-      }
-      $this->db =& $mvc->db;
+      $this->ctrl = $ctrl;
+      $this->db = $ctrl->db;
       $vars = get_class_vars('\\bbn\\appui\\cron');
       foreach ( $cfg as $cf_name => $cf_value ){
         if ( array_key_exists($cf_name, $vars) ){
@@ -240,10 +237,10 @@ class cron extends \bbn\obj{
   }
 
   private function _exec($file, $data=[]){
-    $this->mvc->data = $data;
+    $this->ctrl->data = $data;
     $this->obj = new \stdClass();
     ob_start();
-    $this->mvc->incl($file, false);
+    $this->ctrl->incl($file, false);
     $output = ob_get_contents();
     ob_end_clean();
     return $output;

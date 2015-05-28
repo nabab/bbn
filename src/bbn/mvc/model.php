@@ -28,121 +28,83 @@ class model{
 		 * @var \bbn\db\connection Database object
 		 */
 		$db,
-		/**
-		 * The name of the controller (its real path and filename without extension)
-		 * @var null|string
-		 */
-		$dest,
-		/**
-		 * The directory of the controller (the directory in which is $this->dest).
-		 * @var null|string
-		 */
-		$dir,
+    /**
+     * The data model
+     * @var null|array
+     */
+		$data,
 		/**
 		 * The path as being requested
 		 * @var null|string
 		 */
-		$path;
-
-	public
+    $file,
 		/**
 		 * An external object that can be filled after the object creation and can be used as a global with the function add_inc
 		 * @var stdClass
 		 */
-		$inc,
-		/**
-		 * The data model
-		 * @var null|array
-		 */
-		$data = [],
-		/**
-		 * The request sent to the server to get the actual controller.
-		 * @var null|string
-		 */
-		$url;
-
-	const
-		/**
-		 * Path to the models.
-		 */
-		root = 'mvc/models/';
+		$inc;
 
 	/**
-	 * This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).
+	 * Models are always recreated and reincluded, even if they have from the same path
+   * They are all created from \bbn\mvc::get_model
 	 *
-	 * @param object | string $db The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books/466565 or html/home)</em>
+   * @param array  $info The full path to the model's file
+	 * @param null|\bbn\db\connection $db The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books/466565 or html/home)</em>
 	 * @param string | object $parent The parent controller</em>
 	 * @return bool
 	 */
-	public function __construct($path, \bbn\db\connection $db=null, \stdClass $inc=null)
-	{
-		if ( $this->check_path() && file_exists(self::root.$path.'.php') ){
-			$this->inc = $inc;
+	public function __construct(array $info, \bbn\db\connection $db=null, controller $ctrl){
+		if ( $this->check_path() ){
+      $this->ctrl = $ctrl;
+			$this->inc = $this->ctrl->inc;
 			$this->db = $db;
-			$this->path = $path;
+			$this->file = $info['file'];
 		}
 		else{
-			$this->error("The model $path doesn't exist");
+			$this->error("The model $file doesn't exist");
 		}
 	}
 
-	/**
-	 * This will get a the content of a file located within the data path
-	 *
-	 * @param string $file_name
-	 * @return string|false
-	 */
-	public function get_content($file_name)
-	{
-		if ( $this->check_path($file_name) && defined('BBN_DATA_PATH') && is_file(BBN_DATA_PATH.$file_name) ){
-			return file_get_contents(BBN_DATA_PATH.$file_name);
-		}
-		return false;
-	}
+  public function get(array $data=null){
+    if ( is_null($data) ){
+      $data = [];
+    }
+    $this->data = $data;
+    $d = include($this->file);
+    if ( !is_array($d) ){
+      return false;
+    }
+    return $d;
+  }
 
-	public function get(array $data=null){
-		$db = isset($db) ? $db : $this->db;
-		$file = self::root.$this->path.'.php';
-		if ( is_null($data) ){
-			$data = [];
-		}
-		$this->data = $data;
-		return call_user_func(
-			function() use ($db, $file, $data)
-			{
-				//$r = include($last_model_file);
-				//return is_array($r) ? $r : array();
-				return include($file);
-			}
-		);
-	}
+  public function get_content(){
+    return call_user_func_array([$this->ctrl, 'get_content'], func_get_args());
+  }
 
-	/**
-	 * This will get the model. There is no order for the arguments.
-	 *
-	 * @params string path to the model
-	 * @params array data to send to the model
-	 * @return array|false A data model
-	 */
-	private function get_model($path, $data=[])
-	{
-		if ( $this->check() ) {
-			$model = new \bbn\mvc\model($this->db, $path);
-			return $model->get($data);
-		}
-	}
+  public function get_model(){
+    return call_user_func_array([$this->ctrl, 'get_model'], func_get_args());
+  }
 
-	/**
+  /**
 	 * Checks if data exists or if a specific index exists in the data
 	 *
 	 * @return bool
 	 */
 	public function has_data($idx=null)
 	{
-		if ( is_null($idx) ){
-			return ( is_array($this->data) && !empty($this->data) );
-		}
-		return ( is_array($this->data) && isset($this->data[$idx]) );
+    if ( !is_array($this->data) ){
+      return false;
+    }
+    if ( is_null($idx) ){
+      return !empty($this->data);
+    }
+    $args = func_get_args();
+    foreach ( $args as $arg ){
+      if ( !isset($this->data[$idx]) ){
+        return false;
+      }
+    }
+    return true;
 	}
 
 	/**

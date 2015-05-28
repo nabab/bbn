@@ -6,66 +6,60 @@ class controller implements api{
 
 	use common;
 
-	private
-		/**
-		 * The MVC class from which the controller is called
-		 * @var \bbn\mvcv2
-		 */
-		$mvc,
+  private
+    /**
+     * The MVC class from which the controller is called
+     * @var \bbn\mvc
+     */
+    $mvc,
 		/**
 		 * Is set to null while not controled, then 1 if controller was found, and false otherwise.
 		 * @var null|boolean
 		 */
 		$is_controlled,
-		/**
-		 * The name of the controller.
-		 * @var null|string
-		 */
-		$dest,
+    /**
+     * The internal path to the controller.
+     * @var null|string
+     */
+    $path,
+    /**
+     * The request sent to get to the controller
+     * @var null|string
+     */
+    $request,
 		/**
 		 * The directory of the controller.
 		 * @var null|string
 		 */
 		$dir,
-		/**
-		 * The full path to the controller's file.
-		 * @var null|string
-		 */
-		$file,
+    /**
+     * The full path to the controller's file.
+     * @var null|string
+     */
+    $file,
 		/**
 		 * The checkers files (with full path)
 		 * If any they will be checked before the controller
 		 * @var null|string
 		 */
-		$checkers = [],
-		/**
-		 * The controller file (with full path)
-		 * @var null|string
-		 */
-		$controller,
+		$checkers = [];
+
+  public
 		/**
 		 * The data model
 		 * @var null|array
 		 */
-		$data = [];
-
-	public
-		/**
-		 * An external object that can be filled after the object creation and can be used as a global with the function add_inc
-		 * @var stdClass
-		 */
-		$inc,
+		$data = [],
 		/**
 		 * The output object
 		 * @var null|object
 		 */
-		$obj;
-
-	const
-		/**
-		 * Path to the controllers.
-		 */
-		root = 'mvc/controllers/';
+		$obj,
+    /**
+     * An external object that can be filled after the object creation and can be used as a global with the function add_inc
+     * @var stdClass
+     */
+    $inc;
 
 	/**
 	 * This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).
@@ -74,46 +68,31 @@ class controller implements api{
 	 * @param string | object $parent The parent controller</em>
 	 * @return bool
 	 */
-	public function __construct(\bbn\mvcv2 $mvc, array $path, $data = false){
+	public function __construct(\bbn\mvc $mvc, array $files, $data = false){
 		// The initial call should only have $db as parameter
-		if ( defined('BBN_CUR_PATH') && isset($path['path']) ) {
-			$this->mvc = $mvc;
-			$this->file = $path['path'];
-      $this->checkers = $path['checkers'];
+		if ( defined('BBN_CUR_PATH') && isset($files['mode'], $files['path'], $files['file'], $files['request']) ) {
+      $this->mvc = $mvc;
+      $this->path = $files['path'];
+      $this->request = $files['request'];
+      $this->data = is_array($data) ? $data : [];
+      $this->file = $files['file'];
+      $this->arguments = $files['args'];
+      $this->checkers = $files['checkers'];
+      $this->mode = $files['mode'];
 			$this->data = is_array($data) ? $data : [];
-      $this->mode = $this->mvc->get_mode();
 			// When using CLI a first parameter can be used as route,
 			// a second JSON encoded can be used as $this->post
-			$this->post = $this->mvc->get_post();
+      $this->inc = $this->mvc->inc;
+      $this->post = $this->mvc->get_post();
 			$this->get = $this->mvc->get_get();
 			$this->files = $this->mvc->get_files();
-			$this->params = $this->mvc->get_params();
-		}
-	}
-
-	/**
-	 * Adds the newly found controller to the known controllers array, and sets the original controller if it has not been set yet
-	 *
-	 * @param string $c The name of the request or how set by the controller
-	 * @param file $f The actual controller file ($this->controller)
-	 * @return void
-	 */
-	private function set_controller($p)
-	{
-		if ( $this->controller ){
-			$this->dest = $p;
-			$this->dir = dirname($p);
-			if ( $this->dir === '.' ){
-				$this->dir = '';
-			}
-			else{
-				$this->dir .= '/';
-			}
+      $this->params = $this->mvc->get_params();
+      $this->url = $this->mvc->get_url();
 		}
 	}
 
 	public function exists(){
-		return !empty($this->dest);
+		return !empty($this->path);
 	}
 
 	/**
@@ -123,7 +102,7 @@ class controller implements api{
 	 */
 	public function say_controller()
 	{
-		return $this->controller ? $this->controller : false;
+		return $this->file;
 	}
 
 	/**
@@ -133,7 +112,7 @@ class controller implements api{
 	 */
 	public function say_path()
 	{
-		return $this->controller ? substr($this->controller, strlen(self::root), -4) : false;
+		return $this->path;
 	}
 
 	/**
@@ -143,7 +122,7 @@ class controller implements api{
 	 */
 	public function say_route()
 	{
-		return $this->path;
+		return $this->request;
 	}
 
 	/**
@@ -153,7 +132,7 @@ class controller implements api{
 	 */
 	public function say_dir()
 	{
-		return $this->controller ? dirname($this->controller) : false;
+		return $this->path ? dirname($this->path) : false;
 	}
 
 	/**
@@ -168,13 +147,10 @@ class controller implements api{
 		if ( empty($model) && $this->has_data() ){
 			$model = $this->data;
 		}
-		if ( !is_array($model) ){
-			$model = [];
-		}
 		if ( is_string($view) ) {
-			return \bbn\tpl::render($view, $model);
+			return is_array($model) ? \bbn\tpl::render($view, $model) : $view;
 		}
-		die(\bbn\tools::hdump("Problem with the template", $view));
+		die(\bbn\tools::hdump("Problem with the template", $view, $this->path, $this->mode));
 	}
 
 	/**
@@ -185,39 +161,6 @@ class controller implements api{
 	public function is_cli()
 	{
 		return $this->mvc->is_cli();
-	}
-
-	/**
-	 * This looks for a given controller in the file system if it has not been already done and returns it if it finds it, false otherwise.
-	 *
-	 * @param string $p
-	 * @return void
-	 */
-	private function get_controller($p)
-	{
-		if ( !$this->controller ){
-			if ( !is_string($p) ){
-				return false;
-			}
-			if ( is_file(self::root.$this->mode.'/'.$p.'.php') ){
-				$this->controller = self::root.$this->mode.'/'.$p.'.php';
-			}
-			if ( $this->controller ){
-				// if the current directory of the controller, or any directory above it in the controllers' filesystem, has a file called _htaccess.php, it will be executed and expected to return a non false value in order to authorize the loading of the controller
-				$parts = explode('/', $this->controller);
-				$path = self::root;
-				foreach ( $parts as $pt ){
-					if ( is_file($path.'_ctrl.php') ){
-						array_push($this->checkers, $path.'/_ctrl.php');
-					}
-					$path .= $pt.'/';
-				}
-				$this->set_controller($p);
-				return 1;
-			}
-			return false;
-		}
-		return 1;
 	}
 
 	/**
@@ -239,8 +182,8 @@ class controller implements api{
 	 */
 	public function incl($file_name)
 	{
-		if ( $this->is_routed ){
-			$d = $this->say_dir().'/';
+		if ( $this->exists() ){
+			$d = dirname($this->file).'/';
 			if ( substr($file_name, -4) !== '.php' ){
 				$file_name .= '.php';
 			}
@@ -279,17 +222,17 @@ class controller implements api{
 	{
 		if ( $this->file && is_null($this->is_controlled) ){
 			ob_start();
-			foreach ( $this->checkers as $chk ){
+			foreach ( $this->checkers as $appui_checker_file ){
 				// If a checker file returns false, the controller is not processed
 				// The checker file can define data and inc that can be used in the subsequent controller
-				if ( !include_once($chk) ){
+				if ( !require($appui_checker_file) ){
 					return false;
 				}
 			}
-			$x = function() {
-				require($this->file);
-			};
-			$x();
+      ob_end_clean();
+      unset($appui_checker_file);
+      ob_start();
+      require($this->file);
 			$output = ob_get_contents();
 			ob_end_clean();
 			if ( is_object($this->obj) && !isset($this->obj->output) && !empty($output) ){
@@ -325,7 +268,15 @@ class controller implements api{
 	 */
 	public function get_js($path='', array $data=null)
 	{
-    return $this->get_view($path, $data, 'js');
+    if ( $r = $this->get_view($path, 'js') ){
+      return '
+<script>
+(function($){
+'.$r.'
+})(jQuery);
+</script>';
+    }
+    return false;
 	}
 
 	/**
@@ -336,7 +287,10 @@ class controller implements api{
 	 */
 	public function get_css($path='')
 	{
-    return $this->get_view($path, $data, 'css');
+    if ( $r = $this->get_view($path, 'css') ){
+      return '<style scoped>'.\CssMin::minify($r).'</style>';
+    }
+    return false;
 	}
 
 	/**
@@ -347,7 +301,13 @@ class controller implements api{
 	 */
 	public function get_less($path='')
 	{
-    return $this->get_view($path, $data, 'less');
+    if ( !class_exists('lessc') ){
+      die("No less class, check composer");
+    }
+    $less = new \lessc();
+    if ( $r = $this->get_view($path, 'css') ) {
+      return '<style scoped>' . \CssMin::minify($less->compile($r)) . '</style>';
+    }
 	}
 
 	/**
@@ -382,22 +342,38 @@ class controller implements api{
 	 * @param string $mode
 	 * @return string|false
 	 */
-	public function get_view($path='', $data=null, $mode='html')
+	public function get_view()
 	{
-		if ( is_array($path) ){
-			$data = $path;
-			$path = '';
-		}
-		if ( is_string($data) ){
-			$mode = $data;
-		}
-		if ( empty($path) ){
-			$path = $this->dest;
-		}
-		if ( empty($data) ){
-			$data = $this->data;
-		}
-		return $this->mvc->get_view($path ? $path : $this->dest, $data, $mode);
+    $args = func_get_args();
+    $die = 1;
+    foreach ( $args as $a ){
+      if ( is_string($a) && !isset($path) ) {
+        $path = strlen($a) ? $a : $this->path;
+      }
+      else if ( is_string($a) && router::is_mode($a) ) {
+        $mode = $a;
+      }
+      else if ( is_array($a) ) {
+        $data = $a;
+      }
+      else if ( is_bool($a) ) {
+        $die = $a;
+      }
+    }
+    if ( !isset($path) ) {
+      $path = $this->path;
+    }
+    if ( !isset($mode) ) {
+      $mode = 'html';
+    }
+    if ( !isset($data) ) {
+      $data = $this->data;
+    }
+		$v = $this->mvc->get_view($path, $mode, $data);
+    if ( !$v && $die ){
+      die("Impossible to find the $mode view $path");
+    }
+    return $v;
 	}
 
 	public function combo(){
@@ -464,14 +440,41 @@ class controller implements api{
 	 * @params array data to send to the model
 	 * @return array|false A data model
 	 */
-	public function get_model($path, array $data=null){
-		if ( is_null($data) ){
-			$data = $this->data;
-		}
-		return $this->mvc->get_model($path, $data);
+	public function get_model(){
+    $args = func_get_args();
+    $die = 1;
+    foreach ( $args as $a ){
+      if ( is_string($a) && strlen($a) ) {
+        $path = $a;
+      }
+      else if ( is_array($a) ) {
+        $data = $a;
+      }
+      else if ( is_bool($a) ) {
+        $die = $a;
+      }
+    }
+    if ( !isset($path) ) {
+      $path = $this->path;
+    }
+    if ( !isset($data) ) {
+      $data = $this->data;
+    }
+		$m = $this->mvc->get_model($path, $data, $this);
+    if ( !is_array($m) && !$die ){
+      die("$path is an invalid model");
+    }
+    return $m;
 	}
 
-	/**
+  public function get_object_model(){
+    $m = call_user_func_array([$this, 'get_model'], func_get_args());
+    if ( is_array($m) ){
+      return \bbn\tools::to_object($m);
+    }
+  }
+
+  /**
 	 * Adds a property to the MVC object inc if it has not been declared.
 	 *
 	 * @return bool
@@ -574,12 +577,13 @@ class controller implements api{
 	 *
 	 * @return void
 	 */
-	public function add($d, $data=array())
+	public function add($path, $data=[], $internal = false)
 	{
-		$o = new mvc($d, $this, $data);
-		if ( $o->check() ){
-			return $o;
-		}
+    if ( $route = $this->mvc->get_route($path, $internal ? 'internal' : 'public') ){
+      $o = new controller($this->mvc, $route, $data);
+      $o->process();
+      return $o;
+    }
 		return false;
 	}
 

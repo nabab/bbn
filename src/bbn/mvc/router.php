@@ -8,33 +8,70 @@
 
 namespace bbn\mvc;
 
-
 class router {
 
   use common;
 
   private static
-    $routes = [
-      'content' => [],
-      'container' => []
+    /**
+     * The path for the default controller
+     * @var array
+     */
+    $def = 'default',
+    /**
+     * The list of types of controllers
+     * @var array
+     */
+    $controllers = ['cli', 'dom', 'content', 'public', 'internal'],
+    /**
+     * The list of filetypes for each non controller element
+     * @var array
+     */
+    $filetypes = [
+      'model' => ['php'],
+      'html' => ['html'],
+      'js' => ['js', 'coffee'],
+      'css' => ['css', 'less', 'scss']
     ],
-    $def = 'default';
+    /**
+     * The list of types
+     * @var array
+     */
+    $types = [
+      'cli',
+      'internal',
+      'dom',
+      'public',
+      'model',
+      'html',
+      'js',
+      'css'
+    ];
 
   private
+    /**
+     * The list of known external controllers routes.
+     * @var array
+     */
+    $routes = [],
     /**
      * The list of used controllers with their corresponding request, so we don't have to look for them again.
      * @var array
      */
     $known = [
-      'container' => [],
-      'content' => []
-    ],
-    /**
-     * The path sent to the main controller.
-     * @var null|string
-     */
-    $path = false;
+      'cli' => [],
+      'dom' => [],
+      'public' => [],
+      'internal' => [],
+      'model' => [],
+      'html' => [],
+      'js' => [],
+      'css' => []
+    ];
 
+  public static function is_mode($mode){
+    return in_array($mode, self::$types);
+  }
 
   /**
    * This will fetch the route to the controller for a given path. Chainable
@@ -42,7 +79,7 @@ class router {
    * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
    * @return void
    */
-  public function __construct(\bbn\mvcv2 $mvc, array $routes=[])
+  public function __construct(\bbn\mvc $mvc, array $routes=[])
   {
     if ( !defined('BBN_APP_PATH') ){
       die("The constant BBN_APP_PATH must be defined!");
@@ -51,72 +88,78 @@ class router {
     $this->routes = $routes;
   }
 
-  private function get_mode($mode=''){
-    return !empty($mode) && isset(\bbn\mvc\view::$outputs[$mode]) ? $mode : $this->mvc->get_mode();
+  private function get_root($mode){
+    if ( self::is_mode($mode) ){
+      return BBN_APP_PATH.'mvc/'.( $mode === 'dom' ? 'public' : $mode ).'/';
+    }
+    return false;
   }
 
-  private function get_root($mode=''){
-    return BBN_APP_PATH.'mvc/controllers/'.( empty($mode) ?  $this->mvc->get_mode() : $mode ).'/';
+  private function parse($path){
+    return \bbn\str\text::parse_path($path);
   }
 
-  private function get_path($path=''){
-    return empty($path) ? $this->mvc->get_url() : \bbn\str\text::parse_path($path);
+  private function has_route($path){
+    return is_string($path) && isset($this->routes[$path]);
   }
 
-  private function add_path($path){
-
-  }
-
-  private function has_route($path, $mode=''){
-    return isset($this->routes[$this->get_mode($mode)][$path]);
-  }
-
-  private function get_route($path, $mode=''){
-    $mode = $this->get_mode($mode);
-    if ( $this->has_route($path, $mode) ) {
-      if ( is_array($this->routes[$mode][$path]) ){
-        return $this->routes[$mode][$path][0];
+  private function get_route($path){
+    if ( $this->has_route($path) ) {
+      if ( is_array($this->routes[$path]) ){
+        return $this->routes[$path][0];
       }
       else{
-        return $this->routes[$mode][$path];
+        return $this->routes[$path];
       }
     }
     return false;
   }
 
-  private function is_known($path, $mode=''){
-    return isset($this->known[$this->get_mode($mode)][$path]);
+  private function is_known($path, $mode){
+    return self::is_mode($mode) && isset($this->known[$mode][$path]);
   }
 
-  private function get_known($path, $mode=''){
+  private function get_known($path, $mode){
     if ( $this->is_known($path, $mode) ){
-      return $this->known[$this->get_mode($mode)][$path];
+      if ( in_array($mode, self::$controllers) && is_string($this->known[$mode][$path]) ){
+      }
+      return $this->known[$mode][$path];
     }
     return false;
   }
 
-  private function set_known($path, $mode=''){
-    $mode = $this->get_mode($mode);
+  private function set_known(array $o){
+    if ( !isset($o['mode'], $o['path'], $o['file']) || !self::is_mode($o['mode']) || !is_string($o['path']) || !is_string($o['file']) ){
+      return false;
+    }
+    $mode = $o['mode'];
+    $path = $o['path'];
     $root = $this->get_root($mode);
-    $path0 = $path;
+
     if ( !isset($this->known[$mode][$path]) ){
-      $this->known[$mode][$path0] = [
-        'path' => $root.$path.'.php',
-        'checkers' => []
-      ];
-      while ( strlen($path) > 0 ){
-        $path = dirname($path);
-        $ctrl = $root.( $path === '.' ? '' : $path.'/' ).'_ctrl.php';
-        if ( is_file($ctrl) ){
-          array_unshift($this->known[$mode][$path0]['checkers'], $ctrl);
+      if ( in_array($mode, self::$controllers) ){
+        $this->known[$mode][$path] = $o;
+        $this->known[$mode][$path]['checkers'] = [];
+        $tmp = $path;
+        while ( strlen($tmp) > 0 ){
+          $tmp = $this->parse(dirname($tmp));
+          $ctrl = $root.( $tmp === '.' ? '' : $tmp.'/' ).'_ctrl.php';
+          if ( is_file($ctrl) ){
+            array_unshift($this->known[$mode][$path]['checkers'], $ctrl);
+          }
+          if ( $tmp === '.' ){
+            $tmp = '';
+          }
         }
-        if ( $path === '.' ){
-          $path = '';
+        if ( $o['path'] !== $o['request'] ){
+          $this->known[$mode][$o['request']] = $o['path'];
         }
       }
+      else if ( !empty($o['ext']) ){
+        $this->known[$mode][$path] = $o;
+      }
     }
-    \bbn\tools::hdump($this->known);
-    return $this->known[$mode][$path0];
+    return $this->known[$mode][$path];
   }
 
   public function add_routes(array $routes){
@@ -124,34 +167,104 @@ class router {
     return $this;
   }
 
-  public function route($type='controller', $path='', $mode=''){
+  public function route($path, $mode){
+    if ( self::is_mode($mode) ) {
+      $root = $this->get_root($mode);
+      $path = $this->parse($path);
 
-    $mode = $this->get_mode($mode);
-    $root = $this->get_root($mode);
-    $path = $this->get_path($path);
-
-    // We go through each path, starting by the longest until it's empty
-    while ( strlen($path) > 0 ){
-      if ( $this->is_known($path, $mode) ){
-        return $this->get_known($path, $mode);
+      if (in_array($mode, self::$controllers)) {
+        $tmp = $path ? $path : '.';
+        $args = [];
+        // We go through each path, starting by the longest until it's empty
+        while (strlen($tmp) > 0) {
+          if ($this->is_known($tmp, $mode)) {
+            return $this->get_known($tmp, $mode);
+          }
+          if ( $mode === 'dom' ){
+            if ( $tmp === '.' ){
+              if ( file_exists($root.'index.php') ){
+                return $this->set_known([
+                  'file' => $root . 'index.php',
+                  'path' => 'index',
+                  'request' => $path,
+                  'mode' => 'dom',
+                  'args' => $args
+                ]);
+              }
+              break;
+            }
+            else if ( file_exists($root.$tmp.'/index.php') ){
+              return $this->set_known([
+                'file' => $root . $tmp . '/index.php',
+                'path' => $tmp,
+                'request' => $path,
+                'mode' => 'dom',
+                'args' => $args
+              ]);
+            }
+          }
+          if ( (($mode === 'dom') && (BBN_DEFAULT_MODE === 'dom')) || ($mode !== 'dom') ){
+            if ( $this->has_route($tmp) ){
+              $tmp = $this->get_route($tmp);
+              $file = $root.$tmp.'.php';
+              if ( !is_file($file) ){
+                die("The file $file specified by the route $tmp doesn't exist.");
+              }
+              return $this->set_known([
+                'file' => $root . $tmp . '.php',
+                'path' => $tmp,
+                'request' => $path,
+                'mode' => $mode,
+                'args' => $args
+              ]);
+            }
+            else if (file_exists($root . $tmp . '.php')) {
+              return $this->set_known([
+                'file' => $root . $tmp . '.php',
+                'path' => $tmp,
+                'request' => $path,
+                'mode' => $mode,
+                'args' => $args
+              ]);
+            }
+          }
+          array_unshift($args, basename($tmp));
+          $tmp = strpos($tmp, '/') === false ? '' : substr($tmp, 0, strrpos($tmp, '/'));
+          if ( empty($tmp) && ($mode === 'dom') ){
+            $tmp = '.';
+          }
+          else if ( $tmp === '.' ){
+            $tmp = '';
+          }
+        }
+        if ( ((($mode === 'dom') && (BBN_DEFAULT_MODE === 'dom')) || ($mode !== 'dom') ) && $this->is_known(self::$def, $mode) ){
+          return $this->get_known(self::$def, $mode);
+        }
+        if ( ((($mode === 'dom') && (BBN_DEFAULT_MODE === 'dom')) || ($mode !== 'dom') ) && $this->has_route(self::$def)) {
+          $tmp = $this->get_route(self::$def);
+          return $this->set_known([
+            'file' => $root . $tmp . '.php',
+            'path' => $tmp,
+            'request' => $path,
+            'mode' => $mode,
+            'args' => $args
+          ]);
+        }
+        die("No default file defined for mode $mode");
       }
-      else if ( $this->has_route($path, $mode) ){
-        return $this->set_known($this->get_route($path, $mode));
-      }
-      else if ( file_exists($root.$path.'.php') ) {
-        return $this->set_known($path, $mode);
-      }
-      else{
-        $path = strpos($path, '/') === false ? '' : substr($path, 0, strrpos($path, '/'));
+      else {
+        foreach ( self::$filetypes[$mode] as $t ){
+          if ( is_file($root.$path.'.'.$t) ){
+            return $this->set_known([
+              'file' => $root . $path.'.'.$t,
+              'path' => $path,
+              'ext' => $t,
+              'mode' => $mode
+            ]);
+          }
+        }
       }
     }
-    if ( $this->is_known(self::$def, $mode) ){
-      return $this->get_known(self::$def, $mode);
-    }
-    else if ( $this->has_route(self::$def, $mode) ){
-      $path = $this->get_route(self::$def, $mode);
-      return $this->set_known($path, $mode);
-    }
-    die("No default file defined for mode $mode");
+    return false;
   }
 }

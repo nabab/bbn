@@ -72,6 +72,7 @@ class actions {
       $delete = [];
       if ( $type === 'file' ) {
         if ( $data['dir'] === 'controllers' ) {
+          $tab_url_mvc = $data['dir'] . '/' . $data['path'];
           if ( $data['name'] != '_ctrl' ) {
             foreach ( $cfg['controllers']['files'] as $f ) {
               $p = $f['path'] . substr($data['path'], 0, -3) . $f['ext'];
@@ -99,9 +100,15 @@ class actions {
         }
       }
       if ($type === 'dir') {
+        $p_mvc = false;
+        $p_mvc2 = false;
         if ( $data['dir'] === 'controllers' ) {
           foreach ( $cfg['controllers']['files'] as $f ) {
             $p = $f['path'] . $data['path'];
+            if ( $f['title'] === 'Controller' ){
+              $p_mvc = $f['path'] . $data['path'];
+              $p_mvc2 = $f['path'];
+            }
             if ( is_dir($p) && !in_array($p, $delete) ) {
               array_push($delete, $p);
             }
@@ -113,6 +120,16 @@ class actions {
             array_push($delete, $p);
           }
         }
+        // Files and directories to check if they're opened
+        $sub_files = \bbn\file\dir::scan(empty($p_mvc) ? $p : $p_mvc);
+        foreach ( $sub_files as $i => $sub ){
+          if ( is_file($sub) ){
+            $sub_files[$i] = str_replace((empty($p_mvc2) ? $cfg[$data['dir']]['root_path'] : $p_mvc2), $data['dir'] . '/', $sub);
+          }
+          else {
+            unset($sub_files[$i]);
+          }
+        }
       }
       foreach ( $delete as $d ){
         $r = $type === 'dir' ? \bbn\file\dir::delete($d) : unlink($d);
@@ -120,7 +137,14 @@ class actions {
           return $this->error("Impossible to delete the $wtype $d");
         }
       }
-      return ['path' => $p];
+      $ret = [
+        'path' => empty($p_mvc) ? $p : $p_mvc,
+        'sub_files' => empty($sub_files) ? false : array_values($sub_files)
+      ];
+      if ( empty($ret['sub_files']) ){
+        $ret['tab_url'] = [empty($tab_url_mvc) ? str_replace($cfg[$data['dir']]['root_path'], $data['dir'], $ret['path']) : $tab_url_mvc];
+      }
+      return $ret;
     }
     else {
       return $this->error("There is a problem in the name you entered");
@@ -445,7 +469,7 @@ class actions {
           $dir = false;
           foreach ( $dirs[$data['dir']]['files'] as $f ){
             if ( $ext === $f['ext'] ){
-              $dir = $f['root'];
+              $dir = $f['path'];
             }
           }
           if ( !$dir ){

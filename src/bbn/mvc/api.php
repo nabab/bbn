@@ -13,10 +13,6 @@ interface api {
 
   function reroute($path='', $check = 1);
 
-  function get_model($path, array $data=null);
-
-  function get_view($path, $data=[], $mode);
-
   function is_cli();
 
 }

@@ -184,18 +184,19 @@ class connection extends \PDO implements actions, api, engines
   }
   
   private function _cache_name($item, $mode){
+    $r = false;
     switch ( $mode ){
       case 'columns':
-        return "bbn/db/".$this->engine."/".$this->host."/".$item;
+        $r = "bbn-db-".$this->engine."-".$this->host."-".$this->table_full_name($item);
         break;
       case 'tables':
-        return "bbn/db/".$this->engine."/".$this->host."/".$item;
+        $r = "bbn-db-".$this->engine."-".$this->host."-".$item;
         break;
       case 'databases':
-        return "bbn/db/".$this->engine."/".$this->host;
+        $r = "bbn-db-".$this->engine."-".$this->host;
         break;
     }
-    return false;
+    return $r;
   }
   
   /**
@@ -1700,7 +1701,8 @@ class connection extends \PDO implements actions, api, engines
 
   /**
    * Returns first row as an object.
-   * 
+   *
+   * @example
    * <code>
    * $this->db->select(
    *  "tab_users",
@@ -1712,14 +1714,14 @@ class connection extends \PDO implements actions, api, engines
    *  ["id" => "ASC"],
    *  2);
    * </code>
-   * 
+   *
    * @param string $table The table name.
    * @param string|array $fields The fields name.
    * @param array $where  The "where" condition.
    * @param string|array $order The "order" condition, default: false.
    * @param int $start The "start" condition, default: 0.
    * 
-   * @return object|false
+   * @return object|boolean
    */
 	public function select($table, $fields = [], $where = [], $order = false, $start = 0)
 	{
@@ -2500,7 +2502,8 @@ class connection extends \PDO implements actions, api, engines
 	
 	/**
    * Returns SQL code for table creation.
-   * 
+   *
+   * @example
    * <code>
    * $this->db->get_create("table_users");
    * </code>

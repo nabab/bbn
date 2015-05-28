@@ -13,7 +13,7 @@ class directories {
   public function add($data){
     if ( $this->db->insert('bbn_ide_directories', [
       'name' => $data['name'],
-      'root_path' => $data['root_path'],
+      'root_path' => \bbn\str\text::parse_path($data['root_path']),
       'fcolor' => $data['fcolor'],
       'bcolor' => $data['bcolor'],
       'files' => $data['files']
@@ -27,7 +27,7 @@ class directories {
   public function edit($data){
     if ( $this->db->update('bbn_ide_directories', [
       'name' => $data['name'],
-      'root_path' => $data['root_path'],
+      'root_path' => \bbn\str\text::parse_path($data['root_path']),
       'fcolor' => $data['fcolor'],
       'bcolor' => $data['bcolor'],
       'files' => $data['files']
@@ -52,11 +52,11 @@ class directories {
     $dirs = [];
     foreach ( $this->get() as $d ){
       $files = json_decode($d['files']);
-      $p = substr($d['root_path'], 0, strpos($d['root_path'], '/'));
-      $d['root_path'] = constant($p).str_replace($p, '', $d['root_path']);
+      $p = \bbn\str\text::parse_path(substr($d['root_path'], 0, strpos($d['root_path'], '/')));
+      $d['root_path'] = \bbn\str\text::parse_path(constant($p).str_replace($p, '', $d['root_path']));
       foreach ( $files as $i => $f ){
         $f = (array)$f;
-        $f['path'] = $d['root_path'].$f['path'];
+        $f['path'] = \bbn\str\text::parse_path($d['root_path'].$f['path']);
         if ( !empty($f['default']) ){
           $d['def'] = $f['url'];
         }
