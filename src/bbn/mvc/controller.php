@@ -439,11 +439,6 @@ class controller implements api{
 		return false;
 	}
 
-  private function set_prepath($path){
-    if ( $this->exists() ){
-      return $this->mvc->set_prepath($path);
-    }
-  }
 	/**
 	 * This will get the model. There is no order for the arguments.
 	 *

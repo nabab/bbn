@@ -69,7 +69,8 @@ class output {
         ) {
           $this->mode = 'file';
         }
-      } else if (!empty($this->obj->img)) {
+      }
+      else if (!empty($this->obj->img)) {
         if (is_string($this->obj->img) && is_file($this->obj->img)) {
           $this->obj->img = new \bbn\file\image($this->obj->img);
         }
@@ -104,6 +105,7 @@ class output {
       (($this->mode === 'public') && empty($this->obj)) ){
       $this->mode = '';
     }
+    //die(var_dump($this->mode, $this->obj));
 
     switch ( $this->mode ){
 

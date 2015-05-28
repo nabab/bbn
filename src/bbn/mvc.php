@@ -302,10 +302,4 @@ class mvc implements \bbn\mvc\api{
       return $this->db;
     }
   }
-
-  public function set_prepath($path){
-    if ( $this->check() ){
-      return $this->router->set_prepath($path);
-    }
-  }
 }

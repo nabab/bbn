@@ -33,7 +33,7 @@ class tpl {
     $tpl = \LightnCandy::compile($st, [
       'flags' => \LightnCandy::FLAG_MUSTACHELOOKUP |
         \LightnCandy::FLAG_PARENT |
-        \LightnCandy::FLAG_HANDLEBARS |
+        \LightnCandy::FLAG_HANDLEBARSJS |
         \LightnCandy::FLAG_ERROR_LOG
     ]);
     file_put_contents($file, $tpl);

@@ -178,11 +178,15 @@ class router {
     return $this;
   }
 
+  public function get_prepath(){
+    return $this->prepath;
+  }
+
   public function route($path, $mode){
     if ( self::is_mode($mode) ) {
       $root = $this->get_root($mode);
       $path = $this->parse($path);
-      if ( $this->prepath && (strpos($path, '/') !== 0) ){
+      if ( $this->prepath && (strpos($path, '/') !== 0) && (strpos($path, $this->prepath.'/') !== 0) ){
         $path = $this->prepath.$path;
       }
 
