@@ -259,9 +259,6 @@ class controller implements api{
 		if ( is_null($this->is_controlled) ){
 			$this->obj = new \stdClass();
 			$this->control();
-			if ( $this->has_data() && isset($this->obj->output) ){
-				$this->obj->output = $this->render($this->obj->output, $this->data);
-			}
 		}
 		return $this;
 	}
@@ -331,12 +328,15 @@ class controller implements api{
 			if ( is_array($a) ){
 				$data = $a;
 			}
-			else if ( is_string($a) ){
+			else if ( is_string($a) && !empty($a) ){
 				$path = $a;
 			}
 		}
-		if ( $r = $this->get_view(isset($path) ? $path : '', 'js') ){
-			$this->add_script($this->render($r, isset($data) ? $data : $this->data));
+    if ( !isset($path) ) {
+      $path = $this->path;
+    }
+		if ( $r = $this->get_view($path, 'js', $data) ){
+			$this->add_script($r);
 		}
 		return $this;
 	}
@@ -439,6 +439,11 @@ class controller implements api{
 		return false;
 	}
 
+  private function set_prepath($path){
+    if ( $this->exists() ){
+      return $this->mvc->set_prepath($path);
+    }
+  }
 	/**
 	 * This will get the model. There is no order for the arguments.
 	 *

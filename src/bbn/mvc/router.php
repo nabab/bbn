@@ -186,7 +186,7 @@ class router {
     if ( self::is_mode($mode) ) {
       $root = $this->get_root($mode);
       $path = $this->parse($path);
-      if ( $this->prepath && (strpos($path, '/') !== 0) && (strpos($path, $this->prepath.'/') !== 0) ){
+      if ( $this->prepath && (strpos($path, '/') !== 0) && (strpos($path, $this->prepath) !== 0) ){
         $path = $this->prepath.$path;
       }
 
@@ -214,7 +214,7 @@ class router {
             else if ( file_exists($root.$tmp.'/index.php') ){
               return $this->set_known([
                 'file' => $root . $tmp . '/index.php',
-                'path' => $tmp,
+                'path' => $tmp. '/index',
                 'request' => $path,
                 'mode' => 'dom',
                 'args' => $args
