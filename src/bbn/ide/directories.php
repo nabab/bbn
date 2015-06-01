@@ -44,13 +44,15 @@ class directories {
     return $this->error('Error: Delete.');
   }
 
-  public function get(){
-    return $this->db->rselect_all('bbn_ide_directories');
+  public function get($name=''){
+    return empty($name) ?
+      $this->db->rselect_all('bbn_ide_directories') :
+      $this->db->rselect_all('bbn_ide_directories', [], ['name' => $name]);
   }
 
-  public function dirs(){
+  public function dirs($name=''){
     $dirs = [];
-    foreach ( $this->get() as $d ){
+    foreach ( $this->get($name) as $d ){
       $files = json_decode($d['files']);
       $p = \bbn\str\text::parse_path(substr($d['root_path'], 0, strpos($d['root_path'], '/')));
       $d['root_path'] = \bbn\str\text::parse_path(constant($p).str_replace($p, '', $d['root_path']));
@@ -69,7 +71,7 @@ class directories {
       $d['files'] = $files;
       $dirs[$d['name'] === 'MVC' ? 'controllers' : $d['name']] = $d;
     }
-    return $dirs;
+    return $name && isset($dirs[$name]) ? $dirs[$name] : $dirs;
   }
 
   public function modes(){
