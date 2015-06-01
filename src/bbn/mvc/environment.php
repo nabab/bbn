@@ -53,7 +53,7 @@ class environment {
         if ( !empty($t) ) {
           if ( in_array($t, \bbn\mvc::$reserved) ){
             die("The controller you are asking for contains one of the following reserved strings: " .
-              implode(", ", self::$reserved));
+              implode(", ", \bbn\mvc::$reserved));
           }
           array_push($this->params, $t);
         }
