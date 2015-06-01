@@ -439,6 +439,12 @@ class controller implements api{
 		return false;
 	}
 
+  private function get_prepath(){
+    if ( $this->exists() ){
+      return $this->mvc->get_prepath();
+    }
+  }
+
   private function set_prepath($path){
     if ( $this->exists() ){
       return $this->mvc->set_prepath($path);
