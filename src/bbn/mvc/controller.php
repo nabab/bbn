@@ -111,17 +111,30 @@ class controller implements api{
 		return $this->file;
 	}
 
-	/**
-	 * Returns the current controller's path.
-	 *
-	 * @return string
-	 */
-	public function say_path()
-	{
-		return $this->path;
-	}
+  /**
+   * Returns the current controller's path.
+   *
+   * @return string
+   */
+  public function say_path()
+  {
+    return $this->path;
+  }
 
-	/**
+  /**
+   * Returns the current controller's path.
+   *
+   * @return string
+   */
+  public function say_local_path()
+  {
+    if ( $pp = $this->get_prepath() && (strpos($this->path, $pp) === 0) ){
+      return substr($this->path, strlen($pp));
+    }
+    return $this->path;
+  }
+
+  /**
 	 * Returns the current controller's route, i.e as demanded by the client.
 	 *
 	 * @return string
@@ -130,6 +143,19 @@ class controller implements api{
 	{
 		return $this->request;
 	}
+
+  /**
+   * Returns the current controller's path.
+   *
+   * @return string
+   */
+  public function say_local_route()
+  {
+    if ( $pp = $this->get_prepath() && (strpos($this->request, $pp) === 0) ){
+      return substr($this->request, strlen($pp));
+    }
+    return $this->request;
+  }
 
 	/**
 	 * Returns the current controller's file's name.

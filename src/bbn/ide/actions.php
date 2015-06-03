@@ -455,7 +455,7 @@ class actions {
               }
             }
             else {
-              $dir = $f['path'].$data['name'];
+              $dir = $f['path'].$data['path'];
               if ( file_exists($dir) ){
                 if ( !\bbn\file\dir::copy($dir, $dest.$data['name']) ){
                   return $this->error('Impossible to export the folder '.$data['name']);

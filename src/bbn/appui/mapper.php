@@ -324,10 +324,10 @@ class mapper{
           'description' => null,
           'url' => implode("/", $params),
           'primary' => $cfg['keys']['PRIMARY']['columns'][0],
-          'select' => 'admin/select/'.$table,
-          'insert' => 'admin/insert/'.$table,
-          'update' => 'admin/update/'.$table,
-          'delete' => 'admin/delete/'.$table,
+          'select' => 'select/'.$table,
+          'insert' => 'insert/'.$table,
+          'update' => 'update/'.$table,
+          'delete' => 'delete/'.$table,
           'elements' => []
       ];
       
