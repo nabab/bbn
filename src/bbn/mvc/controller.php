@@ -361,6 +361,9 @@ class controller implements api{
     if ( !isset($path) ) {
       $path = $this->path;
     }
+    if ( !isset($data) ) {
+      $data = $this->data;
+    }
 		if ( $r = $this->get_view($path, 'js', $data) ){
 			$this->add_script($r);
 		}
