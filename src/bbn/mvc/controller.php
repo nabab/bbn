@@ -128,7 +128,7 @@ class controller implements api{
    */
   public function say_local_path()
   {
-    if ( $pp = $this->get_prepath() && (strpos($this->path, $pp) === 0) ){
+    if ( ($pp = $this->get_prepath()) && (strpos($this->path, $pp) === 0) ){
       return substr($this->path, strlen($pp));
     }
     return $this->path;
@@ -151,7 +151,7 @@ class controller implements api{
    */
   public function say_local_route()
   {
-    if ( $pp = $this->get_prepath() && (strpos($this->request, $pp) === 0) ){
+    if ( ($pp = $this->get_prepath()) && (strpos($this->request, $pp) === 0) ){
       return substr($this->request, strlen($pp));
     }
     return $this->request;
