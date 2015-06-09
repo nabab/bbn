@@ -158,7 +158,10 @@ class environment {
         }
       }
       // If no post, assuming to be a DOM document
-      else{
+      else if ( count($_FILES) ){
+        $this->set_mode(BBN_DEFAULT_MODE);
+      }
+      else {
         $this->set_mode('dom');
       }
       if ( isset($_SERVER['REQUEST_URI']) &&
