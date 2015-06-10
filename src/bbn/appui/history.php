@@ -481,6 +481,7 @@ class history
       if ( isset(self::$hstructures[$table], self::$hstructures[$table]['history']) && self::$hstructures[$table]['history'] ){
         $s =& self::$hstructures[$table];
         if ( !isset($s['primary']) ){
+          self::$db->error("You need to have a primary key on a single column in your table $table in order to use the history class");
           die(\bbn\tools::dump("You need to have a primary key on a single column in your table $table in order to use the history class", $s));
         }
 

@@ -380,6 +380,10 @@ class connection
             $this->permissions = array_merge(json_decode($p, 1), $this->permissions);
           }
         }
+        /** @todo Add all the permissions explicitly for admin */
+        if ( $this->is_admin() ){
+
+        }
         $this->set_session('permissions', $this->permissions);
         $this->set_session('groups', $this->groups);
       }
@@ -410,10 +414,7 @@ class connection
     if ( isset($this->permissions[$name]) && $this->permissions[$name] ){
       return 1;
     }
-    else if ( $check_admin && isset($this->permissions["admin"]) && $this->permissions["admin"] ){
-      return 1;
-    }
-    return false;
+    return ( $check_admin && $this->is_admin() );
   }
   
   /**
@@ -423,8 +424,11 @@ class connection
    * 
    * @return void
    */
-  public function check_permission($name){
-    if ( !$this->has_permission($name) ){
+  public function check_permission($name, $check_admin=1){
+    if ( isset($this->permissions[$name]) && $this->permissions[$name] ){
+      return 1;
+    }
+    if ( !( $check_admin && $this->is_admin() ) ){
       die("You don't have the requested permission ($name)");
     }
   }
@@ -785,7 +789,7 @@ class connection
 	 */
   public function is_admin()
   {
-    return $this->has_permission("admin");
+    return (isset($this->permissions["admin"]) && $this->permissions["admin"]);
   }
 
 	/**

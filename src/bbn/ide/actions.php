@@ -446,19 +446,19 @@ class actions {
               $path = substr($data['path'], 0, strrpos($data['path'], $ext));
               $file = $f['path'].$path.$f['ext'];
               if ( file_exists($file) ){
-                if ( !\bbn\file\dir::create_path($dest) ){
-                  return $this->error("Impossible to create the path $dest");
+                if ( !\bbn\file\dir::create_path($dest.dirname($data['path'])) ){
+                  return $this->error("Impossible to create the path " .$dest.dirname($data['path']));
                 }
-                if ( !\bbn\file\dir::copy($file, $dest.$data['name'].'.'.$f['ext']) ){
-                  return $this->error('Impossible to export the file '.$data['name'].'.'.$f['ext']);
+                if ( !\bbn\file\dir::copy($file, $dest.$data['path']) ){
+                  return $this->error('Impossible to export the file '.$data['path']);
                 }
               }
             }
             else {
               $dir = $f['path'].$data['path'];
               if ( file_exists($dir) ){
-                if ( !\bbn\file\dir::copy($dir, $dest.$data['name']) ){
-                  return $this->error('Impossible to export the folder '.$data['name']);
+                if ( !\bbn\file\dir::copy($dir, $dest.$data['path']) ){
+                  return $this->error('Impossible to export the folder '.$data['path']);
                 }
               }
             }

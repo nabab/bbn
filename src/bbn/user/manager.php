@@ -108,15 +108,15 @@ You can click the following link to access directly your account:<br>
     }
   }
   
-  public function groups(){
+  public function groups($adm=false){
     return $this->db->rselect_all(
       $this->cfg['tables']['groups'], [
-        'id' => $this->cfg['arch']['groups']['id'],
-        'group' => $this->cfg['arch']['groups']['group'],
-        'cfg' => $this->cfg['arch']['groups']['cfg']
-      ]);
+      'id' => $this->cfg['arch']['groups']['id'],
+      'group' => $this->cfg['arch']['groups']['group'],
+      'cfg' => $this->cfg['arch']['groups']['cfg']
+    ], $adm ? '' : [['id', '>', 1]]);
   }
-  
+
   public function text_value_groups(){
     return $this->db->rselect_all(
       $this->cfg['tables']['groups'], [

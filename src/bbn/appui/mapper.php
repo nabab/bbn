@@ -507,6 +507,7 @@ class mapper{
             }
           }
           else {
+            /** @todo Che succede??? */
             var_dump($f['type']);
           }
           if ( $r['field'] === 'numeric' ){
