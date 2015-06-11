@@ -142,7 +142,7 @@ class actions {
         'sub_files' => empty($sub_files) ? false : array_values($sub_files)
       ];
       if ( empty($ret['sub_files']) ){
-        $ret['tab_url'] = [empty($tab_url_mvc) ? str_replace($cfg[$data['dir']]['root_path'], $data['dir'], $ret['path']) : $tab_url_mvc];
+        $ret['tab_url'] = [empty($tab_url_mvc) ? str_replace($cfg[$data['dir']]['root_path'], $data['dir'].'/', $ret['path']) : $tab_url_mvc];
       }
       return $ret;
     }
@@ -389,6 +389,7 @@ class actions {
         }
         else {
           $dest_file= $dir.\bbn\str\text::file_ext($data['name'], 1)[0];
+          $ext = \bbn\str\text::file_ext($data['name']);
           $src = $cfg['root_path'].$src_file.($type === 'file' ? '.'.\bbn\str\text::file_ext($path) : '');
           $dest = dirname($src).'/'.\bbn\str\text::file_ext($data['name'], 1)[0].($type === 'file' ? '.'.\bbn\str\text::file_ext($data['path']) : '');
           $is_dir = ($type === 'dir') && is_dir($src);
@@ -407,12 +408,15 @@ class actions {
             return $this->error("Impossible de déplacer le fichier $src");
           }
         }
-        return ['new_file' => $dest_file];
+        return [
+          'new_file' => $dest_file,
+          'new_file_ext' => $ext
+        ];
       }
     }
     return $this->error();
   }
-
+  
   public function close($data){
     if ( isset($data['dir'], $data['file']) ){
       $data['file'] = ($data['dir'] === 'controllers') && (\bbn\str\text::file_ext($data['file']) !== 'php') ?

@@ -390,16 +390,46 @@ class connection
     }
     return $this;
   }
-  
+
   /**
    * Returns all the current user's permissions
-   * 
+   *
    * @return array
    */
   public function get_permissions(){
     return $this->permissions;
   }
-  
+
+  /**
+   * Sets the current user's permissions (only if admin)
+   *
+   * @return array
+   */
+  public function set_admin_permissions($perms){
+    if ( $this->is_admin() ){
+      //\bbn\tools::hdump($perms);
+      $x = function($ar, $res = [], $prefix = '') use (&$x){
+        foreach ( $ar as $a ){
+          $pref = isset($a['prefix']) ? $prefix.$a['prefix'] : $prefix;
+          if ( !empty($a['link']) ){
+            $res[$pref.$a['link']] = 1;
+          }
+          if ( isset($a['items']) ){
+            $res = $x($a['items'], $res, $pref);
+          }
+        }
+        return $res;
+      };
+      $this->permissions = $x($perms);
+      if ( !isset($this->permissions['admin']) ){
+        $this->permissions['admin'] = 1;
+      }
+      $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]['permissions'] = $this->permissions;
+      return 1;
+    }
+    return false;
+  }
+
   /**
    * Checks if the user has the given permission
    * 
