@@ -8,7 +8,7 @@ class history
 	
 	private static
           /* @var \bbn\db\connection  The DB connection */
-          $db = false,
+          $db,
           /* @var array A collection of the  */
           $dbs = [],
           $hstructures = array(),
@@ -310,27 +310,29 @@ class history
     }
     return false;
   }
-  
-  public static function get_first_date($table, $id, $column = null){
-    if ( is_string($column) ){
-      return self::$db->select_one(
-              self::$htable,
-              'last_mod', [
-                ['column', 'LIKE', self::$db->table_full_name($table).".".$column],
-                ['line', '=', $id]
-              ],
-              ['last_mod' => 'ASC']);
+
+  public static function get_creation_date($table, $id){
+    if ( self::check($table) ) {
+      return self::$db->select_one(self::$htable, 'last_mod', [
+        'column' => self::$db->table_full_name($table) . ".%",
+        'line' => $id,
+        'operation' => 'INSERT'
+      ]);
     }
-    return self::$db->select_one(
-            self::$htable,
-            'last_mod', [
-              ['column', 'LIKE', self::$db->table_full_name($table).'.%'],
-              ['line', '=', $id],
-              ['operation', 'LIKE', 'INSERT']
-            ],
-            ['last_mod' => 'ASC']);
+    return false;
   }
-  
+
+  public static function get_creation($table, $id){
+    if ( self::check($table) ) {
+      return self::$db->rselect(self::$htable, ['date' => 'last_mod', 'user' => 'id_user'], [
+        ['column', 'LIKE', self::$db->table_full_name($table) . ".%"],
+        'line' => $id,
+        'operation' => 'INSERT'
+      ]);
+    }
+    return false;
+  }
+
   public static function get_last_date($table, $id, $column = null){
     if ( is_string($column) ){
       return self::$db->select_one(
@@ -389,6 +391,50 @@ class history
       $r = [];
     }
 	}
+
+  public static function get_column_history($table, $id, $column){
+    if ( self::check($table)&& ($primary = self::$db->get_primary($table)) ){
+      $current = self::$db->select_one($table, $column, [
+        $primary[0] => $id
+      ]);
+      $hist = self::get_history($table, $id, $column);
+      $r = [];
+      if ( $crea = self::get_creation($table, $id) ){
+        if ( !empty($hist['upd']) ){
+          $hist['upd'] = array_reverse($hist['upd']);
+          foreach ( $hist['upd'] as $i => $h ){
+            if ( $i === 0 ){
+              array_push($r, [
+                'date' => $crea['date'],
+                'val' => $h['old'],
+                'user' => $crea['user']
+              ]);
+            }
+            else{
+              array_push($r, [
+                'date' => $hist['upd'][$i-1]['date'],
+                'val' => $h['old'],
+                'user' => $hist['upd'][$i-1]['user']
+              ]);
+            }
+          }
+          array_push($r, [
+            'date' => $hist['upd'][$i]['date'],
+            'val' => $current,
+            'user' => $hist['upd'][$i]['user']
+          ]);
+        }
+        else{
+          $r[0] = [
+            'date' => $hist['ins'][0]['date'],
+            'val' => $current,
+            'user' => $hist['ins'][0]['user']
+          ];
+        }
+      }
+      return $r;
+    }
+  }
 	
 	/**
 	 * Gets all information about a given table
