@@ -86,7 +86,7 @@ class cron extends \bbn\obj{
     if ( ($article = $this->get_article($id)) &&
             ($cron = $this->get_cron($article['id_cron'])) ){
       $time = $this->timer->has_started('cron_'.$article['id_cron']) ? $this->timer->stop('cron_'.$article['id_cron']): 0;
-      if ( !empty($res) ) {
+      if ( !empty($res) ){
         \bbn\tools::hdump($id, $res);
         $this->db->update($this->jtable, [
           'finish' => date('Y-m-d H:i:s'),
@@ -98,6 +98,10 @@ class cron extends \bbn\obj{
       }
       else{
         $this->db->delete($this->jtable, ['id' => $id]);
+        $prev = $this->db->rselect($this->jtable, ['res', 'id'], ['id_cron' => $article['id_cron']], ['finish' => 'DESC']);
+        if ( $prev['res'] === 'error' ){
+          $this->db->update($this->jtable, ['res' => 'Restarted after error'], ['id' => $prev['id']]);
+        }
       }
       $this->db->update($this->table, [
         'prev' => $article['start'],
