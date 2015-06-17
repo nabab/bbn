@@ -416,7 +416,7 @@ class actions {
     }
     return $this->error();
   }
-  
+
   public function close($data){
     if ( isset($data['dir'], $data['file']) ){
       $data['file'] = ($data['dir'] === 'controllers') && (\bbn\str\text::file_ext($data['file']) !== 'php') ?

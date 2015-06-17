@@ -351,7 +351,7 @@ class history
             ['last_mod' => 'DESC']);
   }
 	
-	public static function get_history($table, $id){
+	public static function get_history($table, $id, $col=''){
     if ( self::check($table) ){
       $pat = [
         'ins' => 'INSERT',
@@ -361,14 +361,17 @@ class history
       $r = [];
       $table = self::$db->table_full_name($table);
       foreach ( $pat as $k => $p ){
-        if ( $q = self::$db->rselect(
+        if ( $q = self::$db->rselect_all(
           self::$htable,
           [
             'date' => 'last_mod',
-            'user' => 'id_user'
+            'user' => 'id_user',
+            'old',
+            'column',
+            'id'
           ],[
             ['line', '=', $id],
-            ['column', 'LIKE', "$table.%"],
+            ['column', 'LIKE', $table.'.'.( $col ? $col : '%' )],
             ['operation', 'LIKE', $p]
           ],[
             'last_mod' => 'desc'

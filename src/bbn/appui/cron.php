@@ -156,9 +156,9 @@ class cron extends \bbn\obj{
     if ( $this->check() && ($data = $this->db->get_row("
         SELECT *
         FROM {$this->table}
-        WHERE active = 1 
-        AND next < ?".
-        ( is_int($id_cron) ? " AND `id_cron` = $id_cron" : "" )."
+        WHERE `active` = 1 
+        AND `next` < ?".
+        ( is_int($id_cron) ? " AND `id` = $id_cron" : "" )."
         ORDER BY `priority` ASC, `next` ASC
         LIMIT 1",
         date('Y-m-d H:i:s'))) ){
@@ -192,8 +192,8 @@ class cron extends \bbn\obj{
     }
   }
 
-  public function run($id_cron = null){
-    if ( ($cron = $this->get_next($id_cron)) ){
+  public function run($id_cron){
+    if ( $cron = $this->get_next($id_cron) ){
       if ( $this->is_running($cron['id']) ){
         if ( $this->is_timeout($cron['id']) ){
           $r = $this->get_runner($cron['id']);
@@ -219,8 +219,14 @@ class cron extends \bbn\obj{
 
   public function run_all(){
     $time = 0;
-    while ( ($time < $this->timeout) && ($ctx = $this->run()) ){
-      $time += $ctx;
+    $done = [];
+    while ( ($time < $this->timeout) &&
+           ($cron = $this->get_next()) &&
+           !in_array($cron['id'], $done) ){
+      if ( $ctx = $this->run($cron['id']) ){
+        $time += $ctx;
+      }
+      array_push($done, $cron['id']);
     }
     return $time;
   }
