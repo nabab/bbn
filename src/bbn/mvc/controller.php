@@ -164,7 +164,14 @@ class controller implements api{
 	 */
 	public function say_dir()
 	{
-		return $this->path ? dirname($this->path) : false;
+    if ( $this->path ){
+      $p = dirname($this->path);
+      if ( $p === '.' ){
+        return '/';
+      }
+      return '/'.$p;
+    }
+		return false;
 	}
 
 	/**
@@ -215,7 +222,7 @@ class controller implements api{
 	public function incl($file_name)
 	{
 		if ( $this->exists() ){
-			$d = dirname($this->file).'/';
+			$d = $this->say_dir().'/';
 			if ( substr($file_name, -4) !== '.php' ){
 				$file_name .= '.php';
 			}
@@ -415,21 +422,31 @@ class controller implements api{
 		echo $this->add_data($this->post)->add_data($this->get_model($this->dest))->get_view().$this->get_js().$this->get_less();
 	}
 
-	/**
-	 * This will get a the content of a file located within the data path
-	 *
-	 * @param string $file_name
-	 * @return string|false
-	 */
-	public function get_content($file_name)
-	{
-		if ( $this->check_path($file_name) && defined('BBN_DATA_PATH') && is_file(BBN_DATA_PATH.$file_name) ){
-			return file_get_contents(BBN_DATA_PATH.$file_name);
-		}
-		return false;
-	}
+  /**
+   * This will get a the content of a file located within the data path
+   *
+   * @param string $file_name
+   * @return string|false
+   */
+  public function get_content($file_name)
+  {
+    if ( $this->check_path($file_name) && defined('BBN_DATA_PATH') && is_file(BBN_DATA_PATH.$file_name) ){
+      return file_get_contents(BBN_DATA_PATH.$file_name);
+    }
+    return false;
+  }
 
-	/**
+  /**
+   * This will return the path to the directory of the current controller
+   *
+   * @return string
+   */
+  public function get_dir()
+  {
+    return $this->dir;
+  }
+
+  /**
 	 * This will get a PHP template view
 	 *
 	 * @param string $path

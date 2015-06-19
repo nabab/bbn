@@ -934,7 +934,7 @@ class text
         }
         $st .= str_repeat('    ', $lev);
         if ( $is_assoc ){
-          $st .= ( is_string($k) ? "'".\bbn\str\text::escape_squote($k)."'" : $k ). " => ";
+          $st .= ( is_string($k) ? '"'.\bbn\str\text::escape_dquote($k).'"' : $k ). " => ";
         }
         if ( is_array($v) ){
           $st .= self::export($v, $remove_empty, $lev+1);
@@ -961,7 +961,7 @@ class text
           $st .= $v;
         }
         else if ( !$remove_empty || !empty($v) ){
-          $st .= "'".\bbn\str\text::escape_squote($v)."'";
+          $st .= '"'.\bbn\str\text::escape_dquote($v).'"';
         }
         $st .= ','.PHP_EOL;
       }

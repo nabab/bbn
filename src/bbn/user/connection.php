@@ -407,7 +407,6 @@ class connection
    */
   public function set_admin_permissions($perms){
     if ( $this->is_admin() ){
-      //\bbn\tools::hdump($perms);
       $x = function($ar, $res = [], $prefix = '') use (&$x){
         foreach ( $ar as $a ){
           $pref = isset($a['prefix']) ? $prefix.$a['prefix'] : $prefix;
@@ -421,6 +420,7 @@ class connection
         return $res;
       };
       $this->permissions = $x($perms);
+      //die(\bbn\tools::hdump($this->permissions ));
       if ( !isset($this->permissions['admin']) ){
         $this->permissions['admin'] = 1;
       }

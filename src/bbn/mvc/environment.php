@@ -42,7 +42,8 @@ class environment {
      * Determines if it is sent through the command line
      * @var boolean
      */
-    $cli;
+    $cli,
+    $new_url;
 
   private function set_params($path)
   {
@@ -74,8 +75,7 @@ class environment {
     return $this->mode;
   }
 
-  public function __construct(){
-    $this->cli = (php_sapi_name() === 'cli');
+  private function _init(){
     // When using CLI a first parameter can be used as route,
     // a second JSON encoded can be used as $this->post
     if ( $this->cli ){
@@ -87,6 +87,12 @@ class environment {
       $this->get_post();
     }
     $this->url = implode('/',$this->params);
+    return $this;
+  }
+
+  public function __construct($url=false){
+    $this->cli = (php_sapi_name() === 'cli');
+    $this->_init();
   }
 
   /**
@@ -103,6 +109,12 @@ class environment {
 
   public function get_url(){
     return $this->url;
+  }
+
+  public function simulate($url){
+    $this->post = null;
+    $this->new_url = $url;
+    $this->_init();
   }
 
   public function get_mode(){
@@ -164,9 +176,15 @@ class environment {
       else {
         $this->set_mode('dom');
       }
-      if ( isset($_SERVER['REQUEST_URI']) &&
-        ( BBN_CUR_PATH === '' || strpos($_SERVER['REQUEST_URI'],BBN_CUR_PATH) !== false ) ){
-        $url = explode("?", urldecode($_SERVER['REQUEST_URI']))[0];
+      if ( $this->new_url ){
+        $current = $this->new_url;
+      }
+      else if ( isset($_SERVER['REQUEST_URI']) ){
+        $current = $_SERVER['REQUEST_URI'];
+      }
+      if ( isset($current) &&
+        ( BBN_CUR_PATH === '' || strpos($current, BBN_CUR_PATH) !== false ) ){
+        $url = explode("?", urldecode($current))[0];
         $this->set_params(substr($url, strlen(BBN_CUR_PATH)));
       }
     }

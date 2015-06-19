@@ -203,12 +203,15 @@ class mvc implements \bbn\mvc\api{
 	 */
 	public function reroute($path='', $check = 1)
 	{
+    $this->env->simulate($path);
 		$this->is_routed = false;
 		$this->controller = false;
 		$this->is_controlled = null;
-		$this->route($path);
+    $this->info = null;
+		$this->route();
 		if ( $check ){
-			$this->check();
+			$this->process();
+      //die(\bbn\tools::dump($this->get_url(), $this->controller));
 		}
 		return $this;
 	}
