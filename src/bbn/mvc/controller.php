@@ -222,7 +222,7 @@ class controller implements api{
 	public function incl($file_name)
 	{
 		if ( $this->exists() ){
-			$d = $this->say_dir().'/';
+			$d = dirname($this->file).'/';
 			if ( substr($file_name, -4) !== '.php' ){
 				$file_name .= '.php';
 			}
