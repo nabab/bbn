@@ -86,7 +86,7 @@ class environment {
     else{
       $this->get_post();
     }
-    $this->url = implode('/',$this->params);
+    $this->url = implode('/', $this->params);
     return $this;
   }
 
@@ -183,9 +183,14 @@ class environment {
         $current = $_SERVER['REQUEST_URI'];
       }
       if ( isset($current) &&
-        ( BBN_CUR_PATH === '' || strpos($current, BBN_CUR_PATH) !== false ) ){
+        ( BBN_CUR_PATH === '/' || strpos($current, BBN_CUR_PATH) !== false ) ){
         $url = explode("?", urldecode($current))[0];
-        $this->set_params(substr($url, strlen(BBN_CUR_PATH)));
+        if ( BBN_CUR_PATH === '/' ) {
+          $this->set_params($url);
+        }
+        else{
+          $this->set_params(substr($url, strlen(BBN_CUR_PATH)));
+        }
       }
     }
     return $this->post;

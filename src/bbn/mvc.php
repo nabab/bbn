@@ -211,7 +211,6 @@ class mvc implements \bbn\mvc\api{
 		$this->route();
 		if ( $check ){
 			$this->process();
-      //die(\bbn\tools::dump($this->get_url(), $this->controller));
 		}
 		return $this;
 	}
