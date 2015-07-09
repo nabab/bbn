@@ -389,9 +389,9 @@ class actions {
         }
         else {
           $dest_file= $dir.\bbn\str\text::file_ext($data['name'], 1)[0];
-          $ext = \bbn\str\text::file_ext($data['name']);
-          $src = $cfg['root_path'].$src_file.($type === 'file' ? '.'.\bbn\str\text::file_ext($path) : '');
-          $dest = dirname($src).'/'.\bbn\str\text::file_ext($data['name'], 1)[0].($type === 'file' ? '.'.\bbn\str\text::file_ext($data['path']) : '');
+          $ext = \bbn\str\text::file_ext($data['path']);
+          $src = $cfg['root_path'].$src_file.($type === 'file' ? '.'.$ext : '');
+          $dest = dirname($src).'/'.\bbn\str\text::file_ext($data['name'], 1)[0].($type === 'file' ? '.'.$ext : '');
           $is_dir = ($type === 'dir') && is_dir($src);
           $is_file = ($type === 'dir') || $is_dir ? false : is_file($src);
           if ( $is_dir || $is_file ){
@@ -408,9 +408,22 @@ class actions {
             return $this->error("Impossible de déplacer le fichier $src");
           }
         }
+        if ( isset($_SESSION[BBN_SESS_NAME]['ide']['list']) ){
+          $sess = [
+            'dir' => $data['dir'],
+            'file' => $data['path']
+          ];
+          if ( in_array($sess, $_SESSION[BBN_SESS_NAME]['ide']['list']) ){
+            unset($_SESSION[BBN_SESS_NAME]['ide']['list'][array_search($sess, $_SESSION[BBN_SESS_NAME]['ide']['list'])]);
+            array_push($_SESSION[BBN_SESS_NAME]['ide']['list'], [
+              'dir' => $data['dir'],
+              'file' => $dest_file.( empty($ext) ? '.php' : '.'.$ext )
+            ]);
+          }
+        }
         return [
           'new_file' => $dest_file,
-          'new_file_ext' => $ext
+          'new_file_ext' => empty($ext) ? '' : $ext
         ];
       }
     }
@@ -425,21 +438,15 @@ class actions {
     }
     if ( isset($_SESSION[BBN_SESS_NAME]['ide']) &&
       in_array($data, $_SESSION[BBN_SESS_NAME]['ide']['list']) ){
-      foreach ( $_SESSION[BBN_SESS_NAME]['ide']['list'] as $i => $v ){
-        if ( ($v['dir'] === $data['dir']) && ($v['file'] === $data['file']) ){
-          unset($_SESSION[BBN_SESS_NAME]['ide']['list'][$i]);
-          return 1;
-        }
-      }
+      unset($_SESSION[BBN_SESS_NAME]['ide']['list'][array_search($data, $_SESSION[BBN_SESS_NAME]['ide']['list'])]);
     }
     return ['data' => "Tab is not in session."];
   }
-
+  
   public function export($data){
     if ( isset($data['dir'], $data['name'], $data['path'], $data['type']) ){
       $directories = new directories($this->db);
       $dirs = $directories->dirs();
-      //$root_dest = BBN_DATA_PATH.'users/'.$_SESSION[BBN_SESS_NAME]['user']['id'].'/ide/exported/';
       $root_dest = BBN_USER_PATH.'tmp/'.\bbn\str\text::genpwd().'/';
       if ( isset($dirs[$data['dir']]) ){
         if ( $data['dir'] === 'controllers' ){
@@ -451,10 +458,10 @@ class actions {
               $file = $f['path'].$path.$f['ext'];
               if ( file_exists($file) ){
                 if ( !\bbn\file\dir::create_path($dest.dirname($data['path'])) ){
-                  return $this->error("Impossible to create the path " .$dest.dirname($data['path']));
+                  return $this->error("Impossible to create the path ".$dest.dirname($data['path']));
                 }
-                if ( !\bbn\file\dir::copy($file, $dest.$data['path']) ){
-                  return $this->error('Impossible to export the file '.$data['path']);
+                if ( !\bbn\file\dir::copy($file, $dest.$path.$f['ext']) ){
+                  return $this->error('Impossible to export the file '.$path.$f['ext']);
                 }
               }
             }

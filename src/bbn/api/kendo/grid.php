@@ -157,22 +157,22 @@ class grid // extends object
           if ( isset($cfg['select']) ){
             $this->set_select(
                     ($cfg['select'] === 1) || ($cfg['select'] === 'on') ?
-                        'json/select/'.$cfg['url'] : $cfg['select']);
+                        'select/'.$cfg['url'] : $cfg['select']);
           }
           if ( isset($cfg['insert']) ){
             $this->set_insert(
                     ($cfg['insert'] === 1) || ($cfg['insert'] === 'on') ?
-                        'json/insert/'.$cfg['url'] : $cfg['insert']);
+                        'insert/'.$cfg['url'] : $cfg['insert']);
           }
           if ( isset($cfg['update']) ){
             $this->set_update(
                     ($cfg['update'] === 1) || ($cfg['update'] === 'on') ?
-                        'json/update/'.$cfg['url'] : $cfg['update']);
+                        'update/'.$cfg['url'] : $cfg['update']);
           }
           if ( isset($cfg['delete']) ){
             $this->set_delete(
                     ($cfg['delete'] === 1) || ($cfg['delete'] === 'on') ?
-                        'json/delete/'.$cfg['url'] : $cfg['delete']);
+                        'delete/'.$cfg['url'] : $cfg['delete']);
           }
         }
         $this->dataSource->transport($this->transport);

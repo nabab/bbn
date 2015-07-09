@@ -157,7 +157,7 @@ class tree // extends object
   
   public function set_insert($url, $with_button=1){
     $dst = new \Kendo\Data\DataSourceTransportCreate();
-    $dst    ->url('json/insert/'.$url)
+    $dst    ->url('insert/'.$url)
             ->contentType('application/json')  
             ->type('POST');
     $this->grid->transport->create($dst);
@@ -169,7 +169,7 @@ class tree // extends object
 
   public function set_select($url){
     $dst = new \Kendo\Data\DataSourceTransportRead();
-    $dst    ->url('json/select/'.$url)
+    $dst    ->url('select/'.$url)
             ->contentType('application/json')  
             ->type('POST');
     $this->grid->transport->read($dst);
@@ -177,7 +177,7 @@ class tree // extends object
 
   public function set_update($url){
     $dst = new \Kendo\Data\DataSourceTransportUpdate();
-    $dst    ->url('json/update/'.$url)
+    $dst    ->url('update/'.$url)
             ->contentType('application/json')  
             ->type('POST');
     $this->grid->transport->update($dst);
@@ -185,7 +185,7 @@ class tree // extends object
 
   public function set_delete($url){
     $dst = new \Kendo\Data\DataSourceTransportDestroy();
-    $dst    ->url('json/delete/'.$url)
+    $dst    ->url('delete/'.$url)
             ->contentType('application/json')  
             ->type('POST');
     $this->grid->transport->destroy($dst);

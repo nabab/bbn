@@ -235,16 +235,16 @@ class mapper{
         }
         /*
         if ( empty($cfg['select']) && \bbn\str\text::is_number($cfg['url']) ){
-          $cfg['select'] = 'json/select/'.$id."/".implode("/", $params);
+          $cfg['select'] = 'select/'.$id."/".implode("/", $params);
         }
         if ( empty($cfg['insert'])  && \bbn\str\text::is_number($cfg['url']) ){
-          $cfg['insert'] = 'json/insert/'.$id."/".implode("/", $params);
+          $cfg['insert'] = 'insert/'.$id."/".implode("/", $params);
         }
         if ( empty($cfg['update']) && \bbn\str\text::is_number($cfg['url']) ){
-          $cfg['update'] = 'json/update/'.$id."/".implode("/", $params);
+          $cfg['update'] = 'update/'.$id."/".implode("/", $params);
         }
         if ( empty($cfg['delete']) && \bbn\str\text::is_number($cfg['url']) ){
-          $cfg['delete'] = 'json/delete/'.$id."/".implode("/", $params);
+          $cfg['delete'] = 'delete/'.$id."/".implode("/", $params);
         }
          * 
          */

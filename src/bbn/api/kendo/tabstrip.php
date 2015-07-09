@@ -105,7 +105,7 @@ class grid extends object
   public function set_insert($url){
     $this->cfg['datasource']['transport']['create'] = [
         'fn' => '\\Kendo\Data\DataSourceTransportCreate',
-        'url' => 'json/insert/'.$url,
+        'url' => 'insert/'.$url,
         'contentType' => 'application/json',
         'type' => 'POST'
     ];
@@ -114,7 +114,7 @@ class grid extends object
   public function set_select($url){
     $this->cfg['datasource']['transport']['read'] = [
         'fn' => '\\Kendo\Data\DataSourceTransportRead',
-        'url' => 'json/select/'.$url,
+        'url' => 'select/'.$url,
         'contentType' => 'application/json',
         'type' => 'POST'
     ];
@@ -123,7 +123,7 @@ class grid extends object
   public function set_update($url){
     $this->cfg['datasource']['transport']['update'] = [
         'fn' => '\\Kendo\Data\DataSourceTransportUpdate',
-        'url' => 'json/update/'.$url,
+        'url' => 'update/'.$url,
         'contentType' => 'application/json',
         'type' => 'POST'
     ];
@@ -132,7 +132,7 @@ class grid extends object
   public function set_delete($url){
     $this->cfg['datasource']['transport']['destroy'] = [
         'fn' => '\\Kendo\Data\DataSourceTransportDestroy',
-        'url' => 'json/delete/'.$url,
+        'url' => 'delete/'.$url,
         'contentType' => 'application/json',
         'type' => 'POST'
     ];
