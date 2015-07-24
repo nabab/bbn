@@ -13,7 +13,7 @@
     }
   ],
   "require": {
-    "php": ">=5.4.0",
+    "php": ">=5.5.0",
     "phpfastcache/phpfastcache": "dev-final",
     "zordius/lightncandy": "dev-master",
     "greenlion/php-sql-parser": "dev-trunk",
@@ -26,6 +26,7 @@
     "justinrainbow/json-schema": "dev-master",
     "coffeescript/coffeescript": "dev-master",
     "tedivm/jshrink": "dev-master",
+    "phpmailer/phpmailer": "dev-master",
     "phpdocumentor/reflection-docblock": "2.0.4"
   },
   "autoload": {
