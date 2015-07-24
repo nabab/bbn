@@ -519,7 +519,7 @@ class history
    * 
    * @return bool returns true
 	 */
-  public static function trigger($table, $kind, $moment, $values=[], $where=[])
+  public static function trigger($table, $kind, $moment, $values=[], $where=[], $trig=false)
   {
     if ( self::$enabled && self::check($table) ){
       $table = self::$db->table_full_name($table);
@@ -539,7 +539,7 @@ class history
         if ( (count($values) === 1) && (array_keys($values)[0] === self::$hcol) ){
           $kind = array_values($values)[0] === 1 ? 'restore' : 'delete';
         }
-          
+
         switch ( $kind ){
           case 'select':
             break;
@@ -566,7 +566,7 @@ class history
             if ( $moment === 'after' ){
               self::$db->insert(self::$htable, [
                 'operation' => 'RESTORE',
-                'line' => $where[$s['primary']],
+                'line' => $where['keypair'][$s['primary']],
                 'column' => $table.'.'.self::$hcol,
                 'old' => '0',
                 'last_mod' => $date,
@@ -576,7 +576,7 @@ class history
             break;
           case 'update':
             if ( $moment === 'before' ){
-              self::$last_rows = self::$db->rselect_all($table, array_keys($values), $where);
+              self::$last_rows = self::$db->rselect_all($table, array_keys($values), $where['final']);
             }
             else if ( $moment === 'after' ){
               if ( is_array(self::$last_rows) ){
@@ -588,7 +588,7 @@ class history
                     if ( ( $v !== $upd[$c] ) && ( $c !== self::$hcol ) && isset($s['fields'][$c]['config']['history']) ){
                       self::$db->insert(self::$htable, [
                         'operation' => 'UPDATE',
-                        'line' => $where[$s['primary']],
+                        'line' => $where['keypair'][$s['primary']],
                         'column' => $table.'.'.$c,
                         'old' => $upd[$c],
                         'last_mod' => $date,
@@ -613,25 +613,36 @@ class history
               self::$last_rows = false;
             }
             break;
+          // Nothing is really deleted, the hcol is just set to 0
           case 'delete':
             if ( $moment === 'before' ){
-              // Looking for foreign constraints 
-              // Nothing is really deleted, the hcol is just set to 0
-              $values = array_values($where);
+              // The lines affected by the change
+              $lines = self::$db->get_column_values($table, $s['primary'], $where['final']);
+              // In order to execute a request setting 'hcol' to 0 with such query:
+              // UPDATE bbn_history SET 'hcol' = ? WHERE....
+              // we take the where's value(s) and add a 0 at the start of this array
+              $values = $where['values'];
               array_unshift($values, 0);
+              // We execute the query to update the hcol
               if ( $r = self::$db->query(
                       self::$db->get_update(
                         $table,
                         [self::$hcol],
-                        $where), $values) ){
-                self::$db->insert(self::$htable, [
-                  'operation' => 'DELETE',
-                  'line' => $where[$s['primary']],
-                  'column' => $table.'.'.self::$hcol,
-                  'old' => 1,
-                  'last_mod' => $date,
-                  'id_user' => self::$huser]);
-                return ['trig' => false, 'value' => $r];
+                        $where['final']), $values) ){
+                // And we insert into the history table
+                \bbn\tools::log([$where, $s['primary'], $lines], 'history');
+                if ( $lines ) {
+                  foreach ($lines as $line){
+                    self::$db->insert(self::$htable, [
+                      'operation' => 'DELETE',
+                      'line' => $line,
+                      'column' => $table . '.' . self::$hcol,
+                      'old' => 1,
+                      'last_mod' => $date,
+                      'id_user' => self::$huser]);
+                  }
+                }
+                return ['trig' => false, 'value' => $r, 'lines' => $lines];
                 /* For each value of this key which is deleted (hopefully one)
                 $to_check = self::$db->get_rows("
                   SELECT k.`column` AS id, c1.`column` AS to_change, c2.`column` AS from_change,
@@ -678,6 +689,10 @@ class history
                  * 
                  */
               }
+            }
+            // After
+            else{
+              \bbn\tools::log($trig, 'history');
             }
             break;
         }

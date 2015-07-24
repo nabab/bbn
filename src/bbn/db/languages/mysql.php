@@ -629,17 +629,18 @@ class mysql implements \bbn\db\engines
 			}
 
 			$r = substr($r,0,strrpos($r,',')).$this->db->get_where($where, $table);
+      $where = $this->db->where_cfg($where);
 
       if ( $php ){
 				$r .= "\",\n";
 				$i = 0;
 				foreach ( array_keys($m['fields']) as $k ){
-					if ( !in_array($k, $where) && ( count($fields) === 0 || in_array($k,$fields) ) ){
+					if ( !in_array($k, $where['fields']) && ( count($fields) === 0 || in_array($k,$fields) ) ){
 						$r .= "\$d['$k'],\n";
 					}
 				}
-				foreach ( $where as $f ){
-					$r .= "\$d['$f[0]'],\n";
+				foreach ( $where['fields'] as $f ){
+					$r .= "\$d['$f'],\n";
 				}
 				$r = substr($r,0,strrpos($r,',')).');';
 			}

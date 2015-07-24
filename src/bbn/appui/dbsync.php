@@ -144,7 +144,7 @@ class dbsync
     if ( !self::$disabled && self::check() && in_array($table, self::$tables) ){
       if ( $moment === 'before' ){
         if ( $kind === 'delete' ){
-          $values = self::$db->select($table, [], $where);
+          $res['values'] = self::$db->select($table, [], $where['final']);
         }
         else if ( $kind === 'insert' ){
           if ( self::$db->has_id_increment($table) && 
@@ -158,27 +158,12 @@ class dbsync
       }
       else if ( $moment === 'after' ){
         // Case where we actually delete or restore through the $hcol column
-        if ( ($kind === 'update') && self::$has_history && isset($values[\bbn\appui\history::$hcol]) ){
-          if ( !$values[\bbn\appui\history::$hcol] ){
-            $kind = 'delete';
-            $values = self::$db->select($table, [], $where);
-          }
-          else{
-            $kind = 'insert';
-            $values = self::$db->select($table, [], $where);
-          }
-        }
-        /*
-        else if ( $kind === 'insert' ){
-          $values = self::$db->select($table, [], $values);
-        }
-         */
         self::$dbs->insert(self::$dbs_table, [
           'db' => self::$db->current,
           'tab' => $stable,
           'action' => $kind,
           'moment' => date('Y-m-d H:i:s'),
-          'rows' => json_encode($where),
+          'rows' => json_encode($where['final']),
           'vals' => empty($values) ? '[]' : json_encode($values)
         ]);
       }

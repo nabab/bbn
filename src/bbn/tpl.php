@@ -26,7 +26,7 @@ class tpl {
       die("The template parameter is not a string");
     }
     $md5 = md5($st);
-    $file = BBN_DATA_PATH.'tmp/function.'.$md5.'.php';
+    $file = BBN_DATA_PATH.'tmp/tpl.'.$md5.'.php';
     if ( file_exists($file) ){
       return include($file);
     }

@@ -28,6 +28,7 @@ class cron extends \bbn\obj{
           $primary = 'id',
           $date = false,
           $last_rows = false,
+          $mail,
           $ok = false,
           $enabled = true,
           $timeout = 50;
@@ -202,8 +203,8 @@ class cron extends \bbn\obj{
         if ( $this->is_timeout($cron['id']) ){
           $r = $this->get_runner($cron['id']);
           $this->finish($r['id'], "error");
-          $mail = new \apst\mail();
-          $mail->send([
+          if ( isset($this->mail) )
+            $this->mail->send([
             'to' => BBN_ADMIN_EMAIL,
             'subject' => 'CRON FAILURE',
             'text' => "Id: ".$cron['id']." - File: ".$cron['file']." - Desc: ".$cron['description']." - Start: ".$r['start']." - Server: ".( BBN_IS_DEV ? 'Dev' : 'Prod')
