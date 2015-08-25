@@ -52,26 +52,29 @@ class directories {
 
   public function dirs($name=''){
     $dirs = [];
-    foreach ( $this->get($name) as $d ){
-      $files = json_decode($d['files']);
-      $p = \bbn\str\text::parse_path(substr($d['root_path'], 0, strpos($d['root_path'], '/')));
-      $d['root_path'] = \bbn\str\text::parse_path(constant($p).str_replace($p, '', $d['root_path']));
-      foreach ( $files as $i => $f ){
-        $f = (array)$f;
-        $f['path'] = \bbn\str\text::parse_path($d['root_path'].$f['path']);
-        if ( !empty($f['default']) ){
-          $d['def'] = $f['url'];
-        }
+    if ( $all = $this->get($name) ){
+      foreach ( $this->get($name) as $d ){
+        $files = json_decode($d['files']);
+        $p = \bbn\str\text::parse_path(substr($d['root_path'], 0, strpos($d['root_path'], '/')));
+        $d['root_path'] = \bbn\str\text::parse_path(constant($p).str_replace($p, '', $d['root_path']));
+        foreach ( $files as $i => $f ){
+          $f = (array)$f;
+          $f['path'] = \bbn\str\text::parse_path($d['root_path'].$f['path']);
+          if ( !empty($f['default']) ){
+            $d['def'] = $f['url'];
+          }
 
-        $files[!empty($f['title']) ? $f['title'] : $i] = $f;
-        if ( !empty($f['title']) ){
-          unset($files[$i]);
+          $files[!empty($f['title']) ? $f['title'] : $i] = $f;
+          if ( !empty($f['title']) ){
+            unset($files[$i]);
+          }
         }
+        $d['files'] = $files;
+        $dirs[$d['name'] === 'MVC' ? 'controllers' : $d['name']] = $d;
       }
-      $d['files'] = $files;
-      $dirs[$d['name'] === 'MVC' ? 'controllers' : $d['name']] = $d;
+      return $name && isset($dirs[$name]) ? $dirs[$name] : $dirs;
     }
-    return $name && isset($dirs[$name]) ? $dirs[$name] : $dirs;
+    die(var_dump($name, $this->db->last()));
   }
 
   public function modes(){

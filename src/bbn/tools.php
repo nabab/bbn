@@ -25,7 +25,7 @@ class tools
 	 * Add information to the $info array.
 	 *
 	 * @param string $st The information to be added.
-   * 
+   *
 	 * @return null
 	 */
 	public static function report($st)
@@ -51,17 +51,17 @@ class tools
       }
 		}
 	}
-  
+
   /**
 	 * Save the logs to a file.
 	 *
    * <code>
    * \bbn\tools::log('My text','FileName');
    * </code>
-   * 
+   *
 	 * @param string $st Text to save.
 	 * @param string $file Filename, , default: "misc".
-   * 
+   *
 	 * @return null
 	 */
 	public static function log($st, $file='misc')
@@ -77,7 +77,7 @@ class tools
       $i = end($backtrace);
 			$r = "[".date('d/m/Y H:i:s')."]\t".$i['file']." - line ".$i['line'].
               self::get_dump($st).PHP_EOL;
-      
+
       if ( php_sapi_name() === 'cli' ){
         echo self::get_dump($st).PHP_EOL;
       }
@@ -92,32 +92,32 @@ class tools
       }
 		}
 	}
-  
+
  	/**
 	 * Returns an object as merge of two objects.
-   * 
+   *
    * <code>
    * class A {
    *  public $a = 10;
    *  public $b = 20;
    * };
-   * 
+   *
    * class B {
-   *  public $c = 30; 
+   *  public $c = 30;
    *  public $d = 40;
    * };
-   * 
+   *
    * $obj1 = new A;
    * $obj2 = new B;
-   * 
+   *
    * \bbn\tools::merge_objects($obj1, $obj2); //Returns {'a': 10, 'b': 20, 'c': 30, 'd': 40}
    * </code>
-   * 
+   *
    * @param object $o1 The first object to merge.
    * @param object $o2 The second object to merge.
-   * 
+   *
 	 * @return object The merged object.
-	 */  
+	 */
   public static function merge_objects($o1, $o2){
     $args = func_get_args();
     if ( count($args) > 2 ){
@@ -133,14 +133,14 @@ class tools
   }
  	/**
    * Returns an array as merge of two arrays.
-	 * 
+	 *
    * <code>
    * \bbn\tools::merge_arrays([1, 'Test'], [2, 'Example']); //Returns [1, 'Test', 2, 'Example']
    * </code>
-   * 
+   *
    * @param array $a1 The first array to merge.
    * @param array $a2 The second array to merge.
-   * 
+   *
    * @return array The merged array.
 	 */
   public static function merge_arrays(array $a1, array $a2) {
@@ -174,16 +174,16 @@ class tools
     }
     return $r;
   }
-  
+
   /**
    * Makes an object of an array.
-   * 
+   *
    * <code>
    * \bbn\tools::to_object([[1, 'Test'], [2, 'Example']]); //Returns {[1, 'Test'], [2, 'Example']}
    * </code>
-   * 
+   *
    * @param array $ar The array to trasform.
-   * 
+   *
    * @return false|object
    */
   public static function to_object($ar){
@@ -204,7 +204,7 @@ class tools
 
   /**
    * Makes an array of an object.
-   * 
+   *
    * <code>
    * $file = new \bbn\file\file("C:/logs/test.log");
    * echo \bbn\tools::to_array($file);
@@ -222,9 +222,9 @@ class tools
    *     ],
    * ]
    * </code>
-   * 
+   *
    * @param object $obj The object to trasform.
-   * 
+   *
    * @return false|object
    */
   public static function to_array($obj){
@@ -248,14 +248,14 @@ class tools
 
   /**
    * Indents a flat JSON string to make it more human-readable.
-   * 
+   *
    * <code>
    * \bbn\tools::indent_json('{"firstName": "John", "lastName": "Smith", "age": 25}');
    * //Returns {"firstName": "John", "lastName": "Smith", "isAlive": true, "age": 25}
    * </code>
    *
    * @param string $json The original JSON string to process.
-   * 
+   *
    * @return string Indented version of the original JSON string.
    */
   public static function indent_json($json) {
@@ -308,7 +308,7 @@ class tools
 
       return $result;
   }
-  
+
   /**
    * Returns an object or an array cleaned up from all empty values.
    *
@@ -316,10 +316,10 @@ class tools
    * \bbn\tools::remove_empty(['Pippo', 'Pluto', '', 'Paperino', ' ']); //Returns [0 => 'Pippo', 1 => 'Pluto', 3 => 'Paperino', 4 => ' ']
    * \bbn\tools::remove_empty(['Pippo', 'Pluto', '', 'Paperino', ' '], 1)); //Returns [0 => 'Pippo', 1 => 'Pluto', 3 => 'Paperino']
    * </code>
-   * 
+   *
    * @param array|object $arr An object or array to clean.
    * @param bool $remove_space If "true" the spaces are removed, default: "false".
-   * 
+   *
    * @return string The clean result.
    */
   public static function remove_empty($arr, $remove_space=false){
@@ -351,14 +351,14 @@ class tools
    * Returns an array containing an array for each element highlighting the index with an alias (keyname) and the value with an alias (valname).
    *
    * <code>
-   * \bbn\tools::to_groups(['Pippo', 'Pluto', 'Paperino']); 
+   * \bbn\tools::to_groups(['Pippo', 'Pluto', 'Paperino']);
    * //Returns [['value' => 0, 'text' => 'Pippo'], ['value' => 1, 'text' => 'Pluto'], ['value' => 2, 'text' => 'Paperino']]
    * </code>
-   * 
+   *
    * @param array $arr The original array.
    * @param string $keyname Alias for index, default: "value".
    * @param string $valname Alias for value, default: "text".
-   * 
+   *
    * @return array Groups array.
    */
   public static function to_groups(array $arr, $keyname = 'value', $valname = 'text'){
@@ -368,9 +368,9 @@ class tools
     }
     return $r;
   }
-  
+
   /**
-   * Exports variable in fashion immediately re-importable in PHP. 
+   * Exports variable in fashion immediately re-importable in PHP.
    *
    * @param array $r The array to be.
    * @return bool
@@ -385,7 +385,7 @@ class tools
     }
     return false;
   }
-  
+
   /**
    * @return string
    */
@@ -422,7 +422,7 @@ class tools
     }
     return PHP_EOL.$st.PHP_EOL;
   }
-  
+
   /**
    * @return string
    */
@@ -431,16 +431,16 @@ class tools
   }
 
   /**
-   * 
+   *
    *
    */
   public static function dump(){
     echo call_user_func_array('self::get_dump', func_get_args());
-    
+
   }
-  
+
   /**
-   * 
+   *
    *
    */
   public static function hdump(){
@@ -455,13 +455,13 @@ class tools
    * \bbn\tools::build_options(['yes', 'no'], 'no'); //Returns "<option value="yes">yes</option><option value="no" selected="selected">no</option>"
    * \bbn\tools::build_options(['yes', 'no'], 'no', 'LabelForEmpty'); //Returns "<option value="">LabelForEmpty</option><option value="yes">yes</option><option value="no" selected="selected">no</option>"
    * </code>
-   * 
+   *
    * @param array $values An array with one or plus values.
    * @param string $select The value to indicate how selected, default: "".
    * @param string $empty_label Label for empty value, default: "false".
-   * 
+   *
    * @return string The HTML code.
-   */  
+   */
   public static function build_options($values, $selected='', $empty_label=false){
     if ( is_array($values) )
     {
@@ -494,19 +494,19 @@ class tools
       return $r;
     }
   }
-  
+
   /**
    * Converts a numeric array to an associative one, using the values alternatively as key or value.
    *
    * <code>
    * \bbn\tools::to_keypair(['Test', 'TestFile', 'Example', 'ExampleFile']); //Returns ['Test' => 'TestFile', 'Example' => 'ExampleFile']
    * </code>
-   * 
+   *
    * @param array $arr must contain an even number of values.
    * @param bool $protected if false no index protection will be performed, default: "1".
-   * 
+   *
    * @return array|false
-   */ 
+   */
   public static function to_keypair($arr, $protected = 1){
     $num = count($arr);
     $res = [];
@@ -522,9 +522,9 @@ class tools
     }
     return $res;
   }
-  
+
   /**
-   * Returns the maximum value of an index of a multidimensional array. 
+   * Returns the maximum value of an index of a multidimensional array.
    *
    * <code>
    * \bbn\tools::max_with_key([
@@ -532,14 +532,14 @@ class tools
    *  ['v' => 8, 'name' => 'test2'],
    *  ['v' => 45, 'name' => 'test3'],
    *  ['v' => 2, 'name' => 'test4']
-   * ], 'v'); //Returns 45 
+   * ], 'v'); //Returns 45
    * </code>
-   * 
-   * @param array $arr A multidimensional array. 
+   *
+   * @param array $arr A multidimensional array.
    * @param mixed $key The index where to search.
-   * 
+   *
    * @return mixed
-   */   
+   */
   public static function max_with_key($array, $key) {
     if (!is_array($array) || count($array) == 0) return false;
     $max = $array[0][$key];
@@ -552,7 +552,7 @@ class tools
   }
 
   /**
-   * Returns the minimum value of an index of a multidimensional array. 
+   * Returns the minimum value of an index of a multidimensional array.
    *
    * <code>
    * \bbn\tools::max_with_key([
@@ -560,14 +560,14 @@ class tools
    *  ['v' => 8, 'name' => 'test2'],
    *  ['v' => 45, 'name' => 'test3'],
    *  ['v' => 2, 'name' => 'test4']
-   * ], 'v'); //Returns  1 
+   * ], 'v'); //Returns  1
    * </code>
-   * 
-   * @param array $arr A multidimensional array. 
+   *
+   * @param array $arr A multidimensional array.
    * @param mixed $key The index where to search.
-   * 
+   *
    * @return mixed
-   */ 
+   */
   public static function min_with_key($array, $key) {
     if (!is_array($array) || count($array) == 0) return false;
     $min = $array[0][$key];
@@ -578,11 +578,11 @@ class tools
     }
     return $min;
   }
-  
+
   /**
    *
    *
-   */ 
+   */
   public static function debug($file=''){
     $debug = array_map(function($a){
       if ( isset($a['object']) ){
@@ -653,11 +653,11 @@ class tools
   {
     return strtoupper(substr(PHP_OS, 0, 3)) == 'WIN';
   }
-  
+
   /**
    *
    *
-   */ 
+   */
   public static function curl($url, $param = false, $method = false){
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -686,6 +686,27 @@ class tools
       self::log(curl_error($ch), 'curl');
     }
     return $r;
+  }
+
+  public static function get_tree(array $ar){
+    $res = [];
+    foreach ( $ar as $k => $a ){
+      $r = ['text' => $k];
+      if ( is_array($a) ){
+        $r['items'] = self::get_tree($a);
+      }
+      else {
+        $r['text'] .= ': '.(string)$a;
+      }
+      array_push($res, $r);
+    }
+    return $res;
+  }
+
+  public static function make_tree(array $ar){
+    $id = \bbn\str\text::genpwd();
+    return '<div id="'.$id.'"></div><script>$("#'.$id.'").kendoTreeView({dataSource: '.
+      json_encode(self::get_tree($ar)).'});</script>';
   }
 }
 ?>

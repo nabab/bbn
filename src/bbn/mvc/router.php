@@ -122,8 +122,10 @@ class router {
 
   private function get_known($path, $mode){
     if ( $this->is_known($path, $mode) ){
-      if ( in_array($mode, self::$controllers) && is_string($this->known[$mode][$path]) ){
+      if ( in_array($mode, self::$controllers) && is_string($this->known[$mode][$path]) && isset($this->known[$mode][$this->known[$mode][$path]]) ){
+        $path = $this->known[$mode][$path];
       }
+      $this->log("known", $this->known);
       return $this->known[$mode][$path];
     }
     return false;
@@ -196,11 +198,13 @@ class router {
         // We go through each path, starting by the longest until it's empty
         while (strlen($tmp) > 0) {
           if ($this->is_known($tmp, $mode)) {
+            $this->log("case -4");
             return $this->get_known($tmp, $mode);
           }
           if ( $mode === 'dom' ){
             if ( $tmp === '.' ){
               if ( file_exists($root.'index.php') ){
+                $this->log("case -3");
                 return $this->set_known([
                   'file' => $root . 'index.php',
                   'path' => 'index',
@@ -212,6 +216,7 @@ class router {
               break;
             }
             else if ( file_exists($root.$tmp.'/index.php') ){
+              $this->log("case -2");
               return $this->set_known([
                 'file' => $root . $tmp . '/index.php',
                 'path' => $tmp. '/index',
@@ -228,6 +233,7 @@ class router {
               if ( !is_file($file) ){
                 die("The file $file specified by the route $tmp doesn't exist.");
               }
+              $this->log("case -1");
               return $this->set_known([
                 'file' => $root . $tmp . '.php',
                 'path' => $tmp,
@@ -236,7 +242,8 @@ class router {
                 'args' => $args
               ]);
             }
-            else if (file_exists($root . $tmp . '.php')) {
+            else if (file_exists($root.$tmp.'.php')) {
+              $this->log("case 0");
               return $this->set_known([
                 'file' => $root . $tmp . '.php',
                 'path' => $tmp,
@@ -256,9 +263,11 @@ class router {
           }
         }
         if ( ((($mode === 'dom') && (BBN_DEFAULT_MODE === 'dom')) || ($mode !== 'dom') ) && $this->is_known(self::$def, $mode) ){
+          $this->log("case 1");
           return $this->get_known(self::$def, $mode);
         }
         if ( ((($mode === 'dom') && (BBN_DEFAULT_MODE === 'dom')) || ($mode !== 'dom') ) && $this->has_route(self::$def)) {
+          $this->log("case 2");
           $tmp = $this->get_route(self::$def);
           return $this->set_known([
             'file' => $root . $tmp . '.php',
@@ -272,6 +281,7 @@ class router {
       }
       else {
         foreach ( self::$filetypes[$mode] as $t ){
+          $this->log("case 3");
           if ( is_file($root.$path.'.'.$t) ){
             return $this->set_known([
               'file' => $root . $path.'.'.$t,

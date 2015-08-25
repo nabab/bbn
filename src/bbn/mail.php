@@ -42,14 +42,6 @@
 
 namespace bbn;
 
-// cf http://stackoverflow.com/questions/8561495/sent-mails-with-phpmailer-dont-go-to-sent-imap-folder
-
-class mail_with_sent extends \PHPMailer {
-  public function get_mail_string() {
-    return $this->MIMEHeader.$this->MIMEBody;
-  }
-}
-
 class mail extends obj
 {
   private static
@@ -78,7 +70,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
     if ( !isset($cfg['host'], $cfg['from']) || !str\text::is_domain($cfg['host']) || !str\text::is_email($cfg['from'])) {
       die("A host name and a \"From\" eMail address must be provided");
     }
-    $this->mailer = new mail_with_sent();
+    $this->mailer = new \PHPMailer();
     $this->mailer->CharSet = isset($cfg['charset']) ? $cfg['charset'] : "UTF-8";
     $this->mailer->isSMTP();
     // SMTP connection will not close after each email sent, reduces SMTP overhead
@@ -243,7 +235,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
       $this->mailer->msgHTML($renderer($ar), $this->path, true);
       $r = $this->mailer->send();
       if ( $r && !empty($this->imap_string) ){
-        $mail_string = $this->mailer->get_mail_string();
+        $mail_string = $this->mailer->getSentMIMEMessage();
         if ( !is_resource($this->imap) ){
           $this->imap = imap_open($this->imap_string, $this->imap_user, $this->imap_pass);
         }

@@ -423,7 +423,7 @@ class sqlite implements \bbn\db\engines
 	 */
 	public function get_delete($table, array $where, $ignore = false, $php = false)
 	{
-		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 && count($where) > 0 ){
+		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) ){
 			$r = '';
 			if ( $php ){
 				$r .= '$db->query(\'';
@@ -441,52 +441,80 @@ class sqlite implements \bbn\db\engines
 	/**
 	 * @return string
 	 */
-	public function get_select($table, array $fields = array(), array $where = array(), $order = array(), $limit = false, $start = 0, $php = false)
-	{
-		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
-		{
-			$r = '';
-			if ( $php ){
-				$r .= '$db->query(\'';
-			}
+  public function get_select($table, array $fields = [], array $where = [], $order = [], $limit = false, $start = 0, $php = false){
+    // Tables are an array
+    if ( !is_array($table) ){
+      $table = [$table];
+    }
+    /** @var array $tables_fields List of all the fields' names indexed by table */
+    $tables_fields = [];
+    foreach ( $table as $i => $tab ){
+      if ( $fn = $this->table_full_name($tab, 1) ) {
+        $table[$i] = $fn;
+        $tables_fields[$table[$i]] = array_keys($this->modelize($table[$i])['fields']);
+      }
+    }
+    if ( !empty($tables_fields) ){
+      /** @var string $r The SELECT resulting string */
+      $r = '';
+      if ( $php ){
+        $r .= '$db->query("';
+      }
       $aliases = [];
-			$r .= 'SELECT '.PHP_EOL;
-			if ( count($fields) > 0 ){
-				foreach ( $fields as $k => $c ){
-					if ( !isset($m['fields'][$c]) ){
-						die("The column $c doesn't exist in $table");
-					}
-					else{
-            if ( !is_numeric($k) && \bbn\str\text::check_name($k) && ($k !== $c) ){
-              array_push($aliases, $k);
-              $r .= "{$this->escape($c)} AS {$this->escape($k)},".PHP_EOL;
+      $r .= "SELECT \n";
+      // Columns are specified
+      if ( count($fields) > 0 ){
+        foreach ( $fields as $k => $c ){
+          // Here there is no full name
+          if ( !strpos($c, '.') ){
+            // So we look into the tables to check if there is the field
+            $tab = [];
+            foreach ( $tables_fields as $t => $f ){
+              if ( in_array($c, $f) ){
+                array_push($tab, $t);
+              }
             }
-            else{
-              $r .= $this->escape($c).",".PHP_EOL;
+            // If the same column is passed twice in its short form
+            if ( count($tab) === 1 ){
+              $c = $this->col_full_name($c, $tab[0]);
             }
-					}
-				}
-			}
-			else{
-				foreach ( array_keys($m['fields']) as $c ){
-					$r .= "`$c`,".PHP_EOL;
-				}
-			}
-			$r = substr($r,0,strrpos($r,',')).PHP_EOL."FROM $table";
-			if ( count($where) > 0 ){
-        $r .= $this->db->get_where($where, $table, $aliases);
+            else if ( count($tab) > 1 ){
+              die('Error! Duplicate field name, you must insert the fields with their fullname.');
+            }
+            else {
+              die("Error! The column '$c' doesn't exist in '".implode(", ", array_keys($tables_fields))."' table(s)");
+            }
+          }
+          if ( !is_numeric($k) && \bbn\str\text::check_name($k) && ($k !== $c) ){
+            array_push($aliases, $k);
+            $r .= "{$this->escape($c)} AS {$this->escape($k)},".PHP_EOL;
+          }
+          else {
+            $r .= $this->escape($c).",".PHP_EOL;
+          }
+        }
       }
-      $r .= PHP_EOL . $this->get_order($order, $table, $aliases);
+      // All the columns are selected
+      else{
+        foreach ( $tables_fields as $t => $f ){
+          foreach ( $f as $v ){
+            $r .= "`$t.$v`,\n";
+          }
+        }
+      }
+      $r = substr($r,0,strrpos($r,',')).PHP_EOL."FROM ".implode(', ', $table).PHP_EOL.
+        $this->get_where($where, $table, $aliases).PHP_EOL.
+        $this->get_order($order, $table, $aliases);
       if ( $limit ){
-  			$r .= PHP_EOL . $this->get_limit([$limit, $start]);
+        $r .= PHP_EOL . $this->get_limit([$limit, $start]);
       }
-			if ( $php ){
-				$r .= '\');';
-			}
-			return $r;
-		}
-		return false;
-	}
+      if ( $php ){
+        $r .= '");';
+      }
+      return $r;
+    }
+    return false;
+  }
 	
 	/**
 	 * @return string

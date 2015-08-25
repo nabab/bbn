@@ -530,15 +530,6 @@ class mapper{
           }
         }
 
-
-
-
-
-
-
-
-
-
         return $r;
       }
     }
@@ -773,12 +764,13 @@ class mapper{
         (`id`, `host`, `db`)
         VALUES
         ('$db', '{$this->db->host}', '$db')");
-      $has_history = false;
+      $tab_history = false;
       if ( \bbn\appui\history::$is_used && isset($schema[\bbn\appui\history::$htable]) ){
-        $has_history = 1;
+        $tab_history = 1;
       }
       
 			foreach ( $schema as $t => $vars ){
+        $col_history = $tab_history;
 				if ( isset($vars['fields']) ){
           $tmp = explode(".", $t);
           $db = $tmp[0];
@@ -788,9 +780,12 @@ class mapper{
 						'db' => $db,
 						'table' => $table
 					]);
+          if ( $col_history && !array_key_exists(\bbn\appui\history::$hcol, $vars['fields']) ){
+            $col_history = false;
+          }
           foreach ( $vars['fields'] as $col => $f ){
     				$config = new \stdClass();
-						if ( $has_history && array_key_exists(\bbn\appui\history::$hcol, $vars['fields']) && ($col !== \bbn\appui\history::$hcol) ){
+						if ( $col_history && ($col !== \bbn\appui\history::$hcol) ){
 							$config->history = 1;
 						}
 						if ( isset($f['default']) ){
@@ -821,14 +816,13 @@ class mapper{
 							'position' => $f['position'],
 							'type' => $f['type'],
 							'null' => $f['null'],
-							'key' => $f['key'],
+              'key' => $f['key'],
+              'default' => $f['default'],
 							'config' => json_encode($config)
 						]);
 					}
 				}
-			}
-			foreach ( $schema as $t => $vars ){
-				if ( isset($vars['keys']) && is_array($vars['keys']) ){
+        if ( isset($vars['keys']) && is_array($vars['keys']) ){
           foreach ( $vars['keys'] as $k => $arr ){
             $pos = 1;
             foreach ( $arr['columns'] as $c ){

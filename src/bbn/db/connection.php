@@ -19,7 +19,10 @@ use \bbn\str\text;
 
 class connection extends \PDO implements actions, api, engines
 {
-  const E_CONTINUE = 'continue',
+  use triggers;
+
+  const
+    E_CONTINUE = 'continue',
     E_DIE = 'die',
     E_STOP_ALL = 'stop_all',
     E_STOP = 'stop';
@@ -107,11 +110,7 @@ class connection extends \PDO implements actions, api, engines
      *      die: the script will die with the error
      *      continue: the script and further queries will be executed
      */
-    $on_error = self::E_STOP,
-    /**
-     * @var bool
-     */
-    $triggers_disabled = false;
+    $on_error = self::E_STOP;
 
   public
     /**
@@ -138,28 +137,6 @@ class connection extends \PDO implements actions, api, engines
      * @var mixed
      */
     $current,
-    /**
-     * An array of functions for launching triggers on actions
-     * @var mixed
-     */
-    $triggers = [
-    'select' => [
-      'before' => [],
-      'after' => []
-    ],
-    'insert' => [
-      'before' => [],
-      'after' => []
-    ],
-    'update' => [
-      'before' => [],
-      'after' => []
-    ],
-    'delete' => [
-      'before' => [],
-      'after' => []
-    ]
-  ],
     /**
      * The information that will be accessed by \bbn\db\query as the current statement's options
      * @var array
@@ -191,7 +168,7 @@ class connection extends \PDO implements actions, api, engines
     $r = false;
     switch ( $mode ){
       case 'columns':
-        $r = "bbn-db-".$this->engine."-".$this->host."-".$this->table_full_name($item);
+        $r = "bbn-db-".$this->engine."-".$this->host."-".$this->tfn($item);
         break;
       case 'tables':
         $r = "bbn-db-".$this->engine."-".$this->host."-".$item;
@@ -209,11 +186,14 @@ class connection extends \PDO implements actions, api, engines
    * @param string $table The table from which the structure is seeked
    * @return array | false
    */
-  private function _get_cache($item, $mode='columns'){
+  private function _get_cache($item, $mode = 'columns', $force = false){
+    if ( $force && isset($this->cache[$item]) ){
+      unset($this->cache[$item]);
+    }
     if ( !isset($this->cache[$item]) ){
       $cache_name = $this->_cache_name($item, $mode);
       $tmp = $this->cacher->get($cache_name);
-      if ( !$tmp ){
+      if ( !$tmp || $force ){
         switch ( $mode ){
           case 'columns':
             $keys = $this->language->get_keys($item);
@@ -236,10 +216,10 @@ class connection extends \PDO implements actions, api, engines
         if ( !isset($tmp) ){
           die("Erreur avec la table $item ou le mode $mode");
         }
+        $this->cacher->set($cache_name, $tmp, $this->cache_renewal);
       }
       if ( $tmp ){
         $this->cache[$item] = $tmp;
-        $this->cacher->set($cache_name, $this->cache[$item], $this->cache_renewal);
       }
     }
     return isset($this->cache[$item]) ? $this->cache[$item] : false;
@@ -301,41 +281,6 @@ class connection extends \PDO implements actions, api, engines
   }
 
   /**
-   * @returns a selection query
-   */
-  private function _sel($table, $fields = [], $where = [], $order = false, $limit = 100, $start = 0)
-  {
-    $where = $this->where_cfg($where, $table);
-    $hash = $this->make_hash('select', $table, serialize($fields), serialize($this->get_where($where, $table)), serialize($order), $limit, $start);
-    if ( isset($this->queries[$hash]) ){
-      $sql = $this->queries[$this->queries[$hash]]['statement'];
-    }
-    else{
-      $sql = $this->language->get_select($table, $fields, $where['final'], $order, $limit, $start);
-    }
-    $values = array_values($fields);
-    if ( $sql && (
-        $this->triggers_disabled ||
-        $this->_trigger(
-          $table,
-          'select',
-          'before',
-          $values,
-          $where['keypair']) ) ){
-      if ( count($where['values']) > 0 ){
-        $r = $this->query($sql, $hash, $where['values']);
-      }
-      else{
-        $r = $this->query($sql, $hash);
-      }
-      if ( !$this->triggers_disabled && $r ){
-        $this->_trigger($table, 'select', 'after', $fields, $where['keypair']);
-      }
-      return $r;
-    }
-  }
-
-  /**
    * @todo Thomas fais ton taf!!
    *
    * @param
@@ -386,61 +331,6 @@ class connection extends \PDO implements actions, api, engines
   }
 
   /**
-   * Launches a function before or after
-   *
-   * @param $table
-   * @param $kind
-   * @param $moment
-   * @param $values
-   * @param $where
-   * @return bool
-   */
-  private function _trigger($table, $kind, $moment, $values, $where=[])
-  {
-    $trig = 1;
-    if ( !empty($this->triggers[$kind][$moment]) ){
-      $table = $this->table_full_name($table);
-
-      // Specific to a table
-      if ( isset($this->triggers[$kind][$moment][$table]) ){
-
-        foreach ( $this->triggers[$kind][$moment][$table] as $i => $f ){
-          if ( is_callable($f) ){
-            $tmp = call_user_func_array($f, [$table, $kind, $moment, $values, $where]);
-            if ( !$tmp ){
-              $trig = false;
-            }
-            if ( $trig && is_array($tmp) ){
-              $trig = $tmp;
-            }
-          }
-        }
-      }
-    }
-    return $trig;
-  }
-
-  /**
-   * Enable the triggers' functions
-   *
-   * @return \bbn\db\connection
-   */
-  public function enable_trigger(){
-    $this->triggers_disabled = false;
-    return $this;
-  }
-
-  /**
-   * Disable the triggers' functions
-   *
-   * @return \bbn\db\connection
-   */
-  public function disable_trigger(){
-    $this->triggers_disabled = true;
-    return $this;
-  }
-
-  /**
    * Checks if the database is in a state ready to query
    *
    * @return bool
@@ -481,7 +371,7 @@ class connection extends \PDO implements actions, api, engines
       if ( isset($cfg['on_error']) ){
         $this->on_error = $cfg['on_error'];
       }
-      $this->cacher = isset($cfg['cacher']) ? $cfg['cacher'] : new \phpFastCache('apc');
+      $this->cacher = isset($cfg['cacher']) ? $cfg['cacher'] : new \phpFastCache('auto');
       if ( $cfg = $this->language->get_connection($cfg) ){
         $this->qte = $this->language->qte;
         try{
@@ -669,6 +559,11 @@ class connection extends \PDO implements actions, api, engines
     return $this->language->table_full_name($table, $escaped);
   }
 
+  public function tfn($table, $escaped=false)
+  {
+    return $this->table_full_name($table, $escaped);
+  }
+
   /**
    * Returns a table's simple name.
    * i.e. "table".
@@ -685,6 +580,11 @@ class connection extends \PDO implements actions, api, engines
   public function table_simple_name($table, $escaped=false)
   {
     return $this->language->table_simple_name($table, $escaped);
+  }
+
+  public function tsn($table, $escaped=false)
+  {
+    return $this->table_simple_name($table, $escaped);
   }
 
   /**
@@ -706,6 +606,11 @@ class connection extends \PDO implements actions, api, engines
     return $this->language->col_full_name($col, $table, $escaped);
   }
 
+  public function cfn($col, $table='', $escaped=false)
+  {
+    return $this->col_full_name($col, $table, $escaped);
+  }
+
   /**
    * Returns a column's simple name.
    * i.e. "column"
@@ -722,6 +627,11 @@ class connection extends \PDO implements actions, api, engines
   public function col_simple_name($col, $escaped=false)
   {
     return $this->language->col_simple_name($col, $escaped);
+  }
+
+  public function csn($col, $escaped=false)
+  {
+    return $this->col_simple_name($col, $escaped);
   }
 
   /**
@@ -744,69 +654,6 @@ class connection extends \PDO implements actions, api, engines
   public function get_hash()
   {
     return $this->hash;
-  }
-
-  /**
-   * Apply a function each time the methods $kind are used
-   *
-   * @param callable $function
-   * @param string $kind select|insert|update|delete
-   * @param string $moment before|after
-   * @param string|array table database's table(s) name(s)
-   * @return \bbn\db\connection
-   */
-  public function set_trigger($function, $kind='', $moment='', $tables='*' )
-  {
-    if ( is_callable($function) ){
-      $kinds = ['select', 'insert', 'update', 'delete'];
-      $moments = ['before', 'after'];
-      if ( empty($kind) ){
-        $kind = $kinds;
-      }
-      else if ( !is_array($kind) ){
-        $kind = [strtolower($kind)];
-      }
-      else{
-        $kind = array_map(function($a){
-          return strtolower($a);
-        }, $kind);
-      }
-      if ( empty($moment) ){
-        $moment = $moments;
-      }
-      else if ( !is_array($moment) ){
-        $moment = [strtolower($moment)];
-      }
-      else{
-        $moment = array_map(function($a){
-          return strtolower($a);
-        }, $moment);
-      }
-      foreach ( $kind as $k ){
-        if ( in_array($k, $kinds) ){
-          foreach ( $moment as $m ){
-            if ( in_array($m, $moments) && isset($this->triggers[$k][$m]) ){
-              if ( $tables === '*' ){
-                $tables = $this->get_tables();
-              }
-              else if ( \bbn\str\text::check_name($tables) ){
-                $tables = [$tables];
-              }
-              if ( is_array($tables) ){
-                foreach ( $tables as $table ){
-                  $t = $this->table_full_name($table);
-                  if ( !isset($this->triggers[$k][$m][$t]) ){
-                    $this->triggers[$k][$m][$t] = [];
-                  }
-                  array_push($this->triggers[$k][$m][$t], $function);
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    return $this;
   }
 
   /**
@@ -980,9 +827,9 @@ class connection extends \PDO implements actions, api, engines
     if ( $this->check() ){
       $where = $this->where_cfg($where, $table);
       $sql = 'SELECT COUNT(*) AS '.$this->qte.'num'.$this->qte.', '.
-        $this->col_simple_name($column, 1).PHP_EOL.
-        'FROM '.$this->table_full_name($table, 1).PHP_EOL.
-        'GROUP BY '.$this->col_simple_name($column, 1).PHP_EOL.
+        $this->csn($column, 1).PHP_EOL.
+        'FROM '.$this->tfn($table, 1).PHP_EOL.
+        'GROUP BY '.$this->csn($column, 1).PHP_EOL.
         $this->get_where($where).PHP_EOL.
         ( empty($order) ?
           'ORDER BY '.$this->qte.'num'.$this->qte.' DESC'
@@ -1256,14 +1103,16 @@ class connection extends \PDO implements actions, api, engines
       if ( $max >= mt_getrandmax() ){
         $max = mt_getrandmax();
       }
-      if (($max > 1) && $table = $this->table_full_name($table, 1)) {
+      if (($max > 1) && $table = $this->tfn($table, 1)) {
+        $i = 0;
         do {
           $id = mt_rand(1, $max);
           if ( strpos($tab['fields'][$id_field]['type'], 'char') !== false ){
             $id = substr(md5('bbn'.$id), 0, mt_rand(1, $maxlength));
           }
+          $i++;
         }
-        while ( $this->select($table, [$id_field], [$id_field => $id]) );
+        while ( ($i < 100) && $this->select($table, [$id_field], [$id_field => $id]) );
         return $id;
       }
       return false;
@@ -1610,70 +1459,6 @@ class connection extends \PDO implements actions, api, engines
   }
 
   /**
-   * @todo Thomas fais ton taf!!
-   * @param type $where
-   * @return type
-   */
-  public function where_cfg($where, $table = '')
-  {
-    $r = [
-      'fields' => [],
-      'values' => [],
-      'final' => [],
-      'keypair' => [],
-      'unique' => []
-    ];
-
-    if ( is_array($where) && count($where) > 0 ){
-      $i = 0;
-      foreach ( $where as $k => $w ){
-        // arrays with [ field_name, operator, value]
-        if ( is_numeric($k) && is_array($w) && count($w) >= 3 ){
-          array_push($r['fields'], $w[0]);
-          array_push($r['values'], $w[2]);
-          $r['keypair'][$w[0]] = $w[2];
-          array_push($r['final'], [$w[0], $w[1], $w[2]]);
-        }
-        // arrays with [ field_name => value, field_name => value...] (equal assumed)
-        else if ( is_string($k) ){
-          array_push($r['fields'], $k);
-          array_push($r['values'], $w);
-          $r['keypair'][$k] = $w;
-          array_push($r['final'], [$k, '=', $w]);
-        }
-        if ( isset($r['final'][$i]) ){
-          array_push($r['unique'], [$r['final'][$i][0], $r['final'][$i][1]]);
-        }
-        else{
-          $this->log("Incorrect where", $where);
-        }
-        $i++;
-      }
-    }
-    // Automatically select non deleted if history is enabled
-    if ( !empty($table) &&
-      !$this->triggers_disabled &&
-      class_exists('\\bbn\\appui\\history', false) &&
-      \bbn\appui\history::has_history($this)
-    ){
-      $hcol = \bbn\appui\history::$hcol;
-      if ( !in_array($this->col_simple_name($hcol), $r['fields']) &&
-        !in_array($this->col_full_name($hcol, $table), $r['fields']) ){
-        $cols = array_keys($this->get_columns($table));
-        if ( in_array($hcol, $cols) ){
-          array_push($r['fields'], $hcol);
-          array_push($r['values'], 1);
-          array_push($r['final'], [$hcol, '=', 1]);
-          array_push($r['unique'], [$hcol, '=']);
-          $r['keypair'][$hcol] = 1;
-        }
-      }
-    }
-
-    return $r;
-  }
-
-  /**
    * Returns the number of records in the table corresponding to the $where parameter (non mandatory).
    *
    * <code>
@@ -1691,7 +1476,7 @@ class connection extends \PDO implements actions, api, engines
   public function count($table, array $where = []){
     $where_arr = $this->where_cfg($where, $table);
     $where = $this->get_where($where_arr, $table);
-    if ($table = $this->table_full_name($table, 1) ){
+    if ($table = $this->tfn($table, 1) ){
       $sql = "SELECT COUNT(*) FROM ".$table.$where;
       if ( count($where_arr['values']) > 0 ){
         return call_user_func_array([$this, "get_one"], array_merge([$sql], $where_arr['values']));
@@ -1931,312 +1716,6 @@ class connection extends \PDO implements actions, api, engines
   }
 
   /**
-   * Inserts row(s) in a table.
-   *
-   * <code>
-   * $this->db->insert(
-   *  "table_users",
-   *  [
-   *    ["name" => "Ted"],
-   *    ["surname" => "McLow"]
-   *  ]);
-   * </code>
-   *
-   * @param string $table The table name.
-   * @param array $values The values to insert.
-   * @param bool $ignore If true, controls if the row is already existing and ignores it.
-   *
-   * @return int Number affected rows.
-   */
-  public function insert($table, array $values, $ignore = false)
-  {
-    $r = false;
-    $trig = 1;
-    $keys = array_keys($values);
-    if ( isset($keys[0]) && ($keys[0] === 0) ){
-      $keys = array_keys($values[0]);
-    }
-    else{
-      $values = [$values];
-    }
-    $affected = 0;
-    if ( $sql = $this->_statement('insert', $table, $keys, $ignore) ){
-      foreach ( $values as $i => $vals ){
-        if ( $this->triggers_disabled ){
-          if ( $r = $this->query($sql['sql'], $sql['hash'], array_values($vals)) ){
-            $affected += $r;
-          }
-        }
-        else{
-          // in case the trigger is called, values might be changed by the callback.
-          // In this case, they will be sent back in the result array as 'values'
-          // Then  the SQL statement needs to be rebuilt
-          $trig = $this->_trigger($table, 'insert', 'before', $vals);
-          if ( !is_array($trig) ){
-            $trig = ['trig' => $trig];
-          }
-          if ( $trig['trig'] ){
-            if ( isset($trig['values']) ){
-              $vals = $trig['values'];
-              if ( !($sql = $this->_statement('insert', $table, array_keys($vals), $ignore)) ){
-                die($this->log(
-                  "Problem with the values returned by the callback function(s)",
-                  $table,
-                  $vals));
-              }
-            }
-            if ( $r = $this->query($sql['sql'], $sql['hash'], array_values($vals)) ){
-              $affected += $r;
-              $this->_trigger($table, 'insert', 'after', $vals);
-            }
-            if ( isset($trig['value']) ){
-              if ( \bbn\str\text::is_integer($trig['value']) ){
-                $affected += $trig['value'];
-              }
-              else{
-                $affected = $trig['value'];
-              }
-            }
-          }
-        }
-      }
-    }
-    return $affected;
-  }
-
-  /**
-   * If not exist inserts row(s) in a table, else update.
-   *
-   * <code>
-   * $this->db->insert_update(
-   *  "table_users",
-   *  [
-   *    'id' => '12',
-   *    'name' => 'Frank'
-   *  ]
-   * );
-   * </code>
-   *
-   * @param string $table The table name.
-   * @param array $values The values to insert.
-   *
-   * @return int The number of rows inserted or updated.
-   */
-  public function insert_update($table, array $values){
-    $r = false;
-    // Twice the arguments
-    $table = $this->table_full_name($table);
-    if ( $sql = $this->_statement('insert_update', $table, array_keys($values)) ){
-      $vals = array_merge(array_values($values),array_values($values));
-      if ( $this->triggers_disabled ){
-        $r = $this->query($sql['sql'], $sql['hash'], $vals);
-      }
-      else{
-        $trig = $this->_trigger($table, 'insert', 'before', $values);
-        if ( !is_array($trig) ){
-          $trig = ['trig' => $trig];
-        }
-        if ( $trig['trig'] ){
-          if ( isset($trig['values']) ){
-            $values = $trig['values'];
-          }
-          if ( isset($this->triggers['insert']['after'][$table]) || isset($this->triggers['update']['after'][$table]) ){
-            $update = false;
-            $where = [];
-            if ( $tmp = $this->get_keys($table) ){
-              foreach ( $tmp['keys'] as $t ){
-                if ( $t['unique'] ){
-                  foreach ( $t['columns'] as $tc ){
-                    if ( isset($values[$tc]) ){
-                      $where[$tc] = $values[$tc];
-                    }
-                  }
-                }
-              }
-              if ( (count($where) > 0) && $this->count($table, $where) === 1 ){
-                $update = 1;
-              }
-            }
-          }
-          $r = $this->query($sql['sql'], $sql['hash'], $vals);
-          if ( $r && (isset($this->triggers['insert']['after'][$table]) || isset($this->triggers['update']['after'][$table])) ){
-            if ( !$update ){
-              $this->_trigger($table, 'insert', 'after', $values);
-            }
-            else{
-              $this->_trigger($table, 'update', 'after', array_diff_key($values, $where), $where);
-            }
-          }
-        }
-        if ( isset($trig['value']) ){
-          $r = $trig['value'];
-        }
-      }
-    }
-    return $r;
-  }
-
-  /**
-   * Updates row(s) in a table.
-   *
-   * <code>
-   * $this->db->update(
-   *  "table_users",
-   *  [
-   *    ['name' => 'Frank'],
-   *    ['surname' => 'Red']
-   *  ],
-   *  ['id' => '127']
-   * );
-   * </code>
-   *
-   * @param string $table The table name.
-   * @param array $values The new value(s).
-   * @param array $where The "where" condition.
-   * @param boolean $ignore If IGNORE should be added to the statement
-   *
-   * @return int The number of rows updated.
-   */
-  public function update($table, array $values, array $where, $ignore=false)
-  {
-    $r = false;
-    $trig = 1;
-    $where = $this->where_cfg($where, $table);
-    if ( $sql = $this->_statement('update', $table, array_keys($values), $where, $ignore) ){
-      if ( $this->triggers_disabled ){
-        $r = $this->query($sql['sql'], $sql['hash'], array_merge(array_values($values), $where['values']));
-      }
-      else if ( $trig = $this->_trigger($table, 'update', 'before', $values, $where['keypair']) ){
-        if ( !is_array($trig) ){
-          $trig = ['trig' => $trig];
-        }
-        if ( $trig['trig'] ){
-          if ( isset($trig['values']) ){
-            $values = $trig['values'];
-            if ( !($sql = $this->_statement('update', $table, array_keys($values), $where, $ignore)) ){
-              die($this->log(
-                "Problem with the values returned by the callback function(s)",
-                $table, $values)
-              );
-            }
-          }
-          $r = $this->query($sql['sql'], $sql['hash'], array_merge(array_values($values), $where['values']));
-          if ( $r ){
-            $this->_trigger($table, 'update', 'after', $values, $where['keypair']);
-          }
-        }
-        if ( isset($trig['value']) ){
-          $r = $trig['value'];
-        }
-      }
-    }
-    return $r;
-  }
-
-  /**
-   * If exist delete row(s) in a table, else ignore.
-   *
-   * <code>
-   * $this->db->delete_ignore(
-   *  "table_users",
-   *  ['id' => '20']
-   * );
-   * </code>
-   *
-   * @param string $table The table name.
-   * @param array $where The "where" condition.
-   *
-   * @return int The number of rows deleted.
-   */
-  public function update_ignore($table, array $values, array $where)
-  {
-    return $this->update($table, $values, $where, 1);
-  }
-
-  /**
-   * Deletes row(s) in a table.
-   *
-   * <code>
-   * $this->db->delete("table_users", ['id' => '32']);
-   * </code>
-   *
-   * @param string $table The table name.
-   * @param array $where The "where" condition.
-   * @param bool $ignore default: false.
-   *
-   * @return int The number of rows deleted.
-   */
-  public function delete($table, array $where, $ignore = false)
-  {
-    $r = false;
-    $trig = 1;
-    $where = $this->where_cfg($where, $table);
-    if ( $sql = $this->_statement('delete', $table, $where, $ignore) ){
-      if ( $this->triggers_disabled ){
-        $r = $this->query($sql['sql'], $sql['hash'], $where['values']);
-      }
-      else if ( $trig = $this->_trigger($table, 'delete', 'before', [], $where['keypair']) ){
-        if ( !is_array($trig) ){
-          $trig = ['trig' => $trig];
-        }
-        if ( $trig['trig'] ){
-          $r = $this->query($sql['sql'], $sql['hash'], $where['values']);
-          if ( $r ){
-            $this->_trigger($table, 'delete', 'after', [], $where['keypair']);
-          }
-        }
-      }
-      if ( isset($trig['value']) ){
-        $r = $trig['value'];
-      }
-    }
-    return $r;
-  }
-
-  /**
-   * If exist delete row(s) in a table, else ignore.
-   *
-   * <code>
-   * $this->db->delete_ignore(
-   *  "table_users",
-   *  ['id' => '20']
-   * );
-   * </code>
-   *
-   * @param string $table The table name.
-   * @param array $where The "where" condition.
-   *
-   * @return int The number of rows deleted.
-   */
-  public function delete_ignore($table, array $where)
-  {
-    return $this->delete($table, $where, 1);
-  }
-
-  /**
-   * If not exist inserts row(s) in a table, else ignore.
-   *
-   * <code>
-   * $this->db->insert_ignore(
-   *  "table_users",
-   *  [
-   *    ['id' => '19', 'name' => 'Frank'],
-   *    ['id' => '20', 'name' => 'Ted'],
-   *  ]
-   * );
-   * </code>
-   *
-   * @param string $table The table name.
-   * @param array $values The row(s) values.
-   *
-   * @return int The number of rows inserted.
-   */
-  public function insert_ignore($table, array $values)
-  {
-    return $this->insert($table, $values, 1);
-  }
-
-  /**
    * Returns table's structure as indexed array.
    *
    * <code>
@@ -2247,7 +1726,7 @@ class connection extends \PDO implements actions, api, engines
    *
    * @return array | false
    */
-  public function modelize($table='')
+  public function modelize($table = '', $force = false)
   {
     $r = [];
     $tables = false;
@@ -2262,8 +1741,8 @@ class connection extends \PDO implements actions, api, engines
     }
     if ( is_array($tables) ){
       foreach ( $tables as $t ){
-        $full = $this->table_full_name($t);
-        $r[$full] = $this->_get_cache($full);
+        $full = $this->tfn($t);
+        $r[$full] = $this->_get_cache($full, 'columns', $force);
       }
       if ( count($r) === 1 ){
         return end($r);
@@ -2431,23 +1910,28 @@ class connection extends \PDO implements actions, api, engines
    *
    * @return string
    */
-  public function get_where(array $where, $table='', $aliases = [])
-  {
-    if ( !isset($where['final'], $where['keypair'], $where['values'], $where['fields']) ){
+  public function get_where(array $where, $table='', $aliases = []){
+    if ( !isset($where['final'], $where['keyval'], $where['values'], $where['fields']) ){
       $where = $this->where_cfg($where, $table, $aliases);
     }
     $st = '';
     if ( count($where['final']) > 0 ){
+      if ( !is_array($table) ){
+        $table = [$table];
+      }
       if ( !empty($table) ){
-        $m = $this->modelize($table);
-        if ( !$m || count($m['fields']) === 0 ){
-          /*
-           * @todo  check the fields against the table's model and the aliases
-           */
-          return $st;
+        foreach ( $table as $tab ){
+          $m = $this->modelize($table);
+          if ( !$m || count($m['fields']) === 0 ){
+            /*
+            * @todo  check the fields against the table's model and the aliases
+            */
+            return $st;
+          }
         }
       }
-      $operators = eval('return \\bbn\\db\\languages\\'.$this->engine.'::$operators;');
+      $cls = '\\bbn\\db\\languages\\'.$this->engine;
+      $operators = $cls::$operators;
       foreach ( $where['final'] as $w ){
         // 2 parameters, we use equal
         if ( count($w) >= 3 && in_array(strtolower($w[1]), $operators) ){
@@ -2466,7 +1950,6 @@ class connection extends \PDO implements actions, api, engines
         $st = ' WHERE 1 '.PHP_EOL.$st;
       }
     }
-
     return $st;
   }
 

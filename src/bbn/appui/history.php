@@ -7,9 +7,9 @@ class history
 {
 	
 	private static
-          /* @var \bbn\db\connection  The DB connection */
+          /** @var \bbn\db\connection $db The DB connection */
           $db,
-          /* @var array A collection of the  */
+          /** @var array A collection of the  */
           $dbs = [],
           $hstructures = array(),
           $admin_db = '',
@@ -440,40 +440,46 @@ class history
 	 * Gets all information about a given table
 	 * @return table full name
 	 */
-	public static function get_table_cfg($table){
-    if ( self::check($table) ){
-      $table = self::$db->table_full_name($table);
-      if ( isset(self::$hstructures[$table]) ){
-        return self::$hstructures[$table];
-      }
-      else if ( $cfg = self::$db->modelize($table) ){
+	public static function get_table_cfg($table, $force = false){
+
+    // Check history is enabled and table's name correct
+    if ( self::$enabled && self::check($table) ){
+      $table = self::$db->tfn($table);
+
+      // Looking for the config of the table
+      if ( !isset(self::$hstructures[$table]) || $force ){
         self::$hstructures[$table] = [
           'history'=>false,
           'fields' => []
         ];
         $s =& self::$hstructures[$table];
-        if ( isset($cfg['keys']['PRIMARY']) && 
-                (count($cfg['keys']['PRIMARY']['columns']) === 1) ){
-          $s['primary'] = $cfg['keys']['PRIMARY']['columns'][0];
+        $model = self::$db->modelize($table);
+        if ( isset($model['keys']['PRIMARY']) &&
+                (count($model['keys']['PRIMARY']['columns']) === 1) ){
+          $s['primary'] = $model['keys']['PRIMARY']['columns'][0];
         }
-        $cols = self::$db->select_all(
+        $cols = self::$db->rselect_all(
                 self::$admin_db.'.'.self::$prefix.'columns',
                 [],
                 ['table' => $table],
                 'position');
         foreach ( $cols as $col ){
-          $col = (array) $col;
           $c = $col['column'];
+          if ( $col['default'] === 'NULL' ){
+            $col['default'] = null;
+          }
           $s['fields'][$c] = $col;
-          $s['fields'][$c]['config'] = (array)json_decode($col['config']);
+          $s['fields'][$c]['config'] = json_decode($col['config'], 1);
           if ( isset($s['fields'][$c]['config']['history']) && $s['fields'][$c]['config']['history'] == 1 ){
             $s['history'] = 1;
           }
-          if ( isset($s['fields'][$c]['config']['keys']) ){
-            $s['fields'][$c]['config']['keys'] = (array) $s['fields'][$c]['config']['keys'];
-          }
         }
-        return self::$hstructures[$table];
+      }
+      // The table exists and has history
+      if ( isset(self::$hstructures[$table], self::$hstructures[$table]['history']) &&
+        self::$hstructures[$table]['history']
+      ){
+        return $table;
       }
     }
     return false;
@@ -492,19 +498,38 @@ class history
 	* @return 1
 	*/
   private static function check($table=null){
+    if ( !isset(self::$huser, self::$htable, self::$db) ){
+      die('One of the key elements has not been configured in history (user? database?)');
+    }
     if ( !empty($table) ){
-      if ( strpos($table, '.') ){
-        $ts = explode('.', $table);
-        $table = end($ts);
-      }
+      $table = self::$db->tsn($table);
       if ( strpos($table, self::$prefix) === 0 ){
         return false;
       }
     }
-		if ( !isset(self::$huser, self::$htable, self::$db) ){
-      die('One of the key elements has not been configured in history (user? database?)');
-		}
     return 1;
+  }
+
+  private static function fcol($col, $table){
+    if ( self::check() && ($table = self::$db->tfn($table)) ){
+      return $table.'.'.self::$db->csn($col);
+    }
+    return false;
+  }
+
+  private static function _insert(array $cfg){
+    if ( self::$enabled && isset($cfg['operation'], $cfg['column'], $cfg['line']) ){
+      $id = self::$db->last_id();
+      $res = self::$db->insert(self::$htable, [
+        'operation' => $cfg['operation'],
+        'line' => $cfg['line'],
+        'column' => $cfg['column'],
+        'old' => isset($cfg['old']) ? $cfg['old'] : null,
+        'chrono' => self::$date ? self::$date : microtime(1),
+        'id_user' => self::$huser]);
+      self::$db->set_last_insert_id($id);
+      return $res;
+    }
   }
   
 	/**
@@ -519,186 +544,198 @@ class history
    * 
    * @return bool returns true
 	 */
-  public static function trigger($table, $kind, $moment, $values=[], $where=[], $trig=false)
-  {
-    if ( self::$enabled && self::check($table) ){
-      $table = self::$db->table_full_name($table);
-      
-      if ( !isset(self::$hstructures[$table]) ){
-        self::get_table_cfg($table);
+  public static function trigger(array $cfg){
+
+    // Result from this function
+    $res = ['trig' => 1, 'run' => 1, 'history' => []];
+
+    // Will return false if disabled, the table doesn't exist, or doesn't have history
+    if ( $table = self::get_table_cfg($cfg['table']) ){
+
+      /** @var array $s The table's structure and configuration */
+      $s =& self::$hstructures[$table];
+
+      // Need to have a single primary key, otherwise the script dies
+      if ( !isset($s['primary']) ){
+        self::$db->error("You need to have a primary key on a single column in your table $table in order to use the history class");
+        die(\bbn\tools::hdump("You need to have a primary key on a single column in your table $table in order to use the history class"));
       }
-      if ( isset(self::$hstructures[$table], self::$hstructures[$table]['history']) && self::$hstructures[$table]['history'] ){
-        $s =& self::$hstructures[$table];
-        if ( !isset($s['primary']) ){
-          self::$db->error("You need to have a primary key on a single column in your table $table in order to use the history class");
-          die(\bbn\tools::dump("You need to have a primary key on a single column in your table $table in order to use the history class", $s));
+
+      // This happens before the query is executed
+      if ( $cfg['moment'] === 'before' ){
+
+        /** @var bool $primary_defined */
+        $primary_defined = false;
+        $primary = self::$db->cfn($s['primary'], $table);
+        if ( isset($cfg['where']['keyval'][$primary]) ){
+          foreach ( $cfg['where']['final'] as $ar ){
+            if ( self::$db->csn($ar[0]) === $s['primary'] ){
+              if ( $ar[1] === '=' ){
+                $primary_defined = true;
+              }
+              break;
+            }
+          }
         }
 
-        $date = self::$date ? self::$date : date('Y-m-d H:i:s');
-        
-        if ( (count($values) === 1) && (array_keys($values)[0] === self::$hcol) ){
-          $kind = array_values($values)[0] === 1 ? 'restore' : 'delete';
-        }
+        switch ( $cfg['kind'] ){
 
-        switch ( $kind ){
-          case 'select':
-            break;
           case 'insert':
-            if ( $moment === 'before' && isset($values[$s['primary']]) ){
-              if ( self::$db->select_one($table, self::$hcol, [$s['primary'] => $values[$s['primary']]]) === 0 ){
-                self::$db->update($table, [self::$hcol=1], [$s['primary'] => $values[$s['primary']]]);
+            // If the primary is specified and already exists in a row in deleted state
+            // (if it exists in active state, DB will return its standard error but it's not this class' problem)
+            if ( isset($cfg['values'][$s['primary']]) &&
+              self::$db->select_one($table, $s['primary'], [
+                $s['primary'] => $cfg['values'][$s['primary']],
+                self::$hcol => 0
+              ])
+            ){
+              // We restore the element
+              $trig = self::$db->update($table, [ self::$hcol => 1], [
+                $s['primary'] => $cfg['values'][$s['primary']],
+                self::$hcol => 0
+              ]);
+              // Real query's execution will be prevented
+              $res = [
+                // We won't execute the after trigger
+                'trig' => false,
+                'run' => false,
+                'value' => $trig,
+              ];
+              // We get the content of the row
+              $all = self::$db->rselect($table, [], [$s['primary'] => $cfg['values'][$s['primary']]]);
+              /** @var array $update The values to be updated */
+              $update = [];
+              // We update each element which needs to (the new ones different from the old, and the old ones different from the default)
+              foreach ( $all as $k => $v ){
+                if ( isset($cfg['values'][$k]) &&
+                  ($cfg['values'][$k] !== $v)
+                ){
+                  $update[$k] = $v;
+                }
+                else if ( !isset($cfg['values'][$k]) &&
+                  ($v !== $s['fields'][$k]['default'])
+                ){
+                  $update[$k] = $s['fields'][$k]['default'];
+                }
+              }
+              if ( count($update) > 0 ) {
+                self::$db->update($table, $update, [$s['primary'] => $cfg['values'][$s['primary']]]);
               }
             }
-            else if ( $moment === 'after' ){
-              $id = self::$db->last_id();
-              self::$db->insert(self::$htable, [
+            else {
+              array_push($res['history'], [
                 'operation' => 'INSERT',
-                'line' => $id,
-                'column' => $table.'.'.$s['primary'],
-                'old' => null,
-                'last_mod' => $date,
-                'id_user' => self::$huser
+                'column' => self::fcol($s['primary'], $table)
               ]);
-              self::$db->set_last_insert_id($id);
+            }
+            break;
+
+          case 'update':
+            if ( $primary_defined ){
+              // If the only update regards the history field
+              if ( isset($cfg['values'][self::$hcol]) ){
+                $history_value = self::$db->select_one($table, self::$hcol, $cfg['where']['final']);
+                if ( $cfg['values'][self::$hcol] !== $history_value ){
+                  if ( $history_value === 1 ){
+                    $cfg['kind'] = 'delete';
+                  }
+                  else{
+                    $cfg['kind'] = 'restore';
+                  }
+                  array_push($res['history'], [
+                    'operation' => strtoupper($cfg['kind']),
+                    'column' => self::fcol(self::$hcol, $table),
+                    'old' => $history_value
+                  ]);
+                }
+              }
+              $row = self::$db->rselect($table, array_keys($cfg['values']), $cfg['where']['final']);
+              foreach ( $cfg['values'] as $k => $v ){
+                if ( ($k !== self::$hcol) && ($row[$k] !== $v) ){
+                  array_push($res['history'], [
+                    'operation' => 'UPDATE',
+                    'column' => self::fcol($k, $table),
+                    'line' => $cfg['where']['keyval'][$primary],
+                    'old' => $row[$k]
+                  ]);
+                }
+              }
+            }
+            // Case where the primary is not defined, we'll update each primary instead
+            else{
+              $ids = self::$db->get_column_values($table, $s['primary'], $cfg['where']['final']);
+              $res = [
+                // We won't execute the after trigger
+                'trig' => false,
+                'run' => false,
+                'value' => 0
+              ];
+              foreach ( $ids as $id ){
+                $res['value'] += self::$db->update($table, $cfg['values'], array_merge([[$s['primary'], '=', $id]], $cfg['where']['final']));
+              }
+            }
+            break;
+
+          // Nothing is really deleted, the hcol is just set to 0
+          case 'delete':
+            $res = [
+              // We won't execute the query as nothing will be really deleted
+              'trig' => false,
+              'run' => false,
+              'value' => 0,
+            ];
+            // Case where the primary is not defined, we'll delete based on each primary instead
+            if ( !$primary_defined ){
+              $ids = self::$db->get_column_values($table, $s['primary'], $cfg['where']['final']);
+              foreach ( $ids as $id ){
+                $res['value'] += self::$db->delete($table, [$s['primary'] => $id]);
+              }
+            }
+            else if ( $res['value'] = self::$db->query(
+              self::$db->get_update($table, [self::$hcol], [
+                  [$s['primary'], '=', $cfg['where']['keyval'][$primary]],
+                  [self::$hcol, '=', 1]
+                ]
+              ), [0, $cfg['where']['keyval'][$primary], 1])
+            ){
+              $res['trig'] = 1;
+              // And we insert into the history table
+              array_push($res['history'], [
+                'operation' => 'DELETE',
+                'column' => self::fcol(self::$hcol, $table),
+                'line' => $cfg['where']['keyval'][$primary],
+                'old' => 1
+              ]);
+            }
+            break;
+        }
+      }
+      else if ( $cfg['moment'] === 'after' ){
+        switch ( $cfg['kind'] ){
+          case 'insert':
+            $id = self::$db->last_id();
+            foreach ( $cfg['history'] as $i => $h ){
+              $cfg['history'][$i]['line'] = $id;
             }
             break;
           case 'restore':
-            if ( $moment === 'after' ){
-              self::$db->insert(self::$htable, [
-                'operation' => 'RESTORE',
-                'line' => $where['keypair'][$s['primary']],
-                'column' => $table.'.'.self::$hcol,
-                'old' => '0',
-                'last_mod' => $date,
-                'id_user' => self::$huser
-              ]);
-            }
+            //die(\bbn\tools::hdump($cfg));
             break;
           case 'update':
-            if ( $moment === 'before' ){
-              self::$last_rows = self::$db->rselect_all($table, array_keys($values), $where['final']);
-            }
-            else if ( $moment === 'after' ){
-              if ( is_array(self::$last_rows) ){
-                foreach ( self::$last_rows as $upd ){
-                  foreach ( $values as $c => $v ){
-                    if ( !isset($upd[$c]) ){
-                      $upd[$c] = null;
-                    }
-                    if ( ( $v !== $upd[$c] ) && ( $c !== self::$hcol ) && isset($s['fields'][$c]['config']['history']) ){
-                      self::$db->insert(self::$htable, [
-                        'operation' => 'UPDATE',
-                        'line' => $where['keypair'][$s['primary']],
-                        'column' => $table.'.'.$c,
-                        'old' => $upd[$c],
-                        'last_mod' => $date,
-                        'id_user' => self::$huser]);
-                    }
-                  }
-                }
-              }
-              // insert_update case
-              else{
-                $id = self::$db->last_id();
-                self::$db->insert(self::$htable, [
-                  'operation' => 'INSERT',
-                  'line' => $id,
-                  'column' => $table.'.'.$s['primary'],
-                  'old' => '',
-                  'last_mod' => $date,
-                  'id_user' => self::$huser
-                ]);
-                self::$db->set_last_insert_id($id);
-              }
-              self::$last_rows = false;
-            }
+            //die(\bbn\tools::hdump($cfg));
             break;
           // Nothing is really deleted, the hcol is just set to 0
           case 'delete':
-            if ( $moment === 'before' ){
-              // The lines affected by the change
-              $lines = self::$db->get_column_values($table, $s['primary'], $where['final']);
-              // In order to execute a request setting 'hcol' to 0 with such query:
-              // UPDATE bbn_history SET 'hcol' = ? WHERE....
-              // we take the where's value(s) and add a 0 at the start of this array
-              $values = $where['values'];
-              array_unshift($values, 0);
-              // We execute the query to update the hcol
-              if ( $r = self::$db->query(
-                      self::$db->get_update(
-                        $table,
-                        [self::$hcol],
-                        $where['final']), $values) ){
-                // And we insert into the history table
-                \bbn\tools::log([$where, $s['primary'], $lines], 'history');
-                if ( $lines ) {
-                  foreach ($lines as $line){
-                    self::$db->insert(self::$htable, [
-                      'operation' => 'DELETE',
-                      'line' => $line,
-                      'column' => $table . '.' . self::$hcol,
-                      'old' => 1,
-                      'last_mod' => $date,
-                      'id_user' => self::$huser]);
-                  }
-                }
-                return ['trig' => false, 'value' => $r, 'lines' => $lines];
-                /* For each value of this key which is deleted (hopefully one)
-                $to_check = self::$db->get_rows("
-                  SELECT k.`column` AS id, c1.`column` AS to_change, c2.`column` AS from_change,
-                  c1.`null`, t.`table`
-                  FROM `".self::$admin_db."`.`".self::$prefix."keys` AS k
-                    JOIN `".self::$prefix."columns` AS c1
-                      ON c1.`id` LIKE k.`column`
-                    JOIN `".self::$prefix."columns` AS c2
-                      ON c2.`id` LIKE k.`ref_column`
-                    JOIN `".self::$prefix."tables` AS t
-                      ON t.`id` LIKE c1.`table`
-                  WHERE k.`ref_column` LIKE ?",
-                  $table.'.%%');
-                $to_select = [self::$primary];
-                foreach ( $to_check as $c ){
-                  array_push($to_select, $c['from_change']);
-                }
-                // The values from the constrained rows that should have been deleted
-                $delete = self::$db->select_all($table, array_unique($to_select), $where);
-                foreach ( $delete as $del ){
-                  $del = (array) $del;
-                  // For each table having a constrain
-                  foreach ( $to_check as $c ){
-                    // If it's nullable we set it to null
-                    if ( $c['null'] == 1 ){
-                      self::$db->query("
-                        UPDATE `$c[table]`
-                        SET `$c[to_change]` = NULL
-                        WHERE `$c[to_change]` = ?",
-                        $del[$c['from_change']]);
-                    }
-                    // Then we "delete" it on the same manner
-                    self::$db->delete($c['table'], [ $c['to_change'] => $del[$c['from_change']] ], $date);
-                  }
-                  // Inserting a new history row for each deleted value
-                  self::$db->insert(self::$htable, [
-                    'operation' => 'DELETE',
-                    'line' => $del[$s['primary']],
-                    'column' => $table.'.'.self::$hcol,
-                    'old' => 1,
-                    'last_mod' => $date,
-                    'id_user' => self::$huser]);
-                }
-                 * 
-                 */
-              }
-            }
-            // After
-            else{
-              \bbn\tools::log($trig, 'history');
-            }
+            //die(\bbn\tools::hdump($cfg));
             break;
+        }
+        if ( isset($cfg['res']['history']) ){
+          foreach ($cfg['history'] as $i => $h) {
+            self::_insert($h);
+          }
         }
       }
     }
-    return 1;
+    return $res;
   }
-	
 }

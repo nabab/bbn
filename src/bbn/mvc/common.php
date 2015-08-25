@@ -37,4 +37,13 @@ trait common {
     die($msg);
   }
 
+  public function log(){
+    if ( \bbn\mvc::get_debug() ){
+      $ar = func_get_args();
+      foreach ( $ar as $a ){
+        \bbn\tools::log($a, 'mvc');
+      }
+    }
+  }
+
 }

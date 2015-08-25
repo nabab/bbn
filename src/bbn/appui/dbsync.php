@@ -35,13 +35,11 @@ class dbsync
     }
   }
 
-  final public static function addMethod($name, $fn)
-  {
+  final public static function addMethod($name, $fn){
     self::$methods[$name] = \Closure::bind($fn, NULL, __CLASS__);
   }
 
-  final protected static function protectedMethod()
-  {
+  final protected static function protectedMethod(){
     echo __METHOD__ . " was called" . PHP_EOL;
   }
 
@@ -52,8 +50,7 @@ class dbsync
     }
   }
   
-  private static function def($dbs, $dbs_table='')
-  {
+  private static function def($dbs, $dbs_table=''){
     if ( empty($dbs) ){
       $dbs = self::$default_cfg;
     }
@@ -76,8 +73,7 @@ class dbsync
 	/**
 	 * @return void 
 	 */
-	public static function init(\bbn\db\connection $db, $dbs='', $tables=[], $dbs_table='')
-	{
+	public static function init(\bbn\db\connection $db, $dbs='', $tables=[], $dbs_table=''){
     self::$db = $db;
     self::def($dbs, $dbs_table);
     self::$tables = $tables;
@@ -90,19 +86,13 @@ class dbsync
       }
       self::$db->set_trigger(
             '\\bbn\\appui\\dbsync::trigger',
-            ['delete', 'insert'],
-            'before',
-            self::$tables);
-      self::$db->set_trigger(
-            '\\bbn\\appui\\dbsync::trigger',
             ['delete', 'update', 'insert'],
             'after',
             self::$tables);
     }
 	}
   
-  public static function first_call()
-  {
+  public static function first_call(){
     if ( is_array(self::$dbs) ){
       self::$dbs = new \bbn\db\connection(self::$dbs);
     }
@@ -110,25 +100,58 @@ class dbsync
       self::$has_history = 1;
     }
     if ( (self::$dbs->engine === 'sqlite') && !in_array(self::$dbs_table, self::$dbs->get_tables()) ){
-      self::$dbs->query('CREATE TABLE "dbsync" ("id" INTEGER PRIMARY KEY  NOT NULL ,"db" TEXT NOT NULL ,"tab" TEXT NOT NULL ,"moment" DATETIME NOT NULL,"action" TEXT NOT NULL ,"rows" TEXT,"vals" TEXT,"state" INTEGER NOT NULL DEFAULT (0) );');
+      self::$dbs->query('
+        CREATE TABLE "dbsync" (
+          "id" INTEGER PRIMARY KEY  NOT NULL ,
+          "db" TEXT NOT NULL ,
+          "tab" TEXT NOT NULL ,
+          "chrono" REAL NOT NULL,
+          "action" TEXT NOT NULL,
+          "rows" TEXT,"vals" TEXT,
+          "state" INTEGER NOT NULL DEFAULT (0)
+        );
+        CREATE INDEX "db" "dbsync" ("db");
+        CREATE INDEX "tab" "dbsync" ("tab");
+        CREATE INDEX "chrono" "dbsync" ("chrono");
+        CREATE INDEX "action" "dbsync" ("action");
+        CREATE INDEX "state" "dbsync" ("state");
+      ');
+    }
+    else if ( (self::$dbs->engine === 'mysql') && !in_array(self::$dbs_table, self::$dbs->get_tables()) ){
+      self::$dbs->query("
+        CREATE TABLE IF NOT EXISTS `dbsync` (
+          `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+          `db` varchar(50) NOT NULL,
+          `tab` varchar(50) NOT NULL,
+          `chrono` decimal(14,4) unsigned NOT NULL,
+          `action` varchar(20) NOT NULL,
+          `rows` text,
+          `vals` longtext,
+          `state` int(10) NOT NULL DEFAULT '0'
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        ALTER TABLE `dbsync`
+          ADD PRIMARY KEY (`id`),
+          ADD KEY `db` (`db`),
+          ADD KEY `tab` (`tab`),
+          ADD KEY `chrono` (`chrono`),
+          ADD KEY `action` (`action`),
+          ADD KEY `state` (`state`);
+      ");
     }
   }
 	/**
 	 * Checks if the initialization has been all right
 	 * @return bool
 	 */
-  public static function check()
-  {
+  public static function check(){
     return ( is_object(self::$db) && (get_class(self::$dbs) === 'bbn\db\connection') );
   }
   
-  public static function disable()
-  {
+  public static function disable(){
     self::$disabled = 1;
   }
   
-  public static function enable()
-  {
+  public static function enable(){
     self::$disabled = false;
   }
   
@@ -136,51 +159,37 @@ class dbsync
 	 * Gets all information about a given table
 	 * @return table full name
 	 */
-  public static function trigger($table, $kind, $moment, array $values=[], array $where=[])
-  {
+  public static function trigger(array $cfg){
     self::first_call();
-    $res = ['trig' => 1];
+    $res = ['trig' => 1, 'run' => 1];
+    $table = self::$db->table_full_name($cfg['table']);
     $stable = self::$db->table_simple_name($table);
-    if ( !self::$disabled && self::check() && in_array($table, self::$tables) ){
-      if ( $moment === 'before' ){
-        if ( $kind === 'delete' ){
-          $res['values'] = self::$db->select($table, [], $where['final']);
-        }
-        else if ( $kind === 'insert' ){
-          if ( self::$db->has_id_increment($table) && 
-                  ($pri = self::$db->get_unique_primary($table)) &&
-                  empty($values[$pri]) ){
-            $values[$pri] = self::$db->new_id($table);
-            $res['values'] = $values;
-            return $res;
-          }
-        }
-      }
-      else if ( $moment === 'after' ){
-        // Case where we actually delete or restore through the $hcol column
-        self::$dbs->insert(self::$dbs_table, [
-          'db' => self::$db->current,
-          'tab' => $stable,
-          'action' => $kind,
-          'moment' => date('Y-m-d H:i:s'),
-          'rows' => json_encode($where['final']),
-          'vals' => empty($values) ? '[]' : json_encode($values)
-        ]);
-      }
+    if ( !self::$disabled &&
+      self::check() &&
+      in_array($table, self::$tables) &&
+      ($cfg['moment'] === 'after')
+    ){
+      // Case where we actually delete or restore through the $hcol column
+      self::$dbs->insert(self::$dbs_table, [
+        'db' => self::$db->current,
+        'tab' => $stable,
+        'action' => $cfg['kind'],
+        'chrono' => microtime(1),
+        'rows' => json_encode($cfg['where']['final']),
+        'vals' => empty($cfg['values']) ? '[]' : json_encode($cfg['values'])
+      ]);
     }
     return $res;
   }
   
-  public static function callback1(\Closure $f)
-  {
+  public static function callback1(\Closure $f){
     self::addMethod('cbf1', $f);
   }
   
-  public static function callback2(\Closure $f)
-  {
+  public static function callback2(\Closure $f){
     self::addMethod('cbf2', $f);
   }
-  
+
   // Looking at the rows from the other DB with status = 0 and setting them to 1
   // Comparing the new rows with the ones from this DB
   // Deleting the rows from this DB which have state = 1
@@ -213,7 +222,7 @@ class dbsync
     $retry = false;
 
     $start = ( $test = self::$dbs->get_one("
-      SELECT MIN(moment)
+      SELECT MIN(chrono)
       FROM ".self::$dbs->escape(self::$dbs_table)."
       WHERE db NOT LIKE ?
       AND state = 0",
@@ -222,16 +231,16 @@ class dbsync
     $to_log['deleted_sync'] = self::$dbs->delete(self::$dbs_table, [
       ['db', 'LIKE', self::$db->current],
       ['state', '=', 1],
-      ['moment', '<', $start]
+      ['chrono', '<', $start]
     ]);
     
     // Selecting the entries inserted
-    $ds = self::$dbs->rselect_all(self::$dbs_table, ['id', 'tab', 'vals', 'moment'], [
+    $ds = self::$dbs->rselect_all(self::$dbs_table, ['id', 'tab', 'vals', 'chrono'], [
       ['db', 'NOT LIKE', self::$db->current],
       ['state', '=', 0],
       ['action', 'LIKE', 'insert']
     ], [
-      'moment' => 'ASC',
+      'chrono' => 'ASC',
       'id' => 'ASC'
     ]);
     // They just have to be inserted
@@ -267,7 +276,7 @@ class dbsync
 
     // Selecting the entries modified and deleted in the twin DB,
     // ordered by table and rows (so the same go together)
-    $ds = self::$dbs->rselect_all(self::$dbs_table, ['id', 'tab', 'action', 'rows', 'vals', 'moment'], [
+    $ds = self::$dbs->rselect_all(self::$dbs_table, ['id', 'tab', 'action', 'rows', 'vals', 'chrono'], [
       ['db', 'NOT LIKE', self::$db->current],
       ['state', '=', 0],
       ['rows', 'NOT LIKE', '[]'],
@@ -275,7 +284,7 @@ class dbsync
     ], [
       'tab' => 'ASC',
       'rows' => 'ASC',
-      'moment' => 'ASC',
+      'chrono' => 'ASC',
       'id' => 'ASC'
     ]);
     foreach ( $ds as $i => $d ){
@@ -306,16 +315,16 @@ class dbsync
               isset($ds[$i+1]) &&
               ($ds[$i+1]['tab'] === $d['tab']) &&
               ($ds[$i+1]['rows'] === $d['rows'])
-            ) ? $ds[$i+1]['moment'] : date('Y-m-d H:i:s');
+            ) ? $ds[$i+1]['chrono'] : microtime();
       // Looking for the actions done on this specific record in our database
       // between the twin change and the next (or now if there is no other change)
       $each = self::$dbs->rselect_all(self::$dbs_table, 
-        ['id', 'moment', 'action', 'vals'], [
+        ['id', 'chrono', 'action', 'vals'], [
           ['db', 'LIKE', self::$db->current],
           ['tab', 'LIKE', $d['tab']],
           ['rows', 'LIKE', $d['rows']],
-          ['moment', '>=', $d['moment']],
-          ['moment', '<', $next_time],
+          ['chrono', '>=', $d['chrono']],
+          ['chrono', '<', $next_time],
         ]);
       if ( count($each) > 0 ){
         $to_log['num_problems']++;
@@ -403,4 +412,3 @@ class dbsync
     return $res;
   }
 }
-?>

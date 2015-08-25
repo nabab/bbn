@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
  * Copyright (C) 2014 BBN
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,8 +19,8 @@
 namespace bbn\appui;
 
 class grid extends \bbn\obj{
-  
-	private 
+
+	private
           /* @var \bbn\db\connection The DB connection */
           $db = false,
           /* @var string The tables' prefix (the tables will be called ?cron and ?journal) */
@@ -31,7 +31,7 @@ class grid extends \bbn\obj{
           $structure = false,
           $fields = null,
           $additional_fields = [];
-	
+
   public function __construct(\bbn\db\connection $db, $cfg, $table = null, $fields = null){
     if ( is_array($cfg) ){
       $this->db = $db;
@@ -61,29 +61,29 @@ class grid extends \bbn\obj{
       $this->cfg['filter'] = isset($cfg['filter']['filters']) ? $cfg['filter'] : [];
     }
   }
-  
+
   public function check()
   {
     return is_array($this->cfg);
   }
-  
+
   public function start()
   {
     return $this->cfg['start'];
   }
-  
+
   public function limit()
   {
     return $this->cfg['limit'];
   }
-  
+
   public function where()
   {
     if ( $this->check() ){
       return $this->filter($this->cfg['filter']);
     }
   }
-  
+
   public function get_field($f){
     if ( is_array($f) && isset($f['field']) ) {
       $f = $f['field'];
@@ -98,7 +98,7 @@ class grid extends \bbn\obj{
     }
     return false;
   }
-  
+
   public function filter($filters){
     $res = '';
     if ( $this->check() && isset($filters['filters']) ){
@@ -177,7 +177,7 @@ class grid extends \bbn\obj{
     }
     return $res;
   }
-  
+
   public function order(){
     $st = '';
     if ( !empty($this->cfg['sort']) ){
@@ -192,5 +192,5 @@ class grid extends \bbn\obj{
     }
     return $st;
   }
-  
+
 }

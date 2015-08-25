@@ -444,7 +444,7 @@ class mysql implements \bbn\db\engines
 	 */
 	public function get_delete($table, array $where, $ignore = false, $php = false)
 	{
-		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 && count($where) > 0 ){
+		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) ){
 			$r = '';
 			if ( $php ){
 				$r .= '$db->query("';
@@ -462,50 +462,80 @@ class mysql implements \bbn\db\engines
 	/**
 	 * @return string
 	 */
-	public function get_select($table, array $fields = [], array $where = [], $order = [], $limit = false, $start = 0, $php = false)
-	{
-		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
-		{
-			$r = '';
-			if ( $php ){
-				$r .= '$db->query("';
-			}
+  public function get_select($table, array $fields = [], array $where = [], $order = [], $limit = false, $start = 0, $php = false){
+    // Tables are an array
+    if ( !is_array($table) ){
+      $table = [$table];
+    }
+    /** @var array $tables_fields List of all the fields' names indexed by table */
+    $tables_fields = [];
+    foreach ( $table as $i => $tab ){
+      if ( $fn = $this->table_full_name($tab, 1) ) {
+        $table[$i] = $fn;
+        $tables_fields[$table[$i]] = array_keys($this->db->modelize($table[$i])['fields']);
+      }
+    }
+    if ( !empty($tables_fields) ){
+      /** @var string $r The SELECT resulting string */
+      $r = '';
+      if ( $php ){
+        $r .= '$db->query("';
+      }
       $aliases = [];
-			$r .= "SELECT \n";
-			if ( count($fields) > 0 ){
-				foreach ( $fields as $k => $c ){
-					if ( !isset($m['fields'][$c]) ){
-						die("The column $c doesn't exist in $table");
-					}
-					else{
-            if ( !is_numeric($k) && \bbn\str\text::check_name($k) && ($k !== $c) ){
-              array_push($aliases, $k);
-              $r .= "{$this->escape($c)} AS {$this->escape($k)},".PHP_EOL;
+      $r .= "SELECT \n";
+      // Columns are specified
+      if ( count($fields) > 0 ){
+        foreach ( $fields as $k => $c ){
+          // Here there is no full name
+          if ( !strpos($c, '.') ){
+            // So we look into the tables to check if there is the field
+            $tab = [];
+            foreach ( $tables_fields as $t => $f ){
+              if ( in_array($c, $f) ){
+                array_push($tab, $t);
+              }
             }
-            else{
-              $r .= $this->escape($c).",".PHP_EOL;
+            // If the same column is passed twice in its short form
+            if ( count($tab) === 1 ){
+              $c = $this->col_full_name($c, $tab[0]);
             }
-					}
-				}
-			}
-			else{
-				foreach ( array_keys($m['fields']) as $c ){
-					$r .= "`$c`,\n";
-				}
-			}
-			$r = substr($r,0,strrpos($r,',')).PHP_EOL."FROM $table".PHP_EOL.
+            else if ( count($tab) > 1 ){
+              die('Error! Duplicate field name, you must insert the fields with their fullname.');
+            }
+            else {
+              die(var_dump("Error! The column '$c' doesn't exist in '".implode(", ", array_keys($tables_fields))."' table(s)", $fields));
+            }
+          }
+          if ( !is_numeric($k) && \bbn\str\text::check_name($k) && ($k !== $c) ){
+            array_push($aliases, $k);
+            $r .= "{$this->escape($c)} AS {$this->escape($k)},".PHP_EOL;
+          }
+          else {
+            $r .= $this->escape($c).",".PHP_EOL;
+          }
+        }
+      }
+      // All the columns are selected
+      else{
+        foreach ( $tables_fields as $t => $f ){
+          foreach ( $f as $v ){
+            $r .= "{$this->db->col_full_name($v, $t, 1)},\n";
+          }
+        }
+      }
+      $r = substr($r,0,strrpos($r,',')).PHP_EOL."FROM ".implode(', ', $table).PHP_EOL.
         $this->db->get_where($where, $table, $aliases).PHP_EOL.
         $this->get_order($order, $table, $aliases);
       if ( $limit ){
-  			$r .= PHP_EOL . $this->get_limit([$limit, $start]);
+        $r .= PHP_EOL . $this->get_limit([$limit, $start]);
       }
-			if ( $php ){
-				$r .= '");';
-			}
-			return $r;
-		}
-		return false;
-	}
+      if ( $php ){
+        $r .= '");';
+      }
+      return $r;
+    }
+    return false;
+  }
 	
 	/**
 	 * @return string
@@ -527,7 +557,7 @@ class mysql implements \bbn\db\engines
 			if ( count($fields) > 0 ){
 				foreach ( $fields as $k ){
 					if ( !isset($m['fields'][$k]) ){
-						die("The column $k doesn't exist in $table");
+						die(var_dump("Error in Insert query creation: the column $k doesn't exist in $table", $fields));
 					}
 					else{
 						$r .= "`$k`, ";
@@ -600,7 +630,10 @@ class mysql implements \bbn\db\engines
 	 */
 	public function get_update($table, array $fields = [], array $where = [], $ignore = false, $php = false)
 	{
-		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 ){
+		if ( ($table = $this->table_full_name($table, 1)) &&
+      ($m = $this->db->modelize($table)) &&
+      (count($m['fields']) > 0)
+    ){
       $r = '';
       if ( $php ){
         $r .= '$db->query("';
@@ -610,30 +643,28 @@ class mysql implements \bbn\db\engines
         $r .= "IGNORE ";
       }
       $r .= "$table SET ";
-			$i = 0;
 
 			if ( count($fields) > 0 ){
 				foreach ( $fields as $k ){
-					if ( !isset($m['fields'][$k]) ){
-						die("The column $k doesn't exist in $table");
+					if ( !isset($m['fields'][$this->db->csn($k)]) ){
+						die(var_dump("Error in Update query creation: the column $k doesn't exist in $table", $m['fields']));
 					}
 					else{
-						$r .= "`$k` = ?,".PHP_EOL;
+						$r .= $this->db->cfn($k, $table, 1)." = ?,".PHP_EOL;
 					}
 				}
 			}
 			else{
 				foreach ( array_keys($m['fields']) as $k ){
-					$r .= "`$k` = ?,".PHP_EOL;
+					$r .= $this->db->cfn($k, $table, 1)." = ?,".PHP_EOL;
 				}
 			}
 
 			$r = substr($r,0,strrpos($r,',')).$this->db->get_where($where, $table);
-      $where = $this->db->where_cfg($where);
+      $where = $this->db->where_cfg($where, $table);
 
       if ( $php ){
 				$r .= "\",\n";
-				$i = 0;
 				foreach ( array_keys($m['fields']) as $k ){
 					if ( !in_array($k, $where['fields']) && ( count($fields) === 0 || in_array($k,$fields) ) ){
 						$r .= "\$d['$k'],\n";
@@ -656,18 +687,23 @@ class mysql implements \bbn\db\engines
 	*/
 	public function get_column_values($table, $field,  array $where = [], $limit = false, $start = 0, $php = false)
   {
-		if ( text::check_name($field) && ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
-		{
+    $csn = $this->db->csn($field);
+    $cfn = $this->db->cfn($field, $table, 1);
+		if ( text::check_name($csn) &&
+      ($table = $this->table_full_name($table, 1)) &&
+      ($m = $this->db->modelize($table)) &&
+      (count($m['fields']) > 0)
+    ){
 			$r = '';
 			if ( $php ){
 				$r .= '$db->query("';
 			}
-      if ( !isset($m['fields'][$field]) ){
-        die("The column $field doesn't exist in $table");
+      if ( !isset($m['fields'][$csn]) ){
+        die(var_dump("Error in collecting values: the column $field doesn't exist in $table", $m));
       }
-			$r .= "SELECT DISTINCT `$field` FROM $table".PHP_EOL.
+			$r .= "SELECT DISTINCT $cfn FROM $table".PHP_EOL.
         $this->db->get_where($where, $table).PHP_EOL.
-        "ORDER BY `$field`";
+        "ORDER BY $cfn";
       if ( $limit ){
   			$r .= PHP_EOL . $this->get_limit([$limit, $start]);
       }
@@ -693,7 +729,7 @@ class mysql implements \bbn\db\engines
 				$r .= '$db->query("';
 			}
       if ( !isset($m['fields'][$field]) ){
-        die("The column $field doesn't exist in $table");
+        die(var_dump("Error in values' count: the column $field doesn't exist in $table", $m));
       }
 			$r .= "SELECT COUNT(*) AS num, `$field` AS val FROM $table";
 			if ( count($where) > 0 ){

@@ -19,34 +19,50 @@ namespace bbn;
  */
 class obj 
 {
-	/**
-	 * @var false|string
-	 */
-	protected $error;
+	protected
+		/**
+		 * @var false|string
+		 */
+		$error,
+		/**
+		 * @var boolean
+		 */
+		$is_debug = false,
+		/**
+		 * @var array
+		 */
+		$log=array();
 
 	/**
-	 * @var array
+	 * Checks whether the error property has been set (so an error happened).
+	 * @return bool
 	 */
-	protected $log=array();
-  
+	public function debug($state = 1)
+	{
+		$this->is_debug = $state;
+	}
+
 	/**
 	 * Checks whether the error property has been set (so an error happened).
 	 * @return bool
 	 */
 	public function test()
 	{
-		if ( $this->error )
+		if ( $this->error ) {
 			return false;
+		}
 		return true;
 	}
-  
-  public function log()
+
+	public function log()
   {
-    $ar = func_get_args();
-    $cn = \bbn\str\text::encode_filename(str_replace('\\', '_', get_class($this)));
-    foreach ( $ar as $a ){
-      \bbn\tools::log($a, $cn);
-    }
+		if ( $this->is_debug ){
+			$ar = func_get_args();
+			$cn = \bbn\str\text::encode_filename(str_replace('\\', '_', get_class($this)));
+			foreach ( $ar as $a ){
+				\bbn\tools::log($a, $cn);
+			}
+		}
   }
   
   /**

@@ -249,7 +249,7 @@ class connection
 		$this->db = $db;
 		
     $this->user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
-    $this->ip_address = 'boo'; //isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
+    $this->ip_address = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
 
     $this->cfg = \bbn\tools::merge_arrays(self::$_defaults, $cfg);
     // As we'll give the object the properties of these additional field they should not conflict with existing ones
@@ -853,7 +853,7 @@ class connection
   public function get_name()
   {
     if ( $this->auth ){
-      return $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]['login'];
+      return $this->get_session('info')['login'];
     }
     return false;
   }

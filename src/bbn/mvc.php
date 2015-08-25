@@ -38,7 +38,8 @@ class mvc implements \bbn\mvc\api{
       'html' => [],
       'css' => [],
       'js' => []
-    ];
+    ],
+    $is_debug = false;
 
 	private
     /**
@@ -114,9 +115,18 @@ class mvc implements \bbn\mvc\api{
     self::$db_in_controller = $r ? true : false;
   }
 
+  public static function get_debug(){
+    return self::$is_debug;
+  }
+
+  public static function debug($state = 1){
+    self::$is_debug = $state;
+  }
+
   private function route(){
     if ( is_null($this->info) ){
       $this->info = $this->get_route($this->get_url(), $this->get_mode());
+      $this->log("get_route", $this->info);
     }
     return $this;
   }
@@ -209,6 +219,7 @@ class mvc implements \bbn\mvc\api{
 		$this->is_controlled = null;
     $this->info = null;
 		$this->route();
+    $this->log("reroute", $path, $this->info);
 		if ( $check ){
 			$this->process();
 		}
@@ -264,8 +275,7 @@ class mvc implements \bbn\mvc\api{
 	 *
 	 * @return bool
 	 */
-	public function add_inc($name, $obj)
-	{
+	public function add_inc($name, $obj){
 		if ( !isset($this->inc->{$name}) ){
 			$this->inc->{$name} = $obj;
 		}
@@ -280,6 +290,8 @@ class mvc implements \bbn\mvc\api{
 	public function process(){
     if ( $this->check() ) {
       $this->obj = new \stdClass();
+      $this->log($this->info);
+      if ( !is_array($this->info)){die();}
       $this->controller = new \bbn\mvc\controller($this, $this->info, $this->data, $this->obj);
       $this->controller->process();
     }
