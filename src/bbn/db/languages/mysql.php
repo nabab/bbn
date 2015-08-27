@@ -259,7 +259,7 @@ class mysql implements \bbn\db\engines
         $p = 1;
         foreach ( $rows as $row ){
           $f = $row['Field'];
-          $r[$f] = array(
+          $r[$f] = [
             'position' => $p++,
             'null' => $row['Null'] === 'NO' ? 0 : 1,
             'key' => in_array($row['Key'], array('PRI', 'UNI', 'MUL')) ? $row['Key'] : null,
@@ -267,7 +267,7 @@ class mysql implements \bbn\db\engines
             'extra' => $row['Extra'],
             'signed' => 0,
             'maxlength' => 0
-          );
+          ];
           if ( strpos($row['Type'], 'enum') === 0 ){
             $r[$f]['type'] = 'enum';
             if ( preg_match_all('/\((.*?)\)/', $row['Type'], $matches) ){

@@ -157,29 +157,35 @@ class dbsync
   
 	/**
 	 * Gets all information about a given table
-	 * @return table full name
+   *
+   * @param array $cfg Configuration array
+	 * @return array Resulting configuration
 	 */
   public static function trigger(array $cfg){
     self::first_call();
-    $res = ['trig' => 1, 'run' => 1];
-    $table = self::$db->table_full_name($cfg['table']);
-    $stable = self::$db->table_simple_name($table);
+    if ( !isset($cfg['run']) ){
+      $cfg['run'] = 1;
+    }
+    if ( !isset($cfg['trig']) ){
+      $cfg['run'] = 1;
+    }
     if ( !self::$disabled &&
+      ($cfg['moment'] === 'after') &&
       self::check() &&
-      in_array($table, self::$tables) &&
-      ($cfg['moment'] === 'after')
+      ($table = self::$db->tfn($cfg['table'])) &&
+      in_array($table, self::$tables)
     ){
       // Case where we actually delete or restore through the $hcol column
       self::$dbs->insert(self::$dbs_table, [
         'db' => self::$db->current,
-        'tab' => $stable,
+        'tab' => self::$db->tsn($table),
         'action' => $cfg['kind'],
         'chrono' => microtime(1),
-        'rows' => json_encode($cfg['where']['final']),
+        'rows' => empty($cfg['where']) ? '[]' : json_encode($cfg['where']['final']),
         'vals' => empty($cfg['values']) ? '[]' : json_encode($cfg['values'])
       ]);
     }
-    return $res;
+    return $cfg;
   }
   
   public static function callback1(\Closure $f){

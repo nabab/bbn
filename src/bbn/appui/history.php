@@ -546,11 +546,9 @@ class history
 	 */
   public static function trigger(array $cfg){
 
-    // Result from this function
-    $res = ['trig' => 1, 'run' => 1, 'history' => []];
-
+    $tables = is_array($cfg['table']) ? $cfg['table'] : [$cfg['table']];
     // Will return false if disabled, the table doesn't exist, or doesn't have history
-    if ( $table = self::get_table_cfg($cfg['table']) ){
+    if ( $table = self::get_table_cfg($tables[0]) ){
 
       /** @var array $s The table's structure and configuration */
       $s =& self::$hstructures[$table];
@@ -563,6 +561,39 @@ class history
 
       // This happens before the query is executed
       if ( $cfg['moment'] === 'before' ){
+
+        // We will add a verification on the history field to not interfere with deleted entries
+        if ( $cfg['kind'] === 'where' ){
+          /** @var boolean $add_history_field Specifies if the field will be added to where config */
+          $add_history_field = 1;
+          // If the history field is part of the where config
+          foreach ( $tables as $t ){
+            if ( in_array(self::$db->cfn(self::$hcol, $t), $cfg['where']['fields']) ){
+              $add_history_field = false;
+            }
+          }
+          if ( in_array(self::$hcol, $cfg['where']['fields']) ){
+            $add_history_field = false;
+          }
+          // If the history fields is part of an update
+          if ( isset($cfg['values'][self::$hcol]) ){
+            $add_history_field = false;
+          }
+          if ( $add_history_field ){
+            foreach ( $tables as $t ){
+              $cfn = self::$db->cfn(self::$hcol, $t);
+              array_push($cfg['where']['fields'], $cfn);
+              array_push($cfg['where']['values'], 1);
+              array_push($cfg['where']['final'], [$cfn, '=', 1]);
+              $cfg['where']['keyval'][$cfn] = 1;
+              array_push($cfg['where']['unique'], [$cfn, '=']);
+            }
+          }
+        }
+        // Queries to be executed after
+        else if ( !isset($cfg['history']) ){
+          $cfg['history'] = [];
+        }
 
         /** @var bool $primary_defined */
         $primary_defined = false;
@@ -589,18 +620,15 @@ class history
                 self::$hcol => 0
               ])
             ){
+              // We won't execute the after trigger
+              $cfg['trig'] = false;
+              // Real query's execution will be prevented
+              $cfg['run'] = false;
               // We restore the element
-              $trig = self::$db->update($table, [ self::$hcol => 1], [
+              $cfg['value'] = self::$db->update($table, [ self::$hcol => 1], [
                 $s['primary'] => $cfg['values'][$s['primary']],
                 self::$hcol => 0
               ]);
-              // Real query's execution will be prevented
-              $res = [
-                // We won't execute the after trigger
-                'trig' => false,
-                'run' => false,
-                'value' => $trig,
-              ];
               // We get the content of the row
               $all = self::$db->rselect($table, [], [$s['primary'] => $cfg['values'][$s['primary']]]);
               /** @var array $update The values to be updated */
@@ -613,7 +641,7 @@ class history
                   $update[$k] = $v;
                 }
                 else if ( !isset($cfg['values'][$k]) &&
-                  ($v !== $s['fields'][$k]['default'])
+                  ($v != $s['fields'][$k]['default'])
                 ){
                   $update[$k] = $s['fields'][$k]['default'];
                 }
@@ -623,7 +651,7 @@ class history
               }
             }
             else {
-              array_push($res['history'], [
+              array_push($cfg['history'], [
                 'operation' => 'INSERT',
                 'column' => self::fcol($s['primary'], $table)
               ]);
@@ -636,15 +664,10 @@ class history
               if ( isset($cfg['values'][self::$hcol]) ){
                 $history_value = self::$db->select_one($table, self::$hcol, $cfg['where']['final']);
                 if ( $cfg['values'][self::$hcol] !== $history_value ){
-                  if ( $history_value === 1 ){
-                    $cfg['kind'] = 'delete';
-                  }
-                  else{
-                    $cfg['kind'] = 'restore';
-                  }
-                  array_push($res['history'], [
-                    'operation' => strtoupper($cfg['kind']),
+                  array_push($cfg['history'], [
+                    'operation' => $history_value === 1 ? 'DELETE' : 'RESTORE',
                     'column' => self::fcol(self::$hcol, $table),
+                    'line' => $cfg['where']['keyval'][$primary],
                     'old' => $history_value
                   ]);
                 }
@@ -652,7 +675,7 @@ class history
               $row = self::$db->rselect($table, array_keys($cfg['values']), $cfg['where']['final']);
               foreach ( $cfg['values'] as $k => $v ){
                 if ( ($k !== self::$hcol) && ($row[$k] !== $v) ){
-                  array_push($res['history'], [
+                  array_push($cfg['history'], [
                     'operation' => 'UPDATE',
                     'column' => self::fcol($k, $table),
                     'line' => $cfg['where']['keyval'][$primary],
@@ -664,43 +687,41 @@ class history
             // Case where the primary is not defined, we'll update each primary instead
             else{
               $ids = self::$db->get_column_values($table, $s['primary'], $cfg['where']['final']);
-              $res = [
-                // We won't execute the after trigger
-                'trig' => false,
-                'run' => false,
-                'value' => 0
-              ];
+              // We won't execute the after trigger
+              $cfg['trig'] = false;
+              // Real query's execution will be prevented
+              $cfg['run'] = false;
+              $cfg['value'] = 0;
               foreach ( $ids as $id ){
-                $res['value'] += self::$db->update($table, $cfg['values'], array_merge([[$s['primary'], '=', $id]], $cfg['where']['final']));
+                $cfg['value'] += self::$db->update($table, $cfg['values'], array_merge([[$s['primary'], '=', $id]], $cfg['where']['final']));
               }
             }
             break;
 
           // Nothing is really deleted, the hcol is just set to 0
           case 'delete':
-            $res = [
-              // We won't execute the query as nothing will be really deleted
-              'trig' => false,
-              'run' => false,
-              'value' => 0,
-            ];
+            // We won't execute the after trigger
+            $cfg['trig'] = false;
+            // Real query's execution will be prevented
+            $cfg['run'] = false;
+            $cfg['value'] = 0;
             // Case where the primary is not defined, we'll delete based on each primary instead
             if ( !$primary_defined ){
               $ids = self::$db->get_column_values($table, $s['primary'], $cfg['where']['final']);
               foreach ( $ids as $id ){
-                $res['value'] += self::$db->delete($table, [$s['primary'] => $id]);
+                $cfg['value'] += self::$db->delete($table, [$s['primary'] => $id]);
               }
             }
-            else if ( $res['value'] = self::$db->query(
+            else if ( $cfg['value'] = self::$db->query(
               self::$db->get_update($table, [self::$hcol], [
                   [$s['primary'], '=', $cfg['where']['keyval'][$primary]],
                   [self::$hcol, '=', 1]
                 ]
               ), [0, $cfg['where']['keyval'][$primary], 1])
             ){
-              $res['trig'] = 1;
+              $cfg['trig'] = 1;
               // And we insert into the history table
-              array_push($res['history'], [
+              array_push($cfg['history'], [
                 'operation' => 'DELETE',
                 'column' => self::fcol(self::$hcol, $table),
                 'line' => $cfg['where']['keyval'][$primary],
@@ -711,31 +732,21 @@ class history
         }
       }
       else if ( $cfg['moment'] === 'after' ){
-        switch ( $cfg['kind'] ){
-          case 'insert':
+        if ( isset($cfg['history']) ){
+          if ( $cfg['kind'] === 'insert' ) {
             $id = self::$db->last_id();
-            foreach ( $cfg['history'] as $i => $h ){
+            foreach ($cfg['history'] as $i => $h) {
               $cfg['history'][$i]['line'] = $id;
             }
-            break;
-          case 'restore':
-            //die(\bbn\tools::hdump($cfg));
-            break;
-          case 'update':
-            //die(\bbn\tools::hdump($cfg));
-            break;
-          // Nothing is really deleted, the hcol is just set to 0
-          case 'delete':
-            //die(\bbn\tools::hdump($cfg));
-            break;
-        }
-        if ( isset($cfg['res']['history']) ){
+          }
+          $last = self::$db->last();
           foreach ($cfg['history'] as $i => $h) {
             self::_insert($h);
           }
+          self::$db->last_query = $last;
         }
       }
     }
-    return $res;
+    return $cfg;
   }
 }
