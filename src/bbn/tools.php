@@ -64,8 +64,7 @@ class tools
    *
 	 * @return null
 	 */
-	public static function log($st, $file='misc')
-	{
+	public static function log($st, $file='misc'){
 		if ( defined('BBN_DATA_PATH') ){
       if ( !is_string($file) ){
         $file = 'misc';
@@ -79,16 +78,18 @@ class tools
               self::get_dump($st).PHP_EOL;
 
       if ( php_sapi_name() === 'cli' ){
-        echo self::get_dump($st).PHP_EOL;
+        global $argv;
+        if ( isset($argv[2]) && ($argv[2] === 'log') ) {
+          echo self::get_dump($st).PHP_EOL;
+        }
       }
       $s = ( file_exists($log_file) ) ? filesize($log_file) : 0;
-			if ( $s > 1048576 )
-			{
-				file_put_contents($log_file.'.old',file_get_contents($log_file),FILE_APPEND);
-				file_put_contents($log_file,$r);
+			if ( $s > 1048576 ){
+				file_put_contents($log_file.'.old', file_get_contents($log_file), FILE_APPEND);
+				file_put_contents($log_file, $r);
 			}
 			else{
-				file_put_contents($log_file,$r,FILE_APPEND);
+				file_put_contents($log_file, $r, FILE_APPEND);
       }
 		}
 	}

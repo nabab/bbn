@@ -243,6 +243,9 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
           $this->log(imap_last_error());
         }
       }
+      if ( !$r ){
+        $this->log(imap_last_error());
+      }
     }
     else{
       $r = false;
