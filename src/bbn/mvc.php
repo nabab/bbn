@@ -126,7 +126,6 @@ class mvc implements \bbn\mvc\api{
   private function route(){
     if ( is_null($this->info) ){
       $this->info = $this->get_route($this->get_url(), $this->get_mode());
-      $this->log("get_route", $this->info);
     }
     return $this;
   }

@@ -232,7 +232,7 @@ class dbsync
       FROM ".self::$dbs->escape(self::$dbs_table)."
       WHERE db NOT LIKE ?
       AND state = 0",
-      self::$db->current) ) ? $test : date('Y-m-d H:i:s');
+      self::$db->current) ) ? $test : time();
     // Deleting the entries prior to this sync we produced and have been seen by the twin process
     $to_log['deleted_sync'] = self::$dbs->delete(self::$dbs_table, [
       ['db', 'LIKE', self::$db->current],

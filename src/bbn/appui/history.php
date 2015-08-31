@@ -144,7 +144,7 @@ class history
     if ( $date > $t ){
       $date = $t;
     }
-		self::$date = date('Y-m-d H:i:s', $date);
+		self::$date = $date;
 	}
 	
 	/**
@@ -204,7 +204,7 @@ class history
         SELECT DISTINCT(`line`)
         FROM ".self::$db->escape(self::$htable)."
         WHERE `column` LIKE ?
-        ORDER BY last_mod ".(
+        ORDER BY chrono ".(
                 is_string($dir) &&
                         (\bbn\str\text::change_case($dir, 'lower') === 'asc') ?
                   'ASC' : 'DESC' )."
@@ -223,7 +223,7 @@ class history
         WHERE ".self::$db->escape('column')." LIKE ?
         AND ( ".self::$db->escape('operation')." LIKE 'INSERT'
                 OR ".self::$db->escape('operation')." LIKE 'UPDATE' )
-        ORDER BY ".self::$db->escape('last_mod')." DESC
+        ORDER BY ".self::$db->escape('chrono')." DESC
         LIMIT $start, $limit",
         self::$db->table_full_name($table).'.%');
     }
@@ -243,8 +243,8 @@ class history
         WHERE ".self::$db->escape('column')." LIKE ?
         AND ".self::$db->escape('line')." = ?
         AND ".self::$db->escape('operation')." LIKE 'UPDATE'
-        AND ".self::$db->escape('last_mod')." > ?
-        ORDER BY ".self::$db->escape('last_mod')." ASC
+        AND ".self::$db->escape('chrono')." > ?
+        ORDER BY ".self::$db->escape('chrono')." ASC
         LIMIT 1",
         $table,
         $id,
@@ -266,8 +266,8 @@ class history
         WHERE ".self::$db->escape('column')." LIKE ?
         AND ".self::$db->escape('line')." = ?
         AND ".self::$db->escape('operation')." LIKE 'UPDATE'
-        AND ".self::$db->escape('last_mod')." < ?
-        ORDER BY ".self::$db->escape('last_mod')." DESC
+        AND ".self::$db->escape('chrono')." < ?
+        ORDER BY ".self::$db->escape('chrono')." DESC
         LIMIT 1",
         $table,
         $id,
@@ -282,7 +282,6 @@ class history
     }
     $when = (int) $when;
     if ( \bbn\str\text::check_name($table) && ($when > 0) && (count($where) === 1) ){
-      $when = date('Y-m-d H:i:s', $when);
       if ( count($columns) === 0 ){
         $columns = array_keys(self::$db->get_columns($table));
       }
@@ -297,8 +296,8 @@ class history
             ".self::$db->escape('operation')." LIKE 'UPDATE'
             OR ".self::$db->escape('operation')." LIKE 'INSERT'
           )
-          AND last_mod >= ?
-          ORDER BY last_mod ASC
+          AND chrono >= ?
+          ORDER BY chrono ASC
           LIMIT 1",
           $fc,
           end($where),
@@ -313,7 +312,7 @@ class history
 
   public static function get_creation_date($table, $id){
     if ( self::check($table) ) {
-      return self::$db->select_one(self::$htable, 'last_mod', [
+      return self::$db->select_one(self::$htable, 'chrono', [
         'column' => self::$db->table_full_name($table) . ".%",
         'line' => $id,
         'operation' => 'INSERT'
@@ -324,7 +323,7 @@ class history
 
   public static function get_creation($table, $id){
     if ( self::check($table) ) {
-      return self::$db->rselect(self::$htable, ['date' => 'last_mod', 'user' => 'id_user'], [
+      return self::$db->rselect(self::$htable, ['date' => 'chrono', 'user' => 'id_user'], [
         ['column', 'LIKE', self::$db->table_full_name($table) . ".%"],
         'line' => $id,
         'operation' => 'INSERT'
@@ -337,20 +336,20 @@ class history
     if ( is_string($column) ){
       return self::$db->select_one(
               self::$htable,
-              'last_mod', [
+              'chrono', [
                 ['column', 'LIKE', self::$db->table_full_name($table).".".$column],
                 ['line', '=', $id]
               ],
-              ['last_mod' => 'DESC']);
+              ['chrono' => 'DESC']);
     }
     return self::$db->select_one(
             self::$htable,
-            'last_mod', [
+            'chrono', [
               ['column', 'LIKE', self::$db->table_full_name($table).'.%'],
               ['line', '=', $id],
               ['operation', 'NOT LIKE', 'DELETE']
             ],
-            ['last_mod' => 'DESC']);
+            ['chrono' => 'DESC']);
   }
 	
 	public static function get_history($table, $id, $col=''){
@@ -366,7 +365,7 @@ class history
         if ( $q = self::$db->rselect_all(
           self::$htable,
           [
-            'date' => 'last_mod',
+            'date' => 'chrono',
             'user' => 'id_user',
             'old',
             'column',
@@ -376,7 +375,7 @@ class history
             ['column', 'LIKE', $table.'.'.( $col ? $col : '%' )],
             ['operation', 'LIKE', $p]
           ],[
-            'last_mod' => 'desc'
+            'chrono' => 'desc'
           ]
         ) ){
           $r[$k] = $q;

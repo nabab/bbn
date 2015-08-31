@@ -20,17 +20,30 @@ class svn
 		$url,
 		$has_svn = false;
 	
-	private $user, $pass;
+	private
+    $hash,
+    $auth = false,
+    $user,
+    $pass;
+
+  private static $current = '';
+
+  private static function set_current($path){
+    self::$current = $path;
+  }
 	
   private function auth(){
-    svn_auth_set_parameter(PHP_SVN_AUTH_PARAM_IGNORE_SSL_VERIFY_ERRORS, true);
-    svn_auth_set_parameter(SVN_AUTH_PARAM_NON_INTERACTIVE, true);
-    svn_auth_set_parameter(SVN_AUTH_PARAM_NO_AUTH_CACHE, true);
-    if ( $this->user ){
-      svn_auth_set_parameter(SVN_AUTH_PARAM_DEFAULT_USERNAME, $this->user);
-    }
-    if ( $this->pass ){
-      svn_auth_set_parameter(SVN_AUTH_PARAM_DEFAULT_PASSWORD, $this->pass);
+    if ( !$this->auth || (self::$current !== $this->hash) ) {
+      svn_auth_set_parameter(PHP_SVN_AUTH_PARAM_IGNORE_SSL_VERIFY_ERRORS, true);
+      svn_auth_set_parameter(SVN_AUTH_PARAM_NON_INTERACTIVE, true);
+      svn_auth_set_parameter(SVN_AUTH_PARAM_NO_AUTH_CACHE, true);
+      if ($this->user) {
+        svn_auth_set_parameter(SVN_AUTH_PARAM_DEFAULT_USERNAME, $this->user);
+      }
+      if ($this->pass) {
+        svn_auth_set_parameter(SVN_AUTH_PARAM_DEFAULT_PASSWORD, $this->pass);
+      }
+      self::set_current($this->hash);
     }
   }
   
@@ -65,6 +78,7 @@ class svn
 		$this->url = $url;
 		$this->user = $user;
 		$this->pass = $pass;
+    $this->hash = md5($url.(string)$user.(string)$pass);
 		if ( function_exists('svn_export') ){
 			$this->has_svn = 1;
 		}
@@ -87,11 +101,11 @@ class svn
 		}
 	}
   
-  public function info($path='.')
+  public function info($path='/')
   {
     if ( $this->has_svn ){
       $this->auth();
-      return svn_status($path, SVN_NON_RECURSIVE|SVN_ALL);
+      return svn_status($this->url.$path, SVN_NON_RECURSIVE|SVN_ALL);
     }
     else{
       ob_start();
@@ -103,11 +117,11 @@ class svn
     }
   }
   
-  public function last()
+  public function last($path='/')
   {
     if ( $this->has_svn ){
       $this->auth();
-      return svn_status($path, SVN_NON_RECURSIVE|SVN_ALL);
+      return svn_status($this->url.$path, SVN_NON_RECURSIVE|SVN_ALL);
     }
     else{
       ob_start();
@@ -123,15 +137,16 @@ class svn
     
   }
   
-  public function log($path='.', $num = 5)
+  public function log($path='/', $num = 5)
   {
     if ( $this->has_svn ){
       $this->auth();
-      return svn_status($path, SVN_NON_RECURSIVE|SVN_ALL);
+      return svn_log($this->url.$path);
+      //return svn_status($path, SVN_NON_RECURSIVE|SVN_ALL);
     }
     else{
       if ( !$num ){
-        $num = $this->last();
+        $num = $this->last($this->url.$path);
       }
       ob_start();
       header('Content-Type: text/plain; charset=UTF-8');

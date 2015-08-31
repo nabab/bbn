@@ -11,12 +11,17 @@ class directories {
   }
 
   public function add($data){
+    $data['position'] = $this->db->get_one('
+      SELECT MAX(position) AS pos
+      FROM bbn_ide_directories') + 1;
     if ( $this->db->insert('bbn_ide_directories', [
       'name' => $data['name'],
       'root_path' => \bbn\str\text::parse_path($data['root_path']),
       'fcolor' => $data['fcolor'],
       'bcolor' => $data['bcolor'],
-      'files' => $data['files']
+      'outputs' => strlen($data['outputs']) ? $data['outputs'] : NULL,
+      'files' => $data['files'],
+      'position' => $data['position']
     ]) ){
       $data['id'] = $this->db->last_id();
       return $data;
@@ -30,7 +35,9 @@ class directories {
       'root_path' => \bbn\str\text::parse_path($data['root_path']),
       'fcolor' => $data['fcolor'],
       'bcolor' => $data['bcolor'],
-      'files' => $data['files']
+      'outputs' => strlen($data['outputs']) ? $data['outputs'] : NULL,
+      'files' => $data['files'],
+      'position' => $data['position']
     ], ['id' => $data['id']]) ){
       return 1;
     }
@@ -46,35 +53,32 @@ class directories {
 
   public function get($name=''){
     return empty($name) ?
-      $this->db->rselect_all('bbn_ide_directories') :
+      $this->db->rselect_all('bbn_ide_directories', [], [], ['position' => 'ASC']) :
       $this->db->rselect_all('bbn_ide_directories', [], ['name' => $name]);
   }
 
   public function dirs($name=''){
     $dirs = [];
-    if ( $all = $this->get($name) ){
-      foreach ( $this->get($name) as $d ){
-        $files = json_decode($d['files']);
-        $p = \bbn\str\text::parse_path(substr($d['root_path'], 0, strpos($d['root_path'], '/')));
-        $d['root_path'] = \bbn\str\text::parse_path(constant($p).str_replace($p, '', $d['root_path']));
-        foreach ( $files as $i => $f ){
-          $f = (array)$f;
-          $f['path'] = \bbn\str\text::parse_path($d['root_path'].$f['path']);
-          if ( !empty($f['default']) ){
-            $d['def'] = $f['url'];
-          }
-
-          $files[!empty($f['title']) ? $f['title'] : $i] = $f;
-          if ( !empty($f['title']) ){
-            unset($files[$i]);
-          }
+    foreach ( $this->get($name) as $d ){
+      $files = json_decode($d['files']);
+      $p = \bbn\str\text::parse_path(substr($d['root_path'], 0, strpos($d['root_path'], '/')));
+      $d['root_path'] = \bbn\str\text::parse_path(constant($p).str_replace($p, '', $d['root_path']));
+      foreach ( $files as $i => $f ){
+        $f = (array)$f;
+        $f['path'] = \bbn\str\text::parse_path($d['root_path'].$f['path']);
+        if ( !empty($f['default']) ){
+          $d['def'] = $f['url'];
         }
-        $d['files'] = $files;
-        $dirs[$d['name'] === 'MVC' ? 'controllers' : $d['name']] = $d;
+
+        $files[!empty($f['title']) ? $f['title'] : $i] = $f;
+        if ( !empty($f['title']) ){
+          unset($files[$i]);
+        }
       }
-      return $name && isset($dirs[$name]) ? $dirs[$name] : $dirs;
+      $d['files'] = $files;
+      $dirs[$d['name'] === 'MVC' ? 'controllers' : $d['name']] = $d;
     }
-    die(var_dump($name, $this->db->last()));
+    return $name && isset($dirs[$name]) ? $dirs[$name] : $dirs;
   }
 
   public function modes(){
