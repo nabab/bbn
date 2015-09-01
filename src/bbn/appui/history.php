@@ -357,6 +357,7 @@ class history
       $pat = [
         'ins' => 'INSERT',
         'upd' => 'UPDATE',
+        'res' => 'RESTORE',
         'del' => 'DELETE'
       ];
       $r = [];
@@ -423,11 +424,18 @@ class history
             'user' => $hist['upd'][$i]['user']
           ]);
         }
-        else{
+        else if (!empty($hist['ins']) ){
           $r[0] = [
             'date' => $hist['ins'][0]['date'],
             'val' => $current,
             'user' => $hist['ins'][0]['user']
+          ];
+        }
+        else{
+          $r[0] = [
+            'date' => 0,
+            'val' => $current,
+            'user' => null
           ];
         }
       }

@@ -71,17 +71,25 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
       die("A host name and a \"From\" eMail address must be provided");
     }
     $this->mailer = new \PHPMailer();
-    $this->mailer->CharSet = isset($cfg['charset']) ? $cfg['charset'] : "UTF-8";
     $this->mailer->isSMTP();
+    if ( !empty($cfg['ssl']) ){
+      if ( is_array($cfg['ssl']) ){
+        $this->mailer->SMTPOptions = ['ssl' => $cfg['ssl']];
+      }
+      else{
+        $this->mailer->SMTPSecure = 'ssl';
+      }
+    }
+    else{
+      $this->mailer->SMTPSecure = 'tls';
+    }
+    $this->mailer->CharSet = isset($cfg['charset']) ? $cfg['charset'] : "UTF-8";
     // SMTP connection will not close after each email sent, reduces SMTP overhead
     $this->mailer->SMTPKeepAlive = true;
     $this->mailer->SMTPDebug = empty($cfg['debug']) ? false : 3;
     $this->mailer->Debugoutput = 'error_log';
     $this->mailer->Host = $cfg['host'];
     $this->mailer->Port = isset($cfg['port']) ? $cfg['port'] : 587;
-    if ( !isset($cfg['ssl']) || $cfg['ssl'] ){
-      $this->mailer->SMTPSecure = isset($cfg['ssl']) ? $cfg['ssl'] : "tls";
-    }
     if ( isset($cfg['user'], $cfg['pass']) ){
       $this->mailer->SMTPAuth = true;
       $this->mailer->Username = $cfg['user'];
@@ -92,17 +100,11 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
     }
     $this->set_from($cfg['from'], isset($cfg['name']) ? $cfg['name'] : 0);
     $this->set_template(isset($cfg['template']) ? $cfg['template'] : self::$default_template);
-    if ( !empty($cfg['imap']) ){
-      $this->set_imap($cfg);
-    }
   }
 
   public function set_imap($cfg){
     if ( !isset($cfg['imap_user'], $cfg['imap_pass']) && !isset($cfg['user'], $cfg['pass']) ){
       die("You need to provide user and password for IMAP connection");
-    }
-    if ( isset($cfg['imap_ssl']) ){
-      $cfg['ssl'] = $cfg['imap_ssl'];
     }
     $imap_host = isset($cfg['imap_host']) ? $cfg['imap_host'] : $cfg['host'];
     $this->imap_user = isset($cfg['imap_user']) ? $cfg['imap_user'] : $cfg['user'];
@@ -111,7 +113,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
     if ( isset($cfg['imap_port']) ){
       $imap_port = $cfg['imap_port'];
     }
-    if ( !empty($cfg['ssl']) ){
+    if ( !empty($cfg['imap_ssl']) ){
       if ( !isset($cfg['imap_port']) ) {
         $imap_port = 993;
       }
