@@ -944,7 +944,7 @@ class mapper{
         `line` int(10) unsigned NOT NULL,
         `column` varchar(180) NOT NULL,
         `old` text DEFAULT NULL,
-        `last_mod` datetime NOT NULL,
+        `chrono` decimal(14,4) unsigned NOT NULL,
         `id_user` int(10) unsigned NOT NULL,
         PRIMARY KEY (`id`),
         KEY `id_user` (`id_user`),

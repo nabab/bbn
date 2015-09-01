@@ -161,11 +161,11 @@ You can click the following link to access directly your account:<br>
   }
 
   public function get_user($id){
-    if ( is_string($id) ){
-      $where = [$this->cfg['arch']['users']['login'] => $id];
+    if ( \bbn\str\text::is_integer($id) ){
+      $where = [$this->cfg['arch']['users']['id'] => $id];
     }
     else{
-      $where = [$this->cfg['arch']['users']['id'] => $id];
+      $where = [$this->cfg['arch']['users']['login'] => $id];
     }
     return $this->db->rselect(
       $this->cfg['tables']['users'],
@@ -285,6 +285,8 @@ You can click the following link to access directly your account:<br>
       ]);
       $id_link = $this->db->last_id();
       $link = "?id=$id_link&key=".$magic['key'];
+      die(sprintf($this->messages[$message]['text'],
+        sprintf($this->messages[$message]['link'], $link)));
       $this->mailer->send([
         'to' => $usr['email'],
         'subject' => $this->messages[$message]['subject'],

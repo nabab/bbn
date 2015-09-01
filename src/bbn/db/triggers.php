@@ -241,10 +241,10 @@ trait triggers {
     if ( $cfg['sql'] ){
       if ( $this->triggers_disabled ){
         if ( count($cfg['where']['values']) > 0 ){
-          $cfg['run'] = $this->query($cfg['sql'], $cfg['hash'], $cfg['where']['values']);
+          $r = $this->query($cfg['sql'], $cfg['hash'], $cfg['where']['values']);
         }
         else{
-          $cfg['run'] = $this->query($cfg['sql'], $cfg['hash']);
+          $r = $this->query($cfg['sql'], $cfg['hash']);
         }
       }
       else{
@@ -333,8 +333,8 @@ trait triggers {
             }
             else {
               die(var_dump(
-                "Error! The column '$w[0]' as mentioned in where doesn't exist in '".
-                implode(", ", array_keys($tables_fields))."' table(s)", $w
+                "Error! The column '$v[0]' as mentioned in where doesn't exist in '".
+                implode(", ", array_keys($tables_fields))."' table(s)", $v
               ));
             }
           }
