@@ -277,7 +277,7 @@ class history
   }
 
   public static function get_row_back($table, array $columns, array $where, $when){
-    if ( !is_int($when) ){
+    if ( !\bbn\str\text::is_number($when) ){
       $when = strtotime($when);
     }
     $when = (int) $when;
@@ -429,13 +429,6 @@ class history
             'date' => $hist['ins'][0]['date'],
             'val' => $current,
             'user' => $hist['ins'][0]['user']
-          ];
-        }
-        else{
-          $r[0] = [
-            'date' => 0,
-            'val' => $current,
-            'user' => null
           ];
         }
       }

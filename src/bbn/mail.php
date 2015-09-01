@@ -47,7 +47,9 @@ class mail extends obj
   private static
     $dest_fields = ['to', 'cc', 'bcc'],
     $default_template = '<!DOCTYPE html><html><head><title>{{title}}</title><meta http-equiv="Content-Type"
-content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></html>';
+content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></html>',
+    $content = '',
+    $hash_content;
 
   public $mailer;
 
@@ -59,6 +61,17 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
     $imap_sent,
     $imap_string,
     $imap;
+
+  private static function set_content($c){
+    $md5 = md5($c);
+    if ( $md5 !== self::$hash_content ){
+      self::$hash_content = $md5;
+      $inliner = new \TijsVerkoyen\CssToInlineStyles\CssToInlineStyles();
+      $inliner->setHTML($c);
+      $inliner->setCSS($c);
+      self::$content = $inliner->convert();
+    }
+  }
 
   public function __construct($cfg) {
     if ( !defined('BBN_ADMIN_EMAIL') || !defined('BBN_IS_DEV') ){
@@ -232,9 +245,12 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
       if ( !isset($renderer) ){
         $renderer = \bbn\tpl::renderer($this->template);
       }
-      $ar['text'] = $cfg['text'];
       $ar['url'] = defined('BBN_URL') ? BBN_URL : '';
-      $this->mailer->msgHTML($renderer($ar), $this->path, true);
+      $ar['text'] = $cfg['text'];
+      $ar['text'] = $renderer($ar);
+      self::set_content($ar['text']);
+
+      $this->mailer->msgHTML(self::$content, $this->path, true);
       $r = $this->mailer->send();
       if ( $r && !empty($this->imap_string) ){
         $mail_string = $this->mailer->getSentMIMEMessage();
