@@ -27,6 +27,7 @@
     "coffeescript/coffeescript": "dev-master",
     "tedivm/jshrink": "dev-master",
     "phpmailer/phpmailer": "dev-master",
+    "tijsverkoyen/css-to-inline-styles": "dev-master",
     "phpdocumentor/reflection-docblock": "2.0.4"
   },
   "autoload": {
