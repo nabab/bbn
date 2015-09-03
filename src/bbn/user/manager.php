@@ -285,8 +285,6 @@ You can click the following link to access directly your account:<br>
       ]);
       $id_link = $this->db->last_id();
       $link = "?id=$id_link&key=".$magic['key'];
-      die(sprintf($this->messages[$message]['text'],
-        sprintf($this->messages[$message]['link'], $link)));
       $this->mailer->send([
         'to' => $usr['email'],
         'subject' => $this->messages[$message]['subject'],
