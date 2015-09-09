@@ -638,7 +638,7 @@ class connection extends \PDO implements actions, api, engines
    * @todo Thomas fais ton taf!!
    * @return
    */
-  protected function make_hash()
+  public function make_hash()
   {
     $args = func_get_args();
     if ( (count($args) === 1) && is_array($args[0]) ){
@@ -910,30 +910,30 @@ class connection extends \PDO implements actions, api, engines
           }
         }
         if ( !isset($this->queries[$hash]) ){
-          if ( $sequences = $this->parse_query($statement) ){
-            if ( $num_values > 0 ){
-              $statement = str_replace("%%",'%',$statement);
+          if ( $sequences = $this->parse_query($statement) ) {
+            if ($num_values > 0) {
+              $statement = str_replace("%%", '%', $statement);
               /* Compatibility with sprintf basic expressions - to be enhanced */
-              if ( preg_match_all('/(%[s|u|d])/',$statement) ){
-                $statement = str_replace("'%s'",'?',$statement);
-                $statement = str_replace("%s",'?',$statement);
-                $statement = str_replace("%d",'?',$statement);
-                $statement = str_replace("%u",'?',$statement);
+              if (preg_match_all('/(%[s|u|d])/', $statement)) {
+                $statement = str_replace("'%s'", '?', $statement);
+                $statement = str_replace("%s", '?', $statement);
+                $statement = str_replace("%d", '?', $statement);
+                $statement = str_replace("%u", '?', $statement);
               }
             }
             /* Or looking for question marks */
-            preg_match_all('/(\?)/',$statement,$exp);
+            preg_match_all('/(\?)/', $statement, $exp);
             $this->add_query(
               $hash,
               $statement,
               $sequences,
               isset($exp[1]) && is_array($exp[1]) ? count($exp[1]) : 0,
               $driver_options);
-            if ( isset($hash_sent) ){
+            if ( isset($hash_sent) ) {
               $this->queries[$hash_sent] = $hash;
             }
           }
-          else if ( $this->engine === 'sqlite' && strpos($statement, 'PRAGMA') === 0 ){
+          else if ( ($this->engine === 'sqlite') && strpos($statement, 'PRAGMA') === 0 ){
             $sequences = ['PRAGMA' => $statement];
             $this->add_query(
               $hash,

@@ -87,7 +87,7 @@ class dbsync
       self::$db->set_trigger(
             '\\bbn\\appui\\dbsync::trigger',
             ['delete', 'update', 'insert'],
-            'after',
+            ['before', 'after'],
             self::$tables);
     }
 	}
@@ -170,20 +170,33 @@ class dbsync
       $cfg['run'] = 1;
     }
     if ( !self::$disabled &&
-      ($cfg['moment'] === 'after') &&
       self::check() &&
       ($table = self::$db->tfn($cfg['table'])) &&
       in_array($table, self::$tables)
     ){
-      // Case where we actually delete or restore through the $hcol column
-      self::$dbs->insert(self::$dbs_table, [
-        'db' => self::$db->current,
-        'tab' => self::$db->tsn($table),
-        'action' => $cfg['kind'],
-        'chrono' => microtime(1),
-        'rows' => empty($cfg['where']) ? '[]' : json_encode($cfg['where']['final']),
-        'vals' => empty($cfg['values']) ? '[]' : json_encode($cfg['values'])
-      ]);
+      if ( ($cfg['moment'] === 'before') &&
+        ($cfg['kind'] === 'insert') &&
+        self::$db->has_id_increment($table) &&
+        ($pri = self::$db->get_unique_primary($table)) &&
+        ($pri = self::$db->csn($pri)) &&
+        empty($cfg['values'][$pri])
+      ){
+        $cfg['values'][$pri] = self::$db->new_id($table);
+        $cfg['run'] = false;
+        $cfg['trig'] = false;
+        $cfg['value'] = self::$db->insert($table, $cfg['values'], $cfg['ignore']);
+      }
+      else if ( $cfg['moment'] === 'after' ){
+        // Case where we actually delete or restore through the $hcol column
+        self::$dbs->insert(self::$dbs_table, [
+          'db' => self::$db->current,
+          'tab' => self::$db->tsn($table),
+          'action' => $cfg['kind'],
+          'chrono' => microtime(1),
+          'rows' => empty($cfg['where']) ? '[]' : json_encode($cfg['where']['final']),
+          'vals' => empty($cfg['values']) ? '[]' : json_encode($cfg['values'])
+        ]);
+      }
     }
     return $cfg;
   }

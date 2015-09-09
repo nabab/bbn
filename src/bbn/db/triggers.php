@@ -71,20 +71,12 @@ trait triggers {
                     $cfg['trig'] = $v;
                   }
                 }
-                else if ( $k === 'force' ){
-                  if ( !isset($cfg['force']) ){
-                    $cfg['force'] = $v;
-                  }
-                }
                 else if ( $k === 'run' ){
                   if ( $cfg['run'] ) {
                     if (!$v || ($v > $cfg['run'])) {
                       $cfg['run'] = $v;
                     }
                   }
-                }
-                else if ( $k === 'value' ){
-                  $cfg['value'] = $v;
                 }
                 else{
                   $cfg[$k] = $v;
@@ -413,28 +405,28 @@ trait triggers {
    * @return mixed The query's result or the value returned by the trigger
    */
   private function _exec_triggers(array $cfg){
-    $query_args = [
-      $cfg['sql'],
-      $cfg['hash']
-    ];
     $cfg['moment'] = 'before';
-    switch ( $cfg['kind'] ){
-      case 'insert':
-        array_push($query_args, array_values($cfg['values']));
-        break;
-      case 'update':
-        array_push($query_args, empty($cfg['where']) ?
-          array_values($cfg['values']) :
-          array_merge(array_values($cfg['values']), $cfg['where']['values'])
-        );
-        break;
-      case 'delete':
-        array_push($query_args, empty($cfg['where']) ? [] : $cfg['where']['values']);
-        break;
-      case 'select':
-        break;
-    }
     if ( $this->triggers_disabled ){
+      $query_args = [
+        $cfg['sql'],
+        $cfg['hash']
+      ];
+      switch ( $cfg['kind'] ){
+        case 'insert':
+          array_push($query_args, array_values($cfg['values']));
+          break;
+        case 'update':
+          array_push($query_args, empty($cfg['where']) ?
+            array_values($cfg['values']) :
+            array_merge(array_values($cfg['values']), $cfg['where']['values'])
+          );
+          break;
+        case 'delete':
+          array_push($query_args, empty($cfg['where']) ? [] : $cfg['where']['values']);
+          break;
+        case 'select':
+          break;
+      }
       return $this->query($query_args);
     }
     else if ( $cfg = $this->_trigger($cfg) ){
@@ -445,18 +437,26 @@ trait triggers {
         $cfg['run'] = $cfg['trig'];
       }
       if ( $cfg['run'] ) {
-        /** @todo: understand! */
-        /*
-        if ( isset($trig['values']) ){
-          $values = $trig['values'];
-          if ( !($sql = $this->_statement('update', $table, array_keys($values), $where, $ignore)) ){
-            die($this->log(
-              "Problem with the values returned by the callback function(s)",
-              $table, $values)
+        $query_args = [
+          $cfg['sql'],
+          $cfg['hash']
+        ];
+        switch ( $cfg['kind'] ){
+          case 'insert':
+            array_push($query_args, array_values($cfg['values']));
+            break;
+          case 'update':
+            array_push($query_args, empty($cfg['where']) ?
+              array_values($cfg['values']) :
+              array_merge(array_values($cfg['values']), $cfg['where']['values'])
             );
-          }
+            break;
+          case 'delete':
+            array_push($query_args, empty($cfg['where']) ? [] : $cfg['where']['values']);
+            break;
+          case 'select':
+            break;
         }
-        */
         $cfg['run'] = call_user_func_array([$this, 'query'], $query_args);
         if ( isset($cfg['force']) && $cfg['force'] ){
           $cfg['trig'] = 1;
@@ -524,13 +524,13 @@ trait triggers {
     $affected = 0;
     if ( $sql = $this->_statement('insert', $table, $keys, $ignore) ){
       foreach ( $values as $i => $vals ){
-
         $r = $this->_exec_triggers([
           'table' => $table,
           'kind' => 'insert',
           'values' => $vals,
           'hash' => $sql['hash'],
-          'sql' => $sql['sql']
+          'sql' => $sql['sql'],
+          'ignore' => $ignore
         ]);
         if ( is_numeric($r) ){
           $affected += $r;
@@ -626,7 +626,8 @@ trait triggers {
         'values' => $values,
         'where' => $where,
         'hash' => $sql['hash'],
-        'sql' => $sql['sql']
+        'sql' => $sql['sql'],
+        'ignore' => $ignore
       ]);
     }
     return false;
@@ -676,7 +677,8 @@ trait triggers {
         'kind' => 'delete',
         'where' => $where,
         'hash' => $sql['hash'],
-        'sql' => $sql['sql']
+        'sql' => $sql['sql'],
+        'ignore' => $ignore
       ]);
     }
     return $r;

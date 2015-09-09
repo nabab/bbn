@@ -581,29 +581,19 @@ class mysql implements \bbn\db\engines
 			$i = 0;
 			if ( count($fields) > 0 ){
 				foreach ( $fields as $k ){
-					if ( stripos($m['fields'][$k]['type'],'INT') !== false ){
-						$r .= "%u, ";
-					}
-					else{
-						$r .= "%s, ";
-					}
+          $r .= "?, ";
 					$i++;
 					if ( $i % 4 === 0 ){
-						$r .= "\n";
+						$r .= PHP_EOL;
 					}
 				}
 			}
 			else{
 				foreach ( $m['fields'] as $k => $f ){
-					if ( stripos($f['type'],'INT') !== false ){
-						$r .= "%u, ";
-					}
-					else{
-						$r .= "%s, ";
-					}
+          $r .= "?, ";
 					$i++;
 					if ( $i % 4 === 0 ){
-						$r .= "\n";
+						$r .= PHP_EOL;
 					}
 				}
 			}

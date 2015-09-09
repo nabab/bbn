@@ -310,6 +310,13 @@ class history
     return false;
   }
 
+  public static function get_val_back($table, $column, array $where, $when){
+    if ( $row = self::get_row_back($table, [$column], $where, $when) ){
+      return $row[$column];
+    }
+    return false;
+  }
+
   public static function get_creation_date($table, $id){
     if ( self::check($table) ) {
       return self::$db->select_one(self::$htable, 'chrono', [
