@@ -171,17 +171,21 @@ class router {
   }
 
   public function set_prepath($path){
-    if ( $this->check_path($path) ){
-      $this->prepath = $path;
-      if ( substr($this->prepath, -1) !== '/' ){
-        $this->prepath = $this->prepath.'/';
-      }
+    if ( !$this->check_path($path) ) {
+      die("The prepath $path is not valid");
     }
-    return $this;
+    $this->prepath = $path;
+    if ( substr($this->prepath, -1) !== '/' ){
+      $this->prepath = $this->prepath.'/';
+    }
+    return 1;
   }
 
-  public function get_prepath(){
-    return $this->prepath;
+  public function get_prepath($with_slash = 1){
+    if ( !empty($this->prepath) ){
+      return $with_slash ? $this->prepath : substr($this->prepath, 0, -1);
+    }
+    return '';
   }
 
   public function route($path, $mode){

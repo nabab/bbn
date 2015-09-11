@@ -95,6 +95,14 @@ class environment {
     $this->_init();
   }
 
+  public function set_prepath($path){
+    if ( $this->check_path($path) && ($this->params[0] === $this->mvc->get_prepath(false)) ){
+      array_shift($this->params);
+      return true;
+    }
+    die("The prepath doesn't seem to correspond to the current path");
+  }
+
   /**
    * Returns true if called from CLI/Cron, false otherwise
    *

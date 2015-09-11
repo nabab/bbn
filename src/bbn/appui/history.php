@@ -571,24 +571,12 @@ class history
 
         // We will add a verification on the history field to not interfere with deleted entries
         if ( $cfg['kind'] === 'where' ){
-          /** @var boolean $add_history_field Specifies if the field will be added to where config */
-          $add_history_field = 1;
-          // If the history field is part of the where config
           foreach ( $tables as $t ){
-            if ( in_array(self::$db->cfn(self::$hcol, $t), $cfg['where']['fields']) ){
-              $add_history_field = false;
-            }
-          }
-          if ( in_array(self::$hcol, $cfg['where']['fields']) ){
-            $add_history_field = false;
-          }
-          // If the history fields is part of an update
-          if ( isset($cfg['values'][self::$hcol]) ){
-            $add_history_field = false;
-          }
-          if ( $add_history_field ){
-            foreach ( $tables as $t ){
-              $cfn = self::$db->cfn(self::$hcol, $t);
+            $cfn = self::$db->cfn(self::$hcol, $t);
+            // Only if the history col is neither in the where config nor in the update values
+            if ( !in_array($cfn, $cfg['where']['fields']) &&
+              !isset($cfg['values'][self::$hcol])
+            ){
               array_push($cfg['where']['fields'], $cfn);
               array_push($cfg['where']['values'], 1);
               array_push($cfg['where']['final'], [$cfn, '=', 1]);

@@ -330,7 +330,7 @@ trait triggers {
               ));
             }
           }
-          // arrays with [ field_name, operator, value]
+          // arrays with [ field_name => value]
           if ( count($v) === 2 ){
             array_push($r['fields'], $v[0]);
             array_push($r['values'], $v[1]);
@@ -346,6 +346,7 @@ trait triggers {
             }
             array_push($r['final'], [$v[0], $v[1], $v[2]]);
           }
+          // arrays with [ field_name, operator, value, bool] value is a DB function/column (unescaped)
           else if ( count($v) === 4 ){
             array_push($r['fields'], $v[0]);
             array_push($r['values'], $v[2]);
