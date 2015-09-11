@@ -96,12 +96,18 @@ class environment {
   }
 
   public function set_prepath($path){
-
-    if ( $this->params[0] === $path ){
-      array_shift($this->params);
-      return true;
+    $path = \bbn\tools::remove_empty(explode('/', $path));
+    if ( count($path) ) {
+      foreach ($path as $p) {
+        if ($this->params[0] === $p) {
+          array_shift($this->params);
+        }
+        else {
+          die("The prepath $path doesn't seem to correspond to the current path {$this->url}");
+        }
+      }
     }
-    die("The prepath doesn't seem to correspond to the current path");
+    return true;
   }
 
   /**
