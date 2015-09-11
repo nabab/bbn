@@ -318,6 +318,9 @@ class mvc implements \bbn\mvc\api{
 
   public function set_prepath($path){
     if ( $this->check() ){
+      if ( $this->router->get_prepath(false) === $path ){
+        return 1;
+      }
       if ( $this->router->set_prepath($path) && $this->env->set_prepath($path) ){
         $this->params = $this->get_params();
         return 1;
