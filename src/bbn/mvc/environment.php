@@ -96,7 +96,7 @@ class environment {
   }
 
   public function set_prepath($path){
-    if ( $this->check_path($path) && ($this->params[0] === $this->mvc->get_prepath(false)) ){
+    if ( $this->params[0] === $path ){
       array_shift($this->params);
       return true;
     }
