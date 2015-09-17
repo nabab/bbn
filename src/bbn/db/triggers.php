@@ -265,8 +265,7 @@ trait triggers {
    */
   public function where_cfg(array $w, $table = [], $values = []){
     // Checking this array is not already correctly configured to be where
-    if ( isset($w['bbn_where_cfg'], $w['fields'], $w['values'], $w['final'], $w['keyval'],
-        $w['unique']) &&
+    if ( isset($w['bbn_where_cfg'], $w['fields'], $w['values'], $w['final'], $w['keyval'], $w['unique']) &&
       ($w['bbn_where_cfg'] === 1)
     ){
       return $w;
@@ -451,6 +450,7 @@ trait triggers {
               array_values($cfg['values']) :
               array_merge(array_values($cfg['values']), $cfg['where']['values'])
             );
+            //var_dump($cfg, $query_args);
             break;
           case 'delete':
             array_push($query_args, empty($cfg['where']) ? [] : $cfg['where']['values']);
@@ -620,7 +620,11 @@ trait triggers {
   public function update($table, array $values, array $where, $ignore=false)
   {
     $where = $this->where_cfg($where, $table, $values);
-    if ( $sql = $this->_statement('update', $table, array_keys($values), $where, $ignore) ){
+    $vals = [];
+    foreach ( $values as $k => $v ){
+      array_push($vals, $this->cfn($k, $table));
+    }
+    if ( $sql = $this->_statement('update', $table, $vals, $where, $ignore) ){
       return $this->_exec_triggers([
         'table' => $table,
         'kind' => 'update',

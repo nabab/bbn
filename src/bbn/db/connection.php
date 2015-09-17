@@ -264,7 +264,7 @@ class connection extends \PDO implements actions, api, engines
           $sql = $this->queries[$this->queries[$hash]]['statement'];
         }
         else{
-          $sql = $this->language->get_update($table, $keypairs, $arg4['final']);
+          $sql = $this->language->get_update($table, $keypairs, $arg4);
         }
         break;
       case 'delete':

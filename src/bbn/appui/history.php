@@ -678,6 +678,7 @@ class history
                   ]);
                 }
               }
+              //\bbn\tools::dump($cfg);
             }
             // Case where the primary is not defined, we'll update each primary instead
             else{

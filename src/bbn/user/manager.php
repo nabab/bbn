@@ -245,7 +245,6 @@ You can click the following link to access directly your account:<br>
         $this->cfg['tables']['users'],
         $cfg,
         [$this->cfg['arch']['users']['id'] => $id_user]);
-      die(\bbn\tools::dump($this->db));
       return $cfg;
     }
 		return false;

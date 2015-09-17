@@ -124,7 +124,7 @@ class query extends \PDOStatement implements actions
             else{
               $param = \PDO::PARAM_STR;
             }
-            $this->bindValue($i+1,$v,$param);
+            $this->bindValue($i+1, $v, $param);
           }
         }
 				try{
