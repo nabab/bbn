@@ -89,7 +89,7 @@ class connection
                 'email' => 'email',
                 'login' => 'email',
                 'cfg' => 'cfg',
-                'status' => 'status'
+                'status' => 'active'
               ],
             ],
             /*

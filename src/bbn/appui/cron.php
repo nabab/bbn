@@ -73,12 +73,23 @@ class cron extends \bbn\obj{
   }
   
   public function start($id_cron){
-    if ( $this->check() && $this->db->insert($this->jtable, [
-      'id_cron' => $id_cron,
-      'start' => date('Y-m-d H:i:s')
-    ]) ){
-      $this->timer->start('cron_'.$id_cron);
-      return $this->db->last_id ();
+    if ( $this->check() ) {
+      $cron = $this->get_cron($id_cron);
+      $start = date('Y-m-d H:i:s');
+      if ($cron && $this->db->insert($this->jtable, [
+          'id_cron' => $id_cron,
+          'start' => $start
+        ])
+      ) {
+        $this->db->update($this->table, [
+          'prev' => $start,
+          'next' => date('Y-m-d H:i:s', $this->get_next_date($cron['cfg']['frequency']))
+        ], [
+          'id' => $id_cron
+        ]);
+        $this->timer->start('cron_' . $id_cron);
+        return $this->db->last_id();
+      }
     }
     return false;
   }
@@ -104,12 +115,6 @@ class cron extends \bbn\obj{
           $this->db->update($this->jtable, ['res' => 'Restarted after error'], ['id' => $prev['id']]);
         }
       }
-      $this->db->update($this->table, [
-        'prev' => $article['start'],
-        'next' => date('Y-m-d H:i:s', $this->get_next_date($cron['cfg']['frequency']))
-      ], [
-        'id' => $cron['id']
-      ]);
       return $time;
     }
     return false;
