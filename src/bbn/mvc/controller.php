@@ -305,6 +305,17 @@ class controller implements api{
 	public function get_js($path='', array $data=null)
 	{
     if ( $r = $this->get_view($path, 'js') ){
+/*
+			$data = json_encode(is_array($data) ? $data : $this->data);
+			return <<<EOD
+<script>
+(function(\$){
+var model = $data;
+$r
+})(jQuery);
+</script>
+EOD;
+*/
       return '
 <script>
 (function($){
@@ -371,8 +382,30 @@ class controller implements api{
     if ( !isset($data) ) {
       $data = $this->data;
     }
+		else {
+			$this->js_data($data);
+		}
 		if ( $r = $this->get_view($path, 'js', $data) ){
 			$this->add_script($r);
+		}
+		return $this;
+	}
+
+	public function set_title($title){
+		$this->obj->title = $title;
+		return $this;
+	}
+
+	public function js_data($data){
+		if ( \bbn\tools::is_assoc($data) ){
+			if ( !isset($this->obj->data) ){
+				$this->obj->data = $data;
+			}
+			else if ( \bbn\tools::is_assoc($this->obj->data) ){
+				foreach ( $data as $k => $v ){
+					$this->obj->data[$k] = $v;
+				}
+			}
 		}
 		return $this;
 	}

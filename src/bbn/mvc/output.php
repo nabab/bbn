@@ -37,7 +37,7 @@ class output {
       if ( empty($this->obj->prescript) ){
         unset($this->obj->prescript);
       }
-      else{
+      else if ( !BBN_IS_DEV ){
         $this->obj->prescript = \JShrink\Minifier::minify($this->obj->prescript);
       }
     }
@@ -45,7 +45,7 @@ class output {
       if ( empty($this->obj->script) ){
         unset($this->obj->script);
       }
-      else{
+      else if ( !BBN_IS_DEV ){
         $this->obj->script = \JShrink\Minifier::minify($this->obj->script);
       }
     }
@@ -53,7 +53,7 @@ class output {
       if ( empty($this->obj->postscript) ){
         unset($this->obj->postscript);
       }
-      else{
+      else if ( !BBN_IS_DEV ){
         $this->obj->postscript = \JShrink\Minifier::minify($this->obj->postscript);
       }
     }

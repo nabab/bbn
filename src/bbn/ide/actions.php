@@ -3,6 +3,9 @@
 
 namespace bbn\ide;
 
+if ( !defined('BBN_DATA_PATH') ){
+  die("Your constant BBN_DATA_PATH is not defined");
+}
 
 class actions {
 
@@ -24,7 +27,7 @@ class actions {
       if ( isset($cfg[$dir]) ){
         $dirs =& $cfg[$dir];
         // Change the path for the MVC
-        if ( $dir === 'controllers'){
+        if ( $dir === 'MVC'){
           // type of file part of the MVC
           foreach ( $dirs['files'] as $f ){
             if ( $f['url'] === end($args) ){
@@ -36,19 +39,22 @@ class actions {
                 $arg = array_slice($args, 0 , count($args)-1);
                 $new_path = substr(implode("/", $arg), 0 , -3).$f['ext'];
               }
-              $new_path = $f['path'].$new_path;
+              $new_path = $f['fpath'].$new_path;
+              break;
             }
           }
         }
         else {
           foreach ( $dirs['files'] as $f ){
             if ( $f['ext'] === \bbn\str\text::file_ext($path) ){
-              $new_path = $f['path'].$path;
+              $new_path = $f['fpath'].$path;
+              break;
             }
           }
         }
         if ( is_file($new_path) ){
           $backup = BBN_DATA_PATH.'users/'.$_SESSION[BBN_SESS_NAME]['user']['id'].'/ide/backup/'.date('Y-m-d His').' - Save/'.$dir.'/'.$path;
+          //die(\bbn\tools::dump($f, $new_path, $backup, $dir ));
           \bbn\file\dir::create_path(dirname($backup));
           rename($new_path, $backup);
         }
@@ -71,18 +77,18 @@ class actions {
       $wtype = $type === 'dir' ? 'directory' : 'file';
       $delete = [];
       if ( $type === 'file' ) {
-        if ( $data['dir'] === 'controllers' ) {
+        if ( $data['dir'] === 'MVC' ) {
           $tab_url_mvc = $data['dir'] . '/' . $data['path'];
           if ( $data['name'] != '_ctrl' ) {
-            foreach ( $cfg['controllers']['files'] as $f ) {
-              $p = $f['path'] . substr($data['path'], 0, -3) . $f['ext'];
+            foreach ( $cfg['MVC']['files'] as $f ) {
+              $p = $f['fpath'] . substr($data['path'], 0, -3) . $f['ext'];
               if ( file_exists($p) && !in_array($p, $delete) ) {
                 array_push($delete, $p);
               }
             }
           }
           else {
-            $p = $cfg['controllers']['files']['CTRL']['path'].$data['path'];
+            $p = $cfg['MVC']['files']['CTRL']['fpath'].$data['path'];
             if ( file_exists($p) && !in_array($p, $delete) ) {
               array_push($delete, $p);
             }
@@ -91,7 +97,7 @@ class actions {
         else {
           foreach ( $cfg[$data['dir']]['files'] as $f ) {
             if ( $f['ext'] === \bbn\str\text::file_ext($data['path']) ) {
-              $p = $f['path'] . $data['path'];
+              $p = $f['fpath'] . $data['path'];
               if ( file_exists($p) && !in_array($p, $delete) ) {
                 array_push($delete, $p);
               }
@@ -102,12 +108,12 @@ class actions {
       if ($type === 'dir') {
         $p_mvc = false;
         $p_mvc2 = false;
-        if ( $data['dir'] === 'controllers' ) {
-          foreach ( $cfg['controllers']['files'] as $f ) {
-            $p = $f['path'] . $data['path'];
+        if ( $data['dir'] === 'MVC' ) {
+          foreach ( $cfg['MVC']['files'] as $f ) {
+            $p = $f['fpath'] . $data['path'];
             if ( $f['title'] === 'Controller' ){
-              $p_mvc = $f['path'] . $data['path'];
-              $p_mvc2 = $f['path'];
+              $p_mvc = $f['fpath'] . $data['path'];
+              $p_mvc2 = $f['fpath'];
             }
             if ( is_dir($p) && !in_array($p, $delete) ) {
               array_push($delete, $p);
@@ -161,7 +167,7 @@ class actions {
       if ( isset($dirs[$data['dir']]) ){
         $cfg =& $dirs[$data['dir']];
         $src = $data['src'];
-        $type = is_dir($cfg['files'][0]['path'].$src) ? 'dir' : 'file';
+        $type = is_dir($cfg['files'][0]['fpath'].$src) ? 'dir' : 'file';
         $dir_src = dirname($src).'/';
         if ( $dir_src === './' ){
           $dir_src = '';
@@ -171,17 +177,17 @@ class actions {
         $src_file = $dir_src.$name;
         $dest_file = $data['path'].'/'.$data['name'];
         $todo = [];
-        if ( $data['dir'] === 'controllers' ){
+        if ( $data['dir'] === 'MVC' ){
           foreach ( $cfg['files'] as $f ){
             if ( $f != 'CTRL' ){
-              $src = $f['path'].$src_file;
+              $src = $f['fpath'].$src_file;
               if ( $type === 'file' ){
                 $src .= '.'.$f['ext'];
               }
               $is_dir = ($type === 'dir') && is_dir($src);
               $is_file = ($type === 'dir') || $is_dir ? false : is_file($src);
               if ( $is_dir || $is_file ){
-                $dest = $f['path'].$dest_file;
+                $dest = $f['fpath'].$dest_file;
                 if ( $type === 'file' ){
                   $dest .= '.'.$f['ext'];
                 }
@@ -229,16 +235,17 @@ class actions {
       $cfg =& $dirs[$data['dir']];
       $type = $data['type'] === 'file' ? 'file' : 'dir';
       $wtype = $type === 'dir' ? 'directory' : 'file';
-      $dir = $data['dir'] === 'controllers' ? $cfg['files']['Controller']['path'] : $cfg['root_path'];
-      $ext = $data['dir'] === 'controllers' ? $cfg['files']['Controller']['ext'] : $data['ext'];
-      if ( ($type === 'file') && ($dir != 'controllers') && !empty($ext) ) {
+      $dir = $data['dir'] === 'MVC' ? $cfg['files']['Controller']['fpath'] : $cfg['root_path'];
+      $ext = $data['dir'] === 'MVC' ? $cfg['files']['Controller']['ext'] : $data['ext'];
+      if ( ($type === 'file') && ($dir != 'MVC') && !empty($ext) ) {
         foreach ( $cfg['files'] as $f ) {
           if ( $ext === $f['ext'] ) {
-            $dir = $f['path'];
+            $dir = $f['fpath'];
             break;
           }
         }
       }
+      //\bbn\tools::dump($cfg, $dir);
       $path = '';
       if ( ($data['path'] !== './') ){
         if ( is_dir($dir.$data['path']) ){
@@ -278,8 +285,8 @@ class actions {
         $cfg =& $dirs[$data['dir']];
         $spath = $data['spath'];
         $dpath = $data['dpath'];
-        if ( $data['dir'] === 'controllers' ){
-          $type = is_dir($cfg['files']['Controller']['path'].$spath) ? 'dir' : 'file';
+        if ( $data['dir'] === 'MVC' ){
+          $type = is_dir($cfg['files']['Controller']['fpath'].$spath) ? 'dir' : 'file';
         }
         else {
           $type = is_dir($cfg['root_path'].$spath) ? 'dir' : 'file';
@@ -291,18 +298,18 @@ class actions {
         $name = \bbn\str\text::file_ext($spath, 1)[0];
         $ext = \bbn\str\text::file_ext($spath);
         $todo = [];
-        if ( $data['dir'] === 'controllers' ){
+        if ( $data['dir'] === 'MVC' ){
           foreach ( $cfg['files'] as $f ){
             if ( $f != 'CTRL' ){
-              $src = $f['path'].$dir.$name;
+              $src = $f['fpath'].$dir.$name;
               if ( $type === 'file' ){
                 $src .= '.'.$f['ext'];
               }
               $is_dir = ($type === 'dir') && is_dir($src);
               $is_file = ($type === 'dir') || $is_dir ? false : is_file($src);
               if ( $is_dir || $is_file ){
-                \bbn\file\dir::create_path($f['path'].$dpath);
-                $dest = $f['path'].$dpath.'/'.$name;
+                \bbn\file\dir::create_path($f['fpath'].$dpath);
+                $dest = $f['fpath'].$dpath.'/'.$name;
                 if ( $type === 'file' ){
                   $dest .= '.'.$f['ext'];
                 }
@@ -351,8 +358,8 @@ class actions {
       if ( isset($dirs[$data['dir']]) ){
         $cfg =& $dirs[$data['dir']];
         $path = $data['path'];
-        if ( $data['dir'] === 'controllers' ){
-          $type = is_dir($cfg['files']['Controller']['path'].$path) ? 'dir' : 'file';
+        if ( $data['dir'] === 'MVC' ){
+          $type = is_dir($cfg['files']['Controller']['fpath'].$path) ? 'dir' : 'file';
         }
         else {
           $type = is_dir($cfg['root_path'].$path) ? 'dir' : 'file';
@@ -365,10 +372,10 @@ class actions {
         $src_file = $dir.$name;
         $dest_file = $dir.$data['name'];
         $todo = [];
-        if ( $data['dir'] === 'controllers' ){
+        if ( $data['dir'] === 'MVC' ){
           foreach ( $cfg['files'] as $f ){
             if ( $f != 'CTRL' ){
-              $src = $f['path'].$src_file;
+              $src = $f['fpath'].$src_file;
               $dest = dirname($src).'/'.$data['name'];
               if ( $type === 'file' ){
                 $src .= '.'.$f['ext'];
@@ -432,7 +439,7 @@ class actions {
 
   public function close($data){
     if ( isset($data['dir'], $data['file']) ){
-      $data['file'] = ($data['dir'] === 'controllers') && (\bbn\str\text::file_ext($data['file']) !== 'php') ?
+      $data['file'] = ($data['dir'] === 'MVC') && (\bbn\str\text::file_ext($data['file']) !== 'php') ?
         substr($data['file'], 0, strrpos($data['file'], "/")) : $data['file'];
       unset($data['act']);
     }
@@ -449,13 +456,13 @@ class actions {
       $dirs = $directories->dirs();
       $root_dest = BBN_USER_PATH.'tmp/'.\bbn\str\text::genpwd().'/';
       if ( isset($dirs[$data['dir']]) ){
-        if ( $data['dir'] === 'controllers' ){
-          foreach ( $dirs['controllers']['files'] as $f ) {
-            $dest = $root_dest.$data['name'].'/'.str_replace(BBN_APP_PATH, '', $f['path']);
+        if ( $data['dir'] === 'MVC' ){
+          foreach ( $dirs['MVC']['files'] as $f ) {
+            $dest = $root_dest.$data['name'].'/'.str_replace(BBN_APP_PATH, '', $f['fpath']);
             if ( $data['type'] === 'file' ) {
               $ext = \bbn\str\text::file_ext($data['path']);
               $path = substr($data['path'], 0, strrpos($data['path'], $ext));
-              $file = $f['path'].$path.$f['ext'];
+              $file = $f['fpath'].$path.$f['ext'];
               if ( file_exists($file) ){
                 if ( !\bbn\file\dir::create_path($dest.dirname($data['path'])) ){
                   return $this->error("Impossible to create the path ".$dest.dirname($data['path']));
@@ -466,7 +473,7 @@ class actions {
               }
             }
             else {
-              $dir = $f['path'].$data['path'];
+              $dir = $f['fpath'].$data['path'];
               if ( file_exists($dir) ){
                 if ( !\bbn\file\dir::copy($dir, $dest.$data['path']) ){
                   return $this->error('Impossible to export the folder '.$data['path']);
@@ -480,11 +487,11 @@ class actions {
           $dir = false;
           foreach ( $dirs[$data['dir']]['files'] as $f ){
             if ( $ext === $f['ext'] ){
-              $dir = $f['path'];
+              $dir = $f['fpath'];
             }
           }
           if ( !$dir ){
-            $dir = $dirs[$data['dir']]['files'][0]['path'];
+            $dir = $dirs[$data['dir']]['files'][0]['fpath'];
           }
           $dest = $root_dest.$data['name'].'/'.$data['path'];
           if ( $data['type'] === 'file' ) {
@@ -498,12 +505,12 @@ class actions {
         }
         // Create zip file
         if ( class_exists('\\ZipArchive') ) {
-          $dest = ( $data['dir'] === 'controllers' ) ? $root_dest.$data['name'].'/mvc/' : $dest;
+          $dest = ( $data['dir'] === 'MVC' ) ? $root_dest.$data['name'].'/mvc/' : $dest;
           $filezip = BBN_USER_PATH.'tmp/'.$data['name'].'.zip';
           $zip = new \ZipArchive();
           if ( $err = $zip->open($filezip, \ZipArchive::OVERWRITE) ) {
             if ( file_exists($dest) ){
-              if ( ($data['type'] === 'dir') || ($data['dir'] === 'controllers') ){
+              if ( ($data['type'] === 'dir') || ($data['dir'] === 'MVC') ){
                 // Create recursive directory iterator
                 $files = \bbn\file\dir::scan($dest);
                 foreach ($files as $file) {

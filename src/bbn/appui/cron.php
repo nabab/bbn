@@ -120,10 +120,10 @@ class cron extends \bbn\obj{
     return false;
   }
   
-  public function get_next_date($frequency, $timestamp = false){
+  public function get_next_date($frequency, $tm = false){
     if ( is_string($frequency) && (strlen($frequency) >= 2) ){
-      if ( !$timestamp ){
-        $timestamp = time();
+      if ( !$tm ){
+        $tm = time();
       }
       $letter = \bbn\str\text::change_case(substr($frequency, 0, 1), 'lower');
       $number = (int)substr($frequency, 1);
@@ -143,13 +143,13 @@ class cron extends \bbn\obj{
             break;
         }
         if ( isset($unit) ){
-          $r = $timestamp + ($unit * $number);
+          $r = $tm + ($unit * $number);
         }
         if ( $letter === 'm' ){
-          $r = mktime(date('H', $timestamp), date('i', $timestamp), date('s', $timestamp), date('n', $timestamp)+$number, date('j', $timestamp), date('Y', $timestamp));
+          $r = mktime(date('H', $tm), date('i', $tm), date('s', $tm), date('n', $tm)+$number, date('j', $tm), date('Y', $tm));
         }
         if ( $letter === 'y' ){
-          $r = mktime(date('H', $timestamp), date('i', $timestamp), date('s', $timestamp), date('n', $timestamp)+$number, date('j', $timestamp), date('Y', $timestamp));
+          $r = mktime(date('H', $tm), date('i', $tm), date('s', $tm), date('n', $tm)+$number, date('j', $tm), date('Y', $tm));
         }
         if ( isset($r) ){
           if ( $r < time() ){

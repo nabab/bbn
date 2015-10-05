@@ -65,7 +65,8 @@ class directories {
       $d['root_path'] = \bbn\str\text::parse_path(constant($p).str_replace($p, '', $d['root_path']));
       foreach ( $files as $i => $f ){
         $f = (array)$f;
-        $f['path'] = \bbn\str\text::parse_path($d['root_path'].$f['path']);
+        $f['path'] = \bbn\str\text::parse_path($f['path']);
+        $f['fpath'] = \bbn\str\text::parse_path($d['root_path'].$f['path']);
         if ( !empty($f['default']) ){
           $d['def'] = $f['url'];
         }
@@ -76,7 +77,7 @@ class directories {
         }
       }
       $d['files'] = $files;
-      $dirs[$d['name'] === 'MVC' ? 'controllers' : $d['name']] = $d;
+      $dirs[$d['name']] = $d;
     }
     return $name && isset($dirs[$name]) ? $dirs[$name] : $dirs;
   }
