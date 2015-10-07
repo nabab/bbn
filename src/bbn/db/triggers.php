@@ -200,11 +200,10 @@ trait triggers {
           $fields[$i] = $this->cfn($field, $tab[0]);
         }
         else if ( count($tab) > 1 ){
-          die('Error! Duplicate field name, you must insert the fields with their fullname.');
+          $this->error('Error! Duplicate field name, you must insert the fields with their fullname.');
         }
         else {
-          die(var_dump("Error! The column '$field' doesn't exist in '".implode(", ", array_keys($tables_fields))."'
-          table(s)", $fields));
+          $this->error("Error! The column '$field' doesn't exist in '".implode(", ", array_keys($tables_fields)));
         }
       }
     }

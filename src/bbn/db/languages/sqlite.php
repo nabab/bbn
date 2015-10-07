@@ -479,10 +479,10 @@ class sqlite implements \bbn\db\engines
               $c = $this->col_full_name($c, $tab[0]);
             }
             else if ( count($tab) > 1 ){
-              die('Error! Duplicate field name, you must insert the fields with their fullname.');
+              $this->db->error('Error! Duplicate field name, you must insert the fields with their fullname.');
             }
             else {
-              die("Error! The column '$c' doesn't exist in '".implode(", ", array_keys($tables_fields))."' table(s)");
+              $this->db->error("Error! The column '$c' doesn't exist in '".implode(", ", array_keys($tables_fields))."' table(s)");
             }
           }
           if ( !is_numeric($k) && \bbn\str\text::check_name($k) && ($k !== $c) ){
@@ -539,7 +539,7 @@ class sqlite implements \bbn\db\engines
 			if ( count($fields) > 0 ){
 				foreach ( $fields as $k ){
 					if ( !isset($m['fields'][$k]) ){
-            die(var_dump("Error in Insert query creation: the column $k doesn't exist in $table", $fields));
+            $this->db->error("Error in Insert query creation: the column $k doesn't exist in $table");
 					}
 					else{
 						$r .= '"'.$k.'", ';
@@ -619,7 +619,7 @@ class sqlite implements \bbn\db\engines
 			if ( count($fields) > 0 ){
 				foreach ( $fields as $k ){
           if ( !isset($m['fields'][$this->db->csn($k)]) ){
-            die(var_dump("Error in Update query creation: the column $k doesn't exist in $table", $m['fields']));
+            $this->db->error("Error in Update query creation: the column $k doesn't exist in $table");
           }
           else{
             $r .= $this->db->cfn($k, $table, 1)." = ?,".PHP_EOL;
@@ -672,7 +672,7 @@ class sqlite implements \bbn\db\engines
   			$r .= '$db->query(\'';
 			}
       if ( !isset($m['fields'][$csn]) ){
-        die(var_dump("Error in collecting values: the column $field doesn't exist in $table", $m));
+        $this->db->error("Error in collecting values: the column $field doesn't exist in $table");
       }
 			$r .= "SELECT DISTINCT $cfn FROM $table".PHP_EOL.
         $this->db->get_where($where, $table).PHP_EOL.
@@ -702,7 +702,7 @@ class sqlite implements \bbn\db\engines
         $r .= '$db->query(\'';
 			}
       if ( !isset($m['fields'][$field]) ){
-        die(var_dump("Error in values' count: the column $field doesn't exist in $table", $m));
+        $this->db->error("Error in values' count: the column $field doesn't exist in $table");
       }
 			$r .= 'SELECT COUNT(*) AS num, "'.$field.'" AS val FROM '.$table;
 			if ( count($where) > 0 ){
@@ -737,7 +737,7 @@ class sqlite implements \bbn\db\engines
     $iname = text::encode_filename($table);
     foreach ( $column as $i => $c ){
       if ( !text::check_name($c) ){
-        die("Illegal column $c");
+        $this->db->error("Illegal column $c");
       }
       $iname .= '_'.$c;
       $column[$i] = "`".$column[$i]."`";

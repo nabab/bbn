@@ -127,6 +127,20 @@ class options
     return false;
   }
 
+  /**
+   * Retourne la liste des options d'une catégorie indexée sur leur `id`
+   *
+   * @param string|int $cat La catégorie, sous la forme de son `id`, ou de son nom
+   * @return array La liste des options indexée sur leur `id`
+   */
+  public function count($cat = null){
+    $cat = $this->from_code($cat);
+    if ( \bbn\str\text::is_integer($cat) ) {
+      return $this->db->count($this->cfg['table'], [$this->cfg['cols']['id_parent'] => $cat]);
+    }
+    return false;
+  }
+
   protected function get_query(){
     $tab = $this->db->tsn($this->cfg['table']);
     $cols = [];
@@ -150,15 +164,16 @@ class options
    * @param string|int $cat La catégorie, sous la forme de son `id`, ou de son nom
    * @return array Un tableau des caractéristiques de chaque option de la catégorie, indexée sur leur `id`
    */
-  public function full_options($cat = null){
+  public function full_options($cat = null, $start = 0, $limit = 2000){
     $cat = $this->from_code($cat);
-    if ( \bbn\str\text::is_integer($cat) ) {
+    if ( \bbn\str\text::is_integer($cat, $start, $limit) ) {
       $db =& $this->db;
       $tab = $db->tsn($this->cfg['table']);
       $opts = $db->get_rows($this->get_query()."
         AND ".$db->cfn($this->cfg['cols']['id_parent'], $tab, 1)." = ?
         GROUP BY ".$db->cfn($this->cfg['cols']['id'], $tab, 1)."
-        ORDER BY ".$db->cfn($this->cfg['cols']['text'], $tab, 1),
+        ORDER BY ".$db->cfn($this->cfg['cols']['text'], $tab, 1)."
+        LIMIT $start, $limit",
         $cat);
       $res = [];
       // Tells if we sort by order property or leave it by text
