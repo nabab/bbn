@@ -911,16 +911,6 @@ class connection extends \PDO implements actions, api, engines
         }
         if ( !isset($this->queries[$hash]) ){
           if ( $sequences = $this->parse_query($statement) ) {
-            if ($num_values > 0) {
-              $statement = str_replace("%%", '%', $statement);
-              /* Compatibility with sprintf basic expressions - to be enhanced */
-              if (preg_match_all('/(%[s|u|d])/', $statement)) {
-                $statement = str_replace("'%s'", '?', $statement);
-                $statement = str_replace("%s", '?', $statement);
-                $statement = str_replace("%d", '?', $statement);
-                $statement = str_replace("%u", '?', $statement);
-              }
-            }
             /* Or looking for question marks */
             preg_match_all('/(\?)/', $statement, $exp);
             $this->add_query(
