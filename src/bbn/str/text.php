@@ -740,8 +740,7 @@ class text
 			$r['url'] = $p[0];
 			$r['query'] = $p[1];
 			$ps = explode('&',$r['query']);
-			foreach ( $ps as $p )
-			{
+			foreach ( $ps as $p ){
 				$px = explode('=',$p);
 				$r['params'][$px[0]] = $px[1];
 			}
@@ -762,7 +761,7 @@ class text
 	 */
 	public static function parse_path($path)
 	{
-    $path = str_replace('\\', '/', self::cast($path));
+    $path = str_replace('\\', '/', strval($path));
     while ( strpos($path, '//') !== false ) {
       $path = str_replace('//', '/', $path);
     }

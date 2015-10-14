@@ -25,6 +25,15 @@ if ( !defined("BBN_DEFAULT_MODE") ){
 	define("BBN_DEFAULT_MODE", 'public');
 }
 
+// Correspond to the path after the URL to the application's public root (set to '/' for a domain's root)
+if ( !defined("BBN_CUR_PATH") ){
+	die("BBN_CUR_PATH must be defined");
+}
+
+if ( !defined("BBN_APP_PATH") ){
+	die("BBN_APP_PATH must be defined");
+}
+
 class mvc implements \bbn\mvc\api{
 
 	use mvc\common;
@@ -137,20 +146,17 @@ class mvc implements \bbn\mvc\api{
 	 * @param array $routes An array of routes usually defined in /_appui/current/config/routes.php</em>
 	 */
 	public function __construct($db = null, $routes = []){
-		// Correspond to the path after the URL to the application's public root (set to '/' for a domain's root)
-		if ( defined('BBN_CUR_PATH') ){
-      $this->env = new \bbn\mvc\environment();
-			if ( is_object($db) && ( $class = get_class($db) ) && ( $class === 'PDO' || strpos($class, 'bbn\\db\\') !== false ) ){
-				$this->db = $db;
-			}
-			else{
-				$this->db = false;
-			}
-			$this->inc = new \stdClass();
-      $this->o = $this->inc;
-      $this->router = new \bbn\mvc\router($this, $routes);
-      $this->route();
+    $this->env = new \bbn\mvc\environment();
+		if ( is_object($db) && ( $class = get_class($db) ) && ( $class === 'PDO' || strpos($class, 'bbn\\db\\') !== false ) ){
+			$this->db = $db;
 		}
+		else{
+			$this->db = false;
+		}
+		$this->inc = new \stdClass();
+    $this->o = $this->inc;
+    $this->router = new \bbn\mvc\router($this, $routes);
+    $this->route();
 	}
 
   /**

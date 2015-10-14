@@ -51,6 +51,11 @@ class router {
   private
     $prepath,
     /**
+     * The path to the app root (where is ./mvc)
+     * @var string
+     */
+    $root,
+    /**
      * The list of known external controllers routes.
      * @var array
      */
@@ -82,16 +87,33 @@ class router {
    */
   public function __construct(\bbn\mvc $mvc, array $routes=[])
   {
-    if ( !defined('BBN_APP_PATH') ){
-      die("The constant BBN_APP_PATH must be defined!");
-    }
     $this->mvc = $mvc;
     $this->routes = $routes;
+    $this->set_root();
+  }
+
+  public function set_root($dir=''){
+    $ok = false;
+    if ( empty($dir) ){
+      $dir = BBN_APP_PATH;
+      $ok = 1;
+    }
+    else{
+      $dir = \bbn\str\text::parse_path($dir);
+      if ( substr($dir, -1) !== '/' ){
+        $dir .= '/';
+      }
+    }
+    if ( $ok || is_dir($dir.'mvc') ){
+      $this->root = $dir;
+      return $this;
+    }
+    die("I CAN'T FIND ROOT in $dir... NO mvc DIRECTORY!");
   }
 
   private function get_root($mode){
     if ( self::is_mode($mode) ){
-      return BBN_APP_PATH.'mvc/'.( $mode === 'dom' ? 'public' : $mode ).'/';
+      return $this->root.'mvc/'.( $mode === 'dom' ? 'public' : $mode ).'/';
     }
     return false;
   }
