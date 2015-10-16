@@ -192,6 +192,43 @@ class options
     return false;
   }
 
+  /**
+   * Retourne toutes les caractéristiques des options d'une catégorie donnée dans un tableau indexé sur leur `id`
+   *
+   * @param string|int $cat La catégorie, sous la forme de son `id`, ou de son nom
+   * @return array Un tableau des caractéristiques de chaque option de la catégorie, indexée sur leur `id`
+   */
+  public function native_options($cat = null, $id_parent = false, $start = 0, $limit = 2000){
+    $cat = $this->from_code($cat, $id_parent);
+    if ( \bbn\str\text::is_integer($cat, $start, $limit) ) {
+      $db =& $this->db;
+      $tab = $db->tsn($this->cfg['table']);
+      $opts = $db->get_rows($this->get_query()."
+        AND ".$db->cfn($this->cfg['cols']['id_parent'], $tab, 1)." = ?
+        GROUP BY ".$db->cfn($this->cfg['cols']['id'], $tab, 1)."
+        ORDER BY ".$db->cfn($this->cfg['cols']['text'], $tab, 1)."
+        LIMIT $start, $limit",
+        $cat);
+      $res = [];
+      // Tells if we sort by order property or leave it by text
+      $order = 1;
+      if (!empty($opts)) {
+        foreach ($opts as $i => $o) {
+          array_push($res, $o);
+          // If only one does not have the order property defined we don't sort
+          if ( !isset($res[$o['id']]['order']) ){
+            $order = false;
+          }
+        }
+        if ( $order ) {
+          \bbn\tools::sort_by($res, 'order');
+        }
+      }
+      return $res;
+    }
+    return false;
+  }
+
   public function tree($cat, $id_parent = false, $length = 128){
     $length--;
     if ( $length >= 0 ){
