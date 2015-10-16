@@ -5,7 +5,7 @@ use \bbn\str\text;
 
 class history
 {
-	
+
 	private static
           /** @var \bbn\db\connection $db The DB connection */
           $db,
@@ -20,14 +20,14 @@ class history
           $last_rows = false,
           $ok = false,
           $enabled = true;
-	
+
   public static
           $htable = false,
           $hcol = 'active',
           $is_used = false;
-  
+
 	/**
-	 * @return void 
+	 * @return void
 	 */
   public static function disable()
   {
@@ -35,7 +35,7 @@ class history
   }
 
 	/**
-	 * @return void 
+	 * @return void
 	 */
   public static function enable()
   {
@@ -51,7 +51,7 @@ class history
   }
 
   /**
-	 * @return void 
+	 * @return void
 	 */
 	public static function init(\bbn\db\connection $db, $cfg = [])
 	{
@@ -74,14 +74,14 @@ class history
       self::$is_used = 1;
     }
 	}
-  
+
 	/**
-	 * @return void 
+	 * @return void
 	 */
   public static function is_init(){
     return self::$ok;
   }
-	
+
 	/**
 	 * @return bool
 	 */
@@ -89,13 +89,13 @@ class history
     $hash = $db->get_hash();
     return in_array($hash, self::$dbs) && self::$enabled;
   }
-	
+
 	/**
-	 * @return void 
+	 * @return void
 	 */
 	public static function delete($table, $id)
 	{
-		// Sets the "active" column name 
+		// Sets the "active" column name
 		if ( self::is_init() && text::check_name($table) && \bbn\str\text::is_integer($id) ){
       self::$db->query("
         DELETE FROM ".self::$db->escape(self::$htable)."
@@ -103,11 +103,11 @@ class history
         AND ".self::$db->escape('line')." = $id");
 		}
 	}
-	
+
 	/**
-   * Sets the "active" column name 
-   * 
-	 * @return void 
+   * Sets the "active" column name
+   *
+	 * @return void
 	 */
 	public static function set_hcol($hcol)
 	{
@@ -115,11 +115,11 @@ class history
 			self::$hcol = $hcol;
 		}
 	}
-	
+
 	/**
-   * Gets the "active" column name 
-   * 
-	 * @return string the "active" column name 
+   * Gets the "active" column name
+   *
+	 * @return string the "active" column name
 	 */
 	public static function get_hcol()
 	{
@@ -127,9 +127,9 @@ class history
 			self::$hcol = self::$hcol;
 		}
 	}
-	
+
 	/**
-	 * @return void 
+	 * @return void
 	 */
 	public static function set_date($date)
 	{
@@ -146,43 +146,43 @@ class history
     }
 		self::$date = $date;
 	}
-	
+
 	/**
-	 * @return date 
+	 * @return date
 	 */
 	public static function get_date()
 	{
 		return self::$date;
 	}
-	
+
 	/**
-	 * @return void 
+	 * @return void
 	 */
 	public static function unset_date()
 	{
 		self::$date = false;
 	}
-	
+
  /**
   * Sets the history table name
-	* @return void 
+	* @return void
 	*/
 	public static function set_admin_db($db)
 	{
-		// Sets the history table name 
+		// Sets the history table name
 		if ( text::check_name($db) ){
 			self::$admin_db = $db;
 			self::$htable = self::$admin_db.'.'.self::$prefix.'history';
 		}
 	}
-	
+
 	/**
 	 * Sets the user ID that will be used to fill the user_id field
-	 * @return void 
+	 * @return void
 	 */
 	public static function set_huser($huser)
 	{
-		// Sets the history table name 
+		// Sets the history table name
 		if ( \bbn\str\text::is_number($huser) ){
 			self::$huser = $huser;
 		}
@@ -213,7 +213,7 @@ class history
     }
     return $r;
   }
-  
+
   public static function get_last_modified_lines($table, $start=0, $limit=20){
     $r = [];
     if ( \bbn\str\text::check_name($table) && is_int($start) && is_int($limit) ){
@@ -358,7 +358,7 @@ class history
             ],
             ['chrono' => 'DESC']);
   }
-	
+
 	public static function get_history($table, $id, $col=''){
     if ( self::check($table) ){
       $pat = [
@@ -392,7 +392,7 @@ class history
       return $r;
     }
 	}
-		
+
 	public static function get_full_history($table, $id){
     if ( self::check($table) ){
       $r = [];
@@ -442,7 +442,7 @@ class history
       return $r;
     }
   }
-	
+
 	/**
 	 * Gets all information about a given table
 	 * @return table full name
@@ -491,29 +491,31 @@ class history
     }
     return false;
 	}
-	
+
   public static function add($table, $operation, $date, $values=[], $where=[])
   {
     if ( self::check($table) ){
-      
+
     }
   }
-  
+
  /**
   * This checks if the table is not part of the system's tables and makes the script die if a user has not been configured
-  * 
+  *
 	* @return 1
 	*/
   private static function check($table=null){
     if ( !isset(self::$huser, self::$htable, self::$db) ){
       die('One of the key elements has not been configured in history (user? database?)');
     }
+		/*
     if ( !empty($table) ){
       $table = self::$db->tsn($table);
       if ( strpos($table, self::$prefix) === 0 ){
         return false;
       }
     }
+		*/
     return 1;
   }
 
@@ -538,17 +540,17 @@ class history
       return $res;
     }
   }
-  
+
 	/**
 	 * The function used by the \bbn\db\connection trigger
    * This will basically execute the history query if it's configured for.
-   * 
+   *
    * @param string $table The table for which the history is called
    * @param string $kind The type of action: select|update|insert|delete
    * @param string $moment The moment according to the db action: before|after
    * @param array $values key/value array of fields names and fields values selected/inserted/updated
    * @param array $where key/value array of fields names and fields values identifying the row
-   * 
+   *
    * @return bool returns true
 	 */
   public static function trigger(array $cfg){

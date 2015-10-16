@@ -311,6 +311,9 @@ class mvc implements \bbn\mvc\api{
       if ( is_array($obj) ){
         $obj = \bbn\tools::to_object($obj);
       }
+			if ( (gettype($obj) !== 'object') || (get_class($obj) !== 'stdClass') ){
+				die(\bbn\tools::dump("Unexpected output: ".gettype($obj)));
+			}
       $output = new \bbn\mvc\output($obj, $this->get_mode());
       $output->run();
     }

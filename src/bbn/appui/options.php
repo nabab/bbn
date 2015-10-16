@@ -15,16 +15,6 @@ class options
     /** @var array */
     $_defaults = [
     'errors' => [
-      0 => 'login failed',
-      2 => 'password sent',
-      3 => 'no email such as',
-      4 => 'too many attempts',
-      5 => 'impossible to create the user',
-      6 => 'wrong user and/or password',
-      7 => 'different passwords',
-      8 => 'less than 5 mn between emailing password',
-      9 => 'user already exists',
-      10 => 'problem during user creation'
     ],
     'table' => 'bbn_options',
     'cols' => [
@@ -46,13 +36,20 @@ class options
     $this->cfg = \bbn\tools::merge_arrays(self::$_defaults, $cfg);
   }
 
-  public function set_default($cat = 0){
+  public function set_default($cat = 0, $id_parent = false){
+    $cat = $this->from_code($cat, $id_parent);
     $this->default = $cat;
   }
 
-  public function from_code($cat){
+  public function from_code($cat, $id_parent = false){
+    if ( is_string($id_parent) ){
+      $id_parent = $this->db->select_one($this->cfg['table'], $this->cfg['cols']['id'], [
+        $this->cfg['cols']['id_parent'] => $this->default,
+        $this->cfg['cols']['code'] => $id_parent
+      ]);
+    }
     if ( is_string($cat) && ($r = $this->db->select_one($this->cfg['table'], $this->cfg['cols']['id'], [
-      $this->cfg['cols']['id_parent'] => $this->default,
+      $this->cfg['cols']['id_parent'] => $id_parent ? $id_parent : $this->default,
       $this->cfg['cols']['code'] => $cat
     ])) ){
       return $r;
@@ -65,8 +62,8 @@ class options
    * @param int $id La valeur du champ `id` de l'option dans la base de données
    * @return array La liste des catégories
    */
-  public function option($id){
-    $id = $this->from_code($id);
+  public function option($id, $cat = false){
+    $id = $this->from_code($id, $cat);
     if ( \bbn\str\text::is_integer($id) ) {
       $tab = $this->db->tsn($this->cfg['table']);
       $opt = $this->db->get_row($this->get_query()."
@@ -87,8 +84,8 @@ class options
    * @param int $id La valeur du champ `id` de l'option dans la base de données
    * @return string La valeur du champ titre correspondant
    */
-  public function text($id){
-    $id = $this->from_code($id);
+  public function text($id, $cat = false){
+    $id = $this->from_code($id, $cat);
     if ( \bbn\str\text::is_integer($id) ) {
       return $this->db->get_val($this->cfg['table'], $this->cfg['cols']['text'], $this->cfg['cols']['id'], $id);
     }
@@ -102,7 +99,6 @@ class options
    * @return string La valeur du champ titre correspondant
    */
   public function code($id){
-    $id = $this->from_code($id);
     if ( \bbn\str\text::is_integer($id) ) {
       return $this->db->get_val($this->cfg['table'], $this->cfg['cols']['code'], $this->cfg['cols']['id'], $id);
     }
@@ -115,8 +111,8 @@ class options
    * @param string|int $cat La catégorie, sous la forme de son `id`, ou de son nom
    * @return array La liste des options indexée sur leur `id`
    */
-  public function options($cat = null){
-    $cat = $this->from_code($cat);
+  public function options($cat = null, $id_parent = false){
+    $cat = $this->from_code($cat, $id_parent);
     if ( \bbn\str\text::is_integer($cat) ) {
       return $this->db->select_all_by_keys($this->cfg['table'],
         [$this->cfg['cols']['id'], $this->cfg['cols']['text']],
@@ -133,8 +129,8 @@ class options
    * @param string|int $cat La catégorie, sous la forme de son `id`, ou de son nom
    * @return array La liste des options indexée sur leur `id`
    */
-  public function count($cat = null){
-    $cat = $this->from_code($cat);
+  public function count($cat = null, $id_parent = false){
+    $cat = $this->from_code($cat, $id_parent);
     if ( \bbn\str\text::is_integer($cat) ) {
       return $this->db->count($this->cfg['table'], [$this->cfg['cols']['id_parent'] => $cat]);
     }
@@ -164,8 +160,8 @@ class options
    * @param string|int $cat La catégorie, sous la forme de son `id`, ou de son nom
    * @return array Un tableau des caractéristiques de chaque option de la catégorie, indexée sur leur `id`
    */
-  public function full_options($cat = null, $start = 0, $limit = 2000){
-    $cat = $this->from_code($cat);
+  public function full_options($cat = null, $id_parent = false, $start = 0, $limit = 2000){
+    $cat = $this->from_code($cat, $id_parent);
     if ( \bbn\str\text::is_integer($cat, $start, $limit) ) {
       $db =& $this->db;
       $tab = $db->tsn($this->cfg['table']);
@@ -196,10 +192,10 @@ class options
     return false;
   }
 
-  public function tree($cat, $length=128){
+  public function tree($cat, $id_parent = false, $length = 128){
     $length--;
     if ( $length >= 0 ){
-      $cat = $this->from_code($cat);
+      $cat = $this->from_code($cat, $id_parent);
       if ( \bbn\str\text::is_integer($cat) && ($text = $this->text($cat)) ) {
         $res = [
           'id' => $cat,
@@ -228,10 +224,10 @@ class options
     return false;
   }
 
-  public function full_tree($cat, $length=128){
+  public function full_tree($cat, $id_parent = false, $length=128){
     $length--;
     if ( $length >= 0 ) {
-      $cat = $this->from_code($cat);
+      $cat = $this->from_code($cat, $id_parent);
       if (\bbn\str\text::is_integer($cat) && ($text = $this->text($cat))) {
         $res = $this->db->rselect($this->cfg['table'], array_values($this->cfg['cols']), [
           $this->cfg['cols']['id'] => $cat
@@ -305,7 +301,7 @@ class options
 
   public function add($cfg){
     if ( !isset($cfg[$this->cfg['cols']['id_parent']]) ){
-      $cfg[$this->cfg['cols']['id_parent']] = 0;
+      $cfg[$this->cfg['cols']['id_parent']] = $this->default;
     }
     if ( isset($cfg[$this->cfg['cols']['id_parent']], $cfg[$this->cfg['cols']['text']]) ){
       if ( empty($cfg[$this->cfg['cols']['value']]) ){
