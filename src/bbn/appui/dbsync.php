@@ -5,7 +5,7 @@ use \bbn\str\text;
 
 class dbsync
 {
-	
+
 	public static
           /**
            * @var \bbn\db\connection The DB connection
@@ -14,7 +14,7 @@ class dbsync
           $dbs = false,
           $tables = [],
           $dbs_table = 'dbsync';
-  
+
   protected static $methods = array();
 
   private static
@@ -26,8 +26,8 @@ class dbsync
           ],
           $disabled = false,
           $max_retry = 5;
-	
-  
+
+
   final public static function __callStatic($name, $arguments)
   {
     if ( ($name === 'cbf1') || ($name === 'cbf2') ){
@@ -49,7 +49,7 @@ class dbsync
       \bbn\tools::log($a, 'dbsync');
     }
   }
-  
+
   private static function def($dbs, $dbs_table=''){
     if ( empty($dbs) ){
       $dbs = self::$default_cfg;
@@ -71,7 +71,7 @@ class dbsync
     }
   }
 	/**
-	 * @return void 
+	 * @return void
 	 */
 	public static function init(\bbn\db\connection $db, $dbs='', $tables=[], $dbs_table=''){
     self::$db = $db;
@@ -91,7 +91,7 @@ class dbsync
             self::$tables);
     }
 	}
-  
+
   public static function first_call(){
     if ( is_array(self::$dbs) ){
       self::$dbs = new \bbn\db\connection(self::$dbs);
@@ -146,15 +146,15 @@ class dbsync
   public static function check(){
     return ( is_object(self::$db) && (get_class(self::$dbs) === 'bbn\db\connection') );
   }
-  
+
   public static function disable(){
     self::$disabled = 1;
   }
-  
+
   public static function enable(){
     self::$disabled = false;
   }
-  
+
 	/**
 	 * Gets all information about a given table
    *
@@ -200,11 +200,11 @@ class dbsync
     }
     return $cfg;
   }
-  
+
   public static function callback1(\Closure $f){
     self::addMethod('cbf1', $f);
   }
-  
+
   public static function callback2(\Closure $f){
     self::addMethod('cbf2', $f);
   }
@@ -223,9 +223,9 @@ class dbsync
       self::$db->set_error_mode("continue");
       self::$dbs->set_error_mode("continue");
     }
-    
+
     $num_try++;
-    
+
     $to_log = [
       'deleted_sync' => 0,
       'deleted_real' => 0,
@@ -236,8 +236,8 @@ class dbsync
       'num_problems' => 0,
       'problems' => []
     ];
-    
-    
+
+
     $retry = false;
 
     $start = ( $test = self::$dbs->get_one("
@@ -252,7 +252,7 @@ class dbsync
       ['state', '=', 1],
       ['chrono', '<', $start]
     ]);
-    
+
     // Selecting the entries inserted
     $ds = self::$dbs->rselect_all(self::$dbs_table, ['id', 'tab', 'vals', 'chrono'], [
       ['db', 'NOT LIKE', self::$db->current],
@@ -291,7 +291,7 @@ class dbsync
         $retry = 1;
       }
     }
-    
+
 
     // Selecting the entries modified and deleted in the twin DB,
     // ordered by table and rows (so the same go together)
@@ -337,7 +337,7 @@ class dbsync
             ) ? $ds[$i+1]['chrono'] : microtime();
       // Looking for the actions done on this specific record in our database
       // between the twin change and the next (or now if there is no other change)
-      $each = self::$dbs->rselect_all(self::$dbs_table, 
+      $each = self::$dbs->rselect_all(self::$dbs_table,
         ['id', 'chrono', 'action', 'vals'], [
           ['db', 'LIKE', self::$db->current],
           ['tab', 'LIKE', $d['tab']],
@@ -353,7 +353,7 @@ class dbsync
           if ( $e['action'] === 'delete' ){
             if ( $d['action'] === 'update' ){
               if ( !(self::$db->insert_update(
-                      $d['tab'], 
+                      $d['tab'],
                       \bbn\tools::merge_arrays(
                               json_decode($e['vals'], 1),
                               json_decode($d['vals'], 1)
@@ -368,7 +368,7 @@ class dbsync
           else if ( $e['action'] === 'update' ){
             if ( $d['action'] === 'delete' ){
               if ( !(self::$db->insert_update(
-                      $d['tab'], 
+                      $d['tab'],
                       \bbn\tools::merge_arrays(
                               json_decode($d['vals'], 1),
                               json_decode($e['vals'], 1)
@@ -412,8 +412,8 @@ class dbsync
         self::cbf2($d);
       }
     }
-    
-    
+
+
     $res = [];
     foreach ( $to_log as $k => $v ){
       if ( !empty($v) ){

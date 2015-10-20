@@ -648,13 +648,8 @@ class history
               }
             }
             else {
-							if ( !isset($cfg['values'][$s['primary']]) ){
-								$cfg['values'][$s['primary']] = self::$db->new_id($table);
-								$cfg['sql'] = self::$db->get_insert($table, array_keys($cfg['values']));
-							}
               array_push($cfg['history'], [
                 'operation' => 'INSERT',
-								'line' => $cfg['values'][$s['primary']],
                 'column' => self::fcol($s['primary'], $table)
               ]);
             }
@@ -736,12 +731,15 @@ class history
       }
       else if ( $cfg['moment'] === 'after' ){
         if ( isset($cfg['history']) ){
+          if ( $cfg['kind'] === 'insert' ) {
+            $id = self::$db->last_id();
+            foreach ($cfg['history'] as $i => $h) {
+              $cfg['history'][$i]['line'] = $id;
+            }
+          }
           $last = self::$db->last();
           foreach ($cfg['history'] as $i => $h) {
             self::_insert($h);
-          }
-          if ( $cfg['kind'] === 'insert' ) {
-						self::$db->set_last_insert_id($cfg['values'][$s['primary']]);
           }
           self::$db->last_query = $last;
         }

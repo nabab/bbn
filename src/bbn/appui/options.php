@@ -341,21 +341,33 @@ class options
       $cfg[$this->cfg['cols']['id_parent']] = $this->default;
     }
     if ( isset($cfg[$this->cfg['cols']['id_parent']], $cfg[$this->cfg['cols']['text']]) ){
+      if ( isset($cfg[$this->cfg['cols']['value']]) &&
+        \bbn\str\text::is_json($cfg[$this->cfg['cols']['value']])
+      ){
+        $cfg[$this->cfg['cols']['value']] = json_decode($cfg[$this->cfg['cols']['value']], 1);
+      }
       if ( empty($cfg[$this->cfg['cols']['value']]) ){
         $cfg[$this->cfg['cols']['value']] = [];
-        foreach ( $cfg as $k => $c ){
-          if ( ($k !== 'items') && !in_array($k, $this->cfg['cols']) ){
-            $cfg[$this->cfg['cols']['value']][$k] = \bbn\str\text::is_json($c) ? json_decode($c, 1) : $c;
-          }
+      }
+      if ( isset($cfg['num_children']) ){
+        unset($cfg['num_children']);
+      }
+      if ( isset($cfg['items']) ){
+        unset($cfg['items']);
+      }
+      foreach ( $cfg as $k => $c ){
+        if ( !in_array($k, $this->cfg['cols']) ){
+          $cfg[$this->cfg['cols']['value']][$k] = \bbn\str\text::is_json($c) ? json_decode($c, 1) : $c;
+          unset($cfg[$k]);
         }
       }
-      if ( !empty($cfg[$this->cfg['cols']['value']]) && is_array($cfg[$this->cfg['cols']['value']]) ){
+      if ( is_array($cfg[$this->cfg['cols']['value']]) ){
         $cfg[$this->cfg['cols']['value']] = json_encode($cfg[$this->cfg['cols']['value']]);
       }
       if ( $this->db->insert($this->cfg['table'], [
         $this->cfg['cols']['id_parent'] => $cfg[$this->cfg['cols']['id_parent']],
         $this->cfg['cols']['text'] => $cfg[$this->cfg['cols']['text']],
-        $this->cfg['cols']['code'] => isset($cfg[$this->cfg['cols']['code']]) ? $cfg[$this->cfg['cols']['code']] : null,
+        $this->cfg['cols']['code'] => !empty($cfg[$this->cfg['cols']['code']]) ? $cfg[$this->cfg['cols']['code']] : null,
         $this->cfg['cols']['value'] => isset($cfg[$this->cfg['cols']['value']]) ? $cfg[$this->cfg['cols']['value']] : '',
         $this->cfg['cols']['active'] => 1
       ]) ){
@@ -375,7 +387,9 @@ class options
 
   public function set($id, $cfg){
     if ( !empty($id) && !empty($cfg) && is_int($id) ){
-      if ( \bbn\str\text::is_json($cfg[$this->cfg['cols']['value']]) ){
+      if ( isset($cfg[$this->cfg['cols']['value']]) &&
+        \bbn\str\text::is_json($cfg[$this->cfg['cols']['value']])
+      ){
         $cfg[$this->cfg['cols']['value']] = json_decode($cfg[$this->cfg['cols']['value']], 1);
       }
       if ( empty($cfg[$this->cfg['cols']['value']]) ){
