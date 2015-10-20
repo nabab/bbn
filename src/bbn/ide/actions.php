@@ -35,6 +35,12 @@ class actions {
                 $arg = array_slice($args, 0 , count($args)-2);
                 $new_path = count($arg) > 0 ? implode("/", $arg).'/_ctrl.'.$f['ext'] : '_ctrl.'.$f['ext'];
               }
+              // If MVC file is not controller and no content, we delete the file
+              else if ( empty($data['code']) && ($f['url'] !== 'php') ){
+                $new_path = $f['fpath'].substr(implode("/", $arg), 0 , -3).$f['ext'];
+                unlink($new_path);
+                return ['path' => $new_path];
+              }
               else{
                 $arg = array_slice($args, 0 , count($args)-1);
                 $new_path = substr(implode("/", $arg), 0 , -3).$f['ext'];
@@ -449,7 +455,7 @@ class actions {
     }
     return ['data' => "Tab is not in session."];
   }
-  
+
   public function export($data){
     if ( isset($data['dir'], $data['name'], $data['path'], $data['type']) ){
       $directories = new directories($this->db);
