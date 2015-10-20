@@ -677,7 +677,7 @@ EOD;
 	 */
 	public function add($path, $data=[], $internal = false)
 	{
-    if ( $route = $this->mvc->get_route($path, $internal ? 'internal' : 'public') ){
+    if ( $route = $this->mvc->get_route($path, $internal ? 'private' : 'public') ){
       $o = new controller($this->mvc, $route, $data);
       $o->process();
       return $o;

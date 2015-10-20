@@ -375,15 +375,25 @@ class options
 
   public function set($id, $cfg){
     if ( !empty($id) && !empty($cfg) && is_int($id) ){
+      if ( \bbn\str\text::is_json($cfg[$this->cfg['cols']['value']]) ){
+        $cfg[$this->cfg['cols']['value']] = json_decode($cfg[$this->cfg['cols']['value']], 1);
+      }
       if ( empty($cfg[$this->cfg['cols']['value']]) ){
         $cfg[$this->cfg['cols']['value']] = [];
-        foreach ( $cfg as $k => $c ){
-          if ( ($k !== 'items') && ($k !== 'num_children') && !in_array($k, $this->cfg['cols']) ){
-            $cfg[$this->cfg['cols']['value']][$k] = \bbn\str\text::is_json($c) ? json_decode($c, 1) : $c;
-          }
+      }
+      if ( isset($cfg['num_children']) ){
+        unset($cfg['num_children']);
+      }
+      if ( isset($cfg['items']) ){
+        unset($cfg['items']);
+      }
+      foreach ( $cfg as $k => $c ){
+        if ( !in_array($k, $this->cfg['cols']) ){
+          $cfg[$this->cfg['cols']['value']][$k] = \bbn\str\text::is_json($c) ? json_decode($c, 1) : $c;
+          unset($cfg[$k]);
         }
       }
-      if ( !empty($cfg[$this->cfg['cols']['value']]) && is_array($cfg[$this->cfg['cols']['value']]) ){
+      if ( is_array($cfg[$this->cfg['cols']['value']]) ){
         $cfg[$this->cfg['cols']['value']] = json_encode($cfg[$this->cfg['cols']['value']]);
       }
       if ( $this->db->update($this->cfg['table'], [

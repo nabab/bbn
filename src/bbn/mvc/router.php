@@ -22,7 +22,7 @@ class router {
      * The list of types of controllers
      * @var array
      */
-    $controllers = ['cli', 'dom', 'content', 'public', 'internal'],
+    $controllers = ['cli', 'dom', 'content', 'public', 'private'],
     /**
      * The list of filetypes for each non controller element
      * @var array
@@ -68,7 +68,7 @@ class router {
       'cli' => [],
       'dom' => [],
       'public' => [],
-      'internal' => [],
+      'private' => [],
       'model' => [],
       'html' => [],
       'js' => [],
