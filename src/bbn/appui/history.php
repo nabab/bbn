@@ -285,9 +285,12 @@ class history
       if ( count($columns) === 0 ){
         $columns = array_keys(self::$db->get_columns($table));
       }
+			if ( $when >= time() ){
+				return self::$db->rselect($table, $columns, [self::$db->get_primary($table)[0] => end($where)]);
+			}
       foreach ( $columns as $col ){
         $fc = self::$db->current.'.'.self::$db->col_full_name($col, $table);
-        if ( !($r[$col] = self::$db->get_one("
+        $r[$col] = self::$db->get_one("
           SELECT old
           FROM bbn_history
           WHERE ".self::$db->escape('column')." LIKE ?
@@ -301,9 +304,7 @@ class history
           LIMIT 1",
           $fc,
           end($where),
-          $when)) ){
-          $r[$col] = self::$db->get_val($table, $col, $where);
-        }
+          $when);
       }
       return $r;
     }
