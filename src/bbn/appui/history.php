@@ -305,6 +305,9 @@ class history
           $fc,
           end($where),
           $when);
+				if ( $r[$col] === false ){
+					$r[$col] = self::$db->get_val($table, $col, $where);
+				}
       }
       return $r;
     }
