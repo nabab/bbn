@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
  * Copyright (C) 2014 BBN
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,7 +19,7 @@
 namespace bbn\appui;
 
 class cron extends \bbn\obj{
-  
+
 	private
           /* @var \bbn\db\connection The DB connection */
           $db = false,
@@ -32,7 +32,7 @@ class cron extends \bbn\obj{
           $ok = false,
           $enabled = true,
           $timeout = 50;
-	
+
   public function __construct(\bbn\mvc\controller $ctrl, $cfg = []) {
     if ( is_array($cfg) ){
       $this->ctrl = $ctrl;
@@ -48,14 +48,14 @@ class cron extends \bbn\obj{
       $this->jtable = $this->prefix.'cron_journal';
     }
   }
-  
+
   public function check(){
     if ( $this->table && $this->db ){
       return 1;
     }
     return false;
   }
-  
+
   public function get_article($id){
     if ( $this->check() && ($data = $this->db->rselect($this->jtable, [], ['id' => $id])) ){
       $data['cfg'] = json_decode($data['cfg'], 1);
@@ -63,7 +63,7 @@ class cron extends \bbn\obj{
     }
     return false;
   }
-  
+
   public function get_cron($id){
     if ( $this->check() ){
       $data = $this->db->rselect($this->table, [], ['id' => $id]);
@@ -71,7 +71,7 @@ class cron extends \bbn\obj{
       return $data;
     }
   }
-  
+
   public function start($id_cron){
     if ( $this->check() ) {
       $cron = $this->get_cron($id_cron);
@@ -93,7 +93,7 @@ class cron extends \bbn\obj{
     }
     return false;
   }
-  
+
   public function finish($id, $res = ''){
     if ( ($article = $this->get_article($id)) &&
             ($cron = $this->get_cron($article['id_cron'])) ){
@@ -119,7 +119,7 @@ class cron extends \bbn\obj{
     }
     return false;
   }
-  
+
   public function get_next_date($frequency, $tm = false){
     if ( is_string($frequency) && (strlen($frequency) >= 2) ){
       if ( !$tm ){
@@ -161,12 +161,12 @@ class cron extends \bbn\obj{
     }
     return false;
   }
-  
+
   public function get_next($id_cron = null){
     if ( $this->check() && ($data = $this->db->get_row("
         SELECT *
         FROM {$this->table}
-        WHERE `active` = 1 
+        WHERE `active` = 1
         AND `next` < ?".
         ( is_int($id_cron) ? " AND `id` = $id_cron" : "" )."
         ORDER BY `priority` ASC, `next` ASC
@@ -177,7 +177,7 @@ class cron extends \bbn\obj{
       return $data;
     }
   }
-  
+
   public function is_running($id_cron){
     if ( $this->check() && is_int($id_cron) ){
       return $this->db->get_one("
@@ -188,7 +188,7 @@ class cron extends \bbn\obj{
         $id_cron) ? true : false;
     }
   }
-  
+
   private function get_runner($id_cron){
     if ( $this->check() && is_int($id_cron) ){
       $d = $this->db->get_row("

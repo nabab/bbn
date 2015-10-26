@@ -599,6 +599,24 @@ class tools
     }
   }
 
+	public static function find(array $ar, array $where){
+		if ( !empty($where) ){
+			foreach ( $ar as $i => $v ){
+				$ok = 1;
+				foreach ( $where as $k => $w ){
+					if ( !isset($v[$k]) || ($v[$k] !== $w) ){
+						$ok = false;
+						break;
+					}
+				}
+				if ( $ok ){
+					return $i;
+				}
+			}
+		}
+		return false;
+	}
+
   /**
    *
    *

@@ -66,10 +66,9 @@ class options
     $id = $this->from_code($id, $cat);
     if ( \bbn\str\text::is_integer($id) ) {
       $tab = $this->db->tsn($this->cfg['table']);
-      $opt = $this->db->get_row($this->get_query()."
-        AND " . $this->db->cfn($this->cfg['cols']['id'], $tab, 1) . " = ?
-        GROUP BY " . $this->db->cfn($this->cfg['cols']['id'], $tab, 1),
-        $id);
+      $opt = $this->get_row([
+        $this->db->cfn($this->cfg['cols']['id'], $tab) => $id
+      ]);
       if ($opt) {
         $this->get_value($id, $opt);
         return $opt;
@@ -137,21 +136,46 @@ class options
     return false;
   }
 
-  protected function get_query(){
+  protected function get_rows($where, $start = 0, $limit = 2000){
     $tab = $this->db->tsn($this->cfg['table']);
+    $db =& $this->db;
     $cols = [];
-    foreach ( $this->cfg['cols'] AS $k => $col ){
-      if ( $k !== 'active' ){
-        array_push($cols, $this->db->cfn($col, $tab, 1));
+    if ( \bbn\str\text::is_integer($start, $limit) && !empty($where) ){
+      if ( !isset($where[$this->cfg['cols']['active']]) ){
+        $where[$this->cfg['cols']['active']] = 1;
+      }
+      if ( $wst = $db->get_where($where, $tab) ){
+        foreach ( $this->cfg['cols'] AS $k => $col ){
+          if ( $k !== 'active' ){
+            array_push($cols, $db->cfn($col, $tab, 1));
+          }
+        }
+        array_push($cols, "COUNT(".$db->escape($tab.'2').'.'.$db->escape($this->cfg['cols']['id']).") AS num_children ");
+        $q = "SELECT ".implode(", ", $cols)."
+          FROM ".$db->tsn($tab, 1)."
+            LEFT JOIN ".$db->tsn($tab, 1)." AS ".$db->escape($tab.'2')."
+              ON ".$db->cfn($this->cfg['cols']['id_parent'], $tab.'2', 1)." = ".$db->cfn($this->cfg['cols']['id'], $tab, 1)."
+              AND ".$db->cfn($this->cfg['cols']['active'], $tab.'2', 1)." = 1
+          $wst
+          AND ".$this->db->cfn($this->cfg['cols']['active'], $tab, 1)." = 1
+          GROUP BY " . $this->db->cfn($this->cfg['cols']['id'], $tab, 1)."
+          ORDER BY text
+          LIMIT $start, $limit";
+        $args = array_values($where);
+        if ( class_exists('\\bbn\\appui\\history') && \bbn\appui\history::is_enabled() ){
+          array_push($args, 1);
+        }
+        return $this->db->get_rows($q, $args);
       }
     }
-    array_push($cols, "COUNT(".$this->db->escape($tab.'2').'.'.$this->db->escape($this->cfg['cols']['id']).") AS num_children ");
-    return "SELECT ".implode(", ", $cols)."
-      FROM ".$this->db->tsn($tab, 1)."
-        LEFT JOIN ".$this->db->tsn($tab, 1)." AS ".$this->db->escape($tab.'2')."
-          ON ".$this->db->cfn($this->cfg['cols']['id_parent'], $tab.'2', 1)." = ".$this->db->cfn($this->cfg['cols']['id'], $tab, 1)."
-          AND ".$this->db->cfn($this->cfg['cols']['active'], $tab.'2', 1)." = 1
-      WHERE ".$this->db->cfn($this->cfg['cols']['active'], $tab, 1)." = 1";
+    return false;
+  }
+
+  protected function get_row($where){
+    if ( $res = $this->get_rows($where, 0, 1) ){
+      return $res[0];
+    }
+    return false;
   }
 
   /**
@@ -161,33 +185,22 @@ class options
    * @return array Un tableau des caractéristiques de chaque option de la catégorie, indexée sur leur `id`
    */
   public function full_options($cat = null, $id_parent = false, $start = 0, $limit = 2000){
-    $cat = $this->from_code($cat, $id_parent);
-    if ( \bbn\str\text::is_integer($cat, $start, $limit) ) {
-      $db =& $this->db;
-      $tab = $db->tsn($this->cfg['table']);
-      $opts = $db->get_rows($this->get_query()."
-        AND ".$db->cfn($this->cfg['cols']['id_parent'], $tab, 1)." = ?
-        GROUP BY ".$db->cfn($this->cfg['cols']['id'], $tab, 1)."
-        ORDER BY ".$db->cfn($this->cfg['cols']['text'], $tab, 1)."
-        LIMIT $start, $limit",
-        $cat);
-      $res = [];
-      // Tells if we sort by order property or leave it by text
+    if ( $opts = $this->native_options($cat, $id_parent, $start, $limit) ){
+      foreach ($opts as $i => $o) {
+        $this->get_value($o['id'], $opts[$i]);
+      }
       $order = 1;
-      if (!empty($opts)) {
-        foreach ($opts as $i => $o) {
-          $res[$o['id']] = $o;
-          $this->get_value($o['id'], $res[$o['id']]);
-          // If only one does not have the order property defined we don't sort
-          if ( !isset($res[$o['id']]['order']) ){
-            $order = false;
-          }
-        }
-        if ( $order ) {
-          \bbn\tools::sort_by($res, 'order');
+      foreach ($opts as $i => $o) {
+        // If only one does not have the order property defined we don't sort
+        if ( !isset($o['order']) ){
+          $order = false;
+          break;
         }
       }
-      return $res;
+      if ( $order ) {
+        \bbn\tools::sort_by($opts, 'order');
+      }
+      return $opts;
     }
     return false;
   }
@@ -201,30 +214,7 @@ class options
   public function native_options($cat = null, $id_parent = false, $start = 0, $limit = 2000){
     $cat = $this->from_code($cat, $id_parent);
     if ( \bbn\str\text::is_integer($cat, $start, $limit) ) {
-      $db =& $this->db;
-      $tab = $db->tsn($this->cfg['table']);
-      $opts = $db->get_rows($this->get_query()."
-        AND ".$db->cfn($this->cfg['cols']['id_parent'], $tab, 1)." = ?
-        GROUP BY ".$db->cfn($this->cfg['cols']['id'], $tab, 1)."
-        ORDER BY ".$db->cfn($this->cfg['cols']['text'], $tab, 1)."
-        LIMIT $start, $limit",
-        $cat);
-      $res = [];
-      // Tells if we sort by order property or leave it by text
-      $order = 1;
-      if (!empty($opts)) {
-        foreach ($opts as $i => $o) {
-          array_push($res, $o);
-          // If only one does not have the order property defined we don't sort
-          if ( !isset($res[$o['id']]['order']) ){
-            $order = false;
-          }
-        }
-        if ( $order ) {
-          \bbn\tools::sort_by($res, 'order');
-        }
-      }
-      return $res;
+      return $this->get_rows([$this->cfg['cols']['id_parent'] => $cat], $start, $limit);
     }
     return false;
   }
@@ -289,7 +279,7 @@ class options
           }
           else if ( $res['code'] === 'bbn_options' ){
             $res['items'] = $this->full_options();
-            if ( defined('BBN_OPTIONS_URL') ){
+            if ( defined('BBN_OPTIONS_URL') && $res['items'] ){
               array_walk($res['items'], function(&$a){
                 $a['link'] = BBN_OPTIONS_URL.$a['id'];
               });
@@ -410,24 +400,93 @@ class options
       if ( is_array($cfg[$this->cfg['cols']['value']]) ){
         $cfg[$this->cfg['cols']['value']] = json_encode($cfg[$this->cfg['cols']['value']]);
       }
-      if ( $this->db->update($this->cfg['table'], [
+      return $this->db->update($this->cfg['table'], [
         $this->cfg['cols']['text'] => $cfg[$this->cfg['cols']['text']],
         $this->cfg['cols']['code'] => !empty($cfg[$this->cfg['cols']['code']]) ? $cfg[$this->cfg['cols']['code']] : null,
         $this->cfg['cols']['value'] => isset($cfg[$this->cfg['cols']['value']]) ? $cfg[$this->cfg['cols']['value']] : ''
       ], [
         $this->cfg['cols']['id'] => $id
-      ]) ){
-        return 1;
-      }
+      ]);
     }
     return false;
   }
 
   public function remove($id){
-    if ( !empty($id) && is_int($id) ){
+    $id = $this->from_code($id);
+    if ( is_int($id) ){
       return $this->db->delete($this->cfg['table'], [
         $this->cfg['cols']['id'] => $id
       ]);
+    }
+    return false;
+  }
+
+  public function get_id_parent($id){
+    if ( $id = $this->from_code($id) ){
+      return $this->db->get_val(
+        $this->cfg['table'],
+        $this->cfg['cols']['id_parent'],
+        ['id' => $id]);
+    }
+    return false;
+  }
+
+  public function parent($id){
+    if ( $id_parent = $this->get_id_parent($id) ){
+      return $this->option($id_parent);
+    }
+    return false;
+  }
+
+  public function order($id, $pos){
+    if ( $parent = $this->parent($id) ){
+      if ( !empty($parent['orderable']) ){
+        $options = $this->full_options($parent['id']);
+        // The order really changes
+        if ( $options[$id]['order'] !== $pos ){
+          $idx = \bbn\tools::find($options, ['id' => $id]);
+          if ( $idx !== false ){
+
+          }
+
+
+
+
+          $i = 1;
+          $new_order = [];
+          foreach ( $options as $k => $o ){
+            if ( $i === $pos ){
+
+            }
+            else if ( $k === $id ){
+
+            }
+            if ( !isset($o['order']) || $o['order'] !== $i ){
+
+            }
+          }
+        }
+        var_dump($options);
+      }
+    }
+    return false;
+  }
+
+  public function is_parent($id, $id_parent){
+    $id = $this->from_code($id);
+    $id_parent = $this->from_code($id_parent);
+    // Preventing infinite loop
+    $done = [$id];
+    if ( \bbn\str\text::is_integer($id, $id_parent) ){
+      while ( $id = $this->get_id_parent($id) ){
+        if ( $id === $id_parent ){
+          return true;
+        }
+        if ( in_array($id, $done) ){
+          break;
+        }
+        array_push($done, $id);
+      }
     }
     return false;
   }

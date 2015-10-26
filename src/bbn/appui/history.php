@@ -280,38 +280,50 @@ class history
     if ( !\bbn\str\text::is_number($when) ){
       $when = strtotime($when);
     }
-    $when = (int) $when;
-    if ( \bbn\str\text::check_name($table) && ($when > 0) && (count($where) === 1) ){
-      if ( count($columns) === 0 ){
-        $columns = array_keys(self::$db->get_columns($table));
-      }
-			if ( $when >= time() ){
-				return self::$db->rselect($table, $columns, [self::$db->get_primary($table)[0] => end($where)]);
-			}
-      foreach ( $columns as $col ){
-        $fc = self::$db->current.'.'.self::$db->col_full_name($col, $table);
-        $r[$col] = self::$db->get_one("
-          SELECT old
-          FROM bbn_history
-          WHERE ".self::$db->escape('column')." LIKE ?
-          AND ".self::$db->escape('line')." = ?
-          AND (
-            ".self::$db->escape('operation')." LIKE 'UPDATE'
-            OR ".self::$db->escape('operation')." LIKE 'INSERT'
-          )
-          AND chrono >= ?
-          ORDER BY chrono ASC
-          LIMIT 1",
-          $fc,
-          end($where),
-          $when);
-				if ( $r[$col] === false ){
-					$r[$col] = self::$db->get_val($table, $col, $where);
-				}
-      }
-      return $r;
+    if ( !\bbn\str\text::check_name($table) ){
+			die("The table $table has an incorrect name");
+		}
+		if ( !\bbn\str\text::is_number($when) || ($when <= 0) ){
+			die("The date $when is incorrect");
+		}
+		if ( !($primary = self::$db->get_unique_primary($table)) ){
+			die("The table $table doesn't have a unique primary");
+		}
+		if ( !isset($where[$primary]) ){
+			die("The primary key $primary needs to be sent");
+		}
+    if ( count($columns) === 0 ){
+      $columns = array_keys(self::$db->get_columns($table));
     }
-    return false;
+		if ( $when >= time() ){
+			return self::$db->rselect($table, $columns, [
+				$primary => $where[$primary]
+			]);
+		}
+		if ( $when < self::get_creation_date($table, $where[$primary]) ){
+			return false;
+		}
+    foreach ( $columns as $col ){
+      $fc = self::$db->current.'.'.self::$db->col_full_name($col, $table);
+      $r[$col] = self::$db->get_one("
+        SELECT old
+        FROM bbn_history
+        WHERE ".self::$db->escape('column')." LIKE ?
+        AND ".self::$db->escape('line')." = ?
+        AND ".self::$db->escape('operation')." LIKE 'UPDATE'
+        AND chrono >= ?
+        ORDER BY chrono ASC
+        LIMIT 1",
+        $fc,
+        $where[$primary],
+        $when);
+			if ( $r[$col] === false ){
+				$r[$col] = self::$db->get_val($table, $col, [
+					$primary => $where[$primary]
+				]);
+			}
+    }
+    return $r;
   }
 
   public static function get_val_back($table, $column, array $where, $when){
