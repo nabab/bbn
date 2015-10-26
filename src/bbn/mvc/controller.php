@@ -351,9 +351,8 @@ EOD;
     if ( !class_exists('lessc') ){
       die("No less class, check composer");
     }
-    $less = new \lessc();
     if ( $r = $this->get_view($path, 'css') ) {
-      return '<style scoped>' . \CssMin::minify($less->compile($r)) . '</style>';
+      return '<style scoped>' . \CssMin::minify($r) . '</style>';
     }
 	}
 

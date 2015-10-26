@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * Copyright (C) 2014 BBN
  *
  * This program is free software: you can redistribute it and/or modify
@@ -73,24 +73,24 @@ class view{
 			if ( empty($this->content) ){
 				return '';
 			}
-      $res = is_array($data) ? \bbn\tpl::render($this->content, $data) : $this->content;
       switch ( $this->ext ){
         case 'js':
-          break;
+					return $this->content;
         case 'coffee':
-          break;
+					return $this->content;
         case 'css':
-          break;
+					return $this->content;
         case 'less':
-          break;
+			    $less = new \lessc();
+					return $less->compile($this->content);
         case 'scss':
-          break;
+					return $this->content;
         case 'css':
-          break;
+					return $this->content;
         case 'html':
+		      return is_array($data) ? \bbn\tpl::render($this->content, $data) : $this->content;
           break;
       }
-			return $res;
 		}
 		return false;
 	}

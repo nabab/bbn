@@ -190,17 +190,18 @@ class options
         $this->get_value($o['id'], $opts[$i]);
       }
       $order = 1;
+      $res = [];
       foreach ($opts as $i => $o) {
         // If only one does not have the order property defined we don't sort
+        $res[$o['id']] = $o;
         if ( !isset($o['order']) ){
           $order = false;
-          break;
         }
       }
       if ( $order ) {
-        \bbn\tools::sort_by($opts, 'order');
+        \bbn\tools::sort_by($res, 'order');
       }
-      return $opts;
+      return $res;
     }
     return false;
   }
