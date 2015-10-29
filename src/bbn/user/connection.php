@@ -11,7 +11,7 @@ namespace bbn\user;
  * @copyright BBN Solutions
  * @since Apr 4, 2011, 23:23:55 +0000
  * @category  Authentication
- * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @license   http://opensource.org/licenses/MIT MIT
  * @version 0.2r89
  * @todo Groups and hotlinks features
  * @todo Implement Cache for session requests' results?
@@ -94,7 +94,7 @@ class connection
             ],
             /*
              * Password saving encryption
-             * @var string 
+             * @var string
              */
             'encryption' => 'sha1',
             /*
@@ -104,14 +104,14 @@ class connection
             'conditions' => [],
             /*
              * Additional fields to select from the users' table
-             * They will become property 
+             * They will become property
              * Their names mustn't interfere with existing properties
-             * @var array 
+             * @var array
              */
             'additional_fields' => [],
             /*
              * The session name
-             * @var string 
+             * @var string
              */
             'sess_name' => BBN_SESS_NAME,
             /*
@@ -121,17 +121,17 @@ class connection
             'sess_user' => 'user',
             /*
              * length in minutes of the session regeneration (can be doubled)
-             * @var integer 
+             * @var integer
              */
             'sess_length' => 5,
             /*
              * Number of times a user can try to log in in the period retry_length
-             * @var integer 
+             * @var integer
              */
             'max_attempts' => 5,
             /*
              * User ban's length in minutes after max attempts is reached
-             * @var integer 
+             * @var integer
              */
             'retry_length' => 5,
             /*
@@ -145,7 +145,7 @@ class connection
              */
             'hotlinks' => false
           ];
-  
+
 	protected
           /** @var string */
           $error = null,
@@ -173,7 +173,7 @@ class connection
           $user_cfg,
           /** @var array */
           $fields;
-          
+
 
 	public
           /** @var \bbn\db\connection */
@@ -189,12 +189,12 @@ class connection
   {
     return \bbn\str\text::genpwd(32, 16);
   }
-  
+
 	/**
    * Creates a magic string which will be used for hotlinks
    * The hash is stored in the database
    * The key is sent to the user
-   * 
+   *
 	 * @return array
 	 */
   public static function make_magic_string()
@@ -205,15 +205,15 @@ class connection
       'hash' => hash('sha256', $key)
     ];
   }
-  
+
   protected static function is_magic_string($key, $hash)
   {
     return ( hash('sha256', $key) === $hash );
   }
-  
-  
+
+
 	/**
-	 * @return string 
+	 * @return string
 	 */
   public function get_error(){
     return ( !is_null($this->error) && isset($this->cfg['errors'][$this->error]) ) ?
@@ -242,12 +242,12 @@ class connection
   }
 
   /**
-	 * @return \bbn\user\connection 
+	 * @return \bbn\user\connection
 	 */
 	public function __construct(\bbn\db\connection $db, array $cfg, $credentials='')
 	{
 		$this->db = $db;
-		
+
     $this->user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
     $this->ip_address = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
 
@@ -258,7 +258,7 @@ class connection
         die("Wrong configuration: the column's name $f is illegal!");
       }
     }
-    
+
     /*
      * The selection comprises the defined fields of the users table
      * Plus a bunch of user-defined additional fields in the same table
@@ -266,12 +266,12 @@ class connection
     $this->fields = \bbn\tools::merge_arrays($this->cfg['arch']['users'], $this->cfg['additional_fields']);
 
     // Case where the user logs in
-    // Allowing the use of a simple array [user, pass] 
+    // Allowing the use of a simple array [user, pass]
     if ( isset($credentials[0], $credentials[1]) ) {
       $credentials['user'] = $credentials[0];
       $credentials['pass'] = $credentials[1];
     }
-    
+
     // Expecting array with user and pass keys
     if ( isset($credentials['user'], $credentials['pass']) ) {
       $this->_identify($credentials);
@@ -281,12 +281,12 @@ class connection
 		else {
       $this->check_session();
 		}
-    
+
     return $this;
 	}
-  
+
 	/**
-	 * @return \bbn\user\connection 
+	 * @return \bbn\user\connection
 	 */
 	private function _init_session()
   {
@@ -315,15 +315,15 @@ class connection
       ];
 
       $this->save_session();
-      
+
       $this->auth = 1;
-      
+
     }
     return $this;
   }
-  
+
 	/**
-	 * @return \bbn\user\connection 
+	 * @return \bbn\user\connection
 	 */
 	private function _login()
   {
@@ -336,9 +336,9 @@ class connection
   /**
    * Gathers all the information about a user and puts it in the session
    * The user's table data can be sent as argument if it has already been fetched
-   * 
+   *
    * @param array $d The user's table data
-   * 
+   *
    * @return \bbn\user\connection
    */
   private function _user_info(array $d=null){
@@ -432,9 +432,9 @@ class connection
 
   /**
    * Checks if the user has the given permission
-   * 
+   *
    * @param string $name The name of the permission
-   * 
+   *
    * @return bool
    */
   public function has_permission($name, $check_admin=1){
@@ -446,12 +446,12 @@ class connection
     }
     return ( $check_admin && $this->is_admin() );
   }
-  
+
   /**
    * Checks if the user has the given permission and dies otherwise
-   * 
+   *
    * @param string $name The name of the permission
-   * 
+   *
    * @return void
    */
   public function check_permission($name, $check_admin=1){
@@ -462,12 +462,12 @@ class connection
       die("You don't have the requested permission ($name)");
     }
   }
-  
+
   /**
-   * Changes the data in the user's table 
-   * 
+   * Changes the data in the user's table
+   *
    * @param array $d The new data
-   * 
+   *
    * @return bool
    */
   public function update_info(array $d)
@@ -509,12 +509,12 @@ class connection
     }
     return $this;
   }
-  
+
   private function _check_password($pass_given, $pass_stored)
   {
     return ($this->_crypt($pass_given) ===  $pass_stored);
   }
-  
+
   private function _crypt($st){
     if ( !function_exists($this->cfg['encryption']) ){
       die("You need the PHP function {$this->cfg['encryption']} to have the user connection class working");
@@ -550,7 +550,7 @@ class connection
 
         $this->id = $d['id'];
         $this->_user_info($d);
-        
+
        // Canceling authentication if num_attempts > max_attempts
         if ( !$this->check_attempts() ){
           $this->error = 4;
@@ -583,9 +583,9 @@ class connection
     }
     return false;
 	}
-  
+
 	/**
-	 * @return \bbn\user\connection 
+	 * @return \bbn\user\connection
 	 */
   public function set_session($attr){
     if ( isset($_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]) ){
@@ -616,14 +616,14 @@ class connection
 	 * @return bool
 	 */
   public function has_session($attr){
-    return ( 
-            is_string($attr) && 
+    return (
+            is_string($attr) &&
             isset($_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']][$attr])
            );
   }
 
   /**
-	 * @return \bbn\user\connection 
+	 * @return \bbn\user\connection
 	 */
   public function save_session() {
     $p =& $this->cfg['arch']['sessions'];
@@ -641,7 +641,7 @@ class connection
   }
 
   /**
-	 * @return \bbn\user\connection 
+	 * @return \bbn\user\connection
 	 */
   public function close_session() {
     $p =& $this->cfg['arch']['sessions'];
@@ -663,7 +663,7 @@ class connection
 		$_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']] = [];
     return $this;
   }
-  
+
   /*
    * @return bool
    */
@@ -677,7 +677,7 @@ class connection
     }
     return true;
   }
-  
+
   /*
    * return \bbn\user\connection
    */
@@ -691,7 +691,7 @@ class connection
     }
     return $this;
   }
-  
+
   /*
    * return \bbn\user\connection
    */
@@ -732,7 +732,7 @@ class connection
     }
     return $this;
   }
-  
+
   /*
    * return \bbn\user\connection
    */
@@ -757,38 +757,38 @@ class connection
 	}
 
 	/**
-	 * @return bool 
+	 * @return bool
 	 */
 	public function check_session()
 	{
     // If this->id is set it means we've already looked it up
        // \bbn\tools::hdump($this->sess_cfg, $this->has_session('fingerprint'), $this->get_print($this->get_session('fingerprint')), $this->sess_cfg['fingerprint']);
 		if ( !$this->id ) {
-      
+
       // The user ID must be in the session
 			if ( $this->has_session('id') ) {
         $this->id = $this->get_session('id');
-        
+
         $this->_sess_info();
 
         if ( isset($this->sess_cfg['fingerprint']) && $this->has_session('fingerprint') &&
           ($this->get_print($this->get_session('fingerprint')) === $this->sess_cfg['fingerprint']) ){
           $this->auth = 1;
           $this->_user_info()->save_session();
-          
+
         }
 			}
 		}
 		return $this->auth;
 	}
-  
+
   public function get_id()
   {
     if ( $this->check() ) {
       return $this->id;
     }
   }
-  
+
   public function expire_hotlink($id){
     return $this->db->update($this->cfg['tables']['hotlinks'],
             [$this->cfg['arch']['hotlinks']['expire'] => date('Y-m-d H:i:s')],
@@ -813,7 +813,7 @@ class connection
     }
     return false;
   }
-  
+
 	/**
 	 * @return boolean
 	 */
@@ -888,7 +888,7 @@ class connection
   }
 
 	/**
-	 * @return void 
+	 * @return void
 	 */
 	public function set_password($old_pass, $new_pass)
 	{
@@ -906,7 +906,7 @@ class connection
 	}
 
   	/**
-	 * @return boolean 
+	 * @return boolean
 	 */
 	public function force_password($pass)
 	{

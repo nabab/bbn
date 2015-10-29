@@ -51,6 +51,19 @@ class history
   }
 
   /**
+   * @return number|false
+   */
+  public static function valid_date($d){
+    if ( !\bbn\str\text::is_number($d) ){
+      $d = strtotime($d);
+    }
+    if ( \bbn\str\text::is_number($d) && ($d > 0) ){
+      return $d;
+    }
+    return false;
+  }
+
+  /**
 	 * @return void
 	 */
 	public static function init(\bbn\db\connection $db, $cfg = [])
@@ -232,7 +245,7 @@ class history
 
   public static function get_next_update($table, $date, $id, $column=''){
     if ( \bbn\str\text::check_name($table) &&
-      \bbn\time\date::validateSQL($date) &&
+      ($date = self::valid_date($date)) &&
       is_int($id) &&
       (empty($column) || \bbn\str\text::check_name($column))
     ){
@@ -255,7 +268,7 @@ class history
 
   public static function get_prev_update($table, $date, $id, $column=''){
     if ( \bbn\str\text::check_name($table) &&
-      \bbn\time\date::validateSQL($date) &&
+      ($date = self::valid_date($date)) &&
       is_int($id) &&
       (empty($column) || \bbn\str\text::check_name($column))
     ){
@@ -277,7 +290,7 @@ class history
   }
 
   public static function get_row_back($table, array $columns, array $where, $when){
-    if ( !\bbn\str\text::is_number($when) ){
+    if ( $when = self::valid_date($when) ){
       $when = strtotime($when);
     }
     if ( !\bbn\str\text::check_name($table) ){
