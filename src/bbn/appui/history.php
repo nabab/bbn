@@ -290,14 +290,11 @@ class history
   }
 
   public static function get_row_back($table, array $columns, array $where, $when){
-    if ( $when = self::valid_date($when) ){
-      $when = strtotime($when);
+    if ( !($when = self::valid_date($when)) ){
+      die("The date $when is incorrect");
     }
     if ( !\bbn\str\text::check_name($table) ){
 			die("The table $table has an incorrect name");
-		}
-		if ( !\bbn\str\text::is_number($when) || ($when <= 0) ){
-			die("The date $when is incorrect");
 		}
 		if ( !($primary = self::$db->get_unique_primary($table)) ){
 			die("The table $table doesn't have a unique primary");
