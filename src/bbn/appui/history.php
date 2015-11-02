@@ -289,6 +289,29 @@ class history
     return false;
   }
 
+  public static function get_prev_value($table, $date, $id, $column){
+    if ( \bbn\str\text::check_name($table) &&
+      ($date = self::valid_date($date)) &&
+      is_int($id) &&
+      \bbn\str\text::check_name($column)
+    ){
+      $table = self::$db->table_full_name($table).'.'.$column;
+      return self::$db->get_one("
+        SELECT old
+        FROM ".self::$db->escape(self::$htable)."
+        WHERE ".self::$db->escape('column')." LIKE ?
+        AND ".self::$db->escape('line')." = ?
+        AND ".self::$db->escape('operation')." LIKE 'UPDATE'
+        AND ".self::$db->escape('chrono')." < ?
+        ORDER BY ".self::$db->escape('chrono')." DESC
+        LIMIT 1",
+        $table,
+        $id,
+        $date);
+    }
+    return false;
+  }
+
   public static function get_row_back($table, array $columns, array $where, $when){
     if ( !($when = self::valid_date($when)) ){
       die("The date $when is incorrect");

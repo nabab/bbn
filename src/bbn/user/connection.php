@@ -407,13 +407,13 @@ class connection
    */
   public function set_admin_permissions($perms){
     if ( $this->is_admin() ){
-      $x = function($ar, $res = [], $prefix = '') use (&$x){
+      $x = function(array $ar, $res = [], $prefix = '') use (&$x){
         foreach ( $ar as $a ){
           $pref = isset($a['prefix']) ? $prefix.$a['prefix'] : $prefix;
           if ( !empty($a['link']) ){
             $res[$pref.$a['link']] = 1;
           }
-          if ( isset($a['items']) ){
+          if ( !empty($a['items']) ){
             $res = $x($a['items'], $res, $pref);
           }
         }

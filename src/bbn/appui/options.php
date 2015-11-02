@@ -1,12 +1,20 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: BBN
- * Date: 17/09/2015
- * Time: 01:16
+ * @package bbn\appui
  */
-
 namespace bbn\appui;
+/**
+ * An all-in-one options management system
+ *
+ *
+ * @author Thomas Nabet <thomas.nabet@gmail.com>
+ * @copyright BBN Solutions
+ * @since Oct 28, 2015, 10:23:55 +0000
+ * @category  Appui tools
+ * @license   http://opensource.org/licenses/MIT MIT
+ * @version 0.1
+ * @todo Implement Cache
+ */
 
 
 class options
@@ -31,9 +39,82 @@ class options
     $db,
     $default = 0;
 
+  protected function get_rows($where, $start = 0, $limit = 2000){
+    $tab = $this->db->tsn($this->cfg['table']);
+    $db =& $this->db;
+    $cols = [];
+    if ( \bbn\str\text::is_integer($start, $limit) && !empty($where) ){
+      if ( !isset($where[$this->cfg['cols']['active']]) ){
+        $where[$this->cfg['cols']['active']] = 1;
+      }
+      if ( $wst = $db->get_where($where, $tab) ){
+        foreach ( $this->cfg['cols'] AS $k => $col ){
+          if ( $k !== 'active' ){
+            array_push($cols, $db->cfn($col, $tab, 1));
+          }
+        }
+        array_push($cols, "COUNT(".$db->escape($tab.'2').'.'.$db->escape($this->cfg['cols']['id']).") AS num_children ");
+        $q = "SELECT ".implode(", ", $cols)."
+          FROM ".$db->tsn($tab, 1)."
+            LEFT JOIN ".$db->tsn($tab, 1)." AS ".$db->escape($tab.'2')."
+              ON ".$db->cfn($this->cfg['cols']['id_parent'], $tab.'2', 1)." = ".$db->cfn($this->cfg['cols']['id'], $tab, 1)."
+              AND ".$db->cfn($this->cfg['cols']['active'], $tab.'2', 1)." = 1
+          $wst
+          AND ".$this->db->cfn($this->cfg['cols']['active'], $tab, 1)." = 1
+          GROUP BY " . $this->db->cfn($this->cfg['cols']['id'], $tab, 1)."
+          ORDER BY text
+          LIMIT $start, $limit";
+        $args = array_values($where);
+        if ( class_exists('\\bbn\\appui\\history') && \bbn\appui\history::is_enabled() ){
+          array_push($args, 1);
+        }
+        return $this->db->get_rows($q, $args);
+      }
+    }
+    return false;
+  }
+
+  protected function get_row($where){
+    if ( $res = $this->get_rows($where, 0, 1) ){
+      return $res[0];
+    }
+    return false;
+  }
+
   public function __construct(\bbn\db\connection $db, array $cfg=[]){
     $this->db = $db;
     $this->cfg = \bbn\tools::merge_arrays(self::$_defaults, $cfg);
+  }
+
+  public function set_value($id, $val){
+    if ( is_array($val) ){
+      $val = json_encode($val);
+    }
+    return $this->db->update($this->cfg['table'], [
+      $this->cfg['cols']['value'] => $val
+    ], [
+      $this->cfg['cols']['id'] => $id
+    ]);
+  }
+
+  public function get_value($id, &$val=null){
+    if ( is_null($val) ){
+      $val = [
+        $this->cfg['cols']['value'] => $this->db->select_one(
+          $this->cfg['table'],
+          $this->cfg['cols']['value'],
+          [ $this->cfg['cols']['id'] => $id ]
+        )
+      ];
+    }
+    if ( \bbn\str\text::is_json($val[$this->cfg['cols']['value']]) ){
+      $cfg = json_decode($val[$this->cfg['cols']['value']], 1);
+      foreach ($cfg as $k => $v) {
+        $val[$k] = $v;
+      }
+      unset($val[$this->cfg['cols']['value']]);
+    }
+    return $val;
   }
 
   public function set_default($cat = 0, $id_parent = false){
@@ -42,20 +123,16 @@ class options
   }
 
   public function from_code($cat, $id_parent = false){
-    if ( is_string($id_parent) ){
-      $id_parent = $this->db->select_one($this->cfg['table'], $this->cfg['cols']['id'], [
-        $this->cfg['cols']['id_parent'] => $this->default,
-        $this->cfg['cols']['code'] => $id_parent
-      ]);
-    }
+    $id_parent = $id_parent === false ? $this->default : $this->from_code($id_parent);
     if ( is_string($cat) && ($r = $this->db->select_one($this->cfg['table'], $this->cfg['cols']['id'], [
-      $this->cfg['cols']['id_parent'] => $id_parent ? $id_parent : $this->default,
+      $this->cfg['cols']['id_parent'] => $id_parent,
       $this->cfg['cols']['code'] => $cat
     ])) ){
       return $r;
     }
-    return \bbn\str\text::is_integer($cat) ? $cat : $this->default;
+    return \bbn\str\text::is_integer($cat) ? $cat : false;
   }
+
   /**
    * Retourne le contenu complet d'une option
    *
@@ -136,48 +213,6 @@ class options
     return false;
   }
 
-  protected function get_rows($where, $start = 0, $limit = 2000){
-    $tab = $this->db->tsn($this->cfg['table']);
-    $db =& $this->db;
-    $cols = [];
-    if ( \bbn\str\text::is_integer($start, $limit) && !empty($where) ){
-      if ( !isset($where[$this->cfg['cols']['active']]) ){
-        $where[$this->cfg['cols']['active']] = 1;
-      }
-      if ( $wst = $db->get_where($where, $tab) ){
-        foreach ( $this->cfg['cols'] AS $k => $col ){
-          if ( $k !== 'active' ){
-            array_push($cols, $db->cfn($col, $tab, 1));
-          }
-        }
-        array_push($cols, "COUNT(".$db->escape($tab.'2').'.'.$db->escape($this->cfg['cols']['id']).") AS num_children ");
-        $q = "SELECT ".implode(", ", $cols)."
-          FROM ".$db->tsn($tab, 1)."
-            LEFT JOIN ".$db->tsn($tab, 1)." AS ".$db->escape($tab.'2')."
-              ON ".$db->cfn($this->cfg['cols']['id_parent'], $tab.'2', 1)." = ".$db->cfn($this->cfg['cols']['id'], $tab, 1)."
-              AND ".$db->cfn($this->cfg['cols']['active'], $tab.'2', 1)." = 1
-          $wst
-          AND ".$this->db->cfn($this->cfg['cols']['active'], $tab, 1)." = 1
-          GROUP BY " . $this->db->cfn($this->cfg['cols']['id'], $tab, 1)."
-          ORDER BY text
-          LIMIT $start, $limit";
-        $args = array_values($where);
-        if ( class_exists('\\bbn\\appui\\history') && \bbn\appui\history::is_enabled() ){
-          array_push($args, 1);
-        }
-        return $this->db->get_rows($q, $args);
-      }
-    }
-    return false;
-  }
-
-  protected function get_row($where){
-    if ( $res = $this->get_rows($where, 0, 1) ){
-      return $res[0];
-    }
-    return false;
-  }
-
   /**
    * Retourne toutes les caractéristiques des options d'une catégorie donnée dans un tableau indexé sur leur `id`
    *
@@ -213,7 +248,7 @@ class options
    * @return array Un tableau des caractéristiques de chaque option de la catégorie, indexée sur leur `id`
    */
   public function native_options($cat = null, $id_parent = false, $start = 0, $limit = 2000){
-    $cat = $this->from_code($cat, $id_parent);
+    $cat = $this->from_code(is_null($cat) ? $this->default : $cat, $id_parent);
     if ( \bbn\str\text::is_integer($cat, $start, $limit) ) {
       return $this->get_rows([$this->cfg['cols']['id_parent'] => $cat], $start, $limit);
     }
@@ -296,37 +331,6 @@ class options
     return false;
   }
 
-  public function set_value($id, $val){
-    if ( is_array($val) ){
-      $val = json_encode($val);
-    }
-    return $this->db->update($this->cfg['table'], [
-      $this->cfg['cols']['value'] => $val
-    ], [
-      $this->cfg['cols']['id'] => $id
-    ]);
-  }
-
-  public function get_value($id, &$val=null){
-    if ( is_null($val) ){
-      $val = [
-        $this->cfg['cols']['value'] => $this->db->select_one(
-          $this->cfg['table'],
-          $this->cfg['cols']['value'],
-          [ $this->cfg['cols']['id'] => $id ]
-        )
-      ];
-    }
-    if ( \bbn\str\text::is_json($val[$this->cfg['cols']['value']]) ){
-      $cfg = json_decode($val[$this->cfg['cols']['value']], 1);
-      foreach ($cfg as $k => $v) {
-        $val[$k] = $v;
-      }
-      unset($val[$this->cfg['cols']['value']]);
-    }
-    return $val;
-  }
-
   public function add($cfg){
     if ( !isset($cfg[$this->cfg['cols']['id_parent']]) ){
       $cfg[$this->cfg['cols']['id_parent']] = $this->default;
@@ -376,6 +380,29 @@ class options
     return false;
   }
 
+  public function set_prop($id, $cfg){
+    if ( !empty($id) && !empty($cfg) && ($o = $this->option($id)) ){
+      foreach ( $cfg as $k => $v ) {
+        $o[$k] = $v;
+      }
+      return $this->set($id, $o);
+    }
+    return false;
+  }
+
+  public function unset_prop($id, $cfg){
+    if ( !empty($id) && !empty($cfg) && ($o = $this->option($id)) ){
+      if ( is_string($cfg) ){
+        $cfg = [$cfg];
+      }
+      foreach ( $cfg as $k ) {
+        unset($o[$k]);
+      }
+      return $this->set($id, $o);
+    }
+    return false;
+  }
+
   public function set($id, $cfg){
     if ( !empty($id) && !empty($cfg) && is_int($id) ){
       if ( isset($cfg[$this->cfg['cols']['value']]) &&
@@ -417,6 +444,15 @@ class options
     if ( is_int($id) ){
       return $this->db->delete($this->cfg['table'], [
         $this->cfg['cols']['id'] => $id
+      ]);
+    }
+    return false;
+  }
+
+  public function get_ids_by_code($code){
+    if ( $code ) {
+      return $this->db->get_column_values($this->cfg['table'], 'id', [
+        $this->cfg['cols']['code'] => $code
       ]);
     }
     return false;
@@ -490,5 +526,32 @@ class options
       }
     }
     return false;
+  }
+
+  public function apply($f, $id = 0, $deep = false){
+    $id = $this->from_code($id);
+    $opts = $this->full_options($id);
+    $changes = 0;
+    foreach ( $opts as $i => $o ){
+      $o = $f($o);
+      if ( $deep && $o['num_children'] ){
+        $this->apply($f, $opts[$i]['id'], 1);
+      }
+      if ( $o && ($opts[$i] !== $o) ){
+        $changes += (int)$this->set($o['id'], $o);
+      }
+    }
+  }
+
+  public function get_id($code, $id_parent){
+    if ( !($id = $this->from_code($code, $id_parent)) ){
+      $this->add([
+        'code' => $code,
+        'text' => $code,
+        'id_parent' => $id_parent
+      ]);
+      $id = $this->from_code($code, $id_parent);
+    }
+    return $id;
   }
 }
