@@ -206,11 +206,11 @@ class mvc implements \bbn\mvc\api{
 		return $this->env->get_mode();
 	}
 
-	public function is_cli(){
-		return $this->env->is_cli();
-	}
+  public function is_cli(){
+    return $this->env->is_cli();
+  }
 
-	/**
+  /**
 	 * This will reroute a controller to another one seemlessly. Chainable
 	 *
 	 * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
@@ -295,7 +295,7 @@ class mvc implements \bbn\mvc\api{
 	public function process(){
     if ( $this->check() ) {
       $this->obj = new \stdClass();
-      $this->log($this->info);
+      //$this->log($this->info);
       if ( !is_array($this->info)){die();}
       $this->controller = new \bbn\mvc\controller($this, $this->info, $this->data, $this->obj);
       $this->controller->process();

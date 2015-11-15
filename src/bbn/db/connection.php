@@ -1127,8 +1127,9 @@ class connection extends \PDO implements actions, api, engines
       die("Error! Unique numeric primary key doesn't exist");
     }
     if ( $id_field = $tab['keys']['PRIMARY']['columns'][0] ){
-      $cur = (int)$this->select_one($table, $id_field, [], ['id' => 'DESC']);
-      return $cur+1;
+      if ( $cur = (int)$this->get_one("SELECT MAX(".$this->escape($id_field).") FROM ".$this->escape($table)) ) {
+        return $cur + 1;
+      }
     }
     return false;
   }

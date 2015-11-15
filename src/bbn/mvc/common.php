@@ -33,7 +33,7 @@ trait common {
 
   private function error($msg){
     $msg = "Error from ".get_class($this).": ".$msg;
-    \bbn\tools::log($msg, 'mvc');
+    $this->log($msg, 'mvc');
     die($msg);
   }
 

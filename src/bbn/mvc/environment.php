@@ -10,6 +10,8 @@ namespace bbn\mvc;
 
 class environment {
 
+  private static $initiated = false;
+
   private
     /**
      * The list of views which have been loaded. We keep their content in an array to not have to include the file again. This is useful for loops.
@@ -45,6 +47,10 @@ class environment {
     $cli,
     $new_url;
 
+  private static function _initialize(){
+    self::$initiated = true;
+  }
+
   private function set_params($path)
   {
     if ( !is_null($this->params) ) {
@@ -75,6 +81,84 @@ class environment {
     return $this->mode;
   }
 
+/*
+  private function set_config($cfgs){
+    $i = 0;
+    while ( !isset($cfg) && ($i < count($cfgs)) ){
+      if ( isset($cfgs[$i]['env_method'], $cfgs[$i]['env_value']) ){
+        if ( $this->is_cli ){
+          if ( $cfgs[$i]['env_value'] === $this->dir ){
+            $cfg = $cfgs[$i];
+          }
+        }
+        else{
+          $values = explode(',', $cfgs[$i]['env_value']);
+          foreach ( $values as $v ){
+            if ( ($cfgs[$i]['env_method'] === 'port') && ($_SERVER['SERVER_PORT'] == $v) ){
+              $cfg = $cfgs[$i];
+            }
+            else if ( $cfgs[$i]['env_method'] === 'path' ){
+              if ( strpos($_SERVER['SCRIPT_FILENAME'], $v) === 0 ){
+                $cfg = $cfgs[$i];
+              }
+            }
+            else if ( $cfgs[$i]['env_method'] === 'host' ){
+              if ( $_SERVER['SERVER_NAME'] === $v ){
+                $cfg = $cfgs[$i];
+              }
+              else if ( ( strpos($_SERVER['SERVER_NAME'], 'www.') === 0 ) &&
+                ( strpos($v, 'www.') !== 0 ) &&
+                $_SERVER['SERVER_NAME'] === 'www.'.$v
+              ){
+                $cfg = $cfgs[$i];
+              }
+              else if ( ( strpos($_SERVER['SERVER_NAME'], 'www.') !== 0 ) &&
+                ( strpos($v, 'www.') === 0 ) &&
+                'www.'.$_SERVER['SERVER_NAME'] === $v
+              ){
+                $cfg = $cfgs[$i];
+              }
+            }
+          }
+        }
+      }
+      $i++;
+    }
+    if ( !isset($cfg) ){
+      die("No parameter corresponding to the current configuration. Check your config/cfg_".
+        ( $is_cli ? "cli" : "server" ).
+        ".php file.");
+    }
+    return $cfg;
+  }
+
+  private function set_constants($cfg){
+    foreach ( $cfg as $n => $c ){
+      define('BBN_'.strtoupper($n),$c);
+    }
+    if ( !defined('BBN_IS_SSL') ){
+      define('BBN_IS_SSL',false);
+    }
+    if ( !defined('BBN_PORT') ){
+      define('BBN_PORT',false);
+    }
+    $tmp = 'http';
+    if ( BBN_IS_SSL ){
+      $tmp .= 's';
+    }
+    $tmp .= '://'.BBN_SERVER_NAME;
+    if ( BBN_PORT && (BBN_PORT != 80) && (BBN_PORT != 443) ){
+      $tmp .= ':'.BBN_PORT;
+    }
+    if ( BBN_CUR_PATH ){
+      $tmp .= BBN_CUR_PATH;
+      if ( substr(BBN_CUR_PATH,-1) !== '/' ){
+        $tmp .= '/';
+      }
+    }
+    define('BBN_URL', $tmp);
+  }*/
+
   private function _init(){
     // When using CLI a first parameter can be used as route,
     // a second JSON encoded can be used as $this->post
@@ -91,12 +175,15 @@ class environment {
   }
 
   public function __construct($url=false){
-    $this->cli = (php_sapi_name() === 'cli');
-    $this->_init();
+    if ( !self::$initiated ){
+      self::_initialize();
+      $this->cli = (php_sapi_name() === 'cli');
+      $this->_init();
+    }
+
   }
 
   public function set_prepath($path){
-    var_dump($this->params);
     $path = \bbn\tools::remove_empty(explode('/', $path));
     if ( count($path) ) {
       foreach ($path as $p) {
