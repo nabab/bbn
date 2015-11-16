@@ -9,6 +9,13 @@ if ( !defined('BBN_DATA_PATH') ){
 
 class actions {
 
+  private function is_mvc($dirs){
+    if ( isset($dirs['files']) && count($dirs['files']) ){
+      return ( isset($dirs['files'][0], $dirs['files'][0]['title']) && ($dirs['files'][0]['title'] === 'CTRL') ) || isset($dirs['files']['CTRL']);
+    }
+    return false;
+  }
+
   public function __construct(\bbn\db\connection $db){
     $this->db = $db;
   }
@@ -27,7 +34,7 @@ class actions {
       if ( isset($cfg[$dir]) ){
         $dirs =& $cfg[$dir];
         // Change the path for the MVC
-        if ( $dir === 'MVC'){
+        if ( $this->is_mvc($dirs) ){
           // type of file part of the MVC
           foreach ( $dirs['files'] as $f ){
             if ( $f['url'] === end($args) ){
@@ -37,7 +44,7 @@ class actions {
               }
               // If MVC file is not controller and no content, we delete the file
               else if ( empty($data['code']) && ($f['url'] !== 'php') ){
-                $new_path = $f['fpath'].substr(implode("/", $arg), 0 , -3).$f['ext'];
+                $new_path = $f['fpath'].substr(implode("/", $args), 0 , -3).$f['ext'];
                 unlink($new_path);
                 return ['path' => $new_path];
               }
@@ -78,15 +85,18 @@ class actions {
     $directories = new directories($this->db);
     $cfg = $directories->dirs();
     if ( isset($data['dir'], $data['name'], $data['path'], $data['type'], $cfg[$data['dir']]) &&
-      (strpos($data['path'], '../') === false) && \bbn\str\text::check_filename($data['name']) ) {
+      (strpos($data['path'], '../') === false) &&
+      \bbn\str\text::check_filename($data['name'])
+    ) {
       $type = $data['type'] === 'file' ? 'file' : 'dir';
       $wtype = $type === 'dir' ? 'directory' : 'file';
       $delete = [];
+      $dirs =& $cfg[$data['dir']];
       if ( $type === 'file' ) {
-        if ( $data['dir'] === 'MVC' ) {
+        if ( $this->is_mvc($dirs) ){
           $tab_url_mvc = $data['dir'] . '/' . $data['path'];
           if ( $data['name'] != '_ctrl' ) {
-            foreach ( $cfg['MVC']['files'] as $f ) {
+            foreach ( $cfg[$data['dir']]['files'] as $f ) {
               $p = $f['fpath'] . substr($data['path'], 0, -3) . $f['ext'];
               if ( file_exists($p) && !in_array($p, $delete) ) {
                 array_push($delete, $p);
@@ -94,14 +104,14 @@ class actions {
             }
           }
           else {
-            $p = $cfg['MVC']['files']['CTRL']['fpath'].$data['path'];
+            $p = $cfg[$data['dir']]['files']['CTRL']['fpath'].$data['path'];
             if ( file_exists($p) && !in_array($p, $delete) ) {
               array_push($delete, $p);
             }
           }
         }
         else {
-          foreach ( $cfg[$data['dir']]['files'] as $f ) {
+          foreach ( $dirs['files'] as $f ) {
             if ( $f['ext'] === \bbn\str\text::file_ext($data['path']) ) {
               $p = $f['fpath'] . $data['path'];
               if ( file_exists($p) && !in_array($p, $delete) ) {
@@ -114,8 +124,8 @@ class actions {
       if ($type === 'dir') {
         $p_mvc = false;
         $p_mvc2 = false;
-        if ( $data['dir'] === 'MVC' ) {
-          foreach ( $cfg['MVC']['files'] as $f ) {
+        if ( $this->is_mvc($cfg[$data['dir']]) ) {
+          foreach ( $cfg[$data['dir']]['files'] as $f ) {
             $p = $f['fpath'] . $data['path'];
             if ( $f['title'] === 'Controller' ){
               $p_mvc = $f['fpath'] . $data['path'];
@@ -183,7 +193,7 @@ class actions {
         $src_file = $dir_src.$name;
         $dest_file = $data['path'].'/'.$data['name'];
         $todo = [];
-        if ( $data['dir'] === 'MVC' ){
+        if ( $this->is_mvc($cfg) ){
           foreach ( $cfg['files'] as $f ){
             if ( $f != 'CTRL' ){
               $src = $f['fpath'].$src_file;
@@ -241,9 +251,9 @@ class actions {
       $cfg =& $dirs[$data['dir']];
       $type = $data['type'] === 'file' ? 'file' : 'dir';
       $wtype = $type === 'dir' ? 'directory' : 'file';
-      $dir = $data['dir'] === 'MVC' ? $cfg['files']['Controller']['fpath'] : $cfg['root_path'];
-      $ext = $data['dir'] === 'MVC' ? $cfg['files']['Controller']['ext'] : $data['ext'];
-      if ( ($type === 'file') && ($dir != 'MVC') && !empty($ext) ) {
+      $dir = $this->is_mvc($cfg) ? $cfg['files']['Controller']['fpath'] : $cfg['root_path'];
+      $ext = $this->is_mvc($cfg) ? $cfg['files']['Controller']['ext'] : $data['ext'];
+      if ( ($type === 'file') && !$this->is_mvc($cfg) && !empty($ext) ) {
         foreach ( $cfg['files'] as $f ) {
           if ( $ext === $f['ext'] ) {
             $dir = $f['fpath'];
@@ -291,7 +301,7 @@ class actions {
         $cfg =& $dirs[$data['dir']];
         $spath = $data['spath'];
         $dpath = $data['dpath'];
-        if ( $data['dir'] === 'MVC' ){
+        if ( $this->is_mvc($cfg) ){
           $type = is_dir($cfg['files']['Controller']['fpath'].$spath) ? 'dir' : 'file';
         }
         else {
@@ -304,7 +314,7 @@ class actions {
         $name = \bbn\str\text::file_ext($spath, 1)[0];
         $ext = \bbn\str\text::file_ext($spath);
         $todo = [];
-        if ( $data['dir'] === 'MVC' ){
+        if ( $this->is_mvc($cfg) ){
           foreach ( $cfg['files'] as $f ){
             if ( $f != 'CTRL' ){
               $src = $f['fpath'].$dir.$name;
@@ -364,7 +374,7 @@ class actions {
       if ( isset($dirs[$data['dir']]) ){
         $cfg =& $dirs[$data['dir']];
         $path = $data['path'];
-        if ( $data['dir'] === 'MVC' ){
+        if ( $this->is_mvc($cfg) ){
           $type = is_dir($cfg['files']['Controller']['fpath'].$path) ? 'dir' : 'file';
         }
         else {
@@ -378,7 +388,7 @@ class actions {
         $src_file = $dir.$name;
         $dest_file = $dir.$data['name'];
         $todo = [];
-        if ( $data['dir'] === 'MVC' ){
+        if ( $this->is_mvc($cfg) ){
           foreach ( $cfg['files'] as $f ){
             if ( $f != 'CTRL' ){
               $src = $f['fpath'].$src_file;
@@ -445,13 +455,17 @@ class actions {
 
   public function close($data){
     if ( isset($data['dir'], $data['file']) ){
-      $data['file'] = ($data['dir'] === 'MVC') && (\bbn\str\text::file_ext($data['file']) !== 'php') ?
+      $directories = new directories($this->db);
+      $dirs = $directories->dirs($data['dir']);
+      $data['file'] = $this->is_mvc($dirs) && (\bbn\str\text::file_ext($data['file']) !== 'php') ?
         substr($data['file'], 0, strrpos($data['file'], "/")) : $data['file'];
       unset($data['act']);
+      return 1;
     }
     if ( isset($_SESSION[BBN_SESS_NAME]['ide']) &&
       in_array($data, $_SESSION[BBN_SESS_NAME]['ide']['list']) ){
       unset($_SESSION[BBN_SESS_NAME]['ide']['list'][array_search($data, $_SESSION[BBN_SESS_NAME]['ide']['list'])]);
+      return 1;
     }
     return ['data' => "Tab is not in session."];
   }
@@ -462,8 +476,8 @@ class actions {
       $dirs = $directories->dirs();
       $root_dest = BBN_USER_PATH.'tmp/'.\bbn\str\text::genpwd().'/';
       if ( isset($dirs[$data['dir']]) ){
-        if ( $data['dir'] === 'MVC' ){
-          foreach ( $dirs['MVC']['files'] as $f ) {
+        if ( $this->is_mvc($dirs[$data['dir']]) ){
+          foreach ( $dirs[$data['dir']]['files'] as $f ) {
             $dest = $root_dest.$data['name'].'/'.str_replace(BBN_APP_PATH, '', $f['fpath']);
             if ( $data['type'] === 'file' ) {
               $ext = \bbn\str\text::file_ext($data['path']);
@@ -511,12 +525,12 @@ class actions {
         }
         // Create zip file
         if ( class_exists('\\ZipArchive') ) {
-          $dest = ( $data['dir'] === 'MVC' ) ? $root_dest.$data['name'].'/mvc/' : $dest;
+          $dest = $this->is_mvc($dirs[$data['dir']]) ? $root_dest.$data['name'].'/mvc/' : $dest;
           $filezip = BBN_USER_PATH.'tmp/'.$data['name'].'.zip';
           $zip = new \ZipArchive();
           if ( $err = $zip->open($filezip, \ZipArchive::OVERWRITE) ) {
             if ( file_exists($dest) ){
-              if ( ($data['type'] === 'dir') || ($data['dir'] === 'MVC') ){
+              if ( ($data['type'] === 'dir') || $this->is_mvc($dirs[$data['dir']]) ){
                 // Create recursive directory iterator
                 $files = \bbn\file\dir::scan($dest);
                 foreach ($files as $file) {

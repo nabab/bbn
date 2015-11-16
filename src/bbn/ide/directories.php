@@ -70,7 +70,6 @@ class directories {
         if ( !empty($f['default']) ){
           $d['def'] = $f['url'];
         }
-
         $files[!empty($f['title']) ? $f['title'] : $i] = $f;
         if ( !empty($f['title']) ){
           unset($files[$i]);
@@ -80,6 +79,10 @@ class directories {
       $dirs[$d['name']] = $d;
     }
     return $name && isset($dirs[$name]) ? $dirs[$name] : $dirs;
+  }
+
+  public function dir($name){
+    return $this->dirs($name);
   }
 
   public function modes(){

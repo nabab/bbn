@@ -167,9 +167,9 @@ class controller implements api{
     if ( $this->path ){
       $p = dirname($this->path);
       if ( $p === '.' ){
-        return '/';
+        return '';
       }
-      return '/'.$p;
+      return $p;
     }
 		return false;
 	}
@@ -437,6 +437,9 @@ EOD;
     if ( !isset($path) ) {
       $path = $this->path;
     }
+		else if ( strpos($path, './') === 0 ){
+			$path = $this->say_dir().substr($path, 1);
+		}
     if ( !isset($mode) ) {
       $mode = 'html';
     }
@@ -554,6 +557,9 @@ EOD;
     if ( !isset($path) ) {
       $path = $this->path;
     }
+		else if ( strpos($path, './') === 0 ){
+			$path = $this->say_dir().substr($path, 1);
+		}
     if ( !isset($data) ) {
       $data = $this->data;
     }
