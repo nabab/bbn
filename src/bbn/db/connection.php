@@ -1482,7 +1482,6 @@ class connection extends \PDO implements actions, api, engines
   /**
    * Returns first row as an object.
    *
-   * @example
    * <code>
    * $this->db->select(
    *  "tab_users",
@@ -1512,8 +1511,7 @@ class connection extends \PDO implements actions, api, engines
   }
 
   /**
-   * Returns a single value.
-   * Returns same value as "get_one".
+   * Returns a single value, same value as "get_one".
    *
    * <code>
    * $this->db->select_one(
@@ -1981,7 +1979,6 @@ class connection extends \PDO implements actions, api, engines
   /**
    * Returns SQL code for table creation.
    *
-   * @example
    * <code>
    * $this->db->get_create("table_users");
    * </code>

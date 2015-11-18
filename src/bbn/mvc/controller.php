@@ -335,7 +335,7 @@ EOD;
 	public function get_css($path='')
 	{
     if ( $r = $this->get_view($path, 'css') ){
-      return '<style scoped>'.\CssMin::minify($r).'</style>';
+      return '<style>'.\CssMin::minify($r).'</style>';
     }
     return false;
 	}
@@ -352,7 +352,7 @@ EOD;
       die("No less class, check composer");
     }
     if ( $r = $this->get_view($path, 'css') ) {
-      return '<style scoped>' . \CssMin::minify($r) . '</style>';
+      return '<style>' . \CssMin::minify($r) . '</style>';
     }
 	}
 

@@ -1,0 +1,7 @@
+cd /home/mybbn/domains/github.mybbn.so/public_html/apigen
+
+apigen --source "/home/mybbn/_lib/vendor/bbn" --destination "/home/mybbn/domains/doc.mybbn.so/public_html" --charset "utf-8" --title "BBN Library" --debug --access-levels "public" --todo "yes" --templateTheme=bootstrap
+
+cd /home/mybbn/domains/github.mybbn.so/public_html/phpDocumentor2/bin
+
+phpdoc -d "/home/mybbn/_lib/vendor" -t "/home/mybbn/domains/doc.mybbn.so/public_html/doc2" --title "BBN Library"

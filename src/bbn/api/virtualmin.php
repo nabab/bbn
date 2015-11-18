@@ -1,19 +1,14 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: BBN
- * Date: 11/11/2015
- * Time: 17:28
- */
-namespace bbn\api;
-
-/**
- * Virtualmin API
+ * Class virtualmin
+ * @package bbn\api
  *
  * @author Edwin Mugendi <edwinmugendi@gmail.com>
  * @author Thomas Nabet <thomas.nabet@gmail.com>
  *
  */
+namespace bbn\api;
+
 class virtualmin {
 
   private
@@ -22,7 +17,9 @@ class virtualmin {
     /** @var  Virtualmin password */
     $pass,
     /** @var  Virtualmin hostname */
-    $hostname;
+    $hostname,
+    /** @var  Check instance existence */
+    $checked = false;
 
   public
     // The last action to have been performed
@@ -33,13 +30,36 @@ class virtualmin {
   /**
    * This is the default construtor
    */
-  public function __construct($config) {
-    $this->user = $config['user'];
-    $this->pass = $config['pass'];
-    $this->hostname = $config['hostname'];
+  public function __construct(array $config) {
+    if ( isset($config['user'], $config['pass']) ){
+      $this->user = $config['user'];
+      $this->pass = $config['pass'];
+      $this->hostname = isset($config['host']) ? $config['host'] : 'localhost';
+      $this->checked = true;
+    }
   }
 
-//End of default constructor
+  /**
+   * This function is used to sanitize the strings which are given as parameters
+   * @return string The the header url part to be executed
+   */
+  private function sanitize($st) {
+    $st = trim((string)$st);
+    if ( strpos($st, ';') !== false ){
+      return '';
+    }
+    if ( strpos($st, '<') !== false ){
+      return '';
+    }
+    if ( strpos($st, '"') !== false ){
+      return '';
+    }
+    if ( strpos($st, "'") !== false ){
+      return '';
+    }
+    return $st;
+  }
+
   /**
    * This function is used to get the header url part to be executed
    * @return string The the header url part to be executed
@@ -47,8 +67,6 @@ class virtualmin {
   private function get_header_url() {
     return "wget -O - --quiet --http-user=" . $this->user . " --http-passwd=" . $this->pass . " --no-check-certificate 'https://" . $this->hostname . ":10000/virtual-server/remote.cgi?json=1&program=";
   }
-
-//End of get_header_url() function
 
   /**
    * API DESCRIPTION: Create a mail, FTP or database user
@@ -144,8 +162,6 @@ class virtualmin {
     return $this->call_shell_exec($url_part);
   }
 
-//End of create_user() function
-
   /**
    * API DESCRIPTION: Temporarily disable a virtual server.
    * This function is used to temporarily diable a virtual server
@@ -179,8 +195,6 @@ class virtualmin {
     return $this->call_shell_exec($url_part);
   }
 
-//End of disable_domain() function
-
   /**
    * API DESCRIPTION: Re-enable one virtual server.
    * This function is used to re-enable one virtual server
@@ -209,8 +223,6 @@ class virtualmin {
     //Calling shell_exec and returning the result array
     return $this->call_shell_exec($url_part);
   }
-
-//End of disable_domain() function
 
   /**
    * API DESCRIPTION: Delete one or more virtual servers.
@@ -250,8 +262,6 @@ class virtualmin {
     return $this->call_shell_exec($url_part);
   }
 
-//End of delete_domain() function
-
   /**
    * API DESCRIPTION: Lists all virtual servers.
    * This function is used to list all virtual servers
@@ -273,75 +283,100 @@ class virtualmin {
 
     if (isset($param['multiline'])) {//multiline parameter is set
       $url_part .= "&multiline";
-    } else if (isset($param['name-only'])) {//name-only parameter is set
+    }
+    else if (isset($param['name-only'])) {//name-only parameter is set
       $url_part .= "&name-only";
-    } else if (isset($param['id-only'])) {//id-only parameter is set
+    }
+    else if (isset($param['id-only'])) {//id-only parameter is set
       $url_part .= "&id-only";
-    } else if (isset($param['simple-multiline'])) {//simple-multiline parameter is set
+    }
+    else if (isset($param['simple-multiline'])) {//simple-multiline parameter is set
       $url_part .= "&simple-multiline";
-    } else if (isset($param['user-only'])) {//user-only parameter is set
+    }
+    else if (isset($param['user-only'])) {//user-only parameter is set
       $url_part .= "&user-only";
-    } else if (isset($param['home-only'])) {//home-only parameter is set
+    }
+    else if (isset($param['home-only'])) {//home-only parameter is set
       $url_part .= "&home-only";
-    } //End of if else statement
+    }
 
-    if (isset($param['domain']) && is_array($param['domain'])) {//domain parameter is set and is an array
-      foreach ($param['domain'] as $single_domain) {//Iterate of over the domain array and concatenate it to $url_part
+    //domain parameter is set and is an array
+    if (isset($param['domain']) && is_array($param['domain'])) {
+      //Iterate of over the domain array and concatenate it to $url_part
+      foreach ($param['domain'] as $single_domain) {
         $url_part .= "&domain=" . $single_domain;
-      }//End of foreach statement
-    }//End of if statement
-    if (isset($param['user']) && is_array($param['user'])) {//user parameter is set and is an array
-      foreach ($param['user'] as $single_user) {//Iterate of over the user array and concatenate it to $url_part
+      }
+    }
+
+    //user parameter is set and is an array
+    if (isset($param['user']) && is_array($param['user'])) {
+      //Iterate of over the user array and concatenate it to $url_part
+      foreach ($param['user'] as $single_user) {
         $url_part .= "&user=" . $single_user;
-      }//End of foreach statement
-    }//End of if statement
+      }
+    }
 
-    if (isset($param['with-feature'])) {//with-feature parameter is set
+    //with-feature parameter is set
+    if (isset($param['with-feature'])) {
       $url_part .= "&with-feature=" . $param['with-feature'];
-    } //End of if statement
+    }
 
-    if (isset($param['without-feature'])) {//without-feature parameter is set
+    //without-feature parameter is set
+    if (isset($param['without-feature'])) {
       $url_part .= "&without-feature=" . $param['without-feature'];
-    } //End of if statement
+    }
 
-    if (isset($param['alias'])) {//alias  parameter is set
+    //alias  parameter is set
+    if (isset($param['alias'])) {
       $url_part .= "&alias";
-    } else if (isset($param['no-alias'])) {//no-alias  parameter is set
+    }
+    //no-alias  parameter is set
+    else if (isset($param['no-alias'])) {
       $url_part .= "&no-alias";
-    } else if (isset($param['subserver'])) {//subserver parameter is set
+    }
+    //subserver parameter is set
+    else if (isset($param['subserver'])) {
       $url_part .= "&subserver";
-    } else if (isset($param['toplevel'])) {//toplevel parameter is set
+    }
+    //toplevel parameter is set
+    else if (isset($param['toplevel'])) {
       $url_part .= "&toplevel";
-    } else if (isset($param['subdomain'])) {//subdomain parameter is set
+    }
+    //subdomain parameter is set
+    else if (isset($param['subdomain'])) {
       $url_part .= "&subdomain";
-    }//End of if else statement
-
-    if (isset($param['plan'])) {//plan parameter is set
+    }
+    //plan parameter is set
+    if (isset($param['plan'])) {
       $url_part .= "&plan=" . $param['plan'];
-    } //End of if statement
+    }
 
     if (isset($param['reseller'])) {//reseller parameter is set
       $url_part .= "&reseller=" . $param['reseller'];
-    } else if (isset($param['no-reseller'])) {//no-reseller  parameter is set
+    }
+    else if (isset($param['no-reseller'])) {//no-reseller  parameter is set
       $url_part .= "&no-reseller";
-    } else if (isset($param['any-reseller'])) {//any-reseller  parameter is set
+    }
+    else if (isset($param['any-reseller'])) {//any-reseller  parameter is set
       $url_part .= "&any-reseller";
-    }//End of if else statement
+    }
 
-    if (isset($param['id']) && is_array($param['id'])) {//id parameter is set and is an array
-      foreach ($param['id'] as $single_id) {//Iterate of over the id array and concatenate it to $url_part
+    //id parameter is set and is an array
+    if (isset($param['id']) && is_array($param['id'])) {
+      //Iterate of over the id array and concatenate it to $url_part
+      foreach ($param['id'] as $single_id) {
         $url_part .= "&id=" . $single_id;
-      }//End of foreach statement
-    }//End of if statement
+      }
+    }
+
     //Concatenating the closing single quote
     $url_part .="'";
     //Concatenating the header url and $url_part to create the full url to be executed
     $url_part = $this->get_header_url() . $url_part;
     //Calling shell_exec and returning the result array
+    //return $url_part;
     return $this->call_shell_exec($url_part);
   }
-
-//End of delete_domain() function
 
   /**
    * API DESCRIPTION: Turn on some features for a virtual server
@@ -449,8 +484,6 @@ class virtualmin {
     return $this->call_shell_exec($url_part);
   }
 
-//End of enable_feature() function
-
   /**
    * API DESCRIPTION: Turn off some features for a virtual server
    * This function is used to turn off some features for a virtual server
@@ -552,8 +585,6 @@ class virtualmin {
     //Calling shell_exec and returning the result array
     return $this->call_shell_exec($url_part);
   }
-
-//End of enable_feature() function
 
   /**
    *  API DESCRIPTION: Create a virtual server
@@ -813,40 +844,34 @@ class virtualmin {
     return $this->call_shell_exec($url_part);
   }
 
-//End of create_domain() function
-
   /**
    * This function is used to execute the $request using shell_exec
    * @param string $request the command to be excecuted
    * @return array an array with the execution status and message
    */
   private function call_shell_exec($request) {
-//Executing the shell_exec, decoding the json result into an array
-    $result_array = json_decode(shell_exec($request), TRUE);
-    //Array to be returned
-    $result_minimal = array();
-
-    //Setting the status status into the the $result_minimal array
-    $result_minimal['status'] = $result_array['status'];
-    //Setting the command that was executed into the $result_minimal array
-    $result_minimal['command'] = $result_array['command'];
-
-    if ($result_array['status'] == 'success' && substr($this->last_action, 0, 5) == 'list-') {//shell_exec call successed and the last_action is a list- command
-      //Setting the data message
-      $result_minimal['message'] = $result_array['data'];
-    } else if ($result_array['status'] == 'success') {//shell_exec call successed
-      //Setting the success message
-      $result_minimal['message'] = $result_array['output'];
-    } else {//shell_exec call failed
-      //Setting the error message
-      $this->error = $result_array['error'];
-      return false;
-    }//End of inner if else statement
-    //Returning the status and message array
-    return $result_minimal;
+    //Executing the shell_exec
+    if ( $result = shell_exec($request) ){
+      //Decoding the json result into an array
+      $result_array = json_decode($result, TRUE);
+      if ( isset($result_array['error']) ){
+        $this->error = $result_array['error'];
+      }
+      if ($result_array['status'] === 'success' ) {
+        if (isset($result_array['data'])) {
+          if ( isset($result_array['data'][0], $result_array['data'][0]['name']) &&
+            ($result_array['data'][0]['name'] === 'Warning') ){
+            $result_array['data'] = array_slice($result_array['data'], 1);
+          }
+          return $result_array['data'];
+        }
+        else if (isset($result_array['output'])) {
+          return $result_array['output'];
+        }
+      }
+    }
+    return false;
   }
-
-//End of call_shell_exec() function
 
   /**
    * This function is used to process the parameters
@@ -855,22 +880,17 @@ class virtualmin {
    */
   private function process_parameters($param) {
     foreach ($param as $key => $val) {
-      if (is_array($val)) {//$val is an array
-        //Variable to watch the number of parameter values in sub array
-        $param_count = 0;
-        foreach ($val as $single_val) {
-          $param[$key][$param_count] = \bbn\cls\str\text::encode_filename_virtalmin($single_val);
-          $param_count++;
-        }//End of inner foreach statement
-      } else {//$val is not an array
-        $param[$key] = \bbn\cls\str\text::encode_filename_virtalmin($val);
-      }//End of inner if else statement
-    }//End of outer foreach statement
+      //$val is an array
+      if (is_array($val)) {
+        $param[$key] = $this->process_parameters($val);
+      }
+      else {
+        $param[$key] = $this->sanitize($val);
+      }
+    }
     //Return the processed parameters
     return $param;
   }
-
-//End of process_parameters() function
 
   public function list_commands($param = array('multiline' => 1)) {
     //Prepping, processing and validating the create user parameters
@@ -882,13 +902,14 @@ class virtualmin {
     $url_part = "list-commands";
     if (isset($param['short'])) {//short parameter is set
       $url_part .= "&short";
-    }//End of if statement
+    }
 
     if (isset($param['multiline'])) {//multiline parameter is set
       $url_part .= "&multiline";
-    } else if (isset($param['nameonly'])) {//nameonly parameter is set
+    }
+    else if (isset($param['nameonly'])) {//nameonly parameter is set
       $url_part .= "&nameonly";
-    }//End of if else statement
+    }
     //Concatenating the closing single quote
     $url_part .="'";
     //Concatenating the header url and $url_part to create the full url to be executed
@@ -897,7 +918,20 @@ class virtualmin {
     return $this->call_shell_exec($url_part);
   }
 
-//End of process_parameters() function
+  public function get_command($command) {
+    //Setting the last action performed
+    $this->last_action = "get-command";
+
+    //Defining  the $url_part and the command to be executed
+    $url_part = "get-command&multiline=&command=".$this->sanitize($command);
+    //Concatenating the closing single quote
+    $url_part .="'";
+    //Concatenating the header url and $url_part to create the full url to be executed
+    $url_part = $this->get_header_url() . $url_part;
+    //Calling shell_exec and returning the result array
+    return $this->call_shell_exec($url_part);
+  }
+
 }
 
 

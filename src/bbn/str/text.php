@@ -1,21 +1,22 @@
 <?php
-/**
- * @package bbn\str
- */
 namespace bbn\str;
+
 /**
+ * Class text
  * String manipulation class
- *
  *
  * This class only uses static methods and has lots of alias for the escaping methods
  *
+ * @package bbn\str
  * @author Thomas Nabet <thomas.nabet@gmail.com>
  * @copyright BBN Solutions
  * @since Apr 4, 2011, 23:23:55 +0000
  * @category  Strings
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @version 0.2r89
+ *
  */
+
 class text
 {
 
