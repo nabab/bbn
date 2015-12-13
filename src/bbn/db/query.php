@@ -314,6 +314,7 @@ class query extends \PDOStatement implements actions
 	public function get_rows()
 	{
 		if ( $this->does_return() ){
+
 			return $this->fetchAll(\PDO::FETCH_ASSOC);
     }
 		return false;

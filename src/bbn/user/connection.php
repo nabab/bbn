@@ -16,13 +16,6 @@ namespace bbn\user;
  * @todo Groups and hotlinks features
  * @todo Implement Cache for session requests' results?
  */
-if ( !defined('BBN_FINGERPRINT') ) {
-	define('BBN_FINGERPRINT', 'define_me!!');
-}
-if ( !defined('BBN_SESS_NAME') ) {
-	define('BBN_SESS_NAME', 'define_me!!!!');
-}
-
 class connection
 {
 
@@ -110,21 +103,6 @@ class connection
              */
             'additional_fields' => [],
             /*
-             * The session name
-             * @var string
-             */
-            'sess_name' => BBN_SESS_NAME,
-            /*
-             * In the session array the index on which user info will be stored
-             * i.e. the default storage will be $_SESSION[BBN_SESS_NAME]['user']
-             */
-            'sess_user' => 'user',
-            /*
-             * length in minutes of the session regeneration (can be doubled)
-             * @var integer
-             */
-            'sess_length' => 5,
-            /*
              * Number of times a user can try to log in in the period retry_length
              * @var integer
              */
@@ -172,7 +150,9 @@ class connection
           /** @var array */
           $user_cfg,
           /** @var array */
-          $fields;
+          $fields,
+          /** @var bool */
+          $has_preference = false;
 
 
 	public
@@ -206,6 +186,11 @@ class connection
     ];
   }
 
+  /**
+   * Checks if a magic string complies with a hash
+   *
+   * @return bool
+   */
   protected static function is_magic_string($key, $hash)
   {
     return ( hash('sha256', $key) === $hash );
@@ -213,17 +198,23 @@ class connection
 
 
 	/**
-	 * @return string
+   * Reurns the last known error and false if there was no error
+	 * @return mixed
 	 */
   public function get_error(){
     return ( !is_null($this->error) && isset($this->cfg['errors'][$this->error]) ) ?
               $this->cfg['errors'][$this->error] : false;
   }
 
+  /**
+   * Give the current user's configuration
+   * @param string $attr
+   * @return mixed
+   */
   public function get_cfg($attr = ''){
     if ( $this->check() ){
       if ( !$this->user_cfg ){
-        $this->user_cfg = $this->get_session('cfg');
+        $this->user_cfg = $this->session->get('cfg');
       }
       if ( empty($attr) ){
         return $this->user_cfg;
@@ -235,6 +226,10 @@ class connection
     }
   }
 
+  /**
+   * Returns the current configuration of this very class
+   * @return array
+   */
   public function get_class_cfg(){
     if ( $this->check() ){
       return $this->cfg;
@@ -242,16 +237,26 @@ class connection
   }
 
   /**
-	 * @return \bbn\user\connection
-	 */
-	public function __construct(\bbn\db\connection $db, array $cfg, $credentials='')
-	{
+   * connection constructor.
+   * @param \bbn\db\connection $db
+   * @param session $session
+   * @param array $cfg
+   * @param string $credentials
+   */
+  public function __construct(\bbn\db\connection $db, session $session, array $cfg, $credentials=''){
 		$this->db = $db;
+    $this->session = $session;
 
     $this->user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
     $this->ip_address = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
 
     $this->cfg = \bbn\tools::merge_arrays(self::$_defaults, $cfg);
+
+    if ( isset($cfg['preferences']) ){
+      $this->has_preferences = 1;
+      $this->preferences = $cfg['preferences'];
+      unset($cfg['preferences']);
+    }
     // As we'll give the object the properties of these additional field they should not conflict with existing ones
     foreach ( $this->cfg['additional_fields'] as $f ){
       if ( property_exists($this, $f) ) {
@@ -286,27 +291,18 @@ class connection
 	}
 
 	/**
-	 * @return \bbn\user\connection
+	 * @return connection
 	 */
-	private function _init_session()
-  {
+	private function _init_session(){
     if ( $this->check() ){
-      if ( session_id() == '' ){
-        session_start();
-      }
-
-      if ( !isset($_SESSION[$this->cfg['sess_name']]) ){
-        $_SESSION[$this->cfg['sess_name']] = [];
-      }
-
       $fingerprint = self::make_fingerprint();
 
-      if ( !isset($_SESSION[$this->cfg['sess_name']], $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]) ){
-        $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']] = [
-            'id' => $this->id,
-            'fingerprint' => $fingerprint,
-            'tokens' => []
-        ];
+      if ( !$this->session->has('user') ){
+        $this->session->set([
+          'id' => $this->id,
+          'fingerprint' => $fingerprint,
+          'tokens' => []
+        ], 'user');
       }
 
       $this->sess_cfg = [
@@ -325,8 +321,7 @@ class connection
 	/**
 	 * @return \bbn\user\connection
 	 */
-	private function _login()
-  {
+	private function _login(){
     if ( $this->check() ){
       $this->_init_session()->save_session();
     }
@@ -360,7 +355,7 @@ class connection
             $r[$key] = $val;
           }
         }
-        $this->set_session('info', $r);
+        $this->session->set($r, 'info');
         $this->user_cfg = empty($d['cfg']) ?
                         ['log_tries' => 0] : json_decode($d['cfg'], true);
         $this->set_session('cfg', $this->user_cfg);
@@ -424,7 +419,7 @@ class connection
       if ( !isset($this->permissions['admin']) ){
         $this->permissions['admin'] = 1;
       }
-      $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]['permissions'] = $this->permissions;
+      $this->session->set($this->permissions, 'user', 'permissions');
       return 1;
     }
     return false;
@@ -499,7 +494,7 @@ class connection
             $this->cfg['tables']['sessions'],
             $this->cfg['arch']['sessions'],
             [
-                $this->cfg['arch']['sessions']['sess_id'] => session_id(),
+                $this->cfg['arch']['sessions']['sess_id'] => $this->session->get_id(),
                 $this->cfg['arch']['sessions']['id_user'] => $this->id
             ]);
       }
@@ -579,7 +574,7 @@ class connection
   protected function get_print()
 	{
     if ( ($fp = $this->get_session('fingerprint')) ){
-      return sha1($this->user_agent . $this->ip_address . $fp);
+      return sha1($this->user_agent . /*$this->ip_address .*/ $fp);
     }
     return false;
 	}
@@ -588,15 +583,14 @@ class connection
 	 * @return \bbn\user\connection
 	 */
   public function set_session($attr){
-    if ( isset($_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']]) ){
-      $s =& $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']];
+    if ( $this->session->has('user') ){
       $args = func_get_args();
       if ( (count($args) === 2) && is_string($args[0]) ){
         $attr = [$args[0] => $args[1]];
       }
       foreach ( $attr as $key => $val ){
         if ( is_string($key) ){
-          $s[$key]  = $val;
+          $this->session->set($val, 'user', $key);
         }
       }
     }
@@ -607,8 +601,8 @@ class connection
 	 * @return mixed
 	 */
   public function get_session($attr){
-    if ( $this->has_session($attr) ){
-      return $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']][$attr];
+    if ( $this->session->has('user') ){
+      return $this->session->get('user', $attr);
     }
   }
 
@@ -616,10 +610,7 @@ class connection
 	 * @return bool
 	 */
   public function has_session($attr){
-    return (
-            is_string($attr) &&
-            isset($_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']][$attr])
-           );
+    return $this->session->has('user', $attr);
   }
 
   /**
@@ -629,7 +620,7 @@ class connection
     $p =& $this->cfg['arch']['sessions'];
     $this->db->insert_update($this->cfg['tables']['sessions'], [
       $p['id_user'] => $this->id,
-      $p['sess_id'] => session_id(),
+      $p['sess_id'] => $this->session->get_id(),
       $p['ip_address'] => $this->ip_address,
       $p['user_agent'] => $this->user_agent,
       $p['auth'] => $this->auth ? 1 : 0,
@@ -654,13 +645,13 @@ class connection
         $p['cfg'] => json_encode($this->sess_cfg)
       ],[
         $p['id_user'] => $this->id,
-        $p['sess_id'] => session_id()
+        $p['sess_id'] => $this->session->get_id()
       ]);
     $this->auth = false;
     $this->id = null;
     $this->user_cfg = null;
     $this->sess_cfg = null;
-		$_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']] = [];
+    $this->session->set([], 'user');
     return $this;
   }
 
@@ -763,6 +754,7 @@ class connection
 	{
     // If this->id is set it means we've already looked it up
        // \bbn\tools::hdump($this->sess_cfg, $this->has_session('fingerprint'), $this->get_print($this->get_session('fingerprint')), $this->sess_cfg['fingerprint']);
+    //die(\bbn\tools::dump($this->id));
 		if ( !$this->id ) {
 
       // The user ID must be in the session
@@ -843,8 +835,8 @@ class connection
    */
   public function logout()
   {
+    $this->session->set([], 'user');
     $this->close_session();
-    session_destroy();
   }
 
   /**
@@ -853,7 +845,7 @@ class connection
   public function get_name()
   {
     if ( $this->auth ){
-      return $this->get_session('info')['login'];
+      return $this->session->get('info', 'login');
     }
     return false;
   }
@@ -863,12 +855,13 @@ class connection
    */
   public function get_token($st)
   {
-    if ( $this->auth ){
-      $s =& $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']];
-      if ( isset($s['tokens']) ) {
-        $s['tokens'][$st] = \bbn\str\text::genpwd();
-        return $s['tokens'][$st];
-      }
+    if ( $this->auth && $this->session->has('user', 'tokens', $st) ){
+      $this->session->work(function(&$a) use($st){
+        if ( isset($a['tokens']) ){
+          $a['tokens'][$st] = \bbn\str\text::genpwd();
+        }
+      }, 'user');
+      return $this->session->get('user', 'tokens', $st);
     }
     return false;
   }
@@ -878,11 +871,8 @@ class connection
    */
   public function check_token($st, $token)
   {
-    if ( $this->auth ){
-      $s =& $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']];
-      if ( isset($s['tokens'], $s['tokens'][$st]) ) {
-        return $s['tokens'][$st] === $token;
-      }
+    if ( $this->auth && $this->session->has('user', 'tokens', $st) ){
+      return $this->session->get('user', 'tokens', $st) === $token;
     }
     return false;
   }

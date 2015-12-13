@@ -177,18 +177,11 @@ class dir extends \bbn\obj
 	{
     $dir = self::clean($dir);
 		if ( is_dir($dir) ){
-			$files = scandir($dir);
-			foreach ( $files as $file ) 
-			{
-				if ( $file != "." && $file != ".." ) 
-				{
-					if ( is_dir($dir.'/'.$file) )
-						\bbn\file\dir::delete($dir.'/'.$file);
-					else
-						unlink($dir.'/'.$file);
-				}
+			$files = self::get_files($dir, 1);
+			foreach ( $files as $file ){
+        self::delete($file);
 			}
-			if ( $full === 1 ){
+			if ( $full ){
 				return rmdir($dir);
       }
 			return true;

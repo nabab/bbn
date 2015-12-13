@@ -41,7 +41,9 @@ class preferences
 		/** @var \bbn\db\connection */
 			$db,
 		/** @var array */
-			$cfg = [];
+			$cfg = [],
+		/** @var int */
+			$id_user;
 
   /**
 	 * @return \bbn\user\permissions
@@ -50,6 +52,13 @@ class preferences
 		$this->cfg = \bbn\tools::merge_arrays(self::$_defaults, $cfg);
 		$this->opt = $opt;
 		$this->db = $db;
+	}
+
+	public function set_user($id_user){
+		if ( is_int($id_user) ){
+			$this->id_user = $id_user;
+		}
+		return $this;
 	}
 
 	public function set_value($id, $val){
@@ -98,24 +107,24 @@ class preferences
 	 * @return
 	 */
 	public function get($id_option, $id_user = null, $id_group = null){
-		if ( $id_user || $id_group ){
-			$res = false;
-			if ( $id_user ){
-				$res = $this->db->rselect($this->cfg['table'], $this->cfg['cols'], [
-					$this->cfg['cols']['id_option'] => $id_option,
-					$this->cfg['cols']['id_user'] => $id_user
-				]);
-			}
-			if ( !$res && $id_group ){
-				$res = $this->db->rselect($this->cfg['table'], $this->cfg['cols'], [
-					$this->cfg['cols']['id_option'] => $id_option,
-					$this->cfg['cols']['id_group'] => $id_group
-				]);
-			}
-			if ( $res ){
-				$this->get_value($res['id'], $res);
-				return $res;
-			}
+		if ( $id_group ) {
+			$res = $this->db->rselect($this->cfg['table'], $this->cfg['cols'], [
+				$this->cfg['cols']['id_option'] => $id_option,
+				$this->cfg['cols']['id_group'] => $id_group
+			]);
+		}
+		else if ( $id_user || $this->id_user ){
+			$res = $this->db->rselect($this->cfg['table'], $this->cfg['cols'], [
+				$this->cfg['cols']['id_option'] => $id_option,
+				$this->cfg['cols']['id_user'] => $id_user ? $id_user : $this->id_user
+			]);
+		}
+		else{
+			return false;
+		}
+		if ( $res ) {
+			$this->get_value($res['id'], $res);
+			return $res;
 		}
 		return false;
 	}
@@ -126,33 +135,31 @@ class preferences
 	 * @return
 	 */
 	public function set($id_option, array $cfg, $id_user = null, $id_group = null){
-		if ( $id_user || $id_group ){
-			$id = false;
-			if ( $id_user ){
-				$id = $this->db->get_val($this->cfg['table'], $this->cfg['cols']['id'], [
-					$this->cfg['cols']['id_option'] => $id_option,
-					$this->cfg['cols']['id_user'] => $id_user
-				]);
-			}
-			else{
-				$id = $this->db->get_val($this->cfg['table'], $this->cfg['cols']['id'], [
-					$this->cfg['cols']['id_option'] => $id_option,
-					$this->cfg['cols']['id_group'] => $id_group
-				]);
-			}
-			if ( $id ) {
-				return $this->set_value($id, $cfg);
-			}
-			else{
-				return $this->db->insert($this->cfg['table'], [
-					'id_option' => $id_option,
-					'id_user' => $id_user ? $id_user : null,
-					'id_group' => $id_group ? $id_group : null,
-					'value' => json_encode($this->get_value(false, $cfg))
-				]);
-			}
+		if ( $id_group ) {
+			$id = $this->db->get_val($this->cfg['table'], $this->cfg['cols']['id'], [
+				$this->cfg['cols']['id_option'] => $id_option,
+				$this->cfg['cols']['id_group'] => $id_group
+			]);
 		}
-		return false;
+		else if ( $id_user || $this->id_user ){
+			$id = $this->db->get_val($this->cfg['table'], $this->cfg['cols']['id'], [
+				$this->cfg['cols']['id_option'] => $id_option,
+				$this->cfg['cols']['id_user'] => $id_user ? $id_user : $this->id_user
+			]);
+		}
+		else{
+			return false;
+		}
+		if ( $id ) {
+			return $this->set_value($id, $cfg);
+		}
+		$r = $this->db->insert($this->cfg['table'], [
+			'id_option' => $id_option,
+			'id_user' => !$id_group && ($id_user || $this->id_user) ? ($id_user ? $id_user : $this->id_user)  : null,
+			'id_group' => $id_group ? $id_group : null,
+			'value' => json_encode($this->get_value(false, $cfg))
+		]);
+    return $r;
 	}
 
 	/**
@@ -161,16 +168,16 @@ class preferences
 	 * @return array
 	 */
 	public function delete($id_option, $id_user = null, $id_group = null){
-		if ( $id_user ) {
-			return $this->db->delete($this->cfg['table'], [
-				$this->cfg['cols']['id_option'] => $id_option,
-				$this->cfg['cols']['id_user'] => $id_user
-			]);
-		}
 		if ( $id_group ) {
 			return $this->db->delete($this->cfg['table'], [
-					$this->cfg['cols']['id_option'] => $id_option,
-					$this->cfg['cols']['id_group'] => $id_group
+				$this->cfg['cols']['id_option'] => $id_option,
+				$this->cfg['cols']['id_group'] => $id_group
+			]);
+		}
+		if ( $id_user || $this->id_user ) {
+			return $this->db->delete($this->cfg['table'], [
+				$this->cfg['cols']['id_option'] => $id_option,
+				$this->cfg['cols']['id_user'] => $id_user ? $id_user : $this->id_user
 			]);
 		}
 	}

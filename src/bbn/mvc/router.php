@@ -172,11 +172,11 @@ class router {
         while ( strlen($tmp) > 0 ){
           $tmp = $this->parse(dirname($tmp));
           $ctrl = ( $tmp === '.' ? '' : $tmp.'/' ).'_ctrl.php';
+          if ( $this->alt_root && is_file($this->get_alt_root($mode).$ctrl) ){
+            array_unshift($this->known[$mode][$path]['checkers'], $this->get_alt_root($mode).$ctrl);
+          }
           if ( is_file($root.$ctrl) ){
             array_unshift($this->known[$mode][$path]['checkers'], $root.$ctrl);
-          }
-          else if ( $this->alt_root && is_file($this->get_alt_root($mode).$ctrl) ){
-            array_unshift($this->known[$mode][$path]['checkers'], $alt_root.$ctrl);
           }
           if ( $tmp === '.' ){
             $tmp = '';
@@ -290,7 +290,7 @@ class router {
       ]);
     }
     // Aaaargh!
-    die("No default file defined for mode $mode");
+    die(\bbn\tools::hdump("No default file defined for mode $mode $tmp", self::$def, $this->has_route(self::$def)));
   }
 
   private function find_mv($path, $mode){

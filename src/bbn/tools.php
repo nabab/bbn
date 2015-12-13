@@ -152,7 +152,7 @@ class tools
       }
       $a2 = $args[1];
     }
-    if ( self::is_assoc($a1) && self::is_assoc($a2) ){
+    if ( (self::is_assoc($a1) || empty($a1)) && (self::is_assoc($a2) || empty($a2)) ){
       $keys = array_unique(array_merge(array_keys($a1), array_keys($a2)));
       $r = [];
       foreach ( $keys as $k ) {

@@ -81,6 +81,72 @@ class actions {
     return $this->error('Error: Save');
   }
 
+  public function insert($data){
+    $directories = new directories($this->db);
+    $dirs = $directories->dirs();
+    if ( isset($data['dir'], $data['name'], $data['path'], $data['type'], $dirs[$data['dir']]) &&
+      (strpos($data['path'], '../') === false) &&
+      \bbn\str\text::check_filename($data['name']) ){
+      $cfg =& $dirs[$data['dir']];
+      $type = $data['type'] === 'file' ? 'file' : 'dir';
+      $wtype = $type === 'dir' ? 'directory' : 'file';
+      $dir = $this->is_mvc($cfg) ? $cfg['files']['Controller']['fpath'] : $cfg['root_path'];
+      $ext = $this->is_mvc($cfg) ? $cfg['files']['Controller']['ext'] : $data['ext'];
+      if ( ($type === 'file') && !$this->is_mvc($cfg) && !empty($ext) ) {
+        foreach ( $cfg['files'] as $f ) {
+          if ( $ext === $f['ext'] ) {
+            $dir = $f['fpath'];
+            break;
+          }
+        }
+      }
+      //\bbn\tools::dump($cfg, $dir);
+      $path = '';
+      if ( ($data['path'] !== './') ){
+        if ( is_dir($dir.$data['path']) ){
+          $path = $data['path'].'/';
+        }
+        else{
+          return $this->error("The container directory doesn't exist");
+        }
+      }
+      $path .= $type === 'file' ? $data['name'].'.'.$ext : $data['name'];
+      if ( file_exists($dir.$path) ){
+        return $this->error("The $wtype already exists");
+      }
+      if ( $type === 'dir' ){
+        if ( !mkdir($dir.$path) ){
+          return $this->error("Impossible to create the $wtype");
+        }
+      }
+      else if ( $ext ){
+        $modes = $directories->modes();
+        if ( !file_put_contents($dir.$path, isset($modes[$ext]['code']) ? $modes[$ext]['code'] : ' ') ){
+          return $this->error("Impossible to create the $wtype");
+        }
+      }
+      return 1;
+    }
+    return $this->error("There is a problem in the name you entered");
+  }
+
+  public function close($data){
+    if ( isset($data['dir'], $data['file']) ){
+      $directories = new directories($this->db);
+      $dirs = $directories->dirs($data['dir']);
+      $data['file'] = $this->is_mvc($dirs) && (\bbn\str\text::file_ext($data['file']) !== 'php') ?
+        substr($data['file'], 0, strrpos($data['file'], "/")) : $data['file'];
+      unset($data['act']);
+      return 1;
+    }
+    if ( isset($_SESSION[BBN_SESS_NAME]['ide']) &&
+      in_array($data, $_SESSION[BBN_SESS_NAME]['ide']['list']) ){
+      unset($_SESSION[BBN_SESS_NAME]['ide']['list'][array_search($data, $_SESSION[BBN_SESS_NAME]['ide']['list'])]);
+      return 1;
+    }
+    return ['data' => "Tab is not in session."];
+  }
+
   public function delete($data){
     $directories = new directories($this->db);
     $cfg = $directories->dirs();
@@ -240,55 +306,6 @@ class actions {
       }
     }
     return $this->error();
-  }
-
-  public function insert($data){
-    $directories = new directories($this->db);
-    $dirs = $directories->dirs();
-    if ( isset($data['dir'], $data['name'], $data['path'], $data['type'], $dirs[$data['dir']]) &&
-      (strpos($data['path'], '../') === false) &&
-      \bbn\str\text::check_filename($data['name']) ){
-      $cfg =& $dirs[$data['dir']];
-      $type = $data['type'] === 'file' ? 'file' : 'dir';
-      $wtype = $type === 'dir' ? 'directory' : 'file';
-      $dir = $this->is_mvc($cfg) ? $cfg['files']['Controller']['fpath'] : $cfg['root_path'];
-      $ext = $this->is_mvc($cfg) ? $cfg['files']['Controller']['ext'] : $data['ext'];
-      if ( ($type === 'file') && !$this->is_mvc($cfg) && !empty($ext) ) {
-        foreach ( $cfg['files'] as $f ) {
-          if ( $ext === $f['ext'] ) {
-            $dir = $f['fpath'];
-            break;
-          }
-        }
-      }
-      //\bbn\tools::dump($cfg, $dir);
-      $path = '';
-      if ( ($data['path'] !== './') ){
-        if ( is_dir($dir.$data['path']) ){
-          $path = $data['path'].'/';
-        }
-        else{
-          return $this->error("The container directory doesn't exist");
-        }
-      }
-      $path .= $type === 'file' ? $data['name'].'.'.$ext : $data['name'];
-      if ( file_exists($dir.$path) ){
-        return $this->error("The $wtype already exists");
-      }
-      if ( $type === 'dir' ){
-        if ( !mkdir($dir.$path) ){
-          return $this->error("Impossible to create the $wtype");
-        }
-      }
-      else if ( $ext ){
-        $modes = $directories->modes();
-        if ( !file_put_contents($dir.$path, isset($modes[$ext]['code']) ? $modes[$ext]['code'] : ' ') ){
-          return $this->error("Impossible to create the $wtype");
-        }
-      }
-      return 1;
-    }
-    return $this->error("There is a problem in the name you entered");
   }
 
   public function move($data){
@@ -451,23 +468,6 @@ class actions {
       }
     }
     return $this->error();
-  }
-
-  public function close($data){
-    if ( isset($data['dir'], $data['file']) ){
-      $directories = new directories($this->db);
-      $dirs = $directories->dirs($data['dir']);
-      $data['file'] = $this->is_mvc($dirs) && (\bbn\str\text::file_ext($data['file']) !== 'php') ?
-        substr($data['file'], 0, strrpos($data['file'], "/")) : $data['file'];
-      unset($data['act']);
-      return 1;
-    }
-    if ( isset($_SESSION[BBN_SESS_NAME]['ide']) &&
-      in_array($data, $_SESSION[BBN_SESS_NAME]['ide']['list']) ){
-      unset($_SESSION[BBN_SESS_NAME]['ide']['list'][array_search($data, $_SESSION[BBN_SESS_NAME]['ide']['list'])]);
-      return 1;
-    }
-    return ['data' => "Tab is not in session."];
   }
 
   public function export($data){

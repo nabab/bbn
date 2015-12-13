@@ -750,7 +750,7 @@ class text
 	}
 
 	/**
-   * Replace backslash with slash in a path string.
+   * Replace backslash with slash in a path string. Forbids the use of ../
    *
    * <code>
    * \bbn\str\text::parse_path('C:\TedstDir\New\New folder'); //Returns "C:/TedstDir/New/New folder"
@@ -763,6 +763,7 @@ class text
 	public static function parse_path($path)
 	{
     $path = str_replace('\\', '/', strval($path));
+		$path = str_replace('/./', '/', strval($path));
     while ( strpos($path, '//') !== false ) {
       $path = str_replace('//', '/', $path);
     }

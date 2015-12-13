@@ -42,7 +42,7 @@ class tpl {
 
   static public function render($st, $data){
     self::_init();
-    if ( $tpl = self::renderer($st) ) {
+    if ( is_callable($tpl = self::renderer($st)) ) {
       return $tpl($data);
     }
     return '';

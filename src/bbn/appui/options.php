@@ -109,28 +109,53 @@ class options
     }
     if ( \bbn\str\text::is_json($val[$this->cfg['cols']['value']]) ){
       $cfg = json_decode($val[$this->cfg['cols']['value']], 1);
-      foreach ($cfg as $k => $v) {
-        $val[$k] = $v;
+      if ( \bbn\tools::is_assoc($cfg) ) {
+        foreach ($cfg as $k => $v) {
+          $val[$k] = $v;
+        }
+        unset($val[$this->cfg['cols']['value']]);
       }
-      unset($val[$this->cfg['cols']['value']]);
+      else{
+        $val[$this->cfg['cols']['value']] = $cfg;
+      }
     }
     return $val;
   }
 
   public function set_default($cat = 0, $id_parent = false){
-    $cat = $this->from_code($cat, $id_parent);
+    $cat = $id_parent ? $this->from_code($cat, $id_parent) : $this->from_code($cat);
     $this->default = $cat;
   }
 
-  public function from_code($cat, $id_parent = false){
-    $id_parent = $id_parent === false ? $this->default : $this->from_code($id_parent);
-    if ( is_string($cat) && ($r = $this->db->select_one($this->cfg['table'], $this->cfg['cols']['id'], [
-      $this->cfg['cols']['id_parent'] => $id_parent,
-      $this->cfg['cols']['code'] => $cat
-    ])) ){
-      return $r;
+  public function from_code(){
+    $args = func_get_args();
+    if ( count($args) && is_array($args[0]) ){
+      $args = $args[0];
     }
-    return \bbn\str\text::is_integer($cat) ? $cat : false;
+    $rargs = array_reverse($args, false);
+    $id_parent = $this->default;
+    while ( count($rargs) ){
+      $cur = current($rargs);
+      if ( \bbn\str\text::is_integer($cur) ){
+        $id_parent = $cur;
+      }
+      else if ( is_string($cur) ){
+        $id_parent = $this->db->select_one($this->cfg['table'], $this->cfg['cols']['id'], [
+          $this->cfg['cols']['id_parent'] => $id_parent,
+          $this->cfg['cols']['code'] => $cur
+        ]);
+      }
+      else{
+        return false;
+      }
+      if ( !\bbn\str\text::is_integer($id_parent) ){
+        \bbn\tools::log($cur." ||| ".$id_parent, "no_options");
+        return false;
+      }
+      array_shift($rargs);
+    }
+    \bbn\tools::log($id_parent, "options");
+    return \bbn\str\text::is_integer($id_parent) ? $id_parent : false;
   }
 
   /**
@@ -139,9 +164,8 @@ class options
    * @param int $id La valeur du champ `id` de l'option dans la base de données
    * @return array La liste des catégories
    */
-  public function option($id, $cat = false){
-    $id = $this->from_code($id, $cat);
-    if ( \bbn\str\text::is_integer($id) ) {
+  public function option($id){
+    if ( $id = $this->from_code(func_get_args()) ) {
       $tab = $this->db->tsn($this->cfg['table']);
       $opt = $this->get_row([
         $this->db->cfn($this->cfg['cols']['id'], $tab) => $id
@@ -160,9 +184,8 @@ class options
    * @param int $id La valeur du champ `id` de l'option dans la base de données
    * @return string La valeur du champ titre correspondant
    */
-  public function text($id, $cat = false){
-    $id = $this->from_code($id, $cat);
-    if ( \bbn\str\text::is_integer($id) ) {
+  public function text($id){
+    if ( $id = $this->from_code(func_get_args()) ) {
       return $this->db->get_val($this->cfg['table'], $this->cfg['cols']['text'], $this->cfg['cols']['id'], $id);
     }
     return false;
@@ -187,9 +210,8 @@ class options
    * @param string|int $cat La catégorie, sous la forme de son `id`, ou de son nom
    * @return array La liste des options indexée sur leur `id`
    */
-  public function options($cat = null, $id_parent = false){
-    $cat = $this->from_code($cat, $id_parent);
-    if ( \bbn\str\text::is_integer($cat) ) {
+  public function options($cat = 0){
+    if ( $cat = $this->from_code(func_get_args()) ) {
       return $this->db->select_all_by_keys($this->cfg['table'],
         [$this->cfg['cols']['id'], $this->cfg['cols']['text']],
         [$this->cfg['cols']['id_parent'] => $cat],
@@ -205,8 +227,8 @@ class options
    * @param string|int $cat La catégorie, sous la forme de son `id`, ou de son nom
    * @return array La liste des options indexée sur leur `id`
    */
-  public function count($cat = null, $id_parent = false){
-    $cat = $this->from_code($cat, $id_parent);
+  public function count($cat = 0){
+    $cat = $this->from_code(func_get_args());
     if ( \bbn\str\text::is_integer($cat) ) {
       return $this->db->count($this->cfg['table'], [$this->cfg['cols']['id_parent'] => $cat]);
     }
@@ -219,8 +241,9 @@ class options
    * @param string|int $cat La catégorie, sous la forme de son `id`, ou de son nom
    * @return array Un tableau des caractéristiques de chaque option de la catégorie, indexée sur leur `id`
    */
-  public function full_options($cat = null, $id_parent = false, $start = 0, $limit = 2000){
-    if ( $opts = $this->native_options($cat, $id_parent, $start, $limit) ){
+  public function full_options($cat = 0, $id_parent = false, $start = 0, $limit = 2000){
+    $opts = $this->native_options($cat, $id_parent, $start, $limit);
+    if ( is_array($opts) ){
       foreach ($opts as $i => $o) {
         $this->get_value($o['id'], $opts[$i]);
       }
@@ -247,8 +270,8 @@ class options
    * @param string|int $cat La catégorie, sous la forme de son `id`, ou de son nom
    * @return array Un tableau des caractéristiques de chaque option de la catégorie, indexée sur leur `id`
    */
-  public function native_options($cat = null, $id_parent = false, $start = 0, $limit = 2000){
-    $cat = $this->from_code(is_null($cat) ? $this->default : $cat, $id_parent);
+  public function native_options($cat = 0, $id_parent = false, $start = 0, $limit = 2000){
+    $cat = $this->from_code($cat, $id_parent ? $id_parent : $this->default);
     if ( \bbn\str\text::is_integer($cat, $start, $limit) ) {
       return $this->get_rows([$this->cfg['cols']['id_parent'] => $cat], $start, $limit);
     }
@@ -258,7 +281,7 @@ class options
   public function tree($cat, $id_parent = false, $length = 128){
     $length--;
     if ( $length >= 0 ){
-      $cat = $this->from_code($cat, $id_parent);
+      $cat = $this->from_code($cat, $id_parent ? $id_parent : $this->default);
       if ( \bbn\str\text::is_integer($cat) && ($text = $this->text($cat)) ) {
         $res = [
           'id' => $cat,
@@ -290,7 +313,7 @@ class options
   public function full_tree($cat, $id_parent = false, $length=128){
     $length--;
     if ( $length >= 0 ) {
-      $cat = $this->from_code($cat, $id_parent);
+      $cat = $this->from_code($cat, $id_parent ? $id_parent : $this->default);
       if (\bbn\str\text::is_integer($cat) && ($text = $this->text($cat))) {
         $res = $this->db->rselect($this->cfg['table'], array_values($this->cfg['cols']), [
           $this->cfg['cols']['id'] => $cat
@@ -440,8 +463,7 @@ class options
   }
 
   public function remove($id){
-    $id = $this->from_code($id);
-    if ( is_int($id) ){
+    if ( $id = $this->from_code(func_get_args()) ) {
       return $this->db->delete($this->cfg['table'], [
         $this->cfg['cols']['id'] => $id
       ]);
@@ -450,16 +472,16 @@ class options
   }
 
   public function get_ids_by_code($code){
-    if ( $code ) {
+    if ( $id = $this->from_code(func_get_args()) ) {
       return $this->db->get_column_values($this->cfg['table'], 'id', [
-        $this->cfg['cols']['code'] => $code
+        $this->cfg['cols']['id_parent'] => $id
       ]);
     }
     return false;
   }
 
   public function get_id_parent($id){
-    if ( $id = $this->from_code($id) ){
+    if ( $id = $this->from_code(func_get_args()) ){
       return $this->db->get_val(
         $this->cfg['table'],
         $this->cfg['cols']['id_parent'],
@@ -510,8 +532,6 @@ class options
   }
 
   public function is_parent($id, $id_parent){
-    $id = $this->from_code($id);
-    $id_parent = $this->from_code($id_parent);
     // Preventing infinite loop
     $done = [$id];
     if ( \bbn\str\text::is_integer($id, $id_parent) ){
@@ -543,15 +563,79 @@ class options
     }
   }
 
-  public function get_id($code, $id_parent){
-    if ( !($id = $this->from_code($code, $id_parent)) ){
-      $this->add([
-        'code' => $code,
-        'text' => $code,
-        'id_parent' => $id_parent
-      ]);
-      $id = $this->from_code($code, $id_parent);
+  public function has_id(){
+    $args = func_get_args();
+    if ( $this->from_code($args) ){
+      return true;
+    }
+    if ( is_string($args[0]) && (count($args) > 1) ){
+      $code = $args[0];
+      array_shift($args);
+      if ( $this->from_code($args) ){
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public function get_id(){
+    $args = func_get_args();
+    if ( !($id = $this->from_code($args)) ){
+      if ( is_string($args[0]) && (count($args) > 1) ){
+        $code = $args[0];
+        array_shift($args);
+        if ( !($id = $this->from_code($args)) ){
+          $this->add([
+            'code' => $code,
+            'text' => $code,
+            'id_parent' => $id
+          ]);
+          $id = $this->from_code(func_get_args());
+        }
+      }
     }
     return $id;
+  }
+
+  public function soptions($cat){
+    $r = [];
+    if ( $cats = $this->options($cat) ){
+      foreach ( $cats as $id => $txt ){
+        $o = $this->options($id);
+        if ( is_array($o) ){
+          $r = \bbn\tools::merge_arrays($r, $o);
+        }
+        else{
+          die("BAD ID: $id");
+        }
+      }
+    }
+    return $r;
+  }
+
+  public function full_soptions($cat){
+    $r = [];
+    if ( $cats = $this->options($cat) ){
+      foreach ( $cats as $id => $txt ){
+        $o = $this->full_options($id);
+        if ( is_array($o) ){
+          $r = \bbn\tools::merge_arrays($r, $o);
+        }
+        else{
+          die("BAD ID: $id");
+        }
+      }
+    }
+    return $r;
+  }
+
+  public function native_soptions($cat){
+    $r = [];
+    if ( $cats = $this->options($cat) ){
+      foreach ( $cats as $id => $txt ){
+        $r = \bbn\tools::merge_arrays($r, $this->native_options($id));
+      }
+    }
+    return $r;
   }
 }

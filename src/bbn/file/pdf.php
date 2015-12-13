@@ -57,7 +57,9 @@ EOF
       'signature' => '<div style="text-align:right">Your signing here</div>'
   ];
   public $cfg;
-	private $pdf = false;
+	private
+    $pdf = false,
+    $last_cfg = [];
  
   public static function set_default(array $cfg){
     self::$default_cfg = \bbn\tools::merge_arrays(self::$default_cfg, $cfg);
@@ -113,15 +115,17 @@ EOF
 	public function add_page($html, $cfg=null, $sign=false)
 	{
 		if ( $this->check() ){
-      
-      $cfg = $this->get_config($cfg);
-      $this->pdf->defHTMLHeaderByName('head', $cfg['head']);
-      $this->pdf->defHTMLFooterByName('foot', $cfg['foot']);
 
-      if ( isset($cfg['template']) && is_file($cfg['template']) ){
-        $src = $this->pdf->SetSourceFile($cfg['template']);
-        $tpl = $this->pdf->ImportPage($src);
-        $this->pdf->SetPageTemplate($tpl);
+      if ( $this->last_cfg !== $cfg ){
+        $this->last_cfg = $cfg;
+        $cfg = $this->get_config($cfg);
+        $this->pdf->defHTMLHeaderByName('head', $cfg['head']);
+        $this->pdf->defHTMLFooterByName('foot', $cfg['foot']);
+        if ( isset($cfg['template']) && is_file($cfg['template']) ){
+          $src = $this->pdf->SetSourceFile($cfg['template']);
+          $tpl = $this->pdf->ImportPage($src);
+          $this->pdf->SetPageTemplate($tpl);
+        }
       }
 
       $this->pdf->AddPageByArray(array(
@@ -171,5 +175,49 @@ EOF
 			return chunk_split(base64_encode($pdfdoc));
 		}
 	}
+
+  public function save($filename){
+    if ( $this->check() ){
+      $filename = \bbn\str\text::parse_path($filename);
+      if ( !is_dir(dirname($filename)) ){
+        die("Error! No destination directory");
+      }
+      $this->pdf->Output($filename,'F');
+    }
+  }
+
+  public function import($files){
+    if ( $this->check() ){
+      if ( !is_array($files) ){
+        $files = [$files];
+      }
+      $this->pdf->SetImportUse();
+      foreach ( $files as $f ){
+        if ( is_file($f) ){
+          $pagecount = $this->pdf->SetSourceFile($f);
+          for ( $i = 1; $i <= $pagecount; $i++ ){
+            $import_page = $this->pdf->ImportPage($i);
+            $this->pdf->UseTemplate($import_page);
+            $this->pdf->addPage();
+          }
+        }
+      }
+    }
+    return $this;
+  }
+
+  public function import_page($file, $page){
+    if ( $this->check() ){
+      $this->pdf->SetImportUse();
+      if ( is_file($file) ){
+        $pagecount = $this->pdf->SetSourceFile($file);
+        if ( ($page > 0) && ($page < $pagecount) ){
+          $import_page = $this->pdf->ImportPage($page);
+          $this->pdf->UseTemplate($import_page);
+          $this->pdf->addPage();
+        }
+      }
+    }
+    return $this;
+  }
 }
-?>

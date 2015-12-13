@@ -121,6 +121,10 @@ class connection extends \PDO implements actions, api, engines
     /**
      * @var string
      */
+    $last_error = false,
+    /**
+     * @var string
+     */
     $last_query,
     /**
      * The ODBC engine of this connection
@@ -309,11 +313,12 @@ class connection extends \PDO implements actions, api, engines
     }
     array_push($msg,self::$line);
     if ( is_string($e) ){
-      array_push($msg,'Error message: '.$e);
+      array_push($msg, $e);
     }
     else if ( method_exists($e, "getMessage") ){
-      array_push($msg,'Error message: '.$e->getMessage());
+      array_push($msg, $e->getMessage());
     }
+    $this->last_error = end($msg);
     array_push($msg, self::$line);
     array_push($msg, $this->last());
     array_push($msg, self::$line);
@@ -1885,6 +1890,12 @@ class connection extends \PDO implements actions, api, engines
       }
     }
     return $fields;
+  }
+
+  public function where_json($prop, $value){
+    $r = [$prop => $value];
+    $json = json_encode($r);
+    return '%'.substr($json, 1, -1).'%';
   }
 
   /**

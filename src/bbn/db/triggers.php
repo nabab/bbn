@@ -178,7 +178,8 @@ trait triggers {
   /**
    * @returns a selection query
    */
-  private function _sel($table, $fields = [], $where = [], $order = false, $limit = 100, $start = 0){
+  private function _sel($table, $fields = [], $where = [], $order = false, $limit = 100, $start = 0)
+  {
     if ( !is_array($table) ){
       $table = [$table];
     }
@@ -187,6 +188,9 @@ trait triggers {
     foreach ( $table as $tab ){
       $tables_fields[$tab] = array_keys($this->modelize($tab)['fields']);
       array_push($tables_full, $this->tfn($tab));
+    }
+    if ( !is_array($fields) ){
+      $fields = [$fields];
     }
     foreach ( $fields as $i => $field ){
       if ( !strpos($field, '.') ){
@@ -228,6 +232,7 @@ trait triggers {
     else{
       $cfg['sql'] = $this->language->get_select($table, $fields, $cfg['where']['final'], $order, $limit, $start);
     }
+
     $cfg['values'] = array_values($fields);
     if ( $cfg['sql'] ){
       if ( $this->triggers_disabled ){
@@ -319,13 +324,13 @@ trait triggers {
               $v[0] = $this->cfn($v[0], $tab[0]);
             }
             else if (count($tab) > 1) {
-              die('Error! Duplicate field name, you must insert the fields with their fullname.');
+              $this->error('Error! Duplicate field name, you must insert the fields with their fullname.');
             }
             else {
-              die(var_dump(
+              $this->error(
                 "Error! The column '$v[0]' as mentioned in where doesn't exist in '".
                 implode(", ", array_keys($tables_fields))."' table(s)", $v
-              ));
+              );
             }
           }
           // arrays with [ field_name => value]
