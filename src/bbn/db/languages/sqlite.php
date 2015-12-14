@@ -451,7 +451,7 @@ class sqlite implements \bbn\db\engines
     foreach ( $table as $i => $tab ){
       if ( $fn = $this->table_full_name($tab, 1) ) {
         $table[$i] = $fn;
-        $tables_fields[$table[$i]] = array_keys($this->modelize($table[$i])['fields']);
+        $tables_fields[$table[$i]] = array_keys($this->db->modelize($table[$i])['fields']);
       }
     }
     if ( !empty($tables_fields) ){
@@ -503,7 +503,7 @@ class sqlite implements \bbn\db\engines
         }
       }
       $r = substr($r, 0, strrpos($r,',')).PHP_EOL."FROM ".implode(', ', $table).PHP_EOL.
-        $this->get_where($where, $table, $aliases).PHP_EOL.
+        $this->db->get_where($where, $table, $aliases).PHP_EOL.
         $this->get_order($order, $table, $aliases);
       if ( $limit ){
         $r .= PHP_EOL . $this->get_limit([$limit, $start]);
