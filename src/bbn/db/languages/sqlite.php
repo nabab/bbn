@@ -498,7 +498,7 @@ class sqlite implements \bbn\db\engines
       else{
         foreach ( $tables_fields as $t => $f ){
           foreach ( $f as $v ){
-            $r .= "`$t.$v`,\n";
+            $r .= $this->col_full_name($v, $t, 1).",".PHP_EOL;
           }
         }
       }
