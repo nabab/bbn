@@ -622,13 +622,13 @@ class sqlite implements \bbn\db\engines
             $this->db->error("Error in Update query creation: the column $k doesn't exist in $table");
           }
           else{
-            $r .= $this->db->cfn($k, $table, 1)." = ?,".PHP_EOL;
+            $r .= $this->col_simple_name($k, 1)." = ?,".PHP_EOL;
           }
 				}
 			}
 			else{
 				foreach ( array_keys($m['fields']) as $k ){
-          $r .= $this->db->cfn($k, $table, 1)." = ?,".PHP_EOL;
+          $r .= $this->col_simple_name($k, 1)." = ?,".PHP_EOL;
 				}
 			}
 
