@@ -712,7 +712,14 @@ class connection extends \PDO implements actions, api, engines
     if ( !isset($this->parser) ){
       $this->parser = new \PHPSQLParser\PHPSQLParser();
     }
-    return $this->parser->parse($cfg);
+    $r = $this->parser->parse($cfg);
+    if ( !count($r) ){
+      return false;
+    }
+    if ( isset($r['BRACKET']) && (count($r) === 1) ){
+      return false;
+    }
+    return $r;
   }
 
   /**
@@ -928,7 +935,7 @@ class connection extends \PDO implements actions, api, engines
               $this->queries[$hash_sent] = $hash;
             }
           }
-          else if ( ($this->engine === 'sqlite') && strpos($statement, 'PRAGMA') === 0 ){
+          else if ( ($this->engine === 'sqlite') && (strpos($statement, 'PRAGMA') === 0) ){
             $sequences = ['PRAGMA' => $statement];
             $this->add_query(
               $hash,

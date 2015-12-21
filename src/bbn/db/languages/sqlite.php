@@ -254,11 +254,11 @@ class sqlite implements \bbn\db\engines
 	public function get_columns($table)
 	{
     $r = [];
-    
-		if ( ( $table = $this->table_full_name($table, 1) ) ){
+
+		if ( ( $table = $this->table_full_name($table) ) ){
 
       $p = 1;
-      if ( $rows = $this->db->get_rows('PRAGMA table_info('.$table.')') ){
+      if ( $rows = $this->db->get_rows("PRAGMA table_info($table)") ){
         foreach ( $rows as $row ){
           $f = $row['name'];
           $r[$f] = [
