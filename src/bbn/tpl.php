@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: BBN
- * Date: 07/12/2014
- * Time: 18:26
- */
-
 namespace bbn;
 
 if ( !defined('BBN_DATA_PATH') ){
@@ -30,14 +23,14 @@ class tpl {
     if ( file_exists($file) ){
       return include($file);
     }
+
     $tpl = \LightnCandy\LightnCandy::compile($st, [
       'flags' => \LightnCandy\LightnCandy::FLAG_MUSTACHELOOKUP |
         \LightnCandy\LightnCandy::FLAG_PARENT |
         \LightnCandy\LightnCandy::FLAG_HANDLEBARSJS |
         \LightnCandy\LightnCandy::FLAG_ERROR_LOG
     ]);
-    file_put_contents($file, $tpl);
-    return include($file);
+    return \LightnCandy\LightnCandy::prepare($tpl);
   }
 
   static public function render($st, $data){
@@ -47,5 +40,4 @@ class tpl {
     }
     return '';
   }
-
-} 
+}
