@@ -352,9 +352,11 @@ class mapper{
         
         $full_cfg['elements'][$i]['table'] = $table;
 
+        /*
         if ( ($f['key'] === 'PRI') || ($i >= $limit) ){
           $full_cfg['elements'][$i]['hidden'] = 1;
         }
+        */
         $i++;
       }
       array_push($full_cfg['elements'], [
@@ -437,15 +439,13 @@ class mapper{
           if ( isset($f['keys']) ){
             foreach ( $f['keys'] as $k ){
               $key = $cfg['keys'][$k];
-              if ( ($k === 'PRIMARY') ){
-                $r['field'] = 'hidden';
-                $r['hidden'] = 1;
-              }
-              else if ( \bbn\str\text::check_name($key['ref_db'], $key['ref_table'], $key['ref_column']) ){
+              if ( isset($key['ref_db'], $key['ref_table'], $key['ref_column']) &&
+                \bbn\str\text::check_name($key['ref_db'], $key['ref_table'], $key['ref_column'])
+              ){
                 $ref = [
-                    'db' => $key['ref_db'],
-                    'table' => $key['ref_table'],
-                    'column' => $key['ref_column']
+                  'db' => $key['ref_db'],
+                  'table' => $key['ref_table'],
+                  'column' => $key['ref_column']
                 ];
                 break;
               }
@@ -457,8 +457,8 @@ class mapper{
             foreach ( $ref_table_cfg['fields'] as $name => $def ){
               if ( ($def['type'] === 'varchar') || ($def['type'] === 'text') ){
                 $cols = [
-                    "value" => $ref['column'],
-                    "text" => $name
+                  "value" => $ref['column'],
+                  "text" => $name
                 ];
                 break;
               }
@@ -512,7 +512,9 @@ class mapper{
           }
           if ( $r['field'] === 'numeric' ){
             $r['attr']['maxlength'] = isset($r['widget']['options']['decimals']) ? (int)($f['maxlength'] + 1) : (int)$f['maxlength'];
-            $r['widget']['options']['format'] = isset($r['widget']['options']['decimals']) ? '#' : 'n';
+            if ( !empty($r['widget']['options']['decimals']) ){
+              $r['widget']['options']['format'] = 'n2';
+            }
             $r['format'] = $r['widget']['options']['format'];
             $r['attr']['type'] = 'number';
             $r['widget']['options']['step'] = 10/pow(10, isset($r['widget']['options']['decimals']) ? $r['widget']['options']['decimals']+1 : 1);
@@ -622,11 +624,7 @@ class mapper{
         if ( isset($col['keys']) ){
           foreach ( $col['keys'] as $k ){
             $key = $table_cfg['keys'][$k];
-            if ( ($k === 'PRIMARY') ){
-              $cfg['field'] = 'hidden';
-              $cfg['hidden'] = 1;
-            }
-            else if ( \bbn\str\text::check_name($key['ref_db'], $key['ref_table'], $key['ref_column']) ){
+            if ( \bbn\str\text::check_name($key['ref_db'], $key['ref_table'], $key['ref_column']) ){
               $ref = [
                   'db' => $key['ref_db'],
                   'table' => $key['ref_table'],
@@ -662,7 +660,7 @@ class mapper{
             $cfg['widget']['options']['decimals'] = (int)$dec[1];
           }
           $cfg['attr']['maxlength'] = isset($cfg['widget']['options']['decimals']) ? (int)($col['maxlength'] + 1) : (int)$col['maxlength'];
-					$cfg['widget']['options']['format'] = isset($cfg['widget']['options']['decimals']) ? '#' : 'n';
+					$cfg['widget']['options']['format'] = empty($cfg['widget']['options']['decimals']) ? 'n0' : 'n2';
 					$cfg['attr']['type'] = 'number';
           $cfg['widget']['options']['step'] = 10/pow(10, $cfg['widget']['options']['decimals']+1);
 					$max = '';

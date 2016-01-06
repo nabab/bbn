@@ -849,6 +849,94 @@ class directories {
     return $this->error();
   }
 
+  public function rename($dir, $file, $new){
+    if ( isset($data['dir'], $data['name'], $data['path']) &&
+      (strpos($data['path'], '../') === false) &&
+      \bbn\str\text::check_filename($data['name'])
+    ){
+      $dirs = $this->dir();
+      if ( isset($dirs[$data['dir']]) ){
+        $cfg =& $dirs[$data['dir']];
+        $path = $data['path'];
+        if ( $this->is_mvc($cfg) ){
+          $type = is_dir($cfg['files']['Controller']['fpath'].$path) ? 'dir' : 'file';
+        }
+        else {
+          $type = is_dir($cfg['root_path'].$path) ? 'dir' : 'file';
+        }
+        $dir = dirname($path).'/';
+        if ( $dir === './' ){
+          $dir = '';
+        }
+        $name = \bbn\str\text::file_ext($path, 1)[0];
+        $src_file = $dir.$name;
+        $dest_file = $dir.$data['name'];
+        $todo = [];
+        if ( $this->is_mvc($cfg) ){
+          foreach ( $cfg['files'] as $f ){
+            if ( $f != 'CTRL' ){
+              $src = $f['fpath'].$src_file;
+              $dest = dirname($src).'/'.$data['name'];
+              if ( $type === 'file' ){
+                $src .= '.'.$f['ext'];
+                $dest .= '.'.$f['ext'];
+              }
+              $is_dir = ($type === 'dir') && is_dir($src);
+              $is_file = ($type === 'dir') || $is_dir ? false : is_file($src);
+              if ( $is_dir || $is_file ){
+                if ( file_exists($dest) ){
+                  return $this->error("Un fichier du meme nom existe déjà $dest");
+                }
+                else{
+                  $todo[$src] = $dest;
+                }
+              }
+            }
+          }
+        }
+        else {
+          $dest_file= $dir.\bbn\str\text::file_ext($data['name'], 1)[0];
+          $ext = \bbn\str\text::file_ext($data['path']);
+          $src = $cfg['root_path'].$src_file.($type === 'file' ? '.'.$ext : '');
+          $dest = dirname($src).'/'.\bbn\str\text::file_ext($data['name'], 1)[0].($type === 'file' ? '.'.$ext : '');
+          $is_dir = ($type === 'dir') && is_dir($src);
+          $is_file = ($type === 'dir') || $is_dir ? false : is_file($src);
+          if ( $is_dir || $is_file ){
+            if ( file_exists($dest) ){
+              return $this->error("Un fichier du meme nom existe déjà $dest");
+            }
+            else{
+              $todo[$src] = $dest;
+            }
+          }
+        }
+        foreach ( $todo as $src => $dest ){
+          if ( !rename($src, $dest) ){
+            return $this->error("Impossible de déplacer le fichier $src");
+          }
+        }
+        if ( isset($_SESSION[BBN_SESS_NAME]['ide']['list']) ){
+          $sess = [
+            'dir' => $data['dir'],
+            'file' => $data['path']
+          ];
+          if ( in_array($sess, $_SESSION[BBN_SESS_NAME]['ide']['list']) ){
+            unset($_SESSION[BBN_SESS_NAME]['ide']['list'][array_search($sess, $_SESSION[BBN_SESS_NAME]['ide']['list'])]);
+            array_push($_SESSION[BBN_SESS_NAME]['ide']['list'], [
+              'dir' => $data['dir'],
+              'file' => $dest_file.( empty($ext) ? '.php' : '.'.$ext )
+            ]);
+          }
+        }
+        return [
+          'new_file' => $dest_file,
+          'new_file_ext' => empty($ext) ? '' : $ext
+        ];
+      }
+    }
+    return $this->error();
+  }
+
   /**
    * Returns
    * @return array

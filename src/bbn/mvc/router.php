@@ -156,7 +156,6 @@ class router {
   }
 
   private function set_known(array $o){
-    $this->log("SET KNOWN", $o);
     if ( !isset($o['mode'], $o['path'], $o['file']) || !self::is_mode($o['mode']) || !is_string($o['path']) || !is_string($o['file']) ){
       return false;
     }
@@ -172,8 +171,19 @@ class router {
         while ( strlen($tmp) > 0 ){
           $tmp = $this->parse(dirname($tmp));
           $ctrl = ( $tmp === '.' ? '' : $tmp.'/' ).'_ctrl.php';
-          if ( $this->alt_root && is_file($this->get_alt_root($mode).$ctrl) ){
-            array_unshift($this->known[$mode][$path]['checkers'], $this->get_alt_root($mode).$ctrl);
+          if ( $this->alt_root ){
+            if ( strpos($tmp, $this->alt_root) === 0 ){
+              $alt_ctrl = $this->get_alt_root($mode).
+                ( strlen($tmp) === strlen($this->alt_root) ?
+                  '' : substr($tmp, strlen($this->alt_root)+1).'/'
+                ).'_ctrl.php';
+              if ( is_file($alt_ctrl) ){
+                array_unshift($this->known[$mode][$path]['checkers'], $alt_ctrl);
+              }
+            }
+            else if ( is_file($this->get_alt_root($mode).$ctrl) ){
+              array_unshift($this->known[$mode][$path]['checkers'], $this->get_alt_root($mode).$ctrl);
+            }
           }
           if ( is_file($root.$ctrl) ){
             array_unshift($this->known[$mode][$path]['checkers'], $root.$ctrl);
@@ -182,6 +192,7 @@ class router {
             $tmp = '';
           }
         }
+        $this->known[$mode][$path]['checkers'] = array_unique($this->known[$mode][$path]['checkers']);
         if ( $o['path'] !== $o['request'] ){
           $this->known[$mode][$o['request']] = $o['path'];
         }

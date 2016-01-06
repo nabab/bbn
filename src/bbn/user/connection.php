@@ -835,7 +835,7 @@ class connection
    */
   public function logout()
   {
-    $this->session->set([], 'user');
+    $this->session->set([]);
     $this->close_session();
   }
 
