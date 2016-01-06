@@ -144,6 +144,36 @@ class session
     }
   }
 
+  public function destroy(){
+    if ( $this->id ){
+      $this->open();
+      $args = func_get_args();
+      $var =& $_SESSION[BBN_SESS_NAME];
+      $var2 =& $var;
+      foreach ( $args as $i => $a ){
+        if ( !is_array($var) ){
+          $var = [];
+        }
+        if ( !isset($var[$a]) ){
+          if ( count($args) >= $i ){
+            $var[$a] = [];
+          }
+          else{
+            break;
+          }
+        }
+        unset($var2);
+        $var2 =& $var[$a];
+        unset($var);
+        $var =& $var2;
+      }
+      $var = null;
+      $this->data = isset($_SESSION[BBN_SESS_NAME]) ? $_SESSION[BBN_SESS_NAME] : [];
+      $this->close();
+      return $this;
+    }
+  }
+
   /**
    * Executes a function on the session or a part of the session
    * @param function $func
