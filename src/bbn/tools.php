@@ -712,6 +712,9 @@ class tools
     $res = [];
     foreach ( $ar as $k => $a ){
       $r = ['text' => $k];
+      if ( is_object($a) ){
+        $a = self::to_array($a);
+      }
       if ( is_array($a) ){
         $r['items'] = self::get_tree($a);
       }
