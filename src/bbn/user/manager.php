@@ -109,12 +109,18 @@ You can click the following link to access directly your account:<br>
   }
   
   public function groups($adm=false){
-    return $this->db->rselect_all(
-      $this->cfg['tables']['groups'], [
-      'id' => $this->cfg['arch']['groups']['id'],
-      'group' => $this->cfg['arch']['groups']['group'],
-      'cfg' => $this->cfg['arch']['groups']['cfg']
-    ], $adm ? '' : [['id', '>', 1]]);
+    return $this->db->get_rows("
+      SELECT ".$this->db->cfn($this->cfg['arch']['groups']['id'], $this->cfg['tables']['groups'], 1)." AS `id`,
+      ".$this->db->cfn($this->cfg['arch']['groups']['group'], $this->cfg['tables']['groups'], 1)." AS `group`,
+      COUNT(".$this->db->cfn($this->cfg['arch']['users']['id'], $this->cfg['tables']['users'], 1).") AS `num`
+      FROM ".$this->db->escape($this->cfg['tables']['groups'])."
+        LEFT JOIN ".$this->db->escape($this->cfg['tables']['usergroups'])."
+          ON ".$this->db->cfn($this->cfg['arch']['usergroups']['id_group'], $this->cfg['tables']['usergroups'], 1)." = ".$this->db->cfn($this->cfg['arch']['groups']['id'], $this->cfg['tables']['groups'], 1)."
+        LEFT JOIN ".$this->db->escape($this->cfg['tables']['users'])."
+          ON ".$this->db->cfn($this->cfg['arch']['users']['id'], $this->cfg['tables']['users'], 1)." = ".$this->db->cfn($this->cfg['arch']['usergroups']['id_user'], $this->cfg['tables']['usergroups'], 1)."
+          AND ".$this->db->cfn($this->cfg['arch']['users']['status'], $this->cfg['tables']['users'], 1)." = 1
+          ".( $adm ? '' : "WHERE ".$this->db->cfn($this->cfg['arch']['groups']['id'], $this->cfg['tables']['groups'], 1)." > 1" )."
+      GROUP BY ".$this->db->cfn($this->cfg['arch']['groups']['id'], $this->cfg['tables']['groups'], 1));
   }
 
   public function text_value_groups(){
