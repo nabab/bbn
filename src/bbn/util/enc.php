@@ -30,8 +30,14 @@ class enc
 				$key = 'dsjfjsdvcb34YhXZLW';
 			}
 		}
-		$key = 'nabab_'.$key;
-		$iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB); /* get vector size on ECB mode */
+    $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB); /* get vector size on ECB mode */
+    $key_size = strlen($key);
+    if ( $key_size > $iv_size ){
+      $key = substr($key, 0, $iv_size);
+    }
+    else if ( $key_size < $iv_size ){
+      $key = str_pad($key, $iv_size, 'bbn_');
+    }
 		$iv = mcrypt_create_iv($iv_size, MCRYPT_RAND); /* Creating the vector */
 		$cryptedpass = @mcrypt_encrypt (MCRYPT_RIJNDAEL_256, $key, $pass, MCRYPT_MODE_ECB, $iv); /* Encrypting using MCRYPT_RIJNDAEL_256 algorithm */
 		return base64_encode($cryptedpass);
@@ -51,8 +57,14 @@ class enc
 			}
 		}
 		$encpass = base64_decode($encpass);
-		$key = 'nabab_'.$key;
-		$iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB);
+    $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB); /* get vector size on ECB mode */
+    $key_size = strlen($key);
+    if ( $key_size > $iv_size ){
+      $key = substr($key, 0, $iv_size);
+    }
+    else if ( $key_size < $iv_size ){
+      $key = str_pad($key, $iv_size, 'bbn_');
+    }
 		$iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
 		$decryptedpass = @mcrypt_decrypt (MCRYPT_RIJNDAEL_256, $key, $encpass, MCRYPT_MODE_ECB, $iv); /* Decrypting... */
 		return rtrim($decryptedpass);

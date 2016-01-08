@@ -683,12 +683,12 @@ class tools
     if (is_object($param) ){
       $param = self::to_array($param);
     }
+    if ( defined('BBN_IS_SSL') && defined('BBN_IS_DEV') && BBN_IS_SSL && BBN_IS_DEV ){
+      curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+      curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+      //curl_setopt($ch, CURLOPT_SAFE_UPLOAD, false);
+    }
     if ( is_array($param) && (count($param) > 0) ){
-      if ( defined('BBN_IS_SSL') && defined('BBN_IS_DEV') && BBN_IS_SSL && BBN_IS_DEV ){
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        //curl_setopt($ch, CURLOPT_SAFE_UPLOAD, false);
-      }
       if ( $method === 'post' ){
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, 1);
