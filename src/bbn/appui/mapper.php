@@ -397,13 +397,14 @@ class mapper{
           $field = 'checkbox';
         }
         $r = [
-            'attr' => [
-                'name' => $column,
-            ],
-            'label' => (ucwords(str_replace('_', ' ', $column))),
-            'type' => $type,
-            'menu' => true,
-            'editable' => $f['key'] === 'PRI' ? false : true,
+          'attr' => [
+            'name' => $column,
+          ],
+          'field' => $field,
+          'label' => (ucwords(str_replace('_', ' ', $column))),
+          'type' => $type,
+          'menu' => true,
+          'editable' => $f['key'] === 'PRI' ? false : true,
         ];
         if ( $type === 'boolean' ){
           $r['template'] = "#= $column ? 'Oui' : 'Non' #";
@@ -436,11 +437,10 @@ class mapper{
         else{
           $dec = false;
           $ref = false;
-          if ( isset($f['keys']) ){
-            foreach ( $f['keys'] as $k ){
+          if ( isset($cfg['cols'][$column]) ){
+            foreach ( $cfg['cols'][$column] as $k ){
               $key = $cfg['keys'][$k];
-              if ( isset($key['ref_db'], $key['ref_table'], $key['ref_column']) &&
-                \bbn\str\text::check_name($key['ref_db'], $key['ref_table'], $key['ref_column'])
+              if ( isset($key['ref_db'], $key['ref_table'], $key['ref_column'])
               ){
                 $ref = [
                   'db' => $key['ref_db'],
@@ -451,9 +451,9 @@ class mapper{
               }
             }
           }
-          if ( is_array($ref) && $ref_table_cfg = $this->db->modelize($ref['table']) ){
+          if ( is_array($ref) && ($ref_table_cfg = $this->db->modelize($ref['table'])) ){
             // Arguments for select
-            $cols = [$ref['column']];
+            $cols = false;
             foreach ( $ref_table_cfg['fields'] as $name => $def ){
               if ( ($def['type'] === 'varchar') || ($def['type'] === 'text') ){
                 $cols = [
@@ -463,12 +463,20 @@ class mapper{
                 break;
               }
             }
-            $r['sql'] = $this->db->get_select($ref['table'], $cols);
-            $r['field'] = 'dropdown';
-            $r['widget'] = [];
-            $r['widget']['options'] = [];
-            $r['widget']['options']['dataTextField'] = 'text';
-            $r['widget']['options']['dataValueField'] = 'value';
+            if ( $cols && (count($cols) > 1) ){
+              if ( $this->db->count($ref['table']) < 500 ){
+                $r['values'] = $this->db->rselect_all($ref['table'], $cols);
+                $r['field'] = 'dropdown';
+                $r['widget'] = [];
+                $r['widget']['options'] = [];
+                $r['widget']['options']['dataTextField'] = 'text';
+                $r['widget']['options']['dataValueField'] = 'value';
+                $r['widget']['dataSource'] = $r['values'];
+              }
+              else{
+                $r['sql_one'] = $this->db->get_select($ref['table'], $cols);
+              }
+            }
 
           }
           else if ( strpos($f['type'], 'char') !== false ){
