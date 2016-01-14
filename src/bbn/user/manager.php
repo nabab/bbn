@@ -241,7 +241,6 @@ You can click the following link to access directly your account:<br>
     }
     if ( !$id_user && isset($cfg[$this->cfg['arch']['users']['id']]) ){
       $id_user = $cfg[$this->cfg['arch']['users']['id']];
-      unset($cfg[$this->cfg['arch']['users']['id']]);
     }
     if ( $id_user && (
             !isset($cfg[$this->cfg['arch']['users']['email']]) ||
@@ -251,6 +250,7 @@ You can click the following link to access directly your account:<br>
         $this->cfg['tables']['users'],
         $cfg,
         [$this->cfg['arch']['users']['id'] => $id_user]);
+      $cfg['id'] = $id_user;
       return $cfg;
     }
 		return false;
