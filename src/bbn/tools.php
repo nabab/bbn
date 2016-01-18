@@ -560,6 +560,7 @@ class tools
    *  ['v' => 1, 'name' => 'test1'],
    *  ['v' => 8, 'name' => 'test2'],
    *  ['v' => 45, 'name' => 'test3'],
+   *  ['v' => 45, 'name' => 'test3'],
    *  ['v' => 2, 'name' => 'test4']
    * ], 'v'); //Returns  1
    * </code>
@@ -732,34 +733,49 @@ class tools
       json_encode(self::get_tree($ar)).'});</script>';
   }
 
-	/**
-	* Formats a line (passed as a fields  array) as CSV and returns the CSV as a string.
-	* Adapted from http://us3.php.net/manual/en/function.fputcsv.php#87120
-	*/
-	public static function to_csv( array $data, $delimiter = ';', $enclosure = '"', $separator = PHP_EOL, $encloseAll = false, $nullToMysqlNull = false ) {
+  /**
+   * Formats a line (passed as a fields  array) as CSV and returns the CSV as a string.
+   * Adapted from http://us3.php.net/manual/en/function.fputcsv.php#87120
+   */
+  public static function from_csv($st, $delimiter = ';', $enclosure = '"', $separator = PHP_EOL) {
+    if ( is_string($st) ){
+      $r = [];
+      $lines = explode($separator, $st);
+      foreach ( $lines as $line ){
+        array_push($r, str_getcsv($line, $delimiter, $enclosure));
+      }
+      return $r;
+    }
+    return [];
+  }
+
+  /**
+   * Formats an array (passed as a fields  array) as CSV and returns the CSV as a string.
+   * Adapted from http://us3.php.net/manual/en/function.fputcsv.php#87120
+   */
+  public static function to_csv(array $data, $delimiter = ';', $enclosure = '"', $separator = PHP_EOL, $encloseAll = false, $nullToMysqlNull = false ) {
     $delimiter_esc = preg_quote($delimiter, '/');
     $enclosure_esc = preg_quote($enclosure, '/');
 
-		$lines = [];
-		foreach ( $data as $d ){
-	    $output = [];
-	    foreach ( $d as $field ) {
-	      if ($field === null && $nullToMysqlNull) {
-	        $output[] = 'NULL';
-	        continue;
-	      }
+    $lines = [];
+    foreach ( $data as $d ){
+      $output = [];
+      foreach ( $d as $field ) {
+        if ($field === null && $nullToMysqlNull) {
+          $output[] = 'NULL';
+          continue;
+        }
 
-	      // Enclose fields containing $delimiter, $enclosure or whitespace
-	      if ( $encloseAll || preg_match( "/(?:${delimiter_esc}|${enclosure_esc}|\s)/", $field ) ) {
-	        $output[] = $enclosure . str_replace($enclosure, $enclosure . $enclosure, $field) . $enclosure;
-	      }
-	      else {
-	        $output[] = $field;
-	      }
-	    }
-			array_push($lines, implode( $delimiter, $output ));
-		}
+        // Enclose fields containing $delimiter, $enclosure or whitespace
+        if ( $encloseAll || preg_match( "/(?:${delimiter_esc}|${enclosure_esc}|\s)/", $field ) ) {
+          $output[] = $enclosure . str_replace($enclosure, $enclosure . $enclosure, $field) . $enclosure;
+        }
+        else {
+          $output[] = $field;
+        }
+      }
+      array_push($lines, implode( $delimiter, $output ));
+    }
     return implode( $separator, $lines );
-	}
+  }
 }
-?>
