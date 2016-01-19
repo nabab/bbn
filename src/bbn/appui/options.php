@@ -39,9 +39,9 @@ class options
     $db,
     $default = 0;
 
-  protected function get_rows($where, $start = 0, $limit = 2000){
-    $tab = $this->db->tsn($this->cfg['table']);
+  protected function get_rows($where, $start = false, $limit = false){
     $db =& $this->db;
+    $tab = $db->tsn($this->cfg['table']);
     $cols = [];
     if ( \bbn\str\text::is_integer($start, $limit) && !empty($where) ){
       if ( !isset($where[$this->cfg['cols']['active']]) ){
@@ -63,7 +63,7 @@ class options
           AND ".$this->db->cfn($this->cfg['cols']['active'], $tab, 1)." = 1
           GROUP BY " . $this->db->cfn($this->cfg['cols']['id'], $tab, 1)."
           ORDER BY text
-          LIMIT $start, $limit";
+          ".( $limit && \bbn\str\text::is_integer($start) ? "LIMIT $start, $limit" : '');
         $args = array_values($where);
         if ( class_exists('\\bbn\\appui\\history') && \bbn\appui\history::is_enabled() ){
           array_push($args, 1);
@@ -157,6 +157,32 @@ class options
     return \bbn\str\text::is_integer($id_parent) ? $id_parent : false;
   }
 
+  public function get_prop($id, $prop, $false = true){
+    if ( \bbn\str\text::is_integer($id) && ($o = $this->option($id)) ){
+      if ( isset($o[$prop]) ){
+        return $o[$prop];
+      }
+    }
+    return $false ? false : null;
+  }
+
+  public function fix_order($id, $deep = false){
+    if (
+      ($id = $this->from_code(func_get_args())) &&
+      $this->get_prop($id, 'orderable') &&
+      ($opts = $this->full_options($id))
+    ) {
+      $i = 1;
+      foreach ( $opts as $o ){
+        if ( !isset($o['order']) || ($o['order'] != $i) ){
+          $this->set_prop($o['id'], ['order' => $i]);
+        }
+        $i++;
+      }
+    }
+    return $this;
+  }
+
   /**
    * Retourne le contenu complet d'une option
    *
@@ -242,7 +268,7 @@ class options
    * @return array Un tableau des caractéristiques de chaque option de la catégorie, indexée sur leur `id`
    */
   public function full_options($cat = 0, $id_parent = false, $where = [], $order = [], $start = 0, $limit = 2000){
-    $opts = $this->native_options($cat, $id_parent, $start, $limit);
+    $opts = $this->native_options($cat, $id_parent, $where = [], $order = [], $start, $limit);
     if ( is_array($opts) ){
       foreach ($opts as $i => $o) {
         $this->get_value($o['id'], $opts[$i]);
@@ -270,10 +296,14 @@ class options
    * @param string|int $cat La catégorie, sous la forme de son `id`, ou de son nom
    * @return array Un tableau des caractéristiques de chaque option de la catégorie, indexée sur leur `id`
    */
-  public function native_options($cat = 0, $id_parent = false, $start = 0, $limit = 2000){
+  public function native_options($cat = 0, $id_parent = false, $where = [], $order = [], $start = 0, $limit = false){
     $cat = $this->from_code($cat, $id_parent ? $id_parent : $this->default);
     if ( \bbn\str\text::is_integer($cat, $start, $limit) ) {
-      return $this->get_rows([$this->cfg['cols']['id_parent'] => $cat], $start, $limit);
+      if ( !is_array($where) ){
+        $where = [];
+      }
+      $where[$this->cfg['cols']['id_parent']] = $cat;
+      return $this->get_rows($where, $order = [], $start, $limit);
     }
     return false;
   }
@@ -400,6 +430,18 @@ class options
     return false;
   }
 
+  public function orderable($id, $is_orderable = true, $destruct = false){
+    if ( !empty($id) && !empty($cfg) && ($o = $this->option($id)) ){
+      if ( $is_orderable && empty($o['orderable']) ){
+
+      }
+      else if ( !$is_orderable && !empty($o['orderable']) ){
+
+      }
+    }
+    return $this;
+  }
+
   public function set_prop($id, $cfg){
     if ( !empty($id) && !empty($cfg) && ($o = $this->option($id)) ){
       foreach ( $cfg as $k => $v ) {
@@ -495,37 +537,39 @@ class options
   }
 
   public function order($id, $pos){
-    if ( $parent = $this->parent($id) ){
-      if ( !empty($parent['orderable']) ){
-        $options = $this->full_options($parent['id']);
-        // The order really changes
-        if ( $options[$id]['order'] !== $pos ){
-          $idx = \bbn\tools::find($options, ['id' => $id]);
-          if ( $idx !== false ){
-
+    if (
+      ($pos > 0) &&
+      ($parent = $this->parent($id)) &&
+      !empty($parent['orderable'])
+    ){
+      $options = $this->full_options($parent['id']);
+      // The order really changes
+      if ( $options[$id]['order'] !== $pos ){
+        $options = array_values($options);
+        $idx = \bbn\tools::find($options, ['id' => $id]);
+        if ( $idx !== false ){
+          $this->set_prop($options[$idx]['id'], ['order' => $pos]);
+          if ( $idx < ($pos - 1) ){
+            while ( $idx < ($pos - 1) ){
+              $idx++;
+              $this->set_prop($options[$idx]['id'], ['order' => $idx]);
+            }
           }
-
-
-
-
-          $i = 1;
-          $new_order = [];
-          foreach ( $options as $k => $o ){
-            if ( $i === $pos ){
-
+          else{
+            if ( $idx > ($pos - 1) ){
+              while ( $idx > ($pos - 1) ){
+                $this->set_prop($options[$idx-1]['id'], ['order' => $idx+1]);
+                $idx--;
+              }
             }
-            else if ( $k === $id ){
-
-            }
-            if ( !isset($o['order']) || $o['order'] !== $i ){
-
+            else{
+              $this->fix_order($parent['id']);
             }
           }
         }
-        var_dump($options);
       }
     }
-    return false;
+    return $this;
   }
 
   public function is_parent($id, $id_parent){
