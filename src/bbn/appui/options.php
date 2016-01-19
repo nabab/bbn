@@ -154,7 +154,6 @@ class options
       }
       array_shift($rargs);
     }
-    \bbn\tools::log($id_parent, "options");
     return \bbn\str\text::is_integer($id_parent) ? $id_parent : false;
   }
 
@@ -211,7 +210,8 @@ class options
    * @return array La liste des options indexée sur leur `id`
    */
   public function options($cat = 0){
-    if ( $cat = $this->from_code(func_get_args()) ) {
+    $args = func_get_args();
+    if ( ($cat = $this->from_code(empty($args) ? $cat : $args)) !== false ) {
       return $this->db->select_all_by_keys($this->cfg['table'],
         [$this->cfg['cols']['id'], $this->cfg['cols']['text']],
         [$this->cfg['cols']['id_parent'] => $cat],
@@ -241,7 +241,7 @@ class options
    * @param string|int $cat La catégorie, sous la forme de son `id`, ou de son nom
    * @return array Un tableau des caractéristiques de chaque option de la catégorie, indexée sur leur `id`
    */
-  public function full_options($cat = 0, $id_parent = false, $start = 0, $limit = 2000){
+  public function full_options($cat = 0, $id_parent = false, $where = [], $order = [], $start = 0, $limit = 2000){
     $opts = $this->native_options($cat, $id_parent, $start, $limit);
     if ( is_array($opts) ){
       foreach ($opts as $i => $o) {
@@ -287,11 +287,11 @@ class options
           'id' => $cat,
           'text' => $text
         ];
-        $res['item'] = [];
         if ($opts = $this->db->get_column_values($this->cfg['table'], $this->cfg['cols']['id'], [
           $this->cfg['cols']['id_parent'] => $cat
         ])
         ) {
+          $res['items'] = [];
           foreach ($opts as $o) {
             if ($t = $this->tree($o, $length)) {
               array_push($res['items'], $t);
@@ -300,9 +300,6 @@ class options
         }
         else if ( $this->text->code($cat) === 'bbn_options' ){
           $res['items'] = $this->options();
-        }
-        else{
-          unset($res['items']);
         }
         return $res;
       }

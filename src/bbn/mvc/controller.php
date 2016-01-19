@@ -346,12 +346,12 @@ EOD;
 	 * @param string $path
 	 * @return string|false
 	 */
-	public function get_less($path='')
+	public function get_less($path='', $die = true)
 	{
     if ( !class_exists('lessc') ){
       die("No less class, check composer");
     }
-    if ( $r = $this->get_view($path, 'css') ) {
+    if ( $r = $this->get_view($path, 'css', $die) ) {
       return '<style>' . \CssMin::minify($r) . '</style>';
     }
 	}
@@ -367,24 +367,20 @@ EOD;
 	public function add_js()
 	{
 		$args = func_get_args();
+		$has_path = false;
 		foreach ( $args as $a ){
-			if ( is_array($a) ){
-				$data = $a;
+			if ( is_string($a) ){
+				$has_path = 1;
 			}
-			else if ( is_string($a) && !empty($a) ){
-				$path = $a;
-			}
+      if ( is_array($a) ){
+        $this->js_data($a);
+      }
 		}
-    if ( !isset($path) ) {
-      $path = $this->path;
-    }
-    if ( !isset($data) ) {
-      $data = $this->data;
-    }
-		else {
-			$this->js_data($data);
+		if ( !$has_path ){
+			array_unshift($args, $this->path);
 		}
-		if ( $r = $this->get_view($path, 'js', $data) ){
+		array_push($args, 'js');
+		if ( $r = call_user_func_array([$this, 'get_view'], $args) ){
 			$this->add_script($r);
 		}
 		return $this;
@@ -453,8 +449,13 @@ EOD;
     return $v;
 	}
 
-	public function combo(){
-		echo $this->add_data($this->post)->add_data($this->get_model($this->dest))->get_view().$this->get_js().$this->get_less();
+	public function combo($title = '', $data=[]){
+		echo $this->get_less($this->path, false).
+			$this->set_title($title)
+				->add_js($data, false)
+				->add_data($this->post)
+				->add_data($this->get_model())
+				->get_view($this->path, false);
 	}
 
   /**
