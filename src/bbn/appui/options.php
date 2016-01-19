@@ -39,11 +39,11 @@ class options
     $db,
     $default = 0;
 
-  protected function get_rows($where, $start = false, $limit = false){
+  protected function get_rows($where){
     $db =& $this->db;
     $tab = $db->tsn($this->cfg['table']);
     $cols = [];
-    if ( \bbn\str\text::is_integer($start, $limit) && !empty($where) ){
+    if ( !empty($where) ){
       if ( !isset($where[$this->cfg['cols']['active']]) ){
         $where[$this->cfg['cols']['active']] = 1;
       }
@@ -75,7 +75,7 @@ class options
   }
 
   protected function get_row($where){
-    if ( $res = $this->get_rows($where, 0, 1) ){
+    if ( $res = $this->get_rows($where) ){
       return $res[0];
     }
     return false;
@@ -254,7 +254,8 @@ class options
    * @return array La liste des options indexée sur leur `id`
    */
   public function count($cat = 0){
-    $cat = $this->from_code(func_get_args());
+    $args = func_get_args();
+    $cat = $this->from_code(empty($args) ? $cat : $args);
     if ( \bbn\str\text::is_integer($cat) ) {
       return $this->db->count($this->cfg['table'], [$this->cfg['cols']['id_parent'] => $cat]);
     }
@@ -298,12 +299,12 @@ class options
    */
   public function native_options($cat = 0, $id_parent = false, $where = [], $order = [], $start = 0, $limit = false){
     $cat = $this->from_code($cat, $id_parent ? $id_parent : $this->default);
-    if ( \bbn\str\text::is_integer($cat, $start, $limit) ) {
+    if ( \bbn\str\text::is_integer($cat, $start) ) {
       if ( !is_array($where) ){
         $where = [];
       }
       $where[$this->cfg['cols']['id_parent']] = $cat;
-      return $this->get_rows($where, $order = [], $start, $limit);
+      return $this->get_rows($where, $start, $limit);
     }
     return false;
   }
@@ -640,7 +641,7 @@ class options
 
   public function soptions($cat){
     $r = [];
-    if ( $cats = $this->options($cat) ){
+    if ( $cats = $this->options($this->from_code(func_get_args())) ){
       foreach ( $cats as $id => $txt ){
         $o = $this->options($id);
         if ( is_array($o) ){
@@ -656,13 +657,15 @@ class options
 
   public function full_soptions($cat){
     $r = [];
-    if ( $cats = $this->options($cat) ){
+    if ( $cats = $this->options($this->from_code(func_get_args())) ){
       foreach ( $cats as $id => $txt ){
         $o = $this->full_options($id);
         if ( is_array($o) ){
           $r = \bbn\tools::merge_arrays($r, $o);
         }
         else{
+          die(var_dump($this->text($id)));
+          die("hkjhkj");
           die("BAD ID: $id");
         }
       }
