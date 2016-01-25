@@ -58,7 +58,7 @@ trait triggers {
       // Specific to a table
       if ( isset($this->triggers[$cfg['kind']][$cfg['moment']][$table]) ){
         foreach ( $this->triggers[$cfg['kind']][$cfg['moment']][$table] as $i => $f ){
-          if ( is_callable($f) ){
+          if ( $f ){
             $cfg[$f] = call_user_func($f, $cfg);
             if ( !$cfg[$f] ){
               $cfg['run'] = false;

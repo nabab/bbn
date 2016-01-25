@@ -526,11 +526,18 @@ class history
           }
           $s['fields'][$c] = $col;
           $s['fields'][$c]['config'] = json_decode($col['config'], 1);
+          /*
+          // Per field approach
           if ( isset($s['fields'][$c]['config']['history']) && $s['fields'][$c]['config']['history'] == 1 ){
             $s['history'] = 1;
           }
+          */
+        }
+        if ( isset($s['fields'][self::$hcol]) ){
+          $s['history'] = 1;
         }
       }
+
       // The table exists and has history
       if ( isset(self::$hstructures[$table], self::$hstructures[$table]['history']) &&
         self::$hstructures[$table]['history']
@@ -603,10 +610,10 @@ class history
    * @return bool returns true
 	 */
   public static function trigger(array $cfg){
-
     $tables = is_array($cfg['table']) ? $cfg['table'] : [$cfg['table']];
     // Will return false if disabled, the table doesn't exist, or doesn't have history
     if ( $table = self::get_table_cfg($tables[0]) ){
+      self::$db->log(\bbn\tools::get_dump($table));
 
       /** @var array $s The table's structure and configuration */
       $s =& self::$hstructures[$table];

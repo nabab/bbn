@@ -225,9 +225,8 @@ class mysql implements \bbn\db\engines
         return ( $a['Database'] === 'information_schema' ) || ( $a['Database'] === 'mysql' ) ? false : 1;
       }));
       sort($x);
-      return $x;
     }
-    return false;
+    return $x;
 	}
 
 	/**
