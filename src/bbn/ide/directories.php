@@ -15,8 +15,10 @@ class directories {
   protected
     /** @var \bbn\appui\options $options */
     $options,
-    /** @var null|string $last_error The last error recorded by the class */
-    $last_error;
+    /** @var null|string The last error recorded by the class */
+    $last_error,
+    /** @var array MVC routes for linking with dirs */
+    $routes = [];
 
   /**
    * Sets the root of the paths' types option
@@ -97,7 +99,6 @@ class directories {
     $dirs = $this->dirs();
     foreach ( $dirs as $i => $d ){
       $root = $this->get_root_path($i);
-      $bits = explode('/', $d['root_path']);
       if ( strpos($file, $root) === 0 ){
         $res = $i.'/';
         $nfile = substr($file, strlen($root));
@@ -150,6 +151,30 @@ class directories {
       }
     }
     return false;
+  }
+
+  public function add_routes(array $routes){
+    $this->routes = \bbn\tools::merge_arrays($this->routes, $routes);
+    return $this;
+  }
+
+  public function mvc_dirs(){
+    $dirs = $this->dirs();
+    $res = [];
+    foreach ( $dirs as $i => $d ){
+      if ( !empty($d['is_mvc']) ){
+        $d['real_path'] = $this->decipher_path($d['root_path']);
+        $d['prefix'] = strpos($d['real_path'], BBN_APP_PATH) === 0 ? '' : false;
+        foreach ( $this->routes as $alias => $route ){
+          if ( strpos($d['real_path'], $route) === 0 ){
+            $d['prefix'] = $alias.'/';
+            break;
+          }
+        }
+        $res[$i] = $d;
+      }
+    }
+    return $res;
   }
 
   public function url_to_real($file){
@@ -246,17 +271,7 @@ class directories {
       /** @var string $real_root */
       $real_root = \bbn\str\text::parse_path($dir['root_path']);
       /** @var array $bits2 Each part of the path */
-      $bits2 = explode('/', $real_root);
-      /** @var string $constant The first path of the path which might be a constant */
-      $constant = $bits2[0];
-
-      /** @var string $path The path that will be returned */
-      $path = '';
-      if ( defined($constant) ){
-        $path .= constant($constant);
-        array_shift($bits2);
-      }
-      $path .= implode('/', $bits2).'/';
+      $path = $this->decipher_path($real_root);
       if ( isset($dir['tabs'], $bits[0], $dir['tabs'][$bits[0]]) ){
         $path .= $dir['tabs'][$bits[0]]['path'].'/';
         array_shift($bits);
@@ -268,6 +283,27 @@ class directories {
       return $r;
     }
     return false;
+  }
+
+  /**
+   * Get the real root path from a directory's alias as recorded in the options
+   * @param $st
+   * @return bool|string
+   */
+  public function decipher_path($st){
+
+    $st = \bbn\str\text::parse_path($st);
+    $bits = explode('/', $st);
+    /** @var string $constant The first path of the path which might be a constant */
+    $constant = $bits[0];
+    /** @var string $path The path that will be returned */
+    $path = '';
+    if ( defined($constant) ){
+      $path .= constant($constant);
+      array_shift($bits);
+    }
+    $path .= implode('/', $bits);
+    return $path;
   }
 
   /**
@@ -317,7 +353,7 @@ class directories {
    * @return array|int
    */
   public function delete($data){
-    if ( $this->db->delete('bbn_ide_directories', ['id' => $data['id']]) ){
+    if ( $this->options->remove($data['id']) ){
       return 1;
     }
     return $this->error('Error: Delete.');
@@ -333,11 +369,8 @@ class directories {
       return $all;
     }
     else{
-
+      return isset($all[$name]) ? $all[$name] : false;
     }
-    return empty($name) ?
-      $this->db->rselect_all('bbn_ide_directories', [], [], ['position' => 'ASC']) :
-      $this->db->rselect_all('bbn_ide_directories', [], ['name' => $name]);
   }
 
   /**

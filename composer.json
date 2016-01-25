@@ -14,7 +14,6 @@
   ],
   "require": {
     "php": ">=5.4.0",
-    "phpfastcache/phpfastcache": "dev-final",
     "zordius/lightncandy": "dev-master",
     "greenlion/php-sql-parser": "dev-trunk",
     "mpdf/mpdf": "5.7.4",

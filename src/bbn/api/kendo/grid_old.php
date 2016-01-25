@@ -122,9 +122,9 @@ class grid_old extends object
         $(".k-edit-form-container").parent().css({
           height:"auto",
           width:720,
-          "max-height":appui.v.height-100
+          "max-height":appui.env.height-100
         }).restyle().data("kendoWindow").title("Formulaire de saisie").center();
-        appui.f.log(arguments);
+        appui.fn.log(arguments);
        }'
     ];
   

@@ -343,4 +343,13 @@ class mvc implements \bbn\mvc\api{
       return $this->router->get_prepath();
     }
   }
+
+  public function get_routes($type = 'root'){
+    if ( $this->check() ){
+      $routes = $this->router->get_routes();
+      return isset($routes[$type]) ? $routes[$type] : false;
+    }
+  }
+
+
 }

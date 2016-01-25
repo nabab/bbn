@@ -179,7 +179,7 @@ class session
    * @param function $func
    * @return session
    */
-  public function work($func){
+  public function work(callable $func){
     if ( $this->id ){
       $args = func_get_args();
       array_shift($args);

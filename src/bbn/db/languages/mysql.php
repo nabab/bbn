@@ -227,6 +227,7 @@ class mysql implements \bbn\db\engines
       sort($x);
       return $x;
     }
+    return false;
 	}
 
 	/**

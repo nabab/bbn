@@ -59,7 +59,7 @@ class grid extends object
       'resizable' => true,
       'columnMenu' => true,
       'edit' => 'function(){
-        $(".k-edit-form-container").parent().css({height:"auto",maxWidth:appui.v.width-200,maxHeight:appui.v.height-100,textAlign:"center"}).restyle().data("kendoWindow").title("Modification").center();
+        $(".k-edit-form-container").parent().css({height:"auto",maxWidth:appui.env.width-200,maxHeight:appui.env.height-100,textAlign:"center"}).restyle().data("kendoWindow").title("Modification").center();
        }'
     ];
   

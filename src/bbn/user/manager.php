@@ -112,6 +112,7 @@ You can click the following link to access directly your account:<br>
     return $this->db->get_rows("
       SELECT ".$this->db->cfn($this->cfg['arch']['groups']['id'], $this->cfg['tables']['groups'], 1)." AS `id`,
       ".$this->db->cfn($this->cfg['arch']['groups']['group'], $this->cfg['tables']['groups'], 1)." AS `group`,
+      ".$this->db->cfn($this->cfg['arch']['groups']['cfg'], $this->cfg['tables']['groups'], 1)." AS `cfg`,
       COUNT(".$this->db->cfn($this->cfg['arch']['users']['id'], $this->cfg['tables']['users'], 1).") AS `num`
       FROM ".$this->db->escape($this->cfg['tables']['groups'])."
         LEFT JOIN ".$this->db->escape($this->cfg['tables']['usergroups'])."

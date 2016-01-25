@@ -374,4 +374,8 @@ class router {
     }
     return false;
   }
+
+  public function get_routes(){
+    return $this->routes;
+  }
 }

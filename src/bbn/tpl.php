@@ -9,12 +9,7 @@ class tpl {
 
   static private $engine, $tmp;
 
-  static private function _init(){
-
-  }
-
   static public function renderer($st){
-    self::_init();
     if ( !is_string($st) ){
       die("The template parameter is not a string");
     }
@@ -34,7 +29,6 @@ class tpl {
   }
 
   static public function render($st, $data){
-    self::_init();
     if ( is_callable($tpl = self::renderer($st)) ) {
       return $tpl($data);
     }

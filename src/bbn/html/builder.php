@@ -433,12 +433,12 @@ class builder
                       'click' => 'function(e){
                         $("#'.$cfg['attr']['id'].'").prop("disabled", $(this).is(":checked"));'.
                       ( isset($cfg['widget']['name']) ? '
-                        appui.f.log("'.$cfg['widget']['name'].'");
+                        appui.fn.log("'.$cfg['widget']['name'].'");
                         try{
                           $("#'.$cfg['attr']['id'].'").'.$cfg['widget']['name'].'("enable", (!$(this).is(":checked")));
                         }
                         catch(err){
-                          appui.f.log(err);
+                          appui.fn.log(err);
                         }' : '' ).
                       '
                       }'

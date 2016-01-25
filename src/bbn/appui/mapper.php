@@ -760,16 +760,11 @@ class mapper{
 				}
 			}
 			*/
-      $this->db->disable_keys();
-      $this->db->query("DELETE IGNORE FROM `{$this->prefix}dbs` WHERE id LIKE '{$db}.%'");
-      $this->db->query("DELETE IGNORE FROM `{$this->prefix}tables` WHERE id LIKE '{$db}.%'");
-      $this->db->query("DELETE IGNORE FROM `{$this->prefix}columns` WHERE id LIKE '{$db}.%'");
-      $this->db->query("DELETE IGNORE FROM `{$this->prefix}keys` WHERE id LIKE '{$db}.%'");
-			$this->db->raw_query("
-        INSERT IGNORE INTO `{$this->admin_db}`.`{$this->prefix}dbs`
-        (`id`, `host`, `db`)
-        VALUES
-        ('$db', '{$this->db->host}', '$db')");
+			$this->db->insert_update($this->admin_db.'.'.$this->prefix.'dbs',[
+        'id' => $db,
+        'db' => $db,
+        'host' => $this->db->host
+      ]);
       $tab_history = false;
       if ( \bbn\appui\history::$is_used && isset($schema[\bbn\appui\history::$htable]) ){
         $tab_history = 1;

@@ -835,7 +835,7 @@ class connection
    */
   public function logout()
   {
-    $this->session->destroy('user');
+    $this->session->destroy();
     return $this;
   }
 

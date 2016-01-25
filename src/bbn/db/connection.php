@@ -191,11 +191,11 @@ class connection extends \PDO implements actions, api, engines
    * @return array | false
    */
   private function _get_cache($item, $mode = 'columns', $force = false){
-    if ( $force && isset($this->cache[$item]) ){
+    $cache_name = $this->_cache_name($item, $mode);
+    if ( $force && isset($this->cache[$cache_name]) ){
       unset($this->cache[$item]);
     }
-    if ( !isset($this->cache[$item]) ){
-      $cache_name = $this->_cache_name($item, $mode);
+    if ( !isset($this->cache[$cache_name]) ){
       $tmp = $this->cacher->get($cache_name);
       if ( !$tmp || $force ){
         switch ( $mode ){
@@ -220,13 +220,15 @@ class connection extends \PDO implements actions, api, engines
         if ( !isset($tmp) ){
           die("Erreur avec la table $item ou le mode $mode");
         }
-        $this->cacher->set($cache_name, $tmp, $this->cache_renewal);
+        if ( $tmp ){
+          $this->cacher->set($cache_name, $tmp, $this->cache_renewal);
+        }
       }
       if ( $tmp ){
-        $this->cache[$item] = $tmp;
+        $this->cache[$cache_name] = $tmp;
       }
     }
-    return isset($this->cache[$item]) ? $this->cache[$item] : false;
+    return isset($this->cache[$cache_name]) ? $this->cache[$cache_name] : false;
   }
 
   /**
@@ -376,7 +378,7 @@ class connection extends \PDO implements actions, api, engines
       if ( isset($cfg['on_error']) ){
         $this->on_error = $cfg['on_error'];
       }
-      $this->cacher = isset($cfg['cacher']) ? $cfg['cacher'] : new \phpFastCache('auto');
+      $this->cacher = \bbn\cache::get_engine();
       if ( $cfg = $this->language->get_connection($cfg) ){
         $this->qte = $this->language->qte;
         try{
@@ -442,7 +444,7 @@ class connection extends \PDO implements actions, api, engines
   public function clear_cache($item, $mode)
   {
     $cache_name = $this->_cache_name($item, $mode);
-    if ( $this->cacher->isExisting($cache_name) ){
+    if ( $this->cacher->has($cache_name) ){
       $this->cacher->delete($cache_name);
     }
     return $this;
@@ -455,7 +457,7 @@ class connection extends \PDO implements actions, api, engines
    */
   public function clear_all_cache()
   {
-    $this->cacher->clean();
+    $this->cacher->clear();
     return $this;
   }
 
