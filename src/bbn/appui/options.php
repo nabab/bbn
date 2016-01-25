@@ -49,17 +49,28 @@ class options
   }
 
   private function _cache_delete($id, $deep = false){
-    $this->cacher->delete($this->_cache_name('option'), $id);
-    $this->cacher->delete($this->_cache_name('options'), $id);
-    $this->cacher->delete($this->_cache_name('full_options'), $id);
-    $this->cacher->delete($this->_cache_name('native_options'), $id);
-    $this->cacher->delete($this->_cache_name('native_soptions'), $id);
-    $this->cacher->delete($this->_cache_name('soptions'), $id);
+    $this->cacher->delete($this->_cache_name('option', $id), $id);
+    $this->cacher->delete($this->_cache_name('options', $id), $id);
+    $this->cacher->delete($this->_cache_name('full_options', $id), $id);
+    $this->cacher->delete($this->_cache_name('native_options', $id), $id);
+    $this->cacher->delete($this->_cache_name('native_soptions', $id), $id);
+    $this->cacher->delete($this->_cache_name('soptions', $id), $id);
+    $this->cacher->delete($this->_cache_name('full_tree', $id), $id);
+    $this->cacher->delete($this->_cache_name('tree', $id), $id);
     if ( $deep ){
       $items = $this->items($id);
       foreach ( $items as $item ){
         $this->_cache_delete($item, 1);
       }
+    }
+    $parents = $this->parents($id);
+    foreach ( $parents as $i => $p ){
+      if ( $i === 0 ){
+        $this->cacher->delete($this->_cache_name('native_soptions', $p), $p);
+        $this->cacher->delete($this->_cache_name('soptions', $p), $p);
+      }
+      $this->cacher->delete($this->_cache_name('full_tree', $p), $p);
+      $this->cacher->delete($this->_cache_name('tree', $p), $p);
     }
     return $this;
   }
@@ -506,9 +517,9 @@ class options
       if ( isset($cfg['items']) ){
         unset($cfg['items']);
       }
-      foreach ( $cfg as $k => $c ){
+      foreach ( $cfg as $k => $v ){
         if ( !in_array($k, $c) ){
-          $cfg[$c['value']][$k] = \bbn\str\text::is_json($c) ? json_decode($c, 1) : $c;
+          $cfg[$c['value']][$k] = \bbn\str\text::is_json($v) ? json_decode($v, 1) : $v;
           unset($cfg[$k]);
         }
       }
@@ -799,8 +810,23 @@ class options
   }
 
   public function parent($id){
-    if ( $id_parent = $this->get_id_parent($id) ){
-      return $this->option($id_parent);
+    if ( $id = $this->from_code(func_get_args()) ){
+      if ( $id_parent = $this->get_id_parent($id) ){
+        return $this->option($id_parent);
+      }
+    }
+    return false;
+  }
+
+  public function parents($id){
+    if ( $id = $this->from_code(func_get_args()) ){
+      $root = [false, 0, $this->default];
+      $res = [];
+      while ( !in_array(($id_parent = $this->get_id_parent($id)), $root) ){
+        array_push($res, $id_parent);
+        $id = $id_parent;
+      }
+      return $res;
     }
     return false;
   }
