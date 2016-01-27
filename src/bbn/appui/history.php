@@ -613,7 +613,6 @@ class history
     $tables = is_array($cfg['table']) ? $cfg['table'] : [$cfg['table']];
     // Will return false if disabled, the table doesn't exist, or doesn't have history
     if ( $table = self::get_table_cfg($tables[0]) ){
-      self::$db->log(\bbn\tools::get_dump($table));
 
       /** @var array $s The table's structure and configuration */
       $s =& self::$hstructures[$table];

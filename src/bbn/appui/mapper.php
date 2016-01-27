@@ -27,7 +27,7 @@ namespace bbn\appui;
  * @version 0.2r89
  */
 
-class mapper{
+class mapper extends \bbn\obj_db{
   
   public static
           $types = [
@@ -70,14 +70,41 @@ class mapper{
           ];
 
   private 
-          $db,
           $prefix,
           $admin_db,
           $client_db;
 	public 
           $schema = false,
           $auto_update = false;
-  
+
+  /**
+   * @param \bbn\db\connection $db A valid database connection
+   * @param string $prefix
+   * @throws \Exception
+   * @return void
+   */
+  public function __construct( \bbn\db\connection $db, $database = '', $prefix='bbn'){
+    // Checking the prefix string
+    parent::__construct($db);
+    if ( \bbn\str\text::check_name($prefix) || ($prefix === false) ){
+      $this->admin_db = empty($database) ? $this->db->current : $database;
+      $this->client_db = $this->db->current;
+      $this->prefix = $prefix;
+      // If there's no underscore finishing the prefix we add it
+      if ( !$this->prefix ){
+        $this->prefix = '';
+      }
+      else if ( substr($this->prefix,-1) !== '_' ){
+        $this->prefix .= '_';
+      }
+      // If there's no client table we presume none exist and we create the schemas
+      $this->create_tables();
+    }
+    else{
+      throw new \Exception();
+    }
+  }
+
   /**
    * Returns the ID of a table (db.table)
    * 
@@ -135,34 +162,6 @@ class mapper{
     return array_pop($tmp);
   }
 
-  /**
-	 * @param \bbn\db\connection $db A valid database connection
-	 * @param string $prefix
-	 * @return void
-	 */
-	public function __construct( \bbn\db\connection $db, $database = '', $prefix='bbn'){
-		// Checking the prefix string
-		if ( \bbn\str\text::check_name($prefix) || ($prefix === false) ){
-			// The database connection
-			$this->db = $db;
-			$this->admin_db = empty($database) ? $this->db->current : $database;
-			$this->client_db = $this->db->current;
-			$this->prefix = $prefix;
-			// If there's no underscore finishing the prefix we add it
-      if ( !$this->prefix ){
-        $this->prefix = '';
-      }
-			else if ( substr($this->prefix,-1) !== '_' ){
-				$this->prefix .= '_';
-			}
-			// If there's no client table we presume none exist and we create the schemas
-			$this->create_tables();
-		}
-    else{
-      throw new Exception;
-    }
-	}
-	
   /**
    * Saves the given configuration in the database and returns the new ID
    * 
@@ -769,7 +768,11 @@ class mapper{
       if ( \bbn\appui\history::$is_used && isset($schema[\bbn\appui\history::$htable]) ){
         $tab_history = 1;
       }
-      
+      if ( !is_array($schema) ){
+
+        die(var_dump("THIS IS NOT AN ARRAY", $schema));
+      }
+
 			foreach ( $schema as $t => $vars ){
         $col_history = $tab_history;
 				if ( isset($vars['fields']) ){
