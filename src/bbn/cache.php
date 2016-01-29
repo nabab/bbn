@@ -90,7 +90,7 @@ class cache{
       }
     }
     else {
-      $this->path = defined("BBN_CACHE_PATH") ? BBN_DATA_PATH : \bbn\file\dir::clean(sys_get_temp_dir());
+      $this->path = defined("BBN_DATA_PATH") ? BBN_DATA_PATH : \bbn\file\dir::clean(sys_get_temp_dir());
       if ( substr($this->path, -1) !== '/' ){
         $this->path .= '/';
       }

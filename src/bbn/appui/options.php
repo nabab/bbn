@@ -68,6 +68,9 @@ class options
     $parents = $this->parents($id);
     foreach ( $parents as $i => $p ){
       if ( $i === 0 ){
+        $this->cacher->delete($this->_cache_name('options', $p), $p);
+        $this->cacher->delete($this->_cache_name('full_options', $p), $p);
+        $this->cacher->delete($this->_cache_name('native_options', $p), $p);
         $this->cacher->delete($this->_cache_name('native_soptions', $p), $p);
         $this->cacher->delete($this->_cache_name('soptions', $p), $p);
       }
@@ -344,6 +347,9 @@ class options
    * @return array Un tableau des caractéristiques de chaque option de la catégorie, indexée sur leur `id`
    */
   public function full_options($id = 0, $id_parent = false, $where = [], $order = [], $start = 0, $limit = 2000){
+    if ( $this->cacher->has($this->_cache_name(__FUNCTION__, $id)) ){
+      return $this->cacher->get($this->_cache_name(__FUNCTION__, $id));
+    }
     $opts = $this->native_options($id, $id_parent, $where = [], $order = [], $start, $limit);
     if ( is_array($opts) ){
       $res = [];
@@ -355,6 +361,7 @@ class options
       if ( $this->get_param($id, 'orderable') ) {
         \bbn\tools::sort_by($res, 'order');
       }
+      $this->cacher->set($this->_cache_name(__FUNCTION__, $id), $res);
       return $res;
     }
     return false;
@@ -576,6 +583,7 @@ class options
       if ( $res = $this->db->update($this->cfg['table'], [
         $c['text'] => $cfg[$c['text']],
         $c['code'] => !empty($cfg[$c['code']]) ? $cfg[$c['code']] : null,
+        $c['cfg'] => isset($cfg[$c['cfg']]) ? $cfg[$c['cfg']] : '{}',
         $c['value'] => isset($cfg[$c['value']]) ? $cfg[$c['value']] : ''
       ], [
         $c['id'] => $id

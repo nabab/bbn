@@ -716,6 +716,7 @@ class directories {
   }
 
   public function save($file, $code, array $cfg = null, \bbn\user\preferences $pref = null){
+    die(var_dump($file, $this->url_to_real($file), $this->real_to_id($this->url_to_real($file))));
     if ( ($file = \bbn\str\text::parse_path($file)) && ($real = $this->url_to_real($file)) ){
       $bits = explode('/', $file);
       // We delete if code is empty and we're in a non mandatory file of tabs' set
@@ -777,7 +778,7 @@ class directories {
     return $this->error('Error: Save');
   }
 
-  public function close($dir, $file, array $cfg = null, \bbn\user\preferences $pref = null){
+  public function close($dir, array $cfg = null, \bbn\user\preferences $pref = null){
     if ( $dirs = $this->dirs($dir) ){
       if ( !empty($cfg) ){
         foreach ( $cfg as $c ){
@@ -796,21 +797,7 @@ class directories {
           }
         }
       }
-      /*
-      $data['file'] = $this->is_mvc($dirs) && (\bbn\str\text::file_ext($data['file']) !== 'php') ?
-        substr($data['file'], 0, strrpos($data['file'], "/")) : $data['file'];
-      unset($data['act']);
-      return 1;
-      */
     }
-    /*
-    if ( isset($_SESSION[BBN_SESS_NAME]['ide']) &&
-      in_array($data, $_SESSION[BBN_SESS_NAME]['ide']['list']) ){
-      unset($_SESSION[BBN_SESS_NAME]['ide']['list'][array_search($data, $_SESSION[BBN_SESS_NAME]['ide']['list'])]);
-      return 1;
-    }
-    return ['data' => "Tab is not in session."];
-    */
   }
 
   public function copy($dir, $src, $dest){
