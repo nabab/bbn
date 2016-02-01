@@ -189,6 +189,7 @@ class environment {
       foreach ($path as $p) {
         if ($this->params[0] === $p) {
           array_shift($this->params);
+          $this->url = substr($this->url, strlen($p)+1);
         }
         else {
           die("The prepath $p doesn't seem to correspond to the current path {$this->url}");
@@ -253,15 +254,54 @@ class environment {
     return $this->get;
   }
 
+  private static function _set_index(array $keys, array &$arr, $val){
+    $new_arr =& $arr;
+    while ( count($keys) ){
+      $var = array_shift($keys);
+      if ( !isset($new_arr[$var]) ){
+        $new_arr[$var] = count($keys) ? [] : $val;
+        $new_arr =& $new_arr[$var];
+      }
+    }
+    return $arr;
+  }
+
+  private static function _dot_to_array(&$val){
+    if ( is_array($val) ){
+      $to_unset = [];
+      foreach ( $val as $key => $v ){
+        $keys = explode(".", $key);
+        if ( count($keys) > 1 ){
+          self::_set_index($keys, $val, $v);
+          array_push($to_unset, $key);
+        }
+      }
+      foreach ( $to_unset as $a ){
+        unset($val[$a]);
+      }
+    }
+  }
+
   public function get_post(){
     if ( is_null($this->post) ){
+      $pairs = explode("&", file_get_contents("php://input"));
       $this->post = [];
       // If data is post as in the appui SPA framework, mode is assumed to be BBN_DEFAULT_MODE, json by default
-      if ( count($_POST) > 0 ){
+      if ( count($pairs) ){
         // Data are "normalized" i.e. types are changed through str\text::correct_types
-        $this->post = array_map(function($a){
-          return \bbn\str\text::correct_types($a);
-        }, $_POST);
+        foreach ( $pairs as $pair ){
+          $nv = explode("=", $pair);
+          if ( count($nv) === 2 ){
+            $k = urldecode($nv[0]);
+            $v = urldecode($nv[1]);
+            if ( $k ){
+              $this->post[$k] = \bbn\str\text::correct_types($v);
+            }
+          }
+        }
+      }
+      if ( count($this->post) ){
+        self::_dot_to_array($this->post);
         /** @todo Remove the json parameter from the appui.js functions */
         if ( isset($this->post['appui']) && ($this->post['appui'] !== 'json') ){
           $this->set_mode($this->post['appui']);

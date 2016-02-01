@@ -169,6 +169,12 @@ class controller implements api{
       if ( $p === '.' ){
         return '';
       }
+			if (
+				($prepath = $this->get_prepath()) &&
+				(strpos($p, $prepath) === 0)
+			){
+				return substr($p, strlen($prepath));
+			}
       return $p;
     }
 		return false;

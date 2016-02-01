@@ -22,19 +22,19 @@ class options
   protected static
     /** @var array */
     $_defaults = [
-    'errors' => [
-    ],
-    'table' => 'bbn_options',
-    'cols' => [
-      'id' => 'id',
-      'id_parent' => 'id_parent',
-      'text' => 'text',
-      'code' => 'code',
-      'value' => 'value',
-      'cfg' => 'cfg',
-      'active' => 'active'
-    ]
-  ];
+      'errors' => [
+      ],
+      'table' => 'bbn_options',
+      'cols' => [
+        'id' => 'id',
+        'id_parent' => 'id_parent',
+        'text' => 'text',
+        'code' => 'code',
+        'value' => 'value',
+        'cfg' => 'cfg',
+        'active' => 'active'
+      ]
+    ];
 
   protected
     /** @var \bbn\db\connection The database connection */
@@ -48,7 +48,7 @@ class options
     return 'bbn-options-'.$method.'-'.$uid;
   }
 
-  private function _cache_delete($id, $deep = false){
+  private function _cache_delete($id, $parents = true, $deep = false){
     $this->cacher->delete($this->_cache_name('option', $id), $id);
     $this->cacher->delete($this->_cache_name('native_option', $id), $id);
     $this->cacher->delete($this->_cache_name('options', $id), $id);
@@ -59,24 +59,26 @@ class options
     $this->cacher->delete($this->_cache_name('native_tree', $id), $id);
     $this->cacher->delete($this->_cache_name('full_tree', $id), $id);
     $this->cacher->delete($this->_cache_name('tree', $id), $id);
+    if ( $parents ){
+      $parents = $this->parents($id);
+      foreach ( $parents as $i => $p ){
+        if ( $i === 0 ){
+          $this->cacher->delete($this->_cache_name('options', $p), $p);
+          $this->cacher->delete($this->_cache_name('full_options', $p), $p);
+          $this->cacher->delete($this->_cache_name('native_options', $p), $p);
+          $this->cacher->delete($this->_cache_name('native_soptions', $p), $p);
+          $this->cacher->delete($this->_cache_name('soptions', $p), $p);
+        }
+        $this->cacher->delete($this->_cache_name('native_tree', $p), $p);
+        $this->cacher->delete($this->_cache_name('full_tree', $p), $p);
+        $this->cacher->delete($this->_cache_name('tree', $p), $p);
+      }
+    }
     if ( $deep ){
       $items = $this->items($id);
       foreach ( $items as $item ){
-        $this->_cache_delete($item, 1);
+        $this->_cache_delete($item, false, 1);
       }
-    }
-    $parents = $this->parents($id);
-    foreach ( $parents as $i => $p ){
-      if ( $i === 0 ){
-        $this->cacher->delete($this->_cache_name('options', $p), $p);
-        $this->cacher->delete($this->_cache_name('full_options', $p), $p);
-        $this->cacher->delete($this->_cache_name('native_options', $p), $p);
-        $this->cacher->delete($this->_cache_name('native_soptions', $p), $p);
-        $this->cacher->delete($this->_cache_name('soptions', $p), $p);
-      }
-      $this->cacher->delete($this->_cache_name('native_tree', $p), $p);
-      $this->cacher->delete($this->_cache_name('full_tree', $p), $p);
-      $this->cacher->delete($this->_cache_name('tree', $p), $p);
     }
     return $this;
   }
@@ -209,18 +211,14 @@ class options
     return $false ? false : null;
   }
 
-  public function fix_order(&$id, $deep = false){
-    if ( is_array($id) ){
-      $opt =& $id;
-    }
+  public function fix_order($id, $deep = false){
     if (
-      ($id = $this->from_code(func_get_args())) &&
       $this->get_param($id, 'orderable') &&
       ($opts = $this->full_options($id))
     ) {
       $i = 1;
       foreach ( $opts as $o ){
-        if ( !isset($o['order']) || ($o['order'] != $i) ){
+        if ( !isset($o['cfg'], $o['cfg']['order']) || ($o['cfg']['order'] != $i) ){
           $this->set_param($o['id'], ['order' => $i]);
         }
         $i++;
@@ -359,7 +357,7 @@ class options
         $res[$o['id']] = $opts[$i];
       }
       if ( $this->get_param($id, 'orderable') ) {
-        \bbn\tools::sort_by($res, 'order');
+        \bbn\tools::sort_by($res, ['cfg', 'order']);
       }
       $this->cacher->set($this->_cache_name(__FUNCTION__, $id), $res);
       return $res;
@@ -497,7 +495,7 @@ class options
     die("Exhausted length of $length in tree function");
   }
 
-  public function add($it){
+  private function _prepare(&$it, $with_items=false){
     $c = $this->cfg['cols'];
     if ( !isset($it[$c['id_parent']]) ){
       $it[$c['id_parent']] = $this->default;
@@ -514,6 +512,9 @@ class options
       if ( isset($it['num_children']) ){
         unset($it['num_children']);
       }
+      if ( !$with_items && isset($it['items']) ){
+        unset($it['items']);
+      }
       foreach ( $it as $k => $v ){
         if ( !in_array($k, $c) ){
           $it[$c['value']][$k] = \bbn\str\text::is_json($v) ? json_decode($v, 1) : $v;
@@ -526,6 +527,20 @@ class options
       if ( is_array($it[$c['cfg']]) ){
         $it[$c['cfg']] = json_encode($it[$c['cfg']]);
       }
+      if ( empty($it[$c['value']]) || ($it[$c['value']] === '[]') ){
+        $it[$c['value']] = '{}';
+      }
+      if ( empty($it[$c['cfg']]) || ($it[$c['cfg']] === '[]') ){
+        $it[$c['cfg']] = '{}';
+      }
+      return true;
+    }
+    return false;
+  }
+
+  public function add($it){
+    if ( $this->_prepare($it, 1) ){
+      $c = $this->cfg['cols'];
       if ( $this->db->insert($this->cfg['table'], [
         $c['id_parent'] => $it[$c['id_parent']],
         $c['text'] => $it[$c['text']],
@@ -550,41 +565,14 @@ class options
   }
 
   public function set($id, $cfg){
-    if ( !empty($id) && !empty($cfg) && is_int($id) ){
+    if ( $this->_prepare($cfg) ){
       $c = $this->cfg['cols'];
-      if ( isset($cfg[$c['value']]) &&
-        \bbn\str\text::is_json($cfg[$c['value']])
-      ){
-        $cfg[$c['value']] = json_decode($cfg[$c['value']], 1);
-      }
-      if ( empty($cfg[$c['value']]) ){
-        $cfg[$c['value']] = [];
-      }
-      if ( isset($cfg['num_children']) ){
-        unset($cfg['num_children']);
-      }
-      if ( isset($cfg['items']) ){
-        unset($cfg['items']);
-      }
-      foreach ( $cfg as $k => $v ){
-        if ( !in_array($k, $c) ){
-          $cfg[$c['value']][$k] = \bbn\str\text::is_json($v) ? json_decode($v, 1) : $v;
-          unset($cfg[$k]);
-        }
-      }
-      if ( isset($cfg[$c['cfg']]) &&
-        (is_array($cfg[$c['cfg']]) || is_object($cfg[$c['cfg']]))
-      ){
-        $cfg[$c['cfg']] = json_encode($cfg[$c['cfg']]);
-      }
-      if ( is_array($cfg[$c['value']]) ){
-        $cfg[$c['value']] = json_encode($cfg[$c['value']]);
-      }
+      \bbn\tools::dump($cfg);
       if ( $res = $this->db->update($this->cfg['table'], [
         $c['text'] => $cfg[$c['text']],
         $c['code'] => !empty($cfg[$c['code']]) ? $cfg[$c['code']] : null,
-        $c['cfg'] => isset($cfg[$c['cfg']]) ? $cfg[$c['cfg']] : '{}',
-        $c['value'] => isset($cfg[$c['value']]) ? $cfg[$c['value']] : ''
+        $c['cfg'] => $cfg[$c['cfg']],
+        $c['value'] => $cfg[$c['value']]
       ], [
         $c['id'] => $id
       ]) ){
@@ -638,28 +626,16 @@ class options
       if ( is_string($params) && isset($args[2]) ){
         $params = [$params => $args[2]];
       }
-      foreach ( $params as $k => $v ) {
-        $o[$k] = $v;
+      if ( !is_array($params) ){
+        die("the parameter sent must be an array in set_param");
       }
-      return $this->set($id, [$this->cfg['cols']['cfg'] => $o]);
+      $cfg = $this->get_cfg($id);
+      foreach ( $params as $k => $v ){
+        $cfg[$k] = $v;
+      }
+      return $this->set_cfg($id, $cfg);
     }
-
-    if ( !is_array($params) && !is_object($params) ){
-      return false;
-    }
-    $cfg = $this->get_cfg($id);
-    foreach ( $params as $k => $v ){
-      $cfg->$k = $v;
-    }
-    if ( $res = $this->db->update($this->cfg['table'], [
-      $this->cfg['cols']['cfg'] => json_encode($cfg)
-    ], [
-      $this->cfg['cols']['id'] => $id
-    ]) ){
-      $this->_cache_delete($id);
-      return $res;
-    }
-    return 0;
+    return false;
   }
 
   /**

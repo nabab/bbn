@@ -716,7 +716,6 @@ class directories {
   }
 
   public function save($file, $code, array $cfg = null, \bbn\user\preferences $pref = null){
-    die(var_dump($file, $this->url_to_real($file), $this->real_to_id($this->url_to_real($file))));
     if ( ($file = \bbn\str\text::parse_path($file)) && ($real = $this->url_to_real($file)) ){
       $bits = explode('/', $file);
       // We delete if code is empty and we're in a non mandatory file of tabs' set

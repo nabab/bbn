@@ -49,6 +49,7 @@ class router {
     ];
 
   private
+    $mode = false,
     $prepath,
     /**
      * The path to the app root (where is ./mvc)
@@ -113,6 +114,9 @@ class router {
 
   private function set_alt_root($path){
     $path = $this->parse($path);
+    if ( strpos($path, '/') === 0 ){
+      $path = substr($path, 1);
+    }
     if ( !isset($this->routes['root'][$path]) ){
       die("The alternative root $path doesn't exist!");
     }
@@ -244,7 +248,7 @@ class router {
         // $tmp corresponds to a root index
         else if ( isset($this->routes['root'][$tmp]) ){
           $this->set_alt_root($tmp);
-          return $this->route(substr($path, strlen($tmp)), $mode);
+          return $this->route(substr(substr($path, strlen($tmp)), strlen($this->prepath)+1), $mode);
         }
       }
       if ( !$file ){
@@ -287,9 +291,17 @@ class router {
       }
     }
     // Not found, sending the default controllers
-    if ( !$file && ((($mode === 'dom') && (BBN_DEFAULT_MODE === 'dom')) || ($mode !== 'dom') ) && $this->has_route(self::$def)) {
-      $npath = $this->get_route(self::$def);
-      $file = $root . $tmp . '.php';
+    if ( !$file ){
+      if ( (
+          ($mode === 'dom') &&
+          (BBN_DEFAULT_MODE === 'dom')
+        ) || (
+          ($mode !== 'dom') &&
+          !empty($this->routes[self::$def])
+        ) ){
+        $npath = $this->routes[self::$def];
+        $file = $root.$this->routes[self::$def].'.php';
+      }
     }
     if ( $file ) {
       return $this->set_known([
@@ -342,6 +354,9 @@ class router {
     if ( substr($this->prepath, -1) !== '/' ){
       $this->prepath = $this->prepath.'/';
     }
+    if ( $this->mode ){
+      $this->route($this->mvc->get_url(), $this->mode);
+    }
     return 1;
   }
 
@@ -366,6 +381,7 @@ class router {
 
       // We only try to retrieve a file path through a whole URL for controllers
       if (in_array($mode, self::$controllers)) {
+        $this->mode = $mode;
         return $this->find_controller($path, $mode);
       }
       else{

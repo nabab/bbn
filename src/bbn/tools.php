@@ -618,6 +618,18 @@ class tools
 		return false;
 	}
 
+  public static function pick(array $ar, array $keys){
+    while ( count($keys) ){
+      $r = array_shift($keys);
+      if ( isset($ar[$r]) ){
+        $ar = $ar[$r];
+        if ( !count($keys) ){
+          return $ar;
+        }
+      }
+    }
+  }
+
   /**
    *
    *
@@ -645,18 +657,23 @@ class tools
    */
   public static function sort_by(&$ar, $key){
     usort($ar, function($a, $b) use($key){
-      if ( !isset($a[$key], $b[$key]) ){
+      if ( !is_array($key) ){
+        $key = [$key];
+      }
+      $v1 = self::pick($a, $key);
+      $v2 = self::pick($b, $key);
+      if ( !isset($v1, $v2) ){
         return 0;
       }
-      if ( !\bbn\str\text::is_number($a[$key], $b[$key]) ) {
-        $a[$key] = str_replace('.', '0', str_replace('_', '1', \bbn\str\text::change_case($a[$key], 'lower')));
-        $b[$key] = str_replace('.', '0', str_replace('_', '1', \bbn\str\text::change_case($b[$key], 'lower')));
-        return strcmp($a[$key], $b[$key]);
+      if ( !\bbn\str\text::is_number($v1, $v2) ) {
+        $v1 = str_replace('.', '0', str_replace('_', '1', \bbn\str\text::change_case($v1, 'lower')));
+        $v2 = str_replace('.', '0', str_replace('_', '1', \bbn\str\text::change_case($v2, 'lower')));
+        return strcmp($v1, $v2);
       }
-      if ( $a[$key] > $b[$key] ){
+      if ( $v1 > $v2 ){
         return 1;
       }
-      else if ($a[$key] == $b[$key]){
+      else if ($v1 == $v2){
         return 0;
       }
       return -1;

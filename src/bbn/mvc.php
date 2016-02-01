@@ -330,7 +330,7 @@ class mvc implements \bbn\mvc\api{
       if ( $this->router->get_prepath(false) === $path ){
         return 1;
       }
-      if ( $this->router->set_prepath($path) && $this->env->set_prepath($path) ){
+      if ( $this->env->set_prepath($path) && $this->router->set_prepath($path) ){
         $this->params = $this->get_params();
         return 1;
       }
