@@ -117,6 +117,10 @@ class router {
     if ( strpos($path, '/') === 0 ){
       $path = substr($path, 1);
     }
+    $prepath = $this->get_prepath();
+    if ( $prepath && (strpos($path, $prepath.'/') === 0) ){
+      $path = substr($path, strlen($prepath));
+    }
     if ( !isset($this->routes['root'][$path]) ){
       die("The alternative root $path doesn't exist!");
     }
@@ -173,6 +177,7 @@ class router {
         $this->known[$mode][$path]['checkers'] = [];
         $tmp = $path;
         while ( strlen($tmp) > 0 ){
+          $this->log("WHILE", $tmp);
           $tmp = $this->parse(dirname($tmp));
           $ctrl = ( $tmp === '.' ? '' : $tmp.'/' ).'_ctrl.php';
           if ( $this->alt_root ){
@@ -181,22 +186,23 @@ class router {
                 ( strlen($tmp) === strlen($this->alt_root) ?
                   '' : substr($tmp, strlen($this->alt_root)+1).'/'
                 ).'_ctrl.php';
+              $this->log("ALT", $alt_ctrl);
               if ( is_file($alt_ctrl) ){
-                array_unshift($this->known[$mode][$path]['checkers'], $alt_ctrl);
+                if ( !in_array($alt_ctrl, $this->known[$mode][$path]['checkers']) ){
+                  array_unshift($this->known[$mode][$path]['checkers'], $alt_ctrl);
+                }
               }
-            }
-            else if ( is_file($this->get_alt_root($mode).$ctrl) ){
-              array_unshift($this->known[$mode][$path]['checkers'], $this->get_alt_root($mode).$ctrl);
             }
           }
           if ( is_file($root.$ctrl) ){
-            array_unshift($this->known[$mode][$path]['checkers'], $root.$ctrl);
+            if ( !in_array($root.$ctrl, $this->known[$mode][$path]['checkers']) ){
+              array_unshift($this->known[$mode][$path]['checkers'], $root.$ctrl);
+            }
           }
           if ( $tmp === '.' ){
             $tmp = '';
           }
         }
-        $this->known[$mode][$path]['checkers'] = array_unique($this->known[$mode][$path]['checkers']);
         if ( $o['path'] !== $o['request'] ){
           $this->known[$mode][$o['request']] = $o['path'];
         }
@@ -205,6 +211,7 @@ class router {
         $this->known[$mode][$path] = $o;
       }
     }
+    $this->log($this->known[$mode][$path]);
     return $this->known[$mode][$path];
   }
 
