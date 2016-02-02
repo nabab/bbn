@@ -284,21 +284,9 @@ class environment {
 
   public function get_post(){
     if ( is_null($this->post) ){
-      $pairs = explode("&", file_get_contents("php://input"));
-      $this->post = [];
-      // If data is post as in the appui SPA framework, mode is assumed to be BBN_DEFAULT_MODE, json by default
-      if ( count($pairs) ){
-        // Data are "normalized" i.e. types are changed through str\text::correct_types
-        foreach ( $pairs as $pair ){
-          $nv = explode("=", $pair);
-          if ( count($nv) === 2 ){
-            $k = urldecode($nv[0]);
-            $v = urldecode($nv[1]);
-            if ( $k ){
-              $this->post[$k] = \bbn\str\text::correct_types($v);
-            }
-          }
-        }
+      $this->post = empty($_POST) ? json_decode(file_get_contents("php://input"), 1) : $_POST;
+      if ( !$this->post ){
+        $this->post = [];
       }
       if ( count($this->post) ){
         self::_dot_to_array($this->post);
@@ -311,6 +299,10 @@ class environment {
           unset($this->post['appui']);
           $this->set_mode(BBN_DEFAULT_MODE);
         }
+        array_walk($this->post, function($a){
+          $a = \bbn\str\text::correct_types($a);
+          return $a;
+        });
       }
       // If no post, assuming to be a DOM document
       else if ( count($_FILES) ){

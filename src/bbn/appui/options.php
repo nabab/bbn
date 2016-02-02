@@ -60,8 +60,8 @@ class options
     $this->cacher->delete($this->_cache_name('full_tree', $id), $id);
     $this->cacher->delete($this->_cache_name('tree', $id), $id);
     if ( $parents ){
-      $parents = $this->parents($id);
-      foreach ( $parents as $i => $p ){
+      $ps = $this->parents($id);
+      foreach ( $ps as $i => $p ){
         if ( $i === 0 ){
           $this->cacher->delete($this->_cache_name('options', $p), $p);
           $this->cacher->delete($this->_cache_name('full_options', $p), $p);
@@ -567,7 +567,6 @@ class options
   public function set($id, $cfg){
     if ( $this->_prepare($cfg) ){
       $c = $this->cfg['cols'];
-      \bbn\tools::dump($cfg);
       if ( $res = $this->db->update($this->cfg['table'], [
         $c['text'] => $cfg[$c['text']],
         $c['code'] => !empty($cfg[$c['code']]) ? $cfg[$c['code']] : null,
@@ -846,9 +845,8 @@ class options
 
   public function parents($id){
     if ( $id = $this->from_code(func_get_args()) ){
-      $root = [false, 0, $this->default];
       $res = [];
-      while ( !in_array(($id_parent = $this->get_id_parent($id)), $root) ){
+      while ( ($id_parent = $this->get_id_parent($id)) !== false ){
         array_push($res, $id_parent);
         $id = $id_parent;
       }
