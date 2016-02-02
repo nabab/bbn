@@ -93,8 +93,12 @@ class controller implements api{
 			$this->get = $this->mvc->get_get();
 			$this->files = $this->mvc->get_files();
       $this->params = $this->mvc->get_params();
-      $this->url = $this->mvc->get_url();
+      $this->url = $this->get_url();
 		}
+	}
+
+	public function get_url(){
+		return $this->mvc->get_url();
 	}
 
 	public function exists(){
