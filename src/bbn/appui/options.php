@@ -445,8 +445,8 @@ class options
                 array_push($res['items'], $t);
               }
             }
-            if (isset($t['order'])) {
-              \bbn\tools::sort_by($res['items'], 'order');
+            if (isset($res['cfg']['orderable'])) {
+              \bbn\tools::sort_by($res['items'], ['cfg', 'order']);
             }
           }
           else if ( ($res['code'] === 'bbn_options') &&
