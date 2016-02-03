@@ -859,25 +859,30 @@ class options
     if (
       ($pos > 0) &&
       ($parent = $this->parent($id)) &&
-      !empty($parent['orderable'])
+      !empty($parent['cfg']['orderable'])
     ){
       $options = $this->full_options($parent['id']);
       // The order really changes
-      if ( $options[$id]['order'] !== $pos ){
+      $idx = \bbn\tools::find($options, ['id' => $id]);
+      if ( $options[$id]['cfg']['order'] !== $pos ){
         $options = array_values($options);
         $idx = \bbn\tools::find($options, ['id' => $id]);
         if ( $idx !== false ){
-          $this->set_prop($options[$idx]['id'], ['order' => $pos]);
+          $this->set_param($options[$idx]['id'], ['order' => $pos]);
           if ( $idx < ($pos - 1) ){
             while ( $idx < ($pos - 1) ){
               $idx++;
-              $this->set_prop($options[$idx]['id'], ['order' => $idx]);
+              if ( $options[$idx]['id'] !== $id ){
+                $this->set_param($options[$idx]['id'], ['order' => $idx]);
+              }
             }
           }
           else{
             if ( $idx > ($pos - 1) ){
               while ( $idx > ($pos - 1) ){
-                $this->set_prop($options[$idx-1]['id'], ['order' => $idx+1]);
+                if ( $options[$idx-1]['id'] !== $id ){
+                  $this->set_param($options[$idx - 1]['id'], ['order' => $idx + 1]);
+                }
                 $idx--;
               }
             }

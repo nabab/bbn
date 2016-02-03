@@ -299,7 +299,7 @@ class environment {
           unset($this->post['appui']);
           $this->set_mode(BBN_DEFAULT_MODE);
         }
-        array_walk($this->post, function($a){
+        array_walk_recursive($this->post, function(&$a){
           $a = \bbn\str\text::correct_types($a);
           return $a;
         });

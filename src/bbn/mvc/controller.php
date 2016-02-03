@@ -237,7 +237,9 @@ class controller implements api{
 				$file_name .= '.php';
 			}
 			if ( (strpos($file_name, '..') === false) && file_exists($d.$file_name) ){
-				include($d.$file_name);
+				$bbn_path = $d.$file_name;
+				unset($d, $file_name);
+				include($bbn_path);
 			}
 		}
 		return $this;

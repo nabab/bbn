@@ -54,8 +54,7 @@ You can click the following link to access directly your account:<br>
           $db,
           $cfg = false;
   
-  private static function set_permissions()
-  {
+  private static function set_permissions(){
     if ( count(self::$permissions) === 0 ){
       self::$permissions = array_merge(self::$_default_permissions, self::$permissions);
     }
