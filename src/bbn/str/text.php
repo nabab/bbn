@@ -987,4 +987,8 @@ class text
 			&& preg_match("/^.{1,253}$/", $st) //overall length check
 			&& preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $st)   ); //length of each label
 	}
+
+	public static function is_date_sql($st){
+		return \bbn\time\date::validateSQL($st);
+	}
 }
