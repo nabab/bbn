@@ -73,6 +73,11 @@ class connection
                 'last_activity' => 'last_activity',
                 'cfg' => 'cfg',
               ],
+              'profiles' => [
+                'id' => 'id',
+                'id_group' => 'id_group',
+                'id_user' => 'id_user',
+              ],
               'usergroups' => [
                 'id_group' => 'id_group',
                 'id_user' => 'id_user',
