@@ -27,7 +27,7 @@ namespace bbn\appui;
  * @version 0.2r89
  */
 
-class mapper extends \bbn\obj_db{
+class mapper extends \bbn\objdb{
   
   public static
           $types = [

@@ -988,6 +988,12 @@ class text
 			&& preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $st)   ); //length of each label
 	}
 
+	/**
+	 * Validates if a stringg is SQL formatted date
+	 *
+	 * @param $st
+	 * @return bool
+	 */
 	public static function is_date_sql($st){
 		return \bbn\time\date::validateSQL($st);
 	}
