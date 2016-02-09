@@ -826,11 +826,14 @@ class mapper extends \bbn\objdb{
 						]);
 					}
 				}
+			}
+      foreach ( $schema as $t => $vars ){
+        $col_history = $tab_history;
         if ( isset($vars['keys']) && is_array($vars['keys']) ){
           foreach ( $vars['keys'] as $k => $arr ){
             $pos = 1;
             foreach ( $arr['columns'] as $c ){
-              $this->db->insert_update($this->admin_db.'.'.$this->prefix.'keys',[
+              $this->db->insert_update($this->admin_db.'.'.$this->prefix.'keys', [
                 'id' => $t.'.'.$c.'.'.$k,
                 'key' => $k,
                 'column' => $t.'.'.$c,
@@ -841,7 +844,7 @@ class mapper extends \bbn\objdb{
             }
           }
         }
-			}
+      }
       /*
 			foreach ( $projects as $i => $p ){
 				$this->db->insert($this->admin_db.'.'.$this->prefix.'projects',[

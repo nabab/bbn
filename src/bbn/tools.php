@@ -94,6 +94,57 @@ class tools
 		}
 	}
 
+  /**
+   * Puts the PHP errors in a JSON file
+   *
+   * @param string $st Text to save.
+   * @param string $file Filename, , default: "misc".
+   *
+   * @return null
+   */
+  public static function log_error($errno, $errstr, $errfile, $errline, $context = []){
+    if ( defined('BBN_DATA_PATH') ){
+      if ( is_dir(BBN_DATA_PATH.'logs') ){
+        $file = BBN_DATA_PATH.'logs/_php_error.json';
+        $r = false;
+        if ( is_file($file) ){
+          $r = json_decode(file_get_contents($file), 1);
+        }
+        if ( !$r ){
+          $r = [];
+        }
+        $t = date('Y-m-d H:i:s');
+        $idx = \bbn\tools::find($r, [
+          'type' => $errno,
+          'error' => $errstr,
+          'file' => $errfile,
+          'line' => $errline
+        ]);
+        if ( $idx !== false ){
+          $r[$idx]['count']++;
+          $r[$idx]['last_date'] = $t;
+        }
+        else{
+          array_push($r, [
+            'first_date' => $t,
+            'last_date' => $t,
+            'count' => 1,
+            'type' => $errno,
+            'error' => $errstr,
+            'file' => $errfile,
+            'line' => $errline,
+            //'context' => $context
+          ]);
+        }
+        file_put_contents($file, json_encode($r));
+      }
+      if ( $errno > 8 ){
+        die($errstr);
+      }
+    }
+    return false;
+  }
+
  	/**
 	 * Returns an object as merge of two objects.
    *

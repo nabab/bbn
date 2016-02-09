@@ -560,6 +560,7 @@ class directories {
         }
         unset($cfg['tabs']);
       }
+      // We are in an MVC and it's the default file which is asked for
       if ( isset($cfg['tabs'], $cfg['tabs'][$sd]) && !empty($cfg['tabs'][$sd]['default']) ){
         /** @var string $real_file The absolute full path to the file */
         $real_file = $real_dir.$cfg['tabs'][$sd]['path'].implode('/', $bits);
@@ -669,9 +670,11 @@ class directories {
         if ( !isset($content) ){
           $content = file_get_contents($real_file);
         }
-
-
-
+        if ( empty($mode) ){
+          if ( !($mode = $this->modes($ext)) ){
+            die("No mode for extension $ext");
+          }
+        }
         if ( !isset($cfg['tabs']) ){
           unset($sd);
         }
@@ -960,8 +963,8 @@ class directories {
    * Returns
    * @return array
    */
-  public function modes(){
-    return [
+  public function modes($type = false){
+    $r = [
       'html' => [
         'name' => 'HTML',
         'mode' => 'htmlmixed',
@@ -1007,5 +1010,6 @@ class directories {
         'code' => is_file(BBN_DATA_PATH.'ide/defaults/default.php') ? file_get_contents(BBN_DATA_PATH.'ide/defaults/default.php') : ''
       ]
     ];
+    return $type ? ( isset($r[$type]) ? $r[$type] : false ) : $r;
   }
 }
