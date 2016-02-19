@@ -146,6 +146,10 @@ class options
     $this->cacher = \bbn\cache::get_engine();
   }
 
+  public function get_default(){
+    return $this->default;
+  }
+
   /**
    * Gets an option ID from its code, or a succession of codes/ID from the most specific till the most general - or even from the whole option array
    *
@@ -501,6 +505,7 @@ class options
       $it[$c['id_parent']] = $this->default;
     }
     if ( isset($it[$c['id_parent']], $it[$c['text']]) ){
+      $parent = $this->option($it[$c['id_parent']]);
       if ( isset($it[$c['value']]) &&
         \bbn\str\text::is_json($it[$c['value']])
       ){
@@ -524,7 +529,16 @@ class options
       if ( is_array($it[$c['value']]) ){
         $it[$c['value']] = json_encode($it[$c['value']]);
       }
+      if ( \bbn\str\text::is_json($it[$c['cfg']]) ){
+        $it[$c['cfg']] = json_decode($it[$c['cfg']], 1);
+      }
+      else if ( !is_array($it[$c['cfg']]) ){
+        $it[$c['cfg']] = [];
+      }
       if ( is_array($it[$c['cfg']]) ){
+        if ( !empty($parent['cfg']['orderable']) && empty($it[$c['cfg']]['order']) ){
+          $it[$c['cfg']]['order'] = $parent['num_children'] + 1;
+        }
         $it[$c['cfg']] = json_encode($it[$c['cfg']]);
       }
       if ( empty($it[$c['value']]) || ($it[$c['value']] === '[]') ){
@@ -585,6 +599,7 @@ class options
 
   public function remove($id){
     if ( $id = $this->from_code(func_get_args()) ) {
+      $this->_cache_delete($id);
       return $this->db->delete($this->cfg['table'], [
         $this->cfg['cols']['id'] => $id
       ]);
@@ -1015,6 +1030,25 @@ class options
       $id = $this->db->last_id();
       foreach ( $items as $it ){
         $res += (int)$this->import($it, $id);
+      }
+    }
+    return $res;
+  }
+
+  /**
+   * Retourne la liste des options d'une catégorie indexée sur leur `id` sous la forme d'un tableau text/value
+   *
+   * @param string|int $cat La catégorie, sous la forme de son `id`, ou de son nom
+   * @return array La liste des options dans un tableau text/value
+   */
+  public function text_value_options($cat = null, $id = 'value', $text = 'text'){
+    $res = [];
+    if ( $opts = $this->options($cat) ){
+      foreach ( $opts as $k => $o ){
+        array_push($res, [
+          $id => $k,
+          $text => $o
+        ]);
       }
     }
     return $res;

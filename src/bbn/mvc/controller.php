@@ -105,6 +105,17 @@ class controller implements api{
 		return !empty($this->path);
 	}
 
+	public function say_all(){
+		return [
+			'controller' => $this->say_controller(),
+			'dir' => $this->say_dir(),
+			'local_path' => $this->say_local_path(),
+			'local_route' => $this->say_local_route(),
+			'path' => $this->say_path(),
+			'route' => $this->say_route()
+		];
+	}
+
 	/**
 	 * Returns the current controller's file's name.
 	 *
@@ -695,6 +706,9 @@ EOD;
 	 */
 	public function add($path, $data=[], $internal = false)
 	{
+		if ( substr($path, 0, 2) === './' ){
+			$path = $this->say_dir().substr($path, 1);
+		}
     if ( $route = $this->mvc->get_route($path, $internal ? 'private' : 'public') ){
       $o = new controller($this->mvc, $route, $data);
       $o->process();

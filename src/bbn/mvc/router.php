@@ -39,7 +39,7 @@ class router {
      */
     $types = [
       'cli',
-      'internal',
+      'private',
       'dom',
       'public',
       'model',
@@ -177,7 +177,7 @@ class router {
         $this->known[$mode][$path]['checkers'] = [];
         $tmp = $path;
         while ( strlen($tmp) > 0 ){
-          $this->log("WHILE", $tmp);
+          //$this->log("WHILE", $tmp);
           $tmp = $this->parse(dirname($tmp));
           $ctrl = ( $tmp === '.' ? '' : $tmp.'/' ).'_ctrl.php';
           if ( $this->alt_root ){
@@ -211,7 +211,7 @@ class router {
         $this->known[$mode][$path] = $o;
       }
     }
-    $this->log($this->known[$mode][$path]);
+    //$this->log($this->known[$mode][$path]);
     return $this->known[$mode][$path];
   }
 
@@ -378,6 +378,7 @@ class router {
 
     if ( self::is_mode($mode) ) {
 
+
       /** @var string $path The path to the file from $root */
       $path = $this->parse($path);
 
@@ -389,6 +390,7 @@ class router {
       // We only try to retrieve a file path through a whole URL for controllers
       if (in_array($mode, self::$controllers)) {
         $this->mode = $mode;
+        $this->log($path);
         return $this->find_controller($path, $mode);
       }
       else{

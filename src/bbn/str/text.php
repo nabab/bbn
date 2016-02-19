@@ -542,34 +542,64 @@ class text
   }
 
 	/**
-   * Checks if the item is a integer.
-   * Can take as many arguments and will return false if one of them is not an integer or the string of an integer.
-   *
-   * <code>
-   * \bbn\str\text::is_integer(13.2); //Returns false
-   * \bbn\str\text::is_integer(14); //Returns true
-   * \bbn\str\text::is_integer('14'); //Returns true
-   * </code>
-   *
-   * @param mixed $st The item to be tested.
-   *
+	 * Checks if the item is a integer.
+	 * Can take as many arguments and will return false if one of them is not an integer or the string of an integer.
+	 *
+	 * <code>
+	 * \bbn\str\text::is_integer(13.2); //Returns false
+	 * \bbn\str\text::is_integer(14); //Returns true
+	 * \bbn\str\text::is_integer('14'); //Returns true
+	 * </code>
+	 *
+	 * @param mixed $st The item to be tested.
+	 *
 	 * @return bool
 	 */
 	public static function is_integer()
 	{
-    $args = func_get_args();
-    foreach ( $args as $a ){
-      if ( is_string($a) || (abs($a) > PHP_INT_MAX) ){
-        if ( !preg_match('/^-?(\d+)$/', (string)$a) ){
-          return false;
-        }
-      }
-      else if ( !is_int($a) ){
-        return false;
-      }
-    }
-    return true;
-  }
+		$args = func_get_args();
+		foreach ( $args as $a ){
+			if ( is_string($a) || (abs($a) > PHP_INT_MAX) ){
+				if ( !preg_match('/^-?(\d+)$/', (string)$a) ){
+					return false;
+				}
+			}
+			else if ( !is_int($a) ){
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Checks if the item is a integer.
+	 * Can take as many arguments and will return false if one of them is not an integer or the string of an integer.
+	 *
+	 * <code>
+	 * \bbn\str\text::is_integer(13.2); //Returns false
+	 * \bbn\str\text::is_integer(14); //Returns true
+	 * \bbn\str\text::is_integer('14'); //Returns true
+	 * </code>
+	 *
+	 * @param mixed $st The item to be tested.
+	 *
+	 * @return bool
+	 */
+	public static function is_clean_path()
+	{
+		$args = func_get_args();
+		foreach ( $args as $a ){
+			if ( is_string($a) ){
+				if ( (strpos($a, '../') !== false) || (strpos($a, '..\\') !== false) ){
+					return false;
+				}
+			}
+			else {
+				return false;
+			}
+		}
+		return true;
+	}
 
 	/**
    * Checks if the item is a decimal.

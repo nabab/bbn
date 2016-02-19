@@ -616,6 +616,7 @@ class directories {
         if ( isset($sd) && (empty($ext) || !empty($cfg['fixed'])) ){
           $r['static'] = 1;
           $r['title'] = $cfg['title'];
+          $r['default'] = empty($cfg['default']) ? false : true;
           $new_file = false;
           if ( !empty($cfg['fixed']) ){
             $ext = \bbn\str\text::file_ext($cfg['fixed']);
