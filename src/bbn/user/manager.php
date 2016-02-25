@@ -201,13 +201,8 @@ You can click the following link to access directly your account:<br>
 	public function add($cfg)
 	{
     $fields = array_unique(array_merge(array_values($this->cfg['arch']['users']), $this->cfg['additional_fields']));
-    foreach ( $fields as $f ){
-      $cfg[$this->cfg['arch']['users']['status']] = 1;
-      $cfg[$this->cfg['arch']['users']['cfg']] = '{}';
-      if ( !isset($cfg[$f]) && ($f !== $this->cfg['arch']['users']['id']) ){
-        die("Field $f empty!");
-      }
-    }
+    $cfg[$this->cfg['arch']['users']['status']] = 1;
+    $cfg[$this->cfg['arch']['users']['cfg']] = '{}';
     foreach ( $cfg as $k => $v ){
       if ( !in_array($k, $fields) ){
         unset($cfg[$k]);
