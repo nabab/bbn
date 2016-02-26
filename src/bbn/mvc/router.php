@@ -105,9 +105,12 @@ class router {
     return false;
   }
 
-  private function get_alt_root($mode){
-    if ( $this->alt_root && self::is_mode($mode) ){
-      return $this->parse($this->routes['root'][$this->alt_root].'/mvc/'.( $mode === 'dom' ? 'public' : $mode ).'/');
+  private function get_alt_root($mode, $path = false){
+    if ( ($path || $this->alt_root) &&
+      self::is_mode($mode) &&
+      isset($this->routes['root'][$path ? $path : $this->alt_root])
+    ){
+      return $this->parse($this->routes['root'][$path ? $path : $this->alt_root].'/mvc/'.( $mode === 'dom' ? 'public' : $mode ).'/');
     }
     return false;
   }
@@ -328,13 +331,22 @@ class router {
     $root = $this->get_root($mode);
     /** @var boolean|string $file Once found, full path and filename */
     $file = false;
-    $alt_root = $this->get_alt_root($mode);
+    $alt_path = false;
+    $parts = explode('/', $path);
+    if ( !empty($parts) ){
+      if ( count($parts) && ($alt_root = $this->get_alt_root($mode, $parts[0])) ){
+        $alt_path = $parts[0];
+      }
+    }
+    else if ( $alt_root = $this->get_alt_root($mode) ){
+      $alt_path = $this->alt_root;
+    }
     foreach ( self::$filetypes[$mode] as $t ){
       if ( is_file($root.$path.'.'.$t) ) {
         $file = $root . $path . '.' . $t;
       }
-      else if ( is_file($alt_root.substr($path, strlen($this->alt_root)+1).'.'.$t) ) {
-        $file = $alt_root . substr($path, strlen($this->alt_root)+1) . '.' . $t;
+      else if ( $alt_path && is_file($alt_root.substr($path, strlen($alt_path)+1).'.'.$t) ) {
+        $file = $alt_root . substr($path, strlen($alt_path)+1) . '.' . $t;
       }
       if ( $file ){
         return $this->set_known([

@@ -403,6 +403,31 @@ class connection extends \PDO implements actions, api, engines
     }
   }
 
+  public function get_foreign_keys($col, $table, $db = false){
+    if ( !$db ){
+      $db = $this->current;
+    }
+    $res = [];
+    $model = $this->modelize();
+    foreach ( $model as $tn => $m ){
+      foreach ( $m['keys'] as $k => $t ){
+        if ( ($t['ref_table'] === $table) &&
+          ($t['ref_column'] === $col) &&
+          ($t['ref_db'] === $db) &&
+          (count($t['columns']) === 1)
+        ){
+          if ( !isset($res[$tn]) ){
+            $res[$tn] = [$t['columns'][0]];
+          }
+          else{
+            array_push($res[$tn], $t['columns'][0]);
+          }
+        }
+      }
+    }
+    return $res;
+  }
+
   public function log($st){
     $args = func_get_args();
     foreach ( $args as $a ){

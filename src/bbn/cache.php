@@ -138,25 +138,29 @@ class cache{
     }
   }
 
-  public function delete_all($st){
-    if ( self::$type && is_string($st) ){
+  public function delete_all($st=false){
+    if ( self::$type ){
       $its = $this->items();
+      $res = 0;
       foreach ( $its as $it ){
-        if ( strpos($it, $st) === 0 ){
+        if ( !$st || strpos($it, $st) === 0 ){
           switch ( self::$type ){
             case 'apc':
-              return apc_delete($it);
+              $res += (int)apc_delete($it);
+              break;
             case 'memcache':
-              return $this->obj->delete($it);
+              $res += (int)$this->obj->delete($it);
+              break;
             case 'files':
               $file = $this->path.\bbn\str\text::encode_filename($it).'.bbn.cache';
               if ( is_file($file) ){
-                return unlink($file);
+                $res += (int)unlink($file);
               }
-              return 1;
+              break;
           }
         }
       }
+      return $res;
     }
   }
 

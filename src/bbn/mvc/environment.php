@@ -57,7 +57,7 @@ class environment {
       $this->params = [];
       $tmp = explode('/', \bbn\str\text::parse_path($path));
       foreach ( $tmp as $t ) {
-        if ( !empty($t) ) {
+        if ( !empty($t) || \bbn\str\text::is_number($t) ) {
           if ( in_array($t, \bbn\mvc::$reserved) ){
             die("The controller you are asking for contains one of the following reserved strings: " .
               implode(", ", \bbn\mvc::$reserved));

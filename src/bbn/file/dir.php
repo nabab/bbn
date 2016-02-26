@@ -230,7 +230,65 @@ class dir extends \bbn\obj
     return $all;
 	}
 
-	/**
+  /**
+   * Scans all the content from a directory, including the subdirectories, and return a tree
+   *
+   * <code>
+   * \bbn\file\dir::scan("/home/me");
+   * \bbn\file\dir::delete("C:\Documents\Test");
+   * </code>
+   *
+   * @param string $dir The directory path.
+   * @param string $type The type of item to return ('file', 'dir', default is both)
+   *
+   * @return array
+   */
+  public static function get_tree($dir, $only_dir = false, $filter = false)
+  {
+    $r = [];
+    $dir = self::clean($dir);
+    $dirs = self::get_dirs($dir);
+    if ( is_array($dirs) ){
+      foreach ( $dirs as $d ){
+        $x = [
+          'name' => $d,
+          'type' => 'dir',
+          'num_children' => 0,
+          'items' => self::get_tree($d, $only_dir, $filter)
+        ];
+        $x['num_children'] = count($x['items']);
+        if ( is_callable($filter) ){
+          if ( $filter($x) ){
+            array_push($r, $x);
+          }
+        }
+        else{
+          array_push($r, $x);
+        }
+      }
+      if ( !$only_dir ){
+        $files = self::get_files($dir);
+        foreach ( $files as $f ){
+          $x = [
+            'name' => $f,
+            'type' => 'file',
+            'ext' => \bbn\str\text::file_ext($f)
+          ];
+          if ( is_callable($filter) ){
+            if ( $filter($x) ){
+              array_push($r, $x);
+            }
+          }
+          else{
+            array_push($r, $x);
+          }
+        }
+      }
+    }
+    return $r;
+  }
+
+  /**
 	 * Creates all the directories from the path taht don't exist
 	 *
    * <code>
