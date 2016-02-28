@@ -67,9 +67,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
     if ( $md5 !== self::$hash_content ){
       self::$hash_content = $md5;
       $inliner = new \TijsVerkoyen\CssToInlineStyles\CssToInlineStyles();
-      $inliner->setHTML($c);
-      $inliner->setCSS($c);
-      self::$content = $inliner->convert();
+      self::$content = $inliner->convert($c);
     }
   }
 
