@@ -56,8 +56,8 @@ class preferences
 		$this->cfg = \bbn\x::merge_arrays(self::$_defaults, $cfg);
 		$this->opt = $opt;
 		$this->db = $db;
-		$this->id_user = is_int($cfg['id_user']) ? $cfg['id_user'] : false;
-		$this->id_group = is_int($cfg['id_group']) ? $cfg['id_group'] : false;
+		$this->id_user = is_int($this->cfg['id_user']) ? $this->cfg['id_user'] : false;
+		$this->id_group = is_int($this->cfg['id_group']) ? $this->cfg['id_group'] : false;
 	}
 
 	public function set_user($id_user){
@@ -98,7 +98,7 @@ class preferences
 				[ $this->cfg['cols']['id'] => $id ]
 			);
 		}
-		if ( isset($val[$this->cfg['cols']['value']]) && \bbn\str\text::is_json($val[$this->cfg['cols']['value']]) ) {
+		if ( isset($val[$this->cfg['cols']['value']]) && \bbn\txt::is_json($val[$this->cfg['cols']['value']]) ) {
 			$val = \bbn\x::merge_arrays(json_decode($val[$this->cfg['cols']['value']], 1), $val);
 		}
 		$new = [];

@@ -264,20 +264,20 @@ class element
 	 */
   public static function css_to_string($css){
     if ( is_string($css) ){
-      return ' style="'.\bbn\str\text::escape_dquotes($css).'"';
+      return ' style="'.\bbn\txt::escape_dquotes($css).'"';
     }
     else if ( is_array($css) && count($css) > 0 ){
       $st = '';
       foreach ( $css as $prop => $val ){
         $st .= $prop.':'.$val.';';
       }
-      return ' style="'.\bbn\str\text::escape_dquotes($st).'"';
+      return ' style="'.\bbn\txt::escape_dquotes($st).'"';
     }
   }
   
   public function css(array $cfg){
     foreach ( $cfg as $i => $k ){
-      if ( !\bbn\str\text::is_number($i) ){
+      if ( !\bbn\txt::is_number($i) ){
         $this->css[$i] = $k;
       }
     }
@@ -460,7 +460,7 @@ class element
 	 */
   public function get_param()
   {
-    return \bbn\str\text::make_readable($this->get_config());
+    return \bbn\txt::make_readable($this->get_config());
   }
   
 	/**
@@ -470,7 +470,7 @@ class element
 	 */
   public function show_config()
   {
-    return \bbn\str\text::export(\bbn\str\text::make_readable($this->get_config()), 1);
+    return \bbn\txt::export(\bbn\txt::make_readable($this->get_config()), 1);
   }
 	
 	/**
@@ -502,7 +502,7 @@ class element
                 $r .= $o;
               }
               else{
-                $r .= '"'.\bbn\str\text::escape_dquotes($o).'"';
+                $r .= '"'.\bbn\txt::escape_dquotes($o).'"';
               }
             }
             else if ( is_bool($o) ){
@@ -660,7 +660,7 @@ class element
   
   public function ele_and_script()
   {
-    return ['$(\''.\bbn\str\text::escape_squotes($this->html()).'\')',$this->script(false)];
+    return ['$(\''.\bbn\txt::escape_squotes($this->html()).'\')',$this->script(false)];
   }
 	
   public function make_empty()

@@ -86,7 +86,7 @@ class mapper extends \bbn\objdb{
   public function __construct( \bbn\db\connection $db, $database = '', $prefix='bbn'){
     // Checking the prefix string
     parent::__construct($db);
-    if ( \bbn\str\text::check_name($prefix) || ($prefix === false) ){
+    if ( \bbn\txt::check_name($prefix) || ($prefix === false) ){
       $this->admin_db = empty($database) ? $this->db->current : $database;
       $this->client_db = $this->db->current;
       $this->prefix = $prefix;
@@ -221,7 +221,7 @@ class mapper extends \bbn\objdb{
   public function load_config($id, $class = 'grid', $params=[])
   {
     if( $this->db ){
-      if ( \bbn\str\text::is_number($id) && 
+      if ( \bbn\txt::is_number($id) && 
               $obj = $this->db->rselect(
                       $this->admin_db . '.' . $this->prefix . 'objects',
                       [],
@@ -233,16 +233,16 @@ class mapper extends \bbn\objdb{
           $cfg['url'] = $id;
         }
         /*
-        if ( empty($cfg['select']) && \bbn\str\text::is_number($cfg['url']) ){
+        if ( empty($cfg['select']) && \bbn\txt::is_number($cfg['url']) ){
           $cfg['select'] = 'select/'.$id."/".implode("/", $params);
         }
-        if ( empty($cfg['insert'])  && \bbn\str\text::is_number($cfg['url']) ){
+        if ( empty($cfg['insert'])  && \bbn\txt::is_number($cfg['url']) ){
           $cfg['insert'] = 'insert/'.$id."/".implode("/", $params);
         }
-        if ( empty($cfg['update']) && \bbn\str\text::is_number($cfg['url']) ){
+        if ( empty($cfg['update']) && \bbn\txt::is_number($cfg['url']) ){
           $cfg['update'] = 'update/'.$id."/".implode("/", $params);
         }
-        if ( empty($cfg['delete']) && \bbn\str\text::is_number($cfg['url']) ){
+        if ( empty($cfg['delete']) && \bbn\txt::is_number($cfg['url']) ){
           $cfg['delete'] = 'delete/'.$id."/".implode("/", $params);
         }
          * 
@@ -316,7 +316,7 @@ class mapper extends \bbn\objdb{
             count($cfg['keys']['PRIMARY']['columns']) === 1 &&
             ($table = $this->db->table_full_name($table)) ){
 
-      $id = \bbn\str\text::genpwd();
+      $id = \bbn\txt::genpwd();
       $full_cfg = [
           'id'=>$id,
           'table' => $table,
@@ -380,7 +380,7 @@ class mapper extends \bbn\objdb{
   private function get_default_col_config($table, $column, $where=[], $params=[]){
     
 		// Looks in the db for columns corresponding to the given table
-		if ( $this->db && \bbn\str\text::check_name($column) &&
+		if ( $this->db && \bbn\txt::check_name($column) &&
             ($cfg = $this->db->modelize($table)) &&
             isset($cfg['fields'][$column]) ){
 
@@ -606,7 +606,7 @@ class mapper extends \bbn\objdb{
 	private function get_default_field_config($table, $column){
     
 		// Looks in the db for columns corresponding to the given table
-		if ( $this->db && \bbn\str\text::check_name($column) &&
+		if ( $this->db && \bbn\txt::check_name($column) &&
             ($table_cfg = $this->db->modelize($table)) &&
             isset($table_cfg['fields'][$column]) ){
       $col = $table_cfg['fields'][$column];
@@ -631,7 +631,7 @@ class mapper extends \bbn\objdb{
         if ( isset($col['keys']) ){
           foreach ( $col['keys'] as $k ){
             $key = $table_cfg['keys'][$k];
-            if ( \bbn\str\text::check_name($key['ref_db'], $key['ref_table'], $key['ref_column']) ){
+            if ( \bbn\txt::check_name($key['ref_db'], $key['ref_table'], $key['ref_column']) ){
               $ref = [
                   'db' => $key['ref_db'],
                   'table' => $key['ref_table'],
@@ -729,7 +729,7 @@ class mapper extends \bbn\objdb{
 		if ( empty($db) ){
 			$db = $this->db->current;
 		}
-		if ( \bbn\str\text::check_name($db) ){
+		if ( \bbn\txt::check_name($db) ){
 
       $this->db->clear_all_cache();
 

@@ -36,11 +36,11 @@ class grid extends \bbn\obj{
     if ( is_array($cfg) ){
       $this->db = $db;
       $this->cfg['start'] = isset($cfg['skip']) &&
-              \bbn\str\text::is_number($cfg['skip']) ?
+              \bbn\txt::is_number($cfg['skip']) ?
                       $cfg['skip'] : 0;
 
       $this->cfg['limit'] = ( isset($cfg['take']) &&
-              \bbn\str\text::is_number($cfg['take']) ) ?
+              \bbn\txt::is_number($cfg['take']) ) ?
                       $cfg['take'] : 20;
 
       $this->cfg['order'] = $this->cfg['dir'] = false;
@@ -119,18 +119,18 @@ class grid extends \bbn\obj{
             if ( $this->structure && isset($this->structure['fields'][$f['field']]) ){
               if ( ($this->structure['fields'][$f['field']]['type'] === 'int') &&
                       ($this->structure['fields'][$f['field']]['maxlength'] == 1) &&
-                      !\bbn\str\text::is_integer($f['value']) ){
+                      !\bbn\txt::is_integer($f['value']) ){
                 $f['value'] = ($f['value'] === 'true') ? 1 : 0;
               }
             }
             $res .= $pre.$field." ";
             switch ( $f['operator'] ){
               case 'eq':
-              $res .= \bbn\str\text::is_number($f['value']) ? "= ".$f['value'] : "LIKE '".$this->db->escape_value($f['value'])."'";
+              $res .= \bbn\txt::is_number($f['value']) ? "= ".$f['value'] : "LIKE '".$this->db->escape_value($f['value'])."'";
               break;
 
               case 'neq':
-              $res .= \bbn\str\text::is_number($f['value']) ? "!= ".$f['value'] : "NOT LIKE '".$this->db->escape_value($f['value'])."'";
+              $res .= \bbn\txt::is_number($f['value']) ? "!= ".$f['value'] : "NOT LIKE '".$this->db->escape_value($f['value'])."'";
               break;
 
               case 'startswith':

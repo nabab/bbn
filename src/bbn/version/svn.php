@@ -67,7 +67,7 @@ class svn
     foreach ( $tmp as $t ){
       $i = strpos($t, ':');
       if ( $i > 0 ){
-        $res[\bbn\str\text::change_case(\bbn\str\text::encode_filename(substr($t, 0, $i)), 'lower')] = trim(substr($t, $i+1));
+        $res[\bbn\txt::change_case(\bbn\txt::encode_filename(substr($t, 0, $i)), 'lower')] = trim(substr($t, $i+1));
       }
     }
     return $res;

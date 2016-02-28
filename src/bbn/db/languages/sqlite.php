@@ -386,10 +386,10 @@ class sqlite implements \bbn\db\engines
         $args = $args[0];
       }
     }
-    if ( count($args) === 2 && \bbn\str\text::is_number($args[0], $args[1]) ){
+    if ( count($args) === 2 && \bbn\txt::is_number($args[0], $args[1]) ){
       return " LIMIT $args[1], $args[0]";
     }
-    if ( \bbn\str\text::is_number($args[0]) ){
+    if ( \bbn\txt::is_number($args[0]) ){
       return " LIMIT $args[0]";
     }
     return '';
@@ -485,7 +485,7 @@ class sqlite implements \bbn\db\engines
               $this->db->error("Error! The column '$c' doesn't exist in '".implode(", ", array_keys($tables_fields))."' table(s)");
             }
           }
-          if ( !is_numeric($k) && \bbn\str\text::check_name($k) && ($k !== $c) ){
+          if ( !is_numeric($k) && \bbn\txt::check_name($k) && ($k !== $c) ){
             array_push($aliases, $k);
             $r .= "{$this->escape($c)} AS {$this->escape($k)},".PHP_EOL;
           }

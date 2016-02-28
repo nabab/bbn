@@ -166,7 +166,7 @@ class input extends element
 			$mandatory_attr = array();
       
       if ( !isset($this->attr['id']) ){
-  			$this->attr['id'] = \bbn\str\text::genpwd(20,15);
+  			$this->attr['id'] = \bbn\txt::genpwd(20,15);
       }
       
 			$this->script = isset($cfg['script']) ? $cfg['script'] : '';
@@ -204,7 +204,7 @@ class input extends element
 		$s = $this->html();
     if ( !empty($s) ){
 			if ( BBN_IS_DEV ){
-        $title = str_replace('"', '', print_r (\bbn\str\text::make_readable($this->cfg), true));
+        $title = str_replace('"', '', print_r (\bbn\txt::make_readable($this->cfg), true));
 			}
 			else if ( isset($this->attr['title']) ){
 				$title = $this->attr['title'];

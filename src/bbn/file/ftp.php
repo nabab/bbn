@@ -130,7 +130,7 @@ class ftp extends \bbn\obj
           @ftp_cdup($this->cn);
         }
         else{
-          $ele['type'] = \bbn\str\text::file_ext($file);
+          $ele['type'] = \bbn\txt::file_ext($file);
         }
         array_push($res,$ele);
       }

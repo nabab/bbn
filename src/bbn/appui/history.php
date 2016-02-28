@@ -54,10 +54,10 @@ class history
    * @return number|false
    */
   public static function valid_date($d){
-    if ( !\bbn\str\text::is_number($d) ){
+    if ( !\bbn\txt::is_number($d) ){
       $d = strtotime($d);
     }
-    if ( \bbn\str\text::is_number($d) && ($d > 0) ){
+    if ( \bbn\txt::is_number($d) && ($d > 0) ){
       return $d;
     }
     return false;
@@ -109,7 +109,7 @@ class history
 	public static function delete($table, $id)
 	{
 		// Sets the "active" column name
-		if ( self::is_init() && text::check_name($table) && \bbn\str\text::is_integer($id) ){
+		if ( self::is_init() && text::check_name($table) && \bbn\txt::is_integer($id) ){
       self::$db->query("
         DELETE FROM ".self::$db->escape(self::$htable)."
         WHERE ".self::$db->escape('column')." LIKE '".self::$db->table_full_name($table).".%'
@@ -147,7 +147,7 @@ class history
 	public static function set_date($date)
 	{
 		// Sets the current date
-		if ( !\bbn\str\text::is_number($date) ){
+		if ( !\bbn\txt::is_number($date) ){
       if ( !($date = strtotime($date)) ){
         return false;
       }
@@ -196,7 +196,7 @@ class history
 	public static function set_huser($huser)
 	{
 		// Sets the history table name
-		if ( \bbn\str\text::is_number($huser) ){
+		if ( \bbn\txt::is_number($huser) ){
 			self::$huser = $huser;
 		}
 	}
@@ -212,14 +212,14 @@ class history
 
   public static function get_all_history($table, $start=0, $limit=20, $dir=false){
     $r = [];
-    if ( \bbn\str\text::check_name($table) && is_int($start) && is_int($limit) ){
+    if ( \bbn\txt::check_name($table) && is_int($start) && is_int($limit) ){
       $r = self::$db->get_rows("
         SELECT DISTINCT(`line`)
         FROM ".self::$db->escape(self::$htable)."
         WHERE `column` LIKE ?
         ORDER BY chrono ".(
                 is_string($dir) &&
-                        (\bbn\str\text::change_case($dir, 'lower') === 'asc') ?
+                        (\bbn\txt::change_case($dir, 'lower') === 'asc') ?
                   'ASC' : 'DESC' )."
         LIMIT $start, $limit",
         self::$db->table_full_name($table).'.%');
@@ -229,7 +229,7 @@ class history
 
   public static function get_last_modified_lines($table, $start=0, $limit=20){
     $r = [];
-    if ( \bbn\str\text::check_name($table) && is_int($start) && is_int($limit) ){
+    if ( \bbn\txt::check_name($table) && is_int($start) && is_int($limit) ){
       $r = self::$db->get_rows("
         SELECT DISTINCT(".self::$db->escape('line').")
         FROM ".self::$db->escape(self::$htable)."
@@ -244,10 +244,10 @@ class history
   }
 
   public static function get_next_update($table, $date, $id, $column=''){
-    if ( \bbn\str\text::check_name($table) &&
+    if ( \bbn\txt::check_name($table) &&
       ($date = self::valid_date($date)) &&
       is_int($id) &&
-      (empty($column) || \bbn\str\text::check_name($column))
+      (empty($column) || \bbn\txt::check_name($column))
     ){
       $table = self::$db->table_full_name($table).'.'.( empty($column) ? '%' : $column );
       return self::$db->get_row("
@@ -267,10 +267,10 @@ class history
   }
 
   public static function get_prev_update($table, $date, $id, $column=''){
-    if ( \bbn\str\text::check_name($table) &&
+    if ( \bbn\txt::check_name($table) &&
       ($date = self::valid_date($date)) &&
       is_int($id) &&
-      (empty($column) || \bbn\str\text::check_name($column))
+      (empty($column) || \bbn\txt::check_name($column))
     ){
       $table = self::$db->table_full_name($table).'.'.( empty($column) ? '%' : $column );
       return self::$db->get_row("
@@ -290,10 +290,10 @@ class history
   }
 
   public static function get_prev_value($table, $date, $id, $column){
-    if ( \bbn\str\text::check_name($table) &&
+    if ( \bbn\txt::check_name($table) &&
       ($date = self::valid_date($date)) &&
       is_int($id) &&
-      \bbn\str\text::check_name($column)
+      \bbn\txt::check_name($column)
     ){
       $table = self::$db->table_full_name($table).'.'.$column;
       return self::$db->get_one("
@@ -316,7 +316,7 @@ class history
     if ( !($when = self::valid_date($when)) ){
       die("The date $when is incorrect");
     }
-    if ( !\bbn\str\text::check_name($table) ){
+    if ( !\bbn\txt::check_name($table) ){
 			die("The table $table has an incorrect name");
 		}
 		if ( !($primary = self::$db->get_unique_primary($table)) ){

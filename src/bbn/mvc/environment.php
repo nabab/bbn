@@ -55,9 +55,9 @@ class environment {
   {
     if ( !is_null($this->params) ) {
       $this->params = [];
-      $tmp = explode('/', \bbn\str\text::parse_path($path));
+      $tmp = explode('/', \bbn\txt::parse_path($path));
       foreach ( $tmp as $t ) {
-        if ( !empty($t) || \bbn\str\text::is_number($t) ) {
+        if ( !empty($t) || \bbn\txt::is_number($t) ) {
           if ( in_array($t, \bbn\mvc::$reserved) ){
             die("The controller you are asking for contains one of the following reserved strings: " .
               implode(", ", \bbn\mvc::$reserved));
@@ -234,7 +234,7 @@ class environment {
         if ( isset($argv[2]) && ($json = json_decode($argv[2], 1)) ){
           // Data are "normalized" i.e. types are changed through str\text::correct_types
           $this->post = array_map(function($a){
-            return \bbn\str\text::correct_types($a);
+            return \bbn\txt::correct_types($a);
           }, $json);
         }
       }
@@ -247,7 +247,7 @@ class environment {
       $this->get = [];
       if ( count($_GET) > 0 ){
         $this->get = array_map(function($a){
-          return \bbn\str\text::correct_types($a);
+          return \bbn\txt::correct_types($a);
         }, $_GET);
       }
     }
@@ -300,7 +300,7 @@ class environment {
           $this->set_mode(BBN_DEFAULT_MODE);
         }
         array_walk_recursive($this->post, function(&$a){
-          $a = \bbn\str\text::correct_types($a);
+          $a = \bbn\txt::correct_types($a);
           return $a;
         });
       }

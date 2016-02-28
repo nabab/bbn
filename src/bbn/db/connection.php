@@ -549,8 +549,8 @@ class connection extends \PDO implements actions, api, engines
   {
     if ( is_string($value) ){
       return str_replace('%', '\\%', $esc === '"' ?
-        \bbn\str\text::escape_dquotes($value) :
-        \bbn\str\text::escape_squotes($value));
+        \bbn\txt::escape_dquotes($value) :
+        \bbn\txt::escape_squotes($value));
     }
     return $value;
   }
@@ -565,7 +565,7 @@ class connection extends \PDO implements actions, api, engines
   {
     if ( $id === '' ){
       $id = $this->lastInsertId();
-      if ( is_string($id) && \bbn\str\text::is_integer($id) ){
+      if ( is_string($id) && \bbn\txt::is_integer($id) ){
         $id = (int)$id;
       }
     }

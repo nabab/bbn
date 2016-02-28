@@ -414,11 +414,11 @@ class json implements \bbn\db\api
       }
     }
     if ( count($args) === 2 &&
-            \bbn\str\text::is_number($args[0], $args[1]) &&
+            \bbn\txt::is_number($args[0], $args[1]) &&
             ($args[0] > 0) ){
       return " LIMIT $args[1], $args[0]";
     }
-    if ( \bbn\str\text::is_number($args[0]) &&
+    if ( \bbn\txt::is_number($args[0]) &&
             ($args[0] > 0) ){
       return " LIMIT $args[0]";
     }
@@ -475,7 +475,7 @@ class json implements \bbn\db\api
 						die("The column $c doesn't exist in $table");
 					}
 					else{
-            if ( !is_numeric($k) && \bbn\str\text::check_name($k) && ($k !== $c) ){
+            if ( !is_numeric($k) && \bbn\txt::check_name($k) && ($k !== $c) ){
               array_push($aliases, $k);
               $r .= "{$this->escape($c)} AS {$this->escape($k)},".PHP_EOL;
             }
@@ -801,10 +801,10 @@ class json implements \bbn\db\api
   public function get_users($user='', $host='')
   {
     $cond = '';
-    if ( !empty($user) && \bbn\str\text::check_name($user) ){
+    if ( !empty($user) && \bbn\txt::check_name($user) ){
       $cond .= " AND  user LIKE '$user' ";
     }
-    if ( !empty($host) && \bbn\str\text::check_name($host) ){
+    if ( !empty($host) && \bbn\txt::check_name($host) ){
       $cond .= " AND  host LIKE '$host' ";
     }
     $us = $this->db->get_rows("

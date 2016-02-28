@@ -29,7 +29,7 @@ class date
   public static function last_day_of_month($date, $format = false){
     if ( $date ){
       $m = false;
-      if ( \bbn\str\text::is_number($date) ){
+      if ( \bbn\txt::is_number($date) ){
         if ( $date <= 12 ){
           $m = $date;
           $y = date('Y');

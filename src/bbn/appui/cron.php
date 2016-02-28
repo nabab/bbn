@@ -125,7 +125,7 @@ class cron extends \bbn\obj{
       if ( !$tm ){
         $tm = time();
       }
-      $letter = \bbn\str\text::change_case(substr($frequency, 0, 1), 'lower');
+      $letter = \bbn\txt::change_case(substr($frequency, 0, 1), 'lower');
       $number = (int)substr($frequency, 1);
       if ( $number > 0 ){
         switch ( $letter ){

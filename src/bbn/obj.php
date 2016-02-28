@@ -58,7 +58,7 @@ class obj
   {
 		if ( $this->is_debug ){
 			$ar = func_get_args();
-			$cn = \bbn\str\text::encode_filename(str_replace('\\', '_', get_class($this)));
+			$cn = \bbn\txt::encode_filename(str_replace('\\', '_', get_class($this)));
 			foreach ( $ar as $a ){
 				\bbn\x::log($a, $cn);
 			}

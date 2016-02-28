@@ -13,7 +13,7 @@ namespace bbn\api;
  * @category  Utilities
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @version 0.2r89
- & @todo Change make_love_with_me to \bbn\str\text::clean
+ & @todo Change make_love_with_me to \bbn\txt::clean
  */
 class paybox
 {
@@ -41,7 +41,7 @@ class paybox
 		if ( isset($cfg['site'],$cfg['rang'],$cfg['id'],$cfg['key'],$cfg['pass'])
 		&& is_numeric($price)
 		&& $price > 0
-		&& \bbn\str\text::is_email($email)
+		&& \bbn\txt::is_email($email)
 		&& $this->check_server() )
 		{
 			if ( isset(self::$currencies[$currency]) )
