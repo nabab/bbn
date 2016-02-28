@@ -170,7 +170,7 @@ class mvc implements \bbn\mvc\api{
   }
 
   public function add_routes(array $routes){
-    $this->routes = \bbn\tools::merge_arrays($this->routes, $routes);
+    $this->routes = \bbn\x::merge_arrays($this->routes, $routes);
     return $this;
   }
 
@@ -309,10 +309,10 @@ class mvc implements \bbn\mvc\api{
         die(isset($obj->output) ? $obj->output : "no output");
       }
       if ( is_array($obj) ){
-        $obj = \bbn\tools::to_object($obj);
+        $obj = \bbn\x::to_object($obj);
       }
 			if ( (gettype($obj) !== 'object') || (get_class($obj) !== 'stdClass') ){
-				die(\bbn\tools::dump("Unexpected output: ".gettype($obj)));
+				die(\bbn\x::dump("Unexpected output: ".gettype($obj)));
 			}
       $output = new \bbn\mvc\output($obj, $this->get_mode());
       $output->run();

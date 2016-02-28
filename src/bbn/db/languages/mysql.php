@@ -674,32 +674,26 @@ class mysql implements \bbn\db\engines
 	* 
 	* @return false|array
 	*/
-	public function get_column_values($table, $field,  array $where = [], $limit = false, $start = 0, $php = false)
+	public function get_column_values($table, $field,  array $where = [], array $order = [], $limit = false, $start = 0, $php = false)
   {
     $csn = $this->db->csn($field);
     $cfn = $this->db->cfn($field, $table, 1);
 		if ( text::check_name($csn) &&
-      ($table = $this->table_full_name($table, 1)) &&
       ($m = $this->db->modelize($table)) &&
+      ($table = $this->table_full_name($table, 1)) &&
       (count($m['fields']) > 0)
     ){
-			$r = '';
-			if ( $php ){
-				$r .= '$db->query("';
-			}
       if ( !isset($m['fields'][$csn]) ){
         $this->db->error("Error in collecting values: the column $field doesn't exist in $table");
       }
-			$r .= "SELECT DISTINCT $cfn FROM $table".PHP_EOL.
-        $this->db->get_where($where, $table).PHP_EOL.
-        "ORDER BY $cfn";
-      if ( $limit ){
-  			$r .= PHP_EOL . $this->get_limit([$limit, $start]);
+      else{
+        return ($php ? '$db->query(\'' : '').
+        "SELECT DISTINCT $cfn FROM $table".PHP_EOL.
+        (empty($where) ? '' : $this->db->get_where($where, $table).PHP_EOL).
+        (empty($order) ? '' : $this->db->get_order($order, $table).PHP_EOL).
+        (empty($limit) ? '' : $this->db->get_limit([$limit, $start]).PHP_EOL).
+        ($php ? '\');' : '');
       }
-			if ( $php ){
-				$r .= '");';
-			}
-			return $r;
 		}
 		return false;
   }
@@ -709,7 +703,7 @@ class mysql implements \bbn\db\engines
 	* 
 	* @return false|array
 	*/
-	public function get_values_count($table, $field, array $where = [], $limit, $start, $php = false)
+	public function get_values_count($table, $field, array $where = [], $limit = false, $start = 0, $php = false)
   {
 		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
 		{
@@ -721,7 +715,7 @@ class mysql implements \bbn\db\engines
         $this->db->error("Error in values' count: the column $field doesn't exist in $table");
       }
 			$r .= "SELECT COUNT(*) AS num, `$field` AS val FROM $table";
-			if ( count($where) > 0 ){
+      if ( count($where) > 0 ){
         $r .= PHP_EOL . $this->db->get_where($where, $table);
       }
       $r .= PHP_EOL . "GROUP BY `$field`";

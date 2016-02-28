@@ -328,7 +328,7 @@ class connection extends \PDO implements actions, api, engines
       array_push($msg, self::$line);
       array_push($msg, 'Parameters');
       array_push($msg, self::$line);
-      array_push($msg, \bbn\tools::get_dump($this->last_params['values']));
+      array_push($msg, \bbn\x::get_dump($this->last_params['values']));
       array_push($msg, self::$line);
     }
     $this->log(implode(PHP_EOL, $msg));
@@ -396,7 +396,7 @@ class connection extends \PDO implements actions, api, engines
           $this->enable_keys();
         }
         catch ( \PDOException $e ){
-          \bbn\tools::log("Impossible to create the connection for ".$cfg['engine']."/".$cfg['db'], 'db');
+          \bbn\x::log("Impossible to create the connection for ".$cfg['engine']."/".$cfg['db'], 'db');
           die();
         }
       }
@@ -431,7 +431,7 @@ class connection extends \PDO implements actions, api, engines
   public function log($st){
     $args = func_get_args();
     foreach ( $args as $a ){
-      \bbn\tools::log($a, 'db');
+      \bbn\x::log($a, 'db');
     }
   }
 
@@ -2117,7 +2117,7 @@ class connection extends \PDO implements actions, api, engines
   }
 
   /**
-   * Returns a single numeric-indexed array with the values of the unique column $field from the $table $table
+   * Returns a single numeric-indexed array with the values of the unique column $field from the table $table
    *
    * <code>
    * $this->db->get_column_values("table_users", "surname");
@@ -2132,12 +2132,12 @@ class connection extends \PDO implements actions, api, engines
    *
    * @return array
    */
-  public function get_column_values($table, $field,  array $where = [], $limit = false, $start = 0, $php = false)
+  public function get_column_values($table, $field,  array $where = [], array $order = [], $limit = false, $start = 0, $php = false)
   {
     $r = [];
     $where = $this->where_cfg($where, $table);
     if ( $rows = $this->get_irows(
-      $this->language->get_column_values($table, $field, $where, $limit, $start, false),
+      $this->language->get_column_values($table, $field, $where, $order, $limit, $start, false),
       $where['values'])
     ){
       foreach ( $rows as $row ){
@@ -2186,7 +2186,7 @@ class connection extends \PDO implements actions, api, engines
    */
   public function get_field_values($table, $field,  array $where = [], $limit = false, $start = 0)
   {
-    if ( $r = $this->language->get_column_values($table, $field, $where, $limit, $start) ){
+    if ( $r = $this->language->get_column_values($table, $field, $where, [], $limit, $start) ){
       if ( $d = $this->get_by_columns($r) ){
         return $d[$field];
       }

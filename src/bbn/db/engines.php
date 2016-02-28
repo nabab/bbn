@@ -147,35 +147,35 @@ interface engines
 	 * 
 	 * @return false|array
 	 */
-	public function get_select($table, array $fields = array(), array $where = array(), $order, $limit, $start, $php = false);
+	public function get_select($table, array $fields = [], array $where = [], $order, $limit, $start, $php = false);
 	
 	/**
 	 * Fetches the database and returns an array of objects 
 	 * 
 	 * @return false|array
 	 */
-	public function get_insert($table, array $fields = array(), $ignore = false, $php = false);
+	public function get_insert($table, array $fields = [], $ignore = false, $php = false);
 	
 	/**
 	* Fetches the database and returns an array of objects 
 	* 
 	* @return false|array
 	*/
-	public function get_update($table, array $fields = array(), array $where = array(), $php = false);
+	public function get_update($table, array $fields = [], array $where = [], $php = false);
 	
 	/**
 	* Return an array of each values of the field $field in the table $table
 	* 
 	* @return false|array
 	*/
-	public function get_column_values($table, $field, array $where = array(), $limit, $start, $php = false);
+	public function get_column_values($table, $field, array $where = [], array $order = [], $limit = false, $start = 0, $php = false);
 	
 	/**
 	* Return an array of double values arrays: each value of the field $field in the table $table and the number of instances
 	* 
 	* @return false|array
 	*/
-	public function get_values_count($table, $field, array $where = array(), $limit, $start, $php = false);
+	public function get_values_count($table, $field, array $where = [], $limit, $start, $php = false);
 	
 	/**
 	 * Fetches the database and returns an array of objects 

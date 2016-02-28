@@ -56,7 +56,7 @@ class x
 	 * Save the logs to a file.
 	 *
    * <code>
-   * \bbn\tools::log('My text','FileName');
+   * \bbn\x::log('My text','FileName');
    * </code>
    *
 	 * @param string $st Text to save.
@@ -162,7 +162,7 @@ class x
    * $obj1 = new A;
    * $obj2 = new B;
    *
-   * \bbn\tools::merge_objects($obj1, $obj2); //Returns {'a': 10, 'b': 20, 'c': 30, 'd': 40}
+   * \bbn\x::merge_objects($obj1, $obj2); //Returns {'a': 10, 'b': 20, 'c': 30, 'd': 40}
    * </code>
    *
    * @param object $o1 The first object to merge.
@@ -187,7 +187,7 @@ class x
    * Returns an array as merge of two arrays.
 	 *
    * <code>
-   * \bbn\tools::merge_arrays([1, 'Test'], [2, 'Example']); //Returns [1, 'Test', 2, 'Example']
+   * \bbn\x::merge_arrays([1, 'Test'], [2, 'Example']); //Returns [1, 'Test', 2, 'Example']
    * </code>
    *
    * @param array $a1 The first array to merge.
@@ -231,7 +231,7 @@ class x
    * Makes an object of an array.
    *
    * <code>
-   * \bbn\tools::to_object([[1, 'Test'], [2, 'Example']]); //Returns {[1, 'Test'], [2, 'Example']}
+   * \bbn\x::to_object([[1, 'Test'], [2, 'Example']]); //Returns {[1, 'Test'], [2, 'Example']}
    * </code>
    *
    * @param array $ar The array to trasform.
@@ -259,7 +259,7 @@ class x
    *
    * <code>
    * $file = new \bbn\file\file("C:/logs/test.log");
-   * echo \bbn\tools::to_array($file);
+   * echo \bbn\x::to_array($file);
    * //Returns [
    *     '*size' => 0,
    *     '*ext' => 'log',
@@ -302,7 +302,7 @@ class x
    * Indents a flat JSON string to make it more human-readable.
    *
    * <code>
-   * \bbn\tools::indent_json('{"firstName": "John", "lastName": "Smith", "age": 25}');
+   * \bbn\x::indent_json('{"firstName": "John", "lastName": "Smith", "age": 25}');
    * //Returns {"firstName": "John", "lastName": "Smith", "isAlive": true, "age": 25}
    * </code>
    *
@@ -365,8 +365,8 @@ class x
    * Returns an object or an array cleaned up from all empty values.
    *
    * <code>
-   * \bbn\tools::remove_empty(['Pippo', 'Pluto', '', 'Paperino', ' ']); //Returns [0 => 'Pippo', 1 => 'Pluto', 3 => 'Paperino', 4 => ' ']
-   * \bbn\tools::remove_empty(['Pippo', 'Pluto', '', 'Paperino', ' '], 1)); //Returns [0 => 'Pippo', 1 => 'Pluto', 3 => 'Paperino']
+   * \bbn\x::remove_empty(['Pippo', 'Pluto', '', 'Paperino', ' ']); //Returns [0 => 'Pippo', 1 => 'Pluto', 3 => 'Paperino', 4 => ' ']
+   * \bbn\x::remove_empty(['Pippo', 'Pluto', '', 'Paperino', ' '], 1)); //Returns [0 => 'Pippo', 1 => 'Pluto', 3 => 'Paperino']
    * </code>
    *
    * @param array|object $arr An object or array to clean.
@@ -403,7 +403,7 @@ class x
    * Returns an array containing an array for each element highlighting the index with an alias (keyname) and the value with an alias (valname).
    *
    * <code>
-   * \bbn\tools::to_groups(['Pippo', 'Pluto', 'Paperino']);
+   * \bbn\x::to_groups(['Pippo', 'Pluto', 'Paperino']);
    * //Returns [['value' => 0, 'text' => 'Pippo'], ['value' => 1, 'text' => 'Pluto'], ['value' => 2, 'text' => 'Paperino']]
    * </code>
    *
@@ -503,9 +503,9 @@ class x
    * Returns HTML code for creating the <option> tag.
    *
    * <code>
-   * \bbn\tools::build_options(['yes', 'no']); //Returns "<option value="yes">yes</option><option value="no">no</option>"
-   * \bbn\tools::build_options(['yes', 'no'], 'no'); //Returns "<option value="yes">yes</option><option value="no" selected="selected">no</option>"
-   * \bbn\tools::build_options(['yes', 'no'], 'no', 'LabelForEmpty'); //Returns "<option value="">LabelForEmpty</option><option value="yes">yes</option><option value="no" selected="selected">no</option>"
+   * \bbn\x::build_options(['yes', 'no']); //Returns "<option value="yes">yes</option><option value="no">no</option>"
+   * \bbn\x::build_options(['yes', 'no'], 'no'); //Returns "<option value="yes">yes</option><option value="no" selected="selected">no</option>"
+   * \bbn\x::build_options(['yes', 'no'], 'no', 'LabelForEmpty'); //Returns "<option value="">LabelForEmpty</option><option value="yes">yes</option><option value="no" selected="selected">no</option>"
    * </code>
    *
    * @param array $values An array with one or plus values.
@@ -551,7 +551,7 @@ class x
    * Converts a numeric array to an associative one, using the values alternatively as key or value.
    *
    * <code>
-   * \bbn\tools::to_keypair(['Test', 'TestFile', 'Example', 'ExampleFile']); //Returns ['Test' => 'TestFile', 'Example' => 'ExampleFile']
+   * \bbn\x::to_keypair(['Test', 'TestFile', 'Example', 'ExampleFile']); //Returns ['Test' => 'TestFile', 'Example' => 'ExampleFile']
    * </code>
    *
    * @param array $arr must contain an even number of values.
@@ -579,7 +579,7 @@ class x
    * Returns the maximum value of an index of a multidimensional array.
    *
    * <code>
-   * \bbn\tools::max_with_key([
+   * \bbn\x::max_with_key([
    *  ['v' => 1, 'name' => 'test1'],
    *  ['v' => 8, 'name' => 'test2'],
    *  ['v' => 45, 'name' => 'test3'],
@@ -607,7 +607,7 @@ class x
    * Returns the minimum value of an index of a multidimensional array.
    *
    * <code>
-   * \bbn\tools::max_with_key([
+   * \bbn\x::max_with_key([
    *  ['v' => 1, 'name' => 'test1'],
    *  ['v' => 8, 'name' => 'test2'],
    *  ['v' => 45, 'name' => 'test3'],

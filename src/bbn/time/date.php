@@ -21,7 +21,7 @@ class date
   
   public static function is_windows(){
     if ( is_null(self::$windows) ){
-      self::$windows = \bbn\tools::is_windows();
+      self::$windows = \bbn\x::is_windows();
     }
     return self::$windows;
   }
@@ -130,7 +130,7 @@ class date
     for ( $i = 1; $i <= 12; $i++ ){
       $arr[$i] = self::month_name($i);
     }
-    return \bbn\tools::build_options($arr, $val);
+    return \bbn\x::build_options($arr, $val);
   }
   
   public static function month_name($m){

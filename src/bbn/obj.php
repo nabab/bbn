@@ -60,7 +60,7 @@ class obj
 			$ar = func_get_args();
 			$cn = \bbn\str\text::encode_filename(str_replace('\\', '_', get_class($this)));
 			foreach ( $ar as $a ){
-				\bbn\tools::log($a, $cn);
+				\bbn\x::log($a, $cn);
 			}
 		}
   }
@@ -110,7 +110,7 @@ class obj
     }
 		/*
      * else if ( $name === 'log' )
-			array_push(\bbn\tools::log, $value);
+			array_push(\bbn\x::log, $value);
 	}
 	 */
 }

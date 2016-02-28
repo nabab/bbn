@@ -72,6 +72,10 @@ class permissions
 		return self::$root > 0;
 	}
 
+	public static function update_all($path, array $roots = [], $local = ''){
+
+	}
+
 	/**
 	 * @return \bbn\user\permissions
 	 */

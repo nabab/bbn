@@ -184,7 +184,7 @@ class environment {
   }
 
   public function set_prepath($path){
-    $path = \bbn\tools::remove_empty(explode('/', $path));
+    $path = \bbn\x::remove_empty(explode('/', $path));
     if ( count($path) ) {
       foreach ($path as $p) {
         if ($this->params[0] === $p) {

@@ -19,7 +19,7 @@ class history
           $date = false,
           $last_rows = false,
           $ok = false,
-          $enabled = true;
+          $enabled = 1;
 
   public static
           $htable = false,
@@ -610,6 +610,9 @@ class history
    * @return bool returns true
 	 */
   public static function trigger(array $cfg){
+    if ( !self::$enabled ){
+      return $cfg;
+    }
     $tables = is_array($cfg['table']) ? $cfg['table'] : [$cfg['table']];
     // Will return false if disabled, the table doesn't exist, or doesn't have history
     if ( $table = self::get_table_cfg($tables[0]) ){
@@ -620,7 +623,7 @@ class history
       // Need to have a single primary key, otherwise the script dies
       if ( !isset($s['primary']) ){
         self::$db->error("You need to have a primary key on a single column in your table $table in order to use the history class");
-        die(\bbn\tools::hdump("You need to have a primary key on a single column in your table $table in order to use the history class"));
+        die(\bbn\x::hdump("You need to have a primary key on a single column in your table $table in order to use the history class"));
       }
 
       // This happens before the query is executed
@@ -735,7 +738,7 @@ class history
                   ]);
                 }
               }
-              //\bbn\tools::dump($cfg);
+              //\bbn\x::dump($cfg);
             }
             // Case where the primary is not defined, we'll update each primary instead
             else{

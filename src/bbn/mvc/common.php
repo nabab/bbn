@@ -41,7 +41,7 @@ trait common {
     if ( \bbn\mvc::get_debug() ){
       $ar = func_get_args();
       foreach ( $ar as $a ){
-        \bbn\tools::log($a, 'mvc');
+        \bbn\x::log($a, 'mvc');
       }
     }
   }

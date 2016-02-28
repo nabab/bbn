@@ -36,7 +36,7 @@ class sqlite implements \bbn\db\engines
   /**
 	 * @return void 
 	 */
-  public function get_connection($cfg=array())
+  public function get_connection($cfg=[])
   {
     $cfg['engine'] = 'sqlite';
     if ( !isset($cfg['db']) && defined('BBN_DATABASE') ){
@@ -519,7 +519,7 @@ class sqlite implements \bbn\db\engines
 	/**
 	 * @return string
 	 */
-	public function get_insert($table, array $fields = array(), $ignore = false, $php = false)
+	public function get_insert($table, array $fields = [], $ignore = false, $php = false)
 	{
     if ( ($table = $this->table_full_name($table, 1)) &&
       ($m = $this->db->modelize($table)) &&
@@ -600,7 +600,7 @@ class sqlite implements \bbn\db\engines
 	/**
 	 * @return string
 	 */
-	public function get_update($table, array $fields = array(), array $where = array(), $ignore = false, $php = false)
+	public function get_update($table, array $fields = [], array $where = [], $ignore = false, $php = false)
 	{
     if ( ($table = $this->table_full_name($table, 1)) &&
       ($m = $this->db->modelize($table)) &&
@@ -657,7 +657,7 @@ class sqlite implements \bbn\db\engines
 	* 
 	* @return false|array
 	*/
-	public function get_column_values($table, $field,  array $where = array(), $limit = false, $start = 0, $php = false)
+	public function get_column_values($table, $field,  array $where = [],  array $order = [], $limit = false, $start = 0, $php = false)
   {
 
     $csn = $this->db->csn($field);
@@ -667,23 +667,17 @@ class sqlite implements \bbn\db\engines
       ($m = $this->db->modelize($table)) &&
       (count($m['fields']) > 0)
     ){
-			$r = '';
-			if ( $php ){
-  			$r .= '$db->query(\'';
-			}
       if ( !isset($m['fields'][$csn]) ){
         $this->db->error("Error in collecting values: the column $field doesn't exist in $table");
       }
-			$r .= "SELECT DISTINCT $cfn FROM $table".PHP_EOL.
-        $this->db->get_where($where, $table).PHP_EOL.
-        "ORDER BY $cfn";
-      if ( $limit ){
-  			$r .= PHP_EOL . $this->get_limit([$limit, $start]);
+      else{
+        return ($php ? '$db->query(\'' : '').
+        "SELECT DISTINCT $cfn FROM $table".PHP_EOL.
+        (empty($where) ? '' : $this->db->get_where($where, $table).PHP_EOL).
+        (empty($order) ? '' : $this->db->get_order($order, $table).PHP_EOL).
+        (empty($limit) ? '' : $this->db->get_limit([$limit, $start]).PHP_EOL).
+        ($php ? '\');' : '');
       }
-			if ( $php ){
-				$r .= '\');';
-			}
-			return $r;
 		}
 		return false;
   }
@@ -693,7 +687,7 @@ class sqlite implements \bbn\db\engines
 	* 
 	* @return false|array
 	*/
-	public function get_values_count($table, $field, array $where = array(), $limit, $start, $php = false)
+	public function get_values_count($table, $field, array $where = [], $limit, $start, $php = false)
   {
 		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
 		{

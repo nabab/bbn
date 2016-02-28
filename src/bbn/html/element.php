@@ -173,7 +173,7 @@ class element
       }
     }
     if ( !empty(static::$schema) ){
-      static::$schema = \bbn\tools::merge_objects(self::$schema, \bbn\tools::to_object(static::$schema));
+      static::$schema = \bbn\x::merge_objects(self::$schema, \bbn\x::to_object(static::$schema));
     }
     else{
       static::$schema = self::$schema;
@@ -233,7 +233,7 @@ class element
       self::$error = "The configuration is not a valid array";
       return false;
     }
-    self::$validator->check(\bbn\tools::to_object($cfg), static::$schema);
+    self::$validator->check(\bbn\x::to_object($cfg), static::$schema);
     self::$error = '';
     if ( self::$validator->isValid() ){
       return 1;
@@ -440,7 +440,7 @@ class element
 	public function get_config()
 	{
     $this->update();
-		$tmp = \bbn\tools::remove_empty($this->cfg);
+		$tmp = \bbn\x::remove_empty($this->cfg);
     if ( isset($tmp['content']) && is_array($tmp['content']) ){
       foreach ( $tmp['content'] as $i => $c ){
         if ( is_object($c) ){

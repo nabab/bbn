@@ -323,12 +323,12 @@ class router {
       ]);
     }
     // Aaaargh!
-    die(\bbn\tools::hdump("No default file defined for mode $mode $tmp", self::$def, $this->has_route(self::$def)));
+    die(\bbn\x::hdump("No default file defined for mode $mode $tmp", self::$def, $this->has_route(self::$def)));
   }
 
   private function find_in_roots($path){
     foreach ( $this->routes['root'] as $p => $real ){
-      if ( (strpos($p.'/', $path) === 0) || ($p === $path) ){
+      if ( (strpos($path, $p.'/') === 0) || ($p === $path) ){
         return $p;
       }
     }
@@ -340,8 +340,9 @@ class router {
     $root = $this->get_root($mode);
     /** @var boolean|string $file Once found, full path and filename */
     $file = false;
+    $alt_path = false;
     if ( $alt_path = $this->find_in_roots($path) ){
-
+      $alt_root = $this->get_alt_root($mode, $alt_path);
     }
     else if ( $alt_root = $this->get_alt_root($mode) ){
       $alt_path = $this->alt_root;
@@ -366,7 +367,7 @@ class router {
   }
 
   public function add_routes(array $routes){
-    $this->routes = \bbn\tools::merge_arrays($this->routes['alias'], $routes);
+    $this->routes = \bbn\x::merge_arrays($this->routes['alias'], $routes);
     return $this;
   }
 

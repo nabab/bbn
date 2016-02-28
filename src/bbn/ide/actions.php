@@ -67,7 +67,7 @@ class actions {
         }
         if ( is_file($new_path) ){
           $backup = BBN_DATA_PATH.'users/'.$_SESSION[BBN_SESS_NAME]['user']['id'].'/ide/backup/'.date('Y-m-d His').' - Save/'.$dir.'/'.$path;
-          //die(\bbn\tools::dump($f, $new_path, $backup, $dir ));
+          //die(\bbn\x::dump($f, $new_path, $backup, $dir ));
           \bbn\file\dir::create_path(dirname($backup));
           rename($new_path, $backup);
         }
@@ -100,7 +100,7 @@ class actions {
           }
         }
       }
-      //\bbn\tools::dump($cfg, $dir);
+      //\bbn\x::dump($cfg, $dir);
       $path = '';
       if ( ($data['path'] !== './') ){
         if ( is_dir($dir.$data['path']) ){

@@ -212,7 +212,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
               $valid = 1;
             }
             else{
-              \bbn\tools::log("Adresse email invalide: ".$dest);
+              \bbn\x::log("Adresse email invalide: ".$dest);
               $valid = false;
             }
           }

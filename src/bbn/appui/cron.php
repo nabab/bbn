@@ -99,7 +99,7 @@ class cron extends \bbn\obj{
             ($cron = $this->get_cron($article['id_cron'])) ){
       $time = $this->timer->has_started('cron_'.$article['id_cron']) ? $this->timer->stop('cron_'.$article['id_cron']): 0;
       if ( !empty($res) ){
-        \bbn\tools::hdump($id, $res);
+        \bbn\x::hdump($id, $res);
         $this->db->update($this->jtable, [
           'finish' => date('Y-m-d H:i:s'),
           'duration' => $time,
@@ -220,7 +220,7 @@ class cron extends \bbn\obj{
         $id = $this->start($cron['id']);
         $output = $this->_exec($cron['file'], $cron['cfg']);
         $time = $this->finish($id, $output);
-        \bbn\tools::dump("Execution of ".$cron['file']." (Journal ID: $id) in $time secs", $output);
+        \bbn\x::dump("Execution of ".$cron['file']." (Journal ID: $id) in $time secs", $output);
         return $time;
       }
     }

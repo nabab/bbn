@@ -21,7 +21,7 @@ class preferences
 
 	protected static
 		/** @var array */
-			$_defaults = [
+		$_defaults = [
 			'errors' => [
 			],
 			'table' => 'bbn_user_options',
@@ -32,8 +32,10 @@ class preferences
 					'id_group' => 'id_group',
 					'value' => 'value',
 					'active' => 'active'
-			]
-	];
+			],
+			'id_user' => null,
+			'id_group' => null
+		];
 
 	protected
 		/** @var \bbn\appui\options */
@@ -43,20 +45,31 @@ class preferences
 		/** @var array */
 			$cfg = [],
 		/** @var int */
-			$id_user;
+		$id_user,
+		/** @var int */
+		$id_group;
 
   /**
 	 * @return \bbn\user\permissions
 	 */
 	public function __construct(\bbn\appui\options $opt, \bbn\db\connection $db, array $cfg = []){
-		$this->cfg = \bbn\tools::merge_arrays(self::$_defaults, $cfg);
+		$this->cfg = \bbn\x::merge_arrays(self::$_defaults, $cfg);
 		$this->opt = $opt;
 		$this->db = $db;
+		$this->id_user = is_int($cfg['id_user']) ? $cfg['id_user'] : false;
+		$this->id_group = is_int($cfg['id_group']) ? $cfg['id_group'] : false;
 	}
 
 	public function set_user($id_user){
 		if ( is_int($id_user) ){
 			$this->id_user = $id_user;
+		}
+		return $this;
+	}
+
+	public function set_group($id_group){
+		if ( is_int($id_group) ){
+			$this->id_group = $id_group;
 		}
 		return $this;
 	}
@@ -86,7 +99,7 @@ class preferences
 			);
 		}
 		if ( isset($val[$this->cfg['cols']['value']]) && \bbn\str\text::is_json($val[$this->cfg['cols']['value']]) ) {
-			$val = \bbn\tools::merge_arrays(json_decode($val[$this->cfg['cols']['value']], 1), $val);
+			$val = \bbn\x::merge_arrays(json_decode($val[$this->cfg['cols']['value']], 1), $val);
 		}
 		$new = [];
 		if ( is_array($val) ){
@@ -106,17 +119,17 @@ class preferences
 	 *
 	 * @return
 	 */
-	public function get($id_option, $id_user = null, $id_group = null){
-		if ( $id_group ) {
+	public function get($id_option){
+		if ( $this->id_user ){
 			$res = $this->db->rselect($this->cfg['table'], $this->cfg['cols'], [
 				$this->cfg['cols']['id_option'] => $id_option,
-				$this->cfg['cols']['id_group'] => $id_group
+				$this->cfg['cols']['id_user'] => $this->id_user
 			]);
 		}
-		else if ( $id_user || $this->id_user ){
+		if ( empty($res) && $this->id_group ) {
 			$res = $this->db->rselect($this->cfg['table'], $this->cfg['cols'], [
 				$this->cfg['cols']['id_option'] => $id_option,
-				$this->cfg['cols']['id_user'] => $id_user ? $id_user : $this->id_user
+				$this->cfg['cols']['id_group'] => $this->id_group
 			]);
 		}
 		else{
@@ -127,6 +140,36 @@ class preferences
 			return $res;
 		}
 		return false;
+	}
+
+	/**
+	 * Returns a preference's ID for a given option
+	 *
+	 * @return int|false
+	 */
+	public function get_id($id_option){
+		if ( $this->id_user ){
+			$res = $this->db->select_one($this->cfg['table'], $this->cfg['cols']['id'], [
+				$this->cfg['cols']['id_option'] => $id_option,
+				$this->cfg['cols']['id_user'] => $this->id_user
+			]);
+		}
+		if ( empty($res) && $this->id_group ) {
+			$res = $this->db->select_one($this->cfg['table'], $this->cfg['cols']['id'], [
+				$this->cfg['cols']['id_option'] => $id_option,
+				$this->cfg['cols']['id_group'] => $this->id_group
+			]);
+		}
+		return empty($res) ? $res : false;
+	}
+
+	/**
+	 * Returns true if a user/group has a preference, false otherwise
+	 *
+	 * @return bool
+	 */
+	public function has($id_option){
+		return $this->get_id($id_option) ? true : false;
 	}
 
 	/**

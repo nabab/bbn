@@ -65,7 +65,7 @@ class mailbox{
           array_push($msg,' ');
           array_push($msg,'Error message: ');
           array_push($msg,$this->status);
-          \bbn\tools::log(implode("\n",$msg),'imap');
+          \bbn\x::log(implode("\n",$msg),'imap');
         }
       }
     }
@@ -584,8 +584,8 @@ class mailbox{
     // add code here to get date, from, to, cc, subject...
     // BODY STRUCTURE
     $structure = $this->get_msg_structure($msgno);
-    \bbn\tools::log($header,'imap');
-    \bbn\tools::log($structure,'imap');
+    \bbn\x::log($header,'imap');
+    \bbn\x::log($structure,'imap');
     if ( !$structure->parts ) {  // simple
       $this->get_msg_part($msgno, $structure, 0);
     }

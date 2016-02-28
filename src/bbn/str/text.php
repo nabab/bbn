@@ -764,7 +764,7 @@ class text
 	public static function parse_url($url)
 	{
     $url = self::cast($url);
-		$r = \bbn\tools::merge_arrays(parse_url($url), ['url' => $url,'query' => '','params' => []]);
+		$r = \bbn\x::merge_arrays(parse_url($url), ['url' => $url,'query' => '','params' => []]);
 		if ( strpos($url,'?') > 0 )
 		{
 			$p = explode('?',$url);
@@ -955,7 +955,7 @@ class text
       $st .= "Object ".get_class($o).PHP_EOL;
     }
     if ( is_object($o) || is_array($o) ){
-      $is_assoc = (is_object($o) || \bbn\tools::is_assoc($o));
+      $is_assoc = (is_object($o) || \bbn\x::is_assoc($o));
       //$st .= $is_assoc ? '{' : '[';
       $st .= '[';
       $st .= PHP_EOL;

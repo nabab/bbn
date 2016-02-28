@@ -67,7 +67,7 @@ class directories {
    * @param $st
    */
   protected function error($st){
-    \bbn\tools::log($st, "directories");
+    \bbn\x::log($st, "directories");
     $this->last_error = $st;
   }
 
@@ -154,7 +154,7 @@ class directories {
   }
 
   public function add_routes(array $routes){
-    $this->routes = \bbn\tools::merge_arrays($this->routes, $routes);
+    $this->routes = \bbn\x::merge_arrays($this->routes, $routes);
     return $this;
   }
 
@@ -418,7 +418,7 @@ class directories {
   }
 
   public function create($dir, $path, $name, $type = 'file'){
-    //die(\bbn\tools::dump($dir, $path, $name, $type));
+    //die(\bbn\x::dump($dir, $path, $name, $type));
     if ( ($cfg = $this->dir($dir)) &&
       ($root = $this->get_root_path($dir)) &&
       ($url = \bbn\str\text::parse_path($dir.'/'.$path.'/'.$name))
@@ -578,10 +578,10 @@ class directories {
             $r['def'] = $k;
           }
           $file = dirname($t['path'].implode('/', $bits)).'/'.$name;
-          //die(\bbn\tools::dump("TEST", $file, $real_file, $real_dir, $ext, $bits));
+          //die(\bbn\x::dump("TEST", $file, $real_file, $real_dir, $ext, $bits));
           $info = $this->get_file($file, $dir, $t, $pref);
           if ( !$info ){
-            $this->error("Impossible to get a tab's configuration: DIR: $dir - FILE: $file - CFG: ".\bbn\tools::get_dump($t));
+            $this->error("Impossible to get a tab's configuration: DIR: $dir - FILE: $file - CFG: ".\bbn\x::get_dump($t));
             die($this->get_last_error());
           }
           else{
@@ -594,7 +594,7 @@ class directories {
               $file = dirname($file).'/'.$t['fixed'];
               $info = $this->get_file($file, $dir, $t, $pref);
               if ( !$info ){
-                $this->error("Impossible to get a supra-controller's configuration: DIR: $dir - FILE: $file - CFG: ".\bbn\tools::get_dump($t));
+                $this->error("Impossible to get a supra-controller's configuration: DIR: $dir - FILE: $file - CFG: ".\bbn\x::get_dump($t));
                 die($this->get_last_error());
               }
               else{

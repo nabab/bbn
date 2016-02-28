@@ -249,7 +249,7 @@ class connection
     $this->ip_address = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
 
     /** The class configuration is the result of a merge between the class' default values and the configuration sent to the constructor */
-    $this->cfg = \bbn\tools::merge_arrays(self::$_defaults, $cfg);
+    $this->cfg = \bbn\x::merge_arrays(self::$_defaults, $cfg);
 
     // As we'll give the object the properties of these additional fields they should not conflict with existing ones
     foreach ( $this->cfg['additional_fields'] as $f ){
@@ -260,7 +260,7 @@ class connection
     
     // The selection comprises the defined fields of the users table
     // Plus a bunch of user-defined additional fields in the same table
-    $this->fields = \bbn\tools::merge_arrays($this->cfg['arch']['users'], $this->cfg['additional_fields']);
+    $this->fields = \bbn\x::merge_arrays($this->cfg['arch']['users'], $this->cfg['additional_fields']);
 
     // Case where the user logs in
     // Allowing the use of a simple array [user, pass]
@@ -351,7 +351,7 @@ class connection
         $d = $this->db->rselect(
               $this->cfg['tables']['users'],
               $this->fields,
-              \bbn\tools::merge_arrays(
+              \bbn\x::merge_arrays(
                     $this->cfg['conditions'],
                     [$this->cfg['arch']['users']['id'] => $this->id]));
       }
@@ -502,7 +502,7 @@ class connection
       if ( $d = $this->db->rselect(
               $this->cfg['tables']['users'],
               $this->fields,
-              \bbn\tools::merge_arrays(
+              \bbn\x::merge_arrays(
                     $this->cfg['conditions'],
                     [$arch['users']['login'] => $credentials['user']])
               ) ){
@@ -621,7 +621,7 @@ class connection
 	public function check_session()
 	{
     // If this->id is set it means we've already looked it up
-    //\bbn\tools::hdump($this->sess_cfg, $this->has_session('fingerprint'), $this->get_print($this->get_session('fingerprint')), $this->sess_cfg['fingerprint']);
+    //\bbn\x::hdump($this->sess_cfg, $this->has_session('fingerprint'), $this->get_print($this->get_session('fingerprint')), $this->sess_cfg['fingerprint']);
 		if ( empty($this->id) ) {
       
       // The user ID must be in the session

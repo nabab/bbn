@@ -62,7 +62,7 @@ EOF
     $last_cfg = [];
  
   public static function set_default(array $cfg){
-    self::$default_cfg = \bbn\tools::merge_arrays(self::$default_cfg, $cfg);
+    self::$default_cfg = \bbn\x::merge_arrays(self::$default_cfg, $cfg);
   }
   
 	private function check()
@@ -97,14 +97,14 @@ EOF
   
   public function get_config(array $cfg=null){
     if ( $cfg ){
-      return \bbn\tools::merge_arrays($this->cfg, $cfg);
+      return \bbn\x::merge_arrays($this->cfg, $cfg);
     }
     return $this->cfg;
   }
   
   public function reset_config($cfg){
     if ( is_array($cfg) ){
-      $this->cfg = \bbn\tools::merge_arrays(self::$default_cfg, $cfg);
+      $this->cfg = \bbn\x::merge_arrays(self::$default_cfg, $cfg);
     }
     else{
       $this->cfg = self::$default_cfg;

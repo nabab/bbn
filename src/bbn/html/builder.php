@@ -121,7 +121,7 @@ class builder
 	{
 		if ( is_array($cfg) ){
       $this->parameters = $cfg;
-      $this->_defaults = \bbn\tools::merge_arrays($this->_defaults, $cfg);
+      $this->_defaults = \bbn\x::merge_arrays($this->_defaults, $cfg);
 		}
 		$this->reset();
 	}
@@ -478,7 +478,7 @@ class builder
       
       self::give_id($cfg);
       if ( isset($cfg['field']) ){
-        $cfg = \bbn\tools::merge_arrays(self::specs('fields', $cfg['field']), $cfg);
+        $cfg = \bbn\x::merge_arrays(self::specs('fields', $cfg['field']), $cfg);
       }
       
       /*

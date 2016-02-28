@@ -112,7 +112,7 @@ class svn
       system("svn info ".$this->args());
       $st = ob_get_contents();
       ob_end_clean();
-      \bbn\tools::hdump($st);
+      \bbn\x::hdump($st);
       return $this->parseCMD($st);
     }
   }
@@ -155,7 +155,7 @@ class svn
       ob_end_clean();
       $log = new \SimpleXMLElement($st);
       $r = [];
-      //\bbn\tools::hdump($st);
+      //\bbn\x::hdump($st);
       foreach ( $log->logentry as $l ){
         $r[(int)$l['revision']] = [
           'author' => (string)$l->author,

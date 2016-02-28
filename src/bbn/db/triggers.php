@@ -86,8 +86,8 @@ trait triggers {
             }
           }
         }
-        //echo \bbn\tools::make_tree($trig);
-        //echo \bbn\tools::make_tree($cfg);
+        //echo \bbn\x::make_tree($trig);
+        //echo \bbn\x::make_tree($cfg);
       }
     }
     return $cfg;
@@ -568,7 +568,7 @@ trait triggers {
    */
   public function insert_update($table, array $values){
     // Twice the arguments
-    if ( !\bbn\tools::is_assoc($values) ){
+    if ( !\bbn\x::is_assoc($values) ){
       $res = 0;
       foreach ( $values as $v ){
         $res += $this->insert_update($table, $v);

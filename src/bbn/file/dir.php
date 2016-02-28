@@ -104,7 +104,7 @@ class dir extends \bbn\obj
         }
 			}
       if ( !empty($dirs) ){
-        \bbn\tools::sort($dirs);
+        \bbn\x::sort($dirs);
       }
 			return $dirs;
 		}
@@ -151,7 +151,7 @@ class dir extends \bbn\obj
 				}
 			}
       if ( count($files) > 0 ){
-        \bbn\tools::sort($files);
+        \bbn\x::sort($files);
       }
 			return $files;
 		}

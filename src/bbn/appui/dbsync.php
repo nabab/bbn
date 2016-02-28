@@ -46,7 +46,7 @@ class dbsync
   private static function log(){
     $args = func_get_args();
     foreach ( $args as $a ){
-      \bbn\tools::log($a, 'dbsync');
+      \bbn\x::log($a, 'dbsync');
     }
   }
 
@@ -354,7 +354,7 @@ class dbsync
             if ( $d['action'] === 'update' ){
               if ( !(self::$db->insert_update(
                       $d['tab'],
-                      \bbn\tools::merge_arrays(
+                      \bbn\x::merge_arrays(
                               json_decode($e['vals'], 1),
                               json_decode($d['vals'], 1)
                       )
@@ -369,7 +369,7 @@ class dbsync
             if ( $d['action'] === 'delete' ){
               if ( !(self::$db->insert_update(
                       $d['tab'],
-                      \bbn\tools::merge_arrays(
+                      \bbn\x::merge_arrays(
                               json_decode($d['vals'], 1),
                               json_decode($e['vals'], 1)
                       )
@@ -381,7 +381,7 @@ class dbsync
           // If it's updated locally and in the twin we merge the values for the update
             else if ( $d['action'] === 'update' ){
               $d['vals'] = json_encode(
-                      \bbn\tools::merge_arrays(
+                      \bbn\x::merge_arrays(
                               json_decode($d['vals'], 1),
                               json_decode($e['vals'], 1)
                       ));
@@ -395,7 +395,7 @@ class dbsync
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
           $to_log['updated_real']++;
         }
-        else if ( self::$db->select($d['tab'], [], \bbn\tools::merge_arrays(json_decode($d['rows'], 1), json_decode($d['vals'], 1))) ){
+        else if ( self::$db->select($d['tab'], [], \bbn\x::merge_arrays(json_decode($d['rows'], 1), json_decode($d['vals'], 1))) ){
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
         }
         else{
@@ -421,7 +421,7 @@ class dbsync
       }
     }
     if ( $retry && ( $num_try <= self::$max_retry ) ){
-      $res = \bbn\tools::merge_arrays($res, self::sync($db, $dbs, $dbs_table, $num_try));
+      $res = \bbn\x::merge_arrays($res, self::sync($db, $dbs, $dbs_table, $num_try));
     }
     else{
       self::$db->set_error_mode($mode_db);

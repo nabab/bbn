@@ -255,7 +255,7 @@ class connection
     $this->user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
     $this->ip_address = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
 
-    $this->cfg = \bbn\tools::merge_arrays(self::$_defaults, $cfg);
+    $this->cfg = \bbn\x::merge_arrays(self::$_defaults, $cfg);
 
     if ( isset($cfg['preferences']) ){
       $this->has_preferences = 1;
@@ -273,7 +273,7 @@ class connection
      * The selection comprises the defined fields of the users table
      * Plus a bunch of user-defined additional fields in the same table
      */
-    $this->fields = \bbn\tools::merge_arrays($this->cfg['arch']['users'], $this->cfg['additional_fields']);
+    $this->fields = \bbn\x::merge_arrays($this->cfg['arch']['users'], $this->cfg['additional_fields']);
 
     // Case where the user logs in
     // Allowing the use of a simple array [user, pass]
@@ -347,7 +347,7 @@ class connection
         $d = $this->db->rselect(
               $this->cfg['tables']['users'],
               $this->fields,
-              \bbn\tools::merge_arrays(
+              \bbn\x::merge_arrays(
                     $this->cfg['conditions'],
                     [$this->cfg['arch']['users']['status'] => 1],
                     [$this->cfg['arch']['users']['id'] => $this->id]));
@@ -420,7 +420,7 @@ class connection
         return $res;
       };
       $this->permissions = $x($perms);
-      //die(\bbn\tools::hdump($this->permissions ));
+      //die(\bbn\x::hdump($this->permissions ));
       if ( !isset($this->permissions['admin']) ){
         $this->permissions['admin'] = 1;
       }
@@ -542,7 +542,7 @@ class connection
       if ( $d = $this->db->rselect(
               $this->cfg['tables']['users'],
               $this->fields,
-              \bbn\tools::merge_arrays(
+              \bbn\x::merge_arrays(
                     $this->cfg['conditions'],
                     [$arch['users']['status'] => 1],
                     [$arch['users']['login'] => $credentials['user']])
@@ -701,7 +701,7 @@ class connection
         $prop = 'user_cfg';
       }
       foreach ( $attr as $key => $val ){
-        //\bbn\tools::dump($key, $val);
+        //\bbn\x::dump($key, $val);
         if ( is_string($key) ){
           $this->{$prop}[$key] = $val;
         }
@@ -758,8 +758,8 @@ class connection
 	public function check_session()
 	{
     // If this->id is set it means we've already looked it up
-       // \bbn\tools::hdump($this->sess_cfg, $this->has_session('fingerprint'), $this->get_print($this->get_session('fingerprint')), $this->sess_cfg['fingerprint']);
-    //die(\bbn\tools::dump($this->id));
+       // \bbn\x::hdump($this->sess_cfg, $this->has_session('fingerprint'), $this->get_print($this->get_session('fingerprint')), $this->sess_cfg['fingerprint']);
+    //die(\bbn\x::dump($this->id));
 		if ( !$this->id ) {
 
       // The user ID must be in the session

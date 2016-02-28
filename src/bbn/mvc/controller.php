@@ -210,7 +210,7 @@ class controller implements api{
 		if ( is_string($view) ) {
 			return is_array($model) ? \bbn\tpl::render($view, $model) : $view;
 		}
-		die(\bbn\tools::hdump("Problem with the template", $view, $this->path, $this->mode));
+		die(\bbn\x::hdump("Problem with the template", $view, $this->path, $this->mode));
 	}
 
 	/**
@@ -415,11 +415,11 @@ EOD;
 	}
 
 	public function js_data($data){
-		if ( \bbn\tools::is_assoc($data) ){
+		if ( \bbn\x::is_assoc($data) ){
 			if ( !isset($this->obj->data) ){
 				$this->obj->data = $data;
 			}
-			else if ( \bbn\tools::is_assoc($this->obj->data) ){
+			else if ( \bbn\x::is_assoc($this->obj->data) ){
 				foreach ( $data as $k => $v ){
 					$this->obj->data[$k] = $v;
 				}
@@ -597,7 +597,7 @@ EOD;
   public function get_object_model(){
     $m = call_user_func_array([$this, 'get_model'], func_get_args());
     if ( is_array($m) ){
-      return \bbn\tools::to_object($m);
+      return \bbn\x::to_object($m);
     }
   }
 

@@ -49,7 +49,7 @@ trait logger
 	public function debug($file='misc')
 	{
 		$i = debug_backtrace();
-		\bbn\tools::log(print_r($i, 1));
+		\bbn\x::log(print_r($i, 1));
 	}
 	/**
 	 * Add information to the $info array

@@ -248,21 +248,21 @@ return [
         ],
         'label' => 'defaultLanguage',
     ],
-    'devtools_styles' => [
+    'devx_styles' => [
         'tag' => 'input',
         'attr' => [
             'type' => 'text',
-            'name' => 'ckeditor_devtools_styles',
+            'name' => 'ckeditor_devx_styles',
         ],
-        'label' => 'devtools_styles',
+        'label' => 'devx_styles',
     ],
-    'devtools_textCallback' => [
+    'devx_textCallback' => [
         'tag' => 'input',
         'attr' => [
             'type' => 'text',
-            'name' => 'ckeditor_devtools_textCallback',
+            'name' => 'ckeditor_devx_textCallback',
         ],
-        'label' => 'devtools_textCallback',
+        'label' => 'devx_textCallback',
     ],
     'dialog_backgroundCoverColor' => [
         'tag' => 'input',
