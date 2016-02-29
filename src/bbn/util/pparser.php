@@ -46,7 +46,7 @@ class pparser
                     $this->push();
                     // push current scope to the stack an begin a new scope
                     array_push($this->stack, $this->current);
-                    $this->current = array();
+                    $this->current = [];
                     break;
 
                 case ')':

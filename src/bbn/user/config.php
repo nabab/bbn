@@ -79,7 +79,10 @@ class config
 	{
 		$a = func_get_args();
 		if ( count($a) === 2 ){
-			$credentials = array('user'=>$a[0],'pass'=>$a[1]);
+			$credentials = [
+				'user' => $a[0],
+				'pass' => $a[1]
+			];
 		}
 		return new connection($this->cfg, $this->db, $credentials);
 	}
