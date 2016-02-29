@@ -142,9 +142,9 @@ You can click the following link to access directly your account:<br>
   }
 
   public function get_email($id){
-    if ( \bbn\txt::is_integer($id) ){
+    if ( \bbn\str::is_integer($id) ){
       $email = $this->db->select_one($this->cfg['tables']['users'], $this->cfg['arch']['users']['email'], [$this->cfg['arch']['users']['id'] => $id]);
-      if ( $email && \bbn\txt::is_email($email) ){
+      if ( $email && \bbn\str::is_email($email) ){
         return $email;
       }
     }
@@ -190,7 +190,7 @@ You can click the following link to access directly your account:<br>
   }
 
   public function get_users($group_id){
-    if ( \bbn\txt::is_integer($group_id) ) {
+    if ( \bbn\str::is_integer($group_id) ) {
       return $this->db->get_col_array("
         SELECT DISTINCT(".$this->cfg['arch']['usergroups']['id_user'].")
         FROM ".$this->cfg['tables']['usergroups']." AS g
@@ -223,7 +223,7 @@ You can click the following link to access directly your account:<br>
         unset($cfg[$k]);
       }
     }
-    if ( \bbn\txt::is_email($cfg[$this->cfg['arch']['users']['email']]) &&
+    if ( \bbn\str::is_email($cfg[$this->cfg['arch']['users']['email']]) &&
             $this->db->insert($this->cfg['tables']['users'], $cfg) ){
       $cfg[$this->cfg['arch']['users']['id']] = $this->db->last_id();
 
@@ -255,7 +255,7 @@ You can click the following link to access directly your account:<br>
     }
     if ( $id_user && (
             !isset($cfg[$this->cfg['arch']['users']['email']]) ||
-            \bbn\txt::is_email($cfg[$this->cfg['arch']['users']['email']]) 
+            \bbn\str::is_email($cfg[$this->cfg['arch']['users']['email']]) 
           ) ){
       $this->db->update(
         $this->cfg['tables']['users'],

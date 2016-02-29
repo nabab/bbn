@@ -1,7 +1,7 @@
 <?php
 namespace bbn\appui;
 
-use \bbn\str\text;
+use \bbn\str;
 
 class dbsync
 {
@@ -65,7 +65,7 @@ class dbsync
     if ( !empty($dbs_table) ){
       self::$dbs_table = $dbs_table;
     }
-    if ( !\bbn\txt::check_name(self::$dbs_table) ){
+    if ( !\bbn\str::check_name(self::$dbs_table) ){
       self::log("Table name not allowed", self::$dbs_table);
       die("Table name not allowed");
     }

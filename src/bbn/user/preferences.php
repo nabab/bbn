@@ -26,12 +26,12 @@ class preferences
 			],
 			'table' => 'bbn_user_options',
 			'cols' => [
-					'id' => 'id',
-					'id_option' => 'id_option',
-					'id_user' => 'id_user',
-					'id_group' => 'id_group',
-					'value' => 'value',
-					'active' => 'active'
+				'id' => 'id',
+				'id_option' => 'id_option',
+				'id_user' => 'id_user',
+				'id_group' => 'id_group',
+				'id_link' => 'id_link',
+				'cfg' => 'cfg'
 			],
 			'id_user' => null,
 			'id_group' => null
@@ -74,42 +74,42 @@ class preferences
 		return $this;
 	}
 
-	public function set_value($id, $val){
-		if ( is_array($val) ){
-			foreach ( $val as $k => $v ){
+	public function set_cfg($id, $cfg){
+		if ( is_array($cfg) ){
+			foreach ( $cfg as $k => $v ){
 				if ( in_array($k, $this->cfg['cols']) ){
-					unset($val[$k]);
+					unset($cfg[$k]);
 				}
 			}
-			$val = json_encode($val);
+			$cfg = json_encode($cfg);
 		}
 		return $this->db->update($this->cfg['table'], [
-			$this->cfg['cols']['value'] => $val
+			$this->cfg['cols']['cfg'] => $cfg
 		], [
 			$this->cfg['cols']['id'] => $id
 		]);
 	}
 
-	public function get_value($id, &$val=null){
-		if ( is_null($val) ){
-			$val = $this->db->rselect(
+	public function get_cfg($id, &$cfg=null){
+		if ( is_null($cfg) ){
+			$cfg = $this->db->rselect(
 				$this->cfg['table'],
-				[$this->cfg['cols']['value']],
+				[$this->cfg['cols']['cfg']],
 				[ $this->cfg['cols']['id'] => $id ]
 			);
 		}
-		if ( isset($val[$this->cfg['cols']['value']]) && \bbn\txt::is_json($val[$this->cfg['cols']['value']]) ) {
-			$val = \bbn\x::merge_arrays(json_decode($val[$this->cfg['cols']['value']], 1), $val);
+		if ( isset($cfg[$this->cfg['cols']['cfg']]) && \bbn\str::is_json($cfg[$this->cfg['cols']['cfg']]) ) {
+			$cfg = \bbn\x::merge_arrays(json_decode($cfg[$this->cfg['cols']['cfg']], 1), $cfg);
 		}
 		$new = [];
-		if ( is_array($val) ){
-			foreach ( $val as $k => $v) {
+		if ( is_array($cfg) ){
+			foreach ( $cfg as $k => $v) {
 				if ( !in_array($k, $this->cfg['cols']) ) {
-					$val[$k] = $v;
+					$cfg[$k] = $v;
 					$new[$k] = $v;
 				}
 			}
-			unset($val[$this->cfg['cols']['value']]);
+			unset($cfg[$this->cfg['cols']['cfg']]);
 		}
 		return $new;
 	}
@@ -136,7 +136,7 @@ class preferences
 			return false;
 		}
 		if ( $res ) {
-			$this->get_value($res['id'], $res);
+			$this->get_cfg($res['id'], $res);
 			return $res;
 		}
 		return false;
@@ -194,13 +194,13 @@ class preferences
 			return false;
 		}
 		if ( $id ) {
-			return $this->set_value($id, $cfg);
+			return $this->set_cfg($id, $cfg);
 		}
 		$r = $this->db->insert($this->cfg['table'], [
 			'id_option' => $id_option,
 			'id_user' => !$id_group && ($id_user || $this->id_user) ? ($id_user ? $id_user : $this->id_user)  : null,
 			'id_group' => $id_group ? $id_group : null,
-			'value' => json_encode($this->get_value(false, $cfg))
+			'cfg' => json_encode($this->get_cfg(false, $cfg))
 		]);
     return $r;
 	}

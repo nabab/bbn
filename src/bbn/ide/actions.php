@@ -59,7 +59,7 @@ class actions {
         }
         else {
           foreach ( $dirs['files'] as $f ){
-            if ( $f['ext'] === \bbn\txt::file_ext($path) ){
+            if ( $f['ext'] === \bbn\str::file_ext($path) ){
               $new_path = $f['fpath'].$path;
               break;
             }
@@ -86,7 +86,7 @@ class actions {
     $dirs = $directories->dirs();
     if ( isset($data['dir'], $data['name'], $data['path'], $data['type'], $dirs[$data['dir']]) &&
       (strpos($data['path'], '../') === false) &&
-      \bbn\txt::check_filename($data['name']) ){
+      \bbn\str::check_filename($data['name']) ){
       $cfg =& $dirs[$data['dir']];
       $type = $data['type'] === 'file' ? 'file' : 'dir';
       $wtype = $type === 'dir' ? 'directory' : 'file';
@@ -134,7 +134,7 @@ class actions {
     if ( isset($data['dir'], $data['file']) ){
       $directories = new directories($this->db);
       $dirs = $directories->dirs($data['dir']);
-      $data['file'] = $this->is_mvc($dirs) && (\bbn\txt::file_ext($data['file']) !== 'php') ?
+      $data['file'] = $this->is_mvc($dirs) && (\bbn\str::file_ext($data['file']) !== 'php') ?
         substr($data['file'], 0, strrpos($data['file'], "/")) : $data['file'];
       unset($data['act']);
       return 1;
@@ -152,7 +152,7 @@ class actions {
     $cfg = $directories->dirs();
     if ( isset($data['dir'], $data['name'], $data['path'], $data['type'], $cfg[$data['dir']]) &&
       (strpos($data['path'], '../') === false) &&
-      \bbn\txt::check_filename($data['name'])
+      \bbn\str::check_filename($data['name'])
     ) {
       $type = $data['type'] === 'file' ? 'file' : 'dir';
       $wtype = $type === 'dir' ? 'directory' : 'file';
@@ -178,7 +178,7 @@ class actions {
         }
         else {
           foreach ( $dirs['files'] as $f ) {
-            if ( $f['ext'] === \bbn\txt::file_ext($data['path']) ) {
+            if ( $f['ext'] === \bbn\str::file_ext($data['path']) ) {
               $p = $f['fpath'] . $data['path'];
               if ( file_exists($p) && !in_array($p, $delete) ) {
                 array_push($delete, $p);
@@ -243,7 +243,7 @@ class actions {
     if ( isset($data['dir'], $data['path'], $data['src'], $data['name']) &&
       (strpos($data['src'], '../') === false) &&
       (strpos($data['path'], '../') === false) &&
-      \bbn\txt::check_filename($data['name']) ){
+      \bbn\str::check_filename($data['name']) ){
       $directories = new directories($this->db);
       $dirs = $directories->dirs();
       if ( isset($dirs[$data['dir']]) ){
@@ -254,8 +254,8 @@ class actions {
         if ( $dir_src === './' ){
           $dir_src = '';
         }
-        $name = \bbn\txt::file_ext($src, 1)[0];
-        $ext = \bbn\txt::file_ext($src);
+        $name = \bbn\str::file_ext($src, 1)[0];
+        $ext = \bbn\str::file_ext($src);
         $src_file = $dir_src.$name;
         $dest_file = $data['path'].'/'.$data['name'];
         $todo = [];
@@ -328,8 +328,8 @@ class actions {
         if ( $dir === './' ){
           $dir = '';
         }
-        $name = \bbn\txt::file_ext($spath, 1)[0];
-        $ext = \bbn\txt::file_ext($spath);
+        $name = \bbn\str::file_ext($spath, 1)[0];
+        $ext = \bbn\str::file_ext($spath);
         $todo = [];
         if ( $this->is_mvc($cfg) ){
           foreach ( $cfg['files'] as $f ){
@@ -385,7 +385,7 @@ class actions {
   public function rename($data){
     if ( isset($data['dir'], $data['name'], $data['path']) &&
       (strpos($data['path'], '../') === false) &&
-      \bbn\txt::check_filename($data['name']) ){
+      \bbn\str::check_filename($data['name']) ){
       $directories = new directories($this->db);
       $dirs = $directories->dirs();
       if ( isset($dirs[$data['dir']]) ){
@@ -401,7 +401,7 @@ class actions {
         if ( $dir === './' ){
           $dir = '';
         }
-        $name = \bbn\txt::file_ext($path, 1)[0];
+        $name = \bbn\str::file_ext($path, 1)[0];
         $src_file = $dir.$name;
         $dest_file = $dir.$data['name'];
         $todo = [];
@@ -428,10 +428,10 @@ class actions {
           }
         }
         else {
-          $dest_file= $dir.\bbn\txt::file_ext($data['name'], 1)[0];
-          $ext = \bbn\txt::file_ext($data['path']);
+          $dest_file= $dir.\bbn\str::file_ext($data['name'], 1)[0];
+          $ext = \bbn\str::file_ext($data['path']);
           $src = $cfg['root_path'].$src_file.($type === 'file' ? '.'.$ext : '');
-          $dest = dirname($src).'/'.\bbn\txt::file_ext($data['name'], 1)[0].($type === 'file' ? '.'.$ext : '');
+          $dest = dirname($src).'/'.\bbn\str::file_ext($data['name'], 1)[0].($type === 'file' ? '.'.$ext : '');
           $is_dir = ($type === 'dir') && is_dir($src);
           $is_file = ($type === 'dir') || $is_dir ? false : is_file($src);
           if ( $is_dir || $is_file ){
@@ -474,13 +474,13 @@ class actions {
     if ( isset($data['dir'], $data['name'], $data['path'], $data['type']) ){
       $directories = new directories($this->db);
       $dirs = $directories->dirs();
-      $root_dest = BBN_USER_PATH.'tmp/'.\bbn\txt::genpwd().'/';
+      $root_dest = BBN_USER_PATH.'tmp/'.\bbn\str::genpwd().'/';
       if ( isset($dirs[$data['dir']]) ){
         if ( $this->is_mvc($dirs[$data['dir']]) ){
           foreach ( $dirs[$data['dir']]['files'] as $f ) {
             $dest = $root_dest.$data['name'].'/'.str_replace(BBN_APP_PATH, '', $f['fpath']);
             if ( $data['type'] === 'file' ) {
-              $ext = \bbn\txt::file_ext($data['path']);
+              $ext = \bbn\str::file_ext($data['path']);
               $path = substr($data['path'], 0, strrpos($data['path'], $ext));
               $file = $f['fpath'].$path.$f['ext'];
               if ( file_exists($file) ){
@@ -503,7 +503,7 @@ class actions {
           }
         }
         else {
-          $ext = \bbn\txt::file_ext($data['path']);
+          $ext = \bbn\str::file_ext($data['path']);
           $dir = false;
           foreach ( $dirs[$data['dir']]['files'] as $f ){
             if ( $ext === $f['ext'] ){

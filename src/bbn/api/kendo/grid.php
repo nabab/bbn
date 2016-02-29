@@ -36,7 +36,7 @@ class grid // extends object
     
     if ( isset($cfg['primary']) ){
 
-      $this->id = isset($cfg['id']) ? $cfg['id'] : \bbn\txt::genpwd();
+      $this->id = isset($cfg['id']) ? $cfg['id'] : \bbn\str::genpwd();
       $this->primary = $cfg['primary'];
       if ( !isset($cfg['builder']) ){
         $cfg['builder'] = new \bbn\html\builder();
@@ -205,7 +205,7 @@ class grid // extends object
                   height:"auto",
                   width:720,
                   "max-height":appui.env.height-100
-                }).restyle().data("kendoWindow").title("'.\bbn\txt::escape_dquotes($cfg['description']).'").center();
+                }).restyle().data("kendoWindow").title("'.\bbn\str::escape_dquotes($cfg['description']).'").center();
                }'));
 
       

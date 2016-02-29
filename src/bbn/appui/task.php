@@ -137,9 +137,9 @@ class task {
         }
         if ( $target !== $info['target_date'] ){
           $text .= "<p> L'objectif est passé de ".
-            ( empty($info['target_date']) ? "non défini" : \bbn\time\date::format($info['target_date']) ).
+            ( empty($info['target_date']) ? "non défini" : \bbn\date::format($info['target_date']) ).
             " à ".
-            ( empty($target) ? "non défini" : \bbn\time\date::format($target) ).
+            ( empty($target) ? "non défini" : \bbn\date::format($target) ).
             "</p>";
         }
       }

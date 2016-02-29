@@ -468,7 +468,7 @@ class tools
         $r = '0';
       }
       else if ( is_object($a) || is_array($a) ){
-        $r = \bbn\txt::export($a);
+        $r = \bbn\str::export($a);
       }
       $st .= $r.PHP_EOL;
     }
@@ -565,7 +565,7 @@ class tools
     if ( ($num % 2) === 0 ){
       $i = 0;
       while ( isset($arr[$i]) ){
-        if ( !is_string($arr[$i]) || ( !$protected && !preg_match('/[0-9A-z\-_]+/8', \bbn\txt::cast($arr[$i])) ) ){
+        if ( !is_string($arr[$i]) || ( !$protected && !preg_match('/[0-9A-z\-_]+/8', \bbn\str::cast($arr[$i])) ) ){
           return false;
         }
         $res[$arr[$i]] = $arr[$i+1];
@@ -687,9 +687,9 @@ class tools
    */
   public static function sort(&$ar){
     usort($ar, function($a, $b){
-      if ( !\bbn\txt::is_number($a, $b) ) {
-        $a = str_replace('.', '0', str_replace('_', '1', \bbn\txt::change_case($a, 'lower')));
-        $b = str_replace('.', '0', str_replace('_', '1', \bbn\txt::change_case($b, 'lower')));
+      if ( !\bbn\str::is_number($a, $b) ) {
+        $a = str_replace('.', '0', str_replace('_', '1', \bbn\str::change_case($a, 'lower')));
+        $b = str_replace('.', '0', str_replace('_', '1', \bbn\str::change_case($b, 'lower')));
         return strcmp($a, $b);
       }
       if ( $a > $b ){
@@ -716,9 +716,9 @@ class tools
       if ( !isset($v1, $v2) ){
         return 0;
       }
-      if ( !\bbn\txt::is_number($v1, $v2) ) {
-        $v1 = str_replace('.', '0', str_replace('_', '1', \bbn\txt::change_case($v1, 'lower')));
-        $v2 = str_replace('.', '0', str_replace('_', '1', \bbn\txt::change_case($v2, 'lower')));
+      if ( !\bbn\str::is_number($v1, $v2) ) {
+        $v1 = str_replace('.', '0', str_replace('_', '1', \bbn\str::change_case($v1, 'lower')));
+        $v2 = str_replace('.', '0', str_replace('_', '1', \bbn\str::change_case($v2, 'lower')));
         return strcmp($v1, $v2);
       }
       if ( $v1 > $v2 ){
@@ -796,7 +796,7 @@ class tools
   }
 
   public static function make_tree(array $ar){
-    $id = \bbn\txt::genpwd();
+    $id = \bbn\str::genpwd();
     return '<div id="'.$id.'"></div><script>$("#'.$id.'").kendoTreeView({dataSource: '.
       json_encode(self::get_tree($ar)).'});</script>';
   }

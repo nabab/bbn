@@ -45,7 +45,7 @@ class cache{
   }
 
   public static function ttl($ttl){
-    if ( \bbn\txt::is_integer($ttl) ){
+    if ( \bbn\str::is_integer($ttl) ){
       return $ttl;
     }
     if ( is_string($ttl) ){
@@ -108,7 +108,7 @@ class cache{
         case 'memcache':
           return $this->obj->get($it) !== $it;
         case 'files':
-          $file = $this->path.\bbn\txt::encode_filename($it).'.bbn.cache';
+          $file = $this->path.\bbn\str::encode_filename($it).'.bbn.cache';
           if ( is_file($file) ){
             $t = unserialize(file_get_contents($file));
             if ( !$t['expire'] || ($t['expire'] > time()) ){
@@ -129,7 +129,7 @@ class cache{
         case 'memcache':
           return $this->obj->delete($it);
         case 'files':
-          $file = $this->path.\bbn\txt::encode_filename($it).'.bbn.cache';
+          $file = $this->path.\bbn\str::encode_filename($it).'.bbn.cache';
           if ( is_file($file) ){
             return unlink($file);
           }
@@ -152,7 +152,7 @@ class cache{
               $res += (int)$this->obj->delete($it);
               break;
             case 'files':
-              $file = $this->path.\bbn\txt::encode_filename($it).'.bbn.cache';
+              $file = $this->path.\bbn\str::encode_filename($it).'.bbn.cache';
               if ( is_file($file) ){
                 $res += (int)unlink($file);
               }
@@ -193,7 +193,7 @@ class cache{
         case 'memcache':
           return $this->obj->set($it, $val, false, $ttl);
         case 'files':
-          $file = $this->path.\bbn\txt::encode_filename($it).'.bbn.cache';
+          $file = $this->path.\bbn\str::encode_filename($it).'.bbn.cache';
           $value = [
             'expire' => $ttl ? time() + $ttl : 0,
             'value' => $val
@@ -211,7 +211,7 @@ class cache{
         case 'memcache':
           return $this->obj->get($it);
         case 'files':
-          $file = $this->path.\bbn\txt::encode_filename($it).'.bbn.cache';
+          $file = $this->path.\bbn\str::encode_filename($it).'.bbn.cache';
           $t = file_get_contents($file);
           return $t ? unserialize($t)['value'] : false;
       }

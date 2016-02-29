@@ -205,7 +205,7 @@ class connection
 	 */
   public static function make_fingerprint()
   {
-    return \bbn\txt::genpwd(32, 16);
+    return \bbn\str::genpwd(32, 16);
   }
   
   /**
@@ -728,7 +728,7 @@ class connection
     if ( $this->auth ){
       $s =& $_SESSION[$this->cfg['sess_name']][$this->cfg['sess_user']];
       if ( isset($s['tokens']) ) {
-        $s['tokens'][$st] = \bbn\txt::genpwd();
+        $s['tokens'][$st] = \bbn\str::genpwd();
         return $s['tokens'][$st];
       }
     }

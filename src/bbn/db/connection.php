@@ -4,7 +4,7 @@
  */
 namespace bbn\db;
 
-use \bbn\str\text;
+use \bbn\str;
 /**
  * Database Class
  *
@@ -549,8 +549,8 @@ class connection extends \PDO implements actions, api, engines
   {
     if ( is_string($value) ){
       return str_replace('%', '\\%', $esc === '"' ?
-        \bbn\txt::escape_dquotes($value) :
-        \bbn\txt::escape_squotes($value));
+        \bbn\str::escape_dquotes($value) :
+        \bbn\str::escape_squotes($value));
     }
     return $value;
   }
@@ -565,7 +565,7 @@ class connection extends \PDO implements actions, api, engines
   {
     if ( $id === '' ){
       $id = $this->lastInsertId();
-      if ( is_string($id) && \bbn\txt::is_integer($id) ){
+      if ( is_string($id) && \bbn\str::is_integer($id) ){
         $id = (int)$id;
       }
     }

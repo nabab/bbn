@@ -272,7 +272,7 @@ class dir extends \bbn\obj
           $x = [
             'name' => $f,
             'type' => 'file',
-            'ext' => \bbn\txt::file_ext($f)
+            'ext' => \bbn\str::file_ext($f)
           ];
           if ( is_callable($filter) ){
             if ( $filter($x) ){
@@ -354,16 +354,16 @@ class dir extends \bbn\obj
           $i = 1;
           while ( $i ){
             $dir = dirname($dest).'/';
-            $file_name = \bbn\txt::file_ext($dest, 1);
+            $file_name = \bbn\str::file_ext($dest, 1);
             $file = $file_name[0].$st;
             if ( $length > 0 ){
-              $len = strlen(\bbn\txt::cast($i));
+              $len = strlen(\bbn\str::cast($i));
               if ( $len > $length ){
                 return false;
               }
               $file .= str_repeat('0', $length - $len);
             }
-            $file .= \bbn\txt::cast($i);
+            $file .= \bbn\str::cast($i);
             if ( !empty($file_name[1]) ){
               $file .= '.'.$file_name[1];
             }

@@ -4,7 +4,7 @@
  */
 namespace bbn\db\languages;
 
-use \bbn\str\text;
+use \bbn\str;
 /**
  * Database Class
  *
@@ -98,7 +98,7 @@ class sqlite implements \bbn\db\engines
       $items = explode('.', str_replace('"', '', $item));
       $r = [];
       foreach ( $items as $m ){
-        if ( !text::check_name($m) ){
+        if ( !str::check_name($m) ){
           return false;
         }
         array_push($r, '"'.$m.'"');
@@ -127,7 +127,7 @@ class sqlite implements \bbn\db\engines
         $db = $this->db->current;
         $table = trim($mtable[0]);
       }
-      if ( text::check_name($db,$table) ){
+      if ( str::check_name($db,$table) ){
         if ( $db === 'main' ){
           return $escaped ? '"'.$table.'"' : $table;
         }
@@ -151,7 +151,7 @@ class sqlite implements \bbn\db\engines
     if ( is_string($table) && ($table = trim($table)) ){
       $mtable = explode('.', str_replace('"', '', $table));
       $table = end($mtable);
-      if ( text::check_name($table) ){
+      if ( str::check_name($table) ){
         return $escaped ? '"'.$table.'"' : $table;
       }
     }
@@ -180,7 +180,7 @@ class sqlite implements \bbn\db\engines
         $table = array_pop($mcol);
         $ok = 1;
       }
-      if ( isset($ok) && text::check_name($table, $col) ){
+      if ( isset($ok) && str::check_name($table, $col) ){
         return $escaped ? '"'.$table.'"."'.$col.'"' : $table.'.'.$col;
       }
     }
@@ -199,7 +199,7 @@ class sqlite implements \bbn\db\engines
     if ( is_string($col) && ($col = trim($col)) ){
       $mcol = explode('.', str_replace('"', '', $col));
       $col = end($mcol);
-      if ( text::check_name($col) ){
+      if ( str::check_name($col) ){
         return $escaped ? '"'.$col.'"' : $col;
       }
     }
@@ -227,7 +227,7 @@ class sqlite implements \bbn\db\engines
 	 */
 	public function get_tables($database='')
 	{
-		if ( empty($database) || !text::check_name($database) ){
+		if ( empty($database) || !str::check_name($database) ){
 			$database = $this->db->current === 'main' ? '' : '"'.$this->db->current.'".';
 		}
     else if ( $database === 'main' ){
@@ -386,10 +386,10 @@ class sqlite implements \bbn\db\engines
         $args = $args[0];
       }
     }
-    if ( count($args) === 2 && \bbn\txt::is_number($args[0], $args[1]) ){
+    if ( count($args) === 2 && \bbn\str::is_number($args[0], $args[1]) ){
       return " LIMIT $args[1], $args[0]";
     }
-    if ( \bbn\txt::is_number($args[0]) ){
+    if ( \bbn\str::is_number($args[0]) ){
       return " LIMIT $args[0]";
     }
     return '';
@@ -485,7 +485,7 @@ class sqlite implements \bbn\db\engines
               $this->db->error("Error! The column '$c' doesn't exist in '".implode(", ", array_keys($tables_fields))."' table(s)");
             }
           }
-          if ( !is_numeric($k) && \bbn\txt::check_name($k) && ($k !== $c) ){
+          if ( !is_numeric($k) && \bbn\str::check_name($k) && ($k !== $c) ){
             array_push($aliases, $k);
             $r .= "{$this->escape($c)} AS {$this->escape($k)},".PHP_EOL;
           }
@@ -662,7 +662,7 @@ class sqlite implements \bbn\db\engines
 
     $csn = $this->db->csn($field);
     $cfn = $this->db->cfn($field, $table, 1);
-    if ( text::check_name($csn) &&
+    if ( str::check_name($csn) &&
       ($table = $this->table_full_name($table, 1)) &&
       ($m = $this->db->modelize($table)) &&
       (count($m['fields']) > 0)
@@ -728,9 +728,9 @@ class sqlite implements \bbn\db\engines
         $length = [$length];
       }
     }
-    $iname = text::encode_filename($table);
+    $iname = str::encode_filename($table);
     foreach ( $column as $i => $c ){
-      if ( !text::check_name($c) ){
+      if ( !str::check_name($c) ){
         $this->db->error("Illegal column $c");
       }
       $iname .= '_'.$c;
@@ -739,7 +739,7 @@ class sqlite implements \bbn\db\engines
         $column[$i] .= "(".$length[$i].")";
       }
     }
-    $iname = text::cut($iname, 50);
+    $iname = str::cut($iname, 50);
 		if ( ( $table = $this->table_full_name($table, 1) ) ){
 			$this->db->raw_query("
 			CREATE ".( $unique ? "UNIQUE " : "" )."INDEX `$iname`
@@ -753,7 +753,7 @@ class sqlite implements \bbn\db\engines
 	 */
 	public function delete_db_index($table, $column)
 	{
-		if ( ( $table = $this->table_full_name($table, 1) ) && text::check_name($column) ){
+		if ( ( $table = $this->table_full_name($table, 1) ) && str::check_name($column) ){
 			$this->db->raw_query("
 				ALTER TABLE $table
 				DROP INDEX `$column`");

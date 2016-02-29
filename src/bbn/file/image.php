@@ -113,7 +113,7 @@ public static function jpg2pdf($jpg, $pdf){
 				if ( !empty($dir) ){
 					$dir .= '/';
 				}
-				$f = \bbn\txt::file_ext($pdf, 1);
+				$f = \bbn\str::file_ext($pdf, 1);
         $jpg = $dir.$f[0].'.jpg';
       }
       if ( $num !== 'all' ) {
@@ -126,7 +126,7 @@ public static function jpg2pdf($jpg, $pdf){
         if ( $img->writeImages($jpg, 1) ) {
 					$i = 0;
 					$r = [];
-					$f = \bbn\txt::file_ext($jpg, 1);
+					$f = \bbn\str::file_ext($jpg, 1);
 					$dir = dirname($jpg);
 					if ( !empty($dir) ){
 						$dir .= '/';

@@ -82,13 +82,13 @@ class builder
       $cfg['attr'] = [];
     }
     if ( !isset($cfg['attr']['id']) ){
-      $cfg['attr']['id'] = \bbn\txt::genpwd(30, 15);
+      $cfg['attr']['id'] = \bbn\str::genpwd(30, 15);
     }
   }
 
   public static function specs($cat, $item)
   {
-    if ( \bbn\txt::check_name($cat, $item) ){
+    if ( \bbn\str::check_name($cat, $item) ){
       if ( !isset(self::$specs[$cat]) &&
               is_dir(__DIR__.'/specs/'.$cat) ){
         self::$specs[$cat] = [];
@@ -161,9 +161,9 @@ class builder
 	public function export_config()
 	{
     if ( isset($this->_root_element) ){
-      return \bbn\txt::make_readable($this->_root_element->get_config());
+      return \bbn\str::make_readable($this->_root_element->get_config());
     }
-		return \bbn\txt::make_readable($this->_cfg);
+		return \bbn\str::make_readable($this->_cfg);
 	}
 
   public function save_config($cfg)
@@ -426,7 +426,7 @@ class builder
               [
                   'tag' => 'input',
                   'attr' => [
-                      'id' => \bbn\txt::genpwd(),
+                      'id' => \bbn\str::genpwd(),
                       'type' => 'checkbox',
                   ],
                   'events' => [

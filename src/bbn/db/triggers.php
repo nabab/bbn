@@ -155,7 +155,7 @@ trait triggers {
               if ( $tables === '*' ){
                 $tables = $this->get_tables();
               }
-              else if ( \bbn\txt::check_name($tables) ){
+              else if ( \bbn\str::check_name($tables) ){
                 $tables = [$tables];
               }
               if ( is_array($tables) ){

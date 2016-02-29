@@ -132,7 +132,7 @@ class router {
   }
 
   private function parse($path){
-    return \bbn\txt::parse_path($path);
+    return \bbn\str::parse_path($path);
   }
 
   private function has_route($path){

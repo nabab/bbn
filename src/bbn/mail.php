@@ -78,7 +78,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
     if ( !isset($cfg['from']) && isset($cfg['user']) ){
       $cfg['from'] = $cfg['user'];
     }
-    if ( !isset($cfg['host'], $cfg['from']) || !str\text::is_domain($cfg['host']) || !str\text::is_email($cfg['from'])) {
+    if ( !isset($cfg['host'], $cfg['from']) || !str::is_domain($cfg['host']) || !str::is_email($cfg['from'])) {
       die("A host name and a \"From\" eMail address must be provided");
     }
     $this->mailer = new \PHPMailer();
@@ -149,7 +149,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
   }
 
   public function set_from($email, $name=null){
-    if ( !str\text::is_email($email) ){
+    if ( !str::is_email($email) ){
       die("The From eMail address is not valid");
     }
     if ( !$name ){

@@ -123,7 +123,7 @@ class directories {
                 $res .= $t['url'].'/';
                 $nfile = substr($nfile, strlen($t['path']));
                 if ( !empty($t['default']) ){
-                  $nfile = dirname($nfile).'/'.basename($nfile, '.'.\bbn\txt::file_ext($file)).'/'.$t['url'];
+                  $nfile = dirname($nfile).'/'.basename($nfile, '.'.\bbn\str::file_ext($file)).'/'.$t['url'];
                 }
                 break;
               }
@@ -131,7 +131,7 @@ class directories {
           }
         }
         $res .= $nfile;
-        return \bbn\txt::parse_path($res);
+        return \bbn\str::parse_path($res);
       }
     }
     return false;
@@ -147,7 +147,7 @@ class directories {
         $d['root_path'] .= implode('/', $bits);
       }
       if ( strpos($file, $d['root_path']) === 0 ){
-        return \bbn\txt::parse_path($i.'/'.substr($file, strlen($d['root_path'])));
+        return \bbn\str::parse_path($i.'/'.substr($file, strlen($d['root_path'])));
       }
     }
     return false;
@@ -212,7 +212,7 @@ class directories {
           }
         }
         $res .= implode('/', $bits);
-        return \bbn\txt::parse_path($res);
+        return \bbn\str::parse_path($res);
       }
     }
     return false;
@@ -232,7 +232,7 @@ class directories {
         }
       }
       $res .= implode('/', $bits);
-      return \bbn\txt::parse_path($res);
+      return \bbn\str::parse_path($res);
     }
   }
 
@@ -257,7 +257,7 @@ class directories {
    */
   public function get_root_path($st, $full = false){
 
-    $st = \bbn\txt::parse_path($st);
+    $st = \bbn\str::parse_path($st);
     /** @var array $bits Each part of the path */
     $bits = explode('/', $st);
     /** @var string $root */
@@ -269,14 +269,14 @@ class directories {
     if ( $dir && !empty($dir['root_path']) ){
 
       /** @var string $real_root */
-      $real_root = \bbn\txt::parse_path($dir['root_path']);
+      $real_root = \bbn\str::parse_path($dir['root_path']);
       /** @var array $bits2 Each part of the path */
       $path = $this->decipher_path($real_root);
       if ( isset($dir['tabs'], $bits[0], $dir['tabs'][$bits[0]]) ){
         $path .= $dir['tabs'][$bits[0]]['path'].'/';
         array_shift($bits);
       }
-      $r = \bbn\txt::parse_path($path.'/');
+      $r = \bbn\str::parse_path($path.'/');
       if ( $full ){
         $r .= implode('/', $bits);
       }
@@ -292,7 +292,7 @@ class directories {
    */
   public function decipher_path($st){
 
-    $st = \bbn\txt::parse_path($st);
+    $st = \bbn\str::parse_path($st);
     $bits = explode('/', $st);
     /** @var string $constant The first path of the path which might be a constant */
     $constant = $bits[0];
@@ -316,7 +316,7 @@ class directories {
       FROM bbn_ide_directories') + 1;
     if ( $this->db->insert('bbn_ide_directories', [
       'name' => $data['name'],
-      'root_path' => \bbn\txt::parse_path($data['root_path']),
+      'root_path' => \bbn\str::parse_path($data['root_path']),
       'fcolor' => $data['fcolor'],
       'bcolor' => $data['bcolor'],
       'outputs' => strlen($data['outputs']) ? $data['outputs'] : NULL,
@@ -336,7 +336,7 @@ class directories {
   public function edit($data){
     if ( $this->db->update('bbn_ide_directories', [
       'name' => $data['name'],
-      'root_path' => \bbn\txt::parse_path($data['root_path']),
+      'root_path' => \bbn\str::parse_path($data['root_path']),
       'fcolor' => $data['fcolor'],
       'bcolor' => $data['bcolor'],
       'outputs' => strlen($data['outputs']) ? $data['outputs'] : NULL,
@@ -421,7 +421,7 @@ class directories {
     //die(\bbn\x::dump($dir, $path, $name, $type));
     if ( ($cfg = $this->dir($dir)) &&
       ($root = $this->get_root_path($dir)) &&
-      ($url = \bbn\txt::parse_path($dir.'/'.$path.'/'.$name))
+      ($url = \bbn\str::parse_path($dir.'/'.$path.'/'.$name))
     ){
       $ext = false;
       $type = $type === 'file' ? 'file' : 'dir';
@@ -439,7 +439,7 @@ class directories {
               $default = $t['extensions'][0]['default'];
             }
             else if ( $type === 'file' ){
-              $ext = \bbn\txt::file_ext($name);
+              $ext = \bbn\str::file_ext($name);
               foreach ( $t['extensions'] as $e ){
                 if ( $e['ext'] === $ext ){
                   $default = $e['default'];
@@ -453,7 +453,7 @@ class directories {
       $real = $this->url_to_real($url);
       //die($real);
       if ( ($type === 'file') && !$ext ){
-        $ext = \bbn\txt::file_ext($real);
+        $ext = \bbn\str::file_ext($real);
         foreach ( $cfg['extensions'] as $e ){
           if ( $e['ext'] === $ext ){
             $default = $e['default'];
@@ -496,8 +496,8 @@ class directories {
 
     /** @var boolean|array $res */
     $res = false;
-    $file = \bbn\txt::parse_path($file);
-    $dir = \bbn\txt::parse_path($dir);
+    $file = \bbn\str::parse_path($file);
+    $dir = \bbn\str::parse_path($dir);
 
     if ( $file && $dir ){
 
@@ -508,7 +508,7 @@ class directories {
       $dir_cfg = $this->dir($bits[0]);
 
       if ( !empty($bits[1]) ){
-        $file = \bbn\txt::parse_path($bits[1].'/'.$file);
+        $file = \bbn\str::parse_path($bits[1].'/'.$file);
       }
 
       $res = $this->get_file($file, $bits[0], $dir_cfg, $pref);
@@ -533,9 +533,9 @@ class directories {
       }
 
       /** @var string $name The file's name - without path and extension */
-      $name = \bbn\txt::file_ext($file, 1)[0];
+      $name = \bbn\str::file_ext($file, 1)[0];
       /** @var string $ext The file's extension */
-      $ext = \bbn\txt::file_ext($file);
+      $ext = \bbn\str::file_ext($file);
 
       /** @var string $real_dir The real/actual path to the root directory */
       $real_dir = $this->get_root_path($dir);
@@ -569,7 +569,7 @@ class directories {
         if ( $tmp === './' ){
           $tmp = '';
         }
-        $r['url'] = \bbn\txt::parse_path($dir.'/'.$cfg['tabs'][$sd]['url'].'/'.$tmp.$name);
+        $r['url'] = \bbn\str::parse_path($dir.'/'.$cfg['tabs'][$sd]['url'].'/'.$tmp.$name);
         $r['title'] = $tmp.basename(end($bits), '.php');
         $r['def'] = '';
 
@@ -619,7 +619,7 @@ class directories {
           $r['default'] = empty($cfg['default']) ? false : true;
           $new_file = false;
           if ( !empty($cfg['fixed']) ){
-            $ext = \bbn\txt::file_ext($cfg['fixed']);
+            $ext = \bbn\str::file_ext($cfg['fixed']);
             foreach ( $cfg['extensions'] as $e ){
               if ( $e['ext'] === $ext ){
                 $new_file = dirname($file).'/'.$cfg['fixed'];
@@ -688,7 +688,7 @@ class directories {
           $o = [];
         }
 
-        $r['id_script'] = \bbn\txt::parse_path($dir.'/'.$file);
+        $r['id_script'] = \bbn\str::parse_path($dir.'/'.$file);
         if ( !empty($r['static']) && (empty($cfg['fixed']) || (basename($file) !== $cfg['fixed'])) ){
           $r['id_script'] .= '.'.$ext;
         }
@@ -720,7 +720,7 @@ class directories {
   }
 
   public function save($file, $code, array $cfg = null, \bbn\user\preferences $pref = null){
-    if ( ($file = \bbn\txt::parse_path($file)) && ($real = $this->url_to_real($file)) ){
+    if ( ($file = \bbn\str::parse_path($file)) && ($real = $this->url_to_real($file)) ){
       $bits = explode('/', $file);
       // We delete if code is empty and we're in a non mandatory file of tabs' set
       if ( empty($code) && ($dir = $this->dir($bits[0])) ){
@@ -753,7 +753,7 @@ class directories {
       }
       if ( is_file($real) ){
         if ( $id_user ){
-          $ext = \bbn\txt::file_ext($real, 1);
+          $ext = \bbn\str::file_ext($real, 1);
           $backup = dirname(BBN_DATA_PATH."users/$id_user/ide/backup/".$id_file).'/'.$ext[0].'/'.date('Y-m-d His').'.'.$ext[1];
           \bbn\file\dir::create_path(dirname($backup));
           rename($real, $backup);
@@ -807,7 +807,7 @@ class directories {
     if ( isset($data['dir'], $data['path'], $data['src'], $data['name']) &&
       (strpos($data['src'], '../') === false) &&
       (strpos($data['path'], '../') === false) &&
-      \bbn\txt::check_filename($data['name']) ){
+      \bbn\str::check_filename($data['name']) ){
       $directories = new directories($this->db);
       $dirs = $directories->dirs();
       if ( isset($dirs[$data['dir']]) ){
@@ -818,8 +818,8 @@ class directories {
         if ( $dir_src === './' ){
           $dir_src = '';
         }
-        $name = \bbn\txt::file_ext($src, 1)[0];
-        $ext = \bbn\txt::file_ext($src);
+        $name = \bbn\str::file_ext($src, 1)[0];
+        $ext = \bbn\str::file_ext($src);
         $src_file = $dir_src.$name;
         $dest_file = $data['path'].'/'.$data['name'];
         $todo = [];
@@ -875,7 +875,7 @@ class directories {
   public function rename($dir, $file, $new){
     if ( isset($data['dir'], $data['name'], $data['path']) &&
       (strpos($data['path'], '../') === false) &&
-      \bbn\txt::check_filename($data['name'])
+      \bbn\str::check_filename($data['name'])
     ){
       $dirs = $this->dir();
       if ( isset($dirs[$data['dir']]) ){
@@ -891,7 +891,7 @@ class directories {
         if ( $dir === './' ){
           $dir = '';
         }
-        $name = \bbn\txt::file_ext($path, 1)[0];
+        $name = \bbn\str::file_ext($path, 1)[0];
         $src_file = $dir.$name;
         $dest_file = $dir.$data['name'];
         $todo = [];
@@ -918,10 +918,10 @@ class directories {
           }
         }
         else {
-          $dest_file= $dir.\bbn\txt::file_ext($data['name'], 1)[0];
-          $ext = \bbn\txt::file_ext($data['path']);
+          $dest_file= $dir.\bbn\str::file_ext($data['name'], 1)[0];
+          $ext = \bbn\str::file_ext($data['path']);
           $src = $cfg['root_path'].$src_file.($type === 'file' ? '.'.$ext : '');
-          $dest = dirname($src).'/'.\bbn\txt::file_ext($data['name'], 1)[0].($type === 'file' ? '.'.$ext : '');
+          $dest = dirname($src).'/'.\bbn\str::file_ext($data['name'], 1)[0].($type === 'file' ? '.'.$ext : '');
           $is_dir = ($type === 'dir') && is_dir($src);
           $is_file = ($type === 'dir') || $is_dir ? false : is_file($src);
           if ( $is_dir || $is_file ){

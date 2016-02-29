@@ -24,8 +24,8 @@ class text
 	 * Converts any type of variable to a string.
 	 *
 	 * <code>
-	 * \bbn\str\text::cast(1);
-	 * \bbn\str\text::cast([1, 'test', 2, 'text']);
+	 * \bbn\str::cast(1);
+	 * \bbn\str::cast([1, 'test', 2, 'text']);
 	 * </code>
 	 *
 	 * @param mixed $st The item to cast.
@@ -44,9 +44,9 @@ class text
 	 * Converts the case of a string.
 	 *
 	 * <code>
-	 * \bbn\str\text::change_case('TEST CASE', 'lower')); //Returns "test case"
-	 * \bbn\str\text::change_case('test case', 'upper')); //Returns "TEST CASE"
-	 * \bbn\str\text::change_case('test case')); //Returns "Test Case"
+	 * \bbn\str::change_case('TEST CASE', 'lower')); //Returns "test case"
+	 * \bbn\str::change_case('test case', 'upper')); //Returns "TEST CASE"
+	 * \bbn\str::change_case('test case')); //Returns "Test Case"
 	 * </code>
 	 *
 	 * @param mixed $st The item to convert.
@@ -78,7 +78,7 @@ class text
 	 * Escape string in double quotes.
 	 *
 	 * <code>
-	 * \bbn\str\text::escape_dquotes('L\'infanzia di "Maria"'); //Returns "L'infanzia di \"Maria\""
+	 * \bbn\str::escape_dquotes('L\'infanzia di "Maria"'); //Returns "L'infanzia di \"Maria\""
 	 * </code>
 	 *
 	 * @param string $st The string to escape.
@@ -94,7 +94,7 @@ class text
 	 * Synonym of "escape_dquotes".
 	 *
 	 * <code>
-	 * \bbn\str\text::escape_dquote('L\'infanzia di "Maria"'); //Returns "L'infanzia di \"Maria\""
+	 * \bbn\str::escape_dquote('L\'infanzia di "Maria"'); //Returns "L'infanzia di \"Maria\""
 	 * </code>
 	 *
 	 * @param string $st The string to escape.
@@ -110,7 +110,7 @@ class text
 	 * Synonym of "escape_dquotes".
 	 *
 	 * <code>
-	 * \bbn\str\text::escape_quote('L\'infanzia di "Maria"'); //Returns "L'infanzia di \"Maria\""
+	 * \bbn\str::escape_quote('L\'infanzia di "Maria"'); //Returns "L'infanzia di \"Maria\""
 	 * </code>
 	 *
 	 * @param string $st The string to escape.
@@ -126,7 +126,7 @@ class text
 	 * Synonym of "escape_dquotes".
 	 *
 	 * <code>
-	 * \bbn\str\text::escape_quotes('L\'infanzia di "Maria"'); //Returns "L'infanzia di \"Maria\""
+	 * \bbn\str::escape_quotes('L\'infanzia di "Maria"'); //Returns "L'infanzia di \"Maria\""
 	 * </code>
 	 *
 	 * @param string $st The string to escape.
@@ -142,7 +142,7 @@ class text
 	 * Escape string in quotes.
 	 *
 	 * <code>
-	 * \bbn\str\text::escape_squotes("L'infanzia di \"maria\""); //Returns "L\'infanzia di "maria""
+	 * \bbn\str::escape_squotes("L'infanzia di \"maria\""); //Returns "L\'infanzia di "maria""
 	 * </code>
 	 *
 	 * @param string $st The string to escape.
@@ -158,7 +158,7 @@ class text
 	 * Synonym of "escape_squotes".
 	 *
 	 * <code>
-	 * \bbn\str\text::escape("L'infanzia di \"maria\""); //Returns "L\'infanzia di "maria""
+	 * \bbn\str::escape("L'infanzia di \"maria\""); //Returns "L\'infanzia di "maria""
 	 * </code>
 	 *
 	 * @param string $st The string to escape.
@@ -174,7 +174,7 @@ class text
 	 * Synonym of "escape_squotes".
 	 *
 	 * <code>
-	 * \bbn\str\text::escape_apo("L'infanzia di \"maria\""); //Returns "L\'infanzia di "maria""
+	 * \bbn\str::escape_apo("L'infanzia di \"maria\""); //Returns "L\'infanzia di "maria""
 	 * </code>
 	 *
 	 * @param string $st The string to escape.
@@ -190,7 +190,7 @@ class text
 	 * Synonym of "escape_squotes".
 	 *
 	 * <code>
-	 * \bbn\str\text::escape_squote("L'infanzia di \"maria\""); //Returns "L\'infanzia di "maria""
+	 * \bbn\str::escape_squote("L'infanzia di \"maria\""); //Returns "L\'infanzia di "maria""
 	 * </code>
 	 *
 	 * @param string $st The string to escape.
@@ -277,7 +277,7 @@ class text
 	 * Cut a string (HTML and PHP tags stripped) to maximum lenght inserted.
 	 *
 	 * <code>
-	 * \bbn\str\text::cut("<!-- HTML Document --> Example text", 7); //Returns "Example..."
+	 * \bbn\str::cut("<!-- HTML Document --> Example text", 7); //Returns "Example..."
 	 * </code>
 	 *
 	 * @param string $st The string to be cut.
@@ -313,7 +313,7 @@ class text
 	 * Returns a cross-platform filename for file.
 	 *
 	 * <code>
-	 * \bbn\str\text::encode_filename('test file/,1', 15, 'txt'); //Returns
+	 * \bbn\str::encode_filename('test file/,1', 15, 'txt'); //Returns
 	"test_file_1.txt"
 	 * </code>
 	 *
@@ -378,7 +378,7 @@ class text
 	 * Returns a corrected string for database naming.
 	 *
 	 * <code>
-	 * \bbn\str\text::encode_dbname('my.database_name ? test  :,; !plus'); //Returns  "my_database_name_test_plus"
+	 * \bbn\str::encode_dbname('my.database_name ? test  :,; !plus'); //Returns  "my_database_name_test_plus"
 	 * </code>
 	 *
 	 * @param string $st The name as string.
@@ -415,8 +415,8 @@ class text
 	 * Returns the file extension.
 	 *
 	 * <code>
-	 * \bbn\str\text::file_ext('d:\test.txt'); //Returns "txt"
-	 * \bbn\str\text::file_ext('d:\test.txt', 1); //Returns ['d:\\a', 'txt']
+	 * \bbn\str::file_ext('d:\test.txt'); //Returns "txt"
+	 * \bbn\str::file_ext('d:\test.txt', 1); //Returns ['d:\\a', 'txt']
 	 * </code>
 	 *
 	 * @param string $file The file path.
@@ -449,8 +449,8 @@ class text
 	 * Returns a random password.
 	 *
 	 * <code>
-	 * \bbn\str\text::genpwd(); //Returns "khc9P871w"
-	 * \bbn\str\text::genpwd(6, 4); //Returns "dDEtxY"
+	 * \bbn\str::genpwd(); //Returns "khc9P871w"
+	 * \bbn\str::genpwd(6, 4); //Returns "dDEtxY"
 	 * </code>
 	 *
 	 * @param int $int_max Maximum characters of password, default: "12".
@@ -495,7 +495,7 @@ class text
 	 * Checks if the string is a json string.
 	 *
 	 * <code>
-	 * \bbn\str\text::is_json('{"firstName": "John", "lastName": "Smith", "age": 25}'); //Returns true
+	 * \bbn\str::is_json('{"firstName": "John", "lastName": "Smith", "age": 25}'); //Returns true
 	 * </code>
 	 *
 	 * @param string $st The string.
@@ -516,9 +516,9 @@ class text
 	 * Can take as many arguments and will return false if one of them is not a number.
 	 *
 	 * <code>
-	 * \bbn\str\text::is_number([1, 2]); //Returns false
-	 * \bbn\str\text::is_number(150); //Returns true
-	 * \bbn\str\text::is_number('150'); //Returns true
+	 * \bbn\str::is_number([1, 2]); //Returns false
+	 * \bbn\str::is_number(150); //Returns true
+	 * \bbn\str::is_number('150'); //Returns true
 	 * </code>
 	 *
 	 * @param mixed $st The item to be tested.
@@ -546,9 +546,9 @@ class text
 	 * Can take as many arguments and will return false if one of them is not an integer or the string of an integer.
 	 *
 	 * <code>
-	 * \bbn\str\text::is_integer(13.2); //Returns false
-	 * \bbn\str\text::is_integer(14); //Returns true
-	 * \bbn\str\text::is_integer('14'); //Returns true
+	 * \bbn\str::is_integer(13.2); //Returns false
+	 * \bbn\str::is_integer(14); //Returns true
+	 * \bbn\str::is_integer('14'); //Returns true
 	 * </code>
 	 *
 	 * @param mixed $st The item to be tested.
@@ -576,9 +576,9 @@ class text
 	 * Can take as many arguments and will return false if one of them is not an integer or the string of an integer.
 	 *
 	 * <code>
-	 * \bbn\str\text::is_integer(13.2); //Returns false
-	 * \bbn\str\text::is_integer(14); //Returns true
-	 * \bbn\str\text::is_integer('14'); //Returns true
+	 * \bbn\str::is_integer(13.2); //Returns false
+	 * \bbn\str::is_integer(14); //Returns true
+	 * \bbn\str::is_integer('14'); //Returns true
 	 * </code>
 	 *
 	 * @param mixed $st The item to be tested.
@@ -606,9 +606,9 @@ class text
 	 * Can take as many arguments and will return false if one of them is not a decimal or the string of a decimal (float).
 	 *
 	 * <code>
-	 * \bbn\str\text::is_decimal(13.2); //Returns true
-	 * \bbn\str\text::is_decimal('13.2'); //Returns true
-	 * \bbn\str\text::is_decimal(14); //Returns false
+	 * \bbn\str::is_decimal(13.2); //Returns true
+	 * \bbn\str::is_decimal('13.2'); //Returns true
+	 * \bbn\str::is_decimal(14); //Returns false
 	 * </code>
 	 *
 	 * @param mixed $st The item to be tested.
@@ -635,9 +635,9 @@ class text
 	 * Converts string variable into int or float if it looks like it and returns the argument anyway.
 	 *
 	 * <code>
-	 * \bbn\str\text::correct_types('1230'); //Returns 1230
-	 * \bbn\str\text::correct_types(12.30); //Returns 12.3
-	 * \bbn\str\text::correct_types([1230]); //Returns [1230]
+	 * \bbn\str::correct_types('1230'); //Returns 1230
+	 * \bbn\str::correct_types(12.30); //Returns 12.3
+	 * \bbn\str::correct_types([1230]); //Returns [1230]
 	 * </code>
 	 *
 	 * @param string $st The string.
@@ -676,10 +676,10 @@ class text
 	 * Checks if the string is a correct type of e-mail address.
 	 *
 	 * <code>
-	 * \bbn\str\text::is_email('test@email.com'); //Returns true
-	 * \bbn\str\text::is_email('test@email'); //Returns false
-	 * \bbn\str\text::is_email('test@.com'); //Returns false
-	 * \bbn\str\text::is_email('testemail.com'); //Returns false
+	 * \bbn\str::is_email('test@email.com'); //Returns true
+	 * \bbn\str::is_email('test@email'); //Returns false
+	 * \bbn\str::is_email('test@.com'); //Returns false
+	 * \bbn\str::is_email('testemail.com'); //Returns false
 	 * </code>
 	 *
 	 * @param string $email E-mail address.
@@ -740,7 +740,7 @@ class text
 	 * Returns an array containing any of the various components of the URL that are present.
 	 *
 	 * <code>
-	 * \bbn\str\text::parse_url('http://localhost/phpmyadmin/?db=test&table=users&server=1&target=&token=e45a102c5672b2b4fe84ae75d9148981');
+	 * \bbn\str::parse_url('http://localhost/phpmyadmin/?db=test&table=users&server=1&target=&token=e45a102c5672b2b4fe84ae75d9148981');
 	 * /*Returns [
 	 *     'scheme' => 'http',
 	 *     'host' => 'localhost',
@@ -783,7 +783,7 @@ class text
 	 * Replace backslash with slash in a path string. Forbids the use of ../
 	 *
 	 * <code>
-	 * \bbn\str\text::parse_path('C:\TedstDir\New\New folder'); //Returns "C:/TedstDir/New/New folder"
+	 * \bbn\str::parse_path('C:\TedstDir\New\New folder'); //Returns "C:/TedstDir/New/New folder"
 	 * </code>
 	 *
 	 * @param string $path The path.
@@ -807,7 +807,7 @@ class text
 	 * Replaces accented characters with their character without accent.
 	 *
 	 * <code>
-	 * \bbn\str\text::remove_accents("TÃ¨st FÃ¬lÃ¨ Ã²Ã¨Ã Ã¹"); //Returns "Test File oeau"
+	 * \bbn\str::remove_accents("TÃ¨st FÃ¬lÃ¨ Ã²Ã¨Ã Ã¹"); //Returns "Test File oeau"
 	 * </code>
 	 *
 	 * @param string $st The string.
@@ -828,8 +828,8 @@ class text
 	 * Checks if a string comply with SQL naming convention.
 	 *
 	 * <code>
-	 * \bbn\str\text::check_name("Paul"); //Returns true
-	 * \bbn\str\text::check_name("PÃ ul"); //Returns false
+	 * \bbn\str::check_name("Paul"); //Returns true
+	 * \bbn\str::check_name("PÃ ul"); //Returns false
 	 * </code>
 	 *
 	 * @return bool
@@ -852,8 +852,8 @@ class text
 	 * Checks if a string doesn't contain a filesystem path
 	 *
 	 * <code>
-	 * \bbn\str\text::check_name("Paul"); //Returns true
-	 * \bbn\str\text::check_name("PA/ul"); //Returns false
+	 * \bbn\str::check_name("Paul"); //Returns true
+	 * \bbn\str::check_name("PA/ul"); //Returns false
 	 * </code>
 	 *
 	 * @return bool
@@ -876,9 +876,9 @@ class text
 	 * Returns "true" if slash or backslash are present.
 	 *
 	 * <code>
-	 * \bbn\str\text::has_slash("Paul"); //Returns false
-	 * \bbn\str\text::has_slash("Paul/"); //Returns true
-	 * \bbn\str\text::has_slash("Paul\\"); //Returns true
+	 * \bbn\str::has_slash("Paul"); //Returns false
+	 * \bbn\str::has_slash("Paul/"); //Returns true
+	 * \bbn\str::has_slash("Paul\\"); //Returns true
 	 * </code>
 	 *
 	 * @return bool
@@ -900,7 +900,7 @@ class text
 	 * Extracts all digits from a string.
 	 *
 	 * <code>
-	 * \bbn\str\text::get_numbers("test 13 example 24"); //Returns 1324
+	 * \bbn\str::get_numbers("test 13 example 24"); //Returns 1324
 	 * </code>
 	 *
 	 * @param string $st The string.
@@ -1025,6 +1025,6 @@ class text
 	 * @return bool
 	 */
 	public static function is_date_sql($st){
-		return \bbn\time\date::validateSQL($st);
+		return \bbn\date::validateSQL($st);
 	}
 }
