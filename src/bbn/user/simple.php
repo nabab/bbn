@@ -58,16 +58,16 @@ class simple extends \bbn\obj
 	private static function get_users()
 	{
 		if ( file_exists(self::$cf) )	{
-			$res = array();
+			$res = [];
 			$users = explode("\n",file_get_contents(self::$cf));
 			foreach ( $users as $i => $user ){
 				$credentials = explode(self::$sp,$user);
-				$res[$i] = array(
+				$res[$i] = [
 					'login' => $credentials[0],
 					'priv' => $credentials[1],
 					'pass' => $credentials[2],
 					'sess' => ''
-				);
+				];
 				if ( isset($credentials[3]) ){
 					$res[$i]['sess'] = $credentials[3];
 				}
@@ -83,7 +83,7 @@ class simple extends \bbn\obj
 	private static function set_users($users)
 	{
 		if ( file_exists(self::$cf) && is_array($users) ){
-			$res = array();
+			$res = [];
 			foreach ( $users as $i => $user ){
 				$res[$i] = 
 					$users[$i]['login'].self::$sp.
@@ -101,7 +101,7 @@ class simple extends \bbn\obj
 	/**
 	 * @return void 
 	 */
-	public function __construct($cfg=array())
+	public function __construct($cfg=[])
 	{
 		self::init();
 		if ( is_array($cfg) && isset($cfg['login']) ){
@@ -230,7 +230,7 @@ class simple extends \bbn\obj
 	public function change_password($old, $new)
 	{
 		if ( $this->identified )
-			$cfg = array();
+			$cfg = [];
 	}
 
 	/**

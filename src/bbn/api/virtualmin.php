@@ -226,7 +226,7 @@ class virtualmin {
 
 
 
-  public function list_commands($param = array('multiline' => 1)) {
+  public function list_commands($param = ['multiline' => 1]) {
     //Prepping, processing and validating the create user parameters
     $param = $this->process_parameters($param);
     //Setting the last action performed

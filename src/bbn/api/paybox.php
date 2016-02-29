@@ -21,15 +21,16 @@ class paybox
 	 * @var string
 	 */
 	private static
-		$servers = array('tpeweb.paybox.com', 'tpeweb1.paybox.com'),
+		$servers = ['tpeweb.paybox.com', 'tpeweb1.paybox.com'],
 		//	$servers = array('preprod-tpeweb.paybox.com'),
 		$url_reponse = 'http://www.atlantica.fr/paybox',	
 		$url = '/cgi/MYchoix_pagepaiement.cgi',
-		$currencies = array(
+		$currencies = [
 			'EUR' => '978',
 			'USD' => '840',
-			'CFA' => '952'),
-		$encryptions = array('SHA512','SHA256','RIPEMD160','SHA224','SHA384');
+			'CFA' => '952'
+		],
+		$encryptions = ['SHA512','SHA256','RIPEMD160','SHA224','SHA384'];
 	private $cfg, $server, $price, $enc, $time, $form, $params, $query, $binkey, $currency, $hmac, $email, $ref, $processed = false;
 	public $online = false;
 
@@ -54,7 +55,7 @@ class paybox
 				$this->cfg = $cfg;
 				$this->enc = self::$encryptions[array_rand(self::$encryptions)];
 				$this->time = date('c');
-				$this->params = array(
+				$this->params = [
 					'PBX_SITE' => $this->cfg['site'],
 					'PBX_RANG' => $this->cfg['rang'],
 					'PBX_IDENTIFIANT' => $this->cfg['id'],
@@ -66,7 +67,7 @@ class paybox
 					'PBX_REPONDRE_A' => self::$url_reponse,
 					'PBX_HASH' => $this->enc,
 					'PBX_TIME' => $this->time
-				);
+				];
 				$this->process();
 				$this->online = 1;
 			}

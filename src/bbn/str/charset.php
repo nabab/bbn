@@ -7,8 +7,8 @@ namespace bbn\str;
 define("ERR_OPEN_MAP_FILE","ERR_OPEN_MAP_FILE");
 
 class utf8 {
-	var $ascMap = array();
-	var $utfMap = array();
+	var $ascMap = [];
+	var $utfMap = [];
 
 	/* Constructor */
 	function utf8($charset='ISO-8859-1')

@@ -24,7 +24,7 @@ class image extends \bbn\file\file
 	 * @var array
 	 */
 	protected static
-          $allowed_extensions = array('jpg','gif','jpeg','png','svg'),
+          $allowed_extensions = ['jpg','gif','jpeg','png','svg'],
           $max_width = 5000;
 
 	/**

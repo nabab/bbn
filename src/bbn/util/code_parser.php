@@ -163,13 +163,13 @@ class code_parser
 				$this->sequences[$index]['content'] .= $c;
 				if ( trim($this->sequences[$index]['content']) !== '' || $cur !== 'code' )
 					$index++;
-				$this->sequences[$index] = array('kind'=>$cur,'content'=>'');
+				$this->sequences[$index] = ['kind' => $cur, 'content' => ''];
 			}
 			else if ( $next )
 			{
 				if ( trim($this->sequences[$index]['content']) !== '' || $cur !== 'code' )
 					$index++;
-				$this->sequences[$index] = array('kind'=>$next,'content'=>$c);
+				$this->sequences[$index] = ['kind' => $next, 'content' => $c];
 			}
 			else
 				$this->sequences[$index]['content'] .= $c;

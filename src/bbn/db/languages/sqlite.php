@@ -309,22 +309,23 @@ class sqlite implements \bbn\db\engines
       if ( $indexes = $this->db->get_rows('PRAGMA index_list('.$table.')') ){
         foreach ( $indexes as $d ){
           if ( $fields = $this->db->get_rows('PRAGMA index_info('.$database.'"'.$d['name'].'")') ){
+            /** @todo Redo, $a is false! */
             foreach ( $fields as $d2 ){
               $a = false;
               if ( !isset($keys[$d['name']]) ){
-                $keys[$d['name']] = array(
-                'columns' => array($d2['name']),
-                'ref_db' => $a ? $a['ref_db'] : null,
-                'ref_table' => $a ? $a['ref_table'] : null,
-                'ref_column' => $a ? $a['ref_column'] : null,
-                'unique' => $d['unique'] == 1 ? 1 : 0
-                );
+                $keys[$d['name']] = [
+                  'columns' => [$d2['name']],
+                  'ref_db' => $a ? $a['ref_db'] : null,
+                  'ref_table' => $a ? $a['ref_table'] : null,
+                  'ref_column' => $a ? $a['ref_column'] : null,
+                  'unique' => $d['unique'] == 1 ? 1 : 0
+                ];
               }
               else{
                 array_push($keys[$d['name']]['columns'], $d2['name']);
               }
               if ( !isset($cols[$d2['name']]) ){
-                $cols[$d2['name']] = array($d['name']);
+                $cols[$d2['name']] = [$d['name']];
               }
               else{
                 array_push($cols[$d2['name']], $d['name']);

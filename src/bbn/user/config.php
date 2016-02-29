@@ -23,8 +23,8 @@ class config
 {
 
 	private 
-		$_defaults=array(
-			'fields' => array(
+		$_defaults = [
+			'fields' => [
 				'id' => 'id',
 				'user' => 'email',
 				'pass' => 'pass',
@@ -33,17 +33,17 @@ class config
 				'reset_link' => 'reset_link',
 				'ip' => 'ip',
 				'last_connection' => 'last_connection'
-			),
+			],
 			'encryption' => 'sha1',
 			'table' => 'users',
 			'condition' => "acces > 0",
-			'additional_fields' => array(),
+			'additional_fields' => [],
 			'user_group' => false,
 			'group' => false,
 			'num_attempts' => 3,
 			'sess_name' => BBN_SESS_NAME,
 			'sess_user' => 'user'
-		),
+		],
 		$cfg,
 		$db;
 

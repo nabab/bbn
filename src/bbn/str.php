@@ -255,7 +255,7 @@ class str
 				$st = mb_ereg_replace("!/\*.*?\*/!s",'',$st); // comment_pattern
 				$st = mb_ereg_replace("[\r\n]",'',$st);
 				$st = mb_ereg_replace("\t"," ",$st);
-				$chars = array(';','=','+','-','\(','\)','\{','\}','\[','\]',',',':');
+				$chars = [';','=','+','-','\(','\)','\{','\}','\[','\]',',',':'];
 				foreach ( $chars as $char )
 				{
 					while ( mb_strpos($st,$char.' ') !== false ){
@@ -427,20 +427,20 @@ class str
 	public static function file_ext($file, $ar=false)
 	{
     $file = self::cast($file);
-		if ( mb_strrpos($file,'/') !== false )
-			$file = substr($file,mb_strrpos($file,'/')+1);
-		if ( mb_strpos($file,'.') !== false )
+		if ( mb_strrpos($file, '/') !== false )
+			$file = substr($file, mb_strrpos($file, '/')+1);
+		if ( mb_strpos($file, '.') !== false )
 		{
-			$p = mb_strrpos($file,'.');
-			$f = mb_substr($file,0,$p);
-			$ext = mb_convert_case(mb_substr($file,$p+1),MB_CASE_LOWER);
+			$p = mb_strrpos($file, '.');
+			$f = mb_substr($file, 0, $p);
+			$ext = mb_convert_case(mb_substr($file, $p+1), MB_CASE_LOWER);
 			if ( $ar )
-				return array($f,$ext);
+				return [$f, $ext];
 			else
 				return $ext;
 		}
 		else if ( $ar )
-				return array($file,'');
+				return [$file, ''];
 		else
 			return '';
 	}

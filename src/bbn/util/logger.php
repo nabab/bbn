@@ -18,7 +18,7 @@ namespace bbn\util;
  */
 trait logger
 {
-	public $reports = array();
+	public $reports = [];
 	/**
 	 * Add information to the $info array
 	 *

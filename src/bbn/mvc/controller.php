@@ -530,7 +530,7 @@ EOD;
 					$bbn_php = $this->add_php($file);
 				}
 				if ( isset($bbn_php) ){
-					$args = array();
+					$args = [];
 					if ( $this->has_data() ){
 						foreach ( (array)$this->data as $key => $val ){
 							$$key = $val;

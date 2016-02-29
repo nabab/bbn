@@ -11,7 +11,7 @@ class history
           $db,
           /** @var array A collection of the  */
           $dbs = [],
-          $hstructures = array(),
+          $hstructures = [],
           $admin_db = '',
           $huser = false,
           $prefix = 'bbn_',

@@ -29,7 +29,7 @@ class appui extends \bbn\user\connection
 	/**
 	 * @var array
 	 */
-	private $infos=array();
+	private $infos=[];
 
 	/**
 	 * @var mixed
@@ -45,10 +45,10 @@ class appui extends \bbn\user\connection
 	/**
 	 * @return void 
 	 */
-	public function __construct($cfg=array())
+	public function __construct($cfg=[])
 	{
-		self::set_cfg(array(
-			'fields' => array(
+		self::set_cfg([
+			'fields' => [
 				'id' => 'id',
 				'user' => 'bbn_login',
 				'pass' => 'bbn_pass',
@@ -59,14 +59,14 @@ class appui extends \bbn\user\connection
 				'ip' => 'bbn_ip',
 				'lang' => 'bbn_lang',
 				'last_connection' => 'bbn_last_time'
-			),
+			],
 			'encryption' => 'sha1',
 			'table' => 'id_users',
 			'condition' => "bbn_active LIKE 'y'",
-			'additional_fields' => array('bbn_id_account'),
+			'additional_fields' => ['bbn_id_account'],
 			'num_attempts' => 3,
 			'session' => 'id_user'
-		));
+		]);
 		parent::__construct($cfg);
 		if ( $this->auth )
 		{
@@ -158,29 +158,29 @@ class appui extends \bbn\user\connection
 				)
 			)
 			{
-				$this->infos = array(
+				$this->infos = [
 					'ps' => $this->ps,
 					'prev_time' => $this->prev_time,
 					'company' => $p['company'],
-					'fenster' => array(),
-					'js' => array(),
-					'priv' => array(),
-					'sites' => array(),
-					'online_users' => array(),
-					'chat' => array(
+					'fenster' => [],
+					'js' => [],
+					'priv' => [],
+					'sites' => [],
+					'online_users' => [],
+					'chat' => [
 						'on' => 0,
 						'last_id' => 0,
 						'last_time' => 0,
 						'interval' => 0
-					),
-					'mails' => array(),
-					'sync_mail' => array(
-						'acc' => array(),
-						'dir' => array(),
-						'num' => array()
-					),
+					],
+					'mails' => [],
+					'sync_mail' => [
+						'acc' => [],
+						'dir' => [],
+						'num' => []
+					],
 					'socket_akt' => 'init'
-				);
+				];
 				foreach ( $d as $n => $v )
 				{
 					if ( substr($n,-4) != 'pass' )
@@ -209,7 +209,7 @@ class appui extends \bbn\user\connection
 				{
 					while ( $d = $r->get_row() )
 					{
-						$this->infos['mails'][$d['id']] = array(
+						$this->infos['mails'][$d['id']] = [
 							'bbn_email' => $d['bbn_email'],
 							'bbn_name' => $d['bbn_name'],
 							'bbn_type' => $d['bbn_type'],
@@ -224,8 +224,8 @@ class appui extends \bbn\user\connection
 							'bbn_draft' => $d['bbn_draft'],
 							'bbn_spam' => $d['bbn_spam'],
 							'bbn_folders' => $d['bbn_folders'],
-							'bbn_dir' => array()
-						);
+							'bbn_dir' => []
+						];
 						$mbox_dirs = explode("\n",$d['bbn_folders']);
 						if ( !empty($d['bbn_spam']) )
 							array_unshift($mbox_dirs,$d['bbn_spam']);
@@ -253,10 +253,10 @@ class appui extends \bbn\user\connection
 									$last_uid = $r1->fetchColumn();
 								else
 									$last_uid = 0;
-								$this->infos['mails'][$bbn['id']]['bbn_dir'][$mbox_dir] = array(
+								$this->infos['mails'][$bbn['id']]['bbn_dir'][$mbox_dir] = [
 									'bbn_num_msg' => $r1->count(),
 									'bbn_last_uid' => $last_uid
-								);
+								];
 							}
 						}
 					}
@@ -273,11 +273,11 @@ class appui extends \bbn\user\connection
 					date('Y-m-d H:i:s',time()-180),
 					$u['id']);
 				while ( $d = $r->get_row() )
-					$this->infos['online_users'][$d['id']] = array(
+					$this->infos['online_users'][$d['id']] = [
 						'bbn_login' => $d['bbn_login'],
 						'bbn_fname' => $d['bbn_fname'],
 						'bbn_name' => $d['bbn_name']
-					);
+					];
 					
 				/* Check the sites privileges for this user */
 				$r = self::$db->query("

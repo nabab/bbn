@@ -15,7 +15,7 @@ class dbsync
           $tables = [],
           $dbs_table = 'dbsync';
 
-  protected static $methods = array();
+  protected static $methods = [];
 
   private static
           $has_history = false,

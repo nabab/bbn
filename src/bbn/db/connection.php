@@ -1762,7 +1762,7 @@ class connection extends \PDO implements actions, api, engines
       $tables = $this->get_tables($this->current);
     }
     else if ( is_string($table) ){
-      $tables = array($table);
+      $tables = [$table];
     }
     else if ( is_array($table) ){
       $tables = $table;

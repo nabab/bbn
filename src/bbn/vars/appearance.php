@@ -20,7 +20,7 @@ class appearance
 	 * jQuery UI themes
 	 * @var array
 	 */
-	private static $themes = array(
+	private static $themes = [
 		'black-tie',
 		'blitzer',
 		'cupertino',
@@ -44,13 +44,14 @@ class appearance
 		'trontastic',
 		'ui-darkness' => 'ui_dark',
 		'ui-lightness' => 'ui_light',
-		'vader' => 'black_matte');
+		'vader' => 'black_matte'
+	];
 
 	/**
 	 * CodeMirror themes
 	 * @var array
 	 */
-	private static $ide_themes = array(
+	private static $ide_themes = [
 		'ambiance',
 		'blackboard',
 		'cobalt',
@@ -63,7 +64,8 @@ class appearance
 		'night',
 		'rubyblue',
 		'vibrant-ink',
-		'xq-dark');
+		'xq-dark'
+	];
 
 	/**
 	 * Google fonts

@@ -73,7 +73,7 @@ class square
 				WHERE bbn_id_smenu = %u
 				ORDER BY bbn_position",
 				$smenu->id);
-			$smenu->fields = array();
+			$smenu->fields = [];
 			while ( $d = $r->get_row() ){
 				$smenu->fields[$d['bbn_name']] = $this->get_field($d['id']);
 			}
@@ -117,7 +117,7 @@ class square
 					}
 					$f->$k = $v;
 				}
-				$f->params = array();
+				$f->params = [];
 				$r = $this->db->query("
 					SELECT bbn_value, 
 					IFNULL(bbn_smenus.bbn_name,'') AS reftable,
@@ -141,7 +141,7 @@ class square
 	}
 	public function get_config_from_id($id, $cfg)
 	{
-		$tmp = array();
+		$tmp = [];
 		$field = '';
 		if ( !is_array($cfg) ){
 			$cfg = [];
@@ -258,7 +258,10 @@ class square
 				if ( strpos($a2[$i], "'") === 0 ){
 					$a2[$i] = substr($a2[$i], 1, -1);
 				}
-				array_push($tmp['options']['dataSource'], array('text'=>$a, 'value'=>$a2[$i]));
+				array_push($tmp['options']['dataSource'], [
+					'text' => $a,
+					'value'=>$a2[$i]
+				]);
 			}
 			break;
 			

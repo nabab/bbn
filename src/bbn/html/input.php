@@ -163,7 +163,7 @@ class input extends element
     
 		if ( $this->tag ){
       
-			$mandatory_attr = array();
+			$mandatory_attr = [];
       
       if ( !isset($this->attr['id']) ){
   			$this->attr['id'] = \bbn\str::genpwd(20,15);

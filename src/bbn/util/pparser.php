@@ -26,7 +26,7 @@ class pparser
     {
         if (!$string) {
             // no string, no data
-            return array();
+            return [];
         }
 
         if ($string[0] == '(') {
@@ -34,8 +34,8 @@ class pparser
             $string = substr($string, 1, -1);
         }
 
-        $this->current = array();
-        $this->stack = array();
+        $this->current = [];
+        $this->stack = [];
 
         $this->string = $string;
         $this->length = strlen($this->string);

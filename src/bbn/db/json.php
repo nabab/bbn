@@ -256,15 +256,15 @@ class json implements \bbn\db\api
         $p = 1;
         foreach ( $rows as $row ){
           $f = $row['Field'];
-          $r[$f] = array(
+          $r[$f] = [
             'position' => $p++,
             'null' => $row['Null'] === 'NO' ? 0 : 1,
-            'key' => in_array($row['Key'], array('PRI', 'UNI', 'MUL')) ? $row['Key'] : null,
+            'key' => in_array($row['Key'], ['PRI', 'UNI', 'MUL']) ? $row['Key'] : null,
             'default' => is_null($row['Default']) && $row['Null'] !== 'NO' ? 'NULL' : $row['Default'],
             'extra' => $row['Extra'],
             'signed' => 0,
             'maxlength' => 0
-          );
+          ];
           if ( strpos($row['Type'], 'enum') === 0 ){
             $r[$f]['type'] = 'enum';
             if ( preg_match_all('/\((.*?)\)/', $row['Type'], $matches) ){
@@ -341,20 +341,20 @@ class json implements \bbn\db\api
           $d['Key_name'],
           $d['Seq_in_index']);
         if ( !isset($keys[$d['Key_name']]) ){
-          $keys[$d['Key_name']] = array(
-          'columns' => array($d['Column_name']),
-          'ref_db' => $a && $a['ref_db'] ? $a['ref_db'] : null,
-          'ref_table' => $a && $a['ref_table'] ? $a['ref_table'] : null,
-          'ref_column' => $a && $a['ref_column'] ? $a['ref_column'] : null,
-          'unique' => $d['Non_unique'] == 0 ? 1 : 0
-          );
+          $keys[$d['Key_name']] = [
+            'columns' => [$d['Column_name']],
+            'ref_db' => $a && $a['ref_db'] ? $a['ref_db'] : null,
+            'ref_table' => $a && $a['ref_table'] ? $a['ref_table'] : null,
+            'ref_column' => $a && $a['ref_column'] ? $a['ref_column'] : null,
+            'unique' => $d['Non_unique'] == 0 ? 1 : 0
+          ];
         }
         else{
           array_push($keys[$d['Key_name']]['columns'], $d['Column_name']);
           $keys[$d['Key_name']]['ref_db'] = $keys[$d['Key_name']]['ref_table'] = $keys[$d['Key_name']]['ref_column'] = null;
         }
         if ( !isset($cols[$d['Column_name']]) ){
-          $cols[$d['Column_name']] = array($d['Key_name']);
+          $cols[$d['Column_name']] = [$d['Key_name']];
         }
         else{
           array_push($cols[$d['Column_name']], $d['Key_name']);
