@@ -87,7 +87,7 @@ class mapper extends \bbn\objdb{
     // Checking the prefix string
     parent::__construct($db);
     if ( \bbn\str::check_name($prefix) || ($prefix === false) ){
-      $this->admin_db = empty($database) ? $this->db->current : $database;
+      $this->admin_db = $database ?: $this->db->current;
       $this->client_db = $this->db->current;
       $this->prefix = $prefix;
       // If there's no underscore finishing the prefix we add it
@@ -207,7 +207,7 @@ class mapper extends \bbn\objdb{
         }
         $this->db->insert($this->admin_db.'.'.$this->prefix.'fields',[
           'id_obj' => $id,
-          'column' => ( $column ? $column : null ),
+          'column' => ( $column ?: null ),
           'title' => isset($ele['label']) ? $ele['label'] : null,
           'position' => $i,
           'configuration' => json_encode($ele)

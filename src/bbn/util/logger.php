@@ -71,7 +71,7 @@ trait logger
 				$i = debug_backtrace()[0];
 				$r .= $i['file']." - line ".$i['line'];
 			}
-			$r .= "\n".( is_string($st) ? $st : print_r($st,true) )."\n\n";
+			$r .= "\n".( is_string($st) ? $st : print_r($st, true) )."\n\n";
 			$s = ( file_exists($log_file) ) ? filesize($log_file) : 0;
 			if ( $s > 1048576 ){
 				file_put_contents($log_file.'.old',file_get_contents($log_file),FILE_APPEND);

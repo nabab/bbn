@@ -354,7 +354,7 @@ class options
    */
   public function options($id = 0){
     $args = func_get_args();
-    if ( ($id = $this->from_code(empty($args) ? $id : $args)) !== false ) {
+    if ( ($id = $this->from_code($args ?: $id)) !== false ) {
       if ( isset($args[0]['id']) ){
         return $args[0]['id'];
       }
@@ -380,7 +380,7 @@ class options
    */
   public function count($id = 0){
     $args = func_get_args();
-    $id = $this->from_code(empty($args) ? $id : $args);
+    $id = $this->from_code($args ?: $id);
     if ( \bbn\str::is_integer($id) ) {
       return $this->db->count($this->cfg['table'], [$this->cfg['cols']['id_parent'] => $id]);
     }
@@ -437,7 +437,7 @@ class options
    * @return array
    */
   public function native_options($id = 0, $id_parent = false, $where = [], $order = [], $start = 0, $limit = false){
-    $id = $this->from_code($id, $id_parent ? $id_parent : $this->default);
+    $id = $this->from_code($id, $id_parent ?: $this->default);
     if ( \bbn\str::is_integer($id, $start) ) {
       if ( $this->cacher->has($this->_cache_name(__FUNCTION__, $id)) ){
         return $this->cacher->get($this->_cache_name(__FUNCTION__, $id));
@@ -454,7 +454,7 @@ class options
   }
 
   public function tree($id, $id_parent = false, $root = ''){
-    $id = $this->from_code($id, $id_parent ? $id_parent : $this->default);
+    $id = $this->from_code($id, $id_parent ?: $this->default);
     if ( \bbn\str::is_integer($id) && ($text = $this->text($id)) ) {
       if ( $this->cacher->has($this->_cache_name(__FUNCTION__, $id)) ){
         return $this->cacher->get($this->_cache_name(__FUNCTION__, $id));
@@ -662,7 +662,7 @@ class options
       }
       $parent = $this->from_code($p, $parent);
     }
-    return $parent ? $parent : false;
+    return $parent ?: false;
   }
 
   public function set($id, $cfg){
@@ -872,7 +872,7 @@ class options
 
   public function set_alias($id, $alias){
     return $this->db->update_ignore($this->cfg['table'], [
-      $this->cfg['cols']['id_alias'] => \bbn\str::is_integer($alias) ? $alias : null
+      $this->cfg['cols']['id_alias'] => $alias ?: null
     ], [
       $this->cfg['cols']['id'] => $id
     ]);
@@ -1242,7 +1242,7 @@ class options
   }
 
   public function import(array $option, $id_parent = false, $force = false){
-    $option['id_parent'] = $id_parent ? $id_parent : $this->default;
+    $option['id_parent'] = $id_parent ?: $this->default;
     $res = 0;
     $items = empty($option['items']) ? false : $option['items'];
     unset($option['id']);

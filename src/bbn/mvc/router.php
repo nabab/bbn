@@ -108,9 +108,9 @@ class router {
   private function get_alt_root($mode, $path = false){
     if ( ($path || $this->alt_root) &&
       self::is_mode($mode) &&
-      isset($this->routes['root'][$path ? $path : $this->alt_root])
+      isset($this->routes['root'][$path ?: $this->alt_root])
     ){
-      return $this->parse($this->routes['root'][$path ? $path : $this->alt_root].'/mvc/'.( $mode === 'dom' ? 'public' : $mode ).'/');
+      return $this->parse($this->routes['root'][$path ?: $this->alt_root].'/mvc/'.( $mode === 'dom' ? 'public' : $mode ).'/');
     }
     return false;
   }

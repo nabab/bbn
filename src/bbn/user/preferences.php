@@ -56,8 +56,8 @@ class preferences
 		$this->cfg = \bbn\x::merge_arrays(self::$_defaults, $cfg);
 		$this->opt = $opt;
 		$this->db = $db;
-		$this->id_user = is_int($this->cfg['id_user']) ? $this->cfg['id_user'] : false;
-		$this->id_group = is_int($this->cfg['id_group']) ? $this->cfg['id_group'] : false;
+		$this->id_user = $this->cfg['id_user'] ?: false;
+		$this->id_group = $this->cfg['id_group'] ?: false;
 	}
 
 	public function set_user($id_user){
@@ -148,6 +148,7 @@ class preferences
 	 * @return int|false
 	 */
 	public function get_id($id_option){
+    $res = false;
 		if ( $this->id_user ){
 			$res = $this->db->select_one($this->cfg['table'], $this->cfg['cols']['id'], [
 				$this->cfg['cols']['id_option'] => $id_option,
@@ -160,7 +161,7 @@ class preferences
 				$this->cfg['cols']['id_group'] => $this->id_group
 			]);
 		}
-		return empty($res) ? $res : false;
+		return $res ?: false;
 	}
 
 	/**
@@ -187,7 +188,7 @@ class preferences
 		else if ( $id_user || $this->id_user ){
 			$id = $this->db->get_val($this->cfg['table'], $this->cfg['cols']['id'], [
 				$this->cfg['cols']['id_option'] => $id_option,
-				$this->cfg['cols']['id_user'] => $id_user ? $id_user : $this->id_user
+				$this->cfg['cols']['id_user'] => $id_user ?: $this->id_user
 			]);
 		}
 		else{
@@ -199,7 +200,7 @@ class preferences
 		$r = $this->db->insert($this->cfg['table'], [
 			'id_option' => $id_option,
 			'id_user' => !$id_group && ($id_user || $this->id_user) ? ($id_user ? $id_user : $this->id_user)  : null,
-			'id_group' => $id_group ? $id_group : null,
+			'id_group' => $id_group ?: null,
 			'cfg' => json_encode($this->get_cfg(false, $cfg))
 		]);
     return $r;
