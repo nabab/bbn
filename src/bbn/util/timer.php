@@ -68,13 +68,19 @@ class timer
   {
     if ( isset($this->measures[$key], $this->measures[$key]['start']) ){
       $this->measures[$key]['num']++;
-      $time = microtime(1) - $this->measures[$key]['start'];
+      $time = $this->measure($key);
       $this->measures[$key]['sum'] += $time;
       unset($this->measures[$key]['start']);
       return $time;
     }
     else{
       die("Missing a start declaration for timer $key");
+    }
+  }
+
+  public function measure($key='default'){
+    if ( isset($this->measures[$key], $this->measures[$key]['start']) ){
+      return microtime(1) - $this->measures[$key]['start'];
     }
   }
   

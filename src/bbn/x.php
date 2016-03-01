@@ -706,8 +706,8 @@ class x
    *
    *
    */
-  public static function sort_by(&$ar, $key){
-    usort($ar, function($a, $b) use($key){
+  public static function sort_by(&$ar, $key, $dir = ''){
+    usort($ar, function($a, $b) use($key, $dir){
       if ( !is_array($key) ){
         $key = [$key];
       }
@@ -716,15 +716,17 @@ class x
       if ( !isset($v1, $v2) ){
         return 0;
       }
+      $a1 = strtolower($dir) === 'desc' ? $v2 : $v1;
+      $a2 = strtolower($dir) === 'desc' ? $v1 : $v2;
       if ( !str::is_number($v1, $v2) ) {
-        $v1 = str_replace('.', '0', str_replace('_', '1', str::change_case($v1, 'lower')));
-        $v2 = str_replace('.', '0', str_replace('_', '1', str::change_case($v2, 'lower')));
+        $a1 = str_replace('.', '0', str_replace('_', '1', str::change_case($a1, 'lower')));
+        $a2 = str_replace('.', '0', str_replace('_', '1', str::change_case($a2, 'lower')));
         return strcmp($v1, $v2);
       }
-      if ( $v1 > $v2 ){
+      if ( $a1 > $a2 ){
         return 1;
       }
-      else if ($v1 == $v2){
+      else if ($a1 == $a2){
         return 0;
       }
       return -1;

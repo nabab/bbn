@@ -192,21 +192,21 @@ class dir extends \bbn\obj
 		return false;
 	}
 
-	/**
-	 * Scans all the content from a directory, including the subdirectories
-	 *
+  /**
+   * Scans all the content from a directory, including the subdirectories
+   *
    * <code>
    * \bbn\file\dir::scan("/home/me");
    * \bbn\file\dir::delete("C:\Documents\Test");
    * </code>
-   * 
-	 * @param string $dir The directory path.
-	 * @param string $type The type of item to return ('file', 'dir', default is both)
-   * 
-	 * @return array
-	 */
-	public static function scan($dir, $type = null)
-	{
+   *
+   * @param string $dir The directory path.
+   * @param string $type The type of item to return ('file', 'dir', default is both)
+   *
+   * @return array
+   */
+  public static function scan($dir, $type = null)
+  {
     $all = [];
     $dir = self::clean($dir);
     $dirs = self::get_dirs($dir);
@@ -228,7 +228,50 @@ class dir extends \bbn\obj
       }
     }
     return $all;
-	}
+  }
+
+  /**
+   * Scans all the content from a directory, including the subdirectories, and returns from each of them an array with the name and the mtime
+   *
+   * <code>
+   * \bbn\file\dir::mscan("/home/me");
+   * \bbn\file\dir::delete("C:\Documents\Test");
+   * </code>
+   *
+   * @param string $dir The directory path.
+   * @param string $type The type of item to return ('file', 'dir', default is both)
+   *
+   * @return array
+   */
+  public static function mscan($dir, $type = null)
+  {
+    $all = [];
+    $dir = self::clean($dir);
+    $dirs = self::get_dirs($dir);
+    if ( is_array($dirs) ){
+      if ( $type && (strpos($type, 'file') === 0) ){
+        $all = self::get_files($dir);
+      }
+      else if ( $type && ((strpos($type, 'dir') === 0) || (strpos($type, 'fold') === 0)) ){
+        $all = $dirs;
+      }
+      else{
+        $files = self::get_files($dir);
+        if ( is_array($files) ){
+          $all = array_merge($dirs, $files);
+        }
+      }
+      foreach ( $dirs as $d ){
+        $all = array_merge(is_array($all) ? $all : [], self::scan($d, $type));
+      }
+      $res = [];
+      foreach ($all as $a ){
+        $t = filemtime($a);
+        array_push($res, ['name' => $a, 'mtime' => $t, 'date' => date('Y-m-d H:i:s', $t)]);
+      }
+    }
+    return !$all ? [] : $res;
+  }
 
   /**
    * Scans all the content from a directory, including the subdirectories, and return a tree
