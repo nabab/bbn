@@ -765,6 +765,11 @@ class connection
       // The user ID must be in the session
 			if ( $this->has_session('id') ) {
         $this->id = $this->get_session('id');
+        if ( $this->preferences ){
+          $this->preferences->set_user($this->id);
+          /** @todo Redo this!!! Bad! */
+          $this->preferences->set_group($this->get_session('groups')[0]);
+        }
 
         $this->_sess_info();
 

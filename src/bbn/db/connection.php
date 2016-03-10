@@ -170,15 +170,16 @@ class connection extends \PDO implements actions, api, engines
 
   private function _cache_name($item, $mode){
     $r = false;
+    $h = crc32($this->host);
     switch ( $mode ){
       case 'columns':
-        $r = "bbn-db-".$this->engine."-".$this->host."-".$this->tfn($item);
+        $r = "bbn-db-".$this->engine."-".$h."-".$this->tfn($item);
         break;
       case 'tables':
-        $r = "bbn-db-".$this->engine."-".$this->host."-".$item;
+        $r = "bbn-db-".$this->engine."-".$h."-".$item;
         break;
       case 'databases':
-        $r = "bbn-db-".$this->engine."-".$this->host;
+        $r = "bbn-db-".$this->engine."-".$h;
         break;
     }
     return $r;

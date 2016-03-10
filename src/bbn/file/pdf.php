@@ -183,6 +183,7 @@ EOF
         die("Error! No destination directory");
       }
       $this->pdf->Output($filename,'F');
+      return is_file($filename);
     }
   }
 

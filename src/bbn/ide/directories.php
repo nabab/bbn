@@ -349,17 +349,6 @@ class directories {
   }
 
   /**
-   * @param $data
-   * @return array|int
-   */
-  public function delete($data){
-    if ( $this->options->remove($data['id']) ){
-      return 1;
-    }
-    return $this->error('Error: Delete.');
-  }
-
-  /**
    * @param string $name
    * @return array
    */
@@ -872,92 +861,214 @@ class directories {
     return $this->error();
   }
 
-  public function rename($dir, $file, $new){
-    if ( isset($data['dir'], $data['name'], $data['path']) &&
-      (strpos($data['path'], '../') === false) &&
-      \bbn\str::check_filename($data['name'])
+  public function delete($dir, $path, $name, $type = 'file'){
+    if ( ($cfg = $this->dir($dir)) &&
+      ($root = $this->get_root_path($dir))
     ){
-      $dirs = $this->dir();
-      if ( isset($dirs[$data['dir']]) ){
-        $cfg =& $dirs[$data['dir']];
-        $path = $data['path'];
-        if ( $this->is_mvc($cfg) ){
-          $type = is_dir($cfg['files']['Controller']['fpath'].$path) ? 'dir' : 'file';
+      $is_file = $type === 'file';
+      $wtype = $is_file ? 'file' : 'directory';
+      $delete = [];
+      if ( !empty($cfg['is_mvc']) ){
+        $root = $this->get_root_path($cfg['code']);
+        foreach ( $cfg['tabs'] as $t ){
+          $real = $root . $t['path'];
+          if ( dirname($path) !== '.' ){
+            $real .= dirname($path) . '/';
+          }
+          $real .= $is_file ? $name . '.' . $t['extensions'][0]['ext'] : $name;
+          if ( file_exists($real) && !in_array($real, $delete) ){
+            array_push($delete, $real);
+          }
+        }
+      }
+      else {
+        $real = $root . $path;
+        if ( file_exists($real) ){
+          array_push($delete, $real);
+        }
+      }
+      $files = [];
+      foreach ( $delete as $d ){
+        if ( $is_file ){
+          array_push($files, $this->real_to_url($d));
+          $del = unlink($d);
         }
         else {
-          $type = is_dir($cfg['root_path'].$path) ? 'dir' : 'file';
+          $sub_files = \bbn\file\dir::scan($d);
+          foreach ( $sub_files as $sub ){
+            array_push($files, $this->real_to_url($sub));
+          }
+          $del = \bbn\file\dir::delete($d);
         }
-        $dir = dirname($path).'/';
-        if ( $dir === './' ){
-          $dir = '';
+        if ( empty($del) ){
+          $this->error("Impossible to delete the $wtype $d");
+          return false;
         }
-        $name = \bbn\str::file_ext($path, 1)[0];
-        $src_file = $dir.$name;
-        $dest_file = $dir.$data['name'];
-        $todo = [];
-        if ( $this->is_mvc($cfg) ){
-          foreach ( $cfg['files'] as $f ){
-            if ( $f != 'CTRL' ){
-              $src = $f['fpath'].$src_file;
-              $dest = dirname($src).'/'.$data['name'];
-              if ( $type === 'file' ){
-                $src .= '.'.$f['ext'];
-                $dest .= '.'.$f['ext'];
-              }
-              $is_dir = ($type === 'dir') && is_dir($src);
-              $is_file = ($type === 'dir') || $is_dir ? false : is_file($src);
-              if ( $is_dir || $is_file ){
-                if ( file_exists($dest) ){
-                  return $this->error("Un fichier du meme nom existe déjà $dest");
+      }
+      return $files;
+    }
+    return false;
+  }
+
+  public function export($dir, $path, $name, $type = 'file'){
+    if ( ($cfg = $this->dir($dir)) &&
+      ($root = $this->get_root_path($dir))
+    ){
+      $is_file = $type === 'file';
+      $wtype = $is_file ? 'file' : 'directory';
+      $rnd = \bbn\str::genpwd();
+      $root_dest = BBN_USER_PATH . 'tmp/' . $rnd . '/' . $name;
+      if ( !empty($cfg['is_mvc']) ){
+        $root = $this->get_root_path($cfg['code']);
+        $root_dest = $root_dest . '/mvc/';
+        foreach ( $cfg['tabs'] as $t ){
+          $path_tmp = $t['path'];
+          if ( dirname($path) !== '.' ){
+            $path_tmp .= dirname($path) . '/';
+          }
+          $path_tmp .= $is_file ? $name . '.' . $t['extensions'][0]['ext'] : $name;
+          if ( file_exists($root . $path_tmp) ){
+            if ( !\bbn\file\dir::create_path($root_dest . ($is_file ? dirname($path_tmp) : $path_tmp)) ){
+              $this->error("Impossible to create the path " . $root_dest . ($is_file ? dirname($path_tmp) : $path_tmp));
+              return false;
+            }
+            if ( !\bbn\file\dir::copy($root . $path_tmp, $root_dest . $path_tmp) ){
+              $this->error('Impossible to export the ' . $wtype . ' ' . $path_tmp);
+              return false;
+            }
+          }
+        }
+      }
+      else {
+        $real = $root . $path;
+        if ( file_exists($real) ){
+          $r = $is_file ? ((dirname($path) !== '.') ? dirname($path) : '') : $path;
+
+          if ( !\bbn\file\dir::create_path($root_dest . '/' . $r) ){
+            $this->error("Impossible to create the path " . $root_dest . '/' . $r);
+            return false;
+          }
+          if ( !\bbn\file\dir::copy($real, $root_dest . '/' . $path) ){
+            $this->error('Impossible to export the ' . $wtype . ' ' . $path);
+            return false;
+          }
+        }
+      }
+      // Create zip file
+      if ( class_exists('\\ZipArchive') ) {
+        $filezip = BBN_USER_PATH.'tmp/'.$name.'.zip';
+        $zip = new \ZipArchive();
+        if ( $err = $zip->open($filezip, \ZipArchive::OVERWRITE) ){
+          if ( file_exists($root_dest) ){
+            if ( (!$is_file) || !empty($cfg['is_mvc']) ){
+              // Create recursive directory iterator
+              $files = \bbn\file\dir::scan($root_dest);
+              foreach ($files as $file){
+                $tmp_dest = str_replace(
+                  $root_dest . (empty($cfg['is_mvc']) ? '/' : ''),
+                  (!empty($cfg['is_mvc']) ? 'mvc/' : ''),
+                  $file
+                );
+                // Add current file to archive
+                if ( ($file !== $root_dest.$name) &&
+                  is_file($file) &&
+                  !$zip->addFile($file, $tmp_dest)
+                ){
+                  $this->error("Impossible to add $file");
+                  return false;
                 }
-                else{
-                  $todo[$src] = $dest;
+              }
+            }
+            else {
+              if ( !$zip->addFile($root_dest, $path) ){
+                $this->error("Impossible to add $root_dest");
+                return false;
+              }
+            }
+            if ( $zip->close() ) {
+              if ( !\bbn\file\dir::delete(BBN_USER_PATH . 'tmp/' . $rnd, 1) ) {
+                $this->error("Impossible to delete the directory " . BBN_USER_PATH . 'tmp/' . $rnd);
+                return false;
+              }
+              return $filezip;
+            }
+            $this->error("Impossible to close the zip file $filezip");
+            return false;
+          }
+          $this->error("The path does not exist: $root_dest");
+          return false;
+        }
+        $this->error("Impossible to create $filezip ($err)");
+        return false;
+      }
+      $this->error("ZipArchive class non-existent");
+      return false;
+    }
+  }
+
+  public function rename($dir, $path, $new, $type = 'file'){
+    if ( ($cfg = $this->dir($dir)) &&
+      ($root = $this->get_root_path($dir)) &&
+      \bbn\str::check_filename($new)
+    ){
+      $is_file = $type === 'file';
+      $wtype = $is_file ? 'file' : 'directory';
+      $pi = pathinfo($path);
+      if ( $pi['filename'] !== $new ){
+        if ( !empty($cfg['is_mvc']) ){
+          // mvc root path
+          $root = $this->get_root_path($cfg['code']);
+          foreach ( $cfg['tabs'] as $i => $t ){
+            if ( $i !== '_ctrl' ){
+              // mvc tab's root path
+              $real = $root . $t['path'];
+              if ( $pi['dirname'] !== '.' ){
+                $real .= $pi['dirname'] . '/';
+              }
+              $real_new = $real . ($is_file ? $new . '.' . $t['extensions'][0]['ext'] : $new);
+              $real .= $is_file ? $pi['filename'] . '.' . $t['extensions'][0]['ext'] : $pi['filename'];
+              if ( file_exists($real) && !file_exists($real_new) ){
+                if ( !rename($real, $real_new) ){
+                  $this->error("Impossible to rename the $wtype " . $real );
+                  return false;
+                }
+                if ( $is_file && !empty($t['default']) ){
+                  $file_url = $this->real_to_url($real);
+                  $file_new_url = $this->real_to_url($real_new);
+                  $file_new = (($pi['dirname'] !== '.') ? $pi['dirname'] . '/' : '') . $new . ($is_file ? '.' . $t['extensions'][0]['ext'] : '');
+                  $file_new_name = (($pi['dirname'] !== '.') ? $pi['dirname'] . '/' : '') . $new;
+                  $file_new_ext = false;
                 }
               }
             }
           }
         }
         else {
-          $dest_file= $dir.\bbn\str::file_ext($data['name'], 1)[0];
-          $ext = \bbn\str::file_ext($data['path']);
-          $src = $cfg['root_path'].$src_file.($type === 'file' ? '.'.$ext : '');
-          $dest = dirname($src).'/'.\bbn\str::file_ext($data['name'], 1)[0].($type === 'file' ? '.'.$ext : '');
-          $is_dir = ($type === 'dir') && is_dir($src);
-          $is_file = ($type === 'dir') || $is_dir ? false : is_file($src);
-          if ( $is_dir || $is_file ){
-            if ( file_exists($dest) ){
-              return $this->error("Un fichier du meme nom existe déjà $dest");
+          $real = $root . $path;
+          $real_new = $root . $new . '.' . ($is_file ?  '.' . $pi['extension'] : '');
+          if ( file_exists($real) && !file_exists($real_new) ){
+            if ( !rename($real, $real_new) ){
+              $this->error("Impossible to rename the $wtype " . $real );
+              return false;
             }
-            else{
-              $todo[$src] = $dest;
-            }
-          }
-        }
-        foreach ( $todo as $src => $dest ){
-          if ( !rename($src, $dest) ){
-            return $this->error("Impossible de déplacer le fichier $src");
-          }
-        }
-        if ( isset($_SESSION[BBN_SESS_NAME]['ide']['list']) ){
-          $sess = [
-            'dir' => $data['dir'],
-            'file' => $data['path']
-          ];
-          if ( in_array($sess, $_SESSION[BBN_SESS_NAME]['ide']['list']) ){
-            unset($_SESSION[BBN_SESS_NAME]['ide']['list'][array_search($sess, $_SESSION[BBN_SESS_NAME]['ide']['list'])]);
-            array_push($_SESSION[BBN_SESS_NAME]['ide']['list'], [
-              'dir' => $data['dir'],
-              'file' => $dest_file.( empty($ext) ? '.php' : '.'.$ext )
-            ]);
+            $file_url = $this->real_to_url($real);
+            $file_new_url = $this->real_to_url($real_new);
+            $file_new = (($pi['dirname'] !== '.') ? $pi['dirname'] . '/' : '') . $new . ($is_file ?  '.' . $pi['extension'] : '');
+            $file_new_name = (($pi['dirname'] !== '.') ? $pi['dirname'] . '/' : '') . $new . ($is_file ?  '.' . $pi['extension'] : '');
+            $file_new_ext = $is_file ? $pi['extension'] : false;
           }
         }
         return [
-          'new_file' => $dest_file,
-          'new_file_ext' => empty($ext) ? '' : $ext
+          'file_url' => $file_url,
+          'file_new_url' => $file_new_url,
+          'file_new' => $file_new,
+          'file_new_name' => $file_new_name,
+          'file_new_ext' => $file_new_ext
         ];
       }
+      $this->error("The old name and the new name are identical.");
+      return false;
     }
-    return $this->error();
   }
 
   /**

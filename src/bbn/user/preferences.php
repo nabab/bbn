@@ -60,21 +60,29 @@ class preferences
 		$this->id_group = $this->cfg['id_group'] ?: false;
 	}
 
-	public function set_user($id_user){
-		if ( is_int($id_user) ){
-			$this->id_user = $id_user;
-		}
-		return $this;
-	}
+  public function set_user($id_user){
+    if ( is_int($id_user) ){
+      $this->id_user = $id_user;
+    }
+    return $this;
+  }
 
-	public function set_group($id_group){
-		if ( is_int($id_group) ){
-			$this->id_group = $id_group;
-		}
-		return $this;
-	}
+  public function set_group($id_group){
+    if ( is_int($id_group) ){
+      $this->id_group = $id_group;
+    }
+    return $this;
+  }
 
-	public function set_cfg($id, $cfg){
+  public function get_user($id_user){
+    return $this->id_user;
+  }
+
+  public function get_group($id_group){
+    return $this->id_group;
+  }
+
+  public function set_cfg($id, $cfg){
 		if ( is_array($cfg) ){
 			foreach ( $cfg as $k => $v ){
 				if ( in_array($k, $this->cfg['cols']) ){
@@ -147,21 +155,21 @@ class preferences
 	 *
 	 * @return int|false
 	 */
-	public function get_id($id_option){
+	public function get_id($id_option, $id_user = null, $id_group = null){
     $res = false;
 		if ( $this->id_user ){
 			$res = $this->db->select_one($this->cfg['table'], $this->cfg['cols']['id'], [
 				$this->cfg['cols']['id_option'] => $id_option,
-				$this->cfg['cols']['id_user'] => $this->id_user
+				$this->cfg['cols']['id_user'] => $id_user ?: $this->id_user
 			]);
 		}
-		if ( empty($res) && $this->id_group ) {
+		if ( !$id_user && empty($res) && $this->id_group ) {
 			$res = $this->db->select_one($this->cfg['table'], $this->cfg['cols']['id'], [
 				$this->cfg['cols']['id_option'] => $id_option,
-				$this->cfg['cols']['id_group'] => $this->id_group
+				$this->cfg['cols']['id_group'] => $id_group ?: $this->id_group
 			]);
 		}
-		return $res ?: false;
+		return $res;
 	}
 
 	/**
@@ -169,8 +177,11 @@ class preferences
 	 *
 	 * @return bool
 	 */
-	public function has($id_option){
-		return $this->get_id($id_option) ? true : false;
+	public function has($id_option, $id_user = null, $id_group = null){
+		return
+      ($this->id_group === 1) ||
+      $this->get_id($id_option, $id_user, $id_group) ?
+        true : false;
 	}
 
 	/**
