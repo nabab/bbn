@@ -327,7 +327,11 @@ class controller implements api{
 	 */
 	public function get_js($path='', array $data=null)
 	{
-    if ( $r = $this->get_view($path, 'js') ){
+    if ( is_array($path) ){
+      $data = $path;
+      $path = '';
+    }
+    if ( $r = $this->get_view($path, 'js', $data) ){
 /*
 			$data = json_encode(is_array($data) ? $data : $this->data);
 			return <<<EOD
@@ -342,6 +346,7 @@ EOD;
       return '
 <script>
 (function($){
+'.( empty($data) ? '' : 'var data = '.json_encode($data).';').'
 '.$r.'
 })(jQuery);
 </script>';

@@ -19,7 +19,11 @@ namespace bbn\user;
 class preferences
 {
 
-	protected static
+  private static
+    $id_permission_root;
+
+  protected static
+    $permission_root = 'bbn_permissions',
 		/** @var array */
 		$_defaults = [
 			'errors' => [
@@ -39,27 +43,45 @@ class preferences
 
 	protected
 		/** @var \bbn\appui\options */
-			$opt,
+    $options,
 		/** @var \bbn\db\connection */
-			$db,
+    $db,
 		/** @var array */
-			$cfg = [],
+    $cfg = [],
 		/** @var int */
 		$id_user,
 		/** @var int */
 		$id_group;
 
+  private static function _set_permission_root($root){
+    self::$id_permission_root = $root;
+  }
+
+  private function _get_permission_root(){
+    if ( is_null(self::$id_permission_root) &&
+      ($id = $this->options->from_path(self::$permission_root))
+    ){
+      self::_set_permission_root($id);
+    }
+    return self::$id_permission_root;
+  }
+
   /**
 	 * @return \bbn\user\permissions
 	 */
-	public function __construct(\bbn\appui\options $opt, \bbn\db\connection $db, array $cfg = []){
+	public function __construct(\bbn\appui\options $options, \bbn\db\connection $db, array $cfg = []){
 		$this->cfg = \bbn\x::merge_arrays(self::$_defaults, $cfg);
-		$this->opt = $opt;
+		$this->options = $options;
 		$this->db = $db;
 		$this->id_user = $this->cfg['id_user'] ?: false;
 		$this->id_group = $this->cfg['id_group'] ?: false;
 	}
 
+  /**
+   * Changes the current user
+   * @param $id_user
+   * @return $this
+   */
   public function set_user($id_user){
     if ( is_int($id_user) ){
       $this->id_user = $id_user;
@@ -67,6 +89,11 @@ class preferences
     return $this;
   }
 
+  /**
+   * Changes the current user's group
+   * @param $id_group
+   * @return $this
+   */
   public function set_group($id_group){
     if ( is_int($id_group) ){
       $this->id_group = $id_group;
@@ -74,14 +101,28 @@ class preferences
     return $this;
   }
 
-  public function get_user($id_user){
+  /**
+   * Returns the current user's ID
+   * @return int|false
+   */
+  public function get_user(){
     return $this->id_user;
   }
 
-  public function get_group($id_group){
+  /**
+   * Returns the current user's group's ID
+   * @return int|false
+   */
+  public function get_group(){
     return $this->id_group;
   }
 
+  /**
+   * Sets the cfg field of a given preference based on its ID
+   * @param int $id
+   * @param array $cfg
+   * @return int
+   */
   public function set_cfg($id, $cfg){
 		if ( is_array($cfg) ){
 			foreach ( $cfg as $k => $v ){
@@ -98,7 +139,13 @@ class preferences
 		]);
 	}
 
-	public function get_cfg($id, &$cfg=null){
+  /**
+   * Gets the cfg field of a given preference based on its ID
+   * @param $id
+   * @param null $cfg
+   * @return array
+   */
+  public function get_cfg($id, &$cfg=null){
 		if ( is_null($cfg) ){
 			$cfg = $this->db->rselect(
 				$this->cfg['table'],
@@ -123,31 +170,31 @@ class preferences
 	}
 
 	/**
-	 * Returns all the current user's permissions
-	 *
+	 * Returns the current user's preference based on his own profile and his group's
+	 * @param int $id_option
 	 * @return
 	 */
 	public function get($id_option){
-		if ( $this->id_user ){
-			$res = $this->db->rselect($this->cfg['table'], $this->cfg['cols'], [
-				$this->cfg['cols']['id_option'] => $id_option,
-				$this->cfg['cols']['id_user'] => $this->id_user
-			]);
-		}
-		if ( empty($res) && $this->id_group ) {
-			$res = $this->db->rselect($this->cfg['table'], $this->cfg['cols'], [
+    $res = [];
+    if ( $this->id_group &&
+      ($res1 = $this->db->rselect($this->cfg['table'], $this->cfg['cols'], [
 				$this->cfg['cols']['id_option'] => $id_option,
 				$this->cfg['cols']['id_group'] => $this->id_group
-			]);
+			]))
+    ){
+      $this->get_cfg($res['id'], $res1);
+      $res = \bbn\x::merge_arrays($res, $res1);
 		}
-		else{
-			return false;
+    if ( $this->id_user &&
+      ($res2 = $this->db->rselect($this->cfg['table'], $this->cfg['cols'], [
+				$this->cfg['cols']['id_option'] => $id_option,
+				$this->cfg['cols']['id_user'] => $this->id_user
+			]))
+    ){
+      $this->get_cfg($res['id'], $res2);
+      $res = \bbn\x::merge_arrays($res, $res2);
 		}
-		if ( $res ) {
-			$this->get_cfg($res['id'], $res);
-			return $res;
-		}
-		return false;
+    return empty($res) ? false : $res;
 	}
 
 	/**
@@ -157,17 +204,21 @@ class preferences
 	 */
 	public function get_id($id_option, $id_user = null, $id_group = null){
     $res = false;
-		if ( $this->id_user ){
+    if ( !\bbn\str::is_integer($id_option) ){
+      $id_option = $this->from_path($id_option);
+    }
+		if ( !$id_group && $this->id_user ){
 			$res = $this->db->select_one($this->cfg['table'], $this->cfg['cols']['id'], [
 				$this->cfg['cols']['id_option'] => $id_option,
 				$this->cfg['cols']['id_user'] => $id_user ?: $this->id_user
 			]);
 		}
-		if ( !$id_user && empty($res) && $this->id_group ) {
+		if ( !$id_user && empty($res) && ($this->id_group || $id_group) ) {
 			$res = $this->db->select_one($this->cfg['table'], $this->cfg['cols']['id'], [
-				$this->cfg['cols']['id_option'] => $id_option,
+				$this->cfg['cols']['id_option'] => (int)$id_option,
 				$this->cfg['cols']['id_group'] => $id_group ?: $this->id_group
 			]);
+			//die(var_dump($id_option, $res));
 		}
 		return $res;
 	}
@@ -177,23 +228,105 @@ class preferences
 	 *
 	 * @return bool
 	 */
-	public function has($id_option, $id_user = null, $id_group = null){
+	public function has($id_option, $id_user = null, $id_group = null, $force = false){
+    if ( !\bbn\str::is_integer($id_option) ){
+      $id_option = $this->from_path($id_option);
+    }
 		return
-      ($this->id_group === 1) ||
-      $this->get_id($id_option, $id_user, $id_group) ?
+      (!$force && $this->id_group === 1) ||
+      $this->get_id($id_option, $id_user, $id_group, $force) ?
         true : false;
 	}
 
-	/**
-	 * Returns all the current user's permissions
+  public function has_permission($path, $type = 'page', $id_user = null, $id_group = null, $force = false){
+    if ( $id_option = $this->from_path($path, $type) ){
+      return $this->has($id_option, $id_user, $id_group, $force);
+    }
+  }
+
+  public function is_permission($path, $type = 'page'){
+    return $this->from_path($path, $type) ? true : false;
+  }
+
+  public function from_path($path, $type = 'page'){
+    $parent = null;
+    if ( $root = $this->options->from_code($type, $this->_get_permission_root()) ){
+      $parts = explode('/', $path);
+      $num = count($parts);
+      foreach ( $parts as $i => $p ){
+        if ( !empty($p) ){
+          if ( is_null($parent) ){
+            $parent = $root;
+          }
+          $parent = $this->options->from_code($p.($i < $num-1 ? '/' : ''), $parent);
+        }
+      }
+    }
+    return $parent ?: false;
+  }
+
+
+  /**
+   * Returns all the current user's permissions
+   *
+   * @return
+   */
+  public function add_permission($id_option, $type = 'page', $id_user = null, $id_group = null){
+    if ( !\bbn\str::is_integer($id_option) ){
+      $id_option = $this->from_path($id_option, $type);
+    }
+    if ( $id = $this->get_id($id_option, $id_user, $id_group) ){
+      return $id;
+    }
+    $d = [
+      'id_option' => $id_option,
+    ];
+    if ( !empty($id_user) ){
+      $d['id_user'] = $id_user;
+    }
+    else if ( !empty($id_group) ){
+      $d['id_group'] = $id_group;
+    }
+    else{
+      return false;
+    }
+    if ( $r = $this->db->insert($this->cfg['table'], $d) ){
+      return $this->db->last_id();
+    }
+    return false;
+  }
+
+  /**
+   * Returns all the current user's permissions
+   *
+   * @return
+   */
+  public function remove_permission($id_option, $type = 'page', $id_user = null, $id_group = null){
+    if ( !\bbn\str::is_integer($id_option) ){
+      $id_option = $this->from_path($id_option, $type);
+    }
+    if ( $id_user && ($id = $this->get_id($id_option, $id_user)) ){
+      return $this->db->delete($this->cfg['table'], [$this->cfg['cols']['id'] => $id]);
+    }
+    if ( $id_group && ($id = $this->get_id($id_option, null, $id_group)) ){
+      return $this->db->delete($this->cfg['table'], [$this->cfg['cols']['id'] => $id]);
+    }
+    return false;
+  }
+
+  /**
+	 * Sets permission's config to user or group - and adds the permission if needed
 	 *
 	 * @return
 	 */
 	public function set($id_option, array $cfg, $id_user = null, $id_group = null){
-		if ( $id_group ) {
+    if ( !\bbn\str::is_integer($id_option) ){
+      $id_option = $this->from_path($id_option);
+    }
+    if ( !$id_user && $this->id_group ) {
 			$id = $this->db->get_val($this->cfg['table'], $this->cfg['cols']['id'], [
 				$this->cfg['cols']['id_option'] => $id_option,
-				$this->cfg['cols']['id_group'] => $id_group
+				$this->cfg['cols']['id_group'] => $id_group ?: $this->id_group
 			]);
 		}
 		else if ( $id_user || $this->id_user ){
@@ -223,6 +356,9 @@ class preferences
 	 * @return array
 	 */
 	public function delete($id_option, $id_user = null, $id_group = null){
+    if ( !\bbn\str::is_integer($id_option) ){
+      $id_option = $this->from_path($id_option);
+    }
 		if ( $id_group ) {
 			return $this->db->delete($this->cfg['table'], [
 				$this->cfg['cols']['id_option'] => $id_option,

@@ -52,33 +52,15 @@ class options
   }
 
   private function _cache_name($method, $uid){
-    return self::$_cache_prefix.$method.'-'.(string)$uid;
+    return self::$_cache_prefix.(string)$uid.'-'.$method;
   }
 
   private function _cache_delete($id, $parents = true, $deep = false){
-    $this->cacher->delete($this->_cache_name('option', $id), $id);
-    $this->cacher->delete($this->_cache_name('native_option', $id), $id);
-    $this->cacher->delete($this->_cache_name('options', $id), $id);
-    $this->cacher->delete($this->_cache_name('full_options', $id), $id);
-    $this->cacher->delete($this->_cache_name('native_options', $id), $id);
-    $this->cacher->delete($this->_cache_name('native_soptions', $id), $id);
-    $this->cacher->delete($this->_cache_name('soptions', $id), $id);
-    $this->cacher->delete($this->_cache_name('native_tree', $id), $id);
-    $this->cacher->delete($this->_cache_name('full_tree', $id), $id);
-    $this->cacher->delete($this->_cache_name('tree', $id), $id);
+    $this->cacher->delete_all($this->_cache_name('', $id));
     if ( $parents ){
       $ps = $this->parents($id);
       foreach ( $ps as $i => $p ){
-        if ( $i === 0 ){
-          $this->cacher->delete($this->_cache_name('options', $p), $p);
-          $this->cacher->delete($this->_cache_name('full_options', $p), $p);
-          $this->cacher->delete($this->_cache_name('native_options', $p), $p);
-          $this->cacher->delete($this->_cache_name('native_soptions', $p), $p);
-          $this->cacher->delete($this->_cache_name('soptions', $p), $p);
-        }
-        $this->cacher->delete($this->_cache_name('native_tree', $p), $p);
-        $this->cacher->delete($this->_cache_name('full_tree', $p), $p);
-        $this->cacher->delete($this->_cache_name('tree', $p), $p);
+        $this->cacher->delete_all($this->_cache_name('', $p));
       }
     }
     if ( $deep ){
@@ -654,13 +636,16 @@ class options
     return $res;
   }
 
-  public function from_path($path){
-    $parts = explode("|", $path);
+  public function from_path($path, $sep = '|'){
+    $parts = explode($sep, $path);
+    $parent = null;
     foreach ( $parts as $p ){
-      if ( !isset($parent) ){
-        $parent = $this->default;
+      if ( !empty($p) ){
+        if ( is_null($parent) ){
+          $parent = $this->default;
+        }
+        $parent = $this->from_code($p, $parent);
       }
-      $parent = $this->from_code($p, $parent);
     }
     return $parent ?: false;
   }

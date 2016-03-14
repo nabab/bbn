@@ -9,7 +9,7 @@ class menu {
     $id_public_root;
 
   protected static
-    $root = 'bbn_permissions|menus',
+    $root = 'bbn_menus',
     $public_root = 'bbn_permissions|page';
 
   protected

@@ -759,7 +759,7 @@ class mapper extends \bbn\objdb{
 				}
 			}
 			*/
-			$this->db->insert_update($this->admin_db.'.'.$this->prefix.'dbs',[
+			$this->db->insert_ignore($this->admin_db.'.'.$this->prefix.'dbs',[
         'id' => $db,
         'db' => $db,
         'host' => $this->db->host

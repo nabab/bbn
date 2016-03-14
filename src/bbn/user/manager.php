@@ -106,7 +106,12 @@ You can click the following link to access directly your account:<br>
       self::set_permissions();
     }
   }
-  
+
+  /**
+   * Returns all the users' groups - with or without admin
+   * @param bool $adm
+   * @return array|false
+   */
   public function groups($adm=false){
     return $this->db->get_rows("
       SELECT ".$this->db->cfn($this->cfg['arch']['groups']['id'], $this->cfg['tables']['groups'], 1)." AS `id`,
@@ -141,7 +146,7 @@ You can click the following link to access directly your account:<br>
     return false;
   }
   
-  public function get_list(){
+  public function get_list($group_id = null){
     
     $sql = "SELECT ";
     foreach ( self::$list_fields as $f ){
@@ -152,6 +157,7 @@ You can click the following link to access directly your account:<br>
     }
     $sql .= "
       GROUP_CONCAT(DISTINCT {$this->db->escape($this->cfg['tables']['groups'].'.'.$this->cfg['arch']['groups']['id'])} SEPARATOR ',') AS id_groups,
+      {$this->db->escape($this->cfg['tables']['groups'].'.'.$this->cfg['arch']['groups']['id'])} AS id_group,
       MAX({$this->db->escape($this->cfg['tables']['sessions'].'.'.$this->cfg['arch']['sessions']['last_activity'])}) AS last_activity,
       COUNT({$this->db->escape($this->cfg['tables']['sessions'].'.'.$this->cfg['arch']['sessions']['sess_id'])}) AS num_sessions
       FROM {$this->db->escape($this->cfg['tables']['users'])}
@@ -162,6 +168,8 @@ You can click the following link to access directly your account:<br>
         LEFT JOIN {$this->db->escape($this->cfg['tables']['sessions'])}
           ON {$this->db->escape($this->cfg['tables']['sessions'].'.'.$this->cfg['arch']['sessions']['id_user'])} = {$this->db->escape($this->cfg['tables']['users'].'.'.$this->cfg['arch']['users']['id'])}
       WHERE {$this->db->escape($this->cfg['tables']['users'].'.'.$this->cfg['arch']['users']['status'])} = 1
+      AND ".$this->cfg['arch']['usergroups']['id_group']." ".
+      ( $group_id ? "= ".(int)$group_id : "!= 1" )."
       GROUP BY {$this->db->escape($this->cfg['tables']['users'].'.'.$this->cfg['arch']['users']['id'])}
       ORDER BY {$this->db->escape($this->cfg['tables']['users'].'.'.$this->cfg['arch']['users']['login'])}";
     return $this->db->get_rows($sql);
@@ -180,17 +188,17 @@ You can click the following link to access directly your account:<br>
       $where);
   }
 
-  public function get_users($group_id){
-    if ( \bbn\str::is_integer($group_id) ) {
-      return $this->db->get_col_array("
-        SELECT DISTINCT(".$this->cfg['arch']['usergroups']['id_user'].")
-        FROM ".$this->cfg['tables']['usergroups']." AS g
-          JOIN ".$this->cfg['tables']['users']." AS u
-            ON u.".$this->cfg['arch']['users']['id']." = g.id_user
-            AND u.".$this->cfg['arch']['users']['status']." = 1
-        WHERE  ".$this->cfg['arch']['usergroups']['id_group']." = ?",
-        $group_id);
-    }
+  public function get_users($group_id = null){
+    return $this->db->get_col_array("
+      SELECT DISTINCT(".$this->cfg['arch']['usergroups']['id_user'].")
+      FROM ".$this->cfg['tables']['usergroups']." AS g
+        JOIN ".$this->cfg['tables']['users']." AS u
+          ON u.".$this->cfg['arch']['users']['id']." = g.id_user
+          AND u.".$this->cfg['arch']['users']['status']." = 1
+      WHERE {$this->db->escape($this->cfg['tables']['users'].'.'.$this->cfg['arch']['users']['status'])} = 1
+      AND ".$this->cfg['arch']['usergroups']['id_group']." ".
+      ( $group_id ? "= ".(int)$group_id : "!= 1" )
+    );
   }
 
   /**
@@ -440,4 +448,3 @@ You can click the following link to access directly your account:<br>
   }
 
 }
-?>
