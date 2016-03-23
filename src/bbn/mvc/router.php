@@ -218,6 +218,12 @@ class router {
     return $this->known[$mode][$path];
   }
 
+  /**
+   * Return the actual controller file corresponding to a gievn path
+   * @param string $path
+   * @param string $mode
+   * @return mixed
+   */
   private function find_controller($path, $mode){
     /** @var string $root Where the files will be searched for by default */
     $root = $this->get_root($mode);
@@ -227,6 +233,7 @@ class router {
     $args = [];
     // We go through each path, starting by the longest until it's empty
     while (strlen($tmp) > 0) {
+      //var_dump($tmp);
       if ($this->is_known($tmp, $mode)) {
         return $this->get_known($tmp, $mode);
       }
@@ -301,6 +308,7 @@ class router {
       }
     }
     // Not found, sending the default controllers
+    //die(var_dump('-----', $mode, $tmp));
     if ( !$file ){
       if ( (
           ($mode === 'dom') &&
@@ -404,6 +412,7 @@ class router {
       if ( $this->prepath && (strpos($path, '/') !== 0) && (strpos($path, $this->prepath) !== 0) ){
         $path = $this->prepath.$path;
       }
+
 
       // We only try to retrieve a file path through a whole URL for controllers
       if (in_array($mode, self::$controllers)) {

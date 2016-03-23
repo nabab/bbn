@@ -239,6 +239,9 @@ class preferences
 	}
 
   public function has_permission($path, $type = 'page', $id_user = null, $id_group = null, $force = false){
+		if ( is_null($id_group) && is_null($id_user) && ($this->id_group === 1) ){
+			return 1;
+		}
     if ( $id_option = $this->from_path($path, $type) ){
       return $this->has($id_option, $id_user, $id_group, $force);
     }

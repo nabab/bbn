@@ -34,7 +34,8 @@ class virtualmin {
     $message;
 
   /**
-   * This is the default construtor
+   * virtualmin constructor.
+   * @param array $cfg
    */
   public function __construct(array $cfg) {
     if ( isset($cfg['user'], $cfg['pass']) ){
@@ -42,14 +43,24 @@ class virtualmin {
       $this->pass = $cfg['pass'];
       $this->hostname = isset($cfg['host']) ? $cfg['host'] : 'localhost';
       $this->checked = true;
-      $this->cacher = \bbn\cache::get_engine();
-      if ( !$this->cacher->has(self::cache_name) ){
-        $this->fetch_commands();
+      if ( class_exists('\\bbn\\cache') ){
+        $this->cacher = \bbn\cache::get_engine();
+        if ( !$this->cacher->has(self::cache_name) ){
+          $this->fetch_commands();
+        }
+        $this->commands = $this->cacher->get(self::cache_name);
       }
-      $this->commands = $this->cacher->get(self::cache_name);
+      else{
+        $this->commands = $this->fetch_commands();
+      }
     }
   }
 
+  /**
+   * @param $name
+   * @param $arguments
+   * @return array|bool
+   */
   public function __call($name, $arguments){
     if ( $this->checked ){
       $cmd_name = str_replace('_', '-', $name);
@@ -98,6 +109,9 @@ class virtualmin {
     return false;
   }
 
+  /**
+   * @return array
+   */
   private function fetch_commands(){
     if ( $this->checked ){
       $raw_commands = $this->list_commands();
@@ -132,6 +146,7 @@ class virtualmin {
 
   /**
    * This function is used to sanitize the strings which are given as parameters
+   * @param string $st
    * @return string The the header url part to be executed
    */
   private function sanitize($st) {
@@ -160,7 +175,7 @@ class virtualmin {
   }
 
   /**
-   * This function is used to execute the $request using shell_exec
+   * Executes the $request using shell_exec
    * @param string $request the command to be excecuted
    * @return array an array with the execution status and message
    */
@@ -189,7 +204,7 @@ class virtualmin {
   }
 
   /**
-   * This function is used to process the parameters
+   * Sanitize each parameter
    * @param array $param the raw parameters
    * @return array the processed parameters
    */
@@ -208,6 +223,7 @@ class virtualmin {
   }
 
   /**
+   * Returns the arguments description of a given command
    * @param $name The command name
    * @return array
    */
@@ -218,6 +234,10 @@ class virtualmin {
     }
   }
 
+  /**
+   * Returns an array containing all the commands and their parameters
+   * @return array
+   */
   public function get_commands(){
     if ( $this->checked ){
       return $this->commands;
@@ -225,7 +245,11 @@ class virtualmin {
   }
 
 
-
+  /**
+   * Gets all the commands directly from the API
+   * @param array $param
+   * @return array
+   */
   public function list_commands($param = ['multiline' => 1]) {
     //Prepping, processing and validating the create user parameters
     $param = $this->process_parameters($param);
@@ -252,6 +276,10 @@ class virtualmin {
     return $this->call_shell_exec($url_part);
   }
 
+  /**
+   * @param $command
+   * @return array
+   */
   public function get_command($command) {
     $command = str_replace('_', '-', $command);
     //Setting the last action performed
@@ -267,6 +295,24 @@ class virtualmin {
     return $this->call_shell_exec($url_part);
   }
 
+  /**
+   * Returns a string of PHP code for executing a given command with all its possible parameters pre-populated
+   * @param $command
+   * @return bool|string
+   */
+  public function generate($command){
+    $perl_cmd = str_replace('_', '-', $command);
+    if ( isset($this->commands[$perl_cmd]) ){
+      $cmd = $this->commands[$perl_cmd];
+      $st = '$vm->'.$command.'(['.PHP_EOL;
+      foreach ( $cmd['args'] as $k => $v ){
+        $st .= "'$k' => ".($v['binary'] ? '0' : "''").PHP_EOL;
+      }
+      $st .= ']);';
+      return $st;
+    }
+    return false;
+  }
 }
 
 

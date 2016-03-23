@@ -388,6 +388,28 @@ class options
     }
   }
 
+  public function options_by_alias($id_alias, $full = false){
+    if ( \bbn\str::is_integer($id_alias) ){
+      $where = [$this->cfg['cols']['id_alias'] => $id_alias];
+      $list = $this->get_rows($where);
+      if ( is_array($list) ){
+        $res = [];
+        foreach ($list as $i ){
+          if ( $full ){
+            array_push($res, $this->option($i));
+          }
+          else{
+            unset($i['value'], $i['cfg']);
+            array_push($res, $i);
+          }
+
+        }
+        return $res;
+      }
+    }
+    return false;
+  }
+
   /**
    * Returns all the infos about the options with a given parent in an array indexed on their IDs
    *
@@ -528,6 +550,10 @@ class options
       !empty($it[$c['text']]) &&
       ($parent = $this->option($it[$c['id_parent']]))
     ){
+      // If code is empty it MUST be null
+      if ( empty($it[$c['code']]) ){
+        $it[$c['code']] = null;
+      }
       // In this case we look for an inherited parent
       if ( empty($parent['cfg']['inheritance']) ){
         $parents = $this->parents($it[$c['id_parent']]);
