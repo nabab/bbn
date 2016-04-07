@@ -47,7 +47,7 @@ class controller implements api{
   public
     /**
      * The db connection if accepted by the mvc class
-     * @var null|\bbn\db\connection
+     * @var null|\bbn\db
      */
     $db,
     /**
@@ -464,12 +464,12 @@ EOD;
 		else if ( strpos($path, './') === 0 ){
 			$path = $this->say_dir().substr($path, 1);
 		}
-    if ( !isset($mode) ) {
-      $mode = 'html';
-    }
     if ( !isset($data) ) {
       $data = $this->data;
     }
+		if ( !isset($mode) ) {
+			$mode = 'html';
+		}
 		$v = $this->mvc->get_view($path, $mode, $data);
     if ( !$v && $die ){
       die("Impossible to find the $mode view $path");
@@ -480,9 +480,9 @@ EOD;
 	public function combo($title = '', $data=[]){
 		echo $this->get_less($this->path, false).
 			$this->set_title($title)
-				->add_js($data, false)
 				->add_data($this->post)
 				->add_data($this->get_model())
+				->add_js($this->path, is_array($data) && count($data) ? $data : ( $data ? $this->data : false))
 				->get_view($this->path, false);
 	}
 
@@ -509,45 +509,6 @@ EOD;
   {
     return $this->dir;
   }
-
-  /**
-	 * This will get a PHP template view
-	 *
-	 * @param string $path
-	 * @param string $mode
-	 * @return string|false
-	 */
-	private function get_php($path='', $mode='')
-	{
-		if ( $this->mode && !is_null($this->dest) && $this->check_path($path, $this->mode) ){
-			if ( empty($mode) ){
-				$mode = $this->mode;
-			}
-			if ( empty($path) ){
-				$path = $this->dest;
-			}
-			if ( isset($this->outputs[$mode]) ){
-				$file = $path.'.php';
-				if ( isset($this->loaded_phps[$file]) ){
-					$bbn_php = $this->loaded_phps[$file];
-				}
-				else if ( is_file(self::vpath.$file) ){
-					$bbn_php = $this->add_php($file);
-				}
-				if ( isset($bbn_php) ){
-					$args = [];
-					if ( $this->has_data() ){
-						foreach ( (array)$this->data as $key => $val ){
-							$$key = $val;
-							array_push($args, '$'.$key);
-						}
-					}
-					return eval('return call_user_func(function() use ('.implode(',', $args).'){ ?>'.$bbn_php.' <?php });');
-				}
-			}
-		}
-		return false;
-	}
 
   private function get_prepath(){
     if ( $this->exists() ){

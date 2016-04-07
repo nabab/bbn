@@ -27,16 +27,11 @@ class task {
     }
   }
 
-  public function __construct(\bbn\db $db, \bbn\user\connection $user, \bbn\appui\options $options){
+  public function __construct(\bbn\db $db, $user){
     $this->db = $db;
-    $this->options = $options;
     $this->id_user = $user->get_id();
     $this->user = $user->get_name();
     $this->mgr = new \bbn\user\manager($user);
-  }
-
-  public function categories(){
-    return $this->options->tree('bbn_tasks');
   }
 
   public function info($id){

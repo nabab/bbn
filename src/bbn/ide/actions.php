@@ -16,7 +16,7 @@ class actions {
     return false;
   }
 
-  public function __construct(\bbn\db\connection $db){
+  public function __construct(\bbn\db $db){
     $this->db = $db;
   }
 

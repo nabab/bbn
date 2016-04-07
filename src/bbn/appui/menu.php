@@ -9,7 +9,9 @@ class menu {
     $id_public_root;
 
   protected static
-    $root = 'bbn_menus',
+    /** @var string path where the menus are */
+    $root = 'bbn_permissions|menus',
+    /** @var string path where the permissions and real path are */
     $public_root = 'bbn_permissions|page';
 
   protected

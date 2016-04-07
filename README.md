@@ -23,7 +23,7 @@ A quick example:
 
 ```php
 <?php
-$db = new \bbn\db\connection($cfg);
+$db = new \bbn\db($cfg);
 
 \bbn\x::hdump($db->modelize("my_table_name"));
 

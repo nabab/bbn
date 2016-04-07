@@ -27,7 +27,7 @@ class mysql implements \bbn\db\engines
   /**
    * 
    */
-  public function __construct(\bbn\db\connection $db = null) {
+  public function __construct(\bbn\db $db = null) {
     if ( !extension_loaded('pdo_mysql') ){
       die("The MySQL driver for PDO is not installed...");
     }

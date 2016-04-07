@@ -193,7 +193,7 @@ class connection
           
 
 	public
-          /** @var \bbn\db\connection */
+          /** @var \bbn\db */
           $db,
           /** @var mixed */
           $prev_time;
@@ -248,13 +248,13 @@ class connection
   }
   
   /**
-   * @param \bbn\db\connection $db
+   * @param \bbn\db $db
    * @param array $cfg
    * @param array|string $credentials
    *
 	 * @return \bbn\user\connection
 	 */
-	public function __construct(\bbn\db\connection $db, array $cfg, $credentials='')
+	public function __construct(\bbn\db $db, array $cfg, $credentials='')
 	{
     self::init();
 

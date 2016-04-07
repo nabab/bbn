@@ -55,7 +55,7 @@ class permissions
 
 
 	public
-          /** @var \bbn\db\connection */
+          /** @var \bbn\db */
           $db,
           /** @var mixed */
           $prev_time;
@@ -79,7 +79,7 @@ class permissions
 	/**
 	 * @return \bbn\user\permissions
 	 */
-	public function __construct(\bbn\db\connection $db, \bbn\appui\options $opt){
+	public function __construct(\bbn\db $db, \bbn\appui\options $opt){
 		$this->db = $db;
 		$this->opt = $opt;
 	}

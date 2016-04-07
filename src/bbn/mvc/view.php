@@ -87,8 +87,17 @@ class view{
 					return $this->content;
         case 'css':
 					return $this->content;
-        case 'html':
-		      return is_array($data) ? \bbn\tpl::render($this->content, $data) : $this->content;
+				case 'html':
+					return is_array($data) ? \bbn\tpl::render($this->content, $data) : $this->content;
+				case 'php':
+					$args = [];
+					if ( is_array($data) ){
+						foreach ( $data as $key => $val ){
+							$$key = $val;
+							array_push($args, '$'.$key);
+						}
+					}
+					return eval('return call_user_func(function() use ('.implode(',', $args).'){ ?>'.$this->content.' <?php });');
           break;
       }
 		}

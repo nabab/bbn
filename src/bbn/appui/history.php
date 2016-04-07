@@ -7,7 +7,7 @@ class history
 {
 
 	private static
-          /** @var \bbn\db\connection $db The DB connection */
+          /** @var \bbn\db $db The DB connection */
           $db,
           /** @var array A collection of the  */
           $dbs = [],
@@ -66,7 +66,7 @@ class history
   /**
 	 * @return void
 	 */
-	public static function init(\bbn\db\connection $db, $cfg = [])
+	public static function init(\bbn\db $db, $cfg = [])
 	{
     $hash = $db->get_hash();
     if ( !in_array($hash, self::$dbs) ){
@@ -598,7 +598,7 @@ class history
   }
 
 	/**
-	 * The function used by the \bbn\db\connection trigger
+	 * The function used by the \bbn\db trigger
    * This will basically execute the history query if it's configured for.
    *
    * @param string $table The table for which the history is called

@@ -50,7 +50,7 @@ class config
 	/**
 	 * @return void 
 	 */
-	public function __construct($cfg, \bbn\db\connection $db)
+	public function __construct($cfg, \bbn\db $db)
 	{
 		$this->db = $db;
 		$this->cfg = $this->_defaults;

@@ -44,7 +44,7 @@ class preferences
 	protected
 		/** @var \bbn\appui\options */
     $options,
-		/** @var \bbn\db\connection */
+		/** @var \bbn\db */
     $db,
 		/** @var array */
     $cfg = [],
@@ -69,7 +69,7 @@ class preferences
   /**
 	 * @return \bbn\user\permissions
 	 */
-	public function __construct(\bbn\appui\options $options, \bbn\db\connection $db, array $cfg = []){
+	public function __construct(\bbn\appui\options $options, \bbn\db $db, array $cfg = []){
 		$this->cfg = \bbn\x::merge_arrays(self::$_defaults, $cfg);
 		$this->options = $options;
 		$this->db = $db;
@@ -374,6 +374,36 @@ class preferences
 				$this->cfg['cols']['id_user'] => $id_user ? $id_user : $this->id_user
 			]);
 		}
+	}
+
+	/**
+	 * Adapts a given array of options' to user's permissions
+	 *
+	 * @param array $arr
+	 * @return array
+	 */
+	public function customize(array $arr){
+		$res = [];
+		if ( isset($arr[0]) ){
+			foreach ( $arr as $a ){
+				if ( isset($a['id']) && $this->has($a['id']) ){
+					array_push($res, $a);
+				}
+			}
+		}
+		else if ( isset($arr['items']) ){
+			$res = $arr;
+			unset($res['items']);
+			foreach ( $arr['items'] as $a ){
+				if ( isset($a['id']) && $this->has($a['id']) ){
+					if ( !isset($res['items']) ){
+						$res['items'] = [];
+					}
+					array_push($res['items'], $a);
+				}
+			}
+		}
+		return $res;
 	}
 
 }

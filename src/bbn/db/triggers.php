@@ -96,7 +96,7 @@ trait triggers {
   /**
    * Enable the triggers' functions
    *
-   * @return \bbn\db\connection
+   * @return \bbn\db
    */
   public function enable_trigger(){
     $this->triggers_disabled = false;
@@ -106,7 +106,7 @@ trait triggers {
   /**
    * Disable the triggers' functions
    *
-   * @return \bbn\db\connection
+   * @return \bbn\db
    */
   public function disable_trigger(){
     $this->triggers_disabled = true;
@@ -120,7 +120,7 @@ trait triggers {
    * @param string $kind select|insert|update|delete
    * @param string $moment before|after
    * @param string|array table database's table(s) name(s)
-   * @return \bbn\db\connection
+   * @return \bbn\db
    */
   public function set_trigger($function, $kind='', $moment='', $tables='*' ){
     if ( is_callable($function) ){

@@ -21,7 +21,7 @@ namespace bbn\appui;
 class cron extends \bbn\obj{
 
 	private
-          /* @var \bbn\db\connection The DB connection */
+          /* @var \bbn\db The DB connection */
           $db = false,
           /* @var string The tables' prefix (the tables will be called ?cron and ?journal) */
           $prefix = 'bbn_',

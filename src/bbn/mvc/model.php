@@ -25,7 +25,7 @@ class model{
 
 	private
 		/**
-		 * @var \bbn\db\connection Database object
+		 * @var \bbn\db Database object
 		 */
 		$db,
     /**
@@ -49,11 +49,11 @@ class model{
    * They are all created from \bbn\mvc::get_model
 	 *
    * @param array  $info The full path to the model's file
-	 * @param null|\bbn\db\connection $db The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books/466565 or html/home)</em>
+	 * @param null|\bbn\db $db The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books/466565 or html/home)</em>
 	 * @param string | object $parent The parent controller</em>
 	 * @return bool
 	 */
-	public function __construct(array $info, \bbn\db\connection $db=null, controller $ctrl){
+	public function __construct(array $info, \bbn\db $db=null, controller $ctrl){
 		if ( $this->check_path() ){
       $this->ctrl = $ctrl;
 			$this->inc = $this->ctrl->inc;

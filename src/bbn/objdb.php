@@ -21,11 +21,11 @@ class objdb extends obj
 {
 	protected
 		/**
-		 * @var \bbn\db\connection
+		 * @var \bbn\db
 		 */
 		$db;
 
-	public function __construct(\bbn\db\connection $db)
+	public function __construct(\bbn\db $db)
 	{
 		$this->db = $db;
 	}

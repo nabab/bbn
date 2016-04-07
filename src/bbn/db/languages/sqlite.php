@@ -25,7 +25,7 @@ class sqlite implements \bbn\db\engines
   /**
    * 
    */
-  public function __construct(\bbn\db\connection $db = null) {
+  public function __construct(\bbn\db $db = null) {
     if ( !extension_loaded('pdo_sqlite') ){
       die("The SQLite driver for PDO is not installed...");
     }

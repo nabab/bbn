@@ -40,7 +40,7 @@ class options
     ];
 
   protected
-    /** @var \bbn\db\connection The database connection */
+    /** @var \bbn\db The database connection */
     $db,
     /** @var \bbn\cache The cache object */
     $cacher,
@@ -64,9 +64,9 @@ class options
       }
     }
     if ( $deep ){
-      $items = $this->items($id);
+      $items = $this->tree_ids($id);
       foreach ( $items as $item ){
-        $this->_cache_delete($item, false, 1);
+        $this->_cache_delete($item, false);
       }
     }
     return $this;
@@ -127,10 +127,10 @@ class options
 
   /**
    * options constructor.
-   * @param \bbn\db\connection $db
+   * @param \bbn\db $db
    * @param array $cfg
    */
-  public function __construct(\bbn\db\connection $db, array $cfg=[]){
+  public function __construct(\bbn\db $db, array $cfg=[]){
     $this->db = $db;
     $this->cfg = \bbn\x::merge_arrays(self::$_defaults, $cfg);
     $this->cacher = \bbn\cache::get_engine();
@@ -292,6 +292,9 @@ class options
         $this->get_value($opt);
         $this->get_cfg($opt);
         if ( \bbn\str::is_integer($opt['id_alias']) ){
+          if ( $opt['id_alias'] === $id ){
+            die("Impossible to have the same ID as ALIAS, check out ID $id");
+          }
           $opt['alias'] = $this->option($opt['id_alias']);
         }
         $this->cacher->set($this->_cache_name(__FUNCTION__, $id), $opt);
@@ -457,8 +460,25 @@ class options
     return false;
   }
 
-  public function tree($id, $id_parent = false, $root = ''){
-    $id = $this->from_code($id, $id_parent ?: $this->default);
+  public function tree_ids($id, &$res = []){
+    $id = $this->from_code(func_get_args());
+    if ( \bbn\str::is_integer($id) ) {
+      if ( $this->cacher->has($this->_cache_name(__FUNCTION__, $id)) ){
+        return $this->cacher->get($this->_cache_name(__FUNCTION__, $id));
+      }
+      if ( $opts = $this->items($id) ){
+        foreach ($opts as $o) {
+          array_push($res, $o);
+          $this->tree_ids($o, $res);
+        }
+      }
+      return $res;
+    }
+    return false;
+  }
+
+  public function tree($id, $id_parent = false){
+    $id = $this->from_code(func_get_args());
     if ( \bbn\str::is_integer($id) && ($text = $this->text($id)) ) {
       if ( $this->cacher->has($this->_cache_name(__FUNCTION__, $id)) ){
         return $this->cacher->get($this->_cache_name(__FUNCTION__, $id));
@@ -541,11 +561,18 @@ class options
     return false;
   }
 
+  /**
+   * @param $it
+   * @return bool
+   */
   private function _prepare(&$it){
+    // The table's columns
     $c = $this->cfg['cols'];
+    // If id_parent is undefined it uses the default
     if ( !isset($it[$c['id_parent']]) ){
       $it[$c['id_parent']] = $this->default;
     }
+    // Text is required and parent exists
     if ( isset($it[$c['id_parent']]) &&
       !empty($it[$c['text']]) &&
       ($parent = $this->option($it[$c['id_parent']]))
@@ -572,6 +599,9 @@ class options
       }
       if ( empty($it[$c['value']]) ){
         $it[$c['value']] = [];
+      }
+      if ( isset($it['alias']) ){
+        unset($it['alias']);
       }
       if ( isset($it['num_children']) ){
         unset($it['num_children']);
@@ -1183,18 +1213,22 @@ class options
     return false;
   }
 
-  public function get_id(){
+  public function get_id_or_create(){
     $args = func_get_args();
+    // If the ID doesn't exist yet
     if ( !($id = $this->from_code($args)) ){
+      // check there is a first argument with code and other(s)
       if ( is_string($args[0]) && (count($args) > 1) ){
-        $code = $args[0];
-        array_shift($args);
-        if ( !($id = $this->from_code($args)) ){
+        // Use the code for creation
+        $code = array_shift($args);
+        // If the rest of the arguments correspond to an option it will create a new one with this ID as parent
+        if ( $id = $this->from_code($args) ){
           $this->add([
             'code' => $code,
             'text' => $code,
             'id_parent' => $id
           ]);
+          // After adding it we should be able to retrieve the ID
           $id = $this->from_code(func_get_args());
         }
       }

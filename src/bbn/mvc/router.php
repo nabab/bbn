@@ -29,7 +29,7 @@ class router {
      */
     $filetypes = [
       'model' => ['php'],
-      'html' => ['html'],
+      'html' => ['html', 'php'],
       'js' => ['js', 'coffee'],
       'css' => ['css', 'less', 'scss']
     ],

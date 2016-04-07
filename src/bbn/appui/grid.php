@@ -21,7 +21,7 @@ namespace bbn\appui;
 class grid extends \bbn\obj{
 
 	private
-          /* @var \bbn\db\connection The DB connection */
+          /* @var \bbn\db The DB connection */
           $db = false,
           /* @var string The tables' prefix (the tables will be called ?cron and ?journal) */
           $prefix = 'bbn_',
@@ -32,7 +32,7 @@ class grid extends \bbn\obj{
           $fields = null,
           $additional_fields = [];
 
-  public function __construct(\bbn\db\connection $db, $cfg, $table = null, $fields = null){
+  public function __construct(\bbn\db $db, $cfg, $table = null, $fields = null){
     if ( is_array($cfg) ){
       $this->db = $db;
       $this->cfg['start'] = isset($cfg['skip']) &&

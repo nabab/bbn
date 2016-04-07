@@ -8,7 +8,7 @@ class dbsync
 
 	public static
           /**
-           * @var \bbn\db\connection The DB connection
+           * @var \bbn\db The DB connection
            */
           $db = false,
           $dbs = false,
@@ -73,7 +73,7 @@ class dbsync
 	/**
 	 * @return void
 	 */
-	public static function init(\bbn\db\connection $db, $dbs='', $tables=[], $dbs_table=''){
+	public static function init(\bbn\db $db, $dbs='', $tables=[], $dbs_table=''){
     self::$db = $db;
     self::def($dbs, $dbs_table);
     self::$tables = $tables;
@@ -94,7 +94,7 @@ class dbsync
 
   public static function first_call(){
     if ( is_array(self::$dbs) ){
-      self::$dbs = new \bbn\db\connection(self::$dbs);
+      self::$dbs = new \bbn\db(self::$dbs);
     }
     if ( \bbn\appui\history::$is_used ){
       self::$has_history = 1;
@@ -144,7 +144,7 @@ class dbsync
 	 * @return bool
 	 */
   public static function check(){
-    return ( is_object(self::$db) && (get_class(self::$dbs) === 'bbn\db\connection') );
+    return ( is_object(self::$db) && (get_class(self::$dbs) === 'bbn\db') );
   }
 
   public static function disable(){
@@ -212,7 +212,7 @@ class dbsync
   // Looking at the rows from the other DB with status = 0 and setting them to 1
   // Comparing the new rows with the ones from this DB
   // Deleting the rows from this DB which have state = 1
-  public static function sync(\bbn\db\connection $db, $dbs='', $dbs_table='', $num_try = 0){
+  public static function sync(\bbn\db $db, $dbs='', $dbs_table='', $num_try = 0){
 
     if ( !$num_try ){
       self::def($dbs, $dbs_table);

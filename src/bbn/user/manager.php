@@ -201,6 +201,16 @@ You can click the following link to access directly your account:<br>
     );
   }
 
+  public function get_name($user, $full = true){
+    if ( !is_array($user) ){
+      $user = $this->get_user($user);
+    }
+    if ( is_array($user) ){
+      return $user[$this->cfg['arch']['users']['login']];
+    }
+    return '';
+  }
+
   /**
    * Creates a new user and returns its configuration (with the new ID)
    * 

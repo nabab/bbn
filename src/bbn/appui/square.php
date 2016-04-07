@@ -5,7 +5,7 @@ class square
 {
 	private $id, $site, $change = false;
 	
-	public function __construct(\bbn\db\connection $db, $schema)
+	public function __construct(\bbn\db $db, $schema)
 	{
 		$this->db = $db;
 		if ( $this->db->current !== 'bbn' ){

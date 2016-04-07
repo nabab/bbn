@@ -86,6 +86,7 @@ class connection
                 'id' => 'id',
                 'email' => 'email',
                 'login' => 'email',
+                'admin' => 'admin',
                 'cfg' => 'cfg',
                 'status' => 'active'
               ],
@@ -161,7 +162,7 @@ class connection
 
 
 	public
-          /** @var \bbn\db\connection */
+          /** @var \bbn\db */
           $db,
           /** @var mixed */
           $prev_time;
@@ -243,12 +244,12 @@ class connection
 
   /**
    * connection constructor.
-   * @param \bbn\db\connection $db
+   * @param \bbn\db $db
    * @param session $session
    * @param array $cfg
    * @param string $credentials
    */
-  public function __construct(\bbn\db\connection $db, session $session, array $cfg, $credentials=''){
+  public function __construct(\bbn\db $db, session $session, array $cfg, $credentials=''){
 		$this->db = $db;
     $this->session = $session;
 
@@ -386,6 +387,7 @@ class connection
         }
         $this->set_session('permissions', $this->permissions);
         $this->set_session('groups', $this->groups);
+        $this->set_session('id_group', count($this->groups) ? $this->groups[0] : false);
       }
     }
     return $this;
@@ -821,7 +823,7 @@ class connection
 	 */
   public function is_admin()
   {
-    return (isset($this->permissions["admin"]) && $this->permissions["admin"]);
+    return (isset($this->permissions["admin"]) && $this->permissions["admin"]) || $this->session->get('info', 'admin');
   }
 
 	/**

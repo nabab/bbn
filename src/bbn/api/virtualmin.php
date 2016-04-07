@@ -105,6 +105,34 @@ class virtualmin {
         //Calling shell_exec and returning the result array
         return $this->call_shell_exec($url_part);
       }
+      // We force even if we don't have the command in the list
+      else if ( !empty($arguments[1]) ){
+        $args = $this->process_parameters($arguments[0]);
+        $url_part = $cmd_name;
+        foreach ( $args as $k => $v ){
+          if ( is_array($v) ){
+            foreach ( $v as $w ){
+              $url_part .= "&$k=$w";
+            }
+          }
+          else if ( $v === 1 ){
+            $url_part .= "&$k";
+          }
+          else{
+            $url_part .= "&$k=$v";
+          }
+        }
+        //Concatenating the closing single quote
+        $url_part .= "'";
+        //Concatenating the header url and $url_part to create the full url to be executed
+        $url_part = $this->get_header_url() . $url_part;
+        var_dump($url_part);
+        //Calling shell_exec and returning the result array
+        return $this->call_shell_exec($url_part);
+      }
+      else{
+        die("The command $name doesn't exist...");
+      }
     }
     return false;
   }

@@ -57,7 +57,7 @@ class mvc implements \bbn\mvc\api{
      */
     $controller,
     /**
-     * @var \bbn\db\connection Database object
+     * @var \bbn\db Database object
      */
     $db,
     /**
@@ -147,7 +147,7 @@ class mvc implements \bbn\mvc\api{
 	 */
 	public function __construct($db = null, $routes = []){
     $this->env = new \bbn\mvc\environment();
-		if ( is_object($db) && ( $class = get_class($db) ) && ( $class === 'PDO' || strpos($class, 'bbn\\db\\') !== false ) ){
+		if ( is_object($db) && ( $class = get_class($db) ) && ( $class === 'PDO' || strpos($class, 'bbn\\db') !== false ) ){
 			$this->db = $db;
 		}
 		else{

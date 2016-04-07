@@ -78,12 +78,12 @@ class mapper extends \bbn\objdb{
           $auto_update = false;
 
   /**
-   * @param \bbn\db\connection $db A valid database connection
+   * @param \bbn\db $db A valid database connection
    * @param string $prefix
    * @throws \Exception
    * @return void
    */
-  public function __construct( \bbn\db\connection $db, $database = '', $prefix='bbn'){
+  public function __construct( \bbn\db $db, $database = '', $prefix='bbn'){
     // Checking the prefix string
     parent::__construct($db);
     if ( \bbn\str::check_name($prefix) || ($prefix === false) ){

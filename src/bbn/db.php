@@ -2,7 +2,7 @@
 /**
  * @package bbn\db
  */
-namespace bbn\db;
+namespace bbn;
 
 use \bbn\str;
 /**
@@ -17,9 +17,9 @@ use \bbn\str;
  * @version 0.2r89
  */
 
-class connection extends \PDO implements actions, api, engines
+class db extends \PDO implements db\actions, db\api, db\engines
 {
-  use triggers;
+  use db\triggers;
 
   const
     E_CONTINUE = 'continue',
@@ -465,7 +465,7 @@ class connection extends \PDO implements actions, api, engines
   /**
    * Delete a specific item from the cache
    *
-   * @return \bbn\db\connection
+   * @return \bbn\db
    */
   public function clear_cache($item, $mode)
   {
@@ -479,7 +479,7 @@ class connection extends \PDO implements actions, api, engines
   /**
    * @todo clear_all_cache() with $this->language->get_databases etc...
    *
-   * @return \bbn\db\connection
+   * @return \bbn\db
    */
   public function clear_all_cache()
   {
@@ -560,7 +560,7 @@ class connection extends \PDO implements actions, api, engines
    * Changes the value of last_insert_id (used by history)
    *
    * @param int $id The last ID inserted
-   * @return \bbn\db\connection
+   * @return \bbn\db
    */
   public function set_last_insert_id($id='')
   {
@@ -809,7 +809,7 @@ class connection extends \PDO implements actions, api, engines
    * Use the given database
    *
    * @param string $db
-   * @return \bbn\db\connection
+   * @return \bbn\db
    */
   public function change($db)
   {
@@ -822,7 +822,7 @@ class connection extends \PDO implements actions, api, engines
   /**
    * Disable foreign keys constraints
    *
-   * @return \bbn\db\connection
+   * @return \bbn\db
    */
   public function disable_keys()
   {
@@ -833,7 +833,7 @@ class connection extends \PDO implements actions, api, engines
   /**
    * Enable foreign keys constraints
    *
-   * @return \bbn\db\connection
+   * @return \bbn\db
    */
   public function enable_keys()
   {
