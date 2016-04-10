@@ -29,7 +29,8 @@
     "tijsverkoyen/css-to-inline-styles": "dev-master",
     "phpdocumentor/reflection-docblock": "2.0.4",
     "kasp3r/link-preview": "dev-master",
-    "wapmorgan/unified-archive": "dev-master"
+    "wapmorgan/unified-archive": "dev-master",
+    "pear/archive_tar": "dev-master"
   },
   "autoload": {
     "psr-0": {"bbn": "src/"}
