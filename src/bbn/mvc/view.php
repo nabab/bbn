@@ -85,8 +85,6 @@ class view{
 					return $less->compile($this->content);
         case 'scss':
 					return $this->content;
-        case 'css':
-					return $this->content;
 				case 'html':
 					return is_array($data) ? \bbn\tpl::render($this->content, $data) : $this->content;
 				case 'php':

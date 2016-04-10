@@ -1182,21 +1182,35 @@ class options
     return false;
   }
 
-  public function apply($f, $id = 0, $deep = false){
-    $id = $this->from_code($id);
-    if ( \bbn\str::is_integer($id) ){
-      $opts = $this->full_options($id);
-      $changes = 0;
+  public function map($f, $id, $deep = false){
+    $opts = is_array($id) ? $id : ( $deep ? $this->full_tree($id) : $this->full_options($id) );
+    if ( is_array($opts) ){
       foreach ( $opts as $i => $o ){
-        $o = $f($o);
+        $opts[$i] = $f($o);
         if ( $deep && $o['num_children'] ){
-          $this->apply($f, $opts[$i]['id'], 1);
-        }
-        if ( $o && ($opts[$i] !== $o) ){
-          $changes += (int)$this->set($o['id'], $o);
+          $this->map($f, $opts[$i], 1);
         }
       }
     }
+    return $opts;
+  }
+
+  public function apply($f, $id, $deep = false){
+    $originals = is_array($id) ? $id : ( $deep ? $this->full_tree($id) : $this->full_options($id) );
+    $opts = $this->map($f, $originals, $deep);
+    if ( is_array($opts) ){
+      $changes = 0;
+      foreach ( $opts as $i => $o ){
+        if ( $originals[$i] !== $o ){
+          $changes += (int)$this->set($o['id'], $o);
+        }
+        if ( $deep && $o['num_children'] ){
+          $this->apply($f, $o, 1);
+        }
+      }
+      return $changes;
+    }
+    return false;
   }
 
   public function has_id(){

@@ -36,7 +36,7 @@ class task {
   }
 
   public function categories(){
-    return $this->options->tree('bbn_tasks');
+    return $this->options->tree('bbn_tasks')['items'];
   }
 
   public function info($id){
