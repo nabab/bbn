@@ -618,7 +618,10 @@ class options
       if ( is_array($it[$c['value']]) ){
         $it[$c['value']] = json_encode($it[$c['value']]);
       }
-      if ( \bbn\str::is_json($it[$c['cfg']]) ){
+      if ( !isset($it[$c['cfg']]) ){
+        $it[$c['cfg']] = [];
+      }
+      else if ( \bbn\str::is_json($it[$c['cfg']]) ){
         $it[$c['cfg']] = json_decode($it[$c['cfg']], 1);
       }
       else if ( !is_array($it[$c['cfg']]) ){
@@ -1187,7 +1190,7 @@ class options
     if ( is_array($opts) ){
       foreach ( $opts as $i => $o ){
         $opts[$i] = $f($o);
-        if ( $deep && $o['num_children'] ){
+        if ( $deep && !empty($o['num_children']) ){
           $this->map($f, $opts[$i], 1);
         }
       }

@@ -1012,6 +1012,10 @@ class str
 		return $subject;
 	}
 
+	public static function is_url($st){
+		return filter_var($st, FILTER_VALIDATE_URL);
+	}
+
 	public static function is_domain($st){
 		return (preg_match("/^([a-z\d](-*[a-z\d])*)(\.([a-z\d](-*[a-z\d])*))*$/i", $st) //valid chars check
 			&& preg_match("/^.{1,253}$/", $st) //overall length check
