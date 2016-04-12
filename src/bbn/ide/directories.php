@@ -144,8 +144,9 @@ class directories {
    *
    * @param \bbn\appui\options $options
    */
-  public function __construct(\bbn\appui\options $options){
+  public function __construct(\bbn\appui\options $options, $routes){
     $this->options = $options;
+    $this->routes = $routes;
   }
 
   public function add_routes(array $routes){
@@ -550,6 +551,12 @@ class directories {
         if ( !file_put_contents($real, $default) ){
           return $this->error("Impossible to create the file");
         }
+        // Add item to options table for permissions
+        if ( $tab === 'php' ){
+          if ( !$this->create_perm_by_real($real, $root) ){
+            return $this->error("Impossible to create the option");
+          }
+        }
       }
       //New directory
       else if ( $type === 'dir' ){
@@ -717,6 +724,25 @@ class directories {
                 $r['file'] = $real_file;
                 $mode = $e['mode'];
                 // Permissions
+                if ( ($id_opt = $this->real_to_perm($real_file, $root_path)) &&
+                  ($opt = $this->options->option($id_opt))
+                ){
+                  $r['perm_id'] = $opt['id'];
+                  $r['perm_code'] = $opt['code'];
+                  $r['perm_text'] = $opt['text'];
+                  if ( isset($opt['help']) ){
+                    $r['perm_help'] = $opt['help'];
+                  }
+                  $sopt = $this->options->full_options($opt['id']);
+                  $perm_chi = [];
+                  foreach ( $sopt as $so ){
+                      array_push($perm_chi, [
+                        'perm_code' => $so['code'],
+                        'perm_text' => $so['text']
+                      ]);
+                  }
+                  $r['perm_children'] = $perm_chi;
+                }
                 break;
               }
             }
@@ -837,6 +863,7 @@ class directories {
    * @param string $type file|dir
    * @param string $file The existing file path and name
    * @return bool|string
+   * @todo Duplicate the users' permissions when duplicating a controller file
    */
   public function copy($dir, $path, $name, $type, $file){
     if ( ($cfg = $this->dir($dir)) &&
@@ -936,6 +963,7 @@ class directories {
    * @param string $name The file|directory's name
    * @param string $type The type (file|dir)
    * @return array|bool
+   * @todo Delete users' permissions to options table when deleting a controller file
    */
   public function delete($dir, $path, $name, $type = 'file'){
     if ( ($cfg = $this->dir($dir)) &&
@@ -1124,6 +1152,7 @@ class directories {
    * @param string $new The new file's name
    * @param string $type file|dir
    * @return array|bool
+   * @todo Change option's code to options table when renaming a controller file
    */
   public function rename($dir, $path, $new, $type = 'file'){
     if ( ($cfg = $this->dir($dir)) &&
@@ -1243,6 +1272,7 @@ class directories {
    * @param string $dest The destination path
    * @param string $type file|dir
    * @return array|bool
+   * @todo Change option's code to options table when moving a controller file
    */
   public function move($dir, $src, $dest, $type = 'file'){
     if ( ($cfg = $this->dir($dir)) &&
@@ -1344,7 +1374,14 @@ class directories {
       return false;
     }
   }
-  
+
+  /**
+   * Changes the extension to a file.
+   *
+   * @param string $ext The new extension
+   * @param string $file The file to change
+   * @return array
+   */
   public function change_ext($ext, $file){
     if ( !empty($ext) &&
       !empty($file) &&
@@ -1359,6 +1396,87 @@ class directories {
       ];
     }
     $this->error("Error.");
+  }
+
+  public function real_to_perm($file, $root_path){
+    if ( !empty($file) &&
+      !empty($root_path) &&
+      file_exists($file)
+    ){
+      // Check if it's an external route
+      foreach ( $this->routes as $i => $r ){
+        if ( strpos($file, $r) === 0 ){
+          // Remove route
+          $f = substr($file, strlen($r), strlen($file));
+          // Remove /mvc/public
+          $f = substr($f, strlen('/mvc/public'), strlen($f));
+          // Add the route's name to path
+          $f = $i . $f;
+        }
+      }
+      // Internal route
+      if ( empty($f) ) {
+        if ( strpos($file, $root_path) === 0 ){
+          // Remove root path and 'public/'
+          $f = substr($file, strlen($root_path)+7, strlen($file));
+        }
+      }
+      $bits = \bbn\x::remove_empty(explode('/', $f));
+      $code = \bbn\str::file_ext(array_pop($bits), 1)[0];
+      $id_parent = $this->options->from_code('page', 'bbn_permissions');
+      foreach ( $bits as $b ){
+        $id_parent = $this->options->from_code($b.'/', $id_parent);
+      }
+      return $this->options->from_code($code, $id_parent);
+    }
+    return false;
+  }
+
+  public function create_perm_by_real($file, $root_path){
+    if ( !empty($file) &&
+      !empty($root_path) &&
+      file_exists($file)
+    ){
+      // Check if it's an external route
+      foreach ( $this->routes as $i => $r ){
+        if ( strpos($file, $r) === 0 ){
+          // Remove route
+          $f = substr($file, strlen($r), strlen($file));
+          // Remove /mvc/public
+          $f = substr($f, strlen('/mvc/public'), strlen($f));
+          // Add the route's name to path
+          $f = $i . $f;
+        }
+      }
+      // Internal route
+      if ( empty($f) ) {
+        if ( strpos($file, $root_path) === 0 ){
+          // Remove root path
+          $f = substr($file, strlen($root_path), strlen($file));
+        }
+      }
+      $bits = \bbn\x::remove_empty(explode('/', $f));
+      $code = \bbn\str::file_ext(array_pop($bits), 1)[0];
+      $id_parent = $this->options->from_code('page', 'bbn_permissions');
+      foreach ( $bits as $b ){
+        if ( empty($this->options->from_code($b.'/', $id_parent)) ){
+          $this->options->add([
+            'id_parent' => $id_parent,
+            'code' => $b.'/',
+            'text' => $b.'/'
+          ]);
+          $id_parent = $this->options->from_code($b.'/', $id_parent);
+        }
+      }
+      if ( $this->options->add([
+        'id_parent' => $id_parent,
+        'code' => $code,
+        'text' => $code
+      ]) ){
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

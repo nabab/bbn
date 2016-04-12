@@ -625,7 +625,7 @@ class options
         $it[$c['cfg']] = json_decode($it[$c['cfg']], 1);
       }
       else if ( !is_array($it[$c['cfg']]) ){
-        $it[$c['cfg']] = $this->get_cfg($it[$c[id]]);
+        $it[$c['cfg']] = $this->get_cfg($it[$c['id']]);
       }
       if ( !is_array($it[$c['cfg']]) ){
         $it[$c['cfg']] = [];
