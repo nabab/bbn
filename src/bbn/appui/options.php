@@ -729,27 +729,6 @@ class options
     return false;
   }
 
-  public function update($id, $cfg){
-    $originals = $cfg;
-    if ( $this->_prepare($cfg) ){
-      $c = $this->cfg['cols'];
-      $change = [];
-      foreach ( $originals as $k => $v ){
-        if ( ($k !== 'id') && isset($cfg[$k]) ){
-          $change[$k] = $cfg[$k];
-        }
-      }
-      if ( $res = $this->db->update($change, [
-        $c['id'] => $id
-      ]) ){
-        $this->_cache_delete($id);
-        return $res;
-      }
-      return 0;
-    }
-    return false;
-  }
-
   public function remove($id){
     if ( $id = $this->from_code(func_get_args()) ) {
       $this->_cache_delete($id);
@@ -938,6 +917,22 @@ class options
   public function set_alias($id, $alias){
     return $this->db->update_ignore($this->cfg['table'], [
       $this->cfg['cols']['id_alias'] => $alias ?: null
+    ], [
+      $this->cfg['cols']['id'] => $id
+    ]);
+  }
+
+  public function set_text($id, $text){
+    return $this->db->update_ignore($this->cfg['table'], [
+      $this->cfg['cols']['text'] => $text
+    ], [
+      $this->cfg['cols']['id'] => $id
+    ]);
+  }
+
+  public function set_code($id, $code){
+    return $this->db->update_ignore($this->cfg['table'], [
+      $this->cfg['cols']['code'] => $code ?: null
     ], [
       $this->cfg['cols']['id'] => $id
     ]);
