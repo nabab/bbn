@@ -621,7 +621,11 @@ EOD;
 	}
 
 	public function set_mode($mode){
-		return $this->mvc->set_mode($mode);
+		if ( $this->mvc->set_mode($mode) ){
+			$this->mode = $mode;
+			//die(var_dump($mode));
+		}
+		return $this;
 	}
 
 	/**

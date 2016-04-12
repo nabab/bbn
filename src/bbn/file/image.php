@@ -21,13 +21,6 @@ namespace bbn\file;
 class image extends \bbn\file\file 
 {
 	/**
-	 * @var array
-	 */
-	protected static
-          $allowed_extensions = ['jpg','gif','jpeg','png','svg'],
-          $max_width = 5000;
-
-	/**
 	 * @var bool
 	 */
 	protected static $exif=false;
@@ -51,6 +44,12 @@ class image extends \bbn\file\file
 	 * @var mixed
 	 */
 	protected $img;
+	/**
+	 * @var array
+	 */
+	protected static
+		$allowed_extensions = ['jpg','gif','jpeg','png','svg'],
+		$max_width = 5000;
 
 /**
  * Converts one or more jpg image(s) to one pdf file.
@@ -169,29 +168,27 @@ public static function jpg2pdf($jpg, $pdf){
    * 
 	 * @return string 
 	 */
-	public function get_extension()
-	{
-		if ( !$this->ext2 && $this->file )
-		{
-			if ( function_exists('exif_imagetype') )
-			{
-				if ( $r = exif_imagetype($this->file) )
-				{
-					if ( array_key_exists($r,\bbn\file\image::$allowed_extensions) )
-						$this->ext = \bbn\file\image::$allowed_extensions[$r];
-					else
-						$this->ext = false;
+	public function get_extension(){
+    parent::get_extension();
+		if ( !$this->ext2 && $this->file ){
+			if ( function_exists('exif_imagetype') ){
+				if ( $r = exif_imagetype($this->file) ){
+          if ( array_key_exists($r, \bbn\file\image::$allowed_extensions) ){
+            $this->ext = \bbn\file\image::$allowed_extensions[$r];
+          }
+					else{
+            $this->ext = false;
+          }
 				}
-				else
-					$this->ext = false;
+				else{
+          $this->ext = false;
+        }
 			}
-			else
-				parent::get_extension();
-			if ( $this->ext )
-			{
+			if ( $this->ext ){
 				$this->ext2 = $this->ext;
-				if ( $this->ext2 == 'jpg' )
-					$this->ext2 = 'jpeg';
+				if ( $this->ext2 == 'jpg' ){
+          $this->ext2 = 'jpeg';
+        }
 			}
 		}
 		return $this->ext;
@@ -309,7 +306,11 @@ public static function jpg2pdf($jpg, $pdf){
 				$dest = $this->file;
 			}
 			if ( class_exists('\\Imagick') ){
-        if ( !$this->img->writeImage($dest) ){
+        try{
+					$this->img->writeImage($dest);
+				}
+				catch ( \Exception $e ){
+					die(var_dump($dest, $this->file));
           $this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
             BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
         }
@@ -828,10 +829,8 @@ public function flip($mode='v')
 	 */
 	public function polaroid()
 	{
-		if ( $this->test() )
-		{
-			if ( class_exists('\\Imagick') )
-			{
+		if ( $this->test() ){
+			if ( class_exists('\\Imagick') ){
 				if ( !$this->img->polaroidImage(new \ImagickDraw(), 0) ){
 					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
@@ -839,6 +838,51 @@ public function flip($mode='v')
 			}
 		}
 		return $this;
+	}
+
+	public function thumbs($dest = '.', $sizes = [[false, 960], [false, 480], [false, 192], [false, 96], [false, 48]], $mask = '_%s', $crop = false, $bigger = false){
+		if ( $this->test() && is_dir($dest) ){
+      $this->get_extension();
+			$w = $this->get_width();
+			$h = $this->get_height();
+			$d = $w >= $h ? 'w' : 'h';
+      $res = [];
+      if ( \bbn\str::is_integer($sizes) ){
+        $sizes = [[$sizes, false]];
+      }
+			if ( $$d / ($d === 'w' ? $h : $w) < 5 ){
+				$mask = ($dest === '.' ? '' : $dest.'/').$this->title.$mask.'.'.$this->ext;
+        //die(var_dump($mask));
+				foreach ( $sizes as $s ){
+          if ( \bbn\str::is_integer($s) ){
+            $s = [$s, false];
+          }
+          if (
+            (!empty($s[0]) && ($w > $s[0])) ||
+            (!empty($s[1]) && ($h > $s[1])) ||
+            $bigger
+          ){
+            $smask = (empty($s[0]) ? '' : 'w'.$s[0]).(empty($s[1]) ? '' : 'h'.$s[1]);
+            $fn = sprintf($mask, $smask);
+            if ( $s[0] && $s[1] ){
+              if ( $crop ){
+                $this->resize($s[0], $s[1], true);
+              }
+              else{
+                $this->resize($d === 'w' ? $s[0] : false, $d === 'h' ? $s[1] : false, false, $s[0], $s[1]);
+              }
+            }
+            else{
+              $this->resize($s[0], $s[1], $crop);
+            }
+            $this->save($fn);
+            $res[$smask] = $fn;
+          }
+				}
+				return $res;
+			}
+		}
+    return false;
 	}
 
 	/**

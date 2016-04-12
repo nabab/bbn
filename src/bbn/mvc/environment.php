@@ -74,7 +74,7 @@ class environment {
    * @param $mode
    * @return string $this->mode
    */
-  private function set_mode($mode){
+  public function set_mode($mode){
     if ( router::is_mode($mode) ) {
       $this->mode = $mode;
     }

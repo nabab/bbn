@@ -20,6 +20,7 @@ class connection
 {
 
 	private static
+          $init = false,
           /** @var string */
           $fingerprint = BBN_FINGERPRINT;
 
@@ -129,6 +130,15 @@ class connection
              */
             'hotlinks' => false
           ];
+
+  protected static function _init_dir(\bbn\user\connection $usr){
+    if ( !self::$init && ($id = $usr->get_id()) ){
+      self::$init = true;
+      if ( !defined('BBN_USER_PATH') ){
+        define('BBN_USER_PATH', BBN_DATA_PATH.'users/'.$id.'/');
+      }
+    }
+  }
 
 	protected
           /** @var string */
@@ -292,6 +302,8 @@ class connection
 		else {
       $this->check_session();
 		}
+
+    self::_init_dir($this);
 
     return $this;
 	}

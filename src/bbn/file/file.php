@@ -27,17 +27,17 @@ class file extends \bbn\obj
     $ext;
 
 	/**
-	 * @var mixed
+	 * @var string
 	 */
 	protected $hash;
 
 	/**
-	 * @var mixed
+	 * @var string
 	 */
 	public $path;
 
 	/**
-	 * @var mixed
+	 * @var string
 	 */
 	public $name;
 
@@ -131,20 +131,17 @@ class file extends \bbn\obj
 	 */
 	public function get_extension()
 	{
-		if ( $this->name )
-		{
-			if ( !isset($this->ext) )
-			{
-				if ( strpos($this->name,'.') !== false )
-				{
-					$p = strrpos($this->name,'.');
-					$this->ext = strtolower(substr($this->name,$p+1));
-					$this->title = substr($this->name,0,-(strlen($this->ext)+1));
+		if ( $this->name ){
+			if ( !isset($this->ext) ){
+				if ( strpos($this->name, '.') !== false ){
+					$p = \bbn\str::file_ext($this->name, 1);
+					$this->ext = $p[1];
+					$this->title = $p[0];
 				}
 				else
 				{
 					$this->ext = '';
-					$this->title = substr($this->name,-1) == '/' ? substr($this->name,0,-1) : $this->name;
+					$this->title = substr($this->name,-1) === '/' ? substr($this->name,0,-1) : $this->name;
 				}
 			}
 			return $this->ext;

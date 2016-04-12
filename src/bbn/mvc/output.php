@@ -57,7 +57,7 @@ class output {
         $this->obj->postscript = \JShrink\Minifier::minify($this->obj->postscript);
       }
     }
-    if ( empty($this->obj->output) ) {
+    if ( empty($this->obj->output) || ( ($this->mode === 'file') || ($this->mode === 'image') ) ) {
       if (!empty($this->obj->file)) {
         if (is_string($this->obj->file) && is_file($this->obj->file)) {
           $this->obj->file = new \bbn\file\file($this->obj->file);
@@ -139,7 +139,7 @@ class output {
         break;
 
       case 'image':
-        if ( isset($this->obj->img) ){
+        if ( isset($this->obj->img) && is_object($this->obj->img) ){
           $this->obj->img->display();
         }
         else{

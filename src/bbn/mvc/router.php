@@ -38,6 +38,8 @@ class router {
      * @var array
      */
     $types = [
+      'image',
+      'file',
       'cli',
       'private',
       'dom',
@@ -256,16 +258,15 @@ class router {
         }
         // An alternative root exists, we look into it
         else if ( $this->alt_root &&
-          (strpos($tmp, $this->alt_root) === 0) &&
-          file_exists($this->get_alt_root($mode).substr($tmp, strlen($this->alt_root)+1).'/index.php')
+          file_exists($this->get_alt_root($mode).$tmp.'/index.php')
         ){
           $npath = $tmp. '/index';
-          $file = $this->get_alt_root($mode).substr($tmp, strlen($this->alt_root)+1).'/index.php';
+          $file = $this->get_alt_root($mode).$tmp.'/index.php';
         }
         // $tmp corresponds to a root index
         else if ( isset($this->routes['root'][$tmp]) ){
           $this->set_alt_root($tmp);
-          return $this->route(substr(substr($path, strlen($tmp)), strlen($this->prepath)+1), $mode);
+          return $this->route(substr($path, strlen($tmp)+1), $mode);
         }
       }
       if ( !$file ){
@@ -308,7 +309,6 @@ class router {
       }
     }
     // Not found, sending the default controllers
-    //die(var_dump('-----', $mode, $tmp));
     if ( !$file ){
       if ( (
           ($mode === 'dom') &&

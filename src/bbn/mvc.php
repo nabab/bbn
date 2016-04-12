@@ -202,9 +202,13 @@ class mvc implements \bbn\mvc\api{
 		return $this->env->get_files();
 	}
 
-	public function get_mode(){
-		return $this->env->get_mode();
-	}
+  public function get_mode(){
+    return $this->env->get_mode();
+  }
+
+  public function set_mode($mode){
+    return $this->env->set_mode($mode);
+  }
 
   public function is_cli(){
     return $this->env->is_cli();

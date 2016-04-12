@@ -716,6 +716,7 @@ class directories {
               if ( is_file($real_file) ){
                 $r['file'] = $real_file;
                 $mode = $e['mode'];
+                // Permissions
                 break;
               }
             }
@@ -1342,6 +1343,22 @@ class directories {
       $this->error("The old name and the new name are identical.");
       return false;
     }
+  }
+  
+  public function change_ext($ext, $file){
+    if ( !empty($ext) &&
+      !empty($file) &&
+      file_exists($file)
+    ){
+      $pi = pathinfo($file);
+      $new = $pi['dirname'].'/'.$pi['filename'].'.'.$ext;
+      \bbn\file\dir::move($file, $new, true);
+      return [
+        'file' => $new,
+        'file_url' => $this->real_to_url($new)
+      ];
+    }
+    $this->error("Error.");
   }
 
   /**
