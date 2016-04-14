@@ -1463,7 +1463,7 @@ class directories {
           $this->options->add([
             'id_parent' => $id_parent,
             'code' => $b.'/',
-            'text' => $b.'/'
+            'text' => $b
           ]);
           $id_parent = $this->options->from_code($b.'/', $id_parent);
         }

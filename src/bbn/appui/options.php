@@ -319,6 +319,23 @@ class options
   }
 
   /**
+   * Returns an option's title translated
+   *
+   * @param int $id La valeur du champ `id` de l'option dans la base de données
+   * @return string La valeur du champ titre correspondant
+   */
+  public function itext($id){
+    $id = $this->from_code(func_get_args());
+    if ( \bbn\str::is_integer($id) ) {
+      $val = $this->db->get_val($this->cfg['table'], $this->cfg['cols']['text'], $this->cfg['cols']['id'], $id);
+      if ( $val ){
+        return _($val);
+      }
+    }
+    return false;
+  }
+
+  /**
    * Returns an option's code
    *
    * @param int $id La valeur du champ `id` de l'option dans la base de données
@@ -658,7 +675,6 @@ class options
         !is_null($c['code']) &&
         \bbn\str::is_integer($id = $this->db->select_one($this->cfg['table'], $c['id'], [
           $c['id_parent'] => $it[$c['id_parent']],
-          $c['text'] => $it[$c['text']],
           $c['code'] => $it[$c['code']]
         ]))
       ){
@@ -695,9 +711,8 @@ class options
     return $res;
   }
 
-  public function from_path($path, $sep = '|'){
+  public function from_path($path, $sep = '|', $parent = null){
     $parts = explode($sep, $path);
-    $parent = null;
     foreach ( $parts as $p ){
       if ( !empty($p) ){
         if ( is_null($parent) ){
