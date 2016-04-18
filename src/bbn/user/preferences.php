@@ -182,7 +182,7 @@ class preferences
 				$this->cfg['cols']['id_group'] => $this->id_group
 			]))
     ){
-      $this->get_cfg($res['id'], $res1);
+      $this->get_cfg($res1['id'], $res1);
       $res = \bbn\x::merge_arrays($res, $res1);
 		}
     if ( $this->id_user &&
@@ -191,7 +191,7 @@ class preferences
 				$this->cfg['cols']['id_user'] => $this->id_user
 			]))
     ){
-      $this->get_cfg($res['id'], $res2);
+      $this->get_cfg($res2['id'], $res2);
       $res = \bbn\x::merge_arrays($res, $res2);
 		}
     return empty($res) ? false : $res;

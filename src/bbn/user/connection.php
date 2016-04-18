@@ -20,9 +20,10 @@ class connection
 {
 
 	private static
-          $init = false,
           /** @var string */
-          $fingerprint = BBN_FINGERPRINT;
+          $fingerprint = BBN_FINGERPRINT,
+          /** @var \bbn\user\connection */
+          $current;
 
 	protected static
           /** @var array */
@@ -131,13 +132,17 @@ class connection
             'hotlinks' => false
           ];
 
-  protected static function _init_dir(\bbn\user\connection $usr){
-    if ( !self::$init && ($id = $usr->get_id()) ){
-      self::$init = true;
+  protected static function _init(\bbn\user\connection $usr){
+    if ( $id = $usr->get_id() ){
+      self::$current =& $usr;
       if ( !defined('BBN_USER_PATH') ){
         define('BBN_USER_PATH', BBN_DATA_PATH.'users/'.$id.'/');
       }
     }
+  }
+
+  public static function get_user(){
+    return self::$current;
   }
 
 	protected
@@ -303,7 +308,7 @@ class connection
       $this->check_session();
 		}
 
-    self::_init_dir($this);
+    self::_init($this);
 
     return $this;
 	}

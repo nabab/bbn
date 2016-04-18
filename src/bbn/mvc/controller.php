@@ -425,9 +425,7 @@ EOD;
 				$this->obj->data = $data;
 			}
 			else if ( \bbn\x::is_assoc($this->obj->data) ){
-				foreach ( $data as $k => $v ){
-					$this->obj->data[$k] = $v;
-				}
+				$this->obj->data = \bbn\x::merge_arrays($this->obj->data, $data);
 			}
 		}
 		return $this;

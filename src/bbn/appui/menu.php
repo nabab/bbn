@@ -10,7 +10,7 @@ class menu {
 
   protected static
     /** @var string path where the menus are */
-    $root = 'bbn_permissions|menus',
+    $root = 'bbn_menus',
     /** @var string path where the permissions and real path are */
     $public_root = 'bbn_permissions|page';
 
@@ -72,6 +72,10 @@ class menu {
   }
 
   private function _filter($ar, \bbn\user\preferences $pref){
+    $usr = \bbn\user\connection::get_user();
+    if ( is_object($usr) && $usr->is_admin() ){
+      return $ar;
+    }
     return array_filter($ar, function($a)use($pref){
       if ( isset($a['id_permission']) ){
         if ( !$pref->has($a['id_permission']) ){
