@@ -337,6 +337,17 @@ class task {
     }
   }
 
+  public function search($st){
+    $res = [];
+    $res1 = $this->search_in_task($st);
+
+    return $res1;
+  }
+
+  public function search_in_task($st){
+    return $this->db->rselect_all('bbn_tasks', ['id', 'title', 'creation'], [['title',  'LIKE', '%'.$st.'%']]);
+  }
+
   public function full_info($id){
 
   }
