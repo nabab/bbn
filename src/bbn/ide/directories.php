@@ -784,30 +784,36 @@ class directories {
    */
   public function save($file, $code, array $cfg = null, \bbn\user\preferences $pref = null){
     if ( ($file = \bbn\str::parse_path($file)) && ($real = $this->url_to_real($file)) ){
-      $bits = explode('/', $file);
-      // We delete if code is empty and we're in a non mandatory file of tabs' set
-      if ( empty($code) && ($dir = $this->dir($bits[0])) ){
-        array_shift($bits);
-        if ( !empty($dir['tabs']) && !empty($bits) ){
-          $tab = array_pop($bits);
-          if ( !empty($dir['tabs'][$tab]) &&
-            empty($dir['tabs'][$tab]['default']) &&
-            empty($dir['tabs'][$tab]['fixed'])
-          ){
-            if ( @unlink($real) ){
-              return 1;
-            }
-          }
-        }
-      }
       $id_file = $this->real_to_id($real);
+      $ext = \bbn\str::file_ext($real, 1);
       $id_user = false;
       if ( $session = \bbn\user\session::get_current() ){
         $id_user = $session->get('user', 'id');
       }
+      // We delete the file if code is empty and we aren't in a _ctrl file
+      if ( empty($code) && ($dir = $this->dir($this->dir_from_url($file))) ){
+        $bits = explode('/', $file);
+        if ( !empty($dir['tabs']) && !empty($bits) ){
+          $tab = array_pop($bits);
+          if ( !empty($dir['tabs'][$tab]) &&
+            empty($dir['tabs'][$tab]['fixed'])
+          ){
+            if ( @unlink($real) ){
+              // Remove permissions
+              $this->delete_perm($real);
+              // Remove ide backups
+              if ( $id_user ){
+                \bbn\file\dir::delete(dirname(BBN_DATA_PATH."users/$id_user/ide/backup/".$id_file).'/'.$ext[0].'/', 1);
+              }
+              return [
+                'deleted' => 1
+              ];
+            }
+          }
+        }
+      }
       if ( is_file($real) ){
         if ( $id_user ){
-          $ext = \bbn\str::file_ext($real, 1);
           $backup = dirname(BBN_DATA_PATH."users/$id_user/ide/backup/".$id_file).'/'.$ext[0].'/'.date('Y-m-d His').'.'.$ext[1];
           \bbn\file\dir::create_path(dirname($backup));
           rename($real, $backup);
@@ -817,11 +823,13 @@ class directories {
         \bbn\file\dir::create_path(dirname($real));
       }
       file_put_contents($real, $code);
-
       if ( $pref && $id_user ){
         $this->set_preferences($id_user, $id_file, md5($code), $cfg, $pref);
       }
-      return ['path' => $real];
+      return [
+        'success' => 1,
+        'path' => $real
+      ];
     }
     return $this->error('Error: Save');
   }
@@ -1266,11 +1274,6 @@ class directories {
           }
         }
 
-        // Change permission
-        if ( !empty($change_perm) ){
-          $this->change_perm_by_real($change_perm['old'], $change_perm['new'], $change_perm['type']);
-        }
-
         foreach ( $files as $s => $d ){
           if ( !rename($s, $d) ){
             $this->error("Impossible to rename the $wtype: $s -> $d");
@@ -1284,6 +1287,12 @@ class directories {
             $this->rem_dir_opt($s);
           }
         }
+
+        // Change permission
+        if ( !empty($change_perm) ){
+          $this->change_perm_by_real($change_perm['old'], $change_perm['new'], $change_perm['type']);
+        }
+
         return [
           'file_url' => $file_url,
           'file_new_url' => $file_new_url,
@@ -1351,7 +1360,7 @@ class directories {
               }
               else {
                 $real_new = $real . $dest . '/' . $pi['basename'];
-                $real .= $pi['basename'];
+                $real .= $src;
                 if ( file_exists($real) ){
                   if ( !file_exists($real_new) ){
                     $files[$real] = $real_new;
@@ -1394,11 +1403,6 @@ class directories {
           }
         }
 
-        // Change permission
-        if ( !empty($change_perm) ){
-          $this->change_perm_by_real($change_perm['old'], $change_perm['new'], $change_perm['type']);
-        }
-
         foreach ( $files as $s => $d ){
           if ( !\bbn\file\dir::move($s, $d) ){
             $this->error("Impossible to rename the $wtype: $s -> $d");
@@ -1412,6 +1416,11 @@ class directories {
             // Remove dir's options (preferences)
             $this->rem_dir_opt($s);
           }
+        }
+
+        // Change permission
+        if ( !empty($change_perm) ){
+          $this->change_perm_by_real($change_perm['old'], $change_perm['new'], $change_perm['type']);
         }
 
         return [
@@ -1506,7 +1515,9 @@ class directories {
   public function create_perm_by_real($file, $type='file'){
     if ( !empty($file) &&
       defined('BBN_APP_PATH') &&
-      file_exists($file)
+      file_exists($file) &&
+      // It must be a controller
+      (strpos($file, '/mvc/public/') !== false)
     ){
       $is_file = $type === 'file';
       // Check if it's an external route
@@ -1575,9 +1586,9 @@ class directories {
     ){
       $is_file = $type === 'file';
       $code = $is_file ? \bbn\str::file_ext(basename($file_new), 1)[0] : basename($file_new).'/';
-      if ( ($id_parent = $this->create_perm_by_real(dirname($file_new).'/', 'dir')) &&
-        $this->options->set_prop($id_opt, ['code' => $code])
+      if ( ($id_parent = $this->create_perm_by_real(dirname($file_new).'/', 'dir'))
       ){
+        $this->options->set_prop($id_opt, ['code' => $code]);
         $this->options->move($id_opt, $id_parent);
         return true;
       }

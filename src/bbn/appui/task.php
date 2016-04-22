@@ -71,7 +71,7 @@ class task {
     return self::$id_role;
   }
 
-  protected static function get_cats($force = false){
+  public static function get_cats($force = false){
     if ( empty(self::$cats) || $force ){
       if ( ($opt = \bbn\appui\options::get_options()) && self::get_id_cat() ){
         $tree = $opt->tree(self::$id_cat);
@@ -84,7 +84,7 @@ class task {
     return self::$cats;
   }
 
-  protected static function get_actions($force = false){
+  public static function get_actions($force = false){
     if ( empty(self::$actions) || $force ){
       if ( ($opt = \bbn\appui\options::get_options()) && self::get_id_action() ){
         $actions = $opt->full_options(self::$id_action);
@@ -99,7 +99,7 @@ class task {
     return self::$actions;
   }
 
-  protected static function get_states($force = false){
+  public static function get_states($force = false){
     if ( empty(self::$states) || $force ){
       if ( ($opt = \bbn\appui\options::get_options()) && self::get_id_state() ){
         $states = $opt->full_options(self::$id_state);
@@ -114,7 +114,7 @@ class task {
     return self::$states;
   }
 
-  protected static function get_roles($force = false){
+  public static function get_roles($force = false){
     if ( empty(self::$roles) || $force ){
       if ( ($opt = \bbn\appui\options::get_options()) && self::get_id_role() ){
         $roles = $opt->full_options(self::$id_role);
@@ -129,7 +129,7 @@ class task {
     return self::$roles;
   }
 
-  protected static function get_cat($code, $force = false){
+  public static function get_cat($code, $force = false){
     if ( !isset(self::$cats[$code]) || $force ){
       self::get_cats(1);
       if ( !isset(self::$cats[$code]) ){
@@ -139,7 +139,7 @@ class task {
     return isset(self::$cats[$code]) ? self::$cats[$code] : false;
   }
 
-  protected static function get_action($code, $force = false){
+  public static function get_action($code, $force = false){
     if ( !isset(self::$actions[$code]) || $force ){
       self::get_actions(1);
       if ( !isset(self::$actions[$code]) ){
@@ -149,7 +149,7 @@ class task {
     return isset(self::$actions[$code]) ? self::$actions[$code] : false;
   }
 
-  protected static function get_state($code, $force = false){
+  public static function get_state($code, $force = false){
     if ( !isset(self::$states[$code]) || $force ){
       self::get_states(1);
       if ( !isset(self::$states[$code]) ){
@@ -159,7 +159,7 @@ class task {
     return isset(self::$states[$code]) ? self::$states[$code] : false;
   }
 
-  protected static function get_role($code, $force = false){
+  public static function get_role($code, $force = false){
     if ( !isset(self::$roles[$code]) || $force ){
       self::get_roles(1);
       if ( !isset(self::$roles[$code]) ){
@@ -169,12 +169,32 @@ class task {
     return isset(self::$roles[$code]) ? self::$roles[$code] : false;
   }
 
+  public static function cat_correspondances(){
+    if ( $opt = \bbn\appui\options::get_options() ){
+      $cats = self::get_cats();
+      $res = [];
+      $opt->map(function ($a) use (&$res){
+        array_push($res, [
+          'value' => $a['id'],
+          'text' => $a['text']
+        ]);
+        $a['is_parent'] = !empty($a['items']);
+        if ( $a['is_parent'] ){
+          $a['expanded'] = true;
+        }
+        return $a;
+      }, $cats, 1);
+      return $res;
+    }
+    return false;
+  }
+
   public static function get_options(){
     if ( $opt = \bbn\appui\options::get_options() ){
       return [
         'states' => $opt->text_value_options(self::get_id_state()),
         'roles' => $opt->text_value_options(self::get_id_role()),
-        'states' => $opt->text_value_options(self::get_id_cat()),
+        'cats' => self::cat_correspondances()
       ];
     }
   }
@@ -340,12 +360,11 @@ class task {
   public function search($st){
     $res = [];
     $res1 = $this->search_in_task($st);
-
     return $res1;
   }
 
   public function search_in_task($st){
-    return $this->db->rselect_all('bbn_tasks', ['id', 'title', 'creation'], [['title',  'LIKE', '%'.$st.'%']]);
+    return $this->db->rselect_all('bbn_tasks', ['id', 'title', 'creation_date'], [['title',  'LIKE', '%'.$st.'%']]);
   }
 
   public function full_info($id){

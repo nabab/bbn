@@ -282,11 +282,20 @@ class router {
             $npath = $tmp;
             $file = $root.$tmp.'.php';
           }
+          else if ( is_dir($root.$tmp) && is_file($root.$tmp.'/home.php') ){
+            $npath = $tmp.'/home';
+            $file = $root.$tmp.'/home.php';
+          }
           // An alternative root exists, we look into it
           else if ( $this->alt_root && (strpos($tmp, $this->alt_root) === 0) ){
-            if ( file_exists($this->get_alt_root($mode).substr($tmp, strlen($this->alt_root)+1).'.php') ){
+            $name = substr($tmp, strlen($this->alt_root)+1);
+            if ( file_exists($this->get_alt_root($mode).$name.'.php') ){
               $npath = $tmp;
-              $file = $this->get_alt_root($mode).substr($tmp, strlen($this->alt_root)+1).'.php';
+              $file = $this->get_alt_root($mode).$name.'.php';
+            }
+            else if ( is_dir($this->get_alt_root($mode).$name) && is_file($this->get_alt_root($mode).$name.'/home.php') ){
+              $npath = $tmp.'/home';
+              $file = $this->get_alt_root($mode).$name.'/home.php';
             }
           }
           // $tmp corresponds to a root
