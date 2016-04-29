@@ -30,7 +30,7 @@ class output {
     }
 
     if ( $this->mode === 'cli' ){
-      die(isset($this->obj->output) ? $this->obj->output : "no output");
+      die(isset($this->obj->content) ? $this->obj->content : "no output");
     }
 
     if ( isset($this->obj->prescript) ){
@@ -57,7 +57,7 @@ class output {
         $this->obj->postscript = \JShrink\Minifier::minify($this->obj->postscript);
       }
     }
-    if ( empty($this->obj->output) || ( ($this->mode === 'file') || ($this->mode === 'image') ) ) {
+    if ( empty($this->obj->content) || ( ($this->mode === 'file') || ($this->mode === 'image') ) ) {
       if (!empty($this->obj->file)) {
         if (is_string($this->obj->file) && is_file($this->obj->file)) {
           $this->obj->file = new \bbn\file\file($this->obj->file);
@@ -100,7 +100,7 @@ class output {
       default:
         ob_start();
     }
-    if ( (empty($this->obj->output) && empty($this->obj->file) && empty($this->obj->img) && ($this->mode !==
+    if ( (empty($this->obj->content) && empty($this->obj->file) && empty($this->obj->img) && ($this->mode !==
           'public')) ||
       (($this->mode === 'public') && empty($this->obj)) ){
       $this->mode = '';
@@ -110,32 +110,28 @@ class output {
     switch ( $this->mode ){
 
       case 'public':
-        if ( isset($this->obj->output) ){
-          $this->obj->html = $this->obj->output;
-          unset($this->obj->output);
-        }
         header('Content-type: application/json; charset=utf-8');
         echo json_encode($this->obj);
         break;
 
       case 'js':
         header('Content-type: application/javascript; charset=utf-8');
-        echo $this->obj->output;
+        echo $this->obj->content;
         break;
 
       case 'css':
         header('Content-type: text/css; charset=utf-8');
-        echo $this->obj->output;
+        echo $this->obj->content;
         break;
 
       case 'text':
         header('Content-type: text/plain; charset=utf-8');
-        echo $this->obj->output;
+        echo $this->obj->content;
         break;
 
       case 'xml':
         header('Content-type: text/xml; charset=utf-8');
-        echo $this->obj->output;
+        echo $this->obj->content;
         break;
 
       case 'image':
@@ -162,7 +158,7 @@ class output {
 
       default:
         header('Content-type: text/html; charset=utf-8');
-        echo isset($this->obj->output) ? $this->obj->output : '';
+        echo isset($this->obj->content) ? $this->obj->content : '';
 
     }
   }

@@ -354,6 +354,7 @@ class builder
         unset($title['legend']);
       }
       $fieldset = new \bbn\html\element($title);
+      $fieldset->add_class("appui-section");
 
       if ( isset($legend_txt) ){
         $legend = new \bbn\html\element('legend');
@@ -364,6 +365,7 @@ class builder
     else{
 
       $fieldset = new \bbn\html\element('fieldset');
+      $fieldset->add_class("appui-section");
 
       if ( !is_null($title) ){
         $legend = new \bbn\html\element('legend');

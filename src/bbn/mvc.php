@@ -310,7 +310,7 @@ class mvc implements \bbn\mvc\api{
     if ( $this->check() && $this->controller ) {
       $obj = $this->controller->get();
       if ($this->is_cli()) {
-        die(isset($obj->output) ? $obj->output : "no output");
+        die(isset($obj->content) ? $obj->content : "no output");
       }
       if ( is_array($obj) ){
         $obj = \bbn\x::to_object($obj);

@@ -297,8 +297,8 @@ class controller implements api{
       require($this->file);
 			$output = ob_get_contents();
 			ob_end_clean();
-			if ( is_object($this->obj) && !isset($this->obj->output) && !empty($output) ){
-				$this->obj->output = $output;
+			if ( is_object($this->obj) && !isset($this->obj->content) && !empty($output) ){
+				$this->obj->content = $output;
 			}
 			$this->is_controlled = 1;
 		}
@@ -608,8 +608,8 @@ EOD;
 	 */
 	public function get_rendered()
 	{
-		if ( isset($this->obj->output) ){
-			return $this->obj->output;
+		if ( isset($this->obj->content) ){
+			return $this->obj->content;
 		}
 		return false;
 	}

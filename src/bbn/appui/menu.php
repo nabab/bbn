@@ -92,6 +92,7 @@ class menu {
   private function _arrange(array $menu){
     if ( isset($menu['text']) ){
       $res = [
+        'id' => $menu['id'],
         'text' => $menu['text'],
         'icon' => isset($menu['icon']) ? $menu['icon'] : 'cog'
       ];
@@ -110,19 +111,36 @@ class menu {
     return false;
   }
 
-  public function to_id($id){
-    if ( !\bbn\str::is_integer($id) ){
-      $id = $this->options->from_path(self::$root.'|'.$id);
+  public function from_path($path){
+    if ( !\bbn\str::is_integer($path) ){
+      $path = $this->options->from_path(self::$root.'|'.$path);
     }
-    return \bbn\str::is_integer($id) ? $id : false;
+    return \bbn\str::is_integer($path) ? $path : false;
+  }
+
+  /**
+   * Returns the path corresponding to an ID
+   * @param $id
+   */
+  public function to_path($id){
+    if ( \bbn\str::is_integer($id) ){
+      return $this->options->to_path($id, '', $this->_get_public_root());
+    }
+    return false;
   }
 
   public function get($id, $prefix = ''){
-    $id = $this->to_id($id);
+    $id = $this->from_path($id);
+  }
+
+  public function add_shortcut($id, \bbn\user\preferences $pref){
+    if ( $id_menu = $this->from_path('shortcuts') ){
+      return $pref->set_link($id, $id_menu);
+    }
   }
 
   public function tree($id){
-    if ( $id = $this->to_id($id) ){
+    if ( $id = $this->from_path($id) ){
       $cn = $this->_cache_name(__FUNCTION__, $id);
       if ( $this->cacher->has($cn) ){
         return $this->cacher->get($cn);
@@ -137,6 +155,25 @@ class menu {
   public function custom_tree($id, \bbn\user\preferences $pref){
     if ( ($tree = $this->tree($id)) && isset($tree['items']) ){
       return $this->_adapt($tree['items'], $pref);
+    }
+  }
+  
+  public function shortcuts(\bbn\user\preferences $pref){
+    if ( $id_menu = $this->from_path('shortcuts') ){
+      $ids = $pref->get_links($id_menu);
+      $res = [];
+      foreach ( $ids as $id ){
+        if ( ($o = $this->options->option($id)) &&
+          ($url = $this->to_path($o['id_alias']))
+        ){
+          array_push($res, [
+            'url' => $url,
+            'text' => $o['text'],
+            'icon' => $o['icon']
+          ]);
+        }
+      }
+      return $res;
     }
   }
 

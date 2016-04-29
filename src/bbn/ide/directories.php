@@ -3,6 +3,8 @@
 namespace bbn\ide;
 
 
+use bbn\str;
+
 class directories {
 
   private static
@@ -158,7 +160,9 @@ class directories {
     $dirs = $this->dirs();
     $res = [];
     foreach ( $dirs as $i => $d ){
-      if ( !empty($d['tabs']) ){
+      if ( !empty($d['tabs']) &&
+        defined('BBN_APP_PATH')
+      ){
         $d['real_path'] = $this->decipher_path($d['path']);
         $d['prefix'] = strpos($d['real_path'], BBN_APP_PATH) === 0 ? '' : false;
         foreach ( $this->routes as $alias => $route ){
@@ -224,6 +228,20 @@ class directories {
    * @return bool|string
    */
   public function real_to_id($file){
+    $url = self::real_to_url($file);
+    $dir = self::dir(self::dir_from_url($url));
+    if ( !empty($dir) &&
+      defined($dir['bbn_path'])
+    ){
+      $bbn_p = constant($dir['bbn_path']);
+      if ( strpos($file, $bbn_p) === 0 ){
+        $f = substr($file, strlen($bbn_p));
+        return \bbn\str::parse_path($dir['bbn_path'].'/'.$f);
+      }
+    }
+
+    // OLD VERSION
+    /*
     $dirs = $this->dirs();
     $len = 0;
     $bbn_path = '';
@@ -234,6 +252,7 @@ class directories {
         if ( strpos($file, $bbn_p) === 0 ){
           $p = substr($file, strlen($bbn_p));
           if ( strpos($p, $d['code']) === 0 ){
+            die(var_dump($file, $bbn_p, $p));
             $len_tmp = count(explode('/', $d['code']));
             if ( $len_tmp > $len ){
               $len = $len_tmp;
@@ -245,6 +264,7 @@ class directories {
       }
     }
     return \bbn\str::parse_path($bbn_path.'/'.$f);
+    */
   }
 
   /**
@@ -263,15 +283,16 @@ class directories {
         $bits = explode('/', substr($url, strlen($dn), strlen($url)));
         if ( !empty($dir['tabs']) && !empty($bits) ){
           $tab = array_pop($bits);
-          $fn = implode('/', $bits);
+          $fn = array_pop($bits);
+          $fp = implode('/', $bits).'/';
           if ( !empty($dir['tabs'][$tab]) ){
             $tab = $dir['tabs'][$tab];
             $res .= $tab['path'];
             if ( !empty($tab['fixed']) ){
-              $res .= $tab['fixed'];
+              $res .= $fp . $tab['fixed'];
             }
             else {
-              $res .= $fn;
+              $res .= $fp . $fn;
               $ext_ok = false;
               foreach ( $tab['extensions'] as $e ){
                 $ext = '.' . $e['ext'];
@@ -291,6 +312,10 @@ class directories {
           }
         }
         else {
+          // Remove the last element of the path if it's 'code' (it's the tab's URL in a non MVC architecture)
+          if ( end($bits) === 'code' ){
+            array_pop($bits);
+          }
           $res .= implode('/', $bits);
         }
         return \bbn\str::parse_path($res);
@@ -460,20 +485,22 @@ class directories {
     $cats = [];
     $r = [];
     foreach ( $all as $a ){
-      $k = $a['bbn_path'] . '/' . ($a['code'] === '/' ? '' : $a['code']);
-      if ( !isset($cats[$a['id_alias']]) ){
-        $cats[$a['id_alias']] = $this->options->option($a['id_alias']);
+      if ( defined($a['bbn_path']) ){
+        $k = $a['bbn_path'] . '/' . ($a['code'] === '/' ? '' : $a['code']);
+        if ( !isset($cats[$a['id_alias']]) ){
+          $cats[$a['id_alias']] = $this->options->option($a['id_alias']);
+        }
+        $r[$k] = $a;
+        $r[$k]['title'] = $r[$k]['text'];
+        $r[$k]['alias_code'] = $cats[$a['id_alias']]['code'];
+        if ( !empty($cats[$a['id_alias']]['tabs']) ){
+          $r[$k]['tabs'] = $cats[$a['id_alias']]['tabs'];
+        }
+        else{
+          $r[$k]['extensions'] = $cats[$a['id_alias']]['extensions'];
+        }
+        unset($r[$k]['alias']);
       }
-      $r[$k] = $a;
-      $r[$k]['title'] = $r[$k]['text'];
-      $r[$k]['alias_code'] = $cats[$a['id_alias']]['code'];
-      if ( !empty($cats[$a['id_alias']]['tabs']) ){
-        $r[$k]['tabs'] = $cats[$a['id_alias']]['tabs'];
-      }
-      else{
-        $r[$k]['extensions'] = $cats[$a['id_alias']]['extensions'];
-      }
-      unset($r[$k]['alias']);
     }
     if ( $code ){
       return isset($r[$code]) ? $r[$code] : false;
@@ -676,7 +703,16 @@ class directories {
           $real_file = $root_path . $file;
           $r['url'] = $dir . $file;
           $r['title'] = $file;
-          $r['file'] = $real_file;
+          $r['list'] = [[
+            'bcolor' => $r['bcolor'],
+            'fcolor' => $r['fcolor'],
+            'title' => 'Code',
+            'url' => 'code',
+            'static' => 1,
+            'default' => 1,
+            'file' => $real_file
+          ]];
+          //$r['file'] = $real_file;
           foreach ( $cfg['extensions'] as $e ){
             if ( $e['ext'] === $ext ){
               $mode = $e['mode'];
@@ -760,14 +796,24 @@ class directories {
         ){
           $o = $pref->get($id_option);
         }
-        $r['id_script'] = $this->real_to_id($real_file);
-        $r['cfg'] = [
-          'mode' => !empty($mode) ? $mode : $cfg['extensions'][0]['mode'],
-          'value' => empty($value) ? file_get_contents($real_file) : $value,
-          'selections' => !empty($o['selections']) ? $o['selections'] : [],
-          'marks' => !empty($o['marks']) ? $o['marks'] : []
-        ];
-
+        if ( empty($tab) && empty($cfg['url']) ){
+          $r['list'][0]['id_script'] = $this->real_to_id($real_file);
+          $r['list'][0]['cfg'] = [
+            'mode' => !empty($mode) ? $mode : $cfg['extensions'][0]['mode'],
+            'value' => empty($value) ? file_get_contents($real_file) : $value,
+            'selections' => !empty($o['selections']) ? $o['selections'] : [],
+            'marks' => !empty($o['marks']) ? $o['marks'] : []
+          ];
+        }
+        else {
+          $r['id_script'] = $this->real_to_id($real_file);
+          $r['cfg'] = [
+            'mode' => !empty($mode) ? $mode : $cfg['extensions'][0]['mode'],
+            'value' => empty($value) ? file_get_contents($real_file) : $value,
+            'selections' => !empty($o['selections']) ? $o['selections'] : [],
+            'marks' => !empty($o['marks']) ? $o['marks'] : []
+          ];
+        }
       }
       return $r;
     }
@@ -783,7 +829,11 @@ class directories {
    * @return array|void
    */
   public function save($file, $code, array $cfg = null, \bbn\user\preferences $pref = null){
-    if ( ($file = \bbn\str::parse_path($file)) && ($real = $this->url_to_real($file)) ){
+    if ( ($file = \bbn\str::parse_path($file)) &&
+      ($real = $this->url_to_real($file)) &&
+      ($dir = $this->dir($this->dir_from_url($file))) &&
+      defined('BBN_USER_PATH')
+    ){
       $id_file = $this->real_to_id($real);
       $ext = \bbn\str::file_ext($real, 1);
       $id_user = false;
@@ -791,7 +841,7 @@ class directories {
         $id_user = $session->get('user', 'id');
       }
       // We delete the file if code is empty and we aren't in a _ctrl file
-      if ( empty($code) && ($dir = $this->dir($this->dir_from_url($file))) ){
+      if ( empty($code) ){
         $bits = explode('/', $file);
         if ( !empty($dir['tabs']) && !empty($bits) ){
           $tab = array_pop($bits);
@@ -802,8 +852,8 @@ class directories {
               // Remove permissions
               $this->delete_perm($real);
               // Remove ide backups
-              if ( $id_user ){
-                \bbn\file\dir::delete(dirname(BBN_DATA_PATH."users/$id_user/ide/backup/".$id_file).'/'.$ext[0].'/', 1);
+              if ( $id_file ){
+                \bbn\file\dir::delete(dirname(BBN_USER_PATH."ide/backup/$id_file")."/$ext[0]/", 1);
               }
               return [
                 'deleted' => 1
@@ -813,8 +863,9 @@ class directories {
         }
       }
       if ( is_file($real) ){
-        if ( $id_user ){
-          $backup = dirname(BBN_DATA_PATH."users/$id_user/ide/backup/".$id_file).'/'.$ext[0].'/'.date('Y-m-d His').'.'.$ext[1];
+        if ( $id_file ){
+          $filename = empty($dir['tabs']) ? $ext[0].'.'.$ext[1] : $ext[0];
+          $backup = dirname(BBN_USER_PATH."ide/backup/".$id_file).'/'.$filename.'/'.date('Y-m-d His').'.'.$ext[1];
           \bbn\file\dir::create_path(dirname($backup));
           rename($real, $backup);
         }
@@ -906,6 +957,9 @@ class directories {
                   if ( !file_exists($real_new) ){
                     $files[$real] = $real_new;
                     $ext = empty($ext) ? $e['ext'] : $ext;
+                    if ( $t['url'] === 'php' ){
+                      $perms = $real_new;
+                    }
                   }
                   else {
                     $this->error("The file $real_new is already exists.");
@@ -920,6 +974,9 @@ class directories {
               if ( file_exists($real) ){
                 if ( !file_exists($real_new) ){
                   $files[$real] = $real_new;
+                  if ( $t['url'] === 'php' ){
+                    $perms = $real_new;
+                  }
                 }
                 else {
                   $this->error("The directory $real_new is already exists.");
@@ -953,6 +1010,28 @@ class directories {
         if ( !\bbn\file\dir::copy($s, $d) ){
           $this->error("Impossible to duplicate the $wtype: $s -> $d");
           return false;
+        }
+      }
+
+      // Create permissions
+      if ( !empty($perms) ){
+        if ( $is_file ){
+          self::create_perm_by_real($perms);
+        }
+        else {
+          $dir_perms = function($fd) use(&$dir_perms){
+            foreach ( $fd as $f ){
+              if ( is_file($f) &&
+                (basename($f) !== '_ctrl.php')
+              ){
+                self::create_perm_by_real($f);
+              }
+              else if ( is_dir($f) ){
+                $dir_perms(\bbn\file\dir::get_files($f, 1));
+              }
+            }
+          };
+          $dir_perms(\bbn\file\dir::get_files($perms, 1));
         }
       }
 
@@ -993,10 +1072,7 @@ class directories {
                 if ( file_exists($tmp) && !in_array($tmp, $delete) ){
                   array_push($delete, $tmp);
                   if ( $t['url'] === 'php' ){
-                    $del_perm = [
-                      'file' => $tmp,
-                      'type' => 'file'
-                    ];
+                    $del_perm = $tmp;
                   }
                 }
               }
@@ -1006,10 +1082,7 @@ class directories {
               if ( file_exists($real) && !in_array($real, $delete) ){
                 array_push($delete, $real);
                 if ( $t['url'] === 'php' ){
-                  $del_perm = [
-                    'file' => $real,
-                    'type' => 'dir'
-                  ];
+                  $del_perm = $real;
                 }
               }
             }
@@ -1025,7 +1098,7 @@ class directories {
       $files = [];
       // Remove permissions
       if ( !empty($del_perm) ){
-        $this->delete_perm($del_perm['file'], $del_perm['type']);
+        $this->delete_perm($del_perm, $type);
       }
       foreach ( $delete as $d ){
         if ( $is_file ){
@@ -1049,7 +1122,7 @@ class directories {
           }
         }
       }
-      return $files;
+      return ['files' => $files];
     }
     return false;
   }
@@ -1065,7 +1138,8 @@ class directories {
    */
   public function export($dir, $path, $name, $type = 'file'){
     if ( ($cfg = $this->dir($dir)) &&
-      ($root = $this->get_root_path($dir))
+      ($root = $this->get_root_path($dir)) &&
+      defined('BBN_USER_PATH')
     ){
       $is_file = $type === 'file';
       $wtype = $is_file ? 'file' : 'directory';
@@ -1570,7 +1644,7 @@ class directories {
   }
 
   /**
-   * Changes permisions to a file/dir from the old and new real file/dir's path
+   * Changes permissions to a file/dir from the old and new real file/dir's path
    *
    * @param string $file The old real file/dir's path
    * @param string $file_new The new real file/dir's path
@@ -1614,56 +1688,200 @@ class directories {
   }
 
   /**
+   * @param $path
+   * @param $cfg
+   * @param $all
+   * @param bool $mvc
+   * @return array|bool
+   */
+  private function get_history($path, $cfg, $all, $mvc=false ){
+    if ( !empty($path) &&
+      !empty($cfg) &&
+      is_array($all)
+    ){
+      // Get all files in the path
+      if ( $files = \bbn\file\dir::get_files($path) ){
+        // Get the creation date and time of each backups and insert them into result array
+        foreach ( $files as $f ){
+          $mode = false;
+          $ext = \bbn\str::file_ext($f, 1);
+          foreach ( $cfg['extensions'] as $e ){
+            if ( $e['ext'] === $ext[1] ){
+              $mode = $e['mode'];
+            }
+          }
+          $moment = strtotime($ext[0]);
+          $date = date('d/m/Y', $moment);
+          $time = date('H:i:s', $moment);
+          if ( !isset($all[$date]) ){
+            $all[$date] = [];
+          }
+          // MVC
+          if ( $mvc ){
+            if ( !isset($all[$date][$cfg['url']]) ){
+              $all[$date][$cfg['url']] = [];
+            }
+            if ( !empty($mode) ){
+              array_push($all[$date][$cfg['url']], [
+                'text' => $time,
+                'code' => file_get_contents($f),
+                'mode' => $mode,
+                'tab' => $cfg['url']
+              ]);
+            }
+          }
+          // Normal Tab
+          else{
+            if ( !isset($all[$date]) ){
+              $all[$date] = [];
+            }
+            if ( !empty($mode) ){
+              array_push($all[$date], [
+                'text' => $time,
+                'code' => file_get_contents($f),
+                'mode' => $mode,
+                'tab' => 'code'
+              ]);
+            }
+          }
+        }
+      }
+      return $all;
+    }
+    return false;
+  }
+
+  /**
+   * Returns all backup history of a file.
+   *
+   * @param string $url The file's URL
+   * @return array|bool
+   */
+  public function history($url){
+    if ( !empty($url) &&
+      ( $dir = $this->dir_from_url($url) ) &&
+      ( $dir_cfg = $this->dir($dir) ) &&
+      defined('BBN_USER_PATH')
+    ){
+      $res = [];
+      $all = [];
+      // IDE backup path
+      $path = BBN_USER_PATH."ide/backup/$dir";
+      // Remove dir name from url
+      $file = substr($url, strlen($dir), strlen($url));
+      // MVC
+      if ( !empty($dir_cfg['tabs']) ){
+        foreach ( $dir_cfg['tabs'] as $t ){
+          if ( empty($t['fixed']) ){
+            // The file's backup path of the MVC's tab
+            $p = $path . $t['path'] . $file . '/';
+            // Get history
+            $all = self::get_history($p, $t, $all, true);
+          }
+        }
+      }
+      else {
+        // The file's backup path of the MVC's tab
+        $p = $path . $file . '/';
+        // Get history
+        $all = self::get_history($p, $dir_cfg, $all);
+      }
+      if ( !empty($all) ){
+        foreach ( $all as $i => $a ){
+          if ( !empty($dir_cfg['tabs']) ){
+            $tmp = [];
+            foreach ( $a as $k => $b ){
+              array_push($tmp, [
+                'text' => $k,
+                'items' => $b
+              ]);
+            }
+          }
+          array_push($res, [
+            'text' => $i,
+            'items' => !empty($tmp) ? $tmp : $a
+          ]);
+        }
+      }
+      return ['list' => $res];
+    }
+  }
+
+  public function history_clear($url=''){
+    if ( defined('BBN_USER_PATH') ){
+      $path = BBN_USER_PATH.'ide/backup/';
+    }
+    if ( !empty($url) &&
+      ( $dir = $this->dir_from_url($url) ) &&
+      ( $dir_cfg = $this->dir($dir) )
+    ){
+      // Remove dir name from url
+      $file = substr($url, strlen($dir), strlen($url));
+      $path .= $dir . $file;
+    }
+    if ( is_dir($path) &&
+      \bbn\file\dir::delete($path, !empty($url))
+    ){
+      return ['success' => 1];
+    }
+    $this->error('Error to delete the backup directory');
+    return false;
+  }
+
+  /**
    * Returns
    * @return array
    */
   public function modes($type = false){
-    $r = [
-      'html' => [
-        'name' => 'HTML',
-        'mode' => 'htmlmixed',
-        'code' => is_file(BBN_DATA_PATH.'ide/defaults/default.html') ? file_get_contents(BBN_DATA_PATH.'ide/defaults/default.html') : ''
-      ],
-      'xml' => [
-        'name' => 'XML',
-        'mode' => 'text/xml',
-        'code' => is_file(BBN_DATA_PATH.'ide/defaults/default.xml') ? file_get_contents(BBN_DATA_PATH.'ide/defaults/default.xml') : ''
-      ],
-      'js' => [
-        'name' => 'JavaScript',
-        'mode' => 'javascript',
-        'code' => is_file(BBN_DATA_PATH.'ide/defaults/default.js') ? file_get_contents(BBN_DATA_PATH.'ide/defaults/default.js') : ''
-      ],
-      'svg' => [
-        'name' => 'SVG',
-        'mode' => 'text/xml',
-        'code' => is_file(BBN_DATA_PATH.'ide/defaults/default.svg') ? file_get_contents(BBN_DATA_PATH.'ide/defaults/default.svg') : ''
-      ],
-      'php' => [
-        'name' => 'PHP',
-        'mode' => 'application/x-httpd-php',
-        'code' => is_file(BBN_DATA_PATH.'ide/defaults/default.php') ? file_get_contents(BBN_DATA_PATH.'ide/defaults/default.php') : ''
-      ],
-      'css' => [
-        'name' => 'CSS',
-        'mode' => 'text/css',
-        'code' => is_file(BBN_DATA_PATH.'ide/defaults/default.css') ? file_get_contents(BBN_DATA_PATH.'ide/defaults/default.css') : ''
-      ],
-      'less' => [
-        'name' => 'LESS',
-        'mode' => 'text/x-less',
-        'code' => is_file(BBN_DATA_PATH.'ide/defaults/default.css') ? file_get_contents(BBN_DATA_PATH.'ide/defaults/default.css') : ''
-      ],
-      'sql' => [
-        'name' => 'SQL',
-        'mode' => 'text/x-sql',
-        'code' => is_file(BBN_DATA_PATH.'ide/defaults/default.sql') ? file_get_contents(BBN_DATA_PATH.'ide/defaults/default.sql') : ''
-      ],
-      'def' => [
-        'mode' => 'application/x-httpd-php',
-        'code' => is_file(BBN_DATA_PATH.'ide/defaults/default.php') ? file_get_contents(BBN_DATA_PATH.'ide/defaults/default.php') : ''
-      ]
-    ];
-    return $type ? ( isset($r[$type]) ? $r[$type] : false ) : $r;
+    if ( defined('BBN_DATA_PATH') ){
+      $r = [
+        'html' => [
+          'name' => 'HTML',
+          'mode' => 'htmlmixed',
+          'code' => is_file(BBN_DATA_PATH.'ide/defaults/default.html') ? file_get_contents(BBN_DATA_PATH.'ide/defaults/default.html') : ''
+        ],
+        'xml' => [
+          'name' => 'XML',
+          'mode' => 'text/xml',
+          'code' => is_file(BBN_DATA_PATH.'ide/defaults/default.xml') ? file_get_contents(BBN_DATA_PATH.'ide/defaults/default.xml') : ''
+        ],
+        'js' => [
+          'name' => 'JavaScript',
+          'mode' => 'javascript',
+          'code' => is_file(BBN_DATA_PATH.'ide/defaults/default.js') ? file_get_contents(BBN_DATA_PATH.'ide/defaults/default.js') : ''
+        ],
+        'svg' => [
+          'name' => 'SVG',
+          'mode' => 'text/xml',
+          'code' => is_file(BBN_DATA_PATH.'ide/defaults/default.svg') ? file_get_contents(BBN_DATA_PATH.'ide/defaults/default.svg') : ''
+        ],
+        'php' => [
+          'name' => 'PHP',
+          'mode' => 'application/x-httpd-php',
+          'code' => is_file(BBN_DATA_PATH.'ide/defaults/default.php') ? file_get_contents(BBN_DATA_PATH.'ide/defaults/default.php') : ''
+        ],
+        'css' => [
+          'name' => 'CSS',
+          'mode' => 'text/css',
+          'code' => is_file(BBN_DATA_PATH.'ide/defaults/default.css') ? file_get_contents(BBN_DATA_PATH.'ide/defaults/default.css') : ''
+        ],
+        'less' => [
+          'name' => 'LESS',
+          'mode' => 'text/x-less',
+          'code' => is_file(BBN_DATA_PATH.'ide/defaults/default.css') ? file_get_contents(BBN_DATA_PATH.'ide/defaults/default.css') : ''
+        ],
+        'sql' => [
+          'name' => 'SQL',
+          'mode' => 'text/x-sql',
+          'code' => is_file(BBN_DATA_PATH.'ide/defaults/default.sql') ? file_get_contents(BBN_DATA_PATH.'ide/defaults/default.sql') : ''
+        ],
+        'def' => [
+          'mode' => 'application/x-httpd-php',
+          'code' => is_file(BBN_DATA_PATH.'ide/defaults/default.php') ? file_get_contents(BBN_DATA_PATH.'ide/defaults/default.php') : ''
+        ]
+      ];
+      return $type ? ( isset($r[$type]) ? $r[$type] : false ) : $r;
+    }
+    return false;
   }
 }

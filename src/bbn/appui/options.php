@@ -597,6 +597,7 @@ class options
   }
 
   /**
+   * Transforms an array of parameters into valid option array
    * @param $it
    * @return bool
    */
@@ -740,6 +741,31 @@ class options
       }
     }
     return $parent ?: false;
+  }
+
+  public function to_path($id, $sep = '|', $parent = null){
+    if ( $parents = $this->parents($id) ){
+      $parents = array_reverse($parents);
+      $st = '';
+      $ok = false;
+      foreach ( $parents as $p ){
+        if ( $p == $parent ){
+          $ok = 1;
+        }
+        else if ( $ok ){
+          $st .= $this->code($p).$sep;
+        }
+      }
+      $st .= $this->code($id);
+      return $st;
+    }
+  }
+
+  public function get_codes($id){
+    if ( $id = $this->from_code(func_get_args()) ){
+      $c = $this->cfg['cols'];
+      return $this->db->select_all_by_keys($this->cfg['table'], [$c['id'], $c['code']], [$c['id_parent'] => $id]);
+    }
   }
 
   public function set($id, $cfg){
