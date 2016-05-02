@@ -55,11 +55,11 @@ class menu {
     return self::$_cache_prefix.$method.'-'.(string)$uid;
   }
 
-  private function _adapt($ar, \bbn\user\preferences $pref){
+  private function _adapt($ar, \bbn\user\preferences $pref, $prepath = false){
     $tmp = $this->_filter($ar, $pref);
     foreach ( $tmp as $i => $it ){
       if ( !empty($it['items']) ){
-        $tmp[$i]['items'] = $this->_adapt($it['items'], $pref);
+        $tmp[$i]['items'] = $this->_adapt($it['items'], $pref, $prepath);
       }
     }
     $res = [];
@@ -89,7 +89,7 @@ class menu {
     });
   }
 
-  private function _arrange(array $menu){
+  private function _arrange(array $menu, $prepath = false){
     if ( isset($menu['text']) ){
       $res = [
         'id' => $menu['id'],
@@ -99,11 +99,14 @@ class menu {
       if ( !empty($menu['alias']) ){
         $res['id_permission'] = $menu['id_alias'];
         $res['link'] = $this->options->get_path($menu['id_alias'], $this->_get_public_root(), '');
+        if ( $prepath && (strpos($res['link'], $prepath) === 0) ){
+
+        }
       }
       if ( !empty($menu['items']) ){
         $res['items'] = [];
         foreach ( $menu['items'] as $m ){
-          array_push($res['items'], $this->_arrange($m));
+          array_push($res['items'], $this->_arrange($m, $prepath));
         }
       }
       return $res;
@@ -145,22 +148,22 @@ class menu {
     }
   }
 
-  public function tree($id){
+  public function tree($id, $prepath = false){
     if ( $id = $this->from_path($id) ){
       $cn = $this->_cache_name(__FUNCTION__, $id);
       if ( $this->cacher->has($cn) ){
         return $this->cacher->get($cn);
       }
       $items = $this->options->full_tree($id);
-      $res = $this->_arrange($items);
+      $res = $this->_arrange($items, $prepath);
       $this->cacher->set($this->_cache_name(__FUNCTION__, $id), $res);
       return $res;
     }
   }
 
-  public function custom_tree($id, \bbn\user\preferences $pref){
-    if ( ($tree = $this->tree($id)) && isset($tree['items']) ){
-      return $this->_adapt($tree['items'], $pref);
+  public function custom_tree($id, \bbn\user\preferences $pref, $prepath = false){
+    if ( ($tree = $this->tree($id, $prepath)) && isset($tree['items']) ){
+      return $this->_adapt($tree['items'], $pref, $prepath);
     }
   }
   
