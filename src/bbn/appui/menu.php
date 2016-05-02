@@ -78,7 +78,7 @@ class menu {
     }
     return array_filter($ar, function($a)use($pref){
       if ( isset($a['id_permission']) ){
-        if ( !$pref->has($a['id_permission']) ){
+        if ( !$pref->has($a['id_permission'], $pref->get_user(), $pref->get_group()) ){
           return false;
         }
       }
@@ -139,6 +139,12 @@ class menu {
     }
   }
 
+  public function remove_shortcut($id, \bbn\user\preferences $pref){
+    if ( $id_menu = $this->from_path('shortcuts') ){
+      return $pref->unset_link($id);
+    }
+  }
+
   public function tree($id){
     if ( $id = $this->from_path($id) ){
       $cn = $this->_cache_name(__FUNCTION__, $id);
@@ -167,6 +173,7 @@ class menu {
           ($url = $this->to_path($o['id_alias']))
         ){
           array_push($res, [
+            'id' => $id,
             'url' => $url,
             'text' => $o['text'],
             'icon' => $o['icon']

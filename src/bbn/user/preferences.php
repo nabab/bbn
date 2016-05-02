@@ -199,10 +199,16 @@ class preferences
     if ( !\bbn\str::is_integer($id_option) ){
       $id_option = $this->from_path($id_option);
     }
-		return
-      (!$force && $this->id_group === 1) ||
-      $this->retrieve_id($id_option, $id_user, $id_group, $force) ?
-        true : false;
+    if ( !$force && $this->id_group === 1 ){
+      return true;
+    }
+    if ( $id_user && $this->retrieve_id($id_option, $id_user, false, $force) ){
+      return true;
+    }
+    if ( $id_group && $this->retrieve_id($id_option, false, $id_group, $force) ){
+      return true;
+    }
+		return false;
 	}
 
 	public function get_existing_permissions($path){
@@ -236,7 +242,7 @@ class preferences
 			if ( !empty($option['public']) ){
 				return true;
 			}
-			return $this->has($id_option, $id_user, $id_group, $force);
+			return $this->has($id_option, $id_user ?: $this->id_user, $id_group ?: $this->id_group, $force);
 		}
 	}
 
@@ -340,6 +346,22 @@ class preferences
           $this->cfg['cols']['id_user'] => $id_group ? null : ( $id_user ?: $this->id_user )
         ]);
       }
+    }
+  }
+
+  /**
+   *
+   * @param $id_pref
+   * @param $id_link
+   * @return int
+   */
+  public function unset_link($id_option, $id_user = null, $id_group = null){
+    if ( $id = $this->retrieve_id($id_option, $id_user, $id_group) ){
+      return $this->db->update($this->cfg['table'], [
+        $this->cfg['cols']['id_link'] => null
+      ], [
+        $this->cfg['cols']['id'] => $id
+      ]);
     }
   }
 
