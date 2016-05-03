@@ -100,7 +100,7 @@ class menu {
         $res['id_permission'] = $menu['id_alias'];
         $res['link'] = $this->options->get_path($menu['id_alias'], $this->_get_public_root(), '');
         if ( $prepath && (strpos($res['link'], $prepath) === 0) ){
-
+          $res['link'] = substr($res['link'], strlen($prepath));
         }
       }
       if ( !empty($menu['items']) ){

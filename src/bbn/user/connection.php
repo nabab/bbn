@@ -121,11 +121,6 @@ class connection
              */
             'retry_length' => 5,
             /*
-             * Sets if the groups features should be in used
-             * @var bool
-             */
-            'groups' => false,
-            /*
              * Sets if the hotlinks features should be in used
              * @var bool
              */
@@ -149,8 +144,6 @@ class connection
           /** @var string */
           $error = null,
           /** @var array */
-          $groups = [],
-          /** @var array */
           $permissions = [],
           /** @var string */
           $user_agent,
@@ -162,6 +155,8 @@ class connection
           $sql,
           /** @var int */
           $id,
+          /** @var int */
+          $id_group,
           /** @var mixed */
           $alert,
           /** @var array */
@@ -323,6 +318,7 @@ class connection
       if ( !$this->session->has('user') ){
         $this->session->set([
           'id' => $this->id,
+          'id_group' => $this->id_group,
           'fingerprint' => $fingerprint,
           'tokens' => []
         ], 'user');
@@ -382,29 +378,13 @@ class connection
         $this->user_cfg = empty($d['cfg']) ?
                         ['log_tries' => 0] : json_decode($d['cfg'], true);
         $this->set_session('cfg', $this->user_cfg);
-        // Groups
-        $this->permissions = [];
-        $this->groups = $this->db->get_col_array("
-          SELECT {$this->cfg['arch']['usergroups']['id_group']}
-          FROM {$this->cfg['tables']['usergroups']}
-          WHERE {$this->cfg['arch']['usergroups']['id_user']} = ?",
-          $this->id);
-        foreach ( $this->groups as $gr ){
-          if ( $p = $this->db->get_val(
-            $this->cfg['tables']['groups'],
-            $this->cfg['arch']['groups']['cfg'],
-            $this->cfg['arch']['groups']['id'],
-            $gr) ){
-            $this->permissions = array_merge(json_decode($p, 1), $this->permissions);
-          }
-        }
-        /** @todo Add all the permissions explicitly for admin */
-        if ( $this->is_admin() ){
-
-        }
-        $this->set_session('permissions', $this->permissions);
-        $this->set_session('groups', $this->groups);
-        $this->set_session('id_group', count($this->groups) ? $this->groups[0] : false);
+        // Group
+        $this->id_group = $this->db->select_one(
+          $this->cfg['tables']['usergroups'],
+          $this->cfg['arch']['usergroups']['id_group'],
+          [$this->cfg['arch']['usergroups']['id_user'] => $this->id]
+        );
+        $this->set_session('id_group', $this->id_group);
       }
     }
     return $this;
@@ -787,7 +767,7 @@ class connection
         if ( $this->preferences ){
           $this->preferences->set_user($this->id);
           /** @todo Redo this!!! Bad! */
-          $this->preferences->set_group($this->get_session('groups')[0]);
+          $this->preferences->set_group($this->get_session('id_group'));
         }
 
         $this->_sess_info();

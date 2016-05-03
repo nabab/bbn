@@ -19,25 +19,26 @@ namespace bbn\mvc;
  * @todo Look into the check function and divide it
  */
 
-class model{
+class model extends \bbn\objcache{
 
 	use common;
 
 	private
-		/**
-		 * @var \bbn\db Database object
-		 */
-		$db,
     /**
      * The data model
      * @var null|array
      */
 		$data,
-		/**
-		 * The path as being requested
-		 * @var null|string
-		 */
+    /**
+     * The file as being requested
+     * @var null|string
+     */
     $file,
+    /**
+     * The path as being requested
+     * @var null|string
+     */
+    $path,
 		/**
 		 * An external object that can be filled after the object creation and can be used as a global with the function add_inc
 		 * @var stdClass
@@ -53,15 +54,18 @@ class model{
 	 * @param string | object $parent The parent controller</em>
 	 * @return bool
 	 */
-	public function __construct(array $info, \bbn\db $db=null, controller $ctrl){
-		if ( $this->check_path() ){
+	public function __construct(\bbn\db $db=null, array $info, controller $ctrl){
+		if ( isset($info['path']) && $this->check_path($info['path']) ){
+      parent::__construct($db);
       $this->ctrl = $ctrl;
 			$this->inc = $this->ctrl->inc;
-			$this->db = $db;
-			$this->file = $info['file'];
+      if ( is_file($info['file']) ){
+        $this->path = $info['path'];
+        $this->file = $info['file'];
+      }
 		}
 		else{
-			$this->error("The model $file doesn't exist");
+			$this->error("The model $info[path] doesn't exist");
 		}
 	}
 
@@ -70,11 +74,14 @@ class model{
       $data = [];
     }
     $this->data = $data;
-    $d = include($this->file);
-    if ( !is_array($d) ){
-      return false;
+    if ( $this->file ){
+      $d = include($this->file);
+      if ( !is_array($d) ){
+        return false;
+      }
+      return $d;
     }
-    return $d;
+    return false;
   }
 
   public function get_content(){
@@ -83,6 +90,10 @@ class model{
 
   public function get_model(){
     return call_user_func_array([$this->ctrl, 'get_model'], func_get_args());
+  }
+
+  public function get_cached_model(){
+    return call_user_func_array([$this->ctrl, 'get_cached_model'], func_get_args());
   }
 
   /**
@@ -134,4 +145,24 @@ class model{
 		}
 		return $this;
 	}
+
+  public function set_cache(array $data = null, $spec=''){
+    if ( $this->path ){
+      $d = $this->get($data);
+      $this->cache_set($this->path.(empty($spec) ? '' : '-'.$spec), '', $d);
+    }
+  }
+
+  public function get_from_cache(array $data = null, $spec=''){
+    if ( $this->path ){
+      if ( $this->cache_has($this->path.(empty($spec) ? '' : '-'.$spec)) ){
+        return $this->cache_get($this->path.(empty($spec) ? '' : '-'.$spec));
+      }
+      $this->set_cache($data, $spec);
+      if ( $this->cache_has($this->path.(empty($spec) ? '' : '-'.$spec)) ){
+        return $this->cache_get($this->path.(empty($spec) ? '' : '-'.$spec));
+      }
+      return false;
+    }
+  }
 }

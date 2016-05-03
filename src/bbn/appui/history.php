@@ -323,7 +323,7 @@ class history
 			die("The table $table doesn't have a unique primary");
 		}
 		if ( !isset($where[$primary]) ){
-			die("The primary key $primary needs to be sent");
+			die("The primary key $primary needs to be sent for table $table");
 		}
     if ( count($columns) === 0 ){
       $columns = array_keys(self::$db->get_columns($table));

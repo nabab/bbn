@@ -520,7 +520,8 @@ EOD;
       return $this;
     }
     die("Prepath $path is not valid");
-  }
+	}
+
 	/**
 	 * This will get the model. There is no order for the arguments.
 	 *
@@ -558,7 +559,78 @@ EOD;
     return $m;
 	}
 
-  public function get_object_model(){
+	/**
+	 * This will get the model. There is no order for the arguments.
+	 *
+	 * @params string path to the model
+	 * @params array data to send to the model
+	 * @return array|false A data model
+	 */
+	public function get_cached_model(){
+		$args = func_get_args();
+		$die = 1;
+		foreach ( $args as $a ){
+			if ( is_string($a) && strlen($a) ) {
+				$path = $a;
+			}
+			else if ( is_array($a) ) {
+				$data = $a;
+			}
+			else if ( is_bool($a) ) {
+				$die = $a;
+			}
+		}
+		if ( !isset($path) ) {
+			$path = $this->path;
+		}
+		else if ( strpos($path, './') === 0 ){
+			$path = $this->say_dir().substr($path, 1);
+		}
+		if ( !isset($data) ) {
+			$data = $this->data;
+		}
+		$m = $this->mvc->get_cached_model($path, $data, $this);
+		if ( !is_array($m) && !$die ){
+			die("$path is an invalid model");
+		}
+		return $m;
+	}
+
+	/**
+	 * This will get the model. There is no order for the arguments.
+	 *
+	 * @params string path to the model
+	 * @params array data to send to the model
+	 * @return array|false A data model
+	 */
+	public function set_cached_model(){
+		$args = func_get_args();
+		$die = 1;
+		foreach ( $args as $a ){
+			if ( is_string($a) && strlen($a) ) {
+				$path = $a;
+			}
+			else if ( is_array($a) ) {
+				$data = $a;
+			}
+			else if ( is_bool($a) ) {
+				$die = $a;
+			}
+		}
+		if ( !isset($path) ) {
+			$path = $this->path;
+		}
+		else if ( strpos($path, './') === 0 ){
+			$path = $this->say_dir().substr($path, 1);
+		}
+		if ( !isset($data) ) {
+			$data = $this->data;
+		}
+		$this->mvc->set_cached_model($path, $data, $this);
+		return $this;
+	}
+
+	public function get_object_model(){
     $m = call_user_func_array([$this, 'get_model'], func_get_args());
     if ( is_array($m) ){
       return \bbn\x::to_object($m);

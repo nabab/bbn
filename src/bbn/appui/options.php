@@ -17,10 +17,9 @@ namespace bbn\appui;
  */
 
 
-class options
+class options extends \bbn\objcache
 {
   private static
-    $_cache_prefix = 'bbn-options-',
     $current;
 
   protected static
@@ -42,19 +41,11 @@ class options
     ];
 
   protected
-    /** @var \bbn\db The database connection */
-    $db,
-    /** @var \bbn\cache The cache object */
-    $cacher,
     /** @var int The default root ID of the options in the table */
     $default = 0;
 
   private function _has_history(){
     return class_exists('\\bbn\\appui\\history') && \bbn\appui\history::is_enabled();
-  }
-
-  private function _cache_name($uid, $method = ''){
-    return self::$_cache_prefix.(string)$uid.'-'.$method;
   }
 
   private function _cache_delete($id, $parents = true, $deep = false){
@@ -72,10 +63,6 @@ class options
       }
     }
     return $this;
-  }
-
-  private function delete_cache($id, $parents = true, $deep = false){
-    return $this->_cache_delete($id, $parents, $deep);
   }
 
   protected static function _init(\bbn\appui\options $opt){
@@ -148,9 +135,8 @@ class options
    * @param array $cfg
    */
   public function __construct(\bbn\db $db, array $cfg=[]){
-    $this->db = $db;
+    parent::__construct($db);
     $this->cfg = \bbn\x::merge_arrays(self::$_defaults, $cfg);
-    $this->cacher = \bbn\cache::get_engine();
     self::_init($this);
   }
 
@@ -273,15 +259,15 @@ class options
   public function native_option($id){
     $id = $this->from_code(func_get_args());
     if ( \bbn\str::is_integer($id) ) {
-      if ( $this->cacher->has($this->_cache_name($id, __FUNCTION__)) ){
-        return $this->cacher->get($this->_cache_name($id, __FUNCTION__));
+      if ( $r = $this->cache_get($id, __FUNCTION__) ){
+        return $r;
       }
       $tab = $this->db->tsn($this->cfg['table']);
       $opt = $this->get_row([
         $this->db->cfn($this->cfg['cols']['id'], $tab) => $id
       ]);
       if ( $opt ){
-        $this->cacher->set($this->_cache_name($id, __FUNCTION__), $opt);
+        $this->cache_set($id, __FUNCTION__, $opt);
         return $opt;
       }
     }
@@ -303,8 +289,8 @@ class options
       $id = $this->from_code(func_get_args());
     }
     if ( \bbn\str::is_integer($id) ) {
-      if ( $this->cacher->has($this->_cache_name($id, __FUNCTION__)) ){
-        return $this->cacher->get($this->_cache_name($id, __FUNCTION__));
+      if ( $r = $this->cache_get($id, __FUNCTION__) ){
+        return $r;
       }
       if ( isset($opt) || ($opt = $this->native_option($id)) ){
         $this->get_value($opt);
@@ -315,7 +301,7 @@ class options
           }
           $opt['alias'] = $this->option($opt['id_alias']);
         }
-        $this->cacher->set($this->_cache_name($id, __FUNCTION__), $opt);
+        $this->cache_set($id, __FUNCTION__, $opt);
         return $opt;
       }
     }
@@ -378,15 +364,15 @@ class options
       if ( isset($args[0]['id']) ){
         return $args[0]['id'];
       }
-      if ( $this->cacher->has($this->_cache_name($id, __FUNCTION__)) ){
-        return $this->cacher->get($this->_cache_name($id, __FUNCTION__));
+      if ( $r = $this->cache_get($id, __FUNCTION__) ){
+        return $r;
       }
       $opt = $this->db->select_all_by_keys($this->cfg['table'],
         [$this->cfg['cols']['id'], $this->cfg['cols']['text']],
         [$this->cfg['cols']['id_parent'] => $id],
         [$this->cfg['cols']['text'] => 'ASC']
       );
-      $this->cacher->set($this->_cache_name($id, __FUNCTION__), $opt);
+      $this->cache_set($id, __FUNCTION__, $opt);
       return $opt;
     }
     return false;
@@ -455,8 +441,9 @@ class options
    * @return array Un tableau des caractéristiques de chaque option de la catégorie, indexée sur leur `id`
    */
   public function full_options($id = 0, $id_parent = false, $where = [], $order = [], $start = 0, $limit = 2000){
-    if ( $this->cacher->has($this->_cache_name($id, __FUNCTION__)) ){
-      return $this->cacher->get($this->_cache_name($id, __FUNCTION__));
+    $id = $this->from_code($id, $id_parent);
+    if ( $r = $this->cache_get($id, __FUNCTION__) ){
+      return $r;
     }
     if ( \bbn\str::is_integer($id = $this->from_code($id, $id_parent)) ){
       $list = $this->items($id);
@@ -465,7 +452,7 @@ class options
         foreach ($list as $i) {
           $res[$i] = $this->option($i);
         }
-        $this->cacher->set($this->_cache_name($id, __FUNCTION__), $res);
+        $this->cache_set($id, __FUNCTION__, $res);
         return $res;
       }
     }
@@ -481,15 +468,15 @@ class options
   public function native_options($id = 0, $id_parent = false, $where = [], $order = [], $start = 0, $limit = false){
     $id = $this->from_code($id, $id_parent ?: $this->default);
     if ( \bbn\str::is_integer($id, $start) ) {
-      if ( $this->cacher->has($this->_cache_name($id, __FUNCTION__)) ){
-        return $this->cacher->get($this->_cache_name($id, __FUNCTION__));
+      if ( $r = $this->cache_get($id, __FUNCTION__) ){
+        return $r;
       }
       if ( !is_array($where) ){
         $where = [];
       }
       $where[$this->cfg['cols']['id_parent']] = $id;
       $opts = $this->get_rows($where, $start, $limit);
-      $this->cacher->set($this->_cache_name($id, __FUNCTION__), $opts);
+      $this->cache_set($id, __FUNCTION__, $opts);
       return $opts;
     }
     return false;
@@ -498,8 +485,8 @@ class options
   public function tree_ids($id, &$res = []){
     $id = $this->from_code(func_get_args());
     if ( \bbn\str::is_integer($id) ) {
-      if ( $this->cacher->has($this->_cache_name($id, __FUNCTION__)) ){
-        return $this->cacher->get($this->_cache_name($id, __FUNCTION__));
+      if ( $r = $this->cache_get($id, __FUNCTION__) ){
+        return $r;
       }
       if ( $opts = $this->items($id) ){
         foreach ($opts as $o) {
@@ -507,6 +494,7 @@ class options
           $this->tree_ids($o, $res);
         }
       }
+      $this->cache_set($id, __FUNCTION__, $res);
       return $res;
     }
     return false;
@@ -515,8 +503,8 @@ class options
   public function tree($id, $id_parent = false){
     $id = $this->from_code(func_get_args());
     if ( \bbn\str::is_integer($id) && ($text = $this->text($id)) ) {
-      if ( $this->cacher->has($this->_cache_name($id, __FUNCTION__)) ){
-        return $this->cacher->get($this->_cache_name($id, __FUNCTION__));
+      if ( $r = $this->cache_get($id, __FUNCTION__) ){
+        return $r;
       }
       $res = [
         'id' => $id,
@@ -530,10 +518,7 @@ class options
           }
         }
       }
-      /*else if ( $this->code($id) === 'bbn_options' ){
-        $res['items'] = $this->options();
-      }*/
-      $this->cacher->set($this->_cache_name($id, __FUNCTION__), $res);
+      $this->cache_set($id, __FUNCTION__, $res);
       return $res;
     }
     return false;
@@ -542,10 +527,9 @@ class options
   public function full_tree($id){
     $id = $this->from_code(func_get_args());
     if (\bbn\str::is_integer($id) && ($text = $this->text($id))) {
-      if ( $this->cacher->has($this->_cache_name($id, __FUNCTION__)) ){
-        return $this->cacher->get($this->_cache_name($id, __FUNCTION__));
+      if ( $r = $this->cache_get($id, __FUNCTION__) ){
+        return $r;
       }
-
       if ( $res = $this->option($id) ){
         $res['items'] = [];
         if ($opts = $this->items($id) ){
@@ -555,19 +539,10 @@ class options
             }
           }
         }
-        /*else if ( ($res['code'] === 'bbn_options') &&
-          ($res['items'] = $this->full_options())
-        ){
-          if ( defined('BBN_OPTIONS_URL') ){
-            array_walk($res['items'], function(&$a){
-              $a['link'] = BBN_OPTIONS_URL.$a['id'];
-            });
-          }
-        }*/
         else{
           unset($res['items']);
         }
-        $this->cacher->set($this->_cache_name($id, __FUNCTION__), $res);
+        $this->cache_set($id, __FUNCTION__, $res);
         return $res;
       }
     }
@@ -577,10 +552,9 @@ class options
   public function native_tree($id){
     $id = $this->from_code(func_get_args());
     if ( \bbn\str::is_integer($id) ) {
-      if ( $this->cacher->has($this->_cache_name($id, __FUNCTION__)) ){
-        return $this->cacher->get($this->_cache_name($id, __FUNCTION__));
+      if ( $r = $this->cache_get($id, __FUNCTION__) ){
+        return $r;
       }
-      $c = $this->cfg['cols'];
       if ( $res = $this->native_option($id) ) {
         $its = $this->items($id);
         if ( count($its) ){
@@ -589,7 +563,7 @@ class options
             array_push($res['items'], $this->native_tree($it, $id));
           }
         }
-        $this->cacher->set($this->_cache_name($id, __FUNCTION__), $res);
+        $this->cache_set($id, __FUNCTION__, $res);
         return $res;
       }
     }
@@ -1210,7 +1184,6 @@ class options
     ){
       $options = $this->full_options($parent['id']);
       // The order really changes
-      $idx = \bbn\x::find($options, ['id' => $id]);
       if ( $options[$id]['cfg']['order'] !== $pos ){
         $options = array_values($options);
         $idx = \bbn\x::find($options, ['id' => $id]);

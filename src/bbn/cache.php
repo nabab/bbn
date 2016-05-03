@@ -184,17 +184,38 @@ class cache{
     return $this;
   }
 
+  public function timestamp($it){
+    if ( $r = $this->get_raw($it) ){
+      return $r['timestamp'];
+    }
+    return false;
+  }
+
+  public function is_new($it, $time){
+    if ( $r = $this->get_raw($it) ){
+      return $r['timestamp'] > $time;
+    }
+    return true;
+  }
+
   public function set($it, $val, $ttl = 0){
     if ( self::$type && is_string($it) ){
       $ttl = self::ttl($ttl);
       switch ( self::$type ){
         case 'apc':
-          return apc_store($it, $val, $ttl);
+          return apc_store($it, [
+            'timestamp' => microtime(1),
+            'value' => $val
+          ], $ttl);
         case 'memcache':
-          return $this->obj->set($it, $val, false, $ttl);
+          return $this->obj->set($it, [
+            'timestamp' => microtime(1),
+            'value' => $val
+          ], false, $ttl);
         case 'files':
           $file = $this->path.\bbn\str::encode_filename($it).'.bbn.cache';
           $value = [
+            'timestamp' => microtime(1),
             'expire' => $ttl ? time() + $ttl : 0,
             'value' => $val
           ];
@@ -203,7 +224,7 @@ class cache{
     }
   }
 
-  public function get($it){
+  private function get_raw($it){
     if ( $this->has($it) ){
       switch ( self::$type ){
         case 'apc':
@@ -213,8 +234,15 @@ class cache{
         case 'files':
           $file = $this->path.\bbn\str::encode_filename($it).'.bbn.cache';
           $t = file_get_contents($file);
-          return $t ? unserialize($t)['value'] : false;
+          return $t ? unserialize($t) : false;
       }
+    }
+    return false;
+  }
+
+  public function get($it){
+    if ( $r = $this->get_raw($it) ){
+      return $r['value'];
     }
     return false;
   }

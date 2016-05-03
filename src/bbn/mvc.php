@@ -260,26 +260,62 @@ class mvc implements \bbn\mvc\api{
 		return '';
 	}
 
-	/**
-	 * This will get the model. There is no order for the arguments.
-	 *
-	 * @params string path to the model
-	 * @params array data to send to the model
-	 * @return array|false A data model
-	 */
-	public function get_model($path, array $data, mvc\controller $ctrl)
-	{
+  /**
+   * This will get the model. There is no order for the arguments.
+   *
+   * @params string path to the model
+   * @params array data to send to the model
+   * @return array|false A data model
+   */
+  public function get_model($path, array $data, mvc\controller $ctrl)
+  {
     if ( is_null($data) ){
       $data = $this->data;
     }
     if ( $route = $this->router->route($path, 'model') ){
-      $model = new mvc\model($route, $this->db, $ctrl);
+      $model = new mvc\model($this->db, $route, $ctrl);
       return $model->get($data);
     }
     return [];
-	}
+  }
 
-	/**
+  /**
+   * This will get the model as it is in cache if any and otherwise will save it in cache then return it
+   *
+   * @params string path to the model
+   * @params array data to send to the model
+   * @return array|false A data model
+   */
+  public function get_cached_model($path, array $data, mvc\controller $ctrl){
+    if ( is_null($data) ){
+      $data = $this->data;
+    }
+    if ( $route = $this->router->route($path, 'model') ){
+      $model = new mvc\model($this->db, $route, $ctrl);
+      return $model->get_from_cache($data);
+    }
+    return [];
+  }
+
+  /**
+   * This will set the model in cache
+   *
+   * @params string path to the model
+   * @params array data to send to the model
+   * @return array|false A data model
+   */
+  public function set_cached_model($path, array $data, mvc\controller $ctrl){
+    if ( is_null($data) ){
+      $data = $this->data;
+    }
+    if ( $route = $this->router->route($path, 'model') ){
+      $model = new mvc\model($this->db, $route, $ctrl);
+      return $model->set_cache($data);
+    }
+    return [];
+  }
+
+  /**
 	 * Adds a property to the MVC object inc if it has not been declared.
 	 *
 	 * @return bool
