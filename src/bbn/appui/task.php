@@ -257,7 +257,7 @@ class task {
       'duration' => 'duration',
       'num_children' => 'num_children',
       'title' => 'title',
-      'num_attachments' => 'num_attachments',
+      'num_notes' => 'num_notes',
       'role' => 'role',
       'state' => 'state',
       'priority' => 'priority'
@@ -287,12 +287,15 @@ class task {
     FROM_UNIXTIME(MIN(bbn_tasks_logs.chrono)) AS `first`,
     FROM_UNIXTIME(MAX(bbn_tasks_logs.chrono)) AS `last`,
     COUNT(children.id) AS num_children,
+    COUNT(DISTINCT bbn_tasks_notes.id_note) AS num_notes,
     MAX(bbn_tasks_logs.chrono) - MIN(bbn_tasks_logs.chrono) AS duration
     FROM bbn_tasks_roles
       JOIN bbn_tasks
         ON bbn_tasks_roles.id_task = bbn_tasks.id
       JOIN bbn_tasks_logs
         ON bbn_tasks_logs.id_task = bbn_tasks_roles.id_task
+      LEFT JOIN bbn_tasks_notes
+        ON bbn_tasks_notes.id_task = bbn_tasks_roles.id_task
       LEFT JOIN bbn_tasks AS children
         ON bbn_tasks_roles.id_task = children.id_parent
     WHERE bbn_tasks_roles.id_user = ?".
@@ -320,12 +323,12 @@ class task {
     return $res;
   }
 
-  private function add_attachment($type, $value, $title){
+  private function add_note($type, $value, $title){
 
   }
 
   public function add_link(){
-    return $this->add_attachment();
+    return $this->add_note();
   }
 
   public function info($id){
@@ -340,7 +343,7 @@ class task {
         'id_task' => $id,
       ], ['chrono' => 'DESC']);
       $info['roles'] = $this->db->rselect_all('bbn_tasks_roles', [], ['id_task' => $id]);
-      $info['attachments'] = $this->db->get_column_values('bbn_tasks_attachments', 'id_note', ['id_task' => $id]);
+      $info['notes'] = $this->db->get_column_values('bbn_tasks_notes', 'id_note', ['id_task' => $id]);
       $info['children'] = $this->db->rselect_all('bbn_tasks', [], ['id_parent' => $id, 'active' => 1]);
       $info['aliases'] = $this->db->rselect_all('bbn_tasks', ['id', 'title'], ['id_alias' => $id, 'active' => 1]);
       $info['num_children'] = count($info['children']);
@@ -373,6 +376,10 @@ class task {
 
   public function info_roles($id){
     return $this->db->rselect_all('bbn_tasks_roles', 'id_user', ['id_task' => $id]);
+  }
+
+  public function get_comments($id_task){
+
   }
 
   public function comment($id, $text){

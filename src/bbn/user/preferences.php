@@ -212,16 +212,16 @@ class preferences
 	}
 
 	public function get_existing_permissions($path){
+		$r = [];
 		if ( $id = $this->from_path($path) ){
 			// Keeps the order
 			$opt = $this->options->full_options($id);
-			$r = [];
 			foreach ( $opt as $o ){
 				$r[$o['id']] = $o['code'];
 			}
 			return $r;
 		}
-		return false;
+		return $r;
 	}
 
 	public function has_permission($path, $type = 'page', $id_user = null, $id_group = null, $force = false){

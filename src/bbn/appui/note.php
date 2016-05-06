@@ -57,6 +57,17 @@ class note extends \bbn\objdb
 
   }
 
+  public function latest($id){
+    return $this->db->get_var("SELECT MAX(version) FROM bbn_notes_versions WHERE id_note = ?", $id);
+  }
 
-
+  public function get($id, $version = false){
+    if ( !is_int($version) ){
+      $version = $this->latest($id);
+    }
+    return $this->db->rselect('bbn_notes_versions', [], [
+      'id_note' => $id,
+      'version' => $version
+    ]);
+  }
 }

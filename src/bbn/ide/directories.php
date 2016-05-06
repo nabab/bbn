@@ -1154,8 +1154,8 @@ class directories {
           }
           if ( $is_file ){
             foreach ( $t['extensions'] as $e ){
-              $path_tmp .= $name . '.' . $e['ext'];
-              if ( file_exists($root . $path_tmp) ){
+              if ( file_exists($root . $name . '.' . $e['ext']) ){
+                $path_tmp .= $name . '.' . $e['ext'];
                 break;
               }
             }
