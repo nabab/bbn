@@ -53,10 +53,25 @@ class note extends \bbn\objdb
     return self::get_media($code);
   }
 
-  public function insert($title, $content, $media = 'text', $private = false){
+  public function insert($title, $content, $private = false, $parent = null){
     if ( $usr = \bbn\user\connection::get_user() ){
-      $this->db->insert('bbn_notes', []);
+      if ( $this->db->insert('bbn_notes', [
+        'id_parent' => $parent,
+        'private' => $private ? 1 : 0,
+        'creator' => $usr->get_id()
+      ]) ){
+        $id_note = $this->db->last_id();
+        $this->db->insert('bbn_notes_versions', [
+          'id_note' => $id_note,
+          'version' => 1,
+          'title' => $title,
+          'content' => $content,
+          'creation' => date('Y-m-d H:i;s')
+        ]);
+        return $id_note;
+      }
     }
+    return false;
   }
 
   public function latest($id){
