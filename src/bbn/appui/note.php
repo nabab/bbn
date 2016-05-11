@@ -54,7 +54,9 @@ class note extends \bbn\objdb
   }
 
   public function insert($title, $content, $media = 'text', $private = false){
-
+    if ( $usr = \bbn\user\connection::get_user() ){
+      $this->db->insert('bbn_notes', []);
+    }
   }
 
   public function latest($id){

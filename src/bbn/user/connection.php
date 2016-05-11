@@ -846,10 +846,15 @@ class connection
   /**
    * @return void
    */
-  public function get_name()
+  public function get_name(array $usr = null)
   {
     if ( $this->auth ){
-      return $this->session->get('info', 'login');
+      if ( is_null($usr) ){
+        return $this->session->get('info', 'login');
+      }
+      else if ( isset($usr['login']) ){
+        return $usr['login'];
+      }
     }
     return false;
   }

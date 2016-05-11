@@ -24,6 +24,7 @@ class task {
   protected
     $db,
     $id_user,
+    $is_admin,
     $user;
 
 
@@ -207,7 +208,8 @@ class task {
     $this->db = $db;
     if ( $user = \bbn\user\connection::get_user() ){
       $this->user = $user->get_name();
-      $this->user_id = $user->get_id();
+      $this->id_user = $user->get_id();
+      $this->is_admin = $user->is_admin();
       $this->mgr = new \bbn\user\manager($user);
     }
     $this->columns = array_keys($this->db->get_columns('bbn_tasks'));
@@ -246,10 +248,87 @@ class task {
   }
 
   public function get_mine($parent = null, $order = 'priority', $dir = 'ASC', $limit = 50, $start = 0){
-    return $this->get_list($parent, 'opened|ongoing|holding', $this->user_id, $order, $dir, $limit, $start);
+    return $this->get_list($parent, 'opened|ongoing|holding', $this->id_user, $order, $dir, $limit, $start);
   }
 
-  public function get_list($parent = null, $status = 'opened|ongoing|holding', $id_user = false, $order = 'priority', $dir = 'ASC', $limit = 500, $start = 0){
+  public function translate_log(array $log){
+    if ( ($opt = \bbn\appui\options::get_options()) && isset($log['action']) ){
+      $type = explode('_', $opt->code($log['action']));
+      $action = $opt->text($log['action']);
+      $log['value'] = empty($log['value']) ? [] : json_decode($log['value']);
+      if ( !empty($log['value']) ){
+        $values = [];
+        switch ( $type[0] ){
+          case 'deadline':
+            foreach ( $log['value'] as $v ){
+              array_push($values, \bbn\date::format($v, 's'));
+            }
+            break;
+          case 'title':
+            $values = $log['value'];
+            break;
+          case 'comment':
+            array_push($values, \bbn\str::cut($this->db->get_one("
+              SELECT content
+              FROM bbn_notes_versions
+              WHERE id_note = ?
+              ORDER BY version DESC
+              LIMIT 1",
+              $log['value'][0]), 80));
+            break;
+          case 'role':
+            if ( ($user = \bbn\user\connection::get_user()) && isset($log['value'][0], $log['value'][1]) ){
+              $values[0] = $user->get_name($this->mgr->get_user($log['value'][0]));
+              $values[1] = $opt->text($log['value'][1]);
+            }
+            break;
+          case 'priority':
+            $values = $log['value'];
+            break;
+          default:
+            foreach ( $log['value'] as $v ){
+              array_push($values, $opt->text($v));
+            }
+        }
+        if ( !empty($values) ){
+          foreach ( $values as $i => $v ){
+            $values[$i] = '<strong>'.$v.'</strong>';
+          }
+          array_unshift($values, $action);
+          return call_user_func_array("sprintf", $values);
+        }
+      }
+      return $action;
+    }
+  }
+
+  public function get_log($id){
+    $logs = $this->db->rselect_all('bbn_tasks_logs', [], ['id_task' => $id]);
+    $res = [];
+    foreach ( $logs as $log ){
+      array_push($res, [
+        'action' => $this->translate_log($log),
+        'id_user' => $log['id_user'],
+        'chrono' => $log['chrono']
+      ]);
+    }
+    return $res;
+  }
+
+  public function get_all_logs($limit = 100, $start = 0){
+    $logs = $this->db->rselect_all('bbn_tasks_logs', [], [], ['chrono' => 'DESC']);
+    $res = [];
+    foreach ( $logs as $log ){
+      array_push($res, [
+        'action' => $this->translate_log($log),
+        'id_user' => $log['id_user'],
+        'chrono' => $log['chrono']
+      ]);
+    }
+    return $res;
+  }
+
+  public function get_list($parent = null, $status = 'opened|ongoing|holding', $id_user = false, $order = 'priority', $dir = 'ASC', $limit = 1000, $start = 0){
     $orders_ok = [
       'id' => 'bbn_tasks.id',
       'last' => 'last',
@@ -270,15 +349,17 @@ class task {
     }
     $dir = strtolower($dir) === 'asc' ? 'ASC' : 'DESC';
     if ( !$id_user ){
-      $id_user = $this->user_id;
+      $id_user = $this->id_user;
     }
-    $statuses = [];
-    $tmp = explode("|", $status);
     $where = [];
-    foreach ( $tmp as $s ){
-      if ( $t = $this->id_state($s) ){
-        array_push($statuses, $t);
-        array_push($where, "`bbn_tasks`.`state` = $t");
+    if ( !empty($status) ){
+      $statuses = [];
+      $tmp = explode("|", $status);
+      foreach ( $tmp as $s ){
+        if ( $t = $this->id_state($s) ){
+          array_push($statuses, $t);
+          array_push($where, "`bbn_tasks`.`state` = $t");
+        }
       }
     }
     $where = count($where) ? implode( " OR ", $where) : '';
@@ -323,6 +404,76 @@ class task {
     return $res;
   }
 
+  public function get_slist($search, $order = 'last', $dir = 'DESC', $limit = 1000, $start = 0){
+    $orders_ok = [
+      'id' => 'bbn_tasks.id',
+      'last' => 'last',
+      'first' => 'first',
+      'duration' => 'duration',
+      'num_children' => 'num_children',
+      'title' => 'title',
+      'num_notes' => 'num_notes',
+      'role' => 'role',
+      'state' => 'state',
+      'priority' => 'priority'
+    ];
+    if ( !isset($orders_ok[$order]) || !\bbn\str::is_integer($limit, $start) ){
+      return false;
+    }
+    $dir = strtolower($dir) === 'asc' ? 'ASC' : 'DESC';
+    $sql = "
+    SELECT bbn_tasks.*,
+    FROM_UNIXTIME(MIN(bbn_tasks_logs.chrono)) AS `first`,
+    FROM_UNIXTIME(MAX(bbn_tasks_logs.chrono)) AS `last`,
+    COUNT(children.id) AS num_children,
+    COUNT(DISTINCT bbn_tasks_notes.id_note) AS num_notes,
+    MAX(bbn_tasks_logs.chrono) - MIN(bbn_tasks_logs.chrono) AS duration
+    FROM bbn_tasks
+      JOIN bbn_tasks_logs
+        ON bbn_tasks_logs.id_task = bbn_tasks.id
+      LEFT JOIN bbn_tasks_notes
+        ON bbn_tasks_notes.id_task = bbn_tasks.id
+      LEFT JOIN bbn_notes_versions
+        ON bbn_notes_versions.id_note = bbn_tasks_notes.id_note
+      LEFT JOIN bbn_tasks AS children
+        ON children.id = bbn_tasks.id
+    WHERE (bbn_tasks.title LIKE ?
+    OR bbn_notes_versions.content LIKE ?)
+    AND bbn_tasks.active = 1 
+    GROUP BY bbn_tasks.id
+    LIMIT $start, $limit";
+
+    $opt = \bbn\appui\options::get_options();
+    $res = $this->db->get_rows($sql, "%$search%");
+    foreach ( $res as $i => $r ){
+      $res[$i]['type'] = $opt->itext($r['type']);
+      $res[$i]['state'] = $opt->itext($r['state']);
+      $res[$i]['role'] = $opt->itext($r['role']);
+      $res[$i]['hasChildren'] = $r['num_children'] ? true : false;
+    }
+    /*
+    foreach ( $res as $i => $r ){
+      $res[$i]['details'] = $this->info($r['id']);
+    }
+    */
+    \bbn\x::sort_by($res, $order, $dir);
+    return $res;
+  }
+
+  public function get_tree($id = null, $closed = false){
+    $statuses = empty($closed) ? 'opened|ongoing|holding' : false;
+    $res = [];
+    $all = $this->get_list($id ?: null, $statuses, 5000);
+    foreach ( $all as $a ){
+      array_push($res, [
+        'id' => $a['id'],
+        'text' => $a['title'].' ('.\bbn\date::format($a['first']).'-'.\bbn\date::format($a['last']).')',
+        'is_parent' => $a['num_children'] ? true : false
+      ]);
+    }
+    return $res;
+  }
+
   private function add_note($type, $value, $title){
 
   }
@@ -342,7 +493,7 @@ class task {
       $info['last'] = $this->db->select_one('bbn_tasks_logs', 'chrono', [
         'id_task' => $id,
       ], ['chrono' => 'DESC']);
-      $info['roles'] = $this->db->rselect_all('bbn_tasks_roles', [], ['id_task' => $id]);
+      $info['roles'] = $this->info_roles($id);
       $info['notes'] = $this->db->get_column_values('bbn_tasks_notes', 'id_note', ['id_task' => $id]);
       $info['children'] = $this->db->rselect_all('bbn_tasks', [], ['id_parent' => $id, 'active' => 1]);
       $info['aliases'] = $this->db->rselect_all('bbn_tasks', ['id', 'title'], ['id_alias' => $id, 'active' => 1]);
@@ -375,7 +526,30 @@ class task {
   }
 
   public function info_roles($id){
-    return $this->db->rselect_all('bbn_tasks_roles', 'id_user', ['id_task' => $id]);
+    $r = [];
+    if ( ($opt = \bbn\appui\options::get_options()) && self::get_id_role() ){
+      $roles = $opt->full_options(self::$id_role);
+      $all = $this->db->rselect_all('bbn_tasks_roles', [], ['id_task' => $id], 'role');
+      $n = false;
+      foreach ( $all as $a ){
+        if ( $n !== $roles[$a['role']]['code'] ){
+          $n = $roles[$a['role']]['code'];
+          $r[$n] = [];
+        }
+        array_push($r[$n], $a['id_user']);
+      }
+    }
+    return $r;
+  }
+
+  public function has_role($id_task, $id_user){
+    if ( $opt = \bbn\appui\options::get_options() ){
+      $r = $this->db->select_one('bbn_tasks_roles', 'role', ['id_task' => $id_task, 'id_user' => $id_user]);
+      if ( $r ){
+        return $opt->code($r);
+      }
+    }
+    return false;
   }
 
   public function get_comments($id_task){
@@ -383,99 +557,118 @@ class task {
   }
 
   public function comment($id, $text){
-    if ( ($info = $this->info($id)) && $this->db->insert('bbn_tasks_comments', [
-      'id_task' => $id,
-      'creation_date' => date('Y-m-d H:i:s'),
-      'id_user' => $this->id_user,
-      'comment' => $text
-    ]) ) {
-      $id_comment = $this->db->last_id();
-      $subject = 'Nouveau commentaire pour le bug '.$info['title'];
-      $text = "<p>{$this->user} a écrit un nouveau message concernant le bug<br>".
-        "<strong>$info[title]</strong></p>".
-        "<p>".nl2br($text)."</p>".
-        "<p><em>Rendez-vous dans votre interface APST pour lui répondre</em></p>";
-      $this->_email($id, $subject, $text);
-      return $id_comment;
+    
+  }
+
+  public function add_log($id_task, $action, array $value = []){
+    if ( $this->id_user ){
+      return $this->db->insert('bbn_tasks_logs', [
+        'id_task' => $id_task,
+        'id_user' => $this->id_user,
+        'action' => is_int($action) ? $action : $this->id_action($action),
+        'value' => empty($value) ? '' : json_encode($value),
+        'chrono' => microtime(true)
+      ]);
     }
     return false;
   }
 
-  public function insert($title, $target = false){
+  public function exists($id_task){
+    return $this->db->count('bbn_tasks', ['id' => $id_task]) ? true : false;
+  }
+
+  public function add_role($id_task, $role, $id_user = null){
+    if ( $this->exists($id_task) ){
+      if ( !\bbn\str::is_integer($role) ){
+        if ( substr($role, -1) !== 's' ){
+          $role .= 's';
+        }
+        $role = $this->id_role($role);
+      }
+      if ( \bbn\str::is_integer($role) && ($id_user || $this->id_user) ){
+        if ( $this->db->insert('bbn_tasks_roles', [
+          'id_task' => $id_task,
+          'id_user' => $id_user ?: $this->id_user,
+          'role' => $role
+        ]) ){
+          $this->add_log($id_task, 'role_insert', [$id_user ?: $this->id_user, $role]);
+          return 1;
+        }
+      }
+    }
+    return 0;
+  }
+
+  public function remove_role($id_task, $id_user = null){
+    if ( $this->exists($id_task) && ($id_user || $this->id_user) ){
+      $role = $this->db->select_one('bbn_tasks_roles', 'role', [
+        'id_task' => $id_task,
+        'id_user' => $id_user ?: $this->id_user
+      ]);
+      if ( $this->db->delete('bbn_tasks_roles', [
+        'id_task' => $id_task,
+        'id_user' => $id_user ?: $this->id_user
+      ]) ){
+        $this->add_log($id_task, 'role_delete', [$id_user ?: $this->id_user, $role]);
+        return 1;
+      }
+    }
+    return 0;
+  }
+
+  public function insert($title, $type, $parent = null){
     $date = date('Y-m-d H:i:s');
     if ( $this->db->insert('bbn_tasks', [
       'title' => $title,
-      'id_user' => $this->id_user,
+      'type' => $type,
+      'priority' => 5,
+      'id_parent' => $parent,
+      'id_user' => $this->id_user ?: null,
       'state' => $this->id_state('opened'),
-      'target_date' => empty($target) ? null : $target,
       'creation_date' => $date
     ]) ){
       $id = $this->db->last_id();
-      $this->db->insert('bbn_tasks_status', [
-        'id_task' => $id,
-        'creation_date' => $date,
-        'id_user' => $this->id_user,
-        'status' => 'ouvert'
-      ]);
-      $this->db->insert('bbn_tasks_comments', [
-        'id_task' => $id,
-        'creation_date' => $date,
-        'id_user' => $this->id_user,
-        'comment' => $text
-      ]);
-      $this->db->insert('bbn_tasks_cc', ['id_user' => $this->id_user, 'id_task' => $id]);
+      $this->add_log($id, 'insert');
+      $this->add_role($id, 'managers');
+      /*
       $subject = "Nouveau bug posté par {$this->user}";
       $text = "<p>{$this->user} a posté un nouveau bug</p>".
         "<p><strong>$title</strong></p>".
         "<p>".nl2br($text)."</p>".
         "<p><em>Rendez-vous dans votre interface APST pour lui répondre</em></p>";
       $this->_email($id, $subject, $text);
+      */
       return $id;
     }
   }
 
-  public function update($id, $title, $status, $priority, $target = null){
-    if ( $info = $this->info($id) ){
-      $date = date('Y-m-d H:i:s');
-      $pretext = "<p>{$this->user} a procédé aux changements suivants concernant le bug<br> <strong>$title</strong>:</p>";
-      $text = '';
-      if ( $this->db->update("bbn_tasks", [
-        'title' => $title,
-        'target_date' => empty($target) ? null : $target,
-        'priority' => $priority
-      ], [
-        'id' => $id
-      ]) ){
-        if ( $priority !== $info['priority'] ){
-          $text .= "<p> La priorité est passée de $info[priority] à $priority</p>";
+  public function update($id_task, $prop, $value){
+    if ( $this->exists($id_task) ){
+      $ok = false;
+      if ( $prop === 'deadline' ){
+        $prev = $this->db->select_one('bbn_tasks', 'deadline', ['id' => $id_task]);
+        if ( !$prev && $value ){
+          $this->add_log($id_task, 'deadline_insert', [$value]);
+          $ok = 1;
         }
-        if ( $title !== $info['title'] ){
-          $text .= "<p> L'ancien titre était $info[title]</p>";
+        else if ( $prev && !$value ){
+          $this->add_log($id_task, 'deadline_delete', [$value]);
+          $ok = 1;
         }
-        if ( $target !== $info['target_date'] ){
-          $text .= "<p> L'objectif est passé de ".
-            ( empty($info['target_date']) ? "non défini" : \bbn\date::format($info['target_date']) ).
-            " à ".
-            ( empty($target) ? "non défini" : \bbn\date::format($target) ).
-            "</p>";
+        if ( $prev && $value && ($prev !== $value) ){
+          $this->add_log($id_task, 'deadline_update', [$prev, $value]);
+          $ok = 1;
         }
       }
-      if ( $status !== $info['status'] ){
-        $this->db->insert('bbn_tasks_status', [
-          'id_task' => $id,
-          'creation_date' => $date,
-          'id_user' => $this->id_user,
-          'status' => $status
-        ]);
-        $text .= "<p>Le statut a été changé de $info[status] à $status</p>";
+      else if ( $prev = $this->db->select_one('bbn_tasks', $prop, ['id' => $id_task]) ){
+        $ok = 1;
+        $this->add_log($id_task, $prop.'_update', [$prev, $value]);
       }
-      if ( !empty($text) ) {
-        $subject = "Modification du bug $info[title]";
-        $text = $pretext . $text . "<p><em>Rendez-vous dans l'interface APST pour répondre</em></p>";
-        $this->_email($id, $subject, $text);
-        return $id;
+      if ( $ok ){
+        return $this->db->update('bbn_tasks', [$prop => $value], ['id' => $id_task]);
       }
     }
+    return false;
   }
 
   public function delete($id){
@@ -489,13 +682,13 @@ class task {
 
   public function up($id){
     if ( $info = $this->info($id) ){
-      return $this->update($id, $info['title'], $info['status'], $info['priority']-1, $info['target_date']);
+      return $this->update($id, $info['title'], $info['status'], $info['priority']-1, $info['deadline']);
     }
   }
 
   public function down($id){
     if ( $info = $this->info($id) ){
-      return $this->update($id, $info['title'], $info['status'], $info['priority']+1, $info['target_date']);
+      return $this->update($id, $info['title'], $info['status'], $info['priority']+1, $info['deadline']);
     }
   }
 

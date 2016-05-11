@@ -90,7 +90,7 @@ class task {
     if ( $this->db->insert('bbn_tasks', [
       'title' => $title,
       'id_user' => $this->id_user,
-      'target_date' => empty($target) ? null : $target,
+      'deadline' => empty($target) ? null : $target,
       'creation_date' => $date
     ]) ){
       $id = $this->db->last_id();
@@ -124,7 +124,7 @@ class task {
       $text = '';
       if ( $this->db->update("bbn_tasks", [
         'title' => $title,
-        'target_date' => empty($target) ? null : $target,
+        'deadline' => empty($target) ? null : $target,
         'priority' => $priority
       ], [
         'id' => $id
@@ -135,9 +135,9 @@ class task {
         if ( $title !== $info['title'] ){
           $text .= "<p> L'ancien titre était $info[title]</p>";
         }
-        if ( $target !== $info['target_date'] ){
+        if ( $target !== $info['deadline'] ){
           $text .= "<p> L'objectif est passé de ".
-            ( empty($info['target_date']) ? "non défini" : \bbn\date::format($info['target_date']) ).
+            ( empty($info['deadline']) ? "non défini" : \bbn\date::format($info['deadline']) ).
             " à ".
             ( empty($target) ? "non défini" : \bbn\date::format($target) ).
             "</p>";
@@ -172,13 +172,13 @@ class task {
 
   public function up($id){
     if ( $info = $this->info($id) ){
-      return $this->update($id, $info['title'], $info['status'], $info['priority']-1, $info['target_date']);
+      return $this->update($id, $info['title'], $info['status'], $info['priority']-1, $info['deadline']);
     }
   }
 
   public function down($id){
     if ( $info = $this->info($id) ){
-      return $this->update($id, $info['title'], $info['status'], $info['priority']+1, $info['target_date']);
+      return $this->update($id, $info['title'], $info['status'], $info['priority']+1, $info['deadline']);
     }
   }
 
