@@ -390,9 +390,6 @@ class task {
     $opt = \bbn\appui\options::get_options();
     $res = $this->db->get_rows($sql, $id_user);
     foreach ( $res as $i => $r ){
-      $res[$i]['type'] = $opt->itext($r['type']);
-      $res[$i]['state'] = $opt->itext($r['state']);
-      $res[$i]['role'] = $opt->itext($r['role']);
       $res[$i]['hasChildren'] = $r['num_children'] ? true : false;
     }
     /*
@@ -511,10 +508,167 @@ class task {
     }
   }
 
-  public function search($st){
+  private function _format_where(array $cfg){
     $res = [];
-    $res1 = $this->search_in_task($st);
-    return $res1;
+    foreach ( $cfg as $i => $c ){
+      if ( is_array($c) ){
+        array_push($res, $c);
+      }
+      else if ( ($i === 'text') || ($i === 'title') ){
+        array_push($res, [$i, 'LIKE', "%$c%"]);
+      }
+      else{
+        array_push($res, [$i, '=', $c]);
+      }
+    }
+    return $res;
+  }
+
+  public function search(array $where = [], $start = 0, $num = 1000){
+    $where = $this->_format_where($where);
+    $ids = [
+      'id_parent' => 'bbn_tasks.id_parent',
+      'state' => 'bbn_tasks.state',
+      'role' => 'my_role.role',
+      'type' => 'bbn_tasks.type'
+    ];
+    $nums = [
+      'num_notes' => 'num_notes',
+      'priority' => 'bbn_tasks.priority'
+    ];
+    $dates = [
+      'deadline' => 'bbn_tasks.deadline',
+      'first' => 'first',
+      'last' => 'last'
+    ];
+    $texts = [
+      'title' => 'bbn_tasks.title',
+      'text' => 'bbn_notes_versions.content'
+    ];
+    $users = [
+      'id_user' => '',
+      'id_group' => ''
+    ];
+    $query = '';
+    $join = '';
+    $having = '';
+    $args1 = [];
+    $args2 = [];
+    foreach ( $where as $i => $w ){
+      if ( isset($ids[$w[0]]) ){
+        // For id_parent, no other search for now
+        if ( $w[0] === 'id_parent' ){
+          $query = "AND ".$ids[$w[0]]." = ? ";
+          $args = [$w[2]];
+          break;
+        }
+        else if ( is_array($w[2]) ){
+          $query .= "AND ( ";
+          foreach ( $w[2] as $j => $v ){
+            if ( $j ){
+              $query .= " OR ";
+            }
+            $query .= $ids[$w[0]]." = ? ";
+            array_push($args1, $v);
+          }
+          $query .= ") ";
+        }
+        else{
+          $query .= " AND ".$ids[$w[0]]." $w[1] ? ";
+          array_push($args1, $w[2]);
+        }
+      }
+      else if ( isset($dates[$w[0]]) ){
+        if ( strpos($w[1], 'IS ') === 0 ){
+          $query .= " AND ".$dates[$w[0]]." $w[1] ";
+        }
+        else if ( \bbn\date::validateSQL($w[2]) ){
+          if ( $w[0] !== 'deadline' ){
+            $having .= " AND DATE(".$dates[$w[0]].") $w[1] ? ";
+            array_push($args2, $w[2]);
+          }
+          else{
+            $query .= " AND DATE(".$dates[$w[0]].") $w[1] ? ";
+            array_push($args1, $w[2]);
+          }
+        }
+      }
+      else if ( isset($nums[$w[0]]) ){
+        if ( is_int($w[2]) ){
+          $query .= " AND ".$nums[$w[0]]." $w[1] ? ";
+          array_push($args1, $w[2]);
+        }
+      }
+      else if ( isset($texts[$w[0]]) ){
+        if ( !empty($w[2]) ){
+          if ( $w[0] === 'title' ){
+            $query .= " AND bbn_tasks.title LIKE ? ";
+            array_push($args1, "%$w[2]%");
+          }
+          else if ( $w[0] === 'text' ){
+            $query .= " AND (bbn_tasks.title LIKE ? OR bbn_notes_versions.content LIKE ?) ";
+            array_push($args1, "%$w[2]%", "%$w[2]%");
+            $join .= "
+        LEFT JOIN bbn_tasks_notes
+          ON bbn_tasks_notes.id_task = bbn_tasks.id";
+          }
+        }
+      }
+      else if ( isset($users[$w[0]]) ){
+        if ( !empty($w[2]) ){
+          if ( $w[0] === 'id_user' ){
+            $query .= " AND bbn_tasks_roles.id_user = ?";
+            array_push($args1, $w[2]);
+            $join .= "
+        JOIN bbn_tasks_roles AS user_role
+          ON user_role.id_task = bbn_tasks.id";
+          }
+          else if ( $w[0] === 'id_group' ){
+            $query .= " AND apst_users.id_group = ? ";
+            array_push($args1, $w[2]);
+            $join .= "
+        JOIN bbn_tasks_roles AS group_role
+          ON group_role.id_task = bbn_tasks.id
+        JOIN apst_users
+          ON bbn_tasks_roles.id_user = apst_users.id";
+          }
+        }
+      }
+    }
+    $sql = "
+      SELECT my_role.role, bbn_tasks.*,
+      FROM_UNIXTIME(MIN(bbn_tasks_logs.chrono)) AS `first`,
+      FROM_UNIXTIME(MAX(bbn_tasks_logs.chrono)) AS `last`,
+      COUNT(children.id) AS num_children,
+      COUNT(DISTINCT bbn_tasks_notes.id_note) AS num_notes,
+      MAX(bbn_tasks_logs.chrono) - MIN(bbn_tasks_logs.chrono) AS duration
+      FROM bbn_tasks
+        LEFT JOIN bbn_tasks_roles AS my_role
+          ON my_role.id_task = bbn_tasks.id
+          AND my_role.id_user = {$this->id_user}
+        LEFT JOIN bbn_tasks_roles
+          ON bbn_tasks_roles.id_task = bbn_tasks.id
+        JOIN bbn_tasks_logs
+          ON bbn_tasks_logs.id_task = bbn_tasks_roles.id_task
+        LEFT JOIN bbn_tasks_notes
+          ON bbn_tasks_notes.id_task = bbn_tasks.id
+        LEFT JOIN bbn_tasks AS children
+          ON bbn_tasks_roles.id_task = children.id_parent
+        $join
+      WHERE bbn_tasks.active = 1
+      $query
+      GROUP BY bbn_tasks.id
+      HAVING 1
+      $having";
+    //die(\bbn\x::dump($sql));
+
+    if ( !isset($args) ){
+      $args = array_merge($args1, $args2);
+    }
+    return [
+      'data' => $this->db->get_rows($sql." LIMIT $start, $num", $args),
+      'total' => $this->db->get_one("SELECT COUNT(*) FROM ($sql) AS t", $args)
+    ];
   }
 
   public function search_in_task($st){
@@ -556,8 +710,16 @@ class task {
 
   }
 
-  public function comment($id, $text){
-    
+  public function comment($id_task, array $cfg){
+    if ( $this->exists($id_task) && !empty($cfg) ){
+      $note = new \bbn\appui\note($this->db);
+      $r = $note->insert(empty($cfg['title']) ? '' : $cfg['title'], empty($cfg['text']) ? '' : $cfg['text']);
+      if ( $r ){
+        $this->add_log($id_task, 'comment_insert', [$this->id_user, empty($cfg['title']) ? $cfg['text'] : $cfg['title']]);
+      }
+      return $r;
+    }
+    return false;
   }
 
   public function add_log($id_task, $action, array $value = []){
@@ -616,30 +778,33 @@ class task {
     return 0;
   }
 
-  public function insert($title, $type, $parent = null){
+  public function insert(array $cfg){
     $date = date('Y-m-d H:i:s');
-    if ( $this->db->insert('bbn_tasks', [
-      'title' => $title,
-      'type' => $type,
-      'priority' => 5,
-      'id_parent' => $parent,
-      'id_user' => $this->id_user ?: null,
-      'state' => $this->id_state('opened'),
-      'creation_date' => $date
-    ]) ){
-      $id = $this->db->last_id();
-      $this->add_log($id, 'insert');
-      $this->add_role($id, 'managers');
-      /*
-      $subject = "Nouveau bug posté par {$this->user}";
-      $text = "<p>{$this->user} a posté un nouveau bug</p>".
-        "<p><strong>$title</strong></p>".
-        "<p>".nl2br($text)."</p>".
-        "<p><em>Rendez-vous dans votre interface APST pour lui répondre</em></p>";
-      $this->_email($id, $subject, $text);
-      */
-      return $id;
+    if ( isset($cfg['title'], $cfg['type']) ){
+      if ( $this->db->insert('bbn_tasks', [
+        'title' => $cfg['title'],
+        'type' => $cfg['type'],
+        'priority' => isset($cfg['priority']) ? $cfg['priority'] : 5,
+        'id_parent' => isset($cfg['id_parent']) ? $cfg['id_parent'] : null,
+        'id_user' => $this->id_user ?: null,
+        'state' => $this->id_state('opened'),
+        'creation_date' => $date
+      ]) ){
+        $id = $this->db->last_id();
+        $this->add_log($id, 'insert');
+        $this->add_role($id, 'managers');
+        /*
+        $subject = "Nouveau bug posté par {$this->user}";
+        $text = "<p>{$this->user} a posté un nouveau bug</p>".
+          "<p><strong>$title</strong></p>".
+          "<p>".nl2br($text)."</p>".
+          "<p><em>Rendez-vous dans votre interface APST pour lui répondre</em></p>";
+        $this->_email($id, $subject, $text);
+        */
+        return $id;
+      }
     }
+    return false;
   }
 
   public function update($id_task, $prop, $value){

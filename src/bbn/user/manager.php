@@ -119,10 +119,8 @@ You can click the following link to access directly your account:<br>
       ".$this->db->cfn($this->cfg['arch']['groups']['cfg'], $this->cfg['tables']['groups'], 1)." AS `cfg`,
       COUNT(".$this->db->cfn($this->cfg['arch']['users']['id'], $this->cfg['tables']['users'], 1).") AS `num`
       FROM ".$this->db->escape($this->cfg['tables']['groups'])."
-        LEFT JOIN ".$this->db->escape($this->cfg['tables']['usergroups'])."
-          ON ".$this->db->cfn($this->cfg['arch']['usergroups']['id_group'], $this->cfg['tables']['usergroups'], 1)." = ".$this->db->cfn($this->cfg['arch']['groups']['id'], $this->cfg['tables']['groups'], 1)."
         LEFT JOIN ".$this->db->escape($this->cfg['tables']['users'])."
-          ON ".$this->db->cfn($this->cfg['arch']['users']['id'], $this->cfg['tables']['users'], 1)." = ".$this->db->cfn($this->cfg['arch']['usergroups']['id_user'], $this->cfg['tables']['usergroups'], 1)."
+          ON ".$this->db->cfn($this->cfg['arch']['users']['id_group'], $this->cfg['tables']['users'], 1)." = ".$this->db->cfn($this->cfg['arch']['groups']['id'], $this->cfg['tables']['groups'], 1)."
           AND ".$this->db->cfn($this->cfg['arch']['users']['status'], $this->cfg['tables']['users'], 1)." = 1
           ".( $adm ? '' : "WHERE ".$this->db->cfn($this->cfg['arch']['groups']['id'], $this->cfg['tables']['groups'], 1)." > 1" )."
       GROUP BY ".$this->db->cfn($this->cfg['arch']['groups']['id'], $this->cfg['tables']['groups'], 1));
@@ -161,14 +159,12 @@ You can click the following link to access directly your account:<br>
       MAX({$this->db->escape($this->cfg['tables']['sessions'].'.'.$this->cfg['arch']['sessions']['last_activity'])}) AS last_activity,
       COUNT({$this->db->escape($this->cfg['tables']['sessions'].'.'.$this->cfg['arch']['sessions']['sess_id'])}) AS num_sessions
       FROM {$this->db->escape($this->cfg['tables']['users'])}
-        JOIN {$this->db->escape($this->cfg['tables']['usergroups'])}
-          ON {$this->db->escape($this->cfg['tables']['usergroups'].'.'.$this->cfg['arch']['usergroups']['id_user'])} = {$this->db->escape($this->cfg['tables']['users'].'.'.$this->cfg['arch']['users']['id'])}
         JOIN {$this->db->escape($this->cfg['tables']['groups'])}
-          ON {$this->db->escape($this->cfg['tables']['usergroups'].'.'.$this->cfg['arch']['usergroups']['id_group'])} = {$this->db->escape($this->cfg['tables']['groups'].'.'.$this->cfg['arch']['groups']['id'])}
+          ON {$this->db->escape($this->cfg['tables']['users'].'.'.$this->cfg['arch']['users']['id_group'])} = {$this->db->escape($this->cfg['tables']['groups'].'.'.$this->cfg['arch']['groups']['id'])}
         LEFT JOIN {$this->db->escape($this->cfg['tables']['sessions'])}
           ON {$this->db->escape($this->cfg['tables']['sessions'].'.'.$this->cfg['arch']['sessions']['id_user'])} = {$this->db->escape($this->cfg['tables']['users'].'.'.$this->cfg['arch']['users']['id'])}
       WHERE {$this->db->escape($this->cfg['tables']['users'].'.'.$this->cfg['arch']['users']['status'])} = 1
-      AND ".$this->cfg['arch']['usergroups']['id_group']." ".
+      AND ".$this->cfg['arch']['users']['id_group']." ".
       ( $group_id ? "= ".(int)$group_id : "!= 1" )."
       GROUP BY {$this->db->escape($this->cfg['tables']['users'].'.'.$this->cfg['arch']['users']['id'])}
       ORDER BY {$this->db->escape($this->cfg['tables']['users'].'.'.$this->cfg['arch']['users']['login'])}";
@@ -190,14 +186,10 @@ You can click the following link to access directly your account:<br>
 
   public function get_users($group_id = null){
     return $this->db->get_col_array("
-      SELECT DISTINCT(".$this->cfg['arch']['usergroups']['id_user'].")
-      FROM ".$this->cfg['tables']['usergroups']." AS g
-        JOIN ".$this->cfg['tables']['users']." AS u
-          ON u.".$this->cfg['arch']['users']['id']." = g.id_user
-          AND u.".$this->cfg['arch']['users']['status']." = 1
+      SELECT ".$this->cfg['arch']['users']['id']."
+      FROM ".$this->cfg['tables']['users']."
       WHERE {$this->db->escape($this->cfg['tables']['users'].'.'.$this->cfg['arch']['users']['status'])} = 1
-      AND ".$this->cfg['arch']['usergroups']['id_group']." ".
-      ( $group_id ? "= ".(int)$group_id : "!= 1" )
+      AND ".$this->cfg['arch']['users']['id_group']." ".( $group_id ? "= ".(int)$group_id : "!= 1" )
     );
   }
 
@@ -325,12 +317,10 @@ You can click the following link to access directly your account:<br>
    * @return \bbn\user\manager
    */
   public function set_unique_group($id_user, $id_group){
-    $this->db->delete($this->cfg['tables']['usergroups'], [
-      $this->cfg['arch']['usergroups']['id_user'] => $id_user,
-    ]);
-    $this->db->insert($this->cfg['tables']['usergroups'], [
-      $this->cfg['arch']['usergroups']['id_user'] => $id_user,
-      $this->cfg['arch']['usergroups']['id_group'] => $id_group
+    $this->db->update($this->cfg['tables']['users'], [
+      $this->cfg['arch']['users']['id_group'] => $id_group
+    ], [
+      $this->cfg['arch']['users']['id'] => $id_user
     ]);
     return $this;
   }
@@ -423,15 +413,6 @@ You can click the following link to access directly your account:<br>
         KEY {$this->db->escape($this->cfg['sessions']['sess_id'])} ({$this->db->escape($this->cfg['sessions']['sess_id'])})
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-      CREATE TABLE IF NOT EXISTS {$this->db->escape($this->cfg['tables']['usergroups'])} (
-        {$this->db->escape($this->cfg['usergroups']['id_group'])} int(10) unsigned NOT NULL,
-        {$this->db->escape($this->cfg['usergroups']['id_user'])} int(10) unsigned NOT NULL,
-        PRIMARY KEY ({$this->db->escape($this->cfg['usergroups']['id_group'])}, {$this->db->escape($this->cfg['usergroups']['id_user'])}),
-        KEY {$this->db->escape($this->cfg['usergroups']['id_group'])} ({$this->db->escape($this->cfg['usergroups']['id_group'])}),
-        KEY {$this->db->escape($this->cfg['usergroups']['id_user'])} ({$this->db->escape($this->cfg['usergroups']['id_user'])})
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
       ALTER TABLE {$this->db->escape($this->cfg['tables']['hotlinks'])}
         ADD FOREIGN KEY ({$this->db->escape($this->cfg['hotlinks']['id_user'])})
           REFERENCES {$this->db->escape($this->cfg['tables']['users'])} ({$this->db->escape($this->cfg['users']['id'])})
@@ -447,12 +428,9 @@ You can click the following link to access directly your account:<br>
           REFERENCES {$this->db->escape($this->cfg['tables']['users'])} ({$this->db->escape($this->cfg['users']['id'])})
             ON DELETE CASCADE ON UPDATE NO ACTION;
 
-      ALTER TABLE {$this->db->escape($this->cfg['tables']['usergroups'])}
-        ADD FOREIGN KEY ({$this->db->escape($this->cfg['usergroups']['id_group'])})
+      ALTER TABLE {$this->db->escape($this->cfg['tables']['users'])}
+        ADD FOREIGN KEY ({$this->db->escape($this->cfg['users']['id_group'])})
           REFERENCES {$this->db->escape($this->cfg['tables']['groups'])} ({$this->db->escape($this->cfg['groups']['id'])})
-            ON DELETE CASCADE ON UPDATE NO ACTION,
-        ADD FOREIGN KEY ({$this->db->escape($this->cfg['usergroups']['id_user'])})
-          REFERENCES {$this->db->escape($this->cfg['tables']['users'])} ({$this->db->escape($this->cfg['users']['id'])})
             ON DELETE CASCADE ON UPDATE NO ACTION;";
     $db->raw_query($sql);
   }

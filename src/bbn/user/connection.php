@@ -45,7 +45,6 @@ class connection
               'hotlinks' => 'bbn_users_hotlinks',
               'passwords' => 'bbn_users_passwords',
               'sessions' => 'bbn_users_sessions',
-              'usergroups' => 'bbn_users_usergroups',
               'users' => 'bbn_users',
             ],
             'arch' => [
@@ -75,12 +74,9 @@ class connection
                 'last_activity' => 'last_activity',
                 'cfg' => 'cfg',
               ],
-              'usergroups' => [
-                'id_group' => 'id_group',
-                'id_user' => 'id_user',
-              ],
               'users' => [
                 'id' => 'id',
+                'id_group' => 'id_group',
                 'email' => 'email',
                 'login' => 'email',
                 'admin' => 'admin',
@@ -374,11 +370,7 @@ class connection
                         ['log_tries' => 0] : json_decode($d['cfg'], true);
         $this->set_session('cfg', $this->user_cfg);
         // Group
-        $this->id_group = $this->db->select_one(
-          $this->cfg['tables']['usergroups'],
-          $this->cfg['arch']['usergroups']['id_group'],
-          [$this->cfg['arch']['usergroups']['id_user'] => $this->id]
-        );
+        $this->id_group = $d['id_group'];
         $this->set_session('id_group', $this->id_group);
       }
     }
@@ -782,6 +774,13 @@ class connection
   {
     if ( $this->check() ) {
       return $this->id;
+    }
+  }
+
+  public function get_group()
+  {
+    if ( $this->check() ) {
+      return $this->id_group;
     }
   }
 

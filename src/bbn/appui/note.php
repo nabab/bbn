@@ -66,7 +66,8 @@ class note extends \bbn\objdb
           'version' => 1,
           'title' => $title,
           'content' => $content,
-          'creation' => date('Y-m-d H:i;s')
+          'id_user' => $usr->get_id(),
+          'creation' => date('Y-m-d H:i:s')
         ]);
         return $id_note;
       }
