@@ -713,8 +713,15 @@ class task {
   public function comment($id_task, array $cfg){
     if ( $this->exists($id_task) && !empty($cfg) ){
       $note = new \bbn\appui\note($this->db);
-      $r = $note->insert(empty($cfg['title']) ? '' : $cfg['title'], empty($cfg['text']) ? '' : $cfg['text']);
+      $r = $note->insert(
+        (empty($cfg['title']) ? '' : $cfg['title']),
+        (empty($cfg['text']) ? '' : $cfg['text'])
+      );
       if ( $r ){
+        $this->db->insert('bbn_tasks_notes', [
+          'id_note' => $r,
+          'id_task' => $id_task
+        ]);
         $this->add_log($id_task, 'comment_insert', [$this->id_user, empty($cfg['title']) ? $cfg['text'] : $cfg['title']]);
       }
       return $r;
