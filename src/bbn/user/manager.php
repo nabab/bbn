@@ -18,7 +18,7 @@ class manager
 {
 
 	private static $_default_permissions = ['is_admin' => 0],
-          $list_fields = ['id', 'email', 'login'];
+          $list_fields = ['id', 'email', 'login', 'id_group'];
   
   protected static $permissions = [];
 
@@ -154,8 +154,6 @@ You can click the following link to access directly your account:<br>
       $sql .= "{$this->db->escape($this->cfg['tables']['users'].'.'.$f)}, ";
     }
     $sql .= "
-      GROUP_CONCAT(DISTINCT {$this->db->escape($this->cfg['tables']['groups'].'.'.$this->cfg['arch']['groups']['id'])} SEPARATOR ',') AS id_groups,
-      {$this->db->escape($this->cfg['tables']['groups'].'.'.$this->cfg['arch']['groups']['id'])} AS id_group,
       MAX({$this->db->escape($this->cfg['tables']['sessions'].'.'.$this->cfg['arch']['sessions']['last_activity'])}) AS last_activity,
       COUNT({$this->db->escape($this->cfg['tables']['sessions'].'.'.$this->cfg['arch']['sessions']['sess_id'])}) AS num_sessions
       FROM {$this->db->escape($this->cfg['tables']['users'])}
@@ -218,6 +216,9 @@ You can click the following link to access directly your account:<br>
       if ( !in_array($k, $fields) ){
         unset($cfg[$k]);
       }
+    }
+    if ( isset($cfg['id']) ){
+      unset($cfg['id']);
     }
     if ( \bbn\str::is_email($cfg[$this->cfg['arch']['users']['email']]) &&
             $this->db->insert($this->cfg['tables']['users'], $cfg) ){
