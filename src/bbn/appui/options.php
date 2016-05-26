@@ -742,6 +742,13 @@ class options extends \bbn\objcache
     }
   }
 
+  public function options_codes($id){
+    if ( $id = $this->from_code(func_get_args()) ){
+      $c = $this->cfg['cols'];
+      return $this->db->select_all_by_keys($this->cfg['table'], [$c['code'], $c['id']], [$c['id_parent'] => $id]);
+    }
+  }
+
   public function set($id, $cfg){
     if ( $this->_prepare($cfg) ){
       $c = $this->cfg['cols'];

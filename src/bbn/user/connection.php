@@ -118,6 +118,9 @@ class connection
             'hotlinks' => false
           ];
 
+  /**
+   * @param connection $usr
+   */
   protected static function _init(\bbn\user\connection $usr){
     if ( $id = $usr->get_id() ){
       self::$current =& $usr;
@@ -127,6 +130,9 @@ class connection
     }
   }
 
+  /**
+   * @return \bbn\user\connection
+   */
   public static function get_user(){
     return self::$current;
   }
@@ -375,6 +381,20 @@ class connection
       }
     }
     return $this;
+  }
+
+  public function get_tables(){
+    if ( !empty($this->cfg) ){
+      return $this->cfg['tables'];
+    }
+    return false;
+  }
+
+  public function get_fields($table=''){
+    if ( !empty($this->cfg) ){
+      return empty($table) ? $this->cfg['arch'] : ( isset($this->cfg['arch'][$table]) ? $this->cfg['arch'][$table] : false );
+    }
+    return false;
   }
 
   /**

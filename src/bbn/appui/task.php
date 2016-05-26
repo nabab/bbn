@@ -214,6 +214,13 @@ class task {
     }
     $this->columns = array_keys($this->db->get_columns('bbn_tasks'));
   }
+  
+  public function get_title($id_task){
+    if ( $title = $this->db->select_one('bbn_tasks', 'title', ['id' => $id_task]) ){
+      return _("Task")." ".$title;
+    }
+    return '';
+  }
 
   public function categories(){
     return self::get_cats();
@@ -419,17 +426,19 @@ class task {
     }
     $dir = strtolower($dir) === 'asc' ? 'ASC' : 'DESC';
     $sql = "
-    SELECT bbn_tasks.*,
-    FROM_UNIXTIME(MIN(bbn_tasks_logs.chrono)) AS `first`,
-    FROM_UNIXTIME(MAX(bbn_tasks_logs.chrono)) AS `last`,
+    SELECT bbn_tasks.*, role,
+    FROM_UNIXTIME(MAX(bbn_tasks_logs.chrono)) AS `last_action`,
     COUNT(children.id) AS num_children,
     COUNT(DISTINCT bbn_tasks_notes.id_note) AS num_notes,
-    MAX(bbn_tasks_logs.chrono) - MIN(bbn_tasks_logs.chrono) AS duration
+    IF(bbn_tasks.`state`=".$this->id_state('closed').", MAX(bbn_tasks_logs.chrono), UNIX_TIMESTAMP()) - MIN(bbn_tasks_logs.chrono) AS duration
     FROM bbn_tasks
       JOIN bbn_tasks_logs
         ON bbn_tasks_logs.id_task = bbn_tasks.id
       LEFT JOIN bbn_tasks_notes
         ON bbn_tasks_notes.id_task = bbn_tasks.id
+      LEFT JOIN bbn_tasks_roles
+        ON bbn_tasks_roles.id_task = bbn_tasks.id
+        AND bbn_tasks_roles.id_user = {$this->id_user}
       LEFT JOIN bbn_notes_versions
         ON bbn_notes_versions.id_note = bbn_tasks_notes.id_note
       LEFT JOIN bbn_tasks AS children
@@ -442,19 +451,22 @@ class task {
 
     $opt = \bbn\appui\options::get_options();
     $res = $this->db->get_rows($sql, "%$search%");
+    /*
     foreach ( $res as $i => $r ){
       $res[$i]['type'] = $opt->itext($r['type']);
       $res[$i]['state'] = $opt->itext($r['state']);
       $res[$i]['role'] = $opt->itext($r['role']);
       $res[$i]['hasChildren'] = $r['num_children'] ? true : false;
     }
-    /*
     foreach ( $res as $i => $r ){
       $res[$i]['details'] = $this->info($r['id']);
     }
     */
     \bbn\x::sort_by($res, $order, $dir);
-    return $res;
+    return [
+      'data' => $res,
+      'total' => count($res)
+    ];
   }
 
   public function get_tree($id = null, $closed = false){
@@ -524,41 +536,45 @@ class task {
     return $res;
   }
 
-  public function search(array $where = [], $start = 0, $num = 1000){
+  public function search(array $where = [], $sort = [], $start = 0, $num = 1000){
     $where = $this->_format_where($where);
-    $ids = [
-      'id_parent' => 'bbn_tasks.id_parent',
-      'state' => 'bbn_tasks.state',
-      'role' => 'my_role.role',
-      'type' => 'bbn_tasks.type'
-    ];
-    $nums = [
-      'num_notes' => 'num_notes',
-      'priority' => 'bbn_tasks.priority'
-    ];
-    $dates = [
-      'deadline' => 'bbn_tasks.deadline',
-      'first' => 'first',
-      'last' => 'last'
-    ];
-    $texts = [
-      'title' => 'bbn_tasks.title',
-      'text' => 'bbn_notes_versions.content'
-    ];
-    $users = [
-      'id_user' => '',
-      'id_group' => ''
+    $fields = [
+      'ids' => [
+        'id_parent' => 'bbn_tasks.id_parent',
+        'state' => 'bbn_tasks.state',
+        'role' => 'my_role.role',
+        'type' => 'bbn_tasks.type'
+      ],
+      'nums' => [
+        'num_notes' => 'num_notes',
+        'duration' => 'duration',
+        'priority' => 'bbn_tasks.priority'
+      ],
+      'dates' => [
+        'deadline' => 'bbn_tasks.deadline',
+        'creation_date' => 'creation_date',
+        'last_action' => 'last_action'
+      ],
+      'texts' => [
+        'title' => 'bbn_tasks.title',
+        'text' => 'bbn_notes_versions.content'
+      ],
+      'users' => [
+        'id_user' => '',
+        'id_group' => ''
+      ]
     ];
     $query = '';
     $join = '';
     $having = '';
+    $order = '';
     $args1 = [];
     $args2 = [];
     foreach ( $where as $i => $w ){
-      if ( isset($ids[$w[0]]) ){
+      if ( isset($fields['ids'][$w[0]]) ){
         // For id_parent, no other search for now
         if ( $w[0] === 'id_parent' ){
-          $query = "AND ".$ids[$w[0]]." = ? ";
+          $query = "AND ".$fields['ids'][$w[0]]." = ? ";
           $args = [$w[2]];
           break;
         }
@@ -568,38 +584,38 @@ class task {
             if ( $j ){
               $query .= " OR ";
             }
-            $query .= $ids[$w[0]]." = ? ";
+            $query .= $fields['ids'][$w[0]]." = ? ";
             array_push($args1, $v);
           }
           $query .= ") ";
         }
         else{
-          $query .= " AND ".$ids[$w[0]]." $w[1] ? ";
+          $query .= " AND ".$fields['ids'][$w[0]]." $w[1] ? ";
           array_push($args1, $w[2]);
         }
       }
-      else if ( isset($dates[$w[0]]) ){
+      else if ( isset($fields['dates'][$w[0]]) ){
         if ( strpos($w[1], 'IS ') === 0 ){
-          $query .= " AND ".$dates[$w[0]]." $w[1] ";
+          $query .= " AND ".$fields['dates'][$w[0]]." $w[1] ";
         }
         else if ( \bbn\date::validateSQL($w[2]) ){
           if ( $w[0] !== 'deadline' ){
-            $having .= " AND DATE(".$dates[$w[0]].") $w[1] ? ";
+            $having .= " AND DATE(".$fields['dates'][$w[0]].") $w[1] ? ";
             array_push($args2, $w[2]);
           }
           else{
-            $query .= " AND DATE(".$dates[$w[0]].") $w[1] ? ";
+            $query .= " AND DATE(".$fields['dates'][$w[0]].") $w[1] ? ";
             array_push($args1, $w[2]);
           }
         }
       }
-      else if ( isset($nums[$w[0]]) ){
+      else if ( isset($fields['nums'][$w[0]]) ){
         if ( is_int($w[2]) ){
-          $query .= " AND ".$nums[$w[0]]." $w[1] ? ";
+          $query .= " AND ".$fields['nums'][$w[0]]." $w[1] ? ";
           array_push($args1, $w[2]);
         }
       }
-      else if ( isset($texts[$w[0]]) ){
+      else if ( isset($fields['texts'][$w[0]]) ){
         if ( !empty($w[2]) ){
           if ( $w[0] === 'title' ){
             $query .= " AND bbn_tasks.title LIKE ? ";
@@ -614,7 +630,7 @@ class task {
           }
         }
       }
-      else if ( isset($users[$w[0]]) ){
+      else if ( isset($fields['users'][$w[0]]) ){
         if ( !empty($w[2]) ){
           if ( $w[0] === 'id_user' ){
             $query .= " AND bbn_tasks_roles.id_user = ?";
@@ -623,25 +639,36 @@ class task {
         JOIN bbn_tasks_roles AS user_role
           ON user_role.id_task = bbn_tasks.id";
           }
-          else if ( $w[0] === 'id_group' ){
-            $query .= " AND apst_users.id_group = ? ";
+          else if ( ($w[0] === 'id_group') && ($usr = \bbn\user\connection::get_user()) ){
+            $usr_table = $usr->get_tables()['users'];
+            $usr_fields = $usr->get_fields('users');
+            $query .= " AND `".$usr_table."`.`".$usr_fields['id_group']."` = ? ";
             array_push($args1, $w[2]);
             $join .= "
         JOIN bbn_tasks_roles AS group_role
           ON group_role.id_task = bbn_tasks.id
-        JOIN apst_users
-          ON bbn_tasks_roles.id_user = apst_users.id";
+        JOIN `".$usr_table."`
+          ON bbn_tasks_roles.id_user = `".$usr_table."`.`".$usr_fields['id']."`";
           }
         }
       }
     }
+    foreach ( $fields as $i => $f ){
+      foreach ( $f as $n => $g ){
+        if ( isset($sort[$n]) ){
+          $order = '`'.$n.'`'.( strtolower($sort[$n]) === 'desc' ? ' DESC' : ' ASC').', ';
+        }
+      }
+    }
+    if ( !empty($order) ){
+      $order = "ORDER BY ".substr($order, 0, -2);
+    }
     $sql = "
       SELECT my_role.role, bbn_tasks.*,
-      FROM_UNIXTIME(MIN(bbn_tasks_logs.chrono)) AS `first`,
-      FROM_UNIXTIME(MAX(bbn_tasks_logs.chrono)) AS `last`,
+      FROM_UNIXTIME(MAX(bbn_tasks_logs.chrono)) AS `last_action`,
       COUNT(children.id) AS num_children,
       COUNT(DISTINCT bbn_tasks_notes.id_note) AS num_notes,
-      MAX(bbn_tasks_logs.chrono) - MIN(bbn_tasks_logs.chrono) AS duration
+      IF(bbn_tasks.`state`=".$this->id_state('closed').", MAX(bbn_tasks_logs.chrono), UNIX_TIMESTAMP()) - MIN(bbn_tasks_logs.chrono) AS duration
       FROM bbn_tasks
         LEFT JOIN bbn_tasks_roles AS my_role
           ON my_role.id_task = bbn_tasks.id
@@ -659,7 +686,8 @@ class task {
       $query
       GROUP BY bbn_tasks.id
       HAVING 1
-      $having";
+      $having
+      $order";
     //die(\bbn\x::dump($sql));
 
     if ( !isset($args) ){
@@ -710,6 +738,18 @@ class task {
 
   }
 
+  public function get_comment($id_task, $id_note){
+    if ( $this->exists($id_task) ){
+      $note = new \bbn\appui\note($this->db);
+      return $note->get($id_note);
+    }
+    return false;
+  }
+
+  public function get_users($id_task){
+    return $this->db->get_column_values('bbn_tasks_roles', 'id_user', ['id_task' => $id_task]);
+  }
+
   public function comment($id_task, array $cfg){
     if ( $this->exists($id_task) && !empty($cfg) ){
       $note = new \bbn\appui\note($this->db);
@@ -722,6 +762,11 @@ class task {
           'id_note' => $r,
           'id_task' => $id_task
         ]);
+        if ( !empty($cfg['files']) ){
+          foreach ( $cfg['files'] as $f ){
+            $note->add_media($r, $f);
+          }
+        }
         $this->add_log($id_task, 'comment_insert', [$this->id_user, empty($cfg['title']) ? $cfg['text'] : $cfg['title']]);
       }
       return $r;
@@ -730,14 +775,28 @@ class task {
   }
 
   public function add_log($id_task, $action, array $value = []){
-    if ( $this->id_user ){
-      return $this->db->insert('bbn_tasks_logs', [
+    if ( $this->id_user && $this->exists($id_task) ){
+      $data = [
         'id_task' => $id_task,
         'id_user' => $this->id_user,
         'action' => is_int($action) ? $action : $this->id_action($action),
         'value' => empty($value) ? '' : json_encode($value),
         'chrono' => microtime(true)
-      ]);
+      ];
+      $this->notify($data);
+      return $this->db->insert('bbn_tasks_logs', $data);
+    }
+    return false;
+  }
+
+  public function notify(array $data){
+    if ( isset($data['id_task'], $data['id_user'], $data['action']) && ($title = $this->get_title($data['id_task'])) ){
+      $text = $this->translate_log($data);
+      $users = array_filter($this->get_users($data['id_task']), function($a) use($data){
+        return $a !== $data['id_user'];
+      });
+      $notif = new \bbn\appui\notification($this->db);
+      return $notif->insert($title, $text, $users);
     }
     return false;
   }
@@ -830,6 +889,27 @@ class task {
         if ( $prev && $value && ($prev !== $value) ){
           $this->add_log($id_task, 'deadline_update', [$prev, $value]);
           $ok = 1;
+        }
+      }
+      else if ( $prop === 'state' ){
+        $states = $this->states();
+        switch ( $value ){
+          case $states['closed']:
+            $ok = 1;
+            $this->add_log($id_task, 'task_close');
+            break;
+          case $states['holding']:
+            $ok = 1;
+            $this->add_log($id_task, 'task_hold');
+            break;
+          case $states['ongoing']:
+            $ok = 1;
+            $this->add_log($id_task, 'task_start');
+            break;
+          case $states['opened']:
+            $ok = 1;
+            $this->add_log($id_task, 'task_reopen');
+            break;
         }
       }
       else if ( $prev = $this->db->select_one('bbn_tasks', $prop, ['id' => $id_task]) ){

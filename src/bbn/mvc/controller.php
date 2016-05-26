@@ -480,7 +480,7 @@ EOD;
 			$this->set_title($title)
 				->add_data($this->post)
 				->add_data($this->get_model())
-				->add_js($this->path, is_array($data) && count($data) ? $data : ( $data ? $this->data : false))
+				->add_js($this->path, is_array($data) && count($data) ? $data : ($data ? $this->data : []), false)
 				->get_view($this->path, false);
 	}
 

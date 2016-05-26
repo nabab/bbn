@@ -225,9 +225,12 @@ class directories {
    * Returns the file's ID from the real file's path.
    *
    * @param string $file The real file's path
+   * @todo Fix the slowness!
    * @return bool|string
    */
   public function real_to_id($file){
+    $timer = new \bbn\util\timer();
+    $timer->start('real_to_id');
     $url = self::real_to_url($file);
     $dir = self::dir(self::dir_from_url($url));
     if ( !empty($dir) &&
@@ -236,6 +239,8 @@ class directories {
       $bbn_p = constant($dir['bbn_path']);
       if ( strpos($file, $bbn_p) === 0 ){
         $f = substr($file, strlen($bbn_p));
+        $timer->stop('real_to_id');
+        \bbn\x::log($timer->results(), "directories");
         return \bbn\str::parse_path($dir['bbn_path'].'/'.$f);
       }
     }
@@ -618,7 +623,6 @@ class directories {
     if ( $file && $dir ){
       /** @var array $dir_cfg The directory configuration from DB */
       $dir_cfg = $this->dir($dir);
-
       $res = $this->get_file($file, $dir, $tab, $dir_cfg, $pref);
     }
     return $res;
@@ -651,6 +655,7 @@ class directories {
         'title' => $cfg['title'],
         'url' => \bbn\str::parse_path($dir . $path . $name)
       ];
+      $timer = new \bbn\util\timer();
 
       if ( !empty($cfg['tabs']) ){
         $r['title'] = $path . $name;
@@ -789,6 +794,10 @@ class directories {
           }
         }
 
+        // Timing problem is here, check out timer below and logs
+        // Do we need to have a single preference for each tab?
+        // Guilty: real_to_id takes 0.15 sec and is called 10+ times
+        $timer->start();
         // User's preferences
         if ( $is_file && 
           $pref &&
@@ -796,6 +805,7 @@ class directories {
         ){
           $o = $pref->get($id_option);
         }
+        $timer->stop();
         if ( empty($tab) && empty($cfg['url']) ){
           $r['list'][0]['id_script'] = $this->real_to_id($real_file);
           $r['list'][0]['cfg'] = [
@@ -814,6 +824,8 @@ class directories {
             'marks' => !empty($o['marks']) ? $o['marks'] : []
           ];
         }
+        \bbn\x::log($timer->results(), "directories");
+
       }
       return $r;
     }
