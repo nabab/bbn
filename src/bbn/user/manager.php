@@ -113,17 +113,27 @@ You can click the following link to access directly your account:<br>
    * @return array|false
    */
   public function groups($adm=false){
+    $a =& $this->cfg['arch'];
+    $t =& $this->cfg['tables'];
+    $id = $this->db->cfn($a['groups']['id'], $t['groups'], 1);
+    $group = $this->db->cfn($a['groups']['group'], $t['groups'], 1);
+    $cfg = $this->db->cfn($a['groups']['cfg'], $t['groups'], 1);
+    $id_group = $this->db->cfn($a['users']['id_group'], $t['users'], 1);
+    $status = $this->db->cfn($a['users']['status'], $t['users'], 1);
+    $users_id = $this->db->cfn($a['users']['id'], $t['users'], 1);
+    $groups = $this->db->escape($t['groups']);
+    $users = $this->db->escape($t['users']);
     return $this->db->get_rows("
-      SELECT ".$this->db->cfn($this->cfg['arch']['groups']['id'], $this->cfg['tables']['groups'], 1)." AS `id`,
-      ".$this->db->cfn($this->cfg['arch']['groups']['group'], $this->cfg['tables']['groups'], 1)." AS `group`,
-      ".$this->db->cfn($this->cfg['arch']['groups']['cfg'], $this->cfg['tables']['groups'], 1)." AS `cfg`,
-      COUNT(".$this->db->cfn($this->cfg['arch']['users']['id'], $this->cfg['tables']['users'], 1).") AS `num`
-      FROM ".$this->db->escape($this->cfg['tables']['groups'])."
-        LEFT JOIN ".$this->db->escape($this->cfg['tables']['users'])."
-          ON ".$this->db->cfn($this->cfg['arch']['users']['id_group'], $this->cfg['tables']['users'], 1)." = ".$this->db->cfn($this->cfg['arch']['groups']['id'], $this->cfg['tables']['groups'], 1)."
-          AND ".$this->db->cfn($this->cfg['arch']['users']['status'], $this->cfg['tables']['users'], 1)." = 1
-          ".( $adm ? '' : "WHERE ".$this->db->cfn($this->cfg['arch']['groups']['id'], $this->cfg['tables']['groups'], 1)." > 1" )."
-      GROUP BY ".$this->db->cfn($this->cfg['arch']['groups']['id'], $this->cfg['tables']['groups'], 1));
+      SELECT $id AS `id`,
+      $group AS `group`,
+      $cfg AS `cfg`,
+      COUNT($users_id) AS `num`
+      FROM $groups
+        LEFT JOIN $users
+          ON $id_group = $id
+          AND $status = 1
+          ".( $adm ? '' : "WHERE $id > 1" )."
+      GROUP BY $id");
   }
 
   public function text_value_groups(){

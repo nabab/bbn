@@ -94,7 +94,7 @@ class mapper extends \bbn\objdb{
       if ( !$this->prefix ){
         $this->prefix = '';
       }
-      else if ( substr($this->prefix,-1) !== '_' ){
+      else if ( (substr($this->prefix, -1) !== '_') || (substr($this->prefix, -1) !== '-') ){
         $this->prefix .= '_';
       }
       // If there's no client table we presume none exist and we create the schemas
@@ -113,17 +113,12 @@ class mapper extends \bbn\objdb{
    * @return string
    */
   public function table_id($table, $db=false){
-    
     if ( substr_count($table, ".") === 1 ){
       return $table;
     }
-    else if ( $db ){
-      return $db.'.'.$table;
+    else {
+      return ( $db ?: $this->client_db ).'.'.$table;
     }
-    else{
-      return $this->client_db.'.'.$table;
-    }
-    
   }
 
   /**
@@ -150,10 +145,10 @@ class mapper extends \bbn\objdb{
       return $this->table_id($table).'.'.$col;
     }
   }
-  
+
   /**
    * Returns the simplest name of a DB item (table/column/key)
-   * 
+   *
    * @param string $item
    * @return string
    */
@@ -217,7 +212,13 @@ class mapper extends \bbn\objdb{
       return $id;
     }
   }
-  
+
+  /**
+   * @param $id
+   * @param string $class
+   * @param array $params
+   * @return mixed
+   */
   public function load_config($id, $class = 'grid', $params=[])
   {
     if( $this->db ){
@@ -308,8 +309,13 @@ class mapper extends \bbn\objdb{
       return $cfg;
     }
   }
-	
-  private function get_default_grid_config($table, $params=[]){
+
+  /**
+   * @param $table
+   * @param array $params
+   * @return array
+   */
+  public function get_default_grid_config($table, $params=[]){
 		if ( $this->db &&
             ($cfg = $this->db->modelize($table)) &&
             isset($cfg['keys']['PRIMARY']) &&
@@ -375,9 +381,16 @@ class mapper extends \bbn\objdb{
       return $full_cfg;
     }
   }
-  
-  
-  private function get_default_col_config($table, $column, $where=[], $params=[]){
+
+
+  /**
+   * @param $table
+   * @param $column
+   * @param array $where
+   * @param array $params
+   * @return array
+   */
+  public function get_default_col_config($table, $column, $where=[], $params=[]){
     
 		// Looks in the db for columns corresponding to the given table
 		if ( $this->db && \bbn\str::check_name($column) &&
@@ -515,9 +528,12 @@ class mapper extends \bbn\objdb{
           }
           else {
             /** @todo Che succede??? */
-            var_dump($f['type']);
+            //var_dump($f['type']);
           }
           if ( $r['field'] === 'numeric' ){
+            if ( !isset($r['widget']) ){
+              $r['widget'] = ['options' => []];
+            }
             $r['attr']['maxlength'] = isset($r['widget']['options']['decimals']) ? (int)($f['maxlength'] + 1) : (int)$f['maxlength'];
             if ( !empty($r['widget']['options']['decimals']) ){
               $r['widget']['options']['format'] = 'n2';
@@ -544,43 +560,30 @@ class mapper extends \bbn\objdb{
     }
   }
 
-  private function get_default_form_config($table){
+  /**
+   * @param $table
+   * @return array
+   */
+  public function get_default_form_config($table){
     
     if ( $this->db && ($full_table = $this->db->table_full_name($table)) ){
 
       $table = explode(".",$full_table);
+      if ( count($table) === 1 ){
+        array_unshift($table, $this->client_db);
+      }
       if ( count($table) === 2 ){
-        $database = trim($table[0]);
-        $this->client_db = $database;
+        $db = trim($table[0]);
         $table = trim($table[1]);
-        // Creates the default form configuration
-        $square = new \bbn\appui\square($this->db, "apst_ui");
 
-        if ( $sqt = $square->get_table($table) ){
-          $title = $sqt->tit;
-        }
-        else{
-          $title = false;
-        }
-        
         $db_info = $this->db->modelize($table);
         $i = 0;
         foreach ( $db_info['fields'] as $name => $c ){
           
-          $cfg[$i] = $this->get_default_field_config($table, $name);
+          $cfg[$i] = $this->get_default_field_config($db.'.'.$table, $name);
           $cfg[$i]['default'] = $c['default'];
           if ( isset($c['maxlength']) ){
             $cfg[$i]['attr']['maxlength'] = $c['maxlength'];
-          }
-          if ( isset($sqt->fields[$name]) ){
-            
-            $info = $sqt->fields[$name];
-            if ( is_object($info) ){
-              $cfg[$i]['required'] = $info->mand == 1 ? 1 : false;
-              $cfg[$i]['label'] = $info->tit;
-              //$cfg[$i] = $square->get_config_from_id($info->id_form,$cfg[$i]);
-            }
-            $cfg[$i]['table'] = $full_table;
           }
           $i++;
         }
@@ -588,7 +591,6 @@ class mapper extends \bbn\objdb{
       return [
           "attr" => [
             "action" => ".",
-            "title" => $title,
           ],
           "table" => $table,
           "elements" => $cfg
@@ -603,7 +605,7 @@ class mapper extends \bbn\objdb{
 	 * @param string $table The table's column
 	 * @return \bbn\html\input
 	 */
-	private function get_default_field_config($table, $column){
+  public function get_default_field_config($table, $column){
     
 		// Looks in the db for columns corresponding to the given table
 		if ( $this->db && \bbn\str::check_name($column) &&
@@ -1020,5 +1022,5 @@ class mapper extends \bbn\objdb{
       }
 		}
 	}
+
 }
-?>

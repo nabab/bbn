@@ -491,7 +491,7 @@ class task {
     return $this->add_note();
   }
 
-  public function info($id){
+  public function info($id, $with_comments = false){
     if ( $info = $this->db->rselect('bbn_tasks', [], ['id' => $id]) ){
 
       $info['first'] = $this->db->select_one('bbn_tasks_logs', 'chrono', [
@@ -503,7 +503,7 @@ class task {
         'id_task' => $id,
       ], ['chrono' => 'DESC']);
       $info['roles'] = $this->info_roles($id);
-      $info['notes'] = $this->db->get_column_values('bbn_tasks_notes', 'id_note', ['id_task' => $id]);
+      $info['notes'] = $with_comments ? $this->get_comments($id) : $this->get_comments_ids($id);
       $info['children'] = $this->db->rselect_all('bbn_tasks', [], ['id_parent' => $id, 'active' => 1]);
       $info['aliases'] = $this->db->rselect_all('bbn_tasks', ['id', 'title'], ['id_alias' => $id, 'active' => 1]);
       $info['num_children'] = count($info['children']);
@@ -518,6 +518,18 @@ class task {
       }
       return $info;
     }
+  }
+
+  public function get_comments_ids($id_task){
+    return $this->db->get_col_array("
+      SELECT bbn_tasks_notes.id_note
+      FROM bbn_tasks_notes
+        JOIN bbn_notes_versions
+          ON bbn_notes_versions.id_note = bbn_tasks_notes.id_note
+      WHERE id_task = ?
+      GROUP BY bbn_tasks_notes.id_note
+      ORDER BY MAX(bbn_notes_versions.creation)",
+      $id_task);
   }
 
   private function _format_where(array $cfg){
@@ -735,7 +747,16 @@ class task {
   }
 
   public function get_comments($id_task){
-
+    if ( $this->exists($id_task) ){
+      $note = new \bbn\appui\note($this->db);
+      $ids = $this->get_comments_ids($id_task);
+      $r = [];
+      foreach ( $ids as $id_note ){
+        array_push($r, $note->get($id_note));
+      }
+      return $r;
+    }
+    return false;
   }
 
   public function get_comment($id_task, $id_note){

@@ -2217,6 +2217,97 @@ class db extends \PDO implements db\actions, db\api, db\engines
     }
   }
 
+  public function find_references($column, $db = ''){
+    $changed = false;
+    if ( $db && ($db !== $this->current) ){
+      $changed = $this->current;
+      $this->change($db);
+    }
+    $column = $this->cfn($column);
+    $bits = explode(".", $column);
+    if ( count($bits) === 2 ){
+      array_unshift($bits, $this->current);
+    }
+    if ( count($bits) !== 3 ){
+      /** @todo Error */
+      return false;
+    }
+    $refs = [];
+    $schema = $this->modelize();
+    $test = function($key) use($bits){
+      return ($key['ref_db'] === $bits[0]) && ($key['ref_table'] === $bits[1]) && ($key['ref_column'] === $bits[2]);
+    };
+    foreach ( $schema as $table => $cfg ){
+      foreach ( $cfg['keys'] as $k ){
+        if ( $test($k) ){
+          array_push($refs, $table.'.'.$k['columns'][0]);
+        }
+      }
+    }
+    if ( $changed ){
+      $this->change($changed);
+    }
+    return $refs;
+  }
+
+  public function find_relations($column, $db = ''){
+    $changed = false;
+    if ( $db && ($db !== $this->current) ){
+      $changed = $this->current;
+      $this->change($db);
+    }
+    $column = $this->cfn($column);
+    $bits = explode(".", $column);
+    if ( count($bits) === 2 ){
+      array_unshift($bits, $this->current);
+    }
+    if ( count($bits) !== 3 ){
+      /** @todo Error */
+      return false;
+    }
+    $table = $bits[1];
+    $refs = [];
+    $schema = $this->modelize();
+    $test = function($key) use($bits){
+      return ($key['ref_db'] === $bits[0]) && ($key['ref_table'] === $bits[1]) && ($key['ref_column'] === $bits[2]);
+    };
+    foreach ( $schema as $tf => $cfg ){
+      $t = $this->tsn($tf);
+      if ( $t !== $table ){
+        foreach ( $cfg['keys'] as $k ){
+          if ( $test($k) ){
+            foreach ( $cfg['keys'] as $k2 ){
+              // Is not the same table
+              if ( !$test($k2) &&
+                // Has a reference
+                !empty($k2['ref_column']) &&
+                // A unique reference
+                (count($k2['columns']) === 1) &&
+                // To a table with a primary
+                isset($schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']]) &&
+                // which is a sole column
+                (count($schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']]) === 1) &&
+                // We retrieve the key name
+                ($key_name = $schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']][0]) &&
+                // which is unique
+                !empty($schema[$this->tfn($k2['ref_table'])]['keys'][$key_name]['unique'])
+              ){
+                if ( !isset($refs[$t]) ){
+                  $refs[$t] = ['column' => $k['ref_column'], 'refs' => []];
+                }
+                $refs[$t]['refs'][$k2['columns'][0]] = $k2['ref_table'].'.'.$k2['ref_column'];
+              }
+            }
+          }
+        }
+      }
+    }
+    if ( $changed ){
+      $this->change($changed);
+    }
+    return $refs;
+  }
+
   /**
    * @return void
    */
@@ -2258,4 +2349,3 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
 }
-?>
