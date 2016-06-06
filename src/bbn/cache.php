@@ -40,6 +40,22 @@ class cache{
     self::$type = $type;
   }
 
+  private static function _dir($item){
+    $dir = dirname($item);
+    if ( empty($dir) ){
+      return '';
+    }
+    return str_replace("../", '', str_replace("\\", "/", $dir));
+  }
+
+  private static function _file($item, $path){
+    return $path.self::_dir($item).'/'.\bbn\str::encode_filename(basename($item)).'.bbn.cache';
+  }
+
+  public static function make_hash($value){
+    return md5(serialize($value));
+  }
+
   public static function get_type(){
     return self::$type;
   }
@@ -108,7 +124,7 @@ class cache{
         case 'memcache':
           return $this->obj->get($it) !== $it;
         case 'files':
-          $file = $this->path.\bbn\str::encode_filename($it).'.bbn.cache';
+          $file = self::_file($it, $this->path);
           if ( is_file($file) ){
             $t = unserialize(file_get_contents($file));
             if ( !$t['expire'] || ($t['expire'] > time()) ){
@@ -129,7 +145,7 @@ class cache{
         case 'memcache':
           return $this->obj->delete($it);
         case 'files':
-          $file = $this->path.\bbn\str::encode_filename($it).'.bbn.cache';
+          $file = self::_file($it, $this->path);
           if ( is_file($file) ){
             return unlink($file);
           }
@@ -152,7 +168,7 @@ class cache{
               $res += (int)$this->obj->delete($it);
               break;
             case 'files':
-              $file = $this->path.\bbn\str::encode_filename($it).'.bbn.cache';
+              $file = self::_file($it, $this->path);
               if ( is_file($file) ){
                 $res += (int)unlink($file);
               }
@@ -191,6 +207,13 @@ class cache{
     return false;
   }
 
+  public function hash($it){
+    if ( $r = $this->get_raw($it) ){
+      return $r['hash'];
+    }
+    return false;
+  }
+
   public function is_new($it, $time){
     if ( $r = $this->get_raw($it) ){
       return $r['timestamp'] > $time;
@@ -201,26 +224,40 @@ class cache{
   public function set($it, $val, $ttl = 0){
     if ( self::$type && is_string($it) ){
       $ttl = self::ttl($ttl);
+      $hash = self::make_hash($val);
       switch ( self::$type ){
         case 'apc':
           return apc_store($it, [
             'timestamp' => microtime(1),
+            'hash' => $hash,
             'value' => $val
           ], $ttl);
         case 'memcache':
           return $this->obj->set($it, [
             'timestamp' => microtime(1),
+            'hash' => $hash,
             'value' => $val
           ], false, $ttl);
         case 'files':
-          $file = $this->path.\bbn\str::encode_filename($it).'.bbn.cache';
+          $file = self::_file($it, $this->path);
+          if ( $dir = self::_dir($it) ){
+            \bbn\file\dir::create_path($this->path.'/'.$dir);
+          }
+
           $value = [
             'timestamp' => microtime(1),
+            'hash' => $hash,
             'expire' => $ttl ? time() + $ttl : 0,
             'value' => $val
           ];
           return file_put_contents($file, serialize($value)) ? true : false;
       }
+    }
+  }
+
+  public function is_changed($it, $hash){
+    if ( $r = $this->get_raw($it) ){
+      return $hash !== $r['hash'];
     }
   }
 
@@ -232,7 +269,7 @@ class cache{
         case 'memcache':
           return $this->obj->get($it);
         case 'files':
-          $file = $this->path.\bbn\str::encode_filename($it).'.bbn.cache';
+          $file = self::_file($it, $this->path);
           $t = file_get_contents($file);
           return $t ? unserialize($t) : false;
       }
@@ -273,7 +310,7 @@ class cache{
     }
   }
 
-  public function items(){
+  public function items($dir = ''){
     if ( self::$type ){
       switch ( self::$type ){
         case 'apc':
@@ -300,9 +337,12 @@ class cache{
           }
           return $list;
         case 'files':
-          return array_map(function($a){
-            return basename($a, '.bbn.cache');
-          }, \bbn\file\dir::get_files($this->path));
+          $cache =& $this;
+          return array_filter(array_map(function($a) use ($dir){
+            return ( $dir ? $dir.'/' : '' ).basename($a, '.bbn.cache');
+          }, \bbn\file\dir::get_files($this->path.($dir ? '/'.$dir : ''))), function($a) use ($cache){
+            return $cache->has($a);
+          });
       }
     }
   }

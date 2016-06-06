@@ -29,7 +29,7 @@ class objcache extends objdb
 	{
 		parent::__construct($db);
 		$this->cacher = \bbn\cache::get_engine();
-		$this->_cache_prefix = \bbn\str::encode_filename(str_replace('\\', '_', get_class($this)));
+		$this->_cache_prefix = \bbn\str::encode_filename(str_replace('\\', '/', get_class($this))).'/';
 	}
 
 	protected function _cache_name($uid, $method = ''){
