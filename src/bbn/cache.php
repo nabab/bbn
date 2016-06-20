@@ -85,9 +85,13 @@ class cache{
     return 0;
   }
 
-  public static function get_engine($engine = null){
+  public static function get_cache($engine = null){
     self::_init($engine);
     return self::$engine;
+  }
+
+  public static function get_engine($engine = null){
+    return self::get_cache($engine);
   }
 
   public function __construct($engine = null){
@@ -338,11 +342,23 @@ class cache{
           return $list;
         case 'files':
           $cache =& $this;
-          return array_filter(array_map(function($a) use ($dir){
+          $list = array_filter(array_map(function($a) use ($dir){
             return ( $dir ? $dir.'/' : '' ).basename($a, '.bbn.cache');
-          }, \bbn\file\dir::get_files($this->path.($dir ? '/'.$dir : ''))), function($a) use ($cache){
-            return $cache->has($a);
+          }, \bbn\file\dir::get_files($this->path.($dir ? '/'.$dir : ''))),
+            function($a) use ($cache){
+            // Only gives valid cache
+              return $cache->has($a);
           });
+          $dirs = \bbn\file\dir::get_dirs($this->path.($dir ? '/'.$dir : ''));
+          if ( count($dirs) ){
+            foreach ( $dirs as $d ){
+              $res = $this->items($dir ? $dir.'/'.basename($d) : basename($d));
+              foreach ( $res as $r ){
+                array_push($list, $r);
+              }
+            }
+          }
+          return $list;
       }
     }
   }
