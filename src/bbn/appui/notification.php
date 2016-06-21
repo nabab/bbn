@@ -54,13 +54,13 @@ class notification extends \bbn\objdb
       return $this->db->get_rows("SELECT ".self::$tc.".*, ".self::$t.".*
         FROM ".self::$t."
           JOIN ".self::$tc."
-            ON id_content = ".self::$tc.".id
+            ON id_content = {$this->db->cfn(self::$c['id'], self::$tc)}
           JOIN apst_users_sessions
-            ON apst_users_sessions.id_user = ".self::$t.".id_user
+            ON apst_users_sessions.id_user = {$this->db->cfn(self::$c['id_user'], self::$t)}
         WHERE {$this->db->cfn(self::$c['id_user'], self::$t)} = ?
-        AND sent IS NULL
-        GROUP BY bbn_notifications.id_user, bbn_notifications.id_content
-        HAVING bbn_notifications_content.creation >= MAX(apst_users_sessions.creation)",
+        AND {$this->db->cfn(self::$c['sent'], self::$t)} IS NULL
+        GROUP BY {$this->db->cfn(self::$c['id_user'], self::$t)}, {$this->db->cfn(self::$c['id_content'], self::$t)}
+        HAVING {$this->db->cfn(self::$c['creation'], self::$tc)} >= MAX(apst_users_sessions.creation)",
         104);
     }
     die("Cannot use get_notifications without user");

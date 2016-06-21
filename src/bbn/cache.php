@@ -185,22 +185,7 @@ class cache{
   }
 
   public function clear(){
-    if ( self::$type ){
-      switch ( self::$type ){
-        case 'apc':
-          apc_clear_cache('user');
-          apc_clear_cache('system');
-          break;
-        case 'memcache':
-          $this->obj->flush();
-          break;
-        case 'files':
-          $files = \bbn\file\dir::get_files($this->path);
-          foreach ( $files as $f ){
-            unlink($f);
-          }
-      }
-    }
+    $this->delete_all();
     return $this;
   }
 

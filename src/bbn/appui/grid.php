@@ -126,46 +126,61 @@ class grid extends \bbn\obj{
             $res .= $pre.$field." ";
             switch ( $f['operator'] ){
               case 'eq':
-              $res .= \bbn\str::is_number($f['value']) ? "= ".$f['value'] : "LIKE '".$this->db->escape_value($f['value'])."'";
-              break;
+                $res .= \bbn\str::is_number($f['value']) ? "= ".$f['value'] : "LIKE '".$this->db->escape_value($f['value'])."'";
+                break;
 
               case 'neq':
-              $res .= \bbn\str::is_number($f['value']) ? "!= ".$f['value'] : "NOT LIKE '".$this->db->escape_value($f['value'])."'";
-              break;
+                $res .= \bbn\str::is_number($f['value']) ? "!= ".$f['value'] : "NOT LIKE '".$this->db->escape_value($f['value'])."'";
+                break;
 
               case 'startswith':
-              $res .= "LIKE '".$this->db->escape_value($f['value'])."%'";
-              break;
+                $res .= "LIKE '".$this->db->escape_value($f['value'])."%'";
+                break;
 
               case 'endswith':
-              $res .= "LIKE '%".$this->db->escape_value($f['value'])."'";
-              break;
+                $res .= "LIKE '%".$this->db->escape_value($f['value'])."'";
+                break;
 
               case 'gte':
-              $res .= ">= '".$this->db->escape_value($f['value'])."'";
-              break;
+                $res .= ">= '".$this->db->escape_value($f['value'])."'";
+                break;
 
               case 'gt':
-              $res .= "> '".$this->db->escape_value($f['value'])."'";
-              break;
+                $res .= "> '".$this->db->escape_value($f['value'])."'";
+                break;
 
               case 'lte':
-              $res .= "<= '".$this->db->escape_value($f['value'])."'";
-              break;
+                $res .= "<= '".$this->db->escape_value($f['value'])."'";
+                break;
 
               case 'lt':
-              $res .= "< '".$this->db->escape_value($f['value'])."'";
-              break;
+                $res .= "< '".$this->db->escape_value($f['value'])."'";
+                break;
+
+              case 'isnull':
+                $res .= "IS NULL";
+                break;
+
+              case 'isnotnull':
+                $res .= "IS NOT NULL";
+                break;
+
+              case 'isempty':
+                $res .= "LIKE ''";
+                break;
+
+              case 'isnotempty':
+                $res .= "NOT LIKE ''";
+                break;
+
+              case 'doesnotcontain':
+                $res .= "NOT LIKE '%".$this->db->escape_value($f['value'])."%'";
+                break;
 
               case 'contains':
               default:
-              $res .= "LIKE '%".$this->db->escape_value($f['value'])."%'";
-              break;
-
-              case 'doesnotcontain':
-              $res .= "NOT LIKE ? ";
-              $f['value'] = '%'.$f['value'].'%';
-              break;
+                $res .= "LIKE '%".$this->db->escape_value($f['value'])."%'";
+                break;
 
             }
           }
