@@ -63,7 +63,7 @@ class date
 	/**
 	 * @return void 
 	 */
-	public static function format($date='', $mode='wdate')
+	public static function format($date='', $mode='')
 	{
 		/* Formatting: idate is the timestamp, and date[0] and date[1] the SQL date and time */
 		if ( empty($date) ){
