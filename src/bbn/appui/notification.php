@@ -21,6 +21,7 @@ class notification extends \bbn\objdb
       'id_content' => 'id_content',
       'id_user' => 'id_user',
       'sent' => 'sent',
+      'read' => 'read',
       'creation' => 'creation',
       'mail' => 'mail'
     ];
@@ -46,12 +47,14 @@ class notification extends \bbn\objdb
     return false;
   }
 
-  public function get_list($id_user = false){
+  public function consult($id_user = false){
+    $self = false;
     if ( !$id_user && ($user = \bbn\user\connection::get_user()) ){
       $id_user = $user->get_id();
+      $self = 1;
     }
     if ( $id_user ){
-      return $this->db->get_rows("SELECT ".self::$tc.".*, ".self::$t.".*
+      $list = $this->db->get_rows("SELECT ".self::$tc.".*, ".self::$t.".*
         FROM ".self::$t."
           JOIN ".self::$tc."
             ON id_content = {$this->db->cfn(self::$c['id'], self::$tc)}
@@ -62,6 +65,50 @@ class notification extends \bbn\objdb
         GROUP BY {$this->db->cfn(self::$c['id_user'], self::$t)}, {$this->db->cfn(self::$c['id_content'], self::$t)}
         HAVING {$this->db->cfn(self::$c['creation'], self::$tc)} >= MAX(apst_users_sessions.creation)",
         104);
+      if ( $self && count($list) ){
+        foreach ( $list as $l ){
+          $this->db->update(self::$t, [
+            self::$c['sent'] => date('Y-m-d H:i:s')
+          ], [
+            self::$c['id_user'] => $l[self::$c['id_user']],
+            self::$c['id_content'] => $l[self::$c['id_content']]
+          ]);
+        }
+      }
+      return $list;
+    }
+    die("Cannot use get_notifications without user");
+  }
+
+  public function get_list($id_user = false, $limit = 100, $start = 0){
+    $self = false;
+    if ( !$id_user && ($user = \bbn\user\connection::get_user()) ){
+      $id_user = $user->get_id();
+      $self = 1;
+    }
+    if ( $id_user && is_int($limit) && is_int($start) ){
+      $list = $this->db->get_rows("SELECT ".self::$tc.".*, ".self::$t.".*
+        FROM ".self::$t."
+          JOIN ".self::$tc."
+            ON id_content = {$this->db->cfn(self::$c['id'], self::$tc)}
+          JOIN apst_users_sessions
+            ON apst_users_sessions.id_user = {$this->db->cfn(self::$c['id_user'], self::$t)}
+        WHERE {$this->db->cfn(self::$c['id_user'], self::$t)} = ?
+        GROUP BY {$this->db->cfn(self::$c['id_user'], self::$t)}, {$this->db->cfn(self::$c['id_content'], self::$t)}
+        HAVING {$this->db->cfn(self::$c['creation'], self::$tc)} >= MAX(apst_users_sessions.creation)
+        LIMIT $start, $limit",
+        104);
+      if ( $self && count($list) ){
+        foreach ( $list as $l ){
+          $this->db->update(self::$t, [
+            self::$c['sent'] => date('Y-m-d H:i:s')
+          ], [
+            self::$c['id_user'] => $l[self::$c['id_user']],
+            self::$c['id_content'] => $l[self::$c['id_content']]
+          ]);
+        }
+      }
+      return $list;
     }
     die("Cannot use get_notifications without user");
   }
