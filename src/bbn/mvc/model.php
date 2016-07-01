@@ -96,6 +96,21 @@ class model extends \bbn\objcache{
     return call_user_func_array([$this->ctrl, 'get_cached_model'], func_get_args());
   }
 
+  public function has_plugin(){
+    return call_user_func_array([$this->ctrl, 'has_plugin'], func_get_args());
+  }
+
+  public function is_plugin(){
+    return call_user_func_array([$this->ctrl, 'is_plugin'], func_get_args());
+  }
+
+  public function plugin_path(){
+    return call_user_func_array([$this->ctrl, 'plugin_path'], func_get_args());
+  }
+
+  public function plugin_url(){
+    return call_user_func_array([$this->ctrl, 'plugin_url'], func_get_args());
+  }
   /**
 	 * Checks if data exists or if a specific index exists in the data
 	 *

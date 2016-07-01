@@ -2290,10 +2290,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
                 // We retrieve the key name
                 ($key_name = $schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']][0]) &&
                 // which is unique
-                !empty($schema[$this->tfn($k2['ref_table'])]['keys'][$key_name]['unique'])
+                !empty($schema[$this->tfn($k2['ref_table'])]['keys'][$key_name]['unique']) &&
+                // and refers to a single column
+                (count($k['columns']) === 1)
               ){
                 if ( !isset($refs[$t]) ){
-                  $refs[$t] = ['column' => $k['ref_column'], 'refs' => []];
+                  $refs[$t] = ['column' => $k['columns'][0], 'refs' => []];
                 }
                 $refs[$t]['refs'][$k2['columns'][0]] = $k2['ref_table'].'.'.$k2['ref_column'];
               }

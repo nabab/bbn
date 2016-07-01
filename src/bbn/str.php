@@ -1031,4 +1031,9 @@ class str
 	public static function is_date_sql($st){
 		return \bbn\date::validateSQL($st);
 	}
+
+	public function remove_comments($st){
+		$pattern = '/(?:(?:\/\*(?:[^*]|(?:\*+[^*\/]))*\*+\/)|(?:(?<!\:|\\\|\')\/\/.*))/';
+		return preg_replace($pattern, '', $st);
+	}
 }

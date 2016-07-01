@@ -71,7 +71,11 @@ class mvc implements \bbn\mvc\api{
     /**
      * @var array The file(s)'s configuration to transmit to the m/v/c
      */
-    $info;
+    $info,
+    /**
+     * @var array The plugins registered through the routes
+     */
+    $plugins;
 
 	public
     /**
@@ -139,6 +143,15 @@ class mvc implements \bbn\mvc\api{
     return $this;
   }
 
+  private function register_plugin(array $plugin){
+    if ( isset($plugin['path'], $plugin['url'], $plugin['name']) ){
+      $this->plugins[$plugin['name']] = [
+        'url' => $plugin['url'],
+        'path' => $plugin['path']
+      ];
+    }
+  }
+
   /**
 	 * This should be called only once from within the app
 	 *
@@ -155,6 +168,14 @@ class mvc implements \bbn\mvc\api{
 		}
 		$this->inc = new \stdClass();
     $this->o = $this->inc;
+    if ( is_array($routes) && isset($routes['root']) ){
+      $roots = $routes['root'];
+      $routes['root'] = [];
+      foreach ( $roots as $r ){
+        $this->register_plugin($r);
+        $routes['root'][$r['url']] = $r['path'];
+      }
+    }
     $this->router = new \bbn\mvc\router($this, $routes);
     $this->route();
 	}
@@ -164,15 +185,31 @@ class mvc implements \bbn\mvc\api{
    *
    * @return bool
    */
-  public function check()
-  {
+  public function check(){
     return $this->info ? true : false;
   }
 
-  public function add_routes(array $routes){
+  public function has_plugin($plugin){
+    return isset($this->plugins[$plugin]);
+  }
+
+  public function is_plugin($plugin){
+    /** @todo This function! */
+    return isset($this->plugins[$plugin]);
+  }
+
+  public function plugin_path($plugin){
+    return $this->has_plugin($plugin) ? $this->plugins[$plugin]['path'] : false;
+  }
+
+  public function plugin_url($plugin){
+    return $this->has_plugin($plugin) ? $this->plugins[$plugin]['url'] : false;
+  }
+
+  /*public function add_routes(array $routes){
     $this->routes = \bbn\x::merge_arrays($this->routes, $routes);
     return $this;
-  }
+  }*/
 
   public function get_route($path, $mode){
     return $this->router->route($path, $mode);

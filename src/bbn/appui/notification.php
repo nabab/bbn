@@ -64,7 +64,7 @@ class notification extends \bbn\objdb
         AND {$this->db->cfn(self::$c['sent'], self::$t)} IS NULL
         GROUP BY {$this->db->cfn(self::$c['id_user'], self::$t)}, {$this->db->cfn(self::$c['id_content'], self::$t)}
         HAVING {$this->db->cfn(self::$c['creation'], self::$tc)} >= MAX(apst_users_sessions.creation)",
-        104);
+        $id_user);
       if ( $self && count($list) ){
         foreach ( $list as $l ){
           $this->db->update(self::$t, [

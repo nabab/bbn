@@ -837,6 +837,11 @@ class connection
     return (isset($this->permissions["admin"]) && $this->permissions["admin"]) || $this->session->get('info', 'admin');
   }
 
+  public function get_manager($mail = false){
+    $mgr = new manager($this, $mail);
+    return $mgr;
+  }
+
 	/**
 	 * @return boolean
 	 */
@@ -865,8 +870,7 @@ class connection
   /**
    * @return void
    */
-  public function get_name(array $usr = null)
-  {
+  public function get_name(array $usr = null){
     if ( $this->auth ){
       if ( is_null($usr) ){
         return $this->session->get('info', 'login');

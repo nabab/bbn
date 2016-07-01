@@ -113,6 +113,34 @@ class directories {
     return $files;
   }
 
+
+  /**
+   * Checks if the file is a superior super-controller and returns the corrected name and path
+   * @param string $tab The tab'name from file's URL
+   * @param string $path The file's path from file's URL
+   * @return array
+   */
+  private function superior_sctrl($tab, $path=''){
+    if ( ($pos = strpos($tab, '_ctrl')) ){
+      // Fix the right path
+      $bits = explode('/', $path);
+      $count = strlen(substr($tab, 0, $pos));
+      if ( !empty($bits) ){
+        while ( $count >= 0 ){
+          array_pop($bits);
+          $count--;
+        }
+        $path = implode('/', $bits).(!empty($bits) ? '/' : '');
+      }
+      // Fix the tab's name
+      $tab = '_ctrl';
+    }
+    return [
+      'tab' => $tab,
+      'path' => $path
+    ];
+  }
+
   /**
    * Sets the last error as the given string.
    *
@@ -279,52 +307,56 @@ class directories {
    * @return bool|string
    */
   public function url_to_real($url){
-    // Dir's name
-    $dn = $this->dir_from_url($url);
-    if ( !empty($dn) ){
-      if ( ($dir = $this->dir($dn)) &&
-        ($res = $this->get_root_path($dn))
-      ){
-        $bits = explode('/', substr($url, strlen($dn), strlen($url)));
-        if ( !empty($dir['tabs']) && !empty($bits) ){
-          $tab = array_pop($bits);
-          $fn = array_pop($bits);
-          $fp = implode('/', $bits).'/';
-          if ( !empty($dir['tabs'][$tab]) ){
-            $tab = $dir['tabs'][$tab];
-            $res .= $tab['path'];
-            if ( !empty($tab['fixed']) ){
-              $res .= $fp . $tab['fixed'];
-            }
-            else {
-              $res .= $fp . $fn;
-              $ext_ok = false;
-              foreach ( $tab['extensions'] as $e ){
-                $ext = '.' . $e['ext'];
-                if ( is_file($res . $ext) ){
-                  $res .= $ext;
-                  $ext_ok = true;
-                  break;
-                }
-              }
-              if ( empty($ext_ok) ){
-                $res .= '.' . $tab['extensions'][0]['ext'];
-              }
-            }
+    if ( ($dn = $this->dir_from_url($url)) &&
+      ($dir = $this->dir($dn)) &&
+      ($res = $this->get_root_path($dn))
+    ){
+      $bits = explode('/', substr($url, strlen($dn), strlen($url)));
+      if ( !empty($dir['tabs']) && !empty($bits) ){
+        // Tab's nane
+        $tab = array_pop($bits);
+        // File's name
+        $fn = array_pop($bits);
+        // File's path
+        $fp = implode('/', $bits).'/';
+        // Check if the file is a superior super-controller
+        $ssc = $this->superior_sctrl($tab, $fp);
+        $tab = $ssc['tab'];
+        $fp = $ssc['path'];
+        if ( !empty($dir['tabs'][$tab]) ){
+          $tab = $dir['tabs'][$tab];
+          $res .= $tab['path'];
+          if ( !empty($tab['fixed']) ){
+            $res .= $fp . $tab['fixed'];
           }
           else {
-            return false;
+            $res .= $fp . $fn;
+            $ext_ok = false;
+            foreach ( $tab['extensions'] as $e ){
+              $ext = '.' . $e['ext'];
+              if ( is_file($res . $ext) ){
+                $res .= $ext;
+                $ext_ok = true;
+                break;
+              }
+            }
+            if ( empty($ext_ok) ){
+              $res .= '.' . $tab['extensions'][0]['ext'];
+            }
           }
         }
         else {
-          // Remove the last element of the path if it's 'code' (it's the tab's URL in a non MVC architecture)
-          if ( end($bits) === 'code' ){
-            array_pop($bits);
-          }
-          $res .= implode('/', $bits);
+          return false;
         }
-        return \bbn\str::parse_path($res);
       }
+      else {
+        // Remove the last element of the path if it's 'code' (it's the tab's URL in a non MVC architecture)
+        if ( end($bits) === 'code' ){
+          array_pop($bits);
+        }
+        $res .= implode('/', $bits);
+      }
+      return \bbn\str::parse_path($res);
     }
     return false;
   }
@@ -646,8 +678,6 @@ class directories {
       $ext = \bbn\str::file_ext($file);
       /** @var string $path The file's path without file's name  */
       $path = dirname($file) !== '.' ? dirname($file) . '/' : '';
-      /** @var string $root_path The real/actual path to the root directory */
-      $root_path = $this->get_root_path($dir);
 
       $r = [
         'bcolor' => $cfg['bcolor'],
@@ -656,7 +686,7 @@ class directories {
         'url' => \bbn\str::parse_path($dir . $path . $name)
       ];
       $timer = new \bbn\util\timer();
-
+      // MVC
       if ( !empty($cfg['tabs']) ){
         $r['title'] = $path . $name;
         $r['list'] = [];
@@ -672,8 +702,9 @@ class directories {
           else{
             array_push($r['list'], $info);
           }
-          $file = dirname($real_file);
+          // Get supra-controllers
           if ( !empty($t['fixed']) && !empty($t['recursive']) ){
+            $file = dirname($real_file);
             $index = count($r['list']) - 1;
             while ( $file && ($file . '/' !== $t['path']) ){
               $file = dirname($file) . '/' .$t['fixed'];
@@ -702,6 +733,8 @@ class directories {
         }
       }
       else {
+        /** @var string $root_path The real/actual path to the root directory */
+        $root_path = $this->get_root_path($dir);
         $is_file = true;
         // Normal Tab
         if ( empty($tab) && empty($cfg['url']) ){
@@ -762,7 +795,6 @@ class directories {
               /** @var string $real_file The absolute full path to the file */
               $real_file = $root_path . $file . '.' . $ext;
               if ( is_file($real_file) ){
-                //die($this->real_to_perm($real_file));
                 $r['file'] = $real_file;
                 $mode = $e['mode'];
                 // Permissions
@@ -856,7 +888,7 @@ class directories {
       if ( empty($code) ){
         $bits = explode('/', $file);
         if ( !empty($dir['tabs']) && !empty($bits) ){
-          $tab = array_pop($bits);
+          $tab = $this->superior_sctrl(array_pop($bits))['tab'];
           if ( !empty($dir['tabs'][$tab]) &&
             empty($dir['tabs'][$tab]['fixed'])
           ){
@@ -874,13 +906,11 @@ class directories {
           }
         }
       }
-      if ( is_file($real) ){
-        if ( $id_file ){
-          $filename = empty($dir['tabs']) ? $ext[0].'.'.$ext[1] : $ext[0];
-          $backup = dirname(BBN_USER_PATH."ide/backup/".$id_file).'/'.$filename.'/'.date('Y-m-d His').'.'.$ext[1];
-          \bbn\file\dir::create_path(dirname($backup));
-          rename($real, $backup);
-        }
+      if ( is_file($real) && $id_file ){
+        $filename = empty($dir['tabs']) ? $ext[0].'.'.$ext[1] : $ext[0];
+        $backup = dirname(BBN_USER_PATH."ide/backup/".$id_file).'/'.$filename.'/'.date('Y-m-d His').'.'.$ext[1];
+        \bbn\file\dir::create_path(dirname($backup));
+        rename($real, $backup);
       }
       else if ( !is_dir(dirname($real)) ){
         \bbn\file\dir::create_path(dirname($real));
@@ -1156,53 +1186,64 @@ class directories {
       $is_file = $type === 'file';
       $wtype = $is_file ? 'file' : 'directory';
       $rnd = \bbn\str::genpwd();
-      $root_dest = BBN_USER_PATH . 'tmp/' . $rnd . '/' . $name;
+      $root_dest = BBN_USER_PATH . 'tmp/' . $rnd . '/';
+      $files = [];
       if ( !empty($cfg['tabs']) ){
-        $root_dest = $root_dest . '/mvc/';
+        $root_dest_mvc = $root_dest . $name . '/mvc/';
         foreach ( $cfg['tabs'] as $t ){
-          $path_tmp = $t['path'];
-          if ( dirname($path) !== '.' ){
-            $path_tmp .= dirname($path) . '/';
-          }
-          if ( $is_file ){
-            foreach ( $t['extensions'] as $e ){
-              if ( file_exists($root . $name . '.' . $e['ext']) ){
-                $path_tmp .= $name . '.' . $e['ext'];
-                break;
+          if ( empty($t['fixed']) ){
+            $real = $t['path'];
+            if ( dirname($path) !== '.' ){
+              $real .= dirname($path) . '/';
+            }
+            if ( $is_file ){
+              foreach ( $t['extensions'] as $e ){
+                if ( is_file($root . $real . $name . '.' . $e['ext']) ){
+                  $real .= $name . '.' . $e['ext'];
+                  array_push($files, [
+                    'src' => $root . $real,
+                    'dest' => $root_dest_mvc . $real,
+                    'is_file' => $is_file
+                  ]);
+                  break;
+                }
               }
             }
-          }
-          else {
-            $path_tmp .= $name;
-          }
-          if ( file_exists($root . $path_tmp) ){
-            if ( !\bbn\file\dir::create_path($root_dest . ($is_file ? dirname($path_tmp) : $path_tmp)) ){
-              $this->error("Impossible to create the path " . $root_dest . ($is_file ? dirname($path_tmp) : $path_tmp));
-              return false;
-            }
-            if ( !\bbn\file\dir::copy($root . $path_tmp, $root_dest . $path_tmp) ){
-              $this->error('Impossible to export the ' . $wtype . ' ' . $path_tmp);
-              return false;
+            else {
+              $real .= $name;
+              if ( is_dir($root . $real) ){
+                array_push($files, [
+                  'src' =>$root . $real,
+                  'dest' => $root_dest_mvc . $real,
+                  'is_file' => $is_file
+                ]);
+              }
             }
           }
         }
       }
       else {
-        $real = $root . $path;
-        if ( file_exists($real) ){
-          $r = $is_file ? ((dirname($path) !== '.') ? dirname($path) : '') : $path;
-
-          if ( !\bbn\file\dir::create_path($root_dest . '/' . $r) ){
-            $this->error("Impossible to create the path " . $root_dest . '/' . $r);
-            return false;
-          }
-          if ( !\bbn\file\dir::copy($real, $root_dest . '/' . $path) ){
-            $this->error('Impossible to export the ' . $wtype . ' ' . $path);
+        if ( file_exists($root . $path) ){
+          array_push($files, [
+            'src' => $root . $path,
+            'dest' => $root_dest . $path,
+            'is_file' => $is_file
+          ]);
+        }
+      }
+      foreach ( $files as $f ){
+        if ( $f['is_file'] ){
+          if ( !\bbn\file\dir::create_path(dirname($f['dest'])) ){
+            $this->error("Impossible to create the path " . dirname($f['dest']));
             return false;
           }
         }
+        if ( !\bbn\file\dir::copy($f['src'], $f['dest']) ){
+          $this->error('Impossible to export the ' . $wtype . ' ' . $f['src']);
+          return false;
+        }
       }
-      // Create zip file
+
       if ( class_exists('\\ZipArchive') ) {
         $filezip = BBN_USER_PATH.'tmp/'.$name.'.zip';
         $zip = new \ZipArchive();
@@ -1249,6 +1290,7 @@ class directories {
         $this->error("Impossible to create $filezip ($err)");
         return false;
       }
+
       $this->error("ZipArchive class non-existent");
       return false;
     }

@@ -21,8 +21,14 @@ class task {
     $id_state,
     $id_role;
 
+  private
+    $references,
+    $references_select = '',
+    $references_join = '';
+
   protected
     $db,
+    $template = false,
     $id_user,
     $is_admin,
     $user;
@@ -204,6 +210,35 @@ class task {
     return isset($this->user);
   }
 
+  private function get_references(){
+    if ( is_null($this->references) ){
+      $refs = $this->db->find_relations('bbn_tasks.id');
+      $this->references = array_filter($refs, function($a, $k){
+        return strpos($k, 'bbn_tasks') !== 0;
+      }, ARRAY_FILTER_USE_BOTH);
+      if ( empty($this->references) ){
+        $this->references = false;
+      }
+      else{
+        foreach ( $this->references as $table => $ref ){
+          foreach ( $ref['refs'] as $j => $r ){
+
+            $this->references_select = empty($this->references_select) ?
+              $this->db->cfn($j, $table, 1) :
+              "IFNULL(".$this->references_select.", ".$this->db->cfn($j, $table, 1).")";
+
+            $this->references_join .= "LEFT JOIN ".$this->db->tfn($table, 1).PHP_EOL.
+              "ON ".$this->db->cfn($ref['column'], $table, 1)." = bbn_tasks.id".PHP_EOL;
+          }
+        }
+        if ( !empty($this->references_select) ){
+          $this->references_select .= " AS reference,".PHP_EOL;
+        }
+      }
+    }
+    return $this->references;
+  }
+
   public function __construct(\bbn\db $db){
     $this->db = $db;
     if ( $user = \bbn\user\connection::get_user() ){
@@ -211,6 +246,14 @@ class task {
       $this->id_user = $user->get_id();
       $this->is_admin = $user->is_admin();
       $this->mgr = new \bbn\user\manager($user);
+      $this->get_references();
+      //die(var_dump(BBN_APP_PATH, $this->references));
+      if ( defined("BBN_APP_PATH") && is_file(BBN_APP_PATH.'plugins/appui-task/reference.php') ){
+        $f = include(BBN_APP_PATH.'plugins/appui-task/reference.php');
+        if ( is_callable($f) ){
+          $this->template = $f;
+        }
+      }
     }
     $this->columns = array_keys($this->db->get_columns('bbn_tasks'));
   }
@@ -259,9 +302,11 @@ class task {
   }
 
   public function translate_log(array $log){
-    if ( ($opt = \bbn\appui\options::get_options()) && isset($log['action']) ){
+    $opt = \bbn\appui\options::get_options();
+    $user = \bbn\user\connection::get_user();
+    if ( $opt && $user && isset($log['action'], $log['id_user']) ){
       $type = explode('_', $opt->code($log['action']));
-      $action = $opt->text($log['action']);
+      $action = $user->get_name().' '.$opt->text($log['action']);
       $log['value'] = empty($log['value']) ? [] : json_decode($log['value']);
       if ( !empty($log['value']) ){
         $values = [];
@@ -276,11 +321,11 @@ class task {
             break;
           case 'comment':
             array_push($values, \bbn\str::cut($this->db->get_one("
-              SELECT content
-              FROM bbn_notes_versions
-              WHERE id_note = ?
-              ORDER BY version DESC
-              LIMIT 1",
+            SELECT content
+            FROM bbn_notes_versions
+            WHERE id_note = ?
+            ORDER BY version DESC
+            LIMIT 1",
               $log['value'][0]), 80));
             break;
           case 'role':
@@ -307,6 +352,7 @@ class task {
       }
       return $action;
     }
+    return false;
   }
 
   public function get_log($id){
@@ -374,6 +420,7 @@ class task {
     SELECT `role`, bbn_tasks.*,
     FROM_UNIXTIME(MIN(bbn_tasks_logs.chrono)) AS `first`,
     FROM_UNIXTIME(MAX(bbn_tasks_logs.chrono)) AS `last`,
+    {$this->references_select}
     COUNT(children.id) AS num_children,
     COUNT(DISTINCT bbn_tasks_notes.id_note) AS num_notes,
     MAX(bbn_tasks_logs.chrono) - MIN(bbn_tasks_logs.chrono) AS duration
@@ -386,6 +433,7 @@ class task {
         ON bbn_tasks_notes.id_task = bbn_tasks_roles.id_task
       LEFT JOIN bbn_tasks AS children
         ON bbn_tasks_roles.id_task = children.id_parent
+      {$this->references_join}
     WHERE bbn_tasks_roles.id_user = ?".
       (empty($where) ? '' : " AND ($where)")."
     AND bbn_tasks.active = 1 
@@ -428,6 +476,7 @@ class task {
     $sql = "
     SELECT bbn_tasks.*, role,
     FROM_UNIXTIME(MAX(bbn_tasks_logs.chrono)) AS `last_action`,
+    {$this->references_select}
     COUNT(children.id) AS num_children,
     COUNT(DISTINCT bbn_tasks_notes.id_note) AS num_notes,
     IF(bbn_tasks.`state`=".$this->id_state('closed').", MAX(bbn_tasks_logs.chrono), UNIX_TIMESTAMP()) - MIN(bbn_tasks_logs.chrono) AS duration
@@ -443,6 +492,7 @@ class task {
         ON bbn_notes_versions.id_note = bbn_tasks_notes.id_note
       LEFT JOIN bbn_tasks AS children
         ON children.id = bbn_tasks.id
+      {$this->references_join}
     WHERE (bbn_tasks.title LIKE ?
     OR bbn_notes_versions.content LIKE ?)
     AND bbn_tasks.active = 1 
@@ -493,12 +543,10 @@ class task {
 
   public function info($id, $with_comments = false){
     if ( $info = $this->db->rselect('bbn_tasks', [], ['id' => $id]) ){
-
       $info['first'] = $this->db->select_one('bbn_tasks_logs', 'chrono', [
         'id_task' => $id,
         'action' => $this->id_action('insert')
       ], ['chrono' => 'ASC']);
-
       $info['last'] = $this->db->select_one('bbn_tasks_logs', 'chrono', [
         'id_task' => $id,
       ], ['chrono' => 'DESC']);
@@ -515,6 +563,21 @@ class task {
       }
       else{
         $info['has_children'] = false;
+      }
+      $info['ref'] = false;
+      if ( $this->references ){
+        foreach ( $this->references as $table => $ref ){
+          foreach ( $ref['refs'] as $j => $r ){
+            $info['dump'] = [$table, $j, [$ref['column'] => $id]];
+            if ( $id_ref = $this->db->select_one($table, $j, [$ref['column'] => $id]) ){
+              $info['ref'] = $this->template === false ? $id_ref : call_user_func($this->template, $this->db, $id_ref, $table);
+              break;
+            }
+          }
+          if ( $info['ref'] ){
+            break;
+          }
+        }
       }
       return $info;
     }
@@ -574,6 +637,9 @@ class task {
       'users' => [
         'id_user' => '',
         'id_group' => ''
+      ],
+      'refs' => [
+        'reference' => 'reference'
       ]
     ];
     $query = '';
@@ -664,6 +730,12 @@ class task {
           }
         }
       }
+      else if ( isset($fields['refs'][$w[0]]) ){
+        if ( is_int($w[2]) ){
+          $having .= " AND ".$fields['refs'][$w[0]]." $w[1] ? ";
+          array_push($args1, $w[2]);
+        }
+      }
     }
     foreach ( $fields as $i => $f ){
       foreach ( $f as $n => $g ){
@@ -680,6 +752,7 @@ class task {
       FROM_UNIXTIME(MAX(bbn_tasks_logs.chrono)) AS `last_action`,
       COUNT(children.id) AS num_children,
       COUNT(DISTINCT bbn_tasks_notes.id_note) AS num_notes,
+      {$this->references_select}
       IF(bbn_tasks.`state`=".$this->id_state('closed').", MAX(bbn_tasks_logs.chrono), UNIX_TIMESTAMP()) - MIN(bbn_tasks_logs.chrono) AS duration
       FROM bbn_tasks
         LEFT JOIN bbn_tasks_roles AS my_role
@@ -694,6 +767,7 @@ class task {
         LEFT JOIN bbn_tasks AS children
           ON bbn_tasks_roles.id_task = children.id_parent
         $join
+        {$this->references_join}
       WHERE bbn_tasks.active = 1
       $query
       GROUP BY bbn_tasks.id
@@ -705,8 +779,19 @@ class task {
     if ( !isset($args) ){
       $args = array_merge($args1, $args2);
     }
+    //\bbn\x::dump($sql);
+    $data = $this->db->get_rows($sql." LIMIT $start, $num", $args);
+    foreach ( $data as $i => $d ){
+      if ( $this->template ){
+        if ( $d['reference'] ){
+          /** @todo How do I get the t1able with the way I made the request??! */
+          $data[$i]['reference'] = call_user_func($this->template, $this->db, $d['reference'], '');
+        }
+        $data[$i]['user'] = \bbn\user\retriever::get_user_name($d['id_user']);
+      }
+    }
     return [
-      'data' => $this->db->get_rows($sql." LIMIT $start, $num", $args),
+      'data' => $data,
       'total' => $this->db->get_one("SELECT COUNT(*) FROM ($sql) AS t", $args)
     ];
   }

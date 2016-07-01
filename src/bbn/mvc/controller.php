@@ -234,7 +234,23 @@ class controller implements api{
 		return $this->mvc->reroute($path, $check);
 	}
 
-	/**
+  public function has_plugin($plugin){
+    return $this->mvc->has_plugin($plugin);
+  }
+
+  public function is_plugin($plugin){
+    return $this->mvc->is_plugin($plugin);
+  }
+
+  public function plugin_path($plugin){
+    return $this->mvc->plugin_path($plugin);
+  }
+
+  public function plugin_url($plugin){
+    return $this->mvc->plugin_url($plugin);
+  }
+
+  /**
 	 * This will include a file from within the controller's path. Chainable
 	 *
 	 * @param string $file_name If .php is ommited it will be added
@@ -325,31 +341,19 @@ class controller implements api{
 	 * @param string $path
 	 * @return string|false
 	 */
-	public function get_js($path='', array $data=null)
+	public function get_js($path='', array $data=null, $encapsulated = true)
 	{
     if ( is_array($path) ){
       $data = $path;
       $path = '';
     }
     if ( $r = $this->get_view($path, 'js', $data) ){
-/*
-			$data = json_encode(is_array($data) ? $data : $this->data);
-			return <<<EOD
-<script>
-(function(\$){
-var model = $data;
-$r
-})(jQuery);
-</script>
-EOD;
-*/
-      return '
-<script>
-(function($){
-'.( empty($data) ? '' : 'var data = '.json_encode($data).';').'
-'.$r.'
-})(jQuery);
-</script>';
+      return '<script>'.
+        ( $encapsulated ? '(function($){' : '' ).
+        ( empty($data) ? '' : 'var data = '.json_encode($data).';' ).
+        $r.
+        ( $encapsulated ? '})(jQuery);' : '' ).
+        '</script>';
     }
     return false;
 	}
@@ -396,11 +400,14 @@ EOD;
 	{
 		$args = func_get_args();
 		$has_path = false;
-		foreach ( $args as $a ){
-			if ( is_string($a) ){
+		foreach ( $args as $i => $a ){
+			if ( $new_data = $this->retrieve_var($a) ){
+				$this->js_data($new_data);
+			}
+			else if ( is_string($a) ){
 				$has_path = 1;
 			}
-      if ( is_array($a) ){
+      else if ( is_array($a) ){
         $this->js_data($a);
       }
 		}
@@ -443,7 +450,10 @@ EOD;
     $args = func_get_args();
     $die = 1;
     foreach ( $args as $a ){
-      if ( is_string($a) && !isset($path) ) {
+    	if ( $new_data = $this->retrieve_var($a) ){
+				$data = $new_data;
+			}
+      else if ( is_string($a) && !isset($path) ) {
         $path = strlen($a) ? $a : $this->path;
       }
       else if ( is_string($a) && router::is_mode($a) ) {
@@ -475,13 +485,24 @@ EOD;
     return $v;
 	}
 
+	private function retrieve_var($var){
+		if ( is_string($var) && (substr($var, 0, 1) === '$') && isset($this->data[substr($var, 1)]) ){
+			return $this->data[substr($var, 1)];
+		}
+		return false;
+	}
+
 	public function combo($title = '', $data=[]){
-		echo $this->get_less($this->path, false).
-			$this->set_title($title)
-				->add_data($this->post)
-				->add_data($this->get_model())
-				->add_js($this->path, is_array($data) && count($data) ? $data : ($data ? $this->data : []), false)
-				->get_view($this->path, false);
+		echo $this->get_less($this->path, false);
+		$this->add_data($this->get_model(false));
+		if ( $new_title = $this->retrieve_var($title) ){
+			$this->set_title($new_title);
+		}
+		else{
+			$this->set_title($title);
+		}
+		echo $this->add_js($this->path, is_array($data) && count($data) ? $data : ($data === true ? $this->data : $data), false)
+			->get_view($this->path, false);
 	}
 
   /**
@@ -531,7 +552,6 @@ EOD;
 	 */
 	public function get_model(){
     $args = func_get_args();
-    $die = 1;
     foreach ( $args as $a ){
       if ( is_string($a) && strlen($a) ) {
         $path = $a;
@@ -553,8 +573,14 @@ EOD;
       $data = $this->data;
     }
 		$m = $this->mvc->get_model($path, $data, $this);
-    if ( !is_array($m) && !$die ){
-      die("$path is an invalid model");
+		if ( is_object($m) ){
+			$m = \bbn\x::to_array($m);
+		}
+    if ( !is_array($m) ){
+			if ( $die ){
+				die("$path is an invalid model");
+			}
+			return [];
     }
     return $m;
 	}
