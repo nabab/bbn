@@ -492,6 +492,9 @@ class controller implements api{
 		else{
       $v = $this->mvc->get_view($args['path'], $args['mode'], $args['data']);
     }*/
+		if ( !isset($args['mode']) ){
+      $args['mode'] = 'html';
+    }
     $v = $this->mvc->get_view($args['path'], isset($args['mode']) ? $args['mode'] : 'html', $args['data']);
     if ( !$v && $args['die'] ){
       die("Impossible to find the $args[mode] view $args[path]");
