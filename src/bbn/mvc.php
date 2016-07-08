@@ -291,7 +291,7 @@ class mvc implements \bbn\mvc\api{
 			$view = new mvc\view($file, $mode, $data);
       self::$loaded_views[$mode][$path] = $view;
 		}
-		if ( isset($view) && $view->check() ) {
+		if ( isset($view) && $view->check() ){
 			return is_array($data) ? $view->get($data) : $view->get();
 		}
 		return '';
