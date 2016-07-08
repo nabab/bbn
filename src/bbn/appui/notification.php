@@ -75,7 +75,13 @@ class notification extends \bbn\objdb
           ]);
         }
       }
-      return $list;
+      return array_map(function($a){
+        return [
+          'id' => $a['id'],
+          'title' => $a['title'],
+          'html' => $a['content']
+        ];
+      }, $list);
     }
     die("Cannot use get_notifications without user");
   }

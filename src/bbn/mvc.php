@@ -282,7 +282,7 @@ class mvc implements \bbn\mvc\api{
 	public function get_view($path='', $mode='html', $data=null)
 	{
     if ( !router::is_mode($mode) ){
-      die("Incorrect mode $mode");
+      die("Incorrect mode $path $mode");
     }
 		if ( isset(self::$loaded_views[$mode][$path]) ){
 			$view = self::$loaded_views[$mode][$path];

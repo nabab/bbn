@@ -438,6 +438,41 @@ class controller implements api{
 		return $this;
 	}
 
+	private function get_arguments(array $args){
+    $r = ['die' => 1];
+    foreach ( $args as $a ){
+      if ( $new_data = $this->retrieve_var($a) ){
+        $r['data'] = $new_data;
+      }
+      else if ( is_string($a) && !isset($r['path']) ){
+        $r['path'] = strlen($a) ? $a : $this->path;
+      }
+      else if ( is_string($a) && router::is_mode($a) && !isset($r['mode']) ){
+        $r['mode'] = $a;
+      }
+      else if ( is_array($a) && !isset($r['data']) ){
+        $r['data'] = $a;
+      }
+      else if ( is_bool($a) && !isset($r['die']) ){
+        $r['die'] = $a;
+      }
+    }
+    if ( !isset($r['mode']) && isset($r['path']) && router::is_mode($r['path']) ){
+      $r['mode'] = $r['path'];
+      unset($r['path']);
+    }
+    if ( !isset($r['path']) ) {
+      $r['path'] = $this->path;
+    }
+    else if ( strpos($r['path'], './') === 0 ){
+      $r['path'] = $this->say_dir().substr($r['path'], 1);
+    }
+    if ( !isset($r['data']) ) {
+      $r['data'] = $this->data;
+    }
+    return $r;
+  }
+
 	/**
 	 * This will get a view.
 	 *
@@ -447,44 +482,41 @@ class controller implements api{
 	 */
 	public function get_view()
 	{
-    $args = func_get_args();
-    $die = 1;
-    foreach ( $args as $a ){
-    	if ( $new_data = $this->retrieve_var($a) ){
-				$data = $new_data;
-			}
-      else if ( is_string($a) && !isset($path) ) {
-        $path = strlen($a) ? $a : $this->path;
+    $args = $this->get_arguments(func_get_args());
+		/*if ( !isset($args['mode']) ) {
+      $v = $this->mvc->get_view($args['path'], 'html', $args['data']);
+      if ( !$v ){
+        $v = $this->mvc->get_view($args['path'], 'php', $args['data']);
       }
-      else if ( is_string($a) && router::is_mode($a) ) {
-        $mode = $a;
-      }
-      else if ( is_array($a) ) {
-        $data = $a;
-      }
-      else if ( is_bool($a) ) {
-        $die = $a;
-      }
-    }
-    if ( !isset($path) ) {
-      $path = $this->path;
-    }
-		else if ( strpos($path, './') === 0 ){
-			$path = $this->say_dir().substr($path, 1);
 		}
-    if ( !isset($data) ) {
-      $data = $this->data;
-    }
-		if ( !isset($mode) ) {
-			$mode = 'html';
-		}
-		$v = $this->mvc->get_view($path, $mode, $data);
-    if ( !$v && $die ){
-      die("Impossible to find the $mode view $path");
+		else{
+      $v = $this->mvc->get_view($args['path'], $args['mode'], $args['data']);
+    }*/
+    $v = $this->mvc->get_view($args['path'], isset($args['mode']) ? $args['mode'] : 'html', $args['data']);
+    if ( !$v && $args['die'] ){
+      die("Impossible to find the $args[mode] view $args[path]");
     }
     return $v;
 	}
+/*
+  public function get_php(){
+    $args = $this->get_arguments(func_get_args());
+    $v = $this->mvc->get_view($args['path'], 'php', $args['data']);
+    if ( !$v && $args['die'] ){
+      die("Impossible to find the PHP view $args[path]");
+    }
+    return $v;
+  }
 
+  public function get_html(){
+    $args = $this->get_arguments(func_get_args());
+    $v = $this->mvc->get_view($args['path'], 'html', $args['data']);
+    if ( !$v && $args['die'] ){
+      die("Impossible to find the HTML view $args[path]");
+    }
+    return $v;
+  }
+*/
 	private function retrieve_var($var){
 		if ( is_string($var) && (substr($var, 0, 1) === '$') && isset($this->data[substr($var, 1)]) ){
 			return $this->data[substr($var, 1)];
