@@ -70,10 +70,9 @@ class obj
 	 * @param array $arguments
 	 * @return void 
 	 */
-	public function __call($name, $arguments)
-	{
+	public function __call($name, $arguments){
     $this->log(["Wrong method used: $name with arguments:", $arguments]);
-		return $this;
+    die(var_dump(["Wrong method used: $name with arguments:", $arguments]));
 	}
 
 	/**

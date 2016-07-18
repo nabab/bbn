@@ -439,7 +439,7 @@ class controller implements api{
 	}
 
 	private function get_arguments(array $args){
-    $r = ['die' => 1];
+    $r = [];
     foreach ( $args as $a ){
       if ( $new_data = $this->retrieve_var($a) ){
         $r['data'] = $new_data;
@@ -469,6 +469,9 @@ class controller implements api{
     }
     if ( !isset($r['data']) ) {
       $r['data'] = $this->data;
+    }
+    if ( !isset($r['die']) ){
+      $r['die'] = true;
     }
     return $r;
   }

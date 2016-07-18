@@ -137,7 +137,7 @@ class history
 	public static function get_hcol()
 	{
 		if ( str::check_name(self::$hcol) ){
-			self::$hcol = self::$hcol;
+			return self::$hcol;
 		}
 	}
 

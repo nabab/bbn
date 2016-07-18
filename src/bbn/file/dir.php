@@ -92,10 +92,9 @@ class dir extends \bbn\obj
    * 
 	 * @return array|false 
 	 */
-	public static function get_dirs($dir)
-	{
+	public static function get_dirs($dir, $hidden = false){
     $dir = self::clean($dir);
-		if ( is_dir($dir) ){
+		if ( is_dir($dir) && ((substr(basename($dir), 0, 1) !== '.') || $hidden) ){
 			$dirs = [];
 			$fs = scandir($dir);
 			foreach ( $fs as $f ){
@@ -127,10 +126,10 @@ class dir extends \bbn\obj
    * 
 	 * @return array|false 
 	 */
-	public static function get_files($dir, $including_dirs=false)
+	public static function get_files($dir, $including_dirs = false, $hidden = false)
 	{
     $dir = self::clean($dir);
-		if ( is_dir($dir) ){
+    if ( is_dir($dir) && ((substr(basename($dir), 0, 1) !== '.') || $hidden) ){
 			$files = [];
 			$fs = scandir($dir);
       //$encodings = ['UTF-8', 'WINDOWS-1252', 'ISO-8859-1', 'ISO-8859-15'];
@@ -142,11 +141,13 @@ class dir extends \bbn\obj
             $f = html_entity_decode(htmlentities($f, ENT_QUOTES, $enc), ENT_QUOTES , 'UTF-8');
           }
           */
-					if ( $including_dirs ){
-						array_push($files, self::cur($dir.'/').$f);
-          }
-					else if ( is_file($dir.'/'.$f) ){
-						array_push($files, self::cur($dir.'/').$f);
+          if ( (substr(basename($f), 0, 1) !== '.') || $hidden ){
+            if ( $including_dirs ){
+              array_push($files, self::cur($dir.'/').$f);
+            }
+            else if ( is_file($dir.'/'.$f) ){
+              array_push($files, self::cur($dir.'/').$f);
+            }
           }
 				}
 			}
@@ -173,7 +174,7 @@ class dir extends \bbn\obj
    * 
 	 * @return bool 
 	 */
-	public static function delete($dir, $full=1)
+	public static function delete($dir, $full = 1)
 	{
     $dir = self::clean($dir);
 		if ( is_dir($dir) ){
@@ -205,26 +206,26 @@ class dir extends \bbn\obj
    *
    * @return array
    */
-  public static function scan($dir, $type = null)
+  public static function scan($dir, $type = null, $hidden = false)
   {
     $all = [];
     $dir = self::clean($dir);
     $dirs = self::get_dirs($dir);
     if ( is_array($dirs) ){
       if ( $type && (strpos($type, 'file') === 0) ){
-        $all = self::get_files($dir);
+        $all = self::get_files($dir, false, $hidden);
       }
       else if ( $type && ((strpos($type, 'dir') === 0) || (strpos($type, 'fold') === 0)) ){
         $all = $dirs;
       }
       else{
-        $files = self::get_files($dir);
+        $files = self::get_files($dir, false, $hidden);
         if ( is_array($files) ){
           $all = array_merge($dirs, $files);
         }
       }
       foreach ( $dirs as $d ){
-        $all = array_merge(is_array($all) ? $all : [], self::scan($d, $type));
+        $all = array_merge(is_array($all) ? $all : [], self::scan($d, $type, $hidden));
       }
     }
     return $all;
@@ -243,26 +244,25 @@ class dir extends \bbn\obj
    *
    * @return array
    */
-  public static function mscan($dir, $type = null)
-  {
+  public static function mscan($dir, $type = null, $hidden = false){
     $all = [];
     $dir = self::clean($dir);
     $dirs = self::get_dirs($dir);
     if ( is_array($dirs) ){
       if ( $type && (strpos($type, 'file') === 0) ){
-        $all = self::get_files($dir);
+        $all = self::get_files($dir, false, $hidden);
       }
       else if ( $type && ((strpos($type, 'dir') === 0) || (strpos($type, 'fold') === 0)) ){
         $all = $dirs;
       }
       else{
-        $files = self::get_files($dir);
+        $files = self::get_files($dir, false, $hidden);
         if ( is_array($files) ){
           $all = array_merge($dirs, $files);
         }
       }
       foreach ( $dirs as $d ){
-        $all = array_merge(is_array($all) ? $all : [], self::scan($d, $type));
+        $all = array_merge(is_array($all) ? $all : [], self::scan($d, $type, $hidden));
       }
       $res = [];
       foreach ($all as $a ){
@@ -286,18 +286,18 @@ class dir extends \bbn\obj
    *
    * @return array
    */
-  public static function get_tree($dir, $only_dir = false, $filter = false)
+  public static function get_tree($dir, $only_dir = false, $filter = false, $hidden = false)
   {
     $r = [];
     $dir = self::clean($dir);
-    $dirs = self::get_dirs($dir);
+    $dirs = self::get_dirs($dir, $hidden);
     if ( is_array($dirs) ){
       foreach ( $dirs as $d ){
         $x = [
           'name' => $d,
           'type' => 'dir',
           'num_children' => 0,
-          'items' => self::get_tree($d, $only_dir, $filter)
+          'items' => self::get_tree($d, $only_dir, $filter, $hidden)
         ];
         $x['num_children'] = count($x['items']);
         if ( is_callable($filter) ){
@@ -310,7 +310,7 @@ class dir extends \bbn\obj
         }
       }
       if ( !$only_dir ){
-        $files = self::get_files($dir);
+        $files = self::get_files($dir, false, $hidden);
         foreach ( $files as $f ){
           $x = [
             'name' => $f,
