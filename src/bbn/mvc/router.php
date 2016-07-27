@@ -191,7 +191,7 @@ class router {
                 ( strlen($tmp) === strlen($this->alt_root) ?
                   '' : substr($tmp, strlen($this->alt_root)+1).'/'
                 ).'_ctrl.php';
-              $this->log("ALT", $alt_ctrl);
+              //$this->log("ALT", $alt_ctrl);
               if ( is_file($alt_ctrl) ){
                 if ( !in_array($alt_ctrl, $this->known[$mode][$path]['checkers']) ){
                   array_unshift($this->known[$mode][$path]['checkers'], $alt_ctrl);

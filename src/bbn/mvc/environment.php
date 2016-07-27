@@ -15,9 +15,9 @@ class environment {
   private
     /**
      * The list of views which have been loaded. We keep their content in an array to not have to include the file again. This is useful for loops.
-     * @var array
+     * @var null|array
      */
-    $params = [],
+    $params,
     /**
      * The mode of the output (doc, html, json, txt, xml...)
      * @var null|string
@@ -53,7 +53,7 @@ class environment {
 
   private function set_params($path)
   {
-    if ( !is_null($this->params) ) {
+    if ( is_null($this->params) ) {
       $this->params = [];
       $tmp = explode('/', \bbn\str::parse_path($path));
       foreach ( $tmp as $t ) {
@@ -168,9 +168,50 @@ class environment {
     }
     // Non CLI request
     else{
-      $this->get_post();
+      if ( !isset($this->post)){
+        $this->get_post();
+      }
+      if ( count($this->post) ){
+        self::_dot_to_array($this->post);
+        /** @todo Remove the json parameter from the appui.js functions */
+        if ( isset($this->post['appui']) && ($this->post['appui'] !== 'json') ){
+          $this->set_mode($this->post['appui']);
+          unset($this->post['appui']);
+        }
+        else {
+          unset($this->post['appui']);
+          $this->set_mode(BBN_DEFAULT_MODE);
+        }
+        array_walk_recursive($this->post, function(&$a){
+          $a = \bbn\str::correct_types($a);
+          return $a;
+        });
+      }
+      // If no post, assuming to be a DOM document
+      else if ( count($_FILES) ){
+        $this->set_mode(BBN_DEFAULT_MODE);
+      }
+      else {
+        $this->set_mode('dom');
+      }
+      if ( $this->new_url ){
+        $current = $this->new_url;
+      }
+      else if ( isset($_SERVER['REQUEST_URI']) ){
+        $current = $_SERVER['REQUEST_URI'];
+      }
+      if ( isset($current) &&
+        ( BBN_CUR_PATH === '/' || strpos($current, BBN_CUR_PATH) !== false ) ){
+        $url = explode("?", urldecode($current))[0];
+        if ( BBN_CUR_PATH === '/' ) {
+          $this->set_params($url);
+        }
+        else{
+          $this->set_params(substr($url, strlen(BBN_CUR_PATH)));
+        }
+      }
     }
-    $this->url = implode('/', $this->params);
+    $this->url = implode('/', $this->params ?: []);
     return $this;
   }
 
@@ -215,8 +256,9 @@ class environment {
     return $this->url;
   }
 
-  public function simulate($url){
-    $this->post = null;
+  public function simulate($url, $post = false, $arguments){
+    $this->params = $params ?: null;
+    $this->post = $post ?: null;
     $this->new_url = $url;
     $this->_init();
   }
@@ -287,45 +329,6 @@ class environment {
       $this->post = empty($_POST) ? json_decode(file_get_contents("php://input"), 1) : $_POST;
       if ( !$this->post ){
         $this->post = [];
-      }
-      if ( count($this->post) ){
-        self::_dot_to_array($this->post);
-        /** @todo Remove the json parameter from the appui.js functions */
-        if ( isset($this->post['appui']) && ($this->post['appui'] !== 'json') ){
-          $this->set_mode($this->post['appui']);
-          unset($this->post['appui']);
-        }
-        else {
-          unset($this->post['appui']);
-          $this->set_mode(BBN_DEFAULT_MODE);
-        }
-        array_walk_recursive($this->post, function(&$a){
-          $a = \bbn\str::correct_types($a);
-          return $a;
-        });
-      }
-      // If no post, assuming to be a DOM document
-      else if ( count($_FILES) ){
-        $this->set_mode(BBN_DEFAULT_MODE);
-      }
-      else {
-        $this->set_mode('dom');
-      }
-      if ( $this->new_url ){
-        $current = $this->new_url;
-      }
-      else if ( isset($_SERVER['REQUEST_URI']) ){
-        $current = $_SERVER['REQUEST_URI'];
-      }
-      if ( isset($current) &&
-        ( BBN_CUR_PATH === '/' || strpos($current, BBN_CUR_PATH) !== false ) ){
-        $url = explode("?", urldecode($current))[0];
-        if ( BBN_CUR_PATH === '/' ) {
-          $this->set_params($url);
-        }
-        else{
-          $this->set_params(substr($url, strlen(BBN_CUR_PATH)));
-        }
       }
     }
     return $this->post;

@@ -5,14 +5,17 @@
 namespace bbn\api\kendo;
 class template // extends object
 {
-  private $ctrl;
+  private
+    $ctrl,
+    $prepath;
 
-  public function __construct(\bbn\mvc\controller $ctrl) {
+  public function __construct(\bbn\mvc\controller $ctrl, $prepath = '') {
     $this->ctrl = $ctrl;
+    $this->prepath = $prepath;
   }
 
   public function get($id){
-    if ( $html = $this->ctrl->get_view("kendo/".$id, "html") ){
+    if ( $html = $this->ctrl->get_view($this->prepath."kendo/".$id, "html") ){
       return '<script id="tpl-'.$id.'" type="text/x-kendo-template">'.$html.'</script>';
     }
   }

@@ -20,9 +20,12 @@ class menu {
     /** @var \bbn\cache The cache object */
     $cacher;
 
-  public function __construct(\bbn\appui\options $o){
+  public function __construct(\bbn\appui\options $o, $r){
     $this->options = $o;
     $this->cacher = \bbn\cache::get_engine();
+    if ( !empty($r) && is_string($r) ){
+      $this->_set_relative_public_root($r);
+    }
   }
 
   private static function _set_root($root){
@@ -49,6 +52,10 @@ class menu {
       self::_set_public_root($id);
     }
     return self::$id_public_root;
+  }
+
+  private function _set_relative_public_root($rel_path){
+    self::$public_root = self::$public_root . '|' . $rel_path;
   }
 
   private function _cache_name($method, $uid){

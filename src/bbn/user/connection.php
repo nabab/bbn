@@ -888,7 +888,7 @@ class connection
   public function get_token($st)
   {
     if ( $this->auth && $this->session->has('user', 'tokens', $st) ){
-      $this->session->work(function(&$a) use($st){
+      $this->session->transform(function(&$a) use($st){
         if ( isset($a['tokens']) ){
           $a['tokens'][$st] = \bbn\str::genpwd();
         }

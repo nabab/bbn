@@ -957,7 +957,7 @@ class str
     if ( is_object($o) || is_array($o) ){
       $is_assoc = (is_object($o) || \bbn\x::is_assoc($o));
       //$st .= $is_assoc ? '{' : '[';
-      $st .= '[';
+      $st .= is_object($o) ? '{' : '[';
       $st .= PHP_EOL;
       foreach ( $o as $k => $v ){
         if ( $remove_empty && ( ( is_string($v) && empty($v) ) || ( is_array($v) && count($v) === 0 ) ) ){
@@ -972,12 +972,7 @@ class str
         }
         else if ( is_object($v) ){
           $cls = get_class($v);
-          if ( $cls === 'stdClass' ){
-            $st .= self::export($v, $remove_empty, $lev+1);
-          }
-          else{
-            $st .= "Object $cls";
-          }
+          $st .= "Object $cls: df ".self::export($v, $remove_empty, $lev+1);
         }
         else if ( $v === 0 ){
           $st .= '0';
@@ -998,7 +993,7 @@ class str
       }
       $st .= str_repeat('    ', $lev-1);
       //$st .= $is_assoc ? '}' : ']';
-      $st .= ']';
+      $st .= is_object($o) ? '}' : ']';
       return $st;
     }
     return $o;

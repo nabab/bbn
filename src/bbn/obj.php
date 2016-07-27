@@ -71,8 +71,9 @@ class obj
 	 * @return void 
 	 */
 	public function __call($name, $arguments){
-    $this->log(["Wrong method used: $name with arguments:", $arguments]);
-    die(var_dump(["Wrong method used: $name with arguments:", $arguments]));
+	  $class = get_class($this);
+    $this->log(["Wrong method used for the class $class: $name with the following arguments:", $arguments]);
+    die(var_dump(["Wrong method used for the class $class: $name with the following arguments:", $arguments]));
 	}
 
 	/**

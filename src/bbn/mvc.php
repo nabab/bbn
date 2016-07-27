@@ -257,9 +257,9 @@ class mvc implements \bbn\mvc\api{
 	 * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
 	 * @return void
 	 */
-	public function reroute($path='', $check = 1)
+	public function reroute($path='', $check = 1, $post = false, $arguments = false)
 	{
-    $this->env->simulate($path);
+    $this->env->simulate($path, $post, array_merge(explode('/', $path), $arguments));
 		$this->is_routed = false;
 		$this->controller = false;
 		$this->is_controlled = null;

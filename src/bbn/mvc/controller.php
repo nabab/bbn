@@ -229,9 +229,11 @@ class controller implements api{
 	 * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
 	 * @return void
 	 */
-	public function reroute($path='', $check = 1)
+	public function reroute($path='', $check = 1, $post = false, $arguments = false)
 	{
-		return $this->mvc->reroute($path, $check);
+	  if ( ($this->url !== $path) && ($this->new_url !== $path) ){
+      return $this->mvc->reroute($path, $check, $post, $arguments);
+    }
 	}
 
   public function has_plugin($plugin){
@@ -256,8 +258,7 @@ class controller implements api{
 	 * @param string $file_name If .php is ommited it will be added
 	 * @return void
 	 */
-	public function incl($file_name)
-	{
+	public function incl($file_name){
 		if ( $this->exists() ){
 			$d = dirname($this->file).'/';
 			if ( substr($file_name, -4) !== '.php' ){
@@ -279,8 +280,7 @@ class controller implements api{
 	 * @param string $script The javascript chain to add
 	 * @return void
 	 */
-	public function add_script($script)
-	{
+	public function add_script($script){
 		if ( is_object($this->obj) ){
 			if ( !isset($this->obj->script) ){
 				$this->obj->script = '';
@@ -296,8 +296,7 @@ class controller implements api{
 	 *
 	 * @return void
 	 */
-	private function control()
-	{
+	private function control(){
 		if ( $this->file && is_null($this->is_controlled) ){
 			ob_start();
 			foreach ( $this->checkers as $appui_checker_file ){
@@ -341,8 +340,7 @@ class controller implements api{
 	 * @param string $path
 	 * @return string|false
 	 */
-	public function get_js($path='', array $data=null, $encapsulated = true)
-	{
+	public function get_js($path='', array $data=null, $encapsulated = true){
     if ( is_array($path) ){
       $data = $path;
       $path = '';

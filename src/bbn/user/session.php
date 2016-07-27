@@ -33,6 +33,7 @@ class session
   private static
     /** @var string */
     $fingerprint = BBN_FINGERPRINT,
+    $name = BBN_SESS_NAME,
     /** session */
     $inst,
     $exist = false;
@@ -58,17 +59,51 @@ class session
     }
   }
 
+  private function _get_value($args){
+    if ( $this->id ){
+      $var =& $this->data;
+      foreach ( $args as $a ){
+        if ( !isset($var[$a]) ){
+          return null;
+        }
+        $var =& $var[$a];
+      }
+      return $var;
+    }
+  }
+
+  private function _set_value($args){
+    if ( $this->id ){
+      $value = array_shift($args);
+      $var =& $this->data;
+      foreach ( $args as $i => $a ){
+        if ( $i === (count($args) - 1) ){
+          if ( is_null($value) ){
+            unset($var[$a]);
+          }
+          else{
+            $var[$a] = $value;
+          }
+        }
+        else{
+          $var =& $var[$a];
+        }
+      }
+    }
+    return $this;
+  }
+
   public function __construct(array $defaults = null){
     if ( !self::exists() ){
       self::init($this);
       $this->open();
-      if ( !isset($_SESSION[BBN_SESS_NAME]) ){
-        $_SESSION[BBN_SESS_NAME] = is_array($defaults) ? $defaults : [];
+      if ( !isset($_SESSION[self::$name]) ){
+        $_SESSION[self::$name] = is_array($defaults) ? $defaults : [];
       }
-      $this->data = $_SESSION[BBN_SESS_NAME];
       $this->id = session_id();
-      $this->close();
+      $this->fetch();
     }
+    return $this;
   }
 
   protected function open(){
@@ -87,59 +122,80 @@ class session
 
   public function get(){
     if ( $this->id ){
-      $var = $this->data;
-      $args = func_get_args();
-      foreach ( $args as $a ){
-        if ( !isset($var[$a]) ){
-          return null;
-        }
-        $var = $var[$a];
-      }
-      return $var;
+      return $this->_get_value(func_get_args());
     }
   }
 
-  public function fetch($arg){
+  public function fetch($arg=null){
     if ( $this->id ){
       $this->open();
-      $this->data = $_SESSION[BBN_SESS_NAME];
-      $r = call_user_func_array([$this, 'get'], func_get_args());
+      $this->data = $_SESSION[self::$name];
       $this->close();
-      return $r;
+      if ( is_null($arg) ){
+        return $this->data;
+      }
+      return $this->_get_value(func_get_args());
     }
   }
 
   public function has(){
-    return !is_null(call_user_func_array([$this, 'get'], func_get_args()));
+    return !is_null($this->_get_value(func_get_args()));
   }
 
   public function set($val){
     if ( $this->id ){
+      $this->_set_value(func_get_args());
+      $this->open();
+      $_SESSION[self::$name] = $this->data;
+      $this->close();
+    }
+    return $this;
+  }
+
+  public function uset($val){
+    if ( $this->id ){
+      $args = func_get_args();
+      array_unshift($args, null);
+      $this->_set_value($args);
+      $this->open();
+      $_SESSION[self::$name] = $this->data;
+      $this->close();
+    }
+    return $this;
+  }
+
+  public function transform(callable $fn){
+    if ( $this->id ){
       $args = func_get_args();
       array_shift($args);
+      $transformed = call_user_func($fn, $this->_get_value($args));
+      array_unshift($args, $transformed);
+      $this->_set_value($args);
       $this->open();
-      $var =& $_SESSION[BBN_SESS_NAME];
-      $var2 =& $var;
-      foreach ( $args as $i => $a ){
-        if ( !is_array($var) ){
-          $var = [];
-        }
-        if ( !isset($var[$a]) ){
-          if ( count($args) >= $i ){
-            $var[$a] = [];
-          }
-          else{
-            break;
-          }
-        }
-        unset($var2);
-        $var2 =& $var[$a];
-        unset($var);
-        $var =& $var2;
-      }
-      $var = $val;
-      $this->data = $_SESSION[BBN_SESS_NAME];
+      $_SESSION[self::$name] = $this->data;
       $this->close();
+    }
+    return $this;
+  }
+
+  public function work(callable $fn){
+    return call_user_func_array([$this, 'transform'], func_get_args());
+  }
+
+
+  public function push($value){
+    if ( $this->id ){
+      $args = func_get_args();
+      array_shift($args);
+      $var = call_user_func_array([$this, 'get'], $args);
+      if ( !is_array($var) ){
+        $var = [];
+      }
+      if ( !in_array($value, $var) ){
+        array_push($var, $value);
+        array_unshift($args, $var);
+        call_user_func_array(["set", $this], $args);
+      }
       return $this;
     }
   }
@@ -148,7 +204,7 @@ class session
     if ( $this->id ){
       $this->open();
       $args = func_get_args();
-      $var =& $_SESSION[BBN_SESS_NAME];
+      $var =& $_SESSION[self::$name];
       $var2 =& $var;
       foreach ( $args as $i => $a ){
         if ( !is_array($var) ){
@@ -168,31 +224,7 @@ class session
         $var =& $var2;
       }
       $var = null;
-      $this->data = isset($_SESSION[BBN_SESS_NAME]) ? $_SESSION[BBN_SESS_NAME] : [];
-      $this->close();
-      return $this;
-    }
-  }
-
-  /**
-   * Executes a function on the session or a part of the session
-   * @param function $func
-   * @return session
-   */
-  public function work(callable $func){
-    if ( $this->id ){
-      $args = func_get_args();
-      array_shift($args);
-      $this->open();
-      foreach ( $args as $a ){
-        if ( !isset($_SESSION[BBN_SESS_NAME][$a]) ){
-          return false;
-        }
-        $var =& $_SESSION[BBN_SESS_NAME][$a];
-      }
-      $r = call_user_func_array([$this, 'get'], $args);
-      $func($var);
-      $this->data = $_SESSION[BBN_SESS_NAME];
+      $this->data = isset($_SESSION[self::$name]) ? $_SESSION[self::$name] : [];
       $this->close();
       return $this;
     }
@@ -233,3 +265,13 @@ class session
     return false;
   }
 }
+/*
+$sess = new \bbn\user\session();
+$sess->set("value of \$_SESSION[BBN_SESS_NAME][foo][bar1]", "foo", "bar1");
+$sess->set("value of \$_SESSION[BBN_SESS_NAME][foo][bar2]", "foo", "bar2");
+$sess->set(10, "myProp");
+$sess->set(10, "myProp2");
+$sess->uset("myProp2");
+$sess->transform(function($a){return $a+1;}, "myProp");
+\bbn\x::hdump($sess->get("myProp"), $sess->get("hhhh"));
+*/
