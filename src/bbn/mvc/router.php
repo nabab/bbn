@@ -426,7 +426,7 @@ class router {
       // We only try to retrieve a file path through a whole URL for controllers
       if (in_array($mode, self::$controllers)) {
         $this->mode = $mode;
-        $this->log($path);
+        //$this->log($path);
         return $this->find_controller($path, $mode);
       }
       else{

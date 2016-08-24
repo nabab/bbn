@@ -12,11 +12,16 @@ class controller implements api{
      * @var \bbn\mvc
      */
     $mvc,
-		/**
-		 * Is set to null while not controled, then 1 if controller was found, and false otherwise.
-		 * @var null|boolean
-		 */
-		$is_controlled,
+    /**
+     * Is set to null while not controled, then 1 if controller was found, and false otherwise.
+     * @var null|boolean
+     */
+    $is_controlled,
+    /**
+     * Is set to false while not rerouted
+     * @var null|boolean
+     */
+    $is_rerouted = false,
     /**
      * The internal path to the controller.
      * @var null|string
@@ -74,28 +79,31 @@ class controller implements api{
 	 * @return bool
 	 */
 	public function __construct(\bbn\mvc $mvc, array $files, $data = false){
-		// The initial call should only have $db as parameter
-		if ( defined('BBN_CUR_PATH') && isset($files['mode'], $files['path'], $files['file'], $files['request']) ) {
-      $this->mvc = $mvc;
-      $this->path = $files['path'];
-      $this->request = $files['request'];
+    $this->mvc = $mvc;
+    $this->reset($files, $data);
+	}
+
+	public function reset(array $info, $data = false){
+    if ( defined('BBN_CUR_PATH') && isset($info['mode'], $info['path'], $info['file'], $info['request']) ) {
+      $this->path = $info['path'];
+      $this->request = $info['request'];
+      $this->file = $info['file'];
+      $this->arguments = $info['args'];
+      $this->checkers = $info['checkers'];
+      $this->mode = $info['mode'];
       $this->data = is_array($data) ? $data : [];
-      $this->file = $files['file'];
-      $this->arguments = $files['args'];
-      $this->checkers = $files['checkers'];
-      $this->mode = $files['mode'];
-			$this->data = is_array($data) ? $data : [];
-			// When using CLI a first parameter can be used as route,
-			// a second JSON encoded can be used as $this->post
+      // When using CLI a first parameter can be used as route,
+      // a second JSON encoded can be used as $this->post
       $this->db = $this->mvc->get_db();
       $this->inc = $this->mvc->inc;
       $this->post = $this->mvc->get_post();
-			$this->get = $this->mvc->get_get();
-			$this->files = $this->mvc->get_files();
+      $this->get = $this->mvc->get_get();
+      $this->files = $this->mvc->get_files();
       $this->params = $this->mvc->get_params();
       $this->url = $this->get_url();
-		}
-	}
+      $this->obj = new \stdClass();
+    }
+  }
 
 	public function get_url(){
 		return $this->mvc->get_url();
@@ -202,8 +210,7 @@ class controller implements api{
 	 * @param array $model The data model to fill the view with
 	 * @return void
 	 */
-	public function render($view, $model='')
-	{
+	public function render($view, $model=''){
 		if ( empty($model) && $this->has_data() ){
 			$model = $this->data;
 		}
@@ -229,10 +236,11 @@ class controller implements api{
 	 * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
 	 * @return void
 	 */
-	public function reroute($path='', $check = 1, $post = false, $arguments = false)
+	public function reroute($path='', $post = false, $arguments = false)
 	{
-	  if ( ($this->url !== $path) && ($this->new_url !== $path) ){
-      return $this->mvc->reroute($path, $check, $post, $arguments);
+	  if ( $this->path !== $path ){
+      $this->mvc->reroute($path, $post, $arguments);
+      $this->is_rerouted = 1;
     }
 	}
 
@@ -294,7 +302,7 @@ class controller implements api{
 	 * This will enclose the controller's inclusion
 	 * It can be publicly launched through check()
 	 *
-	 * @return void
+	 * @return boolean
 	 */
 	private function control(){
 		if ( $this->file && is_null($this->is_controlled) ){
@@ -306,18 +314,31 @@ class controller implements api{
 					return false;
 				}
 			}
+      // If rerouted during the checkers
+			if ( $this->is_rerouted ){
+        $this->is_rerouted = false;
+			  return $this->control();
+      }
+      if ( ($log = ob_get_contents()) && is_string($log) ){
+        $this->log("CONTENT FROM SUPERCONTROLLER", $log);
+      }
       ob_end_clean();
       unset($appui_checker_file);
       ob_start();
       require($this->file);
 			$output = ob_get_contents();
 			ob_end_clean();
+      // If rerouted during the controller
+      if ( $this->is_rerouted ){
+        $this->is_rerouted = false;
+        return $this->control();
+      }
 			if ( is_object($this->obj) && !isset($this->obj->content) && !empty($output) ){
 				$this->obj->content = $output;
 			}
 			$this->is_controlled = 1;
 		}
-		return $this;
+		return $this->is_controlled ? true : false;
 	}
 
 	/**
@@ -328,7 +349,6 @@ class controller implements api{
 	 */
 	public function process(){
 		if ( is_null($this->is_controlled) ){
-			$this->obj = new \stdClass();
 			$this->control();
 		}
 		return $this;
@@ -547,9 +567,11 @@ class controller implements api{
    * @param string $file_name
    * @return string|false
    */
-  public function get_content($file_name)
-  {
-    if ( $this->check_path($file_name) && defined('BBN_DATA_PATH') && is_file(BBN_DATA_PATH.$file_name) ){
+  public function get_content($file_name){
+    if ( $this->check_path($file_name) &&
+      defined('BBN_DATA_PATH') &&
+      is_file(BBN_DATA_PATH.$file_name)
+    ){
       return file_get_contents(BBN_DATA_PATH.$file_name);
     }
     return false;

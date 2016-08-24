@@ -775,6 +775,7 @@ class x
     $r = curl_exec($ch);
     if ( !$r ){
       self::log(curl_error($ch), 'curl');
+      self::log($r, 'curl');
     }
     return $r;
   }

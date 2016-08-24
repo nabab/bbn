@@ -895,8 +895,10 @@ class directories {
             if ( @unlink($real) ){
               // Remove permissions
               $this->delete_perm($real);
-              // Remove ide backups
               if ( $id_file ){
+                // Remove file's options
+                $this->options->remove($this->options->from_code($id_file, $this->_files_pref()));
+                // Remove ide backups
                 \bbn\file\dir::delete(dirname(BBN_USER_PATH."ide/backup/$id_file")."/$ext[0]/", 1);
               }
               return [
@@ -1693,6 +1695,7 @@ class directories {
       else if ( !$is_file ){
         return $this->options->from_code('page', 'bbn_permissions');
       }
+      return true;
     }
     return false;
   }

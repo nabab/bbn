@@ -136,7 +136,7 @@ class mvc implements \bbn\mvc\api{
     self::$is_debug = $state;
   }
 
-  private function route(){
+  private function route($url = false){
     if ( is_null($this->info) ){
       $this->info = $this->get_route($this->get_url(), $this->get_mode());
     }
@@ -257,18 +257,15 @@ class mvc implements \bbn\mvc\api{
 	 * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
 	 * @return void
 	 */
-	public function reroute($path='', $check = 1, $post = false, $arguments = false)
-	{
-    $this->env->simulate($path, $post, array_merge(explode('/', $path), $arguments));
+	public function reroute($path='', $post = false, $arguments = false){
+    $this->env->simulate($path, $post, $arguments);
 		$this->is_routed = false;
-		$this->controller = false;
 		$this->is_controlled = null;
     $this->info = null;
 		$this->route();
-    $this->log("reroute", $path, $this->info);
-		if ( $check ){
-			$this->process();
-		}
+    $this->info['args'] = $arguments;
+    $this->controller->reset($this->info);
+    $this->log("MVC reroute", $path, $post, $arguments, $this->info);
 		return $this;
 	}
 
@@ -372,9 +369,13 @@ class mvc implements \bbn\mvc\api{
 	public function process(){
     if ( $this->check() ) {
       $this->obj = new \stdClass();
-      //$this->log($this->info);
-      if ( !is_array($this->info)){die();}
-      $this->controller = new \bbn\mvc\controller($this, $this->info, $this->data, $this->obj);
+      if ( !is_array($this->info)){
+        $this->log("No info in MVC", $this->info);
+        die("No info in MVC");
+      }
+      if ( !$this->controller ){
+        $this->controller = new \bbn\mvc\controller($this, $this->info, $this->data, $this->obj);
+      }
       $this->controller->process();
     }
 	}

@@ -40,9 +40,7 @@ trait common {
   public function log(){
     if ( \bbn\mvc::get_debug() ){
       $ar = func_get_args();
-      foreach ( $ar as $a ){
-        \bbn\x::log($a, 'mvc');
-      }
+      \bbn\x::log(count($ar) > 1 ? $ar : $ar[0], 'mvc');
     }
   }
 

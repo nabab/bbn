@@ -4,9 +4,18 @@
  * User: BBN
  * Date: 12/05/2015
  * Time: 12:53
+ * Environment class manages the HTTP environment and sets up the MVC variables
+ * - cli
+ * - post
+ * - get
+ * - files
+ * - params
+ * - url
+ * It uses the preset environment variables but can also be simulated
  */
 
 namespace bbn\mvc;
+
 
 class environment {
 
@@ -187,10 +196,10 @@ class environment {
           return $a;
         });
       }
-      // If no post, assuming to be a DOM document
       else if ( count($_FILES) ){
         $this->set_mode(BBN_DEFAULT_MODE);
       }
+      // If no post, assuming to be a DOM document
       else {
         $this->set_mode('dom');
       }
@@ -256,11 +265,12 @@ class environment {
     return $this->url;
   }
 
-  public function simulate($url, $post = false, $arguments){
-    $this->params = $params ?: null;
+  public function simulate($url, $post = false, $arguments = null){
+    unset($this->params);
+    $this->set_params($url.(empty($arguments) ? '' : '/'.implode('/', $arguments)));
     $this->post = $post ?: null;
-    $this->new_url = $url;
     $this->_init();
+    $this->url = $url;
   }
 
   public function get_mode(){

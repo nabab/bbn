@@ -194,7 +194,7 @@ class session
       if ( !in_array($value, $var) ){
         array_push($var, $value);
         array_unshift($args, $var);
-        call_user_func_array(["set", $this], $args);
+        call_user_func_array([$this, 'set'], $args);
       }
       return $this;
     }

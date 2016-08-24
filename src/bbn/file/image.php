@@ -644,8 +644,7 @@ public static function jpg2pdf($jpg, $pdf){
    * 
 	 * @return \bbn\file\image 
 	 */
-public function flip($mode='v')
-	{
+  public function flip($mode='v'){
 		if ( $this->test() )
 		{
 			if ( class_exists('\\Imagick') )
@@ -676,8 +675,29 @@ public function flip($mode='v')
 		}
 		return $this;
 	}
-  
-	/**
+
+  /**
+   * Compresses and sets the image's quality (JPEG image only).
+   *
+   * @param int $q The quality level (0-100)
+   * @param $comp The compression type
+   * @return \bbn\file\image
+   */
+  public function quality($q = 80, $comp = COMPRESSION_JPEG){
+    if ( $this->test() &&
+      ((strtolower($this->get_extension()) === 'jpg') ||
+        (strtolower($this->get_extension()) === 'jpeg'))
+    ){
+      if ( class_exists('\\Imagick') ){
+        $this->img->setImageCompression($comp);
+        $this->img->setImageCompressionQuality($q);
+        $this->img->stripImage();
+      }
+    }
+    return $this;
+  }
+
+  /**
    * Adjusts the image brightness.
    * 
    * <code>
@@ -913,4 +933,3 @@ public function flip($mode='v')
 	}
 
 }
-?>
