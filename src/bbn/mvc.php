@@ -142,7 +142,7 @@ class mvc implements \bbn\mvc\api{
         unset($bbn_inc_key, $bbn_inc_val);
       }
       unset($bbn_inc_data);
-      eval('?>'.$bbn_inc_content.'<?php');
+      eval('?>'.$bbn_inc_content);
       $c = ob_get_contents();
       ob_end_clean();
       return $c;
