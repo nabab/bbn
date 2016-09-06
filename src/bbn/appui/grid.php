@@ -33,8 +33,8 @@ class grid extends \bbn\obj{
           $additional_fields = [];
 
   public function __construct(\bbn\db $db, $cfg, $table = null, $fields = null){
+    $this->db = $db;
     if ( is_array($cfg) ){
-      $this->db = $db;
       $this->cfg['start'] = isset($cfg['skip']) &&
               \bbn\str::is_number($cfg['skip']) ?
                       $cfg['skip'] : 0;
@@ -79,9 +79,10 @@ class grid extends \bbn\obj{
 
   public function where()
   {
-    if ( $this->check() ){
+    if ( $this->check() && isset($this->cfg['filter']) ){
       return $this->filter($this->cfg['filter']);
     }
+    return '';
   }
 
   public function get_field($f){

@@ -75,7 +75,19 @@ class mvc implements \bbn\mvc\api{
     /**
      * @var array The plugins registered through the routes
      */
-    $plugins;
+    $plugins,
+    /**
+     * @var array The plugins registered through the routes
+     */
+    $loaded = [
+      'views' => [
+        'html' => [],
+        'css' => [],
+        'js' => []
+      ],
+      'models' => [],
+      'ctrls' => []
+    ];
 
 	public
     /**
@@ -102,6 +114,49 @@ class mvc implements \bbn\mvc\api{
 	// These strings are forbidden to use in URL
 	public static
     $reserved = ['index', '_private', '_common', '_htaccess'];
+
+  public static function include_model($bbn_inc_file, $model){
+    if ( is_file($bbn_inc_file) ){
+      ob_start();
+      $d = include($bbn_inc_file);
+      ob_end_clean();
+      if ( is_object($d) ){
+        $d = \bbn\x::to_array($d);
+      }
+      if ( !is_array($d) ){
+        return false;
+      }
+      return $d;
+    }
+    return false;
+  }
+
+  public static function include_php_view($bbn_inc_content, array $bbn_inc_data = [])
+  {
+    if ( $bbn_inc_content ){
+      ob_start();
+      if ( count($bbn_inc_data) ){
+        foreach ( $bbn_inc_data as $bbn_inc_key => $bbn_inc_val ){
+          $$bbn_inc_key = $bbn_inc_val;
+        }
+        unset($bbn_inc_key, $bbn_inc_val);
+      }
+      unset($bbn_inc_data);
+      eval('?>'.$bbn_inc_content.'<?php');
+      $c = ob_get_contents();
+      ob_end_clean();
+      return $c;
+    }
+    return '';
+  }
+
+  public static function include_controller($bbn_inc_file, $ctrl){
+    ob_start();
+    require $bbn_inc_file;
+    $output = ob_get_contents();
+    ob_end_clean();
+    return $output;
+  }
 
   /**
    * This function gets the content of a view file and adds it to the loaded_views array.

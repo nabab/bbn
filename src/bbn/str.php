@@ -57,12 +57,12 @@ class str
   public static function change_case($st, $case = false)
   {
     $st = self::cast($st);
-    $case = strtolower($case);
+    $case = substr(strtolower($case), 0, 1);
     switch ( $case ){
-      case "lower":
+      case "l":
         $case = MB_CASE_LOWER;
         break;
-      case "upper":
+      case "u":
         $case = MB_CASE_UPPER;
         break;
       default:

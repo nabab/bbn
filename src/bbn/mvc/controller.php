@@ -71,6 +71,7 @@ class controller implements api{
      */
     $inc;
 
+
 	/**
 	 * This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).
 	 *
@@ -108,6 +109,14 @@ class controller implements api{
 	public function get_url(){
 		return $this->mvc->get_url();
 	}
+
+  public function get_path(){
+    return $this->path;
+  }
+
+  public function get_request(){
+    return $this->request;
+  }
 
 	public function exists(){
 		return !empty($this->path);
@@ -281,7 +290,6 @@ class controller implements api{
 		return $this;
 	}
 
-
 	/**
 	 * This will add the given string to the script property, and create it if needed. Chainable
 	 *
@@ -306,11 +314,12 @@ class controller implements api{
 	 */
 	private function control(){
 		if ( $this->file && is_null($this->is_controlled) ){
+      $ctrl = $this;
 			ob_start();
 			foreach ( $this->checkers as $appui_checker_file ){
 				// If a checker file returns false, the controller is not processed
 				// The checker file can define data and inc that can be used in the subsequent controller
-				if ( !require($appui_checker_file) ){
+        if ( \bbn\mvc::include_controller($appui_checker_file, $this) === false ){
 					return false;
 				}
 			}
@@ -323,11 +332,7 @@ class controller implements api{
         $this->log("CONTENT FROM SUPERCONTROLLER", $log);
       }
       ob_end_clean();
-      unset($appui_checker_file);
-      ob_start();
-      require($this->file);
-			$output = ob_get_contents();
-			ob_end_clean();
+      $output = \bbn\mvc::include_controller($this->file, $this);
       // If rerouted during the controller
       if ( $this->is_rerouted ){
         $this->is_rerouted = false;
@@ -382,8 +387,7 @@ class controller implements api{
 	 * @param string $path
 	 * @return string|false
 	 */
-	public function get_css($path='')
-	{
+	public function get_css($path=''){
     if ( $r = $this->get_view($path, 'css') ){
       return '<style>'.\CssMin::minify($r).'</style>';
     }
@@ -587,7 +591,11 @@ class controller implements api{
     return $this->dir;
   }
 
-  private function get_prepath(){
+  public function get_routes(){
+    return $this->mvc->get_routes();
+  }
+
+  public function get_prepath(){
     if ( $this->exists() ){
       return $this->mvc->get_prepath();
     }

@@ -88,22 +88,7 @@ class view{
 				case 'html':
 					return is_array($data) ? \bbn\tpl::render($this->content, $data) : $this->content;
 				case 'php':
-				  ob_start();
-					if ( is_array($data) ){
-            $args = [];
-						foreach ( $data as $key => $val ){
-							$$key = $val;
-							array_push($args, '$'.$key);
-						}
-            eval('return call_user_func(function() use ('.implode(',', $args).'){ ?>'.$this->content.' <?php });');
-					}
-					else{
-            eval('return call_user_func(function(){ ?>'.$this->content.' <?php });');
-          }
-          $c = ob_get_contents();
-          ob_end_clean();
-          return $c;
-          break;
+          return \bbn\mvc::include_php_view($this->content, $data ?: []);
       }
 		}
 		return false;

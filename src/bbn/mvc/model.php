@@ -25,25 +25,37 @@ class model extends \bbn\objcache{
 
 	private
     /**
-     * The data model
-     * @var null|array
-     */
-		$data,
-    /**
      * The file as being requested
      * @var null|string
      */
     $file,
     /**
+     * The controller instance requesting the model
+     * @var null|string
+     */
+    $ctrl,
+    /**
      * The path as being requested
      * @var null|string
      */
-    $path,
-		/**
-		 * An external object that can be filled after the object creation and can be used as a global with the function add_inc
-		 * @var stdClass
-		 */
-		$inc;
+    $path;
+
+  public
+    /**
+     * The database connection instance
+     * @var null|\bbn\db
+     */
+    $db,
+    /**
+     * The data model
+     * @var null|array
+     */
+    $data,
+  /**
+   * An external object that can be filled after the object creation and can be used as a global with the function add_inc
+   * @var stdClass
+   */
+    $inc;
 
 	/**
 	 * Models are always recreated and reincluded, even if they have from the same path
@@ -74,14 +86,7 @@ class model extends \bbn\objcache{
       $data = [];
     }
     $this->data = $data;
-    if ( $this->file ){
-      $d = include($this->file);
-      if ( !is_array($d) ){
-        return false;
-      }
-      return $d;
-    }
-    return false;
+    return \bbn\mvc::include_model($this->file, $this);
   }
 
   public function get_content(){
