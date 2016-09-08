@@ -601,7 +601,7 @@ class controller implements api{
     }
   }
 
-  private function set_prepath($path){
+  public function set_prepath($path){
     if ( $this->exists() && $this->mvc->set_prepath($path) ){
       $this->params = $this->mvc->get_params();
       return $this;
