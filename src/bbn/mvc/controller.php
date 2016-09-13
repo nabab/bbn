@@ -595,6 +595,10 @@ class controller implements api{
     return $this->mvc->get_routes();
   }
 
+  public function get_route($path, $mode){
+    return $this->mvc->get_route($path, $mode);
+  }
+
   public function get_prepath(){
     if ( $this->exists() ){
       return $this->mvc->get_prepath();
