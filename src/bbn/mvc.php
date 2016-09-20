@@ -150,11 +150,19 @@ class mvc implements \bbn\mvc\api{
     return '';
   }
 
-  public static function include_controller($bbn_inc_file, $ctrl){
+  /**
+   * @param string $bbn_inc_file
+   * @param mvc\controller $ctrl
+   * @return string
+   */
+  public static function include_controller(string $bbn_inc_file, mvc\controller $ctrl, $bbn_is_super = false){
     ob_start();
-    require $bbn_inc_file;
+    $r = require($bbn_inc_file);
     $output = ob_get_contents();
     ob_end_clean();
+    if ( $bbn_is_super ){
+      return $r ? true : false;
+    }
     return $output;
   }
 

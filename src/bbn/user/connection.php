@@ -374,6 +374,7 @@ class connection
         $this->session->set($r, 'info');
         $this->user_cfg = empty($d['cfg']) ?
                         ['log_tries' => 0] : json_decode($d['cfg'], true);
+        $this->set_session('id', $this->id);
         $this->set_session('cfg', $this->user_cfg);
         // Group
         $this->id_group = $d['id_group'];

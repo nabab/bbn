@@ -283,6 +283,7 @@ class controller implements api{
 			}
 			if ( (strpos($file_name, '..') === false) && file_exists($d.$file_name) ){
 				$bbn_path = $d.$file_name;
+				$ctrl =& $this;
 				unset($d, $file_name);
 				include($bbn_path);
 			}
@@ -315,23 +316,28 @@ class controller implements api{
 	private function control(){
 		if ( $this->file && is_null($this->is_controlled) ){
       $ctrl = $this;
+      $ok = 1;
 			ob_start();
 			foreach ( $this->checkers as $appui_checker_file ){
 				// If a checker file returns false, the controller is not processed
 				// The checker file can define data and inc that can be used in the subsequent controller
-        if ( \bbn\mvc::include_controller($appui_checker_file, $this) === false ){
-					return false;
+        if ( \bbn\mvc::include_controller($appui_checker_file, $this, true) === false ){
+					$ok = false;
+					break;
 				}
 			}
-      // If rerouted during the checkers
-			if ( $this->is_rerouted ){
-        $this->is_rerouted = false;
-			  return $this->control();
-      }
       if ( ($log = ob_get_contents()) && is_string($log) ){
         $this->log("CONTENT FROM SUPERCONTROLLER", $log);
       }
       ob_end_clean();
+      // If rerouted during the checkers
+      if ( $this->is_rerouted ){
+        $this->is_rerouted = false;
+        return $this->control();
+      }
+      if ( !$ok ){
+        return false;
+      }
       $output = \bbn\mvc::include_controller($this->file, $this);
       // If rerouted during the controller
       if ( $this->is_rerouted ){
@@ -341,7 +347,7 @@ class controller implements api{
 			if ( is_object($this->obj) && !isset($this->obj->content) && !empty($output) ){
 				$this->obj->content = $output;
 			}
-			$this->is_controlled = 1;
+      $this->is_controlled = 1;
 		}
 		return $this->is_controlled ? true : false;
 	}

@@ -74,19 +74,26 @@ class session
 
   private function _set_value($args){
     if ( $this->id ){
+      // The value is the first argument
       $value = array_shift($args);
-      $var =& $this->data;
-      foreach ( $args as $i => $a ){
-        if ( $i === (count($args) - 1) ){
-          if ( is_null($value) ){
-            unset($var[$a]);
+      // Except if it's an array and there is only one argument
+      if ( !count($args) && is_array($value) && \bbn\x::is_assoc($value) ){
+        $this->data = \bbn\x::merge_arrays($this->data, $value);
+      }
+      else{
+        $var =& $this->data;
+        foreach ( $args as $i => $a ){
+          if ( $i === (count($args) - 1) ){
+            if ( is_null($value) ){
+              unset($var[$a]);
+            }
+            else{
+              $var[$a] = $value;
+            }
           }
           else{
-            $var[$a] = $value;
+            $var =& $var[$a];
           }
-        }
-        else{
-          $var =& $var[$a];
         }
       }
     }
