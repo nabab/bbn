@@ -393,7 +393,7 @@ class options extends \bbn\objcache
     return false;
   }
 
-  public function get_path_array($id, $root){
+  public function get_path_array($id, $root = 0){
     if ( $code = $this->code($id) ){
       $parts = [];
       while ( $id && ($id !== $root) ){
@@ -406,7 +406,7 @@ class options extends \bbn\objcache
     return false;
   }
 
-  public function get_path($id, $root, $sep = '|'){
+  public function get_path($id, $root = 0, $sep = '|'){
     if ( $parts = $this->get_path_array($id, $root) ){
       return implode($sep, $parts);
     }

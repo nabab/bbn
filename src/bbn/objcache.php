@@ -34,7 +34,7 @@ class objcache extends objdb
 
 	protected function _cache_name($uid, $method = ''){
 		return $this->_cache_prefix.(string)$uid.
-			(empty($method) ? '' : '-'.$method);
+			(empty($method) ? '' : '-'.(string)$method);
 	}
 
 	public function cache_delete_all(){
@@ -51,8 +51,8 @@ class objcache extends objdb
 		return $this->cacher->get($this->_cache_name($uid, $method));
 	}
 
-	public function cache_set($uid, $method = '', $data){
-		$this->cacher->set($this->_cache_name($uid, $method), $data);
+	public function cache_set($uid, $method = '', $data = null, $ttl = 0){
+		$this->cacher->set($this->_cache_name($uid, $method), $data, $ttl);
 		return $this;
 	}
 

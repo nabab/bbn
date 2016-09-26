@@ -660,6 +660,16 @@ class directories {
     return $res;
   }
 
+  protected function get_tab(string $url, string $title, array $cfg){
+    return [
+      'url' => \bbn\str::parse_path($url),
+      'title' => $title,
+      'load' => 1,
+      'bcolor' => $cfg['bcolor'],
+      'fcolor' => $cfg['fcolor']
+    ];
+  }
+
   /**
    * Gets a file
    *
@@ -678,23 +688,25 @@ class directories {
       $ext = \bbn\str::file_ext($file);
       /** @var string $path The file's path without file's name  */
       $path = dirname($file) !== '.' ? dirname($file) . '/' : '';
+      $url = $dir . $path . $name;
 
-      $r = [
-        'bcolor' => $cfg['bcolor'],
-        'fcolor' => $cfg['fcolor'],
-        'title' => $cfg['title'],
-        'url' => \bbn\str::parse_path($dir . $path . $name)
-      ];
+      $r = $this->get_tab($url, $cfg['title'], $cfg);
       $timer = new \bbn\util\timer();
       // MVC
       if ( !empty($cfg['tabs']) ){
         $r['title'] = $path . $name;
         $r['list'] = [];
         $r['def'] = false;
-        foreach ( $cfg['tabs'] as $t ){
+        foreach ( $cfg['tabs'] as $name => $t ){
           /** @var string $real_file The absolute full path to the file without the file's extension */
           $real_file = $t['path'] . $path . $name;
-          $info = $this->get_file($real_file, $dir, $tab, $t, $pref);
+          if ( $tab === $name ){
+            $info = $this->get_file($real_file, $dir, $tab, $t, $pref);
+            //die(\bbn\x::dump($info));
+          }
+          else{
+            $info = $this->get_tab($url.'/'.$name, $t['title'], $t);
+          }
           if ( !$info ){
             $this->error("Impossible to get a tab's configuration: DIR: $dir - TAB: $tab - FILE: $real_file - CFG: ".\bbn\x::get_dump($t));
             return false;
@@ -707,10 +719,11 @@ class directories {
             $file = dirname($real_file);
             $index = count($r['list']) - 1;
             while ( $file && ($file . '/' !== $t['path']) ){
-              $file = dirname($file) . '/' .$t['fixed'];
-              $info = $this->get_file($file, $dir, $tab, $t, $pref);
+
+              $t['file'] = dirname($file) . '/' .$t['fixed'];
+              $info = $this->get_tab($url.'/'.$name, $t['title'], $t);
               if ( !$info ){
-                $this->error("Impossible to get a supra-controller's configuration: DIR: $dir - TAB: $tab - FILE: $file - CFG: ".\bbn\x::get_dump($t));
+                $this->error("Impossible to get a supra-controller's configuration: DIR: $dir - TAB: $tab - FILE: $t[file] - CFG: ".\bbn\x::get_dump($t));
                 return false;
               }
               else{
@@ -722,6 +735,10 @@ class directories {
             for ( $i = 0; $i <= $index; $i++ ){
               $r['list'][$i]['title'] .= ' '.($i+1);
               $r['list'][$i]['url'] = str_repeat('_', $index-$i).$r['list'][$i]['url'];
+              if ( $r['list'][$i]['url'] === $tab ){
+                $info = $this->get_file($file, $dir, $tab, $t, $pref);
+
+              }
             }
           }
           if ( !empty($tab) && ($t['url'] === $tab) ){
@@ -873,6 +890,7 @@ class directories {
    * @return array|void
    */
   public function save($file, $code, array $cfg = null, \bbn\user\preferences $pref = null){
+    die(var_dump($file, $code, $cfg ));
     if ( ($file = \bbn\str::parse_path($file)) &&
       ($real = $this->url_to_real($file)) &&
       ($dir = $this->dir($this->dir_from_url($file))) &&

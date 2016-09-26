@@ -59,30 +59,36 @@ trait triggers {
       if ( isset($this->triggers[$cfg['kind']][$cfg['moment']][$table]) ){
         foreach ( $this->triggers[$cfg['kind']][$cfg['moment']][$table] as $i => $f ){
           if ( $f ){
-            $cfg[$f] = call_user_func($f, $cfg);
-            if ( !$cfg[$f] ){
-              $cfg['run'] = false;
-              $cfg['trig'] = false;
-            }
-            else if ( is_array($cfg[$f]) ){
-              foreach ( $cfg[$f] as $k => $v ){
-                if ( $k === 'trig' ) {
-                  if ($cfg['trig']) {
-                    $cfg['trig'] = $v;
-                  }
-                }
-                else if ( $k === 'run' ){
-                  if ( $cfg['run'] ) {
-                    if (!$v || ($v > $cfg['run'])) {
-                      $cfg['run'] = $v;
+            if ( is_string($f) ){
+              $cfg[$f] = call_user_func($f, $cfg);
+              if ( !$cfg[$f] ){
+                $cfg['run'] = false;
+                $cfg['trig'] = false;
+              }
+              else if ( is_array($cfg[$f]) ){
+                foreach ( $cfg[$f] as $k => $v ){
+                  if ( $k === 'trig' ) {
+                    if ($cfg['trig']) {
+                      $cfg['trig'] = $v;
                     }
                   }
-                }
-                else{
-                  $cfg[$k] = $v;
-                  unset($cfg[$f][$k]);
+                  else if ( $k === 'run' ){
+                    if ( $cfg['run'] ) {
+                      if (!$v || ($v > $cfg['run'])) {
+                        $cfg['run'] = $v;
+                      }
+                    }
+                  }
+                  else{
+                    $cfg[$k] = $v;
+                    unset($cfg[$f][$k]);
+                  }
                 }
               }
+            }
+            else if ( is_callable($f) && !$f($cfg) ){
+              $cfg['run'] = false;
+              $cfg['trig'] = false;
             }
           }
         }
