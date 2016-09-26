@@ -366,9 +366,6 @@ class mvc implements \bbn\mvc\api{
    */
   public function get_model($path, array $data, mvc\controller $ctrl)
   {
-    if ( is_null($data) ){
-      $data = $this->data;
-    }
     if ( $route = $this->router->route($path, 'model') ){
       $model = new mvc\model($this->db, $route, $ctrl);
       return $model->get($data);

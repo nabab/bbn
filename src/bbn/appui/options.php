@@ -575,7 +575,7 @@ class options extends \bbn\objcache
    * @param $it
    * @return bool
    */
-  private function _prepare(&$it){
+  private function _prepare(array &$it){
     // The table's columns
     $c = $this->cfg['cols'];
     // If id_parent is undefined it uses the default
@@ -658,28 +658,52 @@ class options extends \bbn\objcache
     return false;
   }
 
-  public function add($it, $force = false){
+  public function add(array $it, $force = false){
     $res = false;
     $items = !empty($it['items']) && is_array($it['items']) ? $it['items'] : false;
     if ( $this->_prepare($it) ){
       $c = $this->cfg['cols'];
       $id = false;
-      if ( $force &&
-        !is_null($c['code']) &&
-        \bbn\str::is_integer($id = $this->db->select_one($this->cfg['table'], $c['id'], [
+      if ( !is_null($it[$c['code']]) ){
+        // Reviving deleted entry
+        if ( $id = $this->db->select_one($this->cfg['table'], $c['id'], [
           $c['id_parent'] => $it[$c['id_parent']],
-          $c['code'] => $it[$c['code']]
-        ]))
-      ){
-        $res = $this->db->update($this->cfg['table'], [
-          $c['text'] => $it[$c['text']],
-          $c['id_alias'] => $it[$c['id_alias']],
-          $c['value'] => $it[$c['value']],
-          $c['cfg'] => $it[$c['cfg']],
-          $c['active'] => 1
-        ], [$c['id'] => $id]);
+          $c['code'] => $it[$c['code']],
+          $c['active'] => 0
+        ])
+        ){
+          $res = $this->db->update($this->cfg['table'], [
+            $c['text'] => $it[$c['text']],
+            $c['id_alias'] => $it[$c['id_alias']],
+            $c['value'] => $it[$c['value']],
+            $c['cfg'] => $it[$c['cfg']],
+            $c['active'] => 1
+          ], [
+            $c['id'] => $id,
+            $c['active'] => 0
+          ]);
+        }
+        else{
+          if ( $force &&
+            ($id = $this->db->select_one($this->cfg['table'], $c['id'], [
+              $c['id_parent'] => $it[$c['id_parent']],
+              $c['code'] => $it[$c['code']],
+              $c['active'] => 0
+            ]))
+          ){
+            $res = $this->db->update($this->cfg['table'], [
+              $c['text'] => $it[$c['text']],
+              $c['id_alias'] => $it[$c['id_alias']],
+              $c['value'] => $it[$c['value']],
+              $c['cfg'] => $it[$c['cfg']]
+            ], [
+              $c['id'] => $id
+            ]);
+          }
+        }
       }
-      else if ( $res = $this->db->insert($this->cfg['table'], [
+      if ( !$id ){
+        if ( $res = $this->db->insert($this->cfg['table'], [
           $c['id_parent'] => $it[$c['id_parent']],
           $c['text'] => $it[$c['text']],
           $c['code'] => $it[$c['code']],
@@ -688,8 +712,9 @@ class options extends \bbn\objcache
           $c['cfg'] => $it[$c['cfg']],
           $c['active'] => 1
         ])
-      ){
-        $id = $this->db->last_id();
+        ){
+          $id = $this->db->last_id();
+        }
       }
       if ( $res ){
         $this->_cache_delete($id);
