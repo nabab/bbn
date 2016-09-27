@@ -628,6 +628,7 @@ class controller implements api{
 	 */
 	public function get_model(){
     $args = func_get_args();
+    $die = false;
     foreach ( $args as $a ){
       if ( is_string($a) && strlen($a) ) {
         $path = $a;
