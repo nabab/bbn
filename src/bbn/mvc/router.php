@@ -464,14 +464,14 @@ class router {
           $dir = $root . $path;
         }
         else if ( $alt_path && is_dir($alt_root.substr($path, strlen($alt_path)+1)) ) {
-          $dir = $alt_root . substr($path, strlen($alt_path)+1) . '.' . $t;
+          $dir = $alt_root . substr($path, strlen($alt_path)+1);
         }
         if ( $dir ){
           $res = [];
           $files = \bbn\file\dir::get_files($dir);
           foreach ( $files as $f ){
             if ( in_array(\bbn\str::file_ext($f), self::$filetypes[$mode]) ){
-              array_push($res, $dir.'/'.\bbn\str::file_ext($f)[0]);
+              array_push($res, $path.'/'.\bbn\str::file_ext($f, true)[0]);
             }
           }
           return $res;
