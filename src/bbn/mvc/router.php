@@ -436,6 +436,52 @@ class router {
     return false;
   }
 
+  public function fetch_dir($dir, $mode){
+
+    // Only for views and models
+    if ( self::is_mode($mode) && !in_array($mode, self::$controllers) ){
+
+
+      /** @var string $path The path to the file from $root */
+      $path = $this->parse($dir);
+
+      // If there is a prepath defined we prepend it to the path
+      if ( $this->prepath && (strpos($path, '/') !== 0) && (strpos($path, $this->prepath) !== 0) ){
+        $path = $this->prepath.$path;
+      }
+
+      /** @var string $root Where the files will be searched for by default */
+      $root = $this->get_root($mode);
+      if ( $alt_path = $this->find_in_roots($path) ){
+        $alt_root = $this->get_alt_root($mode, $alt_path);
+      }
+      else if ( $alt_root = $this->get_alt_root($mode) ){
+        $alt_path = $this->alt_root;
+      }
+      $dir = false;
+      foreach ( self::$filetypes[$mode] as $t ){
+        if ( is_dir($root.$path) ) {
+          $dir = $root . $path;
+        }
+        else if ( $alt_path && is_dir($alt_root.substr($path, strlen($alt_path)+1)) ) {
+          $dir = $alt_root . substr($path, strlen($alt_path)+1) . '.' . $t;
+        }
+        if ( $dir ){
+          $res = [];
+          $files = \bbn\file\dir::get_files($dir);
+          foreach ( $files as $f ){
+            if ( in_array(\bbn\str::file_ext($f), self::$filetypes[$mode]) ){
+              array_push($res, $dir.'/'.\bbn\str::file_ext($f)[0]);
+            }
+          }
+          return $res;
+        }
+      }
+      return false;
+    }
+    return false;
+  }
+
   public function get_routes(){
     return $this->routes;
   }

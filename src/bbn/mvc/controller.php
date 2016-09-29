@@ -387,7 +387,55 @@ class controller implements api{
     return false;
 	}
 
-	/**
+  /**
+   * This will get a javascript view encapsulated in an anonymous function for embedding in HTML.
+   *
+   * @param array|string $files
+   * @param array $data
+   * @param boolean $encapsulated
+   * @return string|false
+   */
+  public function get_js_group($files='', array $data=null, $encapsulated = true){
+    if ( $js = $this->get_view_group($files, $data, 'js') ){
+      return '<script>'.
+      ( $encapsulated ? '(function($){' : '' ).
+      ( empty($data) ? '' : 'var data = '.json_encode($data).';' ).
+      $js.
+      ( $encapsulated ? '})(jQuery);' : '' ).
+      '</script>';
+    }
+    return false;
+  }
+
+  /**
+   * This will get a javascript view encapsulated in an anonymous function for embedding in HTML.
+   *
+   * @param array|string $files
+   * @param array $data
+   * @param boolean $encapsulated
+   * @return string|false
+   */
+  public function get_view_group($files='', array $data=null, $mode = 'html'){
+    if ( !is_array($files) ){
+      if ( !($tmp = $this->mvc->fetch_dir($files, $mode)) ){
+        $this->error("Impossible to get files from directory $files");
+        return false;
+      }
+      $files = $tmp;
+    }
+    if ( is_array($files) && count($files) ){
+      $st = '';
+      foreach ( $files as $f ){
+        if ( $tmp = $this->get_view($f, $mode, $data) ){
+          $st .= $tmp;
+        }
+      }
+      return $st;
+    }
+    $this->error("Impossible to get files from get_view_group files argument empty");
+  }
+
+  /**
 	 * This will get a CSS view encapsulated in a scoped style tag.
 	 *
 	 * @param string $path

@@ -131,6 +131,10 @@ class mvc implements \bbn\mvc\api{
     return false;
   }
 
+  public function fetch_dir($dir, $mode){
+    return $this->router->fetch_dir($dir, $mode);
+  }
+
   public static function include_php_view($bbn_inc_content, array $bbn_inc_data = [])
   {
     if ( $bbn_inc_content ){
