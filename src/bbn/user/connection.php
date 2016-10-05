@@ -3,6 +3,7 @@
  * @package bbn\user
  */
 namespace bbn\user;
+use bbn;
 /**
  * A user authentication Class
  *
@@ -16,13 +17,14 @@ namespace bbn\user;
  * @todo Groups and hotlinks features
  * @todo Implement Cache for session requests' results?
  */
+if ( !defined('BBN_DATA_PATH') ){
+  die("BBN_DATA_PATH must be defined");
+}
 class connection
 {
 
 	private static
-          /** @var string */
-          $fingerprint = BBN_FINGERPRINT,
-          /** @var \bbn\user\connection */
+          /** @var connection */
           $current;
 
 	protected static
@@ -84,6 +86,16 @@ class connection
                 'status' => 'active'
               ],
             ],
+            'fields' => [
+              'user' => 'user',
+              'pass' => 'pass',
+              'salt' => 'appui_salt',
+              'key' => 'key',
+              'id' => 'id',
+              'pass1' => 'pass1',
+              'pass2' => 'pass2',
+              'action' => 'appui_action'
+            ],
             /*
              * Password saving encryption
              * @var string
@@ -121,7 +133,7 @@ class connection
   /**
    * @param connection $usr
    */
-  protected static function _init(\bbn\user\connection $usr){
+  protected static function _init(connection $usr){
     if ( $id = $usr->get_id() ){
       self::$current =& $usr;
       if ( !defined('BBN_USER_PATH') ){
@@ -131,11 +143,13 @@ class connection
   }
 
   /**
-   * @return \bbn\user\connection
+   * @return connection
    */
   public static function get_user(){
     return self::$current;
   }
+
+  private $just_login = false;
 
 	protected
           /** @var string */
@@ -169,7 +183,7 @@ class connection
 
 
 	public
-          /** @var \bbn\db */
+          /** @var db */
           $db,
           /** @var mixed */
           $prev_time;
@@ -180,7 +194,7 @@ class connection
 	 */
   public static function make_fingerprint()
   {
-    return \bbn\str::genpwd(32, 16);
+    return bbn\str::genpwd(32, 16);
   }
 
 	/**
@@ -251,25 +265,25 @@ class connection
 
   /**
    * connection constructor.
-   * @param \bbn\db $db
+   * @param db $db
    * @param session $session
    * @param array $cfg
-   * @param string $credentials
+   * @param array $params
    */
-  public function __construct(\bbn\db $db, session $session, array $cfg, $credentials=''){
+  public function __construct(bbn\db $db, array $cfg = [], array $params = []){
 		$this->db = $db;
-    $this->session = $session;
+    $this->session = session::get_current();
+    if ( !$this->session ){
+      $this->session = new session();
+    }
 
     $this->user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
     $this->ip_address = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
 
-    $this->cfg = \bbn\x::merge_arrays(self::$_defaults, $cfg);
+    $this->cfg = bbn\x::merge_arrays(self::$_defaults, $cfg);
 
-    if ( isset($cfg['preferences']) ){
-      $this->has_preferences = 1;
-      $this->preferences = $cfg['preferences'];
-      unset($cfg['preferences']);
-    }
+    $this->preferences = preferences::get_preferences();
+
     // As we'll give the object the properties of these additional field they should not conflict with existing ones
     foreach ( $this->cfg['additional_fields'] as $f ){
       if ( property_exists($this, $f) ) {
@@ -281,24 +295,42 @@ class connection
      * The selection comprises the defined fields of the users table
      * Plus a bunch of user-defined additional fields in the same table
      */
-    $this->fields = \bbn\x::merge_arrays($this->cfg['arch']['users'], $this->cfg['additional_fields']);
-
-    // Case where the user logs in
-    // Allowing the use of a simple array [user, pass]
-    if ( isset($credentials[0], $credentials[1]) ) {
-      $credentials['user'] = $credentials[0];
-      $credentials['pass'] = $credentials[1];
+    $this->fields = bbn\x::merge_arrays($this->cfg['arch']['users'], $this->cfg['additional_fields']);
+    
+    
+    $f =& $this->cfg['fields'];
+    // The user logs in
+    if ( isset($params[$f['user']], $params[$f['pass']], $params[$f['salt']]) ){
+      if ( !$this->session->has('salt') ){
+        die("You have no salt in your session, please reload");
+      }
+      $this->_identify($params);
+      if ( $this->get_id() ){
+        if ( !defined('BBN_USER_PATH') ){
+          define('BBN_USER_PATH', BBN_DATA_PATH.'users/'.$this->get_id().'/');
+        }
+        bbn\file\dir::create_path(BBN_USER_PATH.'tmp');
+        bbn\file\dir::delete(BBN_USER_PATH.'tmp', false);
+      }
     }
-
-    // Expecting array with user and pass keys
-    if ( isset($credentials['user'], $credentials['pass']) ) {
-      $this->_identify($credentials);
+    // The user is not known yet
+    else if (
+      isset($params[$f['key']], $params[$f['id']], $params[$f['pass1']], $params[$f['pass2']], $params[$f['action']]) &&
+      ($params[$f['action']] === 'init_password') &&
+      ($params[$f['pass1']] === $params[$f['pass2']]) &&
+      $this->check_magic_string($params[$f['id']], $params[$f['key']])
+    ){
+      $this->expire_hotlink($params[$f['id']]);
+      $this->force_password($params[$f['pass2']]);
+      $this->session->set([]);
+      header('Location: .');
+      die();
     }
-
-    // Otherwise the session is checked
-		else {
-      $this->check_session();
-		}
+    else if ( $this->check_session() ){
+      if ( !defined('BBN_USER_PATH') ){
+        define('BBN_USER_PATH', BBN_DATA_PATH.'users/'.$this->get_id().'/');
+      }
+    }
 
     self::_init($this);
 
@@ -335,7 +367,7 @@ class connection
   }
 
 	/**
-	 * @return \bbn\user\connection
+	 * @return connection
 	 */
 	private function _login(){
     if ( $this->check() ){
@@ -350,7 +382,7 @@ class connection
    *
    * @param array $d The user's table data
    *
-   * @return \bbn\user\connection
+   * @return connection
    */
   private function _user_info(array $d=null){
     if ( $this->id ){
@@ -358,7 +390,7 @@ class connection
         $d = $this->db->rselect(
               $this->cfg['tables']['users'],
               $this->fields,
-              \bbn\x::merge_arrays(
+              bbn\x::merge_arrays(
                     $this->cfg['conditions'],
                     [$this->cfg['arch']['users']['status'] => 1],
                     [$this->cfg['arch']['users']['id'] => $this->id]));
@@ -427,7 +459,7 @@ class connection
         return $res;
       };
       $this->permissions = $x($perms);
-      //die(\bbn\x::hdump($this->permissions ));
+      //die(bbn\x::hdump($this->permissions ));
       if ( !isset($this->permissions['admin']) ){
         $this->permissions['admin'] = 1;
       }
@@ -497,22 +529,26 @@ class connection
   }
 
   /*
-   * return \bbn\user\connection
+   * return connection
    */
-  private function _sess_info(array $d=null){
-    if ( $this->id ){
-      if ( is_null($d) ){
-        $d = $this->db->rselect(
-            $this->cfg['tables']['sessions'],
-            $this->cfg['arch']['sessions'],
-            [
-                $this->cfg['arch']['sessions']['sess_id'] => $this->session->get_id(),
-                $this->cfg['arch']['sessions']['id_user'] => $this->id
-            ]);
-      }
-      if ( is_array($d) ){
-        $this->sess_cfg = json_decode($d['cfg'], 1);
-      }
+  private function _sess_info($d=null){
+    if ( is_int($d) ){
+      $id = $d;
+    }
+    else if ( $this->id ){
+      $id = $this->id;
+    }
+    if ( !is_array($d) && isset($id) ){
+      $d = $this->db->rselect(
+          $this->cfg['tables']['sessions'],
+          $this->cfg['arch']['sessions'],
+          [
+              $this->cfg['arch']['sessions']['sess_id'] => $this->session->get_id(),
+              $this->cfg['arch']['sessions']['id_user'] => $id
+          ]);
+    }
+    if ( is_array($d) ){
+      $this->sess_cfg = json_decode($d['cfg'], 1);
     }
     return $this;
   }
@@ -533,29 +569,35 @@ class connection
     return $this->_crypt($st);
   }
 
+  public function is_just_login(){
+    return $this->just_login;
+  }
+
   /**
 	 * @return mixed
 	 */
-	private function _identify($credentials)
+	private function _identify($params)
 	{
     if ( $this->check_session() ){
       $this->close_session();
     }
-		if ( isset($credentials['user'],$credentials['pass']) ) {
+    $f =& $this->cfg['fields'];
+		if ( isset($params[$f['user']],$params[$f['pass']]) ) {
       // Table structure
 			$arch =& $this->cfg['arch'];
 
+      $this->just_login = 1;
       // Database Query
       if ( $d = $this->db->rselect(
               $this->cfg['tables']['users'],
               $this->fields,
-              \bbn\x::merge_arrays(
+              bbn\x::merge_arrays(
                     $this->cfg['conditions'],
                     [$arch['users']['status'] => 1],
-                    [$arch['users']['login'] => $credentials['user']])
+                    [$arch['users']['login'] => $params[$f['user']]])
               ) ){
 
-        $this->id = $d['id'];
+        $this->set_id($d['id']);
         $this->_user_info($d);
 
        // Canceling authentication if num_attempts > max_attempts
@@ -567,13 +609,15 @@ class connection
                 $arch['passwords']['pass'],
                 [$arch['passwords']['id_user'] => $this->id],
                 [$arch['passwords']['added'] => 'DESC']);
-        if ( $this->_check_password($credentials['pass'], $pass) ){
-          $this->auth = 1;
+        if ( $this->_check_password($params[$f['pass']], $pass) ){
           $this->_login();
         }
         else{
           $this->record_attempt();
           $this->error = 6;
+        }
+        if ( !$this->error ){
+          $this->auth = 1;
         }
       }
       else{
@@ -592,7 +636,7 @@ class connection
 	}
 
 	/**
-	 * @return \bbn\user\connection
+	 * @return connection
 	 */
   public function set_session($attr){
     if ( $this->session->has('user') ){
@@ -626,7 +670,7 @@ class connection
   }
 
   /**
-	 * @return \bbn\user\connection
+	 * @return connection
 	 */
   public function save_session() {
     $p =& $this->cfg['arch']['sessions'];
@@ -644,7 +688,7 @@ class connection
   }
 
   /**
-	 * @return \bbn\user\connection
+	 * @return connection
 	 */
   public function close_session() {
     $p =& $this->cfg['arch']['sessions'];
@@ -682,7 +726,7 @@ class connection
   }
 
   /*
-   * return \bbn\user\connection
+   * return connection
    */
   public function save_cfg()
   {
@@ -696,7 +740,7 @@ class connection
   }
 
   /*
-   * return \bbn\user\connection
+   * return connection
    */
   public function set_cfg($attr, $type='user')
   {
@@ -708,7 +752,7 @@ class connection
         $prop = 'user_cfg';
       }
       foreach ( $attr as $key => $val ){
-        //\bbn\x::dump($key, $val);
+        //bbn\x::dump($key, $val);
         if ( is_string($key) ){
           $this->{$prop}[$key] = $val;
         }
@@ -718,7 +762,7 @@ class connection
   }
 
   /*
-   * return \bbn\user\connection
+   * return connection
    */
   public function unset_cfg($attr, $type='user')
   {
@@ -737,7 +781,7 @@ class connection
   }
 
   /*
-   * return \bbn\user\connection
+   * return connection
    */
   protected function record_attempt()
   {
@@ -747,8 +791,18 @@ class connection
     return $this;
   }
 
+  protected function set_id($id){
+    $this->id = $id ?: $this->get_session('id');
+    $this->auth = 1;
+    if ( $this->preferences ){
+      $this->preferences->set_user($this->id);
+      /** @todo Redo this!!! Bad! */
+      $this->preferences->set_group($this->get_session('id_group'));
+    }
+  }
+
   /**
-	 * @return \bbn\user\connection
+	 * @return connection
 	 */
 	public function refresh_info()
 	{
@@ -765,26 +819,22 @@ class connection
 	public function check_session()
 	{
     // If this->id is set it means we've already looked it up
-       // \bbn\x::hdump($this->sess_cfg, $this->has_session('fingerprint'), $this->get_print($this->get_session('fingerprint')), $this->sess_cfg['fingerprint']);
-    //die(\bbn\x::dump($this->id));
+       // bbn\x::hdump($this->sess_cfg, $this->has_session('fingerprint'), $this->get_print($this->get_session('fingerprint')), $this->sess_cfg['fingerprint']);
+    //die(bbn\x::dump($this->id));
 		if ( !$this->id ) {
 
+      //die(var_dump($this->sess_cfg['fingerprint']));
       // The user ID must be in the session
-			if ( $this->has_session('id') ) {
-        $this->id = $this->get_session('id');
-        if ( $this->preferences ){
-          $this->preferences->set_user($this->id);
-          /** @todo Redo this!!! Bad! */
-          $this->preferences->set_group($this->get_session('id_group'));
-        }
+      $id = $this->get_session('id');
+			if ( $id ) {
 
-        $this->_sess_info();
+        $this->_sess_info($id);
 
         if ( isset($this->sess_cfg['fingerprint']) && $this->has_session('fingerprint') &&
           ($this->get_print($this->get_session('fingerprint')) === $this->sess_cfg['fingerprint']) ){
-          $this->auth = 1;
-          $this->_user_info()->save_session();
-
+          $this->set_id($id);
+          $this->_user_info();
+          $this->_login();
         }
 			}
 		}
@@ -820,9 +870,8 @@ class connection
         $this->cfg['arch']['hotlinks']['id'] => $id
             ]) ){
       if ( self::is_magic_string($key, $val[$this->cfg['arch']['hotlinks']['magic_string']]) ){
-        $this->id = $val['id_user'];
+        $this->set_id($val['id_user']);
         $this->_user_info();
-        $this->auth = 1;
         $this->_login();
         return $this->id;
       }
@@ -891,7 +940,7 @@ class connection
     if ( $this->auth && $this->session->has('user', 'tokens', $st) ){
       $this->session->transform(function(&$a) use($st){
         if ( isset($a['tokens']) ){
-          $a['tokens'][$st] = \bbn\str::genpwd();
+          $a['tokens'][$st] = bbn\str::genpwd();
         }
       }, 'user');
       return $this->session->get('user', 'tokens', $st);

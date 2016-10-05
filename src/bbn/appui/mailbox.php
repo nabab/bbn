@@ -41,7 +41,8 @@ class mailbox{
           case 'local':
             $this->host = 'localhost';
             $this->port = 143;
-            $this->mbParam = '{' . $this->host . ':' . $this->port . '/imap/tls/novalidate-cert}';
+            //$this->mbParam = '{' . $this->host . ':' . $this->port . '/imap/tls/novalidate-cert}';
+            $this->mbParam = '{' . $this->host . ':' . $this->port . '/imap/notls}';
             break;
         }
       }
@@ -172,6 +173,105 @@ class mailbox{
       $message = imap_base64($message);
     }
     return $message;
+  }
+
+  /**
+   *
+   *
+   * @param $msgno
+   * @param $structure
+   * @param string|false $partno '1', '2', '2.1', '2.1.3', etc for multipart, 0 if simple
+   */
+  private function get_msg_part($msgno, $structure, $partno){
+    // DECODE DATA
+    $data = $this->get_msg_body($msgno, $partno);
+    // Any part may be encoded, even plain text messages, so check everything.
+    $data = $this->get_decode_value($data, $structure->encoding);
+    // PARAMETERS
+    // get all parameters, like charset, filenames of attachments, etc.
+    $params = [];
+    if ( $structure->parameters ){
+      foreach ( $structure->parameters as $x ){
+        $params[strtolower($x->attribute)] = $x->value;
+      }
+    }
+    if ( $structure->dparameters ){
+      foreach ( $structure->dparameters as $x ){
+        $params[strtolower($x->attribute)] = $x->value;
+      }
+    }
+    // ATTACHMENT
+    // Any part with a filename is an attachment,
+    // so an attached text file (type 0) is not mistaken as the message.
+    if ( $params['filename'] || $params['name'] ) {
+      // filename may be given as 'Filename' or 'Name' or both
+      $filename = $params['filename'] ? $params['filename'] : $params['name'];
+      // filename may be encoded, so see imap_mime_header_decode()
+      array_push($this->attachments, $filename);
+      file_put_contents(BBN_USER_PATH . 'tmp_mail/' . $filename, $data);
+      // this is a problem if two files have same name
+    }
+    // TEXT
+    if ( ($structure->type === 0) && !empty($data) ){
+      // Messages may be split in different parts because of inline attachments,
+      // so append parts together with blank row.
+      $this->charset = $params['charset'];  // assume all parts are same charset
+      if ( strtolower($structure->subtype) === 'plain' ){
+        if ( stripos($this->charset, 'ISO') !== false ){
+          $utfConverter = new utf8($this->charset);
+          $this->plainmsg .= $utfConverter->loadCharset($this->charset) ?
+            $utfConverter->strToUtf8(trim($data)) . PHP_EOL :
+            trim($data) . PHP_EOL;
+        }
+        else
+          $this->plainmsg .= trim($data).PHP_EOL;
+      }
+      else {
+        if ( stripos($this->charset,'ISO') !== false ) {
+
+          if ( $utfConverter = new utf8($this->charset) ) {
+            $this->htmlmsg .= $utfConverter->strToUtf8(trim($data)).'<br><br>';
+          }
+          else {
+            $this->htmlmsg .= trim($data).'<br><br>';
+          }
+        }
+        else {
+          $this->htmlmsg .= trim($data).'<br><br>';
+        }
+        if ( !empty($this->htmlmsg) ) {
+          $body_pattern = "/<body([^>]*)>(.*)<\/body>/smi";
+          preg_match($body_pattern, $this->htmlmsg, $body);
+          if ( !empty($body[2]) ){
+            $this->htmlmsg = $body[2];
+          }
+          $img_pattern = "/<img([^>]+)>/smi";
+          $this->htmlmsg_noimg = preg_replace($img_pattern, '', $this->htmlmsg);
+        }
+      }
+    }
+    // EMBEDDED MESSAGE
+    // Many bounce notifications embed the original message as type 2,
+    // but AOL uses type 1 (multipart), which is not handled here.
+    // There are no PHP functions to parse embedded messages,
+    // so this just appends the raw source to the main message.
+    else if ( ($structure->type === 2) && !empty($data) && strtolower($structure->subtype) === 'plain') {
+      if ( stripos($this->charset, 'ISO') !== false ) {
+        $utfConverter = new utf8($this->charset);
+        $this->plainmsg .= $utfConverter->loadCharset($this->charset) ?
+          $utfConverter->strToUtf8(trim($data)) . PHP_EOL :
+          $this->plainmsg .= trim($data) . PHP_EOL;
+      }
+      else {
+        $this->plainmsg .= trim($data) . PHP_EOL;
+      }
+    }
+    // SUBPART RECURSION
+    if ( $structure->parts ) {
+      foreach ( $structure->parts as $partno0 => $p2 ){
+        $this->get_msg_part($msgno, $p2, $partno . '.' . ($partno0+1));  // 1.2, 1.2.1, etc.
+      }
+    }
   }
 
   /**
@@ -362,13 +462,13 @@ class mailbox{
    * SORTCC - mailbox in first cc address
    * SORTSIZE - size of message in octets
    *
-   * @param static $criteria Pass it without quote or double quote
+   * @param string $criteria Pass it without quote or double quote
    * @param string $reverse Set this to 1 for reverse sorting
    * @return array|bool
    */
-  public function sort_mbox($criteria, $reverse){
-    if ( $this->is_connected() ){
-      return imap_sort($this->stream, $criteria, $reverse, SE_NOPREFETCH);
+  public function sort_mbox($criteria, $reverse = 0){
+    if ( $this->is_connected() && !empty($criteria) ){
+      return imap_sort($this->stream, constant(strtoupper($criteria)), $reverse, SE_NOPREFETCH);
     }
     return false;
   }
@@ -429,10 +529,14 @@ class mailbox{
    * Fetches the header of the message. (Test: ok)
    *
    * @param int $msgnum No of the message
+   * @param int|bool $uid Set true f the msgnum is a UID
    * @return bool|string
    */
-  public function get_msg_header($msgnum){
+  public function get_msg_header($msgnum, $uid = false){
     if ( $this->is_connected() ){
+      if ( $uid ){
+        return imap_fetchheader($this->stream, $msgnum, FT_UID);
+      }
       return imap_fetchheader($this->stream, $msgnum);
     }
     return false;
@@ -597,102 +701,19 @@ class mailbox{
   }
 
   /**
+   * Check if a mailbox exists
    *
-   *
-   * @param $msgno
-   * @param $structure
-   * @param string|false $partno '1', '2', '2.1', '2.1.3', etc for multipart, 0 if simple
+   * @param string $name The mailbox name
+   * @return bool
    */
-  private function get_msg_part($msgno, $structure, $partno){
-    // DECODE DATA
-    $data = $this->get_msg_body($msgno, $partno);
-    // Any part may be encoded, even plain text messages, so check everything.
-    $data = $this->get_decode_value($data, $structure->encoding);
-    // PARAMETERS
-    // get all parameters, like charset, filenames of attachments, etc.
-    $params = [];
-    if ( $structure->parameters ){
-      foreach ( $structure->parameters as $x ){
-        $params[strtolower($x->attribute)] = $x->value;
+  public function mbox_exists($name){
+    if ( $this->is_connected() && !empty($name) ){
+      $names = $this->get_all_names_mboxes();
+      if ( !empty($names) && in_array($name, $names) ){
+        return true;
       }
     }
-    if ( $structure->dparameters ){
-      foreach ( $structure->dparameters as $x ){
-        $params[strtolower($x->attribute)] = $x->value;
-      }
-    }
-    // ATTACHMENT
-    // Any part with a filename is an attachment,
-    // so an attached text file (type 0) is not mistaken as the message.
-    if ( $params['filename'] || $params['name'] ) {
-      // filename may be given as 'Filename' or 'Name' or both
-      $filename = $params['filename'] ? $params['filename'] : $params['name'];
-      // filename may be encoded, so see imap_mime_header_decode()
-      array_push($this->attachments, $filename);
-      file_put_contents(BBN_USER_PATH . 'tmp_mail/' . $filename, $data);
-      // this is a problem if two files have same name
-    }
-    // TEXT
-    if ( ($structure->type === 0) && !empty($data) ){
-      // Messages may be split in different parts because of inline attachments,
-      // so append parts together with blank row.
-      $this->charset = $params['charset'];  // assume all parts are same charset
-      if ( strtolower($structure->subtype) === 'plain' ){
-        if ( stripos($this->charset, 'ISO') !== false ){
-          $utfConverter = new utf8($this->charset);
-          $this->plainmsg .= $utfConverter->loadCharset($this->charset) ?
-            $utfConverter->strToUtf8(trim($data)) . PHP_EOL :
-            trim($data) . PHP_EOL;
-        }
-        else
-          $this->plainmsg .= trim($data).PHP_EOL;
-      }
-      else {
-        if ( stripos($this->charset,'ISO') !== false ) {
-
-          if ( $utfConverter = new utf8($this->charset) ) {
-            $this->htmlmsg .= $utfConverter->strToUtf8(trim($data)).'<br><br>';
-          }
-          else {
-            $this->htmlmsg .= trim($data).'<br><br>';
-          }
-        }
-        else {
-          $this->htmlmsg .= trim($data).'<br><br>';
-        }
-        if ( !empty($this->htmlmsg) ) {
-          $body_pattern = "/<body([^>]*)>(.*)<\/body>/smi";
-          preg_match($body_pattern, $this->htmlmsg, $body);
-          if ( !empty($body[2]) ){
-            $this->htmlmsg = $body[2];
-          }
-          $img_pattern = "/<img([^>]+)>/smi";
-          $this->htmlmsg_noimg = preg_replace($img_pattern, '', $this->htmlmsg);
-        }
-      }
-    }
-    // EMBEDDED MESSAGE
-    // Many bounce notifications embed the original message as type 2,
-    // but AOL uses type 1 (multipart), which is not handled here.
-    // There are no PHP functions to parse embedded messages,
-    // so this just appends the raw source to the main message.
-    else if ( ($structure->type === 2) && !empty($data) && strtolower($structure->subtype) === 'plain') {
-      if ( stripos($this->charset, 'ISO') !== false ) {
-        $utfConverter = new utf8($this->charset);
-        $this->plainmsg .= $utfConverter->loadCharset($this->charset) ?
-          $utfConverter->strToUtf8(trim($data)) . PHP_EOL :
-          $this->plainmsg .= trim($data) . PHP_EOL;
-      }
-      else {
-        $this->plainmsg .= trim($data) . PHP_EOL;
-      }
-    }
-    // SUBPART RECURSION
-    if ( $structure->parts ) {
-      foreach ( $structure->parts as $partno0 => $p2 ){
-        $this->get_msg_part($msgno, $p2, $partno . '.' . ($partno0+1));  // 1.2, 1.2.1, etc.
-      }
-    }
+    return false;
   }
 
 }

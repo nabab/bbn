@@ -745,10 +745,12 @@ class x
   }
 
   /**
-   *
-   *
+   * @param string $url
+   * @param array $param
+   * @param array $options
+   * @return mixed
    */
-  public static function curl($url, $param = false, $method = false){
+  public static function curl(string $url, array $param = null, array $options = ['post' => 1]){
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     if (is_object($param) ){
@@ -759,11 +761,17 @@ class x
       curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
       //curl_setopt($ch, CURLOPT_SAFE_UPLOAD, false);
     }
-    if ( is_array($param) && (count($param) > 0) ){
-      if ( $method === 'post' ){
+    $options = array_change_key_case($options, CASE_UPPER);
+    foreach ( $options as $opt => $val ){
+      if ( defined('CURLOPT_'.strtoupper($opt)) ){
+        curl_setopt($ch, constant('CURLOPT_'.strtoupper($opt)), $val);
+      }
+    }
+    if ( $param ){
+      if ( !empty($options['POST']) ){
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($param));
+        //curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($param));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $param);
       }
       else{
         curl_setopt($ch, CURLOPT_URL, $url.'?'.http_build_query($param));
@@ -775,7 +783,6 @@ class x
     $r = curl_exec($ch);
     if ( !$r ){
       self::log(curl_error($ch), 'curl');
-      self::log($r, 'curl');
     }
     return $r;
   }

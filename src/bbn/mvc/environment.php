@@ -62,7 +62,7 @@ class environment {
 
   private function set_params($path)
   {
-    if ( is_null($this->params) ) {
+    if ( !isset($this->params) ) {
       $this->params = [];
       $tmp = explode('/', \bbn\str::parse_path($path));
       foreach ( $tmp as $t ) {

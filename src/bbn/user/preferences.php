@@ -20,6 +20,7 @@ class preferences
 {
 
   private static
+    $current,
     $id_permission_root;
 
   protected static
@@ -67,6 +68,17 @@ class preferences
 		return self::$id_permission_root;
 	}
 
+  protected static function _init(preferences $pref){
+    self::$current =& $pref;
+  }
+
+  /**
+   * @return \bbn\appui\options
+   */
+  public static function get_preferences(){
+    return self::$current;
+  }
+
   /**
 	 * @return \bbn\user\permissions
 	 */
@@ -76,6 +88,7 @@ class preferences
 		$this->db = $db;
 		$this->id_user = $this->cfg['id_user'] ?: false;
 		$this->id_group = $this->cfg['id_group'] ?: false;
+    self::_init($this);
 	}
 
   public function get_user(){
