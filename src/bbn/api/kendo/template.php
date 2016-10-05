@@ -15,7 +15,7 @@ class template // extends object
   }
 
   public function get($id){
-    if ( $html = $this->ctrl->get_view($this->prepath."kendo/".$id, "html") ){
+    if ( $html = $this->ctrl->get_view($this->prepath."kendo/".$id) ){
       return '<script id="tpl-'.$id.'" type="text/x-kendo-template">'.$html.'</script>';
     }
   }

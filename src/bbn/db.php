@@ -333,7 +333,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       array_push($msg, self::$line);
     }
     $this->log(implode(PHP_EOL, $msg));
-    if ( 1 ){
+    if ( $this->on_error === self::E_DIE ){
       die(implode('<br>', $msg));
     }
   }
