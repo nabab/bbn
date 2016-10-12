@@ -464,38 +464,53 @@ class controller implements api{
     }
 	}
 
-	/**
-	 * This will add a javascript view to $this->obj->script
-	 * Chainable
-	 *
-	 * @param string $path
-	 * @param string $mode
-	 * @return string|false
-	 */
-	public function add_js()
-	{
-		$args = func_get_args();
-		$has_path = false;
-		foreach ( $args as $i => $a ){
-			if ( $new_data = $this->retrieve_var($a) ){
-				$this->js_data($new_data);
-			}
-			else if ( is_string($a) ){
-				$has_path = 1;
-			}
+  /**
+   * This will add a javascript view to $this->obj->script
+   * Chainable
+   *
+   * @param string $path
+   * @param string $mode
+   * @return string|false
+   */
+  public function add_js()
+  {
+    $args = func_get_args();
+    $has_path = false;
+    foreach ( $args as $i => $a ){
+      if ( $new_data = $this->retrieve_var($a) ){
+        $this->js_data($new_data);
+      }
+      else if ( is_string($a) ){
+        $has_path = 1;
+      }
       else if ( is_array($a) ){
         $this->js_data($a);
       }
-		}
-		if ( !$has_path ){
-			array_unshift($args, $this->path);
-		}
-		array_push($args, 'js');
-		if ( $r = call_user_func_array([$this, 'get_view'], $args) ){
-			$this->add_script($r);
-		}
-		return $this;
-	}
+    }
+    if ( !$has_path ){
+      array_unshift($args, $this->path);
+    }
+    array_push($args, 'js');
+    if ( $r = call_user_func_array([$this, 'get_view'], $args) ){
+      $this->add_script($r);
+    }
+    return $this;
+  }
+
+  /**
+   * This will add a javascript view to $this->obj->script
+   * Chainable
+   *
+   * @param string $path
+   * @param string $mode
+   * @return string|false
+   */
+  public function add_js_group($files = '', array $data = []){
+    if ( $js = $this->get_view_group($files, $data, 'js') ){
+      $this->js_data($data)->add_script($js);
+    }
+    return $this;
+  }
 
 	public function set_title($title){
 		$this->obj->title = $title;
