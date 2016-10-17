@@ -958,8 +958,9 @@ class task {
         'type' => $cfg['type'],
         'priority' => isset($cfg['priority']) ? $cfg['priority'] : 5,
         'id_parent' => isset($cfg['id_parent']) ? $cfg['id_parent'] : null,
+        'deadline' => isset($cfg['deadline']) ? $cfg['deadline'] : null,
         'id_user' => $this->id_user ?: null,
-        'state' => $this->id_state('opened'),
+        'state' => isset($cfg['state']) ? $cfg['state'] : $this->id_state('opened'),
         'creation_date' => $date
       ]) ){
         $id = $this->db->last_id();

@@ -680,10 +680,10 @@ public static function jpg2pdf($jpg, $pdf){
    * Compresses and sets the image's quality (JPEG image only).
    *
    * @param int $q The quality level (0-100)
-   * @param $comp The compression type
+   * @param int $comp The compression type
    * @return \bbn\file\image
    */
-  public function quality($q = 80, $comp = COMPRESSION_JPEG){
+  public function quality(int $q = 80, int $comp = 8){
     if ( $this->test() &&
       ((strtolower($this->get_extension()) === 'jpg') ||
         (strtolower($this->get_extension()) === 'jpeg'))
