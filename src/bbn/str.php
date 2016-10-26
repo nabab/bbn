@@ -210,54 +210,43 @@ class str
    *
 	 * @return string
 	 */
-	public static function clean($st, $mode='all')
-	{
-		if ( is_array($st) )
-		{
+	public static function clean($st, $mode='all'){
+		if ( is_array($st) ){
 			reset($st);
 			$i = count($st);
-			if ( trim($st[0]) == '' )
-			{
+			if ( trim($st[0]) == '' ){
 				array_splice($st,0,1);
 				$i--;
 			}
-			if ( $i > 0 )
-			{
-				if ( trim($st[$i-1]) == '' )
-				{
-					array_splice($st,$i-1,1);
+			if ( $i > 0 ){
+				if ( trim($st[$i-1]) === '' ){
+					array_splice($st, $i-1, 1);
 					$i--;
 				}
 			}
 			return $st;
 		}
-		else
-		{
+		else{
       $st = self::cast($st);
-			if ( $mode == 'all' )
-			{
+			if ( $mode == 'all' ){
 				$st = mb_ereg_replace("\n",'\n',$st);
 				$st = mb_ereg_replace("[\t\r]","",$st);
 				$st = mb_ereg_replace('\s{2,}',' ',$st);
 			}
-			else if ( $mode == '2nl' )
-			{
+			else if ( $mode == '2nl' ){
 				$st = mb_ereg_replace("[\r]","",$st);
 				$st = mb_ereg_replace("\n{2,}","\n",$st);
 			}
-			else if ( $mode == 'html' )
-			{
+			else if ( $mode == 'html' ){
 				$st = mb_ereg_replace("[\t\r\n]",'',$st);
 				$st = mb_ereg_replace('\s{2,}',' ',$st);
 			}
-			else if ( $mode == 'code' )
-			{
+			else if ( $mode == 'code' ){
 				$st = mb_ereg_replace("!/\*.*?\*/!s",'',$st); // comment_pattern
 				$st = mb_ereg_replace("[\r\n]",'',$st);
 				$st = mb_ereg_replace("\t"," ",$st);
 				$chars = [';','=','+','-','\(','\)','\{','\}','\[','\]',',',':'];
-				foreach ( $chars as $char )
-				{
+				foreach ( $chars as $char ){
 					while ( mb_strpos($st,$char.' ') !== false ){
 						$st = mb_ereg_replace($char.' ',$char,$st);
 					}
@@ -285,16 +274,14 @@ class str
    *
 	 * @return string
 	 */
-	public static function cut($st, $max = 15)
-	{
+	public static function cut($st, $max = 15){
     $st = self::cast($st);
 		$st = mb_ereg_replace('&nbsp;',' ',$st);
 		$st = mb_ereg_replace('\n',' ',$st);
 		$st = strip_tags($st);
 		$st = html_entity_decode($st, ENT_QUOTES, 'UTF-8');
 		$st = self::clean($st);
-		if ( mb_strlen($st) >= $max )
-		{
+		if ( mb_strlen($st) >= $max ){
       // Chars forbidden to finish the string with
 			$chars = [' ', '.'];
       // Final chars

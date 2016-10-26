@@ -110,7 +110,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
      *      die: the script will die with the error
      *      continue: the script and further queries will be executed
      */
-    $on_error = self::E_STOP;
+    $on_error = self::E_STOP_ALL;
 
   public
     /**

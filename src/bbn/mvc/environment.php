@@ -349,10 +349,20 @@ class environment {
       $this->files = [];
       // Rebuilding the $_FILES array into $this->files in a more logical structure
       if ( count($_FILES) > 0 ){
+        // Some devices send multiple files with the same name
+        $names = [];
         foreach ( $_FILES as $n => $f ){
           if ( is_array($f['name']) ){
             $this->files[$n] = [];
             foreach ( $f['name'] as $i => $v ){
+              while ( in_array($v, $names) ){
+                if ( !isset($j) ){
+                  $j = 0;
+                }
+                $j++;
+                $file = \bbn\str::file_ext($f['name'][$i], true);
+                $v = $file[0].'_'.$j.'.'.$file[1];
+              }
               array_push($this->files[$n], [
                 'name' => $v,
                 'tmp_name' => $f['tmp_name'][$i],
@@ -360,6 +370,7 @@ class environment {
                 'error' => $f['error'][$i],
                 'size' => $f['size'][$i],
               ]);
+              array_push($names, $v);
             }
           }
           else{

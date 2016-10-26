@@ -38,12 +38,8 @@ trait triggers {
   /**
    * Launches a function before or after
    *
-   * @param $table
-   * @param $kind
-   * @param $moment
-   * @param $values
-   * @param $where
-   * @return bool
+   * @param array $cfg
+   * @return array
    */
   private function _trigger(array $cfg){
     if ( !isset($cfg['trig']) ){
