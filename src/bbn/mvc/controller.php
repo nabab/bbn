@@ -622,8 +622,9 @@ class controller implements api{
 	}
 
 	public function combo($title = '', $data=[]){
-		echo $this->get_less($this->path, false);
-		$this->add_data($this->get_model(false));
+		echo $this
+      ->add_data($this->get_model(\bbn\x::merge_arrays($this->post, $this->data)))
+      ->get_less($this->path, false);
 		if ( $new_title = $this->retrieve_var($title) ){
 			$this->set_title($new_title);
 		}

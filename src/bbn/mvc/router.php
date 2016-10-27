@@ -319,16 +319,8 @@ class router {
     }
     // Not found, sending the default controllers
     if ( !$file ){
-      if ( (
-          ($mode === 'dom') &&
-          (BBN_DEFAULT_MODE === 'dom')
-        ) || (
-          ($mode !== 'dom') &&
-          !empty($this->routes[self::$def])
-        ) ){
-        $npath = $this->routes[self::$def];
-        $file = $root.$this->routes[self::$def].'.php';
-      }
+      $npath = '404';
+      $file = $root.'404.php';
     }
     if ( $file ) {
       return $this->set_known([

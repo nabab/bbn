@@ -141,14 +141,13 @@ class connection
        * Sets if the hotlinks features should be in used
        * @var bool
        */
-      'hotlinks' => false
+      'hotlinks' => false,
+      'show' => 'login'
     ];
 
   private
     /** @var bool */
-    $just_login = false,
-    /** @var bool */
-    $identified = false;
+    $just_login = false;
 
 	protected
     /** @var session */
@@ -377,7 +376,8 @@ class connection
         ){
           $this
             ->_authenticate($id)
-            ->_init_dir();
+            ->_init_dir()
+            ->save_session();
         }
         else{
           $this->set_error(19);
@@ -1215,10 +1215,10 @@ class connection
   public function get_name(array $usr = null){
     if ( $this->auth ){
       if ( is_null($usr) ){
-        return $this->session->get('info', 'login');
+        return $this->session->get('info', $this->class_cfg['show']);
       }
-      else if ( isset($usr['login']) ){
-        return $usr['login'];
+      else if ( isset($usr[$this->class_cfg['show']]) ){
+        return $usr[$this->class_cfg['show']];
       }
     }
     return false;

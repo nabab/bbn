@@ -48,19 +48,12 @@ class options extends \bbn\objcache
     return class_exists('\\bbn\\appui\\history') && \bbn\appui\history::is_enabled();
   }
 
-  private function _cache_delete($id, $parents = true, $deep = false){
+  private function _cache_delete($id){
     $this->cacher->delete_all($this->_cache_name($id));
-    if ( $parents ){
-      $ps = $this->parents($id);
-      foreach ( $ps as $i => $p ){
-        $this->cacher->delete_all($this->_cache_name($p));
-      }
-    }
-    if ( $deep ){
-      $items = $this->tree_ids($id);
-      foreach ( $items as $item ){
-        $this->_cache_delete($item, false);
-      }
+    $this->cacher->delete_all($this->_cache_name($this->parent($id)));
+    $ids = $this->get_ids_by_code($id);
+    foreach ( $ids as $id ){
+      $this->cacher->delete_all($this->_cache_name($id));
     }
     return $this;
   }
@@ -84,10 +77,10 @@ class options extends \bbn\objcache
    */
   protected function get_rows($where){
     $db =& $this->db;
-    $tab = $this->cfg['table'];
+    $tab = $this->class_cfg['table'];
     $cols = [];
     if ( empty($where) ){
-      $where = [$this->cfg['cols']['active'] => 1];
+      $where = [$this->class_cfg['cols']['active'] => 1];
     }
     if ( $hist = $this->_has_history() ){
       \bbn\appui\history::disable();
@@ -97,20 +90,20 @@ class options extends \bbn\objcache
       \bbn\appui\history::enable();
     }
     if ( $wst ){
-      foreach ( $this->cfg['cols'] AS $k => $col ){
+      foreach ( $this->class_cfg['cols'] AS $k => $col ){
         if ( $k !== 'active' ){
           array_push($cols, $db->cfn($col, $tab, 1));
         }
       }
-      array_push($cols, "COUNT(".$db->escape($tab.'2').'.'.$db->escape($this->cfg['cols']['id']).") AS num_children ");
+      array_push($cols, "COUNT(".$db->escape($tab.'2').'.'.$db->escape($this->class_cfg['cols']['id']).") AS num_children ");
       $q = "SELECT ".implode(", ", $cols)."
         FROM ".$db->escape($tab)."
           LEFT JOIN ".$db->escape($tab)." AS ".$db->escape($tab.'2')."
-            ON ".$db->cfn($this->cfg['cols']['id_parent'], $tab.'2', 1)." = ".$db->cfn($this->cfg['cols']['id'], $tab, 1)."
-            AND ".$db->cfn($this->cfg['cols']['active'], $tab.'2', 1)." = 1
+            ON ".$db->cfn($this->class_cfg['cols']['id_parent'], $tab.'2', 1)." = ".$db->cfn($this->class_cfg['cols']['id'], $tab, 1)."
+            AND ".$db->cfn($this->class_cfg['cols']['active'], $tab.'2', 1)." = 1
         $wst
-        GROUP BY " . $this->db->cfn($this->cfg['cols']['id'], $tab, 1)."
-        ORDER BY ".$db->cfn($this->cfg['cols']['text'], $tab, 1);
+        GROUP BY " . $this->db->cfn($this->class_cfg['cols']['id'], $tab, 1)."
+        ORDER BY ".$db->cfn($this->class_cfg['cols']['text'], $tab, 1);
       $args = array_values($where);
       return $this->db->get_rows($q, $args);
     }
@@ -136,7 +129,7 @@ class options extends \bbn\objcache
    */
   public function __construct(\bbn\db $db, array $cfg=[]){
     parent::__construct($db);
-    $this->cfg = \bbn\x::merge_arrays(self::$_defaults, $cfg);
+    $this->class_cfg = \bbn\x::merge_arrays(self::$_defaults, $cfg);
     self::_init($this);
   }
 
@@ -170,9 +163,9 @@ class options extends \bbn\objcache
         $id_parent = $cur;
       }
       else if ( is_string($cur) ){
-        $id_parent = $this->db->select_one($this->cfg['table'], $this->cfg['cols']['id'], [
-          $this->cfg['cols']['id_parent'] => $id_parent,
-          $this->cfg['cols']['code'] => $cur
+        $id_parent = $this->db->select_one($this->class_cfg['table'], $this->class_cfg['cols']['id'], [
+          $this->class_cfg['cols']['id_parent'] => $id_parent,
+          $this->class_cfg['cols']['code'] => $cur
         ]);
       }
       else{
@@ -226,14 +219,17 @@ class options extends \bbn\objcache
   }
 
   public function items($id){
+    if ( ($res = $this->cache_get($id, __FUNCTION__)) !== false ){
+      return $res;
+    }
     $cfg = $this->get_cfg($id);
     if ( empty($cfg['orderable']) ){
       return $this->db->get_column_values(
-        $this->cfg['table'],
-        $this->cfg['cols']['id'], [
-          $this->cfg['cols']['id_parent'] => $id,
+        $this->class_cfg['table'],
+        $this->class_cfg['cols']['id'], [
+          $this->class_cfg['cols']['id_parent'] => $id,
         ], [
-          $this->cfg['cols']['text'] => 'ASC'
+          $this->class_cfg['cols']['text'] => 'ASC'
         ]
       );
     }
@@ -242,18 +238,20 @@ class options extends \bbn\objcache
         $a['cfg'] = [];
       }
       return $a;
-    }, $this->db->rselect_all($this->cfg['table'], [
-      $this->cfg['cols']['id'],
-      $this->cfg['cols']['cfg']
+    }, $this->db->rselect_all($this->class_cfg['table'], [
+      $this->class_cfg['cols']['id'],
+      $this->class_cfg['cols']['cfg']
     ], [
-      $this->cfg['cols']['id_parent'] => $id
+      $this->class_cfg['cols']['id_parent'] => $id
     ]));
     usort($rows, function($a, $b){
       return (isset($a['cfg']['order']) ? $a['cfg']['order'] : 1000000) > (isset($b['cfg']['order']) ? $b['cfg']['order'] : 1000000);
     });
-    return array_map(function($a){
+    $res = array_map(function($a){
       return $a['id'];
     }, $rows);
+    $this->cache_set($id, __FUNCTION__, $res);
+    return $res;
   }
 
   public function native_option($id){
@@ -262,9 +260,9 @@ class options extends \bbn\objcache
       if ( $r = $this->cache_get($id, __FUNCTION__) ){
         return $r;
       }
-      $tab = $this->db->tsn($this->cfg['table']);
+      $tab = $this->db->tsn($this->class_cfg['table']);
       $opt = $this->get_row([
-        $this->db->cfn($this->cfg['cols']['id'], $tab) => $id
+        $this->db->cfn($this->class_cfg['cols']['id'], $tab) => $id
       ]);
       if ( $opt ){
         $this->cache_set($id, __FUNCTION__, $opt);
@@ -289,9 +287,6 @@ class options extends \bbn\objcache
       $id = $this->from_code(func_get_args());
     }
     if ( \bbn\str::is_integer($id) ) {
-      if ( $r = $this->cache_get($id, __FUNCTION__) ){
-        return $r;
-      }
       if ( isset($opt) || ($opt = $this->native_option($id)) ){
         $this->get_value($opt);
         $this->get_cfg($opt);
@@ -301,7 +296,6 @@ class options extends \bbn\objcache
           }
           $opt['alias'] = $this->option($opt['id_alias']);
         }
-        $this->cache_set($id, __FUNCTION__, $opt);
         return $opt;
       }
     }
@@ -317,7 +311,7 @@ class options extends \bbn\objcache
   public function text($id){
     $id = $this->from_code(func_get_args());
     if ( \bbn\str::is_integer($id) ) {
-      return $this->db->get_val($this->cfg['table'], $this->cfg['cols']['text'], $this->cfg['cols']['id'], $id);
+      return $this->db->get_val($this->class_cfg['table'], $this->class_cfg['cols']['text'], $this->class_cfg['cols']['id'], $id);
     }
     return false;
   }
@@ -331,7 +325,7 @@ class options extends \bbn\objcache
   public function itext($id){
     $id = $this->from_code(func_get_args());
     if ( \bbn\str::is_integer($id) ) {
-      $val = $this->db->get_val($this->cfg['table'], $this->cfg['cols']['text'], $this->cfg['cols']['id'], $id);
+      $val = $this->db->get_val($this->class_cfg['table'], $this->class_cfg['cols']['text'], $this->class_cfg['cols']['id'], $id);
       if ( $val ){
         return _($val);
       }
@@ -347,7 +341,7 @@ class options extends \bbn\objcache
    */
   public function code($id){
     if ( \bbn\str::is_integer($id) ) {
-      return $this->db->get_val($this->cfg['table'], $this->cfg['cols']['code'], $this->cfg['cols']['id'], $id);
+      return $this->db->get_val($this->class_cfg['table'], $this->class_cfg['cols']['code'], $this->class_cfg['cols']['id'], $id);
     }
     return false;
   }
@@ -361,16 +355,13 @@ class options extends \bbn\objcache
   public function options($id = 0){
     $args = func_get_args();
     if ( ($id = $this->from_code($args ?: $id)) !== false ) {
-      if ( isset($args[0]['id']) ){
-        return $args[0]['id'];
-      }
       if ( $r = $this->cache_get($id, __FUNCTION__) ){
         return $r;
       }
-      $opt = $this->db->select_all_by_keys($this->cfg['table'],
-        [$this->cfg['cols']['id'], $this->cfg['cols']['text']],
-        [$this->cfg['cols']['id_parent'] => $id],
-        [$this->cfg['cols']['text'] => 'ASC']
+      $opt = $this->db->select_all_by_keys($this->class_cfg['table'],
+        [$this->class_cfg['cols']['id'], $this->class_cfg['cols']['text']],
+        [$this->class_cfg['cols']['id_parent'] => $id],
+        [$this->class_cfg['cols']['text'] => 'ASC']
       );
       $this->cache_set($id, __FUNCTION__, $opt);
       return $opt;
@@ -388,7 +379,7 @@ class options extends \bbn\objcache
     $args = func_get_args();
     $id = $this->from_code($args ?: $id);
     if ( \bbn\str::is_integer($id) ) {
-      return $this->db->count($this->cfg['table'], [$this->cfg['cols']['id_parent'] => $id]);
+      return $this->db->count($this->class_cfg['table'], [$this->class_cfg['cols']['id_parent'] => $id]);
     }
     return false;
   }
@@ -414,7 +405,7 @@ class options extends \bbn\objcache
 
   public function options_by_alias($id_alias, $full = false){
     if ( \bbn\str::is_integer($id_alias) ){
-      $where = [$this->cfg['cols']['id_alias'] => $id_alias];
+      $where = [$this->class_cfg['cols']['id_alias'] => $id_alias];
       $list = $this->get_rows($where);
       if ( is_array($list) ){
         $res = [];
@@ -442,9 +433,6 @@ class options extends \bbn\objcache
    */
   public function full_options($id = 0, $id_parent = false, $where = [], $order = [], $start = 0, $limit = 2000){
     $id = $this->from_code($id, $id_parent);
-    if ( $r = $this->cache_get($id, __FUNCTION__) ){
-      return $r;
-    }
     if ( \bbn\str::is_integer($id = $this->from_code($id, $id_parent)) ){
       $list = $this->items($id);
       if ( is_array($list) ){
@@ -452,7 +440,6 @@ class options extends \bbn\objcache
         foreach ($list as $i) {
           $res[$i] = $this->option($i);
         }
-        $this->cache_set($id, __FUNCTION__, $res);
         return $res;
       }
     }
@@ -474,7 +461,7 @@ class options extends \bbn\objcache
       if ( !is_array($where) ){
         $where = [];
       }
-      $where[$this->cfg['cols']['id_parent']] = $id;
+      $where[$this->class_cfg['cols']['id_parent']] = $id;
       $opts = $this->get_rows($where, $start, $limit);
       $this->cache_set($id, __FUNCTION__, $opts);
       return $opts;
@@ -485,16 +472,12 @@ class options extends \bbn\objcache
   public function tree_ids($id, &$res = []){
     $id = $this->from_code(func_get_args());
     if ( \bbn\str::is_integer($id) ) {
-      if ( $r = $this->cache_get($id, __FUNCTION__) ){
-        return $r;
-      }
       if ( $opts = $this->items($id) ){
         foreach ($opts as $o) {
           array_push($res, $o);
           $this->tree_ids($o, $res);
         }
       }
-      $this->cache_set($id, __FUNCTION__, $res);
       return $res;
     }
     return false;
@@ -503,9 +486,6 @@ class options extends \bbn\objcache
   public function tree($id, $id_parent = false){
     $id = $this->from_code(func_get_args());
     if ( \bbn\str::is_integer($id) && ($text = $this->text($id)) ) {
-      if ( $r = $this->cache_get($id, __FUNCTION__) ){
-        return $r;
-      }
       $res = [
         'id' => $id,
         'text' => $text
@@ -518,7 +498,6 @@ class options extends \bbn\objcache
           }
         }
       }
-      $this->cache_set($id, __FUNCTION__, $res);
       return $res;
     }
     return false;
@@ -527,9 +506,6 @@ class options extends \bbn\objcache
   public function full_tree($id){
     $id = $this->from_code(func_get_args());
     if (\bbn\str::is_integer($id) && ($text = $this->text($id))) {
-      if ( $r = $this->cache_get($id, __FUNCTION__) ){
-        return $r;
-      }
       if ( $res = $this->option($id) ){
         $res['items'] = [];
         if ($opts = $this->items($id) ){
@@ -542,7 +518,6 @@ class options extends \bbn\objcache
         else{
           unset($res['items']);
         }
-        $this->cache_set($id, __FUNCTION__, $res);
         return $res;
       }
     }
@@ -552,9 +527,6 @@ class options extends \bbn\objcache
   public function native_tree($id){
     $id = $this->from_code(func_get_args());
     if ( \bbn\str::is_integer($id) ) {
-      if ( $r = $this->cache_get($id, __FUNCTION__) ){
-        return $r;
-      }
       if ( $res = $this->native_option($id) ) {
         $its = $this->items($id);
         if ( count($its) ){
@@ -563,7 +535,6 @@ class options extends \bbn\objcache
             array_push($res['items'], $this->native_tree($it, $id));
           }
         }
-        $this->cache_set($id, __FUNCTION__, $res);
         return $res;
       }
     }
@@ -577,7 +548,7 @@ class options extends \bbn\objcache
    */
   private function _prepare(array &$it){
     // The table's columns
-    $c = $this->cfg['cols'];
+    $c = $this->class_cfg['cols'];
     // If id_parent is undefined it uses the default
     if ( !isset($it[$c['id_parent']]) ){
       $it[$c['id_parent']] = $this->default;
@@ -662,17 +633,17 @@ class options extends \bbn\objcache
     $res = false;
     $items = !empty($it['items']) && is_array($it['items']) ? $it['items'] : false;
     if ( $this->_prepare($it) ){
-      $c = $this->cfg['cols'];
+      $c = $this->class_cfg['cols'];
       $id = false;
       if ( !is_null($it[$c['code']]) ){
         // Reviving deleted entry
-        if ( $id = $this->db->select_one($this->cfg['table'], $c['id'], [
+        if ( $id = $this->db->select_one($this->class_cfg['table'], $c['id'], [
           $c['id_parent'] => $it[$c['id_parent']],
           $c['code'] => $it[$c['code']],
           $c['active'] => 0
         ])
         ){
-          $res = $this->db->update($this->cfg['table'], [
+          $res = $this->db->update($this->class_cfg['table'], [
             $c['text'] => $it[$c['text']],
             $c['id_alias'] => $it[$c['id_alias']],
             $c['value'] => $it[$c['value']],
@@ -685,13 +656,13 @@ class options extends \bbn\objcache
         }
         else{
           if ( $force &&
-            ($id = $this->db->select_one($this->cfg['table'], $c['id'], [
+            ($id = $this->db->select_one($this->class_cfg['table'], $c['id'], [
               $c['id_parent'] => $it[$c['id_parent']],
               $c['code'] => $it[$c['code']],
               $c['active'] => 0
             ]))
           ){
-            $res = $this->db->update($this->cfg['table'], [
+            $res = $this->db->update($this->class_cfg['table'], [
               $c['text'] => $it[$c['text']],
               $c['id_alias'] => $it[$c['id_alias']],
               $c['value'] => $it[$c['value']],
@@ -703,7 +674,7 @@ class options extends \bbn\objcache
         }
       }
       if ( !$id ){
-        if ( $res = $this->db->insert($this->cfg['table'], [
+        if ( $res = $this->db->insert($this->class_cfg['table'], [
           $c['id_parent'] => $it[$c['id_parent']],
           $c['text'] => $it[$c['text']],
           $c['code'] => $it[$c['code']],
@@ -762,22 +733,22 @@ class options extends \bbn\objcache
 
   public function get_codes($id){
     if ( $id = $this->from_code(func_get_args()) ){
-      $c = $this->cfg['cols'];
-      return $this->db->select_all_by_keys($this->cfg['table'], [$c['id'], $c['code']], [$c['id_parent'] => $id]);
+      $c = $this->class_cfg['cols'];
+      return $this->db->select_all_by_keys($this->class_cfg['table'], [$c['id'], $c['code']], [$c['id_parent'] => $id]);
     }
   }
 
   public function options_codes($id){
     if ( $id = $this->from_code(func_get_args()) ){
-      $c = $this->cfg['cols'];
-      return $this->db->select_all_by_keys($this->cfg['table'], [$c['code'], $c['id']], [$c['id_parent'] => $id]);
+      $c = $this->class_cfg['cols'];
+      return $this->db->select_all_by_keys($this->class_cfg['table'], [$c['code'], $c['id']], [$c['id_parent'] => $id]);
     }
   }
 
   public function set($id, $cfg){
     if ( $this->_prepare($cfg) ){
-      $c = $this->cfg['cols'];
-      if ( $res = $this->db->update($this->cfg['table'], [
+      $c = $this->class_cfg['cols'];
+      if ( $res = $this->db->update($this->class_cfg['table'], [
         $c['text'] => $cfg[$c['text']],
         $c['code'] => !empty($cfg[$c['code']]) ? $cfg[$c['code']] : null,
         $c['id_alias'] => !empty($cfg[$c['id_alias']]) ? $cfg[$c['id_alias']] : null,
@@ -797,8 +768,8 @@ class options extends \bbn\objcache
   public function remove($id){
     if ( $id = $this->from_code(func_get_args()) ) {
       $this->_cache_delete($id);
-      return $this->db->delete($this->cfg['table'], [
-        $this->cfg['cols']['id'] => $id
+      return $this->db->delete($this->class_cfg['table'], [
+        $this->class_cfg['cols']['id'] => $id
       ]);
     }
     return false;
@@ -814,10 +785,10 @@ class options extends \bbn\objcache
     if ( is_array($cfg) || is_object($cfg) ){
       $cfg = json_encode($cfg);
     }
-    if ( $res = $this->db->update($this->cfg['table'], [
-      $this->cfg['cols']['cfg'] => $cfg
+    if ( $res = $this->db->update($this->class_cfg['table'], [
+      $this->class_cfg['cols']['cfg'] => $cfg
     ], [
-      $this->cfg['cols']['id'] => $id
+      $this->class_cfg['cols']['id'] => $id
     ]) ){
       $this->_cache_delete($id);
       return $res;
@@ -873,8 +844,8 @@ class options extends \bbn\objcache
     if ( empty($opt) || !isset($opt['id']) ){
       return false;
     }
-    if ( \bbn\str::is_json($opt[$this->cfg['cols']['cfg']]) ){
-      $opt['cfg'] = json_decode($opt[$this->cfg['cols']['cfg']], 1);
+    if ( \bbn\str::is_json($opt[$this->class_cfg['cols']['cfg']]) ){
+      $opt['cfg'] = json_decode($opt[$this->class_cfg['cols']['cfg']], 1);
     }
     $parents = $this->parents($opt['id']);
     foreach ( $parents as $i => $p ){
@@ -901,7 +872,7 @@ class options extends \bbn\objcache
     $num = 0;
     if ( $o_dest && $o_src ){
       $o_final = \bbn\x::merge_arrays($o_src, $o_dest);
-      $tables = $this->db->get_foreign_keys($this->cfg['cols']['id'], $this->cfg['table']);
+      $tables = $this->db->get_foreign_keys($this->class_cfg['cols']['id'], $this->class_cfg['table']);
       foreach ( $tables as $table => $cols ){
         foreach ( $cols as $c ){
           $num += (int)$this->db->update($table, [$c => $dest], [$c => $src]);
@@ -931,14 +902,13 @@ class options extends \bbn\objcache
         $i = empty($target['num_children']) ? 0 : $target['num_children'];
         $this->set_param($id, ['order' => $i + 1]);
       }
-      $res = $this->db->update($this->cfg['table'], [
-        $this->cfg['cols']['id_parent'] => $id_parent
+      $res = $this->db->update($this->class_cfg['table'], [
+        $this->class_cfg['cols']['id_parent'] => $id_parent
       ], [
         'id' => $id
       ]);
       $this->_cache_delete($id_parent);
       $this->_cache_delete($id);
-      $this->_cache_delete($o['id_parent']);
     }
     return $res;
   }
@@ -973,33 +943,33 @@ class options extends \bbn\objcache
     if ( empty($opt) || !isset($opt['id']) ){
       return false;
     }
-    if ( \bbn\str::is_json($opt[$this->cfg['cols']['cfg']]) ){
-      $opt['cfg'] = json_decode($opt[$this->cfg['cols']['cfg']], 1);
+    if ( \bbn\str::is_json($opt[$this->class_cfg['cols']['cfg']]) ){
+      $opt['cfg'] = json_decode($opt[$this->class_cfg['cols']['cfg']], 1);
     }
     return isset($opt['cfg'], $opt['cfg'][$param]) ? $opt['cfg'][$param] : ($false ? false : null);
   }
 
   public function set_alias($id, $alias){
-    return $this->db->update_ignore($this->cfg['table'], [
-      $this->cfg['cols']['id_alias'] => $alias ?: null
+    return $this->db->update_ignore($this->class_cfg['table'], [
+      $this->class_cfg['cols']['id_alias'] => $alias ?: null
     ], [
-      $this->cfg['cols']['id'] => $id
+      $this->class_cfg['cols']['id'] => $id
     ]);
   }
 
   public function set_text($id, $text){
-    return $this->db->update_ignore($this->cfg['table'], [
-      $this->cfg['cols']['text'] => $text
+    return $this->db->update_ignore($this->class_cfg['table'], [
+      $this->class_cfg['cols']['text'] => $text
     ], [
-      $this->cfg['cols']['id'] => $id
+      $this->class_cfg['cols']['id'] => $id
     ]);
   }
 
   public function set_code($id, $code){
-    return $this->db->update_ignore($this->cfg['table'], [
-      $this->cfg['cols']['code'] => $code ?: null
+    return $this->db->update_ignore($this->class_cfg['table'], [
+      $this->class_cfg['cols']['code'] => $code ?: null
     ], [
-      $this->cfg['cols']['id'] => $id
+      $this->class_cfg['cols']['id'] => $id
     ]);
   }
 
@@ -1019,10 +989,10 @@ class options extends \bbn\objcache
   public function unset_cfg($id){
     $res = false;
     if ( !empty($id) && ($o = $this->option($id)) && empty($o['num_children']) ){
-      $res = $this->db->update($this->cfg['table'], [
-        $this->cfg['cols']['cfg'] => null
+      $res = $this->db->update($this->class_cfg['table'], [
+        $this->class_cfg['cols']['cfg'] => null
       ], [
-        $this->cfg['cols']['id'] => $id
+        $this->class_cfg['cols']['id'] => $id
       ]);
       if ( $res ){
         $this->_cache_delete($id);
@@ -1034,10 +1004,10 @@ class options extends \bbn\objcache
   public function unset_value($id){
     $res = false;
     if ( !empty($id) ){
-      $res = $this->db->update($this->cfg['table'], [
-        $this->cfg['cols']['value'] => null
+      $res = $this->db->update($this->class_cfg['table'], [
+        $this->class_cfg['cols']['value'] => null
       ], [
-        $this->cfg['cols']['id'] => $id
+        $this->class_cfg['cols']['id'] => $id
       ]);
       if ( $res ){
         $this->_cache_delete($id);
@@ -1059,10 +1029,10 @@ class options extends \bbn\objcache
     if ( empty($val) ){
       return $this->unset_value($id);
     }
-    if ( $res = $this->db->update($this->cfg['table'], [
-      $this->cfg['cols']['value'] => $val
+    if ( $res = $this->db->update($this->class_cfg['table'], [
+      $this->class_cfg['cols']['value'] => $val
     ], [
-      $this->cfg['cols']['id'] => $id
+      $this->class_cfg['cols']['id'] => $id
     ]) ){
       $this->_cache_delete($id);
       return $res;
@@ -1088,18 +1058,18 @@ class options extends \bbn\objcache
     if ( empty($opt) || !isset($opt['id']) ){
       return false;
     }
-    if ( isset($opt[$this->cfg['cols']['value']]) && \bbn\str::is_json($opt[$this->cfg['cols']['value']]) ){
-      $val = json_decode($opt[$this->cfg['cols']['value']], 1);
+    if ( isset($opt[$this->class_cfg['cols']['value']]) && \bbn\str::is_json($opt[$this->class_cfg['cols']['value']]) ){
+      $val = json_decode($opt[$this->class_cfg['cols']['value']], 1);
       if ( \bbn\x::is_assoc($val) ) {
         foreach ($val as $k => $v) {
           if ( !isset($opt[$k]) ){
             $opt[$k] = $v;
           }
         }
-        unset($opt[$this->cfg['cols']['value']]);
+        unset($opt[$this->class_cfg['cols']['value']]);
       }
       else{
-        $opt[$this->cfg['cols']['value']] = $val;
+        $opt[$this->class_cfg['cols']['value']] = $val;
       }
     }
     return $opt;
@@ -1166,11 +1136,15 @@ class options extends \bbn\objcache
     return false;
   }
 
+  public function get_class_cfg(){
+    return $this->class_cfg;
+  }
+
   public function get_ids_by_code($code){
     $id = $this->from_code(func_get_args());
     if ( \bbn\str::is_integer($id) ) {
-      return $this->db->get_column_values($this->cfg['table'], 'id', [
-        $this->cfg['cols']['id_parent'] => $id
+      return $this->db->get_column_values($this->class_cfg['table'], 'id', [
+        $this->class_cfg['cols']['id_parent'] => $id
       ]);
     }
     return false;
@@ -1179,8 +1153,8 @@ class options extends \bbn\objcache
   public function get_id_parent($id){
     if ( $id = $this->from_code(func_get_args()) ){
       return $this->db->get_val(
-        $this->cfg['table'],
-        $this->cfg['cols']['id_parent'],
+        $this->class_cfg['table'],
+        $this->class_cfg['cols']['id_parent'],
         ['id' => $id]);
     }
     return false;

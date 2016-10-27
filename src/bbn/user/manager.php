@@ -17,52 +17,40 @@ namespace bbn\user;
 class manager
 {
 
-	private static $_default_permissions = ['is_admin' => 0],
-          $list_fields = ['id', 'email', 'login', 'id_group'];
+	private static $list_fields = ['id', 'email', 'login', 'id_group'];
   
-  protected static $permissions = [];
-
   protected $messages = [
-            'creation' => [
-              'subject' => "Account created",
-              'link' => "",
-              'text' => "
+    'creation' => [
+      'subject' => "Account created",
+      'link' => "",
+      'text' => "
 A new user has been created for you.<br>
 Please click the link below in order to activate your account:<br>
 %1\$s"
-            ],
-            'password' => [
-              'subject' => "Password change",
-              'link' => "",
-              'text' => "
+    ],
+    'password' => [
+      'subject' => "Password change",
+      'link' => "",
+      'text' => "
 You can click the following link to change your password:<br>
 %1\$s"
-            ],
-            'hotlink' => [
-              'subject' => "Hotlink",
-              'link' => "",
-              'text' => "
+    ],
+    'hotlink' => [
+      'subject' => "Hotlink",
+      'link' => "",
+      'text' => "
 You can click the following link to access directly your account:<br>
 %1\$s"
-            ]
-          ],
-          // 1 day
-          $hotlink_length = 86400;
+    ]
+  ],
+  // 1 day
+  $hotlink_length = 86400;
 
-  protected $usrcls,
-          $mailer = false,
-          $db,
-          $cfg = false;
-  
-  private static function set_permissions(){
-    if ( count(self::$permissions) === 0 ){
-      self::$permissions = array_merge(self::$_default_permissions, self::$permissions);
-    }
-  }
-  
-  public static function get_permissions(){
-    return self::$permissions;
-  }
+  protected
+    $usrcls,
+    $mailer = false,
+    $db,
+    $class_cfg = false;
   
   public function find_sessions($id_user=null, $minutes = 5)
   {
@@ -70,16 +58,16 @@ You can click the following link to access directly your account:<br>
       if ( is_null($id_user) ){
         return $this->db->get_rows("
           SELECT *
-          FROM `{$this->cfg['tables']['sessions']}`
-          WHERE `{$this->cfg['arch']['sessions']['last_activity']}` > DATE_SUB(?, INTERVAL {$this->cfg['sess_length']} MINUTE)",
+          FROM `{$this->class_cfg['tables']['sessions']}`
+          WHERE `{$this->class_cfg['arch']['sessions']['last_activity']}` > DATE_SUB(?, INTERVAL {$this->class_cfg['sess_length']} MINUTE)",
           date('Y-m-d H:i:s'));
       }
       else{
         return $this->db->get_rows("
           SELECT *
-          FROM `{$this->cfg['tables']['sessions']}`
-          WHERE `{$this->cfg['arch']['sessions']['id_user']}` = ?
-            AND `{$this->cfg['arch']['sessions']['last_activity']}` > DATE_SUB(?, INTERVAL {$this->cfg['sess_length']} MINUTE)",
+          FROM `{$this->class_cfg['tables']['sessions']}`
+          WHERE `{$this->class_cfg['arch']['sessions']['id_user']}` = ?
+            AND `{$this->class_cfg['arch']['sessions']['last_activity']}` > DATE_SUB(?, INTERVAL {$this->class_cfg['sess_length']} MINUTE)",
           $id_user,
           date('Y-m-d H:i:s'));
       }
@@ -94,16 +82,15 @@ You can click the following link to access directly your account:<br>
    * @param object|false $mailer A mail object with the send method
    * 
 	 */
-  public function __construct(\bbn\user\connection $obj, $mailer=false)
+  public function __construct(connection $obj, $mailer=false)
   {
     if ( is_object($obj) && method_exists($obj, 'get_class_cfg') ){
       if ( is_object($mailer) && method_exists($mailer, 'send') ){
         $this->mailer = $mailer;
       }
       $this->usrcls = $obj;
-      $this->cfg = $this->usrcls->get_class_cfg();
+      $this->class_cfg = $this->usrcls->get_class_cfg();
       $this->db =& $this->usrcls->db;
-      self::set_permissions();
     }
   }
 
@@ -113,8 +100,8 @@ You can click the following link to access directly your account:<br>
    * @return array|false
    */
   public function groups($adm=false){
-    $a =& $this->cfg['arch'];
-    $t =& $this->cfg['tables'];
+    $a =& $this->class_cfg['arch'];
+    $t =& $this->class_cfg['tables'];
     $id = $this->db->cfn($a['groups']['id'], $t['groups'], 1);
     $group = $this->db->cfn($a['groups']['group'], $t['groups'], 1);
     $cfg = $this->db->cfn($a['groups']['cfg'], $t['groups'], 1);
@@ -138,15 +125,15 @@ You can click the following link to access directly your account:<br>
 
   public function text_value_groups(){
     return $this->db->rselect_all(
-      $this->cfg['tables']['groups'], [
-        'value' => $this->cfg['arch']['groups']['id'],
-        'text' => $this->cfg['arch']['groups']['group'],
+      $this->class_cfg['tables']['groups'], [
+        'value' => $this->class_cfg['arch']['groups']['id'],
+        'text' => $this->class_cfg['arch']['groups']['group'],
       ]);
   }
 
   public function get_email($id){
     if ( \bbn\str::is_integer($id) ){
-      $email = $this->db->select_one($this->cfg['tables']['users'], $this->cfg['arch']['users']['email'], [$this->cfg['arch']['users']['id'] => $id]);
+      $email = $this->db->select_one($this->class_cfg['tables']['users'], $this->class_cfg['arch']['users']['email'], [$this->class_cfg['arch']['users']['id'] => $id]);
       if ( $email && \bbn\str::is_email($email) ){
         return $email;
       }
@@ -155,49 +142,46 @@ You can click the following link to access directly your account:<br>
   }
   
   public function get_list($group_id = null){
-    
     $sql = "SELECT ";
     foreach ( self::$list_fields as $f ){
-      $sql .= "{$this->db->escape($this->cfg['tables']['users'].'.'.$this->cfg['arch']['users'][$f])} AS $f, ";
+      $sql .= "{$this->db->escape($this->class_cfg['tables']['users'].'.'.$this->class_cfg['arch']['users'][$f])} AS $f, ";
     }
-    foreach ( $this->cfg['additional_fields'] as $f ){
-      $sql .= "{$this->db->escape($this->cfg['tables']['users'].'.'.$f)}, ";
+    foreach ( $this->class_cfg['additional_fields'] as $f ){
+      $sql .= "{$this->db->escape($this->class_cfg['tables']['users'].'.'.$f)}, ";
     }
     $sql .= "
-      MAX({$this->db->escape($this->cfg['tables']['sessions'].'.'.$this->cfg['arch']['sessions']['last_activity'])}) AS last_activity,
-      COUNT({$this->db->escape($this->cfg['tables']['sessions'].'.'.$this->cfg['arch']['sessions']['sess_id'])}) AS num_sessions
-      FROM {$this->db->escape($this->cfg['tables']['users'])}
-        JOIN {$this->db->escape($this->cfg['tables']['groups'])}
-          ON {$this->db->escape($this->cfg['tables']['users'].'.'.$this->cfg['arch']['users']['id_group'])} = {$this->db->escape($this->cfg['tables']['groups'].'.'.$this->cfg['arch']['groups']['id'])}
-        LEFT JOIN {$this->db->escape($this->cfg['tables']['sessions'])}
-          ON {$this->db->escape($this->cfg['tables']['sessions'].'.'.$this->cfg['arch']['sessions']['id_user'])} = {$this->db->escape($this->cfg['tables']['users'].'.'.$this->cfg['arch']['users']['id'])}
-      WHERE {$this->db->escape($this->cfg['tables']['users'].'.'.$this->cfg['arch']['users']['status'])} = 1
-      AND ".$this->cfg['arch']['users']['id_group']." ".
-      ( $group_id ? "= ".(int)$group_id : "!= 1" )."
-      GROUP BY {$this->db->escape($this->cfg['tables']['users'].'.'.$this->cfg['arch']['users']['id'])}
-      ORDER BY {$this->db->escape($this->cfg['tables']['users'].'.'.$this->cfg['arch']['users']['login'])}";
+      MAX({$this->db->escape($this->class_cfg['tables']['sessions'].'.'.$this->class_cfg['arch']['sessions']['last_activity'])}) AS last_activity,
+      COUNT({$this->db->escape($this->class_cfg['tables']['sessions'].'.'.$this->class_cfg['arch']['sessions']['sess_id'])}) AS num_sessions
+      FROM {$this->db->escape($this->class_cfg['tables']['users'])}
+        JOIN {$this->db->escape($this->class_cfg['tables']['groups'])}
+          ON {$this->db->escape($this->class_cfg['tables']['users'].'.'.$this->class_cfg['arch']['users']['id_group'])} = {$this->db->escape($this->class_cfg['tables']['groups'].'.'.$this->class_cfg['arch']['groups']['id'])}
+        LEFT JOIN {$this->db->escape($this->class_cfg['tables']['sessions'])}
+          ON {$this->db->escape($this->class_cfg['tables']['sessions'].'.'.$this->class_cfg['arch']['sessions']['id_user'])} = {$this->db->escape($this->class_cfg['tables']['users'].'.'.$this->class_cfg['arch']['users']['id'])}
+      WHERE {$this->db->escape($this->class_cfg['tables']['users'].'.'.$this->class_cfg['arch']['users']['status'])} = 1
+      GROUP BY {$this->db->escape($this->class_cfg['tables']['users'].'.'.$this->class_cfg['arch']['users']['id'])}
+      ORDER BY {$this->db->escape($this->class_cfg['tables']['users'].'.'.$this->class_cfg['arch']['users']['login'])}";
     return $this->db->get_rows($sql);
   }
 
   public function get_user($id){
     if ( \bbn\str::is_integer($id) ){
-      $where = [$this->cfg['arch']['users']['id'] => $id];
+      $where = [$this->class_cfg['arch']['users']['id'] => $id];
     }
     else{
-      $where = [$this->cfg['arch']['users']['login'] => $id];
+      $where = [$this->class_cfg['arch']['users']['login'] => $id];
     }
     return $this->db->rselect(
-      $this->cfg['tables']['users'],
-      array_merge($this->cfg['arch']['users'], $this->cfg['additional_fields']),
+      $this->class_cfg['tables']['users'],
+      array_merge($this->class_cfg['arch']['users'], $this->class_cfg['additional_fields']),
       $where);
   }
 
   public function get_users($group_id = null){
     return $this->db->get_col_array("
-      SELECT ".$this->cfg['arch']['users']['id']."
-      FROM ".$this->cfg['tables']['users']."
-      WHERE {$this->db->escape($this->cfg['tables']['users'].'.'.$this->cfg['arch']['users']['status'])} = 1
-      AND ".$this->cfg['arch']['users']['id_group']." ".( $group_id ? "= ".(int)$group_id : "!= 1" )
+      SELECT ".$this->class_cfg['arch']['users']['id']."
+      FROM ".$this->class_cfg['tables']['users']."
+      WHERE {$this->db->escape($this->class_cfg['tables']['users'].'.'.$this->class_cfg['arch']['users']['status'])} = 1
+      AND ".$this->class_cfg['arch']['users']['id_group']." ".( $group_id ? "= ".(int)$group_id : "!= 1" )
     );
   }
 
@@ -206,7 +190,7 @@ You can click the following link to access directly your account:<br>
       $user = $this->get_user($user);
     }
     if ( is_array($user) ){
-      return $user[$this->cfg['arch']['users']['login']];
+      return $user[$this->class_cfg['arch']['users']['login']];
     }
     return '';
   }
@@ -219,9 +203,9 @@ You can click the following link to access directly your account:<br>
 	 */
 	public function add($cfg)
 	{
-    $fields = array_unique(array_merge(array_values($this->cfg['arch']['users']), $this->cfg['additional_fields']));
-    $cfg[$this->cfg['arch']['users']['status']] = 1;
-    $cfg[$this->cfg['arch']['users']['cfg']] = '{}';
+    $fields = array_unique(array_merge(array_values($this->class_cfg['arch']['users']), $this->class_cfg['additional_fields']));
+    $cfg[$this->class_cfg['arch']['users']['status']] = 1;
+    $cfg[$this->class_cfg['arch']['users']['cfg']] = '{}';
     foreach ( $cfg as $k => $v ){
       if ( !in_array($k, $fields) ){
         unset($cfg[$k]);
@@ -230,12 +214,12 @@ You can click the following link to access directly your account:<br>
     if ( isset($cfg['id']) ){
       unset($cfg['id']);
     }
-    if ( \bbn\str::is_email($cfg[$this->cfg['arch']['users']['email']]) &&
-            $this->db->insert($this->cfg['tables']['users'], $cfg) ){
-      $cfg[$this->cfg['arch']['users']['id']] = $this->db->last_id();
+    if ( \bbn\str::is_email($cfg[$this->class_cfg['arch']['users']['email']]) &&
+            $this->db->insert($this->class_cfg['tables']['users'], $cfg) ){
+      $cfg[$this->class_cfg['arch']['users']['id']] = $this->db->last_id();
 
       // Envoi d'un lien
-      $this->make_hotlink($cfg[$this->cfg['arch']['users']['id']], 'creation');
+      $this->make_hotlink($cfg[$this->class_cfg['arch']['users']['id']], 'creation');
       return $cfg;
     }
 		return false;
@@ -249,24 +233,24 @@ You can click the following link to access directly your account:<br>
 	 */
 	public function edit($cfg, $id_user=false)
 	{
-    $fields = array_unique(array_merge(array_values($this->cfg['arch']['users']), $this->cfg['additional_fields']));
-    $cfg[$this->cfg['arch']['users']['status']] = 1;
+    $fields = array_unique(array_merge(array_values($this->class_cfg['arch']['users']), $this->class_cfg['additional_fields']));
+    $cfg[$this->class_cfg['arch']['users']['status']] = 1;
     foreach ( $cfg as $k => $v ){
       if ( !in_array($k, $fields) ){
         unset($cfg[$k]);
       }
     }
-    if ( !$id_user && isset($cfg[$this->cfg['arch']['users']['id']]) ){
-      $id_user = $cfg[$this->cfg['arch']['users']['id']];
+    if ( !$id_user && isset($cfg[$this->class_cfg['arch']['users']['id']]) ){
+      $id_user = $cfg[$this->class_cfg['arch']['users']['id']];
     }
     if ( $id_user && (
-            !isset($cfg[$this->cfg['arch']['users']['email']]) ||
-            \bbn\str::is_email($cfg[$this->cfg['arch']['users']['email']]) 
+            !isset($cfg[$this->class_cfg['arch']['users']['email']]) ||
+            \bbn\str::is_email($cfg[$this->class_cfg['arch']['users']['email']]) 
           ) ){
       $this->db->update(
-        $this->cfg['tables']['users'],
+        $this->class_cfg['tables']['users'],
         $cfg,
-        [$this->cfg['arch']['users']['id'] => $id_user]);
+        [$this->class_cfg['arch']['users']['id'] => $id_user]);
       $cfg['id'] = $id_user;
       return $cfg;
     }
@@ -291,9 +275,9 @@ You can click the following link to access directly your account:<br>
       if ( !is_int($exp) || ($exp < 1) ){
         $exp = time() + $this->hotlink_length;
       }
-      $hl =& $this->cfg['arch']['hotlinks'];
+      $hl =& $this->class_cfg['arch']['hotlinks'];
       // Expire existing valid hotlinks
-      $this->db->update($this->cfg['tables']['hotlinks'], [
+      $this->db->update($this->class_cfg['tables']['hotlinks'], [
         $hl['expire'] => date('Y-m-d H:i:s')
       ],[
         [$hl['id_user'], '=', $id_user],
@@ -301,7 +285,7 @@ You can click the following link to access directly your account:<br>
       ]);
       $magic = $this->usrcls->make_magic_string();
       // Create hotlink
-      $this->db->insert($this->cfg['tables']['hotlinks'], [
+      $this->db->insert($this->class_cfg['tables']['hotlinks'], [
         $hl['magic_string'] => $magic['hash'],
         $hl['id_user'] => $id_user,
         $hl['expire'] => date('Y-m-d H:i:s', $exp)
@@ -328,31 +312,115 @@ You can click the following link to access directly your account:<br>
    * @return \bbn\user\manager
    */
   public function set_unique_group($id_user, $id_group){
-    $this->db->update($this->cfg['tables']['users'], [
-      $this->cfg['arch']['users']['id_group'] => $id_group
+    $this->db->update($this->class_cfg['tables']['users'], [
+      $this->class_cfg['arch']['users']['id_group'] => $id_group
     ], [
-      $this->cfg['arch']['users']['id'] => $id_user
+      $this->class_cfg['arch']['users']['id'] => $id_user
     ]);
     return $this;
   }
-  
 
-	/**
+  public function user_has_option($id_user, $id_option, $with_group = true){
+    if ( $with_group && $user = $this->get_user($id_user) ){
+      $id_group = $user[$this->class_cfg['arch']['users']['id_group']];
+      if ( $this->group_has_option($id_group, $id_option) ){
+        return true;
+      }
+    }
+    if ( $pref = preferences::get_preferences() ){
+      if ( $cfg = $pref->get_class_cfg() ){
+        return $this->db->count($cfg['table'], [
+          $cfg['cols']['id_option'] => $id_option,
+          $cfg['cols']['id_user'] => $id_user
+        ]) ? true : false;
+      }
+    }
+    return false;
+  }
+
+  public function group_has_option($id_group, $id_option){
+    if (
+      ($pref = preferences::get_preferences()) &&
+      ($cfg = $pref->get_class_cfg())
+    ){
+      return $this->db->count($cfg['table'], [
+        $cfg['cols']['id_option'] => $id_option,
+        $cfg['cols']['id_group'] => $id_group
+      ]) ? true : false;
+    }
+    return false;
+  }
+
+  public function user_insert_option($id_user, $id_option){
+    if (
+      ($pref = preferences::get_preferences()) &&
+      ($cfg = $pref->get_class_cfg())
+    ){
+      return $this->db->insert_ignore($cfg['table'], [
+        $cfg['cols']['id_option'] => $id_option,
+        $cfg['cols']['id_user'] => $id_user
+      ]);
+    }
+    return false;
+  }
+
+  public function group_insert_option($id_group, $id_option){
+    if (
+      ($pref = preferences::get_preferences()) &&
+      ($cfg = $pref->get_class_cfg())
+    ){
+      return $this->db->insert_ignore($cfg['table'], [
+        $cfg['cols']['id_option'] => $id_option,
+        $cfg['cols']['id_group'] => $id_group
+      ]);
+    }
+    return false;
+  }
+
+  public function user_delete_option($id_user, $id_option){
+    if (
+      ($pref = preferences::get_preferences()) &&
+      ($cfg = $pref->get_class_cfg())
+    ){
+      return $this->db->delete_ignore($cfg['table'], [
+        $cfg['cols']['id_option'] => $id_option,
+        $cfg['cols']['id_user'] => $id_user
+      ]);
+    }
+    return false;
+  }
+
+  public function group_delete_option($id_group, $id_option){
+    if (
+      ($pref = preferences::get_preferences()) &&
+      ($cfg = $pref->get_class_cfg())
+    ){
+      return $this->db->delete_ignore($cfg['table'], [
+        $cfg['cols']['id_option'] => $id_option,
+        $cfg['cols']['id_group'] => $id_group
+      ]);
+    }
+    return false;
+  }
+
+
+
+  /**
    * @param int $id_user User ID
    * 
    * @return \bbn\user\manager
 	 */
 	public function deactivate($id_user){
     $update = [
-      $this->cfg['arch']['users']['status'] => 0,
-      $this->cfg['arch']['users']['email'] => null
+      $this->class_cfg['arch']['users']['status'] => 0,
+      $this->class_cfg['arch']['users']['email'] => null
     ];
-    if ( $this->cfg['arch']['users']['email'] !== $this->cfg['arch']['users']['login'] ){
-      $update[$this->cfg['arch']['users']['login']] = null;
+    if ( $this->class_cfg['arch']['users']['email'] !== $this->class_cfg['arch']['users']['login'] ){
+      $update[$this->class_cfg['arch']['users']['login']] = null;
     }
 
-    $this->db->update($this->cfg['tables']['users'], $update, [
-      $this->cfg['arch']['users']['id'] => $id_user
+    $this->db->update($this->class_cfg['tables']['users'], $update, [
+      $this->class_cfg['arch']['users']['id'] => $id_user
     ]);
     return $this;
 	}
@@ -363,10 +431,10 @@ You can click the following link to access directly your account:<br>
    * @return \bbn\user\manager
 	 */
 	public function reactivate($id_user){
-    $this->db->update($this->cfg['tables']['users'], [
-      $this->cfg['arch']['users']['status'] => 1
+    $this->db->update($this->class_cfg['tables']['users'], [
+      $this->class_cfg['arch']['users']['status'] => 1
     ], [
-      $this->cfg['arch']['users']['id'] => $id_user
+      $this->class_cfg['arch']['users']['id'] => $id_user
     ]);
     return $this;
 	}
@@ -377,71 +445,71 @@ You can click the following link to access directly your account:<br>
   private function create_tables() {
     // @todo!!!
     $sql = "
-      CREATE TABLE IF NOT EXISTS {$this->db->escape($this->cfg['tables']['users'])} (
-          {$this->db->escape($this->cfg['users']['id'])} int(10) unsigned NOT NULL AUTO_INCREMENT,
-        {$this->db->escape($this->cfg['users']['email'])} varchar(100) NOT NULL,".
-        ( $this->cfg['users']['login'] !== $this->cfg['users']['email'] ? "
-                {$this->db->escape($this->cfg['users']['login'])} varchar(35) NOT NULL," : "" )."
-        {$this->db->escape($this->cfg['users']['cfg'])} text NOT NULL,
-        PRIMARY KEY ({$this->db->escape($this->cfg['users']['id'])}),
-        UNIQUE KEY {$this->db->escape($this->cfg['users']['email'])} ({$this->db->escape($this->cfg['users']['email'])})
+      CREATE TABLE IF NOT EXISTS {$this->db->escape($this->class_cfg['tables']['users'])} (
+          {$this->db->escape($this->class_cfg['users']['id'])} int(10) unsigned NOT NULL AUTO_INCREMENT,
+        {$this->db->escape($this->class_cfg['users']['email'])} varchar(100) NOT NULL,".
+        ( $this->class_cfg['users']['login'] !== $this->class_cfg['users']['email'] ? "
+                {$this->db->escape($this->class_cfg['users']['login'])} varchar(35) NOT NULL," : "" )."
+        {$this->db->escape($this->class_cfg['users']['cfg'])} text NOT NULL,
+        PRIMARY KEY ({$this->db->escape($this->class_cfg['users']['id'])}),
+        UNIQUE KEY {$this->db->escape($this->class_cfg['users']['email'])} ({$this->db->escape($this->class_cfg['users']['email'])})
       ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
-      CREATE TABLE IF NOT EXISTS {$this->db->escape($this->cfg['tables']['groups'])} (
-        {$this->db->escape($this->cfg['groups']['id'])} int(10) unsigned NOT NULL AUTO_INCREMENT,
-        {$this->db->escape($this->cfg['groups']['group'])} varchar(100) NOT NULL,
-        {$this->db->escape($this->cfg['groups']['cfg'])} text NOT NULL,
-        PRIMARY KEY ({$this->db->escape($this->cfg['groups']['id'])})
+      CREATE TABLE IF NOT EXISTS {$this->db->escape($this->class_cfg['tables']['groups'])} (
+        {$this->db->escape($this->class_cfg['groups']['id'])} int(10) unsigned NOT NULL AUTO_INCREMENT,
+        {$this->db->escape($this->class_cfg['groups']['group'])} varchar(100) NOT NULL,
+        {$this->db->escape($this->class_cfg['groups']['cfg'])} text NOT NULL,
+        PRIMARY KEY ({$this->db->escape($this->class_cfg['groups']['id'])})
       ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
-      CREATE TABLE IF NOT EXISTS {$this->db->escape($this->cfg['tables']['hotlinks'])} (
-        {$this->db->escape($this->cfg['hotlinks']['id'])} int(10) unsigned NOT NULL AUTO_INCREMENT,
-        {$this->db->escape($this->cfg['hotlinks']['magic_string'])} varchar(64) NOT NULL,
-        {$this->db->escape($this->cfg['hotlinks']['id_user'])} int(10) unsigned NOT NULL,
-        {$this->db->escape($this->cfg['hotlinks']['expire'])} datetime NOT NULL,
-        PRIMARY KEY ({$this->db->escape($this->cfg['hotlinks']['id'])}),
-        KEY {$this->db->escape($this->cfg['hotlinks']['id_user'])} ({$this->db->escape($this->cfg['hotlinks']['id_user'])})
+      CREATE TABLE IF NOT EXISTS {$this->db->escape($this->class_cfg['tables']['hotlinks'])} (
+        {$this->db->escape($this->class_cfg['hotlinks']['id'])} int(10) unsigned NOT NULL AUTO_INCREMENT,
+        {$this->db->escape($this->class_cfg['hotlinks']['magic_string'])} varchar(64) NOT NULL,
+        {$this->db->escape($this->class_cfg['hotlinks']['id_user'])} int(10) unsigned NOT NULL,
+        {$this->db->escape($this->class_cfg['hotlinks']['expire'])} datetime NOT NULL,
+        PRIMARY KEY ({$this->db->escape($this->class_cfg['hotlinks']['id'])}),
+        KEY {$this->db->escape($this->class_cfg['hotlinks']['id_user'])} ({$this->db->escape($this->class_cfg['hotlinks']['id_user'])})
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-      CREATE TABLE IF NOT EXISTS {$this->db->escape($this->cfg['tables']['passwords'])} (
-        {$this->db->escape($this->cfg['passwords']['id_user'])} int(10) unsigned NOT NULL,
-        {$this->db->escape($this->cfg['passwords']['pass'])} varchar(128) NOT NULL,
-        {$this->db->escape($this->cfg['passwords']['added'])} datetime NOT NULL,
-        KEY {$this->db->escape($this->cfg['passwords']['id_user'])} ({$this->db->escape($this->cfg['passwords']['id_user'])})
+      CREATE TABLE IF NOT EXISTS {$this->db->escape($this->class_cfg['tables']['passwords'])} (
+        {$this->db->escape($this->class_cfg['passwords']['id_user'])} int(10) unsigned NOT NULL,
+        {$this->db->escape($this->class_cfg['passwords']['pass'])} varchar(128) NOT NULL,
+        {$this->db->escape($this->class_cfg['passwords']['added'])} datetime NOT NULL,
+        KEY {$this->db->escape($this->class_cfg['passwords']['id_user'])} ({$this->db->escape($this->class_cfg['passwords']['id_user'])})
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-      CREATE TABLE IF NOT EXISTS {$this->db->escape($this->cfg['tables']['sessions'])} (
-        {$this->db->escape($this->cfg['sessions']['id_user'])} int(10) unsigned NOT NULL,
-        {$this->db->escape($this->cfg['sessions']['sess_id'])} varchar(128) NOT NULL,
-        {$this->db->escape($this->cfg['sessions']['ip_address'])} varchar(15),
-        {$this->db->escape($this->cfg['sessions']['user_agent'])} varchar(255),
-        {$this->db->escape($this->cfg['sessions']['auth'])} int(1) unsigned NOT NULL,
-        {$this->db->escape($this->cfg['sessions']['opened'])} int(1) unsigned NOT NULL,
-        {$this->db->escape($this->cfg['sessions']['last_activity'])} datetime NOT NULL,
-        {$this->db->escape($this->cfg['sessions']['cfg'])} text NOT NULL,
-        PRIMARY KEY ({$this->db->escape($this->cfg['sessions']['id_user'])}, {$this->db->escape($this->cfg['sessions']['sess_id'])})
-        KEY {$this->db->escape($this->cfg['sessions']['id_user'])} ({$this->db->escape($this->cfg['sessions']['id_user'])}),
-        KEY {$this->db->escape($this->cfg['sessions']['sess_id'])} ({$this->db->escape($this->cfg['sessions']['sess_id'])})
+      CREATE TABLE IF NOT EXISTS {$this->db->escape($this->class_cfg['tables']['sessions'])} (
+        {$this->db->escape($this->class_cfg['sessions']['id_user'])} int(10) unsigned NOT NULL,
+        {$this->db->escape($this->class_cfg['sessions']['sess_id'])} varchar(128) NOT NULL,
+        {$this->db->escape($this->class_cfg['sessions']['ip_address'])} varchar(15),
+        {$this->db->escape($this->class_cfg['sessions']['user_agent'])} varchar(255),
+        {$this->db->escape($this->class_cfg['sessions']['auth'])} int(1) unsigned NOT NULL,
+        {$this->db->escape($this->class_cfg['sessions']['opened'])} int(1) unsigned NOT NULL,
+        {$this->db->escape($this->class_cfg['sessions']['last_activity'])} datetime NOT NULL,
+        {$this->db->escape($this->class_cfg['sessions']['cfg'])} text NOT NULL,
+        PRIMARY KEY ({$this->db->escape($this->class_cfg['sessions']['id_user'])}, {$this->db->escape($this->class_cfg['sessions']['sess_id'])})
+        KEY {$this->db->escape($this->class_cfg['sessions']['id_user'])} ({$this->db->escape($this->class_cfg['sessions']['id_user'])}),
+        KEY {$this->db->escape($this->class_cfg['sessions']['sess_id'])} ({$this->db->escape($this->class_cfg['sessions']['sess_id'])})
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-      ALTER TABLE {$this->db->escape($this->cfg['tables']['hotlinks'])}
-        ADD FOREIGN KEY ({$this->db->escape($this->cfg['hotlinks']['id_user'])})
-          REFERENCES {$this->db->escape($this->cfg['tables']['users'])} ({$this->db->escape($this->cfg['users']['id'])})
+      ALTER TABLE {$this->db->escape($this->class_cfg['tables']['hotlinks'])}
+        ADD FOREIGN KEY ({$this->db->escape($this->class_cfg['hotlinks']['id_user'])})
+          REFERENCES {$this->db->escape($this->class_cfg['tables']['users'])} ({$this->db->escape($this->class_cfg['users']['id'])})
             ON DELETE CASCADE ON UPDATE NO ACTION;
 
-      ALTER TABLE {$this->db->escape($this->cfg['tables']['passwords'])}
-        ADD FOREIGN KEY ({$this->db->escape($this->cfg['passwords']['id_user'])})
-          REFERENCES {$this->db->escape($this->cfg['tables']['users'])} ({$this->db->escape($this->cfg['users']['id'])})
+      ALTER TABLE {$this->db->escape($this->class_cfg['tables']['passwords'])}
+        ADD FOREIGN KEY ({$this->db->escape($this->class_cfg['passwords']['id_user'])})
+          REFERENCES {$this->db->escape($this->class_cfg['tables']['users'])} ({$this->db->escape($this->class_cfg['users']['id'])})
             ON DELETE CASCADE ON UPDATE NO ACTION;
 
-      ALTER TABLE {$this->db->escape($this->cfg['tables']['sessions'])}
-        ADD FOREIGN KEY ({$this->db->escape($this->cfg['sessions']['id_user'])})
-          REFERENCES {$this->db->escape($this->cfg['tables']['users'])} ({$this->db->escape($this->cfg['users']['id'])})
+      ALTER TABLE {$this->db->escape($this->class_cfg['tables']['sessions'])}
+        ADD FOREIGN KEY ({$this->db->escape($this->class_cfg['sessions']['id_user'])})
+          REFERENCES {$this->db->escape($this->class_cfg['tables']['users'])} ({$this->db->escape($this->class_cfg['users']['id'])})
             ON DELETE CASCADE ON UPDATE NO ACTION;
 
-      ALTER TABLE {$this->db->escape($this->cfg['tables']['users'])}
-        ADD FOREIGN KEY ({$this->db->escape($this->cfg['users']['id_group'])})
-          REFERENCES {$this->db->escape($this->cfg['tables']['groups'])} ({$this->db->escape($this->cfg['groups']['id'])})
+      ALTER TABLE {$this->db->escape($this->class_cfg['tables']['users'])}
+        ADD FOREIGN KEY ({$this->db->escape($this->class_cfg['users']['id_group'])})
+          REFERENCES {$this->db->escape($this->class_cfg['tables']['groups'])} ({$this->db->escape($this->class_cfg['groups']['id'])})
             ON DELETE CASCADE ON UPDATE NO ACTION;";
     $db->raw_query($sql);
   }

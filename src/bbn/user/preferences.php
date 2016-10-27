@@ -48,7 +48,7 @@ class preferences
 		/** @var \bbn\db */
     $db,
 		/** @var array */
-    $cfg = [],
+    $class_cfg = [],
 		/** @var int */
 		$id_user,
 		/** @var int */
@@ -83,11 +83,11 @@ class preferences
 	 * @return \bbn\user\permissions
 	 */
 	public function __construct(\bbn\appui\options $options, \bbn\db $db, array $cfg = []){
-		$this->cfg = \bbn\x::merge_arrays(self::$_defaults, $cfg);
+		$this->class_cfg = \bbn\x::merge_arrays(self::$_defaults, $cfg);
 		$this->options = \bbn\appui\options::get_options();
 		$this->db = $db;
-		$this->id_user = $this->cfg['id_user'] ?: false;
-		$this->id_group = $this->cfg['id_group'] ?: false;
+		$this->id_user = $this->class_cfg['id_user'] ?: false;
+		$this->id_group = $this->class_cfg['id_group'] ?: false;
     self::_init($this);
 	}
 
@@ -132,18 +132,22 @@ class preferences
   public function set_cfg($id, $cfg){
 		if ( is_array($cfg) ){
 			foreach ( $cfg as $k => $v ){
-				if ( in_array($k, $this->cfg['cols']) ){
+				if ( in_array($k, $this->class_cfg['cols']) ){
 					unset($cfg[$k]);
 				}
 			}
 			$cfg = json_encode($cfg);
 		}
-		return $this->db->update($this->cfg['table'], [
-			$this->cfg['cols']['cfg'] => $cfg
+		return $this->db->update($this->class_cfg['table'], [
+			$this->class_cfg['cols']['cfg'] => $cfg
 		], [
-			$this->cfg['cols']['id'] => $id
+			$this->class_cfg['cols']['id'] => $id
 		]);
 	}
+
+	public function get_class_cfg(){
+	  return $this->class_cfg;
+  }
 
   /**
    * Gets the cfg field of a given preference based on its ID
@@ -154,23 +158,23 @@ class preferences
   public function get_cfg($id, &$cfg=null){
 		if ( is_null($cfg) ){
 			$cfg = $this->db->rselect(
-				$this->cfg['table'],
-				[$this->cfg['cols']['cfg']],
-				[ $this->cfg['cols']['id'] => $id ]
+				$this->class_cfg['table'],
+				[$this->class_cfg['cols']['cfg']],
+				[ $this->class_cfg['cols']['id'] => $id ]
 			);
 		}
-		if ( isset($cfg[$this->cfg['cols']['cfg']]) && \bbn\str::is_json($cfg[$this->cfg['cols']['cfg']]) ) {
-			$cfg = \bbn\x::merge_arrays(json_decode($cfg[$this->cfg['cols']['cfg']], 1), $cfg);
+		if ( isset($cfg[$this->class_cfg['cols']['cfg']]) && \bbn\str::is_json($cfg[$this->class_cfg['cols']['cfg']]) ) {
+			$cfg = \bbn\x::merge_arrays(json_decode($cfg[$this->class_cfg['cols']['cfg']], 1), $cfg);
 		}
 		$new = [];
 		if ( is_array($cfg) ){
 			foreach ( $cfg as $k => $v) {
-				if ( !in_array($k, $this->cfg['cols']) ) {
+				if ( !in_array($k, $this->class_cfg['cols']) ) {
 					$cfg[$k] = $v;
 					$new[$k] = $v;
 				}
 			}
-			unset($cfg[$this->cfg['cols']['cfg']]);
+			unset($cfg[$this->class_cfg['cols']['cfg']]);
 		}
 		return $new;
 	}
@@ -183,18 +187,18 @@ class preferences
 	public function get($id_option){
     $res = [];
     if ( $this->id_group &&
-      ($res1 = $this->db->rselect($this->cfg['table'], $this->cfg['cols'], [
-				$this->cfg['cols']['id_option'] => $id_option,
-				$this->cfg['cols']['id_group'] => $this->id_group
+      ($res1 = $this->db->rselect($this->class_cfg['table'], $this->class_cfg['cols'], [
+				$this->class_cfg['cols']['id_option'] => $id_option,
+				$this->class_cfg['cols']['id_group'] => $this->id_group
 			]))
     ){
       $this->get_cfg($res1['id'], $res1);
       $res = \bbn\x::merge_arrays($res, $res1);
 		}
     if ( $this->id_user &&
-      ($res2 = $this->db->rselect($this->cfg['table'], $this->cfg['cols'], [
-				$this->cfg['cols']['id_option'] => $id_option,
-				$this->cfg['cols']['id_user'] => $this->id_user
+      ($res2 = $this->db->rselect($this->class_cfg['table'], $this->class_cfg['cols'], [
+				$this->class_cfg['cols']['id_option'] => $id_option,
+				$this->class_cfg['cols']['id_user'] => $this->id_user
 			]))
     ){
       $this->get_cfg($res2['id'], $res2);
@@ -309,7 +313,7 @@ class preferences
     else if ( $this->id_user ){
       $d['id_user'] = $this->id_user;
     }
-    if ( $r = $this->db->insert($this->cfg['table'], $d) ){
+    if ( $r = $this->db->insert($this->class_cfg['table'], $d) ){
       return $this->db->last_id();
     }
     return false;
@@ -325,10 +329,10 @@ class preferences
       $id_option = $this->from_path($id_option, $type);
     }
     if ( $id_user && ($id = $this->retrieve_id($id_option, $id_user)) ){
-      return $this->db->delete($this->cfg['table'], [$this->cfg['cols']['id'] => $id]);
+      return $this->db->delete($this->class_cfg['table'], [$this->class_cfg['cols']['id'] => $id]);
     }
     if ( $id_group && ($id = $this->retrieve_id($id_option, null, $id_group)) ){
-      return $this->db->delete($this->cfg['table'], [$this->cfg['cols']['id'] => $id]);
+      return $this->db->delete($this->class_cfg['table'], [$this->class_cfg['cols']['id'] => $id]);
     }
     return false;
   }
@@ -341,10 +345,10 @@ class preferences
    */
   public function set_link($id_option, $id_link, $id_user = null, $id_group = null){
     if ( $id = $this->retrieve_id($id_option, $id_user, $id_group) ){
-      return $this->db->update($this->cfg['table'], [
-        $this->cfg['cols']['id_link'] => $id_link
+      return $this->db->update($this->class_cfg['table'], [
+        $this->class_cfg['cols']['id_link'] => $id_link
       ], [
-        $this->cfg['cols']['id'] => $id
+        $this->class_cfg['cols']['id'] => $id
       ]);
     }
     else{
@@ -352,11 +356,11 @@ class preferences
         $id_option = $this->from_path($id_option);
       }
       if ( \bbn\str::is_integer($id_option, $id_link) ){
-        return $this->db->insert($this->cfg['table'], [
-          $this->cfg['cols']['id_option'] => $id_option,
-          $this->cfg['cols']['id_link'] => $id_link,
-          $this->cfg['cols']['id_group'] => $id_group ? $id_group : null,
-          $this->cfg['cols']['id_user'] => $id_group ? null : ( $id_user ?: $this->id_user )
+        return $this->db->insert($this->class_cfg['table'], [
+          $this->class_cfg['cols']['id_option'] => $id_option,
+          $this->class_cfg['cols']['id_link'] => $id_link,
+          $this->class_cfg['cols']['id_group'] => $id_group ? $id_group : null,
+          $this->class_cfg['cols']['id_user'] => $id_group ? null : ( $id_user ?: $this->id_user )
         ]);
       }
     }
@@ -370,10 +374,10 @@ class preferences
    */
   public function unset_link($id_option, $id_user = null, $id_group = null){
     if ( $id = $this->retrieve_id($id_option, $id_user, $id_group) ){
-      return $this->db->update($this->cfg['table'], [
-        $this->cfg['cols']['id_link'] => null
+      return $this->db->update($this->class_cfg['table'], [
+        $this->class_cfg['cols']['id_link'] => null
       ], [
-        $this->cfg['cols']['id'] => $id
+        $this->class_cfg['cols']['id'] => $id
       ]);
     }
   }
@@ -386,8 +390,8 @@ class preferences
       $cfg = ['id_user' => $id_user ?: $this->id_user];
     }
     if ( isset($cfg) ){
-      $cfg[$this->cfg['cols']['id_link']] = $id;
-      return $this->db->get_column_values($this->cfg['table'], $this->cfg['cols']['id_option'], $cfg);
+      $cfg[$this->class_cfg['cols']['id_link']] = $id;
+      return $this->db->get_column_values($this->class_cfg['table'], $this->class_cfg['cols']['id_option'], $cfg);
     }
   }
 
@@ -404,15 +408,15 @@ class preferences
       $id_option = $this->from_path($id_option);
     }
     if ( !$id_user && $id_group ){
-      return $this->db->get_val($this->cfg['table'], $this->cfg['cols']['id'], [
-        $this->cfg['cols']['id_option'] => $id_option,
-        $this->cfg['cols']['id_group'] => $id_group ?: $this->id_group
+      return $this->db->get_val($this->class_cfg['table'], $this->class_cfg['cols']['id'], [
+        $this->class_cfg['cols']['id_option'] => $id_option,
+        $this->class_cfg['cols']['id_group'] => $id_group ?: $this->id_group
       ]);
     }
     else if ( $id_user || $this->id_user ){
-      return $this->db->get_val($this->cfg['table'], $this->cfg['cols']['id'], [
-        $this->cfg['cols']['id_option'] => $id_option,
-        $this->cfg['cols']['id_user'] => $id_user ?: $this->id_user
+      return $this->db->get_val($this->class_cfg['table'], $this->class_cfg['cols']['id'], [
+        $this->class_cfg['cols']['id_option'] => $id_option,
+        $this->class_cfg['cols']['id_user'] => $id_user ?: $this->id_user
       ]);
     }
     return false;
@@ -427,7 +431,7 @@ class preferences
 		if ( $id = $this->retrieve_id($id_option, $id_user, $id_group) ) {
 			return $this->set_cfg($id, $cfg);
 		}
-		return $this->db->insert($this->cfg['table'], [
+		return $this->db->insert($this->class_cfg['table'], [
 			'id_option' => $id_option,
 			'id_user' => !$id_group && ($id_user || $this->id_user) ? ($id_user ? $id_user : $this->id_user)  : null,
 			'id_group' => $id_group ?: null,
@@ -445,15 +449,15 @@ class preferences
       $id_option = $this->from_path($id_option);
     }
 		if ( $id_group ) {
-			return $this->db->delete($this->cfg['table'], [
-				$this->cfg['cols']['id_option'] => $id_option,
-				$this->cfg['cols']['id_group'] => $id_group
+			return $this->db->delete($this->class_cfg['table'], [
+				$this->class_cfg['cols']['id_option'] => $id_option,
+				$this->class_cfg['cols']['id_group'] => $id_group
 			]);
 		}
 		if ( $id_user || $this->id_user ) {
-			return $this->db->delete($this->cfg['table'], [
-				$this->cfg['cols']['id_option'] => $id_option,
-				$this->cfg['cols']['id_user'] => $id_user ? $id_user : $this->id_user
+			return $this->db->delete($this->class_cfg['table'], [
+				$this->class_cfg['cols']['id_option'] => $id_option,
+				$this->class_cfg['cols']['id_user'] => $id_user ? $id_user : $this->id_user
 			]);
 		}
 	}
