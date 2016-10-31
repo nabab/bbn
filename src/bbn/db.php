@@ -69,6 +69,10 @@ class db extends \PDO implements db\actions, db\api, db\engines
      */
     $fancy = 1,
     /**
+     * @var array
+     */
+    $debug_queries = [],
+    /**
      * Error state of the current connection
      * @var bool
      */
@@ -126,6 +130,10 @@ class db extends \PDO implements db\actions, db\api, db\engines
      * @var string
      */
     $last_query,
+    /**
+     * @var boolean
+     */
+    $debug = false,
     /**
      * The ODBC engine of this connection
      * @var string
@@ -689,6 +697,14 @@ class db extends \PDO implements db\actions, db\api, db\engines
     return $this->hash;
   }
 
+  public function add_statement($statement){
+    $this->last_query = $statement;
+    if ( $this->debug ){
+      array_push($this->debug_queries, $statement);
+    }
+    return $this;
+  }
+
   /**
    * Returns boolean value of auto_increment field.
    * Working only on mysql.
@@ -998,7 +1014,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
         if ( $q['exe_time'] === 0 ){
           $t = microtime(1);
         }
-        $this->last_query = $q['statement'];
+        $this->add_statement($q['statement']);
         if ( isset($q['sequences']['DROP']) || isset($q['sequences']['CREATE']) || isset($q['sequences']['ALTER']) ){
           // A voir
           //$this->clear_cache();

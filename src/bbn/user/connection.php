@@ -20,7 +20,7 @@ use bbn;
 if ( !defined('BBN_DATA_PATH') ){
   die("BBN_DATA_PATH must be defined");
 }
-class connection
+class connection extends bbn\obj
 {
 
 	private static
@@ -94,10 +94,11 @@ class connection
           'id' => 'id',
           'id_group' => 'id_group',
           'email' => 'email',
-          'login' => 'email',
+          'username' => 'username',
+          'login' => 'login',
           'admin' => 'admin',
           'cfg' => 'cfg',
-          'status' => 'active'
+          'active' => 'active'
         ],
       ],
       'fields' => [
@@ -121,13 +122,6 @@ class connection
        */
       'conditions' => [],
       /**
-       * Additional fields to select from the users' table
-       * They will become property
-       * Their names mustn't interfere with existing properties
-       * @var array
-       */
-      'additional_fields' => [],
-      /**
        * Number of times a user can try to log in the period
        * @var integer
        */
@@ -142,7 +136,7 @@ class connection
        * @var bool
        */
       'hotlinks' => false,
-      'show' => 'login'
+      'show' => 'name'
     ];
 
   private
@@ -173,9 +167,9 @@ class connection
     /** @var mixed */
     $alert,
     /** @var array */
-    $cfg = [],
+    $cfg,
     /** @var array */
-    $sess_cfg = [],
+    $sess_cfg,
     /** @var array */
     $class_cfg,
     /** @var array */
@@ -254,8 +248,9 @@ class connection
     if ( $this->check() && $id ){
       $this
         ->_authenticate($id)
-        ->_init_dir(true)
         ->_user_info()
+        ->_init_dir(true)
+        ->save_cfg()
         ->_init_user_session()
         ->save_session();
     }
@@ -270,18 +265,20 @@ class connection
    *
    * @return connection
    */
-  private function _user_info(array $d=null){
+  private function _user_info(){
     if ( $this->get_id() ){
-      if ( is_null($d) ){
-        $d = $this->db->rselect(
-          $this->class_cfg['tables']['users'],
-          $this->fields,
-          bbn\x::merge_arrays(
-            $this->class_cfg['conditions'],
-            [$this->class_cfg['arch']['users']['status'] => 1],
-            [$this->class_cfg['arch']['users']['id'] => $this->id]));
+      if ( !empty($this->get_session('cfg')) ){
+        $this->cfg = $this->get_session('cfg');
+        $this->id_group = $this->get_session('id_group');
       }
-      if ( is_array($d) ){
+      else if ( $d = $this->db->rselect(
+        $this->class_cfg['tables']['users'],
+        array_unique(array_values($this->fields)),
+        bbn\x::merge_arrays(
+          $this->class_cfg['conditions'],
+          [$this->fields['active'] => 1],
+          [$this->fields['id'] => $this->id]))
+      ){
         $r = [];
         foreach ( $d as $key => $val ){
           if ( ($key !== 'id') && ($key !== 'cfg') && ($key !== 'auth') && ($key !== 'pass') ){
@@ -290,8 +287,10 @@ class connection
           }
         }
         $this->session->set($r, 'info');
-        $this->cfg = empty($d['cfg']) ?
-          ['log_tries' => 0] : json_decode($d['cfg'], true);
+        if ( !empty($d['cfg']) ){
+          $d['cfg'] = json_decode($d['cfg'], true);
+        }
+        $this->cfg = $d['cfg'] ?: ['log_tries' => 0];
         $this->set_session('id', $this->id);
         $this->set_session('cfg', $this->cfg);
         // Group
@@ -311,20 +310,28 @@ class connection
    */
   private function _sess_info($id_session = null){
     if ( !is_int($id_session) ){
-      $id_session = $this->get_session('id_session');
+      $id_session = $this->get_id_session();
     }
-    if ( is_int($id_session) && ($id = $this->get_session('id')) ){
-      $d = $this->db->rselect(
+    else{
+      $cfg = $this->_get_session('cfg');
+    }
+    if (
+      empty($cfg) &&
+      is_int($id_session) &&
+      ($id = $this->get_session('id')) &&
+      ($d = $this->db->rselect(
         $this->class_cfg['tables']['sessions'],
         $this->class_cfg['arch']['sessions'],
         [
           $this->class_cfg['arch']['sessions']['id'] => $id_session,
           $this->class_cfg['arch']['sessions']['id_user'] => $id,
           $this->class_cfg['arch']['sessions']['opened'] => 1,
-        ]);
+        ]))
+    ){
+      $cfg = json_decode($d['cfg'], true);
     }
-    if ( is_array($d) ){
-      $this->sess_cfg = json_decode($d['cfg'], 1);
+    if ( is_array($cfg) ){
+      $this->sess_cfg = $cfg;
     }
     else{
       $this->set_error(14);
@@ -403,12 +410,12 @@ class connection
     }
 
     /** @var int $id_session The ID of the session row in the DB */
-    if ( $id_session = $this->_get_session('id_session') ){
+    if ( $id_session = $this->get_id_session() ){
       $this->sess_cfg = json_decode($this->db->select_one(
         $this->class_cfg['tables']['sessions'],
         $this->class_cfg['arch']['sessions']['cfg'],
         [$this->class_cfg['arch']['sessions']['id'] => $id_session]
-      ));
+      ), true);
     }
     else{
 
@@ -534,8 +541,8 @@ class connection
           $this->fields['id'],
           bbn\x::merge_arrays(
             $this->class_cfg['conditions'],
-            [$arch['users']['status'] => 1],
-            [$arch['users']['login'] => $params[$f['user']]])
+            [$arch['users']['active'] => 1],
+            [($arch['users']['login'] ?? $arch['users']['email']) => $params[$f['user']]])
         ) ){
 
           $pass = $this->db->select_one(
@@ -570,17 +577,16 @@ class connection
    */
   private function _init_config(array $cfg = []){
     $this->class_cfg = bbn\x::merge_arrays(self::$_defaults, $cfg);
-    // As we'll give the object the properties of these additional field they should not conflict with existing ones
-    foreach ( $this->class_cfg['additional_fields'] as $f ){
-      if ( property_exists($this, $f) ) {
-        die("Wrong configuration: the column's name $f is illegal!");
+    if ( !empty($cfg['arch']) ){
+      foreach ( $cfg['arch'] as $t => $a ){
+        $this->class_cfg['arch'][$t] = $a;
       }
     }
     /*
      * The selection comprises the defined fields of the users table
      * Plus a bunch of user-defined additional fields in the same table
      */
-    $this->fields = bbn\x::merge_arrays($this->class_cfg['arch']['users'], $this->class_cfg['additional_fields']);
+    $this->fields = $this->class_cfg['arch']['users'];
     return $this;
   }
 
@@ -680,7 +686,7 @@ class connection
 
   /**
    * connection constructor
-   * @param \bbn\db $db
+   * @param bbn\db $db
    * @param array $cfg
    * @param array $params
    */
@@ -697,7 +703,7 @@ class connection
     // Setting up the class configuration
     $this->_init_config($cfg);
 
-    // Creating the session's variables if they doesn't exist yet
+    // Creating the session's variables if they don't exist yet
     $this->_init_session();
 
     $this->preferences = preferences::get_preferences();
@@ -716,12 +722,12 @@ class connection
       ($params[$f['action']] === 'init_password') &&
       ($params[$f['pass1']] === $params[$f['pass2']])
     ){
-      if ( $this->get_id_from_magic_string($params[$f['id']], $params[$f['key']]) ){
+      if ( $id = $this->get_id_from_magic_string($params[$f['id']], $params[$f['key']]) ){
         $this->expire_hotlink($params[$f['id']]);
-        $this->force_password($params[$f['pass2']]);
+        $this->force_password($params[$f['pass2']], $id);
         $this->session->set([]);
         // Reloads the page
-        header('Location: .');
+        header('Location: ./');
         die();
       }
       else{
@@ -876,7 +882,13 @@ class connection
     if ( $this->check() ){
       $update = [];
       foreach ( $d as $key => $val ){
-        if ( ($key !== 'id') && ($key !== 'cfg') && ($key !== 'auth') && ($key !== 'pass') && in_array($key, $this->fields) ){
+        if (
+          ($key !== $this->fields['id']) &&
+          ($key !== $this->fields['cfg']) &&
+          ($key !== 'auth') &&
+          ($key !== 'pass') &&
+          in_array($key, $this->fields)
+        ){
           $update[$key] = $val;
         }
       }
@@ -884,7 +896,7 @@ class connection
         return $this->db->update(
                 $this->class_cfg['tables']['users'],
                 $update,
-                [$this->class_cfg['arch']['users']['id'] => $this->id]);
+                [$this->fields['id'] => $this->id]);
       }
     }
     return false;
@@ -979,7 +991,6 @@ class connection
       ]);
     $this->auth = false;
     $this->id = null;
-    $this->cfg = null;
     $this->sess_cfg = null;
     $this->session->set([], self::$un);
     return $this;
@@ -1005,13 +1016,12 @@ class connection
    * Saves the user's config in the cfg field of the users' table
    * return connection
    */
-  public function save_cfg()
-  {
+  public function save_cfg(){
     if ( $this->check() ){
       $this->db->update(
           $this->class_cfg['tables']['users'],
-          [$this->class_cfg['arch']['users']['cfg'] => json_encode($this->cfg)],
-          [$this->class_cfg['arch']['users']['id'] => $this->id]);
+          [$this->fields['cfg'] => json_encode($this->cfg)],
+          [$this->fields['id'] => $this->id]);
     }
     return $this;
   }
@@ -1168,9 +1178,13 @@ class connection
    */
   public function logout(){
     $this->auth = false;
-    $this->user_cfg = [];
     $this->cfg = [];
     $this->close_session();
+  }
+
+  /** Returns an instance of the mailer class */
+  public function get_mailer(){
+    return new bbn\mail();
   }
 
   /**
@@ -1187,7 +1201,7 @@ class connection
         $this->class_cfg['arch']['passwords']['added'] => 'DESC'
       ]);
       if ( $this->_check_password($old_pass, $stored_pass) ){
-        return $this->force_password($new_pass);
+        return $this->force_password($new_pass, $this->get_id());
       }
     }
     return false;
@@ -1197,11 +1211,11 @@ class connection
    * Change the password in the database
    * @return boolean
    */
-  public function force_password($pass){
+  public function force_password($pass, $id){
     if ( $this->check() ){
       return $this->db->insert($this->class_cfg['tables']['passwords'], [
         $this->class_cfg['arch']['passwords']['pass'] => $this->_crypt($pass),
-        $this->class_cfg['arch']['passwords']['id_user'] => $this->id,
+        $this->class_cfg['arch']['passwords']['id_user'] => $id,
         $this->class_cfg['arch']['passwords']['added'] => date('Y-m-d H:i:s')
       ]);
     }

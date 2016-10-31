@@ -190,6 +190,7 @@ class query extends \PDOStatement implements actions
 						}
 					}
 					$sql = $this->db->create_query($qr);
+          $this->db->add_statement($sql);
 					try
 					{
 						$q = $this->db->prepare($sql);

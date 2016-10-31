@@ -3,6 +3,7 @@
  * @package bbn\appui
  */
 namespace bbn\appui;
+use bbn;
 /**
  * An all-in-one options management system
  *
@@ -17,7 +18,7 @@ namespace bbn\appui;
  */
 
 
-class options extends \bbn\objcache
+class options extends bbn\objcache
 {
   private static
     $current;
@@ -45,12 +46,12 @@ class options extends \bbn\objcache
     $default = 0;
 
   private function _has_history(){
-    return class_exists('\\bbn\\appui\\history') && \bbn\appui\history::is_enabled();
+    return class_exists('bbn\\appui\\history') && bbn\appui\history::is_enabled();
   }
 
   private function _cache_delete($id){
     $this->cacher->delete_all($this->_cache_name($id));
-    $this->cacher->delete_all($this->_cache_name($this->parent($id)));
+    $this->cacher->delete_all($this->_cache_name($this->get_id_parent($id)));
     $ids = $this->get_ids_by_code($id);
     foreach ( $ids as $id ){
       $this->cacher->delete_all($this->_cache_name($id));
@@ -58,12 +59,12 @@ class options extends \bbn\objcache
     return $this;
   }
 
-  protected static function _init(\bbn\appui\options $opt){
+  protected static function _init(options $opt){
     self::$current =& $opt;
   }
 
   /**
-   * @return \bbn\appui\options
+   * @return options
    */
   public static function get_options(){
     return self::$current;
@@ -83,11 +84,11 @@ class options extends \bbn\objcache
       $where = [$this->class_cfg['cols']['active'] => 1];
     }
     if ( $hist = $this->_has_history() ){
-      \bbn\appui\history::disable();
+      bbn\appui\history::disable();
     }
     $wst = $db->get_where($where, $tab);
     if ( $hist ){
-      \bbn\appui\history::enable();
+      bbn\appui\history::enable();
     }
     if ( $wst ){
       foreach ( $this->class_cfg['cols'] AS $k => $col ){
@@ -124,12 +125,12 @@ class options extends \bbn\objcache
 
   /**
    * options constructor.
-   * @param \bbn\db $db
+   * @param bbn\db $db
    * @param array $cfg
    */
-  public function __construct(\bbn\db $db, array $cfg=[]){
+  public function __construct(bbn\db $db, array $cfg=[]){
     parent::__construct($db);
-    $this->class_cfg = \bbn\x::merge_arrays(self::$_defaults, $cfg);
+    $this->class_cfg = bbn\x::merge_arrays(self::$_defaults, $cfg);
     self::_init($this);
   }
 
@@ -152,14 +153,14 @@ class options extends \bbn\objcache
     if ( isset($args['id']) ){
       return $args['id'];
     }
-    if ( \bbn\str::is_integer($args[0]) ){
+    if ( bbn\str::is_integer($args[0]) ){
       return $args[0];
     }
     $rargs = array_reverse($args, false);
     $id_parent = $this->default;
     while ( count($rargs) ){
       $cur = current($rargs);
-      if ( \bbn\str::is_integer($cur) ){
+      if ( bbn\str::is_integer($cur) ){
         $id_parent = $cur;
       }
       else if ( is_string($cur) ){
@@ -171,13 +172,13 @@ class options extends \bbn\objcache
       else{
         return false;
       }
-      if ( !\bbn\str::is_integer($id_parent) ){
-        \bbn\x::log($cur." ||| ".$id_parent, "no_options");
+      if ( !bbn\str::is_integer($id_parent) ){
+        bbn\x::log($cur." ||| ".$id_parent, "no_options");
         return false;
       }
       array_shift($rargs);
     }
-    return \bbn\str::is_integer($id_parent) ? $id_parent : false;
+    return bbn\str::is_integer($id_parent) ? $id_parent : false;
   }
 
   /**
@@ -187,7 +188,7 @@ class options extends \bbn\objcache
    * @return mixed
    */
   public function get_prop($id, $prop, $false = true){
-    if ( \bbn\str::is_integer($id) ){
+    if ( bbn\str::is_integer($id) ){
       $opt = $this->option($id);
     }
     else if ( is_array($id) ){
@@ -256,7 +257,7 @@ class options extends \bbn\objcache
 
   public function native_option($id){
     $id = $this->from_code(func_get_args());
-    if ( \bbn\str::is_integer($id) ) {
+    if ( bbn\str::is_integer($id) ) {
       if ( $r = $this->cache_get($id, __FUNCTION__) ){
         return $r;
       }
@@ -286,11 +287,11 @@ class options extends \bbn\objcache
     else{
       $id = $this->from_code(func_get_args());
     }
-    if ( \bbn\str::is_integer($id) ) {
+    if ( bbn\str::is_integer($id) ) {
       if ( isset($opt) || ($opt = $this->native_option($id)) ){
         $this->get_value($opt);
         $this->get_cfg($opt);
-        if ( \bbn\str::is_integer($opt['id_alias']) ){
+        if ( bbn\str::is_integer($opt['id_alias']) ){
           if ( $opt['id_alias'] === $id ){
             die("Impossible to have the same ID as ALIAS, check out ID $id");
           }
@@ -310,7 +311,7 @@ class options extends \bbn\objcache
    */
   public function text($id){
     $id = $this->from_code(func_get_args());
-    if ( \bbn\str::is_integer($id) ) {
+    if ( bbn\str::is_integer($id) ) {
       return $this->db->get_val($this->class_cfg['table'], $this->class_cfg['cols']['text'], $this->class_cfg['cols']['id'], $id);
     }
     return false;
@@ -324,7 +325,7 @@ class options extends \bbn\objcache
    */
   public function itext($id){
     $id = $this->from_code(func_get_args());
-    if ( \bbn\str::is_integer($id) ) {
+    if ( bbn\str::is_integer($id) ) {
       $val = $this->db->get_val($this->class_cfg['table'], $this->class_cfg['cols']['text'], $this->class_cfg['cols']['id'], $id);
       if ( $val ){
         return _($val);
@@ -340,7 +341,7 @@ class options extends \bbn\objcache
    * @return string La valeur du champ titre correspondant
    */
   public function code($id){
-    if ( \bbn\str::is_integer($id) ) {
+    if ( bbn\str::is_integer($id) ) {
       return $this->db->get_val($this->class_cfg['table'], $this->class_cfg['cols']['code'], $this->class_cfg['cols']['id'], $id);
     }
     return false;
@@ -378,7 +379,7 @@ class options extends \bbn\objcache
   public function count($id = 0){
     $args = func_get_args();
     $id = $this->from_code($args ?: $id);
-    if ( \bbn\str::is_integer($id) ) {
+    if ( bbn\str::is_integer($id) ) {
       return $this->db->count($this->class_cfg['table'], [$this->class_cfg['cols']['id_parent'] => $id]);
     }
     return false;
@@ -404,7 +405,7 @@ class options extends \bbn\objcache
   }
 
   public function options_by_alias($id_alias, $full = false){
-    if ( \bbn\str::is_integer($id_alias) ){
+    if ( bbn\str::is_integer($id_alias) ){
       $where = [$this->class_cfg['cols']['id_alias'] => $id_alias];
       $list = $this->get_rows($where);
       if ( is_array($list) ){
@@ -432,8 +433,7 @@ class options extends \bbn\objcache
    * @return array Un tableau des caractéristiques de chaque option de la catégorie, indexée sur leur `id`
    */
   public function full_options($id = 0, $id_parent = false, $where = [], $order = [], $start = 0, $limit = 2000){
-    $id = $this->from_code($id, $id_parent);
-    if ( \bbn\str::is_integer($id = $this->from_code($id, $id_parent)) ){
+    if ( bbn\str::is_integer($id = $this->from_code($id, $id_parent)) ){
       $list = $this->items($id);
       if ( is_array($list) ){
         $res = [];
@@ -454,7 +454,7 @@ class options extends \bbn\objcache
    */
   public function native_options($id = 0, $id_parent = false, $where = [], $order = [], $start = 0, $limit = false){
     $id = $this->from_code($id, $id_parent ?: $this->default);
-    if ( \bbn\str::is_integer($id, $start) ) {
+    if ( bbn\str::is_integer($id, $start) ) {
       if ( $r = $this->cache_get($id, __FUNCTION__) ){
         return $r;
       }
@@ -471,7 +471,7 @@ class options extends \bbn\objcache
 
   public function tree_ids($id, &$res = []){
     $id = $this->from_code(func_get_args());
-    if ( \bbn\str::is_integer($id) ) {
+    if ( bbn\str::is_integer($id) ) {
       if ( $opts = $this->items($id) ){
         foreach ($opts as $o) {
           array_push($res, $o);
@@ -485,7 +485,7 @@ class options extends \bbn\objcache
 
   public function tree($id, $id_parent = false){
     $id = $this->from_code(func_get_args());
-    if ( \bbn\str::is_integer($id) && ($text = $this->text($id)) ) {
+    if ( bbn\str::is_integer($id) && ($text = $this->text($id)) ) {
       $res = [
         'id' => $id,
         'text' => $text
@@ -505,7 +505,7 @@ class options extends \bbn\objcache
 
   public function full_tree($id){
     $id = $this->from_code(func_get_args());
-    if (\bbn\str::is_integer($id) && ($text = $this->text($id))) {
+    if (bbn\str::is_integer($id) && ($text = $this->text($id))) {
       if ( $res = $this->option($id) ){
         $res['items'] = [];
         if ($opts = $this->items($id) ){
@@ -526,7 +526,7 @@ class options extends \bbn\objcache
 
   public function native_tree($id){
     $id = $this->from_code(func_get_args());
-    if ( \bbn\str::is_integer($id) ) {
+    if ( bbn\str::is_integer($id) ) {
       if ( $res = $this->native_option($id) ) {
         $its = $this->items($id);
         if ( count($its) ){
@@ -574,7 +574,7 @@ class options extends \bbn\objcache
         }
       }
       if ( isset($it[$c['value']]) &&
-        \bbn\str::is_json($it[$c['value']])
+        bbn\str::is_json($it[$c['value']])
       ){
         $it[$c['value']] = json_decode($it[$c['value']], 1);
       }
@@ -592,7 +592,7 @@ class options extends \bbn\objcache
       }
       foreach ( $it as $k => $v ){
         if ( !in_array($k, $c) ){
-          $it[$c['value']][$k] = \bbn\str::is_json($v) ? json_decode($v, 1) : $v;
+          $it[$c['value']][$k] = bbn\str::is_json($v) ? json_decode($v, 1) : $v;
           unset($it[$k]);
         }
       }
@@ -602,7 +602,7 @@ class options extends \bbn\objcache
       if ( !isset($it[$c['cfg']]) ){
         $it[$c['cfg']] = [];
       }
-      else if ( \bbn\str::is_json($it[$c['cfg']]) ){
+      else if ( bbn\str::is_json($it[$c['cfg']]) ){
         $it[$c['cfg']] = json_decode($it[$c['cfg']], 1);
       }
       else if ( !is_array($it[$c['cfg']]) ){
@@ -615,7 +615,7 @@ class options extends \bbn\objcache
         $it[$c['cfg']]['order'] = $parent['num_children'] + 1;
       }
       $it[$c['cfg']] = json_encode($it[$c['cfg']]);
-      if ( !isset($it[$c['id_alias']]) || !\bbn\str::is_integer($it[$c['id_alias']]) ){
+      if ( !isset($it[$c['id_alias']]) || !bbn\str::is_integer($it[$c['id_alias']]) ){
         $it[$c['id_alias']] = null;
       }
       if ( empty($it[$c['value']]) || ($it[$c['value']] === '[]') ){
@@ -629,12 +629,12 @@ class options extends \bbn\objcache
     return false;
   }
 
-  public function add(array $it, $force = false){
+  public function add(array $it, $force = false, $return_num = false ){
     $res = false;
     $items = !empty($it['items']) && is_array($it['items']) ? $it['items'] : false;
+    $id = false;
     if ( $this->_prepare($it) ){
       $c = $this->class_cfg['cols'];
-      $id = false;
       if ( !is_null($it[$c['code']]) ){
         // Reviving deleted entry
         if ( $id = $this->db->select_one($this->class_cfg['table'], $c['id'], [
@@ -673,31 +673,31 @@ class options extends \bbn\objcache
           }
         }
       }
-      if ( !$id ){
-        if ( $res = $this->db->insert($this->class_cfg['table'], [
+      if (
+        !$id &&
+        ($res = $this->db->insert($this->class_cfg['table'], [
           $c['id_parent'] => $it[$c['id_parent']],
           $c['text'] => $it[$c['text']],
-          $c['code'] => $it[$c['code']],
+          $c['code'] => empty($it[$c['code']]) ? null : $it[$c['code']],
           $c['id_alias'] => $it[$c['id_alias']],
           $c['value'] => $it[$c['value']],
           $c['cfg'] => $it[$c['cfg']],
           $c['active'] => 1
-        ])
-        ){
-          $id = $this->db->last_id();
-        }
+        ]))
+      ){
+        $id = $this->db->last_id();
       }
       if ( $res ){
         $this->_cache_delete($id);
       }
-      if ( \bbn\str::is_integer($id) && $items ){
+      if ( bbn\str::is_integer($id) && $items ){
         foreach ( $items as $it ){
           $it['id_parent'] = $id;
-          $res += (int)$this->add($it, $force);
+          $res += (int)$this->add($it, $force, $return_num);
         }
       }
     }
-    return $res;
+    return $return_num ? $res : $id;
   }
 
   public function from_path($path, $sep = '|', $parent = null){
@@ -799,11 +799,11 @@ class options extends \bbn\objcache
   /**
    * Sets some cfg parameters in the table for a given option, through an array/object
    * @param int $id
-   * @param mixed $val
+   * @param mixed $params
    * @return int
    */
   public function set_param($id, $params){
-    if ( \bbn\str::is_integer($id) &&
+    if ( bbn\str::is_integer($id) &&
       !empty($params) &&
       ($o = $this->option($id))
     ){
@@ -828,7 +828,6 @@ class options extends \bbn\objcache
    * The function can be called with the value in it, in this case it will just format it without fetching it in the database.
    *
    * @param int $id
-   * @param null $val
    * @return array
    */
   public function get_cfg(&$id){
@@ -837,31 +836,35 @@ class options extends \bbn\objcache
     }
     else{
       $id = $this->from_code(func_get_args());
-      if ( \bbn\str::is_integer($id) ){
+      if ( bbn\str::is_integer($id) ){
         $opt = $this->option($id);
       }
     }
     if ( empty($opt) || !isset($opt['id']) ){
       return false;
     }
-    if ( \bbn\str::is_json($opt[$this->class_cfg['cols']['cfg']]) ){
-      $opt['cfg'] = json_decode($opt[$this->class_cfg['cols']['cfg']], 1);
+    if ( bbn\str::is_json($opt['cfg']) ){
+      $opt['cfg'] = json_decode($opt['cfg'], 1);
+    }
+    if ( !is_array($opt['cfg']) ){
+      $opt['cfg'] = [];
     }
     $parents = $this->parents($opt['id']);
     foreach ( $parents as $i => $p ){
       $parent = $this->option($p);
       if ( !empty($parent['cfg']['inheritance']) ){
-        if ( (($i === 0) && ($parent['cfg']['inheritance'] === 'children')) || ($parent['cfg']['inheritance'] === 'cascade') ){
+        if (
+          (($i === 0) && ($parent['cfg']['inheritance'] === 'children')) ||
+          ($parent['cfg']['inheritance'] === 'cascade')
+        ){
           if ( isset($opt['cfg']['order']) ){
             $parent['cfg']['order'] = $opt['cfg']['order'];
           }
-          $opt['cfg'] = $parent['cfg'];
+          // Keeping in the option cfg properties which don't exist in the parent
+          $opt['cfg'] = array_merge($opt['cfg'], $parent['cfg']);
           break;
         }
       }
-    }
-    if ( empty($opt['cfg']) ){
-      $opt['cfg'] = [];
     }
     return $opt['cfg'];
   }
@@ -871,7 +874,7 @@ class options extends \bbn\objcache
     $o_dest = $this->option($dest);
     $num = 0;
     if ( $o_dest && $o_src ){
-      $o_final = \bbn\x::merge_arrays($o_src, $o_dest);
+      $o_final = bbn\x::merge_arrays($o_src, $o_dest);
       $tables = $this->db->get_foreign_keys($this->class_cfg['cols']['id'], $this->class_cfg['table']);
       foreach ( $tables as $table => $cols ){
         foreach ( $cols as $c ){
@@ -916,7 +919,7 @@ class options extends \bbn\objcache
   public function duplicate($id, $target, $deep = true, $force = false){
     $res = false;
     $target = $this->from_code($target);
-    if ( \bbn\str::is_integer($target) ){
+    if ( bbn\str::is_integer($target) ){
       if ( $opt = $this->export($id, $deep, 1) ){
         $res = $this->import($opt, $target, $force);
         $this->_cache_delete($target);
@@ -934,7 +937,7 @@ class options extends \bbn\objcache
    * @return array
    */
   public function get_param(&$id, $param, $false = true){
-    if ( \bbn\str::is_integer($id) ){
+    if ( bbn\str::is_integer($id) ){
       $opt = $this->option($id);
     }
     else if ( is_array($id) ){
@@ -943,7 +946,7 @@ class options extends \bbn\objcache
     if ( empty($opt) || !isset($opt['id']) ){
       return false;
     }
-    if ( \bbn\str::is_json($opt[$this->class_cfg['cols']['cfg']]) ){
+    if ( bbn\str::is_json($opt[$this->class_cfg['cols']['cfg']]) ){
       $opt['cfg'] = json_decode($opt[$this->class_cfg['cols']['cfg']], 1);
     }
     return isset($opt['cfg'], $opt['cfg'][$param]) ? $opt['cfg'][$param] : ($false ? false : null);
@@ -1049,7 +1052,7 @@ class options extends \bbn\objcache
    * @return mixed
    */
   public function get_value(&$id){
-    if ( \bbn\str::is_integer($id) ){
+    if ( bbn\str::is_integer($id) ){
       $opt = $this->option($id);
     }
     else if ( is_array($id) ){
@@ -1058,9 +1061,9 @@ class options extends \bbn\objcache
     if ( empty($opt) || !isset($opt['id']) ){
       return false;
     }
-    if ( isset($opt[$this->class_cfg['cols']['value']]) && \bbn\str::is_json($opt[$this->class_cfg['cols']['value']]) ){
+    if ( isset($opt[$this->class_cfg['cols']['value']]) && bbn\str::is_json($opt[$this->class_cfg['cols']['value']]) ){
       $val = json_decode($opt[$this->class_cfg['cols']['value']], 1);
-      if ( \bbn\x::is_assoc($val) ) {
+      if ( bbn\x::is_assoc($val) ) {
         foreach ($val as $k => $v) {
           if ( !isset($opt[$k]) ){
             $opt[$k] = $v;
@@ -1078,12 +1081,10 @@ class options extends \bbn\objcache
   /**
    * Makes an option act as if it was the root option
    *
-   * @param mixed $cat
-   * @param mixed $id_parent
-   * @return \bbn\appui\options
+   * @return options
    */
   public function set_default(){
-    if ( \bbn\str::is_integer($id = $this->from_code(func_get_args())) ){
+    if ( bbn\str::is_integer($id = $this->from_code(func_get_args())) ){
       $this->default = $id;
     }
     return $this;
@@ -1124,7 +1125,7 @@ class options extends \bbn\objcache
   }
 
   public function unset_prop($id, $prop){
-    if ( \bbn\str::is_integer($id) && !empty($prop) && ($o = $this->option($id)) ){
+    if ( bbn\str::is_integer($id) && !empty($prop) && ($o = $this->option($id)) ){
       if ( is_string($prop) ){
         $prop = [$prop];
       }
@@ -1142,7 +1143,7 @@ class options extends \bbn\objcache
 
   public function get_ids_by_code($code){
     $id = $this->from_code(func_get_args());
-    if ( \bbn\str::is_integer($id) ) {
+    if ( bbn\str::is_integer($id) ) {
       return $this->db->get_column_values($this->class_cfg['table'], 'id', [
         $this->class_cfg['cols']['id_parent'] => $id
       ]);
@@ -1171,7 +1172,7 @@ class options extends \bbn\objcache
 
   public function parents($id){
     $id = $this->from_code(func_get_args());
-    if ( \bbn\str::is_integer($id) ) {
+    if ( bbn\str::is_integer($id) ) {
       $res = [];
       while ( ($id_parent = $this->get_id_parent($id)) !== false ){
         array_push($res, $id_parent);
@@ -1192,7 +1193,7 @@ class options extends \bbn\objcache
       // The order really changes
       if ( $options[$id]['cfg']['order'] !== $pos ){
         $options = array_values($options);
-        $idx = \bbn\x::find($options, ['id' => $id]);
+        $idx = bbn\x::find($options, ['id' => $id]);
         if ( $idx !== false ){
           $this->set_param($options[$idx]['id'], ['order' => $pos]);
           if ( $idx < ($pos - 1) ){
@@ -1225,7 +1226,7 @@ class options extends \bbn\objcache
   public function is_parent($id, $id_parent){
     // Preventing infinite loop
     $done = [$id];
-    if ( \bbn\str::is_integer($id, $id_parent) ){
+    if ( bbn\str::is_integer($id, $id_parent) ){
       while ( $id = $this->get_id_parent($id) ){
         if ( $id === $id_parent ){
           return true;
@@ -1244,15 +1245,19 @@ class options extends \bbn\objcache
     if ( isset($opts['items']) ){
       $opts = $opts['items'];
     }
+    $res = [];
     if ( is_array($opts) ){
       foreach ( $opts as $i => $o ){
         $opts[$i] = $f($o);
-        if ( $deep && !empty($opts[$i]['items']) ){
+        if ( $deep && $opts[$i] && !empty($opts[$i]['items']) ){
           $opts[$i]['items'] = $this->map($f, $opts[$i]['items'], 1);
+        }
+        if ( is_array($opts[$i]) ){
+          array_push($res, $opts[$i]);
         }
       }
     }
-    return $opts;
+    return $res;
   }
 
   public function apply($f, $id, $deep = false){
@@ -1316,11 +1321,11 @@ class options extends \bbn\objcache
   public function soptions(){
     $r = [];
     $id = $this->from_code(func_get_args());
-    if ( \bbn\str::is_integer($id) ) {
+    if ( bbn\str::is_integer($id) ) {
       foreach ( $id as $i => $txt ){
         $o = $this->options($i);
         if ( is_array($o) ){
-          $r = \bbn\x::merge_arrays($r, $o);
+          $r = bbn\x::merge_arrays($r, $o);
         }
       }
     }
@@ -1330,12 +1335,12 @@ class options extends \bbn\objcache
   public function full_soptions(){
     $r = [];
     $id = $this->from_code(func_get_args());
-    if ( \bbn\str::is_integer($id) ){
+    if ( bbn\str::is_integer($id) ){
       if ( $ids = $this->options($this->from_code($id)) ){
         foreach ( $ids as $id => $txt ){
           $o = $this->full_options($id);
           if ( is_array($o) ){
-            $r = \bbn\x::merge_arrays($r, $o);
+            $r = bbn\x::merge_arrays($r, $o);
           }
         }
       }
@@ -1346,10 +1351,10 @@ class options extends \bbn\objcache
   public function native_soptions(){
     $r = [];
     $id = $this->from_code(func_get_args());
-    if ( \bbn\str::is_integer($id) ){
+    if ( bbn\str::is_integer($id) ){
       if ( $ids = $this->options($this->from_code($id)) ){
         foreach ( $ids as $id => $txt ){
-          $r = \bbn\x::merge_arrays($r, $this->native_options($id));
+          $r = bbn\x::merge_arrays($r, $this->native_options($id));
         }
       }
     }
@@ -1380,10 +1385,12 @@ class options extends \bbn\objcache
   }
 
   /**
-   * Retourne la liste des options d'une catégorie indexée sur leur `id` sous la forme d'un tableau text/value
+   * Returns an option's chiuldren list in a text/value indexed array
    *
-   * @param string|int $cat La catégorie, sous la forme de son `id`, ou de son nom
-   * @return array La liste des options dans un tableau text/value
+   * @param string|int $cat The category, with its ID or code
+   * @param string $text The text field name
+   * @param string $id The ID field name
+   * @return array Options' list in a text/value indexed array
    */
   public function text_value_options($cat = null, $text = 'text', $id = 'value'){
     $res = [];
@@ -1397,4 +1404,30 @@ class options extends \bbn\objcache
     }
     return $res;
   }
+
+  public function find_permissions($id = false, $deep = true){
+    if ( $id === false ){
+      $id = $this->default;
+    }
+    $perms = false;
+    $cfg = $this->get_cfg($id);
+    if ( !empty($cfg['permissions']) ){
+      $perms = [];
+      $opts = $this->full_options($id);
+      foreach ( $opts as $opt ){
+        $o = [
+          'icon' => $opt['icon'] ?: 'fa fa-cog',
+          'text' => $opt['text'],
+          'id' => $opt['id']
+        ];
+        if ( $deep && !empty($opt['cfg']['permissions']) ){
+          $o['items'] = $this->find_permissions($opt['id'], true);
+        }
+        array_push($perms, $o);
+      }
+    }
+    return $perms;
+  }
+
+
 }

@@ -57,9 +57,34 @@ class controller implements api{
     $db,
     /**
      * The data model
-     * @var null|array
+     * @var array
      */
     $data = [],
+    /**
+     * All the parts of the path requested
+     * @var array
+     */
+    $params = [],
+    /**
+     * All the parts of the path requested which are not part of the controller path
+     * @var array
+     */
+    $arguments = [],
+    /**
+     * The data sent through POST
+     * @var array
+     */
+    $post = [],
+    /**
+     * The data sent through GET
+     * @var array
+     */
+    $get = [],
+    /**
+     * A numeric indexed array of the files sent through POST (different from native)
+     * @var array
+     */
+    $files = [],
 		/**
 		 * The output object
 		 * @var null|object
