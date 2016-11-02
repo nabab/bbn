@@ -35,10 +35,7 @@ class session
   private static
     /** @var string */
     $fingerprint = BBN_FINGERPRINT,
-    $name = BBN_SESS_NAME,
-    /** session */
-    $inst,
-    $exist = false;
+    $name = BBN_SESS_NAME;
 
   protected
     $data,
@@ -93,6 +90,7 @@ class session
         $_SESSION[self::$name] = is_array($defaults) ? $defaults : [];
       }
       $this->id = session_id();
+      //
       $this->fetch();
     }
     return $this;

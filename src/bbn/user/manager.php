@@ -209,7 +209,7 @@ You can click the following link to access directly your account:<br>
     }
     if ( $user = $this->db->rselect(
       $this->class_cfg['tables']['users'],
-      array_values($this->class_cfg['arch']['users']),
+      array_values($u),
       $where)
     ){
       if ( $session = $this->db->rselect(

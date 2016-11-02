@@ -1214,7 +1214,7 @@ class user extends models\cls\basic
   public function get_name($usr = null){
     if ( $this->auth ){
       if ( is_null($usr) ){
-        return $this->session->get('info', $this->class_cfg['show']);
+        $usr = $this->get_session();
       }
       else if ( str::is_integer($usr) ){
         $mgr = $this->get_manager();

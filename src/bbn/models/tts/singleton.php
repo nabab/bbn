@@ -16,7 +16,7 @@ trait singleton
     $singleton_exists;
 
   protected static function singleton_init($instance){
-    if ( self::singleton_exists($instance) ){
+    if ( !self::singleton_exists() ){
       self::$singleton_exists = 1;
       self::$singleton_instance = $instance;
     }
