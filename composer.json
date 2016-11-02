@@ -13,7 +13,6 @@
     }
   ],
   "require": {
-    "php": ">=7.0",
     "zordius/lightncandy": "dev-master",
     "greenlion/php-sql-parser": "dev-trunk",
     "mpdf/mpdf": "dev-master",
