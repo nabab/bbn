@@ -1,5 +1,6 @@
 <?php
-namespace \bbn\appui;
+namespace bbn\appui;
+use bbn;
 
 class tabnav{
 

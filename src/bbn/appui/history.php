@@ -1,13 +1,13 @@
 <?php
 namespace bbn\appui;
 
-use \bbn\str;
+use bbn;
 
 class history
 {
 
 	private static
-          /** @var \bbn\db $db The DB connection */
+          /** @var db $db The DB connection */
           $db,
           /** @var array A collection of the  */
           $dbs = [],
@@ -54,10 +54,10 @@ class history
    * @return number|false
    */
   public static function valid_date($d){
-    if ( !\bbn\str::is_number($d) ){
+    if ( !bbn\str::is_number($d) ){
       $d = strtotime($d);
     }
-    if ( \bbn\str::is_number($d) && ($d > 0) ){
+    if ( bbn\str::is_number($d) && ($d > 0) ){
       return $d;
     }
     return false;
@@ -66,14 +66,14 @@ class history
   /**
 	 * @return void
 	 */
-	public static function init(\bbn\db $db, $cfg = [])
+	public static function init(bbn\db $db, $cfg = [])
 	{
     $hash = $db->get_hash();
     if ( !in_array($hash, self::$dbs) ){
       array_push(self::$dbs, $hash);
       self::$db = $db;
-      self::$db->set_trigger('\\bbn\\appui\\history::trigger');
-      $vars = get_class_vars('\\bbn\\appui\\history');
+      self::$db->set_trigger('\\bbn\appui\\history::trigger');
+      $vars = get_class_vars('\\bbn\appui\\history');
       foreach ( $cfg as $cf_name => $cf_value ){
         if ( array_key_exists($cf_name, $vars) ){
           self::$$cf_name = $cf_value;
@@ -109,7 +109,7 @@ class history
 	public static function delete($table, $id)
 	{
 		// Sets the "active" column name
-		if ( self::is_init() && str::check_name($table) && \bbn\str::is_integer($id) ){
+		if ( self::is_init() && bbn\str::check_name($table) && bbn\str::is_integer($id) ){
       self::$db->query("
         DELETE FROM ".self::$db->escape(self::$htable)."
         WHERE ".self::$db->escape('column')." LIKE '".self::$db->table_full_name($table).".%'
@@ -124,7 +124,7 @@ class history
 	 */
 	public static function set_hcol($hcol)
 	{
-		if ( str::check_name($hcol) ){
+		if ( bbn\str::check_name($hcol) ){
 			self::$hcol = $hcol;
 		}
 	}
@@ -136,7 +136,7 @@ class history
 	 */
 	public static function get_hcol()
 	{
-		if ( str::check_name(self::$hcol) ){
+		if ( bbn\str::check_name(self::$hcol) ){
 			return self::$hcol;
 		}
 	}
@@ -147,7 +147,7 @@ class history
 	public static function set_date($date)
 	{
 		// Sets the current date
-		if ( !\bbn\str::is_number($date) ){
+		if ( !bbn\str::is_number($date) ){
       if ( !($date = strtotime($date)) ){
         return false;
       }
@@ -183,7 +183,7 @@ class history
 	public static function set_admin_db($db)
 	{
 		// Sets the history table name
-		if ( str::check_name($db) ){
+		if ( bbn\str::check_name($db) ){
 			self::$admin_db = $db;
 			self::$htable = self::$admin_db.'.'.self::$prefix.'history';
 		}
@@ -196,7 +196,7 @@ class history
 	public static function set_huser($huser)
 	{
 		// Sets the history table name
-		if ( \bbn\str::is_number($huser) ){
+		if ( bbn\str::is_number($huser) ){
 			self::$huser = $huser;
 		}
 	}
@@ -212,14 +212,14 @@ class history
 
   public static function get_all_history($table, $start=0, $limit=20, $dir=false){
     $r = [];
-    if ( \bbn\str::check_name($table) && is_int($start) && is_int($limit) ){
+    if ( bbn\str::check_name($table) && is_int($start) && is_int($limit) ){
       $r = self::$db->get_rows("
         SELECT DISTINCT(`line`)
         FROM ".self::$db->escape(self::$htable)."
         WHERE `column` LIKE ?
         ORDER BY chrono ".(
                 is_string($dir) &&
-                        (\bbn\str::change_case($dir, 'lower') === 'asc') ?
+                        (bbn\str::change_case($dir, 'lower') === 'asc') ?
                   'ASC' : 'DESC' )."
         LIMIT $start, $limit",
         self::$db->table_full_name($table).'.%');
@@ -229,7 +229,7 @@ class history
 
   public static function get_last_modified_lines($table, $start=0, $limit=20){
     $r = [];
-    if ( \bbn\str::check_name($table) && is_int($start) && is_int($limit) ){
+    if ( bbn\str::check_name($table) && is_int($start) && is_int($limit) ){
       $r = self::$db->get_rows("
         SELECT DISTINCT(".self::$db->escape('line').")
         FROM ".self::$db->escape(self::$htable)."
@@ -244,10 +244,10 @@ class history
   }
 
   public static function get_next_update($table, $date, $id, $column=''){
-    if ( \bbn\str::check_name($table) &&
+    if ( bbn\str::check_name($table) &&
       ($date = self::valid_date($date)) &&
       is_int($id) &&
-      (empty($column) || \bbn\str::check_name($column))
+      (empty($column) || bbn\str::check_name($column))
     ){
       $table = self::$db->table_full_name($table).'.'.( empty($column) ? '%' : $column );
       return self::$db->get_row("
@@ -267,10 +267,10 @@ class history
   }
 
   public static function get_prev_update($table, $date, $id, $column=''){
-    if ( \bbn\str::check_name($table) &&
+    if ( bbn\str::check_name($table) &&
       ($date = self::valid_date($date)) &&
       is_int($id) &&
-      (empty($column) || \bbn\str::check_name($column))
+      (empty($column) || bbn\str::check_name($column))
     ){
       $table = self::$db->table_full_name($table).'.'.( empty($column) ? '%' : $column );
       return self::$db->get_row("
@@ -290,10 +290,10 @@ class history
   }
 
   public static function get_prev_value($table, $date, $id, $column){
-    if ( \bbn\str::check_name($table) &&
+    if ( bbn\str::check_name($table) &&
       ($date = self::valid_date($date)) &&
       is_int($id) &&
-      \bbn\str::check_name($column)
+      bbn\str::check_name($column)
     ){
       $table = self::$db->table_full_name($table).'.'.$column;
       return self::$db->get_one("
@@ -316,7 +316,7 @@ class history
     if ( !($when = self::valid_date($when)) ){
       die("The date $when is incorrect");
     }
-    if ( !\bbn\str::check_name($table) ){
+    if ( !bbn\str::check_name($table) ){
 			die("The table $table has an incorrect name");
 		}
 		if ( !($primary = self::$db->get_unique_primary($table)) ){
@@ -598,7 +598,7 @@ class history
   }
 
 	/**
-	 * The function used by the \bbn\db trigger
+	 * The function used by the db trigger
    * This will basically execute the history query if it's configured for.
    *
    * @param string $table The table for which the history is called
@@ -623,7 +623,7 @@ class history
       // Need to have a single primary key, otherwise the script dies
       if ( !isset($s['primary']) ){
         self::$db->error("You need to have a primary key on a single column in your table $table in order to use the history class");
-        die(\bbn\x::hdump("You need to have a primary key on a single column in your table $table in order to use the history class"));
+        die(bbn\x::hdump("You need to have a primary key on a single column in your table $table in order to use the history class"));
       }
 
       // This happens before the query is executed
@@ -738,7 +738,7 @@ class history
                   ]);
                 }
               }
-              //\bbn\x::dump($cfg);
+              //bbn\x::dump($cfg);
             }
             // Case where the primary is not defined, we'll update each primary instead
             else{

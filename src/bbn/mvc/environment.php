@@ -15,6 +15,7 @@
  */
 
 namespace bbn\mvc;
+use bbn;
 
 
 class environment {
@@ -64,12 +65,12 @@ class environment {
   {
     if ( !isset($this->params) ) {
       $this->params = [];
-      $tmp = explode('/', \bbn\str::parse_path($path));
+      $tmp = explode('/', bbn\str::parse_path($path));
       foreach ( $tmp as $t ) {
-        if ( !empty($t) || \bbn\str::is_number($t) ) {
-          if ( in_array($t, \bbn\mvc::$reserved) ){
+        if ( !empty($t) || bbn\str::is_number($t) ) {
+          if ( in_array($t, bbn\mvc::$reserved) ){
             die("The controller you are asking for contains one of the following reserved strings: " .
-              implode(", ", \bbn\mvc::$reserved));
+              implode(", ", bbn\mvc::$reserved));
           }
           array_push($this->params, $t);
         }
@@ -192,7 +193,7 @@ class environment {
           $this->set_mode(BBN_DEFAULT_MODE);
         }
         array_walk_recursive($this->post, function(&$a){
-          $a = \bbn\str::correct_types($a);
+          $a = bbn\str::correct_types($a);
           return $a;
         });
       }
@@ -234,7 +235,7 @@ class environment {
   }
 
   public function set_prepath($path){
-    $path = \bbn\x::remove_empty(explode('/', $path));
+    $path = bbn\x::remove_empty(explode('/', $path));
     if ( count($path) ) {
       foreach ($path as $p) {
         if ($this->params[0] === $p) {
@@ -284,9 +285,9 @@ class environment {
       if ( isset($argv[1]) ){
         $this->set_params($argv[1]);
         if ( isset($argv[2]) && ($json = json_decode($argv[2], 1)) ){
-          // Data are "normalized" i.e. types are changed through str::correct_types
+          // Data are "normalized" i.e. types are changed through bbn\str::correct_types
           $this->post = array_map(function($a){
-            return \bbn\str::correct_types($a);
+            return bbn\str::correct_types($a);
           }, $json);
         }
       }
@@ -299,7 +300,7 @@ class environment {
       $this->get = [];
       if ( count($_GET) > 0 ){
         $this->get = array_map(function($a){
-          return \bbn\str::correct_types($a);
+          return bbn\str::correct_types($a);
         }, $_GET);
       }
     }
@@ -360,7 +361,7 @@ class environment {
                   $j = 0;
                 }
                 $j++;
-                $file = \bbn\str::file_ext($f['name'][$i], true);
+                $file = bbn\str::file_ext($f['name'][$i], true);
                 $v = $file[0].'_'.$j.'.'.$file[1];
               }
               array_push($this->files[$n], [

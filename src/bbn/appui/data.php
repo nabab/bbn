@@ -7,9 +7,10 @@
  */
 
 namespace bbn\appui;
+use bbn;
 
 
-class data extends \bbn\objcache
+class data extends bbn\models\cls\cache
 {
   protected static $registry = [];
 

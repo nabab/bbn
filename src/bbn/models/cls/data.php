@@ -2,7 +2,8 @@
 /**
  * @package bbn
  */
-namespace bbn;
+namespace bbn\models\cls;
+use bbn;
 /**
  * Data Class with Db and cache
  *
@@ -16,7 +17,7 @@ namespace bbn;
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @version 0.1
  */
-class objdata extends objcache{
+class data extends cache{
 
   private static
     $_bbn_reflection_class = false,
@@ -24,10 +25,10 @@ class objdata extends objcache{
     $_bbn_primary;
 
   private static function _init($obj, db $db){
-    self::$_bbn_reflection_class = new ReflectionObject($obj);
+    self::$_bbn_reflection_class = new \ReflectionObject($obj);
     self::$_bbn_protected_properties = array_map(function($a){
       return $a->getName();
-    }, self::$_bbn_reflection_class->getProperties(ReflectionProperty::IS_PROTECTED));
+    }, self::$_bbn_reflection_class->getProperties(\ReflectionProperty::IS_PROTECTED));
     self::$_bbn_primary = "$primary";
   }
 

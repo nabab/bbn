@@ -1,8 +1,9 @@
 <?php
 /**
- * @package bbn\html
+ * @package html
  */
 namespace bbn\html;
+use bbn;
 /**
  * HTML Class creating a form INPUT
  *
@@ -15,7 +16,7 @@ namespace bbn\html;
  * @version 0.4
  * @todo ???
  */
-class button extends element
+class button extends bbn\element
 {
   protected
           /** @var null|string The input's label/title */

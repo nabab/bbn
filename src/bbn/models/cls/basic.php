@@ -2,7 +2,8 @@
 /**
  * @package bbn
  */
-namespace bbn;
+namespace bbn\models\cls;
+use bbn;
 /**
  * Basic object Class
  *
@@ -17,7 +18,7 @@ namespace bbn;
  * @version 0.2r89
  * Todo: create a new delegation generic function for the double underscores functions
  */
-class obj
+class basic
 {
 	protected
 		/**
@@ -31,14 +32,14 @@ class obj
 		/**
 		 * @var array
 		 */
-		$log=array();
+		$log = [];
 
 	/**
 	 * Checks whether the error property has been set (so an error happened).
+   * @param boolean $state
 	 * @return bool
 	 */
-	public function debug($state = 1)
-	{
+	public function debug($state = true){
 		$this->is_debug = $state;
 	}
 
@@ -46,21 +47,19 @@ class obj
 	 * Checks whether the error property has been set (so an error happened).
 	 * @return bool
 	 */
-	public function test()
-	{
+	public function test(){
 		if ( $this->error ) {
 			return false;
 		}
 		return true;
 	}
 
-	public function log()
-  {
+	public function log(){
 		if ( $this->is_debug ){
 			$ar = func_get_args();
-			$cn = \bbn\str::encode_filename(str_replace('\\', '_', get_class($this)));
+			$cn = bbn\str::encode_filename(str_replace('\\', '_', get_class($this)));
 			foreach ( $ar as $a ){
-				\bbn\x::log($a, $cn);
+				bbn\x::log($a, $cn);
 			}
 		}
   }
@@ -110,7 +109,7 @@ class obj
     }
 		/*
      * else if ( $name === 'log' )
-			array_push(\bbn\x::log, $value);
+			array_push(bbn\x::log, $value);
 	}
 	 */
 }

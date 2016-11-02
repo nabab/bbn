@@ -16,7 +16,7 @@
  *
  * Here is an example with gMail
  * <code>
- * $mail = new \bbn\mail([
+ * $mail = new mail([
  *   'port' => 465,
  *   'host' => 'imap.gmail.com',
  *   'user' => 'myemail@gmail.com',
@@ -29,7 +29,7 @@
  *
  * Here is an example with classic
  * <code>
- * $mail = new \bbn\mail([
+ * $mail = new mail([
  *   'host' => 'mail.m3l.co',
  *   'user' => 'myrealemail@babna.com',
  *   'from' => 'myniceemail@babna.com',
@@ -42,7 +42,7 @@
 
 namespace bbn;
 
-class mail extends obj
+class mail extends bbn\models\cls\basic
 {
   private static
     $dest_fields = ['to', 'cc', 'bcc'],
@@ -210,7 +210,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
               $valid = 1;
             }
             else{
-              \bbn\x::log("Adresse email invalide: ".$dest);
+              x::log("Adresse email invalide: ".$dest);
               $valid = false;
             }
           }
@@ -241,7 +241,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
         }
       }
       if ( !isset($renderer) ){
-        $renderer = \bbn\tpl::renderer($this->template);
+        $renderer = tpl::renderer($this->template);
       }
       $ar['url'] = defined('BBN_URL') ? BBN_URL : '';
       $ar['text'] = $cfg['text'];

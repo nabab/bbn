@@ -3,6 +3,7 @@
  * 
  */
 namespace bbn\api\kendo;
+use bbn;
 
 class grid // extends object
 {
@@ -36,10 +37,10 @@ class grid // extends object
     
     if ( isset($cfg['primary']) ){
 
-      $this->id = isset($cfg['id']) ? $cfg['id'] : \bbn\str::genpwd();
+      $this->id = isset($cfg['id']) ? $cfg['id'] : bbn\str::genpwd();
       $this->primary = $cfg['primary'];
       if ( !isset($cfg['builder']) ){
-        $cfg['builder'] = new \bbn\html\builder();
+        $cfg['builder'] = new bbn\html\builder();
       }
       $this->builder = $cfg['builder'];
 
@@ -139,7 +140,7 @@ class grid // extends object
               $col->addCommandItem($c);
             }
           }
-          if ( count(\bbn\x::to_array($col)) > 0 ){
+          if ( count(bbn\x::to_array($col)) > 0 ){
             $this->grid->addColumn($col);
           }
         }
@@ -205,7 +206,7 @@ class grid // extends object
                   height:"auto",
                   width:720,
                   "max-height":appui.env.height-100
-                }).restyle().data("kendoWindow").title("'.\bbn\str::escape_dquotes($cfg['description']).'").center();
+                }).restyle().data("kendoWindow").title("'.bbn\str::escape_dquotes($cfg['description']).'").center();
                }'));
 
       
@@ -234,7 +235,7 @@ class grid // extends object
     $this->set_delete($url);
   }
   
-  public function set_detail(\bbn\api\kendo\grid $grid){
+  public function set_detail(bbn\api\kendo\grid $grid){
     $g = new grid($grid);
     $this->grid->detailInit($g->grid);
   }

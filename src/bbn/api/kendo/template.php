@@ -3,13 +3,14 @@
  * 
  */
 namespace bbn\api\kendo;
+use bbn;
 class template // extends object
 {
   private
     $ctrl,
     $prepath;
 
-  public function __construct(\bbn\mvc\controller $ctrl, $prepath = '') {
+  public function __construct(bbn\mvc\controller $ctrl, $prepath = '') {
     $this->ctrl = $ctrl;
     $this->prepath = $prepath;
   }

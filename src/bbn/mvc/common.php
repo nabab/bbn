@@ -7,6 +7,7 @@
  */
 
 namespace bbn\mvc;
+use bbn;
 
 
 trait common {
@@ -17,11 +18,10 @@ trait common {
    * @param string $p The request path <em>(e.g books/466565 or html/home)</em>
    * @return bool
    */
-  private function check_path()
-  {
+  private function check_path(){
     $ar = func_get_args();
     foreach ( $ar as $a ){
-      $a = \bbn\str::parse_path($a);
+      $a = bbn\str::parse_path($a);
       if ( !is_string($a) ||
         (strpos($a,'./') !== false) ||
         (strpos($a,'/') === 0) ){
@@ -38,9 +38,9 @@ trait common {
   }
 
   public function log(){
-    if ( \bbn\mvc::get_debug() ){
+    if ( bbn\mvc::get_debug() ){
       $ar = func_get_args();
-      \bbn\x::log(count($ar) > 1 ? $ar : $ar[0], 'mvc');
+      bbn\x::log(count($ar) > 1 ? $ar : $ar[0], 'mvc');
     }
   }
 

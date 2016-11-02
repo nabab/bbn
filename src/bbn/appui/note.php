@@ -7,19 +7,20 @@
  */
 
 namespace bbn\appui;
+use bbn;
 
 if ( !defined('BBN_DATA_PATH') ){
   die("The constant BBN_DATA_PATH must be defined in order to use note");
 }
 
-class note extends \bbn\objdb
+class note extends bbn\models\cls\db
 {
   private static
     $media_options = [],
     $media_option_root;
 
   private static function get_media_option_root(){
-    if ( !isset(self::$media_option_root) && ($opt = \bbn\appui\options::get_options()) ){
+    if ( !isset(self::$media_option_root) && ($opt = bbn\appui\options::get_options()) ){
       self::$media_option_root = $opt->from_code('media', 'bbn_notes');
     }
     return self::$media_option_root;
@@ -27,7 +28,7 @@ class note extends \bbn\objdb
 
   protected static function get_media_options($force = false){
     if ( empty(self::$media_options) || $force ){
-      if ( ($opt = \bbn\appui\options::get_options()) && self::get_media_option_root() ){
+      if ( ($opt = bbn\appui\options::get_options()) && self::get_media_option_root() ){
         self::$media_options = $opt->options_codes(self::$media_option_root);
       }
     }
@@ -57,7 +58,7 @@ class note extends \bbn\objdb
     if ( $this->exists($id_note) &&
       !empty($content) &&
       $this->media_option_id($type) &&
-      ($usr = \bbn\user\connection::get_user())
+      ($usr = bbn\user::get_instance())
     ){
       $ok = false;
       switch ( $type ){
@@ -86,7 +87,7 @@ class note extends \bbn\objdb
         ]);
         if ( isset($file) ){
           $path = BBN_DATA_PATH.'media/'.$id;
-          \bbn\file\dir::create_path($path);
+          bbn\file\dir::create_path($path);
           rename($content, $path.DIRECTORY_SEPARATOR.$file);
         }
         return $id;
@@ -96,7 +97,7 @@ class note extends \bbn\objdb
   }
 
   public function insert($title, $content, $private = false, $parent = null){
-    if ( $usr = \bbn\user\connection::get_user() ){
+    if ( $usr = bbn\user::get_instance() ){
       if ( $this->db->insert('bbn_notes', [
         'id_parent' => $parent,
         'private' => $private ? 1 : 0,

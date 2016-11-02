@@ -17,11 +17,13 @@
  */
 
 namespace bbn\appui;
+use bbn;
 
-class grid extends \bbn\obj{
+class grid extends bbn\models\cls\basic
+{
 
 	private
-          /* @var \bbn\db The DB connection */
+          /* @var db The DB connection */
           $db = false,
           /* @var string The tables' prefix (the tables will be called ?cron and ?journal) */
           $prefix = 'bbn_',
@@ -32,15 +34,15 @@ class grid extends \bbn\obj{
           $fields = null,
           $additional_fields = [];
 
-  public function __construct(\bbn\db $db, $cfg, $table = null, $fields = null){
+  public function __construct(bbn\db $db, $cfg, $table = null, $fields = null){
     $this->db = $db;
     if ( is_array($cfg) ){
       $this->cfg['start'] = isset($cfg['skip']) &&
-              \bbn\str::is_number($cfg['skip']) ?
+              bbn\str::is_number($cfg['skip']) ?
                       $cfg['skip'] : 0;
 
       $this->cfg['limit'] = ( isset($cfg['take']) &&
-              \bbn\str::is_number($cfg['take']) ) ?
+              bbn\str::is_number($cfg['take']) ) ?
                       $cfg['take'] : 20;
 
       $this->cfg['order'] = $this->cfg['dir'] = false;
@@ -120,18 +122,18 @@ class grid extends \bbn\obj{
             if ( $this->structure && isset($this->structure['fields'][$f['field']]) ){
               if ( ($this->structure['fields'][$f['field']]['type'] === 'int') &&
                       ($this->structure['fields'][$f['field']]['maxlength'] == 1) &&
-                      !\bbn\str::is_integer($f['value']) ){
+                      !bbn\str::is_integer($f['value']) ){
                 $f['value'] = ($f['value'] === 'true') ? 1 : 0;
               }
             }
             $res .= $pre.$field." ";
             switch ( $f['operator'] ){
               case 'eq':
-                $res .= \bbn\str::is_number($f['value']) ? "= ".$f['value'] : "LIKE '".$this->db->escape_value($f['value'])."'";
+                $res .= bbn\str::is_number($f['value']) ? "= ".$f['value'] : "LIKE '".$this->db->escape_value($f['value'])."'";
                 break;
 
               case 'neq':
-                $res .= \bbn\str::is_number($f['value']) ? "!= ".$f['value'] : "NOT LIKE '".$this->db->escape_value($f['value'])."'";
+                $res .= bbn\str::is_number($f['value']) ? "!= ".$f['value'] : "NOT LIKE '".$this->db->escape_value($f['value'])."'";
                 break;
 
               case 'startswith':

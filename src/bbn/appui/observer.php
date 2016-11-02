@@ -7,25 +7,26 @@
  */
 
 namespace bbn\appui;
+use bbn;
 
 
-class observer extends \bbn\objcache
+class observer extends bbn\models\cls\cache
 {
   private static
     $observers = [],
     $sess_index = 'appui_observer';
 
 
-  public function __construct(\bbn\db $db)
+  public function __construct(bbn\db $db)
   {
-    if ( $this->sess = \bbn\user\session::get_current() ){
+    if ( $this->sess = bbn\user\session::get_instance() ){
       parent::__construct($db);
     }
   }
 
   public function register($value, string $name, string $group = null){
     if ( $this->has_session() && !empty($name) ){
-      $hash = \bbn\cache::make_hash($value);
+      $hash = bbn\cache::make_hash($value);
       if ( $group ){
         $this->sess->set($hash, self::$sess_index, $group, $name);
       }

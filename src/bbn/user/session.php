@@ -1,8 +1,9 @@
 <?php
 /**
- * @package bbn\user
+ * @package user
  */
 namespace bbn\user;
+use bbn;
 /**
  * A session management object for asynchronous PHP tasks
  *
@@ -29,6 +30,7 @@ ini_set('session.gc_maxlifetime', BBN_SESS_LIFETIME);
 
 class session
 {
+  use bbn\models\tts\singleton;
 
   private static
     /** @var string */
@@ -41,23 +43,6 @@ class session
   protected
     $data,
     $id;
-
-  private static function exists(){
-    return self::$exist;
-  }
-
-  private static function init(session $inst){
-    if ( !self::exists() ){
-      self::$exist = 1;
-      self::$inst = $inst;
-    }
-  }
-
-  public static function get_current(){
-    if ( self::exists() ){
-      return self::$inst;
-    }
-  }
 
   private function _get_value($args){
     if ( $this->id ){
@@ -77,8 +62,8 @@ class session
       // The value is the first argument
       $value = array_shift($args);
       // Except if it's an array and there is only one argument
-      if ( !count($args) && is_array($value) && \bbn\x::is_assoc($value) ){
-        $this->data = \bbn\x::merge_arrays($this->data, $value);
+      if ( !count($args) && is_array($value) && bbn\x::is_assoc($value) ){
+        $this->data = bbn\x::merge_arrays($this->data, $value);
       }
       else{
         $var =& $this->data;
@@ -101,8 +86,8 @@ class session
   }
 
   public function __construct(array $defaults = null){
-    if ( !self::exists() ){
-      self::init($this);
+    if ( !self::singleton_exists() ){
+      self::singleton_init($this);
       $this->open();
       if ( !isset($_SESSION[self::$name]) ){
         $_SESSION[self::$name] = is_array($defaults) ? $defaults : [];
@@ -273,12 +258,12 @@ class session
   }
 }
 /*
-$sess = new \bbn\user\session();
+$sess = new bbn\user\session();
 $sess->set("value of \$_SESSION[BBN_SESS_NAME][foo][bar1]", "foo", "bar1");
 $sess->set("value of \$_SESSION[BBN_SESS_NAME][foo][bar2]", "foo", "bar2");
 $sess->set(10, "myProp");
 $sess->set(10, "myProp2");
 $sess->uset("myProp2");
 $sess->transform(function($a){return $a+1;}, "myProp");
-\bbn\x::hdump($sess->get("myProp"), $sess->get("hhhh"));
+bbn\x::hdump($sess->get("myProp"), $sess->get("hhhh"));
 */

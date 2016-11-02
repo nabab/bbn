@@ -2,7 +2,8 @@
 /**
  * @package bbn
  */
-namespace bbn;
+namespace bbn\models\cls;
+use bbn;
 /**
  * Object Class with Db and cache
  *
@@ -17,19 +18,19 @@ namespace bbn;
  * @version 0.2r89
  * Todo: create a new delegation generic function for the double underscores functions
  */
-class objcache extends objdb
+class cache extends db
 {
 	protected
 		/** @var string */
 		$_cache_prefix,
-		/** @var $cacher \bbn\cache */
+		/** @var $cacher cache */
 		$cacher;
 
-	public function __construct(\bbn\db $db)
+	public function __construct(bbn\db $db)
 	{
 		parent::__construct($db);
-		$this->cacher = \bbn\cache::get_engine();
-		$this->_cache_prefix = \bbn\str::encode_filename(str_replace('\\', '/', get_class($this))).'/';
+		$this->cacher = bbn\cache::get_engine();
+		$this->_cache_prefix = bbn\str::encode_filename(str_replace('\\', '/', get_class($this))).'/';
 	}
 
 	protected function _cache_name($uid, $method = ''){

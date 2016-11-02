@@ -1,14 +1,14 @@
 <?php
 namespace bbn\appui;
 
-use \bbn\str;
+use bbn;
 
 class dbsync
 {
 
 	public static
           /**
-           * @var \bbn\db The DB connection
+           * @var db The DB connection
            */
           $db = false,
           $dbs = false,
@@ -46,7 +46,7 @@ class dbsync
   private static function log(){
     $args = func_get_args();
     foreach ( $args as $a ){
-      \bbn\x::log($a, 'dbsync');
+      bbn\x::log($a, 'dbsync');
     }
   }
 
@@ -65,7 +65,7 @@ class dbsync
     if ( !empty($dbs_table) ){
       self::$dbs_table = $dbs_table;
     }
-    if ( !\bbn\str::check_name(self::$dbs_table) ){
+    if ( !bbn\str::check_name(self::$dbs_table) ){
       self::log("Table name not allowed", self::$dbs_table);
       die("Table name not allowed");
     }
@@ -73,7 +73,7 @@ class dbsync
 	/**
 	 * @return void
 	 */
-	public static function init(\bbn\db $db, $dbs='', $tables=[], $dbs_table=''){
+	public static function init(bbn\db $db, $dbs='', $tables=[], $dbs_table=''){
     self::$db = $db;
     self::def($dbs, $dbs_table);
     self::$tables = $tables;
@@ -85,7 +85,7 @@ class dbsync
         self::$tables[$i] = self::$db->table_full_name($t);
       }
       self::$db->set_trigger(
-            '\\bbn\\appui\\dbsync::trigger',
+            '\\bbn\appui\\dbsync::trigger',
             ['delete', 'update', 'insert'],
             ['before', 'after'],
             self::$tables);
@@ -94,9 +94,9 @@ class dbsync
 
   public static function first_call(){
     if ( is_array(self::$dbs) ){
-      self::$dbs = new \bbn\db(self::$dbs);
+      self::$dbs = new db(self::$dbs);
     }
-    if ( \bbn\appui\history::$is_used ){
+    if ( bbn\appui\history::$is_used ){
       self::$has_history = 1;
     }
     if ( (self::$dbs->engine === 'sqlite') && !in_array(self::$dbs_table, self::$dbs->get_tables()) ){
@@ -144,7 +144,7 @@ class dbsync
 	 * @return bool
 	 */
   public static function check(){
-    return ( is_object(self::$db) && (get_class(self::$dbs) === 'bbn\db') );
+    return ( is_object(self::$db) && (get_class(self::$dbs) === 'db') );
   }
 
   public static function disable(){
@@ -212,7 +212,7 @@ class dbsync
   // Looking at the rows from the other DB with status = 0 and setting them to 1
   // Comparing the new rows with the ones from this DB
   // Deleting the rows from this DB which have state = 1
-  public static function sync(\bbn\db $db, $dbs='', $dbs_table='', $num_try = 0){
+  public static function sync(bbn\db $db, $dbs='', $dbs_table='', $num_try = 0){
 
     if ( !$num_try ){
       self::def($dbs, $dbs_table);
@@ -354,7 +354,7 @@ class dbsync
             if ( $d['action'] === 'update' ){
               if ( !(self::$db->insert_update(
                       $d['tab'],
-                      \bbn\x::merge_arrays(
+                      bbn\x::merge_arrays(
                               json_decode($e['vals'], 1),
                               json_decode($d['vals'], 1)
                       )
@@ -369,7 +369,7 @@ class dbsync
             if ( $d['action'] === 'delete' ){
               if ( !(self::$db->insert_update(
                       $d['tab'],
-                      \bbn\x::merge_arrays(
+                      bbn\x::merge_arrays(
                               json_decode($d['vals'], 1),
                               json_decode($e['vals'], 1)
                       )
@@ -381,7 +381,7 @@ class dbsync
           // If it's updated locally and in the twin we merge the values for the update
             else if ( $d['action'] === 'update' ){
               $d['vals'] = json_encode(
-                      \bbn\x::merge_arrays(
+                      bbn\x::merge_arrays(
                               json_decode($d['vals'], 1),
                               json_decode($e['vals'], 1)
                       ));
@@ -395,7 +395,7 @@ class dbsync
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
           $to_log['updated_real']++;
         }
-        else if ( self::$db->select($d['tab'], [], \bbn\x::merge_arrays(json_decode($d['rows'], 1), json_decode($d['vals'], 1))) ){
+        else if ( self::$db->select($d['tab'], [], bbn\x::merge_arrays(json_decode($d['rows'], 1), json_decode($d['vals'], 1))) ){
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
         }
         else{
@@ -421,7 +421,7 @@ class dbsync
       }
     }
     if ( $retry && ( $num_try <= self::$max_retry ) ){
-      $res = \bbn\x::merge_arrays($res, self::sync($db, $dbs, $dbs_table, $num_try));
+      $res = bbn\x::merge_arrays($res, self::sync($db, $dbs, $dbs_table, $num_try));
     }
     else{
       self::$db->set_error_mode($mode_db);

@@ -7,6 +7,7 @@
  */
 
 namespace bbn\mvc;
+use bbn;
 
 class router {
 
@@ -93,7 +94,7 @@ class router {
    * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
    * @return void
    */
-  public function __construct(\bbn\mvc $mvc, array $routes=[])
+  public function __construct(bbn\mvc $mvc, array $routes=[])
   {
     $this->mvc = $mvc;
     $this->routes = $routes;
@@ -134,7 +135,7 @@ class router {
   }
 
   private function parse($path){
-    return \bbn\str::parse_path($path);
+    return bbn\str::parse_path($path);
   }
 
   private function has_route($path){
@@ -332,7 +333,7 @@ class router {
       ]);
     }
     // Aaaargh!
-    die(\bbn\x::hdump("No default file defined for mode $mode $tmp", self::$def, $this->has_route(self::$def)));
+    die(bbn\x::hdump("No default file defined for mode $mode $tmp", self::$def, $this->has_route(self::$def)));
   }
 
   private function find_in_roots($path){
@@ -376,7 +377,7 @@ class router {
   }
 
   public function add_routes(array $routes){
-    $this->routes = \bbn\x::merge_arrays($this->routes['alias'], $routes);
+    $this->routes = bbn\x::merge_arrays($this->routes['alias'], $routes);
     return $this;
   }
 
@@ -460,10 +461,10 @@ class router {
         }
         if ( $dir ){
           $res = [];
-          $files = \bbn\file\dir::get_files($dir);
+          $files = bbn\file\dir::get_files($dir);
           foreach ( $files as $f ){
-            if ( in_array(\bbn\str::file_ext($f), self::$filetypes[$mode]) ){
-              array_push($res, $path.'/'.\bbn\str::file_ext($f, true)[0]);
+            if ( in_array(bbn\str::file_ext($f), self::$filetypes[$mode]) ){
+              array_push($res, $path.'/'.bbn\str::file_ext($f, true)[0]);
             }
           }
           return $res;

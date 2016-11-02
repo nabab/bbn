@@ -1,11 +1,12 @@
 <?php
 namespace bbn\appui;
+use bbn;
 
 class square
 {
 	private $id, $site, $change = false;
 	
-	public function __construct(\bbn\db $db, $schema)
+	public function __construct(bbn\db $db, $schema)
 	{
 		$this->db = $db;
 		if ( $this->db->current !== 'bbn' ){
@@ -48,7 +49,7 @@ class square
       if ( strpos($id, '.') ){
         $id = explode('.', $id)[1];
       }
-      if ( \bbn\str::check_name($id) ){
+      if ( bbn\str::check_name($id) ){
   			$cond = " WHERE bbn_smenus.bbn_name LIKE '$id' ";
       }
 		}
@@ -90,7 +91,7 @@ class square
 		if ( $this->change ){
 			$this->db->change('bbn');
 		}
-		if ( is_string($id) && strpos($id, '.') && ( $x = explode('.', $id) ) && ( count($x) === 2 ) && \bbn\str::check_name($x[0],$x[1]) ){
+		if ( is_string($id) && strpos($id, '.') && ( $x = explode('.', $id) ) && ( count($x) === 2 ) && bbn\str::check_name($x[0],$x[1]) ){
 			$id = $this->get_var("
 				SELECT bbn_fields.id
 				FROM bbn_fields

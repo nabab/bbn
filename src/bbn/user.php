@@ -1,9 +1,8 @@
 <?php
 /**
- * @package bbn\user
+ * @package user
  */
-namespace bbn\user;
-use bbn;
+namespace bbn;
 /**
  * A user authentication Class
  *
@@ -20,8 +19,9 @@ use bbn;
 if ( !defined('BBN_DATA_PATH') ){
   die("BBN_DATA_PATH must be defined");
 }
-class connection extends bbn\obj
+class user extends models\cls\basic
 {
+  use models\tts\retriever;
 
 	private static
     /** @var connection */
@@ -184,24 +184,11 @@ class connection extends bbn\obj
     $prev_time;
 
   /**
-   * Sets the $current static property with the current object
-   * @param connection $usr
-   */
-  protected static function _init(connection $usr){
-    if ( $id = $usr->get_id() ){
-      self::$current =& $usr;
-      if ( !defined('BBN_USER_PATH') ){
-        define('BBN_USER_PATH', BBN_DATA_PATH.'users/'.$id.'/');
-      }
-    }
-  }
-
-  /**
    * Returns the latest created connection, ie the current user's object
    * @return connection
    */
   public static function get_user(){
-    return self::$current;
+    return self::get_instance();
   }
 
   /**
@@ -210,7 +197,7 @@ class connection extends bbn\obj
 	 */
   public static function make_fingerprint()
   {
-    return bbn\str::genpwd(32, 16);
+    return str::genpwd(32, 16);
   }
 
 	/**
@@ -274,7 +261,7 @@ class connection extends bbn\obj
       else if ( $d = $this->db->rselect(
         $this->class_cfg['tables']['users'],
         array_unique(array_values($this->fields)),
-        bbn\x::merge_arrays(
+        x::merge_arrays(
           $this->class_cfg['conditions'],
           [$this->fields['active'] => 1],
           [$this->fields['id'] => $this->id]))
@@ -404,9 +391,9 @@ class connection extends bbn\obj
   private function _init_session(){
 
     // Getting or creating the session is it doesn't exist yet
-    $this->session = session::get_current();
+    $this->session = user\session::get_instance();
     if ( !$this->session ){
-      $this->session = new session();
+      $this->session = new user\session();
     }
 
     /** @var int $id_session The ID of the session row in the DB */
@@ -539,7 +526,7 @@ class connection extends bbn\obj
         if ( $id = $this->db->select_one(
           $this->class_cfg['tables']['users'],
           $this->fields['id'],
-          bbn\x::merge_arrays(
+          x::merge_arrays(
             $this->class_cfg['conditions'],
             [$arch['users']['active'] => 1],
             [($arch['users']['login'] ?? $arch['users']['email']) => $params[$f['user']]])
@@ -576,7 +563,7 @@ class connection extends bbn\obj
    * @return connection
    */
   private function _init_config(array $cfg = []){
-    $this->class_cfg = bbn\x::merge_arrays(self::$_defaults, $cfg);
+    $this->class_cfg = x::merge_arrays(self::$_defaults, $cfg);
     if ( !empty($cfg['arch']) ){
       foreach ( $cfg['arch'] as $t => $a ){
         $this->class_cfg['arch'][$t] = $a;
@@ -600,8 +587,8 @@ class connection extends bbn\obj
         define('BBN_USER_PATH', BBN_DATA_PATH.'users/'.$this->get_id().'/');
       }
       if ( $create ){
-        bbn\file\dir::create_path(BBN_USER_PATH.'tmp');
-        bbn\file\dir::delete(BBN_USER_PATH.'tmp', false);
+        file\dir::create_path(BBN_USER_PATH.'tmp');
+        file\dir::delete(BBN_USER_PATH.'tmp', false);
       }
     }
     return $this;
@@ -686,11 +673,11 @@ class connection extends bbn\obj
 
   /**
    * connection constructor
-   * @param bbn\db $db
+   * @param db $db
    * @param array $cfg
    * @param array $params
    */
-  public function __construct(bbn\db $db, array $cfg = [], array $params = []){
+  public function __construct(db $db, array $cfg = [], array $params = []){
 
     // The database connection
     $this->db = $db;
@@ -706,7 +693,7 @@ class connection extends bbn\obj
     // Creating the session's variables if they don't exist yet
     $this->_init_session();
 
-    $this->preferences = preferences::get_preferences();
+    $this->preferences = user\preferences::get_preferences();
 
     $f =& $this->class_cfg['fields'];
 
@@ -737,7 +724,9 @@ class connection extends bbn\obj
     else if ( $this->check_session() ){
 
     }
-    self::_init($this);
+    if ( $this->get_id() ){
+      self::retriever_init($this);
+    }
     return $this;
   }
 
@@ -1029,19 +1018,15 @@ class connection extends bbn\obj
   /**
    * return connection
    */
-  public function set_cfg($attr, $type='user')
-  {
-    $prop = $type === 'sess' ? 'sess_cfg' : 'user_cfg';
-    if ( isset($this->{$prop}) ){
+  public function set_cfg($attr){
+    if ( isset($this->cfg) ){
       $args = func_get_args();
       if ( (count($args) === 2) && is_string($attr) ){
         $attr = [$args[0] => $args[1]];
-        $prop = 'user_cfg';
       }
       foreach ( $attr as $key => $val ){
-        //bbn\x::dump($key, $val);
         if ( is_string($key) ){
-          $this->{$prop}[$key] = $val;
+          $this->cfg[$key] = $val;
         }
       }
     }
@@ -1049,18 +1034,18 @@ class connection extends bbn\obj
   }
 
   /**
-   * return connection
+   * @param $attr
+   * @return $this
    */
-  public function unset_cfg($attr, $type='user')
-  {
-    if ( isset($this->{$type.'_cfg'}) ){
+  public function unset_cfg($attr){
+    if ( isset($this->cfg) ){
       $args = func_get_args();
       if ( is_string($attr) ){
         $attr = [$attr];
       }
-      foreach ( $attr as $val ){
+      foreach ( $attr as $key ){
         if ( isset($key) ){
-          unset($this->{$type.'_cfg'}[$key]);
+          unset($this->cfg[$key]);
         }
       }
     }
@@ -1094,8 +1079,8 @@ class connection extends bbn\obj
 	 */
 	public function check_session($token=null){
     // If this->id is set it means we've already looked it up
-       // bbn\x::hdump($this->sess_cfg, $this->has_session('fingerprint'), $this->get_print($this->get_session('fingerprint')), $this->sess_cfg['fingerprint']);
-    //die(bbn\x::dump($this->id));
+       // x::hdump($this->sess_cfg, $this->has_session('fingerprint'), $this->get_print($this->get_session('fingerprint')), $this->sess_cfg['fingerprint']);
+    //die(x::dump($this->id));
 		$this->_retrieve_session($token);
 		return $this->auth;
 	}
@@ -1184,7 +1169,7 @@ class connection extends bbn\obj
 
   /** Returns an instance of the mailer class */
   public function get_mailer(){
-    return new bbn\mail();
+    return new mail();
   }
 
   /**
@@ -1226,12 +1211,16 @@ class connection extends bbn\obj
    * Returns the written name of this or a user
    * @return string|false
    */
-  public function get_name(array $usr = null){
+  public function get_name($usr = null){
     if ( $this->auth ){
       if ( is_null($usr) ){
         return $this->session->get('info', $this->class_cfg['show']);
       }
-      else if ( isset($usr[$this->class_cfg['show']]) ){
+      else if ( str::is_integer($usr) ){
+        $mgr = $this->get_manager();
+        $usr = $mgr->get_user($usr);
+      }
+      if ( isset($usr[$this->class_cfg['show']]) ){
         return $usr[$this->class_cfg['show']];
       }
     }
@@ -1248,7 +1237,7 @@ class connection extends bbn\obj
     if ( $this->auth && $this->session->has(self::$sn, 'tokens', $st) ){
       $this->session->transform(function(&$a) use($st){
         if ( isset($a['tokens']) ){
-          $a['tokens'][$st] = bbn\str::genpwd();
+          $a['tokens'][$st] = str::genpwd();
         }
       }, self::$sn);
       return $this->session->get(self::$sn, 'tokens', $st);

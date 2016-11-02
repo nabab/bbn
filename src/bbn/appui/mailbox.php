@@ -1,6 +1,7 @@
 <?php
 
 namespace bbn\appui;
+use bbn;
 
 class mailbox{
 
@@ -66,7 +67,7 @@ class mailbox{
           array_push($msg,' ');
           array_push($msg,'Error message: ');
           array_push($msg,$this->status);
-          \bbn\x::log(implode("\n",$msg),'imap');
+          bbn\x::log(implode("\n",$msg),'imap');
         }
       }
     }
@@ -681,15 +682,15 @@ class mailbox{
     $this->charset = '';
     $this->attachments = [];
     if ( is_dir(BBN_USER_PATH . 'tmp_mail') ){
-      \bbn\file\dir::delete(BBN_USER_PATH . 'tmp_mail');
+      bbn\file\dir::delete(BBN_USER_PATH . 'tmp_mail');
     }
     // HEADER
     $header = $this->get_msg_headerinfo($msgno);
     // add code here to get date, from, to, cc, subject...
     // BODY STRUCTURE
     $structure = $this->get_msg_structure($msgno);
-    \bbn\x::log($header,'imap');
-    \bbn\x::log($structure,'imap');
+    bbn\x::log($header,'imap');
+    bbn\x::log($structure,'imap');
     if ( !$structure->parts ) {  // simple
       $this->get_msg_part($msgno, $structure, 0);
     }

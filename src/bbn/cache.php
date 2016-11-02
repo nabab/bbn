@@ -49,7 +49,7 @@ class cache{
   }
 
   private static function _file($item, $path){
-    return $path.self::_dir($item).'/'.\bbn\str::encode_filename(basename($item)).'.bbn.cache';
+    return $path.self::_dir($item).'/'.str::encode_filename(basename($item)).'.bbn.cache';
   }
 
   public static function make_hash($value){
@@ -61,7 +61,7 @@ class cache{
   }
 
   public static function ttl($ttl){
-    if ( \bbn\str::is_integer($ttl) ){
+    if ( str::is_integer($ttl) ){
       return $ttl;
     }
     if ( is_string($ttl) ){
@@ -110,12 +110,12 @@ class cache{
       }
     }
     else {
-      $this->path = defined("BBN_DATA_PATH") ? BBN_DATA_PATH : \bbn\file\dir::clean(sys_get_temp_dir());
+      $this->path = defined("BBN_DATA_PATH") ? BBN_DATA_PATH : file\dir::clean(sys_get_temp_dir());
       if ( substr($this->path, -1) !== '/' ){
         $this->path .= '/';
       }
       $this->path .= 'bbn_cache/';
-      \bbn\file\dir::create_path($this->path);
+      file\dir::create_path($this->path);
       self::_set_type('files');
     }
   }
@@ -230,7 +230,7 @@ class cache{
         case 'files':
           $file = self::_file($it, $this->path);
           if ( $dir = self::_dir($it) ){
-            \bbn\file\dir::create_path($this->path.'/'.$dir);
+            file\dir::create_path($this->path.'/'.$dir);
           }
 
           $value = [
@@ -281,7 +281,7 @@ class cache{
         case 'memcache':
           return $this->obj->getStats('slabs');
         case 'files':
-          return \bbn\file\dir::get_files($this->path);
+          return file\dir::get_files($this->path);
       }
     }
   }
@@ -294,7 +294,7 @@ class cache{
         case 'memcache':
           return $this->obj->getStats();
         case 'files':
-          return \bbn\file\dir::get_files($this->path);
+          return file\dir::get_files($this->path);
       }
     }
   }
@@ -329,12 +329,12 @@ class cache{
           $cache =& $this;
           $list = array_filter(array_map(function($a) use ($dir){
             return ( $dir ? $dir.'/' : '' ).basename($a, '.bbn.cache');
-          }, \bbn\file\dir::get_files($this->path.($dir ? '/'.$dir : ''))),
+          }, file\dir::get_files($this->path.($dir ? '/'.$dir : ''))),
             function($a) use ($cache){
             // Only gives valid cache
               return $cache->has($a);
           });
-          $dirs = \bbn\file\dir::get_dirs($this->path.($dir ? '/'.$dir : ''));
+          $dirs = file\dir::get_dirs($this->path.($dir ? '/'.$dir : ''));
           if ( count($dirs) ){
             foreach ( $dirs as $d ){
               $res = $this->items($dir ? $dir.'/'.basename($d) : basename($d));

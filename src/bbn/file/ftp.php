@@ -1,8 +1,9 @@
 <?php
 /**
- * @package bbn\file
+ * @package file
  */
 namespace bbn\file;
+use bbn;
 /**
  * File Transfer Protocol Class
  *
@@ -14,7 +15,7 @@ namespace bbn\file;
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @version 0.2r89
  */
-class ftp extends \bbn\obj 
+class ftp extends bbn\models\cls\basic
 {
 
 	/**
@@ -69,11 +70,11 @@ class ftp extends \bbn\obj
 				$this->login = BBN_FTP_LOGIN;
 			}
 			if ( isset($cfg['pass']) ){
-				// $this->pass = \bbn\util\enc::decrypt($cfg['pass']);
+				// $this->pass = bbn\util\enc::decrypt($cfg['pass']);
         $this->pass = $cfg['pass'];
 			}
 			else if ( defined('BBN_FTP_PASS') ){
-				$this->pass = \bbn\util\enc::decrypt(BBN_FTP_PASS);
+				$this->pass = bbn\util\enc::decrypt(BBN_FTP_PASS);
 			}
 			if ( isset($this->dir, $this->host, $this->login, $this->pass) ){
 				if ( $this->dir = $this->checkPath($this->dir) )
@@ -130,7 +131,7 @@ class ftp extends \bbn\obj
           @ftp_cdup($this->cn);
         }
         else{
-          $ele['type'] = \bbn\str::file_ext($file);
+          $ele['type'] = bbn\str::file_ext($file);
         }
         array_push($res,$ele);
       }
@@ -143,8 +144,8 @@ class ftp extends \bbn\obj
 	 * Scans all the content from a directory, including the subdirectories
 	 *
    * <code>
-   * \bbn\file\dir::scan("/home/me");
-   * \bbn\file\dir::delete("C:\Documents\Test");
+   * bbn\file\dir::scan("/home/me");
+   * bbn\file\dir::delete("C:\Documents\Test");
    * </code>
    * 
 	 * @param string $dir The directory path.

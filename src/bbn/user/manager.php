@@ -1,6 +1,6 @@
 <?php
 /**
- * @package bbn\user
+ * @package user
  */
 namespace bbn\user;
 use bbn;
@@ -104,7 +104,7 @@ You can click the following link to access directly your account:<br>
    * @param object|false $mailer A mail object with the send method
    * 
 	 */
-  public function __construct(connection $obj)
+  public function __construct(bbn\user $obj)
   {
     if ( is_object($obj) && method_exists($obj, 'get_class_cfg') ){
       $this->usrcls = $obj;
@@ -151,9 +151,9 @@ You can click the following link to access directly your account:<br>
   }
 
   public function get_email($id){
-    if ( \bbn\str::is_integer($id) ){
+    if ( bbn\str::is_integer($id) ){
       $email = $this->db->select_one($this->class_cfg['tables']['users'], $this->class_cfg['arch']['users']['email'], [$this->class_cfg['arch']['users']['id'] => $id]);
-      if ( $email && \bbn\str::is_email($email) ){
+      if ( $email && bbn\str::is_email($email) ){
         return $email;
       }
     }

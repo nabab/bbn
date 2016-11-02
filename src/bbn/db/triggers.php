@@ -1,5 +1,6 @@
 <?php
 namespace bbn\db;
+use bbn;
 
 
 trait triggers {
@@ -88,8 +89,8 @@ trait triggers {
             }
           }
         }
-        //echo \bbn\x::make_tree($trig);
-        //echo \bbn\x::make_tree($cfg);
+        //echo bbn\x::make_tree($trig);
+        //echo bbn\x::make_tree($cfg);
       }
     }
     return $cfg;
@@ -98,7 +99,7 @@ trait triggers {
   /**
    * Enable the triggers' functions
    *
-   * @return \bbn\db
+   * @return db
    */
   public function enable_trigger(){
     $this->triggers_disabled = false;
@@ -108,7 +109,7 @@ trait triggers {
   /**
    * Disable the triggers' functions
    *
-   * @return \bbn\db
+   * @return db
    */
   public function disable_trigger(){
     $this->triggers_disabled = true;
@@ -122,7 +123,7 @@ trait triggers {
    * @param string $kind select|insert|update|delete
    * @param string $moment before|after
    * @param string|array table database's table(s) name(s)
-   * @return \bbn\db
+   * @return db
    */
   public function set_trigger($function, $kind='', $moment='', $tables='*' ){
     if ( is_callable($function) ){
@@ -157,7 +158,7 @@ trait triggers {
               if ( $tables === '*' ){
                 $tables = $this->get_tables();
               }
-              else if ( \bbn\str::check_name($tables) ){
+              else if ( bbn\str::check_name($tables) ){
                 $tables = [$tables];
               }
               if ( is_array($tables) ){
@@ -293,8 +294,8 @@ trait triggers {
         $table = empty($table) ? [] : [$table];
       }
       /*
-      if ( class_exists('\\bbn\\appui\\history', false) && \bbn\appui\history::has_history($this) ){
-        $hcol = \bbn\appui\history::$hcol;
+      if ( class_exists('\\bbn\appui\\history', false) && bbn\appui\history::has_history($this) ){
+        $hcol = bbn\appui\history::$hcol;
         $hcols = [];
       }
       */
@@ -570,7 +571,7 @@ trait triggers {
    */
   public function insert_update($table, array $values){
     // Twice the arguments
-    if ( !\bbn\x::is_assoc($values) ){
+    if ( !bbn\x::is_assoc($values) ){
       $res = 0;
       foreach ( $values as $v ){
         $res += $this->insert_update($table, $v);

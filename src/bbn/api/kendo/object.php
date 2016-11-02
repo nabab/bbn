@@ -4,6 +4,7 @@
  */
 
 namespace bbn\api\kendo;
+use bbn;
 
 class object
 {

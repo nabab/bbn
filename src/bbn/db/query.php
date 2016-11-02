@@ -1,8 +1,9 @@
 <?php
 /**
- * @package bbn\db
+ * @package db
  */
 namespace bbn\db;
+use bbn;
 /**
  * An extended approach of the PDOStatement object
  *
@@ -232,7 +233,7 @@ class query extends \PDOStatement implements actions
 	public function fetch($fetch_style=\PDO::FETCH_BOTH, $cursor_orientation=\PDO::FETCH_ORI_NEXT, $cursor_offset=0)
 	{
 		$this->execute();
-		return \bbn\str::correct_types(parent::fetch( $fetch_style, $cursor_orientation, $cursor_offset ));
+		return bbn\str::correct_types(parent::fetch( $fetch_style, $cursor_orientation, $cursor_offset ));
 	}
 
 	/**
@@ -250,7 +251,7 @@ class query extends \PDOStatement implements actions
 		else{
 			$res = parent::fetchAll($fetch_style);
     }
-    return \bbn\str::correct_types($res);
+    return bbn\str::correct_types($res);
 	}
 
 	/**
@@ -259,7 +260,7 @@ class query extends \PDOStatement implements actions
 	public function fetchColumn($column_number=0)
 	{
 		$this->execute();
-		return \bbn\str::correct_types(parent::fetchColumn($column_number));
+		return bbn\str::correct_types(parent::fetchColumn($column_number));
 	}
 
 	/**
@@ -268,7 +269,7 @@ class query extends \PDOStatement implements actions
 	public function fetchObject($class_name="stdClass", $ctor_args=array())
 	{
 		$this->execute();
-		return \bbn\str::correct_types(parent::fetchObject($class_name,$ctor_args));
+		return bbn\str::correct_types(parent::fetchObject($class_name,$ctor_args));
 	}
 
 	/**

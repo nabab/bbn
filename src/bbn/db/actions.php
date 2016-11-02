@@ -1,6 +1,6 @@
 <?php
 /**
- * @package bbn\db
+ * @package db
  */
 namespace bbn\db;
 /**

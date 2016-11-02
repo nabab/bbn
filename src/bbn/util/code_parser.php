@@ -1,6 +1,6 @@
 <?php
 /**
- * @package bbn\util
+ * @package util
  */
 namespace bbn\util;
 /**
@@ -15,7 +15,7 @@ namespace bbn\util;
  * @category  Utilities
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @version 0.2r89
- & @todo Change make_love_with_me to \bbn\str::clean
+ & @todo Change make_love_with_me to bbn\str::clean
  */
 class code_parser 
 {

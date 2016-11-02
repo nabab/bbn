@@ -1,6 +1,6 @@
 <?php
 /**
- * @package bbn\util
+ * @package util
  */
 namespace bbn\util;
 /**

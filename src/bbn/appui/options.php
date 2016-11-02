@@ -1,6 +1,6 @@
 <?php
 /**
- * @package bbn\appui
+ * @package appui
  */
 namespace bbn\appui;
 use bbn;
@@ -18,8 +18,11 @@ use bbn;
  */
 
 
-class options extends bbn\objcache
+class options extends bbn\models\cls\cache
 {
+
+  use bbn\models\tts\retriever;
+
   private static
     $current;
 
@@ -42,6 +45,8 @@ class options extends bbn\objcache
     ];
 
   protected
+    /** @var array $class_cfg */
+    $class_cfg,
     /** @var int The default root ID of the options in the table */
     $default = 0;
 
@@ -59,15 +64,11 @@ class options extends bbn\objcache
     return $this;
   }
 
-  protected static function _init(options $opt){
-    self::$current =& $opt;
-  }
-
   /**
    * @return options
    */
   public static function get_options(){
-    return self::$current;
+    return self::get_instance();
   }
 
   /**
@@ -90,6 +91,7 @@ class options extends bbn\objcache
     if ( $hist ){
       bbn\appui\history::enable();
     }
+
     if ( $wst ){
       foreach ( $this->class_cfg['cols'] AS $k => $col ){
         if ( $k !== 'active' ){
@@ -125,13 +127,13 @@ class options extends bbn\objcache
 
   /**
    * options constructor.
-   * @param bbn\db $db
+   * @param db $db
    * @param array $cfg
    */
   public function __construct(bbn\db $db, array $cfg=[]){
     parent::__construct($db);
     $this->class_cfg = bbn\x::merge_arrays(self::$_defaults, $cfg);
-    self::_init($this);
+    self::retriever_init($this);
   }
 
   public function get_default(){
@@ -1403,6 +1405,14 @@ class options extends bbn\objcache
       }
     }
     return $res;
+  }
+
+  public function has_permission($id){
+    if ( $p = $this->get_id_parent($id) ){
+      $cfg = $this->get_cfg($p);
+      return !empty($cfg['permissions']);
+    }
+    return false;
   }
 
   public function find_permissions($id = false, $deep = true){

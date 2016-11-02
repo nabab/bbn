@@ -17,11 +17,12 @@
  */
 
 namespace bbn\appui;
+use bbn;
 
-class cron extends \bbn\obj{
+class cron extends bbn\models\cls\basic{
 
 	private
-          /* @var \bbn\db The DB connection */
+          /* @var db The DB connection */
           $db = false,
           /* @var string The tables' prefix (the tables will be called ?cron and ?journal) */
           $prefix = 'bbn_',
@@ -33,17 +34,17 @@ class cron extends \bbn\obj{
           $enabled = true,
           $timeout = 50;
 
-  public function __construct(\bbn\mvc\controller $ctrl, $cfg = []) {
+  public function __construct(bbn\mvc\controller $ctrl, $cfg = []) {
     if ( is_array($cfg) ){
       $this->ctrl = $ctrl;
       $this->db = $ctrl->db;
-      $vars = get_class_vars('\\bbn\\appui\\cron');
+      $vars = get_class_vars('\\bbn\appui\\cron');
       foreach ( $cfg as $cf_name => $cf_value ){
         if ( array_key_exists($cf_name, $vars) ){
           $this->{$cf_name} = $cf_value;
         }
       }
-      $this->timer = new \bbn\util\timer();
+      $this->timer = new bbn\util\timer();
       $this->table = $this->prefix.'cron';
       $this->jtable = $this->prefix.'cron_journal';
     }
@@ -99,7 +100,7 @@ class cron extends \bbn\obj{
             ($cron = $this->get_cron($article['id_cron'])) ){
       $time = $this->timer->has_started('cron_'.$article['id_cron']) ? $this->timer->stop('cron_'.$article['id_cron']): 0;
       if ( !empty($res) ){
-        \bbn\x::hdump($id, $res);
+        bbn\x::hdump($id, $res);
         $this->db->update($this->jtable, [
           'finish' => date('Y-m-d H:i:s'),
           'duration' => $time,
@@ -125,7 +126,7 @@ class cron extends \bbn\obj{
       if ( !$tm ){
         $tm = time();
       }
-      $letter = \bbn\str::change_case(substr($frequency, 0, 1), 'lower');
+      $letter = bbn\str::change_case(substr($frequency, 0, 1), 'lower');
       $number = (int)substr($frequency, 1);
       if ( $number > 0 ){
         switch ( $letter ){
@@ -220,7 +221,7 @@ class cron extends \bbn\obj{
         $id = $this->start($cron['id']);
         $output = $this->_exec($cron['file'], $cron['cfg']);
         $time = $this->finish($id, $output);
-        \bbn\x::dump("Execution of ".$cron['file']." (Journal ID: $id) in $time secs", $output);
+        bbn\x::dump("Execution of ".$cron['file']." (Journal ID: $id) in $time secs", $output);
         return $time;
       }
     }

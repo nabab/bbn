@@ -1,8 +1,9 @@
 <?php
 /**
- * @package bbn\user
+ * @package user
  */
 namespace bbn\user;
+use bbn;
 /**
  * A permission system linked to options and user classes
  *
@@ -19,9 +20,11 @@ namespace bbn\user;
 class preferences
 {
 
+  use bbn\models\tts\retriever;
+
   private static
-    $current,
-    $id_permission_root;
+    $id_permission_root,
+    $id_option_permission_root;
 
   protected static
     $permission_root = 'bbn_permissions',
@@ -43,9 +46,9 @@ class preferences
 		];
 
 	protected
-		/** @var \bbn\appui\options */
+		/** @var bbn\appui\options */
     $options,
-		/** @var \bbn\db */
+		/** @var db */
     $db,
 		/** @var array */
     $class_cfg = [],
@@ -60,35 +63,47 @@ class preferences
    * @return int
    */
   private static function _get_permission_root(){
-		if ( is_null(self::$id_permission_root) ){
-      /** @var \bbn\appui\options $opt */
-      $opt = \bbn\appui\options::get_options();
-			self::$id_permission_root = $opt->from_path(self::$permission_root);
-		}
-		return self::$id_permission_root;
-	}
-
-  protected static function _init(preferences $pref){
-    self::$current =& $pref;
+    if ( is_null(self::$id_permission_root) ){
+      /** @var bbn\appui\options $opt */
+      if ( $opt = bbn\appui\options::get_options() ){
+        self::$id_permission_root = $opt->from_path(self::$permission_root);
+      }
+    }
+    return self::$id_permission_root;
   }
 
   /**
-   * @return \bbn\appui\options
+   * 	Returns the ID of the option which is at the root of the permissions' path
+   *
+   * @return int
+   */
+  private static function _get_option_permission_root(){
+    if ( is_null(self::$id_option_permission_root) ){
+      /** @var bbn\appui\options $opt */
+      if ( $opt = bbn\appui\options::get_options() ){
+        self::$id_option_permission_root = $opt->from_code('options', 'misc', 'bbn_permissions');
+      }
+    }
+    return self::$id_option_permission_root;
+  }
+
+  /**
+   * @return bbn\appui\options
    */
   public static function get_preferences(){
-    return self::$current;
+    return self::get_instance();
   }
 
   /**
-	 * @return \bbn\user\permissions
+	 * @return bbn\user\permissions
 	 */
-	public function __construct(\bbn\appui\options $options, \bbn\db $db, array $cfg = []){
-		$this->class_cfg = \bbn\x::merge_arrays(self::$_defaults, $cfg);
-		$this->options = \bbn\appui\options::get_options();
+	public function __construct(bbn\appui\options $options, bbn\db $db, array $cfg = []){
+		$this->class_cfg = bbn\x::merge_arrays(self::$_defaults, $cfg);
+		$this->options = bbn\appui\options::get_options();
 		$this->db = $db;
 		$this->id_user = $this->class_cfg['id_user'] ?: false;
 		$this->id_group = $this->class_cfg['id_group'] ?: false;
-    self::_init($this);
+    self::retriever_init($this);
 	}
 
   public function get_user(){
@@ -163,8 +178,8 @@ class preferences
 				[ $this->class_cfg['cols']['id'] => $id ]
 			);
 		}
-		if ( isset($cfg[$this->class_cfg['cols']['cfg']]) && \bbn\str::is_json($cfg[$this->class_cfg['cols']['cfg']]) ) {
-			$cfg = \bbn\x::merge_arrays(json_decode($cfg[$this->class_cfg['cols']['cfg']], 1), $cfg);
+		if ( isset($cfg[$this->class_cfg['cols']['cfg']]) && bbn\str::is_json($cfg[$this->class_cfg['cols']['cfg']]) ) {
+			$cfg = bbn\x::merge_arrays(json_decode($cfg[$this->class_cfg['cols']['cfg']], 1), $cfg);
 		}
 		$new = [];
 		if ( is_array($cfg) ){
@@ -193,7 +208,7 @@ class preferences
 			]))
     ){
       $this->get_cfg($res1['id'], $res1);
-      $res = \bbn\x::merge_arrays($res, $res1);
+      $res = bbn\x::merge_arrays($res, $res1);
 		}
     if ( $this->id_user &&
       ($res2 = $this->db->rselect($this->class_cfg['table'], $this->class_cfg['cols'], [
@@ -202,7 +217,7 @@ class preferences
 			]))
     ){
       $this->get_cfg($res2['id'], $res2);
-      $res = \bbn\x::merge_arrays($res, $res2);
+      $res = bbn\x::merge_arrays($res, $res2);
 		}
     return empty($res) ? false : $res;
 	}
@@ -213,7 +228,7 @@ class preferences
 	 * @return bool
 	 */
 	public function has($id_option, $id_user = null, $id_group = null, $force = false){
-    if ( !\bbn\str::is_integer($id_option) ){
+    if ( !bbn\str::is_integer($id_option) ){
       $id_option = $this->from_path($id_option);
     }
     if ( !$force && $this->id_group === 1 ){
@@ -245,7 +260,7 @@ class preferences
 		if ( !$id_group && !$id_user && ($this->id_group === 1) ){
 			return true;
 		}
-		if ( ($user = \bbn\user\connection::get_user()) && $user->is_admin() ){
+		if ( ($user = bbn\user::get_instance()) && $user->is_admin() ){
 			return true;
 		}
 		if ( is_int($path) ){
@@ -295,7 +310,7 @@ class preferences
    * @return
    */
   public function add_permission($id_option, $type = 'page', $id_user = null, $id_group = null){
-    if ( !\bbn\str::is_integer($id_option) ){
+    if ( !bbn\str::is_integer($id_option) ){
       $id_option = $this->from_path($id_option, $type);
     }
     if ( $id = $this->retrieve_id($id_option, $id_user, $id_group) ){
@@ -325,7 +340,7 @@ class preferences
    * @return
    */
   public function remove_permission($id_option, $type = 'page', $id_user = null, $id_group = null){
-    if ( !\bbn\str::is_integer($id_option) ){
+    if ( !bbn\str::is_integer($id_option) ){
       $id_option = $this->from_path($id_option, $type);
     }
     if ( $id_user && ($id = $this->retrieve_id($id_option, $id_user)) ){
@@ -352,10 +367,10 @@ class preferences
       ]);
     }
     else{
-      if ( !\bbn\str::is_integer($id_option) ){
+      if ( !bbn\str::is_integer($id_option) ){
         $id_option = $this->from_path($id_option);
       }
-      if ( \bbn\str::is_integer($id_option, $id_link) ){
+      if ( bbn\str::is_integer($id_option, $id_link) ){
         return $this->db->insert($this->class_cfg['table'], [
           $this->class_cfg['cols']['id_option'] => $id_option,
           $this->class_cfg['cols']['id_link'] => $id_link,
@@ -404,7 +419,7 @@ class preferences
    * @return false|int
    */
   public function retrieve_id($id_option, $id_user = null, $id_group = null){
-    if ( !\bbn\str::is_integer($id_option) ){
+    if ( !bbn\str::is_integer($id_option) ){
       $id_option = $this->from_path($id_option);
     }
     if ( !$id_user && $id_group ){
@@ -445,7 +460,7 @@ class preferences
 	 * @return array
 	 */
 	public function delete($id_option, $id_user = null, $id_group = null){
-    if ( !\bbn\str::is_integer($id_option) ){
+    if ( !bbn\str::is_integer($id_option) ){
       $id_option = $this->from_path($id_option);
     }
 		if ( $id_group ) {
@@ -492,5 +507,12 @@ class preferences
 		return $res;
 	}
 
-
+  public function has_option_permission($id_option, $id_user = null, $id_group = null){
+    if ( bbn\str::is_integer($id_option) ){
+      $root = self::_get_option_permission_root();
+      $id_to_check = $this->options->from_code('opt'.$id_option, $root);
+      return $this->has_permission($id_to_check, $id_user = null, $id_group = null);
+    }
+    return false;
+  }
 }

@@ -7,9 +7,10 @@
  */
 
 namespace bbn\appui;
+use bbn;
 
 
-class projectManager extends \bbn\objdb
+class projectManager extends bbn\models\cls\db
 {
   function list(array $filter = []){
 

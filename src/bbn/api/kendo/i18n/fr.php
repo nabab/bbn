@@ -1,6 +1,6 @@
 <?php
 /**
- * @package bbn\api\kendo\i18n
+ * @package api\kendo\i18n
  */
 namespace bbn\api\kendo\i18n;
 /**

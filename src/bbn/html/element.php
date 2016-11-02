@@ -1,8 +1,9 @@
 <?php
 /**
- * @package bbn\html
+ * @package html
  */
 namespace bbn\html;
+use bbn;
 /**
  * Creates DOM elements
  * 
@@ -15,7 +16,7 @@ namespace bbn\html;
  * @copyright BBN Solutions
  * @since Apr 2, 2013, 23:23:55 +0000
  * @category  HTML
- * @package bbn\html
+ * @package html
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @version 0.3
  * @todo Tooltips
@@ -173,7 +174,7 @@ class element
       }
     }
     if ( !empty(static::$schema) ){
-      static::$schema = \bbn\x::merge_objects(self::$schema, \bbn\x::to_object(static::$schema));
+      static::$schema = bbn\x::merge_objects(self::$schema, bbn\x::to_object(static::$schema));
     }
     else{
       static::$schema = self::$schema;
@@ -233,7 +234,7 @@ class element
       self::$error = "The configuration is not a valid array";
       return false;
     }
-    self::$validator->check(\bbn\x::to_object($cfg), static::$schema);
+    self::$validator->check(bbn\x::to_object($cfg), static::$schema);
     self::$error = '';
     if ( self::$validator->isValid() ){
       return 1;
@@ -264,20 +265,20 @@ class element
 	 */
   public static function css_to_string($css){
     if ( is_string($css) ){
-      return ' style="'.\bbn\str::escape_dquotes($css).'"';
+      return ' style="'.bbn\str::escape_dquotes($css).'"';
     }
     else if ( is_array($css) && count($css) > 0 ){
       $st = '';
       foreach ( $css as $prop => $val ){
         $st .= $prop.':'.$val.';';
       }
-      return ' style="'.\bbn\str::escape_dquotes($st).'"';
+      return ' style="'.bbn\str::escape_dquotes($st).'"';
     }
   }
   
   public function css(array $cfg){
     foreach ( $cfg as $i => $k ){
-      if ( !\bbn\str::is_number($i) ){
+      if ( !bbn\str::is_number($i) ){
         $this->css[$i] = $k;
       }
     }
@@ -300,7 +301,7 @@ class element
   }
 
 	/**
-	 * @return \bbn\html\element
+	 * @return bbn\html\element
 	 */
   public function __construct($cfg)
 	{
@@ -369,7 +370,7 @@ class element
 	/**
    * Sets the configuration property according to the current configuration
    * 
-	 * @return \bbn\html\element
+	 * @return bbn\html\element
 	 */
   protected function update()
   {
@@ -397,7 +398,7 @@ class element
   /**
    * Add an element to the content, or a string if it's one
    * 
-   * @param string|\bbn\html\element $ele
+   * @param string|bbn\html\element $ele
    */
   public function append($ele)
   {
@@ -440,7 +441,7 @@ class element
 	public function get_config()
 	{
     $this->update();
-		$tmp = \bbn\x::remove_empty($this->cfg);
+		$tmp = bbn\x::remove_empty($this->cfg);
     if ( isset($tmp['content']) && is_array($tmp['content']) ){
       foreach ( $tmp['content'] as $i => $c ){
         if ( is_object($c) ){
@@ -460,7 +461,7 @@ class element
 	 */
   public function get_param()
   {
-    return \bbn\str::make_readable($this->get_config());
+    return bbn\str::make_readable($this->get_config());
   }
   
 	/**
@@ -470,7 +471,7 @@ class element
 	 */
   public function show_config()
   {
-    return \bbn\str::export(\bbn\str::make_readable($this->get_config()), 1);
+    return bbn\str::export(bbn\str::make_readable($this->get_config()), 1);
   }
 	
 	/**
@@ -502,7 +503,7 @@ class element
                 $r .= $o;
               }
               else{
-                $r .= '"'.\bbn\str::escape_dquotes($o).'"';
+                $r .= '"'.bbn\str::escape_dquotes($o).'"';
               }
             }
             else if ( is_bool($o) ){
@@ -535,7 +536,7 @@ class element
     if ( is_array($this->content) ){
       foreach ( $this->content as $c ){
         if ( is_array($c) ){
-          $c = new \bbn\html\element($c);
+          $c = new bbn\html\element($c);
         }
         if (is_object($c) && method_exists($c, 'script') ){
           $r .= $c->script();
@@ -641,7 +642,7 @@ class element
           else if ( is_array($this->content) ){
             foreach ( $this->content as $c ){
               if ( is_array($c) ){
-                $c = new \bbn\html\element($c);
+                $c = new bbn\html\element($c);
               }
               $html .= $c->html($with_js);
             }
@@ -660,7 +661,7 @@ class element
   
   public function ele_and_script()
   {
-    return ['$(\''.\bbn\str::escape_squotes($this->html()).'\')',$this->script(false)];
+    return ['$(\''.bbn\str::escape_squotes($this->html()).'\')',$this->script(false)];
   }
 	
   public function make_empty()

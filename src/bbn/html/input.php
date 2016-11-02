@@ -1,8 +1,9 @@
 <?php
 /**
- * @package bbn\html
+ * @package html
  */
 namespace bbn\html;
+use bbn;
 /**
  * HTML Class creating a form INPUT
  *
@@ -15,7 +16,7 @@ namespace bbn\html;
  * @version 0.4
  * @todo ???
  */
-class input extends element
+class input extends bbn\element
 {
   protected
           /** @var null|string The input's label/title */
@@ -166,7 +167,7 @@ class input extends element
 			$mandatory_attr = [];
       
       if ( !isset($this->attr['id']) ){
-  			$this->attr['id'] = \bbn\str::genpwd(20,15);
+  			$this->attr['id'] = bbn\str::genpwd(20,15);
       }
       
 			$this->script = isset($cfg['script']) ? $cfg['script'] : '';
@@ -204,7 +205,7 @@ class input extends element
 		$s = $this->html();
     if ( !empty($s) ){
 			if ( BBN_IS_DEV ){
-        $title = str_replace('"', '', print_r (\bbn\str::make_readable($this->cfg), true));
+        $title = str_replace('"', '', print_r (bbn\str::make_readable($this->cfg), true));
 			}
 			else if ( isset($this->attr['title']) ){
 				$title = $this->attr['title'];

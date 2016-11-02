@@ -1,6 +1,6 @@
 <?php
 /**
- * @package bbn\util
+ * @package util
  * 
  * Parses an expression with parentheses into a multidimensional array
  */

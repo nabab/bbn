@@ -2,7 +2,8 @@
 /**
  * @package bbn
  */
-namespace bbn;
+namespace bbn\models\cls;
+use bbn;
 /**
  * Basic object Class
  *
@@ -17,16 +18,15 @@ namespace bbn;
  * @version 0.2r89
  * Todo: create a new delegation generic function for the double underscores functions
  */
-class objdb extends obj
+class db extends basic
 {
 	protected
 		/**
-		 * @var \bbn\db
+		 * @var db
 		 */
 		$db;
 
-	public function __construct(\bbn\db $db)
-	{
+	public function __construct(bbn\db $db){
 		$this->db = $db;
 	}
 

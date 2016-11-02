@@ -1,5 +1,6 @@
 <?php
 namespace bbn\appui;
+use bbn;
 
 class menu {
 
@@ -15,14 +16,14 @@ class menu {
     $public_root = 'bbn_permissions|page';
 
   protected
-    /** @var \bbn\appui\options The options object */
+    /** @var bbn\appui\options The options object */
     $options,
-    /** @var \bbn\cache The cache object */
+    /** @var cache The cache object */
     $cacher;
 
-  public function __construct(\bbn\appui\options $o, $r){
+  public function __construct(bbn\appui\options $o, $r){
     $this->options = $o;
-    $this->cacher = \bbn\cache::get_engine();
+    $this->cacher = bbn\cache::get_engine();
     if ( !empty($r) && is_string($r) ){
       $this->_set_relative_public_root($r);
     }
@@ -62,7 +63,7 @@ class menu {
     return self::$_cache_prefix.$method.'-'.(string)$uid;
   }
 
-  private function _adapt($ar, \bbn\user\preferences $pref, $prepath = false){
+  private function _adapt($ar, bbn\user\preferences $pref, $prepath = false){
     $tmp = $this->_filter($ar, $pref);
     foreach ( $tmp as $i => $it ){
       if ( !empty($it['items']) ){
@@ -78,19 +79,23 @@ class menu {
     return $res;
   }
 
-  private function _filter($ar, \bbn\user\preferences $pref){
-    $usr = \bbn\user\connection::get_user();
+  private function _filter($ar, bbn\user\preferences $pref){
+    $usr = bbn\user::get_instance();
     if ( is_object($usr) && $usr->is_admin() ){
       return $ar;
     }
     return array_filter($ar, function($a)use($pref){
-      if ( isset($a['id_permission']) ){
-        if ( !$pref->has($a['id_permission'], $pref->get_user(), $pref->get_group()) ){
-          return false;
+      if ( empty($a['public']) ){
+        if ( isset($a['id_permission']) ){
+          if ( !$pref->has($a['id_permission'], $pref->get_user(), $pref->get_group()) ){
+            return false;
+          }
         }
-      }
-      else if ( empty($a['items']) ){
-        return false;
+        else{
+          if ( empty($a['items']) ){
+            return false;
+          }
+        }
       }
       return true;
     });
@@ -101,6 +106,7 @@ class menu {
       $res = [
         'id' => $menu['id'],
         'text' => $menu['text'],
+        'public' => isset($menu['alias']) && empty($menu['alias']['public']) ? 0 : 1,
         'icon' => isset($menu['icon']) ? $menu['icon'] : 'cog'
       ];
       if ( !empty($menu['alias']) ){
@@ -122,10 +128,10 @@ class menu {
   }
 
   public function from_path($path){
-    if ( !\bbn\str::is_integer($path) ){
+    if ( !bbn\str::is_integer($path) ){
       $path = $this->options->from_path(self::$root.'|'.$path);
     }
-    return \bbn\str::is_integer($path) ? $path : false;
+    return bbn\str::is_integer($path) ? $path : false;
   }
 
   /**
@@ -133,7 +139,7 @@ class menu {
    * @param $id
    */
   public function to_path($id){
-    if ( \bbn\str::is_integer($id) ){
+    if ( bbn\str::is_integer($id) ){
       return $this->options->to_path($id, '', $this->_get_public_root());
     }
     return false;
@@ -143,13 +149,13 @@ class menu {
     $id = $this->from_path($id);
   }
 
-  public function add_shortcut($id, \bbn\user\preferences $pref){
+  public function add_shortcut($id, bbn\user\preferences $pref){
     if ( $id_menu = $this->from_path('shortcuts') ){
       return $pref->set_link($id, $id_menu);
     }
   }
 
-  public function remove_shortcut($id, \bbn\user\preferences $pref){
+  public function remove_shortcut($id, bbn\user\preferences $pref){
     if ( $id_menu = $this->from_path('shortcuts') ){
       return $pref->unset_link($id);
     }
@@ -168,13 +174,13 @@ class menu {
     }
   }
 
-  public function custom_tree($id, \bbn\user\preferences $pref, $prepath = false){
+  public function custom_tree($id, bbn\user\preferences $pref, $prepath = false){
     if ( ($tree = $this->tree($id, $prepath)) && isset($tree['items']) ){
       return $this->_adapt($tree['items'], $pref, $prepath);
     }
   }
   
-  public function shortcuts(\bbn\user\preferences $pref){
+  public function shortcuts(bbn\user\preferences $pref){
     if ( $id_menu = $this->from_path('shortcuts') ){
       $ids = $pref->get_links($id_menu);
       $res = [];

@@ -1,6 +1,6 @@
 <?php
 /**
- * @package bbn\version
+ * @package version
  */
 namespace bbn\version;
 /**
@@ -67,7 +67,7 @@ class svn
     foreach ( $tmp as $t ){
       $i = strpos($t, ':');
       if ( $i > 0 ){
-        $res[\bbn\str::change_case(\bbn\str::encode_filename(substr($t, 0, $i)), 'lower')] = trim(substr($t, $i+1));
+        $res[bbn\str::change_case(bbn\str::encode_filename(substr($t, 0, $i)), 'lower')] = trim(substr($t, $i+1));
       }
     }
     return $res;
@@ -112,7 +112,7 @@ class svn
       system("svn info ".$this->args());
       $st = ob_get_contents();
       ob_end_clean();
-      \bbn\x::hdump($st);
+      bbn\x::hdump($st);
       return $this->parseCMD($st);
     }
   }
@@ -155,7 +155,7 @@ class svn
       ob_end_clean();
       $log = new \SimpleXMLElement($st);
       $r = [];
-      //\bbn\x::hdump($st);
+      //bbn\x::hdump($st);
       foreach ( $log->logentry as $l ){
         $r[(int)$l['revision']] = [
           'author' => (string)$l->author,

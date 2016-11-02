@@ -1,6 +1,6 @@
 <?php
 /**
- * @package bbn\time
+ * @package time
  */
 namespace bbn;
 /**
@@ -21,7 +21,7 @@ class date
   
   public static function is_windows(){
     if ( is_null(self::$windows) ){
-      self::$windows = \bbn\x::is_windows();
+      self::$windows = x::is_windows();
     }
     return self::$windows;
   }
@@ -29,7 +29,7 @@ class date
   public static function last_day_of_month($date, $format = false){
     if ( $date ){
       $m = false;
-      if ( \bbn\str::is_number($date) ){
+      if ( str::is_number($date) ){
         if ( $date <= 12 ){
           $m = $date;
           $y = date('Y');
@@ -139,7 +139,7 @@ class date
     for ( $i = 1; $i <= 12; $i++ ){
       $arr[$i] = self::month_name($i);
     }
-    return \bbn\x::build_options($arr, $val);
+    return x::build_options($arr, $val);
   }
   
   public static function month_name($m){

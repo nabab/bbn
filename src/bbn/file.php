@@ -1,8 +1,8 @@
 <?php
 /**
- * @package bbn\file
+ * @package file
  */
-namespace bbn\file;
+namespace bbn;
 /**
  * A class for dealing with files
  *
@@ -14,7 +14,7 @@ namespace bbn\file;
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @version 0.2r89
  */
-class file extends \bbn\obj 
+class file extends models\cls\basic
 {
 	/**
 	 * @var int
@@ -105,7 +105,7 @@ class file extends \bbn\obj
    * Returns the filesize.
    * 
    * <code>
-   * $file = new \bbn\file\file("C:/Test/file.txt");
+   * $file = new bbn\file("C:/Test/file.txt");
    * echo $file->get_size(); //Returns 314
    * </code>
    * 
@@ -123,7 +123,7 @@ class file extends \bbn\obj
    * Returns the extension name of the file.
    * 
    * <code>
-   * $file = new \bbn\file\file("C:/Test/file.txt");
+   * $file = new file("C:/Test/file.txt");
    * echo $file->get_extension(); //Returns "txt"
    * </code>
    * 
@@ -134,12 +134,11 @@ class file extends \bbn\obj
 		if ( $this->name ){
 			if ( !isset($this->ext) ){
 				if ( strpos($this->name, '.') !== false ){
-					$p = \bbn\str::file_ext($this->name, 1);
+					$p = str::file_ext($this->name, 1);
 					$this->ext = $p[1];
 					$this->title = $p[0];
 				}
-				else
-				{
+				else{
 					$this->ext = '';
 					$this->title = substr($this->name,-1) === '/' ? substr($this->name,0,-1) : $this->name;
 				}
@@ -208,7 +207,7 @@ class file extends \bbn\obj
 	 * Returns the hash of the file.
    * 
    * <code>
-   * $file = new \bbn\file\file("C:/Test/file.txt");
+   * $file = new file("C:/Test/file.txt");
    * echo $file->get_hash(); //Returns "9a388aa36a85adbd9c8c2b59aa2a736c"
    * </code>
    * 
@@ -226,7 +225,7 @@ class file extends \bbn\obj
    * Deletes the file.
    * 
    * <code>
-   * $file = new \bbn\file\file("C:/Test/file.txt");
+   * $file = new file("C:/Test/file.txt");
    * $file->delete(); //Deletes the file
    * </code>
    *  

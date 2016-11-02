@@ -1,8 +1,9 @@
 <?php
 /**
- * @package bbn\html
+ * @package html
  */
 namespace bbn\html;
+use bbn;
 
 /**
  * Generates form and its elements
@@ -16,7 +17,7 @@ namespace bbn\html;
  * @version 0.4
 */
 
-class form extends element
+class form extends bbn\element
 {
 
   public 

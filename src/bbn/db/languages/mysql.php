@@ -1,10 +1,10 @@
 <?php
 /**
- * @package bbn\db
+ * @package db
  */
 namespace bbn\db\languages;
+use bbn;
 
-use \bbn\str;
 /**
  * Database Class
  *
@@ -16,7 +16,7 @@ use \bbn\str;
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @version 0.2r89
  */
-class mysql implements \bbn\db\engines
+class mysql implements bbn\db\engines
 {
   private $db;
 	public static
@@ -24,10 +24,12 @@ class mysql implements \bbn\db\engines
           $numeric_types=['integer', 'int', 'smallint', 'tinyint', 'mediumint', 'bigint', 'decimal', 'numeric', 'float', 'double'];
 
   public $qte = '`';
+
   /**
-   * 
+   * Constructor
+   * @param bbn\db $db
    */
-  public function __construct(\bbn\db $db = null) {
+  public function __construct(bbn\db $db = null) {
     if ( !extension_loaded('pdo_mysql') ){
       die("The MySQL driver for PDO is not installed...");
     }
@@ -76,7 +78,7 @@ class mysql implements \bbn\db\engines
 	 */
 	public function change($db)
 	{
-		if ( ($this->db->current !== $db) && str::check_name($db) ){
+		if ( ($this->db->current !== $db) && bbn\str::check_name($db) ){
 			$this->db->raw_query("USE `$db`");
       return 1;
 		}
@@ -95,7 +97,7 @@ class mysql implements \bbn\db\engines
       $items = explode(".", str_replace("`", "", $item));
       $r = [];
       foreach ( $items as $m ){
-        if ( !str::check_name($m) ){
+        if ( !bbn\str::check_name($m) ){
           return false;
         }
         array_push($r, "`".$m."`");
@@ -128,7 +130,7 @@ class mysql implements \bbn\db\engines
         $db = $this->db->current;
         $table = trim($mtable[0]);
       }
-      if ( str::check_name($db,$table) ){
+      if ( bbn\str::check_name($db,$table) ){
         return $escaped ? "`".$db."`.`".$table."`" : $db.".".$table;
       }
     }
@@ -157,7 +159,7 @@ class mysql implements \bbn\db\engines
           $table = $mtable[1];
           break;
       }
-      if ( str::check_name($table) ){
+      if ( bbn\str::check_name($table) ){
         return $escaped ? "`".$table."`" : $table;
       }
     }
@@ -186,7 +188,7 @@ class mysql implements \bbn\db\engines
         $col = end($mcol);
         $ok = 1;
       }
-      if ( isset($ok) && str::check_name($table, $col) ){
+      if ( isset($ok) && bbn\str::check_name($table, $col) ){
         return $escaped ? "`".$table."`.`".$col."`" : $table.".".$col;
       }
     }
@@ -205,7 +207,7 @@ class mysql implements \bbn\db\engines
     if ( is_string($col) && ($col = trim($col)) ){
       $mcol = explode(".", str_replace("`", "", $col));
       $col = end($mcol);
-      if ( str::check_name($col) ){
+      if ( bbn\str::check_name($col) ){
         return $escaped ? "`".$col."`" : $col;
       }
     }
@@ -234,7 +236,7 @@ class mysql implements \bbn\db\engines
 	 */
 	public function get_tables($database='')
 	{
-		if ( empty($database) || !str::check_name($database) ){
+		if ( empty($database) || !bbn\str::check_name($database) ){
 			$database = $this->db->current;
 		}
 		$t2 = [];
@@ -417,11 +419,11 @@ class mysql implements \bbn\db\engines
       }
     }
     if ( count($args) === 2 &&
-            \bbn\str::is_number($args[0], $args[1]) &&
+            bbn\str::is_number($args[0], $args[1]) &&
             ($args[0] > 0) ){
       return " LIMIT $args[1], $args[0]";
     }
-    if ( \bbn\str::is_number($args[0]) &&
+    if ( bbn\str::is_number($args[0]) &&
             ($args[0] > 0) ){
       return " LIMIT $args[0]";
     }
@@ -506,7 +508,7 @@ class mysql implements \bbn\db\engines
               $this->db->error("Error! The column '$c' doesn't exist in '".implode(", ", array_keys($tables_fields))."' table(s)");
             }
           }
-          if ( !is_numeric($k) && \bbn\str::check_name($k) && ($k !== $c) ){
+          if ( !is_numeric($k) && bbn\str::check_name($k) && ($k !== $c) ){
             array_push($aliases, $k);
             $r .= "{$this->escape($c)} AS {$this->escape($k)},".PHP_EOL;
           }
@@ -678,7 +680,7 @@ class mysql implements \bbn\db\engines
   {
     $csn = $this->db->csn($field);
     $cfn = $this->db->cfn($field, $table, 1);
-		if ( str::check_name($csn) &&
+		if ( bbn\str::check_name($csn) &&
       ($m = $this->db->modelize($table)) &&
       ($table = $this->table_full_name($table, 1)) &&
       (count($m['fields']) > 0)
@@ -744,9 +746,9 @@ class mysql implements \bbn\db\engines
         $length = [$length];
       }
     }
-    $iname = str::encode_filename($table);
+    $iname = bbn\str::encode_filename($table);
     foreach ( $column as $i => $c ){
-      if ( !str::check_name($c) ){
+      if ( !bbn\str::check_name($c) ){
         $this->db->error("Illegal column $c");
       }
       $iname .= '_'.$c;
@@ -755,7 +757,7 @@ class mysql implements \bbn\db\engines
         $column[$i] .= "(".$length[$i].")";
       }
     }
-    $iname = str::cut($iname, 50);
+    $iname = bbn\str::cut($iname, 50);
 		if ( ( $table = $this->table_full_name($table, 1) ) ){
 			$this->db->raw_query("
 			CREATE ".( $unique ? "UNIQUE " : "" )."INDEX `$iname`
@@ -769,7 +771,7 @@ class mysql implements \bbn\db\engines
 	 */
 	public function delete_db_index($table, $column)
 	{
-		if ( ( $table = $this->table_full_name($table, 1) ) && str::check_name($column) ){
+		if ( ( $table = $this->table_full_name($table, 1) ) && bbn\str::check_name($column) ){
 			$this->db->raw_query("
 				ALTER TABLE $table
 				DROP INDEX `$column`");
@@ -782,7 +784,7 @@ class mysql implements \bbn\db\engines
 	 */
 	public function create_db_user($user, $pass, $db)
 	{
-		if ( str::check_name($user, $db) && strpos($pass, "'") === false ){
+		if ( bbn\str::check_name($user, $db) && strpos($pass, "'") === false ){
 			$this->db->raw_query("
 				GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,INDEX,ALTER
 				ON `$db` . *
@@ -796,7 +798,7 @@ class mysql implements \bbn\db\engines
 	 */
 	public function delete_db_user($user)
 	{
-		if ( str::check_name($user) ){
+		if ( bbn\str::check_name($user) ){
 			$this->db->raw_query("
 			REVOKE ALL PRIVILEGES ON *.* 
 			FROM $user");
@@ -826,10 +828,10 @@ class mysql implements \bbn\db\engines
   public function get_users($user='', $host='')
   {
     $cond = '';
-    if ( !empty($user) && \bbn\str::check_name($user) ){
+    if ( !empty($user) && bbn\str::check_name($user) ){
       $cond .= " AND  user LIKE '$user' ";
     }
-    if ( !empty($host) && \bbn\str::check_name($host) ){
+    if ( !empty($host) && bbn\str::check_name($host) ){
       $cond .= " AND  host LIKE '$host' ";
     }
     $us = $this->db->get_rows("

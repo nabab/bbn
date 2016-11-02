@@ -1,13 +1,14 @@
 <?php
 /**
  * Class virtualmin
- * @package bbn\api
+ * @package api
  *
  * @author Edwin Mugendi <edwinmugendi@gmail.com>
  * @author Thomas Nabet <thomas.nabet@gmail.com>
  *
  */
 namespace bbn\api;
+use bbn;
 
 class virtualmin {
 
@@ -24,7 +25,7 @@ class virtualmin {
     $checked = false,
     /** @var  Array of all commands */
     $commands = false,
-    /** @var \bbn\cache */
+    /** @var cache */
     $cacher;
 
   public
@@ -44,7 +45,7 @@ class virtualmin {
       $this->hostname = isset($cfg['host']) ? $cfg['host'] : 'localhost';
       $this->checked = true;
       if ( class_exists('\\bbn\\cache') ){
-        $this->cacher = \bbn\cache::get_engine();
+        $this->cacher = bbn\cache::get_engine();
         if ( !$this->cacher->has(self::cache_name) ){
           $this->fetch_commands();
         }

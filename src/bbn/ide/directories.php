@@ -1,9 +1,7 @@
 <?php
 
 namespace bbn\ide;
-
-
-use bbn\str;
+use bbn;
 
 class directories {
 
@@ -17,7 +15,7 @@ class directories {
 
 
   protected
-    /** @var \bbn\appui\options $options */
+    /** @var bbn\appui\options $options */
     $options,
     /** @var null|string The last error recorded by the class */
     $last_error,
@@ -94,7 +92,7 @@ class directories {
    * @return array
    */
   private function rem_dir_opt($d){
-    $sub_files = \bbn\file\dir::scan($d);
+    $sub_files = bbn\file\dir::scan($d);
     $files = [];
     foreach ( $sub_files as $sub ){
       if ( is_file($sub) ){
@@ -147,7 +145,7 @@ class directories {
    * @param string $st
    */
   protected function error($st){
-    \bbn\x::log($st, "directories");
+    bbn\x::log($st, "directories");
     $this->last_error = $st;
   }
 
@@ -172,15 +170,15 @@ class directories {
   /**
    * Constructor.
    *
-   * @param \bbn\appui\options $options
+   * @param bbn\appui\options $options
    */
-  public function __construct(\bbn\appui\options $options, $routes){
+  public function __construct(bbn\appui\options $options, $routes){
     $this->options = $options;
     $this->routes = $routes;
   }
 
   public function add_routes(array $routes){
-    $this->routes = \bbn\x::merge_arrays($this->routes, $routes);
+    $this->routes = bbn\x::merge_arrays($this->routes, $routes);
     return $this;
   }
 
@@ -224,8 +222,8 @@ class directories {
         if ( !empty($d['tabs']) ){
           $tab_path = array_shift($bits);
           $fn = array_pop($bits);
-          $ext = \bbn\str::file_ext($fn);
-          $fn = \bbn\str::file_ext($fn, 1)[0];
+          $ext = bbn\str::file_ext($fn);
+          $fn = bbn\str::file_ext($fn, 1)[0];
           $res .= implode('/', $bits);
           foreach ( $d['tabs'] as $t ){
             if ( empty($t['fixed']) &&
@@ -243,7 +241,7 @@ class directories {
         else {
           $res .= implode('/', $bits);
         }
-        return \bbn\str::parse_path($res);
+        return bbn\str::parse_path($res);
       }
     }
     return false;
@@ -257,7 +255,7 @@ class directories {
    * @return bool|string
    */
   public function real_to_id($file){
-    $timer = new \bbn\util\timer();
+    $timer = new bbn\util\timer();
     $timer->start('real_to_id');
     $url = self::real_to_url($file);
     $dir = self::dir(self::dir_from_url($url));
@@ -268,8 +266,8 @@ class directories {
       if ( strpos($file, $bbn_p) === 0 ){
         $f = substr($file, strlen($bbn_p));
         $timer->stop('real_to_id');
-        \bbn\x::log($timer->results(), "directories");
-        return \bbn\str::parse_path($dir['bbn_path'].'/'.$f);
+        bbn\x::log($timer->results(), "directories");
+        return bbn\str::parse_path($dir['bbn_path'].'/'.$f);
       }
     }
 
@@ -296,7 +294,7 @@ class directories {
         }
       }
     }
-    return \bbn\str::parse_path($bbn_path.'/'.$f);
+    return bbn\str::parse_path($bbn_path.'/'.$f);
     */
   }
 
@@ -356,7 +354,7 @@ class directories {
         }
         $res .= implode('/', $bits);
       }
-      return \bbn\str::parse_path($res);
+      return bbn\str::parse_path($res);
     }
     return false;
   }
@@ -425,9 +423,9 @@ class directories {
     /** @var array $dir The directory configuration */
     $dir = $this->dir($code);
     if ( $dir ){
-      $path = $this->decipher_path(\bbn\str::parse_path($dir['bbn_path'].(!empty($dir['path']) ? '/' . $dir['path'] : '')));
+      $path = $this->decipher_path(bbn\str::parse_path($dir['bbn_path'].(!empty($dir['path']) ? '/' . $dir['path'] : '')));
 
-      $r = \bbn\str::parse_path($path.'/');
+      $r = bbn\str::parse_path($path.'/');
       return $r;
     }
     return false;
@@ -441,7 +439,7 @@ class directories {
    */
   public function decipher_path($st){
 
-    $st = \bbn\str::parse_path($st);
+    $st = bbn\str::parse_path($st);
     $bits = explode('/', $st);
     /** @var string $constant The first path of the path which might be a constant */
     $constant = $bits[0];
@@ -465,7 +463,7 @@ class directories {
       FROM bbn_ide_directories') + 1;
     if ( $this->db->insert('bbn_ide_directories', [
       'name' => $data['name'],
-      'path' => \bbn\str::parse_path($data['path']),
+      'path' => bbn\str::parse_path($data['path']),
       'fcolor' => $data['fcolor'],
       'bcolor' => $data['bcolor'],
       'outputs' => strlen($data['outputs']) ? $data['outputs'] : NULL,
@@ -485,7 +483,7 @@ class directories {
   public function edit($data){
     if ( $this->db->update('bbn_ide_directories', [
       'name' => $data['name'],
-      'path' => \bbn\str::parse_path($data['path']),
+      'path' => bbn\str::parse_path($data['path']),
       'fcolor' => $data['fcolor'],
       'bcolor' => $data['bcolor'],
       'outputs' => strlen($data['outputs']) ? $data['outputs'] : NULL,
@@ -578,7 +576,7 @@ class directories {
       ($root = $this->get_root_path($dir))
     ){
       $path = $path === './' ? '' : $path . '/';
-      $ext = \bbn\str::file_ext($name);
+      $ext = bbn\str::file_ext($name);
       $default = '';
 
       // MVC
@@ -604,12 +602,12 @@ class directories {
           $ext = $cfg['extensions'][0]['ext'];
           $default = $cfg['extensions'][0]['default'];
         }
-        $file = $path . \bbn\str::file_ext($name, 1)[0] . '.' . $ext;
+        $file = $path . bbn\str::file_ext($name, 1)[0] . '.' . $ext;
         $real = $root . $file;
         if ( is_file($real) ){
           return $this->error("The file already exists");
         }
-        if ( !\bbn\file\dir::create_path(dirname($real)) ){
+        if ( !bbn\file\dir::create_path(dirname($real)) ){
           return $this->error("Impossible to create the container directory");
         }
         if ( !file_put_contents($real, $default) ){
@@ -629,7 +627,7 @@ class directories {
         if ( is_dir($real) ){
           return $this->error("The directory already exists");
         }
-        if ( !\bbn\file\dir::create_path($real) ){
+        if ( !bbn\file\dir::create_path($real) ){
           return $this->error("Impossible to create the directory");
         }
       }
@@ -644,13 +642,13 @@ class directories {
    * @param string $file
    * @param integer $dir
    * @param string $tab
-   * @param \bbn\user\preferences|null $pref
+   * @param bbn\user\preferences|null $pref
    * @return array|bool
    */
-  public function load($file, $dir, $tab, \bbn\user\preferences $pref = null){
+  public function load($file, $dir, $tab, bbn\user\preferences $pref = null){
     /** @var boolean|array $res */
     $res = false;
-    $file = \bbn\str::parse_path($file);
+    $file = bbn\str::parse_path($file);
 
     if ( $file && $dir ){
       /** @var array $dir_cfg The directory configuration from DB */
@@ -662,7 +660,7 @@ class directories {
 
   protected function get_tab(string $url, string $title, array $cfg){
     return [
-      'url' => \bbn\str::parse_path($url),
+      'url' => bbn\str::parse_path($url),
       'title' => $title,
       'load' => 1,
       'bcolor' => $cfg['bcolor'],
@@ -677,21 +675,21 @@ class directories {
    * @param string $dir
    * @param string $tab
    * @param array $cfg
-   * @param \bbn\user\preferences|null $pref
+   * @param bbn\user\preferences|null $pref
    * @return array
    */
-  protected function get_file($file, $dir, $tab, array $cfg, \bbn\user\preferences $pref = null){
+  protected function get_file($file, $dir, $tab, array $cfg, bbn\user\preferences $pref = null){
     if ( isset($cfg['title'], $cfg['bcolor'], $cfg['fcolor']) ){
       /** @var string $name The file's name - without path and extension */
-      $name = \bbn\str::file_ext($file, 1)[0];
+      $name = bbn\str::file_ext($file, 1)[0];
       /** @var string $ext The file's extension */
-      $ext = \bbn\str::file_ext($file);
+      $ext = bbn\str::file_ext($file);
       /** @var string $path The file's path without file's name  */
       $path = dirname($file) !== '.' ? dirname($file) . '/' : '';
       $url = $dir . $path . $name;
 
       $r = $this->get_tab($url, $cfg['title'], $cfg);
-      $timer = new \bbn\util\timer();
+      $timer = new bbn\util\timer();
       // MVC
       if ( !empty($cfg['tabs']) ){
         $r['title'] = $path . $name;
@@ -702,13 +700,13 @@ class directories {
           $real_file = $t['path'] . $path . $name;
           if ( $tab === $name ){
             $info = $this->get_file($real_file, $dir, $tab, $t, $pref);
-            //die(\bbn\x::dump($info));
+            //die(bbn\x::dump($info));
           }
           else{
             $info = $this->get_tab($url.'/'.$name, $t['title'], $t);
           }
           if ( !$info ){
-            $this->error("Impossible to get a tab's configuration: DIR: $dir - TAB: $tab - FILE: $real_file - CFG: ".\bbn\x::get_dump($t));
+            $this->error("Impossible to get a tab's configuration: DIR: $dir - TAB: $tab - FILE: $real_file - CFG: ".bbn\x::get_dump($t));
             return false;
           }
           else{
@@ -723,7 +721,7 @@ class directories {
               $t['file'] = dirname($file) . '/' .$t['fixed'];
               $info = $this->get_tab($url.'/'.$name, $t['title'], $t);
               if ( !$info ){
-                $this->error("Impossible to get a supra-controller's configuration: DIR: $dir - TAB: $tab - FILE: $t[file] - CFG: ".\bbn\x::get_dump($t));
+                $this->error("Impossible to get a supra-controller's configuration: DIR: $dir - TAB: $tab - FILE: $t[file] - CFG: ".bbn\x::get_dump($t));
                 return false;
               }
               else{
@@ -791,7 +789,7 @@ class directories {
           }
           // _CTRL
           if ( !empty($cfg['fixed']) ){
-            $ext = \bbn\str::file_ext($cfg['fixed']);
+            $ext = bbn\str::file_ext($cfg['fixed']);
             foreach ( $cfg['extensions'] as $e ){
               if ( $e['ext'] === $ext ){
                 $file = dirname($file) . '/' . $cfg['fixed'];
@@ -873,7 +871,7 @@ class directories {
             'marks' => !empty($o['marks']) ? $o['marks'] : []
           ];
         }
-        \bbn\x::log($timer->results(), "directories");
+        bbn\x::log($timer->results(), "directories");
 
       }
       return $r;
@@ -886,20 +884,20 @@ class directories {
    * @param string $file The file's URL
    * @param string $code The file's content
    * @param array|null $cfg The user preferences
-   * @param \bbn\user\preferences|null $pref
+   * @param bbn\user\preferences|null $pref
    * @return array|void
    */
-  public function save($file, $code, array $cfg = null, \bbn\user\preferences $pref = null){
+  public function save($file, $code, array $cfg = null, bbn\user\preferences $pref = null){
     die(var_dump($file, $code, $cfg ));
-    if ( ($file = \bbn\str::parse_path($file)) &&
+    if ( ($file = bbn\str::parse_path($file)) &&
       ($real = $this->url_to_real($file)) &&
       ($dir = $this->dir($this->dir_from_url($file))) &&
       defined('BBN_USER_PATH')
     ){
       $id_file = $this->real_to_id($real);
-      $ext = \bbn\str::file_ext($real, 1);
+      $ext = bbn\str::file_ext($real, 1);
       $id_user = false;
-      if ( $session = \bbn\user\session::get_current() ){
+      if ( $session = bbn\user\session::get_instance() ){
         $id_user = $session->get('user', 'id');
       }
       // We delete the file if code is empty and we aren't in a _ctrl file
@@ -917,7 +915,7 @@ class directories {
                 // Remove file's options
                 $this->options->remove($this->options->from_code($id_file, $this->_files_pref()));
                 // Remove ide backups
-                \bbn\file\dir::delete(dirname(BBN_USER_PATH."ide/backup/$id_file")."/$ext[0]/", 1);
+                bbn\file\dir::delete(dirname(BBN_USER_PATH."ide/backup/$id_file")."/$ext[0]/", 1);
               }
               return [
                 'deleted' => 1
@@ -929,11 +927,11 @@ class directories {
       if ( is_file($real) && $id_file ){
         $filename = empty($dir['tabs']) ? $ext[0].'.'.$ext[1] : $ext[0];
         $backup = dirname(BBN_USER_PATH."ide/backup/".$id_file).'/'.$filename.'/'.date('Y-m-d His').'.'.$ext[1];
-        \bbn\file\dir::create_path(dirname($backup));
+        bbn\file\dir::create_path(dirname($backup));
         rename($real, $backup);
       }
       else if ( !is_dir(dirname($real)) ){
-        \bbn\file\dir::create_path(dirname($real));
+        bbn\file\dir::create_path(dirname($real));
       }
       file_put_contents($real, $code);
       if ( $pref && $id_user ){
@@ -954,10 +952,10 @@ class directories {
    * @param string $id_file The file's id
    * @param string $md5 The file's md5
    * @param array|null $cfg
-   * @param \bbn\user\preferences|null $pref
+   * @param bbn\user\preferences|null $pref
    * @return bool
    */
-  public function set_preferences($id_user, $id_file, $md5, array $cfg = null, \bbn\user\preferences $pref = null){
+  public function set_preferences($id_user, $id_file, $md5, array $cfg = null, bbn\user\preferences $pref = null){
     if ( !empty($id_user) && !empty($id_file) && !empty($pref) ){
       $change['md5'] = $md5;
       if ( !empty($cfg['selections']) ){
@@ -990,14 +988,14 @@ class directories {
   public function copy($dir, $path, $name, $type, $file){
     if ( ($cfg = $this->dir($dir)) &&
       ($root = $this->get_root_path($dir)) &&
-      \bbn\str::check_filename($name)
+      bbn\str::check_filename($name)
     ){
       $is_file = $type === 'file';
       $wtype = $is_file ? 'file' : 'directory';
       $path = $path === './' ? '' : $path . '/';
       $bits = explode('/', $file);
       // File cfg
-      $file_cfg =  \bbn\str::file_ext(array_pop($bits), 1);
+      $file_cfg =  bbn\str::file_ext(array_pop($bits), 1);
       // Existing filename without its extension
       $fn = $file_cfg[0];
       // Existing file's extension
@@ -1064,12 +1062,12 @@ class directories {
       }
       foreach ($files as $s => $d ){
         if ( !file_exists(dirname($d)) ){
-          if ( !\bbn\file\dir::create_path(dirname($d)) ){
+          if ( !bbn\file\dir::create_path(dirname($d)) ){
             $this->error("Impossible to create the path $d");
             return false;
           }
         }
-        if ( !\bbn\file\dir::copy($s, $d) ){
+        if ( !bbn\file\dir::copy($s, $d) ){
           $this->error("Impossible to duplicate the $wtype: $s -> $d");
           return false;
         }
@@ -1089,11 +1087,11 @@ class directories {
                 self::create_perm_by_real($f);
               }
               else if ( is_dir($f) ){
-                $dir_perms(\bbn\file\dir::get_files($f, 1));
+                $dir_perms(bbn\file\dir::get_files($f, 1));
               }
             }
           };
-          $dir_perms(\bbn\file\dir::get_files($perms, 1));
+          $dir_perms(bbn\file\dir::get_files($perms, 1));
         }
       }
 
@@ -1178,7 +1176,7 @@ class directories {
           $f = $this->rem_dir_opt($d);
           $files = array_merge($files, $f);
           // Delete directory
-          if ( !\bbn\file\dir::delete($d) ){
+          if ( !bbn\file\dir::delete($d) ){
             $this->error("Impossible to delete the directory $d");
             return false;
           }
@@ -1205,7 +1203,7 @@ class directories {
     ){
       $is_file = $type === 'file';
       $wtype = $is_file ? 'file' : 'directory';
-      $rnd = \bbn\str::genpwd();
+      $rnd = bbn\str::genpwd();
       $root_dest = BBN_USER_PATH . 'tmp/' . $rnd . '/';
       $files = [];
       if ( !empty($cfg['tabs']) ){
@@ -1253,12 +1251,12 @@ class directories {
       }
       foreach ( $files as $f ){
         if ( $f['is_file'] ){
-          if ( !\bbn\file\dir::create_path(dirname($f['dest'])) ){
+          if ( !bbn\file\dir::create_path(dirname($f['dest'])) ){
             $this->error("Impossible to create the path " . dirname($f['dest']));
             return false;
           }
         }
-        if ( !\bbn\file\dir::copy($f['src'], $f['dest']) ){
+        if ( !bbn\file\dir::copy($f['src'], $f['dest']) ){
           $this->error('Impossible to export the ' . $wtype . ' ' . $f['src']);
           return false;
         }
@@ -1271,7 +1269,7 @@ class directories {
           if ( file_exists($root_dest) ){
             if ( (!$is_file) || !empty($cfg['tabs']) ){
               // Create recursive directory iterator
-              $files = \bbn\file\dir::scan($root_dest);
+              $files = bbn\file\dir::scan($root_dest);
               foreach ($files as $file){
                 $tmp_dest = str_replace(
                   $root_dest . (empty($cfg['tabs']) ? '/' : ''),
@@ -1295,7 +1293,7 @@ class directories {
               }
             }
             if ( $zip->close() ) {
-              if ( !\bbn\file\dir::delete(BBN_USER_PATH . 'tmp/' . $rnd, 1) ) {
+              if ( !bbn\file\dir::delete(BBN_USER_PATH . 'tmp/' . $rnd, 1) ) {
                 $this->error("Impossible to delete the directory " . BBN_USER_PATH . 'tmp/' . $rnd);
                 return false;
               }
@@ -1328,7 +1326,7 @@ class directories {
   public function rename($dir, $path, $new, $type = 'file'){
     if ( ($cfg = $this->dir($dir)) &&
       ($root = $this->get_root_path($dir)) &&
-      \bbn\str::check_filename($new)
+      bbn\str::check_filename($new)
     ){
       $is_file = $type === 'file';
       $wtype = $is_file ? 'file' : 'directory';
@@ -1552,7 +1550,7 @@ class directories {
         }
 
         foreach ( $files as $s => $d ){
-          if ( !\bbn\file\dir::move($s, $d) ){
+          if ( !bbn\file\dir::move($s, $d) ){
             $this->error("Impossible to rename the $wtype: $s -> $d");
             return false;
           }
@@ -1596,7 +1594,7 @@ class directories {
     ){
       $pi = pathinfo($file);
       $new = $pi['dirname'].'/'.$pi['filename'].'.'.$ext;
-      \bbn\file\dir::move($file, $new, true);
+      bbn\file\dir::move($file, $new, true);
       return [
         'file' => $new,
         'file_url' => $this->real_to_url($new)
@@ -1641,8 +1639,8 @@ class directories {
       }
       $id_parent = $this->options->from_code('page', 'bbn_permissions');
       if ( !empty($f) ){
-        $bits = \bbn\x::remove_empty(explode('/', $f));
-        $code = $is_file ? \bbn\str::file_ext(array_pop($bits), 1)[0] : array_pop($bits).'/';
+        $bits = bbn\x::remove_empty(explode('/', $f));
+        $code = $is_file ? bbn\str::file_ext(array_pop($bits), 1)[0] : array_pop($bits).'/';
         foreach ( $bits as $b ){
           $id_parent = $this->options->from_code($b.'/', $id_parent);
         }
@@ -1688,8 +1686,8 @@ class directories {
         }
       }
       if ( !empty($f) ){
-        $bits = \bbn\x::remove_empty(explode('/', $f));
-        $code = $is_file ? \bbn\str::file_ext(array_pop($bits), 1)[0] : array_pop($bits).'/';
+        $bits = bbn\x::remove_empty(explode('/', $f));
+        $code = $is_file ? bbn\str::file_ext(array_pop($bits), 1)[0] : array_pop($bits).'/';
         $id_parent = $this->options->from_code('page', 'bbn_permissions');
         foreach ( $bits as $b ){
           if ( !$this->options->from_code($b.'/', $id_parent) ){
@@ -1734,7 +1732,7 @@ class directories {
       !$this->real_to_perm($file_new, $type)
     ){
       $is_file = $type === 'file';
-      $code = $is_file ? \bbn\str::file_ext(basename($file_new), 1)[0] : basename($file_new).'/';
+      $code = $is_file ? bbn\str::file_ext(basename($file_new), 1)[0] : basename($file_new).'/';
       if ( ($id_parent = $this->create_perm_by_real(dirname($file_new).'/', 'dir'))
       ){
         $this->options->set_prop($id_opt, ['code' => $code]);
@@ -1775,11 +1773,11 @@ class directories {
       is_array($all)
     ){
       // Get all files in the path
-      if ( $files = \bbn\file\dir::get_files($path) ){
+      if ( $files = bbn\file\dir::get_files($path) ){
         // Get the creation date and time of each backups and insert them into result array
         foreach ( $files as $f ){
           $mode = false;
-          $ext = \bbn\str::file_ext($f, 1);
+          $ext = bbn\str::file_ext($f, 1);
           foreach ( $cfg['extensions'] as $e ){
             if ( $e['ext'] === $ext[1] ){
               $mode = $e['mode'];
@@ -1895,7 +1893,7 @@ class directories {
       $path .= $dir . $file;
     }
     if ( is_dir($path) &&
-      \bbn\file\dir::delete($path, !empty($url))
+      bbn\file\dir::delete($path, !empty($url))
     ){
       return ['success' => 1];
     }

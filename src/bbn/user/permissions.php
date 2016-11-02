@@ -1,8 +1,9 @@
 <?php
 /**
- * @package bbn\user
+ * @package user
  */
 namespace bbn\user;
+use bbn;
 /**
  * A permission system linked to options and user classes
  *
@@ -55,7 +56,7 @@ class permissions
 
 
 	public
-          /** @var \bbn\db */
+          /** @var db */
           $db,
           /** @var mixed */
           $prev_time;
@@ -77,9 +78,9 @@ class permissions
 	}
 
 	/**
-	 * @return \bbn\user\permissions
+	 * @return bbn\user\permissions
 	 */
-	public function __construct(\bbn\db $db, \bbn\appui\options $opt){
+	public function __construct(bbn\db $db, bbn\appui\options $opt){
 		$this->db = $db;
 		$this->opt = $opt;
 	}

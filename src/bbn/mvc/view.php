@@ -18,10 +18,12 @@
  */
 
 namespace bbn\mvc;
+use bbn;
 
 class view{
 
-	use common;
+  use common;
+
 
 	private
     /**
@@ -86,11 +88,11 @@ class view{
         case 'scss':
 					return $this->content;
 				case 'html':
-					return is_array($data) ? \bbn\tpl::render($this->content, $data) : $this->content;
+					return is_array($data) ? bbn\tpl::render($this->content, $data) : $this->content;
         case 'php':
           $dir = getcwd();
           chdir(dirname($this->file));
-          $r = \bbn\mvc::include_php_view($this->content, $data ?: []);
+          $r = bbn\mvc::include_php_view($this->content, $data ?: []);
           chdir($dir);
           return $r;
       }

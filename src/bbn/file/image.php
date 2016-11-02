@@ -1,8 +1,9 @@
 <?php
 /**
- * @package bbn\file
+ * @package file
  */
 namespace bbn\file;
+use bbn;
 /**
  * Image Class
  *
@@ -18,7 +19,7 @@ namespace bbn\file;
  * @todo Deal specifically with SVG
  * @todo Add a static function and var to check for available libraries (Imagick/GD)
  */
-class image extends \bbn\file\file 
+class image extends bbn\file
 {
 	/**
 	 * @var bool
@@ -55,8 +56,8 @@ class image extends \bbn\file\file
  * Converts one or more jpg image(s) to one pdf file.
  *
  * <code>
- * \bbn\file\image::jpg2pdf(["C:\test\image1.jpg", "C:\test\image1.jpg"], "C:\test\combined.pdf"); //Converts two jpg image to one pdf file"
- * \bbn\file\image::jpg2pdf(["C:\test\image.jpg"], "C:\test\image.pdf"); //Converts jpg image to pdf
+ * bbn\file\image::jpg2pdf(["C:\test\image1.jpg", "C:\test\image1.jpg"], "C:\test\combined.pdf"); //Converts two jpg image to one pdf file"
+ * bbn\file\image::jpg2pdf(["C:\test\image.jpg"], "C:\test\image.pdf"); //Converts jpg image to pdf
  * </code>
  *
  * @param array $jpg The path of jpg file(s) to convert
@@ -91,9 +92,9 @@ public static function jpg2pdf($jpg, $pdf){
    * Converts pdf file to jpg image(s).
    *
    * <code>
-   * \bbn\file\image::pdf2jpg("C:\test\file.pdf"); //Converts the first page of pdf to "C:\test\file.jpg"
-   * \bbn\file\image::pdf2jpg("C:\test\file.pdf", '', 'all'); //Converts all pages of pdf to "C:\test" with filename "file-0.jpg", "file-1.jpg", "file-2.jpg", ecc
-   * \bbn\file\image::pdf2jpg("C:\test\file.pdf", "C:\test2\file.jpg", 2); //Converts the third page of pdf to "C:\test2\file.jpg"
+   * bbn\file\image::pdf2jpg("C:\test\file.pdf"); //Converts the first page of pdf to "C:\test\file.jpg"
+   * bbn\file\image::pdf2jpg("C:\test\file.pdf", '', 'all'); //Converts all pages of pdf to "C:\test" with filename "file-0.jpg", "file-1.jpg", "file-2.jpg", ecc
+   * bbn\file\image::pdf2jpg("C:\test\file.pdf", "C:\test2\file.jpg", 2); //Converts the third page of pdf to "C:\test2\file.jpg"
    * </code>
    *
    * @param $pdf The path of pdf file to convert
@@ -112,7 +113,7 @@ public static function jpg2pdf($jpg, $pdf){
 				if ( !empty($dir) ){
 					$dir .= '/';
 				}
-				$f = \bbn\str::file_ext($pdf, 1);
+				$f = bbn\str::file_ext($pdf, 1);
         $jpg = $dir.$f[0].'.jpg';
       }
       if ( $num !== 'all' ) {
@@ -125,7 +126,7 @@ public static function jpg2pdf($jpg, $pdf){
         if ( $img->writeImages($jpg, 1) ) {
 					$i = 0;
 					$r = [];
-					$f = \bbn\str::file_ext($jpg, 1);
+					$f = bbn\str::file_ext($jpg, 1);
 					$dir = dirname($jpg);
 					if ( !empty($dir) ){
 						$dir .= '/';
@@ -147,7 +148,7 @@ public static function jpg2pdf($jpg, $pdf){
 	public function __construct($file)
 	{
 		parent::__construct($file);
-		if ( !in_array($this->get_extension(),\bbn\file\image::$allowed_extensions) )
+		if ( !in_array($this->get_extension(),bbn\file\image::$allowed_extensions) )
 		{
 			$this->name = false;
 			$this->path = false;
@@ -162,7 +163,7 @@ public static function jpg2pdf($jpg, $pdf){
    * Returns the file image extension.
    * 
    * <code>
-   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img = new bbn\file\image("C:\test\img.jpg");
    * $img->get_extension(); //Returns "jpg"
    * </code>
    * 
@@ -173,8 +174,8 @@ public static function jpg2pdf($jpg, $pdf){
 		if ( !$this->ext2 && $this->file ){
 			if ( function_exists('exif_imagetype') ){
 				if ( $r = exif_imagetype($this->file) ){
-          if ( array_key_exists($r, \bbn\file\image::$allowed_extensions) ){
-            $this->ext = \bbn\file\image::$allowed_extensions[$r];
+          if ( array_key_exists($r, bbn\file\image::$allowed_extensions) ){
+            $this->ext = bbn\file\image::$allowed_extensions[$r];
           }
 					else{
             $this->ext = false;
@@ -198,7 +199,7 @@ public static function jpg2pdf($jpg, $pdf){
    * Tests if the object is a image.
    * 
    * <code>
-   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img = new bbn\file\image("C:\test\img.jpg");
    * $img->test(); //Returns "true"
    * </code>
    * 
@@ -329,7 +330,7 @@ public static function jpg2pdf($jpg, $pdf){
    * Returns the file image width.
    * 
    * <code>
-   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img = new bbn\file\image("C:\test\img.jpg");
    * $img->get_width(); //Returns "512"
    * </code>
    * 
@@ -349,7 +350,7 @@ public static function jpg2pdf($jpg, $pdf){
    * Returns the file image height.
    * 
    * <code>
-   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img = new bbn\file\image("C:\test\img.jpg");
    * $img->get_height(); //Returns "512"
    * </code>
    * 
@@ -369,7 +370,7 @@ public static function jpg2pdf($jpg, $pdf){
    * Resize the image.
    * 
    * <code>
-   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img = new bbn\file\image("C:\test\img.jpg");
    * $img->resize(150, 150); //Resizes image  150x150px
    * $img->resize(0, 150, 1); //Resizes and cuts the image 
    * </code>
@@ -380,7 +381,7 @@ public static function jpg2pdf($jpg, $pdf){
    * @param integer $max_w The maximum value for new width.
    * @param integer $max_h The maximum valure for new height.
    * 
-	 * @return \bbn\file\image 
+	 * @return bbn\file\image
 	 */
 	public function resize($w=false, $h=false, $crop=false, $max_w=false, $max_h=false)
 	{
@@ -503,7 +504,7 @@ public static function jpg2pdf($jpg, $pdf){
    * @param integer $w BBN_MAX_WIDTH
    * @param integer $h BBN_MAX_HEIGHT
    * 
-   * @return \bbn\file\image
+   * @return bbn\file\image
    *  
    * @todo BBN_MAX_WIDTH and BBN_MAX_HEIGHT
 	 */
@@ -532,7 +533,7 @@ public static function jpg2pdf($jpg, $pdf){
    * Returns a crop of the image.
    * 
    * <code>
-   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img = new bbn\file\image("C:\test\img.jpg");
    * $img->crop(150, 150, 300, 300)';
    * </code>
    * 
@@ -541,7 +542,7 @@ public static function jpg2pdf($jpg, $pdf){
    * @param integer $x X coordinate
    * @param integer $y Y coordinate
    * 
-	 * @return \bbn\file\image
+	 * @return bbn\file\image
 	 */
 	public function crop($w, $h, $x, $y)
 	{
@@ -589,13 +590,13 @@ public static function jpg2pdf($jpg, $pdf){
    * Rotates the image.
    * 
    * <code>
-   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img = new bbn\file\image("C:\test\img.jpg");
    * $img->rotate(90); //Rotates the image 90°
    * </code>
    * 
    * @param integer $angle The angle of rotation.
    * 
-	 * @return \bbn\file\image 
+	 * @return bbn\file\image
 	 */
 	public function rotate($angle)
 	{
@@ -635,14 +636,14 @@ public static function jpg2pdf($jpg, $pdf){
    * Flips the image.
    * 
    * <code>
-   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img = new bbn\file\image("C:\test\img.jpg");
    * $img->flip(); //Vertical flipping
    * $img->flip(); //Horizontal flipping
    * </code>
    * 
    * @param string $mode Vertical ("v") or Horizontal ("h") flip, default: "v".
    * 
-	 * @return \bbn\file\image 
+	 * @return bbn\file\image
 	 */
   public function flip($mode='v'){
 		if ( $this->test() )
@@ -681,7 +682,7 @@ public static function jpg2pdf($jpg, $pdf){
    *
    * @param int $q The quality level (0-100)
    * @param int $comp The compression type
-   * @return \bbn\file\image
+   * @return bbn\file\image
    */
   public function quality(int $q = 80, int $comp = 8){
     if ( $this->test() &&
@@ -701,14 +702,14 @@ public static function jpg2pdf($jpg, $pdf){
    * Adjusts the image brightness.
    * 
    * <code>
-   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img = new bbn\file\image("C:\test\img.jpg");
    * $img->brightness(); //Increases the brightness
    * $img->brightness("-"); //Reduces the brightness
    * </code>
    * 
    * @param string $val The value "+" (default) increases the brightness, the value ("-") reduces it.
    *  
-	 * @return \bbn\file\image 
+	 * @return bbn\file\image
 	 */
 	public function brightness($val='+')
 	{
@@ -738,14 +739,14 @@ public static function jpg2pdf($jpg, $pdf){
    *  Adjusts the image contrast.
    * 
    * <code>
-   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img = new bbn\file\image("C:\test\img.jpg");
    * $img->contrast(); //Increases the contrast
    * $img->contrast(); //Reduces the contrast
    * </code>
    * 
    * @param string $val The value "+" (default), increases the contrast, the value ("-") reduces it.
    * 
-	 * @return \bbn\file\image
+	 * @return bbn\file\image
 	 */
 	public function contrast($val='+')
 	{
@@ -775,11 +776,11 @@ public static function jpg2pdf($jpg, $pdf){
    * Converts the color image to grayscale.
    * 
    * <code>
-   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img = new bbn\file\image("C:\test\img.jpg");
    * $img->grayscale();
    * </code>
    * 
-	 * @return \bbn\file\image
+	 * @return bbn\file\image
 	 */
 	public function grayscale()
 	{
@@ -807,11 +808,11 @@ public static function jpg2pdf($jpg, $pdf){
    * Converts the color image to negative.
    * 
    * <code>
-   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img = new bbn\file\image("C:\test\img.jpg");
    * $img->negate();
    * </code>
    *  
-	 * @return \bbn\file\image
+	 * @return bbn\file\image
 	 */
 	public function negate()
 	{
@@ -839,11 +840,11 @@ public static function jpg2pdf($jpg, $pdf){
    * Converts the color image to polaroid filter.
    * 
    * <code>
-   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img = new bbn\file\image("C:\test\img.jpg");
    * $img->polaroid();
    * </code>
    * 
-	 * @return \bbn\file\image
+	 * @return bbn\file\image
    * 
    * @todo Transparency of png files.
 	 */
@@ -867,14 +868,14 @@ public static function jpg2pdf($jpg, $pdf){
 			$h = $this->get_height();
 			$d = $w >= $h ? 'w' : 'h';
       $res = [];
-      if ( \bbn\str::is_integer($sizes) ){
+      if ( bbn\str::is_integer($sizes) ){
         $sizes = [[$sizes, false]];
       }
 			if ( $$d / ($d === 'w' ? $h : $w) < 5 ){
 				$mask = ($dest === '.' ? '' : $dest.'/').$this->title.$mask.'.'.$this->ext;
         //die(var_dump($mask));
 				foreach ( $sizes as $s ){
-          if ( \bbn\str::is_integer($s) ){
+          if ( bbn\str::is_integer($s) ){
             $s = [$s, false];
           }
           if (
@@ -909,7 +910,7 @@ public static function jpg2pdf($jpg, $pdf){
    * Returns the image as string.
    * 
    * <code>
-   * $img = new \bbn\file\image("C:\test\img.jpg");
+   * $img = new bbn\file\image("C:\test\img.jpg");
    * $img->toString();
    * </code>
    * 

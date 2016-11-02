@@ -1,10 +1,8 @@
 <?php
 /**
- * @package bbn\db
+ * @package db
  */
 namespace bbn;
-
-use \bbn\str;
 /**
  * Database Class
  *
@@ -35,7 +33,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
     $parser,
     /**
      * A PHPSQLCreator object
-     * @var \bbn\db\PHPSQLCreator
+     * @var db\PHPSQLCreator
      */
     $creator,
     /**
@@ -80,7 +78,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
 
   protected
     /**
-     * @var \bbn\db\languages\mysql Can be other driver
+     * @var db\languages\mysql Can be other driver
      */
     $language = false,
     /**
@@ -150,7 +148,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
      */
     $current,
     /**
-     * The information that will be accessed by \bbn\db\query as the current statement's options
+     * The information that will be accessed by db\query as the current statement's options
      * @var array
      */
     $last_params = ['sequences' => false, 'values' => false];
@@ -337,7 +335,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       array_push($msg, self::$line);
       array_push($msg, 'Parameters');
       array_push($msg, self::$line);
-      array_push($msg, \bbn\x::get_dump($this->last_params['values']));
+      array_push($msg, x::get_dump($this->last_params['values']));
       array_push($msg, self::$line);
     }
     $this->log(implode(PHP_EOL, $msg));
@@ -387,7 +385,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       if ( isset($cfg['on_error']) ){
         $this->on_error = $cfg['on_error'];
       }
-      $this->cacher = \bbn\cache::get_engine();
+      $this->cacher = cache::get_engine();
       if ( $cfg = $this->language->get_connection($cfg) ){
         $this->qte = $this->language->qte;
         try{
@@ -405,7 +403,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
           $this->enable_keys();
         }
         catch ( \PDOException $e ){
-          \bbn\x::log("Impossible to create the connection for ".$cfg['engine']."/".$cfg['db'], 'db');
+          die(var_dump($e));
+          x::log("Impossible to create the connection for ".$cfg['engine']."/".$cfg['db'], 'db');
           die();
         }
       }
@@ -440,7 +439,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   public function log($st){
     $args = func_get_args();
     foreach ( $args as $a ){
-      \bbn\x::log($a, 'db');
+      x::log($a, 'db');
     }
   }
 
@@ -473,7 +472,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   /**
    * Delete a specific item from the cache
    *
-   * @return \bbn\db
+   * @return db
    */
   public function clear_cache($item, $mode)
   {
@@ -487,7 +486,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   /**
    * @todo clear_all_cache() with $this->language->get_databases etc...
    *
-   * @return \bbn\db
+   * @return db
    */
   public function clear_all_cache()
   {
@@ -513,7 +512,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public function start_fancy_stuff()
   {
-    $this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, ['\bbn\db\query',[$this]]);
+    $this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, ['\\bbn\\db\\query',[$this]]);
     $this->fancy = 1;
   }
 
@@ -558,8 +557,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
   {
     if ( is_string($value) ){
       return str_replace('%', '\\%', $esc === '"' ?
-        \bbn\str::escape_dquotes($value) :
-        \bbn\str::escape_squotes($value));
+        str::escape_dquotes($value) :
+        str::escape_squotes($value));
     }
     return $value;
   }
@@ -568,13 +567,13 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * Changes the value of last_insert_id (used by history)
    *
    * @param int $id The last ID inserted
-   * @return \bbn\db
+   * @return db
    */
   public function set_last_insert_id($id='')
   {
     if ( $id === '' ){
       $id = $this->lastInsertId();
-      if ( is_string($id) && \bbn\str::is_integer($id) ){
+      if ( is_string($id) && str::is_integer($id) ){
         $id = (int)$id;
       }
     }
@@ -825,7 +824,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * Use the given database
    *
    * @param string $db
-   * @return \bbn\db
+   * @return db
    */
   public function change($db)
   {
@@ -838,7 +837,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   /**
    * Disable foreign keys constraints
    *
-   * @return \bbn\db
+   * @return db
    */
   public function disable_keys()
   {
@@ -849,7 +848,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   /**
    * Enable foreign keys constraints
    *
-   * @return \bbn\db
+   * @return db
    */
   public function enable_keys()
   {
@@ -912,10 +911,9 @@ class db extends \PDO implements db\actions, db\api, db\engines
   /**
    * Executes a writing statement and returns the number of affected rows or returns a query object for the reading statement
    *
-   * @return int|\bbn\db\query
+   * @return int|db\query
    */
-  public function query()
-  {
+  public function query(){
     if ( $this->check() ){
       $args = func_get_args();
       if ( !$this->fancy ){

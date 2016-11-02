@@ -1,15 +1,16 @@
 <?php
 
 namespace bbn\mvc;
+use bbn;
 
 class controller implements api{
 
-	use common;
+  use common;
 
   private
     /**
      * The MVC class from which the controller is called
-     * @var \bbn\mvc
+     * @var mvc
      */
     $mvc,
     /**
@@ -52,7 +53,7 @@ class controller implements api{
   public
     /**
      * The db connection if accepted by the mvc class
-     * @var null|\bbn\db
+     * @var null|db
      */
     $db,
     /**
@@ -100,11 +101,11 @@ class controller implements api{
 	/**
 	 * This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).
 	 *
-	 * @param object | string $db The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books/466565 or html/home)</em>
-	 * @param string | object $parent The parent controller</em>
-	 * @return bool
+	 * @param bbn\mvc $mvc
+	 * @param array $files
+   * @param array|boolean $data
 	 */
-	public function __construct(\bbn\mvc $mvc, array $files, $data = false){
+	public function __construct(bbn\mvc $mvc, array $files, $data = false){
     $this->mvc = $mvc;
     $this->reset($files, $data);
 	}
@@ -249,9 +250,9 @@ class controller implements api{
 			$model = $this->data;
 		}
 		if ( is_string($view) ) {
-			return is_array($model) ? \bbn\tpl::render($view, $model) : $view;
+			return is_array($model) ? bbn\tpl::render($view, $model) : $view;
 		}
-		die(\bbn\x::hdump("Problem with the template", $view, $this->path, $this->mode));
+		die(bbn\x::hdump("Problem with the template", $view, $this->path, $this->mode));
 	}
 
 	/**
@@ -346,7 +347,7 @@ class controller implements api{
 			foreach ( $this->checkers as $appui_checker_file ){
 				// If a checker file returns false, the controller is not processed
 				// The checker file can define data and inc that can be used in the subsequent controller
-        if ( \bbn\mvc::include_controller($appui_checker_file, $this, true) === false ){
+        if ( bbn\mvc::include_controller($appui_checker_file, $this, true) === false ){
 					$ok = false;
 					break;
 				}
@@ -363,7 +364,7 @@ class controller implements api{
       if ( !$ok ){
         return false;
       }
-      $output = \bbn\mvc::include_controller($this->file, $this);
+      $output = bbn\mvc::include_controller($this->file, $this);
       // If rerouted during the controller
       if ( $this->is_rerouted ){
         $this->is_rerouted = false;
@@ -543,12 +544,12 @@ class controller implements api{
 	}
 
 	public function js_data($data){
-		if ( \bbn\x::is_assoc($data) ){
+		if ( bbn\x::is_assoc($data) ){
 			if ( !isset($this->obj->data) ){
 				$this->obj->data = $data;
 			}
-			else if ( \bbn\x::is_assoc($this->obj->data) ){
-				$this->obj->data = \bbn\x::merge_arrays($this->obj->data, $data);
+			else if ( bbn\x::is_assoc($this->obj->data) ){
+				$this->obj->data = bbn\x::merge_arrays($this->obj->data, $data);
 			}
 		}
 		return $this;
@@ -648,7 +649,7 @@ class controller implements api{
 
 	public function combo($title = '', $data=[]){
 		echo $this
-      ->add_data($this->get_model(\bbn\x::merge_arrays($this->post, $this->data)))
+      ->add_data($this->get_model(bbn\x::merge_arrays($this->post, $this->data)))
       ->get_less($this->path, false);
 		if ( $new_title = $this->retrieve_var($title) ){
 			$this->set_title($new_title);
@@ -740,7 +741,7 @@ class controller implements api{
     }
 		$m = $this->mvc->get_model($path, $data, $this);
 		if ( is_object($m) ){
-			$m = \bbn\x::to_array($m);
+			$m = bbn\x::to_array($m);
 		}
     if ( !is_array($m) ){
 			if ( $die ){
@@ -825,7 +826,7 @@ class controller implements api{
 	public function get_object_model(){
     $m = call_user_func_array([$this, 'get_model'], func_get_args());
     if ( is_array($m) ){
-      return \bbn\x::to_object($m);
+      return bbn\x::to_object($m);
     }
   }
 

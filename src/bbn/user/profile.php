@@ -1,8 +1,9 @@
 <?php
 /**
- * @package bbn\user
+ * @package user
  */
 namespace bbn\user;
+use bbn;
 /**
  * A user authentication Class
  *
@@ -31,7 +32,7 @@ class profile
     ];
 
 	protected
-    /** @var \bbn\db */
+    /** @var db */
     $db,
     /** @var array */
     $permissions = [],
@@ -45,19 +46,19 @@ class profile
 
   /**
    * connection constructor.
-   * @param \bbn\db $db
+   * @param db $db
    * @param session $session
    * @param array $cfg
    * @param string $credentials
    */
-  public function __construct(\bbn\db $db, connection $user, array $cfg = []){
+  public function __construct(bbn\db $db, bbn\user $user, array $cfg = []){
     if ( $tmp = $user->get_profile() ){
       $this->id = $tmp['id'];
       $this->id_group = $tmp['id_group'];
       $this->id_user = $tmp['id_user'];
       $this->db = $db;
       $this->user = $user;
-      $this->cfg = \bbn\x::merge_arrays(self::$_defaults, $cfg);
+      $this->cfg = bbn\x::merge_arrays(self::$_defaults, $cfg);
     }
     return $this;
 	}

@@ -1,8 +1,9 @@
 <?php
 /**
- * @package bbn\str
+ * @package str
  */
 namespace bbn\str;
+use bbn;
 
 define("ERR_OPEN_MAP_FILE","ERR_OPEN_MAP_FILE");
 

@@ -1,8 +1,9 @@
 <?php
 /**
- * @package bbn\html
+ * @package html
  */
 namespace bbn\html;
+use bbn;
 
 /**
  * This class generates html form elements with a predefined configuration
@@ -82,13 +83,13 @@ class builder
       $cfg['attr'] = [];
     }
     if ( !isset($cfg['attr']['id']) ){
-      $cfg['attr']['id'] = \bbn\str::genpwd(30, 15);
+      $cfg['attr']['id'] = bbn\str::genpwd(30, 15);
     }
   }
 
   public static function specs($cat, $item)
   {
-    if ( \bbn\str::check_name($cat, $item) ){
+    if ( bbn\str::check_name($cat, $item) ){
       if ( !isset(self::$specs[$cat]) &&
               is_dir(__DIR__.'/specs/'.$cat) ){
         self::$specs[$cat] = [];
@@ -121,7 +122,7 @@ class builder
 	{
 		if ( is_array($cfg) ){
       $this->parameters = $cfg;
-      $this->_defaults = \bbn\x::merge_arrays($this->_defaults, $cfg);
+      $this->_defaults = bbn\x::merge_arrays($this->_defaults, $cfg);
 		}
 		$this->reset();
 	}
@@ -161,9 +162,9 @@ class builder
 	public function export_config()
 	{
     if ( isset($this->_root_element) ){
-      return \bbn\str::make_readable($this->_root_element->get_config());
+      return bbn\str::make_readable($this->_root_element->get_config());
     }
-		return \bbn\str::make_readable($this->_cfg);
+		return bbn\str::make_readable($this->_cfg);
 	}
 
   public function save_config($cfg)
@@ -201,7 +202,7 @@ class builder
 	/**
 	 * Change an option in the current configuration - Chainable
 	 * @param array|string $opt Either an array with the param name and value, or 2 strings in the same order
-	 * @return \bbn\html\builder
+	 * @return bbn\html\builder
 	 */
 	public function option($opt)
 	{
@@ -250,7 +251,7 @@ class builder
     $this->record('label_input', $cfg);
     $ele = $this->input($cfg);
     $label = $this->label($ele->get_config());
-    $container = new \bbn\html\element([
+    $container = new bbn\html\element([
         'tag' => 'div',
         'attr' => [
             'class' => self::$field_class
@@ -267,7 +268,7 @@ class builder
   {
     $this->record('central_input', $cfg);
     $ele = $this->input($cfg);
-    $container = new \bbn\html\element([
+    $container = new bbn\html\element([
         'tag' => 'div',
         'attr' => [
             'class' => self::$space_class.' appui-c'
@@ -281,9 +282,9 @@ class builder
   public function fake_label(array $cfg, $force=false)
   {
     $this->record('fake_label', $cfg);
-    $ele = new \bbn\html\element($cfg);
+    $ele = new bbn\html\element($cfg);
     $label = $this->label($cfg);
-    $container = new \bbn\html\element([
+    $container = new bbn\html\element([
         'tag' => 'div',
         'attr' => [
             'class' => self::$field_class
@@ -315,7 +316,7 @@ class builder
     if ( !isset($cfg['text']) && !isset($cfg['content']) ){
       $cfg['content'] = '&nbsp;';
     }
-    $space = new \bbn\html\element($cfg);
+    $space = new bbn\html\element($cfg);
     $this->append($space);
     return $this->_chainable && !$force ? $this : $space;
   }
@@ -337,7 +338,7 @@ class builder
   public function form($cfg)
   {
     $this->record('form', $cfg);
-    $e = new \bbn\html\form($cfg, $force=false);
+    $e = new bbn\html\form($cfg, $force=false);
     $this->_root_element =& $e;
     $this->_current_element =& $e;
     return $this->_chainable && !$force ? $this : $this->_root_element;
@@ -353,22 +354,22 @@ class builder
         $legend_txt = $title['legend'];
         unset($title['legend']);
       }
-      $fieldset = new \bbn\html\element($title);
+      $fieldset = new bbn\html\element($title);
       $fieldset->add_class("appui-section");
 
       if ( isset($legend_txt) ){
-        $legend = new \bbn\html\element('legend');
+        $legend = new bbn\html\element('legend');
         $legend->text($legend_txt);
         $fieldset->append($legend);
       }
     }
     else{
 
-      $fieldset = new \bbn\html\element('fieldset');
+      $fieldset = new bbn\html\element('fieldset');
       $fieldset->add_class("appui-section");
 
       if ( !is_null($title) ){
-        $legend = new \bbn\html\element('legend');
+        $legend = new bbn\html\element('legend');
         $legend->text($title);
         $fieldset->append($legend);
       }
@@ -428,7 +429,7 @@ class builder
               [
                   'tag' => 'input',
                   'attr' => [
-                      'id' => \bbn\str::genpwd(),
+                      'id' => bbn\str::genpwd(),
                       'type' => 'checkbox',
                   ],
                   'events' => [
@@ -466,7 +467,7 @@ class builder
         $label['attr']['for'] = $cfg['attr']['id'];
       }
     }
-    return new \bbn\html\element($label);
+    return new bbn\html\element($label);
   }
   
 	/**
@@ -480,7 +481,7 @@ class builder
       
       self::give_id($cfg);
       if ( isset($cfg['field']) ){
-        $cfg = \bbn\x::merge_arrays(self::specs('fields', $cfg['field']), $cfg);
+        $cfg = bbn\x::merge_arrays(self::specs('fields', $cfg['field']), $cfg);
       }
       
       /*
@@ -578,7 +579,7 @@ class builder
           }
         }
       }
-      $t = new \bbn\html\input($cfg);
+      $t = new bbn\html\input($cfg);
       return $t;
 		}
 		return false;
@@ -602,7 +603,7 @@ class builder
     }
     self::give_id($cfg);
     $cfg['tag'] = 'button';
-    $e = new \bbn\html\element($cfg);
+    $e = new bbn\html\element($cfg);
     return $this->_chainable && !$force ? $this : $e;
   }
 }		

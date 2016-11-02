@@ -1,8 +1,9 @@
 <?php
 /**
- * @package bbn\str
+ * @package str
  */
 namespace bbn\str;
+use bbn;
 /**
  * A Class for hashes
  *

@@ -7,6 +7,7 @@
  */
 
 namespace bbn\mvc;
+use bbn;
 
 
 class output {
@@ -60,7 +61,7 @@ class output {
     if ( empty($this->obj->content) || ( ($this->mode === 'file') || ($this->mode === 'image') ) ) {
       if (!empty($this->obj->file)) {
         if (is_string($this->obj->file) && is_file($this->obj->file)) {
-          $this->obj->file = new \bbn\file\file($this->obj->file);
+          $this->obj->file = new bbn\file($this->obj->file);
         }
         if (is_object($this->obj->file) &&
           method_exists($this->obj->file, 'download') &&
@@ -72,7 +73,7 @@ class output {
       }
       else if (!empty($this->obj->img)) {
         if (is_string($this->obj->img) && is_file($this->obj->img)) {
-          $this->obj->img = new \bbn\file\image($this->obj->img);
+          $this->obj->img = new bbn\file\image($this->obj->img);
         }
         if (is_object($this->obj->img) &&
           method_exists($this->obj->img, 'display') &&

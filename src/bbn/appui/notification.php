@@ -7,9 +7,10 @@
  */
 
 namespace bbn\appui;
+use bbn;
 
 
-class notification extends \bbn\objdb
+class notification extends bbn\models\cls\db
 {
   protected static
     $t = 'bbn_notifications',
@@ -49,7 +50,7 @@ class notification extends \bbn\objdb
 
   public function consult($id_user = false){
     $self = false;
-    if ( !$id_user && ($user = \bbn\user\connection::get_user()) ){
+    if ( !$id_user && ($user = bbn\user::get_instance()) ){
       $id_user = $user->get_id();
       $self = 1;
     }
@@ -88,7 +89,7 @@ class notification extends \bbn\objdb
 
   public function get_list($id_user = false, $limit = 100, $start = 0){
     $self = false;
-    if ( !$id_user && ($user = \bbn\user\connection::get_user()) ){
+    if ( !$id_user && ($user = bbn\user::get_instance()) ){
       $id_user = $user->get_id();
       $self = 1;
     }
@@ -120,7 +121,7 @@ class notification extends \bbn\objdb
   }
 
   public function read($id_user, $id){
-    if ( !$id_user && ($user = \bbn\user\connection::get_user()) ){
+    if ( !$id_user && ($user = bbn\user::get_instance()) ){
       $id_user = $user->get_id();
     }
     if ( $id_user ){

@@ -34,7 +34,7 @@ if ( !defined("BBN_APP_PATH") ){
 	die("BBN_APP_PATH must be defined");
 }
 
-class mvc implements \bbn\mvc\api{
+class mvc implements mvc\api{
 
 	use mvc\common;
 
@@ -53,19 +53,19 @@ class mvc implements \bbn\mvc\api{
 	private
     /**
      * The current controller
-     * @var null|\bbn\mvc\controller
+     * @var null|mvc\controller
      */
     $controller,
     /**
-     * @var \bbn\db Database object
+     * @var db Database object
      */
     $db,
     /**
-     * @var \bbn\mvc\environment Environment object
+     * @var mvc\environment Environment object
      */
     $env,
     /**
-     * @var \bbn\mvc\router Database object
+     * @var mvc\router Database object
      */
     $router,
     /**
@@ -121,7 +121,7 @@ class mvc implements \bbn\mvc\api{
       $d = include($bbn_inc_file);
       ob_end_clean();
       if ( is_object($d) ){
-        $d = \bbn\x::to_array($d);
+        $d = x::to_array($d);
       }
       if ( !is_array($d) ){
         return false;
@@ -176,7 +176,7 @@ class mvc implements \bbn\mvc\api{
    * @param string $p The full path to the view file
    * @return string The content of the view
    */
-  private static function add_view($path, $mode, \bbn\mvc\view $view)
+  private static function add_view($path, $mode, mvc\view $view)
   {
     if ( !isset(self::$loaded_views[$mode][$path]) ){
       self::$loaded_views[$mode][$path] = $view;
@@ -226,8 +226,8 @@ class mvc implements \bbn\mvc\api{
 	 * @param array $routes An array of routes usually defined in /_appui/current/config/routes.php</em>
 	 */
 	public function __construct($db = null, $routes = []){
-    $this->env = new \bbn\mvc\environment();
-		if ( is_object($db) && ( $class = get_class($db) ) && ( $class === 'PDO' || strpos($class, 'bbn\\db') !== false ) ){
+    $this->env = new mvc\environment();
+		if ( is_object($db) && ( $class = get_class($db) ) && ( $class === 'PDO' || strpos($class, '\db') !== false ) ){
 			$this->db = $db;
 		}
 		else{
@@ -243,7 +243,7 @@ class mvc implements \bbn\mvc\api{
         $routes['root'][$r['url']] = $r['path'];
       }
     }
-    $this->router = new \bbn\mvc\router($this, $routes);
+    $this->router = new mvc\router($this, $routes);
     $this->route();
 	}
 
@@ -274,7 +274,7 @@ class mvc implements \bbn\mvc\api{
   }
 
   /*public function add_routes(array $routes){
-    $this->routes = \bbn\x::merge_arrays($this->routes, $routes);
+    $this->routes = x::merge_arrays($this->routes, $routes);
     return $this;
   }*/
 
@@ -438,7 +438,7 @@ class mvc implements \bbn\mvc\api{
         die("No info in MVC");
       }
       if ( !$this->controller ){
-        $this->controller = new \bbn\mvc\controller($this, $this->info, $this->data, $this->obj);
+        $this->controller = new mvc\controller($this, $this->info, $this->data, $this->obj);
       }
       $this->controller->process();
     }
@@ -451,12 +451,12 @@ class mvc implements \bbn\mvc\api{
         die(isset($obj->content) ? $obj->content : "no output");
       }
       if ( is_array($obj) ){
-        $obj = \bbn\x::to_object($obj);
+        $obj = x::to_object($obj);
       }
 			if ( (gettype($obj) !== 'object') || (get_class($obj) !== 'stdClass') ){
-				die(\bbn\x::dump("Unexpected output: ".gettype($obj)));
+				die(x::dump("Unexpected output: ".gettype($obj)));
 			}
-      $output = new \bbn\mvc\output($obj, $this->get_mode());
+      $output = new mvc\output($obj, $this->get_mode());
       $output->run();
     }
   }

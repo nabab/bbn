@@ -3,6 +3,7 @@
  * 
  */
 namespace bbn\api\kendo;
+use bbn;
 
 class tree // extends object
 {
@@ -150,7 +151,7 @@ class tree // extends object
     ];
   }
   
-  public function set_detail(\bbn\api\kendo\grid $grid){
+  public function set_detail(bbn\api\kendo\grid $grid){
     $g = new grid($grid);
     $this->grid->detailInit($g->grid);
   }

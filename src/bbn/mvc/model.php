@@ -1,5 +1,6 @@
 <?php
 namespace bbn\mvc;
+use bbn;
 /**
  * Model View Controller Class
  *
@@ -19,7 +20,7 @@ namespace bbn\mvc;
  * @todo Look into the check function and divide it
  */
 
-class model extends \bbn\objcache{
+class model extends bbn\models\cls\cache{
 
 	use common;
 
@@ -43,7 +44,7 @@ class model extends \bbn\objcache{
   public
     /**
      * The database connection instance
-     * @var null|\bbn\db
+     * @var null|db
      */
     $db,
     /**
@@ -59,14 +60,14 @@ class model extends \bbn\objcache{
 
 	/**
 	 * Models are always recreated and reincluded, even if they have from the same path
-   * They are all created from \bbn\mvc::get_model
+   * They are all created from bbn\mvc::get_model
 	 *
    * @param array  $info The full path to the model's file
-	 * @param null|\bbn\db $db The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books/466565 or html/home)</em>
+	 * @param null|db $db The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books/466565 or html/home)</em>
 	 * @param string | object $parent The parent controller</em>
 	 * @return bool
 	 */
-	public function __construct(\bbn\db $db=null, array $info, controller $ctrl){
+	public function __construct(bbn\db $db=null, array $info, controller $ctrl){
 		if ( isset($info['path']) && $this->check_path($info['path']) ){
       parent::__construct($db);
       $this->ctrl = $ctrl;
@@ -86,7 +87,7 @@ class model extends \bbn\objcache{
       $data = [];
     }
     $this->data = $data;
-    return \bbn\mvc::include_model($this->file, $this);
+    return bbn\mvc::include_model($this->file, $this);
   }
 
   public function get_content(){
