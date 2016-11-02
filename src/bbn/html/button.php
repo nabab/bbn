@@ -16,7 +16,7 @@ use bbn;
  * @version 0.4
  * @todo ???
  */
-class button extends bbn\element
+class button extends element
 {
   protected
           /** @var null|string The input's label/title */

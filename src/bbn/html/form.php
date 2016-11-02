@@ -17,7 +17,7 @@ use bbn;
  * @version 0.4
 */
 
-class form extends bbn\element
+class form extends element
 {
 
   public 

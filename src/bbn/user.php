@@ -144,7 +144,7 @@ class user extends models\cls\basic
     $just_login = false;
 
 	protected
-    /** @var session */
+    /** @var user\session */
     $session = null,
     /** @var int */
     $error = null,
@@ -185,7 +185,7 @@ class user extends models\cls\basic
 
   /**
    * Returns the latest created connection, ie the current user's object
-   * @return connection
+   * @return $this
    */
   public static function get_user(){
     return self::get_instance();
@@ -193,22 +193,20 @@ class user extends models\cls\basic
 
   /**
    * Generates a random long string (16-32 chars)
-	 * @return string
-	 */
-  public static function make_fingerprint()
-  {
+   * @return string
+   */
+  public static function make_fingerprint(){
     return str::genpwd(32, 16);
   }
 
-	/**
+  /**
    * Creates a magic string which will be used for hotlinks
    * The hash is stored in the database
    * The key is sent to the user
    *
 	 * @return array
 	 */
-  public static function make_magic_string()
-  {
+  public static function make_magic_string(){
     $key = self::make_fingerprint();
     return [
       'key' => $key,
@@ -222,14 +220,13 @@ class user extends models\cls\basic
    * @param string $hash
    * @return bool
    */
-  public static function is_magic_string($key, $hash)
-  {
+  public static function is_magic_string($key, $hash){
     return ( hash('sha256', $key) === $hash );
   }
 
   /**
    * initialize (_init_session) and saves session WTF?
-   * @return connection
+   * @return $this
    */
   private function _login($id){
     if ( $this->check() && $id ){
@@ -237,8 +234,6 @@ class user extends models\cls\basic
         ->_authenticate($id)
         ->_user_info()
         ->_init_dir(true)
-        ->save_cfg()
-        ->_init_user_session()
         ->save_session();
     }
     return $this;
@@ -250,7 +245,7 @@ class user extends models\cls\basic
    *
    * @param array $d The user's table data
    *
-   * @return connection
+   * @return $this
    */
   private function _user_info(){
     if ( $this->get_id() ){
@@ -268,21 +263,14 @@ class user extends models\cls\basic
       ){
         $r = [];
         foreach ( $d as $key => $val ){
-          if ( ($key !== 'id') && ($key !== 'cfg') && ($key !== 'auth') && ($key !== 'pass') ){
-            $this->$key = $val;
-            $r[$key] = $val;
-          }
+          $this->$key = $val;
+          $r[$key] = $key === $this->fields['cfg'] ? json_decode($val, true) : $val;
         }
-        $this->session->set($r, 'info');
-        if ( !empty($d['cfg']) ){
-          $d['cfg'] = json_decode($d['cfg'], true);
-        }
-        $this->cfg = $d['cfg'] ?: ['log_tries' => 0];
-        $this->set_session('id', $this->id);
-        $this->set_session('cfg', $this->cfg);
+        $this->cfg = $r['cfg'] ?: [];
         // Group
-        $this->id_group = $d['id_group'];
-        $this->set_session('id_group', $this->id_group);
+        $this->id_group = $r['id_group'];
+        $this->session->set($r, self::$un);
+        $this->save_session();
       }
     }
     return $this;
@@ -293,7 +281,7 @@ class user extends models\cls\basic
    * The session's table data can be sent as argument if it has already been fetched
    *
    * @param mixed $d The session's table data or its ID
-   * @return connection
+   * @return $this
    */
   private function _sess_info($id_session = null){
     if ( !is_int($id_session) ){
@@ -351,7 +339,7 @@ class user extends models\cls\basic
   /**
    * Retrieves all user info from its session and populates the object
    * @param null|string $token
-   * @return connection
+   * @return $this
    */
   private function _retrieve_session($token=null){
     if ( !$this->id ){
@@ -386,11 +374,12 @@ class user extends models\cls\basic
 
   /**
    * Sets the user's session for the first time and creates the session's DB row
-   * @return connection
+   * @return $this
    */
   private function _init_session(){
 
     // Getting or creating the session is it doesn't exist yet
+    /** @var user\session session */
     $this->session = user\session::get_instance();
     if ( !$this->session ){
       $this->session = new user\session();
@@ -450,7 +439,7 @@ class user extends models\cls\basic
 
   /**
    * Sets the user's session for the first time and creates the session's DB row
-   * @return connection
+   * @return $this
    */
   private function _init_user_session(){
     /** @todo Illogical?! */
@@ -466,7 +455,7 @@ class user extends models\cls\basic
   /**
    * Sets the "session" part of the session
    * @param mixed $attr
-   * @return connection $this
+   * @return $this $this
    */
   private function _set_session($attr){
     if ( $this->session->has(self::$sn) ){
@@ -560,7 +549,7 @@ class user extends models\cls\basic
   /**
    * Sets the class configuration as defined in $this->_defaults
    * @param array $cfg
-   * @return connection
+   * @return $this
    */
   private function _init_config(array $cfg = []){
     $this->class_cfg = x::merge_arrays(self::$_defaults, $cfg);
@@ -579,7 +568,7 @@ class user extends models\cls\basic
 
   /**
    * If BBN_DATA_PATH is defined creates a directory and removes temp files
-   * @return connection $this
+   * @return $this $this
    */
   private function _init_dir($create = false){
     if ( defined('BBN_DATA_PATH') && $this->get_id() ){
@@ -597,7 +586,7 @@ class user extends models\cls\basic
   /**
    * Sets a user as authenticated ($this->auth = 1)
    * @param int $id
-   * @return connection
+   * @return $this
    */
   private function _authenticate($id){
     if ( $this->check() && $id ){
@@ -661,12 +650,12 @@ class user extends models\cls\basic
 
   /**
    * Increment the num_attempt variable
-   * @return connection
+   * @return $this
    */
   protected function record_attempt(){
     $this->cfg['num_attempts'] = isset($this->cfg['num_attempts']) ?
       $this->cfg['num_attempts']+1 : 1;
-    $this->set_session(['num_attempts' => $this->cfg['num_attempts']], "user");
+    $this->_set_session('num_attempts', $this->cfg['num_attempts']);
     $this->save_session();
     return $this;
   }
@@ -820,7 +809,7 @@ class user extends models\cls\basic
       if ( !isset($this->permissions['admin']) ){
         $this->permissions['admin'] = 1;
       }
-      $this->session->set($this->permissions, self::$un, 'permissions');
+      $this->set_session('permissions', $this->permissions);
       return 1;
     }
     return false;
@@ -868,7 +857,7 @@ class user extends models\cls\basic
    */
   public function update_info(array $d)
   {
-    if ( $this->check() ){
+    if ( $this->check_session() ){
       $update = [];
       foreach ( $d as $key => $val ){
         if (
@@ -901,7 +890,7 @@ class user extends models\cls\basic
 
 	/**
    * Sets the given attribute(s) in the user's session
-	 * @return connection
+	 * @return $this
 	 */
   public function set_session($attr){
     if ( $this->session->has(self::$un) ){
@@ -939,7 +928,7 @@ class user extends models\cls\basic
 
   /**
    * Saves the session config in the database
-	 * @return connection
+	 * @return $this
 	 */
   public function save_session(){
     $p =& $this->class_cfg['arch']['sessions'];
@@ -964,7 +953,7 @@ class user extends models\cls\basic
   }
 
   /**
-	 * @return connection
+	 * @return $this
 	 */
   public function close_session() {
     $p =& $this->class_cfg['arch']['sessions'];
@@ -981,7 +970,7 @@ class user extends models\cls\basic
     $this->auth = false;
     $this->id = null;
     $this->sess_cfg = null;
-    $this->session->set([], self::$un);
+    $this->session->set([]);
     return $this;
   }
 
@@ -1053,7 +1042,7 @@ class user extends models\cls\basic
   }
 
   /**
-	 * @return connection
+	 * @return $this
 	 */
 	public function refresh_info()
 	{
@@ -1078,11 +1067,10 @@ class user extends models\cls\basic
 	 * @return bool
 	 */
 	public function check_session($token=null){
-    // If this->id is set it means we've already looked it up
-       // x::hdump($this->sess_cfg, $this->has_session('fingerprint'), $this->get_print($this->get_session('fingerprint')), $this->sess_cfg['fingerprint']);
-    //die(x::dump($this->id));
-		$this->_retrieve_session($token);
-		return $this->auth;
+	  if ( $this->check() ){
+      $this->_retrieve_session($token);
+      return $this->auth;
+    }
 	}
 
   /**
@@ -1133,7 +1121,7 @@ class user extends models\cls\basic
 	 */
   public function is_admin()
   {
-    return (isset($this->permissions["admin"]) && $this->permissions["admin"]) || $this->session->get('info', 'admin');
+    return $this->get_session('admin') ? true : false;
   }
 
   public function get_manager($mail = false){
