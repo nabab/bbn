@@ -1,6 +1,6 @@
 {
   "name": "bbn/bbn",
-  "description": "Light MVC framework for PHP 5.4",
+  "description": "Light MVC framework for PHP",
   "keywords": ["database","mvc"],
   "homepage": "https://github.com/nabab/bbn",
   "license": "MIT",
@@ -13,7 +13,7 @@
     }
   ],
   "require": {
-    "php": ">=5.4.0",
+    "php": ">=7.0",
     "zordius/lightncandy": "dev-master",
     "greenlion/php-sql-parser": "dev-trunk",
     "mpdf/mpdf": "dev-master",
