@@ -955,7 +955,7 @@ class user extends models\cls\basic
   /**
 	 * @return $this
 	 */
-  public function close_session() {
+  public function close_session($with_session = false) {
     $p =& $this->class_cfg['arch']['sessions'];
     $this->db->update($this->class_cfg['tables']['sessions'], [
         $p['ip_address'] => $this->ip_address,
@@ -970,7 +970,12 @@ class user extends models\cls\basic
     $this->auth = false;
     $this->id = null;
     $this->sess_cfg = null;
-    $this->session->set([]);
+    if ( $with_session ){
+      $this->session->set([]);
+    }
+    else{
+      $this->session->set([], self::$un);
+    }
     return $this;
   }
 

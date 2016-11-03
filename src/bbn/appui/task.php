@@ -539,6 +539,7 @@ class task {
   }
 
   private function add_note($type, $value, $title){
+    return [];
 
   }
 

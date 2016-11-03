@@ -60,10 +60,12 @@ class date
     return self::validate($date, 'Y-m-d H:i:s') || self::validate($date, 'Y-m-d');
   }
 
-	/**
-	 * @return void 
-	 */
-	public static function format($date='', $mode='')
+  /**
+   * @param string $date
+   * @param string $mode
+   * @return false|int|string
+   */
+  public static function format($date='', $mode='')
 	{
 		/* Formatting: idate is the timestamp, and date[0] and date[1] the SQL date and time */
 		if ( empty($date) ){

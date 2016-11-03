@@ -300,7 +300,7 @@ class query extends \PDOStatement implements actions
 	}
 
 	/**
-	 * @return void 
+	 * @return array|boolean
 	 */
 	public function get_row()
 	{

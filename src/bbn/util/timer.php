@@ -62,7 +62,7 @@ class timer
 	/**
    * Stops a timer for a given key
    * 
-	 * @return void 
+	 * @return int
 	 */
   public function stop($key='default')
   {

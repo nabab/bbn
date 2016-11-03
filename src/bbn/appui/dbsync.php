@@ -94,7 +94,7 @@ class dbsync
 
   public static function first_call(){
     if ( is_array(self::$dbs) ){
-      self::$dbs = new db(self::$dbs);
+      self::$dbs = new bbn\db(self::$dbs);
     }
     if ( bbn\appui\history::$is_used ){
       self::$has_history = 1;
@@ -348,7 +348,7 @@ class dbsync
       if ( count($each) > 0 ){
         $to_log['num_problems']++;
         array_push($to_log['problems'], "Conflict!", $d);
-        foreach ( $each as $i => $e ){
+        foreach ( $each as $e ){
           // If it's deleted locally and updated on the twin we restore
           if ( $e['action'] === 'delete' ){
             if ( $d['action'] === 'update' ){

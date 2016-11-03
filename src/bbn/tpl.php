@@ -1,6 +1,8 @@
 <?php
 namespace bbn;
 
+use LightnCandy\LightnCandy;
+
 if ( !defined('BBN_DATA_PATH') ){
   die("BBN_DATA_PATH must be defined");
 }
@@ -18,14 +20,14 @@ class tpl {
     if ( file_exists($file) ){
       return include($file);
     }
-
-    $tpl = \LightnCandy\LightnCandy::compile($st, [
-      'flags' => \LightnCandy\LightnCandy::FLAG_MUSTACHELOOKUP |
-        \LightnCandy\LightnCandy::FLAG_PARENT |
-        \LightnCandy\LightnCandy::FLAG_HANDLEBARSJS |
-        \LightnCandy\LightnCandy::FLAG_ERROR_LOG
+    $tpl = LightnCandy::compile($st, [
+      'flags' => LightnCandy::FLAG_MUSTACHELOOKUP |
+        LightnCandy::FLAG_PARENT |
+        LightnCandy::FLAG_HANDLEBARSJS |
+        LightnCandy::FLAG_ERROR_LOG
     ]);
-    return \LightnCandy\LightnCandy::prepare($tpl);
+    file_put_contents($file, '<?php '.$tpl.'?>');
+    return include($file);
   }
 
   static public function render($st, $data){

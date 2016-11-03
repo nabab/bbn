@@ -79,12 +79,12 @@ class mapper extends bbn\models\cls\db{
           $auto_update = false;
 
   /**
-   * @param db $db A valid database connection
+   * @param bbn\db $db A valid database connection
    * @param string $prefix
    * @throws \Exception
    * @return void
    */
-  public function __construct( db $db, $database = '', $prefix='bbn'){
+  public function __construct( bbn\db $db, $database = '', $prefix='bbn'){
     // Checking the prefix string
     parent::__construct($db);
     if ( bbn\str::check_name($prefix) || ($prefix === false) ){
@@ -353,7 +353,6 @@ class mapper extends bbn\models\cls\db{
       
       foreach ( $cfg['fields'] as $name => $f ){
 
-        $r = $this->get_default_col_config($table, $name, $where, $params);
         $full_cfg['elements'][$i] = $this->get_default_col_config($table, $name, $where, $params);
         
         $full_cfg['elements'][$i]['table'] = $table;
@@ -381,6 +380,7 @@ class mapper extends bbn\models\cls\db{
 
       return $full_cfg;
     }
+    return [];
   }
 
 
@@ -391,17 +391,16 @@ class mapper extends bbn\models\cls\db{
    * @param array $params
    * @return array
    */
-  public function get_default_col_config($table, $column, $where=[], $params=[]){
+  public function get_default_col_config($table, $column/*, $where=[], $params=[]*/){
     
 		// Looks in the db for columns corresponding to the given table
+    $r = [];
 		if ( $this->db && bbn\str::check_name($column) &&
             ($cfg = $this->db->modelize($table)) &&
             isset($cfg['fields'][$column]) ){
 
       $f = $cfg['fields'][$column];
       
-      $values = false;
-
       if ( isset(self::$types[$f['type']])){
         $type = self::$types[$f['type']]['type'];
         $field = self::$types[$f['type']]['field'];
@@ -556,9 +555,9 @@ class mapper extends bbn\models\cls\db{
           }
         }
 
-        return $r;
       }
     }
+    return $r;
   }
 
   /**
@@ -573,6 +572,7 @@ class mapper extends bbn\models\cls\db{
       if ( count($table) === 1 ){
         array_unshift($table, $this->client_db);
       }
+      $cfg = [];
       if ( count($table) === 2 ){
         $db = trim($table[0]);
         $table = trim($table[1]);
@@ -597,14 +597,15 @@ class mapper extends bbn\models\cls\db{
           "elements" => $cfg
       ];
     }
+    return [];
   }
   
 	/**
 	 * Creates an array for configuring an instance of input for a given field in a given table
 	 * 
 	 * @param string $table The database's table
-	 * @param string $table The table's column
-	 * @return bbn\html\input
+	 * @param string $column The table's column
+	 * @return array $cfg a configuration array for bbn\html\input
 	 */
   public function get_default_field_config($table, $column){
     
@@ -629,7 +630,6 @@ class mapper extends bbn\models\cls\db{
 				}
 			}
       else{
-				$dec = false;
 				$ref = false;
         if ( isset($col['keys']) ){
           foreach ( $col['keys'] as $k ){
@@ -831,7 +831,6 @@ class mapper extends bbn\models\cls\db{
 				}
 			}
       foreach ( $schema as $t => $vars ){
-        $col_history = $tab_history;
         if ( isset($vars['keys']) && is_array($vars['keys']) ){
           foreach ( $vars['keys'] as $k => $arr ){
             $pos = 1;
