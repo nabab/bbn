@@ -120,12 +120,14 @@ EOF
       if ( $this->last_cfg !== $cfg ){
         $this->last_cfg = $cfg;
         $cfg = $this->get_config($cfg);
-        $this->pdf->defHTMLHeaderByName('head', $cfg['head']);
-        $this->pdf->defHTMLFooterByName('foot', $cfg['foot']);
         if ( isset($cfg['template']) && is_file($cfg['template']) ){
           $src = $this->pdf->SetSourceFile($cfg['template']);
           $tpl = $this->pdf->ImportPage($src);
           $this->pdf->SetPageTemplate($tpl);
+        }
+        else{
+          $this->pdf->defHTMLHeaderByName('head', $cfg['head']);
+          $this->pdf->defHTMLFooterByName('foot', $cfg['foot']);
         }
       }
 
@@ -172,8 +174,8 @@ EOF
 	{
 		if ( $this->check() )
 		{
-			$pdfdoc = $this->pdf->Output("", "S");
-			return chunk_split(base64_encode($pdfdoc));
+			$pdf = $this->pdf->Output("", "S");
+			return chunk_split(base64_encode($pdf));
 		}
 	}
 
