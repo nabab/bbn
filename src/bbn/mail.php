@@ -42,7 +42,7 @@
 
 namespace bbn;
 
-class mail extends bbn\models\cls\basic
+class mail extends models\cls\basic
 {
   private static
     $dest_fields = ['to', 'cc', 'bcc'],
