@@ -358,6 +358,7 @@ class user extends models\cls\basic
         ){
           $this
             ->_authenticate($id)
+            ->_user_info()
             ->_init_dir()
             ->save_session();
         }
@@ -551,7 +552,7 @@ class user extends models\cls\basic
    * @param array $cfg
    * @return $this
    */
-  private function _init_config(array $cfg = []){
+  private function _init_class_cfg(array $cfg = []){
     $this->class_cfg = x::merge_arrays(self::$_defaults, $cfg);
     if ( !empty($cfg['arch']) ){
       foreach ( $cfg['arch'] as $t => $a ){
@@ -677,7 +678,7 @@ class user extends models\cls\basic
     $this->accept_lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';
 
     // Setting up the class configuration
-    $this->_init_config($cfg);
+    $this->_init_class_cfg($cfg);
 
     // Creating the session's variables if they don't exist yet
     $this->_init_session();
