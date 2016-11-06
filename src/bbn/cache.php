@@ -40,16 +40,21 @@ class cache{
     self::$type = $type;
   }
 
-  private static function _dir($item){
-    $dir = dirname($item);
+  private static function _dir($dir, $path, $parent = true){
+    if ( $parent ){
+      $dir = dirname($dir);
+    }
     if ( empty($dir) ){
       return '';
     }
-    return str_replace("../", '', str_replace("\\", "/", $dir));
+    else if ( substr($dir, -1) === '/' ){
+      $dir = substr($dir, 0, -1);
+    }
+    return $path.str::encode_filename(str_replace("../", '', str_replace("\\", "/", $dir)), true);
   }
 
   private static function _file($item, $path){
-    return $path.self::_dir($item).'/'.str::encode_filename(basename($item)).'.bbn.cache';
+    return self::_dir($item, $path).'/'.str::encode_filename(basename($item)).'.bbn.cache';
   }
 
   public static function make_hash($value){
@@ -159,8 +164,17 @@ class cache{
   }
 
   public function delete_all($st=false){
-    if ( self::$type ){
-      $its = $this->items();
+    if ( self::$type === 'files' ){
+      $dir = self::_dir($st, $this->path, false);
+      if ( is_dir($dir) ){
+        return file\dir::delete($dir);
+      }
+      else if ( is_file($dir) ){
+        unlink($dir);
+      }
+    }
+    else if ( self::$type ){
+      $its = $this->items($st);
       $res = 0;
       foreach ( $its as $it ){
         if ( !$st || strpos($it, $st) === 0 ){
@@ -182,6 +196,7 @@ class cache{
       }
       return $res;
     }
+    return false;
   }
 
   public function clear(){
@@ -229,10 +244,9 @@ class cache{
           ], false, $ttl);
         case 'files':
           $file = self::_file($it, $this->path);
-          if ( $dir = self::_dir($it) ){
-            file\dir::create_path($this->path.'/'.$dir);
+          if ( $dir = self::_dir($it, $this->path) ){
+            file\dir::create_path($dir);
           }
-
           $value = [
             'timestamp' => microtime(1),
             'hash' => $hash,

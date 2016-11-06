@@ -9,26 +9,16 @@
 namespace bbn\appui;
 use bbn;
 
+class task extends bbn\models\cls\db{
 
-class task {
+  use bbn\models\tts\references,
+    bbn\models\tts\optional;
 
-  private static
-    $cats = [],
-    $actions = [],
-    $states = [],
-    $roles = [],
-    $id_cat,
-    $id_action,
-    $id_state,
-    $id_role;
-
-  private
-    $references,
-    $references_select = '',
-    $references_join = '';
+  protected static
+    $id_option_root,
+    $code_option_root = 'bbn_tasks';
 
   protected
-    $db,
     $template = false,
     $id_user,
     $is_admin,
@@ -51,139 +41,9 @@ class task {
     */
   }
 
-  private static function get_id_cat(){
-    if ( !isset(self::$id_cat) && ($opt = bbn\appui\options::get_options()) ){
-      self::$id_cat = $opt->from_code('cats', 'bbn_tasks');
-    }
-    return self::$id_cat;
-  }
-
-  private static function get_id_action(){
-    if ( !isset(self::$id_action) && ($opt = bbn\appui\options::get_options()) ){
-      self::$id_action = $opt->from_code('actions', 'bbn_tasks');
-    }
-    return self::$id_action;
-  }
-
-  private static function get_id_state(){
-    if ( !isset(self::$id_state) && ($opt = bbn\appui\options::get_options()) ){
-      self::$id_state = $opt->from_code('states', 'bbn_tasks');
-    }
-    return self::$id_state;
-  }
-
-  private static function get_id_role(){
-    if ( !isset(self::$id_role) && ($opt = bbn\appui\options::get_options()) ){
-      self::$id_role = $opt->from_code('roles', 'bbn_tasks');
-    }
-    return self::$id_role;
-  }
-
-  public static function get_cats($force = false){
-    if ( empty(self::$cats) || $force ){
-      if ( ($opt = bbn\appui\options::get_options()) && self::get_id_cat() ){
-        if ( $tree = $opt->tree(self::$id_cat) ){
-          self::$cats = isset($tree['items']) ? $tree['items'] : false;
-        }
-      }
-      else{
-        self::$cats = false;
-      }
-    }
-    return self::$cats;
-  }
-
-  public static function get_actions($force = false){
-    if ( empty(self::$actions) || $force ){
-      if ( ($opt = bbn\appui\options::get_options()) && self::get_id_action() ){
-        if ( $actions = $opt->full_options(self::$id_action) ){
-          foreach ( $actions as $action ){
-            self::$actions[$action['code']] = $action['id'];
-          }
-        }
-      }
-      else{
-        self::$actions = false;
-      }
-    }
-    return self::$actions;
-  }
-
-  public static function get_states($force = false){
-    if ( empty(self::$states) || $force ){
-      if ( ($opt = bbn\appui\options::get_options()) && self::get_id_state() ){
-        if ( $states = $opt->full_options(self::$id_state) ){
-          foreach ( $states as $state ){
-            self::$states[$state['code']] = $state['id'];
-          }
-        }
-      }
-      else{
-        self::$states = false;
-      }
-    }
-    return self::$states;
-  }
-
-  public static function get_roles($force = false){
-    if ( empty(self::$roles) || $force ){
-      if ( ($opt = bbn\appui\options::get_options()) && self::get_id_role() ){
-        if ( $roles = $opt->full_options(self::$id_role) ){
-          foreach ( $roles as $role ){
-            self::$roles[$role['code']] = $role['id'];
-          }
-        }
-      }
-      else{
-        self::$roles = false;
-      }
-    }
-    return self::$roles;
-  }
-
-  public static function get_cat($code, $force = false){
-    if ( !isset(self::$cats[$code]) || $force ){
-      self::get_cats(1);
-      if ( !isset(self::$cats[$code]) ){
-        self::$cats[$code] = false;
-      }
-    }
-    return isset(self::$cats[$code]) ? self::$cats[$code] : false;
-  }
-
-  public static function get_action($code, $force = false){
-    if ( !isset(self::$actions[$code]) || $force ){
-      self::get_actions(1);
-      if ( !isset(self::$actions[$code]) ){
-        self::$actions[$code] = false;
-      }
-    }
-    return isset(self::$actions[$code]) ? self::$actions[$code] : false;
-  }
-
-  public static function get_state($code, $force = false){
-    if ( !isset(self::$states[$code]) || $force ){
-      self::get_states(1);
-      if ( !isset(self::$states[$code]) ){
-        self::$states[$code] = false;
-      }
-    }
-    return isset(self::$states[$code]) ? self::$states[$code] : false;
-  }
-
-  public static function get_role($code, $force = false){
-    if ( !isset(self::$roles[$code]) || $force ){
-      self::get_roles(1);
-      if ( !isset(self::$roles[$code]) ){
-        self::$roles[$code] = false;
-      }
-    }
-    return isset(self::$roles[$code]) ? self::$roles[$code] : false;
-  }
-
   public static function cat_correspondances(){
-    if ( $opt = bbn\appui\options::get_options() ){
-      $cats = self::get_cats();
+    if ( $opt = bbn\appui\options::get_instance() ){
+      $cats = self::get_tree_options('cats');
       $res = [];
       $opt->map(function ($a) use (&$res){
         array_push($res, [
@@ -201,47 +61,22 @@ class task {
     return false;
   }
 
-  public static function get_options(){
-    if ( $opt = bbn\appui\options::get_options() ){
+  public static function get_tasks_options(){
+    if (
+      ($states = self::get_codes_options('states')) &&
+      ($roles = self::get_codes_options('roles')) &&
+      ($cats = self::cat_correspondances())
+    ){
       return [
-        'states' => $opt->text_value_options(self::get_id_state()),
-        'roles' => $opt->text_value_options(self::get_id_role()),
-        'cats' => self::cat_correspondances()
+        'states' => $states,
+        'roles' => $roles,
+        'cats' => $cats
       ];
     }
   }
 
   public function check(){
     return isset($this->user);
-  }
-
-  private function get_references(){
-    if ( is_null($this->references) ){
-      $refs = $this->db->find_relations('bbn_tasks.id');
-      $this->references = array_filter($refs, function($a, $k){
-        return strpos($k, 'bbn_tasks') !== 0;
-      }, ARRAY_FILTER_USE_BOTH);
-      if ( empty($this->references) ){
-        $this->references = false;
-      }
-      else{
-        foreach ( $this->references as $table => $ref ){
-          foreach ( $ref['refs'] as $j => $r ){
-
-            $this->references_select = empty($this->references_select) ?
-              $this->db->cfn($j, $table, 1) :
-              "IFNULL(".$this->references_select.", ".$this->db->cfn($j, $table, 1).")";
-
-            $this->references_join .= "LEFT JOIN ".$this->db->tfn($table, 1).PHP_EOL.
-              "ON ".$this->db->cfn($ref['column'], $table, 1)." = bbn_tasks.id".PHP_EOL;
-          }
-        }
-        if ( !empty($this->references_select) ){
-          $this->references_select .= " AS reference,".PHP_EOL;
-        }
-      }
-    }
-    return $this->references;
   }
 
   public function __construct(bbn\db $db){
@@ -251,7 +86,7 @@ class task {
       $this->id_user = $user->get_id();
       $this->is_admin = $user->is_admin();
       $this->mgr = new bbn\user\manager($user);
-      $this->get_references();
+      $this->_get_references();
       //die(var_dump(BBN_APP_PATH, $this->references));
       if ( defined("BBN_APP_PATH") && is_file(BBN_APP_PATH.'plugins/appui-task/reference.php') ){
         $f = include(BBN_APP_PATH.'plugins/appui-task/reference.php');
@@ -271,35 +106,35 @@ class task {
   }
 
   public function categories(){
-    return self::get_cats();
+    return self::get_tree_options('cats');
   }
 
   public function actions(){
-    return self::get_actions();
+    return self::get_codes_options('actions');
   }
 
   public function states(){
-    return self::get_states();
+    return self::get_codes_options('states');
   }
 
   public function roles(){
-    return self::get_roles();
+    return self::get_codes_options('roles');
   }
 
   public function id_cat($code){
-    return self::get_cat($code);
+    return self::get_id_option($code, 'cats');
   }
 
   public function id_action($code){
-    return self::get_action($code);
+    return self::get_id_option($code, 'actions');
   }
 
   public function id_state($code){
-    return self::get_state($code);
+    return self::get_id_option($code, 'states');
   }
 
   public function id_role($code){
-    return self::get_role($code);
+    return self::get_id_option($code, 'roles');
   }
 
   public function get_mine($parent = null, $order = 'priority', $dir = 'ASC', $limit = 50, $start = 0){
@@ -307,7 +142,7 @@ class task {
   }
 
   public function translate_log(array $log){
-    $opt = bbn\appui\options::get_options();
+    $opt = bbn\appui\options::get_instance();
     $user = bbn\user::get_instance();
     if ( $opt && $user && isset($log['action'], $log['id_user']) ){
       $type = explode('_', $opt->code($log['action']));
@@ -447,7 +282,7 @@ class task {
     GROUP BY bbn_tasks_roles.id_task
     LIMIT $start, $limit";
 
-    $opt = bbn\appui\options::get_options();
+    $opt = bbn\appui\options::get_instance();
     $res = $this->db->get_rows($sql, $id_user);
     foreach ( $res as $i => $r ){
       $res[$i]['hasChildren'] = $r['num_children'] ? true : false;
@@ -504,7 +339,7 @@ class task {
     GROUP BY bbn_tasks.id
     LIMIT $start, $limit";
 
-    $opt = bbn\appui\options::get_options();
+    $opt = bbn\appui\options::get_instance();
     $res = $this->db->get_rows($sql, "%$search%");
     /*
     foreach ( $res as $i => $r ){
@@ -540,7 +375,6 @@ class task {
 
   private function add_note($type, $value, $title){
     return [];
-
   }
 
   public function add_link(){
@@ -813,9 +647,15 @@ class task {
 
   public function info_roles($id){
     $r = [];
-    if ( ($opt = bbn\appui\options::get_options()) && self::get_id_role() ){
-      $roles = $opt->full_options(self::$id_role);
-      $all = $this->db->rselect_all('bbn_tasks_roles', [], ['id_task' => $id], 'role');
+    if (
+      ($opt = bbn\appui\options::get_instance()) &&
+      ($roles = self::get_options('roles'))
+    ){
+      $all = $this->db->rselect_all(
+        'bbn_tasks_roles',
+        [],
+        ['id_task' => $id],
+        'role');
       $n = false;
       foreach ( $all as $a ){
         if ( $n !== $roles[$a['role']]['code'] ){
@@ -829,7 +669,7 @@ class task {
   }
 
   public function has_role($id_task, $id_user){
-    if ( $opt = bbn\appui\options::get_options() ){
+    if ( $opt = bbn\appui\options::get_instance() ){
       $r = $this->db->select_one('bbn_tasks_roles', 'role', ['id_task' => $id_task, 'id_user' => $id_user]);
       if ( $r ){
         return $opt->code($r);

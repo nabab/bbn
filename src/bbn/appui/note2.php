@@ -15,64 +15,62 @@ if ( !defined('BBN_DATA_PATH') ){
 
 class note extends bbn\models\cls\db
 {
-
-  use
-    bbn\models\tts\references,
-    bbn\models\tts\optional,
-    bbn\models\tts\dbconfig;
-
+  use bbn\models\tts\optional;
 
   protected static
     $id_option_root,
     $code_option_root = 'bbn_notes';
 
-  protected static
-    /** @var array */
-    $_defaults = [
-    'errors' => [
-      19 => 'wrong fingerprint'
-    ],
-    'table' => 'bbn_notes',
-    'tables' => [
-      'notes' => 'bbn_notes',
-      'versions' => 'bbn_notes_versions',
-      'medias' => 'bbn_notes_medias'
-    ],
-    'arch' => [
-      'notes' => [
-        'id' => 'id',
-        'id_parent' => 'id_parent',
-        'private' => 'private',
-        'creator' => 'creator',
-        'active' => 'active'
-      ],
-      'versions' => [
-        'id_note' => 'id_note',
-        'version' => 'version',
-        'title' => 'title',
-        'content' => 'content',
-        'id_user' => 'id_user',
-        'creation' => 'creation'
-      ],
-      'medias' => [
-        'id_media' => 'id_media',
-        'id_note' => 'id_note',
-        'id_user' => 'id_user',
-        'comment' => 'comment',
-        'creation' => 'creation',
-      ]
-    ]
-  ];
+  private static
+    $media_options = [],
+    $media_option_root;
 
-  public function __construct(bbn\db $db){
-    parent::__construct($db);
-    self::_init_class_cfg(self::$_defaults);
+  private static function get_media_option_root(){
+    if ( !isset(self::$media_option_root) && ($opt = bbn\appui\options::get_options()) ){
+      self::$media_option_root = $opt->from_code('media', 'bbn_notes');
+    }
+    return self::$media_option_root;
+  }
+
+  protected static function get_media_options($force = false){
+
+    if ( empty(self::$media_options) || $force ){
+      if ( ($opt = bbn\appui\options::get_options()) && self::get_media_option_root() ){
+        self::$media_options = $opt->options_codes(self::$media_option_root);
+      }
+    }
+    return self::$media_options;
+  }
+
+  protected static function get_media_option_id($code, $force = false){
+
+    if ( !isset(self::$media_options[$code]) || $force ){
+      self::get_media_options(1);
+    }
+    return isset(self::$media_options[$code]) ? self::$media_options[$code] : false;
+  }
+
+  public function media_options(){
+    return self::get_media_options();
+  }
+
+  public function media_option_id($code){
+    return self::get_media_option_id($code);
+  }
+
+  public function exists($id_note){
+    return $this->db->count('bbn_notes', ['id' => $id_note]) ? true : false;
+  }
+
+  public function get_relations(){
+    $refs = $this->db->find_relations('bbn_tasks.id');
+
   }
 
   public function add_media($id_note, $content, $title, $type='file', $private = false){
     if ( $this->exists($id_note) &&
       !empty($content) &&
-      ($id_type = self::get_id_option($type, 'media')) &&
+      $this->media_option_id($type) &&
       ($usr = bbn\user::get_instance())
     ){
       $ok = false;
@@ -88,7 +86,7 @@ class note extends bbn\models\cls\db
       if ( $ok ){
         $this->db->insert('bbn_medias', [
           'id_user' => $usr->get_id(),
-          'type' => $id_type,
+          'type' => $this->media_option_id($type),
           'title' => $title,
           'content' => $file,
           'private' => $private ? 1 : 0

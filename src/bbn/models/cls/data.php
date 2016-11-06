@@ -17,7 +17,7 @@ use bbn;
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @version 0.1
  */
-class data extends cache{
+abstract class data extends cache{
 
   private static
     $_bbn_reflection_class = false,

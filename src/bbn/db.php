@@ -17,7 +17,8 @@ namespace bbn;
 
 class db extends \PDO implements db\actions, db\api, db\engines
 {
-  use db\triggers;
+  use
+    db\triggers;
 
   const
     E_CONTINUE = 'continue',
@@ -176,16 +177,16 @@ class db extends \PDO implements db\actions, db\api, db\engines
 
   private function _cache_name($item, $mode){
     $r = false;
-    $h = crc32($this->host);
+    $h = str::encode_filename($this->host);
     switch ( $mode ){
       case 'columns':
-        $r = "bbn-db-".$this->engine."-".$h."-".$this->tfn($item);
+        $r = "bbn/db/".$this->engine."/".$h."/".$this->tfn($item);
         break;
       case 'tables':
-        $r = "bbn-db-".$this->engine."-".$h."-".$item;
+        $r = "bbn/db/".$this->engine."/".$h."/".$item;
         break;
       case 'databases':
-        $r = "bbn-db-".$this->engine."-".$h;
+        $r = "bbn/db/".$this->engine."/".$h."/_bbn-database";
         break;
     }
     return $r;

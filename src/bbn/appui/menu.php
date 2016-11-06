@@ -2,10 +2,12 @@
 namespace bbn\appui;
 use bbn;
 
-class menu {
+class menu extends bbn\models\cls\basic{
+
+  use
+    bbn\models\tts\cache;
 
   private static
-    $_cache_prefix = 'bbn-menu-',
     $id_root,
     $id_public_root;
 
@@ -17,13 +19,13 @@ class menu {
 
   protected
     /** @var bbn\appui\options The options object */
-    $options,
-    /** @var cache The cache object */
-    $cacher;
+    $options;
 
   public function __construct(bbn\appui\options $o, $r){
     $this->options = $o;
-    $this->cacher = bbn\cache::get_engine();
+    $this->cache_init();
+
+
     if ( !empty($r) && is_string($r) ){
       $this->_set_relative_public_root($r);
     }
@@ -57,10 +59,6 @@ class menu {
 
   private function _set_relative_public_root($rel_path){
     self::$public_root = self::$public_root . '|' . $rel_path;
-  }
-
-  private function _cache_name($method, $uid){
-    return self::$_cache_prefix.$method.'-'.(string)$uid;
   }
 
   private function _adapt($ar, bbn\user\preferences $pref, $prepath = false){
@@ -163,13 +161,12 @@ class menu {
 
   public function tree($id, $prepath = false){
     if ( $id = $this->from_path($id) ){
-      $cn = $this->_cache_name(__FUNCTION__, $id);
-      if ( $this->cacher->has($cn) ){
-        return $this->cacher->get($cn);
+      if ( $this->cache_has($id, __FUNCTION__) ){
+        return $this->cache_get($id, __FUNCTION__);
       }
       $items = $this->options->full_tree($id);
       $res = $this->_arrange($items, $prepath);
-      $this->cacher->set($this->_cache_name(__FUNCTION__, $id), $res);
+      $this->cache_set($id, __FUNCTION__, $res);
       return $res;
     }
   }

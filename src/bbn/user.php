@@ -21,7 +21,9 @@ if ( !defined('BBN_DATA_PATH') ){
 }
 class user extends models\cls\basic
 {
-  use models\tts\retriever;
+  use
+    models\tts\retriever,
+    models\tts\dbconfig;
 
 	private static
     /** @var connection */
@@ -55,6 +57,7 @@ class user extends models\cls\basic
         18 => 'incorrect magic string',
         19 => 'wrong fingerprint'
       ],
+      'table' => 'bbn_users',
       'tables' => [
         'groups' => 'bbn_users_groups',
         'hotlinks' => 'bbn_users_hotlinks',
@@ -171,8 +174,6 @@ class user extends models\cls\basic
     /** @var array */
     $sess_cfg,
     /** @var array */
-    $class_cfg,
-    /** @var array */
     $fields,
     /** @var bool */
     $has_preference = false;
@@ -225,7 +226,7 @@ class user extends models\cls\basic
   }
 
   /**
-   * initialize (_init_session) and saves session WTF?
+   * initialize and saves session
    * @return $this
    */
   private function _login($id){
@@ -380,7 +381,7 @@ class user extends models\cls\basic
   private function _init_session(){
 
     // Getting or creating the session is it doesn't exist yet
-    /** @var user\session session */
+    /** @var user\session */
     $this->session = user\session::get_instance();
     if ( !$this->session ){
       $this->session = new user\session();
@@ -434,21 +435,6 @@ class user extends models\cls\basic
       else{
         $this->set_error(16);
       }
-    }
-    return $this;
-  }
-
-  /**
-   * Sets the user's session for the first time and creates the session's DB row
-   * @return $this
-   */
-  private function _init_user_session(){
-    /** @todo Illogical?! */
-    if ( $this->is_auth() ){
-      $this->session->set([
-        'id' => $this->get_id(),
-        'id_group' => $this->id_group
-      ], self::$un);
     }
     return $this;
   }
@@ -545,26 +531,6 @@ class user extends models\cls\basic
       }
     }
     return $this->auth;
-  }
-
-  /**
-   * Sets the class configuration as defined in $this->_defaults
-   * @param array $cfg
-   * @return $this
-   */
-  private function _init_class_cfg(array $cfg = []){
-    $this->class_cfg = x::merge_arrays(self::$_defaults, $cfg);
-    if ( !empty($cfg['arch']) ){
-      foreach ( $cfg['arch'] as $t => $a ){
-        $this->class_cfg['arch'][$t] = $a;
-      }
-    }
-    /*
-     * The selection comprises the defined fields of the users table
-     * Plus a bunch of user-defined additional fields in the same table
-     */
-    $this->fields = $this->class_cfg['arch']['users'];
-    return $this;
   }
 
   /**

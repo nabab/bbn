@@ -18,13 +18,12 @@ use bbn;
  */
 
 
-class options extends bbn\models\cls\cache
+class options extends bbn\models\cls\db
 {
 
-  use bbn\models\tts\retriever;
-
-  private static
-    $current;
+  use
+    bbn\models\tts\retriever,
+    bbn\models\tts\cache;
 
   protected static
     /** @var array */
@@ -55,11 +54,11 @@ class options extends bbn\models\cls\cache
   }
 
   private function _cache_delete($id){
-    $this->cacher->delete_all($this->_cache_name($id));
-    $this->cacher->delete_all($this->_cache_name($this->get_id_parent($id)));
+    $this->cache_engine->delete_all($this->_cache_name($id));
+    $this->cache_engine->delete_all($this->_cache_name($this->get_id_parent($id)));
     $ids = $this->get_ids_by_code($id);
     foreach ( $ids as $id ){
-      $this->cacher->delete_all($this->_cache_name($id));
+      $this->cache_engine->delete_all($this->_cache_name($id));
     }
     return $this;
   }
@@ -134,6 +133,7 @@ class options extends bbn\models\cls\cache
     parent::__construct($db);
     $this->class_cfg = bbn\x::merge_arrays(self::$_defaults, $cfg);
     self::retriever_init($this);
+    $this->cache_init();
   }
 
   public function get_default(){
@@ -738,6 +738,10 @@ class options extends bbn\models\cls\cache
       $c = $this->class_cfg['cols'];
       return $this->db->select_all_by_keys($this->class_cfg['table'], [$c['id'], $c['code']], [$c['id_parent'] => $id]);
     }
+  }
+
+  public function get_ids($id){
+    return call_user_func_array([$this, 'options_codes'], func_get_args());
   }
 
   public function options_codes($id){

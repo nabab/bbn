@@ -36,7 +36,9 @@ if ( !defined("BBN_APP_PATH") ){
 
 class mvc implements mvc\api{
 
-	use mvc\common;
+	use
+    models\tts\singleton,
+    mvc\common;
 
   private static
     /**
@@ -226,6 +228,7 @@ class mvc implements mvc\api{
 	 * @param array $routes An array of routes usually defined in /_appui/current/config/routes.php</em>
 	 */
 	public function __construct($db = null, $routes = []){
+    self::singleton_init($this);
     $this->env = new mvc\environment();
 		if ( is_object($db) && ( $class = get_class($db) ) && ( $class === 'PDO' || strpos($class, '\db') !== false ) ){
 			$this->db = $db;

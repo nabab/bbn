@@ -20,9 +20,11 @@ use bbn;
  * @todo Look into the check function and divide it
  */
 
-class model extends bbn\models\cls\cache{
+class model extends bbn\models\cls\db{
 
-	use common;
+	use
+    common,
+    bbn\models\tts\cache;
 
 	private
     /**
@@ -70,6 +72,7 @@ class model extends bbn\models\cls\cache{
 	public function __construct(bbn\db $db=null, array $info, controller $ctrl){
 		if ( isset($info['path']) && $this->check_path($info['path']) ){
       parent::__construct($db);
+      $this->cache_init();
       $this->ctrl = $ctrl;
 			$this->inc = $this->ctrl->inc;
       if ( is_file($info['file']) ){

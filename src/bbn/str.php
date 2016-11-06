@@ -307,16 +307,18 @@ class str
    * @param string $st The name as string.
    * @param int $maxlength The maximum filename length (without extension), default: "50".
    * @param string $extension The extension of file.
+   * @param bool $is_path Tells if the slashes (/) are authorized in the string
    *
 	 * @return string
 	 */
-	public static function encode_filename($st, $maxlength = 50, $extension = null)
-	{
-		$st = self::remove_accents(self::cast($st));
-		$res = '';
+  public static function encode_filename($st, $maxlength = 50, $extension = null, $is_path = false)
+  {
+    $st = self::remove_accents(self::cast($st));
+    $res = '';
 
-    $allowed = ["-", "_", ".", ","];
+    $allowed = '-_.,';
 
+    // Arguments order doesn't matter
     $args = func_get_args();
     foreach ( $args as $i => $a ){
       if ( $i > 0 ){
@@ -326,6 +328,9 @@ class str
         else if ( is_int($a) ){
           $maxlength = $a;
         }
+        else if ( is_bool($a) ){
+          $is_path = $a;
+        }
       }
     }
 
@@ -333,33 +338,51 @@ class str
       $maxlength = mb_strlen($st);
     }
 
-    if ( $extension &&
-            (self::file_ext($st) === self::change_case($extension, 'lower')) ){
+    if ( $is_path ){
+      $allowed .= '/';
+    }
+
+    if (
+      $extension &&
+      (self::file_ext($st) === self::change_case($extension, 'lower'))
+    ){
       $st = substr($st, 0, -(strlen($extension)+1));
     }
     else if ( $extension = self::file_ext($st) ){
       $st = substr($st, 0, -(strlen($extension)+1));
     }
 
-		for ( $i = 0; $i < $maxlength; $i++ ){
-			if ( mb_ereg_match('[A-z0-9\\-_.,]',mb_substr($st,$i,1)) ){
-				$res .= mb_substr($st,$i,1);
+    for ( $i = 0; $i < $maxlength; $i++ ){
+      if ( mb_ereg_match('[A-z0-9\\'.$allowed.']', mb_substr($st,$i,1)) ){
+        $res .= mb_substr($st,$i,1);
       }
-			else if ( (mb_strlen($res) > 0) &&
-              !in_array(mb_substr($res,-1), $allowed) &&
-              ($i < ( mb_strlen($st) - 1 )) ){
-				$res .= '_';
+      else if ( (mb_strlen($res) > 0) &&
+        (strpos($allowed, mb_substr($res,-1)) === false) &&
+        ($i < ( mb_strlen($st) - 1 ))
+      ){
+        $res .= '_';
       }
-		}
-    if ( substr($res, -1) === '_' ){
-      $res = substr($res, 0, -1);
     }
     if ( $extension ) {
       $res .= '.' . $extension;
     }
+    while ( strpos($res, '__') !== false ){
+      $res = str_replace('__', '_', $res);
+    }
+    if ( substr($res, -1) === '_' ){
+      $res = substr($res, 0, -1);
+    }
+    if ( $is_path ){
+      while ( strpos($res, '//') !== false ){
+        $res = str_replace('//', '/', $res);
+      }
+      if ( substr($res, -1) === '/' ){
+        $res = substr($res, 0, -1);
+      }
+    }
 
-		return $res;
-	}
+    return $res;
+  }
 
   /**
    * Returns a corrected string for database naming.
