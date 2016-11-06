@@ -18,7 +18,9 @@ trait dbconfig
     /** @var array */
     $class_cfg,
     /** @var string */
-    $class_table;
+    $class_table,
+    /** @var string */
+    $class_table_index;
 
   /**
    * Sets the class configuration as defined in $this->_defaults
@@ -30,6 +32,9 @@ trait dbconfig
     if ( !empty($cfg['arch']) ){
       foreach ( $cfg['arch'] as $t => $a ){
         $this->class_cfg['arch'][$t] = $a;
+        if ( $cfg['tables'][$t] === $this->class_cfg['table'] ){
+          $this->class_table_index = $t;
+        }
       }
     }
     if ( empty($this->class_cfg['table']) ){
@@ -40,7 +45,7 @@ trait dbconfig
      * The selection comprises the defined fields of the users table
      * Plus a bunch of user-defined additional fields in the same table
      */
-    $this->fields = $this->class_cfg['arch'][$this->class_table];
+    $this->fields = $this->class_cfg['arch'][$this->class_table_index];
     return $this;
   }
 
