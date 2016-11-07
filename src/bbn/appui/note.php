@@ -69,7 +69,7 @@ class note extends bbn\models\cls\db
     self::_init_class_cfg(self::$_defaults);
   }
 
-  public function add_media($id_note, $content, $title, $type='file', $private = false){
+  public function add_media($id_note, $content, $title = '', $type='file', $private = false){
     if ( $this->exists($id_note) &&
       !empty($content) &&
       ($id_type = self::get_id_option($type, 'media')) &&
@@ -80,7 +80,9 @@ class note extends bbn\models\cls\db
         case 'file':
           if ( is_file($content) ){
             $file = basename($content);
-            $title = basename($content);
+            if ( empty($title) ){
+              $title = basename($content);
+            }
             $ok = 1;
           }
         break;
@@ -103,6 +105,22 @@ class note extends bbn\models\cls\db
         if ( isset($file) ){
           $path = BBN_DATA_PATH.'media/'.$id;
           bbn\file\dir::create_path($path);
+          $ext = bbn\str::file_ext($content, true);
+          $filename = $ext[0];
+          $extension = $ext[1];
+          $length = strlen($filename);
+          if ( $files = bbn\file\dir::get_files(dirname($content)) ){
+            foreach ( $files as $f ){
+              if (
+                (strlen($ext[0]) > $length) &&
+                ($ext[1] === $extension) &&
+                (strpos($ext[0], $filename) === 0) &&
+                preg_match('/_h[\d]+/i', substr($ext[0], $length))
+              ){
+                rename($f, $path.DIRECTORY_SEPARATOR.$ext[0].'.'.$ext[1]);
+              }
+            }
+          }
           rename($content, $path.DIRECTORY_SEPARATOR.$file);
         }
         return $id;
@@ -111,11 +129,12 @@ class note extends bbn\models\cls\db
     return false;
   }
 
-  public function insert($title, $content, $private = false, $parent = null){
+  public function insert($title, $content, $private = false, $locked = false, $parent = null){
     if ( $usr = bbn\user::get_instance() ){
       if ( $this->db->insert('bbn_notes', [
         'id_parent' => $parent,
         'private' => $private ? 1 : 0,
+        'locked' => $locked ? 1 : 0,
         'creator' => $usr->get_id()
       ]) ){
         $id_note = $this->db->last_id();

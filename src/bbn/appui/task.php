@@ -12,7 +12,7 @@ use bbn;
 class task extends bbn\models\cls\db{
 
   use bbn\models\tts\references,
-    bbn\models\tts\optional;
+      bbn\models\tts\optional;
 
   protected static
     $id_option_root,
@@ -25,7 +25,7 @@ class task extends bbn\models\cls\db{
     $user;
 
 
-  private function _email($id_task, $subject, $text){
+  protected function email($id_task, $subject, $text){
     /*
     $users = array_unique(array_merge($this->get_ccs($id_task), $this->mgr->get_users(1)));
     foreach ( $users as $u ){
@@ -97,7 +97,7 @@ class task extends bbn\models\cls\db{
     }
     $this->columns = array_keys($this->db->get_columns('bbn_tasks'));
   }
-  
+
   public function get_title($id_task){
     if ( $title = $this->db->select_one('bbn_tasks', 'title', ['id' => $id_task]) ){
       return _("Task")." ".$title;
@@ -450,11 +450,12 @@ class task extends bbn\models\cls\db{
     return $res;
   }
 
-  public function search(array $where = [], $sort = [], $start = 0, $num = 1000){
+  public function search(array $where = [], $sort = [], $start = 0, $num = 25){
     $where = $this->_format_where($where);
     $fields = [
       'ids' => [
         'id_parent' => 'bbn_tasks.id_parent',
+        'id_user' => 'bbn_tasks.id_user',
         'state' => 'bbn_tasks.state',
         'role' => 'my_role.role',
         'type' => 'bbn_tasks.type'
@@ -474,8 +475,8 @@ class task extends bbn\models\cls\db{
         'text' => 'bbn_notes_versions.content'
       ],
       'users' => [
-        'id_user' => '',
-        'id_group' => ''
+        'my_user' => '',
+        'my_group' => ''
       ],
       'refs' => [
         'reference' => 'reference'
@@ -549,14 +550,14 @@ class task extends bbn\models\cls\db{
       }
       else if ( isset($fields['users'][$w[0]]) ){
         if ( !empty($w[2]) ){
-          if ( $w[0] === 'id_user' ){
-            $query .= " AND bbn_tasks_roles.id_user = ?";
+          if ( $w[0] === 'my_user' ){
+            $query .= " AND user_role.id_user = ?";
             array_push($args1, $w[2]);
             $join .= "
         JOIN bbn_tasks_roles AS user_role
           ON user_role.id_task = bbn_tasks.id";
           }
-          else if ( ($w[0] === 'id_group') && ($usr = bbn\user::get_instance()) ){
+          else if ( ($w[0] === 'my_group') && ($usr = bbn\user::get_instance()) ){
             $usr_table = $usr->get_tables()['users'];
             $usr_fields = $usr->get_fields('users');
             $query .= " AND `".$usr_table."`.`".$usr_fields['id_group']."` = ? ";
@@ -628,7 +629,6 @@ class task extends bbn\models\cls\db{
           /** @todo How do I get the t1able with the way I made the request??! */
           $data[$i]['reference'] = call_user_func($this->template, $this->db, $d['reference'], '');
         }
-        $data[$i]['user'] = $user->get_name($d['id_user']);
       }
     }
     return [
@@ -716,8 +716,22 @@ class task extends bbn\models\cls\db{
           'id_task' => $id_task
         ]);
         if ( !empty($cfg['files']) ){
+          $filename = '';
+          $extension = '';
+          $length = 0;
           foreach ( $cfg['files'] as $f ){
-            $note->add_media($r, $f);
+            $ext = \bbn\str::file_ext($f, true);
+            if (
+              (strlen($ext[0]) < $length) ||
+              ($ext[1] !== $extension) ||
+              (strpos($ext[0], $filename) !== 0) ||
+              !preg_match('/_h[\d]+/i', substr($ext[0], $length))
+            ){
+              $filename = $ext[0];
+              $extension = $ext[1];
+              $length = strlen($filename);
+              $note->add_media($r, $f);
+            }
           }
         }
         $this->add_log($id_task, 'comment_insert', [$this->id_user, empty($cfg['title']) ? $cfg['text'] : $cfg['title']]);
@@ -819,7 +833,7 @@ class task extends bbn\models\cls\db{
           "<p><strong>$title</strong></p>".
           "<p>".nl2br($text)."</p>".
           "<p><em>Rendez-vous dans votre interface APST pour lui répondre</em></p>";
-        $this->_email($id, $subject, $text);
+        $this->email($id, $subject, $text);
         */
         return $id;
       }
@@ -881,7 +895,7 @@ class task extends bbn\models\cls\db{
     if ( ($info = $this->info($id)) && $this->db->delete('bbn_tasks', ['id' => $id]) ){
       $subject = "Suppression du bug $info[title]";
       $text = "<p>{$this->user} a supprimé le bug<br><strong>$info[title]</strong></p>";
-      $this->_email($id, $subject, $text);
+      $this->email($id, $subject, $text);
       return $id;
     }
   }
@@ -905,4 +919,5 @@ class task extends bbn\models\cls\db{
   public function unsubscribe($id){
     return $this->db->delete('bbn_tasks_cc', ['id_user' => $this->id_user, 'id_task' => $id]);
   }
+
 }

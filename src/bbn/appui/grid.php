@@ -64,6 +64,11 @@ class grid extends bbn\models\cls\basic
     }
   }
 
+  public function select(){
+    var_dump($this->fields, $this->additional_fields, $this->where(), $this->order());
+    return 1;
+  }
+
   public function check()
   {
     return is_array($this->cfg);
@@ -87,12 +92,12 @@ class grid extends bbn\models\cls\basic
     return '';
   }
 
-  public function get_field($f){
+  public function get_field($f, $array = false){
     if ( is_array($f) && isset($f['field']) ) {
       $f = $f['field'];
     }
-    if ( empty($this->fields) ){
-      return $this->db->col_simple_name($f, 1);
+    if ( empty($this->fields) || $array ){
+      return $this->db->col_simple_name($f, $array ? false : true);
     }
     if ( is_string($f) && (in_array($f, $this->fields) || in_array($f, $this->additional_fields)) ){
       return ( $this->table && !in_array($f, $this->additional_fields) ) ?
@@ -102,9 +107,9 @@ class grid extends bbn\models\cls\basic
     return false;
   }
 
-  public function filter($filters){
-    $res = '';
-    if ( $this->check() && isset($filters['filters']) ){
+  public function filter($filters, $array = false){
+    $res = $array ? [] : '';
+    if ( $this->check() ){
       if ( isset($filters['filters']) && (count($filters['filters']) > 0) ){
         $logic = isset($filters['logic']) && ($filters['logic'] === 'or') ? 'OR' : 'AND';
         foreach ( $filters['filters'] as $f ){
@@ -116,9 +121,14 @@ class grid extends bbn\models\cls\basic
             $pre = " $logic ";
           }
           if ( isset($f['logic']) ){
-            $res .= $pre.$this->filter($f);
+            if ( $array ){
+              $res = \bbn\x::merge_arrays($res, $this->filter($f, true));
+            }
+            else{
+              $res .= $pre.$this->filter($f);
+            }
           }
-          else if ( $field = $this->get_field($f) ){
+          else if ( $field = $this->get_field($f, $array) ){
             if ( $this->structure && isset($this->structure['fields'][$f['field']]) ){
               if ( ($this->structure['fields'][$f['field']]['type'] === 'int') &&
                       ($this->structure['fields'][$f['field']]['maxlength'] == 1) &&
@@ -126,69 +136,139 @@ class grid extends bbn\models\cls\basic
                 $f['value'] = ($f['value'] === 'true') ? 1 : 0;
               }
             }
-            $res .= $pre.$field." ";
+            if ( !$array ){
+              $res .= $pre.$field." ";
+            }
             switch ( $f['operator'] ){
               case 'eq':
-                $res .= bbn\str::is_number($f['value']) ? "= ".$f['value'] : "LIKE '".$this->db->escape_value($f['value'])."'";
+                if ( $array ){
+                  array_push($res, [$field, bbn\str::is_number($f['value']) ? ' = ' : 'LIKE', $f['value']]);
+                }
+                else{
+                  $res .= bbn\str::is_number($f['value']) ? "= ".$f['value'] : "LIKE '".$this->db->escape_value($f['value'])."'";
+                }
                 break;
 
               case 'neq':
-                $res .= bbn\str::is_number($f['value']) ? "!= ".$f['value'] : "NOT LIKE '".$this->db->escape_value($f['value'])."'";
+                if ( $array ){
+                  array_push($res, [$field, bbn\str::is_number($f['value']) ? '!=' : 'NOT LIKE', $f['value']]);
+                }
+                else{
+                  $res .= bbn\str::is_number($f['value']) ? "!= ".$f['value'] : "NOT LIKE '".$this->db->escape_value($f['value'])."'";
+                }
                 break;
 
               case 'startswith':
-                $res .= "LIKE '".$this->db->escape_value($f['value'])."%'";
+                if ( $array ){
+                  array_push($res, [$field, 'LIKE', $f['value'].'%']);
+                }
+                else{
+                  $res .= "LIKE '".$this->db->escape_value($f['value'])."%'";
+                }
                 break;
 
               case 'endswith':
-                $res .= "LIKE '%".$this->db->escape_value($f['value'])."'";
+                if ( $array ){
+                  array_push($res, [$field, 'LIKE', '%'.$f['value']]);
+                }
+                else{
+                  $res .= "LIKE '%".$this->db->escape_value($f['value'])."'";
+                }
                 break;
 
               case 'gte':
-                $res .= ">= '".$this->db->escape_value($f['value'])."'";
+                if ( $array ){
+                  array_push($res, [$field, '>=', $f['value']]);
+                }
+                else{
+                  $res .= ">= '".$this->db->escape_value($f['value'])."'";
+                }
                 break;
 
               case 'gt':
-                $res .= "> '".$this->db->escape_value($f['value'])."'";
+                if ( $array ){
+                  array_push($res, [$field, '>', $f['value']]);
+                }
+                else{
+                  $res .= "> '".$this->db->escape_value($f['value'])."'";
+                }
                 break;
 
               case 'lte':
-                $res .= "<= '".$this->db->escape_value($f['value'])."'";
+                if ( $array ){
+                  array_push($res, [$field, '<=', $f['value']]);
+                }
+                else{
+                  $res .= "<= '".$this->db->escape_value($f['value'])."'";
+                }
                 break;
 
               case 'lt':
-                $res .= "< '".$this->db->escape_value($f['value'])."'";
+                if ( $array ){
+                  array_push($res, [$field, '<', $f['value']]);
+                }
+                else{
+                  $res .= "< '".$this->db->escape_value($f['value'])."'";
+                }
                 break;
 
               case 'isnull':
-                $res .= "IS NULL";
+                if ( $array ){
+                }
+                else{
+                  $res .= "IS NULL";
+                }
                 break;
 
               case 'isnotnull':
-                $res .= "IS NOT NULL";
+                if ( $array ){
+                }
+                else{
+                  $res .= "IS NOT NULL";
+                }
                 break;
 
               case 'isempty':
-                $res .= "LIKE ''";
+                if ( $array ){
+                  array_push($res, [$field, 'LIKE', '']);
+                }
+                else{
+                  $res .= "LIKE ''";
+                }
                 break;
 
               case 'isnotempty':
-                $res .= "NOT LIKE ''";
+                if ( $array ){
+                  array_push($res, [$field, 'NOT LIKE', '']);
+                }
+                else{
+                  $res .= "NOT LIKE ''";
+                }
                 break;
 
               case 'doesnotcontain':
-                $res .= "NOT LIKE '%".$this->db->escape_value($f['value'])."%'";
+                if ( $array ){
+                  array_push($res, [$field, 'NOT LIKE', '%'.$f['value'].'%']);
+                }
+                else{
+                  $res .= "NOT LIKE '%".$this->db->escape_value($f['value'])."%'";
+                }
                 break;
 
               case 'contains':
               default:
-                $res .= "LIKE '%".$this->db->escape_value($f['value'])."%'";
+                if ( $array ){
+                  array_push($res, [$field, 'LIKE', '%'.$f['value'].'%']);
+                }
+                else{
+                  $res .= "LIKE '%".$this->db->escape_value($f['value'])."%'";
+                }
                 break;
 
             }
           }
         }
-        if ( !empty($res) ){
+        if ( !$array && !empty($res) ){
           $res .= " ) ";
         }
       }

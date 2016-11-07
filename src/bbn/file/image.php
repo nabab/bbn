@@ -174,10 +174,7 @@ public static function jpg2pdf($jpg, $pdf){
 		if ( !$this->ext2 && $this->file ){
 			if ( function_exists('exif_imagetype') ){
 				if ( $r = exif_imagetype($this->file) ){
-          if ( array_key_exists($r, bbn\file\image::$allowed_extensions) ){
-            $this->ext = bbn\file\image::$allowed_extensions[$r];
-          }
-					else{
+          if ( !array_key_exists($r, bbn\file\image::$allowed_extensions) ){
             $this->ext = false;
           }
 				}
@@ -187,7 +184,7 @@ public static function jpg2pdf($jpg, $pdf){
 			}
 			if ( $this->ext ){
 				$this->ext2 = $this->ext;
-				if ( $this->ext2 == 'jpg' ){
+				if ( $this->ext2 === 'jpg' ){
           $this->ext2 = 'jpeg';
         }
 			}

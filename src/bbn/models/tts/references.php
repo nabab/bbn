@@ -33,7 +33,6 @@ trait references
       else{
         foreach ( $this->references as $table => $ref ){
           foreach ( $ref['refs'] as $j => $r ){
-
             $this->references_select = empty($this->references_select) ?
               $this->db->cfn($j, $table, 1) :
               "IFNULL(".$this->references_select.", ".$this->db->cfn($j, $table, 1).")";
@@ -48,6 +47,14 @@ trait references
       }
     }
     return $this->references;
+  }
+
+  public function get_references(){
+    $this->_get_references();
+    return [
+      'select' => $this->references_select,
+      'join' => $this->references_join
+    ];
   }
 
 }

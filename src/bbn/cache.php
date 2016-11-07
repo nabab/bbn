@@ -45,7 +45,7 @@ class cache{
       $dir = dirname($dir);
     }
     if ( empty($dir) ){
-      return '';
+      return $path;
     }
     else if ( substr($dir, -1) === '/' ){
       $dir = substr($dir, 0, -1);
@@ -167,7 +167,7 @@ class cache{
     if ( self::$type === 'files' ){
       $dir = self::_dir($st, $this->path, false);
       if ( is_dir($dir) ){
-        return file\dir::delete($dir);
+        return file\dir::delete($dir, $dir === $this->path ? false : true);
       }
       else if ( is_file($dir) ){
         unlink($dir);
