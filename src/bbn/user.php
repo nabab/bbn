@@ -838,10 +838,13 @@ class user extends models\cls\basic
         }
       }
       if ( count($update) > 0 ){
-        return $this->db->update(
+        $r = $this->db->update(
                 $this->class_cfg['tables']['users'],
                 $update,
                 [$this->fields['id'] => $this->id]);
+        $this->set_session(['cfg' => false]);
+        $this->_user_info();
+        return $r;
       }
     }
     return false;
