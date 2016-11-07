@@ -990,6 +990,7 @@ class user extends models\cls\basic
           $this->cfg[$key] = $val;
         }
       }
+      $this->set_session(['cfg' => $this->cfg]);
     }
     return $this;
   }
@@ -1009,6 +1010,7 @@ class user extends models\cls\basic
           unset($this->cfg[$key]);
         }
       }
+      $this->set_session(['cfg' => $this->cfg]);
     }
     return $this;
   }
