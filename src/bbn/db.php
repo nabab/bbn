@@ -1185,6 +1185,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       if ( $cur = (int)$this->get_one("SELECT MAX(".$this->escape($id_field).") FROM ".$this->escape($table)) ) {
         return $cur + 1;
       }
+      return 1;
     }
     return false;
   }
