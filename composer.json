@@ -31,7 +31,8 @@
     "wapmorgan/unified-archive": "dev-master",
     "pear/archive_tar": "dev-master",
     "alchemy/zippy": "dev-master",
-    "gettext/gettext": "dev-master"
+    "gettext/gettext": "dev-master",
+    "nesbot/carbon": "dev-master"
   },
   "autoload": {
     "psr-0": {"bbn": "src/"}

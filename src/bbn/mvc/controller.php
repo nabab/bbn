@@ -53,7 +53,7 @@ class controller implements api{
   public
     /**
      * The db connection if accepted by the mvc class
-     * @var null|db
+     * @var bbn\db
      */
     $db,
     /**
