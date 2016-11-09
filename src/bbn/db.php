@@ -34,7 +34,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
     $parser,
     /**
      * A PHPSQLCreator object
-     * @var db\PHPSQLCreator
+     * @var PHPSQLCreator
      */
     $creator,
     /**
