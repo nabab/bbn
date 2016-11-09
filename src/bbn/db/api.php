@@ -15,7 +15,7 @@ namespace bbn\db;
  * @since Apr 4, 2011, 23:23:55 +0000
  * @category  Database
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @version 0.2r89
+ * @version 0.3
  */
 interface api
 {
