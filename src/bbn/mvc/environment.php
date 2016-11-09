@@ -349,6 +349,9 @@ class environment {
       if ( !$this->post ){
         $this->post = [];
       }
+      else{
+        $this->post = bbn\str::correct_types($this->post);
+      }
     }
     return $this->post;
   }
