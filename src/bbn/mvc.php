@@ -75,6 +75,10 @@ class mvc implements mvc\api{
      */
     $info,
     /**
+     * @var string The root of the application in the URL (base href)
+     */
+    $root,
+    /**
      * @var array The plugins registered through the routes
      */
     $plugins,
@@ -131,6 +135,20 @@ class mvc implements mvc\api{
       return $d;
     }
     return false;
+  }
+
+  public function set_root($root){
+    /** @todo a proper verification of the path */
+    if ( strpos($root, -1) !== '/' ){
+      $root .= '/';
+    }
+    if ( 1 ){
+      $this->root = $root;
+    }
+  }
+
+  public function get_root(){
+    return $this->root;
   }
 
   public function fetch_dir($dir, $mode){
@@ -273,7 +291,7 @@ class mvc implements mvc\api{
   }
 
   public function plugin_url($plugin){
-    return $this->has_plugin($plugin) ? $this->plugins[$plugin]['url'] : false;
+    return $this->has_plugin($plugin) ? substr($this->plugins[$plugin]['url'], strlen($this->root)) : false;
   }
 
   /*public function add_routes(array $routes){

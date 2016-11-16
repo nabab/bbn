@@ -132,7 +132,16 @@ class controller implements api{
     }
   }
 
-	public function get_url(){
+  public function get_root(){
+    return $this->mvc->get_root();
+  }
+
+  public function set_root($root){
+    $this->mvc->set_root($root);
+    return $this;
+  }
+
+  public function get_url(){
 		return $this->mvc->get_url();
 	}
 
