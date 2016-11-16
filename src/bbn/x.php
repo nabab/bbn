@@ -787,7 +787,7 @@ class x
     return $r;
   }
 
-  public static function get_tree(array $ar){
+  public static function get_tree($ar){
     $res = [];
     foreach ( $ar as $k => $a ){
       $r = ['text' => $k];

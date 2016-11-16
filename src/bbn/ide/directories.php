@@ -5,6 +5,11 @@ use bbn;
 
 class directories {
 
+  const IDE_PATH = 'bbn_ide',
+        DEV_PATH = 'PATHS',
+        PATH_TYPE = 'PTYPES',
+        FILES_PREF = 'files';
+
   private static
     /** @var bool|int $dev_path */
     $dev_path = false,
@@ -36,7 +41,7 @@ class directories {
    */
   private function _dev_path(){
     if ( !self::$dev_path ){
-      if ( $id = $this->options->from_code('PATHS', 'bbn_ide') ){
+      if ( $id = $this->options->from_code(self::DEV_PATH, self::IDE_PATH) ){
         self::set_dev_path($id);
       }
     }
@@ -57,7 +62,7 @@ class directories {
    */
   private function _path_type(){
     if ( !self::$path_type ){
-      if ( $id = $this->options->from_code('PTYPES', 'bbn_ide') ){
+      if ( $id = $this->options->from_code(self::PATH_TYPE, self::IDE_PATH) ){
         self::set_path_type($id);
       }
     }
@@ -78,7 +83,7 @@ class directories {
    */
   private function _files_pref(){
     if ( !self::$files_pref ){
-      if ( $id = $this->options->from_code('files', 'bbn_ide') ){
+      if ( $id = $this->options->from_code(self::FILES_PREF, self::IDE_PATH) ){
         self::set_files_pref($id);
       }
     }
@@ -372,6 +377,7 @@ class directories {
         (strlen($i) > strlen($dir) )
       ){
         $dir = $i;
+        break;
       }
     }
     return $dir;
@@ -500,7 +506,8 @@ class directories {
    * @return array
    */
   public function get($name=''){
-    $all = $this->options->full_soptions(self::_path_type());
+    $all = $this->options->full_options(self::_path_type());
+    die(\bbn\x::dump($all));
     if ( empty($name) ){
       return $all;
     }
@@ -523,8 +530,11 @@ class directories {
       if ( defined($a['bbn_path']) ){
         $k = $a['bbn_path'] . '/' . ($a['code'] === '/' ? '' : $a['code']);
         if ( !isset($cats[$a['id_alias']]) ){
-          $cats[$a['id_alias']] = $this->options->option($a['id_alias']);
+          unset($a['alias']['cfg']);
+          $cats[$a['id_alias']] = $a['alias'];
         }
+        unset($a['cfg']);
+        unset($a['alias']);
         $r[$k] = $a;
         $r[$k]['title'] = $r[$k]['text'];
         $r[$k]['alias_code'] = $cats[$a['id_alias']]['code'];
@@ -640,7 +650,7 @@ class directories {
    * Loads a file.
    *
    * @param string $file
-   * @param integer $dir
+   * @param string|array $dir
    * @param string $tab
    * @param bbn\user\preferences|null $pref
    * @return array|bool
@@ -652,7 +662,16 @@ class directories {
 
     if ( $file && $dir ){
       /** @var array $dir_cfg The directory configuration from DB */
-      $dir_cfg = $this->dir($dir);
+      if ( is_array($dir) ){
+        $dir_cfg = $dir;
+        $dir = $dir_cfg['value'] ?? $dir_cfg['path'];
+      }
+      else{
+        $dir_cfg = $this->dir($dir);
+      }
+      if ( !is_array($dir_cfg) ){
+        die(\bbn\x::dump("Problem with the function directories::dir with argument ".$dir));
+      }
       $res = $this->get_file($file, $dir, $tab, $dir_cfg, $pref);
     }
     return $res;
@@ -690,190 +709,130 @@ class directories {
 
       $r = $this->get_tab($url, $cfg['title'], $cfg);
       $timer = new bbn\util\timer();
-      // MVC
-      if ( !empty($cfg['tabs']) ){
-        $r['title'] = $path . $name;
-        $r['list'] = [];
-        $r['def'] = false;
-        foreach ( $cfg['tabs'] as $name => $t ){
-          /** @var string $real_file The absolute full path to the file without the file's extension */
-          $real_file = $t['path'] . $path . $name;
-          if ( $tab === $name ){
-            $info = $this->get_file($real_file, $dir, $tab, $t, $pref);
-            //die(bbn\x::dump($info));
-          }
-          else{
-            $info = $this->get_tab($url.'/'.$name, $t['title'], $t);
-          }
-          if ( !$info ){
-            $this->error("Impossible to get a tab's configuration: DIR: $dir - TAB: $tab - FILE: $real_file - CFG: ".bbn\x::get_dump($t));
-            return false;
-          }
-          else{
-            array_push($r['list'], $info);
-          }
-          // Get supra-controllers
-          if ( !empty($t['fixed']) && !empty($t['recursive']) ){
-            $file = dirname($real_file);
-            $index = count($r['list']) - 1;
-            while ( $file && ($file . '/' !== $t['path']) ){
-
-              $t['file'] = dirname($file) . '/' .$t['fixed'];
-              $info = $this->get_tab($url.'/'.$name, $t['title'], $t);
-              if ( !$info ){
-                $this->error("Impossible to get a supra-controller's configuration: DIR: $dir - TAB: $tab - FILE: $t[file] - CFG: ".bbn\x::get_dump($t));
-                return false;
-              }
-              else{
-                array_unshift($r['list'], $info);
-              }
-              $file = dirname($file);
-              $index++;
-            }
-            for ( $i = 0; $i <= $index; $i++ ){
-              $r['list'][$i]['title'] .= ' '.($i+1);
-              $r['list'][$i]['url'] = str_repeat('_', $index-$i).$r['list'][$i]['url'];
-              if ( $r['list'][$i]['url'] === $tab ){
-                $info = $this->get_file($file, $dir, $tab, $t, $pref);
-
-              }
-            }
-          }
-          if ( !empty($tab) && ($t['url'] === $tab) ){
-            $r['def'] = $t['url'];
-          }
-          if ( !empty($t['default']) && empty($r['def']) ){
-            $r['def'] = $t['url'];
+      /** @var string $root_path The real/actual path to the root directory */
+      $root_path = $this->get_root_path($dir);
+      $is_file = true;
+      // Normal Tab
+      if ( empty($tab) && empty($cfg['url']) ){
+        $real_file = $root_path . $file;
+        $r['url'] = $dir . $file;
+        $r['title'] = $file;
+        $r['list'] = [[
+          'bcolor' => $r['bcolor'],
+          'fcolor' => $r['fcolor'],
+          'title' => 'Code',
+          'url' => 'code',
+          'static' => 1,
+          'default' => 1,
+          'file' => $real_file
+        ]];
+        //$r['file'] = $real_file;
+        foreach ( $cfg['extensions'] as $e ){
+          if ( $e['ext'] === $ext ){
+            $mode = $e['mode'];
           }
         }
+        if ( !is_file($real_file) ) {
+          $is_file = false;
+          $this->error('Impossible to find the file ' . $real_file);
+          return false;
+        }
       }
+      // MVC's Tab
       else {
-        /** @var string $root_path The real/actual path to the root directory */
-        $root_path = $this->get_root_path($dir);
-        $is_file = true;
-        // Normal Tab
-        if ( empty($tab) && empty($cfg['url']) ){
-          $real_file = $root_path . $file;
-          $r['url'] = $dir . $file;
-          $r['title'] = $file;
-          $r['list'] = [[
-            'bcolor' => $r['bcolor'],
-            'fcolor' => $r['fcolor'],
-            'title' => 'Code',
-            'url' => 'code',
-            'static' => 1,
-            'default' => 1,
-            'file' => $real_file
-          ]];
-          //$r['file'] = $real_file;
+        $r['url'] = $cfg['url'];
+        $r['static'] = 1;
+        if ( empty($tab) ){
+          $r['default'] = !empty($cfg['default']) ? true : false;
+        }
+        else {
+          $r['default'] = ( $cfg['url'] === $tab ) ? true : false;
+        }
+        // _CTRL
+        if ( !empty($cfg['fixed']) ){
+          $ext = bbn\str::file_ext($cfg['fixed']);
           foreach ( $cfg['extensions'] as $e ){
             if ( $e['ext'] === $ext ){
+              $file = dirname($file) . '/' . $cfg['fixed'];
+              $real_file = $root_path . $file;
               $mode = $e['mode'];
-            }
-          }
-          if ( !is_file($real_file) ) {
-            $is_file = false;
-            $this->error('Impossible to find the file ' . $real_file);
-            return false;
-          }
-        }
-        // MVC's Tab
-        else {
-          $r['url'] = $cfg['url'];
-          $r['static'] = 1;
-          if ( empty($tab) ){
-            $r['default'] = !empty($cfg['default']) ? true : false;
-          }
-          else {
-            $r['default'] = ( $cfg['url'] === $tab ) ? true : false;
-          }
-          // _CTRL
-          if ( !empty($cfg['fixed']) ){
-            $ext = bbn\str::file_ext($cfg['fixed']);
-            foreach ( $cfg['extensions'] as $e ){
-              if ( $e['ext'] === $ext ){
-                $file = dirname($file) . '/' . $cfg['fixed'];
-                $real_file = $root_path . $file;
-                $mode = $e['mode'];
-                $r['file'] = $real_file;
-                if ( !is_file($real_file) ) {
-                  $is_file = false;
-                  $value = $e['default'];
-                }
-                break;
+              $r['file'] = $real_file;
+              if ( !is_file($real_file) ) {
+                $is_file = false;
+                $value = $e['default'];
               }
+              break;
             }
           }
-          else {
-            foreach ( $cfg['extensions'] as $e ){
-              $ext = $e['ext'];
-              /** @var string $real_file The absolute full path to the file */
-              $real_file = $root_path . $file . '.' . $ext;
-              if ( is_file($real_file) ){
-                $r['file'] = $real_file;
-                $mode = $e['mode'];
-                // Permissions
-                if ( ($id_opt = $this->real_to_perm($real_file)) &&
-                  ($opt = $this->options->option($id_opt))
-                ){
-                  $r['perm_id'] = $opt['id'];
-                  $r['perm_code'] = $opt['code'];
-                  $r['perm_text'] = $opt['text'];
-                  if ( isset($opt['help']) ){
-                    $r['perm_help'] = $opt['help'];
-                  }
-                  $sopt = $this->options->full_options($opt['id']);
-                  $perm_chi = [];
-                  foreach ( $sopt as $so ){
-                      array_push($perm_chi, [
-                        'perm_code' => $so['code'],
-                        'perm_text' => $so['text']
-                      ]);
-                  }
-                  $r['perm_children'] = $perm_chi;
-                }
-                break;
-              }
-            }
-            if ( empty($mode) ){
-              $value = $cfg['extensions'][0]['default'];
-            }
-          }
-        }
-
-        // Timing problem is here, check out timer below and logs
-        // Do we need to have a single preference for each tab?
-        // Guilty: real_to_id takes 0.15 sec and is called 10+ times
-        $timer->start();
-        // User's preferences
-        if ( $is_file && 
-          $pref &&
-          ($id_option = $this->options->from_code($this->real_to_id($real_file), $this->_files_pref()))
-        ){
-          $o = $pref->get($id_option);
-        }
-        $timer->stop();
-        if ( empty($tab) && empty($cfg['url']) ){
-          $r['list'][0]['id_script'] = $this->real_to_id($real_file);
-          $r['list'][0]['cfg'] = [
-            'mode' => !empty($mode) ? $mode : $cfg['extensions'][0]['mode'],
-            'value' => empty($value) ? file_get_contents($real_file) : $value,
-            'selections' => !empty($o['selections']) ? $o['selections'] : [],
-            'marks' => !empty($o['marks']) ? $o['marks'] : []
-          ];
         }
         else {
-          $r['id_script'] = $this->real_to_id($real_file);
-          $r['cfg'] = [
-            'mode' => !empty($mode) ? $mode : $cfg['extensions'][0]['mode'],
-            'value' => empty($value) ? file_get_contents($real_file) : $value,
-            'selections' => !empty($o['selections']) ? $o['selections'] : [],
-            'marks' => !empty($o['marks']) ? $o['marks'] : []
-          ];
+          foreach ( $cfg['extensions'] as $e ){
+            $ext = $e['ext'];
+            /** @var string $real_file The absolute full path to the file */
+            $real_file = $root_path . $file . '.' . $ext;
+            if ( is_file($real_file) ){
+              $r['file'] = $real_file;
+              $mode = $e['mode'];
+              // Permissions
+              if ( ($id_opt = $this->real_to_perm($real_file)) &&
+                ($opt = $this->options->option($id_opt))
+              ){
+                $r['perm_id'] = $opt['id'];
+                $r['perm_code'] = $opt['code'];
+                $r['perm_text'] = $opt['text'];
+                if ( isset($opt['help']) ){
+                  $r['perm_help'] = $opt['help'];
+                }
+                $sopt = $this->options->full_options($opt['id']);
+                $perm_chi = [];
+                foreach ( $sopt as $so ){
+                    array_push($perm_chi, [
+                      'perm_code' => $so['code'],
+                      'perm_text' => $so['text']
+                    ]);
+                }
+                $r['perm_children'] = $perm_chi;
+              }
+              break;
+            }
+          }
+          if ( empty($mode) ){
+            $value = $cfg['extensions'][0]['default'];
+          }
         }
-        bbn\x::log($timer->results(), "directories");
-
       }
+
+      // Timing problem is here, check out timer below and logs
+      // Do we need to have a single preference for each tab?
+      // Guilty: real_to_id takes 0.15 sec and is called 10+ times
+      $timer->start();
+      // User's preferences
+      if ( $is_file &&
+        $pref &&
+        ($id_option = $this->options->from_code($this->real_to_id($real_file), $this->_files_pref()))
+      ){
+        $o = $pref->get($id_option);
+      }
+      $timer->stop();
+      if ( empty($tab) && empty($cfg['url']) ){
+        $r['list'][0]['id_script'] = $this->real_to_id($real_file);
+        $r['list'][0]['cfg'] = [
+          'mode' => !empty($mode) ? $mode : $cfg['extensions'][0]['mode'],
+          'value' => empty($value) ? file_get_contents($real_file) : $value,
+          'selections' => !empty($o['selections']) ? $o['selections'] : [],
+          'marks' => !empty($o['marks']) ? $o['marks'] : []
+        ];
+      }
+      else {
+        $r['id_script'] = $this->real_to_id($real_file);
+        $r['cfg'] = [
+          'mode' => !empty($mode) ? $mode : $cfg['extensions'][0]['mode'],
+          'value' => empty($value) ? file_get_contents($real_file) : $value,
+          'selections' => !empty($o['selections']) ? $o['selections'] : [],
+          'marks' => !empty($o['marks']) ? $o['marks'] : []
+        ];
+      }
+      bbn\x::log($timer->results(), "directories");
       return $r;
     }
   }

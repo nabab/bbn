@@ -205,6 +205,16 @@ class options extends bbn\models\cls\db
     return $false ? false : null;
   }
 
+  public function delete_cache($id = null){
+    if ( $id ){
+      $this->cache_delete($id);
+    }
+    else{
+      $this->cache_delete_all();
+    }
+    return $this;
+  }
+
   public function fix_order($id, $deep = false){
     if (
       $this->get_param($id, 'orderable') &&

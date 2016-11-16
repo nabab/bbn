@@ -842,6 +842,7 @@ class user extends models\cls\basic
                 $this->class_cfg['tables']['users'],
                 $update,
                 [$this->fields['id'] => $this->id]);
+        /** @todo Why did I do this?? */
         $this->set_session(['cfg' => false]);
         $this->_user_info();
         return $r;
@@ -1102,7 +1103,7 @@ class user extends models\cls\basic
   }
 
   public function get_manager($mail = false){
-    $mgr = new manager($this, $mail);
+    $mgr = new user\manager($this, $mail);
     return $mgr;
   }
 

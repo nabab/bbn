@@ -654,9 +654,9 @@ class str
    *
 	 * @return mixed
 	 */
-  public static function correct_types($st)
-  {
+  public static function correct_types($st){
     if ( is_string($st) ){
+      $st = trim($st);
       if ( self::is_integer($st) && ((substr($st, 0, 1) !== '0') || ($st === '0')) ){
         $tmp = (int)$st;
         if ( ($tmp < PHP_INT_MAX) && ($tmp > -PHP_INT_MAX) ){
