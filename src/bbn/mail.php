@@ -179,7 +179,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
   public function send($cfg){
     $valid = false;
     $r = false;
-    if ( BBN_IS_DEV ){
+    if ( !BBN_IS_PROD ){
       $cfg['to'] = BBN_ADMIN_EMAIL;
       $cfg['cc'] = '';
       $cfg['bcc'] = '';
@@ -262,9 +262,6 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
       if ( !$r ){
         $this->log(imap_last_error());
       }
-    }
-    else{
-      $r = false;
     }
     $this->mailer->ClearAllRecipients();
     $this->mailer->ClearAttachments();
