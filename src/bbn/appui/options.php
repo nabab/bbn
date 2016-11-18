@@ -113,7 +113,7 @@ class options extends bbn\models\cls\db
     if ( bbn\str::is_integer($id) ) {
       if ( isset($opt) || ($opt = $this->native_option($id)) ){
         $this->get_value($opt);
-        $this->get_cfg($opt);
+        $this->get_cfg($id);
         if ( bbn\str::is_integer($opt['id_alias']) ){
           if ( $opt['id_alias'] === $id ){
             die("Impossible to have the same ID as ALIAS, check out ID $id");
@@ -294,7 +294,7 @@ class options extends bbn\models\cls\db
     }
     if ( bbn\str::is_integer($id) ){
       $cf = $this->class_cfg;
-      $cfg = $this->db->select_one($cf['table'], $cf['arch']['cfg'], [$cf['arch']['id'] => $id]);
+      $cfg = $this->db->select_one($cf['table'], $cf['cols']['cfg'], [$cf['cols']['id'] => $id]);
       $cfg = bbn\str::is_json($cfg) ? json_decode($cfg, 1) : [];
       // Looking for parent with inheritance
       $parents = $this->parents($id);
@@ -315,7 +315,7 @@ class options extends bbn\models\cls\db
         }
       }
     }
-    return $opt['cfg'];
+    return $cfg;
   }
 
   /**
