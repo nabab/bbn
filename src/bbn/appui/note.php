@@ -29,40 +29,40 @@ class note extends bbn\models\cls\db
   protected static
     /** @var array */
     $_defaults = [
-    'errors' => [
-      19 => 'wrong fingerprint'
-    ],
-    'table' => 'bbn_notes',
-    'tables' => [
-      'notes' => 'bbn_notes',
-      'versions' => 'bbn_notes_versions',
-      'medias' => 'bbn_notes_medias'
-    ],
-    'arch' => [
-      'notes' => [
-        'id' => 'id',
-        'id_parent' => 'id_parent',
-        'private' => 'private',
-        'creator' => 'creator',
-        'active' => 'active'
+      'errors' => [
+        19 => 'wrong fingerprint'
       ],
-      'versions' => [
-        'id_note' => 'id_note',
-        'version' => 'version',
-        'title' => 'title',
-        'content' => 'content',
-        'id_user' => 'id_user',
-        'creation' => 'creation'
+      'table' => 'bbn_notes',
+      'tables' => [
+        'notes' => 'bbn_notes',
+        'versions' => 'bbn_notes_versions',
+        'medias' => 'bbn_notes_medias'
       ],
-      'medias' => [
-        'id_media' => 'id_media',
-        'id_note' => 'id_note',
-        'id_user' => 'id_user',
-        'comment' => 'comment',
-        'creation' => 'creation',
+      'arch' => [
+        'notes' => [
+          'id' => 'id',
+          'id_parent' => 'id_parent',
+          'private' => 'private',
+          'creator' => 'creator',
+          'active' => 'active'
+        ],
+        'versions' => [
+          'id_note' => 'id_note',
+          'version' => 'version',
+          'title' => 'title',
+          'content' => 'content',
+          'id_user' => 'id_user',
+          'creation' => 'creation'
+        ],
+        'medias' => [
+          'id_media' => 'id_media',
+          'id_note' => 'id_note',
+          'id_user' => 'id_user',
+          'comment' => 'comment',
+          'creation' => 'creation',
+        ]
       ]
-    ]
-  ];
+    ];
 
   public function __construct(bbn\db $db){
     parent::__construct($db);

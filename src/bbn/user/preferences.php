@@ -245,13 +245,14 @@ class preferences
 
 	public function get_existing_permissions($path){
 		$r = [];
-		if ( $id = $this->from_path($path) ){
+		if (
+		  ($id = $this->from_path($path)) &&
 			// Keeps the order
-			$opt = $this->options->full_options($id);
-			foreach ( $opt as $o ){
-				$r[$o['id']] = $o['code'];
-			}
-			return $r;
+			($opt = $this->options->full_options($id))
+    ){
+      foreach ( $opt as $o ){
+        $r[$o['id']] = $o['code'];
+      }
 		}
 		return $r;
 	}

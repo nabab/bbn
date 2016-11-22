@@ -28,24 +28,28 @@ trait dbconfig
    * @return $this
    */
   private function _init_class_cfg(array $cfg = []){
-    $this->class_cfg = bbn\x::merge_arrays(self::$_defaults, $cfg);
+    $tmp = bbn\x::merge_arrays(self::$_defaults, $cfg);
+
+    if ( !isset($tmp['tables'], $tmp['table'], $tmp['arch']) ){
+      die("The class ".get_class($this)."is not configured properly to work with trait dbconfig");
+    }
+
+    // We completely replace the table structure, no merge
     if ( !empty($cfg['arch']) ){
       foreach ( $cfg['arch'] as $t => $a ){
-        $this->class_cfg['arch'][$t] = $a;
-        if ( $cfg['tables'][$t] === $this->class_cfg['table'] ){
+        $tmp['arch'][$t] = $a;
+        if ( $tmp['tables'][$t] === $tmp['table'] ){
           $this->class_table_index = $t;
         }
       }
     }
-    if ( empty($this->class_cfg['table']) ){
-      die("You must define a main table for the class in ".get_class($this));
-    }
-    $this->class_table = $this->class_cfg['table'];
+    $this->class_table = $tmp['table'];
     /*
      * The selection comprises the defined fields of the users table
      * Plus a bunch of user-defined additional fields in the same table
      */
-    $this->fields = $this->class_cfg['arch'][$this->class_table_index];
+    $this->fields = $tmp['arch'][$this->class_table_index];
+    $this->class_cfg = $tmp;
     return $this;
   }
 

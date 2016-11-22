@@ -272,7 +272,9 @@ trait triggers {
    */
   public function where_cfg(array $w, $table = [], $values = []){
     // Checking this array is not already correctly configured to be where
-    if ( isset($w['bbn_where_cfg'], $w['fields'], $w['values'], $w['final'], $w['keyval'], $w['unique']) &&
+    if (
+      $this->check() &&
+      isset($w['bbn_where_cfg'], $w['fields'], $w['values'], $w['final'], $w['keyval'], $w['unique']) &&
       ($w['bbn_where_cfg'] === 1)
     ){
       return $w;
@@ -332,7 +334,7 @@ trait triggers {
             else {
               $this->error(
                 "Error! The column '$v[0]' as mentioned in where doesn't exist in '".
-                implode(", ", array_keys($tables_fields))."' table(s)", $v
+                implode(", ", array_keys($tables_fields))."' table(s)", $v, $w
               );
             }
           }

@@ -28,7 +28,7 @@ abstract class basic
 		/**
 		 * @var boolean
 		 */
-		$is_debug = false,
+		$debug = false,
 		/**
 		 * @var array
 		 */
@@ -55,7 +55,7 @@ abstract class basic
 	}
 
 	public function log(){
-		if ( $this->is_debug ){
+		if ( $this->is_debug() ){
 			$ar = func_get_args();
 			$cn = bbn\str::encode_filename(str_replace('\\', '_', get_class($this)));
 			foreach ( $ar as $a ){
@@ -75,7 +75,24 @@ abstract class basic
     die(var_dump(["Wrong method used for the class $class: $name with the following arguments:", $arguments]));
 	}
 
-	/**
+  /**
+   * @return boolean
+   */
+  public function is_debug(): bool
+  {
+    return $this->debug || (defined("BBN_IS_DEV") && BBN_IS_DEV);
+  }
+
+  /**
+   * @param boolean $debug
+   * @return self
+   */
+  public function set_debug(bool $debug): self
+  {
+    $this->debug = $debug;
+  }
+
+  /**
 	 * @param string $name
 	 * @param array $arguments
 	 * @return void 

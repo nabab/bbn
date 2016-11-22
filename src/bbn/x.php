@@ -479,7 +479,7 @@ class x
    * @return string
    */
   public static function get_hdump(){
-    return '<p>'.nl2br(str_replace(" ", "&nbsp;", htmlentities(call_user_func_array('self::get_dump', func_get_args()))), false).'</p>';
+    return '<p>'.nl2br(str_replace(" ", "&nbsp;&nbsp;", htmlentities(call_user_func_array('self::get_dump', func_get_args()))), false).'</p>';
   }
 
   /**

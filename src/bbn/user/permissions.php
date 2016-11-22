@@ -92,7 +92,7 @@ class permissions
    */
   public function get($code){
 		if ( $this->_check() ){
-			$ids = $this->opt->get_ids_by_code($code);
+			$ids = $this->opt->items($code);
 			foreach ( $ids as $id ){
 				if ( $this->opt->is_parent($id, self::$root) ){
 					return $id;

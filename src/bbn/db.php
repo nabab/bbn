@@ -175,6 +175,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
     self::$has_error_all = true;
   }
 
+  /**
+   * @param $item string 'db_name' or 'table'
+   * @param $mode string 'columns','tables' or'databases'
+   * @return bool|string
+   */
   private function _cache_name($item, $mode){
     $r = false;
     $h = str::encode_filename($this->host);
@@ -346,7 +351,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Checks if the database is in a state ready to query
+   * Checks if the database is ready to process a query
+   *
+   * <code>
+   * $db->check()
+   * </code>
    *
    * @return bool
    */
@@ -369,7 +378,16 @@ class db extends \PDO implements db\actions, db\api, db\engines
   /**
    * @todo Thomas fais ton taf!!
    *
-   * @param $cfg Mandatory: engine, db Optional: cache_length Other: see engine class
+   * @param $cfg Mandatory db_user db_engine db_host db_pass
+   *
+   * <code>
+    $dbtest = new \bbn\db([
+      'db_user' => 'test',
+      'db_engine' => 'mysql',
+      'db_host' => 'localhost',
+      'db_pass' => 't65pZDwEROdfp4IzM',
+      ]);
+   * </code>
    * @return void
    */
   public function __construct($cfg=[])
@@ -412,7 +430,22 @@ class db extends \PDO implements db\actions, db\api, db\engines
     }
   }
 
-  public function get_foreign_keys($col, $table, $db = false){
+  /**
+   ** return an array with tables and fields related to the searched foreign key
+   *
+   * <code>
+   * $this->db->get_foreign_keys('id', 'test_table', 'db_name')
+   * </code>
+   *
+   *
+   * @param string $col
+   * @param string $table
+   * @param string $db the database name if different from the current one
+   *
+   * @return array with tables and fields related to the searched foreign key
+   *
+   */
+  public function get_foreign_keys(string $col, string $table, string $db = null){
     if ( !$db ){
       $db = $this->current;
     }
@@ -437,6 +470,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
     return $res;
   }
 
+  /**
+   * return the log in data/logs/db.log
+   * @param string $st
+   */
+
   public function log($st){
     $args = func_get_args();
     foreach ( $args as $a ){
@@ -445,13 +483,13 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Changes the error mode.
+   * Sets the error mode.
    *
    * <code>
    * $this->db->get_error_mode();
    * </code>
    *
-   * @param string $mode The error mode: "continue", "die".
+   * @param string $mode The error mode: "continue", "die", "stop", "stop_all".
    */
   public function set_error_mode($mode){
     $this->on_error = $mode;
@@ -473,10 +511,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
   /**
    * Delete a specific item from the cache
    *
-   * @return db
+   * @param $item string 'db_name' or 'table_name'
+   * @param $mode string 'columns','tables' or'databases'
+   * @return $this
    */
-  public function clear_cache($item, $mode)
-  {
+  public function clear_cache($item, $mode){
     $cache_name = $this->_cache_name($item, $mode);
     if ( $this->cacher->has($cache_name) ){
       $this->cacher->delete($cache_name);
@@ -489,8 +528,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *
    * @return db
    */
-  public function clear_all_cache()
-  {
+  public function clear_all_cache(){
     $this->cacher->clear();
     return $this;
   }
@@ -500,8 +538,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *
    * @return void
    */
-  public function stop_fancy_stuff()
-  {
+  public function stop_fancy_stuff(){
     $this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, ['\PDOStatement']);
     $this->fancy = false;
   }
@@ -511,8 +548,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *
    * @return void
    */
-  public function start_fancy_stuff()
-  {
+  public function start_fancy_stuff(){
     $this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, ['\\bbn\\db\\query',[$this]]);
     $this->fancy = 1;
   }
@@ -528,23 +564,25 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
+   *
+   * @todo check the example
    * Escape names with the appropriate quotes (db, tables, columns, keys...)
    *
    * <code>
-   * $this->db->escape("table_users");
+   * $this->db->escape("'table_users'");
    * </code>
+   * return \'table_users\'
    *
-   * @param string $table The table's name (escaped or not).
+   * @param string $table Table's name to escape.
    *
    * @return string
    */
-  public function escape($item)
-  {
+  public function escape($item){
     return $this->language->escape($item);
   }
 
   /**
-   * Returns a value string ready to be put inside quotes, with quotes and percent escaped.
+   * Returns a string with quotes and percent escaped.
    *
    * <code>
    * $this->db->escape_value("L'infanzia di \"maria\"");
@@ -554,8 +592,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *
    * @return string | false
    */
-  public function escape_value($value, $esc = "'")
-  {
+  public function escape_value($value, $esc = "'"){
     if ( is_string($value) ){
       return str_replace('%', '\\%', $esc === '"' ?
         str::escape_dquotes($value) :
@@ -569,9 +606,10 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *
    * @param int $id The last ID inserted
    * @return db
+   *
+   * @todo this function should be private
    */
-  public function set_last_insert_id($id='')
-  {
+  public function set_last_insert_id($id=''){
     if ( $id === '' ){
       $id = $this->lastInsertId();
       if ( is_string($id) && str::is_integer($id) ){
@@ -583,103 +621,146 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Returns a table's full name.
+   * Returns table's full name.
    * i.e. "database.table".
    *
    * <code>
-   * $this->db->table_full_name("table_users"); //Returns work_db.table_users
+   * $this->db->table_full_name("table_users"); //Returns db_example.table_users
+   * $this->db->table_full_name("table_users", true); //Returns `db_example`.`table_users`
+   *
    * </code>
    *
-   * @param string $table The table's name (escaped or not).
+   * @param string $table Table's name (escaped or not).
    * @param bool $escaped If set to true the returned string will be escaped.
    *
    * @return string | false
    */
-  public function table_full_name($table, $escaped=false)
-  {
+  public function table_full_name($table, $escaped=false){
     return $this->language->table_full_name($table, $escaped);
   }
 
-  public function tfn($table, $escaped=false)
-  {
+  /**
+   * It's the same function of table_full_name()
+   *
+   * @param $table
+   * @param bool $escaped
+   * @return false|string
+   */
+
+
+  public function tfn($table, $escaped=false){
     return $this->table_full_name($table, $escaped);
   }
 
   /**
-   * Returns a table's simple name.
+   * Returns table's simple name.
    * i.e. "table".
    *
    * <code>
    * $this->db->table_simple_name("work_db.table_users"); //Returns table_users
+   * $this->db->table_simple_name("work_db.table_users", true); //Returns `table_users`
    * </code>
    *
-   * @param string $table The table's name (escaped or not).
+   * @param string $table Table's name (escaped or not).
    * @param bool $escaped If set to true the returned string will be escaped.
    *
    * @return string | false
    */
-  public function table_simple_name($table, $escaped=false)
-  {
+  public function table_simple_name($table, $escaped=false){
     return $this->language->table_simple_name($table, $escaped);
   }
 
-  public function tsn($table, $escaped=false)
-  {
+  /**
+   * It's the same function of table_simple_name
+   *
+   * @param $table
+   * @param bool $escaped
+   * @return false|string
+   *
+   */
+  public function tsn($table, $escaped=false){
     return $this->table_simple_name($table, $escaped);
   }
 
   /**
-   * Returns a column's full name.
+   * Returns column's full name.
    * i.e. "table.column".
    *
    * <code>
    * $this->db->col_full_name("name", "table_users"); //Returns table_users.name
+   * $this->db->col_full_name("name", "table_users", true); //Returns `table_users`.`name`
+   *
+   *
    * </code>
    *
-   * @param string $col The column's name (escaped or not).
-   * @param string $table The table's name (escaped or not).
+   * @param string $col Column's name (escaped or not).
+   * @param string $table Table's name (escaped or not).
    * @param bool $escaped If set to true the returned string will be escaped.
    *
    * @return string | false
    */
-  public function col_full_name($col, $table='', $escaped=false)
-  {
+  public function col_full_name($col, $table='', $escaped=false){
     return $this->language->col_full_name($col, $table, $escaped);
   }
 
-  public function cfn($col, $table='', $escaped=false)
-  {
+  /**
+   * It's the same function of col_full_name
+   *
+   * @param string $col
+   * @param string $table
+   * @param bool $escaped
+   * @return false|string
+   *
+   */
+  public function cfn($col, $table='', $escaped=false){
     return $this->col_full_name($col, $table, $escaped);
   }
 
   /**
-   * Returns a column's simple name.
+   * Returns column's simple name.
    * i.e. "column"
    *
    * <code>
    * $this->db->col_simple_name("table_users.name"); //Returns name
+   * $this->db->col_simple_name("table_users.name", true); //Returns `name`
+   *
    * </code>
    *
-   * @param string $col The column's name (escaped or not).
+   * @param string $col Column's complete name (escaped or not).
    * @param bool $escaped If set to true the returned string will be escaped.
    *
    * @return string | false
    */
-  public function col_simple_name($col, $escaped=false)
-  {
+  public function col_simple_name($col, $escaped=false){
     return $this->language->col_simple_name($col, $escaped);
   }
 
-  public function csn($col, $escaped=false)
-  {
+  /**
+   * It's the same function of col_simple_name
+   *
+   * @param string $col
+   * @param bool $escaped
+   * @return false|string
+   *
+   *
+   */
+  public function csn($col, $escaped=false){
     return $this->col_simple_name($col, $escaped);
   }
 
   /**
+   *
    * @todo Thomas fais ton taf!!
    * @return
    */
-  public function make_hash()
+
+  /**
+   * make a string that will be the id of request
+   *
+   * @return string
+   *
+   */
+  private function make_hash()
   {
     $args = func_get_args();
     if ( (count($args) === 1) && is_array($args[0]) ){
@@ -692,11 +773,22 @@ class db extends \PDO implements db\actions, db\api, db\engines
     return $this->hash_contour.md5($st).$this->hash_contour;
   }
 
+  /**
+   * @todo chiedere e thomas se deve diventare private
+   *
+   *
+   */
   public function get_hash()
   {
     return $this->hash;
   }
 
+
+  /**
+   * @todo nella vecchia doc non esiste
+   * @param $statement
+   * @return $this
+   */
   public function add_statement($statement){
     $this->last_query = $statement;
     if ( $this->debug ){
@@ -713,7 +805,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * $this->db->has_id_increment('table_users');
    * </code>
    *
-   * @param string $table The table name.
+   * @param string $table Table's name.
    *
    * @return bool
    *
@@ -731,14 +823,15 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
+   *
+   * @todo chiedere a thomas, non siamo riusciti a provarla e forse dovrebbe essere private
    * Returns a SQL query based on a configuration (??)
    * @todo Check the configuration format
    *
    * @param array $cfg Description
    * @return string
    */
-  public function create_query($cfg)
-  {
+  public function create_query($cfg){
     if ( !isset($this->creator) ){
       $this->creator = new \PHPSQLParser\PHPSQLCreator();
     }
@@ -746,6 +839,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
+   *
+   * @todo chiedere a thomas
    * Parses a SQL query and returns an array
    *
    * @param string $cfg
@@ -767,11 +862,13 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Returns the last statement used by a query for this connection.
+   * Returns the last query for this connection.
    *
    * <code>
    * $this->db->last();
    * </code>
+   * return UPDATE `db_test`.`table_test` SET `table_test`.`id_user` = ?,
+   *         `table_test`.`sess_id` = ?
    *
    * @return string
    */
@@ -781,6 +878,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
+   *
    * Returns the last inserted ID
    *
    * <code>
@@ -827,8 +925,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @param string $db
    * @return db
    */
-  public function change($db)
-  {
+  public function change($db){
     if ( $this->language->change($db) ){
       $this->current = $db;
     }
@@ -840,8 +937,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *
    * @return db
    */
-  public function disable_keys()
-  {
+  public function disable_keys(){
     $this->language->disable_keys();
     return $this;
   }
@@ -858,7 +954,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Returns a count of identical values in a field as array, reporting a structure type 'num' - 'column_name'.
+   * Returns an array with the count of identical values in a column, reporting a structure type 'num' - 'column_name'.
    *
    * <code>
    * $this->db->stat(
@@ -885,8 +981,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
       $sql = 'SELECT COUNT(*) AS '.$this->qte.'num'.$this->qte.', '.
         $this->csn($column, 1).PHP_EOL.
         'FROM '.$this->tfn($table, 1).PHP_EOL.
+        $this->get_where($where, $table).PHP_EOL.
         'GROUP BY '.$this->csn($column, 1).PHP_EOL.
-        $this->get_where($where).PHP_EOL.
         ( empty($order) ?
           'ORDER BY '.$this->qte.'num'.$this->qte.' DESC'
           : $this->get_order($order)
@@ -897,6 +993,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
+   *
+   * * @todo far vedere a thomams perche non funziona
    * Executes the original PDO query function
    *
    * @return \PDO::query
@@ -910,6 +1008,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
+   * @todo far vedere a thomams perche non funziona
    * Executes a writing statement and returns the number of affected rows or returns a query object for the reading statement
    *
    * @return int|db\query
@@ -1076,15 +1175,16 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * $this->db->get_val("table_users", "surname", "name", "Julien");
    * </code>
    *
-   * @param string $table The table name.
-   * @param string $field_to_get The name of the field to get.
-   * @param string|array $field_to_check the name of the field to check.
+   * return surname's value
+   *
+   * @param string $table Table's name.
+   * @param string $field_to_get Field to get.
+   * @param string|array $field_to_check Name of the field in which search the value.
    * @param string $value The value to check.
    *
    * @return string | false
    */
-  public function get_val($table, $field_to_get, $field_to_check='', $value='')
-  {
+  public function get_val($table, $field_to_get, $field_to_check='', $value=''){
     if ( is_array($field_to_check) ){
       $where = $field_to_check;
     }
@@ -1107,34 +1207,40 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * $this->db->val_by_id("table_users", "surname", "138");
    * </code>
    *
-   * @param string $table The table name.
-   * @param string $field The field name.
+   * return surname value of id = 138
+   *
+   *
+   * @param string $table Table's name.
+   * @param string $field Field's name.
    * @param string $id The "id" value.
-   * @param string $col The id colomn name, dafault: 'id'.
+   * @param string $col Column's name in which search for the value, default: 'id'.
    *
    * @return string | false
    */
-  public function val_by_id($table, $field, $id, $col='id')
-  {
+  public function val_by_id($table, $field, $id, $col='id'){
     return $this->select_one($table, $field, [$col => $id]);
   }
 
   /**
-   * Returns an integer candidate for being a new ID in the given table.
+   *
+   * Generate a new casual id based on the max number of characters of id's column structure in the given table
+   *
    *
    * <code>
-   * $this->db->new_id("table_users");
+   * $this->db->new_id('users',10)
    * </code>
+   * return id value  69991701
    *
-   * @param string $table The table name.
-   * @param string $id_field The id field name, default: 'id'.
-   * @param int $min The minimum value for new id.
-   * @param int $max The maximum value for new id.
+   * @param string $table
+   * @param int $min
+   * @return bool|int
    *
-   * @return int | false
+   *
+   *
+   *
+   *
    */
-  public function new_id($table, $min = 1)
-  {
+  public function new_id($table, $min = 1){
     $tab = $this->modelize($table);
     if ( count($tab['keys']['PRIMARY']['columns']) !== 1 ) {
       die("Error! Unique numeric primary key doesn't exist");
@@ -1165,18 +1271,17 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Returns the integer which will be next incremented ID in the given table.
+   * Returns the integer which will be the next incremented ID in the given table.
    *
    * <code>
    * $this->db->next_id("table_users");
    * </code>
    *
-   * @param string $table The table name.
+   * @param string $table Table's name.
    *
    * @return int | false
    */
-  public function next_id($table)
-  {
+  public function next_id($table){
     $tab = $this->modelize($table);
     if ( count($tab['keys']['PRIMARY']['columns']) !== 1 ) {
       die("Error! Unique numeric primary key doesn't exist");
@@ -1191,13 +1296,23 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Transposition of the original fetch method, but with the query included. It returns an arra or false if no result
+   *  It returns an indexed array with the first result of the query or false if no result
    *
    * @param string $query
    * @return array|false
+   *
+   * <code>
+   * $this->db->fetch("SELECT name FROM users WHERE id = 10")
+   * </code>
+   *
+   * return [
+   * "name" => "john",
+   * 0 => "john",
+   * ]
    */
-  public function fetch($query)
-  {
+
+
+  public function fetch($query){
     if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       return $r->fetch();
     }
@@ -1205,13 +1320,30 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Transposition of the original fetchAll method, but with the query included. It returns an arra or false if no result
+   *
+   *  It returns an array of indexed array with all results of the query or false if no result
+   *
    *
    * @param string $query
    * @return array | false
+   *
+   *
+   * <code>
+   * $this->db->fetchAll("SELECT surname FROM users WHERE name = 'john'")
+   * </code>
+   *
+   *  [
+   *    [
+   *    "surname" => "White",
+   *    0 => "White",
+   *    ],
+   *    [
+   *    "surname" => "White",
+   *    0 => "White",
+   *    ],
+   *  ]
    */
-  public function fetchAll($query)
-  {
+  public function fetchAll($query){
     if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       return $r->fetchAll();
     }
@@ -1219,6 +1351,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
+   *
+   *
+   * @todo confusion between result's index and this->query arguments(IMPORTANT)
+   *
+   *
    * Transposition of the original fetchColumn method, but with the query included. It returns an arra or false if no result
    *
    * @param $query
@@ -1229,6 +1366,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
     if ( !is_int($num) ){
       $num = 0;
     }
+    call_user_func_array('var_dump', func_get_args());
+
     if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       return $r->fetchColumn($num);
     }
@@ -1236,13 +1375,19 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Transposition of the original fetchColumn method, but with the query included. It returns an arra or false if no result
+   * Returns an array with stdClass of object or false if no result.
    *
-   * @param $query
+   * @param string $query
    * @return stdClass
+   *
+   *
+   * <code>
+   * $db->fetchObject("SELECT id FROM users WHERE name = 'john'")
+   * </code>
+   * return stdClass Object ( [id] => 1 )
+   *
    */
-  public function fetchObject($query)
-  {
+  public function fetchObject($query){
     if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       return $r->fetchObject();
     }
@@ -1250,6 +1395,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
+   *
+   * @todo fetchColumn() non funziona, e questo?
    * Execute the given query with given vars, and extract the first cell's result.
    *
    * <code>
@@ -1268,7 +1415,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
 
   /**
    * Synonym of get_one (historical).
-   *
+   * @todo fetchColumn() non funziona, e questo?
    * <code>
    * $this->db->get_var("SELECT name, surname FROM table_users WHERE id=?", 138);
    * </code>
@@ -1281,18 +1428,20 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Returns first row as an array indexed with the fields names.
-   * Same arguments as query.
-   * Returns same value as "select".
+   * Returns the first row as an array indexed with the fields' name.
+   *
+   * @param string $query
+   *
    *
    * <code>
-   * $this->db->get_row("SELECT id, name FROM table_users WHERE id > ?", 30);
+   * $this->db->get_row("SELECT id, name FROM table_users WHERE id > ?", 2);
    * </code>
+   * i.e. return [ ( [id] => 3 [name] => john ]
    *
-   * @return array | false
+   *
+   * @return array | false Return the first row resulant from the query.
    */
-  public function get_row()
-  {
+  public function get_row(){
     if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       return $r->get_row();
     }
@@ -1300,18 +1449,32 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Returns an array of rows as arrays indexed with the fields names.
-   * Same arguments as query.
-   * Returns same value as "select_all".
+   * Returns an array that includes indexed arrays for every row resultant from the query.
    *
    * <code>
-   * $this->db->get_rows("SELECT id, name FROM table_users WHERE id > ? AND name LIKE ? ORDER BY id ASC LIMIT ?", 15, "b%", 4);
+   * $this->db->get_rows("SELECT id, name FROM users WHERE id >   ?  LIMIT ?",2, 3);
    * </code>
    *
+   * i.e. [
+   *        [
+   *        "id" => 3,
+   *        "name" => "john",
+   *        ],
+   *        [
+   *        "id" => 4,
+   *        "name" => "barbara",
+   *        ],
+   *        [
+   *        "id" => 9,
+   *        "name" => "michael",
+   *        ],
+   *      ]
+   *
+   *
+   * @todo far tradurre a thomas
    * @return array | false
    */
-  public function get_rows()
-  {
+  public function get_rows(){
     if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       return $r->get_rows();
     }
@@ -1320,12 +1483,18 @@ class db extends \PDO implements db\actions, db\api, db\engines
 
   /**
    * Returns a row as a numeric indexed array.
-   * Same arguments as query.
-   * Returns same value as "iselect".
+   *
+   * @param string $query
    *
    * <code>
-   * $this->db->get_irow("SELECT id, name, surname FROM table_users WHERE id > ?", 30);
+   * $this->db->get_irow("SELECT id, name, surname FROM users WHERE id > ?  ",2);
    * </code>
+   *
+   * i.e. [
+   *        3,
+   *        "john",
+   *        "brown",
+   *        ]
    *
    * @return array | false
    */
@@ -1339,11 +1508,23 @@ class db extends \PDO implements db\actions, db\api, db\engines
 
   /**
    * Returns an array of numeric indexed rows.
-   * Same arguments as query.
+   *
+   * @param string $query
+   *
    *
    * <code>
-   * $this->db->get_rows("SELECT id, name FROM table_users WHERE id > ? AND name LIKE ? ORDER BY id ASC LIMIT ?", 15, "b%", 4);
+   * $this->db->get_rowsget_irows("SELECT id, name FROM users WHERE id >   ?  LIMIT ?",2, 2);
    * </code>
+   * i.e. [
+   *        [
+   *       3,
+   *        "john",
+   *        ],
+   *        [
+   *        4,
+   *        "barbara",
+   *        ],
+   *      ]
    *
    * @return array
    */
@@ -1356,18 +1537,38 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Returns an array with the first field as index and either the second field as value f there is only 2 fields or with an array of the different fields as value if there are more.
-   * Same arguments as query.
-   * Returns same value as "select_all_by_keys".
+   *
+   * Returns an array indexed on the first field of the request.
+   * The value will be an array if the request has more than two fields
+   *
+   * @param string $query
    *
    * <code>
-   * $this->db->get_rows("SELECT id, name FROM table_users WHERE id > ?", 45);
+   * $db->get_key_val("SELECT name, id_group FROM users")
    * </code>
+   * i.e. [
+   *      "John" => 1,
+   *      "Michael" => 1,
+   *      "Barbara" => 1,
+   *       ]
    *
+   * <code>
+   * $db->get_key_val("SELECT name, surname, id FROM users WHERE id > 2")
+   * </code>
+   * i.e. [
+            "John" => [
+              "surname" => "Brown",
+              "id" => 3,
+            ],
+            "Michael" => [
+              "surname" => "Smith",
+              "id" => 4,
+            ],
+          ]
+
    * @return array | false
    */
-  public function get_key_val()
-  {
+  public function get_key_val(){
     if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       $rows = $r->get_rows();
       // At least 2 columns
@@ -1388,32 +1589,43 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Returns an array with the first field as index and either the second field as value f there is only 2 fields or with an array of the different fields as value if there are more.
+   *  Returns an array indexed on the first field of the request.
+   * The value will be an array if the request has more than two fields
+   *
    * Same arguments as "select_all".
    * Returns same value as "get_key_val".
    *
    * <code>
-   * $this->db->select_all_by_keys(
-   *  "tab_users",
-   *  ["id", "name", "surname"],
+   * $db->select_all_by_keys(
+   *   "bbn_users",
+   *    ["name","id","surname"],
    *  [
-   *    ["id", "<", 138],
-   *    ["name", "LIKE", "c%"]
+   *      ["id", ">", "1"]
    *  ],
-   *  ["id" => "ASC"],
-   *  2);
+   *    ["id" => "ASC"]);
    * </code>
    *
-   * @param string $table The table name.
-   * @param string|array $fields The fields name.
+   *  i.e. [
+   *        "John" => [
+   *          "surname" => "Brown",
+   *          "id" => 3,
+   *          ],
+   *        "Michael" => [
+   *          "surname" => "Smith",
+   *          "id" => 4,
+   *        ],
+   *      ]
+   *
+   *
+   * @param string $table Table's name.
+   * @param string|array $fields Fields's name.
    * @param array $where  The "where" condition.
    * @param string|array $order The "order" condition, default: false.
-   * @param int $start The "start" condition, default: 0.
+   * @param int $limit The $limit condition, default: 0.
    *
    * @return array|false
    */
-  public function select_all_by_keys($table, $fields = [], $where = [], $order = false, $start = 0)
-  {
+  public function select_all_by_keys($table, $fields = [], $where = [], $order = false, $start = 0){
     if ( $sql = $this->get_select($table, $fields, $where, $order, $start) ){
       $where = $this->where_cfg($where, $table);
       if ( count($where['values']) > 0 ){
@@ -1427,16 +1639,25 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Returns an array indexed on the columns in which are all the values.
+   * Returns an array indexed on the field's of the query in which are all the values of the column.
    *
    * <code>
-   * $this->db->get_by_columns("SELECT * FROM table_users WHERE name LIKE ?", 'b%');
+   * $this->db->get_by_columns("SELECT name FROM users WHERE id = 3");
    * </code>
+   *     i.e. [
+   *       "name" => [
+   *         "John",
+   *         "Michael"
+   *        ],
+   *       "surname" => [
+   *          "Brown",
+   *          "Smith"
+   *        ],
+   *       ]
    *
    * @return array
    */
-  public function get_by_columns()
-  {
+  public function get_by_columns(){
     if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       return $r->get_by_columns();
     }
@@ -1444,7 +1665,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Returns the result of a query as a single numeric array for one single column values.
+   * Returns an array with the values of single fields resulting from the query
    *
    * <code>
    * $this->db->get_col_array("SELECT CONCAT(name, ' ', surname) AS n FROM table_users WHERE name LIKE ?", 'b%');
@@ -1452,8 +1673,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *
    * @return array | false
    */
-  public function get_col_array()
-  {
+  public function get_col_array(){
     if ( $r = call_user_func_array([$this, 'get_by_columns'], func_get_args()) ){
       return array_values(current($r));
     }
@@ -1461,27 +1681,33 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * @todo Thomas fais ton taf!!
+   * same that get_object
+   * @param string $query
    *
-   * @return void
+   * @return object
    */
-  public function get_obj()
-  {
+  public function get_obj(){
     return $this->get_object(func_get_args());
   }
 
   /**
-   * Returns first row as an array of object.
+   * Returns first row as an object.
    * Synonym of get_obj.
    *
-   * <code>
-   * $this->db->get_row("SELECT id, name FROM table_users WHERE id > ?", 30);
-   * </code>
+   * @param string $query
    *
-   * @return array | false
+   *
+   * <code>
+   * $this->db->get_object("SELECT name FROM users");
+   * </code>
+   * i.e. {
+   *       "name" => "John"
+   *      }
+   *
+   *
+   * @return object | false
    */
-  public function get_object()
-  {
+  public function get_object(){
     if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
       return $r->get_object();
     }
@@ -1489,13 +1715,25 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Returns an array of rows as arrays of objects.
+   * Returns an array of stdClass objects.
+   *
+   * @param string $query
+   * @return array
    *
    * <code>
-   * $this->db->get_rows("SELECT id, name FROM table_users WHERE id > ? AND name LIKE ? ORDER BY id ASC LIMIT ?", 15, "b%", 4);
+   * $this->db->get_objects("SELECT name FROM loredana LIMIT 2 ");
    * </code>
+   *i.e. [
+   *      Object stdClass: df {
+   *      "name" => "John",
+   *      },
+   *      Object stdClass: df {
+   *    "name" => "Michael",
+   *      }
+   *     ]
    *
-   * @return array
+   *
+   *
    */
   public function get_objects()
   {
@@ -1506,7 +1744,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Returns the number of records in the table corresponding to the $where parameter (non mandatory).
+   * Returns the number of records in the table corresponding to the $where condition (non mandatory).
    *
    * <code>
    * $this->db->count(
@@ -1515,7 +1753,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * );
    * </code>
    *
-   * @param string $table The table name.
+   *
+   * @param string $table Table's name.
    * @param array $where The "where" condition.
    *
    * @return int
@@ -1536,22 +1775,17 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Returns first row as an object.
+   * Returns a row as an object.
    *
    * <code>
-   * $this->db->select(
-   *  "tab_users",
-   *  ["id", "name", "surname"],
-   *  [
-   *    ["id", "<", 138],
-   *    ["name", "LIKE", "c%"]
-   *  ],
-   *  ["id" => "ASC"],
-   *  2);
+   * $this->db->select('users', ['name', 'surname'], [ ['id','>','1']]) );
    * </code>
-   *
-   * @param string $table The table name.
-   * @param string|array $fields The fields name.
+   * i.e.{
+   *      "name" => "John",
+   *      "surname" => "Smith",
+   *      }
+   * @param string $table Table's name.
+   * @param string|array $fields Fields' name.
    * @param array $where  The "where" condition.
    * @param string|array $order The "order" condition, default: false.
    * @param int $start The "start" condition, default: 0.
@@ -1567,30 +1801,29 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Returns a single value, same value as "get_one".
+   * Returns a single value
    *
    * <code>
    * $this->db->select_one(
    *  "tab_users",
-   *  ["id", "name", "surname"],
+   *  "name",
    *  [
    *    ["id", "<", 138],
-   *    ["name", "LIKE", "c%"]
    *  ],
    *  ["id" => "ASC"],
    *  2);
    * </code>
+   * i.e. '$value'
    *
-   * @param string $table The table name.
-   * @param string $field The fields name.
+   * @param string $table Table's name.
+   * @param string $field Field's name.
    * @param array $where  The "where" condition.
    * @param string|array $order The "order" condition, default: false.
    * @param int $start The "start" condition, default: 0.
    *
-   * @return array
+   * @return mixed Whatever value has this field in this row
    */
-  public function select_one($table, $field, $where = [], $order = false, $start = 0)
-  {
+  public function select_one($table, $field, $where = [], $order = false, $start = 0){
     if ( $r = $this->_sel($table, [$field], $where, $order, 1, $start) ){
       if ( $res = $r->get_row() ){
         return $res[$field];
@@ -1607,24 +1840,26 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * $this->db->rselect(
    *  "tab_users",
    *  ["id", "name", "surname"],
-   *  [
-   *    ["id", "<", 138],
-   *    ["name", "LIKE", "c%"]
-   *  ],
+   *  ['id' => 1],
    *  ["id" => "ASC"],
    *  2);
    * </code>
    *
-   * @param string $table The table name.
-   * @param string|array $fields The fields name.
+   * i.e. [
+   *      "id" => 4,
+   *      "name" => "John",
+   *      "surname" => "Smith",
+   *       ]
+   *
+   * @param string $table Table's name.
+   * @param string|array $fields Fields' name.
    * @param array $where  The "where" condition.
    * @param string|array $order The "order" condition, default: false.
    * @param int $start The "start" condition, default: 0.
    *
    * @return array
    */
-  public function rselect($table, $fields = [], $where = [], $order = false, $start = 0)
-  {
+  public function rselect($table, $fields = [], $where = [], $order = false, $start = 0){
     if ( $r = $this->_sel($table, $fields, $where, $order, 1, $start) ){
       return $r->get_row();
     }
@@ -1632,30 +1867,34 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Returns first row as a numeric array.
+   * Returns a row as a numeric array.
    *
    * <code>
    * $this->db->iselect(
    *  "tab_users",
    *  ["id", "name", "surname"],
    *  [
-   *    ["id", "<", 138],
-   *    ["name", "LIKE", "c%"]
+   *    ["id", ">", 1],
    *  ],
    *  ["id" => "ASC"],
    *  2);
    * </code>
+   *i.e. [
+   *      4,
+   *      "John",
+   *      "Smith",
+   *      ]
    *
-   * @param string $table The table name.
-   * @param string|array $fields The fields name.
+   * @param string $table Table's name.
+   * @param string|array $fields Fields' name.
    * @param array $where  The "where" condition.
    * @param string|array $order The "order" condition, default: false.
    * @param int $start The "start" condition, default: 0.
    *
    * @return array
    */
-  public function iselect($table, $fields = [], $where = [], $order = false, $start = 0)
-  {
+
+  public function iselect($table, $fields = [], $where = [], $order = false, $start = 0){
     if ( $r = $this->_sel($table, $fields, $where, $order, 1, $start) ){
       return $r->get_irow();
     }
@@ -1729,7 +1968,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Returns table's rows as an array of numeric arrays.
+   * Returns rows as an array of numeric arrays.
    *
    * <code>
    * $this->db->iselect_all(
@@ -1743,8 +1982,26 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *  15, 2);
    * </code>
    *
-   * @param string $table The table name.
-   * @param string|array $fields The fields name.
+   * i.e.[
+   *      [
+   *        2,
+   *        "Mirko",
+   *        "Argentino",
+   *      ],
+   *      [
+   *        3,
+   *        "Thomas",
+   *        "Nabet",
+   *      ],
+   *      [
+   *        4,
+   *        "BBN",
+   *        "Solutions",
+   *      ],
+   *    ]
+   *
+   * @param string $table Table's name.
+   * @param string|array $fields Fields's name.
    * @param array $where  The "where" condition.
    * @param string|array $order The "order" condition, default: false.
    * @param int $limit The "limit" condition, default: 0.
@@ -1752,8 +2009,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *
    * @return array
    */
-  public function iselect_all($table, $fields = [], $where = [], $order = false, $limit = 0, $start = 0)
-  {
+  public function iselect_all($table, $fields = [], $where = [], $order = false, $limit = 0, $start = 0){
     if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
       return $r->get_irows();
     }
@@ -1761,13 +2017,13 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Returns table's structure as indexed array.
+   * Returns table's structure as an indexed array.
    *
    * <code>
    * $this->db->modelize("table_users");
    * </code>
    *
-   * @param string $table The table name.
+   * @param string $table Table's name.
    *
    * @return array | false
    */
@@ -1798,7 +2054,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Returns databases names as an array.
+   * Returns databases' names as an array.
    *
    * <code>
    * $this->db->get_databases();
@@ -1806,24 +2062,22 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *
    * @return array | false
    */
-  public function get_databases()
-  {
+  public function get_databases(){
     return $this->_get_cache('', 'databases');
   }
 
   /**
-   * Returns tables names of a database as an array.
+   * Returns tables' names of database as an array.
    *
    * <code>
    * $this->db->get_tables("database");
    * </code>
    *
-   * @param string $database The database name.
+   * @param string $database Database name.
    *
    * @return array | false
    */
-  public function get_tables($database='')
-  {
+  public function get_tables($database=''){
     if ( empty($database) ){
       $database = $this->current;
     }
@@ -1837,12 +2091,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * $this->db->get_columns("table_users");
    * </code>
    *
-   * @param string $table The table name.
+   * @param string $table Table's name.
    *
    * @return array | false
    */
-  public function get_columns($table)
-  {
+  public function get_columns($table){
     if ( $tmp = $this->_get_cache($table) ){
       return $tmp['fields'];
     }
@@ -1856,7 +2109,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * $this->db->get_keys("table_users");
    * </code>
    *
-   * @param string $table The table name.
+   * @param string $table Table's name.
    *
    * @return array | false
    */
@@ -1872,10 +2125,9 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * @todo Bugfix
+   * @todo Bugfix non funziona
    */
-  public function get_change($db)
-  {
+  public function get_change($db){
     return $this->language->get_change($db);
   }
 
@@ -1885,13 +2137,16 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * <code>
    * $this->db->get_primary("table_users");
    * </code>
+   * i.e.[
+   *      "id",
+   *      ]
    *
-   * @param string $table The table name.
+   *
+   * @param string $table Table's name.
    *
    * @return array
    */
-  public function get_primary($table)
-  {
+  public function get_primary($table){
     if ( ($keys = $this->get_keys($table)) && isset($keys['keys']['PRIMARY']) ){
       return $keys['keys']['PRIMARY']['columns'];
     }
@@ -1899,18 +2154,17 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Returns unique primary keys of a table.
+   * Returns unique primary key of a table.
    *
    * <code>
    * $this->db->get_unique_primary("table_users");
    * </code>
    *
-   * @param string $table The table name.
+   * @param string $table Table's name.
    *
-   * @return array | false
+   * @return string
    */
-  public function get_unique_primary($table)
-  {
+  public function get_unique_primary($table){
     if ( ($keys = $this->get_keys($table)) &&
       isset($keys['keys']['PRIMARY']) &&
       (count($keys['keys']['PRIMARY']['columns']) === 1) ){
@@ -1943,6 +2197,15 @@ class db extends \PDO implements db\actions, db\api, db\engines
     return $fields;
   }
 
+  /**
+   * @todo chiedere a th
+   *
+   * @param $prop
+   * @param $value
+   * @return string
+   *
+   *
+   */
   public function where_json($prop, $value){
     $r = [$prop => $value];
     $json = json_encode($r);
@@ -1950,6 +2213,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
+   *
+   * @todo chiedere a th, non funziona
    * Get a string starting with WHERE with corresponding parameters to $where.
    *
    * <code>
@@ -2012,12 +2277,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * </code>
    *
    * @param array $order The "order" condition.
-   * @param string $table The table name.
+   * @param string $table Table's name.
    *
    * @return string
    */
-  public function get_order($order, $table='')
-  {
+  public function get_order($order, $table=''){
     return $this->language->get_order($order, $table='');
   }
 
@@ -2033,55 +2297,65 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *
    * @return string
    */
-  public function get_limit($limit, $start = 0)
-  {
+  public function get_limit($limit, $start = 0){
     return $this->language->get_limit($limit, $start);
   }
 
   /**
    * Returns SQL code for table creation.
+   * @todo bisogna inserire una tavola già esistente altrimenti da errore
    *
    * <code>
    * $this->db->get_create("table_users");
    * </code>
+   * i.e. CREATE TABLE `table_users` (
+   *        `userid` int(11) NOT NULL,
+   *        `userdataid` int(11) NOT NULL,
+   *        `info` char(200) DEFAULT NULL,
+   *        PRIMARY KEY (`userid`,`userdataid`)
+   *        ) ENGINE=InnoDB DEFAULT CHARSET=utf8
    *
-   * @param string $table The table name.
+   *
+   *
+   * @param string $table Table's name.
    *
    * @return string | false
    */
-  public function get_create($table)
-  {
+  public function get_create($table){
     return $this->language->get_create($table);
   }
 
   /**
-   * Returns SQL code for row(s) deletion.
+   * Returns SQL code for row(s) DELETE.
    *
    * <code>
-   * $this->db->get_delete("table_users");
+   * $this->db->get_delete("table_users",['id'=>1]);
    * </code>
+   * i.e. DELETE FROM `db_example`.`table_users`  WHERE 1 AND `table_users`.`id` = ?
    *
-   * @param string $table The table name.
+   *
+   *
+   *
+   * @param string $table Table's name.
    * @param array $where The "where" condition.
    * @param bool $ignore If true inserts the "ignore" condition , default: false.
    * @param bool $php default: false.
    *
    * @return string | false
    */
-  public function get_delete($table, array $where, $ignore = false, $php = false)
-  {
+  public function get_delete($table, array $where, $ignore = false, $php = false){
     return $this->language->get_delete($table, $where, $ignore, $php);
   }
 
   /**
-   * Returns SQL code for row(s) selection.
+   * Returns SQL code for row(s) SELECT.
    *
    * <code>
    * $this->db->get_select("table_users", ['id', 'name', 'surname'], ['id', '>', '10'], 'name', 5, 2);
    * </code>
    *
-   * @param string $table The table name.
-   * @param array $fields The fields name.
+   * @param string $table Table's name.
+   * @param array $fields Fields' name.
    * @param array $where The "where" condition.
    * @param string | array $order The "order" condition.
    * @param int $limit The "limit" condition, default: false.
@@ -2090,27 +2364,25 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *
    * @return string
    */
-  public function get_select($table, array $fields = [], array $where = [], $order = [], $limit = false, $start = 0, $php = false)
-  {
+  public function get_select($table, array $fields = [], array $where = [], $order = [], $limit = false, $start = 0, $php = false){
     return $this->language->get_select($table, $fields, $where, $order, $limit, $start, $php);
   }
 
   /**
-   * Returns SQL code for row(s) insertion.
+   * Returns SQL code for row(s) INSERT.
    *
    * <code>
    * $this->db->get_insert("table_users", ['name', 'surname']);
    * </code>
    *
-   * @param string $table The table name.
-   * @param array $fields The fields name.
+   * @param string $table Table's name.
+   * @param array $fields Fields' name.
    * @param bool $ignore If true inserts the "ignore" condition, default: false.
    * @param bool $php default: false.
    *
    * @return string
    */
-  public function get_insert($table, array $fields = [], $ignore = false, $php = false)
-  {
+  public function get_insert($table, array $fields = [], $ignore = false, $php = false){
     return $this->language->get_insert($table, $fields, $ignore, $php);
   }
 
@@ -2121,27 +2393,26 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * $this->db->get_update("table_users", ['gender'], ['gender', '=', 'male']);
    * </code>
    *
-   * @param string $table The table name.
-   * @param array $fields The fields name.
+   * @param string $table Table's name.
+   * @param array $fields Fields' name.
    * @param array $where The "where" condition.
    * @param bool $php default: false.
    *
    * @return string
    */
-  public function get_update($table, array $fields = [], array $where = [], $ignore = false, $php = false)
-  {
+  public function get_update($table, array $fields = [], array $where = [], $ignore = false, $php = false){
     return $this->language->get_update($table, $fields, $where, $ignore, $php);
   }
 
   /**
-   * Returns a single numeric-indexed array with the values of the unique column $field from the table $table
+   * Returns a single numeric indexed array with the values of the unique column $field from the selected table $table
    *
    * <code>
    * $this->db->get_column_values("table_users", "surname");
    * </code>
    *
-   * @param string $table The table name.
-   * @param string $field The field name.
+   * @param string $table Table's name.
+   * @param string $field Field's name.
    * @param array $where The "where" condition.
    * @param int $limit The "limit" condition, default: false.
    * @param int $start The "start" condition, default: 0.
@@ -2149,8 +2420,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *
    * @return array
    */
-  public function get_column_values($table, $field,  array $where = [], array $order = [], $limit = false, $start = 0, $php = false)
-  {
+  public function get_column_values($table, $field,  array $where = [], array $order = [], $limit = false, $start = 0, $php = false){
     $r = [];
     $where = $this->where_cfg($where, $table);
     if ( $rows = $this->get_irows(
@@ -2165,15 +2435,15 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Returns a request sql string for count similar values in a field of a table.
+   * Returns a string with the sql query to count similar values in a field of a table.
    *
    * <code>
    * $this->db->get_values_count("table_users", "surname", ['id', '>', '10'], 50, 2);
    * </code>
    *
    *
-   * @param string $table The table name.
-   * @param string $field The field name.
+   * @param string $table Table's name.
+   * @param string $field Field's name.
    * @param array $where The "where" condition.
    * @param int $limit The "limit" condition, dafault: false.
    * @param int $start The "start" condition, dafault: 0.
@@ -2181,31 +2451,34 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *
    * @return string
    */
-  public function get_values_count($table, $field,  array $where = [], $limit = false, $start = 0, $php = false)
-  {
+  public function get_values_count($table, $field,  array $where = [], $limit = false, $start = 0, $php = false){
     return $this->language->get_values_count($table, $field, $where, $limit, $start, $php);
   }
 
   /**
+   *
+   *
    * Returns the unique values of a column of a table as a numeric indexed array.
    *
    * <code>
    * $this->db->get_field_values("table_users", "surname", ['id', '>', '10'], 50, 2);
    * </code>
    *
-   * @param string $table The table name.
-   * @param string $field The field name.
+   * @param string $table Table's name.
+   * @param string $field Field's name.
    * @param array $where The "where" condition.
    * @param int $limit The "limit" condition, default: false.
    * @param int $start The "start" condition, default: 0.
    *
    * @return array | false
    */
-  public function get_field_values($table, $field,  array $where = [], $limit = false, $start = 0)
-  {
-    if ( $r = $this->language->get_column_values($table, $field, $where, [], $limit, $start) ){
-      if ( $d = $this->get_by_columns($r) ){
-        return $d[$field];
+  public function get_field_values($table, $field,  array $where = [], $limit = false, $start = 0){
+    if ( $statement = $this->language->get_column_values($table, $field, $where, [], $limit, $start) ){
+      $w = $this->where_cfg($where, $table);
+      $args = count($w['values']) ? array_merge([$statement], $w['values']) : [$statement];
+      $r = call_user_func_array([$this, 'get_by_columns'], $args);
+      if ( $r ){
+        return $r[$field];
       }
     }
   }
@@ -2217,22 +2490,29 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * $this->db->count_field_values("table_users", "surname", ['id', '>', '10'], 50, 2);
    * </code>
    *
-   * @param string $table The table name.
-   * @param string $field The field name.
+   * @param string $table Table's name.
+   * @param string $field Field's name.
    * @param array $where The "where" condition.
    * @param int $limit The "limit" condition, default: false.
    * @param int $start The "start" condition, default: 0.
    *
    * @return array | false
    */
-  public function count_field_values($table, $field,  array $where = [], $limit = false, $start = 0)
-  {
+  public function count_field_values($table, $field,  array $where = [], $limit = false, $start = 0){
     if ( $r = $this->language->get_values_count($table, $field, $where, $limit, $start) ){
       $where = $this->where_cfg($where, $table);
       return $this->get_rows($r, $where['values']);
     }
   }
 
+  /**
+   *
+   * /** @todo Error
+   * @param $column
+   * @param string $db
+   * @return array|bool
+   *
+   */
   public function find_references($column, $db = ''){
     $changed = false;
     if ( $db && ($db !== $this->current) ){
@@ -2245,7 +2525,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       array_unshift($bits, $this->current);
     }
     if ( count($bits) !== 3 ){
-      /** @todo Error */
+
       return false;
     }
     $refs = [];
@@ -2265,7 +2545,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
     }
     return $refs;
   }
-
+  /** @todo Error */
   public function find_relations($column, $db = ''){
     $changed = false;
     if ( $db && ($db !== $this->current) ){
@@ -2278,7 +2558,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       array_unshift($bits, $this->current);
     }
     if ( count($bits) !== 3 ){
-      /** @todo Error */
+
       return false;
     }
     $table = $bits[1];

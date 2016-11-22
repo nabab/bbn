@@ -45,7 +45,7 @@ trait optional
       ($opt = bbn\appui\options::get_instance()) &&
       ($id = self::get_id_option_category($code))
     ){
-      return $opt->get_ids($id);
+      return $opt->items($id);
     }
   }
 

@@ -25,10 +25,6 @@ class user extends models\cls\basic
     models\tts\retriever,
     models\tts\dbconfig;
 
-	private static
-    /** @var connection */
-    $current;
-
 	protected static
     /** @var string The name of the session index in for session data */
     $sn = 'bbn_session',

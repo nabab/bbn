@@ -104,12 +104,12 @@ class menu extends bbn\models\cls\basic{
       $res = [
         'id' => $menu['id'],
         'text' => $menu['text'],
-        'public' => isset($menu['alias']) && empty($menu['alias']['public']) ? 0 : 1,
+        'public' => empty($menu['public']) ? 0 : 1,
         'icon' => isset($menu['icon']) ? $menu['icon'] : 'cog'
       ];
-      if ( !empty($menu['alias']) ){
+      if ( !empty($menu['id_alias']) ){
         $res['id_permission'] = $menu['id_alias'];
-        $res['link'] = $this->options->get_path($menu['id_alias'], $this->_get_public_root(), '');
+        $res['link'] = $this->options->to_path($menu['id_alias'], '', $this->_get_public_root());
         if ( $prepath && (strpos($res['link'], $prepath) === 0) ){
           $res['link'] = substr($res['link'], strlen($prepath));
         }
