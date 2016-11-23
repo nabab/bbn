@@ -36,15 +36,6 @@ abstract class basic
 
 	/**
 	 * Checks whether the error property has been set (so an error happened).
-   * @param boolean $state
-	 * @return bool
-	 */
-	public function debug($state = true){
-		$this->is_debug = $state;
-	}
-
-	/**
-	 * Checks whether the error property has been set (so an error happened).
 	 * @return bool
 	 */
 	public function test(){
@@ -78,8 +69,7 @@ abstract class basic
   /**
    * @return boolean
    */
-  public function is_debug(): bool
-  {
+  public function is_debug(){
     return $this->debug || (defined("BBN_IS_DEV") && BBN_IS_DEV);
   }
 
@@ -87,8 +77,7 @@ abstract class basic
    * @param boolean $debug
    * @return self
    */
-  public function set_debug(bool $debug): self
-  {
+  public function set_debug(bool $debug){
     $this->debug = $debug;
   }
 

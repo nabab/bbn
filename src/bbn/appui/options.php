@@ -951,7 +951,7 @@ class options extends bbn\models\cls\db
    *           'id' => 42,
    *           'code' => "test8",
    *           'text' => "Test 8",
-W   *           'id_alias' => null,
+   *           'id_alias' => null,
    *           'value' => "{\"myProperty\":\"My property's value\"}",
    *         ]
    *       ]
