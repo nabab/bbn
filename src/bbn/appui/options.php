@@ -143,10 +143,10 @@ class options extends bbn\models\cls\db
       }
 
       // Taking care of the config
-      if ( !is_array($it[$c['cfg']]) && isset($it[$c['id']]) ){
+      if ( !isset($it[$c['cfg']]) && isset($it[$c['id']]) ){
         $it[$c['cfg']] = $this->get_cfg($it[$c['id']]);
       }
-      else if ( bbn\str::is_json($it[$c['cfg']]) ){
+      else if ( isset($it[$c['cfg']]) && bbn\str::is_json($it[$c['cfg']]) ){
         $it[$c['cfg']] = json_decode($it[$c['cfg']], 1);
       }
       else if ( empty($it[$c['cfg']]) || !is_array($it[$c['cfg']]) ){
@@ -642,13 +642,12 @@ class options extends bbn\models\cls\db
       ($opt = $this->native_option($id))
     ){
       $this->_set_value($opt);
-      if ( bbn\str::is_integer($opt['id_alias']) ){
-        if ( $opt['id_alias'] === $id ){
+      $c =& $this->class_cfg['arch']['options'];
+      if ( bbn\str::is_integer($opt[$c['id_alias']]) && $this->exists($opt[$c['id_alias']]) ){
+        if ( $opt[$c['id_alias']] === $id ){
           die("Impossible to have the same ID as ALIAS, check out ID $id");
         }
-        $alias = $this->native_option($opt['id_alias']);
-        $opt['value'] = $alias['value'];
-        $this->_set_value($opt);
+        $opt['alias'] = $this->option($opt[$c['id_alias']]);
       }
       return $opt;
     }
@@ -783,6 +782,35 @@ class options extends bbn\models\cls\db
         }
         return $res;
       }
+    }
+    $this->log(__LINE__, func_get_args());
+    return false;
+  }
+
+  /**
+   * Returns an id-indexed array of full options with the config in arrays for a given parent
+   *
+   * ```php
+   * bbn\x::dump($opt->full_options_cfg(12));
+   * /*
+   * array [
+   *   ['id' => 21, 'id_parent' => 12, 'title' => "My option 21", 'myProperty' =>  "78%", 'cfg' => ['sortable' => true, 'order' => 1, 'desc' => "I am a description"]],
+   *   ['id' => 22, 'id_parent' => 12, 'title' => "My option 22", 'myProperty' =>  "26%", 'cfg' => ['order' => 2, 'desc' => "I am a description"]],
+   *   ['id' => 25, 'id_parent' => 12, 'title' => "My option 25", 'myProperty' =>  "50%", 'cfg' => ['order' => 3, 'desc' => "I am a description"]],
+   *   ['id' => 27, 'id_parent' => 12, 'title' => "My option 27", 'myProperty' =>  "40%", 'cfg' => ['order' => 4, 'desc' => "I am a description"]]
+   * ]
+   * ```
+   *
+   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @return array|false A list of parent if option not found
+   */
+  public function full_options_cfg($code = null){
+    if ( bbn\str::is_integer($id = $this->from_code(func_get_args())) ){
+      $o =& $this;
+      return $this->map(function($a)use($o){
+        $a['cfg'] = $o->get_cfg($a['id']);
+        return $a;
+      }, $id);
     }
     $this->log(__LINE__, func_get_args());
     return false;
@@ -1418,7 +1446,7 @@ W   *           'id_alias' => null,
   public function is_sortable($code = null){
     if ( bbn\str::is_integer($id = $this->from_code(func_get_args())) ) {
       $cfg = $this->get_cfg($id);
-      return $cfg['sortable'] ? true : false;
+      return empty($cfg['sortable']) ? false : true;
     }
     $this->log(__LINE__, func_get_args());
     return false;
@@ -1674,7 +1702,7 @@ W   *           'id_alias' => null,
       bbn\str::is_integer($id = $this->from_code(func_get_args())) &&
       ($id !== $this->default) &&
       ($id !== $this->root) &&
-      ($id_parent = $this->get_id_parent($id))
+      bbn\str::is_integer(($id_parent = $this->get_id_parent($id)))
     ) {
       $num = 0;
       if ( $this->is_sortable($id_parent) ){
@@ -1707,11 +1735,15 @@ W   *           'id_alias' => null,
    * @return int The number of affected rows
    */
   public function set_alias(int $id, int $alias = null){
-    return $this->db->update_ignore($this->class_cfg['table'], [
+    $res = $this->db->update_ignore($this->class_cfg['table'], [
       $this->class_cfg['arch']['options']['id_alias'] => $alias ?: null
     ], [
       $this->class_cfg['arch']['options']['id'] => $id
     ]);
+    if ( $res ){
+      $this->delete_cache($id);
+    }
+    return $res;
   }
 
   /**
@@ -1727,11 +1759,15 @@ W   *           'id_alias' => null,
    * @return int The number of affected rows
    */
   public function set_text(int $id, string $text){
-    return $this->db->update_ignore($this->class_cfg['table'], [
+    $res = $this->db->update_ignore($this->class_cfg['table'], [
       $this->class_cfg['arch']['options']['text'] => $text
     ], [
       $this->class_cfg['arch']['options']['id'] => $id
     ]);
+    if ( $res ){
+      $this->delete_cache($id);
+    }
+    return $res;
   }
 
   /**
@@ -2307,7 +2343,7 @@ W   *           'id_alias' => null,
    * @param boolean $deep If set to true the children will also be searched
    * @return array|boolean An array of permissions if there are, false otherwise
    */
-  public function find_permissions(int $id = null, $deep = true){
+  public function find_permissions(int $id = null, $deep = false){
     if ( is_null($id) ){
       $id = $this->default;
     }

@@ -177,4 +177,39 @@ class note extends bbn\models\cls\db
     }
     return $res;
   }
+
+  public function browse($limit = 100, $start = 0){
+    if ( $user = bbn\user::get_instance() ){
+      $cf =& $this->class_cfg;
+      /** @var bbn\db $db */
+      $db =& $this->db;
+      $sql = "
+      SELECT {$db->tsn($cf['tables']['versions'], 1)}.*,
+      {$db->tsn($cf['tables']['notes'], 1)}.*
+      FROM {$db->tsn($cf['tables']['versions'], 1)}
+        JOIN {$db->tsn($cf['tables']['notes'], 1)}
+          ON {$db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'], 1)} = {$db->cfn($cf['arch']['versions']['id_note'], $cf['tables']['versions'], 1)}
+      WHERE {$db->cfn($cf['arch']['notes']['creator'], $cf['tables']['notes'], 1)} = ?
+      OR {$db->cfn($cf['arch']['versions']['id_user'], $cf['tables']['versions'], 1)} = ?
+      GROUP BY {$db->cfn($cf['arch']['versions']['id_note'], $cf['tables']['versions'], 1)}
+      ORDER BY {$db->cfn($cf['arch']['versions']['creation'], $cf['tables']['versions'], 1)} DESC
+      LIMIT $start, $limit";
+      return $this->db->get_rows($sql, $user->get_id(), $user->get_id());
+    }
+  }
+
+  public function count(){
+    if ( $user = bbn\user::get_instance() ){
+      $cf =& $this->class_cfg;
+      $db =& $this->db;
+      $sql = "
+      SELECT COUNT(DISTINCT {$db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'], 1)})
+      FROM {$db->tsn($cf['tables']['notes'], 1)}
+        JOIN {$db->tsn($cf['tables']['versions'], 1)}
+          ON {$db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'], 1)} = {$db->cfn($cf['arch']['versions']['id_note'], $cf['tables']['versions'], 1)}
+      WHERE {$db->cfn($cf['arch']['notes']['creator'], $cf['tables']['notes'], 1)} = ?
+      OR {$db->cfn($cf['arch']['versions']['id_user'], $cf['tables']['versions'], 1)} = ?";
+      return $db->get_one($sql, $user->get_id(), $user->get_id());
+    }
+  }
 }

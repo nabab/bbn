@@ -83,19 +83,16 @@ class menu extends bbn\models\cls\basic{
       return $ar;
     }
     return array_filter($ar, function($a)use($pref){
-      if ( empty($a['public']) ){
-        if ( isset($a['id_permission']) ){
-          if ( !$pref->has($a['id_permission'], $pref->get_user(), $pref->get_group()) ){
-            return false;
-          }
-        }
-        else{
-          if ( empty($a['items']) ){
-            return false;
-          }
-        }
+      if ( !empty($a['public']) ){
+        return true;
       }
-      return true;
+      if ( isset($a['id_permission']) && $pref->has($a['id_permission'], $pref->get_user(), $pref->get_group()) ){
+        return true;
+      }
+      if ( !isset($a['id_permission']) && !empty($a['items']) ){
+        return true;
+      }
+      return false;
     });
   }
 
@@ -104,7 +101,7 @@ class menu extends bbn\models\cls\basic{
       $res = [
         'id' => $menu['id'],
         'text' => $menu['text'],
-        'public' => empty($menu['public']) ? 0 : 1,
+        'public' => isset($menu['alias']) && !empty($menu['alias']['public']) ? 1 : 0,
         'icon' => isset($menu['icon']) ? $menu['icon'] : 'cog'
       ];
       if ( !empty($menu['id_alias']) ){
@@ -135,6 +132,7 @@ class menu extends bbn\models\cls\basic{
   /**
    * Returns the path corresponding to an ID
    * @param $id
+   * @return int|boolean
    */
   public function to_path($id){
     if ( bbn\str::is_integer($id) ){

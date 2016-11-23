@@ -511,8 +511,19 @@ class preferences
   public function has_option_permission($id_option, $id_user = null, $id_group = null){
     if ( bbn\str::is_integer($id_option) ){
       $root = self::_get_option_permission_root();
-      $id_to_check = $this->options->from_code('opt'.$id_option, $root);
-      return $this->has_permission($id_to_check, $id_user = null, $id_group = null);
+      $read = $this->options->from_code('read', $root);
+      $id_to_check = $this->options->from_code('opt'.$id_option, $read);
+      return $this->has_permission($id_to_check, false, $id_user, $id_group);
+    }
+    return false;
+  }
+
+  public function has_write_option_permission($id_option, $id_user = null, $id_group = null){
+    if ( bbn\str::is_integer($id_option) ){
+      $root = self::_get_option_permission_root();
+      $write = $this->options->from_code('write', $root);
+      $id_to_check = $this->options->from_code('opt'.$id_option, $write);
+      return $this->has_permission($id_to_check, $id_user, $id_group);
     }
     return false;
   }
