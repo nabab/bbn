@@ -13,7 +13,7 @@ if ( !defined('BBN_DATA_PATH') ){
   die("The constant BBN_DATA_PATH must be defined in order to use note");
 }
 
-class note extends bbn\models\cls\db
+class notes extends bbn\models\cls\db
 {
 
   use
@@ -21,10 +21,6 @@ class note extends bbn\models\cls\db
     bbn\models\tts\optional,
     bbn\models\tts\dbconfig;
 
-
-  protected static
-    $id_option_root,
-    $code_option_root = 'bbn_notes';
 
   protected static
     /** @var array */
@@ -67,12 +63,13 @@ class note extends bbn\models\cls\db
   public function __construct(bbn\db $db){
     parent::__construct($db);
     self::_init_class_cfg(self::$_defaults);
+    self::optional_init($this);
   }
 
   public function add_media($id_note, $content, $title = '', $type='file', $private = false){
     if ( $this->exists($id_note) &&
       !empty($content) &&
-      ($id_type = self::get_id_option($type, 'media')) &&
+      ($id_type = self::get_option_id($type, 'media')) &&
       ($usr = bbn\user::get_instance())
     ){
       $ok = false;

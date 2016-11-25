@@ -2,20 +2,19 @@
 namespace bbn\appui;
 use bbn;
 
-class menu extends bbn\models\cls\basic{
+class menus extends bbn\models\cls\basic{
 
   use
-    bbn\models\tts\cache;
+    bbn\models\tts\cache,
+    bbn\models\tts\optional;
 
   private static
-    $id_root,
+    /** @var int The ID of the option's for the root path / */
     $id_public_root;
 
   protected static
-    /** @var string path where the menus are */
-    $root = 'bbn_menus',
     /** @var string path where the permissions and real path are */
-    $public_root = 'bbn_permissions|page';
+    $public_root = 'permissions|page';
 
   protected
     /** @var bbn\appui\options The options object */
@@ -24,33 +23,19 @@ class menu extends bbn\models\cls\basic{
   public function __construct(bbn\appui\options $o, $r){
     $this->options = $o;
     $this->cache_init();
-
-
-    if ( !empty($r) && is_string($r) ){
-      $this->_set_relative_public_root($r);
-    }
+    self::optional_init($this);
   }
 
-  private static function _set_root($root){
-    self::$id_root = $root;
-  }
-
-  private function _get_root(){
-    if ( is_null(self::$id_root) &&
-      ($id = $this->options->from_path(self::$root))
-    ){
-      self::_set_root($id);
-    }
-    return self::$id_root;
-  }
-
+  /**
+   * @param $root
+   */
   private static function _set_public_root($root){
     self::$id_public_root = $root;
   }
 
   private function _get_public_root(){
     if ( is_null(self::$id_public_root) &&
-      ($id = $this->options->from_path(self::$public_root))
+      ($id = $this->options->from_path(self::$public_root, '|', BBN_APPUI))
     ){
       self::_set_public_root($id);
     }
@@ -122,9 +107,13 @@ class menu extends bbn\models\cls\basic{
     return false;
   }
 
+  /**
+   * @param $path
+   * @return bool|false|int
+   */
   public function from_path($path){
     if ( !bbn\str::is_integer($path) ){
-      $path = $this->options->from_path(self::$root.'|'.$path);
+      $path = $this->options->from_code($path, self::$option_root_id);
     }
     return bbn\str::is_integer($path) ? $path : false;
   }
@@ -162,16 +151,16 @@ class menu extends bbn\models\cls\basic{
       if ( $this->cache_has($id, __FUNCTION__) ){
         return $this->cache_get($id, __FUNCTION__);
       }
-      $items = $this->options->full_tree($id);
-      $res = $this->_arrange($items, $prepath);
-      $this->cache_set($id, __FUNCTION__, $res);
-      return $res;
+      $tree = $this->options->full_tree($id);
+      $res = $this->_arrange($tree, $prepath);
+      $this->cache_set($id, __FUNCTION__, $res['items']);
+      return $res['items'];
     }
   }
 
   public function custom_tree($id, bbn\user\preferences $pref, $prepath = false){
-    if ( ($tree = $this->tree($id, $prepath)) && isset($tree['items']) ){
-      return $this->_adapt($tree['items'], $pref, $prepath);
+    if ( $tree = $this->tree($id, $prepath) ){
+      return $this->_adapt($tree, $pref, $prepath);
     }
   }
   

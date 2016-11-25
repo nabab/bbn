@@ -34,8 +34,6 @@ class profile
 	protected
     /** @var db */
     $db,
-    /** @var array */
-    $permissions = [],
     /** @var int */
     $id,
     /** @var array */

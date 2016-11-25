@@ -18,7 +18,7 @@ use bbn;
  * @version 0.2r89
  * Todo: create a new delegation generic function for the double underscores functions
  */
-abstract class cache extends db
+class cache extends bbn\models\cls\db
 {
 	protected
 		/** @var string */

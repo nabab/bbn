@@ -9,14 +9,10 @@
 namespace bbn\appui;
 use bbn;
 
-class task extends bbn\models\cls\db{
+class tasks extends bbn\models\cls\db{
 
   use bbn\models\tts\references,
       bbn\models\tts\optional;
-
-  protected static
-    $id_option_root,
-    $code_option_root = 'bbn_tasks';
 
   protected
     $template = false,
@@ -43,7 +39,7 @@ class task extends bbn\models\cls\db{
 
   public static function cat_correspondances(){
     if ( $opt = bbn\appui\options::get_instance() ){
-      $cats = self::get_tree_options('cats');
+      $cats = self::get_options_tree('cats');
       $res = [];
       $opt->map(function ($a) use (&$res){
         array_push($res, [
@@ -63,8 +59,8 @@ class task extends bbn\models\cls\db{
 
   public static function get_tasks_options(){
     if (
-      ($states = self::get_codes_options('states')) &&
-      ($roles = self::get_codes_options('roles')) &&
+      ($states = self::get_options_ids('states')) &&
+      ($roles = self::get_options_ids('roles')) &&
       ($cats = self::cat_correspondances())
     ){
       return [
@@ -96,6 +92,7 @@ class task extends bbn\models\cls\db{
       }
     }
     $this->columns = array_keys($this->db->get_columns('bbn_tasks'));
+    self::optional_init($this);
   }
 
   public function get_title($id_task){
@@ -106,35 +103,35 @@ class task extends bbn\models\cls\db{
   }
 
   public function categories(){
-    return self::get_tree_options('cats');
+    return self::get_options_tree('cats');
   }
 
   public function actions(){
-    return self::get_codes_options('actions');
+    return self::get_options_ids('actions');
   }
 
   public function states(){
-    return self::get_codes_options('states');
+    return self::get_options_ids('states');
   }
 
   public function roles(){
-    return self::get_codes_options('roles');
+    return self::get_options_ids('roles');
   }
 
   public function id_cat($code){
-    return self::get_id_option($code, 'cats');
+    return self::get_option_id($code, 'cats');
   }
 
   public function id_action($code){
-    return self::get_id_option($code, 'actions');
+    return self::get_option_id($code, 'actions');
   }
 
   public function id_state($code){
-    return self::get_id_option($code, 'states');
+    return self::get_option_id($code, 'states');
   }
 
   public function id_role($code){
-    return self::get_id_option($code, 'roles');
+    return self::get_option_id($code, 'roles');
   }
 
   public function get_mine($parent = null, $order = 'priority', $dir = 'ASC', $limit = 50, $start = 0){
@@ -680,7 +677,7 @@ class task extends bbn\models\cls\db{
 
   public function get_comments($id_task){
     if ( $this->exists($id_task) ){
-      $note = new bbn\appui\note($this->db);
+      $note = new bbn\appui\notes($this->db);
       $ids = $this->get_comments_ids($id_task);
       $r = [];
       foreach ( $ids as $id_note ){
@@ -693,7 +690,7 @@ class task extends bbn\models\cls\db{
 
   public function get_comment($id_task, $id_note){
     if ( $this->exists($id_task) ){
-      $note = new bbn\appui\note($this->db);
+      $note = new bbn\appui\notes($this->db);
       return $note->get($id_note);
     }
     return false;
@@ -705,7 +702,7 @@ class task extends bbn\models\cls\db{
 
   public function comment($id_task, array $cfg){
     if ( $this->exists($id_task) && !empty($cfg) ){
-      $note = new bbn\appui\note($this->db);
+      $note = new bbn\appui\notes($this->db);
       $r = $note->insert(
         (empty($cfg['title']) ? '' : $cfg['title']),
         (empty($cfg['text']) ? '' : $cfg['text'])

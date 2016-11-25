@@ -5,12 +5,16 @@ use bbn;
 
 class directories {
 
+  use bbn\models\tts\optional;
+
   const IDE_PATH = 'bbn_ide',
         DEV_PATH = 'PATHS',
         PATH_TYPE = 'PTYPES',
         FILES_PREF = 'files';
 
   private static
+    /** @var bool|int $appui_path */
+    $ide_path = false,
     /** @var bool|int $dev_path */
     $dev_path = false,
     /** @var bool|int $path_type */
@@ -26,6 +30,28 @@ class directories {
     $last_error,
     /** @var array MVC routes for linking with dirs */
     $routes = [];
+
+  /**
+   * Sets the root of the development paths option
+   * @param $id
+   */
+  private static function set_ide_path($id){
+    self::$ide_path = $id;
+  }
+
+  /**
+   * Gets the ID of the development paths option
+   * @return int
+   */
+  private function _ide_path(){
+    if ( !self::$dev_path ){
+      $this->_set_appui();
+      if ( $id = $this->options->from_code(self::IDE_PATH, BBN_APPUI) ){
+        self::set_ide_path($id);
+      }
+    }
+    return self::$ide_path;
+  }
 
   /**
    * Sets the root of the development paths option
@@ -180,6 +206,7 @@ class directories {
   public function __construct(bbn\appui\options $options, $routes){
     $this->options = $options;
     $this->routes = $routes;
+    $this->_ide_path();
   }
 
   public function add_routes(array $routes){

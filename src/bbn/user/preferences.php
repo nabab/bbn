@@ -17,17 +17,13 @@ use bbn;
  * @todo Groups and hotlinks features
  */
 
-class preferences
+class preferences extends bbn\models\cls\db
 {
 
-  use bbn\models\tts\retriever;
-
-  private static
-    $id_permission_root,
-    $id_option_permission_root;
+  use bbn\models\tts\retriever,
+      bbn\models\tts\optional;
 
   protected static
-    $permission_root = 'bbn_permissions',
 		/** @var array */
 		$_defaults = [
 			'errors' => [
@@ -56,36 +52,6 @@ class preferences
 		$id_user,
 		/** @var int */
 		$id_group;
-
-  /**
-   * 	Returns the ID of the option which is at the root of the permissions' path
-   *
-   * @return int
-   */
-  private static function _get_permission_root(){
-    if ( is_null(self::$id_permission_root) ){
-      /** @var bbn\appui\options $opt */
-      if ( $opt = bbn\appui\options::get_options() ){
-        self::$id_permission_root = $opt->from_path(self::$permission_root);
-      }
-    }
-    return self::$id_permission_root;
-  }
-
-  /**
-   * 	Returns the ID of the option which is at the root of the permissions' path
-   *
-   * @return int
-   */
-  private static function _get_option_permission_root(){
-    if ( is_null(self::$id_option_permission_root) ){
-      /** @var bbn\appui\options $opt */
-      if ( $opt = bbn\appui\options::get_options() ){
-        self::$id_option_permission_root = $opt->from_code('options', 'misc', 'bbn_permissions');
-      }
-    }
-    return self::$id_option_permission_root;
-  }
 
   /**
    * @return bbn\appui\options
@@ -243,116 +209,6 @@ class preferences
 		return false;
 	}
 
-	public function get_existing_permissions($path){
-		$r = [];
-		if (
-		  ($id = $this->from_path($path)) &&
-			// Keeps the order
-			($opt = $this->options->full_options($id))
-    ){
-      foreach ( $opt as $o ){
-        $r[$o['id']] = $o['code'];
-      }
-		}
-		return $r;
-	}
-
-	public function has_permission($path, $type = 'page', $id_user = null, $id_group = null, $force = false){
-		if ( !$id_group && !$id_user && ($this->id_group === 1) ){
-			return true;
-		}
-		if ( ($user = bbn\user::get_instance()) && $user->is_admin() ){
-			return true;
-		}
-		if ( is_int($path) ){
-			$id_option = $path;
-		}
-		else{
-			$id_option = $this->from_path($path, $type);
-		}
-		if ( $id_option ){
-			$option = $this->options->option($id_option);
-			if ( !empty($option['public']) ){
-				return true;
-			}
-			return $this->has($id_option, $id_user ?: $this->id_user, $id_group ?: $this->id_group, $force);
-		}
-	}
-
-  public function is_permission($path, $type = 'page'){
-    return $this->from_path($path, $type) ? true : false;
-  }
-
-  public function from_path($path, $type = 'page'){
-    $parent = null;
-    if ( $root = $this->options->from_code($type, self::_get_permission_root()) ){
-      $parts = explode('/', $path);
-      $num = count($parts);
-      foreach ( $parts as $i => $p ){
-        if ( !empty($p) ){
-          if ( is_null($parent) ){
-            $parent = $root;
-          }
-					$prev_parent = $parent;
-          $parent = $this->options->from_code($p.($i < $num-1 ? '/' : ''), $parent);
-					if ( !$parent && ($i < $num-1) ){
-						$parent = $this->options->from_code($p, $prev_parent);
-					}
-        }
-      }
-    }
-    return $parent ?: false;
-  }
-
-
-  /**
-   * Returns all the current user's permissions
-   *
-   * @return
-   */
-  public function add_permission($id_option, $type = 'page', $id_user = null, $id_group = null){
-    if ( !bbn\str::is_integer($id_option) ){
-      $id_option = $this->from_path($id_option, $type);
-    }
-    if ( $id = $this->retrieve_id($id_option, $id_user, $id_group) ){
-      return $id;
-    }
-    $d = [
-      'id_option' => $id_option,
-    ];
-    if ( !empty($id_group) ){
-      $d['id_group'] = $id_group;
-    }
-    else if ( !empty($id_user) ){
-      $d['id_user'] = $id_user;
-    }
-    else if ( $this->id_user ){
-      $d['id_user'] = $this->id_user;
-    }
-    if ( $r = $this->db->insert($this->class_cfg['table'], $d) ){
-      return $this->db->last_id();
-    }
-    return false;
-  }
-
-  /**
-   * Returns all the current user's permissions
-   *
-   * @return
-   */
-  public function remove_permission($id_option, $type = 'page', $id_user = null, $id_group = null){
-    if ( !bbn\str::is_integer($id_option) ){
-      $id_option = $this->from_path($id_option, $type);
-    }
-    if ( $id_user && ($id = $this->retrieve_id($id_option, $id_user)) ){
-      return $this->db->delete($this->class_cfg['table'], [$this->class_cfg['cols']['id'] => $id]);
-    }
-    if ( $id_group && ($id = $this->retrieve_id($id_option, null, $id_group)) ){
-      return $this->db->delete($this->class_cfg['table'], [$this->class_cfg['cols']['id'] => $id]);
-    }
-    return false;
-  }
-
   /**
    * 
    * @param $id_pref
@@ -507,24 +363,4 @@ class preferences
 		}
 		return $res;
 	}
-
-  public function has_option_permission($id_option, $id_user = null, $id_group = null){
-    if ( bbn\str::is_integer($id_option) ){
-      $root = self::_get_option_permission_root();
-      $read = $this->options->from_code('read', $root);
-      $id_to_check = $this->options->from_code('opt'.$id_option, $read);
-      return $this->has_permission($id_to_check, false, $id_user, $id_group);
-    }
-    return false;
-  }
-
-  public function has_write_option_permission($id_option, $id_user = null, $id_group = null){
-    if ( bbn\str::is_integer($id_option) ){
-      $root = self::_get_option_permission_root();
-      $write = $this->options->from_code('write', $root);
-      $id_to_check = $this->options->from_code('opt'.$id_option, $write);
-      return $this->has_permission($id_to_check, $id_user, $id_group);
-    }
-    return false;
-  }
 }

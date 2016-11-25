@@ -147,8 +147,6 @@ class user extends models\cls\basic
     $session = null,
     /** @var int */
     $error = null,
-    /** @var array */
-    $permissions = [],
     /** @var string */
     $user_agent,
     /** @var string */
@@ -741,77 +739,6 @@ class user extends models\cls\basic
   }
 
   /**
-   * Returns all the current user's permissions
-   *
-   * @return array
-   */
-  public function get_permissions(){
-    return $this->permissions;
-  }
-
-  /**
-   * Sets the current user's permissions (only if admin)
-   *
-   * @return array
-   */
-  public function set_admin_permissions($perms){
-    if ( $this->is_admin() ){
-      $x = function(array $ar, $res = [], $prefix = '') use (&$x){
-        foreach ( $ar as $a ){
-          $pref = isset($a['prefix']) ? $prefix.$a['prefix'] : $prefix;
-          if ( !empty($a['link']) ){
-            $res[$pref.$a['link']] = 1;
-          }
-          if ( !empty($a['items']) ){
-            $res = $x($a['items'], $res, $pref);
-          }
-        }
-        return $res;
-      };
-      $this->permissions = $x($perms);
-      if ( !isset($this->permissions['admin']) ){
-        $this->permissions['admin'] = 1;
-      }
-      $this->set_session('permissions', $this->permissions);
-      return 1;
-    }
-    return false;
-  }
-
-  /**
-   * Checks if the user has the given permission
-   *
-   * @param string $name The name of the permission
-   *
-   * @return bool
-   */
-  public function has_permission($name, $check_admin=1){
-    if ( !is_string($name) ){
-      throw new \InvalidArgumentException('Has permission have a string as argument');
-    }
-    if ( isset($this->permissions[$name]) && $this->permissions[$name] ){
-      return 1;
-    }
-    return ( $check_admin && $this->is_admin() );
-  }
-
-  /**
-   * Checks if the user has the given permission and dies otherwise
-   *
-   * @param string $name The name of the permission
-   *
-   * @return void
-   */
-  public function check_permission($name, $check_admin=1){
-    if ( isset($this->permissions[$name]) && $this->permissions[$name] ){
-      return 1;
-    }
-    if ( !( $check_admin && $this->is_admin() ) ){
-      die("You don't have the requested permission ($name)");
-    }
-  }
-
-  /**
    * Changes the data in the user's table
    *
    * @param array $d The new data
@@ -1101,14 +1028,6 @@ class user extends models\cls\basic
   public function get_manager($mail = false){
     $mgr = new user\manager($this, $mail);
     return $mgr;
-  }
-
-	/**
-	 * @return boolean
-	 */
-  public function is_allowed($perm)
-  {
-    return ( $this->has_permission("admin") || $this->has_permission($perm) );
   }
 
 	/**
