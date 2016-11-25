@@ -472,56 +472,57 @@ class user extends models\cls\basic
    * @return mixed
    */
   private function _check_credentials($params){
-    /** @var array $f The form fields sent to identify the users */
-    $f =& $this->class_cfg['fields'];
-
-    if ( !isset($params[$f['salt']]) ){
-      $this->set_error(11);
-    }
-    else if ( !$this->check_salt($params[$f['salt']]) ){
-      $this->set_error(17);
-    }
-    if ( $this->check_session() ){
-      $this->close_session();
-    }
-
     if ( $this->check() ){
-      if ( isset($params[$f['user']],$params[$f['pass']]) ) {
-        // Table structure
-        $arch =& $this->class_cfg['arch'];
+      /** @var array $f The form fields sent to identify the users */
+      $f =& $this->class_cfg['fields'];
 
-        $this->just_login = 1;
+      if ( !isset($params[$f['salt']]) ){
+        $this->set_error(11);
+      }
+      else{
+        if ( !$this->check_salt($params[$f['salt']]) ){
+          $this->set_error(17);
+        }
+      }
+      if ( $this->check() ){
+        if ( isset($params[$f['user']], $params[$f['pass']]) ){
+          // Table structure
+          $arch =& $this->class_cfg['arch'];
 
-        // Database Query
-        if ( $id = $this->db->select_one(
-          $this->class_cfg['tables']['users'],
-          $this->fields['id'],
-          x::merge_arrays(
-            $this->class_cfg['conditions'],
-            [$arch['users']['active'] => 1],
-            [($arch['users']['login'] ?? $arch['users']['email']) => $params[$f['user']]])
-        ) ){
+          $this->just_login = 1;
 
-          $pass = $this->db->select_one(
-            $this->class_cfg['tables']['passwords'],
-            $arch['passwords']['pass'],
-            [$arch['passwords']['id_user'] => $id],
-            [$arch['passwords']['added'] => 'DESC']);
-          if ( $this->_check_password($params[$f['pass']], $pass) ){
-            $this->_login($id);
+          // Database Query
+          if (
+            $id = $this->db->select_one(
+              $this->class_cfg['tables']['users'],
+              $this->fields['id'],
+              x::merge_arrays(
+                $this->class_cfg['conditions'],
+                [$arch['users']['active'] => 1],
+                [($arch['users']['login'] ?? $arch['users']['email']) => $params[$f['user']]])
+            )
+          ){
+            $pass = $this->db->select_one(
+              $this->class_cfg['tables']['passwords'],
+              $arch['passwords']['pass'],
+              [$arch['passwords']['id_user'] => $id],
+              [$arch['passwords']['added'] => 'DESC']);
+            if ( $this->_check_password($params[$f['pass']], $pass) ){
+              $this->_login($id);
+            }
+            else{
+              $this->record_attempt();
+              // Canceling authentication if num_attempts > max_attempts
+              $this->set_error($this->check_attempts() ? 6 : 4);
+            }
           }
           else{
-            $this->record_attempt();
-            // Canceling authentication if num_attempts > max_attempts
-            $this->set_error($this->check_attempts() ? 6 : 4);
+            $this->set_error(6);
           }
         }
         else{
-          $this->set_error(6);
+          $this->set_error(12);
         }
-      }
-      else{
-        $this->set_error(12);
       }
     }
     return $this->auth;

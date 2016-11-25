@@ -9,6 +9,11 @@ class controller implements api{
 
   private
     /**
+     * When reroute is used $reroutes will be used to check we're not in an infinite reroute loop
+     * @var array $last_reroute
+     */
+    $reroutes = [],
+    /**
      * The MVC class from which the controller is called
      * @var mvc
      */
@@ -282,7 +287,8 @@ class controller implements api{
 	 */
 	public function reroute($path='', $post = false, $arguments = false)
 	{
-	  if ( $this->path !== $path ){
+	  if ( !in_array($path, $this->reroutes) && ($this->path !== $path) ){
+      array_push($this->reroutes, $path);
       $this->mvc->reroute($path, $post, $arguments);
       $this->is_rerouted = 1;
     }
@@ -367,6 +373,7 @@ class controller implements api{
       ob_end_clean();
       // If rerouted during the checkers
       if ( $this->is_rerouted ){
+        var_dump($this->get_path());
         $this->is_rerouted = false;
         return $this->control();
       }

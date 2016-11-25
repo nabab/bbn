@@ -168,7 +168,7 @@ class options extends bbn\models\cls\db
       }
       return true;
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -181,7 +181,7 @@ class options extends bbn\models\cls\db
   private function _set_value(array &$opt){
 
     if ( !isset($opt['id'], $opt['text']) ){
-      $this->log(__LINE__, func_get_args());
+      $this->log(func_get_args());
       return false;
     }
     if ( !empty($opt[$this->class_cfg['arch']['options']['value']]) && bbn\str::is_json($opt[$this->class_cfg['arch']['options']['value']]) ){
@@ -210,7 +210,7 @@ class options extends bbn\models\cls\db
     if ( $res = $this->get_rows($where, 1) ){
       return $res[0];
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -259,7 +259,7 @@ class options extends bbn\models\cls\db
       $args = array_values($where);
       return $this->db->get_rows($q, $args);
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -432,7 +432,7 @@ class options extends bbn\models\cls\db
       }
       return $tmp;
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -534,7 +534,7 @@ class options extends bbn\models\cls\db
         return $res;
       }
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -570,7 +570,7 @@ class options extends bbn\models\cls\db
         return $opt;
       }
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -605,7 +605,7 @@ class options extends bbn\models\cls\db
       $this->_set_value($opt);
       return $opt;
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -646,7 +646,7 @@ class options extends bbn\models\cls\db
       }
       return $opt;
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -680,7 +680,7 @@ class options extends bbn\models\cls\db
       $this->cache_set($id, __FUNCTION__, $opt);
       return $opt;
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -714,7 +714,7 @@ class options extends bbn\models\cls\db
       $this->cache_set($id, __FUNCTION__, $opt);
       return $opt;
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -778,7 +778,7 @@ class options extends bbn\models\cls\db
         return $res;
       }
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -807,7 +807,7 @@ class options extends bbn\models\cls\db
         return $a;
       }, $id);
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -845,7 +845,7 @@ class options extends bbn\models\cls\db
       }
       return $r;
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -883,7 +883,7 @@ class options extends bbn\models\cls\db
       }
       return $r;
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -911,7 +911,7 @@ class options extends bbn\models\cls\db
       }
       return $res;
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -972,7 +972,7 @@ class options extends bbn\models\cls\db
         return $res;
       }
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1012,7 +1012,7 @@ class options extends bbn\models\cls\db
       }
       return $res;
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1079,7 +1079,7 @@ class options extends bbn\models\cls\db
         return $res;
       }
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1126,7 +1126,7 @@ class options extends bbn\models\cls\db
       }
       return $cfg;
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1152,7 +1152,7 @@ class options extends bbn\models\cls\db
     if ( $id_parent !== false ){
       return $this->get_cfg($id_parent);
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1187,7 +1187,7 @@ class options extends bbn\models\cls\db
       }
       return $res;
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1209,7 +1209,7 @@ class options extends bbn\models\cls\db
         $this->class_cfg['arch']['options']['id_parent'],
         ['id' => $id]);
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1239,7 +1239,7 @@ class options extends bbn\models\cls\db
     ){
       return $this->option($id_parent);
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1271,7 +1271,7 @@ class options extends bbn\models\cls\db
         array_push($done, $id);
       }
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1297,7 +1297,7 @@ class options extends bbn\models\cls\db
       $c =& $this->class_cfg['arch']['options'];
       return $this->db->select_all_by_keys($this->class_cfg['table'], [$c['id'], $c['code']], [$c['id_parent'] => $id]);
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1316,7 +1316,7 @@ class options extends bbn\models\cls\db
     if ( bbn\str::is_integer($id) ) {
       return $this->db->get_val($this->class_cfg['table'], $this->class_cfg['arch']['options']['code'], $this->class_cfg['arch']['options']['id'], $id);
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1338,7 +1338,7 @@ class options extends bbn\models\cls\db
     if ( bbn\str::is_integer($id) ) {
       return $this->db->get_val($this->class_cfg['table'], $this->class_cfg['arch']['options']['text'], $this->class_cfg['arch']['options']['id'], $id);
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1364,7 +1364,7 @@ class options extends bbn\models\cls\db
         return _($val);
       }
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1383,7 +1383,7 @@ class options extends bbn\models\cls\db
     if ( bbn\str::is_integer($id = $this->from_code(func_get_args())) ) {
       return $this->db->count($this->class_cfg['table'], [$this->class_cfg['arch']['options']['id_parent'] => $id]);
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1416,7 +1416,7 @@ class options extends bbn\models\cls\db
         return $res;
       }
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1438,7 +1438,7 @@ class options extends bbn\models\cls\db
       $cfg = $this->get_cfg($id);
       return empty($cfg['sortable']) ? false : true;
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1467,7 +1467,7 @@ class options extends bbn\models\cls\db
       }
       return $parts;
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1519,7 +1519,7 @@ class options extends bbn\models\cls\db
     if ( $parts = $this->get_path_array($id, $parent) ){
       return implode($sep, $parts);
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1675,7 +1675,7 @@ class options extends bbn\models\cls\db
       }
       return 0;
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1714,7 +1714,7 @@ class options extends bbn\models\cls\db
       }
       return $num;
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1851,7 +1851,7 @@ class options extends bbn\models\cls\db
       }
       return $old;
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1915,7 +1915,7 @@ class options extends bbn\models\cls\db
       }
       return 0;
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -1975,7 +1975,7 @@ class options extends bbn\models\cls\db
         }
       }
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -2014,7 +2014,7 @@ class options extends bbn\models\cls\db
       }
       return 0;
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -2191,7 +2191,7 @@ class options extends bbn\models\cls\db
     if ( ($ret = $deep ? $this->native_tree($id) : $this->native_option($id)) ){
       return $return ? $ret : var_export($ret, 1);
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -2279,7 +2279,7 @@ class options extends bbn\models\cls\db
       }
       return $changes;
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -2364,7 +2364,7 @@ class options extends bbn\models\cls\db
       $cfg = $this->get_cfg($p);
       return !empty($cfg['permissions']);
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 
@@ -2403,7 +2403,7 @@ class options extends bbn\models\cls\db
       }
       return $perms;
     }
-    $this->log(__LINE__, func_get_args());
+    $this->log(func_get_args());
     return false;
   }
 }

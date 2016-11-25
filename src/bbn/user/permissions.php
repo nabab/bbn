@@ -117,7 +117,7 @@ class permissions extends bbn\models\cls\basic
         if ( !empty($option['public']) ){
           return true;
         }
-        return $this->has($id_option, $id_user ?: $this->user->get_id(), $id_group ?: $this->user->get_group(), $force);
+        return $this->pref->has($id_option, $id_user ?: $this->user->get_id(), $id_group ?: $this->user->get_group(), $force);
       }
     }
     return false;
@@ -175,25 +175,7 @@ class permissions extends bbn\models\cls\basic
     if ( !bbn\str::is_integer($id_option) ){
       $id_option = $this->from_path($id_option, $type);
     }
-    if ( $id = $this->retrieve_id($id_option, $id_user, $id_group) ){
-      return $id;
-    }
-    $d = [
-      'id_option' => $id_option,
-    ];
-    if ( !empty($id_group) ){
-      $d['id_group'] = $id_group;
-    }
-    else if ( !empty($id_user) ){
-      $d['id_user'] = $id_user;
-    }
-    else if ( $this->id_user ){
-      $d['id_user'] = $this->id_user;
-    }
-    if ( $r = $this->db->insert($this->class_cfg['table'], $d) ){
-      return $this->db->last_id();
-    }
-    return false;
+    return $this->pref->set($id_option, [], $id_user, $id_group);
   }
 
   /**
@@ -247,7 +229,7 @@ class permissions extends bbn\models\cls\basic
 
   public function read_option($id_option, $id_user = null, $id_group = null){
     if ( bbn\str::is_integer($id_option) ){
-      $root = self::get_option_root();
+      $root = self::get_option_id('options');
       $id_to_check = $this->options->from_code('opt'.$id_option, $root);
       return $this->has($id_to_check, 'options', $id_user, $id_group);
     }
@@ -256,9 +238,8 @@ class permissions extends bbn\models\cls\basic
 
   public function write_option($id_option, $id_user = null, $id_group = null){
     if ( bbn\str::is_integer($id_option) ){
-      $root = self::get_option_root();
-      $option = $this->options->from_code('opt'.$id_option, $root);
-      $id_to_check = $this->options->from_code('write', $option);
+      $root = self::get_option_id('opt'.$id_option, 'options');
+      $id_to_check = $this->options->from_code('write', $root);
       return $this->has($id_to_check, 'options', $id_user, $id_group);
     }
     return false;
