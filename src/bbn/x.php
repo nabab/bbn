@@ -651,6 +651,24 @@ class x
     }
   }
 
+  public static function map(callable $fn, array $ar, string $items = null){
+    $res = [];
+    foreach ( $ar as $i => $a ){
+      $is_false = $a === false;
+      $r = $fn($a);
+      if ( $is_false ){
+        array_push($res, $r);
+      }
+      else if ( $r !== false ){
+        if ( is_array($r) && $items && isset($r[$items]) && is_array($r[$items]) ){
+          $r[$items] = self::map($fn, $r[$items], $items);
+        }
+        array_push($res, $r);
+      }
+    }
+    return $res;
+  }
+
 	public static function find(array $ar, array $where){
 		if ( !empty($where) ){
 			foreach ( $ar as $i => $v ){
