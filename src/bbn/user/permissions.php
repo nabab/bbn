@@ -27,13 +27,17 @@ class permissions extends bbn\models\cls\basic
 					/** @var int */
 					$is_init = false,
 					/** @var int the ID of the root option for the permission (it should have the option's root as id_parent and bbn_permissions as code */
-					$root;
+					$root,
+          $current_permission = false;
 
   protected
           $options,
           $pref,
           $user;
 
+  private static function _set_current(int $current){
+    self::$current_permission = $current;
+  }
 
 	/**
    * Constructor
@@ -47,6 +51,15 @@ class permissions extends bbn\models\cls\basic
     self::retriever_init($this);
     self::optional_init($this);
 	}
+
+  public function set_current_permission(int $current){
+    self::_set_current($current);
+    return $this;
+  }
+
+  public function get_current_permission(){
+    return self::$current_permission;
+  }
 
   /**
    * Return the list of permissions existing in the given option

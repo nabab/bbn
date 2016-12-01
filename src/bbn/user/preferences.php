@@ -295,11 +295,15 @@ class preferences extends bbn\models\cls\db
   }
 
   /**
-	 * Sets permission's config to user or group - and adds the permission if needed
-	 *
-	 * @return
-	 */
-	public function set($id_option, array $cfg, $id_user = null, $id_group = null){
+   * Sets permission's config to user or group - and adds the permission if needed.
+   *
+   * @param $id_option
+   * @param array $cfg
+   * @param int|null $id_user
+   * @param int|null $id_group
+   * @return int
+   */
+  public function set(int $id_option, array $cfg, int $id_user = null, int $id_group = null){
 		if ( $id = $this->retrieve_id($id_option, $id_user, $id_group) ) {
 			return $this->set_cfg($id, $cfg);
 		}

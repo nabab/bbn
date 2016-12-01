@@ -219,6 +219,12 @@ class dir extends bbn\models\cls\basic
       else if ( $type && ((strpos($type, 'dir') === 0) || (strpos($type, 'fold') === 0)) ){
         $all = $dirs;
       }
+      else if ( $type ){
+        $all = array_filter(self::get_files($dir, false, $hidden), function($a)use($type){
+          $ext = \bbn\str::file_ext($a);
+          return strtolower($ext) === strtolower($type);
+        });
+      }
       else{
         $files = self::get_files($dir, false, $hidden);
         if ( is_array($files) ){
@@ -246,32 +252,15 @@ class dir extends bbn\models\cls\basic
    * @return array
    */
   public static function mscan($dir, $type = null, $hidden = false){
-    $all = [];
-    $dir = self::clean($dir);
-    $dirs = self::get_dirs($dir);
-    if ( is_array($dirs) ){
-      if ( $type && (strpos($type, 'file') === 0) ){
-        $all = self::get_files($dir, false, $hidden);
-      }
-      else if ( $type && ((strpos($type, 'dir') === 0) || (strpos($type, 'fold') === 0)) ){
-        $all = $dirs;
-      }
-      else{
-        $files = self::get_files($dir, false, $hidden);
-        if ( is_array($files) ){
-          $all = array_merge($dirs, $files);
-        }
-      }
-      foreach ( $dirs as $d ){
-        $all = array_merge(is_array($all) ? $all : [], self::scan($d, $type, $hidden));
-      }
+    if ( $all = self::scan($dir, $type, $hidden) ){
       $res = [];
       foreach ($all as $a ){
         $t = filemtime($a);
         array_push($res, ['name' => $a, 'mtime' => $t, 'date' => date('Y-m-d H:i:s', $t)]);
       }
+      return $res;
     }
-    return !$all ? [] : $res;
+    return [];
   }
 
   /**
