@@ -1295,7 +1295,7 @@ class options extends bbn\models\cls\db
   public function get_codes($code = null){
     if ( bbn\str::is_integer($id = $this->from_code(func_get_args())) ){
       $c =& $this->class_cfg['arch']['options'];
-      return $this->db->select_all_by_keys($this->class_cfg['table'], [$c['id'], $c['code']], [$c['id_parent'] => $id]);
+      return $this->db->select_all_by_keys($this->class_cfg['table'], [$c['id'], $c['code']], [$c['id_parent'] => $id], [($this->is_sortable($id) ? $c['num'] : $c['code']) => 'ASC']);
     }
     $this->log(func_get_args());
     return false;
