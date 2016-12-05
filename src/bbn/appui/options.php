@@ -387,7 +387,7 @@ class options extends bbn\models\cls\db
       return $args['id'];
     }
     // False is accepted as id_parent for root
-    if ( last($args) === false ){
+    if ( end($args) === false ){
       array_pop($args);
     }
     if ( !count($args) ){
