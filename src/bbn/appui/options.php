@@ -751,7 +751,7 @@ class options extends bbn\models\cls\db
   }
 
   /**
-   * Returns an id-indexed array of full options arrays for a given parent
+   * Returns an array of full options arrays for a given parent
    *
    * ```php
    * bbn\x::dump($opt->full_options(12));
@@ -780,6 +780,34 @@ class options extends bbn\models\cls\db
     }
     $this->log(func_get_args());
     return false;
+  }
+
+  /**
+   * Returns an id-indexed array of full options arrays for a given parent
+   *
+   * ```php
+   * bbn\x::dump($opt->full_options(12));
+   * /*
+   * array [
+   *   21 => ['id' => 21, 'id_parent' => 12, 'title' => "My option 21", 'myProperty' =>  "78%"],
+   *   22 => ['id' => 22, 'id_parent' => 12, 'title' => "My option 22", 'myProperty' =>  "26%"],
+   *   25 => ['id' => 25, 'id_parent' => 12, 'title' => "My option 25", 'myProperty' =>  "50%"],
+   *   27 => ['id' => 27, 'id_parent' => 12, 'title' => "My option 27", 'myProperty' =>  "40%"]
+   * ]
+   * ```
+   *
+   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @return array|false A list of parent if option not found
+   */
+  public function full_options_by_id($code = null){
+    $res = [];
+    if ( $opt = $this->full_options(func_get_args()) ){
+      $cf = $this->get_class_cfg();
+      foreach ( $opt as $o ){
+        $res[$o[$cf['arch']['options']['id']]] = $o;
+      }
+    }
+    return $opt === false ?: $res;
   }
 
   /**
