@@ -2297,11 +2297,11 @@ class options extends bbn\models\cls\db
    */
   public function map(callable $f, $id, $deep = false){
     $opts = is_array($id) ? $id : ( $deep ? $this->full_tree($id) : $this->full_options($id) );
-    if ( isset($opts['items']) ){
-      $opts = $opts['items'];
-    }
     $res = [];
     if ( is_array($opts) ){
+      if ( isset($opts['items']) ){
+        $opts = $opts['items'];
+      }
       foreach ( $opts as $i => $o ){
         $opts[$i] = $f($o);
         if ( $deep && $opts[$i] && !empty($opts[$i]['items']) ){

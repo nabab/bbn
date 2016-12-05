@@ -144,7 +144,7 @@ class permissions extends bbn\models\cls\basic
    * @return bool
    */
   public function is(string $path, string $type = 'page'){
-    return $this->from_path($path, $type) ? true : false;
+    return $this->from_path($path, $type) ?: false;
   }
 
   /**
