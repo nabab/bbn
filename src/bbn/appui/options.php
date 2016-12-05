@@ -222,7 +222,7 @@ class options extends bbn\models\cls\db
    * @param int $start Where to start the query (only if limit is > 1)
    * @return array|false An array of rows, empty if not found, false if there is an error in the where config
    */
-  protected function get_rows($where, int $limit = 0, int $start = 0){
+  protected function get_rows($where, $limit = 0, $start = 0){
     $db =& $this->db;
     $tab = $this->class_cfg['table'];
     if ( empty($where) ){
