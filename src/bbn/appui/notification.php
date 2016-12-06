@@ -84,7 +84,7 @@ class notification extends bbn\models\cls\db
         ];
       }, $list);
     }
-    die("Cannot use get_notifications without user");
+    return false;
   }
 
   public function get_list($id_user = false, $limit = 100, $start = 0){
@@ -117,7 +117,7 @@ class notification extends bbn\models\cls\db
       }
       return $list;
     }
-    die("Cannot use get_notifications without user");
+    return false;
   }
 
   public function read($id_user, $id){
@@ -132,7 +132,7 @@ class notification extends bbn\models\cls\db
         self::$c['id_user'] => $id_user
       ]);
     }
-    die("Cannot use get_notifications without user");
+    return false;
   }
 }
 
