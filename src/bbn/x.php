@@ -687,6 +687,20 @@ class x
 		return false;
 	}
 
+  public static function get_row(array $r, array $where){
+    if ( ($res = self::find($r, $where)) !== false ){
+      return $r[$res];
+    }
+    return false;
+  }
+
+  public static function get_field(array $r, array $where, string $field){
+    if ( ($res = self::get_row($r, $where)) && isset($res[$field]) ){
+      return $res[$field];
+    }
+    return false;
+  }
+
   public static function pick(array $ar, array $keys){
     while ( count($keys) ){
       $r = array_shift($keys);

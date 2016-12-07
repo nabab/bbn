@@ -655,8 +655,9 @@ class tasks extends bbn\models\cls\db{
         'role');
       $n = false;
       foreach ( $all as $a ){
-        if ( $n !== $roles[$a['role']]['code'] ){
-          $n = $roles[$a['role']]['code'];
+        $code = bbn\x::get_field($roles, ['id' => $a['role']], 'code');
+        if ( $n !== $code ){
+          $n = $code;
           $r[$n] = [];
         }
         array_push($r[$n], $a['id_user']);
