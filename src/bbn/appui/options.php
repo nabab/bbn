@@ -520,7 +520,7 @@ class options extends bbn\models\cls\db
       if ( ($res = $this->cache_get($id, __FUNCTION__)) !== false ){
         return $res;
       }
-      if ( $cfg = $this->get_parent_cfg($id) ){
+      if ( ($cfg = $this->get_parent_cfg($id)) !== false ){
         // If not sortable returning an array ordered by text
         $order = empty($cfg['sortable']) ?
           [$this->class_cfg['arch']['options']['text'] => 'ASC'] :
