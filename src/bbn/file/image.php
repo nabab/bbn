@@ -53,16 +53,16 @@ class image extends bbn\file
 		$max_width = 5000;
 
 /**
- * Converts one or more jpg image(s) to one pdf file.
+ * Converts one or more jpg image(s) to a pdf file. If the pdf file doesn't exist will be created.
  *
- * <code>
- * bbn\file\image::jpg2pdf(["C:\test\image1.jpg", "C:\test\image1.jpg"], "C:\test\combined.pdf"); //Converts two jpg image to one pdf file"
- * bbn\file\image::jpg2pdf(["C:\test\image.jpg"], "C:\test\image.pdf"); //Converts jpg image to pdf
- * </code>
+ * ```php
+ * bbn\x::dump(bbn\file\image::jpg2pdf(["/home/data/test/two.jpg","/home/data/test/one.jpeg"], "/home/data/test/doc.pdf"));
+ * // (string) "/home/data/test/doc.pdf"
+ * ```
  *
  * @param array $jpg The path of jpg file(s) to convert
- * @param string $pdf The destination pdf filename..
- * @return string|array
+ * @param string $pdf The path of the pdf file
+ * @return string|false
  */
 public static function jpg2pdf($jpg, $pdf){
  if ( class_exists('\\Imagick') ) {
@@ -87,15 +87,18 @@ public static function jpg2pdf($jpg, $pdf){
  }
  return false;
 }
-  
+
 /**
    * Converts pdf file to jpg image(s).
    *
-   * <code>
-   * bbn\file\image::pdf2jpg("C:\test\file.pdf"); //Converts the first page of pdf to "C:\test\file.jpg"
-   * bbn\file\image::pdf2jpg("C:\test\file.pdf", '', 'all'); //Converts all pages of pdf to "C:\test" with filename "file-0.jpg", "file-1.jpg", "file-2.jpg", ecc
-   * bbn\file\image::pdf2jpg("C:\test\file.pdf", "C:\test2\file.jpg", 2); //Converts the third page of pdf to "C:\test2\file.jpg"
-   * </code>
+	 * ```php
+	 * bbn\x::dump(bbn\file\image::pdf2jpg("/home/data/test/doc.pdf"));
+	 * // (string)  "/home/data/test/doc.jpg"
+	 * bbn\x::dump(bbn\file\image::pdf2jpg("/home/data/test/doc.pdf",'', all));
+	 * // (array) ["/home/data/test/doc-0.jpg","/home/data/test/doc-1.jpg"]
+	 * bbn\x::dump(bbn\file\image::pdf2jpg("/home/data/test/doc.pdf",'/home/data/test/Folder/image.jpg', all));
+   * // (array) ["/home/data/test/Folder/image-0.jpg", "/home/data/test/Folder/image-1.jpg"],
+	 * ```
    *
    * @param $pdf The path of pdf file to convert
    * @param $jpg The destination filename. If empty is used the same path of pdf. Default: empty.
@@ -143,7 +146,8 @@ public static function jpg2pdf($jpg, $pdf){
   }
 
 	/**
-	 * @return void 
+	 * Construct
+	 * @return void
 	 */
 	public function __construct($file)
 	{
@@ -160,14 +164,15 @@ public static function jpg2pdf($jpg, $pdf){
 	}
 
 	/**
-   * Returns the file image extension.
-   * 
-   * <code>
-   * $img = new bbn\file\image("C:\test\img.jpg");
-   * $img->get_extension(); //Returns "jpg"
-   * </code>
-   * 
-	 * @return string 
+   * Returns the extension of the image. If the file has jpg extension will return 'jpeg'.
+   *
+	 * ```php
+   * $img = new bbn\file\image("/home/data/test/image.jpg");
+   * bbn\x::dump($img->get_extension());
+	 * // (string) "jpeg"
+   * ```
+   *
+	 * @return string
 	 */
 	public function get_extension(){
     parent::get_extension();
@@ -194,13 +199,17 @@ public static function jpg2pdf($jpg, $pdf){
 
 	/**
    * Tests if the object is a image.
-   * 
-   * <code>
-   * $img = new bbn\file\image("C:\test\img.jpg");
-   * $img->test(); //Returns "true"
-   * </code>
-   * 
-	 * @return boolean 
+   *
+   * ```php
+   * $img = new bbn\file\image("/home/data/test/image.jpg");
+   * bbn\x::dump($img->test());
+	 * // (bool) true
+	 * $img = new bbn\file\image("/home/data/test/file.doc");
+   * bbn\x::dump($img->test());
+	 * // (bool) false
+   * ```
+   *
+	 * @return boolean
 	 */
 	public function test()
 	{
@@ -215,12 +224,13 @@ public static function jpg2pdf($jpg, $pdf){
 	}
 
 	/**
-	 * @return void 
+	 * 
+	 * @return void
 	 */
 	protected function make()
 	{
 		parent::make();
-		/* For images as string - to implement 
+		/* For images as string - to implement
 		if ( class_exists('\\Imagick') )
 		{
 			$this->img = new \Imagick();
@@ -234,13 +244,13 @@ public static function jpg2pdf($jpg, $pdf){
 				if ( class_exists('\\Imagick') ){
 					try{
 						$this->img = new \Imagick($this->file);
-						$this->img->setInterlaceScheme(\Imagick::INTERLACE_PLANE);
+						$this->img->setInterlaceScheme();
 						$this->w = $this->img->getImageWidth();
 						$this->h = $this->img->getImageHeight();
 					}
 					catch ( \Exception $e ){
 						$this->img = false;
-						$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+						$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 							BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 					}
 				}
@@ -254,18 +264,18 @@ public static function jpg2pdf($jpg, $pdf){
 						}
 					}
 					else{
-						$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+						$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 							BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 					}
 				}
 				else{
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
 		}
 		else{
-			$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+			$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 				BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 		}
 		return $this;
@@ -273,7 +283,13 @@ public static function jpg2pdf($jpg, $pdf){
 
 	/**
    * Sends the image with Content-Type.
-   *  
+	 *
+	 * ```php
+   * $img = new bbn\file\image("/home/data/test/image.jpg");
+   * $img->display();
+	 * ```
+	 *
+	 * @return image
 	 */
 	public function display()
 	{
@@ -295,7 +311,20 @@ public static function jpg2pdf($jpg, $pdf){
 	}
 
 	/**
-	 * @return void 
+	 * Save the image in a new destination if given or overwrite the file (default).
+	 *
+	 * ```php
+	 * $new_file="/home/data/test/Folder_test/image_test.jpeg";
+	 * $img2=new bbn\file\image($new_file);
+	 * bbn\x::dump($img2->test());
+	 * // (bool) false
+	 * bbn\x::dump($img->save($new_file));
+	 * bbn\x::dump($img2->test());
+	 * // (bool) true
+	 * ```
+	 *
+	 * @param string $dest The destination of the file to save. Default = false, the file will overwrited.
+	 * @return image
 	 */
 	public function save($dest=false)
 	{
@@ -309,13 +338,13 @@ public static function jpg2pdf($jpg, $pdf){
 				}
 				catch ( \Exception $e ){
 					die(var_dump($dest, $this->file));
-          $this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+          $this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
             BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
         }
       }
 			else if ( function_exists('image'.$this->ext2) ){
         if ( !call_user_func('image'.$this->ext2, $this->img, $dest) ){
-          $this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+          $this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
             BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
         }
 			}
@@ -324,14 +353,15 @@ public static function jpg2pdf($jpg, $pdf){
 	}
 
 	/**
-   * Returns the file image width.
-   * 
-   * <code>
-   * $img = new bbn\file\image("C:\test\img.jpg");
-   * $img->get_width(); //Returns "512"
-   * </code>
-   * 
-	 * @return integer 
+   * If the file is an image will return its width in pixel.
+   *
+	 * ```php
+	 * $img = new bbn\file\image("/home/data/test/image.jpg");
+	 * bbn\x::dump($img->get_width());
+	 * // (int) 265
+   * ```
+   *
+	 * @return int | false
 	 */
 	public function get_width()
 	{
@@ -344,14 +374,15 @@ public static function jpg2pdf($jpg, $pdf){
 	}
 
 	/**
-   * Returns the file image height.
-   * 
-   * <code>
-   * $img = new bbn\file\image("C:\test\img.jpg");
-   * $img->get_height(); //Returns "512"
-   * </code>
-   * 
-	 * @return integer 
+   * If the file is an image will return its height in pixel.
+   *
+	 * ```php
+	 * $img = new bbn\file\image("/home/data/test/image.jpg");
+	 * bbn\x::dump($img->get_height());
+	 * // (int) 190
+   * ```
+   *
+	 * @return int |false
 	 */
 	public function get_height()
 	{
@@ -364,21 +395,30 @@ public static function jpg2pdf($jpg, $pdf){
 	}
 
 	/**
-   * Resize the image.
-   * 
-   * <code>
-   * $img = new bbn\file\image("C:\test\img.jpg");
-   * $img->resize(150, 150); //Resizes image  150x150px
-   * $img->resize(0, 150, 1); //Resizes and cuts the image 
-   * </code>
-   * 
-   * @param integer $w The new width.
-   * @param integer $h The new height.
-   * @param boolean $crop If cropping the image.
-   * @param integer $max_w The maximum value for new width.
-   * @param integer $max_h The maximum valure for new height.
-   * 
-	 * @return bbn\file\image
+   * Resize the width and the height of the image. If is given only width or height the other dimension will be set on auto.
+	 *
+	 * @todo $max_h and $max_w doesn't work.
+	 *
+   * ```php
+	 * $img = new bbn\file\image("/home/data/test/image.jpg");
+	 * bbn\x::hdump($img->get_width(),$img->get_height());
+	 * // (int) 345  146
+	 * bbn\x::hdump($img->resize(200,"" ));
+	 * bbn\x::hdump($img->get_width(),$img->get_height());
+	 * // (int) 200  84
+	 * bbn\x::hdump($img->get_width(),$img->get_height());
+	 * // (int) 345  146
+	 * bbn\x::dump($img->resize(205, 100, 1));
+   * bbn\x::dump($img->get_width(),$img->get_height());
+   * // (int) 205  100
+   * ```
+   *
+   * @param int $w The new width.
+   * @param int $h The new height.
+   * @param boolean $crop If cropping the image. Default = false.
+   * @param int $max_w The maximum value for new width.
+   * @param int $max_h The maximum valure for new height.
+   * @return image
 	 */
 	public function resize($w=false, $h=false, $crop=false, $max_w=false, $max_h=false)
 	{
@@ -482,12 +522,12 @@ public static function jpg2pdf($jpg, $pdf){
 						$this->h = $h2;
 					}
 					else{
-						$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+						$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 							BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 					}
 				}
 				else{
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -496,14 +536,21 @@ public static function jpg2pdf($jpg, $pdf){
 	}
 
 	/**
-   * Resizes the image with constant values.
-   * 
-   * @param integer $w BBN_MAX_WIDTH
-   * @param integer $h BBN_MAX_HEIGHT
-   * 
-   * @return bbn\file\image
-   *  
-   * @todo BBN_MAX_WIDTH and BBN_MAX_HEIGHT
+   * Resize the image with constant values, if the width is not given it will be set to auto.
+	 * @todo BBN_MAX_WIDTH and BBN_MAX_HEIGHT ?
+	 *
+	 * ```php
+	 * $img = new bbn\file\image("/home/data/test/image.jpg");
+	 * bbn\x::dump($img->get_width(),$img->get_height());
+	 * // (int) 345  146
+	 * $img->autoresize("", 100);
+	 * bbn\x::dump($img->get_width(),$img->get_height());
+	 * // (int) 236  100
+	 * ```
+	 *
+	 * @param integer $w default  BBN_MAX_WIDTH
+   * @param integer $h default BBN_MAX_HEIGHT
+   * @return image
 	 */
 	public function autoresize($w=BBN_MAX_WIDTH, $h=BBN_MAX_HEIGHT)
 	{
@@ -520,7 +567,7 @@ public static function jpg2pdf($jpg, $pdf){
 			}
 		}
 		else{
-			$this->error = defined('BBN_ARGUMENTS_MUST_BE_NUMERIC') ? 
+			$this->error = defined('BBN_ARGUMENTS_MUST_BE_NUMERIC') ?
 				BBN_ARGUMENTS_MUST_BE_NUMERIC : 'Arguments must be numeric';
 		}
 		return $this;
@@ -528,18 +575,22 @@ public static function jpg2pdf($jpg, $pdf){
 
 	/**
    * Returns a crop of the image.
-   * 
-   * <code>
-   * $img = new bbn\file\image("C:\test\img.jpg");
-   * $img->crop(150, 150, 300, 300)';
-   * </code>
-   * 
-   * @param integer $w Width
-   * @param integer $h Height
+   *
+   * ```php
+	 * $img = new bbn\file\image("/home/data/test/image.jpg");
+	 * bbn\x::dump($img->get_width(),$img->get_height());
+	 * // (int) 345  146
+	 * $img->crop(10, 10, 30, 30)->save("/home/data/test/img2.jpeg");
+	 * $img2 = new \bbn\file\image("/home/data/test/img2.jpeg");
+	 * bbn\x::hdump($img2->get_width(),$img2->get_height());
+   * // (int) 10  10
+	 * ```
+   *
+   * @param integer $w the new width
+   * @param integer $h the new height
    * @param integer $x X coordinate
    * @param integer $y Y coordinate
-   * 
-	 * @return bbn\file\image
+   * @return image
 	 */
 	public function crop($w, $h, $x, $y)
 	{
@@ -547,7 +598,7 @@ public static function jpg2pdf($jpg, $pdf){
 			$args = func_get_args();
 			foreach ( $args as $arg ){
 				if ( !is_numeric($arg) ){
-					$this->error = defined('BBN_ARGUMENTS_MUST_BE_NUMERIC') ? 
+					$this->error = defined('BBN_ARGUMENTS_MUST_BE_NUMERIC') ?
 						BBN_ARGUMENTS_MUST_BE_NUMERIC : 'Arguments must be numeric';
 				}
 			}
@@ -559,7 +610,7 @@ public static function jpg2pdf($jpg, $pdf){
 			}
 			if ( class_exists('\\Imagick') ){
 				if ( !$this->img->cropImage($w,$h,$x,$y) ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -575,7 +626,7 @@ public static function jpg2pdf($jpg, $pdf){
 					$this->img = $img;
 				}
 				else{
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -585,15 +636,14 @@ public static function jpg2pdf($jpg, $pdf){
 
 	/**
    * Rotates the image.
-   * 
-   * <code>
-   * $img = new bbn\file\image("C:\test\img.jpg");
-   * $img->rotate(90); //Rotates the image 90°
-   * </code>
-   * 
+   *_
+   * ```php
+   * $img = new bbn\file\image("/home/data/test/image.jpg");
+   * $img->rotate( 90 )->save();
+   * ```
+   *
    * @param integer $angle The angle of rotation.
-   * 
-	 * @return bbn\file\image
+   * @return image
 	 */
 	public function rotate($angle)
 	{
@@ -622,25 +672,25 @@ public static function jpg2pdf($jpg, $pdf){
 				}
 			}
 			else{
-				$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+				$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 					BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
-			} 
+			}
 		}
 		return $this;
 	}
 
 	/**
    * Flips the image.
-   * 
-   * <code>
-   * $img = new bbn\file\image("C:\test\img.jpg");
-   * $img->flip(); //Vertical flipping
-   * $img->flip(); //Horizontal flipping
-   * </code>
-   * 
+   *
+   * ```php
+   * $img = new bbn\file\image("/home/data/test/image.jpg");
+   * $img->flip()->save();
+   * $img->flip("h")->save();
+	 * $img->flip()->save();
+   * ```
+	 *
    * @param string $mode Vertical ("v") or Horizontal ("h") flip, default: "v".
-   * 
-	 * @return bbn\file\image
+   * @return image
 	 */
   public function flip($mode='v'){
 		if ( $this->test() )
@@ -650,12 +700,12 @@ public static function jpg2pdf($jpg, $pdf){
 				if ( $mode == 'v' )
 				{
 					if ( !$this->img->flipImage() ){
-						$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+						$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 							BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 					}
 				}
 				else if ( !$this->img->flopImage() ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -677,9 +727,14 @@ public static function jpg2pdf($jpg, $pdf){
   /**
    * Compresses and sets the image's quality (JPEG image only).
    *
+	 * ```php
+   * $img = new bbn\file\image("/home/data/test/image.jpg");
+   * $img->quality(60, 6)->save();
+   * ```
+	 *
    * @param int $q The quality level (0-100)
    * @param int $comp The compression type
-   * @return bbn\file\image
+   * @return image
    */
   public function quality(int $q = 80, int $comp = 8){
     if ( $this->test() &&
@@ -696,17 +751,16 @@ public static function jpg2pdf($jpg, $pdf){
   }
 
   /**
-   * Adjusts the image brightness.
-   * 
-   * <code>
-   * $img = new bbn\file\image("C:\test\img.jpg");
-   * $img->brightness(); //Increases the brightness
-   * $img->brightness("-"); //Reduces the brightness
-   * </code>
-   * 
+   * Adjusts the image's brightness.
+   *
+	 * ```php
+   * $img = new bbn\file\image("/home/data/test/image.jpg");
+   * $img->brightness();
+   * $img->brightness("-");
+   * ```
+   *
    * @param string $val The value "+" (default) increases the brightness, the value ("-") reduces it.
-   *  
-	 * @return bbn\file\image
+   * @return image
 	 */
 	public function brightness($val='+')
 	{
@@ -716,7 +770,7 @@ public static function jpg2pdf($jpg, $pdf){
 			{
 				$p = ( $val == '-' ) ? 90 : 110;
 				if ( !$this->img->modulateImage($p,100,100) ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -724,7 +778,7 @@ public static function jpg2pdf($jpg, $pdf){
 			{
 				$p = ( $val == '-' ) ? -20 : 20;
 				if ( !imagefilter($this->img,IMG_FILTER_BRIGHTNESS,-20) ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -733,17 +787,16 @@ public static function jpg2pdf($jpg, $pdf){
 	}
 
 	/**
-   *  Adjusts the image contrast.
-   * 
-   * <code>
-   * $img = new bbn\file\image("C:\test\img.jpg");
-   * $img->contrast(); //Increases the contrast
-   * $img->contrast(); //Reduces the contrast
-   * </code>
-   * 
+   * Adjusts the image contrast.
+   *
+   * ```php
+   * $img = new bbn\file\image("/home/data/test/image.jpg");
+   * $img->contrast("-");
+   * $img->contrast();
+   * ```
+   *
    * @param string $val The value "+" (default), increases the contrast, the value ("-") reduces it.
-   * 
-	 * @return bbn\file\image
+   * @return image
 	 */
 	public function contrast($val='+')
 	{
@@ -753,7 +806,7 @@ public static function jpg2pdf($jpg, $pdf){
 			{
 				$p = ( $val == '-' ) ? 0 : 1;
 				if ( !$this->img->contrastImage($p) ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -761,7 +814,7 @@ public static function jpg2pdf($jpg, $pdf){
 			{
 				$p = ( $val == '-' ) ? -20 : 20;
 				if ( !imagefilter($this->img,IMG_FILTER_CONTRAST,-20) ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -770,14 +823,14 @@ public static function jpg2pdf($jpg, $pdf){
 	}
 
 	/**
-   * Converts the color image to grayscale.
-   * 
-   * <code>
-   * $img = new bbn\file\image("C:\test\img.jpg");
-   * $img->grayscale();
-   * </code>
-   * 
-	 * @return bbn\file\image
+   * Converts the image's color to grayscale.
+   *
+   * ```php
+   * $img = new bbn\file\image("/home/data/test/image.jpg");
+   * $img->grayscale()->save();
+   * ```
+   *
+	 * @return image
 	 */
 	public function grayscale()
 	{
@@ -786,14 +839,14 @@ public static function jpg2pdf($jpg, $pdf){
 			if ( class_exists('\\Imagick') )
 			{
 				if ( !$this->img->modulateImage(100,0,100) ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
 			else if ( function_exists('imagefilter') )
 			{
 				if ( !imagefilter($this->img,IMG_FILTER_GRAYSCALE) ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -802,14 +855,14 @@ public static function jpg2pdf($jpg, $pdf){
 	}
 
 	/**
-   * Converts the color image to negative.
-   * 
-   * <code>
-   * $img = new bbn\file\image("C:\test\img.jpg");
+   * Converts the image's color to negative.
+   *
+   * ```php
+	 * $img = new bbn\file\image("/home/data/test/image.jpg");
    * $img->negate();
-   * </code>
-   *  
-	 * @return bbn\file\image
+   * ```
+   *
+	 * @return image
 	 */
 	public function negate()
 	{
@@ -818,14 +871,14 @@ public static function jpg2pdf($jpg, $pdf){
 			if ( class_exists('\\Imagick') )
 			{
 				if ( !$this->img->negateImage(false) ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
 			else if ( function_exists('imagefilter') )
 			{
 				if ( !imagefilter($this->img,IMG_FILTER_NEGATE) ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -834,15 +887,14 @@ public static function jpg2pdf($jpg, $pdf){
 	}
 
 	/**
-   * Converts the color image to polaroid filter.
-   * 
-   * <code>
-   * $img = new bbn\file\image("C:\test\img.jpg");
-   * $img->polaroid();
-   * </code>
-   * 
-	 * @return bbn\file\image
-   * 
+   * Converts the image's color with polaroid filter.
+   *
+   * ```php
+   * $img = new bbn\file\image("/home/data/test/image.jpg");
+   * $img->polaroid()->save();
+   * ```
+   *
+	 * @return image
    * @todo Transparency of png files.
 	 */
 	public function polaroid()
@@ -850,7 +902,7 @@ public static function jpg2pdf($jpg, $pdf){
 		if ( $this->test() ){
 			if ( class_exists('\\Imagick') ){
 				if ( !$this->img->polaroidImage(new \ImagickDraw(), 0) ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? 
+					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -858,6 +910,16 @@ public static function jpg2pdf($jpg, $pdf){
 		return $this;
 	}
 
+	/**
+   * Creates miniature of the image
+   *
+   * ```php
+   * $img = new bbn\file\image("/home/data/test/image.jpg");
+   * $img->thumbs()->save(/home/data/test/image_test.jpg");
+   * ```
+   *
+	 * @return image
+   */
 	public function thumbs($dest = '.', $sizes = [[false, 960], [false, 480], [false, 192], [false, 96], [false, 48]], $mask = '_%s', $crop = false, $bigger = false){
 		if ( $this->test() && is_dir($dest) ){
       $this->get_extension();
@@ -904,14 +966,15 @@ public static function jpg2pdf($jpg, $pdf){
 	}
 
 	/**
-   * Returns the image as string.
-   * 
-   * <code>
-   * $img = new bbn\file\image("C:\test\img.jpg");
-   * $img->toString();
-   * </code>
-   * 
-	 * @return string 
+   * Return the image as string.
+   *
+	 * ```php
+	 * $img = new bbn\file\image("/home/data/test/image.jpg");
+   * bbn\x::hdump($img->toString());
+   * // (string)
+	 * ```
+   *
+	 * @return string
 	 */
 	public function toString()
 	{

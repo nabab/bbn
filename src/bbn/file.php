@@ -58,9 +58,11 @@ class file extends models\cls\basic
 
 
 	/**
+	 * Constructor.
+	 *
    * @todo Fairew la doc!!
-   * @param
-	 * @return void 
+   * @param string | array
+	 * @return void
 	 */
 	public function __construct($file)
 	{
@@ -101,15 +103,16 @@ class file extends models\cls\basic
 		return $this;
 	}
 
-	/**
-   * Returns the filesize.
-   * 
-   * <code>
-   * $file = new bbn\file("C:/Test/file.txt");
-   * echo $file->get_size(); //Returns 314
-   * </code>
-   * 
-	 * @return int  
+  /**
+   * Return the filesize in byte.
+   *
+	 * ```php
+	 * $file = new bbn\file("C:/Test/file.txt");
+   * bbn\x::dump($file->get_size());
+   * // (int) 314
+   * ```
+   *
+	 * @return int
 	 */
 	public function get_size()
 	{
@@ -120,14 +123,15 @@ class file extends models\cls\basic
 	}
 
 	/**
-   * Returns the extension name of the file.
-   * 
-   * <code>
+   * Return the extension of the file.
+   *
+   * ```php
    * $file = new file("C:/Test/file.txt");
-   * echo $file->get_extension(); //Returns "txt"
-   * </code>
-   * 
-	 * @return string 
+	 * bbn\x::dump($file->get_extension());
+	 * //(string) "txt"
+   * ```
+   *
+	 * @return string
 	 */
 	public function get_extension()
 	{
@@ -149,7 +153,10 @@ class file extends models\cls\basic
 	}
 
 	/**
-	 * @return
+	 * Creates a temporary file in tmp directory.
+	 *
+	 * @todo da sistemare
+	 * @return bbn\files\file
 	 */
 	protected function make()
 	{
@@ -180,7 +187,14 @@ class file extends models\cls\basic
 	}
 
 	/**
-	 * @return 
+	 * Downloads the file. At the end of the script the user will be invited to choose the file's destination. If the file doesn't exist return an object with parameter file = null.
+	 *
+	 * ```php
+	 * $f = new \bbn\file("C:/Test/file.png");
+	 * $f->download();
+	 * ```
+	 *
+	 * @return bbn\files\file
 	 */
 	public function download()
 	{
@@ -204,14 +218,15 @@ class file extends models\cls\basic
 	}
 
 	/**
-	 * Returns the hash of the file.
-   * 
-   * <code>
+	 * Return the hash of the file.
+   *
+   * ```php
    * $file = new file("C:/Test/file.txt");
-   * echo $file->get_hash(); //Returns "9a388aa36a85adbd9c8c2b59aa2a736c"
-   * </code>
-   * 
-   * @return string 
+   * bbn\x::dump($file->get_hash());
+	 * // (string) "9a3182g36a83adtd9c9c2l59ap2a719c"
+   * ```
+   *
+   * @return string
 	 */
 	public function get_hash()
 	{
@@ -223,12 +238,17 @@ class file extends models\cls\basic
 
 	/**
    * Deletes the file.
-   * 
-   * <code>
+   *
+   * ```php
+	 * bbn\x::hdump( is_file("C:/Test/file.txt") );
+	 * // (bool) true
    * $file = new file("C:/Test/file.txt");
-   * $file->delete(); //Deletes the file
-   * </code>
-   *  
+   * $file->delete();
+	 * bbn\x::hdump( is_file("C:/Test/file.txt") );
+	 * // (bool) false
+	 * ```
+	 *
+	 * @return bbn\files\file
 	 */
 	public function delete()
 	{
@@ -240,7 +260,8 @@ class file extends models\cls\basic
 	}
 
 	/**
-	 * @return void 
+	 *
+	 * @return bbn\files\file
 	 */
 	public function save($dest='./')
 	{
