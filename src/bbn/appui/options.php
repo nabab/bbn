@@ -1948,6 +1948,29 @@ class options extends bbn\models\cls\db
   }
 
   /**
+   * Get an option's single property
+   *
+   * ```php
+   * bbn\x::dump($opt->get_prop(12, 'myProperty'));
+   * // (int) 78
+   * bbn\x::dump($opt->set_prop(12, ['myProperty' => "78%"]));
+   * // (int) 1
+   * bbn\x::dump($opt->get_prop(12, 'myProperty'));
+   * // (string) "78%"
+   * ```
+   *
+   * @param int $id The option from whiuch getting the property
+   * @param string $prop The property's name
+   * @return mixed|false The property's value, false if not found
+   */
+  public function get_prop(int $id, string $prop){
+    if ( !empty($id) && !empty($prop) && ($o = $this->option($id)) && isset($o[$prop]) ){
+      return $o[$prop];
+    }
+    return false;
+  }
+
+  /**
    * Unset option's properties taken from the value column
    *
    * ```php
