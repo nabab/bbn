@@ -373,7 +373,6 @@ class controller implements api{
       ob_end_clean();
       // If rerouted during the checkers
       if ( $this->is_rerouted ){
-        var_dump($this->get_path());
         $this->is_rerouted = false;
         return $this->control();
       }
