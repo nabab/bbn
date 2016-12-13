@@ -144,7 +144,7 @@ class dbsync
 	 * @return bool
 	 */
   public static function check(){
-    return ( is_object(self::$db) && (get_class(self::$dbs) === 'db') );
+    return ( is_object(self::$db) && is_object(self::$dbs) && self::$db->check() && self::$dbs->check() );
   }
 
   public static function disable(){
