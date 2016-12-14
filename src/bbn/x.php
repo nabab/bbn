@@ -65,7 +65,7 @@ class x
 
   /**
    * Puts the PHP errors into a JSON file
-   * @todo non sono riuscita a provarla
+   *
    *
    * @param string Text to save.
    * @param string Filename, default: "misc".
@@ -116,7 +116,7 @@ class x
   }
 
   /**
-   * Returns an object merging several objects.
+   * Returns an object merging two objects.
    *
    * ```php
    * class A {
@@ -239,7 +239,7 @@ class x
    * ]
    * ```
    *
-   * @param object $obj The object to trasform.
+   * @param object $obj The object to convert.
    * @return false | array
    */
   public static function to_array($obj){
@@ -338,7 +338,7 @@ class x
    * // array [0 => 'Allison', 1 => 'Mike', 3 => 'John', 4 => ' ']
    *
    * x::remove_empty(['Allison', 'Mike', '', 'John', ' '], 1));
-   * // array [0 => 'Allison', 1 => 'Pluto', 3 => 'Paperino']
+   * // array [0 => 'Allison', 1 => 'Mike', 3 => 'John']
    * ```
    *
    * @param array|object $arr An object or array to clean.
@@ -503,8 +503,8 @@ class x
    * // string "<option value="yes">yes</option><option value="no" selected="selected">no</option>"
    * x::build_options(['yes', 'no'], 'no', 'LabelForEmpty');
    * // string "<option value="">LabelForEmpty</option><option value="yes">yes</option><option value="no" selected="selected">no</option>"
-   * bbn\x::dump(\bbn\x::build_options([3 => "Loredana", 4 => "Vito", 5 => "Thomas"], 5, 'Who?'));
-   * // string "<option  value="">Who?</option><option  value="3">Loredana</option><option  value="4">Vito</option><option  value="5"  selected="selected">Thomas</option>"
+   * bbn\x::dump(\bbn\x::build_options([3 => "Allison", 4 => "Mike", 5 => "Andrew"], 5, 'Who?'));
+   * // string "<option  value="">Who?</option><option  value="3">Allison</option><option  value="4">Mike</option><option  value="5"  selected="selected">Andrew</option>"
    * ```
    *
    * @param array $values The source array for the options
@@ -554,7 +554,7 @@ class x
    * ```
    *
    * @param array $arr must contain an even number of values
-   * @param boolean $protected if false no index protection will be performed
+   * @param bool $protected if false no index protection will be performed
    * @return array|false
    */
   public static function to_keypair($arr, $protected = 1){
@@ -579,12 +579,13 @@ class x
    *
    * ```php
    * x::max_with_key([
-   *  ['v' => 1, 'name' => 'test1'],
-   *  ['v' => 8, 'name' => 'test2'],
-   *  ['v' => 45, 'name' => 'test3'],
-   *  ['v' => 2, 'name' => 'test4']
-   * ], 'v');
-   * // int 45
+   *  ['age' => 1, 'name' => 'Michelle'],
+   *  ['age' => 8, 'name' => 'John'],
+   *  ['age' => 45, 'name' => 'Sarah'],
+   *  ['age' => 45, 'name' => 'Camilla'],
+   *  ['age' => 2, 'name' => 'Allison']
+   * ], 'age');
+   * // int  45
    * ```
    *
    * @param array $ar A multidimensional array
@@ -604,19 +605,19 @@ class x
 
   /**
    * Returns the minimum value of an index of a multidimensional array.
-   * @todo far vedere descrizione dei param
+   *
    * ```php
    * x::min_with_key([
-   *  ['v' => 1, 'name' => 'test1'],
-   *  ['v' => 8, 'name' => 'test2'],
-   *  ['v' => 45, 'name' => 'test3'],
-   *  ['v' => 45, 'name' => 'test3'],
-   *  ['v' => 2, 'name' => 'test4']
-   * ], 'v');
-   * //int  1
+   *  ['age' => 1, 'name' => 'Michelle'],
+   *  ['age' => 8, 'name' => 'John'],
+   *  ['age' => 45, 'name' => 'Sarah'],
+   *  ['age' => 45, 'name' => 'Camilla'],
+   *  ['age' => 2, 'name' => 'Allison']
+   * ], 'age');
+   * // int  1
    * ```
    *
-   * @param array $arr A multidimensional array.
+   * @param $array A multidimensional array.
    * @param string $key The index where to search.
    * @return mixed value
    */
@@ -634,7 +635,11 @@ class x
   /**
    * Gets the backtrace and dumps it or logs it into a file
    *
+   * ```php
+   * \bbn\x::dump(\bbn\x::debug());
+   * ```
    * @param string $file The file to debug
+   * @return void
    */
   public static function debug($file=''){
     $debug = array_map(function($a){
@@ -652,11 +657,75 @@ class x
   }
 
   /**
-   * @todo non sono riuscita a provarla
+   * Apply the given function at all level of a multidimensional array (if defined param $item).
    *
-   * @param callable $fn
+   * ```php
+   * $ar = [
+   *        ['age' => 45,
+   *          'name' => 'John',
+   *          'children' => [
+   *            ['age' => 8, 'name' => 'Carol'],
+   *            ['age' => 24, 'name' => 'Jack'],
+   *          ]
+   *        ],
+   *        ['age' => 44, 'name' => 'Benjamin'],
+   *        ['age' => 60, 'name' => 'Paul', 'children' =>
+   *          [
+   *            ['age' => 36, 'name' => 'Mike'],
+   *            ['age' => 46, 'name' => 'Alan', 'children' =>
+   *              ['age' => 8, 'name' => 'Allison'],
+   *            ]
+   *          ]
+   *        ]
+   *      ];
+   * \bbn\x::hdump(\bbn\x::map(function($a){
+   *  if ( $a['age']>20){
+   *    $a['name'] = 'Mr. '.$a['name'];
+   *  }
+   *  return $a;
+   *}, $ar,'children'));
+   * /* array [
+   *            [
+   *              "age"  =>  45,
+   *              "name"  =>  "Mr.  John",
+   *              "children"  =>  [
+   *                [
+   *                  "age"  =>  8,
+   *                  "name"  =>  "Carol",
+   *                ],
+   *                [
+   *                  "age"  =>  24,
+   *                  "name"  =>  "Mr.  Jack",
+   *                ],
+   *              ],
+   *            ],
+   *            [
+   *              "age"  =>  44,
+   *              "name"  =>  "Mr.  Benjamin",
+   *            ],
+   *            [
+   *              "age"  =>  60,
+   *              "name"  =>  "Mr.  Paul",
+   *              "children"  =>  [
+   *                [
+   *                  "age"  =>  36,
+   *                  "name"  =>  "Mr.  Mike",
+   *                ],
+   *                [
+   *                  "age"  =>  46,
+   *                  "name"  =>  "Mr.  Alan",
+   *                  "children"  =>  [
+   *                    "age"  =>  8,
+   *                    "name"  =>  "Allison",
+   *                  ],
+   *                ],
+   *            ],
+   *          ]
+   *
+   * ```
+   * @param callable $fn The function to be applied to the items of the array
    * @param array $ar
-   * @param string|null $items
+   * @param string|null $items If null the function will be applied just to the item of parent array
    * @return array
    */
   public static function map(callable $fn, array $ar, string $items = null){
@@ -682,41 +751,41 @@ class x
    *
    * ```php
    * \bbn\x::hdump(bbn\x::find([[
-   *    'id' => 5,
-   *    'name' => 'Loredana',
-   *    'fname' => 'Bruno'
+   *    'id' => 1,
+   *    'name' => 'Andrew',
+   *    'fname' => 'Williams'
    *    ], [
-   *   'id' => 12,
-   *    'name' => 'Vito',
-   *    'fname' => 'Fava'
+   *   'id' => 2,
+   *    'name' => 'Albert',
+   *    'fname' => 'Taylor'
    *    ], [
-   *    'id' => 45,
-   *    'name' => 'Thomas',
-   *    'fname' => 'Nabet'
+   *    'id' => 3,
+   *    'name' => 'Mike',
+   *    'fname' => 'Smith'
    *    ], [
-   *    'id' => 15,
-   *    'name' => 'Mirko',
-   *    'fname' => 'Argentino'
-   *    ]], ['id' => 15]));
+   *    'id' => 4,
+   *    'name' => 'John',
+   *    'fname' => 'White'
+   *    ]], ['id' => 4]));
    * // int 3
    * \bbn\x::hdump(bbn\x::find([[
-   *    'id' => 5,
-   *    'name' => 'Loredana',
-   *    'fname' => 'Bruno'
+   *    'id' => 1,
+   *    'name' => 'Andrew',
+   *    'fname' => 'Williams'
    *    ], [
-   *   'id' => 12,
-   *    'name' => 'Vito',
-   *    'fname' => 'Fava'
+   *   'id' => 2,
+   *    'name' => 'Albert',
+   *    'fname' => 'Taylor'
    *    ], [
-   *    'id' => 45,
-   *    'name' => 'Thomas',
-   *    'fname' => 'Nabet'
+   *    'id' => 3,
+   *    'name' => 'Mike',
+   *    'fname' => 'Smith'
    *    ], [
-   *    'id' => 15,
-   *    'name' => 'Mirko',
-   *    'fname' => 'Argentino'
-   *    ]], ['name' => 'Thomas', 'fname' => 'Nabet']));
-   * // int 2
+   *    'id' => 4,
+   *    'name' => 'John',
+   *    'fname' => 'White'
+   *    ]], ['name' => 'Albert', 'fname' => 'Taylor']));
+   * // int 1
    * ```
    *
    * @param array $ar
@@ -742,11 +811,31 @@ class x
   }
 
   /**
-   * Returns the first row of an array satisfying the where parameters (@link find())
-   * @todo non funziona l'esempio
+   * Returns the first row of an array satisfying the where parameters (@link find()).
+   *
+   * ```php
+   * \bbn\x::dump(bbn\x::get_row([[
+   *    'id' => 1,
+   *    'name' => 'Andrew',
+   *    'fname' => 'Williams'
+   *    ], [
+   *   'id' => 2,
+   *    'name' => 'Albert',
+   *    'fname' => 'Taylor'
+   *    ], [
+   *    'id' => 3,
+   *    'name' => 'Mike',
+   *    'fname' => 'Smith'
+   *    ], [
+   *    'id' => 4,
+   *    'name' => 'John',
+   *    'fname' => 'White'
+   *    ]], ['name' => 'Albert']));
+   * // array [ "id" => 2, "name" => "Albert", "fname" => "Taylor", ]
+   * ```
    *
    * @param array $r
-   * @param array $where
+   * @param array $where The where condition
    * @return bool|mixed
    *
    */
@@ -757,6 +846,35 @@ class x
     return false;
   }
 
+  /**
+   * Returns the first value of a specific field of an array.
+   *
+   * ```php
+   * \bbn\x::dump(bbn\x::get_row([[
+   *    'id' => 1,
+   *    'name' => 'Andrew',
+   *    'fname' => 'Williams'
+   *    ], [
+   *   'id' => 2,
+   *    'name' => 'Albert',
+   *    'fname' => 'Taylor'
+   *    ], [
+   *    'id' => 3,
+   *    'name' => 'Mike',
+   *    'fname' => 'Smith'
+   *    ], [
+   *    'id' => 4,
+   *    'name' => 'John',
+   *    'fname' => 'White'
+   *    ]], ['name' => 'Albert'],'id'));
+   * // int 2
+   * ```
+   *
+   * @param array $r
+   * @param array $where The where condition
+   * @param string $field The field where to look for
+   * @return bool|mixed
+   */
   public static function get_field(array $r, array $where, string $field){
     if ( ($res = self::get_row($r, $where)) && isset($res[$field]) ){
       return $res[$field];
@@ -764,7 +882,31 @@ class x
     return false;
   }
 
-  // Returns a reference to a subarray targeted by an array $keys
+  /**
+   * Returns a reference to a subarray targeted by an array $keys
+   *
+   * ```php
+   * $ar = [
+   *  'session' => [
+   *    'user' => [
+   *      'profile' => [
+   *        'admin' => [
+   *          'email' => 'test@test.com'
+   *        ]
+   *      ]
+   *    ]
+   *  ]
+   * ];
+   * \bbn\x::hdump(\bbn\x::pick($ar,['session', 'user', 'profile', 'admin', 'email']));
+   * // string test@test.com
+   *
+   * \bbn\x::hdump(\bbn\x::pick($ar,['session', 'user', 'profile', 'admin']));
+   * // ["email"  =>  "test@test.com",]
+   * ```
+   * @param array $ar
+   * @param array $keys
+   * @return array|mixed
+   */
   public static function pick(array $ar, array $keys){
     while ( count($keys) ){
       $r = array_shift($keys);
@@ -778,9 +920,19 @@ class x
   }
 
   /**
+   * Sort the item of an array.
    *
+   * ```php
+   * $var = [3, 2, 5, 6, 1];
+   * bbn\x::sort($var);
+   * bbn\x::hdump($var);
+   * // array [1,2,3,5,6]
+   * ```
    *
+   * @param $ar The reference to the array to sort
+   * @return void
    */
+
   public static function sort(&$ar){
     usort($ar, function($a, $b){
       if ( !str::is_number($a, $b) ) {
@@ -799,8 +951,24 @@ class x
   }
 
   /**
+   * Sort the item of an indexed array basing on a given $key.
    *
+   * ```php
+   *  $v = [['age'=>10, 'name'=>'thomas'], ['age'=>22, 'name'=>'John'], ['age'=>37, 'name'=>'Michael']];
+   *  bbn\x::sort_by($v,'name','desc');
+   *  bbn\x::hdump($v);
+   *  bbn\x::sort_by($v,'name','asc');
+   *  bbn\x::hdump($v);
+   *  bbn\x::sort_by($v,'age','asc');
+   *  bbn\x::hdump($v);
+   *  bbn\x::sort_by($v,'age','desc');
+   *  bbn\x::hdump($v);
+   * ```
    *
+   * @param $ar The array of data to sort
+   * @param string $key The key to sort by
+   * @param string The direction of the sort ('asc'|'desc')
+   * @return void
    */
   public static function sort_by(&$ar, $key, $dir = ''){
     usort($ar, function($a, $b) use($key, $dir){
@@ -817,7 +985,7 @@ class x
       if ( !str::is_number($v1, $v2) ) {
         $a1 = str_replace('.', '0', str_replace('_', '1', str::change_case($a1, 'lower')));
         $a2 = str_replace('.', '0', str_replace('_', '1', str::change_case($a2, 'lower')));
-        return strcmp($v1, $v2);
+        return strcmp($a1, $a2);
       }
       if ( $a1 > $a2 ){
         return 1;
@@ -832,6 +1000,10 @@ class x
 
   /**
    * Checks if the operating system from which PHP is executed is Windows or not
+   * ```php
+   * bbn\x::dump(bbn\x::is_windows());
+   * // boolean false
+   * ```
    *
    * @return bool
    */
@@ -841,18 +1013,15 @@ class x
   }
 
   /**
-   * Makes a cURL call towards a URL and returns the result as a string
-   * @todo non riesco a capire cosa è l'html che ritorna
+   * Makes a Curl call towards a URL and returns the result as a string
    *
    * ```php
-   * x::curl('http://www.wordreference.com/enit/even%20number'));
-   * /*
-   * <!DOCTYPE  HTML  PUBLIC  "-//W3C//DTD  HTML  4.01//EN""http://www.w3.org/TR/html4/strict.dtd">
-   * <HTML><HEAD><TITLE>Length  Required</TITLE>
-   * <META  HTTP-EQUIV="Content-Type"  Content="text/html;  charset=us-ascii"></HEAD>
-   * <BODY><h2>Length  Required</h2>
-   * <hr><p>HTTP  Error  411.  The  request  must  be  chunked  or  have  a  content  length.</p>
-   * </BODY></HTML>
+   *  $url = 'https://www.omdbapi.com/';
+   *  $param = ['t'=>'la vita è bella'];
+   *  bbn\x::hdump(bbn\x::curl($url,$param, ['POST' => false]));
+   *
+   * // object {"Title":"La  vita  è  bella","Year":"1943","Rated":"N/A","Released":"26  May  1943","Runtime":"76  min","Genre":"Comedy","Director":"Carlo  Ludovico  Bragaglia","Writer":"Carlo  Ludovico  Bragaglia  (story  and  screenplay)","Actors":"Alberto  Rabagliati,  María  Mercader,  Anna  Magnani,  Carlo  Campanini","Plot":"N/A","Language":"Italian","Country":"Italy","Awards":"N/A","Poster":"http://ia.media-imdb.com/images/M/MV5BYmYyNzA2YWQtNDgyZC00OWVkLWIwMTEtNTdhNDQwZjcwYTMwXkEyXkFqcGdeQXVyNTczNDAyMDc@._V1_SX300.jpg","Metascore":"N/A","imdbRating":"7.9","imdbVotes":"50","imdbID":"tt0036502","Type":"movie","Response":"True"}
+   * ```
    *
    * @param string $url
    * @param array $param
@@ -898,30 +1067,11 @@ class x
 
   /**
    * Returns the given array or object as a tree structure ready for a JS tree
-   * @todo far leggere a thomas la descrizione
    *
    * ```php
-   * x::get_tree([['*ext' => 'log', '*hash' => null,], 1 => '71']));
-   *
-   * /* array  [
-   *            [
-   *            "text"  =>  0,
-   *            "items"  =>  [
-   *              [
-   *              "text"  =>  0,
-   *              "items"  =>  [
-   *                [
-   *                "text"  =>  "*ext:  log",
-   *                ],
-   *                [
-   *                "text"  =>  "*hash:  ",
-   *                ],
-   *              ],
-   *            ],
-   *            [
-   *            "text"  =>  "1:  71",
-   *            ],
-   *          ]
+   * bbn\x::hdump(bbn\x::get_tree([['id' => 1,'name' => 'Andrew','fname' => 'Williams','children' =>[['name' => 'Emma','age' => 6],['name' => 'Giorgio','age' => 9]]], ['id' => 2,'name' => 'Albert','fname' => 'Taylor','children' =>[['name' => 'Esther','age' => 6],['name' => 'Paul','age' => 9]]], ['id' => 3,'name' => 'Mike','fname' => 'Smith','children' =>[['name' => 'Sara','age' => 6],['name' => 'Fred','age' => 9]]]]));
+   * /* array [
+   *    [ "text" => 0, "items" => [ [ "text" => "id: 1", ], [ "text" => "name: Andrew", ], [ "text" => "fname: Williams", ], [ "text" => "children", "items" => [ [ "text" => 0, "items" => [ [ "text" => "name: Emma", ], [ "text" => "age: 6", ], ], ], [ "text" => 1, "items" => [ [ "text" => "name: Giorgio", ], [ "text" => "age: 9", ], ], ], ], ], ], ], [ "text" => 1, "items" => [ [ "text" => "id: 2", ], [ "text" => "name: Albert", ], [ "text" => "fname: Taylor", ], [ "text" => "children", "items" => [ [ "text" => 0, "items" => [ [ "text" => "name: Esther", ], [ "text" => "age: 6", ], ], ], [ "text" => 1, "items" => [ [ "text" => "name: Paul", ], [ "text" => "age: 9", ], ], ], ], ], ], ], [ "text" => 2, "items" => [ [ "text" => "id: 3", ], [ "text" => "name: Mike", ], [ "text" => "fname: Smith", ], [ "text" => "children", "items" => [ [ "text" => 0, "items" => [ [ "text" => "name: Sara", ], [ "text" => "age: 6", ], ], ], [ "text" => 1, "items" => [ [ "text" => "name: Fred", ], [ "text" => "age: 9", ], ], ], ], ], ], ], ]
    * ```
    * @param $ar
    * @return array
@@ -948,33 +1098,43 @@ class x
    * Returns a view of an array or object as a JS tree
    *
    * ```php
-   *       x::make_tree([
-   *                      [
-   *                        [
-   *                          0 => '64',
-   *                          1 => '71',
-   *                        ],
-   *                        1 => '71',
-   *                      ],
-   *                      [
-   *                        [
-   *                          0 => '64',
-   *                          1 => '71',
-   *                        ],
-   *                        1 => '29',
-   *                        2 => '33',
-   *                      ]
-   *                    ]);
-   * /* string  0
-   *              0
-   *                0: 64
-   *                1: 71
-   *              1: 71
-   *            1
-   *              0
-   *              1: 29
-   *              2: 33
+  bbn\x::dump(bbn\x::make_tree([['id' => 1,'name' => 'Andrew','fname' => 'Williams','children' =>[['name' => 'Emma','age' => 6],['name' => 'Giorgio','age' => 9]]], ['id' => 2,'name' => 'Albert','fname' => 'Taylor','children' =>[['name' => 'Esther','age' => 6],['name' => 'Paul','age' => 9]]], ['id' => 3,'name' => 'Mike','fname' => 'Smith','children' =>[['name' => 'Sara','age' => 6],['name' => 'Fred','age' => 9]]]]));
+   * /* string
+   *    0
+   *      id: 1
+   *      name: Andrew
+   *      fname: Williams
+   *      children
+   *        0
+   *          name: Emma
+   *          age: 6
+   *        1
+   *          name: Giorgio
+   *          age: 9
+   *    1
+   *      id: 2
+   *      name: Albert
+   *      fname: Taylor
+   *      children
+   *        0
+   *          name: Esther
+   *          age: 6
+   *        1
+   *          name: Paul
+   *          age: 9
+   *    2
+   *      id: 3
+   *      name: Mike
+   *      fname: Smith
+   *      children
+   *      0
+   *        name: Sara
+   *        age: 6
+   *      1
+   *        name: Fred
+   *        age: 9
    * ```
+   *
    * @param array $ar
    * @return string
    */
@@ -985,12 +1145,18 @@ class x
   }
 
   /**
-   * Formats a line (passed as a fields  array) as CSV and returns the CSV as a string.
+   * Formats a CSV line(s) and returns an array.
    * Adapted from http://us3.php.net/manual/en/function.fputcsv.php#87120
-   * @todo ho l'esempio ma non funziona
    *
+   * ```php
+   *  bbn\x::dump(bbn\x::from_csv(
+   *      '"141";"10/11/2002";"350.00";"1311742251"
+   *      "142";"12/12/2002";"349.00";"1311742258"'
+   *  ));
+   * // [ [ "141", "10/11/2002", "350.00", "1311742251", ], [ "142", "12/12/2002", "349.00", "1311742258", ], ]
+   * ```
    *
-   * @param $st
+   * @param $st The Csv string to format
    * @param string $delimiter
    * @param string $enclosure
    * @param string $separator
@@ -1009,21 +1175,24 @@ class x
   }
 
   /**
-   *
-   * Formats an array as CSV and returns the CSV as a string.
+   * Formats an array as a CSV string.
    * Adapted from http://us3.php.net/manual/en/function.fputcsv.php#87120
-   * @todo non c'è l'esempio perchè non mi funziona
    *
+   * ```php
+   * bbn\x::dump(bbn\x::to_csv([["John", "Mike", "David", "Clara"],["White", "Red", "Green", "Blue"]]));
+   * /* string  John;Mike;David;Clara
+   *            White;Red;Green;Blue
+   * ```
    *
-   * @param array $data
+   * @param array $data The array to format
    * @param string $delimiter
    * @param string $enclosure
    * @param string $separator
    * @param bool $encloseAll
    * @param bool $nullToMysqlNull
    * @return string
-   *
    */
+
   public static function to_csv(array $data, $delimiter = ';', $enclosure = '"', $separator = PHP_EOL, $encloseAll = false, $nullToMysqlNull = false ) {
     $delimiter_esc = preg_quote($delimiter, '/');
     $enclosure_esc = preg_quote($enclosure, '/');

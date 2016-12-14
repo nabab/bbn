@@ -29,8 +29,6 @@ class str
    * // (string) "122"
    * bbn\x::dump(bbn\str::cast(1));
    * // (string) "1"
-   * bbn\x::dump(bbn\str::cast([1, 'test', 2, 'text']));
-   * // (string) ""
    * ```
    *
    * @param mixed $st The item to cast.
@@ -212,6 +210,30 @@ class str
   /**
    * Returns a string expunged of several types of character depending of configuration.
    *
+   * ```php
+   * $test="this      is
+   * cold";
+   *
+   * bbn\x::dump(bbn\str::clean($test));
+   * // (string)  "this is\n cold"
+   *
+   * $test1="this is
+   *
+   *
+   * cold";
+   *
+   * bbn\x::dump(bbn\str::clean($test1,'2nl'));
+   * /* (string)
+   * "this is
+   *  cold"
+   *
+   * bbn\x::dump(bbn\str::clean($test1,'html'));
+   * // (string)  "this is cold"
+   *
+   * bbn\x::dump(bbn\str::clean('$x = 9993','code'));
+   * // (string)  "$x=9993"
+   * ```
+   *
    * @param mixed $st The item to be.
    * @param string $mode A selection of configuration: "all" (default), "2n1", "html", "code".
    * @return string
@@ -272,7 +294,7 @@ class str
    * Cut a string (HTML and PHP tags stripped) to maximum lenght inserted.
    *
    * ```php
-   * bbn\x::dump(bbn\str::cut("<div> Example text </div>", 7));
+   * bbn\x::dump(bbn\str::cut("<!-- HTML Document --> Example text", 7));
    * // (string) "Example..."
    * ```
    *
@@ -594,15 +616,16 @@ class str
   }
 
   /**
-   * Checks if the item is a integer.
-   * Can take as many arguments and will return false if one of them is not an integer or the string of an integer.
+   * check that the path is contained in the parameter ".. \\" or "../" and if there will return false if true.
    *
-   *
-   * <code>
-   * str::is_integer(13.2); //Returns false
-   * str::is_integer(14); //Returns true
-   * str::is_integer('14'); //Returns true
-   * </code>
+   * ```php
+   * \bbn\x::dump(\bbn\str::is_clean_path("/home/user/Images"));
+   * // (bool) true
+   * \bbn\x::dump(\bbn\str::is_clean_path("../home/user/Images"));
+   * // (bool) false
+   * \bbn\x::dump(\bbn\str::is_clean_path("..\\home\user\Images"));
+   * // (bool) false
+   * ```
    *
    * @param mixed $st The item to be tested.
    * @return bool
@@ -669,7 +692,7 @@ class str
    * // (int) [1230]
    * ```
    *
-   * @param string $st The string.
+   * @param mixed $st
    * @return mixed
    */
   public static function correct_types($st){
@@ -773,7 +796,7 @@ class str
    * ```php
    * bbn\x::hdump(bbn\str::parse_url('http://localhost/phpmyadmin/?db=test&table=users&server=1&target=&token=e45a102c5672b2b4fe84ae75d9148981');
    * /* (array)
-   *[
+   * [
    *     'scheme' => 'http',
    *     'host' => 'localhost',
    *     'path' => '/phpmyadmin/',
@@ -813,8 +836,8 @@ class str
   /**
    * Replace backslash with slash in a path string. Forbids the use of ../
    *
-   * bbn\x::dump(bbn\str::parse_path('\home\user\Desktop'));
    * ```php
+   * bbn\x::dump(bbn\str::parse_path('\home\user\Desktop'));
    * // (string) "/home/mybbnone/Desktop"
    * ```
    *
@@ -885,9 +908,9 @@ class str
    * Checks if a string doesn't contain a filesystem path
    *
    * ```php
-   * bbn\x::dump(bbn\str::check_name("Paul"));
+   * bbn\x::dump(bbn\str::check_filename("Paul"));
    * // (bool) true
-   * bbn\x::dump(bbn\str::check_name("PA/ul"));
+   * bbn\x::dump(bbn\str::check_filename("Paul/"));
    * // (bool) false
    * ```
    *
@@ -907,6 +930,7 @@ class str
 
 
   /**
+   * Checks if a string comply with SQL naming convention.
    * Returns "true" if slash or backslash are present.
    *
    * ```php
@@ -949,7 +973,7 @@ class str
   }
 
   /**
-   * returns the argumented value, replacing non standard objects (not stdClass) by their class name.
+   * returns the argumented value, replacing not standard objects (not stdClass) by their class name.
    *
    * ```php
    * $myObj = new stdClass();
@@ -1083,34 +1107,60 @@ class str
   }
 
   /**
-   * Validates if a stringg is SQL formatted date
+   * Look for and superseding part of a string. If the party is seeking is not found, the function returns the string without change
    *
    * ```php
-   * bbn\x::hdump(bbn\str::is_date_sql("1999-12-05 11:10:22"));
-   * // (bool) true
-   * bbn\x::hdump(bbn\str::is_date_sql("1999-12-05"));
-   * // (bool) true
-   * bbn\x::hdump(bbn\str::is_date_sql("19-12-1999"));
-   * // (bool) false
+   * bbn\x::hdump(bbn\str::replace_once("cold","hot", "Today there is cold"));
+   * // (string)  "Today there is hot"
+   * bbn\x::hdump(bbn\str::replace_once("rain","hot", "Today there is cold"));
+   * // (string)  "Today there is cold"
    * ```
    *
    * @param string $search
    * @param string $replace
-   * @param string $st
+   * @param string $subject
    * @return string
    */
-  public static function replace_once($search, $replace, $st){
-    $pos = strpos($st, $search);
+  public static function replace_once($search, $replace, $subject){
+    $pos = strpos($subject, $search);
     if ($pos !== false) {
-      return substr_replace($st, $replace, $pos, strlen($search));
+      return substr_replace($subject, $replace, $pos, strlen($search));
     }
-    return $st;
+    return $subject;
   }
 
+  /**
+   * This function returns url if it is written correctly in parameter passed or false if it is not
+   *
+   * ```php
+   * bbn\x::dump(bbn\str::is_url("http://bbn.so"));
+   * // (string) "https://bbn.so"
+   *
+   * bbn\x::dump(bbn\str::is_url("bbn.so"));
+   * // (bool) false
+   * ```
+   *
+   * @param string $st containing a url
+   * @return string|false
+   */
   public static function is_url($st){
     return filter_var($st, FILTER_VALIDATE_URL);
   }
 
+  /**
+   * This function returns true or false if the string that we pass is written correctly to be a domain
+   *
+   * ```php
+   * bbn\x::dump(bbn\str::is_domain("http://bbn.so"));
+   * // (string) false
+   *
+   * bbn\x::dump(bbn\str::is_domain("bbn.so"));
+   * // (bool) true
+   * ```
+   *
+   * @param string $st
+   * @return bool
+   */
   public static function is_domain($st){
     return (preg_match("/^([a-z\d](-*[a-z\d])*)(\.([a-z\d](-*[a-z\d])*))*$/i", $st) //valid chars check
       && preg_match("/^.{1,253}$/", $st) //overall length check
@@ -1118,14 +1168,14 @@ class str
   }
 
   /**
-   * Validates if a stringg is SQL formatted date
+   * Validates if a string is SQL formatted date
    *
    * ```php
-   * bbn\x::hdump(bbn\str::is_date_sql("1999-12-05 11:10:22"));
+   * bbn\x::dump(bbn\str::is_date_sql("1999-12-05 11:10:22"));
    * // (bool) true
-   * bbn\x::hdump(bbn\str::is_date_sql("1999-12-05"));
+   * bbn\x::dump(bbn\str::is_date_sql("1999-12-05"));
    * // (bool) true
-   * bbn\x::hdump(bbn\str::is_date_sql("19-12-1999"));
+   * bbn\x::dump(bbn\str::is_date_sql("19-12-1999"));
    * // (bool) false
    * ```
    *
@@ -1136,6 +1186,17 @@ class str
     return date::validateSQL($st);
   }
 
+  /**
+   * Remove the comment content
+   *
+   * ```php
+   *  var_dump(bbn\str::remove_comments("<!--this is a comment-->"));
+   *  // (string) ""
+   * ```
+   *
+   * @param string $st
+   * @return string
+   */
   public static function remove_comments($st){
     $pattern = '/(?:(?:\/\*(?:[^*]|(?:\*+[^*\/]))*\*+\/)|(?:(?<!\:|\\\|\')\/\/.*))/';
     return preg_replace($pattern, '', $st);

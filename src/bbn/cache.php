@@ -28,6 +28,10 @@ class cache{
     $path,
     $obj;
 
+  /**
+   * @param null $engine
+   * @return int
+   */
   private static function _init($engine = null){
     if ( !self::$is_init ){
       self::$engine = new cache($engine);
@@ -36,11 +40,20 @@ class cache{
     return 1;
   }
 
-  private static function _set_type($type){
+  /**
+   * @param string $type
+   */
+  private static function _set_type(string $type){
     self::$type = $type;
   }
 
-  private static function _dir($dir, $path, $parent = true){
+  /**
+   * @param string $dir
+   * @param string $path
+   * @param bool $parent
+   * @return string
+   */
+  private static function _dir(string $dir, string $path, $parent = true){
     if ( $parent ){
       $dir = dirname($dir);
     }
@@ -53,18 +66,34 @@ class cache{
     return $path.str::encode_filename(str_replace("../", '', str_replace("\\", "/", $dir)), true);
   }
 
-  private static function _file($item, $path){
+  /**
+   * @param string $item
+   * @param string $path
+   * @return string
+   */
+  private static function _file(string $item, string $path){
     return self::_dir($item, $path).'/'.str::encode_filename(basename($item)).'.bbn.cache';
   }
 
+  /**
+   * @param $value
+   * @return string
+   */
   public static function make_hash($value){
     return md5(serialize($value));
   }
 
+  /**
+   * @return string
+   */
   public static function get_type(){
     return self::$type;
   }
 
+  /**
+   * @param $ttl
+   * @return int
+   */
   public static function ttl($ttl){
     if ( str::is_integer($ttl) ){
       return $ttl;
@@ -90,15 +119,27 @@ class cache{
     return 0;
   }
 
+  /**
+   * @param null $engine
+   * @return mixed
+   */
   public static function get_cache($engine = null){
     self::_init($engine);
     return self::$engine;
   }
 
+  /**
+   * @param null $engine
+   * @return mixed
+   */
   public static function get_engine($engine = null){
     return self::get_cache($engine);
   }
 
+  /**
+   * cache constructor.
+   * @param null $engine
+   */
   public function __construct($engine = null){
 
     if ( self::$is_init ){
@@ -125,8 +166,12 @@ class cache{
     }
   }
 
-  public function has($it){
-    if ( self::$type && is_string($it) ){
+  /**
+   * @param string $it
+   * @return bool|string
+   */
+  public function has(string $it){
+    if ( self::$type ){
       switch ( self::$type ){
         case 'apc':
           return apc_exists($it);
@@ -146,7 +191,11 @@ class cache{
     }
   }
 
-  public function delete($it){
+  /**
+   * @param string $it
+   * @return bool|int|string
+   */
+  public function delete(string $it){
     if ( self::$type && is_string($it) ){
       switch ( self::$type ){
         case 'apc':
@@ -163,7 +212,11 @@ class cache{
     }
   }
 
-  public function delete_all($st=false){
+  /**
+   * @param string|null $st
+   * @return bool|int
+   */
+  public function delete_all(string $st = null){
     if ( self::$type === 'files' ){
       $dir = self::_dir($st, $this->path, false);
       if ( is_dir($dir) ){
@@ -199,34 +252,59 @@ class cache{
     return false;
   }
 
+  /**
+   * @return $this
+   */
   public function clear(){
     $this->delete_all();
     return $this;
   }
 
-  public function timestamp($it){
+  /**
+   * @param string $it
+   * @return bool
+   */
+  public function timestamp(string $it){
     if ( $r = $this->get_raw($it) ){
       return $r['timestamp'];
     }
     return false;
   }
 
-  public function hash($it){
+  /**
+   * @param string $it
+   * @return bool|mixed
+   */
+  public function hash(string $it){
     if ( $r = $this->get_raw($it) ){
       return $r['hash'];
     }
     return false;
   }
 
-  public function is_new($it, $time){
+  /**
+   * @param string $it
+   * @param null $time
+   * @return bool
+   */
+  public function is_new(string $it, $time = null){
+    if ( !$time ){
+      $time = time();
+    }
     if ( $r = $this->get_raw($it) ){
       return $r['timestamp'] > $time;
     }
     return true;
   }
 
-  public function set($it, $val, $ttl = 0){
-    if ( self::$type && is_string($it) ){
+  /**
+   * @param string $it
+   * @param $val
+   * @param int $ttl
+   * @return array|bool
+   */
+  public function set(string $it, $val, $ttl = 0){
+    if ( self::$type ){
       $ttl = self::ttl($ttl);
       $hash = self::make_hash($val);
       switch ( self::$type ){
@@ -258,13 +336,22 @@ class cache{
     }
   }
 
-  public function is_changed($it, $hash){
+  /**
+   * @param string $it
+   * @param $hash
+   * @return bool
+   */
+  public function is_changed(string $it, $hash){
     if ( $r = $this->get_raw($it) ){
       return $hash !== $r['hash'];
     }
   }
 
-  private function get_raw($it){
+  /**
+   * @param string $it
+   * @return array|bool|mixed|string
+   */
+  private function get_raw(string $it){
     if ( $this->has($it) ){
       switch ( self::$type ){
         case 'apc':
@@ -280,13 +367,16 @@ class cache{
     return false;
   }
 
-  public function get($it){
+  public function get(string $it){
     if ( $r = $this->get_raw($it) ){
       return $r['value'];
     }
     return false;
   }
 
+  /**
+   * @return array|bool|false
+   */
   public function info(){
     if ( self::$type ){
       switch ( self::$type ){
@@ -300,6 +390,9 @@ class cache{
     }
   }
 
+  /**
+   * @return array|bool|false
+   */
   public function stat(){
     if ( self::$type ){
       switch ( self::$type ){
@@ -313,7 +406,11 @@ class cache{
     }
   }
 
-  public function items($dir = ''){
+  /**
+   * @param string $dir
+   * @return array
+   */
+  public function items(string $dir = ''){
     if ( self::$type ){
       switch ( self::$type ){
         case 'apc':
