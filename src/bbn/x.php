@@ -21,61 +21,30 @@ namespace bbn;
 
 class x
 {
-	/**
-	 * Add information to the $info array.
-	 *
-	 * @param string $st The information to be added.
-   *
-	 * @return null
-	 */
-	public static function report($st)
-	{
-		if ( !isset(self::$cli) ){
-			global $argv;
-			self::$cli = isset($argv) ? 1 : false;
-		}
-		if ( self::$cli ){
-			if ( is_string($st) ){
-				echo $st."\n";
-      }
-			else{
-				var_dump($st)."\n";
-      }
-		}
-		else{
-			if ( is_string($st) ){
-				array_push(self::$info,$st);
-      }
-			else{
-				array_push(self::$info,print_r($st,true));
-      }
-		}
-	}
 
   /**
-	 * Save the logs to a file.
-	 *
-   * <code>
-   * x::log('My text','FileName');
-   * </code>
+   * Saves logs into a file.
    *
-	 * @param string $st Text to save.
-	 * @param string $file Filename, , default: "misc".
+   * ```php
+   * x::log('My text', 'FileName');
+   * ```
    *
-	 * @return null
-	 */
-	public static function log($st, $file='misc'){
-		if ( defined('BBN_DATA_PATH') ){
+   * @param string $st Text to save.
+   * @param string $file Filename, default: "misc".
+   * @return void
+   */
+  public static function log($st, $file='misc'){
+    if ( defined('BBN_DATA_PATH') ){
       if ( !is_string($file) ){
         $file = 'misc';
       }
-			$log_file = BBN_DATA_PATH.'logs/'.$file.'.log';
+      $log_file = BBN_DATA_PATH.'logs/'.$file.'.log';
       $backtrace = array_filter(debug_backtrace(), function($a){
         return $a['function'] === 'log';
       });
       $i = end($backtrace);
-			$r = "[".date('d/m/Y H:i:s')."]\t".$i['file']." - line ".$i['line'].
-              self::get_dump($st).PHP_EOL;
+      $r = "[".date('d/m/Y H:i:s')."]\t".$i['file']." - line ".$i['line'].
+        self::get_dump($st).PHP_EOL;
 
       if ( php_sapi_name() === 'cli' ){
         global $argv;
@@ -84,21 +53,22 @@ class x
         }
       }
       $s = ( file_exists($log_file) ) ? filesize($log_file) : 0;
-			if ( $s > 1048576 ){
-				file_put_contents($log_file.'.old', file_get_contents($log_file), FILE_APPEND);
-				file_put_contents($log_file, $r);
-			}
-			else{
-				file_put_contents($log_file, $r, FILE_APPEND);
+      if ( $s > 1048576 ){
+        file_put_contents($log_file.'.old', file_get_contents($log_file), FILE_APPEND);
+        file_put_contents($log_file, $r);
       }
-		}
-	}
+      else{
+        file_put_contents($log_file, $r, FILE_APPEND);
+      }
+    }
+  }
 
   /**
-   * Puts the PHP errors in a JSON file
+   * Puts the PHP errors into a JSON file
+   * @todo non sono riuscita a provarla
    *
-   * @param string $st Text to save.
-   * @param string $file Filename, , default: "misc".
+   * @param string Text to save.
+   * @param string Filename, default: "misc".
    *
    * @return null
    */
@@ -145,10 +115,10 @@ class x
     return false;
   }
 
- 	/**
-	 * Returns an object as merge of two objects.
+  /**
+   * Returns an object merging several objects.
    *
-   * <code>
+   * ```php
    * class A {
    *  public $a = 10;
    *  public $b = 20;
@@ -162,16 +132,17 @@ class x
    * $obj1 = new A;
    * $obj2 = new B;
    *
-   * x::merge_objects($obj1, $obj2); //Returns {'a': 10, 'b': 20, 'c': 30, 'd': 40}
-   * </code>
+   * x::merge_objects($obj1, $obj2);
+   * // object {'a': 10, 'b': 20, 'c': 30, 'd': 40}
+   * ```
    *
    * @param object $o1 The first object to merge.
    * @param object $o2 The second object to merge.
-   *
-	 * @return object The merged object.
-	 */
+   * @return object The merged object.
+   */
   public static function merge_objects($o1, $o2){
     $args = func_get_args();
+    /* @todo check if it's working with more than 2 object arguments */
     if ( count($args) > 2 ){
       for ( $i = count($args) - 1; $i > 1; $i-- ){
         $args[$i-1] = self::merge_arrays($args[$i-1], $args[$i]);
@@ -183,19 +154,19 @@ class x
     $res = self::merge_arrays($a1, $a2);
     return self::to_object($res);
   }
- 	/**
-   * Returns an array as merge of two arrays.
-	 *
-   * <code>
-   * x::merge_arrays([1, 'Test'], [2, 'Example']); //Returns [1, 'Test', 2, 'Example']
-   * </code>
+  /**
+   * Returns an array merging several arrays.
+   *
+   * ```php
+   * x::merge_arrays([1, 'Test'], [2, 'Example']);
+   * // array [1, 'Test', 2, 'Example']
+   * ```
    *
    * @param array $a1 The first array to merge.
    * @param array $a2 The second array to merge.
-   *
    * @return array The merged array.
-	 */
-  public static function merge_arrays(array $a1, array $a2) {
+   */
+  public static function merge_arrays(array $a1, array $a2){
     $args = func_get_args();
     if ( count($args) > 2 ){
       for ( $i = count($args) - 1; $i > 1; $i-- ){
@@ -228,15 +199,15 @@ class x
   }
 
   /**
-   * Makes an object of an array.
+   * Converts a JSON string or an array into an object.
    *
-   * <code>
-   * x::to_object([[1, 'Test'], [2, 'Example']]); //Returns {[1, 'Test'], [2, 'Example']}
-   * </code>
+   * ```php
+   * x::to_object([[1, 'Test'], [2, 'Example']]);
+   * // object {[1, 'Test'], [2, 'Example']}
+   * ```
    *
-   * @param array $ar The array to trasform.
-   *
-   * @return false|object
+   * @param array $ar The array to convert.
+   * @return false | object
    */
   public static function to_object($ar){
     if ( is_string($ar) ){
@@ -255,29 +226,21 @@ class x
   }
 
   /**
-   * Makes an array of an object.
+   * Converts a JSON string or an object into an array.
    *
-   * <code>
-   * $file = new file("C:/logs/test.log");
+   * ```php
+   * $file = new stdClass();
+   * $file->foo = "bar";
+   * $file->bar = "foo";
    * echo x::to_array($file);
-   * //Returns [
-   *     '*size' => 0,
-   *     '*ext' => 'log',
-   *     '*hash' => null,
-   *     'path' => 'C:/logs/',
-   *     'name' => 'test.log',
-   *     'file' => 'C:/logs/test.log',
-   *     'title' => 'test',
-   *     'uploaded' => 0,
-   *     '*error' => null,
-   *     '*log' => [
-   *     ],
+   * /* array [
+   *     'foo' => 'bar',
+   *     'bar' => 'foo'
    * ]
-   * </code>
+   * ```
    *
    * @param object $obj The object to trasform.
-   *
-   * @return false|object
+   * @return false | array
    */
   public static function to_array($obj){
     if ( is_string($obj) ){
@@ -301,80 +264,88 @@ class x
   /**
    * Indents a flat JSON string to make it more human-readable.
    *
-   * <code>
-   * x::indent_json('{"firstName": "John", "lastName": "Smith", "age": 25}');
-   * //Returns {"firstName": "John", "lastName": "Smith", "isAlive": true, "age": 25}
-   * </code>
+   * ```php
+   * echo x::indent_json('{"firstName": "John", "lastName": "Smith", "age": 25}');
+   * /*
+   * {
+   *   "firstName": "John",
+   *   "lastName": "Smith",
+   *   "isAlive": true,
+   *   "age": 25
+   * }
+   * ```
    *
    * @param string $json The original JSON string to process.
-   *
    * @return string Indented version of the original JSON string.
    */
-  public static function indent_json($json) {
+  public static function indent_json($json){
 
-      $result      = '';
-      $pos         = 0;
-      $strLen      = strlen($json);
-      $indentStr   = '  ';
-      $newLine     = "\n";
-      $prevChar    = '';
-      $outOfQuotes = true;
+    $result      = '';
+    $pos         = 0;
+    $strLen      = strlen($json);
+    $indentStr   = '  ';
+    $newLine     = "\n";
+    $prevChar    = '';
+    $outOfQuotes = true;
 
-      for ($i=0; $i<=$strLen; $i++) {
+    for ($i=0; $i<=$strLen; $i++) {
 
-          // Grab the next character in the string.
-          $char = substr($json, $i, 1);
+      // Grab the next character in the string.
+      $char = substr($json, $i, 1);
 
-          // Are we inside a quoted string?
-          if ($char == '"' && $prevChar != '\\') {
-              $outOfQuotes = !$outOfQuotes;
+      // Are we inside a quoted string?
+      if ($char == '"' && $prevChar != '\\') {
+        $outOfQuotes = !$outOfQuotes;
 
-          // If this character is the end of an element,
-          // output a new line and indent the next line.
-          } else if(($char == '}' || $char == ']') && $outOfQuotes) {
-              $result .= $newLine;
-              $pos --;
-              for ($j=0; $j<$pos; $j++) {
-                  $result .= $indentStr;
-              }
-          }
-
-          // Add the character to the result string.
-          $result .= $char;
-
-          // If the last character was the beginning of an element,
-          // output a new line and indent the next line.
-          if (($char == ',' || $char == '{' || $char == '[') && $outOfQuotes) {
-              $result .= $newLine;
-              if ($char == '{' || $char == '[') {
-                  $pos ++;
-              }
-
-              for ($j = 0; $j < $pos; $j++) {
-                  $result .= $indentStr;
-              }
-          }
-
-          $prevChar = $char;
+        // If this character is the end of an element,
+        // output a new line and indent the next line.
+      } else if(($char == '}' || $char == ']') && $outOfQuotes) {
+        $result .= $newLine;
+        $pos --;
+        for ($j=0; $j<$pos; $j++) {
+          $result .= $indentStr;
+        }
       }
 
-      return $result;
+      // Add the character to the result string.
+      $result .= $char;
+
+      // If the last character was the beginning of an element,
+      // output a new line and indent the next line.
+      if (($char == ',' || $char == '{' || $char == '[') && $outOfQuotes) {
+        $result .= $newLine;
+        if ($char == '{' || $char == '[') {
+          $pos ++;
+        }
+
+        for ($j = 0; $j < $pos; $j++) {
+          $result .= $indentStr;
+        }
+      }
+
+      $prevChar = $char;
+    }
+
+    return $result;
   }
 
   /**
    * Returns an object or an array cleaned up from all empty values.
+   * @todo Add a preserve_keys option?
    *
-   * <code>
-   * x::remove_empty(['Pippo', 'Pluto', '', 'Paperino', ' ']); //Returns [0 => 'Pippo', 1 => 'Pluto', 3 => 'Paperino', 4 => ' ']
-   * x::remove_empty(['Pippo', 'Pluto', '', 'Paperino', ' '], 1)); //Returns [0 => 'Pippo', 1 => 'Pluto', 3 => 'Paperino']
-   * </code>
+   * ```php
+   * x::remove_empty(['Allison', 'Mike', '', 'John', ' ']);
+   * // array [0 => 'Allison', 1 => 'Mike', 3 => 'John', 4 => ' ']
+   *
+   * x::remove_empty(['Allison', 'Mike', '', 'John', ' '], 1));
+   * // array [0 => 'Allison', 1 => 'Pluto', 3 => 'Paperino']
+   * ```
    *
    * @param array|object $arr An object or array to clean.
    * @param bool $remove_space If "true" the spaces are removed, default: "false".
-   *
-   * @return string The clean result.
+   * @return array The clean result.
    */
-  public static function remove_empty($arr, $remove_space=false){
+  public static function remove_empty($arr, $remove_space = false){
     foreach ( $arr as $k => $v ){
       if ( is_object($arr) ){
         if ( is_array($v) || is_object($v) ){
@@ -400,17 +371,20 @@ class x
   }
 
   /**
-   * Returns an array containing an array for each element highlighting the index with an alias (keyname) and the value with an alias (valname).
+   * Converts an indexed array into a numeric array where the original index is a property.
+   * @todo the name is not fitted
    *
-   * <code>
-   * x::to_groups(['Pippo', 'Pluto', 'Paperino']);
-   * //Returns [['value' => 0, 'text' => 'Pippo'], ['value' => 1, 'text' => 'Pluto'], ['value' => 2, 'text' => 'Paperino']]
-   * </code>
+   * ```php
+   * x::to_groups([25 => 'Allison', 33 => 'Mike', 19 => 'John']);
+   * // array [['value' => 25, 'text' => 'Allison'], ['value' => 33, 'text' => 'Francis'], ['value' => 19, 'text' => 'John']]
+   *
+   * x::to_groups(['Allison', 'Mike', 'John'],'id', 'name');
+   * // array [['id' => 25, 'name' => 'Allison'], ['id' => 33, 'name' => 'Francis'], ['id' => 19, 'name' => 'John']]
+   * ```
    *
    * @param array $arr The original array.
-   * @param string $keyname Alias for index, default: "value".
-   * @param string $valname Alias for value, default: "text".
-   *
+   * @param string $keyname Alias for the index.
+   * @param string $valname Alias for the value.
    * @return array Groups array.
    */
   public static function to_groups(array $arr, $keyname = 'value', $valname = 'text'){
@@ -422,9 +396,17 @@ class x
   }
 
   /**
-   * Exports variable in fashion immediately re-importable in PHP.
+   * Checks if the given array is associative.
+   * bbn\x::is_assoc(['id' => 0, 'name' => 'Allison']);
+   * // boolean true
+   * bbn\x::is_assoc(['Allison', 'John', 'Bert']);
+   * // boolean false
+   * bbn\x::is_assoc([0 => "Allison", 1 => "John", 2 => "Bert"]);
+   * // boolean false
+   * bbn\x::is_assoc([0 => "Allison", 1 => "John", 3 => "Bert"]);
+   * // boolean true
    *
-   * @param array $r The array to be.
+   * @param array $r The array to check.
    * @return bool
    */
   public static function is_assoc(array $r){
@@ -439,6 +421,9 @@ class x
   }
 
   /**
+   * Returns a dump of the given variable.
+   *
+   * @param mixed
    * @return string
    */
   public static function get_dump(){
@@ -476,6 +461,9 @@ class x
   }
 
   /**
+   * Returns an HTML dump of the given variable.
+   *
+   * @param mixed
    * @return string
    */
   public static function get_hdump(){
@@ -483,7 +471,10 @@ class x
   }
 
   /**
+   * Dumps the given variable.
    *
+   * @param mixed
+   * @return void
    *
    */
   public static function dump(){
@@ -492,26 +483,33 @@ class x
   }
 
   /**
+   * Dumps the given variable in HTML.
    *
-   *
+   * @param mixed
+   * @return void
    */
   public static function hdump(){
     echo call_user_func_array('self::get_hdump', func_get_args());
   }
 
   /**
-   * Returns HTML code for creating the <option> tag.
+   * Return HTML code for creating the <option> tag(s) based on an array.
+   * If the array is indexed, the index will be used as value
    *
-   * <code>
-   * x::build_options(['yes', 'no']); //Returns "<option value="yes">yes</option><option value="no">no</option>"
-   * x::build_options(['yes', 'no'], 'no'); //Returns "<option value="yes">yes</option><option value="no" selected="selected">no</option>"
-   * x::build_options(['yes', 'no'], 'no', 'LabelForEmpty'); //Returns "<option value="">LabelForEmpty</option><option value="yes">yes</option><option value="no" selected="selected">no</option>"
-   * </code>
+   * ```php
+   * x::build_options(['yes', 'no']);
+   * // string "<option value="yes">yes</option><option value="no">no</option>"
+   * x::build_options(['yes', 'no'], 'no');
+   * // string "<option value="yes">yes</option><option value="no" selected="selected">no</option>"
+   * x::build_options(['yes', 'no'], 'no', 'LabelForEmpty');
+   * // string "<option value="">LabelForEmpty</option><option value="yes">yes</option><option value="no" selected="selected">no</option>"
+   * bbn\x::dump(\bbn\x::build_options([3 => "Loredana", 4 => "Vito", 5 => "Thomas"], 5, 'Who?'));
+   * // string "<option  value="">Who?</option><option  value="3">Loredana</option><option  value="4">Vito</option><option  value="5"  selected="selected">Thomas</option>"
+   * ```
    *
-   * @param array $values An array with one or plus values.
-   * @param string $select The value to indicate how selected, default: "".
-   * @param string $empty_label Label for empty value, default: "false".
-   *
+   * @param array $values The source array for the options
+   * @param mixed $selected The selected value
+   * @param boolean $empty_label A label for empty value
    * @return string The HTML code.
    */
   public static function build_options($values, $selected='', $empty_label=false){
@@ -538,8 +536,8 @@ class x
         }
         if ( isset($value,$title) ){
           $r .= '<option value="'.$value.'"'.
-                  ( $value == $selected ? ' selected="selected"' : '').
-                  '>'.$title.'</option>';
+            ( $value == $selected ? ' selected="selected"' : '').
+            '>'.$title.'</option>';
         }
         unset($value,$title);
       }
@@ -550,13 +548,13 @@ class x
   /**
    * Converts a numeric array to an associative one, using the values alternatively as key or value.
    *
-   * <code>
-   * x::to_keypair(['Test', 'TestFile', 'Example', 'ExampleFile']); //Returns ['Test' => 'TestFile', 'Example' => 'ExampleFile']
-   * </code>
+   * ```php
+   * x::to_keypair(['Test', 'TestFile', 'Example', 'ExampleFile']);
+   * // string ['Test' => 'TestFile', 'Example' => 'ExampleFile']
+   * ```
    *
-   * @param array $arr must contain an even number of values.
-   * @param bool $protected if false no index protection will be performed, default: "1".
-   *
+   * @param array $arr must contain an even number of values
+   * @param boolean $protected if false no index protection will be performed
    * @return array|false
    */
   public static function to_keypair($arr, $protected = 1){
@@ -576,27 +574,28 @@ class x
   }
 
   /**
-   * Returns the maximum value of an index of a multidimensional array.
+   * Returns the maximum value of a given property from a 2 dimensions array.
+   * @todo Add a custom callable as last parameter
    *
-   * <code>
+   * ```php
    * x::max_with_key([
    *  ['v' => 1, 'name' => 'test1'],
    *  ['v' => 8, 'name' => 'test2'],
    *  ['v' => 45, 'name' => 'test3'],
    *  ['v' => 2, 'name' => 'test4']
-   * ], 'v'); //Returns 45
-   * </code>
+   * ], 'v');
+   * // int 45
+   * ```
    *
-   * @param array $arr A multidimensional array.
-   * @param mixed $key The index where to search.
-   *
+   * @param array $ar A multidimensional array
+   * @param string $key The property where to check the value from
    * @return mixed
    */
-  public static function max_with_key($array, $key) {
-    if (!is_array($array) || count($array) == 0) return false;
-    $max = $array[0][$key];
-    foreach($array as $a) {
-      if($a[$key] > $max) {
+  public static function max_with_key($ar, $key) {
+    if (!is_array($ar) || count($ar) == 0) return false;
+    $max = current($ar)[$key];
+    foreach ( $ar as $a ){
+      if( $a[$key] > $max ){
         $max = $a[$key];
       }
     }
@@ -605,23 +604,23 @@ class x
 
   /**
    * Returns the minimum value of an index of a multidimensional array.
-   *
-   * <code>
-   * x::max_with_key([
+   * @todo far vedere descrizione dei param
+   * ```php
+   * x::min_with_key([
    *  ['v' => 1, 'name' => 'test1'],
    *  ['v' => 8, 'name' => 'test2'],
    *  ['v' => 45, 'name' => 'test3'],
    *  ['v' => 45, 'name' => 'test3'],
    *  ['v' => 2, 'name' => 'test4']
-   * ], 'v'); //Returns  1
-   * </code>
+   * ], 'v');
+   * //int  1
+   * ```
    *
    * @param array $arr A multidimensional array.
-   * @param mixed $key The index where to search.
-   *
-   * @return mixed
+   * @param string $key The index where to search.
+   * @return mixed value
    */
-  public static function min_with_key($array, $key) {
+  public static function min_with_key($array, $key){
     if (!is_array($array) || count($array) == 0) return false;
     $min = $array[0][$key];
     foreach($array as $a) {
@@ -633,8 +632,9 @@ class x
   }
 
   /**
+   * Gets the backtrace and dumps it or logs it into a file
    *
-   *
+   * @param string $file The file to debug
    */
   public static function debug($file=''){
     $debug = array_map(function($a){
@@ -651,6 +651,14 @@ class x
     }
   }
 
+  /**
+   * @todo non sono riuscita a provarla
+   *
+   * @param callable $fn
+   * @param array $ar
+   * @param string|null $items
+   * @return array
+   */
   public static function map(callable $fn, array $ar, string $items = null){
     $res = [];
     foreach ( $ar as $i => $a ){
@@ -669,24 +677,79 @@ class x
     return $res;
   }
 
-	public static function find(array $ar, array $where){
-		if ( !empty($where) ){
-			foreach ( $ar as $i => $v ){
-				$ok = 1;
-				foreach ( $where as $k => $w ){
-					if ( !isset($v[$k]) || ($v[$k] !== $w) ){
-						$ok = false;
-						break;
-					}
-				}
-				if ( $ok ){
-					return $i;
-				}
-			}
-		}
-		return false;
-	}
+  /**
+   * Returns the array's first index which satisfies the where condition.
+   *
+   * ```php
+   * \bbn\x::hdump(bbn\x::find([[
+   *    'id' => 5,
+   *    'name' => 'Loredana',
+   *    'fname' => 'Bruno'
+   *    ], [
+   *   'id' => 12,
+   *    'name' => 'Vito',
+   *    'fname' => 'Fava'
+   *    ], [
+   *    'id' => 45,
+   *    'name' => 'Thomas',
+   *    'fname' => 'Nabet'
+   *    ], [
+   *    'id' => 15,
+   *    'name' => 'Mirko',
+   *    'fname' => 'Argentino'
+   *    ]], ['id' => 15]));
+   * // int 3
+   * \bbn\x::hdump(bbn\x::find([[
+   *    'id' => 5,
+   *    'name' => 'Loredana',
+   *    'fname' => 'Bruno'
+   *    ], [
+   *   'id' => 12,
+   *    'name' => 'Vito',
+   *    'fname' => 'Fava'
+   *    ], [
+   *    'id' => 45,
+   *    'name' => 'Thomas',
+   *    'fname' => 'Nabet'
+   *    ], [
+   *    'id' => 15,
+   *    'name' => 'Mirko',
+   *    'fname' => 'Argentino'
+   *    ]], ['name' => 'Thomas', 'fname' => 'Nabet']));
+   * // int 2
+   * ```
+   *
+   * @param array $ar
+   * @param array $where The where condition
+   * @return bool|int
+   */
+  public static function find(array $ar, array $where){
+    if ( !empty($where) ){
+      foreach ( $ar as $i => $v ){
+        $ok = 1;
+        foreach ( $where as $k => $w ){
+          if ( !isset($v[$k]) || ($v[$k] !== $w) ){
+            $ok = false;
+            break;
+          }
+        }
+        if ( $ok ){
+          return $i;
+        }
+      }
+    }
+    return false;
+  }
 
+  /**
+   * Returns the first row of an array satisfying the where parameters (@link find())
+   * @todo non funziona l'esempio
+   *
+   * @param array $r
+   * @param array $where
+   * @return bool|mixed
+   *
+   */
   public static function get_row(array $r, array $where){
     if ( ($res = self::find($r, $where)) !== false ){
       return $r[$res];
@@ -701,6 +764,7 @@ class x
     return false;
   }
 
+  // Returns a reference to a subarray targeted by an array $keys
   public static function pick(array $ar, array $keys){
     while ( count($keys) ){
       $r = array_shift($keys);
@@ -767,16 +831,29 @@ class x
 
 
   /**
-	 * Tells whether the current system from which PHP is executed is Windows or not
-	 *
-	 * @return bool
-	 */
+   * Checks if the operating system from which PHP is executed is Windows or not
+   *
+   * @return bool
+   */
   public static function is_windows()
   {
     return strtoupper(substr(PHP_OS, 0, 3)) == 'WIN';
   }
 
   /**
+   * Makes a cURL call towards a URL and returns the result as a string
+   * @todo non riesco a capire cosa è l'html che ritorna
+   *
+   * ```php
+   * x::curl('http://www.wordreference.com/enit/even%20number'));
+   * /*
+   * <!DOCTYPE  HTML  PUBLIC  "-//W3C//DTD  HTML  4.01//EN""http://www.w3.org/TR/html4/strict.dtd">
+   * <HTML><HEAD><TITLE>Length  Required</TITLE>
+   * <META  HTTP-EQUIV="Content-Type"  Content="text/html;  charset=us-ascii"></HEAD>
+   * <BODY><h2>Length  Required</h2>
+   * <hr><p>HTTP  Error  411.  The  request  must  be  chunked  or  have  a  content  length.</p>
+   * </BODY></HTML>
+   *
    * @param string $url
    * @param array $param
    * @param array $options
@@ -819,6 +896,36 @@ class x
     return $r;
   }
 
+  /**
+   * Returns the given array or object as a tree structure ready for a JS tree
+   * @todo far leggere a thomas la descrizione
+   *
+   * ```php
+   * x::get_tree([['*ext' => 'log', '*hash' => null,], 1 => '71']));
+   *
+   * /* array  [
+   *            [
+   *            "text"  =>  0,
+   *            "items"  =>  [
+   *              [
+   *              "text"  =>  0,
+   *              "items"  =>  [
+   *                [
+   *                "text"  =>  "*ext:  log",
+   *                ],
+   *                [
+   *                "text"  =>  "*hash:  ",
+   *                ],
+   *              ],
+   *            ],
+   *            [
+   *            "text"  =>  "1:  71",
+   *            ],
+   *          ]
+   * ```
+   * @param $ar
+   * @return array
+   */
   public static function get_tree($ar){
     $res = [];
     foreach ( $ar as $k => $a ){
@@ -837,6 +944,40 @@ class x
     return $res;
   }
 
+  /**
+   * Returns a view of an array or object as a JS tree
+   *
+   * ```php
+   *       x::make_tree([
+   *                      [
+   *                        [
+   *                          0 => '64',
+   *                          1 => '71',
+   *                        ],
+   *                        1 => '71',
+   *                      ],
+   *                      [
+   *                        [
+   *                          0 => '64',
+   *                          1 => '71',
+   *                        ],
+   *                        1 => '29',
+   *                        2 => '33',
+   *                      ]
+   *                    ]);
+   * /* string  0
+   *              0
+   *                0: 64
+   *                1: 71
+   *              1: 71
+   *            1
+   *              0
+   *              1: 29
+   *              2: 33
+   * ```
+   * @param array $ar
+   * @return string
+   */
   public static function make_tree(array $ar){
     $id = str::genpwd();
     return '<div id="'.$id.'"></div><script>$("#'.$id.'").kendoTreeView({dataSource: '.
@@ -846,6 +987,14 @@ class x
   /**
    * Formats a line (passed as a fields  array) as CSV and returns the CSV as a string.
    * Adapted from http://us3.php.net/manual/en/function.fputcsv.php#87120
+   * @todo ho l'esempio ma non funziona
+   *
+   *
+   * @param $st
+   * @param string $delimiter
+   * @param string $enclosure
+   * @param string $separator
+   * @return array
    */
   public static function from_csv($st, $delimiter = ';', $enclosure = '"', $separator = PHP_EOL) {
     if ( is_string($st) ){
@@ -860,8 +1009,20 @@ class x
   }
 
   /**
-   * Formats an array (passed as a fields  array) as CSV and returns the CSV as a string.
+   *
+   * Formats an array as CSV and returns the CSV as a string.
    * Adapted from http://us3.php.net/manual/en/function.fputcsv.php#87120
+   * @todo non c'è l'esempio perchè non mi funziona
+   *
+   *
+   * @param array $data
+   * @param string $delimiter
+   * @param string $enclosure
+   * @param string $separator
+   * @param bool $encloseAll
+   * @param bool $nullToMysqlNull
+   * @return string
+   *
    */
   public static function to_csv(array $data, $delimiter = ';', $enclosure = '"', $separator = PHP_EOL, $encloseAll = false, $nullToMysqlNull = false ) {
     $delimiter_esc = preg_quote($delimiter, '/');

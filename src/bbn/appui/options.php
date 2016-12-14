@@ -1959,7 +1959,7 @@ class options extends bbn\models\cls\db
    * // (string) "78%"
    * ```
    *
-   * @param int $id The option from whiuch getting the property
+   * @param int $id The option from which getting the property
    * @param string $prop The property's name
    * @return mixed|false The property's value, false if not found
    */
