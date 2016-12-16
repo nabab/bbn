@@ -22,6 +22,29 @@ namespace bbn;
 class x
 {
 
+  private static $counters = [];
+
+  /**
+   * @param string $name
+   * @param int $i
+   */
+  public static function increment(string $name = 'num', int $i = 1){
+    if ( !isset(self::$counters[$name]) ){
+      self::$counters[$name] = 0;
+    }
+    self::$counters[$name] += $i;
+  }
+
+  /**
+   * @param string $name
+   * @return mixed
+   */
+  public static function count(string $name = 'num'){
+    $tmp = self::$counters[$name];
+    unset(self::$counters[$name]);
+    return $tmp;
+  }
+
   /**
    * Saves logs into a file.
    *
@@ -811,7 +834,7 @@ class x
   }
 
   /**
-   * Returns the first row of an array satisfying the where parameters (@link find()).
+   * Returns the first row of an array satisfying the where parameters ({@link find()).
    *
    * ```php
    * \bbn\x::dump(bbn\x::get_row([[
