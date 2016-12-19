@@ -24,14 +24,18 @@ class x
 
   private static $counters = [];
 
+  private static function _init_count(string $name){
+    if ( !isset(self::$counters[$name]) ){
+      self::$counters[$name] = 0;
+    }
+  }
+
   /**
    * @param string $name
    * @param int $i
    */
   public static function increment(string $name = 'num', int $i = 1){
-    if ( !isset(self::$counters[$name]) ){
-      self::$counters[$name] = 0;
-    }
+    self::_init_count($name);
     self::$counters[$name] += $i;
   }
 
@@ -40,8 +44,17 @@ class x
    * @return mixed
    */
   public static function count(string $name = 'num'){
+    self::_init_count($name);
     $tmp = self::$counters[$name];
     unset(self::$counters[$name]);
+    return $tmp;
+  }
+
+  public static function count_all($delete = false){
+    $tmp = self::$counters;
+    if ( $delete ){
+      self::$counters = [];
+    }
     return $tmp;
   }
 
