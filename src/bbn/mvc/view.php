@@ -68,7 +68,7 @@ class view{
 	 */
 	public function get(array $data=null)
 	{
-		if ( $this->check() ) {
+		if ( $this->check() ){
 			if ( is_null($this->content) ) {
 				$this->content = file_get_contents($this->file);
 			}
@@ -88,7 +88,7 @@ class view{
         case 'scss':
 					return $this->content;
 				case 'html':
-					return is_array($data) ? bbn\tpl::render($this->content, $data) : $this->content;
+					return empty($data) ? $this->content : bbn\tpl::render($this->content, $data);
         case 'php':
           $dir = getcwd();
           chdir(dirname($this->file));

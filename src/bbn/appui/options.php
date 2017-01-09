@@ -23,8 +23,8 @@ use PhpOffice\PhpWord\Element\PageBreakTest;
  * @author Thomas Nabet <thomas.nabet@gmail.com>
  * @copyright BBN Solutions
  * @since Oct 28, 2015, 10:23:55 +0000
- * @category  Appui x
- * @license   http://opensource.org/licenses/MIT MIT
+ * @category Appui x
+ * @license http://opensource.org/licenses/MIT MIT
  * @version 0.2
  */
 

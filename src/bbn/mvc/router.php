@@ -406,7 +406,6 @@ class router {
 
     if ( self::is_mode($mode) ) {
 
-
       /** @var string $path The path to the file from $root */
       $path = $this->parse($path);
 
@@ -414,7 +413,6 @@ class router {
       if ( $this->prepath && (strpos($path, '/') !== 0) && (strpos($path, $this->prepath) !== 0) ){
         $path = $this->prepath.$path;
       }
-
 
       // We only try to retrieve a file path through a whole URL for controllers
       if (in_array($mode, self::$controllers)) {

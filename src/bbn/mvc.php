@@ -364,8 +364,7 @@ class mvc implements mvc\api{
 	 * @param string $mode
 	 * @return string|false
 	 */
-	public function get_view($path='', $mode='html', $data=null)
-	{
+	public function get_view($path='', $mode='html', $data=null){
     if ( !router::is_mode($mode) ){
       die("Incorrect mode $path $mode");
     }
@@ -373,7 +372,10 @@ class mvc implements mvc\api{
 			$view = self::$loaded_views[$mode][$path];
 		}
 		else if ( $file = $this->router->route($path, $mode) ){
-			$view = new mvc\view($file, $mode, $data);
+      if ( $mode === 'html' ){
+        //die(var_dump("jokjkl", $file, is_file($file['file']), file_get_contents($file['file'])));
+      }
+			$view = new mvc\view($file);
       self::$loaded_views[$mode][$path] = $view;
 		}
 		if ( isset($view) && $view->check() ){
@@ -389,8 +391,7 @@ class mvc implements mvc\api{
    * @params array data to send to the model
    * @return array|false A data model
    */
-  public function get_model($path, array $data, mvc\controller $ctrl)
-  {
+  public function get_model($path, array $data, mvc\controller $ctrl){
     if ( $route = $this->router->route($path, 'model') ){
       $model = new mvc\model($this->db, $route, $ctrl);
       return $model->get($data);
