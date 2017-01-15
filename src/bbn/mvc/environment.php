@@ -183,7 +183,7 @@ class environment {
       }
       if ( count($this->post) ){
         self::_dot_to_array($this->post);
-        /** @todo Remove the json parameter from the appui.js functions */
+        /** @todo Remove the json parameter from the bbn.js functions */
         if ( isset($this->post['appui']) && ($this->post['appui'] !== 'json') ){
           $this->set_mode($this->post['appui']);
           unset($this->post['appui']);

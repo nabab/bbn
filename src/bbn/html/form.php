@@ -64,7 +64,8 @@ class form extends element
 	{
     $st = parent::script($with_ele);
     if ( isset($this->attr['id']) ){
-      $st .= 'kendo.bind("#'.$this->attr['id'].' *", appui.app.tabstrip.obs[appui.app.tabstrip.selected].info);';
+      /** @todo Check it out! */
+      //$st .= 'kendo.bind("#'.$this->attr['id'].' *", bbn.app.tabstrip.obs[bbn.app.tabstrip.selected].info);';
     }
     return $st;
 	}

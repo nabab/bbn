@@ -25,6 +25,9 @@ class x
   private static $counters = [];
 
   private static function _init_count(string $name){
+    if ( !$name ){
+      $name = 'num';
+    }
     if ( !isset(self::$counters[$name]) ){
       self::$counters[$name] = 0;
     }
