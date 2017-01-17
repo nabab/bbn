@@ -263,6 +263,7 @@ class router {
         ){
           $npath = $tmp. '/index';
           $file = $this->get_alt_root($mode).$tmp.'/index.php';
+          $root = $this->get_alt_root($mode);
         }
         // $tmp corresponds to a root index
         else if ( isset($this->routes['root'][$tmp]) ){
@@ -293,10 +294,12 @@ class router {
             if ( file_exists($this->get_alt_root($mode).$name.'.php') ){
               $npath = $tmp;
               $file = $this->get_alt_root($mode).$name.'.php';
+              $root = $this->get_alt_root($mode);
             }
             else if ( is_dir($this->get_alt_root($mode).$name) && is_file($this->get_alt_root($mode).$name.'/home.php') ){
               $npath = $tmp.'/home';
               $file = $this->get_alt_root($mode).$name.'/home.php';
+              $root = $this->get_alt_root($mode);
             }
           }
           // $tmp corresponds to a root
@@ -327,6 +330,7 @@ class router {
       return $this->set_known([
         'file' => $file,
         'path' => $npath,
+        'root' => dirname(dirname($root)).'/',
         'request' => $path,
         'mode' => $mode,
         'args' => $args

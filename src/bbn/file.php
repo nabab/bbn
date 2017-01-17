@@ -10,8 +10,9 @@ namespace bbn;
  * @author Thomas Nabet <thomas.nabet@gmail.com>
  * @copyright BBN Solutions
  * @since Apr 4, 2011, 23:23:55 +0000
- * @category  Files ressources
- * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @category Files ressources
+ * @package bbn
+ * @license \sa elem http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @version 0.2r89
  */
 class file extends models\cls\basic
@@ -60,9 +61,12 @@ class file extends models\cls\basic
 	/**
 	 * Constructor.
 	 *
-   * @todo Fairew la doc!!
-   * @param string | array
-	 * @return void
+	 * ```php
+   * $file=new bbn\file("/home/user/Desktop/test.txt");
+   * ```
+   *
+	 * @params mixed $file
+   * @return $this
 	 */
 	public function __construct($file)
 	{
@@ -131,7 +135,7 @@ class file extends models\cls\basic
 	 * //(string) "txt"
    * ```
    *
-	 * @return string
+	 * @return string|false
 	 */
 	public function get_extension()
 	{
@@ -155,7 +159,7 @@ class file extends models\cls\basic
 	/**
 	 * Creates a temporary file in tmp directory.
 	 *
-	 * @todo da sistemare
+	 * @todo of adjusting
 	 * @return bbn\files\file
 	 */
 	protected function make()
@@ -260,7 +264,13 @@ class file extends models\cls\basic
 	}
 
 	/**
+	 * That feature saves the file as a parameter, and accepts a string that contains the path where to save.
 	 *
+	 * ```php
+	 *  $file->save("/home/user/desktop/");
+	 * ```
+   *
+	 * @param string $dest
 	 * @return bbn\files\file
 	 */
 	public function save($dest='./')

@@ -65,7 +65,7 @@ class x
    * Saves logs into a file.
    *
    * ```php
-   * x::log('My text', 'FileName');
+   * \bbn\x::log('My text', 'FileName');
    * ```
    *
    * @param string $st Text to save.
@@ -105,12 +105,14 @@ class x
   /**
    * Puts the PHP errors into a JSON file
    *
-   *
-   * @param string Text to save.
-   * @param string Filename, default: "misc".
-   *
-   * @return null
+   * @param string $errno The text to save.
+   * @param string $errstr The file's name, default: "misc".
+   * @param $errfile
+   * @param $errline
+   * @param array $context
+   * @return bool
    */
+
   public static function log_error($errno, $errstr, $errfile, $errline, $context = []){
     if ( defined('BBN_DATA_PATH') ){
       if ( is_dir(BBN_DATA_PATH.'logs') ){
@@ -171,7 +173,7 @@ class x
    * $obj1 = new A;
    * $obj2 = new B;
    *
-   * x::merge_objects($obj1, $obj2);
+   * \bbn\x::merge_objects($obj1, $obj2);
    * // object {'a': 10, 'b': 20, 'c': 30, 'd': 40}
    * ```
    *
@@ -197,7 +199,7 @@ class x
    * Returns an array merging several arrays.
    *
    * ```php
-   * x::merge_arrays([1, 'Test'], [2, 'Example']);
+   * \bbn\x::merge_arrays([1, 'Test'], [2, 'Example']);
    * // array [1, 'Test', 2, 'Example']
    * ```
    *
@@ -241,7 +243,7 @@ class x
    * Converts a JSON string or an array into an object.
    *
    * ```php
-   * x::to_object([[1, 'Test'], [2, 'Example']]);
+   * \bbn\x::to_object([[1, 'Test'], [2, 'Example']]);
    * // object {[1, 'Test'], [2, 'Example']}
    * ```
    *
@@ -271,7 +273,7 @@ class x
    * $file = new stdClass();
    * $file->foo = "bar";
    * $file->bar = "foo";
-   * echo x::to_array($file);
+   * echo \bbn\x::to_array($file);
    * /* array [
    *     'foo' => 'bar',
    *     'bar' => 'foo'
@@ -304,7 +306,7 @@ class x
    * Indents a flat JSON string to make it more human-readable.
    *
    * ```php
-   * echo x::indent_json('{"firstName": "John", "lastName": "Smith", "age": 25}');
+   * echo \bbn\x::indent_json('{"firstName": "John", "lastName": "Smith", "age": 25}');
    * /*
    * {
    *   "firstName": "John",
@@ -373,10 +375,10 @@ class x
    * @todo Add a preserve_keys option?
    *
    * ```php
-   * x::remove_empty(['Allison', 'Mike', '', 'John', ' ']);
+   * \bbn\x::remove_empty(['Allison', 'Mike', '', 'John', ' ']);
    * // array [0 => 'Allison', 1 => 'Mike', 3 => 'John', 4 => ' ']
    *
-   * x::remove_empty(['Allison', 'Mike', '', 'John', ' '], 1));
+   * \bbn\x::remove_empty(['Allison', 'Mike', '', 'John', ' '], 1));
    * // array [0 => 'Allison', 1 => 'Mike', 3 => 'John']
    * ```
    *
@@ -414,10 +416,10 @@ class x
    * @todo the name is not fitted
    *
    * ```php
-   * x::to_groups([25 => 'Allison', 33 => 'Mike', 19 => 'John']);
+   * \bbn\x::to_groups([25 => 'Allison', 33 => 'Mike', 19 => 'John']);
    * // array [['value' => 25, 'text' => 'Allison'], ['value' => 33, 'text' => 'Francis'], ['value' => 19, 'text' => 'John']]
    *
-   * x::to_groups(['Allison', 'Mike', 'John'],'id', 'name');
+   * \bbn\x::to_groups(['Allison', 'Mike', 'John'],'id', 'name');
    * // array [['id' => 25, 'name' => 'Allison'], ['id' => 33, 'name' => 'Francis'], ['id' => 19, 'name' => 'John']]
    * ```
    *
@@ -436,14 +438,21 @@ class x
 
   /**
    * Checks if the given array is associative.
-   * bbn\x::is_assoc(['id' => 0, 'name' => 'Allison']);
+
+   * ```php
+   * \bbn\\x::is_assoc(['id' => 0, 'name' => 'Allison']);
+   *
+   * \bbn\\x::is_assoc(['Allison', 'John', 'Bert']);
+   *
+   * \bbn\\x::is_assoc([0 => "Allison", 1 => "John", 2 => "Bert"]);
+   *
+   * \bbn\\x::is_assoc([0 => "Allison", 1 => "John", 3 => "Bert"]);
+   *
    * // boolean true
-   * bbn\x::is_assoc(['Allison', 'John', 'Bert']);
    * // boolean false
-   * bbn\x::is_assoc([0 => "Allison", 1 => "John", 2 => "Bert"]);
    * // boolean false
-   * bbn\x::is_assoc([0 => "Allison", 1 => "John", 3 => "Bert"]);
    * // boolean true
+   * ```
    *
    * @param array $r The array to check.
    * @return bool
@@ -532,17 +541,17 @@ class x
   }
 
   /**
-   * Return HTML code for creating the <option> tag(s) based on an array.
+   * Return HTML code for creating the &lt;option&gt; tag(s) based on an array.
    * If the array is indexed, the index will be used as value
    *
    * ```php
-   * x::build_options(['yes', 'no']);
-   * // string "<option value="yes">yes</option><option value="no">no</option>"
-   * x::build_options(['yes', 'no'], 'no');
+   * \bbn\x::build_options(['yes', 'no']);
+   * // string "<option value="yes">yes</option>;<option value="no">no</option>"
+   * \bbn\x::build_options(['yes', 'no'], 'no');
    * // string "<option value="yes">yes</option><option value="no" selected="selected">no</option>"
-   * x::build_options(['yes', 'no'], 'no', 'LabelForEmpty');
+   * \bbn\x::build_options(['yes', 'no'], 'no', 'LabelForEmpty');
    * // string "<option value="">LabelForEmpty</option><option value="yes">yes</option><option value="no" selected="selected">no</option>"
-   * bbn\x::dump(\bbn\x::build_options([3 => "Allison", 4 => "Mike", 5 => "Andrew"], 5, 'Who?'));
+   * \bbn\x::dump(\bbn\x::build_options([3 => "Allison", 4 => "Mike", 5 => "Andrew"], 5, 'Who?'));
    * // string "<option  value="">Who?</option><option  value="3">Allison</option><option  value="4">Mike</option><option  value="5"  selected="selected">Andrew</option>"
    * ```
    *
@@ -588,7 +597,7 @@ class x
    * Converts a numeric array to an associative one, using the values alternatively as key or value.
    *
    * ```php
-   * x::to_keypair(['Test', 'TestFile', 'Example', 'ExampleFile']);
+   * \bbn\x::to_keypair(['Test', 'TestFile', 'Example', 'ExampleFile']);
    * // string ['Test' => 'TestFile', 'Example' => 'ExampleFile']
    * ```
    *
@@ -617,7 +626,7 @@ class x
    * @todo Add a custom callable as last parameter
    *
    * ```php
-   * x::max_with_key([
+   * \bbn\x::max_with_key([
    *  ['age' => 1, 'name' => 'Michelle'],
    *  ['age' => 8, 'name' => 'John'],
    *  ['age' => 45, 'name' => 'Sarah'],
@@ -646,7 +655,7 @@ class x
    * Returns the minimum value of an index of a multidimensional array.
    *
    * ```php
-   * x::min_with_key([
+   * \bbn\x::min_with_key([
    *  ['age' => 1, 'name' => 'Michelle'],
    *  ['age' => 8, 'name' => 'John'],
    *  ['age' => 45, 'name' => 'Sarah'],
@@ -656,7 +665,7 @@ class x
    * // int  1
    * ```
    *
-   * @param $array A multidimensional array.
+   * @param array $array A multidimensional array.
    * @param string $key The index where to search.
    * @return mixed value
    */
@@ -722,7 +731,7 @@ class x
    *    $a['name'] = 'Mr. '.$a['name'];
    *  }
    *  return $a;
-   *}, $ar,'children'));
+   * }, $ar,'children'));
    * /* array [
    *            [
    *              "age"  =>  45,
@@ -789,7 +798,7 @@ class x
    * Returns the array's first index which satisfies the where condition.
    *
    * ```php
-   * \bbn\x::hdump(bbn\x::find([[
+   * \bbn\x::hdump(\bbn\x::find([[
    *    'id' => 1,
    *    'name' => 'Andrew',
    *    'fname' => 'Williams'
@@ -807,7 +816,7 @@ class x
    *    'fname' => 'White'
    *    ]], ['id' => 4]));
    * // int 3
-   * \bbn\x::hdump(bbn\x::find([[
+   * \bbn\x::hdump(\bbn\x::find([[
    *    'id' => 1,
    *    'name' => 'Andrew',
    *    'fname' => 'Williams'
@@ -853,7 +862,7 @@ class x
    * Returns the first row of an array satisfying the where parameters ({@link find()).
    *
    * ```php
-   * \bbn\x::dump(bbn\x::get_row([[
+   * \bbn\x::dump(\bbn\x::get_row([[
    *    'id' => 1,
    *    'name' => 'Andrew',
    *    'fname' => 'Williams'
@@ -889,7 +898,7 @@ class x
    * Returns the first value of a specific field of an array.
    *
    * ```php
-   * \bbn\x::dump(bbn\x::get_row([[
+   * \bbn\x::dump(\bbn\x::get_row([[
    *    'id' => 1,
    *    'name' => 'Andrew',
    *    'fname' => 'Williams'
@@ -963,8 +972,8 @@ class x
    *
    * ```php
    * $var = [3, 2, 5, 6, 1];
-   * bbn\x::sort($var);
-   * bbn\x::hdump($var);
+   * \bbn\x::sort($var);
+   * \bbn\x::hdump($var);
    * // array [1,2,3,5,6]
    * ```
    *
@@ -994,19 +1003,19 @@ class x
    *
    * ```php
    *  $v = [['age'=>10, 'name'=>'thomas'], ['age'=>22, 'name'=>'John'], ['age'=>37, 'name'=>'Michael']];
-   *  bbn\x::sort_by($v,'name','desc');
-   *  bbn\x::hdump($v);
-   *  bbn\x::sort_by($v,'name','asc');
-   *  bbn\x::hdump($v);
-   *  bbn\x::sort_by($v,'age','asc');
-   *  bbn\x::hdump($v);
-   *  bbn\x::sort_by($v,'age','desc');
-   *  bbn\x::hdump($v);
+   *  \bbn\x::sort_by($v,'name','desc');
+   *  \bbn\x::hdump($v);
+   *  \bbn\x::sort_by($v,'name','asc');
+   *  \bbn\x::hdump($v);
+   *  \bbn\x::sort_by($v,'age','asc');
+   *  \bbn\x::hdump($v);
+   *  \bbn\x::sort_by($v,'age','desc');
+   *  \bbn\x::hdump($v);
    * ```
    *
-   * @param $ar The array of data to sort
-   * @param string $key The key to sort by
-   * @param string The direction of the sort ('asc'|'desc')
+   * @param array $ar The array of data to sort
+   * @param string|int $key The key to sort by
+   * @param string $dir The direction of the sort ('asc'|'desc')
    * @return void
    */
   public static function sort_by(&$ar, $key, $dir = ''){
@@ -1040,7 +1049,7 @@ class x
   /**
    * Checks if the operating system from which PHP is executed is Windows or not
    * ```php
-   * bbn\x::dump(bbn\x::is_windows());
+   * \bbn\x::dump(\bbn\x::is_windows());
    * // boolean false
    * ```
    *
@@ -1057,7 +1066,7 @@ class x
    * ```php
    *  $url = 'https://www.omdbapi.com/';
    *  $param = ['t'=>'la vita è bella'];
-   *  bbn\x::hdump(bbn\x::curl($url,$param, ['POST' => false]));
+   *  \bbn\x::hdump(\bbn\x::curl($url,$param, ['POST' => false]));
    *
    * // object {"Title":"La  vita  è  bella","Year":"1943","Rated":"N/A","Released":"26  May  1943","Runtime":"76  min","Genre":"Comedy","Director":"Carlo  Ludovico  Bragaglia","Writer":"Carlo  Ludovico  Bragaglia  (story  and  screenplay)","Actors":"Alberto  Rabagliati,  María  Mercader,  Anna  Magnani,  Carlo  Campanini","Plot":"N/A","Language":"Italian","Country":"Italy","Awards":"N/A","Poster":"http://ia.media-imdb.com/images/M/MV5BYmYyNzA2YWQtNDgyZC00OWVkLWIwMTEtNTdhNDQwZjcwYTMwXkEyXkFqcGdeQXVyNTczNDAyMDc@._V1_SX300.jpg","Metascore":"N/A","imdbRating":"7.9","imdbVotes":"50","imdbID":"tt0036502","Type":"movie","Response":"True"}
    * ```
@@ -1108,11 +1117,12 @@ class x
    * Returns the given array or object as a tree structure ready for a JS tree
    *
    * ```php
-   * bbn\x::hdump(bbn\x::get_tree([['id' => 1,'name' => 'Andrew','fname' => 'Williams','children' =>[['name' => 'Emma','age' => 6],['name' => 'Giorgio','age' => 9]]], ['id' => 2,'name' => 'Albert','fname' => 'Taylor','children' =>[['name' => 'Esther','age' => 6],['name' => 'Paul','age' => 9]]], ['id' => 3,'name' => 'Mike','fname' => 'Smith','children' =>[['name' => 'Sara','age' => 6],['name' => 'Fred','age' => 9]]]]));
+   * \bbn\x::hdump(\bbn\x::get_tree([['id' => 1,'name' => 'Andrew','fname' => 'Williams','children' =>[['name' => 'Emma','age' => 6],['name' => 'Giorgio','age' => 9]]], ['id' => 2,'name' => 'Albert','fname' => 'Taylor','children' =>[['name' => 'Esther','age' => 6],['name' => 'Paul','age' => 9]]], ['id' => 3,'name' => 'Mike','fname' => 'Smith','children' =>[['name' => 'Sara','age' => 6],['name' => 'Fred','age' => 9]]]]));
    * /* array [
    *    [ "text" => 0, "items" => [ [ "text" => "id: 1", ], [ "text" => "name: Andrew", ], [ "text" => "fname: Williams", ], [ "text" => "children", "items" => [ [ "text" => 0, "items" => [ [ "text" => "name: Emma", ], [ "text" => "age: 6", ], ], ], [ "text" => 1, "items" => [ [ "text" => "name: Giorgio", ], [ "text" => "age: 9", ], ], ], ], ], ], ], [ "text" => 1, "items" => [ [ "text" => "id: 2", ], [ "text" => "name: Albert", ], [ "text" => "fname: Taylor", ], [ "text" => "children", "items" => [ [ "text" => 0, "items" => [ [ "text" => "name: Esther", ], [ "text" => "age: 6", ], ], ], [ "text" => 1, "items" => [ [ "text" => "name: Paul", ], [ "text" => "age: 9", ], ], ], ], ], ], ], [ "text" => 2, "items" => [ [ "text" => "id: 3", ], [ "text" => "name: Mike", ], [ "text" => "fname: Smith", ], [ "text" => "children", "items" => [ [ "text" => 0, "items" => [ [ "text" => "name: Sara", ], [ "text" => "age: 6", ], ], ], [ "text" => 1, "items" => [ [ "text" => "name: Fred", ], [ "text" => "age: 9", ], ], ], ], ], ], ], ]
    * ```
-   * @param $ar
+   *
+   * @param array $ar
    * @return array
    */
   public static function get_tree($ar){
@@ -1137,13 +1147,13 @@ class x
    * Returns a view of an array or object as a JS tree
    *
    * ```php
-  bbn\x::dump(bbn\x::make_tree([['id' => 1,'name' => 'Andrew','fname' => 'Williams','children' =>[['name' => 'Emma','age' => 6],['name' => 'Giorgio','age' => 9]]], ['id' => 2,'name' => 'Albert','fname' => 'Taylor','children' =>[['name' => 'Esther','age' => 6],['name' => 'Paul','age' => 9]]], ['id' => 3,'name' => 'Mike','fname' => 'Smith','children' =>[['name' => 'Sara','age' => 6],['name' => 'Fred','age' => 9]]]]));
+   * \bbn\x::dump(\bbn\x::make_tree([['id' => 1,'name' => 'Andrew','fname' => 'Williams','children' =>[['name' => 'Emma','age' => 6],['name' => 'Giorgio','age' => 9]]], ['id' => 2,'name' => 'Albert','fname' => 'Taylor','children' =>[['name' => 'Esther','age' => 6],['name' => 'Paul','age' => 9]]], ['id' => 3,'name' => 'Mike','fname' => 'Smith','children' =>[['name' => 'Sara','age' => 6],['name' => 'Fred','age' => 9]]]]));
    * /* string
    *    0
    *      id: 1
    *      name: Andrew
    *      fname: Williams
-   *      children
+   *      children:
    *        0
    *          name: Emma
    *          age: 6
@@ -1188,7 +1198,7 @@ class x
    * Adapted from http://us3.php.net/manual/en/function.fputcsv.php#87120
    *
    * ```php
-   *  bbn\x::dump(bbn\x::from_csv(
+   *  \bbn\x::dump(\bbn\x::from_csv(
    *      '"141";"10/11/2002";"350.00";"1311742251"
    *      "142";"12/12/2002";"349.00";"1311742258"'
    *  ));
@@ -1218,7 +1228,7 @@ class x
    * Adapted from http://us3.php.net/manual/en/function.fputcsv.php#87120
    *
    * ```php
-   * bbn\x::dump(bbn\x::to_csv([["John", "Mike", "David", "Clara"],["White", "Red", "Green", "Blue"]]));
+   * \bbn\x::dump(\bbn\x::to_csv([["John", "Mike", "David", "Clara"],["White", "Red", "Green", "Blue"]]));
    * /* string  John;Mike;David;Clara
    *            White;Red;Green;Blue
    * ```

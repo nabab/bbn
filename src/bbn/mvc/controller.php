@@ -48,6 +48,11 @@ class controller implements api{
      * @var null|string
      */
     $file,
+    /**
+     * The full path to the root directory.
+     * @var null|string
+     */
+    $root,
 		/**
 		 * The checkers files (with full path)
 		 * If any they will be checked before the controller
@@ -116,10 +121,11 @@ class controller implements api{
 	}
 
 	public function reset(array $info, $data = false){
-    if ( defined('BBN_CUR_PATH') && isset($info['mode'], $info['path'], $info['file'], $info['request']) ) {
+    if ( defined('BBN_CUR_PATH') && isset($info['mode'], $info['path'], $info['file'], $info['request'], $info['root']) ) {
       $this->path = $info['path'];
       $this->request = $info['request'];
       $this->file = $info['file'];
+      $this->root = $info['root'];
       $this->arguments = $info['args'];
       $this->checkers = $info['checkers'];
       $this->mode = $info['mode'];
@@ -168,20 +174,31 @@ class controller implements api{
 			'dir' => $this->say_dir(),
 			'local_path' => $this->say_local_path(),
 			'local_route' => $this->say_local_route(),
-			'path' => $this->say_path(),
+      'path' => $this->say_path(),
+      'root' => $this->say_root(),
 			'route' => $this->say_route()
 		];
 	}
 
-	/**
-	 * Returns the current controller's file's name.
-	 *
-	 * @return string
-	 */
-	public function say_controller()
-	{
-		return $this->file;
-	}
+  /**
+   * Returns the current controller's root drrectory.
+   *
+   * @return string
+   */
+  public function say_root()
+  {
+    return $this->root;
+  }
+
+  /**
+   * Returns the current controller's file's name.
+   *
+   * @return string
+   */
+  public function say_controller()
+  {
+    return $this->file;
+  }
 
   /**
    * Returns the current controller's path.
@@ -968,5 +985,19 @@ class controller implements api{
 	public function get_result(){
 		return $this->obj;
 	}
+
+  public function init_locale($locale, $domain){
+    putenv('LANG='.$locale);
+    setlocale(LC_ALL, '');
+    setlocale(LC_MESSAGES,$locale);
+    setlocale(LC_CTYPE,$locale);
+    //$domains = glob($root.'/'.$locale.'/LC_MESSAGES/messages-*.mo');
+    //$current = basename($domains[0],'.mo');
+    //$timestamp = preg_replace('{messages-}i','',$current);
+    bindtextdomain($domain, $this->say_root().'locale');
+    textdomain($domain);
+    return $this;
+  }
+
 
 }

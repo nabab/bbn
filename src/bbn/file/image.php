@@ -13,9 +13,10 @@ use bbn;
  * @author Thomas Nabet <thomas.nabet@gmail.com>
  * @copyright BBN Solutions
  * @since Apr 4, 2011, 23:23:55 +0000
- * @category  Files ressources
- * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @category Files ressources
+ * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @version 0.2r89
+ * @package bbn\file
  * @todo Deal specifically with SVG
  * @todo Add a static function and var to check for available libraries (Imagick/GD)
  */
@@ -100,9 +101,9 @@ public static function jpg2pdf($jpg, $pdf){
    * // (array) ["/home/data/test/Folder/image-0.jpg", "/home/data/test/Folder/image-1.jpg"],
 	 * ```
    *
-   * @param $pdf The path of pdf file to convert
-   * @param $jpg The destination filename. If empty is used the same path of pdf. Default: empty.
-   * @param $num The index page of pdf file to convert. If set 'all' all pages to convert. Default: 0(first page).
+   * @param string $pdf The path of pdf file to convert
+   * @param string $jpg The destination filename. If empty is used the same path of pdf. Default: empty.
+   * @param int $num The index page of pdf file to convert. If set 'all' all pages to convert. Default: 0(first page).
    * @return string|array
    */
   public static function pdf2jpg($pdf, $jpg='', $num=0){
@@ -382,7 +383,7 @@ public static function jpg2pdf($jpg, $pdf){
 	 * // (int) 190
    * ```
    *
-	 * @return int |false
+	 * @return int|false
 	 */
 	public function get_height()
 	{
@@ -413,11 +414,11 @@ public static function jpg2pdf($jpg, $pdf){
    * // (int) 205  100
    * ```
    *
-   * @param int $w The new width.
-   * @param int $h The new height.
+   * @param int|bool $w The new width.
+   * @param int|bool $h The new height.
    * @param boolean $crop If cropping the image. Default = false.
-   * @param int $max_w The maximum value for new width.
-   * @param int $max_h The maximum valure for new height.
+   * @param int|bool $max_w The maximum value for new width.
+   * @param int|bool $max_h The maximum valure for new height.
    * @return image
 	 */
 	public function resize($w=false, $h=false, $crop=false, $max_w=false, $max_h=false)
@@ -590,7 +591,7 @@ public static function jpg2pdf($jpg, $pdf){
    * @param integer $h the new height
    * @param integer $x X coordinate
    * @param integer $y Y coordinate
-   * @return image
+   * @return image|false
 	 */
 	public function crop($w, $h, $x, $y)
 	{
@@ -918,7 +919,7 @@ public static function jpg2pdf($jpg, $pdf){
    * $img->thumbs()->save(/home/data/test/image_test.jpg");
    * ```
    *
-	 * @return image
+	 * @return image|false
    */
 	public function thumbs($dest = '.', $sizes = [[false, 960], [false, 480], [false, 192], [false, 96], [false, 48]], $mask = '_%s', $crop = false, $bigger = false){
 		if ( $this->test() && is_dir($dest) ){

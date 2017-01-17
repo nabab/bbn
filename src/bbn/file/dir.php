@@ -1,33 +1,33 @@
 <?php
-/**
- * @package file
- */
+	/**
+		* @package file
+		*/
 namespace bbn\file;
 use bbn;
-/**
- * A class for dealing with directories (folders)
- *
- *
- * @author Thomas Nabet <thomas.nabet@gmail.com>
- * @copyright BBN Solutions
- * @since Apr 4, 2011, 23:23:55 +0000
- * @category  Files ressources
- * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @version 0.2r89
- */
+	/**
+		* A class for dealing with directories (folders)
+		*
+		*
+		* @author Thomas Nabet <thomas.nabet@gmail.com>
+		* @copyright BBN Solutions
+		* @since Apr 4, 2011, 23:23:55 +0000
+		* @category  Files ressources
+		* @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
+		* @version 0.2r89
+		*/
 class dir extends bbn\models\cls\basic
 {
 	/**
-	 * Replaces backslash with slash and deletes whitespace from the beginning and the end of a directory's path.
-	 *
-   * ```php
-   * bbn\x::dump(bbn\file\dir::clean("\home\data\test"));
-	 * // (string) "/home/data/test"
-   * ```
-   *
-	 * @param string $dir The directory path.
-   * @return string
-	 */
+		* Replaces backslash with slash and deletes whitespace from the beginning and the end of a directory's path.
+		*
+		* ```php
+		* \bbn\x::dump(\bbn\file\dir::clean("\home\data\test"));
+		* // (string) "/home/data/test"
+		* ```
+		*
+		* @param string $dir The directory path.
+		* @return string
+		*/
   public static function clean($dir){
     $new = trim(str_replace('\\', '/', $dir));
     if ( substr($new, -1) === '/' ){
@@ -37,19 +37,19 @@ class dir extends bbn\models\cls\basic
   }
 
 	/**
-	 * Checks if the given file(s) exists in the directory.
-   * Accepts unlimited arguments (files name).
-	 *
-	 * ```php
-	 * bbn\x::dump(bbn\file\dir::has_file("/home/data/test/file.txt"));
-	 * // (bool) true
-	 * bbn\x::dump(bbn\file\dir::has_file("/home/data/test", "file.txt", "doc.pdf"));
-	 * // (bool) true
-	 * ```
-	 *
-   * @param string $dir The directory's path.
-	 * @return bool
-	 */
+		* Checks if the given file(s) exists in the directory.
+		* Accepts unlimited arguments (files name).
+		*
+		* ```php
+		* \bbn\x::dump(\bbn\file\dir::has_file("/home/data/test/file.txt"));
+		* // (bool) true
+		* \bbn\x::dump(\bbn\file\dir::has_file("/home/data/test", "file.txt", "doc.pdf"));
+		* // (bool) true
+		* ```
+		*
+		* @param string $dir The directory's path.
+		* @return bool
+		*/
 	public static function has_file($dir)
 	{
     $dir = self::clean($dir);
@@ -64,37 +64,37 @@ class dir extends bbn\models\cls\basic
 	}
 
 	/**
-	 * If the directory's path starts with './' returns the path without './' else returns the complete path.
-	 *
-   * ```php
-   * bbn\x::dump(bbn\file\dir::cur("./home/data/test/"));
-	 * // (string) "home/data/test/"
-   * bbn\x::dump(bbn\file\dir::cur("/home/data/test/"));
-	 * // (string) "/home/data/test/"
-   * ```
-   *
-	 * @param string $dir The directory path.
-   * @return string
-	 */
+		* If the directory's path starts with './' returns the path without './' else returns the complete path.
+		*
+		* ```php
+		* \bbn\x::dump(\bbn\file\dir::cur("./home/data/test/"));
+		* // (string) "home/data/test/"
+		* \bbn\x::dump(\bbn\file\dir::cur("/home/data/test/"));
+		* // (string) "/home/data/test/"
+		* ```
+		*
+		* @param string $dir The directory path.
+		* @return string
+		*/
   public static function cur($dir)
   {
     return strpos($dir, './') === 0 ? substr($dir, 2) : $dir;
   }
 
 	/**
-	 * Return an array of directories contained in the given directory.
-	 * It will return directories' full path.
-	 * @todo vedere il parametro $hidden non mi funziona
-	 *
-   * ```php
-   * bbn\x::dump(bbn\file\dir::get_dirs("C:\Docs\Test"));
-   * // (array) ['C:\DocsTest\test1', 'C:\DocsTest\test2', 'C:\DocsTest\test3']
-   * ```
-	 *
-   * @param string $dir The directory's path.
-   * @param bool $hidden If true return the hidden directories' path
-	 * @return array|false
-	 */
+		* Return an array of directories contained in the given directory.
+		* It will return directories' full path.
+		* @todo vedere il parametro $hidden non mi funziona
+		*
+		* ```php
+		* \bbn\x::dump(\bbn\file\dir::get_dirs("C:\Docs\Test"));
+		* // (array) ['C:\DocsTest\test1', 'C:\DocsTest\test2', 'C:\DocsTest\test3']
+		* ```
+		*
+		* @param string $dir The directory's path.
+		* @param bool $hidden If true return the hidden directories' path
+		* @return array|false
+		*/
 	public static function get_dirs($dir, $hidden = false){
     $dir = self::clean($dir);
 		if ( is_dir($dir) && ((substr(basename($dir), 0, 1) !== '.') || $hidden) ){
@@ -114,25 +114,25 @@ class dir extends bbn\models\cls\basic
 	}
 
 	/**
-	 * Return an array of files contained in the given directory.
-	 * Return the full path of files.
-	 *
-   * ```php
-   * bbn\x::dump(bbn\file\dir::get_files("/home/Docs/Test"));
-	 * // (array) ['/home/Docs/Test/file.txt']
-	 * bbn\x::dump(bbn\file\dir::get_files("/home/Docs/Test",0,1));
-	 * // (array) ['/home/Docs/Test/file.txt', '/home/Docs/Test/.doc.pdf']
-   * bbn\x::dump(bbn\file\dir::get_files("/home/Docs/Test", 1));
-	 * // (array) ['/home/Docs/Test/folder', '/home/Docs/Test/file.txt']
-	 * bbn\x::dump(bbn\file\dir::get_files("/home/Docs/Test", 1,1));
-	 * // (array) ['/home/Docs/Test/folder', '/home/Docs/Test/.folder_test','/home/Docs/Test/file.txt', '/home/Docs/Test/.doc.pdf']
-   * ```
-   *
-	 * @param string $dir The directory's path.
-	 * @param bool $including_dirs If set to true it will also return the folders contained in the given directory.
-   * @param bool $hidden If set to true will also return the hidden files contained the directory
-	 * @return array|false
-	 */
+		* Returns an array of files contained in the given directory.
+		* Returns the full path of files.
+		*
+		* ```php
+		* \bbn\x::dump(\bbn\file\dir::get_files("/home/Docs/Test"));
+		* // (array) ['/home/Docs/Test/file.txt']
+		* \bbn\x::dump(\bbn\file\dir::get_files("/home/Docs/Test",0,1));
+		* // (array) ['/home/Docs/Test/file.txt', '/home/Docs/Test/.doc.pdf']
+		* \bbn\x::dump(\bbn\file\dir::get_files("/home/Docs/Test", 1));
+		* // (array) ['/home/Docs/Test/folder', '/home/Docs/Test/file.txt']
+		* \bbn\x::dump(\bbn\file\dir::get_files("/home/Docs/Test", 1,1));
+		* // (array) ['/home/Docs/Test/folder', '/home/Docs/Test/.folder_test','/home/Docs/Test/file.txt', '/home/Docs/Test/.doc.pdf']
+		* ```
+		*
+		* @param string $dir The directory's path.
+		* @param bool $including_dirs If set to true it will also returns the folders contained in the given directory.
+		* @param bool $hidden If set to true will also returns the hidden files contained the directory
+		* @return array|false
+		*/
 	public static function get_files($dir, $including_dirs = false, $hidden = false)
 	{
     $dir = self::clean($dir);
@@ -167,21 +167,21 @@ class dir extends bbn\models\cls\basic
 	}
 
 	/**
-	 * Deletes the given directory and all its content.
-	 *
-	 * ```php
-   * bbn\x::dump(bbn\file\dir::delete('/home/Docs/Test/')
-	 * // (bool) true
-	 * bbn\x::dump(bbn\file\dir::delete('/home/Docs/Test', 0);
-	 * // (bool) false
-	 * bbn\x::dump(bbn\file\dir::delete('/home/Docs/Test/file.txt');
-	 * // (bool) false
-   * ```
-   *
-	 * @param string $dir The directory path's.
-	 * @param bool $full If set to '0' will delete only the content of the directory. Default: "1".
-   * @return bool
-	 */
+		* Deletes the given directory and all its content.
+		*
+		* ```php
+		* \bbn\x::dump(\bbn\file\dir::delete('/home/Docs/Test/')
+		* // (bool) true
+		* \bbn\x::dump(\bbn\file\dir::delete('/home/Docs/Test', 0);
+		* // (bool) false
+		* \bbn\x::dump(\bbn\file\dir::delete('/home/Docs/Test/file.txt');
+		* // (bool) false
+		* ```
+		*
+		* @param string $dir The directory path's.
+		* @param bool $full If set to '0' will delete only the content of the directory. Default: "1".
+		* @return bool
+ 	*/
 	public static function delete($dir, $full = 1)
 	{
     $dir = self::clean($dir);
@@ -200,32 +200,30 @@ class dir extends bbn\models\cls\basic
     }
 		return false;
 	}
-
-  /**
-   * Return an array with all the content of the given directory.
-	 *
-	 * @todo check the default value for $hidden
-	 *
-	 * ```php
-   * bbn\x::dump(bbn\file\dir::scan("/home/data/test"));
-	 * // (array) ["/home/data/test/Folder", "/home/data/test/Folder_test/image.png"]
-	 * bbn\x::dump(bbn\file\dir::scan("/home/data/test", "", true));
-	 * // (array) ["/home/data/test/Folder", "/home/data/test/Folder_test/image.png", "/home/data/test/.doc.pdf"]
-	 * bbn\x::dump(bbn\file\dir::scan("/home/data/test", "dir"));
-	 * // (array) ["/home/data/test/Folder", "/home/data/test/Folder_test"]
-	 * bbn\x::dump(bbn\file\dir::scan("/home/data/test", "file"));
-	 * // (array) ["/home/data/test/Folder_test/image.png"]
-	 * bbn\x::dump(bbn\file\dir::scan("/home/data/test", "file", true));
-	 * // (array) ["/home/data/test/Folder_test/image.png", "/home/data/test/Folder/.doc.pdf"]
-	 * ```
-   *
-   * @param string $dir The directory's path.
-   * @param string $type The type or the extension of item to return ('file', 'dir', 'php', default is both)
-	 * @param bool $hidden If set to true will include the hidden files/directories in the result
-   * @return array
-   */
-	 public static function scan($dir, $type = null, $hidden = false)
-	 {
+	/**
+		* Returns an array with all the content of the given directory.
+		*
+		* @todo check the default value for $hidden
+		*
+		* ```php
+		* \bbn\x::dump(\bbn\file\dir::scan("/home/data/test"));
+		* // (array) ["/home/data/test/Folder", "/home/data/test/Folder_test/image.png"]
+		* \bbn\x::dump(\bbn\file\dir::scan("/home/data/test", "", true));
+		* // (array) ["/home/data/test/Folder", "/home/data/test/Folder_test/image.png", "/home/data/test/.doc.pdf"]
+		* \bbn\x::dump(\bbn\file\dir::scan("/home/data/test", "dir"));
+		* // (array) ["/home/data/test/Folder", "/home/data/test/Folder_test"]
+		* \bbn\x::dump(\bbn\file\dir::scan("/home/data/test", "file"));
+		* // (array) ["/home/data/test/Folder_test/image.png"]
+		* \bbn\x::dump(\bbn\file\dir::scan("/home/data/test", "file", true));
+		* // (array) ["/home/data/test/Folder_test/image.png", "/home/data/test/Folder/.doc.pdf"]
+		* ```
+		*
+		* @param string $dir The directory's path.
+		* @param string $type The type or the extension of item to return ('file', 'dir', 'php', default is both)
+		* @param bool $hidden If set to true will include the hidden files/directories in the result
+		* @return array
+		*/
+	 public static function scan($dir, $type = null, $hidden = false){
 	   $all = [];
 	   $dir = self::clean($dir);
 	   $dirs = self::get_dirs($dir);
@@ -255,73 +253,73 @@ class dir extends bbn\models\cls\basic
 	   return $all;
 	 }
 
-  /**
-   * Return an array of indexed arrays with the 'name' of the file/folder contained in the given directory, the 'mtime', and the 'date' of creation the file/folder.
-	 *
-	 * ```php
-   * bbn\x::dump(bbn\file\dir::mscan("/home/data/test"));
-	 * /* (array)
-	 * [
-	 *  [
-	 *    "name"  =>  "/home/data/test/Folder",
-	 *    "mtime"  =>  1480422173,
-	 *    "date"  =>  "2016-11-29  13:22:53",
-	 *  ],
-	 *	[
-	 *    "name"  =>  "/home/data/test/Folder_test",
-	 *    "mtime"  =>  1480422173,
-	 *    "date"  =>  "2016-11-29  13:22:53",
-	 *  ],
-	 *  [
-	 *	  "name"  =>  "/home/data/test/Folder_test/image.png",
-	 *    "mtime"  =>  1480418947,
-	 *    "date"  =>  "2016-11-29  12:29:07",
-	 *  ]
-	 * ]
-	 * bbn\x::dump(bbn\file\dir::mscan("/home/data/test", "dir"));
-	 * /* (array)
-	 * [
-	 *  [
-	 *    "name"  =>  "/home/data/test/Folder",
-	 *    "mtime"  =>  1480422173,
-	 *    "date"  =>  "2016-11-29  13:22:53",
-	 *  ],
-	 *	[
-	 *    "name"  =>  "/home/data/test/Folder_test",
-	 *    "mtime"  =>  1480422173,
-	 *    "date"  =>  "2016-11-29  13:22:53",
-	 *  ]
-	 * ]
-	 * bbn\x::dump(bbn\file\dir::mscan("/home/data/test", "file"));
-	 * /* (array)
-	 * [
-	 *  [
-	 *	  "name"  =>  "/home/data/test/Folder_test/image.png",
-	 *    "mtime"  =>  1480418947,
-	 *    "date"  =>  "2016-11-29  12:29:07",
-	 *  ]
-	 * ]
-	 * bbn\x::dump(bbn\file\dir::mscan("/home/data/test", "file",1));
-	 * /* (array)
-	 * [
-	 *  [
-	 *	  "name"  =>  "/home/data/test/Folder_test/image.png",
-	 *    "mtime"  =>  1480418947,
-	 *    "date"  =>  "2016-11-29  12:29:07",
-	 *  ],
-	 * 	[
-	 *	  "name"  =>  "/home/data/test/Folder/.doc.pdf",
-	 *    "mtime"  =>  1480418947,
-	 *    "date"  =>  "2016-11-29  12:29:07",
-	 *  ]
-	 * ]
-	 * ```
-	 *
-   * @param string $dir The directory's path
-   * @param string $type The type or the extension of item to return ('file', 'dir', 'php', default is both)
-	 * @param bool $hidden If set to true will also return the hidden files/folders contained in the given directory. Default=false
-   * @return array
-   */
+	/**
+		* Returns an array of indexed arrays with the 'name' of the file/folder contained in the given directory, the 'mtime', and the 'date' of creation the file/folder.
+		*
+		* ```php
+		* \bbn\x::dump(\bbn\file\dir::mscan("/home/data/test"));
+		* /* (array)
+		* [
+		*  [
+		*    "name"  =>  "/home/data/test/Folder",
+		*    "mtime"  =>  1480422173,
+		*    "date"  =>  "2016-11-29  13:22:53",
+		*  ],
+		*	[
+		*    "name"  =>  "/home/data/test/Folder_test",
+		*    "mtime"  =>  1480422173,
+		*    "date"  =>  "2016-11-29  13:22:53",
+		*  ],
+		*  [
+		*	  "name"  =>  "/home/data/test/Folder_test/image.png",
+		*    "mtime"  =>  1480418947,
+		*    "date"  =>  "2016-11-29  12:29:07",
+		*  ]
+		* ]
+		* \bbn\x::dump(\bbn\file\dir::mscan("/home/data/test", "dir"));
+		* /* (array)
+		* [
+		*  [
+		*    "name"  =>  "/home/data/test/Folder",
+		*    "mtime"  =>  1480422173,
+		*    "date"  =>  "2016-11-29  13:22:53",
+		*  ],
+		*	[
+		*    "name"  =>  "/home/data/test/Folder_test",
+		*    "mtime"  =>  1480422173,
+		*    "date"  =>  "2016-11-29  13:22:53",
+		*  ]
+		* ]
+		* \bbn\x::dump(\bbn\file\dir::mscan("/home/data/test", "file"));
+		* /* (array)
+		* [
+		*  [
+		*	  "name"  =>  "/home/data/test/Folder_test/image.png",
+		*    "mtime"  =>  1480418947,
+		*    "date"  =>  "2016-11-29  12:29:07",
+		*  ]
+		* ]
+		* \bbn\x::dump(\bbn\file\dir::mscan("/home/data/test", "file",1));
+		* /* (array)
+		* [
+		*  [
+		*	  "name"  =>  "/home/data/test/Folder_test/image.png",
+		*    "mtime"  =>  1480418947,
+		*    "date"  =>  "2016-11-29  12:29:07",
+		*  ],
+		* 	[
+		*	  "name"  =>  "/home/data/test/Folder/.doc.pdf",
+		*    "mtime"  =>  1480418947,
+		*    "date"  =>  "2016-11-29  12:29:07",
+		*  ]
+		* ]
+		* ```
+		*
+		* @param string $dir The directory's path
+		* @param string $type The type or the extension of item to return ('file', 'dir', 'php', default is both)
+		* @param bool $hidden If set to true will also return the hidden files/folders contained in the given directory. Default=false
+		* @return array
+		*/
 	 public static function mscan($dir, $type = null, $hidden = false){
 	   if ( $all = self::scan($dir, $type, $hidden) ){
 	     $res = [];
@@ -333,84 +331,84 @@ class dir extends bbn\models\cls\basic
 	   }
     return [];
    }
-  /**
-   * Return an array with the tree of the folder's content.
-	 *
-	 * ```php
-   * bbn\x::dump(bbn\file\dir::get_tree("/home/data/test"));
-   * /* (array)
-	 * [
-   *  [
-   *   "name"  =>  "/home/data/test/Folder",
-   *   "type"  =>  "dir",
-   *   "num_children"  =>  0,
-   *   "items"  =>  [],
-   *  ],
-   *  [
-   *   "name"  =>  "/home/data/test/Folder_test",
-   *   "type"  =>  "dir",
-   *   "num_children"  =>  1,
-   *   "items"  =>  [
-   *                  [
-   *                    "name"  =>  "/home/data/test/Folder_test/image.png",
-   *                    "type"  =>  "file",
-   *                    "ext"  =>  "png",
-   *                  ],
-   *                ],
-   *  ],
-   * ]
-	 * bbn\x::dump(bbn\file\dir::get_tree("/home/data/test", true) );
-	 * /* (array)
-	 * [
-   *   [
-   *     "name"  =>  "/home/data/test/Folder",
-   *     "type"  =>  "dir",
-   *     "num_children"  =>  0,
-   *     "items"  =>  [],
-   *   ],
-   *   [
-   *     "name"  =>  "/home/data/test/Folder_test",
-   *     "type"  =>  "dir",
-   *     "num_children"  =>  0,
-   *     "items"  =>  [],
-   *   ],
-	 * ]
-	 * bbn\x::dump(  bbn\file\dir::get_tree("/home/data/test", false, false, true) );
-	 * /* (array)
-	 * [
-	 *   [
-	 *     "name"  =>  "/home/data/test/Folder",
-	 *     "type"  =>  "dir",
-	 *     "num_children"  =>  1,
-	 *     "items"  =>  [
-	 *                    [
-	 *                      "name"  =>  "/home/data/test/Folder/.doc.pdf",
-	 *                      "type"  =>  "file",
-	 *                      "ext"  =>  "pdf",
-	 *                    ],
-   *                  ],
-   *      ],
-   *      [
-   *        "name"  =>  "/home/data/test/Folder_test",
-   *        "type"  =>  "dir",
-   *        "num_children"  =>  1,
-   *        "items"  =>  [
-   *                       [
-   *                         "name"  =>  "/home/data/test/Folder_test/image.png",
-   *                         "type"  =>  "file",
-   *                         "ext"  =>  "png",
-   *                       ],
-   *                     ],
-   *    ],
-   * ]
-	 * ```
-   *
-   * @param string $dir The directory's path.
-   * @param bool $only_dir If set to true will just return the folder(s), if false will include in the resulr also the file(s). Default = false.
-	 * @param string $filter da vedere
-	 * @param bool $hidden If set to true will also return the hidden file(s)/folder(s)
-	 * @return array
-   */
+	/**
+		* Return an array with the tree of the folder's content.
+		*
+		* ```php
+		* \bbn\x::dump(\bbn\file\dir::get_tree("/home/data/test"));
+		* /* (array)
+		* [
+		*  [
+		*   "name"  =>  "/home/data/test/Folder",
+		*   "type"  =>  "dir",
+		*   "num_children"  =>  0,
+		*   "items"  =>  [],
+		*  ],
+		*  [
+		*   "name"  =>  "/home/data/test/Folder_test",
+		*   "type"  =>  "dir",
+		*   "num_children"  =>  1,
+		*   "items"  =>  [
+		*                  [
+		*                    "name"  =>  "/home/data/test/Folder_test/image.png",
+		*                    "type"  =>  "file",
+		*                    "ext"  =>  "png",
+		*                  ],
+		*                ],
+		*  ],
+		* ]
+		* \bbn\x::dump(\bbn\file\dir::get_tree("/home/data/test", true) );
+		* /* (array)
+		* [
+		*   [
+		*     "name"  =>  "/home/data/test/Folder",
+		*     "type"  =>  "dir",
+		*     "num_children"  =>  0,
+		*     "items"  =>  [],
+		*   ],
+		*   [
+		*     "name"  =>  "/home/data/test/Folder_test",
+		*     "type"  =>  "dir",
+		*     "num_children"  =>  0,
+		*     "items"  =>  [],
+		*   ],
+		* ]
+		* \bbn\x::dump(\bbn\file\dir::get_tree("/home/data/test", false, false, true) );
+		* /* (array)
+		* [
+		*   [
+		*     "name"  =>  "/home/data/test/Folder",
+		*     "type"  =>  "dir",
+		*     "num_children"  =>  1,
+		*     "items"  =>  [
+		*                    [
+		*                      "name"  =>  "/home/data/test/Folder/.doc.pdf",
+		*                      "type"  =>  "file",
+		*                      "ext"  =>  "pdf",
+		*                    ],
+		*                  ],
+		*      ],
+		*      [
+		*        "name"  =>  "/home/data/test/Folder_test",
+		*        "type"  =>  "dir",
+		*        "num_children"  =>  1,
+		*        "items"  =>  [
+		*                       [
+		*                         "name"  =>  "/home/data/test/Folder_test/image.png",
+		*                         "type"  =>  "file",
+		*                         "ext"  =>  "png",
+		*                       ],
+		*                     ],
+		*    ],
+		* ]
+		* ```
+		*
+		* @param string $dir The directory's path.
+		* @param bool $only_dir If set to true will just return the folder(s), if false will include in the resulr also the file(s). Default = false.
+		* @param string $filter da vedere
+		* @param bool $hidden If set to true will also return the hidden file(s)/folder(s)
+		* @return array
+		*/
   public static function get_tree($dir, $only_dir = false, $filter = false, $hidden = false)
   {
     $r = [];
@@ -456,18 +454,18 @@ class dir extends bbn\models\cls\basic
     return $r;
   }
 
-  /**
-	 * Creates a folder with the given path.
-	 *
-	 * ```php
-   * bbn\x::dump(bbn\file\dir::create_path("/home/data/test/New"));
-	 * \\ (string) "/home/data/test/New"
-	 * ```
-   *
-	 * @param string $dir The new directory's path.
-	 * @param bool $chmod If set to true the user won't have the permissions to view the content of the folder created
-	 * @return string|false
-	 */
+	/**
+		* Creates a folder with the given path.
+		*
+		* ```php
+		* \bbn\x::dump(\bbn\file\dir::create_path("/home/data/test/New"));
+		* \\ (string) "/home/data/test/New"
+		* ```
+		*
+		* @param string $dir The new directory's path.
+		* @param bool $chmod If set to true the user won't have the permissions to view the content of the folder created
+		* @return string|false
+		*/
 	public static function create_path($dir, $chmod=false)
 	{
     if ( !$dir || !is_string($dir) ){
@@ -498,25 +496,25 @@ class dir extends bbn\models\cls\basic
 	}
 
 	/**
-	 * Moves a file or directory to a new location
-   *
-	 * ```php
-   * bbn\x::dump(bbn\file\dir::move("/home/data/test/Folder/image.png","/home/data/test/Folder_test/image.png"));
-	 * \\ (string) "image.png"
-	 * bbn\x::dump(bbn\file\dir::move("/home/data/test/Folder/image.png","/home/data/test/Folder_test/Intro/image.png"));
-	 * \\ (string) "image.png"
-	 * bbn\x::dump(bbn\file\dir::move("/home/data/test/Folder","/home/data/test/Folder_test", true));
-	 * \\ (string) "Folder_test"
-	 * bbn\x::dump(bbn\file\dir::move("/home/data/test/Folder","/home/data/test/Folder_test", "_n", 3));
-	 * \\ (string) "Folder_test_n001"
-	 * ```
-	 *
-	 * @param string $orig The path of the file to move
-   * @param string $dest The full name of the destination (including basename)
-   * @param string | true $st If in the destination folder alredy exists a file with the same name of the file to move it will rename the file adding '_v' (default). If 'string' will change the file name with the given string. If $st=true it will overwrite the file/folder.
-   * @param int $length The number of characters to use for the revision number; will be zerofilled
-   * @return string the (new or not) name of file/folder moved  or false
-	 */
+		* Moves a file or directory to a new location
+		*
+		* ```php
+		* \bbn\x::dump(\bbn\file\dir::move("/home/data/test/Folder/image.png","/home/data/test/Folder_test/image.png"));
+		* \\ (string) "image.png"
+		* \bbn\x::dump(\bbn\file\dir::move("/home/data/test/Folder/image.png","/home/data/test/Folder_test/Intro/image.png"));
+		* \\ (string) "image.png"
+		* \bbn\x::dump(\bbn\file\dir::move("/home/data/test/Folder","/home/data/test/Folder_test", true));
+		* \\ (string) "Folder_test"
+		* \bbn\x::dump(\bbn\file\dir::move("/home/data/test/Folder","/home/data/test/Folder_test", "_n", 3));
+		* \\ (string) "Folder_test_n001"
+		* ```
+		*
+		* @param string $orig The path of the file to move
+		* @param string $dest The full name of the destination (including basename)
+		* @param string | true $st If in the destination folder alredy exists a file with the same name of the file to move it will rename the file adding '_v' (default). If 'string' will change the file name with the given string. If $st=true it will overwrite the file/folder.
+		* @param int $length The number of characters to use for the revision number; will be zerofilled
+		* @return string the (new or not) name of file/folder moved  or false
+		*/
 	public static function move($orig, $dest, $st = '_v', $length = 0)
 	{
     if ( file_exists($orig) && self::create_path(dirname($dest)) ){
@@ -556,17 +554,17 @@ class dir extends bbn\models\cls\basic
     return false;
 	}
 	/**
-   * Will move the content of the given folder to a new destination. Doesn't move the hidden files.
-	 *
-	 * ```php
-   * bbn\x::dump(bbn\file\dir::copy("/home/data/test/Folder","/home/data/test/Folder_test"));
-	 * \\ (bool) 1
-	 * ```
-	 *
-	 * @param string $src The path of the files to move
-	 * @param string $dst The new destination of files
- 	 * @return bool
-	 */
+		* Will move the content of the given folder to a new destination. Doesn't move the hidden files.
+		*
+		* ```php
+		* \bbn\x::dump(\bbn\file\dir::copy("/home/data/test/Folder","/home/data/test/Folder_test"));
+		* \\ (bool) 1
+		* ```
+		*
+		* @param string $src The path of the files to move
+		* @param string $dst The new destination of files
+		* @return bool
+		*/
   public static function copy($src, $dst) {
     if ( is_file($src) ){
       return copy($src, $dst);
