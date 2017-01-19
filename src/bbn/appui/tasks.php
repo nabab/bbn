@@ -14,6 +14,8 @@ class tasks extends bbn\models\cls\db{
   use bbn\models\tts\references,
       bbn\models\tts\optional;
 
+  private $columns;
+
   protected
     $template = false,
     $id_user,
@@ -42,10 +44,10 @@ class tasks extends bbn\models\cls\db{
       $cats = self::get_options_tree('cats');
       $res = [];
       $opt->map(function ($a) use (&$res){
-        array_push($res, [
+        $res[] = [
           'value' => $a['id'],
           'text' => $a['text']
-        ]);
+        ];
         $a['is_parent'] = !empty($a['items']);
         if ( $a['is_parent'] ){
           $a['expanded'] = true;
@@ -76,7 +78,7 @@ class tasks extends bbn\models\cls\db{
   }
 
   public function __construct(bbn\db $db){
-    $this->db = $db;
+    parent::__construct($db);
     if ( $user = bbn\user::get_instance() ){
       $this->user = $user->get_name();
       $this->id_user = $user->get_id();

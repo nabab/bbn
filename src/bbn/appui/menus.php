@@ -23,7 +23,7 @@ class menus extends bbn\models\cls\basic{
   public function __construct(bbn\appui\options $o, $r){
     $this->options = $o;
     $this->cache_init();
-    self::optional_init($this);
+    self::optional_init();
   }
 
   /**

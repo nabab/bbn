@@ -49,7 +49,7 @@ class permissions extends bbn\models\cls\basic
     $this->pref = bbn\user\preferences::get_instance();
     $this->user = bbn\user::get_instance();
     self::retriever_init($this);
-    self::optional_init($this);
+    self::optional_init();
 	}
 
   public function set_current_permission(int $current){

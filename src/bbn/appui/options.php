@@ -410,24 +410,36 @@ class options extends bbn\models\cls\db
     }
     // So the target has always the same name
     $local_cache_name = implode('-', $args);
+    if ( in_array('cotisations', $args) ){
+      \bbn\x::log([$args, $local_cache_name]);
+    }
     /** @var int|false $tmp */
     if ( ($tmp = $this->_get_local_cache($local_cache_name)) !== false ){
       return $tmp;
     }
     // Using the code(s) as argument(s) from now
     $id_parent = array_pop($args);
+    /** @todo WTF?? */
     // The ID is already given
     if ( !count($args) ){
+      \bbn\x::log("How the f*** do we end with only one parameter? IE $id_parent", "options_issues");
       return $id_parent;
     }
     $c =& $this->class_cfg;
+    $true_code = array_pop($args);
+    $local_cache_name2 = $true_code.'-'.$id_parent;
+    if ( ($tmp = $this->_get_local_cache($local_cache_name2)) !== false ){
+      $args[] = $tmp;
+      return $this->from_code($args);
+    }
+    /** @var int|false $tmp */
     if ( ($tmp = $this->db->select_one($c['table'], $c['arch']['options']['id'], [
         $c['arch']['options']['id_parent'] => $id_parent,
-        $c['arch']['options']['code'] => array_pop($args)
+        $c['arch']['options']['code'] => $true_code
       ])) !== false ){
-      $this->_set_local_cache($local_cache_name, $tmp);
+      $this->_set_local_cache($local_cache_name2, $tmp);
       if ( count($args) ){
-        array_push($args, $tmp);
+        $args[] = $tmp;
         return $this->from_code($args);
       }
       return $tmp;
@@ -669,6 +681,7 @@ class options extends bbn\models\cls\db
    */
   public function options($code = null){
     if ( bbn\str::is_integer($id = $this->from_code(func_get_args())) ){
+      //var_dump("MY ID: $id");
       if ( $r = $this->cache_get($id, __FUNCTION__) ){
         return $r;
       }

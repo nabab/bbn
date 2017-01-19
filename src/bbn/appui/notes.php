@@ -63,7 +63,7 @@ class notes extends bbn\models\cls\db
   public function __construct(bbn\db $db){
     parent::__construct($db);
     self::_init_class_cfg(self::$_defaults);
-    self::optional_init($this);
+    self::optional_init();
   }
 
   public function add_media($id_note, $content, $title = '', $type='file', $private = false){
