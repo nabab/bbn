@@ -80,7 +80,16 @@ class cache{
    * @return string
    */
   public static function make_hash($value){
-    return md5(serialize($value));
+    if ( is_object($value) || is_array($value) ){
+      $v = json_encode($value);
+    }
+    else{
+      $v = $value;
+    }
+    if ( isset($v) ){
+      return md5($v);
+    }
+    return false;
   }
 
   /**
@@ -180,7 +189,7 @@ class cache{
         case 'files':
           $file = self::_file($it, $this->path);
           if ( is_file($file) ){
-            $t = unserialize(file_get_contents($file));
+            $t = json_decode(file_get_contents($file), true);
             if ( !$t['expire'] || ($t['expire'] > time()) ){
               return true;
             }
@@ -331,7 +340,7 @@ class cache{
             'expire' => $ttl ? time() + $ttl : 0,
             'value' => $val
           ];
-          return file_put_contents($file, serialize($value)) ? true : false;
+          return file_put_contents($file, json_encode($value)) ? true : false;
       }
     }
   }
@@ -361,7 +370,7 @@ class cache{
         case 'files':
           $file = self::_file($it, $this->path);
           $t = file_get_contents($file);
-          return $t ? unserialize($t) : false;
+          return $t ? json_decode($t, true) : false;
       }
     }
     return false;
