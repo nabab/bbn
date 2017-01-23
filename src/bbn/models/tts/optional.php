@@ -36,7 +36,8 @@ trait optional
           die("Impossible to find the option appui for ".__CLASS__);
         }
       }
-      $cls = end(explode("\\", __CLASS__));
+      $tmp = explode("\\", __CLASS__);
+      $cls = end($tmp);
       self::$option_root_id = $opt->from_code($cls, BBN_APPUI);
       if ( !self::$option_root_id ){
         die("Impossible to find the option $cls for ".__CLASS__);
