@@ -25,7 +25,7 @@ class observer extends bbn\models\cls\cache
   }
 
   public function register($value, string $name, string $group = null){
-    if ( $this->has_session() && !empty($name) ){
+    if ( !empty($name) && $this->has_session() ){
       $hash = bbn\cache::make_hash($value);
       if ( $group ){
         $this->sess->set($hash, self::$sess_index, $group, $name);
