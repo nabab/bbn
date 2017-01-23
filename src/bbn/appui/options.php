@@ -405,8 +405,8 @@ class options extends bbn\models\cls\db
       return false;
     }
     // They must all have the same form at start with an id_parent as last argument
-    if ( !bbn\str::is_integer(last($args)) ){
-      array_push($args, $this->default);
+    if ( !bbn\str::is_integer(end($args)) ){
+      $args[] = $this->default;
     }
     // So the target has always the same name
     $local_cache_name = implode('-', $args);

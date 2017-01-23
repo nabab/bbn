@@ -113,7 +113,7 @@ class tree // extends object
                   height:"auto",
                   width:720,
                   "max-height":bbn.env.height-100
-                }).restyle().data("kendoWindow").title("Formulaire de saisie").center();
+                }).data("kendoWindow").title("Formulaire de saisie").center();
                }'));
 
       

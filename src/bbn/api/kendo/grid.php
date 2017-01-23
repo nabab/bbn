@@ -206,7 +206,7 @@ class grid // extends object
                   height:"auto",
                   width:720,
                   "max-height":bbn.env.height-100
-                }).restyle().data("kendoWindow").title("'.bbn\str::escape_dquotes($cfg['description']).'").center();
+                }).data("kendoWindow").title("'.bbn\str::escape_dquotes($cfg['description']).'").center();
                }'));
 
       
