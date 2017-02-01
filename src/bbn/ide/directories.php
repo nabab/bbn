@@ -759,7 +759,7 @@ class directories {
             $mode = $e['mode'];
           }
         }
-        if ( !is_file($real_file) ) {
+        if ( !is_file($real_file) ){
           $is_file = false;
           $this->error('Impossible to find the file ' . $real_file);
           return false;
@@ -784,7 +784,7 @@ class directories {
               $real_file = $root_path . $file;
               $mode = $e['mode'];
               $r['file'] = $real_file;
-              if ( !is_file($real_file) ) {
+              if ( !is_file($real_file) ){
                 $is_file = false;
                 $value = $e['default'];
               }
@@ -1248,7 +1248,7 @@ class directories {
         }
       }
 
-      if ( class_exists('\\ZipArchive') ) {
+      if ( class_exists('\\ZipArchive') ){
         $filezip = BBN_USER_PATH.'tmp/'.$name.'.zip';
         $zip = new \ZipArchive();
         if ( $err = $zip->open($filezip, \ZipArchive::OVERWRITE) ){
@@ -1278,8 +1278,8 @@ class directories {
                 return false;
               }
             }
-            if ( $zip->close() ) {
-              if ( !bbn\file\dir::delete(BBN_USER_PATH . 'tmp/' . $rnd, 1) ) {
+            if ( $zip->close() ){
+              if ( !bbn\file\dir::delete(BBN_USER_PATH . 'tmp/' . $rnd, 1) ){
                 $this->error("Impossible to delete the directory " . BBN_USER_PATH . 'tmp/' . $rnd);
                 return false;
               }
@@ -1411,7 +1411,7 @@ class directories {
             $this->error("Impossible to rename the $wtype: $s -> $d");
             return false;
           }
-          if ( is_file($s) ) {
+          if ( is_file($s) ){
             // Remove file's options
             $this->options->remove($this->options->from_code($this->real_to_id($s), $this->_files_pref()));
           }
@@ -1540,7 +1540,7 @@ class directories {
             $this->error("Impossible to rename the $wtype: $s -> $d");
             return false;
           }
-          if ( is_file($s) ) {
+          if ( is_file($s) ){
             // Remove file's options (preferences)
             $this->options->remove($this->options->from_code($this->real_to_id($s), $this->_files_pref()));
           }
@@ -1616,7 +1616,7 @@ class directories {
         }
       }
       // Internal route
-      if ( empty($f) ) {
+      if ( empty($f) ){
         $root_path = BBN_APP_PATH.'mvc/public/';
         if ( strpos($file, $root_path) === 0 ){
           // Remove root path
@@ -1664,7 +1664,7 @@ class directories {
         }
       }
       // Internal route
-      if ( empty($f) ) {
+      if ( empty($f) ){
         $root_path = BBN_APP_PATH.'mvc/public/';
         if ( strpos($file, $root_path) === 0 ){
           // Remove root path

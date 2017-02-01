@@ -69,7 +69,7 @@ class view{
 	public function get(array $data=null)
 	{
 		if ( $this->check() ){
-			if ( is_null($this->content) ) {
+			if ( is_null($this->content) ){
 				$this->content = file_get_contents($this->file);
 			}
 			if ( empty($this->content) ){

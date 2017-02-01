@@ -10,7 +10,7 @@ class template // extends object
     $ctrl,
     $prepath;
 
-  public function __construct(bbn\mvc\controller $ctrl, $prepath = '') {
+  public function __construct(bbn\mvc\controller $ctrl, $prepath = ''){
     $this->ctrl = $ctrl;
     $this->prepath = $prepath;
   }

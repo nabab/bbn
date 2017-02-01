@@ -144,13 +144,13 @@ class preferences extends bbn\models\cls\db
 				[ $this->class_cfg['cols']['id'] => $id ]
 			);
 		}
-		if ( isset($cfg[$this->class_cfg['cols']['cfg']]) && bbn\str::is_json($cfg[$this->class_cfg['cols']['cfg']]) ) {
+		if ( isset($cfg[$this->class_cfg['cols']['cfg']]) && bbn\str::is_json($cfg[$this->class_cfg['cols']['cfg']]) ){
 			$cfg = bbn\x::merge_arrays(json_decode($cfg[$this->class_cfg['cols']['cfg']], 1), $cfg);
 		}
 		$new = [];
 		if ( is_array($cfg) ){
-			foreach ( $cfg as $k => $v) {
-				if ( !in_array($k, $this->class_cfg['cols']) ) {
+			foreach ( $cfg as $k => $v){
+				if ( !in_array($k, $this->class_cfg['cols']) ){
 					$cfg[$k] = $v;
 					$new[$k] = $v;
 				}
@@ -304,7 +304,7 @@ class preferences extends bbn\models\cls\db
    * @return int
    */
   public function set(int $id_option, array $cfg, int $id_user = null, int $id_group = null){
-		if ( $id = $this->retrieve_id($id_option, $id_user, $id_group) ) {
+		if ( $id = $this->retrieve_id($id_option, $id_user, $id_group) ){
 			return $this->set_cfg($id, $cfg);
 		}
 		return $this->db->insert($this->class_cfg['table'], [
@@ -324,13 +324,13 @@ class preferences extends bbn\models\cls\db
     if ( !bbn\str::is_integer($id_option) ){
       $id_option = $this->from_path($id_option);
     }
-		if ( $id_group ) {
+		if ( $id_group ){
 			return $this->db->delete($this->class_cfg['table'], [
 				$this->class_cfg['cols']['id_option'] => $id_option,
 				$this->class_cfg['cols']['id_group'] => $id_group
 			]);
 		}
-		if ( $id_user || $this->id_user ) {
+		if ( $id_user || $this->id_user ){
 			return $this->db->delete($this->class_cfg['table'], [
 				$this->class_cfg['cols']['id_option'] => $id_option,
 				$this->class_cfg['cols']['id_user'] => $id_user ? $id_user : $this->id_user

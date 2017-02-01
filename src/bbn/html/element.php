@@ -239,7 +239,7 @@ class element
     if ( self::$validator->isValid() ){
       return 1;
     }
-    foreach ( self::$validator->getErrors() as $error ) {
+    foreach ( self::$validator->getErrors() as $error ){
       self::$error .= sprintf("[%s] %s",$error['property'], $error['message']);
       var_dump($cfg);
     }

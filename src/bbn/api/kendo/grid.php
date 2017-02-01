@@ -94,7 +94,7 @@ class grid // extends object
             if ( !isset($e['editor']) ){
               $input = $this->builder->input($e, 1);
               $sc = $input->ele_and_script();
-              $e['editor'] = new \Kendo\JavaScriptFunction('function(container, options) {
+              $e['editor'] = new \Kendo\JavaScriptFunction('function(container, options){
                 '.$sc[0].'.appendTo(container)'.$sc[1].'
               }');
             }

@@ -1161,7 +1161,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
           }
         }
         if ( !isset($this->queries[$hash]) ){
-          if ( $sequences = $this->parse_query($statement) ) {
+          if ( $sequences = $this->parse_query($statement) ){
             /* Or looking for question marks */
             preg_match_all('/(\?)/', $statement, $exp);
             $this->add_query(
@@ -1170,7 +1170,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
                 $sequences,
                 isset($exp[1]) && is_array($exp[1]) ? count($exp[1]) : 0,
                 $driver_options);
-            if ( isset($hash_sent) ) {
+            if ( isset($hash_sent) ){
               $this->queries[$hash_sent] = $hash;
             }
           }
@@ -1327,7 +1327,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public function new_id($table, $min = 1){
     $tab = $this->modelize($table);
-    if ( count($tab['keys']['PRIMARY']['columns']) !== 1 ) {
+    if ( count($tab['keys']['PRIMARY']['columns']) !== 1 ){
       die("Error! Unique numeric primary key doesn't exist");
     }
     else if (
@@ -1339,7 +1339,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       if ( $max >= mt_getrandmax() ){
         $max = mt_getrandmax();
       }
-      if (($max > 1) && $table = $this->tfn($table, 1)) {
+      if (($max > 1) && $table = $this->tfn($table, 1)){
         $i = 0;
         do {
           $id = mt_rand(1, $max);
@@ -1368,11 +1368,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public function next_id($table){
     $tab = $this->modelize($table);
-    if ( count($tab['keys']['PRIMARY']['columns']) !== 1 ) {
+    if ( count($tab['keys']['PRIMARY']['columns']) !== 1 ){
       die("Error! Unique numeric primary key doesn't exist");
     }
     if ( $id_field = $tab['keys']['PRIMARY']['columns'][0] ){
-      if ( $cur = (int)$this->get_one("SELECT MAX(".$this->escape($id_field).") FROM ".$this->escape($table)) ) {
+      if ( $cur = (int)$this->get_one("SELECT MAX(".$this->escape($id_field).") FROM ".$this->escape($table)) ){
         return $cur + 1;
       }
       return 1;
@@ -1761,7 +1761,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * ```php
    * \bbn\x::dump($db->get_obj("SELECT surname FROM table_users"));
    * /*
-   * (obj) {
+   * (obj){
    *       "name" => "Smith"
    *       }
    * ```
@@ -1780,7 +1780,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * ```php
    * \bbn\x::dump($db->get_object("SELECT name FROM table_users"));
    * /*
-   * (obj) {
+   * (obj){
    *       "name" => "John"
    *       }
    * ```

@@ -17,13 +17,13 @@ use bbn;
  * @todo Groups and hotlinks features
  * @todo Implement Cache for session requests' results?
  */
-if ( !defined('BBN_FINGERPRINT') ) {
+if ( !defined('BBN_FINGERPRINT') ){
   die('define BBN_FINGERPRINT');
 }
-if ( !defined('BBN_SESS_NAME') ) {
+if ( !defined('BBN_SESS_NAME') ){
   die('define BBN_SESS_NAME');
 }
-if ( !defined('BBN_SESS_LIFETIME') ) {
+if ( !defined('BBN_SESS_LIFETIME') ){
   die('define BBN_SESS_LIFETIME');
 }
 ini_set('session.gc_maxlifetime', BBN_SESS_LIFETIME);
@@ -41,6 +41,16 @@ class session
     $data,
     $id;
 
+  /**
+   * Gets a reference to the part of the data corresponding to an array of indexes
+   *
+   * ```php
+   * $this->_get_value(['index1', 'index2'])
+   * // Will return the content of $this->data['index1']['index2']
+   * ```
+   * @param $args
+   * @return null
+   */
   private function _get_value($args){
     if ( $this->id ){
       $var =& $this->data;

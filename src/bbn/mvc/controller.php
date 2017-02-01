@@ -58,7 +58,11 @@ class controller implements api{
 		 * If any they will be checked before the controller
 		 * @var null|string
 		 */
-		$checkers = [];
+		$checkers = [],
+    /**
+     * @var null|string If the controller is inside a plugin this property will be set to its name
+     */
+    $plugin;
 
   public
     /**
@@ -66,6 +70,10 @@ class controller implements api{
      * @var bbn\db
      */
     $db,
+    /**
+     * @var string The mode of the controller (dom, cli...), which will determine its route
+     */
+    $mode,
     /**
      * The data model
      * @var array
@@ -120,9 +128,10 @@ class controller implements api{
     $this->reset($files, $data);
 	}
 
-	public function reset(array $info, $data = false){
-    if ( defined('BBN_CUR_PATH') && isset($info['mode'], $info['path'], $info['file'], $info['request'], $info['root']) ) {
+  public function reset(array $info, $data = false){
+    if ( defined('BBN_CUR_PATH') && isset($info['mode'], $info['path'], $info['file'], $info['request'], $info['root']) ){
       $this->path = $info['path'];
+      $this->plugin = $info['plugin'];
       $this->request = $info['request'];
       $this->file = $info['file'];
       $this->root = $info['root'];
@@ -269,7 +278,14 @@ class controller implements api{
 		return false;
 	}
 
-	/**
+  /**
+   * @return mixed
+   */
+  public function say_plugin(){
+    return $this->plugin;
+  }
+
+  /**
 	 * This directly renders content with arbitrary values using the existing Mustache engine.
 	 *
 	 * @param string $view The view to be rendered
@@ -280,7 +296,7 @@ class controller implements api{
 		if ( empty($model) && $this->has_data() ){
 			$model = $this->data;
 		}
-		if ( is_string($view) ) {
+		if ( is_string($view) ){
 			return is_array($model) ? bbn\tpl::render($view, $model) : $view;
 		}
 		die(bbn\x::hdump("Problem with the template", $view, $this->path, $this->mode));
@@ -315,16 +331,20 @@ class controller implements api{
     return $this->mvc->has_plugin($plugin);
   }
 
-  public function is_plugin($plugin){
-    return $this->mvc->is_plugin($plugin);
+  public function is_plugin($plugin = null){
+    return $this->mvc->is_plugin($plugin ?: $this->plugin_name($this->plugin));
   }
 
-  public function plugin_path($plugin){
-    return $this->mvc->plugin_path($plugin);
+  public function plugin_path($plugin = null){
+    return $this->mvc->plugin_path($plugin ?: $this->plugin_name($this->plugin));
   }
 
-  public function plugin_url($plugin){
-    return $this->mvc->plugin_url($plugin);
+  public function plugin_url($plugin = null){
+    return $this->mvc->plugin_url($plugin ?: $this->plugin_name($this->plugin));
+  }
+
+  public function plugin_name($path = null){
+    return $this->mvc->plugin_name($path ?: $this->plugin);
   }
 
   /**
@@ -372,9 +392,19 @@ class controller implements api{
 	 * @return boolean
 	 */
 	private function control(){
-		if ( $this->file && is_null($this->is_controlled) ){
-      $ctrl = $this;
+		if ( $this->file && (null === $this->is_controlled) ){
       $ok = 1;
+      if ( $this->plugin ){
+        spl_autoload_register(function($class_name){
+          if ( strpos($class_name,'/') === false && strpos($class_name,'.') === false ){
+            $cls = explode('\\', $class_name);
+            $path = implode('/', $cls);
+            if ( file_exists($this->plugin_path().'lib/'.$path.'.php') ){
+              include_once($this->plugin_path().'lib/'.$path.'.php');
+            }
+          }
+        });
+      }
 			ob_start();
 			foreach ( $this->checkers as $appui_checker_file ){
 				// If a checker file returns false, the controller is not processed
@@ -470,7 +500,7 @@ class controller implements api{
    *
    * @param array|string $files
    * @param array $data
-   * @param boolean $encapsulated
+   * @param string $mode
    * @return string|false
    */
   public function get_view_group($files='', array $data=null, $mode = 'html'){
@@ -490,7 +520,7 @@ class controller implements api{
       }
       return $st;
     }
-    $this->error("Impossible to get files from get_view_group files argument empty");
+    $this->error('Impossible to get files from get_view_group files argument empty');
   }
 
   /**
@@ -512,12 +542,8 @@ class controller implements api{
 	 * @param string $path
 	 * @return string|false
 	 */
-	public function get_less($path='', $die = true)
-	{
-    if ( !class_exists('lessc') ){
-      die("No less class, check composer");
-    }
-    if ( $r = $this->get_view($path, 'css', $die) ) {
+	public function get_less($path=''){
+    if ( $r = $this->get_view($path, 'css', false) ){
       return '<style>' . \CssMin::minify($r) . '</style>';
     }
 	}
@@ -530,8 +556,7 @@ class controller implements api{
    * @param string $mode
    * @return string|false
    */
-  public function add_js()
-  {
+  public function add_js(){
     $args = func_get_args();
     $has_path = false;
     foreach ( $args as $i => $a ){
@@ -610,13 +635,13 @@ class controller implements api{
       $r['mode'] = $r['path'];
       unset($r['path']);
     }
-    if ( !isset($r['path']) ) {
+    if ( !isset($r['path']) ){
       $r['path'] = $this->path;
     }
     else if ( strpos($r['path'], './') === 0 ){
       $r['path'] = $this->say_dir().substr($r['path'], 1);
     }
-    if ( !isset($r['data']) ) {
+    if ( !isset($r['data']) ){
       $r['data'] = $this->data;
     }
     if ( !isset($r['die']) ){
@@ -635,7 +660,7 @@ class controller implements api{
 	public function get_view()
 	{
     $args = $this->get_arguments(func_get_args());
-		/*if ( !isset($args['mode']) ) {
+		/*if ( !isset($args['mode']) ){
       $v = $this->mvc->get_view($args['path'], 'html', $args['data']);
       if ( !$v ){
         $v = $this->mvc->get_view($args['path'], 'php', $args['data']);
@@ -648,11 +673,25 @@ class controller implements api{
       $args['mode'] = 'html';
     }
     $v = $this->mvc->get_view($args['path'], $args['mode'], $args['data']);
+		/*
     if ( !$v && $args['die'] ){
       die("Impossible to find the $args[mode] view $args[path] from $args[file]");
     }
+		*/
     return $v;
 	}
+
+  public function get_plugin_view(string $path, string $type = 'html', array $data = []){
+    return $this->mvc->get_plugin_view($path, $type, $data, $this->say_plugin());
+  }
+
+  public function get_plugin_views(string $path, array $data = [], array $data2 = null){
+    return [
+      'html' => $this->mvc->get_plugin_view($path, 'html', $data, $this->say_plugin()),
+      'css' => $this->mvc->get_plugin_view($path, 'css', [], $this->say_plugin()),
+      'js' => $this->mvc->get_plugin_view($path, 'js', $data2 ?: $data, $this->say_plugin()),
+    ];
+  }
 /*
   public function get_php(){
     $args = $this->get_arguments(func_get_args());
@@ -752,23 +791,23 @@ class controller implements api{
     $args = func_get_args();
     $die = false;
     foreach ( $args as $a ){
-      if ( is_string($a) && strlen($a) ) {
+      if ( is_string($a) && strlen($a) ){
         $path = $a;
       }
-      else if ( is_array($a) ) {
+      else if ( is_array($a) ){
         $data = $a;
       }
-      else if ( is_bool($a) ) {
+      else if ( is_bool($a) ){
         $die = $a;
       }
     }
-    if ( !isset($path) ) {
+    if ( !isset($path) ){
       $path = $this->path;
     }
 		else if ( strpos($path, './') === 0 ){
 			$path = $this->say_dir().substr($path, 1);
 		}
-    if ( !isset($data) ) {
+    if ( !isset($data) ){
       $data = $this->data;
     }
 		$m = $this->mvc->get_model($path, $data, $this);
@@ -784,7 +823,11 @@ class controller implements api{
     return $m;
 	}
 
-	/**
+  public function get_plugin_model($path, $data = []){
+	  return $this->mvc->get_plugin_model($path, $data, $this, $this->say_plugin());
+  }
+
+  /**
 	 * This will get the model. There is no order for the arguments.
 	 *
 	 * @params string path to the model
@@ -795,23 +838,23 @@ class controller implements api{
 		$args = func_get_args();
 		$die = 1;
 		foreach ( $args as $a ){
-			if ( is_string($a) && strlen($a) ) {
+			if ( is_string($a) && strlen($a) ){
 				$path = $a;
 			}
-			else if ( is_array($a) ) {
+			else if ( is_array($a) ){
 				$data = $a;
 			}
-			else if ( is_bool($a) ) {
+			else if ( is_bool($a) ){
 				$die = $a;
 			}
 		}
-		if ( !isset($path) ) {
+		if ( !isset($path) ){
 			$path = $this->path;
 		}
 		else if ( strpos($path, './') === 0 ){
 			$path = $this->say_dir().substr($path, 1);
 		}
-		if ( !isset($data) ) {
+		if ( !isset($data) ){
 			$data = $this->data;
 		}
 		$m = $this->mvc->get_cached_model($path, $data, $this);
@@ -832,23 +875,23 @@ class controller implements api{
 		$args = func_get_args();
 		$die = 1;
 		foreach ( $args as $a ){
-			if ( is_string($a) && strlen($a) ) {
+			if ( is_string($a) && strlen($a) ){
 				$path = $a;
 			}
-			else if ( is_array($a) ) {
+			else if ( is_array($a) ){
 				$data = $a;
 			}
-			else if ( is_bool($a) ) {
+			else if ( is_bool($a) ){
 				$die = $a;
 			}
 		}
-		if ( !isset($path) ) {
+		if ( !isset($path) ){
 			$path = $this->path;
 		}
 		else if ( strpos($path, './') === 0 ){
 			$path = $this->say_dir().substr($path, 1);
 		}
-		if ( !isset($data) ) {
+		if ( !isset($data) ){
 			$data = $this->data;
 		}
 		$this->mvc->set_cached_model($path, $data, $this);

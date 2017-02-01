@@ -367,7 +367,7 @@ class history
   }
 
   public static function get_creation_date($table, $id){
-    if ( self::check($table) ) {
+    if ( self::check($table) ){
       return self::$db->select_one(self::$htable, 'chrono', [
         'column' => self::$db->table_full_name($table) . ".%",
         'line' => $id,
@@ -378,7 +378,7 @@ class history
   }
 
   public static function get_creation($table, $id){
-    if ( self::check($table) ) {
+    if ( self::check($table) ){
       return self::$db->rselect(self::$htable, ['date' => 'chrono', 'user' => 'id_user'], [
         ['column', 'LIKE', self::$db->table_full_name($table) . ".%"],
         'line' => $id,
@@ -701,7 +701,7 @@ class history
                   $update[$k] = $s['fields'][$k]['default'];
                 }
               }
-              if ( count($update) > 0 ) {
+              if ( count($update) > 0 ){
                 self::$db->update($table, $update, [$s['primary'] => $cfg['values'][$s['primary']]]);
               }
             }
@@ -789,14 +789,14 @@ class history
       }
       else if ( $cfg['moment'] === 'after' ){
         if ( isset($cfg['history']) ){
-          if ( $cfg['kind'] === 'insert' ) {
+          if ( $cfg['kind'] === 'insert' ){
             $id = self::$db->last_id();
-            foreach ($cfg['history'] as $i => $h) {
+            foreach ($cfg['history'] as $i => $h){
               $cfg['history'][$i]['line'] = $id;
             }
           }
           $last = self::$db->last();
-          foreach ($cfg['history'] as $i => $h) {
+          foreach ($cfg['history'] as $i => $h){
             self::_insert($h);
           }
           self::$db->last_query = $last;

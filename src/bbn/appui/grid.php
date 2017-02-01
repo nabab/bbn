@@ -93,7 +93,7 @@ class grid extends bbn\models\cls\basic
   }
 
   public function get_field($f, $array = false){
-    if ( is_array($f) && isset($f['field']) ) {
+    if ( is_array($f) && isset($f['field']) ){
       $f = $f['field'];
     }
     if ( empty($this->fields) || $array ){

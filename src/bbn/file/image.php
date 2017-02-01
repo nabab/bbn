@@ -66,8 +66,8 @@ class image extends bbn\file
  * @return string|false
  */
 public static function jpg2pdf($jpg, $pdf){
- if ( class_exists('\\Imagick') ) {
-  if ( is_array($jpg) ) {
+ if ( class_exists('\\Imagick') ){
+  if ( is_array($jpg) ){
    $img = new \Imagick();
    $img->setResolution(200, 200);
    if ( count($jpg) === 1 ){
@@ -107,12 +107,12 @@ public static function jpg2pdf($jpg, $pdf){
    * @return string|array
    */
   public static function pdf2jpg($pdf, $jpg='', $num=0){
-    if ( class_exists('\\Imagick') ) {
+    if ( class_exists('\\Imagick') ){
       $img = new \Imagick();
       $img->setResolution(200, 200);
       $img->readImage($pdf);
       $img->setImageFormat('jpg');
-      if ( empty($jpg) ) {
+      if ( empty($jpg) ){
 				$dir = dirname($pdf);
 				if ( !empty($dir) ){
 					$dir .= '/';
@@ -120,14 +120,14 @@ public static function jpg2pdf($jpg, $pdf){
 				$f = bbn\str::file_ext($pdf, 1);
         $jpg = $dir.$f[0].'.jpg';
       }
-      if ( $num !== 'all' ) {
+      if ( $num !== 'all' ){
         $img->setIteratorIndex($num);
-        if ( $img->writeImage($jpg) ) {
+        if ( $img->writeImage($jpg) ){
           return $jpg;
         }
       }
       else{
-        if ( $img->writeImages($jpg, 1) ) {
+        if ( $img->writeImages($jpg, 1) ){
 					$i = 0;
 					$r = [];
 					$f = bbn\str::file_ext($jpg, 1);

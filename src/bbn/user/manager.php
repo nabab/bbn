@@ -568,7 +568,7 @@ You can click the following link to access directly your account:<br>
 	/**
 	 * @return void 
 	 */
-  private function create_tables() {
+  private function create_tables(){
     // @todo!!!
     $sql = "
       CREATE TABLE IF NOT EXISTS {$this->db->escape($this->class_cfg['tables']['users'])} (

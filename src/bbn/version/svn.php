@@ -33,14 +33,14 @@ class svn
   }
 	
   private function auth(){
-    if ( !$this->auth || (self::$current !== $this->hash) ) {
+    if ( !$this->auth || (self::$current !== $this->hash) ){
       svn_auth_set_parameter(PHP_SVN_AUTH_PARAM_IGNORE_SSL_VERIFY_ERRORS, true);
       svn_auth_set_parameter(SVN_AUTH_PARAM_NON_INTERACTIVE, true);
       svn_auth_set_parameter(SVN_AUTH_PARAM_NO_AUTH_CACHE, true);
-      if ($this->user) {
+      if ($this->user){
         svn_auth_set_parameter(SVN_AUTH_PARAM_DEFAULT_USERNAME, $this->user);
       }
-      if ($this->pass) {
+      if ($this->pass){
         svn_auth_set_parameter(SVN_AUTH_PARAM_DEFAULT_PASSWORD, $this->pass);
       }
       self::set_current($this->hash);

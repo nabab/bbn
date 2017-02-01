@@ -34,7 +34,7 @@ class cron extends bbn\models\cls\basic{
           $enabled = true,
           $timeout = 50;
 
-  public function __construct(bbn\mvc\controller $ctrl, $cfg = []) {
+  public function __construct(bbn\mvc\controller $ctrl, $cfg = []){
     if ( is_array($cfg) ){
       $this->ctrl = $ctrl;
       $this->db = $ctrl->db;
@@ -74,14 +74,14 @@ class cron extends bbn\models\cls\basic{
   }
 
   public function start($id_cron){
-    if ( $this->check() ) {
+    if ( $this->check() ){
       $cron = $this->get_cron($id_cron);
       $start = date('Y-m-d H:i:s');
       if ($cron && $this->db->insert($this->jtable, [
           'id_cron' => $id_cron,
           'start' => $start
         ])
-      ) {
+      ){
         $this->db->update($this->table, [
           'prev' => $start,
           'next' => date('Y-m-d H:i:s', $this->get_next_date($cron['cfg']['frequency']))

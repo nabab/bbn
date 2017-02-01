@@ -64,14 +64,14 @@ trait triggers {
               }
               else if ( is_array($cfg[$f]) ){
                 foreach ( $cfg[$f] as $k => $v ){
-                  if ( $k === 'trig' ) {
-                    if ($cfg['trig']) {
+                  if ( $k === 'trig' ){
+                    if ($cfg['trig']){
                       $cfg['trig'] = $v;
                     }
                   }
                   else if ( $k === 'run' ){
-                    if ( $cfg['run'] ) {
-                      if (!$v || ($v > $cfg['run'])) {
+                    if ( $cfg['run'] ){
+                      if (!$v || ($v > $cfg['run'])){
                         $cfg['run'] = $v;
                       }
                     }
@@ -249,7 +249,7 @@ trait triggers {
       else{
         $cfg = $this->_trigger($cfg);
         $r = false;
-        if ( $cfg['run'] ) {
+        if ( $cfg['run'] ){
           if ( count($cfg['where']['values']) > 0 ){
             $r = $this->query($cfg['sql'], $cfg['hash'], $cfg['where']['values']);
           }
@@ -317,18 +317,18 @@ trait triggers {
         if ( is_string($k) ){
           $v = [$k, is_string($v) ? 'LIKE' : '=', $v];
         }
-        if ( is_array($v) ) {
+        if ( is_array($v) ){
           if ( !strpos($v[0], '.') && count($table) ){
             $tab = [];
-            foreach ($tables_fields as $t => $f) {
-              if (in_array($v[0], $f)) {
+            foreach ($tables_fields as $t => $f){
+              if (in_array($v[0], $f)){
                 array_push($tab, $t);
               }
             }
-            if (count($tab) === 1) {
+            if (count($tab) === 1){
               $v[0] = $this->cfn($v[0], $tab[0]);
             }
-            else if (count($tab) > 1) {
+            else if (count($tab) > 1){
               $this->error('Error! Duplicate field name, you must insert the fields with their fullname.');
             }
             else {
@@ -445,7 +445,7 @@ trait triggers {
       if ( !isset($cfg['run']) ){
         $cfg['run'] = $cfg['trig'];
       }
-      if ( $cfg['run'] ) {
+      if ( $cfg['run'] ){
         $query_args = [
           $cfg['sql'],
           $cfg['hash']
@@ -482,10 +482,10 @@ trait triggers {
       if ( isset($cfg['value']) ){
         return $cfg['value'];
       }
-      else if ( isset($cfg['run']) ) {
+      else if ( isset($cfg['run']) ){
         return $cfg['run'];
       }
-      else if ( isset($cfg['trig']) ) {
+      else if ( isset($cfg['trig']) ){
         return $cfg['trig'];
       }
     }

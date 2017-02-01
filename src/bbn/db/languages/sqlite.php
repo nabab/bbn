@@ -26,7 +26,7 @@ class sqlite implements bbn\db\engines
    * Constructor
    * @param bbn\db $db
    */
-  public function __construct(bbn\db $db = null) {
+  public function __construct(bbn\db $db = null){
     if ( !extension_loaded('pdo_sqlite') ){
       die("The SQLite driver for PDO is not installed...");
     }
@@ -344,7 +344,7 @@ class sqlite implements bbn\db\engines
 	/**
 	 * @return string
 	 */
-  public function get_order($order, $table = '', $aliases = []) {
+  public function get_order($order, $table = '', $aliases = []){
     if ( is_string($order) ){
       $order = [$order];
     }
@@ -378,7 +378,7 @@ class sqlite implements bbn\db\engines
 	/**
 	 * @return string
 	 */
-  public function get_limit($limit, $start = 0) {
+  public function get_limit($limit, $start = 0){
     if ( is_array($limit) ){
       $args = $limit;
     }
@@ -451,7 +451,7 @@ class sqlite implements bbn\db\engines
     /** @var array $tables_fields List of all the fields' names indexed by table */
     $tables_fields = [];
     foreach ( $table as $i => $tab ){
-      if ( $fn = $this->table_full_name($tab, 1) ) {
+      if ( $fn = $this->table_full_name($tab, 1) ){
         $table[$i] = $fn;
         $tables_fields[$table[$i]] = array_keys($this->db->modelize($table[$i])['fields']);
       }

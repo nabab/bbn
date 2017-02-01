@@ -93,9 +93,9 @@ class actions {
       $wtype = $type === 'dir' ? 'directory' : 'file';
       $dir = $this->is_mvc($cfg) ? $cfg['files']['Controller']['fpath'] : $cfg['root_path'];
       $ext = $this->is_mvc($cfg) ? $cfg['files']['Controller']['ext'] : $data['ext'];
-      if ( ($type === 'file') && !$this->is_mvc($cfg) && !empty($ext) ) {
-        foreach ( $cfg['files'] as $f ) {
-          if ( $ext === $f['ext'] ) {
+      if ( ($type === 'file') && !$this->is_mvc($cfg) && !empty($ext) ){
+        foreach ( $cfg['files'] as $f ){
+          if ( $ext === $f['ext'] ){
             $dir = $f['fpath'];
             break;
           }
@@ -116,7 +116,7 @@ class actions {
         return $this->error("The $wtype already exists");
       }
       if ( $type === 'dir' ){
-        if ( !mkdir($dir.$path) ){
+        if ( !@mkdir($dir.$path) && !is_dir($dir.$path) ){
           return $this->error("Impossible to create the $wtype");
         }
       }
@@ -154,58 +154,58 @@ class actions {
     if ( isset($data['dir'], $data['name'], $data['path'], $data['type'], $cfg[$data['dir']]) &&
       (strpos($data['path'], '../') === false) &&
       bbn\str::check_filename($data['name'])
-    ) {
+    ){
       $type = $data['type'] === 'file' ? 'file' : 'dir';
       $wtype = $type === 'dir' ? 'directory' : 'file';
       $delete = [];
       $dirs =& $cfg[$data['dir']];
-      if ( $type === 'file' ) {
+      if ( $type === 'file' ){
         if ( $this->is_mvc($dirs) ){
           $tab_url_mvc = $data['dir'] . '/' . $data['path'];
-          if ( $data['name'] != '_ctrl' ) {
-            foreach ( $cfg[$data['dir']]['files'] as $f ) {
+          if ( $data['name'] != '_ctrl' ){
+            foreach ( $cfg[$data['dir']]['files'] as $f ){
               $p = $f['fpath'] . substr($data['path'], 0, -3) . $f['ext'];
-              if ( file_exists($p) && !in_array($p, $delete) ) {
+              if ( file_exists($p) && !in_array($p, $delete) ){
                 array_push($delete, $p);
               }
             }
           }
           else {
             $p = $cfg[$data['dir']]['files']['CTRL']['fpath'].$data['path'];
-            if ( file_exists($p) && !in_array($p, $delete) ) {
+            if ( file_exists($p) && !in_array($p, $delete) ){
               array_push($delete, $p);
             }
           }
         }
         else {
-          foreach ( $dirs['files'] as $f ) {
-            if ( $f['ext'] === bbn\str::file_ext($data['path']) ) {
+          foreach ( $dirs['files'] as $f ){
+            if ( $f['ext'] === bbn\str::file_ext($data['path']) ){
               $p = $f['fpath'] . $data['path'];
-              if ( file_exists($p) && !in_array($p, $delete) ) {
+              if ( file_exists($p) && !in_array($p, $delete) ){
                 array_push($delete, $p);
               }
             }
           }
         }
       }
-      if ($type === 'dir') {
+      if ($type === 'dir'){
         $p_mvc = false;
         $p_mvc2 = false;
-        if ( $this->is_mvc($cfg[$data['dir']]) ) {
-          foreach ( $cfg[$data['dir']]['files'] as $f ) {
+        if ( $this->is_mvc($cfg[$data['dir']]) ){
+          foreach ( $cfg[$data['dir']]['files'] as $f ){
             $p = $f['fpath'] . $data['path'];
             if ( $f['title'] === 'Controller' ){
               $p_mvc = $f['fpath'] . $data['path'];
               $p_mvc2 = $f['fpath'];
             }
-            if ( is_dir($p) && !in_array($p, $delete) ) {
+            if ( is_dir($p) && !in_array($p, $delete) ){
               array_push($delete, $p);
             }
           }
         }
         else {
           $p = $cfg[$data['dir']]['root_path'].$data['path'];
-          if ( is_dir($p) && !in_array($p, $delete) ) {
+          if ( is_dir($p) && !in_array($p, $delete) ){
             array_push($delete, $p);
           }
         }
@@ -478,9 +478,9 @@ class actions {
       $root_dest = BBN_USER_PATH.'tmp/'.bbn\str::genpwd().'/';
       if ( isset($dirs[$data['dir']]) ){
         if ( $this->is_mvc($dirs[$data['dir']]) ){
-          foreach ( $dirs[$data['dir']]['files'] as $f ) {
+          foreach ( $dirs[$data['dir']]['files'] as $f ){
             $dest = $root_dest.$data['name'].'/'.str_replace(BBN_APP_PATH, '', $f['fpath']);
-            if ( $data['type'] === 'file' ) {
+            if ( $data['type'] === 'file' ){
               $ext = bbn\str::file_ext($data['path']);
               $path = substr($data['path'], 0, strrpos($data['path'], $ext));
               $file = $f['fpath'].$path.$f['ext'];
@@ -515,7 +515,7 @@ class actions {
             $dir = $dirs[$data['dir']]['files'][0]['fpath'];
           }
           $dest = $root_dest.$data['name'].'/'.$data['path'];
-          if ( $data['type'] === 'file' ) {
+          if ( $data['type'] === 'file' ){
             if ( !bbn\file\dir::create_path(substr($dest, 0, strrpos($dest, '/') + 1)) ){
               return $this->error('Impossible to create the path ' . substr($dest, 0, strrpos($dest, '/') + 1));
             }
@@ -525,16 +525,16 @@ class actions {
           }
         }
         // Create zip file
-        if ( class_exists('\\ZipArchive') ) {
+        if ( class_exists('\\ZipArchive') ){
           $dest = $this->is_mvc($dirs[$data['dir']]) ? $root_dest.$data['name'].'/mvc/' : $dest;
           $filezip = BBN_USER_PATH.'tmp/'.$data['name'].'.zip';
           $zip = new \ZipArchive();
-          if ( $err = $zip->open($filezip, \ZipArchive::OVERWRITE) ) {
+          if ( $err = $zip->open($filezip, \ZipArchive::OVERWRITE) ){
             if ( file_exists($dest) ){
               if ( ($data['type'] === 'dir') || $this->is_mvc($dirs[$data['dir']]) ){
                 // Create recursive directory iterator
                 $files = bbn\file\dir::scan($dest);
-                foreach ($files as $file) {
+                foreach ($files as $file){
                   // Add current file to archive
                   if ( ($file !== $root_dest.$data['name']) &&
                     is_file($file) &&
@@ -549,8 +549,8 @@ class actions {
                   return $this->error("Impossible to add $dest");
                 }
               }
-              if ( $zip->close() ) {
-                if ( !bbn\file\dir::delete($root_dest, 1) ) {
+              if ( $zip->close() ){
+                if ( !bbn\file\dir::delete($root_dest, 1) ){
                   return $this->error("Impossible to delete the directory $root_dest");
                 }
                 return $filezip;

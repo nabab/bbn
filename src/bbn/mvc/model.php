@@ -105,6 +105,10 @@ class model extends bbn\models\cls\db{
     return call_user_func_array([$this->ctrl, 'get_cached_model'], func_get_args());
   }
 
+  public function get_plugin_model($path, $data = []){
+    return call_user_func_array([$this->ctrl, 'get_plugin_model'], func_get_args());
+  }
+
   public function has_plugin(){
     return call_user_func_array([$this->ctrl, 'has_plugin'], func_get_args());
   }

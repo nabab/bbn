@@ -87,7 +87,7 @@ class x
 
       if ( php_sapi_name() === 'cli' ){
         global $argv;
-        if ( isset($argv[2]) && ($argv[2] === 'log') ) {
+        if ( isset($argv[2]) && ($argv[2] === 'log') ){
           echo self::get_dump($st).PHP_EOL;
         }
       }
@@ -218,7 +218,7 @@ class x
     if ( (self::is_assoc($a1) || empty($a1)) && (self::is_assoc($a2) || empty($a2)) ){
       $keys = array_unique(array_merge(array_keys($a1), array_keys($a2)));
       $r = [];
-      foreach ( $keys as $k ) {
+      foreach ( $keys as $k ){
         if ( !array_key_exists($k, $a1) && !array_key_exists($k, $a2) ){
           continue;
         }
@@ -329,21 +329,21 @@ class x
     $prevChar    = '';
     $outOfQuotes = true;
 
-    for ($i=0; $i<=$strLen; $i++) {
+    for ($i=0; $i<=$strLen; $i++){
 
       // Grab the next character in the string.
       $char = substr($json, $i, 1);
 
       // Are we inside a quoted string?
-      if ($char == '"' && $prevChar != '\\') {
+      if ($char == '"' && $prevChar != '\\'){
         $outOfQuotes = !$outOfQuotes;
 
         // If this character is the end of an element,
         // output a new line and indent the next line.
-      } else if(($char == '}' || $char == ']') && $outOfQuotes) {
+      } else if(($char == '}' || $char == ']') && $outOfQuotes){
         $result .= $newLine;
         $pos --;
-        for ($j=0; $j<$pos; $j++) {
+        for ($j=0; $j<$pos; $j++){
           $result .= $indentStr;
         }
       }
@@ -353,13 +353,13 @@ class x
 
       // If the last character was the beginning of an element,
       // output a new line and indent the next line.
-      if (($char == ',' || $char == '{' || $char == '[') && $outOfQuotes) {
+      if (($char == ',' || $char == '{' || $char == '[') && $outOfQuotes){
         $result .= $newLine;
-        if ($char == '{' || $char == '[') {
+        if ($char == '{' || $char == '['){
           $pos ++;
         }
 
-        for ($j = 0; $j < $pos; $j++) {
+        for ($j = 0; $j < $pos; $j++){
           $result .= $indentStr;
         }
       }
@@ -640,7 +640,7 @@ class x
    * @param string $key The property where to check the value from
    * @return mixed
    */
-  public static function max_with_key($ar, $key) {
+  public static function max_with_key($ar, $key){
     if (!is_array($ar) || count($ar) == 0) return false;
     $max = current($ar)[$key];
     foreach ( $ar as $a ){
@@ -672,8 +672,8 @@ class x
   public static function min_with_key($array, $key){
     if (!is_array($array) || count($array) == 0) return false;
     $min = $array[0][$key];
-    foreach($array as $a) {
-      if($a[$key] < $min) {
+    foreach($array as $a){
+      if($a[$key] < $min){
         $min = $a[$key];
       }
     }
@@ -983,7 +983,7 @@ class x
 
   public static function sort(&$ar){
     usort($ar, function($a, $b){
-      if ( !str::is_number($a, $b) ) {
+      if ( !str::is_number($a, $b) ){
         $a = str_replace('.', '0', str_replace('_', '1', str::change_case($a, 'lower')));
         $b = str_replace('.', '0', str_replace('_', '1', str::change_case($b, 'lower')));
         return strcmp($a, $b);
@@ -1030,7 +1030,7 @@ class x
       }
       $a1 = strtolower($dir) === 'desc' ? $v2 : $v1;
       $a2 = strtolower($dir) === 'desc' ? $v1 : $v2;
-      if ( !str::is_number($v1, $v2) ) {
+      if ( !str::is_number($v1, $v2) ){
         $a1 = str_replace('.', '0', str_replace('_', '1', str::change_case($a1, 'lower')));
         $a2 = str_replace('.', '0', str_replace('_', '1', str::change_case($a2, 'lower')));
         return strcmp($a1, $a2);
@@ -1211,7 +1211,7 @@ class x
    * @param string $separator
    * @return array
    */
-  public static function from_csv($st, $delimiter = ';', $enclosure = '"', $separator = PHP_EOL) {
+  public static function from_csv($st, $delimiter = ';', $enclosure = '"', $separator = PHP_EOL){
     if ( is_string($st) ){
       $r = [];
       $lines = explode($separator, $st);
@@ -1242,21 +1242,21 @@ class x
    * @return string
    */
 
-  public static function to_csv(array $data, $delimiter = ';', $enclosure = '"', $separator = PHP_EOL, $encloseAll = false, $nullToMysqlNull = false ) {
+  public static function to_csv(array $data, $delimiter = ';', $enclosure = '"', $separator = PHP_EOL, $encloseAll = false, $nullToMysqlNull = false ){
     $delimiter_esc = preg_quote($delimiter, '/');
     $enclosure_esc = preg_quote($enclosure, '/');
 
     $lines = [];
     foreach ( $data as $d ){
       $output = [];
-      foreach ( $d as $field ) {
-        if ($field === null && $nullToMysqlNull) {
+      foreach ( $d as $field ){
+        if ($field === null && $nullToMysqlNull){
           $output[] = 'NULL';
           continue;
         }
 
         // Enclose fields containing $delimiter, $enclosure or whitespace
-        if ( $encloseAll || preg_match( "/(?:${delimiter_esc}|${enclosure_esc}|\s)/", $field ) ) {
+        if ( $encloseAll || preg_match( "/(?:${delimiter_esc}|${enclosure_esc}|\s)/", $field ) ){
           $output[] = $enclosure . str_replace($enclosure, $enclosure . $enclosure, $field) . $enclosure;
         }
         else {

@@ -27,7 +27,7 @@ class json implements db\api
   /**
    * 
    */
-  public function __construct($file) {
+  public function __construct($file){
     $this->data = $db;
   }
 
@@ -369,7 +369,7 @@ class json implements db\api
 	/**
 	 * @return string
 	 */
-  public function get_order($order, $table = '', $aliases = []) {
+  public function get_order($order, $table = '', $aliases = []){
     if ( is_string($order) ){
       $order = [$order];
     }
@@ -403,7 +403,7 @@ class json implements db\api
 	/**
 	 * @return string
 	 */
-  public function get_limit($limit, $start = 0) {
+  public function get_limit($limit, $start = 0){
     if ( is_array($limit) ){
       $args = $limit;
     }

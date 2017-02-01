@@ -58,28 +58,28 @@ class output {
         $this->obj->postscript = \JShrink\Minifier::minify($this->obj->postscript);
       }
     }
-    if ( empty($this->obj->content) || ( ($this->mode === 'file') || ($this->mode === 'image') ) ) {
-      if (!empty($this->obj->file)) {
-        if (is_string($this->obj->file) && is_file($this->obj->file)) {
+    if ( empty($this->obj->content) || ( ($this->mode === 'file') || ($this->mode === 'image') ) ){
+      if (!empty($this->obj->file)){
+        if (is_string($this->obj->file) && is_file($this->obj->file)){
           $this->obj->file = new bbn\file($this->obj->file);
         }
         if (is_object($this->obj->file) &&
           method_exists($this->obj->file, 'download') &&
           method_exists($this->obj->file, 'test') &&
           $this->obj->file->test()
-        ) {
+        ){
           $this->mode = 'file';
         }
       }
-      else if (!empty($this->obj->img)) {
-        if (is_string($this->obj->img) && is_file($this->obj->img)) {
+      else if (!empty($this->obj->img)){
+        if (is_string($this->obj->img) && is_file($this->obj->img)){
           $this->obj->img = new bbn\file\image($this->obj->img);
         }
         if (is_object($this->obj->img) &&
           method_exists($this->obj->img, 'display') &&
           method_exists($this->obj->img, 'test') &&
           $this->obj->img->test()
-        ) {
+        ){
           $this->mode = 'image';
         }
       }

@@ -24,7 +24,7 @@ class environment {
 
   private
     /**
-     * The list of views which have been loaded. We keep their content in an array to not have to include the file again. This is useful for loops.
+     * An array of strings enclosed between the slashes of the requested path
      * @var null|array
      */
     $params,
@@ -63,16 +63,16 @@ class environment {
 
   private function set_params($path)
   {
-    if ( !isset($this->params) ) {
+    if ( null === $this->params ){
       $this->params = [];
       $tmp = explode('/', bbn\str::parse_path($path));
-      foreach ( $tmp as $t ) {
-        if ( !empty($t) || bbn\str::is_number($t) ) {
-          if ( in_array($t, bbn\mvc::$reserved) ){
-            die("The controller you are asking for contains one of the following reserved strings: " .
-              implode(", ", bbn\mvc::$reserved));
+      foreach ( $tmp as $t ){
+        if ( !empty($t) || bbn\str::is_number($t) ){
+          if ( in_array($t, bbn\mvc::$reserved, true) ){
+            die('The controller you are asking for contains one of the following reserved strings: ' .
+              implode(', ', bbn\mvc::$reserved));
           }
-          array_push($this->params, $t);
+          $this->params[] = $t;
         }
       }
     }
@@ -85,89 +85,11 @@ class environment {
    * @return string $this->mode
    */
   public function set_mode($mode){
-    if ( router::is_mode($mode) ) {
+    if ( router::is_mode($mode) ){
       $this->mode = $mode;
     }
     return $this->mode;
   }
-
-/*
-  private function set_config($cfgs){
-    $i = 0;
-    while ( !isset($cfg) && ($i < count($cfgs)) ){
-      if ( isset($cfgs[$i]['env_method'], $cfgs[$i]['env_value']) ){
-        if ( $this->is_cli ){
-          if ( $cfgs[$i]['env_value'] === $this->dir ){
-            $cfg = $cfgs[$i];
-          }
-        }
-        else{
-          $values = explode(',', $cfgs[$i]['env_value']);
-          foreach ( $values as $v ){
-            if ( ($cfgs[$i]['env_method'] === 'port') && ($_SERVER['SERVER_PORT'] == $v) ){
-              $cfg = $cfgs[$i];
-            }
-            else if ( $cfgs[$i]['env_method'] === 'path' ){
-              if ( strpos($_SERVER['SCRIPT_FILENAME'], $v) === 0 ){
-                $cfg = $cfgs[$i];
-              }
-            }
-            else if ( $cfgs[$i]['env_method'] === 'host' ){
-              if ( $_SERVER['SERVER_NAME'] === $v ){
-                $cfg = $cfgs[$i];
-              }
-              else if ( ( strpos($_SERVER['SERVER_NAME'], 'www.') === 0 ) &&
-                ( strpos($v, 'www.') !== 0 ) &&
-                $_SERVER['SERVER_NAME'] === 'www.'.$v
-              ){
-                $cfg = $cfgs[$i];
-              }
-              else if ( ( strpos($_SERVER['SERVER_NAME'], 'www.') !== 0 ) &&
-                ( strpos($v, 'www.') === 0 ) &&
-                'www.'.$_SERVER['SERVER_NAME'] === $v
-              ){
-                $cfg = $cfgs[$i];
-              }
-            }
-          }
-        }
-      }
-      $i++;
-    }
-    if ( !isset($cfg) ){
-      die("No parameter corresponding to the current configuration. Check your config/cfg_".
-        ( $is_cli ? "cli" : "server" ).
-        ".php file.");
-    }
-    return $cfg;
-  }
-
-  private function set_constants($cfg){
-    foreach ( $cfg as $n => $c ){
-      define('BBN_'.strtoupper($n),$c);
-    }
-    if ( !defined('BBN_IS_SSL') ){
-      define('BBN_IS_SSL',false);
-    }
-    if ( !defined('BBN_PORT') ){
-      define('BBN_PORT',false);
-    }
-    $tmp = 'http';
-    if ( BBN_IS_SSL ){
-      $tmp .= 's';
-    }
-    $tmp .= '://'.BBN_SERVER_NAME;
-    if ( BBN_PORT && (BBN_PORT != 80) && (BBN_PORT != 443) ){
-      $tmp .= ':'.BBN_PORT;
-    }
-    if ( BBN_CUR_PATH ){
-      $tmp .= BBN_CUR_PATH;
-      if ( substr(BBN_CUR_PATH,-1) !== '/' ){
-        $tmp .= '/';
-      }
-    }
-    define('BBN_URL', $tmp);
-  }*/
 
   private function _init(){
     // When using CLI a first parameter can be used as route,
@@ -178,7 +100,7 @@ class environment {
     }
     // Non CLI request
     else{
-      if ( !isset($this->post)){
+      if ( null === $this->post ){
         $this->get_post();
       }
       if ( count($this->post) ){
@@ -213,7 +135,7 @@ class environment {
       if ( isset($current) &&
         ( BBN_CUR_PATH === '/' || strpos($current, BBN_CUR_PATH) !== false ) ){
         $url = explode("?", urldecode($current))[0];
-        if ( BBN_CUR_PATH === '/' ) {
+        if ( BBN_CUR_PATH === '/' ){
           $this->set_params($url);
         }
         else{
@@ -236,9 +158,9 @@ class environment {
 
   public function set_prepath($path){
     $path = bbn\x::remove_empty(explode('/', $path));
-    if ( count($path) ) {
-      foreach ($path as $p) {
-        if ($this->params[0] === $p) {
+    if ( count($path) ){
+      foreach ($path as $p){
+        if ($this->params[0] === $p){
           array_shift($this->params);
           $this->url = substr($this->url, strlen($p)+1);
         }
@@ -256,7 +178,7 @@ class environment {
    * @return boolean
    */
   public function is_cli(){
-    if ( is_null($this->cli) ){
+    if ( null === $this->cli ){
       $this->cli = (php_sapi_name() === 'cli');
     }
     return $this->cli;
@@ -293,8 +215,8 @@ class environment {
             }, $json);
           }
           else{
-            for ( $i = 2; $i < count($argv); $i++ ){
-              array_push($this->post, $argv[$i]);
+            for ( $i = 2, $iMax = count($argv); $i < $iMax; $i++ ){
+              $this->post[] = $argv[$i];
             }
           }
         }
@@ -304,7 +226,7 @@ class environment {
   }
 
   public function get_get(){
-    if ( is_null($this->get) ){
+    if ( null === $this->get ){
       $this->get = [];
       if ( count($_GET) > 0 ){
         $this->get = array_map(function($a){
@@ -331,10 +253,10 @@ class environment {
     if ( is_array($val) ){
       $to_unset = [];
       foreach ( $val as $key => $v ){
-        $keys = explode(".", $key);
+        $keys = explode('.', $key);
         if ( count($keys) > 1 ){
           self::_set_index($keys, $val, $v);
-          array_push($to_unset, $key);
+          $to_unset[] = $key;
         }
       }
       foreach ( $to_unset as $a ){
@@ -344,8 +266,8 @@ class environment {
   }
 
   public function get_post(){
-    if ( is_null($this->post) ){
-      $this->post = empty($_POST) ? json_decode(file_get_contents("php://input"), 1) : $_POST;
+    if ( null === $this->post ){
+      $this->post = empty($_POST) ? json_decode(file_get_contents('php://input'), 1) : $_POST;
       if ( !$this->post ){
         $this->post = [];
       }
@@ -357,7 +279,7 @@ class environment {
   }
 
   public function get_files(){
-    if ( is_null($this->files) ){
+    if ( null === $this->files ){
       $this->files = [];
       // Rebuilding the $_FILES array into $this->files in a more logical structure
       if ( count($_FILES) > 0 ){
@@ -367,7 +289,7 @@ class environment {
           if ( is_array($f['name']) ){
             $this->files[$n] = [];
             foreach ( $f['name'] as $i => $v ){
-              while ( in_array($v, $names) ){
+              while ( in_array($v, $names, true) ){
                 if ( !isset($j) ){
                   $j = 0;
                 }
@@ -375,14 +297,14 @@ class environment {
                 $file = bbn\str::file_ext($f['name'][$i], true);
                 $v = $file[0].'_'.$j.'.'.$file[1];
               }
-              array_push($this->files[$n], [
+              $this->files[$n][] = [
                 'name' => $v,
                 'tmp_name' => $f['tmp_name'][$i],
                 'type' => $f['type'][$i],
                 'error' => $f['error'][$i],
                 'size' => $f['size'][$i],
-              ]);
-              array_push($names, $v);
+              ];
+              $names[] = $v;
             }
           }
           else{

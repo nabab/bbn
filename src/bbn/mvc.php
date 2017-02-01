@@ -257,7 +257,12 @@ class mvc implements mvc\api{
 		$this->inc = new \stdClass();
     $this->o = $this->inc;
     if ( is_array($routes) && isset($routes['root']) ){
-      $roots = $routes['root'];
+      $roots = array_map(function($a){
+        if ( !empty($a['path']) && (substr($a['path'], -1) !== '/') ){
+          $a['path'] .= '/';
+        }
+        return $a;
+      }, $routes['root']);
       $routes['root'] = [];
       foreach ( $roots as $r ){
         $this->register_plugin($r);
@@ -277,6 +282,10 @@ class mvc implements mvc\api{
     return $this->info ? true : false;
   }
 
+  public function get_plugins(){
+    return $this->plugins;
+  }
+
   public function has_plugin($plugin){
     return isset($this->plugins[$plugin]);
   }
@@ -292,6 +301,15 @@ class mvc implements mvc\api{
 
   public function plugin_url($plugin){
     return $this->has_plugin($plugin) ? substr($this->plugins[$plugin]['url'], strlen($this->root)) : false;
+  }
+
+  public function plugin_name($path){
+    foreach ( $this->plugins as $name => $p ){
+      if ( $p['url'] === $path ){
+        return $name;
+      }
+    }
+    return false;
   }
 
   /*public function add_routes(array $routes){
@@ -358,31 +376,58 @@ class mvc implements mvc\api{
 	}
 
   /**
-	 * This will get a view.
-	 *
-	 * @param string $path
-	 * @param string $mode
-	 * @return string|false
-	 */
-	public function get_view($path='', $mode='html', $data=null){
+   * This will get a view.
+   *
+   * @param string $path
+   * @param string $mode
+   * @param array $data
+   * @return string|false
+   */
+  public function get_view(string $path = '', string $mode = 'html', array $data=null){
     if ( !router::is_mode($mode) ){
       die("Incorrect mode $path $mode");
     }
-		if ( isset(self::$loaded_views[$mode][$path]) ){
-			$view = self::$loaded_views[$mode][$path];
-		}
-		else if ( $file = $this->router->route($path, $mode) ){
+    if ( isset(self::$loaded_views[$mode][$path]) ){
+      $view = self::$loaded_views[$mode][$path];
+    }
+    else if ( $file = $this->router->route($path, $mode) ){
       if ( $mode === 'html' ){
         //die(var_dump("jokjkl", $file, is_file($file['file']), file_get_contents($file['file'])));
       }
-			$view = new mvc\view($file);
+      $view = new mvc\view($file);
       self::$loaded_views[$mode][$path] = $view;
-		}
-		if ( isset($view) && $view->check() ){
-			return is_array($data) ? $view->get($data) : $view->get();
-		}
-		return '';
-	}
+    }
+    if ( isset($view) && $view->check() ){
+      return is_array($data) ? $view->get($data) : $view->get();
+    }
+    return '';
+  }
+
+  /**
+   * This will get a view.
+   *
+   * @param string $path
+   * @param string $mode
+   * @param array $data
+   * @param string $plugin
+   * @return string|false
+   */
+  public function get_plugin_view(string $path, string $mode, array $data, string $plugin){
+    if ( !router::is_mode($mode) ){
+      die("Incorrect mode $path $mode");
+    }
+    if (
+      ($name = $this->plugin_name($plugin)) &&
+      ($route = $this->router->route($path, 'html', BBN_APP_PATH.'plugins/'.$name.'/html/'))
+    ){
+      $view = new mvc\view($route);
+      if ( $view->check() ){
+        return empty($data) ? $view->get() : $view->get($data);
+      }
+      return '';
+    }
+    die('Error with the plugin view '.$path.' for '.$name.' ('.$plugin.')');
+  }
 
   /**
    * This will get the model. There is no order for the arguments.
@@ -399,6 +444,15 @@ class mvc implements mvc\api{
     return [];
   }
 
+  public function get_plugin_model(string $path, array $data, mvc\controller $ctrl, string $plugin){
+    if (
+      ($name = $this->plugin_name($plugin)) &&
+      ($route = $this->router->route($path, 'model', BBN_APP_PATH.'plugins/'.$name.'/model/'))
+    ){
+      $model = new mvc\model($this->db, $route, $ctrl);
+      return $model->get($data);
+    }
+  }
   /**
    * This will get the model as it is in cache if any and otherwise will save it in cache then return it
    *
@@ -453,7 +507,7 @@ class mvc implements mvc\api{
 	 * @return string|false
 	 */
 	public function process(){
-    if ( $this->check() ) {
+    if ( $this->check() ){
       $this->obj = new \stdClass();
       if ( !is_array($this->info)){
         $this->log("No info in MVC", $this->info);
@@ -467,9 +521,9 @@ class mvc implements mvc\api{
 	}
 
   public function output(){
-    if ( $this->check() && $this->controller ) {
+    if ( $this->check() && $this->controller ){
       $obj = $this->controller->get();
-      if ($this->is_cli()) {
+      if ($this->is_cli()){
         die(isset($obj->content) ? $obj->content : "no output");
       }
       if ( is_array($obj) ){

@@ -56,7 +56,7 @@ class tree // extends object
 
         $this->transport = new \Kendo\Data\DataSourceTransport();
 
-        $this->transport->parameterMap(new \Kendo\JavaScriptFunction('function(data) {
+        $this->transport->parameterMap(new \Kendo\JavaScriptFunction('function(data){
                           return kendo.stringify(data);
                       }'));
 

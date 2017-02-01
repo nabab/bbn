@@ -38,7 +38,7 @@ class virtualmin {
    * virtualmin constructor.
    * @param array $cfg
    */
-  public function __construct(array $cfg) {
+  public function __construct(array $cfg){
     if ( isset($cfg['user'], $cfg['pass']) ){
       $this->user = $cfg['user'];
       $this->pass = $cfg['pass'];
@@ -178,7 +178,7 @@ class virtualmin {
    * @param string $st
    * @return string The the header url part to be executed
    */
-  private function sanitize($st) {
+  private function sanitize($st){
     $st = trim((string)$st);
     if ( strpos($st, ';') !== false ){
       return '';
@@ -199,7 +199,7 @@ class virtualmin {
    * This function is used to get the header url part to be executed
    * @return string The the header url part to be executed
    */
-  private function get_header_url() {
+  private function get_header_url(){
     return "wget -O - --quiet --http-user=" . $this->user . " --http-passwd=" . $this->pass . " --no-check-certificate 'https://" . $this->hostname . ":10000/virtual-server/remote.cgi?json=1&program=";
   }
 
@@ -208,7 +208,7 @@ class virtualmin {
    * @param string $request the command to be excecuted
    * @return array an array with the execution status and message
    */
-  private function call_shell_exec($request) {
+  private function call_shell_exec($request){
     //Executing the shell_exec
     if ( $result = shell_exec($request) ){
       //Decoding the json result into an array
@@ -216,15 +216,15 @@ class virtualmin {
       if ( isset($result_array['error']) ){
         $this->error = $result_array['error'];
       }
-      if ($result_array['status'] === 'success' ) {
-        if (isset($result_array['data'])) {
+      if ($result_array['status'] === 'success' ){
+        if (isset($result_array['data'])){
           if ( isset($result_array['data'][0], $result_array['data'][0]['name']) &&
             ($result_array['data'][0]['name'] === 'Warning') ){
             $result_array['data'] = array_slice($result_array['data'], 1);
           }
           return $result_array['data'];
         }
-        else if (isset($result_array['output'])) {
+        else if (isset($result_array['output'])){
           return $result_array['output'];
         }
       }
@@ -237,10 +237,10 @@ class virtualmin {
    * @param array $param the raw parameters
    * @return array the processed parameters
    */
-  private function process_parameters($param) {
-    foreach ($param as $key => $val) {
+  private function process_parameters($param){
+    foreach ($param as $key => $val){
       //$val is an array
-      if (is_array($val)) {
+      if (is_array($val)){
         $param[$key] = $this->process_parameters($val);
       }
       else {
@@ -279,7 +279,7 @@ class virtualmin {
    * @param array $param
    * @return array
    */
-  public function list_commands($param = ['multiline' => 1]) {
+  public function list_commands($param = ['multiline' => 1]){
     //Prepping, processing and validating the create user parameters
     $param = $this->process_parameters($param);
     //Setting the last action performed
@@ -287,14 +287,14 @@ class virtualmin {
 
     //Defining  the $url_part and the command to be executed
     $url_part = "list-commands";
-    if (isset($param['short'])) {//short parameter is set
+    if (isset($param['short'])){//short parameter is set
       $url_part .= "&short";
     }
 
-    if (isset($param['multiline'])) {//multiline parameter is set
+    if (isset($param['multiline'])){//multiline parameter is set
       $url_part .= "&multiline=";
     }
-    else if (isset($param['nameonly'])) {//nameonly parameter is set
+    else if (isset($param['nameonly'])){//nameonly parameter is set
       $url_part .= "&nameonly";
     }
     //Concatenating the closing single quote
@@ -309,7 +309,7 @@ class virtualmin {
    * @param $command
    * @return array
    */
-  public function get_command($command) {
+  public function get_command($command){
     $command = str_replace('_', '-', $command);
     //Setting the last action performed
     $this->last_action = "get-command";
@@ -358,7 +358,7 @@ $list_commands_param = array(
   'multiline' => 1
 );
 //$vm->list_commands($list_commands_param);
-if ($r = $vm->list_domains()) {
+if ($r = $vm->list_domains()){
   print_r($r);
 } else {
   var_dump($vm->error);
@@ -371,7 +371,7 @@ $create_domain_param = array(
   'mail' => 1
 );
 echo '</pre><p>create domain with mail: </p><pre>';
-//if ($r = $vm->create_domain($create_domain_param)) {
+//if ($r = $vm->create_domain($create_domain_param)){
 //    print_r($r);
 //} else {
 //   var_dump($vm->error);
@@ -384,13 +384,13 @@ $create_user_param = array(
   'realname' => 'Edwin Mugendi'
 );
 echo '<p>create user: </p><pre>';
-if ($r = $vm->create_user($create_user_param)) {
+if ($r = $vm->create_user($create_user_param)){
   print_r($r);
 } else {
   var_dump($vm->error);
 }
 echo '</pre><p>repeat create user: </p><pre>';
-if ($r = $vm->create_user($create_user_param)) {
+if ($r = $vm->create_user($create_user_param)){
   print_r($a);
 } else {
   var_dump($vm->error);

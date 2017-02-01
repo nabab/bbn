@@ -71,14 +71,14 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
     }
   }
 
-  public function __construct($cfg) {
+  public function __construct($cfg){
     if ( !defined('BBN_ADMIN_EMAIL') || !defined('BBN_IS_DEV') ){
       die("You must provide the constants BBN_ADMIN_EMAIL and BBN_IS_DEV to use the mail class...");
     }
     if ( !isset($cfg['from']) && isset($cfg['user']) ){
       $cfg['from'] = $cfg['user'];
     }
-    if ( !isset($cfg['host'], $cfg['from']) || !str::is_domain($cfg['host']) || !str::is_email($cfg['from'])) {
+    if ( !isset($cfg['host'], $cfg['from']) || !str::is_domain($cfg['host']) || !str::is_email($cfg['from'])){
       die("A host name and a \"From\" eMail address must be provided");
     }
     $this->mailer = new \PHPMailer();
@@ -125,13 +125,13 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
       $imap_port = $cfg['imap_port'];
     }
     if ( !empty($cfg['imap_ssl']) ){
-      if ( !isset($cfg['imap_port']) ) {
+      if ( !isset($cfg['imap_port']) ){
         $imap_port = 993;
       }
       $this->imap_string = "{".$imap_host.":".$imap_port."/ssl";
     }
     else{
-      if ( !isset($cfg['imap_port']) ) {
+      if ( !isset($cfg['imap_port']) ){
         $imap_port = 143;
       }
       $this->imap_string = "{".$imap_host.":".$imap_port."/tls";

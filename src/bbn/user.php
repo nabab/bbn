@@ -850,7 +850,7 @@ class user extends models\cls\basic
   /**
 	 * @return $this
 	 */
-  public function close_session($with_session = false) {
+  public function close_session($with_session = false){
     $p =& $this->class_cfg['arch']['sessions'];
     $this->db->update($this->class_cfg['tables']['sessions'], [
         $p['ip_address'] => $this->ip_address,
@@ -980,7 +980,7 @@ class user extends models\cls\basic
    * @return false|int
    */
   public function get_id(){
-    if ( $this->check() ) {
+    if ( $this->check() ){
       return $this->id;
     }
     return false;
@@ -988,7 +988,7 @@ class user extends models\cls\basic
 
   public function get_group()
   {
-    if ( $this->check() ) {
+    if ( $this->check() ){
       return $this->id_group;
     }
   }

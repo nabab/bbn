@@ -21,8 +21,8 @@ class mailbox{
       $this->pass = $cfg['pass'];
       $this->directory = empty($cfg['dir']) ? '' : $cfg['dir'];
 
-      if ( !empty($cfg['type']) ) {
-        switch ( $this->type ) {
+      if ( !empty($cfg['type']) ){
+        switch ( $this->type ){
           case 'hotmail':
             $this->port = 995;
             $this->mbParam = '{pop3.live.com:' . $this->port . '/pop3/ssl}';
@@ -53,7 +53,7 @@ class mailbox{
       }
 
       if ( isset($this->mbParam) ){
-        if ( $this->stream = @imap_open($this->mbParam.$this->directory, $this->login, $this->pass) ) {
+        if ( $this->stream = @imap_open($this->mbParam.$this->directory, $this->login, $this->pass) ){
           $this->status = 'ok';
         }
         else {
@@ -102,7 +102,7 @@ class mailbox{
    * @return bool|array
    */
   private function list_mboxes($dir){
-    if ( $this->is_connected() ) {
+    if ( $this->is_connected() ){
       return imap_list($this->stream, $this->mbParam, $dir);
     }
     return false;
@@ -136,7 +136,7 @@ class mailbox{
         $name_arr = explode('}', $name);
         $j = count($name_arr) - 1;
         $mbox_name = $name_arr[$j];
-        if( $mbox_name == "" ) {
+        if( $mbox_name == "" ){
           continue; // the DIRECTORY itself
         }
         $ret[$i++] = $mbox_name;
@@ -204,7 +204,7 @@ class mailbox{
     // ATTACHMENT
     // Any part with a filename is an attachment,
     // so an attached text file (type 0) is not mistaken as the message.
-    if ( $params['filename'] || $params['name'] ) {
+    if ( $params['filename'] || $params['name'] ){
       // filename may be given as 'Filename' or 'Name' or both
       $filename = $params['filename'] ? $params['filename'] : $params['name'];
       // filename may be encoded, so see imap_mime_header_decode()
@@ -228,9 +228,9 @@ class mailbox{
           $this->plainmsg .= trim($data).PHP_EOL;
       }
       else {
-        if ( stripos($this->charset,'ISO') !== false ) {
+        if ( stripos($this->charset,'ISO') !== false ){
 
-          if ( $utfConverter = new utf8($this->charset) ) {
+          if ( $utfConverter = new utf8($this->charset) ){
             $this->htmlmsg .= $utfConverter->strToUtf8(trim($data)).'<br><br>';
           }
           else {
@@ -240,7 +240,7 @@ class mailbox{
         else {
           $this->htmlmsg .= trim($data).'<br><br>';
         }
-        if ( !empty($this->htmlmsg) ) {
+        if ( !empty($this->htmlmsg) ){
           $body_pattern = "/<body([^>]*)>(.*)<\/body>/smi";
           preg_match($body_pattern, $this->htmlmsg, $body);
           if ( !empty($body[2]) ){
@@ -256,8 +256,8 @@ class mailbox{
     // but AOL uses type 1 (multipart), which is not handled here.
     // There are no PHP functions to parse embedded messages,
     // so this just appends the raw source to the main message.
-    else if ( ($structure->type === 2) && !empty($data) && strtolower($structure->subtype) === 'plain') {
-      if ( stripos($this->charset, 'ISO') !== false ) {
+    else if ( ($structure->type === 2) && !empty($data) && strtolower($structure->subtype) === 'plain'){
+      if ( stripos($this->charset, 'ISO') !== false ){
         $utfConverter = new utf8($this->charset);
         $this->plainmsg .= $utfConverter->loadCharset($this->charset) ?
           $utfConverter->strToUtf8(trim($data)) . PHP_EOL :
@@ -268,7 +268,7 @@ class mailbox{
       }
     }
     // SUBPART RECURSION
-    if ( $structure->parts ) {
+    if ( $structure->parts ){
       foreach ( $structure->parts as $partno0 => $p2 ){
         $this->get_msg_part($msgno, $p2, $partno . '.' . ($partno0+1));  // 1.2, 1.2.1, etc.
       }
@@ -312,7 +312,7 @@ class mailbox{
    * @return bool
    */
   public function create_mbox($mbox){
-    if ( $this->is_connected() ) {
+    if ( $this->is_connected() ){
       return imap_createmailbox($this->stream, $this->mbParam. $mbox);
     }
     return false;
@@ -325,7 +325,7 @@ class mailbox{
    * @return bool
    */
   public function delete_mbox($mbox){
-    if ( $this->is_connected() ) {
+    if ( $this->is_connected() ){
       return imap_deletemailbox($this->stream, $this->mbParam . $mbox);
     }
     return false;
@@ -429,7 +429,7 @@ class mailbox{
    * @return bool
    */
   public function reopen_mbox($mbox){
-    if ( $this->is_connected() ) {
+    if ( $this->is_connected() ){
       if ( in_array($mbox, $this->get_all_names_mboxes()) ){
         return imap_reopen($this->stream, $this->mbParam . $mbox);
       }
@@ -691,11 +691,11 @@ class mailbox{
     $structure = $this->get_msg_structure($msgno);
     bbn\x::log($header,'imap');
     bbn\x::log($structure,'imap');
-    if ( !$structure->parts ) {  // simple
+    if ( !$structure->parts ){  // simple
       $this->get_msg_part($msgno, $structure, 0);
     }
     else {  // multipart: cycle through each part
-      foreach ( $structure->parts as $partno0 => $p ) {
+      foreach ( $structure->parts as $partno0 => $p ){
         $this->get_msg_part($msgno, $p, $partno0 + 1);
       }
     }

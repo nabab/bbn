@@ -389,7 +389,7 @@ class str
         $res .= '_';
       }
     }
-    if ( $extension ) {
+    if ( $extension ){
       $res .= '.' . $extension;
     }
     while ( strpos($res, '__') !== false ){
@@ -576,7 +576,7 @@ class str
           return false;
         }
       }
-      else if ( !is_int($a) && !is_float($a) ) {
+      else if ( !is_int($a) && !is_float($a) ){
         return false;
       }
     }
@@ -671,7 +671,7 @@ class str
           return false;
         }
       }
-      else if ( !is_float($a) ) {
+      else if ( !is_float($a) ){
         return false;
       }
     }
@@ -848,7 +848,7 @@ class str
   {
     $path = str_replace('\\', '/', strval($path));
     $path = str_replace('/./', '/', strval($path));
-    while ( strpos($path, '//') !== false ) {
+    while ( strpos($path, '//') !== false ){
       $path = str_replace('//', '/', $path);
     }
     if ( strpos($path, '../') !== false ){
@@ -1123,7 +1123,7 @@ class str
    */
   public static function replace_once($search, $replace, $subject){
     $pos = strpos($subject, $search);
-    if ($pos !== false) {
+    if ($pos !== false){
       return substr_replace($subject, $replace, $pos, strlen($search));
     }
     return $subject;

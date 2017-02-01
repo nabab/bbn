@@ -186,8 +186,8 @@ class options extends bbn\models\cls\db
     }
     if ( !empty($opt[$this->class_cfg['arch']['options']['value']]) && bbn\str::is_json($opt[$this->class_cfg['arch']['options']['value']]) ){
       $val = json_decode($opt[$this->class_cfg['arch']['options']['value']], 1);
-      if ( bbn\x::is_assoc($val) ) {
-        foreach ($val as $k => $v) {
+      if ( bbn\x::is_assoc($val) ){
+        foreach ($val as $k => $v){
           if ( !isset($opt[$k]) ){
             $opt[$k] = $v;
           }
@@ -785,7 +785,7 @@ class options extends bbn\models\cls\db
       $list = $this->items($id);
       if ( is_array($list) ){
         $res = [];
-        foreach ($list as $i) {
+        foreach ($list as $i){
           array_push($res, $this->option($i));
         }
         return $res;
@@ -943,9 +943,9 @@ class options extends bbn\models\cls\db
    */
   public function tree_ids($id, &$res = []){
     $id = $this->from_code(func_get_args());
-    if ( bbn\str::is_integer($id) ) {
+    if ( bbn\str::is_integer($id) ){
       if ( $its = $this->items($id) ){
-        foreach ($its as $it) {
+        foreach ($its as $it){
           array_push($res, $it);
           $this->tree_ids($it, $res);
         }
@@ -1001,8 +1001,8 @@ class options extends bbn\models\cls\db
    */
   public function native_tree($code = null){
     $id = $this->from_code(func_get_args());
-    if ( bbn\str::is_integer($id) ) {
-      if ( $res = $this->native_option($id) ) {
+    if ( bbn\str::is_integer($id) ){
+      if ( $res = $this->native_option($id) ){
         $its = $this->items($id);
         if ( count($its) ){
           $res['items'] = [];
@@ -1038,15 +1038,15 @@ class options extends bbn\models\cls\db
    */
   public function tree($code = null){
     $id = $this->from_code(func_get_args());
-    if ( bbn\str::is_integer($id) && ($text = $this->text($id)) ) {
+    if ( bbn\str::is_integer($id) && ($text = $this->text($id)) ){
       $res = [
         'id' => $id,
         'text' => $text
       ];
       if ( $opts = $this->items($id) ){
         $res['items'] = [];
-        foreach ($opts as $o) {
-          if ($t = $this->tree($o)) {
+        foreach ($opts as $o){
+          if ($t = $this->tree($o)){
             array_push($res['items'], $t);
           }
         }
@@ -1108,8 +1108,8 @@ class options extends bbn\models\cls\db
       if ( $res = $this->option($id) ){
         $res['items'] = [];
         if ($opts = $this->items($id) ){
-          foreach ($opts as $o) {
-            if ($t = $this->full_tree($o)) {
+          foreach ($opts as $o){
+            if ($t = $this->full_tree($o)){
               array_push($res['items'], $t);
             }
           }
@@ -1210,7 +1210,7 @@ class options extends bbn\models\cls\db
    */
   public function parents($code = null){
     $id = $this->from_code(func_get_args());
-    if ( bbn\str::is_integer($id) ) {
+    if ( bbn\str::is_integer($id) ){
       $res = [];
       while ( bbn\str::is_integer($id_parent = $this->get_id_parent($id)) ){
         if ( in_array($id_parent, $res) ){
@@ -1354,7 +1354,7 @@ class options extends bbn\models\cls\db
    * @return string|null|false The code value, null is none, false if option not found
    */
   public function code($id){
-    if ( bbn\str::is_integer($id) ) {
+    if ( bbn\str::is_integer($id) ){
       return $this->db->get_val($this->class_cfg['table'], $this->class_cfg['arch']['options']['code'], $this->class_cfg['arch']['options']['id'], $id);
     }
     $this->log(func_get_args());
@@ -1376,7 +1376,7 @@ class options extends bbn\models\cls\db
    */
   public function text($code = null){
     $id = $this->from_code(func_get_args());
-    if ( bbn\str::is_integer($id) ) {
+    if ( bbn\str::is_integer($id) ){
       return $this->db->get_val($this->class_cfg['table'], $this->class_cfg['arch']['options']['text'], $this->class_cfg['arch']['options']['id'], $id);
     }
     $this->log(func_get_args());
@@ -1399,7 +1399,7 @@ class options extends bbn\models\cls\db
    */
   public function itext($code = null){
     $id = $this->from_code(func_get_args());
-    if ( bbn\str::is_integer($id) ) {
+    if ( bbn\str::is_integer($id) ){
       $val = $this->db->get_val($this->class_cfg['table'], $this->class_cfg['arch']['options']['text'], $this->class_cfg['arch']['options']['id'], $id);
       if ( $val ){
         return _($val);
@@ -1421,7 +1421,7 @@ class options extends bbn\models\cls\db
    * @return int|false The number of children or false if option not found
    */
   public function count($code = null){
-    if ( bbn\str::is_integer($id = $this->from_code(func_get_args())) ) {
+    if ( bbn\str::is_integer($id = $this->from_code(func_get_args())) ){
       return $this->db->count($this->class_cfg['table'], [$this->class_cfg['arch']['options']['id_parent'] => $id]);
     }
     $this->log(func_get_args());
@@ -1475,7 +1475,7 @@ class options extends bbn\models\cls\db
    * @return bool
    */
   public function is_sortable($code = null){
-    if ( bbn\str::is_integer($id = $this->from_code(func_get_args())) ) {
+    if ( bbn\str::is_integer($id = $this->from_code(func_get_args())) ){
       $cfg = $this->get_cfg($id);
       return empty($cfg['sortable']) ? false : true;
     }
@@ -1739,7 +1739,7 @@ class options extends bbn\models\cls\db
       ($id !== $this->default) &&
       ($id !== $this->root) &&
       bbn\str::is_integer(($id_parent = $this->get_id_parent($id)))
-    ) {
+    ){
       $num = 0;
       if ( $items = $this->items($id) ){
         foreach ( $items as $it ){
@@ -2028,7 +2028,7 @@ class options extends bbn\models\cls\db
       }
       if ( is_array($prop) ){
         $change = false;
-        foreach ( $prop as $k ) {
+        foreach ( $prop as $k ){
           if ( !in_array($k, $this->class_cfg['arch']['options']) ){
             $change = true;
             unset($o[$k]);

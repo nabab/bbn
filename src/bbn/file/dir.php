@@ -482,11 +482,11 @@ class dir extends bbn\models\cls\basic
           $chmod = substr(sprintf('%o', fileperms(dirname($dir))), -4);
         }
         // Attention mkdir($dir, $chmod) doesn't work!
-        $ok = mkdir($dir);
+        $ok = (!@mkdir($dir) && !is_dir($dir));
         chmod($dir, $chmod);
       }
       else{
-        $ok = mkdir($dir);
+        $ok = (!@mkdir($dir) && !is_dir($dir));
       }
       if ( !$ok ){
         return false;
@@ -565,7 +565,7 @@ class dir extends bbn\models\cls\basic
 		* @param string $dst The new destination of files
 		* @return bool
 		*/
-  public static function copy($src, $dst) {
+  public static function copy($src, $dst){
     if ( is_file($src) ){
       return copy($src, $dst);
     }

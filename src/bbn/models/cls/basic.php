@@ -39,7 +39,7 @@ abstract class basic
 	 * @return bool
 	 */
 	public function test(){
-		if ( $this->error ) {
+		if ( $this->error ){
 			return false;
 		}
 		return true;

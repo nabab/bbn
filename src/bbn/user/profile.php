@@ -66,7 +66,7 @@ class profile
    */
   public function get_id()
   {
-    if ( $this->check() ) {
+    if ( $this->check() ){
       return $this->id;
     }
   }

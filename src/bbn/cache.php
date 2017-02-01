@@ -63,7 +63,7 @@ class cache{
     else if ( substr($dir, -1) === '/' ){
       $dir = substr($dir, 0, -1);
     }
-    return $path.str::encode_filename(str_replace("../", '', str_replace("\\", "/", $dir)), true);
+    return $path.str::encode_filename(str_replace('../', '', str_replace('\\', '/', $dir)), true);
   }
 
   /**
@@ -81,15 +81,9 @@ class cache{
    */
   public static function make_hash($value){
     if ( is_object($value) || is_array($value) ){
-      $v = json_encode($value);
+      $value = json_encode($value);
     }
-    else{
-      $v = $value;
-    }
-    if ( isset($v) ){
-      return md5($v);
-    }
-    return false;
+    return md5($value);
   }
 
   /**
