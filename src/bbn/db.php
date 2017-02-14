@@ -547,7 +547,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return db
    */
   public function clear_all_cache(){
-    $this->cacher->clear();
+    $this->cacher->delete_all('bbn/db/'.$this->engine);
     return $this;
   }
 
@@ -2107,6 +2107,22 @@ class db extends \PDO implements db\actions, db\api, db\engines
         return end($r);
       }
       return $r;
+    }
+    return false;
+  }
+
+  public function fmodelize($table = '', $force = false){
+    if ( $res = call_user_func_array([$this, 'modelize'], func_get_args()) ){
+      foreach ( $res['fields'] as $n => $f ){
+        $res['fields'][$n]['name'] = $n;
+        $res['fields'][$n]['keys'] = [];
+        if ( isset($res['cols'][$n]) ){
+          foreach ( $res['cols'][$n] as $key ){
+            $res['fields'][$n]['keys'][$key] = $res['keys'][$key];
+          }
+        }
+      }
+      return $res['fields'];
     }
     return false;
   }

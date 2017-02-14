@@ -842,9 +842,10 @@ class str
    * ```
    *
    * @param string $path The path.
+   * @param boolean $allow_parent If true ../ is allowed in the path (and will come normalized).
    * @return string
    */
-  public static function parse_path($path)
+  public static function parse_path(string $path, $allow_parent = false)
   {
     $path = str_replace('\\', '/', strval($path));
     $path = str_replace('/./', '/', strval($path));
@@ -852,7 +853,25 @@ class str
       $path = str_replace('//', '/', $path);
     }
     if ( strpos($path, '../') !== false ){
-      return '';
+      if ( !$allow_parent ){
+        return '';
+      }
+      $bits = array_reverse(explode('/', $path));
+      $path = '';
+      $num_parent = 0;
+      foreach ( $bits as $i => $b ){
+        if ( $b === '..' ){
+          $num_parent++;
+        }
+        else if ( $b !== '.' ){
+          if ( $num_parent ){
+            $num_parent--;
+          }
+          else{
+            $path = empty($path) ? $b : $b.'/'.$path;
+          }
+        }
+      }
     }
     return $path;
   }

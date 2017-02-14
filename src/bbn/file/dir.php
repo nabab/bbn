@@ -471,26 +471,8 @@ class dir extends bbn\models\cls\basic
     if ( !$dir || !is_string($dir) ){
       return false;
     }
-    if ( !is_dir(dirname($dir)) ){
-      if ( !self::create_path(dirname($dir), $chmod) ){
-        return false;
-      }
-    }
     if ( !is_dir($dir) ){
-      if ( $chmod ){
-        if ( $chmod === 'parent' ){
-          $chmod = substr(sprintf('%o', fileperms(dirname($dir))), -4);
-        }
-        // Attention mkdir($dir, $chmod) doesn't work!
-        $ok = (!@mkdir($dir) && !is_dir($dir));
-        chmod($dir, $chmod);
-      }
-      else{
-        $ok = (!@mkdir($dir) && !is_dir($dir));
-      }
-      if ( !$ok ){
-        return false;
-      }
+      return mkdir($dir, 0777, true) ? $dir : false;
     }
     return $dir;
 	}

@@ -181,7 +181,7 @@ EOF
 
   public function save($filename){
     if ( $this->check() ){
-      $filename = bbn\str::parse_path($filename);
+      $filename = bbn\str::parse_path($filename, true);
       if ( !is_dir(dirname($filename)) ){
         die("Error! No destination directory");
       }

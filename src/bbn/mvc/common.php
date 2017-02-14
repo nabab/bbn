@@ -21,11 +21,10 @@ trait common {
   private function check_path(){
     $ar = func_get_args();
     foreach ( $ar as $a ){
-      $a = bbn\str::parse_path($a);
-      if ( !is_string($a) ||
-        (strpos($a,'./') !== false) ||
-        (strpos($a,'/') === 0) ){
+      $b = bbn\str::parse_path($a, true);
+      if ( empty($b) && !empty($a) ){
         $this->error("The path $a is not an acceptable value");
+        return false;
       }
     }
     return 1;

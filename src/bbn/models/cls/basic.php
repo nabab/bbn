@@ -34,18 +34,29 @@ abstract class basic
 		 */
 		$log = [];
 
-	/**
-	 * Checks whether the error property has been set (so an error happened).
-	 * @return bool
-	 */
-	public function test(){
-		if ( $this->error ){
-			return false;
-		}
-		return true;
-	}
+  /**
+   * Checks whether the error property has been set (so an error happened).
+   * @return bool
+   */
+  public function test(){
+    if ( $this->error ){
+      return false;
+    }
+    return true;
+  }
 
-	public function log(){
+  /**
+   * Checks whether the error property has been set (so an error happened).
+   * @return bool
+   */
+  public function check(){
+    if ( $this->error ){
+      return false;
+    }
+    return true;
+  }
+
+  public function log(){
 		if ( $this->is_debug() ){
 			$ar = func_get_args();
 			$cn = bbn\str::encode_filename(str_replace('\\', '_', get_class($this)));

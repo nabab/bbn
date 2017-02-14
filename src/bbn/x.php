@@ -1135,6 +1135,15 @@ class x
       if ( is_array($a) ){
         $r['items'] = self::get_tree($a);
       }
+      else if ( is_null($a) ){
+        $r['text'] .= ': null';
+      }
+      else if ( $a === false ){
+        $r['text'] .= ': false';
+      }
+      else if ( $a === true ){
+        $r['text'] .= ': true';
+      }
       else {
         $r['text'] .= ': '.(string)$a;
       }

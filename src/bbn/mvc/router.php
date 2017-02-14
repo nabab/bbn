@@ -120,7 +120,7 @@ class router {
       self::is_mode($mode) &&
       isset($this->routes['root'][$path ?: $this->alt_root])
     ){
-      return $this->parse($this->routes['root'][$path ?: $this->alt_root].'/mvc/'.( $mode === 'dom' ? 'public' : $mode ).'/');
+      return \bbn\str::parse_path($this->routes['root'][$path ?: $this->alt_root].'/mvc/'.( $mode === 'dom' ? 'public' : $mode ).'/');
     }
     return false;
   }
@@ -143,7 +143,7 @@ class router {
 
   private function parse($path){
     //return $path;
-    return bbn\str::parse_path($path);
+    return bbn\str::parse_path($path, true);
   }
 
   private function has_route($path){
@@ -205,17 +205,13 @@ class router {
                   '' : substr($tmp, strlen($this->alt_root)+1).'/'
                 ).'_ctrl.php';
               //$this->log("ALT", $alt_ctrl);
-              if ( is_file($alt_ctrl) ){
-                if ( !in_array($alt_ctrl, self::$known[$mode][$path]['checkers']) ){
-                  array_unshift(self::$known[$mode][$path]['checkers'], $alt_ctrl);
-                }
+              if ( is_file($alt_ctrl) && !in_array($alt_ctrl, self::$known[$mode][$path]['checkers']) ){
+                array_unshift(self::$known[$mode][$path]['checkers'], $alt_ctrl);
               }
             }
           }
-          if ( is_file($root.$ctrl) ){
-            if ( !in_array($root.$ctrl, self::$known[$mode][$path]['checkers']) ){
-              array_unshift(self::$known[$mode][$path]['checkers'], $root.$ctrl);
-            }
+          if ( is_file($root.$ctrl) && !in_array($root.$ctrl, self::$known[$mode][$path]['checkers']) ){
+            array_unshift(self::$known[$mode][$path]['checkers'], $root.$ctrl);
           }
           if ( $tmp === '.' ){
             $tmp = '';
@@ -359,7 +355,7 @@ class router {
       return $this->set_known([
         'file' => $file,
         'path' => $real_path,
-        'root' => dirname(dirname($root)).'/',
+        'root' => dirname($root, 2).'/',
         'request' => $path,
         'mode' => $mode,
         'plugin' => $plugin,
@@ -463,16 +459,13 @@ class router {
 
     if ( self::is_mode($mode) ){
 
-      /** @var string $path The path to the file from $root */
-      $path = $this->parse($path);
-
       // If there is a prepath defined we prepend it to the path
       if ( $this->prepath && (strpos($path, '/') !== 0) && (strpos($path, $this->prepath) !== 0) ){
         $path = $this->prepath.$path;
       }
 
       // We only try to retrieve a file path through a whole URL for controllers
-      if (in_array($mode, self::$controllers)){
+      if ( in_array($mode, self::$controllers, true) ){
         $this->mode = $mode;
         //$this->log($path);
         return $this->find_controller($path, $mode);
@@ -487,14 +480,11 @@ class router {
     return false;
   }
 
-  public function fetch_dir($dir, $mode){
+  public function fetch_dir($path, $mode){
 
     // Only for views and models
     if ( self::is_mode($mode) && !in_array($mode, self::$controllers) ){
 
-
-      /** @var string $path The path to the file from $root */
-      $path = $this->parse($dir);
 
       // If there is a prepath defined we prepend it to the path
       if ( $this->prepath && (strpos($path, '/') !== 0) && (strpos($path, $this->prepath) !== 0) ){
@@ -511,18 +501,24 @@ class router {
       }
       $dir = false;
       foreach ( self::$filetypes[$mode] as $t ){
-        if ( is_dir($root.$path) ){
-          $dir = $root . $path;
+        $dir1 = $this->parse($root.$path);
+        if ( is_dir($dir1) && (strpos($dir1, $root) === 0) ){
+          $dir = $dir1;
         }
-        else if ( $alt_path && is_dir($alt_root.substr($path, strlen($alt_path)+1)) ){
-          $dir = $alt_root . substr($path, strlen($alt_path)+1);
+        else if (
+          $alt_path &&
+          ($dir2 = $this->parse($alt_root.substr($path, strlen($alt_path)+1))) &&
+          (strpos($dir2, $alt_root) === 0) &&
+          is_dir($dir2)
+        ){
+          $dir = $dir2;
         }
         if ( $dir ){
           $res = [];
           $files = bbn\file\dir::get_files($dir);
           foreach ( $files as $f ){
-            if ( in_array(bbn\str::file_ext($f), self::$filetypes[$mode]) ){
-              array_push($res, $path.'/'.bbn\str::file_ext($f, true)[0]);
+            if ( in_array(bbn\str::file_ext($f), self::$filetypes[$mode], true) ){
+              $res[] = $path.'/'.bbn\str::file_ext($f, true)[0];
             }
           }
           return $res;

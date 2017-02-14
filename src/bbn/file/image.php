@@ -228,59 +228,75 @@ public static function jpg2pdf($jpg, $pdf){
 	 * 
 	 * @return void
 	 */
-	protected function make()
-	{
-		parent::make();
-		/* For images as string - to implement
-		if ( class_exists('\\Imagick') )
-		{
-			$this->img = new \Imagick();
-			$this->img->readImageBlob(base64_decode($this->file));
-		}
-		else if ( function_exists('imagecreatefromstring') )
-			$this->img = imagecreatefromstring($this->file);
-		*/
-		if ( $this->file ){
-			if ( !$this->img ){
-				if ( class_exists('\\Imagick') ){
-					try{
-						$this->img = new \Imagick($this->file);
-						$this->img->setInterlaceScheme();
-						$this->w = $this->img->getImageWidth();
-						$this->h = $this->img->getImageHeight();
-					}
-					catch ( \Exception $e ){
-						$this->img = false;
-						$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
-							BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
-					}
-				}
-				else if ( function_exists('imagecreatefrom'.$this->ext2) ){
-					if ( $this->img = call_user_func('imagecreatefrom'.$this->ext2,$this->file) ){
-						imageinterlace($this->img, true);
-						$this->w = imagesx($this->img);
-						$this->h = imagesy($this->img);
-						if ( imagealphablending($this->img,true) ){
-							imagesavealpha($this->img,true);
-						}
-					}
-					else{
-						$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
-							BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
-					}
-				}
-				else{
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
-						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
-				}
-			}
-		}
-		else{
-			$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
-				BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
-		}
-		return $this;
-	}
+  protected function make()
+  {
+    parent::make();
+    /* For images as string - to implement
+    if ( class_exists('\\Imagick') )
+    {
+     $this->img = new \Imagick();
+     $this->img->readImageBlob(base64_decode($this->file));
+    }
+    else if ( function_exists('imagecreatefromstring') )
+     $this->img = imagecreatefromstring($this->file);
+    */
+    if ( $this->file ){
+      if ( !$this->img ){
+        if ( class_exists('\\Imagick') ){
+          try{
+            $this->img = new \Imagick($this->file);
+            switch ( $this->get_extension() ) {
+              case 'gif':
+                $this->img->setInterlaceScheme(Imagick::INTERLACE_GIF);
+                break;
+
+              case 'jpeg':
+              case 'jpg':
+                $this->img->setInterlaceScheme(\Imagick::INTERLACE_JPEG);
+                break;
+
+              case 'png':
+                $this->img->setInterlaceScheme(\Imagick::INTERLACE_PNG);
+                break;
+
+              default:
+                $this->img->setInterlaceScheme(\Imagick::INTERLACE_UNDEFINED);
+            }
+            $this->w = $this->img->getImageWidth();
+            $this->h = $this->img->getImageHeight();
+          }
+          catch ( \Exception $e ){
+            $this->img = false;
+            $this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+              BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+          }
+        }
+        else if ( function_exists('imagecreatefrom'.$this->ext2) ){
+          if ( $this->img = call_user_func('imagecreatefrom'.$this->ext2,$this->file) ){
+            imageinterlace($this->img, true);
+            $this->w = imagesx($this->img);
+            $this->h = imagesy($this->img);
+            if ( imagealphablending($this->img,true) ){
+              imagesavealpha($this->img,true);
+            }
+          }
+          else{
+            $this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+              BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+          }
+        }
+        else{
+          $this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+            BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+        }
+      }
+    }
+    else{
+      $this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+        BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+    }
+    return $this;
+  }
 
 	/**
    * Sends the image with Content-Type.
