@@ -204,12 +204,28 @@ interface engines
 	 * @return false|array
 	 */
 	public function delete_db_user($user);
-  
-	/**
-	 * Returns an array of queries to recreate the user(s)
-	 * 
-	 * @return array
-	 */
+
+  /**
+   * Returns an array of queries to recreate the user(s)
+   *
+   * @return array
+   */
   public function get_users($user='', $host='');
+
+  /**
+   * Gets the size of a database
+   *
+   * @param string $database
+   * @return array
+   */
+  public function db_size(string $database = '');
+
+  /**
+   * Gets the status of a table
+   *
+   * @param string $table
+   * @param string $database
+   * @return array
+   */
+  public function status(string $table = '', string $database = '');
 }
-?>

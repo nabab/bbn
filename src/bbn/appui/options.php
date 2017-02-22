@@ -138,26 +138,37 @@ class options extends bbn\models\cls\db
       if ( !empty($value) ){
         $it[$c['value']] = json_encode($value);
       }
-      else if ( is_array($it[$c['value']]) ){
-        $it[$c['value']] = json_encode($it[$c['value']]);
-      }
-      else if ( empty($it[$c['value']]) ){
-        $it[$c['value']] = null;
+      else{
+        if ( empty($it[$c['value']]) ){
+          $it[$c['value']] = null;
+        }
+        else{
+          if ( is_array($it[$c['value']]) ){
+            $it[$c['value']] = json_encode($it[$c['value']]);
+          }
+        }
       }
 
       // Taking care of the config
       if ( !isset($it[$c['cfg']]) && isset($it[$c['id']]) ){
         $it[$c['cfg']] = $this->get_cfg($it[$c['id']]);
       }
-      else if ( isset($it[$c['cfg']]) && bbn\str::is_json($it[$c['cfg']]) ){
-        $it[$c['cfg']] = json_decode($it[$c['cfg']], 1);
-      }
-      else if ( empty($it[$c['cfg']]) || !is_array($it[$c['cfg']]) ){
-        $it[$c['cfg']] = [];
+      else{
+        if ( isset($it[$c['cfg']]) && bbn\str::is_json($it[$c['cfg']]) ){
+          $it[$c['cfg']] = json_decode($it[$c['cfg']], 1);
+        }
+        else{
+          if ( empty($it[$c['cfg']]) || !is_array($it[$c['cfg']]) ){
+            $it[$c['cfg']] = [];
+          }
+        }
       }
 
       // If parent is sortable and order is not defined we define it as last
-      if ( $this->is_sortable($parent['id']) && empty($it[$c['num']]) ){
+      if ( !$this->is_sortable($parent['id']) ){
+        $it[$c['num']] = null;
+      }
+      else if ( empty($it[$c['num']]) ){
         $it[$c['num']] = $parent['num_children'] + 1;
       }
       if ( !isset($it[$c['id_alias']]) || !bbn\str::is_integer($it[$c['id_alias']]) ){
@@ -1150,12 +1161,17 @@ class options extends bbn\models\cls\db
       $cfg = $this->db->select_one($c['table'], $c['arch']['options']['cfg'], [$c['arch']['options']['id'] => $id]);
       $cfg = bbn\str::is_json($cfg) ? json_decode($cfg, 1) : [];
       // Looking for parent with inheritance
-      $parents = $this->parents($id);
+      $parents = array_reverse($this->parents($id));
+      $last = count($parents) - 1;
       foreach ( $parents as $i => $p ){
-        $parent_cfg = $this->get_cfg($p);
+        $parent_cfg = $this->db->select_one($c['table'], $c['arch']['options']['cfg'], [$c['arch']['options']['id'] => $p]);
+        $parent_cfg = bbn\str::is_json($parent_cfg) ? json_decode($parent_cfg, 1) : [];
         if ( !empty($parent_cfg['inheritance']) ){
           if (
-            (($i === 0) && ($parent_cfg['inheritance'] === 'children')) ||
+            (
+              ($i === $last) &&
+              ($parent_cfg['inheritance'] === 'children')
+            ) ||
             ($parent_cfg['inheritance'] === 'cascade')
           ){
             // Keeping in the option cfg properties which don't exist in the parent
@@ -1213,7 +1229,7 @@ class options extends bbn\models\cls\db
     if ( bbn\str::is_integer($id) ){
       $res = [];
       while ( bbn\str::is_integer($id_parent = $this->get_id_parent($id)) ){
-        if ( in_array($id_parent, $res) ){
+        if ( in_array($id_parent, $res, true) ){
           break;
         }
         else{
@@ -1221,7 +1237,7 @@ class options extends bbn\models\cls\db
             break;
           }
           else{
-            array_push($res, $id_parent);
+            $res[] = $id_parent;
             $id = $id_parent;
           }
         }
@@ -1625,6 +1641,7 @@ class options extends bbn\models\cls\db
             $c['text'] => $it[$c['text']],
             $c['id_alias'] => $it[$c['id_alias']],
             $c['value'] => $it[$c['value']],
+            $c['num'] => $it[$c['num']],
             $c['cfg'] => $it[$c['cfg']],
             $c['active'] => 1
           ], [
@@ -1644,6 +1661,7 @@ class options extends bbn\models\cls\db
               $c['text'] => $it[$c['text']],
               $c['id_alias'] => $it[$c['id_alias']],
               $c['value'] => $it[$c['value']],
+              $c['num'] => $it[$c['num']],
               $c['cfg'] => $it[$c['cfg']]
             ], [
               $c['id'] => $id
@@ -1659,6 +1677,7 @@ class options extends bbn\models\cls\db
           $c['code'] => empty($it[$c['code']]) ? null : $it[$c['code']],
           $c['id_alias'] => $it[$c['id_alias']],
           $c['value'] => $it[$c['value']],
+          $c['num'] => $it[$c['num']],
           $c['cfg'] => $it[$c['cfg']],
           $c['active'] => 1
         ]))
@@ -1755,7 +1774,34 @@ class options extends bbn\models\cls\db
       }
       return $num;
     }
-    $this->log(func_get_args());
+    return false;
+  }
+
+  /**
+   * Deletes a row from the options table, deletes the cache and fix order if needed
+   *
+   * ```php
+   * bbn\x::dump($opt->remove(12));
+   * // (int) 12 Number of options deleted
+   * bbn\x::dump($opt->remove(12));
+   * // (bool) false The option doesn't exist anymore
+   * ```
+   *
+   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @return bool|int The number of affected rows or false if option not found
+   */
+  public function remove_full($code = null){
+    if (
+      bbn\str::is_integer($id = $this->from_code(func_get_args())) &&
+      ($id !== $this->default) &&
+      ($id !== $this->root)
+    ){
+      $this->delete_cache($id);
+      return $this->db->query(
+        "DELETE FROM ".
+        $this->db->tfn($this->class_cfg['table'], 1)."
+        WHERE ".$this->db->csn($this->class_cfg['arch']['options']['id'], 1)." = $id");
+    }
     return false;
   }
 
@@ -2067,13 +2113,19 @@ class options extends bbn\models\cls\db
       if ( isset($cfg['inherited_from']) ){
         unset($cfg['inherited_from']);
       }
+      $old_cfg = $this->get_cfg($id);
       $c =& $this->class_cfg;
       if ( $res = $this->db->update($c['table'], [
         $c['arch']['options']['cfg'] => $cfg ? json_encode($cfg) : null
       ], [
         $c['arch']['options']['id'] => $id
       ]) ){
-        $this->delete_cache($id, true);
+        if ( ($old_cfg['inheritance'] ?? null) !== ($cfg['inheritance'] ?? null) ){
+          $this->delete_cache($id, true);
+        }
+        else{
+          $this->delete_cache($id);
+        }
         return $res;
       }
       return 0;

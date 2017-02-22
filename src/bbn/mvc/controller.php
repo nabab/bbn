@@ -351,7 +351,7 @@ class controller implements api{
 	 * This will include a file from within the controller's path. Chainable
 	 *
 	 * @param string $file_name If .php is ommited it will be added
-	 * @return void
+	 * @return $this
 	 */
 	public function incl($file_name){
 		if ( $this->exists() ){
@@ -373,7 +373,7 @@ class controller implements api{
 	 * This will add the given string to the script property, and create it if needed. Chainable
 	 *
 	 * @param string $script The javascript chain to add
-	 * @return void
+	 * @return $this
 	 */
 	public function add_script($script){
 		if ( is_object($this->obj) ){
@@ -444,7 +444,7 @@ class controller implements api{
 	 * This will launch the controller in a new function.
 	 * It is publicly launched through check().
 	 *
-	 * @return void
+	 * @return $this
 	 */
 	public function process(){
 		if ( is_null($this->is_controlled) ){
@@ -869,7 +869,7 @@ class controller implements api{
 	 *
 	 * @params string path to the model
 	 * @params array data to send to the model
-	 * @return array|false A data model
+	 * @return $this
 	 */
 	public function set_cached_model(){
 		$args = func_get_args();
@@ -984,7 +984,7 @@ class controller implements api{
 	 * Sets the data. Chainable. Should be useless as $this->data is public. Chainable.
 	 *
 	 * @param array $data
-	 * @return void
+	 * @return $this
 	 */
 	public function set_data(array $data)
 	{
@@ -995,7 +995,7 @@ class controller implements api{
 	/**
 	 * Merges the existing data if there is with this one. Chainable.
 	 *
-	 * @return void
+	 * @return $this
 	 */
 	public function add_data(array $data){
 		$ar = func_get_args();

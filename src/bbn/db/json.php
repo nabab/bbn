@@ -260,7 +260,7 @@ class json implements db\api
             'position' => $p++,
             'null' => $row['Null'] === 'NO' ? 0 : 1,
             'key' => in_array($row['Key'], ['PRI', 'UNI', 'MUL']) ? $row['Key'] : null,
-            'default' => is_null($row['Default']) && $row['Null'] !== 'NO' ? 'NULL' : $row['Default'],
+            'default_value' => is_null($row['Default']) && $row['Null'] !== 'NO' ? 'NULL' : $row['Default'],
             'extra' => $row['Extra'],
             'signed' => 0,
             'maxlength' => 0

@@ -266,7 +266,7 @@ class sqlite implements bbn\db\engines
             'position' => $p++,
             'null' => $row['notnull'] == 0 ? 1 : 0,
             'key' => $row['pk'] == 1 ? 'PRI' : null,
-            'default' => $row['dflt_value'],
+            'default_value' => $row['dflt_value'],
             'extra' => null,
             'maxlength' => null,
             'signed' => 1
@@ -801,5 +801,33 @@ class sqlite implements bbn\db\engines
   {
     return [];
   }
+
+  public function db_size(string $database = ''){
+    if ( $database && ($this->db->current !== $database) ){
+      $cur = $this->db->current;
+      $this->db->change($database);
+    }
+
+    $q = $this->db->query('SHOW TABLE STATUS');
+    $size = 0;
+    while ( $row = $q->get_row() ){
+      $size += $row["Data_length"] + $row["Index_length"];
+    }
+    if ( isset($cur) ){
+      $this->db->change($cur);
+    }
+    return $size;
+  }
+
+  public function status(string $table = '', string $database = ''){
+    if ( $database && ($this->db->current !== $database) ){
+      $cur = $this->db->current;
+      $this->db->change($database);
+    }
+    $r = $this->db->get_row('SHOW TABLE STATUS WHERE Name LIKE ?', $table);
+    if ( isset($cur) ){
+      $this->db->change($cur);
+    }
+    return $r;
+  }
 }
-?>

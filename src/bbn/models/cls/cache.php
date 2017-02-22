@@ -18,17 +18,20 @@ use bbn;
  * @version 0.2r89
  * Todo: create a new delegation generic function for the double underscores functions
  */
-abstract class cache extends bbn\models\cls\db
+abstract class cache extends bbn\models\cls\basic
 {
 	protected
+    /**
+     * @var bbn\db
+     */
+    $db,
 		/** @var string */
 		$_cache_prefix,
 		/** @var $cacher cache */
 		$cacher;
 
-	public function __construct(bbn\db $db)
-	{
-		parent::__construct($db);
+  public function __construct(bbn\db $db){
+    $this->db = $db;
 		$this->cacher = bbn\cache::get_engine();
 		$this->_cache_prefix = bbn\str::encode_filename(str_replace('\\', '/', get_class($this))).'/';
 	}

@@ -1091,7 +1091,7 @@ class str
         }
         $st .= str_repeat('    ', $lev);
         if ( $is_assoc ){
-          $st .= ( is_string($k) ? '"'.self::escape_dquote($k).'"' : $k ). " => ";
+          $st .= ( is_string($k) ? '\''.self::escape_squote($k).'\'' : $k ). ' => ';
         }
         if ( is_array($v) ){
           $st .= self::export($v, $remove_empty, $lev+1);
@@ -1113,7 +1113,7 @@ class str
           $st .= $v;
         }
         else if ( !$remove_empty || !empty($v) ){
-          $st .= '"'.self::escape_dquote($v).'"';
+          $st .= '\''.self::escape_squote($v).'\'';
         }
         $st .= ','.PHP_EOL;
       }
@@ -1219,5 +1219,17 @@ class str
   public static function remove_comments($st){
     $pattern = '/(?:(?:\/\*(?:[^*]|(?:\*+[^*\/]))*\*+\/)|(?:(?<!\:|\\\|\')\/\/.*))/';
     return preg_replace($pattern, '', $st);
+  }
+
+  public static function say_size($bytes, $unit = 'bytes'){
+// pretty printer for byte values
+//
+    $i = 0;
+    $units = ['', 'K', 'M', 'G', 'T'];
+    while ( $bytes > 2000 ){
+      $i++;
+      $bytes /= 1024;
+    }
+    return sprintf("%5.2f %s".$unit, $bytes, $units[$i]);
   }
 }

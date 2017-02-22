@@ -193,10 +193,10 @@ class db extends \PDO implements db\actions, db\api, db\engines
     $h = str::encode_filename($this->host);
     switch ( $mode ){
       case 'columns':
-        $r = "bbn/db/".$this->engine."/".$h."/".$this->tfn($item);
+        $r = "bbn/db/".$this->engine."/".$h."/".str_replace(".", "/", $this->tfn($item));
         break;
       case 'tables':
-        $r = "bbn/db/".$this->engine."/".$h."/".$item;
+        $r = "bbn/db/".$this->engine."/".$h."/".($item ? $item : $this->db->current);
         break;
       case 'databases':
         $r = "bbn/db/".$this->engine."/".$h."/_bbn-database";
@@ -1335,17 +1335,20 @@ class db extends \PDO implements db\actions, db\api, db\engines
         ($maxlength = $tab['fields'][$id_field]['maxlength'] )&&
         ($maxlength > 1)
     ){
-      $max = pow(10, $maxlength) - 1;
+      $max = (10 ** $maxlength) - 1;
       if ( $max >= mt_getrandmax() ){
         $max = mt_getrandmax();
       }
-      if (($max > 1) && $table = $this->tfn($table, 1)){
+      if ( ($max > 1) && ($table = $this->tfn($table, 1)) ){
         $i = 0;
         do {
-          $id = mt_rand(1, $max);
+          $id = random_int(1, $max);
+          /** @todo */
+          /*
           if ( strpos($tab['fields'][$id_field]['type'], 'char') !== false ){
-            $id = substr(md5('bbn'.$id), 0, mt_rand(1, $maxlength));
+            $id = substr(md5('bbn'.$id), 0, random_int(1, 10 ** $maxlength));
           }
+          */
           $i++;
         }
         while ( ($i < 100) && $this->select($table, [$id_field], [$id_field => $id]) );
@@ -2888,4 +2891,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
     return $this->language->get_users($user, $host);
   }
 
+  public function db_size(string $database = ''){
+    return $this->language->db_size($database);
+  }
+
+  public function status(string $table = '', string $database = ''){
+    return $this->language->status($table, $database);
+  }
 }

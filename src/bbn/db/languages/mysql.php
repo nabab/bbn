@@ -136,10 +136,10 @@ class mysql implements bbn\db\engines
     }
 		return false;
 	}
-	
+
 	/**
 	 * Returns a table's simple name i.e. table
-	 * 
+	 *
 	 * @param string $table The table's name (escaped or not)
 	 * @param bool $escaped If set to true the returned string will be escaped
 	 * @return string | false
@@ -165,10 +165,10 @@ class mysql implements bbn\db\engines
     }
 		return false;
   }
-  
+
 	/**
 	 * Returns a column's full name i.e. table.column
-	 * 
+	 *
 	 * @param string $col The column's name (escaped or not)
 	 * @param string $table The table's name (escaped or not)
 	 * @param bool $escaped If set to true the returned string will be escaped
@@ -197,7 +197,7 @@ class mysql implements bbn\db\engines
 
 	/**
 	 * Returns a column's simple name i.e. column
-	 * 
+	 *
 	 * @param string $col The column's name (escaped or not)
 	 * @param bool $escaped If set to true the returned string will be escaped
 	 * @return string | false
@@ -213,7 +213,7 @@ class mysql implements bbn\db\engines
     }
     return false;
   }
-	
+
 	/**
 	 * @return array | false
 	 */
@@ -265,15 +265,24 @@ class mysql implements bbn\db\engines
             'position' => $p++,
             'null' => $row['Null'] === 'NO' ? 0 : 1,
             'key' => in_array($row['Key'], ['PRI', 'UNI', 'MUL']) ? $row['Key'] : null,
-            'default' => is_null($row['Default']) && $row['Null'] !== 'NO' ? 'NULL' : $row['Default'],
+            'default_value' => is_null($row['Default']) && $row['Null'] !== 'NO' ? 'NULL' : $row['Default'],
             'extra' => $row['Extra'],
             'signed' => 0,
             'maxlength' => 0
           ];
-          if ( strpos($row['Type'], 'enum') === 0 ){
+          if ( (strpos($row['Type'], 'enum') === 0) || (strpos($row['Type'], 'set') === 0) ){
             $r[$f]['type'] = 'enum';
-            if ( preg_match_all('/\((.*?)\)/', $row['Type'], $matches) ){
+            if (
+              preg_match_all('/\((.*?)\)/', $row['Type'], $matches) &&
+              !empty($matches[1]) &&
+              is_string($matches[1][0]) &&
+              ($matches[1][0][0] === "'")
+            ){
+              $r['values'] = explode("','", substr($matches[1][0], 1, -1));
               $r[$f]['extra'] = $matches[1][0];
+            }
+            else{
+              $r['values'] = [];
             }
           }
           else{
@@ -370,7 +379,7 @@ class mysql implements bbn\db\engines
     }
     return $r;
 	}
-	
+
 	/**
 	 * @return string
 	 */
@@ -404,7 +413,7 @@ class mysql implements bbn\db\engines
     }
     return $r;
   }
-  
+
 	/**
 	 * @return string
 	 */
@@ -440,7 +449,7 @@ class mysql implements bbn\db\engines
 		}
 		return false;
 	}
-	
+
 	/**
 	 * @return string | false
 	 */
@@ -538,7 +547,7 @@ class mysql implements bbn\db\engines
     }
     return false;
   }
-	
+
 	/**
 	 * @return string
 	 */
@@ -555,7 +564,7 @@ class mysql implements bbn\db\engines
 			}
 			$r .= "INTO $table (\n";
 			$i = 0;
-			
+
 			if ( count($fields) > 0 ){
 				foreach ( $fields as $k ){
 					if ( !isset($m['fields'][$k]) ){
@@ -616,7 +625,7 @@ class mysql implements bbn\db\engines
 		}
 		return false;
 	}
-	
+
 	/**
 	 * @return string
 	 */
@@ -670,10 +679,10 @@ class mysql implements bbn\db\engines
 		}
 		return false;
 	}
-	
+
 	/**
 	* Return an array of each values of the field $field in the table $table
-	* 
+	*
 	* @return false|array
 	*/
 	public function get_column_values($table, $field,  array $where = [], array $order = [], $limit = false, $start = 0, $php = false)
@@ -699,10 +708,10 @@ class mysql implements bbn\db\engines
 		}
 		return false;
   }
-	
+
 	/**
 	* Return an array of double values arrays: each value of the field $field in the table $table and the number of instances
-	* 
+	*
 	* @return false|array
 	*/
 	public function get_values_count($table, $field, array $where = [], $limit = false, $start = 0, $php = false)
@@ -732,9 +741,9 @@ class mysql implements bbn\db\engines
 		}
 		return false;
   }
-	
+
 	/**
-	 * @return void 
+	 * @return void
 	 */
 	public function create_db_index($table, $column, $unique = false, $length = null)
 	{
@@ -765,9 +774,9 @@ class mysql implements bbn\db\engines
 		}
 		return $this;
 	}
-	
+
 	/**
-	 * @return void 
+	 * @return void
 	 */
 	public function delete_db_index($table, $column)
 	{
@@ -848,5 +857,38 @@ class mysql implements bbn\db\engines
     }
     return $q;
   }
+
+  public function db_size(string $database = '', string $type = ''){
+    if ( $database && ($this->db->current !== $database) ){
+      $cur = $this->db->current;
+      $this->db->change($database);
+    }
+
+    $q = $this->db->query('SHOW TABLE STATUS');
+    $size = 0;
+    while ( $row = $q->get_row() ){
+      if ( !$type || ($type === 'data') ){
+        $size += $row["Data_length"];
+      }
+      if ( !$type || ($type === 'index') ){
+        $size += $row["Index_length"];
+      }
+    }
+    if ( isset($cur) ){
+      $this->db->change($cur);
+    }
+    return $size;
+  }
+
+  public function status(string $table = '', string $database = ''){
+    if ( $database && ($this->db->current !== $database) ){
+      $cur = $this->db->current;
+      $this->db->change($database);
+    }
+    $r = $this->db->get_row('SHOW TABLE STATUS WHERE Name LIKE ?', $table);
+    if ( isset($cur) ){
+      $this->db->change($cur);
+    }
+    return $r;
+  }
 }
-?>
