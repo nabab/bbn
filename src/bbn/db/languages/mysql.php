@@ -278,7 +278,7 @@ class mysql implements bbn\db\engines
               is_string($matches[1][0]) &&
               ($matches[1][0][0] === "'")
             ){
-              $r['values'] = explode("','", substr($matches[1][0], 1, -1));
+              $r[$f]['values'] = explode("','", substr($matches[1][0], 1, -1));
               $r[$f]['extra'] = $matches[1][0];
             }
             else{
