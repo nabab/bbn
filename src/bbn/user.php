@@ -568,8 +568,8 @@ class user extends models\cls\basic
     return $this;
   }
 
-  protected function set_error($code){
-    $this->error = $code;
+  protected function set_error($err){
+    $this->error = $err;
     //die(var_dump($code, $this->class_cfg['errors'][$code]));
   }
 

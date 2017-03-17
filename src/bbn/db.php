@@ -20,7 +20,8 @@ use bbn\db\query;
 class db extends \PDO implements db\actions, db\api, db\engines
 {
   use
-      db\triggers;
+      db\triggers,
+      models\tts\retriever;
 
   const
       E_CONTINUE = 'continue',
@@ -403,6 +404,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       if ( !class_exists($cls) ){
         die("Sorry the engine class $cfg[engine] does not exist");
       }
+      self::retriever_init($this);
       $this->language = new $cls($this);
       if ( isset($cfg['on_error']) ){
         $this->on_error = $cfg['on_error'];

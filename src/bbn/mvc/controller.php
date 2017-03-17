@@ -392,7 +392,7 @@ class controller implements api{
 	 * @return boolean
 	 */
 	private function control(){
-		if ( $this->file && (null === $this->is_controlled) ){
+		if ( $this->file && !isset($this->is_controlled) ){
       $ok = 1;
       if ( $this->plugin ){
         spl_autoload_register(function($class_name){
@@ -415,7 +415,7 @@ class controller implements api{
 				}
 			}
       if ( ($log = ob_get_contents()) && is_string($log) ){
-        $this->log("CONTENT FROM SUPERCONTROLLER", $log);
+			  $this->obj->content = $log;
       }
       ob_end_clean();
       // If rerouted during the checkers
@@ -718,7 +718,11 @@ class controller implements api{
 		return false;
 	}
 
-	public function combo($title = '', $data=[]){
+  /**
+   * @param string $title
+   * @param null|array $data
+   */
+  public function combo($title = '', $data = null){
 		echo $this
       ->add_data($this->get_model(bbn\x::merge_arrays($this->post, $this->data)))
       ->get_less($this->path, false);
@@ -728,8 +732,19 @@ class controller implements api{
 		else{
 			$this->set_title($title);
 		}
-		echo $this->add_js($this->path, is_array($data) && count($data) ? $data : ($data === true ? $this->data : $data), false)
-			->get_view($this->path, false);
+		if ( $tmp = $this->retrieve_var($data) ){
+		  $data = $tmp;
+    }
+    else if ( !is_array($data) ){
+      $data = $data === true ? $this->data : [];
+    }
+		if ( $this->mode === 'dom' ){
+		  $this->data['script'] = $this->get_js($this->path, $data);
+    }
+    else{
+      $this->add_js($this->path, $data, false);
+    }
+		echo $this->get_view($this->path, false);
 	}
 
   /**

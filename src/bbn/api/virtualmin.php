@@ -12,7 +12,7 @@ use bbn;
 
 class virtualmin {
 
-  const cache_name = 'bbn-api-virtualmin';
+  const cache_name = 'bbn/api/virtualmin';
 
   private
     /** @var  Virtualmin username */
@@ -200,7 +200,7 @@ class virtualmin {
    * @return string The the header url part to be executed
    */
   private function get_header_url(){
-    return "wget -O - --quiet --http-user=" . $this->user . " --http-passwd=" . $this->pass . " --no-check-certificate 'https://" . $this->hostname . ":10000/virtual-server/remote.cgi?json=1&program=";
+    return "wget -O - --quiet --http-user=" . $this->user . " --http-passwd=" . $this->pass . " --no-check-certificate 'https://" . $this->hostname . ":10000/virtual-server/remote.cgi?json=1&multiline=&program=";
   }
 
   /**
@@ -279,7 +279,7 @@ class virtualmin {
    * @param array $param
    * @return array
    */
-  public function list_commands($param = ['multiline' => 1]){
+  public function list_commands($param = []){
     //Prepping, processing and validating the create user parameters
     $param = $this->process_parameters($param);
     //Setting the last action performed
@@ -291,10 +291,7 @@ class virtualmin {
       $url_part .= "&short";
     }
 
-    if (isset($param['multiline'])){//multiline parameter is set
-      $url_part .= "&multiline=";
-    }
-    else if (isset($param['nameonly'])){//nameonly parameter is set
+    if (isset($param['nameonly'])){//nameonly parameter is set
       $url_part .= "&nameonly";
     }
     //Concatenating the closing single quote
@@ -315,7 +312,7 @@ class virtualmin {
     $this->last_action = "get-command";
 
     //Defining  the $url_part and the command to be executed
-    $url_part = "get-command&multiline=&command=".$this->sanitize($command);
+    $url_part = "get-command&command=".$this->sanitize($command);
     //Concatenating the closing single quote
     $url_part .="'";
     //Concatenating the header url and $url_part to create the full url to be executed
@@ -354,9 +351,7 @@ $config = array(
 );
 //Creating a virtualmin object
 $vm = new virtualmin($config);
-$list_commands_param = array(
-  'multiline' => 1
-);
+$list_commands_param = [];
 //$vm->list_commands($list_commands_param);
 if ($r = $vm->list_domains()){
   print_r($r);

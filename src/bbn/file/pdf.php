@@ -224,4 +224,49 @@ EOF
     }
     return $this;
   }
+
+  /**
+   * Adds custom fonts
+   *
+   * $pdf->add_fonts([
+   *  'dawningofanewday' => [
+   *    'R' => BBN_DATA_PATH.'files/DawningofaNewDay.ttf'
+   *   ]
+   * ]);
+   *
+   * @param array $fonts
+   */
+  public function add_fonts(array $fonts){
+    if ( !defined('BBN_LIB_PATH') ){
+      die('You must define BBN_LIB_PATH!');
+    }
+    if ( !is_dir(BBN_LIB_PATH . 'mpdf/mpdf/ttfonts/') ){
+      die("You don't have the mpdf/mpdf/ttfonts directory.");
+    }
+    foreach ($fonts as $f => $fs) {
+      // add to available fonts array
+      foreach ( $fs as $i => $v ){
+        if ( !empty($v) ){
+          // check if file exists in mpdf/ttfonts directory
+          if ( !is_file(BBN_LIB_PATH . 'mpdf/mpdf/ttfonts/' . basename($v)) ){
+            \bbn\file\dir::copy($v, BBN_LIB_PATH . 'mpdf/mpdf/ttfonts/' . basename($v));
+          }
+          $fs[$i] = basename($v);
+          if ( $i === 'R' ){
+            array_push($this->pdf->available_unifonts, $f);
+          }
+          else {
+            array_push($this->pdf->available_unifonts, $f.$i);
+          }
+        }
+        else {
+          unset($fs[$i]);
+        }
+      }
+      // add to fontdata array
+      $this->pdf->fontdata[$f] = $fs;
+    }
+    $this->pdf->default_available_fonts = $this->pdf->available_unifonts;
+  }
+  
 }

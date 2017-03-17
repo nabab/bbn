@@ -63,7 +63,7 @@ class environment {
 
   private function set_params($path)
   {
-    if ( null === $this->params ){
+    if ( !isset($this->params) ){
       $this->params = [];
       $tmp = explode('/', bbn\str::parse_path($path));
       foreach ( $tmp as $t ){
@@ -100,7 +100,7 @@ class environment {
     }
     // Non CLI request
     else{
-      if ( null === $this->post ){
+      if ( !isset($this->post) ){
         $this->get_post();
       }
       if ( count($this->post) ){
@@ -178,7 +178,7 @@ class environment {
    * @return boolean
    */
   public function is_cli(){
-    if ( null === $this->cli ){
+    if ( !isset($this->cli) ){
       $this->cli = (php_sapi_name() === 'cli');
     }
     return $this->cli;
@@ -226,7 +226,7 @@ class environment {
   }
 
   public function get_get(){
-    if ( null === $this->get ){
+    if ( !isset($this->get) ){
       $this->get = [];
       if ( count($_GET) > 0 ){
         $this->get = array_map(function($a){
@@ -266,7 +266,7 @@ class environment {
   }
 
   public function get_post(){
-    if ( null === $this->post ){
+    if ( !isset($this->post) ){
       $this->post = empty($_POST) ? json_decode(file_get_contents('php://input'), 1) : $_POST;
       if ( !$this->post ){
         $this->post = [];
@@ -279,7 +279,7 @@ class environment {
   }
 
   public function get_files(){
-    if ( null === $this->files ){
+    if ( !isset($this->files) ){
       $this->files = [];
       // Rebuilding the $_FILES array into $this->files in a more logical structure
       if ( count($_FILES) > 0 ){

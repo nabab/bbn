@@ -21,10 +21,14 @@ use bbn;
 abstract class basic
 {
 	protected
-		/**
-		 * @var false|string
-		 */
-		$error,
+    /**
+     * @var array
+     */
+    $errors = [],
+    /**
+     * @var false|string
+     */
+    $error = false,
 		/**
 		 * @var boolean
 		 */
@@ -54,6 +58,23 @@ abstract class basic
       return false;
     }
     return true;
+  }
+
+  protected function set_error($err){
+    $this->error = $err;
+    $this->errors[] = [
+      'time' => time(),
+      'msg' => $err
+    ];
+    return $this;
+  }
+
+  public function get_error(){
+    return $this->error;
+  }
+
+  public function get_errors(){
+
   }
 
   public function log(){
