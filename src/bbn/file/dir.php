@@ -4,7 +4,8 @@
 		*/
 namespace bbn\file;
 use bbn;
-	/**
+
+/**
 		* A class for dealing with directories (folders)
 		*
 		*
@@ -466,13 +467,28 @@ class dir extends bbn\models\cls\basic
 		* @param bool $chmod If set to true the user won't have the permissions to view the content of the folder created
 		* @return string|false
 		*/
-	public static function create_path($dir, $chmod=false)
-	{
+	public static function create_path($dir, $chmod=false){
     if ( !$dir || !is_string($dir) ){
       return false;
     }
     if ( !is_dir($dir) ){
-      return mkdir($dir, 0777, true) ? $dir : false;
+      $bits = explode('/', $dir);
+      $num = count($bits);
+      $path = empty($bits[0]) ? '/' : '';
+      foreach ( $bits as $i => $b ){
+        if ( !empty($b) ){
+          $path .= $b;
+          if ( !is_dir($path) ){
+            if ( !@mkdir($path) ){
+              return false;
+            }
+            if ( $chmod ){
+              @chmod($path, $chmod);
+            }
+          }
+          $path .= '/';
+        }
+      }
     }
     return $dir;
 	}

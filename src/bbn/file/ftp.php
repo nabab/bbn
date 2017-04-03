@@ -76,36 +76,34 @@ class ftp extends bbn\models\cls\basic
 			else if ( defined('BBN_FTP_PASS') ){
 				$this->pass = bbn\util\enc::decrypt(BBN_FTP_PASS);
 			}
-			if ( isset($this->dir, $this->host, $this->login, $this->pass) ){
-				if ( $this->dir = $this->checkPath($this->dir) )
-				{
-					if ( $this->cn = ftp_connect($this->host) )
-					{
-						if ( ftp_login($this->cn,$this->login,$this->pass) )
-						{
-							if ( @ftp_chdir($this->cn,$dir) )
-							{
-								ftp_pasv($this->cn,TRUE);
-								return;
-							}
-							else{
-								$this->error = defined('BBN_IMPOSSIBLE_TO_FIND_THE_SPECIFIED_FOLDER') ?
-									BBN_IMPOSSIBLE_TO_FIND_THE_SPECIFIED_FOLDER : 'Impossible to find the specified folder';
-							}
-						}
-						else
-						{
-							$this->cn = false;
-							$this->error = defined('BBN_IMPOSSIBLE_TO_CONNECT_TO_THE_FTP_HOST') ?
-								BBN_IMPOSSIBLE_TO_CONNECT_TO_THE_FTP_HOST : 'Impossible to connect to the FTP host';
-						}
-					}
-					else{
-						$this->error = defined('BBN_IMPOSSIBLE_TO_FIND_THE_FTP_HOST') ?
-							BBN_IMPOSSIBLE_TO_FIND_THE_FTP_HOST : 'Unable to find the FTP host';
-					}
-				}
-			}
+			if (
+			  isset($this->dir, $this->host, $this->login, $this->pass) &&
+				($this->dir = $this->checkPath($this->dir)) &&
+				($this->cn = ftp_connect($this->host))
+      ){
+        if ( ftp_login($this->cn, $this->login,$this->pass) )
+        {
+          if ( @ftp_chdir($this->cn, $this->dir) )
+          {
+            ftp_pasv($this->cn,TRUE);
+            return;
+          }
+          else{
+            $this->error = defined('BBN_IMPOSSIBLE_TO_FIND_THE_SPECIFIED_FOLDER') ?
+              BBN_IMPOSSIBLE_TO_FIND_THE_SPECIFIED_FOLDER : 'Impossible to find the specified folder';
+          }
+        }
+        else
+        {
+          $this->cn = false;
+          $this->error = defined('BBN_IMPOSSIBLE_TO_CONNECT_TO_THE_FTP_HOST') ?
+            BBN_IMPOSSIBLE_TO_CONNECT_TO_THE_FTP_HOST : 'Impossible to connect to the FTP host';
+        }
+      }
+      else{
+        $this->error = defined('BBN_IMPOSSIBLE_TO_FIND_THE_FTP_HOST') ?
+          BBN_IMPOSSIBLE_TO_FIND_THE_FTP_HOST : 'Unable to find the FTP host';
+      }
 		}
 	}
 
