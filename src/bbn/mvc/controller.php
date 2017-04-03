@@ -327,26 +327,6 @@ class controller implements api{
     }
 	}
 
-  public function has_plugin($plugin){
-    return $this->mvc->has_plugin($plugin);
-  }
-
-  public function is_plugin($plugin = null){
-    return $this->mvc->is_plugin($plugin ?: $this->plugin_name($this->plugin));
-  }
-
-  public function plugin_path($plugin = null){
-    return $this->mvc->plugin_path($plugin ?: $this->plugin_name($this->plugin));
-  }
-
-  public function plugin_url($plugin = null){
-    return $this->mvc->plugin_url($plugin ?: $this->plugin_name($this->plugin));
-  }
-
-  public function plugin_name($path = null){
-    return $this->mvc->plugin_name($path ?: $this->plugin);
-  }
-
   /**
 	 * This will include a file from within the controller's path. Chainable
 	 *

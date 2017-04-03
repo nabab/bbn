@@ -438,7 +438,7 @@ class mvc implements mvc\api{
    */
   public function get_model($path, array $data, mvc\controller $ctrl){
     if ( $route = $this->router->route($path, 'model') ){
-      $model = new mvc\model($this->db, $route, $ctrl);
+      $model = new mvc\model($this->db, $route, $ctrl, $this);
       return $model->get($data);
     }
     return [];
@@ -449,7 +449,7 @@ class mvc implements mvc\api{
       ($name = $this->plugin_name($plugin)) &&
       ($route = $this->router->route($path, 'model', BBN_APP_PATH.'plugins/'.$name.'/model/'))
     ){
-      $model = new mvc\model($this->db, $route, $ctrl);
+      $model = new mvc\model($this->db, $route, $ctrl, $this);
       return $model->get($data);
     }
   }
@@ -465,7 +465,7 @@ class mvc implements mvc\api{
       $data = $this->data;
     }
     if ( $route = $this->router->route($path, 'model') ){
-      $model = new mvc\model($this->db, $route, $ctrl);
+      $model = new mvc\model($this->db, $route, $ctrl, $this);
       return $model->get_from_cache($data);
     }
     return [];
@@ -483,7 +483,7 @@ class mvc implements mvc\api{
       $data = $this->data;
     }
     if ( $route = $this->router->route($path, 'model') ){
-      $model = new mvc\model($this->db, $route, $ctrl);
+      $model = new mvc\model($this->db, $route, $ctrl, $this);
       return $model->set_cache($data);
     }
     return [];

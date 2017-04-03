@@ -67,6 +67,11 @@ class router {
 
   private
     /**
+     * The MVC class from which the router is called
+     * @var mvc
+     */
+    $mvc,
+    /**
      * @var bool
      */
     $mode = false,
