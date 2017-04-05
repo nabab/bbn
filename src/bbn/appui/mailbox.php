@@ -13,73 +13,13 @@ class mailbox{
     $charset = '',
     $attachments = [];
 
-  function __construct($cfg){
-    if ( is_array($cfg) ){
-      $this->type = empty($cfg['type']) ? '' : $cfg['type'];
-      $this->host = $cfg['host'];
-      $this->login = $cfg['login'];
-      $this->pass = $cfg['pass'];
-      $this->directory = empty($cfg['dir']) ? '' : $cfg['dir'];
-
-      if ( !empty($cfg['type']) ){
-        switch ( $this->type ){
-          case 'hotmail':
-            $this->port = 995;
-            $this->mbParam = '{pop3.live.com:' . $this->port . '/pop3/ssl}';
-            break;
-          case 'gmail':
-            $this->port = 993;
-            $this->mbParam = '{imap.googlemail.com:' . $this->port . '/imap/ssl}';
-            break;
-          case 'pop':
-            $this->port = 110;
-            $this->mbParam = '{' . $this->host . ':' . $this->port . '/pop3}';
-            break;
-          case 'imap':
-            $this->port = 143;
-            $this->mbParam = '{' . $this->host . ':' . $this->port . '/imap/tls/novalidate-cert}';
-            break;
-          case 'local':
-            $this->host = 'localhost';
-            $this->port = 143;
-            //$this->mbParam = '{' . $this->host . ':' . $this->port . '/imap/tls/novalidate-cert}';
-            $this->mbParam = '{' . $this->host . ':' . $this->port . '/imap/notls}';
-            break;
-        }
-      }
-      else if ( !empty($cfg['port']) && !empty($cfg['param']) ){
-        $this->port = $cfg['port'];
-        $this->mbParam = '{' . $this->host . ':' . $this->port . '/' . $cfg['param'] . '}';
-      }
-
-      if ( isset($this->mbParam) ){
-        if ( $this->stream = @imap_open($this->mbParam.$this->directory, $this->login, $this->pass) ){
-          $this->status = 'ok';
-        }
-        else {
-          $this->status = imap_last_error();
-          $msg = [];
-          array_push($msg,'#################################################################');
-          array_push($msg,date('H:i:s d-m-Y').' - Error in the script!');
-          array_push($msg,'User: '.$this->login);
-          array_push($msg,'Parameters: '.$this->mbParam.$this->directory);
-          array_push($msg,'#################################################################');
-          array_push($msg,' ');
-          array_push($msg,'Error message: ');
-          array_push($msg,$this->status);
-          bbn\x::log(implode("\n",$msg),'imap');
-        }
-      }
-    }
-  }
-
   /**
    * Checks if we are connected  (Test: ok)
    *
    * @return bool
    */
   private function is_connected(){
-    return !empty($this->stream);
+    return imap_ping($this->stream);
   }
 
   /**
@@ -271,6 +211,66 @@ class mailbox{
     if ( $structure->parts ){
       foreach ( $structure->parts as $partno0 => $p2 ){
         $this->get_msg_part($msgno, $p2, $partno . '.' . ($partno0+1));  // 1.2, 1.2.1, etc.
+      }
+    }
+  }
+
+  public function __construct($cfg){
+    if ( is_array($cfg) ){
+      $this->type = empty($cfg['type']) ? '' : $cfg['type'];
+      $this->host = $cfg['host'];
+      $this->login = $cfg['login'];
+      $this->pass = $cfg['pass'];
+      $this->directory = empty($cfg['dir']) ? '' : $cfg['dir'];
+
+      if ( !empty($cfg['type']) ){
+        switch ( $this->type ){
+          case 'hotmail':
+            $this->port = 995;
+            $this->mbParam = '{pop3.live.com:' . $this->port . '/pop3/ssl}';
+            break;
+          case 'gmail':
+            $this->port = 993;
+            $this->mbParam = '{imap.googlemail.com:' . $this->port . '/imap/ssl}';
+            break;
+          case 'pop':
+            $this->port = 110;
+            $this->mbParam = '{' . $this->host . ':' . $this->port . '/pop3}';
+            break;
+          case 'imap':
+            $this->port = 143;
+            $this->mbParam = '{' . $this->host . ':' . $this->port . '/imap/tls/novalidate-cert}';
+            break;
+          case 'local':
+            $this->host = 'localhost';
+            $this->port = 143;
+            //$this->mbParam = '{' . $this->host . ':' . $this->port . '/imap/tls/novalidate-cert}';
+            $this->mbParam = '{' . $this->host . ':' . $this->port . '/imap/notls}';
+            break;
+        }
+      }
+      else if ( !empty($cfg['port']) && !empty($cfg['param']) ){
+        $this->port = $cfg['port'];
+        $this->mbParam = '{' . $this->host . ':' . $this->port . '/' . $cfg['param'] . '}';
+      }
+
+      if ( isset($this->mbParam) ){
+        if ( $this->stream = @imap_open($this->mbParam.$this->directory, $this->login, $this->pass) ){
+          $this->status = 'ok';
+        }
+        else {
+          $this->status = imap_last_error();
+          $msg = [];
+          array_push($msg,'#################################################################');
+          array_push($msg,date('H:i:s d-m-Y').' - Error in the script!');
+          array_push($msg,'User: '.$this->login);
+          array_push($msg,'Parameters: '.$this->mbParam.$this->directory);
+          array_push($msg,'#################################################################');
+          array_push($msg,' ');
+          array_push($msg,'Error message: ');
+          array_push($msg,$this->status);
+          bbn\x::log(implode("\n",$msg),'imap');
+        }
       }
     }
   }
