@@ -56,7 +56,7 @@ class ftp extends bbn\models\cls\basic
 	{
 		if ( is_array($cfg) )
 		{
-			$this->dir = $cfg['dir'] ?? '.';
+			$this->dir = $cfg['dir'] ?? '';
 			if ( isset($cfg['host']) ){
 				$this->host = $cfg['host'];
 			}
@@ -187,7 +187,7 @@ class ftp extends bbn\models\cls\basic
 		$nnew = count($new);
 		if ( $nnew > 1 )
 		{
-			$cur = explode('/',$this->path);
+			$cur = explode('/',$this->dir);
 			$ncur = count($cur);
 			if ( $cur[$ncur-1] == '' )
 			{
@@ -220,12 +220,12 @@ class ftp extends bbn\models\cls\basic
 		else if ( strpos($path,'/') === 0 )
 			return $path;
 		else if ( $path == '.' )
-			return $this->path;
+			return $this->dir;
 		else if ( strlen($path) > 0 )
 		{
 			if ( substr($path,-1) != '/' )
 				$path .= '/';
-			$path = $this->path.$path;
+			$path = $this->dir.$path;
 			if ( substr($path,0,1) != '/' )
 				$path = '/'.$path;
 			return $path;
@@ -242,7 +242,7 @@ class ftp extends bbn\models\cls\basic
       return $dir.substr($file, $slash);
 		}
 		else if ( $slash === false ){
-			return $this->path.$file;
+			return $this->dir.$file;
     }
 		return false;
 	}
@@ -255,7 +255,7 @@ class ftp extends bbn\models\cls\basic
 		{
 			if ( @ftp_chdir($this->cn, $dir) )
 			{
-				$this->path = $dir;
+				$this->dir = $dir;
 				return true;
 			}
 		}
@@ -268,7 +268,7 @@ class ftp extends bbn\models\cls\basic
 	public function checkDir($dir, $create=0){
 		if ( $dir = $this->checkPath($dir) )
 		{
-			$path = $this->path;
+			$path = $this->dir;
 			if ( $this->cdDir($dir) ){
 				$this->cdDir($path);
 				$this->error = defined('BBN_DIRECTORY_EXISTS') ?
