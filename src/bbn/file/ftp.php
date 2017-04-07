@@ -56,7 +56,7 @@ class ftp extends bbn\models\cls\basic
 	{
 		if ( is_array($cfg) )
 		{
-			$this->dir = isset($cfg['dir']) ? $cfg['dir'] : '';
+			$this->dir = $cfg['dir'] ?? '.';
 			if ( isset($cfg['host']) ){
 				$this->host = $cfg['host'];
 			}
@@ -131,7 +131,7 @@ class ftp extends bbn\models\cls\basic
         else{
           $ele['type'] = bbn\str::file_ext($file);
         }
-        array_push($res,$ele);
+        $res[] = $ele;
       }
       return $res;
     }
@@ -351,4 +351,44 @@ class ftp extends bbn\models\cls\basic
 		ftp_close($this->cn);
 	}
 
+  /**
+   * Moves or renames a file on the server
+   *
+   * @param string $old The old file full path
+   * @param string $new The new file full path
+   * @return bool
+   */
+  public function move(string $old, string $new){
+    if (
+      !empty($old) &&
+      !empty($new) &&
+      ($old = $this->checkFilePath($old)) &&
+      ftp_rename($this->cn, $old, $new)
+    ){
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Checks if a file is present in a folder on the server
+   *
+   * @param string $path The file or dir relative or full path
+   * @return bool
+   */
+  public function exists(string $path){
+    if ( !empty($path) ){
+      $dir = dirname($path);
+      $ext = \bbn\str::file_ext($path);
+      $file = basename($path);
+      if ( is_array($files = $this->listFiles($dir)) ){
+        foreach ( $files as $f ){
+          if ( $f['basename'] === $file ){
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
 }

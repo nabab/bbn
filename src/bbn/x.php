@@ -302,6 +302,46 @@ class x
     return (array) $obj;
   }
 
+  public static function js_object($obj){
+    $value_arr = [];
+    $replace_keys = [];
+
+    $transform = function($o, $idx = 0) use(&$transform, &$value_arr, &$replace_keys){
+      foreach( $o as $key => &$value ){
+        $idx++;
+        if ( is_array($value) || is_object($value) ){
+          $value = $transform($value, $idx);
+        }
+        else if (
+          is_string($value) &&
+          // Look for values starting with 'function('
+          (strpos(trim($value), 'function(') === 0)
+        ){
+          // Store function string.
+          $value_arr[] = $value;
+          // Replace function string in $foo with a ‘unique’ special key.
+          $value = "%bbn%$key%bbn%$idx%bbn%";
+          // Later on, we’ll look for the value, and replace it.
+          $replace_keys[] = '"'.$value.'"';
+        }
+      }
+      return $o;
+    };
+    // Now encode the array to json format
+    $json = json_encode($transform($obj));
+    /* $json looks like:
+    {
+      “number”:1,
+      “float”:1.5,
+      “array”:[1,2],
+      “string”:”bar”,
+      “function”:”%bbn%function%bbn%5%bbn%”
+    }
+    */
+    // Replace the special keys with the original string.
+    return count($replace_keys) ? str_replace($replace_keys, $value_arr, $json) : $json;
+  }
+
   /**
    * Indents a flat JSON string to make it more human-readable.
    *

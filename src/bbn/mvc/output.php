@@ -112,7 +112,7 @@ class output {
 
       case 'public':
         header('Content-type: application/json; charset=utf-8');
-        echo json_encode($this->obj);
+        echo \bbn\x::js_object($this->obj);
         break;
 
       case 'js':

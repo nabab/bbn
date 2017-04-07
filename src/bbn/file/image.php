@@ -113,11 +113,11 @@ public static function jpg2pdf($jpg, $pdf){
       $img->readImage($pdf);
       $img->setImageFormat('jpg');
       if ( empty($jpg) ){
-				$dir = dirname($pdf);
-				if ( !empty($dir) ){
-					$dir .= '/';
-				}
-				$f = bbn\str::file_ext($pdf, 1);
+        $dir = dirname($pdf);
+        if ( !empty($dir) ){
+          $dir .= '/';
+        }
+        $f = bbn\str::file_ext($pdf, 1);
         $jpg = $dir.$f[0].'.jpg';
       }
       if ( $num !== 'all' ){
@@ -128,24 +128,34 @@ public static function jpg2pdf($jpg, $pdf){
       }
       else{
         if ( $img->writeImages($jpg, 1) ){
-					$i = 0;
-					$r = [];
-					$f = bbn\str::file_ext($jpg, 1);
-					$dir = dirname($jpg);
-					if ( !empty($dir) ){
-						$dir .= '/';
-					}
-					while ( file_exists($dir.$f[0].'-'.$i.'.'.$f[1]) ){
-						array_push($r, $dir.$f[0].'-'.$i.'.'.$f[1]);
-						$i++;
-					}
+          $i = 0;
+          $r = [];
+          $f = bbn\str::file_ext($jpg, 1);
+          $dir = dirname($jpg);
+          if ( !empty($dir) ){
+            $dir .= '/';
+          }
+          while ( file_exists($dir.$f[0].'-'.$i.'.'.$f[1]) ){
+            array_push($r, $dir.$f[0].'-'.$i.'.'.$f[1]);
+            $i++;
+          }
+          $length = strlen((string)count($r)-1);
+          if ( $length > 1 ){
+            foreach ( $r as $i => $file ){
+              $l = strlen((string)$i);
+              if ( $l < $length ){
+                $new = $dir.$f[0].'-'.str_repeat('0', $length - $l).$i.'.'.$f[1];
+                rename($file, $new);
+                $r[$i] = $new;
+              }
+            }
+          }
           return $r;
         }
       }
     }
     return false;
   }
-
 	/**
 	 * Construct
 	 * @return void

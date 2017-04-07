@@ -447,7 +447,7 @@ class controller implements api{
     if ( $r = $this->get_view($path, 'js', $data) ){
       return '<script>'.
         ( $encapsulated ? '(function($){' : '' ).
-        ( empty($data) ? '' : 'var data = '.json_encode($data).';' ).
+        ( empty($data) ? '' : 'var data = '.\bbn\x::js_object($data).';' ).
         $r.
         ( $encapsulated ? '})(jQuery);' : '' ).
         '</script>';
@@ -467,7 +467,7 @@ class controller implements api{
     if ( $js = $this->get_view_group($files, $data, 'js') ){
       return '<script>'.
       ( $encapsulated ? '(function($){' : '' ).
-      ( empty($data) ? '' : 'var data = '.json_encode($data).';' ).
+      ( empty($data) ? '' : 'var data = '.\bbn\x::js_object($data).';' ).
       $js.
       ( $encapsulated ? '})(jQuery);' : '' ).
       '</script>';
