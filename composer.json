@@ -15,7 +15,7 @@
   "require": {
     "zordius/lightncandy": "dev-master",
     "greenlion/php-sql-parser": "dev-trunk",
-    "mpdf/mpdf": "6.1.2",
+    "mpdf/mpdf": "dev-master",
     "squizlabs/php_codesniffer": "dev-master",
     "natxet/CssMin": "dev-master",
     "sunra/php-simple-html-dom-parser": "dev-master",
