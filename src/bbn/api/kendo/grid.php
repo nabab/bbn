@@ -190,7 +190,7 @@ class grid // extends object
               ->pageSize(50);
 
       $this->grid
-              ->attr("class","appui-full-height")
+              ->attr("class","bbn-full-height")
               ->datasource($this->dataSource)
               ->editable([
                   'mode' => 'popup',

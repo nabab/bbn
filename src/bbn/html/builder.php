@@ -73,9 +73,9 @@ class builder
               'widgets' => []
           ],
           
-          $label_class = 'appui-form-label',
-          $space_class = 'appui-line-breaker',
-          $field_class = 'appui-form-field',
+          $label_class = 'bbn-form-label',
+          $space_class = 'bbn-line-breaker',
+          $field_class = 'bbn-form-field',
           $button_class = 'k-button';
   
   public static function give_id(array &$cfg){
@@ -271,7 +271,7 @@ class builder
     $container = new element([
         'tag' => 'div',
         'attr' => [
-            'class' => self::$space_class.' appui-c'
+            'class' => self::$space_class.' bbn-c'
         ]
     ]);
     $container->append($ele);
@@ -355,7 +355,7 @@ class builder
         unset($title['legend']);
       }
       $fieldset = new element($title);
-      $fieldset->add_class("appui-section k-widget");
+      $fieldset->add_class("bbn-section k-widget");
 
       if ( isset($legend_txt) ){
         $legend = new element('legend');
@@ -366,7 +366,7 @@ class builder
     else{
 
       $fieldset = new element('fieldset');
-      $fieldset->add_class("appui-section k-widget");
+      $fieldset->add_class("bbn-section k-widget");
 
       if ( !is_null($title) ){
         $legend = new element('legend');

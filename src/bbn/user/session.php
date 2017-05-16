@@ -241,26 +241,26 @@ class session
 
   public function set_data_state($name, $data){
     if ( $this->id ){
-      $this->set(md5(serialize($data)), $name, 'appui-data-state');
+      $this->set(md5(serialize($data)), $name, 'bbn-data-state');
     }
   }
 
   public function get_data_state( $name){
     if ( $this->id ){
-      $this->get($name, 'appui-data-state');
+      $this->get($name, 'bbn-data-state');
     }
   }
 
   public function has_data_state($name){
     if ( $this->id ){
-      return $this->get($name, 'appui-data-state') ? true : false;
+      return $this->get($name, 'bbn-data-state') ? true : false;
     }
     return false;
   }
 
   public function is_data_state($name, $data){
     if ( $this->id ){
-      return $this->get($name, 'appui-data-state') === md5(serialize($data));
+      return $this->get($name, 'bbn-data-state') === md5(serialize($data));
     }
     return false;
   }

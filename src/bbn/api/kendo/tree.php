@@ -97,7 +97,7 @@ class tree // extends object
               ->pageSize(20);
 
       $this->grid
-              ->attr(["class","appui-full-height"])
+              ->attr(["class","bbn-full-height"])
               ->datasource($this->dataSource)
               ->schema($this->schema)
               ->editable(['confirmation' => i18n\fr::$editable_confirm])

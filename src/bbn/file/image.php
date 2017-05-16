@@ -53,43 +53,59 @@ class image extends bbn\file
 		$allowed_extensions = ['jpg','gif','jpeg','png','svg'],
 		$max_width = 5000;
 
-/**
- * Converts one or more jpg image(s) to a pdf file. If the pdf file doesn't exist will be created.
- *
- * ```php
- * bbn\x::dump(bbn\file\image::jpg2pdf(["/home/data/test/two.jpg","/home/data/test/one.jpeg"], "/home/data/test/doc.pdf"));
- * // (string) "/home/data/test/doc.pdf"
- * ```
- *
- * @param array $jpg The path of jpg file(s) to convert
- * @param string $pdf The path of the pdf file
- * @return string|false
- */
-public static function jpg2pdf($jpg, $pdf){
- if ( class_exists('\\Imagick') ){
-  if ( is_array($jpg) ){
-   $img = new \Imagick();
-   $img->setResolution(200, 200);
-   if ( count($jpg) === 1 ){
-    $img->readImage($jpg[0]);
-   }
-   else {
-    $img->readImages($jpg);
-   }
-   $img->setImageFormat('pdf');
-   if ( count($jpg) === 1 ){
-    $img->writeImage($pdf);
-   }
-   else {
-    $img->writeImages($pdf, 1);
-   }
-   return $pdf;
+  /**
+   * Removes the alpha channel from an image (Imagick)
+   *
+   * @param \Imagick $img The Imagick object
+   * @return \Imagick
+   */
+  private static function remove_alpha_imagick(\Imagick $img){
+    if ( $img->getImageAlphaChannel() ){
+      $img->setImageBackgroundColor('#FFFFFF');
+      $img->setImageAlphaChannel(11);
+      //$img->mergeImageLayers(\Imagick::LAYERMETHOD_FLATTEN);
+      //$img->transformImageColorspace(\Imagick::COLORSPACE_RGB);
+    }
+    return $img;
   }
- }
- return false;
-}
 
-/**
+  /**
+   * Converts one or more jpg image(s) to a pdf file. If the pdf file doesn't exist will be created.
+   *
+   * ```php
+   * bbn\x::dump(bbn\file\image::jpg2pdf(["/home/data/test/two.jpg","/home/data/test/one.jpeg"], "/home/data/test/doc.pdf"));
+   * // (string) "/home/data/test/doc.pdf"
+   * ```
+   *
+   * @param array $jpg The path of jpg file(s) to convert
+   * @param string $pdf The path of the pdf file
+   * @return string|false
+   */
+  public static function jpg2pdf($jpg, $pdf){
+    if ( class_exists('\\Imagick') ){
+      if ( is_array($jpg) ){
+        $img = new \Imagick();
+        $img->setResolution(200, 200);
+        if ( count($jpg) === 1 ){
+          $img->readImage($jpg[0]);
+        }
+        else {
+          $img->readImages($jpg);
+        }
+        $img->setImageFormat('pdf');
+        if ( count($jpg) === 1 ){
+          $img->writeImage($pdf);
+        }
+        else {
+          $img->writeImages($pdf, 1);
+        }
+        return $pdf;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Converts pdf file to jpg image(s).
    *
 	 * ```php
@@ -111,7 +127,7 @@ public static function jpg2pdf($jpg, $pdf){
       $img = new \Imagick();
       $img->setResolution(200, 200);
       $img->readImage($pdf);
-      $img->setImageFormat('jpg');
+      $img->setFormat('jpg');
       if ( empty($jpg) ){
         $dir = dirname($pdf);
         if ( !empty($dir) ){
@@ -122,41 +138,43 @@ public static function jpg2pdf($jpg, $pdf){
       }
       if ( $num !== 'all' ){
         $img->setIteratorIndex($num);
+        $img = self::remove_alpha_imagick($img);
         if ( $img->writeImage($jpg) ){
           return $jpg;
         }
       }
-      else{
-        if ( $img->writeImages($jpg, 1) ){
-          $i = 0;
-          $r = [];
-          $f = bbn\str::file_ext($jpg, 1);
-          $dir = dirname($jpg);
-          if ( !empty($dir) ){
-            $dir .= '/';
-          }
-          while ( file_exists($dir.$f[0].'-'.$i.'.'.$f[1]) ){
-            array_push($r, $dir.$f[0].'-'.$i.'.'.$f[1]);
-            $i++;
-          }
-          $length = strlen((string)count($r)-1);
-          if ( $length > 1 ){
-            foreach ( $r as $i => $file ){
-              $l = strlen((string)$i);
-              if ( $l < $length ){
-                $new = $dir.$f[0].'-'.str_repeat('0', $length - $l).$i.'.'.$f[1];
-                rename($file, $new);
-                $r[$i] = $new;
-              }
+      else {
+        $pages_number = $img->getNumberImages();
+        $f = bbn\str::file_ext($jpg, 1);
+        $dir = dirname($jpg);
+        $r = [];
+        if ( !empty($dir) ){
+          $dir .= '/';
+        }
+        for ( $i = 0; $i < $pages_number; $i++ ){
+          $img->setIteratorIndex($i);
+          $img = self::remove_alpha_imagick($img);
+          $filename = $dir.$f[0];
+          if ( $pages_number > 1 ){
+            $l = strlen((string)$i);
+            if ( $l < $pages_number ){
+              $filename .= '-'.str_repeat('0', strlen($pages_number) - $l).$i;
             }
           }
+          $filename .= '.'.$f[1];
+          if ( $img->writeImage($filename) ){
+            array_push($r, $filename);
+          }
+        }
+        if ( count($r) === $pages_number ){
           return $r;
         }
       }
     }
     return false;
   }
-	/**
+
+  /**
 	 * Construct
 	 * @return void
 	 */

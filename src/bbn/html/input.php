@@ -214,7 +214,7 @@ class input extends element
 				$title = isset($this->label) ? $this->label : '';
 			}
       if ( !isset($this->cfg['field']) || $this->cfg['field'] !== 'hidden' ){
-  			$s = '<label class="appui-form-label" title="'.$title.'" for="'.$this->attr['id'].'">'.$this->label.'</label><div class="appui-form-field">'.$s.'</div>';
+  			$s = '<label class="bbn-form-label" title="'.$title.'" for="'.$this->attr['id'].'">'.$this->label.'</label><div class="bbn-form-field">'.$s.'</div>';
       }
 		}
 		return $s;
