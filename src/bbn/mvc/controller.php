@@ -511,7 +511,7 @@ class controller implements api{
 	 */
 	public function get_css($path=''){
     if ( $r = $this->get_view($path, 'css') ){
-      return '<style>'.\CssMin::minify($r).'</style>';
+      return \CssMin::minify($r);
     }
     return false;
 	}
@@ -524,7 +524,7 @@ class controller implements api{
 	 */
 	public function get_less($path=''){
     if ( $r = $this->get_view($path, 'css', false) ){
-      return '<style>' . \CssMin::minify($r) . '</style>';
+      return \CssMin::minify($r);
     }
 	}
 
@@ -703,7 +703,7 @@ class controller implements api{
    * @param null|array $data
    */
   public function combo($title = '', $data = null){
-		echo $this
+		$this->obj->css = $this
       ->add_data($this->get_model(bbn\x::merge_arrays($this->post, $this->data)))
       ->get_less($this->path, false);
 		if ( $new_title = $this->retrieve_var($title) ){
