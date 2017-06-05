@@ -73,7 +73,7 @@ class permissions extends bbn\models\cls\basic
       $id_option = $this->from_path($id_option, $type);
     }
     if ( bbn\str::is_integer($id_option) ){
-      return $this->options->get_codes($id_option);
+      return $this->pref->full_options($id_option);
     }
     return false;
   }
@@ -91,9 +91,9 @@ class permissions extends bbn\models\cls\basic
   public function get($id_option, string $type = 'page', int $id_user = null, int $id_group = null, bool $force = false){
     if ( $all = $this->get_all($id_option, $type) ){
       $r = [];
-      foreach ( $all as $k => $a ){
-        if ( $this->has($k, '', $id_user, $id_group, $force) ){
-          $r[$k] = $a;
+      foreach ( $all as $a ){
+        if ( $this->has($a['id'], '', $id_user, $id_group, $force) ){
+          $r[] = $a;
         }
       }
       return $r;

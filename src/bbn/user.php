@@ -678,7 +678,6 @@ class user extends models\cls\basic
     if ( $this->get_id() ){
       self::retriever_init($this);
     }
-    return $this;
   }
 
   /**

@@ -173,8 +173,7 @@ class preferences extends bbn\models\cls\db
 				$this->class_cfg['cols']['id_group'] => $this->id_group
 			]))
     ){
-      $this->get_cfg($res1['id'], $res1);
-      $res = bbn\x::merge_arrays($res, $res1);
+      $res = bbn\x::merge_arrays($res, $this->get_cfg($res1['id'], $res1));
 		}
     if ( $this->id_user &&
       ($res2 = $this->db->rselect($this->class_cfg['table'], $this->class_cfg['cols'], [
@@ -182,8 +181,7 @@ class preferences extends bbn\models\cls\db
 				$this->class_cfg['cols']['id_user'] => $this->id_user
 			]))
     ){
-      $this->get_cfg($res2['id'], $res2);
-      $res = bbn\x::merge_arrays($res, $res2);
+      $res = bbn\x::merge_arrays($res, $this->get_cfg($res2['id'], $res2));
 		}
     return empty($res) ? false : $res;
 	}
@@ -315,6 +313,30 @@ class preferences extends bbn\models\cls\db
 		]);
 	}
 
+  /**
+   * Updates config to user or group - and adds pref if needed.
+   *
+   * @param $id_option
+   * @param array $cfg
+   * @param int|null $id_user
+   * @param int|null $id_group
+   * @return int
+   */
+  public function add(int $id_option, array $cfg, int $id_user = null, int $id_group = null){
+    if ( $id = $this->retrieve_id($id_option, $id_user, $id_group) ){
+      $tmp = $this->get_cfg($id);
+      \bbn\x::log(["MODIFYING", $this->options->text($id_option) ,$tmp, $cfg]);
+      return $this->set_cfg($id, \bbn\x::merge_arrays($tmp, $cfg));
+    }
+    \bbn\x::log("INSERTING");
+    return $this->db->insert($this->class_cfg['table'], [
+      'id_option' => $id_option,
+      'id_user' => !$id_group && ($id_user || $this->id_user) ? ($id_user ? $id_user : $this->id_user)  : null,
+      'id_group' => $id_group ?: null,
+      'cfg' => json_encode($this->get_cfg(false, $cfg))
+    ]);
+  }
+
 	/**
 	 * Returns all the current user's permissions
 	 *
@@ -349,7 +371,7 @@ class preferences extends bbn\models\cls\db
 		if ( isset($arr[0]) ){
 			foreach ( $arr as $a ){
 				if ( isset($a['id']) && $this->has($a['id']) ){
-					array_push($res, $a);
+					$res[] = $a;
 				}
 			}
 		}
@@ -361,10 +383,96 @@ class preferences extends bbn\models\cls\db
 					if ( !isset($res['items']) ){
 						$res['items'] = [];
 					}
-					array_push($res['items'], $a);
+					$res['items'][] = $a;
 				}
 			}
 		}
 		return $res;
 	}
+
+	public function items($code){
+	  if ( $items = $this->options->items(func_get_args()) ){
+	    $res = [];
+      foreach ( $items as $i => $it ){
+        $res[] = ['id' => $it, 'num' => $i + 1];
+        if (
+          ($tmp = $this->get($it)) &&
+          (isset($tmp['num']))
+        ){
+          $res[$i]['num'] = $tmp['num'];
+        }
+      }
+      \bbn\x::sort_by($res, 'num');
+      return array_map(function($a){
+        return $a['id'];
+      }, $res);
+    }
+    return $items;
+  }
+
+  public function option($code){
+    if ( $o = $this->options->option(func_get_args()) ){
+      if ( $id = $this->retrieve_id($o['id']) ){
+        $o = bbn\x::merge_arrays($o, $this->get_cfg($id));
+      }
+      return $o;
+    }
+    return false;
+  }
+
+  public function full_options($code){
+    if ( bbn\str::is_integer($id = $this->options->from_code(func_get_args())) ){
+      $list = $this->items($id);
+      if ( is_array($list) ){
+        $res = [];
+        foreach ($list as $i){
+          array_push($res, $this->option($i));
+        }
+        return $res;
+      }
+    }
+    return false;
+  }
+
+	public function order($id_option, int $index){
+    $id_parent = $this->options->get_id_parent($id_option);
+    \bbn\x::log(["ID_PARENT", $id_parent, $this->options->text($id_parent)]);
+    if ( ($id_parent !== false) && $this->options->is_sortable($id_parent) ){
+      $items = $this->items($id_parent);
+      \bbn\x::log(["ITEMS", $items]);
+      $res = [];
+      $to_change = false;
+      foreach ( $items as $i => $it ){
+        $res[] = [
+          'id' => $it,
+          'num' => $i + 1
+        ];
+        if ( $cfg = $this->get($it) ){
+          $res[$i] = \bbn\x::merge_arrays($res[$i], $cfg);
+        }
+        if ( $it === $id_option ){
+          $to_change = $i;
+        }
+      }
+      \bbn\x::log(["TO_CHANGE", $to_change]);
+      if ( $to_change !== false ){
+        if ( $to_change > $index ){
+          for ( $i = $index; $i < $to_change; $i++ ){
+            $res[$i]['num']++;
+          }
+        }
+        else if ( $to_change < $index ){
+          for ( $i = $to_change + 1; $i <= $index; $i++ ){
+            $res[$i]['num']--;
+          }
+        }
+        $res[$to_change]['num'] = $index + 1;
+        foreach ( $res as $i => $r ){
+          \bbn\x::log(["ADDING", $r, $this->options->text($r['id'])]);
+          $this->add($r['id'], $r);
+        }
+        return $res;
+      }
+    }
+  }
 }

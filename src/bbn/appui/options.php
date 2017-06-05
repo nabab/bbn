@@ -421,9 +421,6 @@ class options extends bbn\models\cls\db
     }
     // So the target has always the same name
     $local_cache_name = implode('-', $args);
-    if ( in_array('cotisations', $args) ){
-      \bbn\x::log([$args, $local_cache_name]);
-    }
     /** @var int|false $tmp */
     if ( ($tmp = $this->_get_local_cache($local_cache_name)) !== false ){
       return $tmp;
@@ -802,7 +799,6 @@ class options extends bbn\models\cls\db
         return $res;
       }
     }
-    $this->log(func_get_args());
     return false;
   }
 
@@ -1934,11 +1930,11 @@ class options extends bbn\models\cls\db
           }
           $p++;
         }
+        $this->delete_cache($id);
         return $pos;
       }
       return $old;
     }
-    $this->log(func_get_args());
     return false;
   }
 
