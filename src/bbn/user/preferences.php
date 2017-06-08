@@ -471,6 +471,7 @@ class preferences extends bbn\models\cls\db
           \bbn\x::log(["ADDING", $r, $this->options->text($r['id'])]);
           $this->add($r['id'], $r);
         }
+        \bbn\x::sort_by($res, 'num');
         return $res;
       }
     }
