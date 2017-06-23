@@ -145,7 +145,7 @@ class tasks extends bbn\models\cls\db{
     $user = bbn\user::get_instance();
     if ( $opt && $user && isset($log['action'], $log['id_user']) ){
       $type = explode('_', $opt->code($log['action']));
-      $action = $user->get_name().' '.$opt->text($log['action']);
+      $action = $user->get_name($this->mgr->get_user($log['id_user'])).' '.$opt->text($log['action']);
       $log['value'] = empty($log['value']) ? [] : json_decode($log['value']);
       if ( !empty($log['value']) ){
         $values = [];
