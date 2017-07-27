@@ -1,0 +1,88 @@
+/**
+ * Created by BBN on 10/02/2017.
+ */
+(function($, bbn, kendo){
+  "use strict";
+
+  Vue.component('bbn-dropdown', {
+    mixins: [bbn.vue.vueComponent],
+    template: '<input class="bbn-dropdown" :value="value" ref="dropdown" @input="update($event.target.value)" @click="click($event)" @focus="focus($event)" @blur="blur($event)" :disabled="disabled ? true : false" :required="required ? true : false" :name="name">',
+    props: {
+      source: {
+        type: [String, Array, Object]
+      },
+      filterValue: {},
+      template: {},
+      valueTemplate: {},
+      cfg: {
+        type: Object,
+        default: function(){
+          return {
+            dataTextField: 'text',
+            dataValueField: 'value',
+            dataSource: []
+          };
+        }
+      }
+    },
+    methods: {
+      getOptions: function(){
+        var vm = this,
+            cfg = bbn.vue.getOptions(vm);
+        cfg.change = function(e){
+          bbn.fn.log(e);
+          vm.$emit("input", e.sender.value());
+        };
+
+        if ( cfg.template ){
+          var tmp = cfg.template;
+          cfg.template = function(e){
+            return tmp(e);
+          }
+        }
+        if ( cfg.valueTemplate ){
+          var tmp = cfg.valueTemplate;
+          cfg.valueTemplate = function(e){
+            return tmp(e);
+          }
+        }
+        return cfg;
+      }
+    },
+    data: function(){
+      return $.extend({
+        widgetName: "kendoDropDownList"
+      }, bbn.vue.treatData(this));
+    },
+    mounted: function(){
+      var vm = this,
+          cfg = vm.getOptions();
+      if ( vm.disabled ){
+        cfg.enable = false;
+      }
+      if ( vm.placeholder ){
+        cfg.optionLabel = vm.placeholder;
+      }
+      vm.widget = $(vm.$el).kendoDropDownList(cfg).data("kendoDropDownList");
+      if ( !cfg.optionLabel && cfg.dataSource.length && !vm.value ){
+        vm.widget.select(0);
+        vm.widget.trigger("change");
+      }
+    },
+    computed: {
+      dataSource: function(){
+        if ( this.source ){
+          return bbn.vue.transformDataSource(this);
+        }
+        return [];
+      }
+    },
+    watch:{
+      source: function(newDataSource){
+        bbn.fn.log("Changed DS", this.dataSource);
+        this.widget.setDataSource(this.dataSource);
+      }
+    }
+  });
+
+})(jQuery, bbn, kendo);

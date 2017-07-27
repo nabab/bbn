@@ -1,0 +1,11 @@
+{
+  "name": "upload",
+  "version": "0.0.1",
+  "authors": [
+    "Thomas Nabet <thomas.nabet@gmail.com>"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "fine-uploader": ">=5.14.3"
+  }
+}

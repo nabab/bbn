@@ -1,0 +1,19 @@
+<span class="k-textbox bbn-input">
+  <input :value="value"
+         :name="name"
+         ref="element"
+         :disabled="disabled ? true : false"
+         :required="required ? true : false"
+         :placeholder="placeholder" :type="type"
+         :autocomplete="autocomplete"
+         :maxlength="maxlength"
+         :pattern="pattern"
+         :size="size"
+         @input="update($event.target.value)"
+         @click="click($event)"
+         @focus="focus($event)"
+         @blur="blur($event)"
+         @change="change($event)"
+         @keydown="keydown($event)"
+         @keyup="keyup($event)">
+</span>

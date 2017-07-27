@@ -1,0 +1,25 @@
+div.bbn-vlist{
+  z-index: 15000;
+  position: fixed !important;
+  overflow: auto;
+  .k-menu .k-animation-container .k-animation-container,
+  .k-menu .k-menu-group .k-menu-group,
+  .k-menu-vertical .k-animation-container,
+  .k-menu-vertical .k-menu-group {
+    top: auto;
+    left: auto;
+  }
+  li{
+    .space{
+      display: inline-block;
+      width: 1.8em;
+      text-align: left;
+    }
+  }
+  >ul.options li .space i{
+    opacity: 0;
+  }
+  >ul.options li.selected .space i{
+    opacity: 1;
+  }
+}

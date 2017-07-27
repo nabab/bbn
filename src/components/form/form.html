@@ -1,0 +1,9 @@
+<form :action="action"
+      :disabled="disabled"
+      :method="method"
+      :autocomplete="autocomplete"
+      class="bbn-form k-edit-form-container"
+      @submit.prevent="submit"
+>
+  <slot></slot>
+</form>

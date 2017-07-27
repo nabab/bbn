@@ -1,0 +1,12 @@
+<span class="bbn-masked">
+  <input ref="element"
+         :disabled="disabled ? true : false"
+         :required="required ? true : false"
+         @keyup="update(widget.raw())">
+  <input :value="value"
+         ref="real_masked"
+         :name="name"
+         :disabled="disabled ? true : false"
+         type="hidden"
+  >
+</span>

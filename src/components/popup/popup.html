@@ -1,0 +1,16 @@
+<div class="bbn-popup" :style="'display: ' + (popups.length ? 'block' : 'none')">
+  <div class="bbn-popup-div"
+       v-for="(popup, i) in popups"
+  >
+    <component v-if="popup.component"
+               :is="popup.component"
+               :ref="popup.ref"
+               :source="popup.source"
+    ></component>
+    <div class="bbn-100"
+         v-else-if="popup.content"
+         v-html="popup.content"
+         :ref="popup.ref"
+    ></div>
+  </div>
+</div>

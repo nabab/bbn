@@ -1,0 +1,20 @@
+<div class="k-widget k-block bbn-treemenu">
+  <div class="bbn-block bbn-w-100 bbn-vpadded bbn-c" v-if="search">
+    <!--bbn-search name="search" style="width: 80%" ref="search" :placeholder="placeholder"></bbn-search-->
+    <bbn-input name="search"
+               style="width: 80%"
+               ref="search"
+               :placeholder="placeholder"
+               @keyup="search($event.target.value)"></bbn-input>
+  </div>
+  <div class="bbn-full-height bbn-w-100">
+    <div class="bbn-full-content">
+      <bbn-tree :source="source"
+                min-expand-level="2"
+                ref="tree"
+                :extensions="['filter']"
+                :select="go"></bbn-tree>
+    </div>
+  </div>
+</div>
+

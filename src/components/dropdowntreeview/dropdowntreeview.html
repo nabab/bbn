@@ -1,0 +1,12 @@
+<span class="bbn-dropdowntreeview">
+  <input :value="value"
+         ref="element"
+         @input="update($event.target.value)"
+         @click="click($event)"
+         @focus="focus($event)"
+         @blur="blur($event)"
+         :disabled="!!disabled"
+         :required="!!required"
+         :name="name"
+  >
+</span>

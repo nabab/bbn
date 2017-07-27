@@ -1,0 +1,69 @@
+.bbn-fisheye {
+  text-align: center;
+  height: 50px;
+  position: relative;
+  overflow: visible;
+  &.ready{
+    opacity: 1 !important;
+  }
+  &.active{
+    color: white;
+    background-color: green;
+    opacity: 0.4;
+  }
+  ul{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    z-index: 13;
+    position: absolute;
+    li {
+      text-align: center;
+      font-weight: bold;
+      text-decoration: none;
+      color: inherit;
+      width: 24px;
+      position: absolute;
+      display: block;
+      margin-top: 8px;
+      padding: 5px;
+      span{
+        display: none;
+        position: absolute;
+        left: 50%;
+        top: 150%;
+        -webkit-transform: translate(-50%, -50%);
+        -moz-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+        color: #FFF;
+        white-space: nowrap;
+        font-size: 36px;
+        text-shadow: 0 0 0.3em #000;
+      }
+      i{
+        display: inline-block;
+        border: none;
+        font-size: 24px;
+      }
+      a{
+        color: inherit !important;
+      }
+    }
+  }
+}
+#bbn_dock_menu_bin{
+  overflow: visible;
+  float: left;
+  z-index: 12;
+  height: auto;
+  width: 100px;
+  position: absolute;
+  top: 250px;
+  left: 50%;
+  margin-left: -50px;
+  display: none;
+  text-align: center;
+}
+#bbn_dock_menu_bin i{
+  font-size: 96px;
+}

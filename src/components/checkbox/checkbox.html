@@ -1,0 +1,8 @@
+<div class="bbn-iblock bbn-checkbox">
+  <input :value="value"
+         :name="name"
+         ref="element"
+         class="k-checkbox"
+         type="checkbox" :id="id" @change="update($event.target.value)" :disabled="disabled ? true : false" :required="required ? true : false">' +
+  '<label class="k-checkbox-label" :for="id" v-text="label"></label>' +
+  '</div>

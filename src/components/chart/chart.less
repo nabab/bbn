@@ -1,0 +1,92 @@
+.bbn-chart {
+  position: relative;
+  .ct-legend {
+    position: relative;
+    z-index: 10;
+    list-style: none;
+    text-align: center;
+    li {
+      position: relative;
+      padding-left: 23px;
+      margin-bottom: 3px;
+      margin-right: 10px;
+      cursor: pointer;
+      div.rect {
+        width: 12px;
+        height: 12px;
+        position: absolute;
+        left: 0;
+        border: 3px solid transparent;
+        border-radius: 2px;
+        cursor: default;
+        &.inactive {
+          background-color: transparent !important;
+        }
+      }
+    }
+    li:before {
+      width: 12px;
+      height: 12px;
+      position: absolute;
+      left: 0;
+      content: '';
+      border: 3px solid transparent;
+      border-radius: 2px;
+    }
+    li.inactive:before {
+      background: transparent;
+    }
+    &.ct-legend-inside {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+    &:not(.ct-legend-inside) li{
+      display: inline-block;
+    }
+  }
+  .ct-zoom-rect {
+    fill: rgba(200, 100, 100, 0.3);
+    stroke: red;
+  }
+  .ct-line.ct-threshold-above, .ct-point.ct-threshold-above, .ct-bar.ct-threshold-above {
+    stroke: #f05b4f;
+  }
+
+  .ct-line.ct-threshold-below, .ct-point.ct-threshold-below, .ct-bar.ct-threshold-below {
+    stroke: #59922b;
+		stroke-width: 2;
+  }
+
+  .ct-area.ct-threshold-above {
+    fill: #f05b4f;
+  }
+
+  .ct-area.ct-threshold-below {
+    fill: #59922b;
+  }
+
+  g.ct-series {
+    path.ct-slice-pie:hover {
+      
+    }
+    path.ct-slice-donut:hover {
+
+    }
+  }
+
+  .ct-chart-pie {
+    filter: drop-shadow(1px 1px 6px #000);
+
+    .ct-label{
+      font-size: 100%;
+      fill: black;
+    }
+  }
+
+  .ct-chart-pie:hover{
+    
+  }
+
+
+}

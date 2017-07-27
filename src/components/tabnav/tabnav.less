@@ -1,0 +1,95 @@
+div.bbn-tabnav {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  ul.k-tabstrip-items {
+    position: relative;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    li.k-item {
+      margin: 0 !important;
+      span.k-link {
+        padding-right: 1.25em !important;
+        padding-left: 1.25em !important;
+      }
+      div.bbn-tabnav-icons{
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        i.fa {
+          position: absolute;
+          right: 0;
+          margin: 0;
+          cursor: pointer;
+          font-size: 1em;
+        }
+        i.fa-times-circle {
+          top: 0;
+          padding-left: 0.2em;
+        }
+        i.fa-caret-down {
+          bottom: 0;
+          padding-left: 0.2em;
+          padding-top: 0.2em;
+          padding-right: 0.15em;
+          display: none;
+        }
+      }
+      div.bbn-tabnav-selected{
+        display: none;
+        position: absolute;
+        bottom: 0.15em;
+        left: 1.15em;
+        right: 1.15em;
+        height: 0.25em;
+      }
+    }
+    li.k-item.bbn-tabnav-static div.bbn-tabnav-icons i.fa-times-circle{
+      display: none
+    }
+    li.k-item.k-state-active {
+      div.bbn-tabnav-icons i.fa-caret-down{
+        display: block
+      }
+      div.bbn-tabnav-selected{
+        display: block;
+      }
+    }
+  }
+  > .k-content {
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+}
+ul.ui-tabNav-menu{
+  font-size: 1.2em !important;
+  i{
+    width: 2em;
+    text-align: center
+  }
+}
+
+ul.fancytree-container,.ui-fancytree{
+  border-width: 0 !important;
+  border-style: none !important;
+  border-color: transparent !important;
+  border: 0 !important;
+  color: inherit !important;
+  background-color: inherit !important;
+  li,span.fancytree-title{
+    color: inherit !important;
+  }
+  li,span.fancytree-title{
+    background-color: inherit !important;
+  }
+  .fancytree-active{
+    span.fancytree-title{
+      background-color: #3875D7 !important;
+      color: #EEE !important;
+    }
+  }
+}

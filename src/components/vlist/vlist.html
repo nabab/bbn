@@ -1,0 +1,49 @@
+<div class="bbn-vlist k-animation-container"
+     :style="getStyles()"
+>
+  <ul :class="'k-widget k-popup k-group k-reset ' + mode + (parent ? ' k-menugroup' : ' k-menu k-menu-vertical k-context-menu')"
+      @mouseleave.stop.prevent="leaveList($event)"
+  >
+    <li v-for="(li, idx) in menu"
+        :class="{
+          'k-item': true,
+          'k-state-default': true,
+          'k-state-hover': currentIndex === idx,
+          selected: li.selected ? true : false,
+          'k-first': idx === 0,
+          'k-last': idx === items.length - 1
+        }"
+        :style="li.items && li.items.length ? 'z-index: auto;' : ''"
+        @mouseenter="over(idx)"
+    >
+      <span class="k-link"
+            @mousedown="beforeClick"
+            @click.stop.prevent="select($event, idx)"
+            @mouseup="afterClick"
+      >
+        <span class="space" v-if="!noIcon">
+          <i v-if="li.icon" :class="li.icon"></i>
+          <i v-else-if="(mode === 'selection') && (li.selected)" class="fa fa-check"></i>
+          <i v-else-if="mode === 'options'" class="fa fa-check"></i>
+        </span>
+        <span class="text" v-html="li.text"></span>
+        <span v-if="li.items && li.items.length"
+              class="k-icon k-i-arrow-60-right"
+        ></span>
+      </span>
+      <bbn-vlist v-if="li.items && li.items.length && (idx === currentIndex)"
+                 @closeall="closeAll()"
+                 :items="li.items"
+                 :unique="li.unique"
+                 :no-icon="li.noIcon"
+                 :mode="li.mode"
+                 :left="li.left"
+                 :top="li.top"
+                 :right="li.right"
+                 :bottom="li.bottom"
+                 :max-height="li.maxHeight"
+                 :parent="true"
+      ></bbn-vlist>
+    </li>
+  </ul>
+</div>

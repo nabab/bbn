@@ -1,0 +1,19 @@
+<div class="bbn-iblock bbn-tree-input">
+  <input :value="ivalue"
+         ref="element"
+         class="k-textbox"
+         :disabled="disabled ? true : false"
+         :required="required ? true : false"
+         readonly="readonly"
+  >
+  <input type="hidden"
+         :value="value"
+         :name="name"
+         ref="hinput"
+  > &nbsp;
+  <bbn-button ref="button"
+              @click="build()"
+  >
+    <i class="fa fa-search"> </i>
+  </bbn-button>
+</div>

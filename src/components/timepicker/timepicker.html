@@ -1,0 +1,14 @@
+<span class="bbn-timepicker">
+  <input :value="ivalue"
+         ref="element"
+         :disabled="!!disabled"
+         :required="!!required"
+         :placeholder="placeholder"
+  >
+  <input :value="value"
+         ref="itimepicker"
+         :name="name"
+         :disabled="disabled ? true : false"
+         type="hidden"
+  >
+</span>

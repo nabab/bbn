@@ -1,0 +1,11 @@
+{
+  "name": "markdown",
+  "version": "0.0.1",
+  "authors": [
+    "Loredana Bruno <lore@bbn.solutions>"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "simplemde-markdown-editor": "~1.11.2"
+  }
+}

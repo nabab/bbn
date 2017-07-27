@@ -1,0 +1,92 @@
+div.bbn-widget{
+  display: inline-block;
+  margin-bottom: 1em;
+  width: 100%;
+  page-break-inside: avoid;
+  div.content{
+    box-sizing: content-box;
+    hyphens: auto;
+    word-wrap: break-word;
+    display: inline-block;
+    float: left;
+    padding:  0.5em  0.5em 1.5em 0.5em;
+    width: ~"-webkit-calc(100% - 1em)";
+    width: ~"-moz-calc(100% - 1em)";
+    width: ~"calc(100% - 1em)";
+    position: relative;
+  }
+  div.zoom{
+    position: absolute;
+    bottom: 0px;
+    right: 2px;
+    cursor: pointer;
+    opacity: 0.5;
+  }
+  div.zoom:hover, div.zoom:focus{
+    opacity: 1;
+  }
+  ul, li{
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  li{
+    padding: 0.4em 0.6em;
+    span:nth-child(even){
+      float: right;
+      clear: right;
+      text-align: right;
+    }
+    span:nth-child(odd){
+      float: left;
+      clear: left;
+    }
+    div.dropdownstats{
+      float: left;
+      clear: both;
+      width: 90%;
+      margin: 10px 6% 5px 4%;
+      span{
+        float: none;
+      }
+    }
+  }
+  div.k-header{
+    text-align: center;
+    margin-bottom: 2px;
+    h4{
+      cursor: move;
+      padding: 0;
+      margin: 0 3em;
+    }
+    span.button{
+      display: inline-block;
+      position: absolute;
+      top: 3px;
+      i{
+        font-size: large;
+        cursor: pointer;
+        opacity: 0.5;
+      }
+      a:hover i{
+        opacity: 1;
+      }
+      i:hover,i:focus {
+        opacity: 1;
+      }
+    }
+    span.button-left{
+      left: 5px;
+      padding-right: 3px;
+      float: left;
+      clear: left;
+    }
+    span.button-right{
+      float: right;
+      padding-left: 3px;
+      clear: right;
+      text-align: right;
+      right: 5px;
+    }
+  }
+}

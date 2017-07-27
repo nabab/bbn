@@ -1,0 +1,19 @@
+<div class="bbn-code bbn-100"
+     style="position: relative; overflow: auto"
+>
+  <div style="position: absolute; width: 25px; height: 25px; z-index: 2"
+       class="bbn-bg-black bbn-p bbn-middle"
+       ref="theme_button"
+  >
+    <i class="fa fa-navicon"> </i>
+  </div>
+  <div class="bbn-100" ref="code"></div>
+  <input class="bbn-100"
+         ref="element"
+         type="hidden"
+         :value="value"
+         :name="name"
+         :disabled="disabled ? true : false"
+         :required="required ? true : false"
+  >
+</div>

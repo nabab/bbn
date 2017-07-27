@@ -1,0 +1,42 @@
+<div class="k-block bbn-widget">
+  <div class="k-header header">
+    <h4 class="ui-sortable-handle" v-html="title"></h4>
+    <span class="button button-left">
+      <i v-if="closable"
+         :title="_('Close')"
+         @click="close()"
+         class="fa fa-times"></i>
+      <bbn-context v-if="hasMenu"
+                   :source="finalMenu"
+      >
+        <i :title="_('Menu')"
+           @click="close()"
+           class="fa fa-caret-down"> </i>
+      </bbn-context>
+      <i v-for="(b, idx) in buttonsLeft"
+         :title="b.text"
+         @click="actionButton(b.action)"
+         :class="b.icon"></i>
+    </span>
+    <span class="button button-right">
+      <i v-for="(b, idx) in buttonsRight"
+         :title="b.text"
+         @click="actionButton(b.action)"
+         :class="b.icon"></i>
+    </span>
+  </div>
+  <div class="content">
+    <component v-if="component" :is="component" :source="source"></component>
+    <div v-else-if="content" v-html="content"></div>
+    <ul v-else-if="items && items.length">
+      <li v-for="(it, idx) in items" v-if="currentLimit ? idx < currentLimit : true">
+        <component v-if="itemComponent" :is="itemComponent" :source="it"></component>
+        <span v-else v-html="it"></span>
+      </li>
+    </ul>
+    <div v-else><slot>Nothing to display</slot></div>
+    <div v-if="0 && zoomable && (items && items.length)" class="zoom">
+      <i class="fa fa-arrows-alt" @click="zoom"></i>
+    </div>
+  </div>
+</div>

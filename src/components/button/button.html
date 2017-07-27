@@ -1,0 +1,11 @@
+<button class="k-button"
+        ref="element"
+        @click="click"
+        :type="type"
+        :disabled="disabled ? true : false"
+        :title="text && notext ? text : (title ? title : '')"
+>
+  <i v-if="icon" :class="icon"> </i>
+  <slot></slot>
+  <span v-if="text && !notext" v-html="text"></span>
+</button>

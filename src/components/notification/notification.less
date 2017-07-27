@@ -1,0 +1,56 @@
+/* LESS Document */
+.bbn-notification{
+  color: @white;
+}
+.bbn-notification,.bbn-loading{
+  font-size: small;
+  text-align: left;
+  padding: 2em 3em;
+  .bbn-notification-close {
+    line-height: 0.7em;
+    padding: 0;
+    cursor: pointer;
+    position: absolute;
+    top: 1px;
+    right: 1px;
+  }
+  .bbn-notification-icon {
+    font-size: 24px;
+    line-height: 24px;
+    margin-right: 10px;
+  }
+  .bbn-notification-info{
+    text-align: right;
+    margin-top: 0.5em;
+    opacity: 0.8;
+  }
+  /** loader */
+  .loader {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-color: inherit;
+    border-width: 4px;
+    border-style: solid;
+    top: 50%;
+    animation: loader 4s infinite ease;
+    margin-right: 15px;
+  }
+  .loader-inner {
+    vertical-align: top;
+    display: inline-block;
+    width: 100%;
+    background-color: #FBFBFB;
+    animation: loader-inner 4s infinite ease-in;
+  }
+}
+
+.bbn-notification{
+  margin-top:20px!important;
+  margin-left:20px;
+  text-align: left;
+  font-size: small;
+  .date{
+    color:grey
+  }
+}

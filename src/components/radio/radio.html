@@ -1,0 +1,20 @@
+<div class="bbn-iblock bbn-radio">
+  <div class="bbn-iblock"
+       v-for="d in dataSource"
+  >
+    <input :value="d.value"
+           ref="element"
+           :name="name" ref="checkbox"
+           class="k-radio"
+           type="radio"
+           :disabled="disabled ? true : false"
+           :required="required ? true : false"
+           :id="name + '_' + d.value"
+    >
+    <label class="k-radio-label"
+           v-text="d.text"
+           :for="name + \'_\' + d.value"
+    ></label>
+    <div class="bbn-iblock" v-html="separator"></div>
+  </div>
+</div>
