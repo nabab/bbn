@@ -7,30 +7,30 @@
   /**
    * Classic input with normalized appearance
    */
-  Vue.component('bbn-notification', {
+  Vue.component('bbn-message', {
     mixins: [bbn.vue.optionComponent],
     template: '#bbn-tpl-component-message',
     props:{
       position: {},
       cfg: {
         type: Object,
-        default: function(){
+        default(){
           return {
             position: "tr"
           };
         }
       }
     },
-    data: function(){
+    data(){
       return {
-        _todo: {
-          _num: 0
+        todo: {
         },
-        _isShown: false,
+        isShown: false,
+        num: 0
       };
     },
     methods: {
-      _getCfg: function (obj, type, timeout) {
+      _getCfg(obj, type, timeout) {
         var group = type ? type : 'info',
             cfg = {
               time: new Date(),
@@ -65,15 +65,15 @@
         return cfg;
       },
 
-      _getClass: function(cfg){
+      _getClass(cfg){
         return 'bbn-notification-section-' + cfg.cat;
       },
 
-      _getTitleHTML: function(cfg){
+      _getTitleHTML(cfg){
         return '<h5 class="ui dividing header">' + cfg.title + '</h5>';
       },
 
-      _getItemHTML: function(cfg){
+      _getItemHTML(cfg){
         if ( cfg.time && cfg.html ){
           var m = moment(cfg.time);
           return '<div class="bbn-form-label" style="width: 130px">' +
@@ -86,11 +86,11 @@
         return '';
       },
 
-      _getHTML: function(cfg){
+      _getHTML(cfg){
         return '<div class="bbn-form-full ' + this._getClass(cfg) + '">' + this._getTitleHTML(cfg) + this._getItemHTML(cfg) + '</div>';
       },
 
-      _addHTML: function(cfg){
+      _addHTML(cfg){
         var $cont = $(".bbn-notification:visible"),
             $ele = $("." + this._getClass(cfg), $cont[0]);
         if ( !$cont.length ){
@@ -115,10 +115,10 @@
         $cont.bbn("analyzeContent", true);
       },
 
-      _callWidget: function(cfg){
-        var md = this,
-            uncertain = {};
-        this._isShown = cfg.type;
+      _callWidget(cfg){
+        const vm = this;
+        var uncertain = {};
+        vm.isShown = cfg.type;
         if ( cfg.close ){
           uncertain.close = cfg.close;
         }
@@ -126,17 +126,17 @@
           uncertain.delay = cfg.timeout;
         }
         $.notifyBar($.extend({
-          html: '<div class="bbn-notification">' + md._getHTML(cfg) + '</div>',
+          html: '<div class="bbn-notification">' + vm._getHTML(cfg) + '</div>',
           cssClass: cfg.type,
           closeOnClick: false,
-          onBeforeHide: function(){
-            md._isShown = false;
+          onBeforeHide(){
+            vm.isShown = false;
             //bbn.fn.log($(".bbn-notification:visible").length, $(".bbn-notification:visible").data("bbn-data"));
             if ( cfg.onClose ){
               cfg.onClose(cfg.data ? cfg.data : []);
             }
           },
-          onShow: function(){
+          onShow(){
             var $n = $(".bbn-notification:visible").redraw();
             if ( cfg.data ){
               $n.data("bbn-data", [cfg.data]);
@@ -144,30 +144,31 @@
           }
         }, uncertain));
       },
-      success: function (obj, timeout) {
+      success(obj, timeout) {
         return this.show(obj, "success", timeout);
       },
 
-      info: function (obj, timeout) {
+      info(obj, timeout) {
         return this.show(obj, "info", timeout ? timeout : false);
       },
 
-      warning: function (obj, timeout) {
+      warning(obj, timeout) {
         return this.show(obj, "warning", timeout ? timeout : false);
       },
 
-      error: function (obj, timeout) {
+      error(obj, timeout) {
         return this.show(obj, "error", timeout === undefined ? 2000 : timeout);
       },
 
-      show: function (obj, type, timeout) {
+      show(obj, type, timeout) {
+        const vm = this;
         if ( !$.notifyBar ) {
           alert("The library notifyBar is needed for bbn.app.messages");
           return false;
         }
-        var cfg = md._getCfg(obj, type, timeout);
-        if ( md._isShown ){
-          if ( md._isShown === cfg.type ){
+        var cfg = vm._getCfg(obj, type, timeout);
+        if ( vm.isShown ){
+          if ( vm.isShown === cfg.type ){
             if ( cfg.close ) {
               addHTML(cfg);
             }
@@ -188,7 +189,7 @@
         }
       },
 
-      setID: function (id) {
+      setID(id) {
         if (!id) {
           id = (new Date()).getMilliseconds();
         }
@@ -196,13 +197,13 @@
         return id;
       },
 
-      getFromID: function (id) {
+      getFromID(id) {
         return widget.getNotifications().filter(function () {
           return $(this).data("bbn-id") === id;
         }).first();
       },
 
-      deleteFromID: function (id) {
+      deleteFromID(id) {
         var ele = this.getFromID(id),
             close = ele.find(".bbn-notification-close");
         if (close.length) {
@@ -215,21 +216,21 @@
         }
       },
 
-      deleteAll: function () {
+      deleteAll() {
         widget.hide();
       },
     },
-    mounted: function(){
-      var vm = this;
+    mounted(){
+      const vm = this;
       setInterval(function(){
-        if ( vm._todo._num && !vm._isShown ){
-          for ( var n in vm._todo ){
-            if ( (n.indexOf('_') !== 0) && vm._todo[n].items.length ){
-              $.each(vm._todo[n].items, function(i, v){
+        if ( vm.num && !vm.isShown ){
+          for ( var n in vm.todo ){
+            if ( vm.todo[n].items.length ){
+              $.each(vm.todo[n].items, function(i, v){
                 vm.show(v, v.type);
               });
-              delete vm._todo[n];
-              vm._todo._num--;
+              delete vm.todo[n];
+              vm.num--;
               break;
             }
           }
@@ -239,4 +240,4 @@
     },
 
   });
-})(jQuery);
+})(window.jQuery, window.bbn, window.kendo);

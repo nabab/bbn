@@ -187,4 +187,4 @@
       }).data("kendoNotification");
     },
   });
-})(jQuery, bbn, kendo);
+})(window.jQuery, window.bbn, window.kendo);

@@ -11,17 +11,24 @@
     mixins: [bbn.vue.optionComponent],
     template: '#bbn-tpl-component-list',
     props: {
-      expandMode: {},
-      source: {},
-      select: {},
-      itemClass: {},
+      expandMode: {
+        type: String
+      },
+      source: {
+        type: [Array, Object]
+      },
+      itemClass: {
+        type: String
+      },
+      selected: {
+        type: Number
+      },
       cfg: {
         type: Object,
         default: function(){
           return {
             loadOnDemand: false,
             // spriteCssClass: "rootfolder",
-            select:{},
             // template:'<span><b></b></span>',
             expandMode: "single",
             dataSource: [],
@@ -39,6 +46,7 @@
     },
     data: function(){
       return $.extend({
+        selectedIndex: null,
         widgetName: "kendoPanelBar",
       }, bbn.vue.treatData(this));
     },
@@ -47,7 +55,7 @@
         var vm = this,
             data = obj.item,
             cfg = bbn.vue.getOptions(vm),
-            cls = cfg.itemClass(data),
+            cls = cfg.itemClass ? ($.isFunction(cfg.itemClass) ? cfg.itemClass(data) : cfg.itemClass) : '',
             tpl = '';
         if ( cls ){
           tpl += '<span class="' + cls + '">';
@@ -74,6 +82,13 @@
             cfg = bbn.vue.getOptions(vm);
         delete cfg.source;
         cfg.template = vm.drawItem;
+        cfg.select = function(e){
+          let idx = $(e.item).index();
+          if ( idx !== vm.selectedIndex ){
+            vm.selectedIndex = idx;
+            vm.$emit("select", idx, vm.dataSource[idx]);
+          }
+        };
         return cfg;
       }
     },
@@ -88,6 +103,7 @@
     mounted: function(){
       var vm = this,
           cfg = this.getOptions();
+      cfg.dataSource = vm.dataSource;
       vm.widget = $(this.$el).kendoPanelBar(cfg).data("kendoPanelBar");
 
     },

@@ -36,11 +36,11 @@
         this.update(this.filterValue);
       },
       listHeight: function(){
-        var vm = this,
-            $ele = $(vm.$refs.element),
+        const vm = this;
+        let $ele = $(vm.$refs.element),
             pos = $ele.offset(),
             h = $ele.height();
-        return $(window).height() - pos.top - h - 30;
+        return pos ? $(window).height() - pos.top - h - 30 : 0;
       },
       getOptions: function(){
         var vm = this,

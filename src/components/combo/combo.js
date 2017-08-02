@@ -34,7 +34,7 @@
       }, bbn.vue.treatData(this));
     },
     mounted: function(){
-      this.widget = $(this.$ref.element).kendoComboBox(this.getOptions()).data("kendoComboBox");
+      this.widget = $(this.$refs.element).kendoComboBox(this.getOptions()).data("kendoComboBox");
     },
     computed: {
       dataSource: function(){

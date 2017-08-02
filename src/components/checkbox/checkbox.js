@@ -6,6 +6,14 @@
   Vue.component('bbn-checkbox', {
     template: '#bbn-tpl-component-checkbox',
     props: {
+      required: {},
+      value: {},
+      name: {
+        type: String
+      },
+      id: {
+        type: String
+      },
       disabled: {},
       label: {
         type: String,

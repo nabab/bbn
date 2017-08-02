@@ -1,0 +1,19 @@
+<div class="bbn-json-editor bbn-100 bbn-block">
+  <div class="bbn-100 bbn-block"
+       ref="element"
+       @click="click($event)"
+       @focus="focus($event)"
+       @blur="blur($event)"
+       @keydown="keydown($event)"
+       @keyup="keyup($event)"
+  >
+  
+  </div>
+  <input :value="value"
+         type="hidden"
+         ref="input"
+         :name="name"
+         :disabled="disabled"
+         :readonly="readonly"
+  >
+</div>

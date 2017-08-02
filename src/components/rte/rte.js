@@ -40,7 +40,7 @@
     mounted: function(){
       var vm = this,
           cfg = vm.getOptions(),
-          $ele = $(vm.$el);
+          $ele = $(vm.$refs.element);
       vm.widget = $ele.trumbowyg({
         lang: 'fr',
         resetCss: true

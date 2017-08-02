@@ -1,0 +1,11 @@
+{
+  "name": "json-editor",
+  "version": "0.0.1",
+  "authors": [
+    "BBN Solutions <support@bbn.solutions>"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "jsoneditor": "~5.9.3"
+  }
+}
