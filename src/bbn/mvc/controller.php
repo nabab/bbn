@@ -376,7 +376,10 @@ class controller implements api{
       $ok = 1;
       if ( $this->plugin ){
         spl_autoload_register(function($class_name){
-          if ( strpos($class_name,'/') === false && strpos($class_name,'.') === false ){
+          if (
+            (strpos($class_name,'/') === false) &&
+            strpos($class_name,'.') === false
+          ){
             $cls = explode('\\', $class_name);
             $path = implode('/', $cls);
             if ( file_exists($this->plugin_path().'lib/'.$path.'.php') ){
@@ -702,14 +705,14 @@ class controller implements api{
    * @param string $title
    * @param null|array $data
    */
-  public function combo($title = '', $data = null){
+  public function combo($title = null, $data = null){
 		$this->obj->css = $this
       ->add_data($this->get_model(bbn\x::merge_arrays($this->post, $this->data)))
       ->get_less($this->path, false);
 		if ( $new_title = $this->retrieve_var($title) ){
 			$this->set_title($new_title);
 		}
-		else{
+		else if ( $title ){
 			$this->set_title($title);
 		}
 		if ( $tmp = $this->retrieve_var($data) ){

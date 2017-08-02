@@ -795,9 +795,6 @@ class mapper extends bbn\models\cls\db{
 						if ( $col_history && ($col !== bbn\appui\history::$hcol) ){
 							$config->history = 1;
 						}
-						if ( isset($f['default']) ){
-							$config->default = $f['default'];
-						}
 						if ( !empty($f['extra']) ){
 							$config->extra = $f['extra'];
 						}
@@ -824,7 +821,7 @@ class mapper extends bbn\models\cls\db{
 							'type' => $f['type'],
 							'null' => $f['null'],
               'key' => $f['key'],
-              'default' => $f['default'],
+              'default' => $f['default_value'],
 							'config' => json_encode($config)
 						]);
 					}
@@ -836,11 +833,13 @@ class mapper extends bbn\models\cls\db{
             $pos = 1;
             foreach ( $arr['columns'] as $c ){
               $this->db->insert_update($this->admin_db.'.'.$this->prefix.'keys', [
-                'id' => $t.'.'.$c.'.'.$k,
+                'id' => $t.'.'.$k,
                 'key' => $k,
+                'table' => $t,
                 'column' => $t.'.'.$c,
                 'position' => $pos,
-                'ref_column' => is_null($arr['ref_column']) ? null : $arr['ref_db'].'.'.$arr['ref_table'].'.'.$arr['ref_column']
+                'ref_column' => is_null($arr['ref_column']) ? null : $arr['ref_db'].'.'.$arr['ref_table'].'.'.$arr['ref_column'],
+                'unique' => $arr['unique']
               ]);
               $pos++;
             }

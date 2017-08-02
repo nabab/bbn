@@ -190,24 +190,30 @@ interface engines
 	 * @return false|array
 	 */
 	public function delete_db_index($table, $column);
-	
-	/**
-	 * Creates a database user
-	 * 
-	 * @return false|array
-	 */
+
+  /**
+   * Creates a database user
+   *
+   * @param $user
+   * @param $pass
+   * @param $db
+   * @return array|false
+   */
 	public function create_db_user($user, $pass, $db);
-	
-	/**
-	 * Deletes a database user
-	 * 
-	 * @return false|array
-	 */
+
+  /**
+   * Deletes a database user
+   *
+   * @param $user
+   * @return array|false
+   */
 	public function delete_db_user($user);
 
   /**
    * Returns an array of queries to recreate the user(s)
    *
+   * @param string $user
+   * @param string $host
    * @return array
    */
   public function get_users($user='', $host='');
@@ -216,9 +222,19 @@ interface engines
    * Gets the size of a database
    *
    * @param string $database
+   * @param string $type
    * @return array
    */
-  public function db_size(string $database = '');
+  public function db_size(string $database = '', string $type = '');
+
+  /**
+   * Gets the size of a table
+   *
+   * @param string $table
+   * @param string $type
+   * @return array
+   */
+  public function table_size(string $table, string $type = '');
 
   /**
    * Gets the status of a table

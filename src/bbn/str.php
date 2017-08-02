@@ -79,6 +79,25 @@ class str
     return $st;
   }
 
+
+
+  /**
+   * Escape all quotes (single and double) from a given string.
+   *
+   * ```php
+   * \bbn\x::dump(\bbn\str::escape_dquotes('the "Gay Pride" is is Putin\'s favorite'));
+   * // (string) "the \"Gay Pride\" is is Putin\'s favorite"
+   * ```
+   *
+   * @param string $st The string to escape.
+   * @return string
+   */
+  public static function escape_all_quotes($st)
+  {
+    return self::escape_dquotes(self::escape_squotes($st));
+  }
+
+
   /**
    * Escape string in double quotes.
    *
@@ -1221,14 +1240,17 @@ class str
     return preg_replace($pattern, '', $st);
   }
 
-  public static function say_size($bytes, $unit = 'bytes'){
+  public static function say_size($bytes, $unit = 'B', $stop = false){
 // pretty printer for byte values
 //
     $i = 0;
     $units = ['', 'K', 'M', 'G', 'T'];
-    while ( $bytes > 2000 ){
+    while ( $stop || ($bytes > 2000) ){
       $i++;
       $bytes /= 1024;
+      if ( $stop === $units[$i] ){
+        break;
+      }
     }
     return sprintf("%5.2f %s".$unit, $bytes, $units[$i]);
   }

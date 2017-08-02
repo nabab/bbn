@@ -880,6 +880,20 @@ class mysql implements bbn\db\engines
     return $size;
   }
 
+  public function table_size(string $table, string $type = ''){
+    $size = 0;
+    if ( \bbn\str::check_name($table) ){
+      $row = $this->db->get_row('SHOW TABLE STATUS WHERE Name LIKE ?', $table);
+      if ( !$type || (strtolower($type) === 'index') ){
+        $size += $row["Index_length"];
+      }
+      if ( !$type || (strtolower($type) === 'data') ){
+        $size += $row["Data_length"];
+      }
+    }
+    return $size;
+  }
+
   public function status(string $table = '', string $database = ''){
     if ( $database && ($this->db->current !== $database) ){
       $cur = $this->db->current;

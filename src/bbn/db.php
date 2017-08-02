@@ -2893,8 +2893,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
     return $this->language->get_users($user, $host);
   }
 
-  public function db_size(string $database = ''){
-    return $this->language->db_size($database);
+  public function db_size(string $database = '', string $type = ''){
+    return $this->language->db_size($database, $type);
+  }
+
+  public function table_size(string $table, string $type = ''){
+    return $this->language->table_size($table, $type);
   }
 
   public function status(string $table = '', string $database = ''){

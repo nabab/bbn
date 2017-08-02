@@ -13,7 +13,6 @@
     }
   ],
   "require": {
-    "zordius/lightncandy": "dev-master",
     "greenlion/php-sql-parser": "dev-trunk",
     "mpdf/mpdf": "6.1.2",
     "squizlabs/php_codesniffer": "dev-master",
@@ -32,7 +31,11 @@
     "pear/archive_tar": "dev-master",
     "alchemy/zippy": "dev-master",
     "gettext/gettext": "dev-master",
-    "nesbot/carbon": "dev-master"
+    "nesbot/carbon": "dev-master",
+    "gears/pdf": "dev-master",
+    "nikic/php-parser": "dev-master",
+    "sabre/dav": "dev-master",
+    "erusev/parsedown": "dev-master"
   },
   "autoload": {
     "psr-0": {"bbn": "src/"}

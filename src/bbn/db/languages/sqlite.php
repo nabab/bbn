@@ -802,21 +802,12 @@ class sqlite implements bbn\db\engines
     return [];
   }
 
-  public function db_size(string $database = ''){
-    if ( $database && ($this->db->current !== $database) ){
-      $cur = $this->db->current;
-      $this->db->change($database);
-    }
+  public function db_size(string $database = '', string $type = ''){
+    return @filesize($database) ?: 0;
+  }
 
-    $q = $this->db->query('SHOW TABLE STATUS');
-    $size = 0;
-    while ( $row = $q->get_row() ){
-      $size += $row["Data_length"] + $row["Index_length"];
-    }
-    if ( isset($cur) ){
-      $this->db->change($cur);
-    }
-    return $size;
+  public function table_size(string $table, string $type = ''){
+    return 0;
   }
 
   public function status(string $table = '', string $database = ''){

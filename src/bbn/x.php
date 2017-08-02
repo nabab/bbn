@@ -1,5 +1,6 @@
 <?php
 namespace bbn;
+
 /**
  * Model View Controller Class
  *
@@ -1017,7 +1018,7 @@ class x
    * // array [1,2,3,5,6]
    * ```
    *
-   * @param $ar The reference to the array to sort
+   * @param $ar The reference to the array t7o sort
    * @return void
    */
 
@@ -1315,5 +1316,40 @@ class x
       array_push($lines, implode( $delimiter, $output ));
     }
     return implode( $separator, $lines );
+  }
+
+  /**
+   * @param string $file1
+   * @param string $file2
+   * @param bool $strict
+   * @return bool
+   */
+  public static function is_same(string $file1, string $file2, $strict = false){
+    if ( !is_file($file1) || !is_file($file2) ){
+      throw Exception("Boo! One of the files given to the x::is_same function doesn't exist");
+    }
+    else{
+      $same = filesize($file1) === filesize($file2);
+      if ( !$strict || !$same ){
+        return $same;
+      }
+      return filemtime($file1) === filemtime($file2);
+    }
+  }
+
+  public static function check_properties($obj){
+    $props = func_get_args();
+    array_shift($props);
+    foreach ( $props as $p ){
+      if ( is_array($p) ){
+        if ( (count($p) !== 2) ){
+          /** @todo proper error */
+          die("Boo with check properties");
+        }
+        if ( function_exists('is_'.$p[1]) ){
+
+        }
+      }
+    }
   }
 }
