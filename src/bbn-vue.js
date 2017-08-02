@@ -244,13 +244,13 @@
     },
 
     defineComponents(){
-      if ( !bbn.vue.loadedComponents.length ){
+      if ( !bbn.vue.loadedComponents.length && !bbn.vue.isNodeJS ){
         $.each(bbn.vue.existingComponents, (i, a) => {
           bbn.vue.loadedComponents.push('bbn-' + a);
           /** @var string bbn_root_url */
           /** @var string bbn_root_dir */
           Vue.component('bbn-' + a, (resolve, reject) => {
-            let url = bbn_root_url + bbn_root_dir + a + "/?component=1";
+            let url = bbn_root_url + bbn_root_dir + 'components/' + a + "/?component=1";
 
             if ( bbn.env.isDev ){
               url += '&test';
