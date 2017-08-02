@@ -1,0 +1,83 @@
+<template>
+
+<div id="appui_dock_menu">
+  <div class="bbn-dock-menu">
+  </div>
+</div>
+
+</template>
+
+<script>export default {
+    name:'bbn-shortcuts',
+    }
+</script>
+<style>
+<style>
+  #appui_dock_menu {
+    text-align: center;
+    height: 50px;
+    position: relative;
+  }
+  #appui_dock_menu .bbn-dock-menu{
+    z-index: 13;
+    position: absolute;
+  }
+  #appui_dock_menu .bbn-dock-menu div {
+    text-align: center;
+    font-weight: bold;
+    text-decoration: none;
+    color: inherit;
+    width: 24px;
+    position: absolute;
+    display: block;
+    margin-top: 8px;
+    padding: 5px;
+  }
+  #appui_dock_menu .bbn-dock-menu div span{
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: 150%;
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    color: #FFF;
+    white-space: nowrap;
+    font-size: 36px;
+    text-shadow: 0 0 0.3em #000;
+  }
+  #appui_dock_menu .bbn-dock-menu div i{
+    display: inline-block;
+    border: none;
+    font-size: 24px;
+  }
+  #appui_dock_menu .bbn-dock-menu div a{
+    color: inherit !important;
+  }
+  #dock_menu_bin{
+    overflow: visible;
+    float: left;
+    z-index: 12;
+    height: auto;
+    width: 100px;
+    position: absolute;
+    top: 250px;
+    left: 50%;
+    margin-left: -50px;
+    display: none;
+    text-align: center;
+  }
+  #dock_menu_bin i{
+    font-size: 96px;
+  }
+  #bbn_menu2dock_helper{
+    z-index: 13;
+  }
+  .bbn-dropable-hover{
+    background-color: red !important;
+  }
+  .bbn-dropable-active{
+    background-color: yellow;
+  }
+</style>
+</style>
