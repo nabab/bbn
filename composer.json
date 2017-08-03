@@ -13,6 +13,7 @@
     }
   ],
   "require": {
+    "zordius/lightncandy": "dev-master",
     "greenlion/php-sql-parser": "dev-trunk",
     "mpdf/mpdf": "6.1.2",
     "squizlabs/php_codesniffer": "dev-master",
