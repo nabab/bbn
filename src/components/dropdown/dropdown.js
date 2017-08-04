@@ -7,12 +7,9 @@
   kendo.ui.DropDownList.prototype.options.autoWidth = true;
 
   Vue.component('bbn-dropdown', {
-    mixins: [bbn.vue.vueComponent],
     template: '#bbn-tpl-component-dropdown',
+    mixins: [bbn.vue.vueComponent, bbn.vue.dataSourceComponent],
     props: {
-      source: {
-        type: [String, Array, Object]
-      },
       filterValue: {},
       template: {},
       valueTemplate: {},
@@ -77,7 +74,7 @@
     computed: {
       dataSource: function(){
         if ( this.source ){
-          return bbn.vue.transformDataSource(this);
+          return bbn.vue.toKendoDataSource(this);
         }
         return [];
       }

@@ -9,11 +9,11 @@
            type="radio"
            :disabled="disabled ? true : false"
            :required="required ? true : false"
-           :id="name + '_' + d.value"
+           :id="'bbn_input_' + name + '_' + d.value"
     >
     <label class="k-radio-label"
            v-text="d.text"
-           :for="name + \'_\' + d.value"
+           :for="'bbn_input_' + name + \'_\' + d.value"
     ></label>
     <div class="bbn-iblock" v-html="separator"></div>
   </div>

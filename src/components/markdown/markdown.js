@@ -57,7 +57,7 @@
       var vm = this,
         cfg = $.extend(vm.getOptions(), {
           change: function(e){
-            vm.update(vm.widget.value());
+            vm.emitInput(vm.widget.value());
             return true
           }
         });
@@ -67,7 +67,7 @@
         element: vm.$refs.element
       }, vm.getOptions()));
       vm.widget.codemirror.on("change", function(){
-        vm.update(vm.widget.value());
+        vm.emitInput(vm.widget.value());
       });
 
     },

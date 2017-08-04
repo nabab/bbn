@@ -4,7 +4,12 @@ div.bbn-tabnav {
   width: 100%;
   height: 100%;
   box-sizing: border-box;
-  ul.k-tabstrip-items {
+  &.k-tabstrip-scrollable{
+    >ul{
+      margin: 0 2.5em;
+    }
+  }
+  >ul.k-tabstrip-items {
     position: relative;
     border-bottom-style: solid;
     border-bottom-width: 1px;

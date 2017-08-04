@@ -51,7 +51,7 @@
     computed: {
       dataSource: function(){
         if ( this.source ){
-          return bbn.vue.transformDataSource(this);
+          return bbn.vue.toKendoDataSource(this);
         }
         return [];
       }

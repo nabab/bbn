@@ -53,6 +53,9 @@
       source: {},
       root: {},
       select: {},
+      contextMenu: {
+        type: Array
+      },
       cfg: {
         type: Object,
         default: function(){
@@ -111,7 +114,7 @@
               bbn.fn.log("click", e, d);
               vm.ivalue = d.node.data.text;
               vm.currentSelection = d.node.data.text;
-              vm.update(d.node.data.id);
+              vm.emitInput(d.node.data.id);
               bbn.fn.closePopup();
             }
           };
@@ -128,8 +131,47 @@
         else if ( $.isArray(cfg.source) ){
           cfg.source = transform(vm.source);
         }
+        cfg.renderNode = (e, n) => {
+          if ( n.node.data.bcolor ){
+            $("span.fancytree-custom-icon", n.node.span).css("color", n.node.data.bcolor);
+          }
+          // ContextMenu
+          if ( cfg.contextMenu ){
+            let ds = [],
+                data = $.extend({is_folder: n.node.folder}, n.node.data);
+            $.each(cfg.contextMenu, (i, v) => {
+              let r = $.extend({}, v);
+              if ( $.isFunction(v.click) ){
+                r.click = () => {
+                  v.click(data, n.node.li);
+                };
+                ds.push(r);
+              }
+            });
+
+            /*
+            $("<ul/>").kendoContextMenu({
+              target: n.node.li,
+              animation: {
+                open: { effects: "fadeIn" },
+                duration: 300
+              },
+              dataSource: ds
+            });
+            */
+            //bbn.fn.log("TEST00000000000000000000000000000000000000000000000000000", test);
+            let ele = $("span.fancytree-title:first", n.node.span).wrap('<bbn-context :context="true" :source="source"></bbn-context>').parent()[0];
+            let test = new Vue({
+              el: ele,
+              data: {
+                source: ds
+              }
+            });
+
+          }
+        };
         cfg.disabled = false;
-        $(this.$el).fancytree(cfg)
+        $(this.$el).fancytree(cfg);
         vm.widget = $(this.$el).fancytree("getTree");
       }
     },

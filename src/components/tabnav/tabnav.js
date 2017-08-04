@@ -104,6 +104,27 @@
     },
 
     methods: {
+      scrollTabs(dir, ul){
+        if ( ul.scrollWidth > ul.clientWidth ){
+          let total = ul.scrollWidth,
+              visible = ul.clientWidth,
+              position = ul.scrollLeft,
+              max = total - visible,
+              newPos = false;
+          bbn.fn.log(dir, total, visible, position, max, '----------');
+          if ( (dir === 'left') && (position > 0) ){
+            newPos = position - 300 < 0 ? 0 : position - 300;
+          }
+          else if ( (dir === 'right') && (position < (total - visible)) ){
+            newPos = (position + 300) > max ? max : position + 300;
+          }
+          if ( newPos !== false ){
+            $(ul).animate({
+              scrollLeft: newPos
+            })
+          }
+        }
+      },
       isValidIndex(idx){
         return (typeof(idx) === "number") && (this.tabs[idx] !== undefined);
       },
@@ -726,7 +747,7 @@
         }
       });
 
-      var ulCfg = {
+      let ulCfg = {
         'class': {
           'k-reset': true,
           'k-tabstrip-items': true,
@@ -734,15 +755,10 @@
           'bbn-tabnav-tabs': true
         },
         ref: 'tabgroup'
-      };
-      if ( vm.scrollable ){
-        ulCfg['style'] = {
-          marginLeft: 35,
-          marginRight: 38
-        }
-      }
+      },
+      ulNode = createElement('ul', ulCfg, tabs);
 
-      containers.unshift(createElement('ul', ulCfg, tabs));
+      containers.unshift(ulNode);
 
       if ( vm.scrollable ){
         containers.push(createElement('span', {
@@ -751,6 +767,11 @@
             'k-button-icon': true,
             'k-button-bare': true,
             'k-tabstrip-prev': true
+          },
+          on: {
+            click: function(e){
+              vm.scrollTabs('left', ulNode.elm);
+            }
           }
         }, [
           createElement('i', {
@@ -768,6 +789,11 @@
             'k-button-bare': true,
             
             'k-tabstrip-next': true
+          },
+          on: {
+            click: function(e){
+              vm.scrollTabs('right', ulNode.elm);
+            }
           }
         }, [
           createElement('i', {
@@ -796,11 +822,14 @@
 
     created(){
       var vm = this;
+      // Adding bbn-tab from the slot
       if (vm.$slots.default){
         for ( var node of this.$slots.default ){
-          // May want to check here if the node is a myCp2,
-          // otherwise, grab the data
-          if ( node.componentOptions && node.componentOptions.propsData.url ){
+          if (
+            node.componentOptions &&
+            (node.componentOptions.tag === 'bbn-tab') &&
+            node.componentOptions.propsData.url
+          ){
             vm.add(node.componentOptions.propsData);
           }
         }
@@ -838,10 +867,6 @@
           }
           */
         }
-        vm.fullBaseURL = '';
-        $.each(vm.parents, function(i, a){
-          vm.fullBaseURL += a.getBaseURL();
-        })
       }
       // We make the tabs reorderable
       var $tabgroup = $(vm.$refs.tabgroup),

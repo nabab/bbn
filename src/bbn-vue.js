@@ -72,7 +72,9 @@
      * @param vm Vue object
      * @returns object
      */
-    transformDataSource(vm){
+    toKendoDataSource(vm){
+      let text = vm.widgetOptions.dataTextField || vm.sourceText,
+          value = vm.widgetOptions.dataValueField || vm.sourceValue;
       let transform = (src) => {
         let type = typeof(src),
             isArray = $.isArray(src);
@@ -80,8 +82,8 @@
           let tmp = [];
           $.each(src, (n, a) => {
             let tmp2 = {};
-            tmp2[vm.widgetCfg.dataTextField] = (typeof a) === 'string' ? a : n;
-            tmp2[vm.widgetCfg.dataValueField] = n;
+            tmp2[text] = (typeof a) === 'string' ? a : n;
+            tmp2[value] = n;
             tmp.push(tmp2);
           });
           return tmp;
@@ -89,8 +91,8 @@
         else if ( isArray && src.length && (typeof(src[0]) !== 'object') ){
           return $.map(src, (a) => {
             let tmp = {};
-            tmp[vm.widgetCfg.dataTextField] = a;
-            tmp[vm.widgetCfg.dataValueField] = a;
+            tmp[text] = a;
+            tmp[value] = a;
             return tmp;
           });
         }
@@ -134,7 +136,12 @@
           }
         });
       }
-      return transform(vm.source);
+      else if ( text && value ){
+        return transform(vm.source);
+      }
+      else{
+        return [];
+      }
     },
 
     isKendo(vm){
@@ -290,47 +297,6 @@
       }
     },
 
-    widgetComponent: {
-      beforeDestroy(){
-        bbn.fn.log("Default destroy");
-        this.destroy();
-      },
-      methods: {
-        destroy(){
-          const vm = this;
-          /*
-          if ( vm.widget && $.isFunction(vm.widget.destroy) ){
-            vm.widget.destroy();
-            vm.widget = false;
-            if ( vm.$refs.element ){
-              let $ele = $(vm.$refs.element).removeAttr("style");
-              while ( $ele.parent()[0] !== vm.$el ){
-                $ele.unwrap();
-              }
-              bbn.fn.log("Moving element", $ele);
-              if ( vm.widgetName ){
-                $ele.removeAttr("data-role").removeAttr("style").removeData(this.widgetName);
-              }
-            }
-            else if ( this.widgetName ){
-              $(this.$el).removeData(this.widgetName);
-            }
-            if ( this.$refs.input ){
-              $(this.$refs.input).appendTo(this.$el)
-            }
-            $(this.$el).children().not("[class^='bbn-']").remove();
-          }
-          */
-        },
-        build(){
-          bbn.fn.log("Default build");
-        },
-        getWidgetCfg(){
-          const vm = this;
-        },
-      }
-    },
-
     eventsComponent: {
       methods: {
         click(e){
@@ -354,16 +320,34 @@
       }
     },
 
+    dataSourceComponent: {
+      props: {
+        source: {
+          type: [Array, Object, String],
+          default(){
+            return [];
+          }
+        },
+        sourceText: {
+          type: String,
+          default: "text"
+        },
+        sourceValue: {
+          type: String,
+          default: "value"
+        }
+      },
+      computed: {
+        dataSource(){
+          return bbn.vue.toKendoDataSource(this)
+        }
+      }
+    },
+
     inputComponent: {
       props: {
         value: {},
         name: {
-          type: String
-        },
-        id: {
-          type: String
-        },
-        pattern: {
           type: String
         },
         placeholder: {
@@ -385,11 +369,11 @@
           type: Number
         },
         maxlength: {
-          type: Number
+          type: [String, Number]
         },
       },
       methods: {
-        update(val){
+        emitInput(val){
           this.$emit('input', val);
         }
       },
@@ -442,6 +426,61 @@
       methods: {
         getOptions(){
           return bbn.vue.getOptions(this);
+        },
+      }
+    },
+
+    widgetComponent: {
+      props: {
+        cfg: {
+          type: Object,
+          default(){
+            return {};
+          }
+        },
+        widgetOptions: {
+          type: Object,
+          default(){
+            return {};
+          }
+        }
+      },
+      beforeDestroy(){
+        bbn.fn.log("Default destroy");
+        //this.destroy();
+      },
+      methods: {
+        destroy(){
+          const vm = this;
+          /*
+          if ( vm.widget && $.isFunction(vm.widget.destroy) ){
+            vm.widget.destroy();
+            vm.widget = false;
+            if ( vm.$refs.element ){
+              let $ele = $(vm.$refs.element).removeAttr("style");
+              while ( $ele.parent()[0] !== vm.$el ){
+                $ele.unwrap();
+              }
+              bbn.fn.log("Moving element", $ele);
+              if ( vm.widgetName ){
+                $ele.removeAttr("data-role").removeAttr("style").removeData(this.widgetName);
+              }
+            }
+            else if ( this.widgetName ){
+              $(this.$el).removeData(this.widgetName);
+            }
+            if ( this.$refs.input ){
+              $(this.$refs.input).appendTo(this.$el)
+            }
+            $(this.$el).children().not("[class^='bbn-']").remove();
+          }
+          */
+        },
+        build(){
+          bbn.fn.log("Default build");
+        },
+        getWidgetCfg(){
+          const vm = this;
         },
       }
     },

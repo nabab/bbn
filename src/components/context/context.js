@@ -58,62 +58,20 @@
       }, bbn.vue.treatData(this));
     },
     methods: {
-      paint: function(x, y){
-        var vm = this;
-        if ( vm.contextMenu ){
-          vm.widget.close();
-          vm.contextMenu.trigger("close");
-          return;
+      clickItem(e){
+        const vm = this;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        let vlist = vm.$root.vlist || (window.appui ? window.appui.vlist : false);
+        if ( vm.source && (vlist !== undefined) ){
+          bbn.fn.log("context click", vm);
+          vlist.push({
+            items: vm.source,
+            left: e.clientX ? e.clientX : vm.$el.offsetLeft,
+            top: e.clientY ? e.clientY : vm.$el.offsetTop
+          });
         }
-        if ( vm.dataSource.length ){
-          vm.contextMenu = $('<ul class="bbn-context-menu"/>');
-          $(document.body).append(vm.contextMenu);
-          vm.widget = vm.contextMenu.kendoContextMenu({
-            close: function(e){
-              if ( e.item[0] === vm.contextMenu[0] ){
-                vm.widget.destroy();
-                vm.contextMenu.remove();
-                setTimeout(function(){
-                  vm.contextMenu = false;
-                }, 5);
-              }
-            },
-            dataSource: vm.dataSource,
-            select: function(e){
-              var indexes = [],
-                  li = $(e.item),
-                  ul = li.closest("ul.k-group"),
-                  res = false;
-              while ( ul.length ){
-                indexes.unshift(ul.children("li").index(li));
-                li = ul.closest("li");
-                ul = li.closest("ul.k-group");
-              }
-              if ( indexes.length ){
-                var ds = vm.dataSource;
-                $.each(indexes, function(i, a){
-                  if ( ds[a] !== undefined ){
-                    if ( i === (indexes.length - 1) ){
-                      res = ds[a];
-                    }
-                    if ( ds[a].items ){
-                      ds = ds[a].items;
-                    }
-                  }
-                });
-                if ( res && $.isFunction(res.click) ){
-                  res.click(e, indexes.pop(), res);
-                }
-              }
-            }
-          }).data("kendoContextMenu");
-          vm.widget.open(x, y);
-        }
-        else{
-          bbn.fn.log("No item");
-        }
-
-      }
+      },
     },
     render: function(createElement){
       var vm = this,
@@ -129,39 +87,27 @@
           }
         }
       }
+      let ev = {};
+      if ( vm.context ){
+        ev.contextmenu = vm.clickItem
+      }
+      else{
+        ev.click = vm.clickItem;
+      }
       if ( !res.tag ){
         res.tag = vm.tag;
       }
+
       return createElement(
         res.tag,
         $.extend(res.data, {
           "class": {
             "bbn-context": true
           },
-          on: {
-            click: function(e){
-              e.preventDefault();
-              e.stopImmediatePropagation();
-              if ( vm.source && (vm.$root.vlist !== undefined) ){
-                vm.$root.vlist.push({
-                  items: vm.source,
-                  left: e.clientX ? e.clientX : vm.$el.offsetLeft,
-                  top: e.clientY ? e.clientY : vm.$el.offsetTop
-                });
-              }
-            }
-          }
+          on: ev
         }, true),
         res.children
       );
-    },
-    mounted: function(){
-      //bbn.fn.log("CONTEXT MOUNTED", this.$el);
-    },
-    watch:{
-      source: function(newDataSource){
-        bbn.fn.log("Changed DS in context", this.dataSource);
-      }
     }
   });
 

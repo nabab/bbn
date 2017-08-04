@@ -5,7 +5,7 @@
   "use strict";
 
   Vue.component('bbn-toolbar', {
-    mixins: [bbn.vue.optionComponent],
+    mixins: [bbn.vue.optionComponent, bbn.vue.widgetComponent],
     template: '#bbn-tpl-component-toolbar',
     props: {
       items: {
@@ -66,7 +66,7 @@
     computed: {
       dataSource: function(){
         if ( this.source ){
-          return bbn.vue.transformDataSource(this);
+          return bbn.vue.toKendoDataSource(this);
         }
         return [];
       }

@@ -46,7 +46,7 @@
         resetCss: true
       });
       $ele.on("tbwchange", function(ev){
-        vm.update(ev.target.value)
+        vm.emitInput(ev.target.value)
       })
 
     },

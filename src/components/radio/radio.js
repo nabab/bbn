@@ -4,21 +4,12 @@
 (function($, bbn, kendo){
   "use strict";
   Vue.component('bbn-radio', {
-    mixins: [bbn.vue.vueComponent],
+    mixins: [bbn.vue.inputComponent],
     template: '#bbn-tpl-component-radio',
     props: {
       separator: {
         type: String,
         default: '<span style="margin-left: 2em">&nbsp;</span>'
-      },
-      cfg: {
-        type: Object,
-        default: function(){
-          return {
-            dataTextField: "text",
-            dataValueField: "value"
-          }
-        }
       },
       source: {
         default: function(){
@@ -38,7 +29,7 @@
     computed: {
       dataSource: function(){
         if ( this.source ){
-          return bbn.vue.transformDataSource(this);
+          return bbn.vue.toKendoDataSource(this);
         }
         return [];
       }

@@ -218,7 +218,7 @@
     mounted: function(){
       var vm = this;
       vm.paint();
-      vm.updateMenu();
+      vm.emitInputMenu();
     },
 
     updated: function(){

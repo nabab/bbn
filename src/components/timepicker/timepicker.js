@@ -104,7 +104,7 @@
       vm.widget = $(this.$refs.element)
         .kendoMaskedTimePicker($.extend(vm.getOptions(), {
           change: function(e){
-            vm.update(kendo.toString(vm.widget.value(), "HH:mm:ss"));
+            vm.emitInput(kendo.toString(vm.widget.value(), "HH:mm:ss"));
             return true;
           }
         }))

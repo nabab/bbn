@@ -97,7 +97,7 @@
       vm.widget = $(this.$refs.element)
         .kendoMaskedDateTimePicker($.extend(vm.getOptions(), {
           change: function(e){
-            vm.update(kendo.toString(vm.widget.value(), "yyyy-MM-dd HH:mm:ss"));
+            vm.emitInput(kendo.toString(vm.widget.value(), "yyyy-MM-dd HH:mm:ss"));
             return true;
           }
         }))

@@ -8,7 +8,6 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-tab', {
-    //template: '#bbn-tpl-component-tab',
     props: {
       title: {
         type: [String, Number],

@@ -9,7 +9,6 @@
    */
   Vue.component('bbn-table', {
     mixins: [bbn.vue.vueComponent],
-    template: '<div class="k-widget bbn-table"><slot></slot></div>',
     props: {
       limit: {
         type: Number,
@@ -76,7 +75,8 @@
         tmpRow: false,
         originalRow: false,
         editedRow: false,
-        editedTr: false
+        editedTr: false,
+        cols: []
       }, bbn.vue.treatData(this));
     },
     methods: {
@@ -240,7 +240,7 @@
              * @type {boolean}
              */
             fixed = true;
-        $.each(vm.columns, function(i, a){
+        $.each(vm.cols, function(i, a){
           bbn.fn.log(a);
           if ( a.fixed && fixed ){
             fixedLeft++;
@@ -263,16 +263,22 @@
           if ( a.title ){
             r.title = a.title;
           }
+          if ( a.width ){
+            r.width = typeof(a.width) === 'number' ? a.width + 'px' : a.width;
+          }
           if ( a.source ){
-            var obj = false,
-                v = vm;
-            while ( v ){
-              if ( v[a.source] !== undefined ){
-                obj = v;
-                break;
-              }
-              else{
-                v = v.$parent;
+            let obj = a.source;
+            /** @todo Remove this case now that we have reactive properties */
+            if ( typeof(a.source) === 'string' ){
+              let v = vm;
+              while ( v ){
+                if ( v[a.source] !== undefined ){
+                  obj = v;
+                  break;
+                }
+                else{
+                  v = v.$parent;
+                }
               }
             }
             if ( obj ){
@@ -346,9 +352,14 @@
                 bbn.fn.log("Error parsing buttons", a.buttons, e);
               }
             }
-            if ( buttons ){
-              r.render = function (data, type, row){
-                return vm.buttons2String(buttons, a.field || '');
+            if ( $.isArray(buttons) ){
+              r.render = function (data, field, row){
+                return vm.buttons2String(buttons, field || '', row);
+              };
+            }
+            else if ( $.isFunction(buttons) ){
+              r.render = function (data, field, row){
+                return vm.buttons2String(buttons(data, field, row), field || '', row);
               };
             }
           }
@@ -656,17 +667,139 @@
         cfg.rowCallback = vm.rowCallback;
         return cfg;
       },
+      addColumn(obj){
+        const vm = this;
+        vm.cols.push(obj);
+      }
     },
-    /*
+
     render(createElement){
       const vm = this;
 
+      let table;
+
+      if (
+        vm.$slots.default &&
+        vm.$slots.default.length &&
+        vm.$slots.default[0].tag === 'table'
+      ){
+        table = vm.$slots.default[0];
+        if ( !table.data ){
+          table.data = {};
+        }
+        if ( !table.data.attrs ){
+          table.data.attrs = {};
+        }
+        if ( !table.data.attrs ){
+          table.data.attrs.class = table.data.attrs.class ? table.data.attrs.class + ' ' + 'k-grid' : 'k-grid';
+        }
+      }
+      else{
+        if ( !vm.rendered && !vm.cols.length ){
+          // Examine the default slot, and if there are any parse
+          // them and add the data to the workingList
+          $.each(vm.columns, function(i, obj){
+            vm.addColumn(obj);
+          });
+        }
+        let cols = [],
+            tableCfg = {
+              'class': {
+                'k-grid': true
+              }
+            },
+            theadCfg = {};
+        $.each(vm.cols, (i, obj) => {
+          let cfg = {
+                ref: "col-" + i,
+                domProps: {
+                  innerHTML: obj.title
+                },
+                'class': {
+                  'bbn-column': true,
+                  'k-last': i === (vm.cols.length - 1),
+                  'k-first': i === 0
+                }
+              },
+              title_cfg = {
+                ref: "title-" + i,
+                'class': {
+                  'k-link': true
+                },
+                domProps: {
+                  innerHTML: obj.title
+                }
+              },
+              selected_cfg = {
+                ref: "selector-" + i,
+                'class': {
+                  'bbn-tabnav-selected': true
+                },
+              };
+          if ( obj.bcolor ){
+            cfg.style = {
+              backgroundColor: obj.bcolor
+            };
+          }
+          if ( obj.fcolor ){
+            if ( !cfg.style ){
+              cfg.style = {};
+            }
+            cfg.style.color = obj.fcolor;
+            title_cfg.style = {
+              color: obj.fcolor
+            };
+            selected_cfg.style = {
+              backgroundColor: obj.fcolor
+            };
+          }
+          cols.push(createElement('th', cfg));
+        });
+        table = createElement('table', tableCfg, [
+          createElement('thead', theadCfg, [
+            createElement("tr", {}, cols)
+          ]),
+          createElement('tbody')
+        ]);
+      }
+      vm.rendered = true;
+
+
+
+      return createElement('div', {
+        'class': {
+          'bbn-table': true,
+          'k-widget': true
+        }
+      }, [table]);
     },
-    */
+
+    created(){
+      var vm = this;
+      // Adding bbn-column from the slot
+      if (vm.$slots.default){
+        for ( var node of this.$slots.default ){
+          bbn.fn.log("TRYING TO ADD COLUMN", node);
+          if (
+            node.componentOptions &&
+            (node.componentOptions.tag === 'bbn-column')
+          ){
+            bbn.fn.log("ADDING COLUMN", node.componentOptions.propsData)
+            vm.addColumn(node.componentOptions.propsData);
+          }
+          else if ( (node.tag === 'bbn-column') && node.data && node.data.attrs ){
+            bbn.fn.log("ADDING COLUMN 2", node.data.attrs)
+            vm.addColumn(node.data.attrs);
+          }
+
+        }
+      }
+    },
     mounted(){
       var vm = this,
           $ele = $(this.$el);
 
+      /*
       if ( !$("table", this.$el).length ){
         $ele.append('<table><thead><tr></tr></thead></table>');
         var thead = $ele.find("thead tr:first");
@@ -685,6 +818,7 @@
           }
         });
       }
+      */
       vm.widgetCfg = vm.getConfig();
       vm.widget = $ele.find("table:first").addClass("k-grid").DataTable(vm.widgetCfg);
       var resizeTimer;
@@ -724,7 +858,7 @@
                 }
               }
               if ( bbn.fn.countProperties(change) ){
-                vm.update(vm.editedTr.tr, change, true);
+                vm.emitInput(vm.editedTr.tr, change, true);
               }
               for ( var n in change ){
                 vm.$set(vm.originalRow, n, newVal[n]);

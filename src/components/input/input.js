@@ -25,9 +25,9 @@
       actionRight: {},
       autoHideLeft: {},
       autoHideRight: {},
-			pattern: {},
-			size: {},
-			maxlength: {},
+      pattern: {
+        type: String
+      },
       cfg:{
         type: Object,
         default: function(){

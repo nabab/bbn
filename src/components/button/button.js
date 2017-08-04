@@ -5,8 +5,8 @@
   "use strict";
 
   Vue.component('bbn-button', {
-    mixins: [bbn.vue.vueComponent],
     template: '#bbn-tpl-component-button',
+    mixins: [bbn.vue.eventsComponent],
     props: {
       title: {
         type: String,
@@ -25,7 +25,10 @@
       type: {
         type: String,
       },
-      disabled: {}
+      disabled: {
+        type: Boolean,
+        default: false
+      }
     },
   });
 

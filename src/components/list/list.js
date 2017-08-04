@@ -8,14 +8,11 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-list', {
-    mixins: [bbn.vue.optionComponent],
+    mixins: [bbn.vue.optionComponent, bbn.vue.widgetComponent, bbn.vue.dataSourceComponent],
     template: '#bbn-tpl-component-list',
     props: {
       expandMode: {
         type: String
-      },
-      source: {
-        type: [Array, Object]
       },
       itemClass: {
         type: String
@@ -95,7 +92,7 @@
     computed: {
       dataSource: function(){
         if ( this.source ){
-          return bbn.vue.transformDataSource(this);
+          return bbn.vue.toKendoDataSource(this);
         }
         return [];
       }

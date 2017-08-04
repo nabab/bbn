@@ -188,7 +188,7 @@
       vm.widget = new CodeMirror(vm.$refs.code, vm.getOptions());
       vm.widget.on("change", function(){
         bbn.fn.log("CHANGE", vm.widget);
-        vm.update(vm.widget.doc.getValue());
+        vm.emitInput(vm.widget.doc.getValue());
       });
       $(vm.$refs.theme_button).on("click", function(){
         themeIndex++;

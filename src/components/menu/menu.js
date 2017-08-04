@@ -18,7 +18,7 @@
   };
 
   Vue.component('bbn-menu', {
-    mixins: [bbn.vue.vueComponent],
+    mixins: [bbn.vue.vueComponent, bbn.vue.dataSourceComponent],
     template: "#bbn-tpl-component-menu",
     props: {
       source: {
@@ -47,7 +47,7 @@
     computed: {
       dataSource: function(){
         if ( this.source ){
-          return mapper(bbn.vue.transformDataSource(this));
+          return mapper(bbn.vue.toKendoDataSource(this));
         }
         return [];
       }

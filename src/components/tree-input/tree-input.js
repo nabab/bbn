@@ -74,7 +74,7 @@
                 bbn.fn.log("click", e, d);
                 vm.ivalue = d.node.data.text;
                 vm.currentSelection = d.node.data.text;
-                vm.update(d.node.data.id);
+                vm.emitInput(d.node.data.id);
                 bbn.fn.closePopup();
               },
             }, vm.getOptions());

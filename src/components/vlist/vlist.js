@@ -123,6 +123,7 @@
               bbn.fn.log("CLICK IS STRING", vm);
             }
             else if ( $.isFunction(vm.menu[idx].click) ){
+              bbn.fn.log("CLICK IS FUNCTION", vm);
               vm.menu[idx].click(e, idx, JSON.parse(JSON.stringify(vm.menu[idx])));
             }
           }
@@ -136,13 +137,10 @@
       }
     },
     mounted: function(){
-      var vm = this,
-          offset;
+      const vm = this;
       vm.$nextTick(function(){
-        var offset = $(vm.$el).offset(),
-            style = {},
+        let style = {},
             h = $(vm.$el).children().height();
-        bbn.fn.log("OFFSET", offset, h);
         if ( vm.bottom ){
           if ( vm.bottom - h < 0 ){
             style.top = '0px';
@@ -154,7 +152,6 @@
           $(vm.$el).css(style)
         }
       })
-      //var vm = this;
     },
     watch:{
       currentIndex: function(newVal){
