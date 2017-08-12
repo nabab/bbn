@@ -21,6 +21,10 @@
         type: Number,
         default: 0
       },
+      zIndex: {
+        type: Number,
+        default: 1
+      },
       delUrl: {},
       insUrl: {},
       top: {},
@@ -90,7 +94,7 @@
         if ( vm.delUrl ){
           vm.binEle = $("#bbn_dock_menu_bin");
           if ( !vm.binEle.length ){
-            vm.binEle = $('<div id="bbn_dock_menu_bin"><i class="fa fa-trash"></i> </div>').appendTo(document.body);
+            vm.binEle = $('<div id="bbn_dock_menu_bin" style="z-index: ' + vm.zIndex + '"><i class="fa fa-trash"></i> </div>').appendTo(document.body);
           }
           if ( vm.droppableBin ){
             vm.droppableBin.droppable("destroy");
@@ -127,7 +131,7 @@
               return r;
             },
             cursorAt: {top: 1, left: 0},
-            zIndex: 13,
+            zIndex: vm.zIndex,
             scroll: false,
             containment: "window",
             appendTo: 'body',

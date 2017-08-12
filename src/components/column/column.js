@@ -33,10 +33,15 @@
         type: String
       },
       fixed: {
+        type: Boolean,
+        default: false
+      },
+      hidden: {
         type: Boolean
       },
       encoded: {
-        type: Boolean
+        type: Boolean,
+        default: false
       },
       buttons: {
         type: [Array, Function]

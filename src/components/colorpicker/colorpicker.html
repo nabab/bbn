@@ -3,13 +3,11 @@
          class="bbn-colorpicker-input"
          :name="name"
          ref="element"
-         :disabled="disabled ? true : false"
-         :required="required ? true : false"
-         @input="update($event.target.value)"
+         :disabled="disabled"
+         :required="required"
          @click="click($event)"
          @focus="focus($event)"
          @blur="blur($event)"
-         @change="change($event)"
          @keydown="keydown($event)"
          @keyup="keyup($event)">
 </span>

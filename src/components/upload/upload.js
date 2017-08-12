@@ -5,7 +5,7 @@
   "use strict";
 
   Vue.component('bbn-upload', {
-    mixins: [bbn.vue.vueComponent],
+    mixins: [bbn.vue.fullComponent],
     template: '<div class="bbn-upload" ref="upload"></div>',
     props: {
       source: {
@@ -182,12 +182,12 @@
           }
         },
         mounted(){
-          const vm2 = this;
-          vm.widget = new qq.FineUploader($.extend(opt, {
-            element: vm.$el,
-            template: vm2.$el,
+          this.widget = new qq.FineUploader($.extend(opt, {
+            element: this.$el,
+            template: this.$el,
           }));
-          vm2.enable(vm2.enabled);
+          this.enable(this.enabled);
+          this.$emit("ready", this.value);
         }
       });
     },

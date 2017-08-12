@@ -1,11 +1,17 @@
-<div class="bbn-iblock bbn-checkbox">
-  <input :value="value"
+<div class="bbn-iblock bbn-checkbox"
+     @click="click"
+     @focus="focus($event)"
+     @blur="blur($event)"
+>
+  <input :value="initialValue"
          :name="name"
+         :id="id"
          ref="element"
          class="k-checkbox"
          type="checkbox"
-         @change="update($event.target.value)"
-         :disabled="disabled ? true : false"
-         :required="required ? true : false">
+         :checked="checked"
+         :disabled="disabled"
+         :required="required"
+  > &nbsp;
   <label class="k-checkbox-label" :for="id" v-text="label"></label>
 </div>

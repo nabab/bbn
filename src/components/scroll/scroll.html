@@ -1,0 +1,36 @@
+<div :class="['bbn-scroll', theme==='dark' ? 'theme-dark' : 'theme-light', classes ? ' ' + classes : '']"
+     ref="scrollContainer"
+>
+  <div ref="scrollContent"
+       :style="{
+        'margin-top': top * -1 + 'px',
+        'margin-left': left * -1 + 'px'
+        }"
+       @wheel="scroll"
+       @touchstart="startDrag"
+       @touchmove="onDrag"
+       @touchend="stopDrag"
+  >
+    <slot></slot>
+  </div>
+  <bbn-scrolly v-if="ready && ((axis === 'both') || (axis === 'y'))"
+                      :content="{ height: scrollContentHeight }"
+                      :container="{ height: scrollContainerHeight }"
+                      :scrolling="{ v: vMovement }"
+                      :dragging-from-parent="dragging"
+                      :on-change-position="handleChangePosition"
+                      :show="show"
+                      @vertical="moveTheScrollbar"
+  >
+  </bbn-scrolly>
+  <bbn-scrollx v-if="ready && ((axis === 'both') || (axis === 'x'))"
+                        :content="{ width: scrollContentWidth }"
+                        :container="{ width: scrollContainerWidth }"
+                        :scrolling="{ h: hMovement }"
+                        :dragging-from-parent="dragging"
+                        :on-change-position="handleChangePosition"
+                        :show="show"
+                        @horizontal="moveTheScrollbar"
+  >
+  </bbn-scrollx>
+</div>

@@ -34,6 +34,7 @@
       if ( this.$options.propsData.script ){
         $(this.$el).data("script", this.$options.propsData.script);
       }
+      this.$emit("ready", this.value);
     }
   });
 

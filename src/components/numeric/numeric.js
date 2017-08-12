@@ -5,7 +5,7 @@
   "use strict";
 
   Vue.component('bbn-numeric', {
-    mixins: [bbn.vue.vueComponent],
+    mixins: [bbn.vue.fullComponent],
     template: '#bbn-tpl-component-numeric',
     props: {
       decimals: {
@@ -41,12 +41,12 @@
       }, bbn.vue.treatData(this));
     },
     mounted: function(){
-      var vm = this;
-      vm.widget = $(vm.$refs.element).kendoNumericTextBox($.extend(vm.getOptions(), {
-        spin: function(e){
-          vm.$emit('input', e.sender.value());
+      this.widget = $(this.$refs.element).kendoNumericTextBox($.extend(vm.getOptions(), {
+        spin: (e) => {
+          this.$emit('input', e.sender.value());
         }
       })).data("kendoNumericTextBox");
+      this.$emit("ready", this.value);
     }
   });
 

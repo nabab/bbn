@@ -1,5 +1,5 @@
 <div class="bbn-fisheye">
-  <ul ref="ul">
+  <ul ref="ul" :style="{zIndex: zIndex}">
     <li v-for="it in value" :data-id="it.id ? it.id : ''">
       <a :href="it.url ? it.url : 'javascript:;'" :title="it.text" @click="onClick(it)">
         <i :class="it.icon"></i>

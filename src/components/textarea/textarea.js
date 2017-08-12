@@ -8,7 +8,7 @@
    * Classic textarea with normalized appearance
    */
   Vue.component('bbn-textarea', {
-    mixins: [bbn.vue.vueComponent],
+    mixins: [bbn.vue.fullComponent],
     template: '#bbn-tpl-component-textarea',
     props: {
 			rows: {
@@ -38,13 +38,13 @@
       }, bbn.vue.treatData(this));
     },
     mounted: function(){
-      var vm = this,
-          $ele = $(vm.$el),
-          cfg = vm.getOptions();
+      let $ele = $(this.$el),
+          cfg = this.getOptions();
 
       if ( this.disabled ){
         $ele.addClass("k-state-disabled");
       }
+      this.$emit("ready", this.value);
     }
   });
 

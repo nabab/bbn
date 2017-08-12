@@ -10,7 +10,7 @@
   $.trumbowyg.svgPath = bbn_root_url + 'lib/Trumbowyg/v2.5.1/dist/ui/icons.svg';
 
   Vue.component('bbn-rte', {
-    mixins: [bbn.vue.vueComponent],
+    mixins: [bbn.vue.fullComponent],
     template: '<textarea class="bbn-rte" :value="value" :name="name" :required="required"></textarea>',
     props: {
       pinned: {},

@@ -10,6 +10,65 @@
     }
   });
 
+  Vue.directive('bbn-fill-height', {
+    inserted(el, binding, vnode, oldVnode){
+      bbn.fn.log("INSERTED FILL HEIGHT");
+      let $ele = $(el),
+          $parent = $ele.parent(),
+          $siblings = $ele.siblings(),
+          h = $parent.innerHeight();
+      if ( $parent[0] === document.body ){
+        h = window.bbn.env.height;
+      }
+      $siblings.each(function(){
+        let h2,
+            $t = $(this);
+        if ( $t.is(":visible") &&
+          ($t.css('position') !== 'absolute') &&
+          ($t.css('position') !== 'fixed') &&
+          ($t.css('display') !== 'inline')
+        ){
+          h2 = $t.outerHeight(true);
+          if ( h2 ){
+            h -= h2;
+          }
+        }
+      });
+      if ( h > 0 ){
+        h = Math.round(h);
+        $ele.outerHeight(h);
+      }
+    },
+    componentUpdated(el, binding, vnode, oldVnode){
+      bbn.fn.log("UPDATED FILL HEIGHT");
+      let $ele = $(el),
+          $parent = $ele.parent(),
+          $siblings = $ele.siblings(),
+          h = $parent.innerHeight();
+      if ( $parent[0] === document.body ){
+        h = window.bbn.env.height;
+      }
+      $siblings.each(function(){
+        let h2,
+            $t = $(this);
+        if ( $t.is(":visible") &&
+          ($t.css('position') !== 'absolute') &&
+          ($t.css('position') !== 'fixed') &&
+          ($t.css('display') !== 'inline')
+        ){
+          h2 = $t.outerHeight(true);
+          if ( h2 ){
+            h -= h2;
+          }
+        }
+      });
+      if ( h > 0 ){
+        h = Math.round(h);
+        $ele.outerHeight(h);
+      }
+    }
+  });
+
   bbn.vue = {
     defaultLocalURL: false,
     defaultLocalPrefix: '',
@@ -51,11 +110,15 @@
       'popup',
       'radio',
       'rte',
+      'scroll',
+      'scrollx',
+      'scrolly',
       'search',
       'slider',
       'splitter',
       'tab',
       'table',
+      'table2',
       'tabnav',
       'textarea',
       'timepicker',
@@ -155,6 +218,7 @@
      * @returns {{}}
      */
     treatData(vm){
+
       let cfg = {};
       if ( vm.$options.props.cfg && (vm.$options.props.cfg.default !== undefined) ){
         $.extend(cfg, $.isFunction(vm.$options.props.cfg.default) ? vm.$options.props.cfg.default() : vm.$options.props.cfg.default);
@@ -174,12 +238,24 @@
       };
     },
 
+    getOptions2(vm, obj){
+      if ( !obj || (typeof(obj) !== 'object') ){
+        obj = {};
+      }
+      let r = {};
+      bbn.fn.log("getOptioons2");
+      return $.extend(obj, r, this.widgetOptions);
+    },
+
     /**
      *
      * @param vm Vue object
      * @returns {{}}
      */
-    getOptions(vm){
+    getOptions(vm, obj){
+      if ( !obj || (typeof(obj) !== 'object') ){
+        obj = {};
+      }
       let tmp = bbn.vue.treatData(vm),
           r = tmp.widgetCfg;
       if ( r.source && vm.widgetName && (vm.widgetName.indexOf("kendo") === 0) ){
@@ -192,7 +268,7 @@
       if ( r.name ){
         delete r.name;
       }
-      return r;
+      return $.extend(obj, r);
     },
 
     setComponentRule(url, prefix){
@@ -317,6 +393,18 @@
         change(e){
           this.$emit('change', e)
         },
+        over(e){
+          this.$emit('over', e);
+          setTimeout(() => {
+            this.$emit('hover', true, e);
+          }, 0)
+        },
+        out(e){
+          this.$emit('out', e);
+          setTimeout(() => {
+            this.$emit('hover', false, e);
+          }, 0)
+        },
       }
     },
 
@@ -337,9 +425,40 @@
           default: "value"
         }
       },
+      methods: {
+        getOptions(obj){
+          let cfg = bbn.vue.getOptions2(this, obj);
+          if ( this.widgetOptions.dataTextField || this.sourceText ){
+            cfg.dataTextField = this.widgetOptions.dataTextField || this.sourceText;
+          }
+          if ( this.widgetOptions.dataValueField || this.sourceValue ){
+            cfg.dataValueField = this.widgetOptions.dataValueField || this.sourceValue;
+          }
+          cfg.dataSource = this.dataSource;
+          return cfg;
+        },
+        getOptions2(obj){
+          let cfg = bbn.vue.getOptions2(this, obj);
+          if ( this.widgetOptions.dataTextField || this.sourceText ){
+            cfg.dataTextField = this.widgetOptions.dataTextField || this.sourceText;
+          }
+          if ( this.widgetOptions.dataValueField || this.sourceValue ){
+            cfg.dataValueField = this.widgetOptions.dataValueField || this.sourceValue;
+          }
+          cfg.dataSource = this.dataSource;
+          return cfg;
+        }
+      },
       computed: {
         dataSource(){
           return bbn.vue.toKendoDataSource(this)
+        }
+      },
+      watch:{
+        source: function(newDataSource){
+          if ( this.widget ){
+            this.widget.setDataSource(this.dataSource);
+          }
         }
       }
     },
@@ -504,10 +623,11 @@
     },
 
     closest(vm, selector){
-      while ( vm && vm.$parent ){
+      while ( vm && vm.$parent && (vm !== vm.$parent) ){
         if ( vm.$parent.$el && $(vm.$parent.$el).is(selector) ){
           return vm.$parent;
         }
+        bbn.fn.log(vm);
         vm = vm.$parent;
       }
       return false;
@@ -521,7 +641,7 @@
           obj.$vnode &&
           obj.$vnode.data &&
           obj.$vnode.data.key &&
-          (obj.$vnode.data.key=== key)
+          (obj.$vnode.data.key === key)
         ){
           if ( selector ){
             return $(obj.$el).is(selector) ||
@@ -533,12 +653,53 @@
       return false;
     },
 
+    find(cp, selector){
+      let cps = bbn.vue.getComponents(cp);
+      for ( let i = 0; i < cps.length; i++ ){
+        if (
+          $(cps[i].$el).is(selector) ||
+          (cps[i].$vnode.componentOptions && (cps[i].$vnode.componentOptions.tag === selector))
+        ){
+          return cps[i];
+        }
+      }
+    },
+
+    findAll(cp, selector){
+      let cps = bbn.vue.getComponents(cp),
+          res = [];
+      for ( let i = 0; i < cps.length; i++ ){
+        if (
+          $(cps[i].$el).is(selector) ||
+          (cps[i].$vnode.componentOptions && (cps[i].$vnode.componentOptions.tag === selector))
+        ){
+          res.push(cps[i]);
+        }
+      }
+      return res;
+    },
+
+    getComponents(cp, ar){
+      if ( !$.isArray(ar) ){
+        ar = [];
+      }
+      $.each(cp.$children, function(i, obj){
+        ar.push(obj)
+        if ( obj.$children ){
+          bbn.vue.getComponents(obj, ar);
+        }
+      });
+      return ar;
+    },
+
+
+
     makeUID(){
       return bbn.fn.randomString(32);
     }
   };
 
-  bbn.vue.vueComponent = bbn.fn.extend({}, bbn.vue.inputComponent, bbn.vue.optionComponent, bbn.vue.eventsComponent, bbn.vue.widgetComponent);
+  bbn.vue.fullComponent = bbn.fn.extend({}, bbn.vue.inputComponent, bbn.vue.optionComponent, bbn.vue.eventsComponent, bbn.vue.widgetComponent);
 
   bbn.vue.defineComponents()
 

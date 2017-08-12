@@ -87,7 +87,7 @@
 
   Vue.component('bbn-code', {
     template: "#bbn-tpl-component-code",
-    mixins: [bbn.vue.vueComponent],
+    mixins: [bbn.vue.fullComponent],
     props: {
       mode: {},
       theme: {},
@@ -197,6 +197,7 @@
         }
         vm.widget.setOption("theme", themes[themeIndex]);
       });
+      this.$emit("ready", this.value);
     },
     data: function(){
       return $.extend({

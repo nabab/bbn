@@ -1,0 +1,85 @@
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+.bbn-scroll {
+  overflow: hidden;
+  position: relative;
+  margin: 0 auto;
+  .bbn-scroll-rail-y {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 6px;
+    height: 100%;
+    z-index: 100000;
+  }
+  .bbn-scroll-rail-x {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 6px;
+    width: 100%;
+    z-index: 100000;
+  }
+  .bbn-scroll-slider-y {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 6px;
+    z-index: 100001;
+    opacity: 0;
+    animation-duration: 1s;
+    animation-fill-mode: both;
+    &.fade-in {
+      animation-name: fadeIn;
+    }
+    &.fade-out {
+      animation-name: fadeOut;
+    }
+  }
+  .bbn-scroll-slider-x {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 6px;
+    z-index: 100001;
+    opacity: 0;
+    animation-duration: 1s;
+    animation-fill-mode: both;
+    &.fade-in {
+      animation-name: fadeIn;
+    }
+    &.fade-out {
+      animation-name: fadeOut;
+    }
+  }
+  .theme-light {
+    .bbn-scroll-slider-y {
+      background: #aaa;
+    }
+    .bbn-scroll-slider-x {
+      background: #aaa;
+    }
+  }
+  .theme-dark {
+    .bbn-scroll-slider-y {
+      background: #222;
+    }
+    .bbn-scroll-slider-x {
+      background: #222;
+    }
+  }
+}

@@ -272,6 +272,13 @@
         }
       },
 
+      getVue(idx){
+        if ( this.isValidIndex(idx) && this.$refs['container-' + idx] ){
+          return this.$refs['container-' + idx];
+        }
+        return false;
+      },
+
       getTab(idx){
         if ( this.isValidIndex(idx) && this.$refs['tab-' + idx] ){
           return this.$refs['tab-' + idx];
@@ -280,10 +287,8 @@
       },
 
       getContainer(idx){
-        if ( this.isValidIndex(idx) && this.$refs['container-' + idx] ){
-          return this.$refs['container-' + idx];
-        }
-        return false;
+        let c = this.getVue(idx);
+        return c ? c.$el : false;
       },
 
       getSubTabNav(idx){

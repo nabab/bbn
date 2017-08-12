@@ -34,6 +34,9 @@
         return [];
       }
     },
+    mounted(){
+      this.$emit("ready", this.checked);
+    }
   });
 
 })(jQuery, bbn, kendo);

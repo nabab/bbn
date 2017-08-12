@@ -9,138 +9,181 @@
    */
   Vue.component('bbn-popup', {
     template: "#bbn-tpl-component-popup",
-
     props: {
+      untitled: {
+        type: String,
+        default: bbn._("Untitled")
+      },
       source: {
         type: Array,
         default: function(){
           return [];
         }
+      },
+      zIndex: {
+        type: Number,
+        default: 1
       }
     },
 
     data: function(){
-      var popups = [],
-          j = 0;
-      $.each(this.source, function(i, a){
-        if ( a.title && (a.content || a.component) ){
-          if ( a.ref === undefined ){
-            a.ref = bbn.fn.randomString(15, 20).toLowerCase();
-          }
-          a.index = j;
-          popups.push(a);
-          j++;
-        }
-      })
       return {
         num: this.source.length,
-        popups: popups
+        showPopup: false
       }
     },
 
     methods: {
-      close: function(idx){
-        var vm = this;
-        if ( vm.popups[idx] ){
-          if ( $.isFunction(vm.popups[idx].close) ){
-            (function(ele, data){
-              vm.popups[idx].close();
-            })(vm.popups[idx].widget.element, vm.popups[idx].data || {});
+      open(obj){
+        let d = {};
+        if ( typeof(obj) !== 'object' ){
+          for ( let i = 0; i < arguments.length; i++ ){
+            if ( !d.content && (typeof(arguments[i]) === 'string') ){
+              d.content = arguments[i];
+            }
+            else if ( bbn.fn.isDimension(arguments[i]) || (arguments[i] === 'auto') ){
+              if ( !d.width ){
+                d.width = arguments[i];
+              }
+              else if ( !d.height ){
+                d.height = arguments[i];
+              }
+            }
+            else if ( !d.title && (typeof(arguments[i]) === 'string') ){
+              d.title = arguments[i];
+            }
+            else if ( $.isFunction(arguments[i]) ){
+              if ( !d.open ){
+                d.open = arguments[i];
+              }
+              else if ( !d.close ){
+                d.close = arguments[i];
+              }
+            }
+            else if ( typeof(arguments[i]) === 'object' ){
+              d.options = arguments[i];
+            }
           }
-          if ( vm.popups[idx].widget ){
-            vm.popups[idx].widget.destroy();
+          if ( !d.height ){
+            d.height = false;
           }
-          vm.popups.splice(idx, 1);
-          vm.source.splice(idx, 1);
+        }
+        else{
+          d = obj;
+        }
+        if ( d ){
+          if ( !d.ref ){
+            d.ref = 'bbn-popup-' + bbn.fn.timestamp().toString()
+          }
+          this.source.push(d);
+          this.makeWindows();
+          return d.ref;
+        }
+        else{
+          new Error("You must give a title and either a content or a component to a popup")
+        }
+        return false;
+      },
+
+      getObject(from){
+        let a = $.extend({}, from);
+        if ( !a.ref ){
+          a.ref = 'bbn-popup-' + bbn.fn.timestamp().toString()
+        }
+        if ( !a.title && this.untitled ){
+          a.title = this.untitled;
+        }
+        if ( !a.component && !a.content ){
+          a.content = ' ';
+        }
+        if ( !a.width ){
+          a.width = 'auto';
+        }
+        else if ( typeof(a.width) === 'number' ){
+          a.width = a.width.toString() + 'px';
+        }
+        if ( !a.height ){
+          a.height = 'auto';
+        }
+        else if ( typeof(a.height) === 'number' ){
+          a.height = a.height.toString() + 'px';
+        }
+        return a;
+      },
+
+      close(idx, force){
+        if ( this.popups[idx] ){
+          let ok = true;
+          if ( !force && $.isFunction(this.popups[idx].close) ){
+            ((ele, data) => {
+              ok = this.popups[idx].close(this, idx);
+            })($(".k-window", this.$el).eq(idx), this.popups[idx].data || {});
+          }
+          if ( ok !== false ){
+            this.source.splice(idx, 1);
+          }
         }
       },
 
-      center: function(idx){
-        var vm = this;
-        if ( vm.popups[idx] && vm.popups[idx].widget ){
-          vm.popups[idx].widget.center();
+      center(idx){
+        if ( this.popups[idx] ){
+          this.$nextTick(() => {
+            bbn.fn.log("CENTERING " + idx.toString());
+            let ele = $(".k-window", this.$el).eq(idx);
+            bbn.fn.center(ele);
+            if ( !ele.hasClass("ui-draggable") ){
+              ele.draggable({
+                handle: ".k-window-title",
+                containment: ".bbn-popup"
+              }).resizable({
+                handles: "se",
+                containment: ".bbn-popup",
+                resize: () => {
+                  bbn.fn.redraw(ele, true);
+                },
+                stop: () => {
+                  this.center(idx);
+                }
+              });
+            }
+          })
         }
       },
 
-      getCfg: function(obj){
-        var vm = this;
-        return {
-          title: obj.title ? obj.title : bbn._("Untitled"),
-          draggable: obj.draggable === false ? false : true,
-          modal: obj.modal === false ? false : true,
-          width: obj.width ? obj.width : 300,
-          height: obj.height ? obj.height : 200,
-          close: function(ui){
-            if ( obj.close ){
-              var ele = ui.sender.element,
-                  data = obj.data || {};
-              obj.close(ele, data);
-            }
-            vm.close(obj.index);
-          },
-          activate: function(ui){
-            if ( obj.open ){
-              var ele = ui.sender.element,
-                  data = obj.data || {};
-              bbn.fn.log("ACTIVATE", obj, vm.$refs[obj.ref]);
-              obj.open(vm.$refs[obj.ref]);
-            }
-          }
-        };
-      },
-
-      makeWindow: function(a){
-        bbn.fn.log("MK", a.ref, this.$refs);
-        var vm = this,
-            ele = vm.$el.children[a.index];
-        a.widget = $(ele).kendoWindow(vm.getCfg(a)).data("kendoWindow");
-        vm.center(a.index);
+      makeWindows(){
+        this.$forceUpdate();
+        this.$nextTick(() => {
+          $.each(this.popups, (i, a) => {
+            this.center(i);
+          })
+        })
       }
     },
 
     computed: {
-      zIndex: function(){
-        return 10005 + $(this.$el).siblings(".bbn-popup").length;
-      }
+      popups(){
+        let r = [];
+        $.each(this.source, (i, a) => {
+          r.push(this.getObject($.extend({index: i}, a)));
+        });
+        return r;
+      },
     },
 
-    mounted: function(){
-      var vm = this;
-      $.each(vm.popups, function(i, a){
-        if ( a.ref === undefined ){
-          a.ref = bbn.fn.randomString(15, 20).toLowerCase();
-        }
-        a.index = i;
-        vm.makeWindow(a);
+    mounted(){
+      $.each(this.popups, (i, a) => {
+        this.makeWindow(a);
       })
     },
 
     watch: {
       source: function(){
-        var vm = this,
-            j = 0;
-        bbn.fn.log("CHANGE IN POPUPS SOURCE");
-        if ( vm.source.length > this.num ){
-          $.each(vm.source, function(i, a){
-            if ( a.title && (a.content || a.component) ){
-              if ( a.ref === undefined ){
-                a.ref = bbn.fn.randomString(15, 20).toLowerCase();
-              }
-              a.index = j;
-              vm.popups.push(a);
-              vm.$nextTick(function(){
-                vm.makeWindow(a);
-              });
-              j++;
-            }
-          })
-        }
-        else if ( vm.source.length < this.num ){
-
-        }
-        this.num = vm.source.length;
+        this.num = this.source.length;
+        this.makeWindows()
       }
-    }
+    },
+
+    updated(){}
   });
 
 })(jQuery, bbn, kendo);

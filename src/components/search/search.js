@@ -8,7 +8,7 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-search', {
-    mixins: [bbn.vue.vueComponent],
+    mixins: [bbn.vue.fullComponent],
     template: '#bbn-tpl-component-search',
     props: {
       action: {},

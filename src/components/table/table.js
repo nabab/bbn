@@ -8,7 +8,7 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-table', {
-    mixins: [bbn.vue.vueComponent],
+    mixins: [bbn.vue.fullComponent],
     props: {
       limit: {
         type: Number,
@@ -76,7 +76,8 @@
         originalRow: false,
         editedRow: false,
         editedTr: false,
-        cols: []
+        cols: [],
+        table: false
       }, bbn.vue.treatData(this));
     },
     methods: {
@@ -130,16 +131,28 @@
         return retrieved;
       },
       defaultDataSet(data){
-        var res = {},
-            done = [];
-        $.each(this.columns, function(i, a){
-          if ( a.field && ($.inArray(a.field, done) === -1) ){
-            done.push(a.field);
-            res[a.field] = a.default !== undefined ? a.default : '';
-
+        let res = [];
+        $.each(this.cols, function(i, a){
+          if ( a.field ){
+            res.push(data[a.field] !== undefined ? data[a.field] : (a.default !== undefined ? a.default : ''));
+          }
+          else{
+            res.push('');
           }
         });
-        return $.extend(res, data ? data : {});
+        return res;
+      },
+      defaultRow(data){
+        let data2 = this.defaultDataSet(data);
+        let res = '<tr role="row">';
+        if ( data2 ){
+          $.each(data2, (i, v) => {
+            res += '<td>' + v + '</td>';
+          })
+        }
+        res += '</tr>';
+        bbn.fn.log(data2, res);
+        return res;
       },
       add(data){
         this.widget.rows().add([data]);
@@ -177,8 +190,11 @@
         if ( vm.tmpRow ){
           vm.removeTmp();
         }
-        vm.tmpRow = vm.widget.rows.add([vm.defaultDataSet(data)]);
-        vm.widget.draw();
+        let row = $(this.defaultRow());
+        bbn.fn.log(row, vm.table, vm.table.find("tbody:first"));
+        vm.table.find("tbody:first").prepend(row);
+        //vm.tmpRow = vm.widget.rows.add([vm.defaultDataSet(data)]);
+        //vm.widget.draw();
       },
       removeTmp(){
         var vm = this;
@@ -242,6 +258,7 @@
             fixed = true;
         $.each(vm.cols, function(i, a){
           bbn.fn.log(a);
+
           if ( a.fixed && fixed ){
             fixedLeft++;
           }
@@ -257,6 +274,9 @@
           var r = {
             data: a.field
           };
+          if ( a.hidden ){
+            r.visible = false;
+          }
           if ( a.cls ){
             r.className = a.cls;
           }
@@ -352,6 +372,7 @@
                 bbn.fn.log("Error parsing buttons", a.buttons, e);
               }
             }
+
             if ( $.isArray(buttons) ){
               r.render = function (data, field, row){
                 return vm.buttons2String(buttons, field || '', row);
@@ -717,6 +738,7 @@
                 },
                 'class': {
                   'bbn-column': true,
+                  'k-header': true,
                   'k-last': i === (vm.cols.length - 1),
                   'k-first': i === 0
                 }
@@ -821,6 +843,19 @@
       */
       vm.widgetCfg = vm.getConfig();
       vm.widget = $ele.find("table:first").addClass("k-grid").DataTable(vm.widgetCfg);
+      vm.$nextTick(() => {
+
+      })
+      vm.table = $ele.find(".dataTables_scrollBody table:first");
+      let headBar = $ele.find("div.dataTables_scroll:first").prev();
+      if ( headBar.is(".fg-toolbar") ){
+        headBar.addClass("k-header k-grid-toolbar")
+      }
+      let footBar = $ele.find("div.dataTables_scroll:first").next();
+      if ( footBar.is(".fg-toolbar") ){
+        footBar.addClass("k-pager-wrap")
+      }
+
       var resizeTimer;
       $(vm.$el).on("bbnResize", () => {
         clearTimeout(resizeTimer);

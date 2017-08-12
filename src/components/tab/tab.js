@@ -13,6 +13,10 @@
         type: [String, Number],
         default: bbn._("Untitled")
       },
+      hasPopups: {
+        type: Boolean,
+        default: false
+      },
       componentAttributes: {
         type: Object
       },
@@ -69,6 +73,12 @@
         if ( url.indexOf(vm.url) === 0 ){
           vm.tabNav.activate(url);
         }
+      },
+      popup(){
+        this.$refs.popup.open.apply(this.$refs.popup, arguments)
+      },
+      getComponent(){
+        return this.$children[1] || this.$children[0]
       },
       getSubTabNav(ele){
         if ( !ele ){
@@ -141,6 +151,7 @@
       r.isComponent = null;
       r.name = bbn.fn.randomString(20, 15).toLowerCase();
       r.isMounted = false;
+      r.popups = [];
       return r;
     },
 
@@ -155,7 +166,14 @@
               'bbn-tab-selected': !!vm.selected
             }
           },
-          children = [],
+          children = [
+            createElement('bbn-popup', {
+              props: {
+                source: vm.popups
+              },
+              ref: "popup"
+            })
+          ],
           res = null;
       if ( vm.isComponent === null ){
         vm.onMount = function(){
@@ -172,9 +190,17 @@
           }
         }
         if ( vm.isComponent ){
-          $.extend(res, {
+          bbn.fn.extend(res ? res : {}, {
             name: vm.name,
             template: '<div class="bbn-100">' + vm.content + '</div>',
+            methods: {
+              getTab: () => {
+                return vm;
+              },
+              popup: vm.popup,
+              addMenu: vm.addMenu,
+              deleteMenu: vm.deleteMenu
+            },
             props: ['source']
           });
           vm.$options.components[vm.name] = res;

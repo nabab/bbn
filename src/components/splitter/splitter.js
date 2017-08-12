@@ -32,8 +32,10 @@
         let cfg = this.getOptions();
         cfg.resize = function(){
           bbn.fn.log("RESIZING FROM CFG");
-          bbn.fn.analyzeContent(vm.$el, true);
-          bbn.fn.propagateResize(vm.$el);
+          vm.$nextTick(() => {
+            bbn.fn.analyzeContent(vm.$el, true);
+            bbn.fn.propagateResize(vm.$el);
+          })
         };
         cfg.panes = [];
         $.each(vm.$el.children, function(i, a){

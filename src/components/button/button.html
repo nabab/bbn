@@ -1,11 +1,16 @@
 <button class="k-button"
         ref="element"
-        @click="click"
+        @click.prevent="click($event)"
+        @focus="focus($event)"
+        @blur="blur($event)"
+        @keydown="keydown($event)"
+        @keyup="keyup($event)"
+        @mouseenter="over($event)"
+        @mouseleave="out($event)"
         :type="type"
-        :disabled="disabled ? true : false"
+        :disabled="disabled"
         :title="text && notext ? text : (title ? title : '')"
 >
   <i v-if="icon" :class="icon"> </i>
-  <slot></slot>
   <span v-if="text && !notext" v-html="text"></span>
 </button>

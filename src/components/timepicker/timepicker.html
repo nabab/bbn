@@ -1,14 +1,23 @@
 <span class="bbn-timepicker">
   <input :value="ivalue"
          ref="element"
-         :disabled="!!disabled"
-         :required="!!required"
+         :disabled="disabled"
+         :required="required"
          :placeholder="placeholder"
+         :readonly="readonly"
+         @click="click($event)"
+         @focus="focus($event)"
+         @blur="blur($event)"
+         @change="change($event)"
+         @keydown="keydown($event)"
+         @keyup="keyup($event)"
+         @mouseenter="over($event)"
+         @mouseleave="out($event)"
   >
   <input :value="value"
          ref="itimepicker"
          :name="name"
-         :disabled="disabled ? true : false"
+         :disabled="disabled"
          type="hidden"
   >
 </span>

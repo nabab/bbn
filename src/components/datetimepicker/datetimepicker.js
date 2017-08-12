@@ -50,7 +50,7 @@
 
 
   Vue.component('bbn-datetimepicker', {
-    mixins: [bbn.vue.vueComponent],
+    mixins: [bbn.vue.fullComponent],
     template: '#bbn-tpl-component-datetimepicker',
     props: {
       cfg: {
@@ -83,25 +83,25 @@
       },
     },
     computed: {
-      ivalue: function(){
+      ivalue(){
         return kendo.toString(kendo.parseDate(this.value, "yyyy-MM-dd HH:mm:ss"), "dd/MM/yyyy HH:mm");
       }
     },
-    data: function(){
+    data(){
       return $.extend({
         widgetName: "kendoMaskedDateTimePicker"
       }, bbn.vue.treatData(this));
     },
-    mounted: function(){
-      var vm = this;
-      vm.widget = $(this.$refs.element)
-        .kendoMaskedDateTimePicker($.extend(vm.getOptions(), {
-          change: function(e){
-            vm.emitInput(kendo.toString(vm.widget.value(), "yyyy-MM-dd HH:mm:ss"));
+    mounted(){
+      this.widget = $(this.$refs.element)
+        .kendoMaskedDateTimePicker($.extend(this.getOptions(), {
+          change: () => {
+            this.emitInput(kendo.toString(this.widget.value(), "yyyy-MM-dd HH:mm:ss"));
             return true;
           }
         }))
         .data("kendoDateTimePicker");
+      this.$emit("ready", this.value);
     }
   });
 

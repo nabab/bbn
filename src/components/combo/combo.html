@@ -1,8 +1,18 @@
-<span class="bbn-combo">
+<span class="bbn-combo"
+      @input="emitInput($event.target.value)"
+      @click="click($event)"
+      @focus="focus($event)"
+      @blur="blur($event)"
+      @change="change($event)"
+      @keydown="keydown($event)"
+      @keyup="keyup($event)"
+      @mouseenter="over($event)"
+      @mouseleave="out($event)"
+>
   <input :value="value"
          :name="name"
          ref="element"
-         :disabled="disabled ? true : false"
-         :required="required ? true : false"
+         :disabled="disabled"
+         :required="required"
   >
 </span>

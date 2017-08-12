@@ -39,7 +39,7 @@
       };
 
   Vue.component('bbn-tree', {
-    mixins: [bbn.vue.vueComponent],
+    mixins: [bbn.vue.fullComponent],
     template: '#bbn-tpl-component-tree',
     props: {
       extensions:{
@@ -138,7 +138,7 @@
           // ContextMenu
           if ( cfg.contextMenu ){
             let ds = [],
-                data = $.extend({is_folder: n.node.folder}, n.node.data);
+                data = $.extend({is_folder: n.node.folder, key: n.node.key}, n.node.data);
             $.each(cfg.contextMenu, (i, v) => {
               let r = $.extend({}, v);
               if ( $.isFunction(v.click) ){

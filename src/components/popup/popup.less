@@ -1,9 +1,25 @@
 .bbn-popup{
-  position: absolute;
+  position: absolute !important;
   top: 0px;
   left: 0px;
-  right: 0px;
-  bottom: 0px;
-  z-index: 14;
-  display: none;
+  .k-window{
+    max-width: 100%;
+    max-height: ~"-webkit-calc(100% - 30px)";
+    max-height: ~"-moz-calc(100% - 30px)";
+    max-height: ~"calc(100% - 30px)";
+    .k-window-title{
+      cursor: move;
+    }
+  }
+  .k-overlay{
+    opacity: 0.5;
+    position: absolute;
+  }
+  .fade-enter-active, .fade-leave-active {
+    transition: opacity .5s;
+    opacity: 0.5;
+  }
+  .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    opacity: 0
+  }
 }

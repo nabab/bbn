@@ -11,13 +11,18 @@
   "use strict";
 
   Vue.component('bbn-json-editor', {
-    mixins: [bbn.vue.vueComponent],
+    mixins: [bbn.vue.fullComponent],
     template: '#bbn-tpl-component-json-editor',
     methods: {
       getOptions(){
         const vm = this;
-        return $.extend(bbn.vue.getOptions(vm), {
-          onChange(){
+        let cfg = bbn.vue.getOptions(vm);
+        if ( vm.readonly ){
+          cfg.modes = [];
+          cfg.mode = 'view';
+        }
+        else{
+          cfg.onChange = () => {
             var v = vm.widget.getText();
             vm.$refs.input.value = v;
             //$(vm.$refs.input).trigger("change");
@@ -25,8 +30,9 @@
             //vm.$set(vm, "value", vm.widget.getText());
             vm.$emit("change", v);
             vm.$emit("input", v);
-          },
-        });
+          };
+        }
+        return cfg;
       }
     },
     props: {
@@ -59,11 +65,11 @@
       }
     },
     mounted(){
-      let vm = this,
-          cfg = vm.getOptions();
-      bbn.fn.log("VALUE", vm.value);
-      vm.widget = new JSONEditor(vm.$refs.element, cfg);
-      vm.widget.setText(vm.value);
+      let cfg = this.getOptions();
+      bbn.fn.log("VALUE", this.value);
+      this.widget = new JSONEditor(this.$refs.element, cfg);
+      this.widget.setText(this.value);
+      this.$emit("ready", this.value);
     },
     data(){
       return $.extend({

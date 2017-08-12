@@ -5,7 +5,7 @@
   "use strict";
 
   Vue.component('bbn-masked', {
-    mixins: [bbn.vue.vueComponent],
+    mixins: [bbn.vue.fullComponent],
     template: '#bbn-tpl-component-masked',
     props: {
       mask: {
@@ -27,6 +27,7 @@
     },
     mounted: function(){
       this.widget = $(this.$refs.element).kendoMaskedTextBox(this.getOptions()).data("kendoMaskedTextBox");
+      this.$emit("ready", this.value);
     }
   });
 

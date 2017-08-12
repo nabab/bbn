@@ -11,7 +11,7 @@
   "use strict";
 
   Vue.component('bbn-markdown', {
-    mixins: [bbn.vue.vueComponent],
+    mixins: [bbn.vue.fullComponent],
     template: '#bbn-tpl-component-markdown',
     methods: {
       test: function(){
@@ -53,23 +53,20 @@
         type: Array
       }
     },
-    mounted: function(){
-      var vm = this,
-        cfg = $.extend(vm.getOptions(), {
-          change: function(e){
-            vm.emitInput(vm.widget.value());
-            return true
-          }
-        });
-
-
-      vm.widget = new SimpleMDE($.extend({
-        element: vm.$refs.element
-      }, vm.getOptions()));
-      vm.widget.codemirror.on("change", function(){
-        vm.emitInput(vm.widget.value());
+    mounted(){
+      let cfg = $.extend(vm.getOptions(), {
+        change: function(e){
+          vm.emitInput(vm.widget.value());
+          return true
+        }
       });
-
+      this.widget = new SimpleMDE($.extend({
+        element: this.$refs.element
+      }, this.getOptions()));
+      this.widget.codemirror.on("change", () => {
+        this.emitInput(this.widget.value());
+      });
+      this.$emit("ready", this.value);
     },
     data: function(){
       return $.extend({

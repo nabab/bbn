@@ -11,6 +11,10 @@
       disabled: {},
       script: {},
       fields: {},
+      confirmLeave: {
+        type: [Boolean, String],
+        default: bbn._("Are you sure you want to discard the changes you made in this form?")
+      },
       action: {
         type: String,
         default: '.'
@@ -44,27 +48,31 @@
     },
     data(){
       return {
-        originalData: false
+        popup: false,
+        popupIndex: false,
+        tab: false,
+        originalData: false,
+        components: []
       };
     },
-    computed: {
+    methods: {
       isModified(){
-        let vm = this,
-            data = bbn.fn.formdata();
-        if ( vm.originalData === false ){
-          return false;
-        }
+        let data = bbn.fn.formdata(this.$el);
         for ( var n in data ){
-          if ( data[n] !== vm.originalData[n] ){
+          if ( data[n] !== this.originalData[n] ){
+            bbn.fn.log("modified", n, data[n], this.originalData[n]);
             return true;
           }
         }
         return false;
-      }
-    },
-    methods: {
+      },
+      closePopup(){
+        if ( this.popup ){
+          this.reset();
+          this.popup.close(this.popupIndex)
+        }
+      },
       cancel(){
-
         return bbn.fn.cancel(this.$el);
       },
       change(prop, value){
@@ -75,23 +83,59 @@
       submit: function(){
         return bbn.fn.submit(this.$el);
       },
-      reset: function(){
-        let vm = this;
+      reset(){
+        $.each(this.originalData, (name, val) => {
+          this.$set(this.source, name, val);
+        });
+        this.$forceUpdate();
       }
     },
     mounted(){
-      var vm = this;
       if ( this.$options.propsData.script ){
         $(this.$el).data("script", this.$options.propsData.script);
       }
-      vm.$nextTick(() => {
-        $(vm.$el).on('input', ':input[name]', function(e){
-          vm.change(this.name, this.value);
-          if ( !vm.isModified && (this.value !== vm.originalData[this.name]) ){
-            vm.isModified = true;
-          }
+      this.$nextTick(() => {
+        /** @todo check every object and get unloaded components
+        let vm = this.$el;
+        while ( vm.children ){
+
+        }
+         */
+        let popup = bbn.vue.closest(this, ".bbn-popup"),
+            tab = bbn.vue.closest(this, ".bbn-tab");
+        this.originalData = bbn.fn.formdata(this.$el);
+        $.each(bbn.vue.getComponents(this), (i, cp) => {
+          cp.$on("ready", )
         });
-        vm.originalData = bbn.fn.formdata(vm.$el);
+
+        //bbn.fn.log("C'e popup? ", popup);
+        if ( popup ){
+          this.popup = popup;
+          this.popupIndex = $(this.$el).closest("div.k-window").index();
+          this.$set(popup.source[this.popupIndex], "close", (popup, idx) => {
+            if ( this.isModified() ){
+              if ( this.confirmLeave ){
+                bbn.fn.confirm(typeof(this.confirmLeave) === 'string' ? this.confirmLeave : bbn._("Are you sure you wanna discard your changes?"), () => {
+                  this.reset();
+                  popup.close(idx, true);
+                })
+              }
+              else{
+                this.reset();
+                popup.close(idx, true);
+              }
+              return false;
+            }
+          })
+        }
+        else if ( tab ){
+          this.tab = tab;
+        }
+        $(this.$el).on('input', ':input[name]', (e) => {
+          bbn.fn.log("INPUT", e);
+          //vm.change(this.name, this.value);
+          this.$forceUpdate();
+        });
       });
     }
   });

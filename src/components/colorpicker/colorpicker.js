@@ -5,7 +5,7 @@
   "use strict";
 
   Vue.component('bbn-colorpicker', {
-    mixins: [bbn.vue.vueComponent],
+    mixins: [bbn.vue.fullComponent],
     template: '#bbn-tpl-component-colorpicker',
     props: {
       value: {
@@ -59,11 +59,8 @@
         const vm  = this;
         let cfg = bbn.vue.getOptions(vm);
         cfg.change = function (e){
-          bbn.fn.log(e);
-          vm.$emit("input", e.sender.value());
-          if ( $.isFunction(vm.change) ){
-            vm.change();
-          }
+          vm.change(e);
+          vm.emitInput(e.sender.value());
         };
         return cfg;
       }
@@ -72,7 +69,7 @@
       this.widget = $(this.$refs.element)
         .kendoColorPicker(this.getOptions())
         .data("kendoColorPicker");
-      bbn.fn.log("WIDGET", this.widget);
+      this.$emit("ready", this.value);
     },
     data: function(){
       return $.extend({

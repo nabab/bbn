@@ -1,8 +1,14 @@
-<div>
-  <textarea class="bbn-rte"
-            ref="element"
+<div class="bbn-rte">
+  <textarea ref="element"
+            class="textarea"
             :value="value"
-            :name="name"
             :required="required"
+            :readonly="readonly"
+            :disabled="disabled"
   ></textarea>
+  <input type="hidden"
+         :value="value"
+         :name="name"
+         :disabled="disabled"
+  >
 </div>
