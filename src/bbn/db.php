@@ -241,7 +241,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
             $tmp = $this->language->get_databases();
             break;
         }
-        if ( !isset($tmp) ){
+        if ( !$tmp ){
           die("Erreur avec la table $item ou le mode $mode");
         }
         if ( $tmp ){

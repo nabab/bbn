@@ -396,17 +396,14 @@ class options extends bbn\models\cls\db
     // False is accepted as id_parent for root
     if ( end($args) === false ){
       array_pop($args);
+      $args[] = $this->default;
     }
-    if ( !count($args) ){
+    $num = count($args);
+    if ( !$num ){
       return $this->default;
     }
-    else if ( count($args) === 1 ){
-      if ( is_null($args[0]) ){
-        return $this->default;
-      }
-      if ( bbn\str::is_integer($args[0]) ){
-        return $args[0];
-      }
+    else if ( ($num === 1) && bbn\str::is_integer($args[0]) ){
+      return $args[0];
     }
     else if ( !is_string($args[0]) && !is_int($args[0]) ){
       return false;
@@ -414,6 +411,10 @@ class options extends bbn\models\cls\db
     // They must all have the same form at start with an id_parent as last argument
     if ( !bbn\str::is_integer(end($args)) ){
       $args[] = $this->default;
+      $num++;
+    }
+    if ( $num < 2 ){
+      return false;
     }
     // So the target has always the same name
     $local_cache_name = implode('-', $args);
@@ -423,12 +424,6 @@ class options extends bbn\models\cls\db
     }
     // Using the code(s) as argument(s) from now
     $id_parent = array_pop($args);
-    /** @todo WTF?? */
-    // The ID is already given
-    if ( !count($args) ){
-      \bbn\x::log("How the f*** do we end with only one parameter? IE $id_parent", "options_issues");
-      return $id_parent;
-    }
     $c =& $this->class_cfg;
     $true_code = array_pop($args);
     $local_cache_name2 = $true_code.'-'.$id_parent;
@@ -437,6 +432,7 @@ class options extends bbn\models\cls\db
       return $this->from_code($args);
     }
     /** @var int|false $tmp */
+    //var_dump("NO?", $args, $tmp, $true_code, $id_parent, $c['arch']['options']);
     if ( ($tmp = $this->db->select_one($c['table'], $c['arch']['options']['id'], [
         $c['arch']['options']['id_parent'] => $id_parent,
         $c['arch']['options']['code'] => $true_code
