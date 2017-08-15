@@ -820,7 +820,7 @@
     mounted(){
       var vm = this,
           $ele = $(this.$el);
-
+      this.onResize = this.setHeight;
       /*
       if ( !$("table", this.$el).length ){
         $ele.append('<table><thead><tr></tr></thead></table>');
@@ -855,18 +855,6 @@
       if ( footBar.is(".fg-toolbar") ){
         footBar.addClass("k-pager-wrap")
       }
-
-      var resizeTimer;
-      $(vm.$el).on("bbnResize", () => {
-        clearTimeout(resizeTimer);
-
-        resizeTimer = setTimeout(() => {
-          bbn.fn.log("Table resize");
-          vm.setHeight();
-          $(vm.$el).trigger("resize");
-          //vm.widget.draw();
-        }, 250);
-      });
     },
     watch: {
       editedRow: {

@@ -1,4 +1,4 @@
-<div class="bbn-table2 bbn-full-screen k-grid" @bbnresize.native="rr()">
+<div class="bbn-table2 bbn-full-screen k-grid">
   <div class="bbn-w-100 bbn-scroller" v-bbn-fill-height ref="xScroller">
     <div class="k-header bbn-table-head bbn-block">
       <table class="k-grid">
@@ -19,8 +19,12 @@
         </tbody>
       </table>
     </div>
-    <div class="bbn-full-height bbn-table-main" v-bbn-fill-height ref="yScroller">
-      <table class="k-grid" v-if="currentData.length">
+    <div class="bbn-table-main" v-bbn-fill-height ref="yScroller" @wheel="scroll">
+      <h3 v-if="isLoading"
+          class="bbn-lpadded"
+          v-html="_('Loading...')"
+      ></h3>
+      <table class="k-grid" v-else-if="currentData.length">
         <colgroup>
           <col v-for="(col, i) in cols"
                :style="headStyles(col)"
@@ -59,83 +63,57 @@
         </tr>
         </tbody>
       </table>
-      <h3 v-else-if="isLoading"
-          v-html="_('Loading...')"
-      ></h3>
     </div>
   </div>
-  <div class="scrollbar-x" ref="xScrollbarContainer">
+  <div class="scrollbar-x" ref="xScrollbarContainer" v-show="xScrollNumber > 1.05">
     <div class="scrollbar" ref="xScrollbar"></div>
   </div>
-  <div class="scrollbar-y" ref="yScrollbarContainer">
+  <div class="scrollbar-y" ref="yScrollbarContainer" v-show="yScrollNumber > 1.05">
     <div class="scrollbar" ref="yScrollbar"></div>
   </div>
+  <!-- Footer -->
   <div class="k-pager-wrap k-grid-pager k-widget k-floatwrap">
-    <span>
-    
-    </span>
-    <a href="#"
-       aria-label="Aller à la première page"
-       title="Aller à la première page"
-       :class="'k-link k-pager-nav k-pager-first' + (start ? '' : ' k-state-disabled')"
-       tabindex="-1"
-    >
-      <span class="k-icon k-i-seek-w"></span>
-    </a>
-    <a href="#"
-       aria-label="Aller à la page précédente"
-       title="Aller à la page précédente"
-       :class="'k-link k-pager-nav' + (start ? '' : ' k-state-disabled')"
-       tabindex="-1"
-    >
-      <span class="k-icon k-i-arrow-w"></span>
-    </a>
-    <ul class="k-pager-numbers k-reset">
-      <li class="k-current-page">
-        <span class="k-link k-pager-nav">1</span>
-      </li>
-      <li><span class="k-state-selected">1</span></li>
-      <li>
-        <a tabindex="-1"
-           href="#"
-           class="k-link"
-        >2</a>
-      </li>
-      <li>
-        <a tabindex="-1"
-           href="#"
-           class="k-link"
-        >10</a>
-      </li>
-      <li>
-        <a tabindex="-1"
-           href="#"
-           class="k-link"
-           title="Plusieurs pages"
-        >...</a>
-      </li>
-    </ul>
-    <span class="k-pager-input k-label">
-      Page<input class="k-textbox" v-model="currentPage">de {{numPages}}
-    </span>
-    <a href="#"
-       aria-label="Aller à la page suivante"
-       title="Aller à la page suivante"
-       class="k-link k-pager-nav"
-       tabindex="-1"
-    >
-      <span class="k-icon k-i-arrow-e"></span>
-    </a>
-    <a href="#"
-       aria-label="Aller à la dernière page"
-       title="Aller à la dernière page"
-       class="k-link k-pager-nav k-pager-last"
-       tabindex="-1"
-    >
-      <span class="k-icon k-i-seek-e"></span>
-    </a>
+    <div class="bbn-iblock" v-if="pagination">
+      <bbn-button icon="fa fa-angle-double-left"
+                  :notext="true"
+                  aria-label="Aller à la première page"
+                  title="Aller à la première page"
+                  :disabled="isLoading || (currentPage === 1)"
+                  @click="currentPage = 1"
+      ></bbn-button>
+      <bbn-button icon="fa fa-angle-left"
+                  :notext="true"
+                  aria-label="Aller à la page précédente"
+                  title="Aller à la page précédente"
+                  :disabled="isLoading || (currentPage === 1)"
+                  @click="currentPage--"
+      ></bbn-button>
+      Page
+      <bbn-numeric v-if="currentData.length"
+                   v-model="currentPage"
+                   :min="1"
+                   :max="numPages"
+                   style="width: 6em"
+                   :disabled="isLoading"
+      ></bbn-numeric>
+      de {{numPages}}
+      <bbn-button icon="fa fa-angle-right"
+                  :notext="true"
+                  aria-label="Aller à la page suivante"
+                  title="Aller à la page suivante"
+                  :disabled="isLoading || (currentPage === numPages)"
+                  @click="currentPage++"
+      ></bbn-button>
+      <bbn-button icon="fa fa-angle-double-right"
+                  :notext="true"
+                  aria-label="Aller à la dernière page"
+                  title="Aller à la dernière page"
+                  @click="currentPage = numPages"
+                  :disabled="isLoading || (currentPage === numPages)"
+      ></bbn-button>
+    </div>
     <span class="k-pager-sizes k-label">
-      <bbn-dropdown :source="limits" v-model="limit"></bbn-dropdown>
+      <bbn-dropdown :source="limits" v-model="currentLimit" @change="currentPage = 0"></bbn-dropdown>
       <span>articles par page</span>
     </span>
     <a href="javascript:"
@@ -147,7 +125,7 @@
       <span class="k-icon k-i-reload"></span>
     </a>
     <span class="k-pager-info k-label">
-      Afficher les items {{start+1}} - {{limit}} de {{total}}
+      Afficher les items {{start+1}} - {{start ? start + currentLimit : currentLimit}} de {{total}}
     </span>
   </div>
   

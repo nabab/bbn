@@ -9,6 +9,7 @@
    */
   Vue.component('bbn-popup', {
     template: "#bbn-tpl-component-popup",
+    mixins: [bbn.vue.resizerComponent],
     props: {
       untitled: {
         type: String,
@@ -140,9 +141,11 @@
                 containment: ".bbn-popup",
                 resize: () => {
                   bbn.fn.redraw(ele, true);
+                  this.$emit("resize");
                 },
                 stop: () => {
                   this.center(idx);
+                  this.$emit("resize");
                 }
               });
             }

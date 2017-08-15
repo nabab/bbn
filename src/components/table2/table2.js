@@ -9,15 +9,11 @@
    */
   Vue.component('bbn-table2', {
     template: '#bbn-tpl-component-table2',
-    mixins: [bbn.vue.fullComponent],
+    mixins: [bbn.vue.resizerComponent],
     props: {
       limit: {
         type: Number,
         default: 25
-      },
-      start: {
-        type: Number,
-        default: 0
       },
       pagination: {
         type: Boolean,
@@ -51,8 +47,12 @@
       fixedLeft: 0,
       fixedRight: 0,
       toolbar: {},
-      xscroll: {},
-      source: {},
+      source: {
+        type: [Array, String],
+        default(){
+          return [];
+        }
+      },
       columns: {
         type: Array,
         default: function(){
@@ -78,6 +78,7 @@
       return $.extend({
         currentData: [],
         limits: [10, 25, 50, 100, 250, 500],
+        start: 0,
         total: 0,
         buttonCls: 'bbn-table-command-',
         buttonDone: 'bbn-table-button',
@@ -93,28 +94,38 @@
         isLoading: false,
         isAjax: typeof this.source === 'string',
         xScrollNumber: 1,
-        YScrollNumber: 1
+        yScrollNumber: 1,
+        currentLimit: this.limit
 
       }, bbn.vue.treatData(this));
     },
     computed: {
       numPages(){
-        return Math.ceil(this.total/this.limit);
+        return Math.ceil(this.total/this.currentLimit);
       },
-      currentPage(){
-        return Math.ceil((this.start+1)/this.limit);
+      currentPage: {
+        get(){
+          return Math.ceil((this.start+1)/this.currentLimit);
+        },
+        set(val){
+          this.start = val > 1 ? (val-1) * this.currentLimit : 0;
+          this.updateData();
+        }
       }
     },
     methods: {
+      /** i18n */
       _: bbn._,
+
+      /** Refresh the current data set */
       updateData(){
         if ( this.isAjax ){
           this.isLoading = true;
           this.$forceUpdate();
           this.$nextTick(() => {
             bbn.fn.post(this.source, {
-              length: this.limit,
-              limit: this.limit,
+              length: this.currentLimit,
+              limit: this.currentLimit,
               start: this.start
             }, (result) => {
               this.isLoading = false;
@@ -132,9 +143,11 @@
         else if ( $.isArray(this.source) ){
           this.currentData = this.source;
           this.total = this.source.length;
+          this.$forceUpdate();
         }
       },
 
+      /** Renders a column according to config */
       render(data, column, index){
         let field = column && column.field ? column.field : '',
             value = data && column.field ? data[column.field] || '' : '';
@@ -184,6 +197,8 @@
         }
         return value;
       },
+
+      /** Returns header's CSS object */
       headStyles(col){
         let css = {
           width: this.getWidth(col.width)
@@ -193,9 +208,13 @@
         }
         return css;
       },
+
+      /** Returns body's CSS object */
       bodyStyles(col){
         return {};
       },
+
+      /** @todo */
       getRow(where){
         var vm = this,
             retrieved = false,
@@ -245,6 +264,8 @@
         }
         return retrieved;
       },
+
+      /** @todo */
       defaultDataSet(data){
         let res = [];
         $.each(this.cols, function(i, a){
@@ -257,6 +278,8 @@
         });
         return res;
       },
+
+      /** @todo */
       defaultRow(data){
         let data2 = this.defaultDataSet(data);
         let res = '<tr role="row">';
@@ -269,10 +292,14 @@
         bbn.fn.log(data2, res);
         return res;
       },
+
+      /** @todo */
       add(data){
         this.widget.rows().add([data]);
         this.widget.draw();
       },
+
+      /** @todo */
       update(where, data, update){
         bbn.fn.log(where);
         var res = this.getRow(where);
@@ -284,6 +311,8 @@
           res.obj.data(data);
         }
       },
+
+      /** @todo */
       editRow(where){
         let vm = this,
             row = vm.getRow(where);
@@ -292,6 +321,8 @@
           vm.editedRow = row.data;
         }
       },
+
+      /** @todo */
       remove(where){
         var vm = this,
             res = this.getRow(where);
@@ -300,6 +331,8 @@
           vm.widget.draw();
         }
       },
+
+      /** @todo */
       addTmp(data){
         var vm = this;
         if ( vm.tmpRow ){
@@ -311,6 +344,8 @@
         //vm.tmpRow = vm.widget.rows.add([vm.defaultDataSet(data)]);
         //vm.widget.draw();
       },
+
+      /** @todo */
       removeTmp(){
         var vm = this;
         if ( vm.tmpRow ){
@@ -319,6 +354,8 @@
           vm.widget.draw();
         }
       },
+
+      /** @todo */
       editTmp(data, update){
         if ( this.tmpRow ){
           if ( update ){
@@ -327,6 +364,8 @@
           this.tmpRow.data(data);
         }
       },
+
+      /** @todo */
       getWidth(w){
         if ( typeof(w) === 'number' ){
           return w + 'px';
@@ -337,6 +376,8 @@
         return 'auto';
 
       },
+
+      /** @todo */
       getColumns(){
         const vm = this;
         var res = [],
@@ -559,6 +600,8 @@
         });
         return res;
       },
+
+      /** @todo */
       rowCallback(row, data, dataIndex){
         const vm = this;
         if ( vm.$options.propsData.trClass ){
@@ -610,6 +653,8 @@
           });
         });
       },
+
+      /** @todo */
       getFixedColumns(columns){
         const vm = this;
         var res = {},
@@ -654,6 +699,8 @@
         }
         return res;
       },
+
+      /** @todo */
       setHeight(){
         const vm = this;
         // Height calculation
@@ -674,6 +721,8 @@
           .height(h)
           .css({maxHeight: h + "px"});
       },
+
+      /** @todo */
       getConfig(){
         var
           /**
@@ -788,38 +837,59 @@
         cfg.rowCallback = vm.rowCallback;
         return cfg;
       },
+
+      /** @todo */
       addColumn(obj){
         const vm = this;
         vm.cols.push(obj);
       },
-      rr(){
-        bbn.fn.log("RESIZE");
-        alert("resize");
-      },
+
+      /** @todo */
       updateScrollbars(){
-        let total = this.$refs.xScroller.scrollWidth,
-          x = this.$refs.xScroller.scrollLeft,
-          visiblePart = this.$refs.xScrollbarContainer.clientWidth,
-          scrollSize = Math.round(visiblePart / total * visiblePart);
-        this.$refs.xScrollbar.style.width = scrollSize + 'px';
-        this.xScrollNumber = Math.ceil((total - visiblePart)*100 / (visiblePart - scrollSize)) / 100;
-        total = this.$refs.yScroller.scrollHeight,
-          x = this.$refs.yScroller.scrollTop,
-          visiblePart = this.$refs.yScrollbarContainer.clientHeight,
-          scrollSize = Math.round(visiblePart / total * visiblePart);
-        this.$refs.yScrollbar.style.height = scrollSize + 'px';
-        this.yScrollNumber = Math.ceil((total - visiblePart)*100 / (visiblePart - scrollSize)) / 100;
+        if ( !this.cols.length ){
+          this.xScrollNumber = 1;
+        }
+        else{
+          let total = this.$refs.xScroller.scrollWidth,
+              visiblePart = this.$refs.xScrollbarContainer.clientWidth,
+              scrollSize = Math.round(visiblePart / total * visiblePart);
+          this.$refs.xScrollbar.style.width = scrollSize + 'px';
+          this.xScrollNumber = Math.ceil((total - visiblePart)*100 / (visiblePart - scrollSize)) / 100;
+        }
+        if ( !this.total ){
+          this.yScrollNumber = 1;
+        }
+        else{
+          let total = this.$refs.yScroller.scrollHeight,
+              visiblePart = this.$refs.yScrollbarContainer.clientHeight,
+              scrollSize = Math.round(visiblePart / total * visiblePart);
+          this.$refs.yScrollbar.style.height = scrollSize + 'px';
+          this.yScrollNumber = Math.ceil((total - visiblePart)*100 / (visiblePart - scrollSize)) / 100;
+        }
       },
+
+      /** @todo */
       scrollX(){
         let pos = parseInt(this.$refs.xScrollbar.style.left);
         bbn.fn.log(pos);
         this.$refs.xScroller.scrollLeft = pos ? Math.round(pos * this.xScrollNumber) : 0;
       },
+
+      /** @todo */
       scrollY(){
         let pos = parseInt(this.$refs.yScrollbar.style.top);
         bbn.fn.log(pos);
         this.$refs.yScroller.scrollTop = pos ? Math.round(pos * this.yScrollNumber) : 0;
-      }
+      },
+
+      /** @todo */
+      scroll(){
+        bbn.fn.log("SCROLLING...");
+      },
+
+      onResize(){
+        this.updateScrollbars();
+      },
     },
 
     created(){
@@ -843,11 +913,10 @@
         }
       }
     },
+
     mounted(){
       this.$nextTick(() => {
         this.updateData();
-        bbn.fn.analyzeContent(this.$el, true);
-        this.updateScrollbars();
         $(this.$refs.xScrollbar).draggable({
           axis: 'x',
           start: this.updateScrollbars,
@@ -860,6 +929,7 @@
           drag: this.scrollY,
           containment: 'parent'
         });
+        $(this.$refs.yScroller).width($(this.$refs.yScroller).prev().width());
         /*
         $(this.$el)
           .find(".bbn-table-main:first")
@@ -880,6 +950,7 @@
       },
       currentData(){
         this.$nextTick(() => {
+          this.updateScrollbars();
           /*
           $(this.$el)
             .children(".bbn-table-scroller")

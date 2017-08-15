@@ -11,63 +11,74 @@
   });
 
   Vue.directive('bbn-fill-height', {
-    inserted(el, binding, vnode, oldVnode){
-      bbn.fn.log("INSERTED FILL HEIGHT");
-      let $ele = $(el),
-          $parent = $ele.parent(),
-          $siblings = $ele.siblings(),
-          h = $parent.innerHeight();
-      if ( $parent[0] === document.body ){
-        h = window.bbn.env.height;
-      }
-      $siblings.each(function(){
-        let h2,
-            $t = $(this);
-        if ( $t.is(":visible") &&
-          ($t.css('position') !== 'absolute') &&
-          ($t.css('position') !== 'fixed') &&
-          ($t.css('display') !== 'inline')
-        ){
-          h2 = $t.outerHeight(true);
-          if ( h2 ){
-            h -= h2;
-          }
-        }
-      });
-      if ( h > 0 ){
-        h = Math.round(h);
-        $ele.outerHeight(h);
-      }
+    bind(el, binding, vnode, oldVnode){
+      //bbn.fn.log("BOUNMD!!!", el, "FROM");
+    },
+    inserted(el, binding, vnode){
+      bbn.vue.setResizeDirective(binding.name, el, vnode);
+    },
+    updated(el, binding, vnode, oldVnode){
+      //bbn.fn.log("UPDATED FILL HEIGHT");
+      //bbn.fn.fillHeight(el);
     },
     componentUpdated(el, binding, vnode, oldVnode){
-      bbn.fn.log("UPDATED FILL HEIGHT");
-      let $ele = $(el),
-          $parent = $ele.parent(),
-          $siblings = $ele.siblings(),
-          h = $parent.innerHeight();
-      if ( $parent[0] === document.body ){
-        h = window.bbn.env.height;
-      }
-      $siblings.each(function(){
-        let h2,
-            $t = $(this);
-        if ( $t.is(":visible") &&
-          ($t.css('position') !== 'absolute') &&
-          ($t.css('position') !== 'fixed') &&
-          ($t.css('display') !== 'inline')
-        ){
-          h2 = $t.outerHeight(true);
-          if ( h2 ){
-            h -= h2;
+      //bbn.fn.log("UPDATED COMPONENT FILL HEIGHT");
+      //bbn.fn.fillHeight(el);
+    },
+    unbind(el, binding, vnode, oldVnode){
+      bbn.vue.unsetResizeDirective(binding.name, el, vnode);
+    }
+  });
+
+  Vue.directive('bbn-fill-width', {
+    inserted(el, binding, vnode, oldVnode){
+      bbn.vue.setResizeDirective(binding.name, el, vnode);
+    },
+    updated(el, binding, vnode, oldVnode){
+      //bbn.fn.log("UPDATED FILL WIDTH");
+      //bbn.fn.fillWidth(el);
+    },
+    componentUpdated(el, binding, vnode, oldVnode){
+      //bbn.fn.log("UPDATED COMPONENT FILL WIDTH");
+      //bbn.fn.fillWidth(el);
+    },
+    unbind(el, binding, vnode, oldVnode){
+      //bbn.fn.log("UNBOUND FILL WIDTH");
+      if ( vnode.componentInstance ){
+        let fn = $(el).data("bbnVueFillWidth");
+        if ( fn ){
+          /** We pick the closest resizable element, i.e. one which  */
+          let closestResizable = bbn.vue.is(vnode.componentInstance, ".bbn-resize-emitter") ? vnode.componentInstance : bbn.vue.closest(vnode.componentInstance, ".bbn-resize-emitter");
+          if ( closestResizable ){
+            /** We put the listener */
+            closestResizable.$off("resize", fn);
+          }
+          else{
+            $(window).off("resize", fn);
           }
         }
-      });
-      if ( h > 0 ){
-        h = Math.round(h);
-        $ele.outerHeight(h);
       }
     }
   });
+
+  /*
+  Vue.directive('bbn-resizable', {
+    inserted(el, binding, vnode, oldVnode){
+      $(el).addClass(".bbn-resizable");
+      let closestResizable = false;
+      if ( vnode.componentInstance ){
+        closestResizable = bbn.vue.is(vnode.componentInstance, ".bbn-resizable") ? vnode.componentInstance : bbn.vue.closest(vnode.componentInstance, ".bbn-resizable");
+        if ( closestResizable ){
+          closestResizable.$on("resize", () => {
+            bbn.fn.log("Emiting resize", el);
+            this.$emit("resize");
+          })
+        }
+      }
+      bbn.fn.log("INSERTED RESIZABLE", el, binding, vnode, oldVnode, rt);
+    }
+  });
+*/
 
   bbn.vue = {
     defaultLocalURL: false,
@@ -604,6 +615,105 @@
       }
     },
 
+    // These components will emit a resize event when their closest parent of the same kind gets really resized
+    resizerComponent: {
+      data(){
+        return {
+          // The closest resizer parent
+          parentResizer: false,
+          // The listener on the closest resizer parent
+          resizeEmitter: false,
+          // Height
+          lastKnownHeight: false,
+          // Width
+          lastKnownWidth: false
+        };
+      },
+      methods: {
+        // a function can be executed just before the resize event is emitted
+        onResize(){
+          return;
+        },
+        setResizeEvent(){
+          // The timeout used in the listener
+          let resizeTimeout;
+          // This class will allow to recognize the element to listen to
+          $(this.$el).addClass("bbn-resize-emitter");
+          this.parentResizer = bbn.vue.closest(this, ".bbn-resize-emitter");
+          // Setting initial dimensions
+          this.lastKnownHeight = this.parentResizer ? Math.round($(this.parentResizer.$el).innerHeight()) : bbn.env.height;
+          this.lastKnownWidth = this.parentResizer ? Math.round($(this.parentResizer.$el).innerWidth()) : bbn.env.width;
+          // Creating the callback function which will be used in the timeout in the listener
+          this.resizeEmitter = () => {
+            // Removing previous timeout
+            clearTimeout(resizeTimeout);
+            // Creating a new one
+            resizeTimeout = setTimeout(() => {
+              if ( $(this.$el).is(":visible") ){
+                // Checking if the parent hasn't changed (case where the child is mounted before)
+                let tmp = bbn.vue.closest(this, ".bbn-resize-emitter");
+                if ( tmp !== this.parentResizer ){
+                  // In that case we reset
+                  this.unsetResizeEvent();
+                  this.setResizeEvent();
+                  tmp.$emit("resize");
+                  bbn.fn.log("Emitting from new element", tmp.$el);
+                  return;
+                }
+                let resize = false,
+                    h      = this.parentResizer ? Math.round($(this.parentResizer.$el).innerHeight()) : bbn.env.height,
+                    w      = this.parentResizer ? Math.round($(this.parentResizer.$el).innerWidth()) : bbn.env.width;
+                if ( h && (this.lastKnownHeight !== h) ){
+                  this.lastKnownHeight = h;
+                  resize = 1;
+                }
+                if ( w && (this.lastKnownWidth !== w) ){
+                  this.lastKnownWidth = w;
+                  resize = 1;
+                }
+                if ( $.isFunction(this.onResize) ){
+                  this.onResize();
+                }
+                if ( resize ){
+                  this.$emit("resize");
+                  bbn.fn.log("EMITTING FROM RESIZE EMITTER", this.$el);
+                }
+              }
+            }, 100);
+          };
+          if ( this.parentResizer ){
+            //bbn.fn.log("SETTING EVENT FOR PARENT", this.$el, this.parentResizer);
+            this.parentResizer.$on("resize", this.resizeEmitter);
+          }
+          else{
+            //bbn.fn.log("SETTING EVENT FOR WINDOW", this.$el);
+            $(window).on("resize", this.resizeEmitter);
+          }
+          this.resizeEmitter();
+        },
+        unsetResizeEvent(){
+          if ( this.resizeEmitter ){
+            if ( this.parentResizer ){
+              //bbn.fn.log("UNSETTING EVENT FOR PARENT", this.$el, this.parentResizer);
+              this.parentResizer.$off("resize", this.resizeEmitter);
+            }
+            else{
+              //bbn.fn.log("UNSETTING EVENT FOR WINDOW", this.$el);
+              $(window).off("resize", this.resizeEmitter);
+            }
+          }
+        }
+      },
+      mounted(){
+        this.$nextTick(() => {
+          this.setResizeEvent();
+        })
+      },
+      beforeDestroy(){
+        this.unsetResizeEvent();
+      }
+    },
+
     retrieveRef(vm, path){
       let bits = path.split("."),
           target = vm,
@@ -622,12 +732,23 @@
       return false;
     },
 
+    is(vm, selector){
+      if ( selector && vm ){
+        if ( vm.$el && $(vm.$el).is(selector) ){
+          return true;
+        }
+        if ( vm.$vnode && vm.$vnode.componentOptions && (vm.$vnode.componentOptions.tag === selector) ){
+          return true;
+        }
+      }
+      return false;
+    },
+
     closest(vm, selector){
       while ( vm && vm.$parent && (vm !== vm.$parent) ){
-        if ( vm.$parent.$el && $(vm.$parent.$el).is(selector) ){
+        if ( bbn.vue.is(vm.$parent, selector) ){
           return vm.$parent;
         }
-        bbn.fn.log(vm);
         vm = vm.$parent;
       }
       return false;
@@ -644,8 +765,7 @@
           (obj.$vnode.data.key === key)
         ){
           if ( selector ){
-            return $(obj.$el).is(selector) ||
-              (obj.$vnode.componentOptions && (obj.$vnode.componentOptions.tag === selector)) ? obj : false;
+            return bbn.vue.is(obj, selector) ? obj : false;
           }
           return obj;
         }
@@ -656,10 +776,7 @@
     find(cp, selector){
       let cps = bbn.vue.getComponents(cp);
       for ( let i = 0; i < cps.length; i++ ){
-        if (
-          $(cps[i].$el).is(selector) ||
-          (cps[i].$vnode.componentOptions && (cps[i].$vnode.componentOptions.tag === selector))
-        ){
+        if ( bbn.vue.is(cps[i], selector) ){
           return cps[i];
         }
       }
@@ -692,7 +809,107 @@
       return ar;
     },
 
+    setResizeDirective(name, el, vnode){
+      let fName,
+          dName;
+      if ( name === 'bbn-fill-height' ){
+        fName = 'fillHeight';
+        dName = 'bbnVueFillHeight';
+      }
+      else if ( name === 'bbn-fill-width' ){
+        fName = 'fillWidth';
+        dName = 'bbnVueFillWidth';
+      }
+      // The function we'll use on el
+      if ( fName ){
+        // We add the directive's name as class
+        $(el).addClass(name);
+        // vnode.context is the object
+        if ( vnode.context ){
+          // Executing directive's function
+          $(el).data(dName, () => {
+            if ( bbn.fn[fName](el, true) ){
+              bbn.fn.log("Emitting from vnode", vnode.context.$el);
+              vnode.context.$emit("resize")
+            }
+          });
+          /** We pick the closest resizable element, i.e. one which  */
+          let closestResizable = bbn.vue.is(vnode.context, ".bbn-resize-emitter") ? vnode.context : bbn.vue.closest(vnode.context, ".bbn-resize-emitter");
+          $(el).data(dName + 'Parent', closestResizable);
+          if ( closestResizable ){
+            /** We put the listener */
+            closestResizable.$on("resize", () => {
+              let tmp = bbn.vue.is(vnode.context, ".bbn-resize-emitter") ? vnode.context : bbn.vue.closest(vnode.context, ".bbn-resize-emitter");
+              if ( tmp !== $(el).data(dName + 'Parent') ){
+                let fn = $(el).data(dName);
+                if ( fn ){
+                  /** We put the listener */
+                  $(el).data(dName + 'Parent').$off("resize", fn);
+                }
+                bbn.vue.setResizeDirective(name, el, vnode);
+                bbn.fn.log("Emitting from DIRECTIVE PARENT", vnode.context.$el);
+                tmp.$emit("resize");
+                return;
+              }
+              $(el).data(dName)();
+            });
+            setTimeout(() => {
+              closestResizable.$emit("resize");
+            }, 10)
+          }
+          else{
+            $(window).on("resize", () => {
+              let tmp = bbn.vue.is(vnode.context, ".bbn-resize-emitter") ? vnode.context : bbn.vue.closest(vnode.context, ".bbn-resize-emitter");
+              if ( tmp ){
+                let fn = $(el).data(dName);
+                if ( fn ){
+                  /** We put the listener */
+                  $(window).off("resize", fn);
 
+                }
+                bbn.vue.setResizeDirective(name, el, vnode);
+                bbn.fn.log("EMITTING FROM NEW DIRECTIVE", tmp.$el)
+                tmp.$emit("resize");
+                return;
+              }
+              //bbn.fn.log("resizing", el, "FROM WINDOW");
+              $(el).data(dName)();
+            });
+            setTimeout(() => {
+              $(window).trigger("resize");
+            }, 10)
+          }
+        }
+        else{
+          bbn.fn[fName](el);
+        }
+
+      }
+    },
+
+    unsetResizeDirective(name, el, vnode, target){
+      let dName;
+      if ( name === 'bbn-fill-height' ){
+        dName = 'bbnVueFillHeight';
+      }
+      else if ( name === 'bbn-fill-width' ){
+        dName = 'bbnVueFillWidth';
+      }
+      if ( dName && vnode.context ){
+        let fn = $(el).data(dName);
+        if ( fn ){
+          /** We pick the closest resizable element, i.e. one which  */
+          let closestResizable = bbn.vue.is(vnode.context, ".bbn-resize-emitter") ? vnode.context: bbn.vue.closest(vnode.context, ".bbn-resize-emitter");
+          if ( closestResizable ){
+            /** We put the listener */
+            closestResizable.$off("resize", fn);
+          }
+          else{
+            $(window).off("resize", fn);
+          }
+        }
+      }
+    },
 
     makeUID(){
       return bbn.fn.randomString(32);

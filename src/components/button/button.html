@@ -5,6 +5,7 @@
         @blur="blur($event)"
         @keydown="keydown($event)"
         @keyup="keyup($event)"
+        @scroll="scroll($event)"
         @mouseenter="over($event)"
         @mouseleave="out($event)"
         :type="type"
@@ -13,4 +14,5 @@
 >
   <i v-if="icon" :class="icon"> </i>
   <span v-if="text && !notext" v-html="text"></span>
+  <span v-else><slot></slot></span>
 </button>

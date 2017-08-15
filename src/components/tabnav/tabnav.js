@@ -25,6 +25,7 @@
    */
   Vue.component('bbn-tabnav', {
     //template: '#bbn-tpl-component-tabnav',
+    mixins: [bbn.vue.resizerComponent],
     props: {
        url: {
         type: String,
@@ -560,7 +561,6 @@
             /** @todo Check if it's right */
             bbn.fn.log("checkTabsHeight change");
             // Previous code (shit!)
-            vm.resize();
           }
           vm.tabsHeight = h;
         }
@@ -910,10 +910,12 @@
               vm.$set(vm.tabs[i], "selected", (i === newVal));
             }
           });
+          vm.navigate();
           vm.$nextTick(() => {
+            vm.$emit("resize");
+            bbn.fn.log("EMITTING FROM TABNAV");
             bbn.fn.analyzeContent(vm.$el, true);
           })
-          vm.navigate();
         }
       },
       currentURL(newVal, oldVal){
@@ -930,7 +932,7 @@
             ){
               vm.$set(vm.tabs[vm.selected], "current", newVal);
             }
-            bbn.fn.log("CHECKING PARENTS");
+            // CHECKING PARENTS
             if ( vm.parents.length ){
               bbn.fn.log("CHANGING URL");
               vm.parents[0].$set(vm.parents[0], "currentURL", vm.baseURL + newVal);

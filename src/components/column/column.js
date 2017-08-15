@@ -8,7 +8,7 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-column', {
-    //template: '#bbn-tpl-component-column',
+    template: '#bbn-tpl-component-column',
     props: {
       width: {
         type: [String, Number],
@@ -71,24 +71,14 @@
       return r;
     },
 
-    render: function(createElement){
-      var vm = this;
-      return createElement("div", {
-        'class': {
-          'bbn-column': true
-        }
-      });
+    mounted(){
+
     },
 
-    mounted: function(){
-      const vm = this;
-      vm.tabNav = bbn.vue.closest(vm, ".bbn-tabnav");
-      bbn.fn.analyzeContent(vm.$parent.$el);
-      if ( !vm.isComponent ){
-        vm.onMount(vm.$el, vm.source);
-      }
-      bbn.fn.analyzeContent(this.$el, true);
+    beforeDestroyed(){
+
     },
+
     watch: {
       selected: function(newVal, oldVal){
         if ( newVal && !oldVal ){

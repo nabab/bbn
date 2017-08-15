@@ -7,13 +7,15 @@
                :placeholder="placeholder"
                @keyup="search($event.target.value)"></bbn-input>
   </div>
-  <div class="bbn-full-height bbn-w-100">
-    <div class="bbn-full-content">
-      <bbn-tree :source="source"
-                min-expand-level="2"
-                ref="tree"
-                :extensions="['filter']"
-                :select="go"></bbn-tree>
+  <div class="bbn-w-100" v-bbn-fill-height>
+    <div class="bbn-100">
+      <div class="bbn-full-content">
+        <bbn-tree :source="source"
+                  min-expand-level="2"
+                  ref="tree"
+                  :extensions="['filter']"
+                  :select="go"></bbn-tree>
+      </div>
     </div>
   </div>
 </div>

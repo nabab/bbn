@@ -12,7 +12,8 @@
         type: [Number, String]
       },
       format: {
-        type: String
+        type: String,
+        default: "n0"
       },
       max: {
         type: [Number, String]
@@ -36,17 +37,29 @@
       }
     },
     data: function(){
-      return $.extend({
+      return {
         widgetName: "kendoNumericTextBox"
-      }, bbn.vue.treatData(this));
+      };
     },
     mounted: function(){
-      this.widget = $(this.$refs.element).kendoNumericTextBox($.extend(vm.getOptions(), {
+      this.widget = $(this.$refs.element).kendoNumericTextBox($.extend(this.getOptions(), {
+        value: this.value,
         spin: (e) => {
+          this.$emit('input', e.sender.value());
+        },
+        change: (e) => {
           this.$emit('input', e.sender.value());
         }
       })).data("kendoNumericTextBox");
       this.$emit("ready", this.value);
+    },
+    watch: {
+      min(newVal){
+        this.widget.setOptions({min: newVal});
+      },
+      max(newVal){
+        this.widget.setOptions({min: newVal});
+      }
     }
   });
 

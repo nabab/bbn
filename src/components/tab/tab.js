@@ -161,10 +161,13 @@
             'class': {
               'bbn-tab': true,
               'k-content': true,
-              'bbn-full-height': true,
+              //'bbn-full-height': true,
               'bbn-w-100': true,
               'bbn-tab-selected': !!vm.selected
-            }
+            },
+            directives: [$.extend({
+              name: 'bbn-fill-height'
+            }, Vue.options.directives['bbn-fill-height'])]
           },
           children = [
             createElement('bbn-popup', {
@@ -242,13 +245,12 @@
     },
 
     mounted: function(){
-      const vm = this;
-      vm.tabNav = bbn.vue.closest(vm, ".bbn-tabnav");
-      bbn.fn.analyzeContent(vm.$parent.$el);
-      if ( !vm.isComponent ){
-        vm.onMount(vm.$el, vm.source);
+      this.tabNav = bbn.vue.closest(this, ".bbn-tabnav");
+      bbn.fn.analyzeContent(this.$parent.$el);
+      if ( !this.isComponent ){
+        this.onMount(this.$el, this.source);
+        bbn.fn.analyzeContent(this.$el, true);
       }
-      bbn.fn.analyzeContent(this.$el, true);
     },
     watch: {
       selected: function(newVal, oldVal){
