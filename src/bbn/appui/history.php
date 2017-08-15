@@ -369,9 +369,9 @@ class history
   public static function get_creation_date($table, $id){
     if ( self::check($table) ){
       return self::$db->select_one(self::$htable, 'chrono', [
-        'column' => self::$db->table_full_name($table) . ".%",
-        'line' => $id,
-        'operation' => 'INSERT'
+        ['line', '=', $id],
+        ['column', 'LIKE', self::$db->table_full_name($table) . ".%"],
+        ['operation', 'LIKE', 'INSERT']
       ]);
     }
     return false;
@@ -380,9 +380,9 @@ class history
   public static function get_creation($table, $id){
     if ( self::check($table) ){
       return self::$db->rselect(self::$htable, ['date' => 'chrono', 'user' => 'id_user'], [
+        ['line', '=', $id],
         ['column', 'LIKE', self::$db->table_full_name($table) . ".%"],
-        'line' => $id,
-        'operation' => 'INSERT'
+        ['operation', 'LIKE', 'INSERT']
       ]);
     }
     return false;
@@ -393,16 +393,16 @@ class history
       return self::$db->select_one(
               self::$htable,
               'chrono', [
-                ['column', 'LIKE', self::$db->table_full_name($table).".".$column],
-                ['line', '=', $id]
+                ['line', '=', $id],
+                ['column', 'LIKE', self::$db->table_full_name($table).".".$column]
               ],
               ['chrono' => 'DESC']);
     }
     return self::$db->select_one(
             self::$htable,
             'chrono', [
-              ['column', 'LIKE', self::$db->table_full_name($table).'.%'],
               ['line', '=', $id],
+              ['column', 'LIKE', self::$db->table_full_name($table).'.%'],
               ['operation', 'NOT LIKE', 'DELETE']
             ],
             ['chrono' => 'DESC']);
