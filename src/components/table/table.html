@@ -1,4 +1,4 @@
-<div class="bbn-table2 bbn-full-screen k-grid">
+<div class="bbn-table bbn-full-screen k-grid">
   <div class="bbn-w-100 bbn-scroller" v-bbn-fill-height ref="xScroller">
     <div class="k-header bbn-table-head bbn-block">
       <table class="k-grid">
@@ -78,14 +78,14 @@
                   :notext="true"
                   aria-label="Aller à la première page"
                   title="Aller à la première page"
-                  :disabled="isLoading || (currentPage === 1)"
+                  :disabled="isLoading || (currentPage == 1)"
                   @click="currentPage = 1"
       ></bbn-button>
       <bbn-button icon="fa fa-angle-left"
                   :notext="true"
                   aria-label="Aller à la page précédente"
                   title="Aller à la page précédente"
-                  :disabled="isLoading || (currentPage === 1)"
+                  :disabled="isLoading || (currentPage == 1)"
                   @click="currentPage--"
       ></bbn-button>
       Page
@@ -101,7 +101,7 @@
                   :notext="true"
                   aria-label="Aller à la page suivante"
                   title="Aller à la page suivante"
-                  :disabled="isLoading || (currentPage === numPages)"
+                  :disabled="isLoading || (currentPage == numPages)"
                   @click="currentPage++"
       ></bbn-button>
       <bbn-button icon="fa fa-angle-double-right"
@@ -109,11 +109,11 @@
                   aria-label="Aller à la dernière page"
                   title="Aller à la dernière page"
                   @click="currentPage = numPages"
-                  :disabled="isLoading || (currentPage === numPages)"
+                  :disabled="isLoading || (currentPage == numPages)"
       ></bbn-button>
     </div>
     <span class="k-pager-sizes k-label">
-      <bbn-dropdown :source="limits" v-model="currentLimit" @change="currentPage = 0"></bbn-dropdown>
+      <bbn-dropdown :source="limits" v-model="currentLimit" @change="currentPage = 1"></bbn-dropdown>
       <span>articles par page</span>
     </span>
     <a href="javascript:"

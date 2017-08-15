@@ -129,7 +129,6 @@
       'splitter',
       'tab',
       'table',
-      'table2',
       'tabnav',
       'textarea',
       'timepicker',

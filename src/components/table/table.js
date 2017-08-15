@@ -8,7 +8,8 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-table', {
-    mixins: [bbn.vue.fullComponent],
+    template: '#bbn-tpl-component-table',
+    mixins: [bbn.vue.resizerComponent],
     props: {
       limit: {
         type: Number,
@@ -17,6 +18,10 @@
       pagination: {
         type: Boolean,
         default: false
+      },
+      paginationType: {
+        type: String,
+        default: 'input'
       },
       info: {
         type: Boolean,
@@ -32,18 +37,22 @@
       url: {
         type: String
       },
-      take: {
-        type: Number
-      },
-      skip: {
-        type: Number
-      },
       trClass: {
         type: [String,Function]
       },
+      component: {
+        type: [String, Boolean],
+        default: false
+      },
+      fixedLeft: 0,
+      fixedRight: 0,
       toolbar: {},
-      xscroll: {},
-      source: {},
+      source: {
+        type: [Array, String],
+        default(){
+          return [];
+        }
+      },
       columns: {
         type: Array,
         default: function(){
@@ -67,6 +76,10 @@
     },
     data: function(){
       return $.extend({
+        currentData: [],
+        limits: [10, 25, 50, 100, 250, 500],
+        start: 0,
+        total: 0,
         buttonCls: 'bbn-table-command-',
         buttonDone: 'bbn-table-button',
         selectDone: 'bbn-table-select',
@@ -77,10 +90,131 @@
         editedRow: false,
         editedTr: false,
         cols: [],
-        table: false
+        table: false,
+        isLoading: false,
+        isAjax: typeof this.source === 'string',
+        xScrollNumber: 1,
+        yScrollNumber: 1,
+        currentLimit: this.limit
+
       }, bbn.vue.treatData(this));
     },
+    computed: {
+      numPages(){
+        return Math.ceil(this.total/this.currentLimit);
+      },
+      currentPage: {
+        get(){
+          return Math.ceil((this.start+1)/this.currentLimit);
+        },
+        set(val){
+          this.start = val > 1 ? (val-1) * this.currentLimit : 0;
+          this.updateData();
+        }
+      }
+    },
     methods: {
+      /** i18n */
+      _: bbn._,
+
+      /** Refresh the current data set */
+      updateData(){
+        if ( this.isAjax ){
+          this.isLoading = true;
+          this.$forceUpdate();
+          this.$nextTick(() => {
+            bbn.fn.post(this.source, {
+              length: this.currentLimit,
+              limit: this.currentLimit,
+              start: this.start
+            }, (result) => {
+              this.isLoading = false;
+              if ( !result || result.error ){
+                alert(result || "Error in updateData")
+              }
+              else{
+                this.currentData = result.data || [];
+                this.total = result.total || 0;
+                this.$forceUpdate();
+              }
+            })
+          })
+        }
+        else if ( $.isArray(this.source) ){
+          this.currentData = this.source;
+          this.total = this.source.length;
+          this.$forceUpdate();
+        }
+      },
+
+      /** Renders a column according to config */
+      render(data, column, index){
+        let field = column && column.field ? column.field : '',
+            value = data && column.field ? data[column.field] || '' : '';
+
+        if ( column.source ){
+          if ( value ){
+            if ( $.isArray(column.source) ){
+              return bbn.fn.get_field(column.source, 'value', value, 'text');
+            }
+            else if ( column.source[value] !== undefined ){
+              return column.source[value];
+            }
+            return bbn._("<em>?</em>");
+          }
+          return "<em>-</em>";
+        }
+        else if ( column.type ){
+          switch ( column.type ){
+            case "date":
+              if ( column.format ){
+                return value ? (new moment(value)).format(a.format) : '-';
+              }
+              else{
+                return value ? bbn.fn.fdate(value) : '-';
+              }
+            case "email":
+              return value ? '<a href="mailto:' + value + '">' + value + '</a>' : '-';
+            case "url":
+              return value ? '<a href="' + value + '">' + value + '</a>' : '-';
+            case "number":
+              return value ? kendo.toString(parseInt(value), "n0") + ( a.unit || this.unit ? " " + ( column.unit || this.unit ) : "") : '-';
+            case "money":
+              return data ?
+                bbn.fn.money(data) + (
+                  column.unit || this.currency ?
+                    " " + ( column.unit || this.currency )
+                    : ""
+                )
+                : '-';
+            case "bool":
+            case "boolean":
+              return value && (value !== 'false') && (value !== '0') ? bbn._("Yes") : bbn._("No");
+          }
+        }
+        else if ( column.render ){
+          return column.render(value, index, data)
+        }
+        return value;
+      },
+
+      /** Returns header's CSS object */
+      headStyles(col){
+        let css = {
+          width: this.getWidth(col.width)
+        };
+        if ( col.hidden ){
+          css.display = 'none';
+        }
+        return css;
+      },
+
+      /** Returns body's CSS object */
+      bodyStyles(col){
+        return {};
+      },
+
+      /** @todo */
       getRow(where){
         var vm = this,
             retrieved = false,
@@ -130,6 +264,8 @@
         }
         return retrieved;
       },
+
+      /** @todo */
       defaultDataSet(data){
         let res = [];
         $.each(this.cols, function(i, a){
@@ -142,6 +278,8 @@
         });
         return res;
       },
+
+      /** @todo */
       defaultRow(data){
         let data2 = this.defaultDataSet(data);
         let res = '<tr role="row">';
@@ -154,10 +292,14 @@
         bbn.fn.log(data2, res);
         return res;
       },
+
+      /** @todo */
       add(data){
         this.widget.rows().add([data]);
         this.widget.draw();
       },
+
+      /** @todo */
       update(where, data, update){
         bbn.fn.log(where);
         var res = this.getRow(where);
@@ -169,6 +311,8 @@
           res.obj.data(data);
         }
       },
+
+      /** @todo */
       editRow(where){
         let vm = this,
             row = vm.getRow(where);
@@ -177,6 +321,8 @@
           vm.editedRow = row.data;
         }
       },
+
+      /** @todo */
       remove(where){
         var vm = this,
             res = this.getRow(where);
@@ -185,6 +331,8 @@
           vm.widget.draw();
         }
       },
+
+      /** @todo */
       addTmp(data){
         var vm = this;
         if ( vm.tmpRow ){
@@ -196,6 +344,8 @@
         //vm.tmpRow = vm.widget.rows.add([vm.defaultDataSet(data)]);
         //vm.widget.draw();
       },
+
+      /** @todo */
       removeTmp(){
         var vm = this;
         if ( vm.tmpRow ){
@@ -204,6 +354,8 @@
           vm.widget.draw();
         }
       },
+
+      /** @todo */
       editTmp(data, update){
         if ( this.tmpRow ){
           if ( update ){
@@ -212,31 +364,20 @@
           this.tmpRow.data(data);
         }
       },
-      buttons2String(buttons, field){
-        const vm = this;
-        let st = '';
-        if ( $.isArray(buttons) ){
-          $.each(buttons, function(k, b){
-            if ( b.url ){
-              st += '<a href="' + b.url + '">';
-            }
-            st += '<bbn-button class="' + vm.buttonCls +
-              b.command  +
-              (b.cls ? " " + b.cls : '') +
-              '"' +
-              (b.text ? ' text="' + b.text + '"' : '') +
-              ' @click="command(\'' + b.command + '\', \'' +
-              (field ? field : '') + '\')"' +
-              ' :notext="' + (b.notext ? 'true' : 'false') + '"' +
-              (b.icon ? ' icon="' + b.icon + '"' : '') +
-              '></bbn-button> ';
-            if ( b.url ){
-              st += '</a>';
-            }
-          });
+
+      /** @todo */
+      getWidth(w){
+        if ( typeof(w) === 'number' ){
+          return w + 'px';
         }
-        return st;
+        if ( bbn.fn.isDimension(w) ){
+          return w;
+        }
+        return 'auto';
+
       },
+
+      /** @todo */
       getColumns(){
         const vm = this;
         var res = [],
@@ -459,6 +600,8 @@
         });
         return res;
       },
+
+      /** @todo */
       rowCallback(row, data, dataIndex){
         const vm = this;
         if ( vm.$options.propsData.trClass ){
@@ -510,6 +653,8 @@
           });
         });
       },
+
+      /** @todo */
       getFixedColumns(columns){
         const vm = this;
         var res = {},
@@ -554,6 +699,8 @@
         }
         return res;
       },
+
+      /** @todo */
       setHeight(){
         const vm = this;
         // Height calculation
@@ -574,6 +721,8 @@
           .height(h)
           .css({maxHeight: h + "px"});
       },
+
+      /** @todo */
       getConfig(){
         var
           /**
@@ -688,112 +837,59 @@
         cfg.rowCallback = vm.rowCallback;
         return cfg;
       },
+
+      /** @todo */
       addColumn(obj){
         const vm = this;
         vm.cols.push(obj);
-      }
-    },
+      },
 
-    render(createElement){
-      const vm = this;
-
-      let table;
-
-      if (
-        vm.$slots.default &&
-        vm.$slots.default.length &&
-        vm.$slots.default[0].tag === 'table'
-      ){
-        table = vm.$slots.default[0];
-        if ( !table.data ){
-          table.data = {};
+      /** @todo */
+      updateScrollbars(){
+        if ( !this.cols.length ){
+          this.xScrollNumber = 1;
         }
-        if ( !table.data.attrs ){
-          table.data.attrs = {};
+        else{
+          let total = this.$refs.xScroller.scrollWidth,
+              visiblePart = this.$refs.xScrollbarContainer.clientWidth,
+              scrollSize = Math.round(visiblePart / total * visiblePart);
+          this.$refs.xScrollbar.style.width = scrollSize + 'px';
+          this.xScrollNumber = Math.ceil((total - visiblePart)*100 / (visiblePart - scrollSize)) / 100;
         }
-        if ( !table.data.attrs ){
-          table.data.attrs.class = table.data.attrs.class ? table.data.attrs.class + ' ' + 'k-grid' : 'k-grid';
+        if ( !this.total ){
+          this.yScrollNumber = 1;
         }
-      }
-      else{
-        if ( !vm.rendered && !vm.cols.length ){
-          // Examine the default slot, and if there are any parse
-          // them and add the data to the workingList
-          $.each(vm.columns, function(i, obj){
-            vm.addColumn(obj);
-          });
+        else{
+          let total = this.$refs.yScroller.scrollHeight,
+              visiblePart = this.$refs.yScrollbarContainer.clientHeight,
+              scrollSize = Math.round(visiblePart / total * visiblePart);
+          this.$refs.yScrollbar.style.height = scrollSize + 'px';
+          this.yScrollNumber = Math.ceil((total - visiblePart)*100 / (visiblePart - scrollSize)) / 100;
         }
-        let cols = [],
-            tableCfg = {
-              'class': {
-                'k-grid': true
-              }
-            },
-            theadCfg = {};
-        $.each(vm.cols, (i, obj) => {
-          let cfg = {
-                ref: "col-" + i,
-                domProps: {
-                  innerHTML: obj.title
-                },
-                'class': {
-                  'bbn-column': true,
-                  'k-header': true,
-                  'k-last': i === (vm.cols.length - 1),
-                  'k-first': i === 0
-                }
-              },
-              title_cfg = {
-                ref: "title-" + i,
-                'class': {
-                  'k-link': true
-                },
-                domProps: {
-                  innerHTML: obj.title
-                }
-              },
-              selected_cfg = {
-                ref: "selector-" + i,
-                'class': {
-                  'bbn-tabnav-selected': true
-                },
-              };
-          if ( obj.bcolor ){
-            cfg.style = {
-              backgroundColor: obj.bcolor
-            };
-          }
-          if ( obj.fcolor ){
-            if ( !cfg.style ){
-              cfg.style = {};
-            }
-            cfg.style.color = obj.fcolor;
-            title_cfg.style = {
-              color: obj.fcolor
-            };
-            selected_cfg.style = {
-              backgroundColor: obj.fcolor
-            };
-          }
-          cols.push(createElement('th', cfg));
-        });
-        table = createElement('table', tableCfg, [
-          createElement('thead', theadCfg, [
-            createElement("tr", {}, cols)
-          ]),
-          createElement('tbody')
-        ]);
-      }
-      vm.rendered = true;
+      },
 
+      /** @todo */
+      scrollX(){
+        let pos = parseInt(this.$refs.xScrollbar.style.left);
+        bbn.fn.log(pos);
+        this.$refs.xScroller.scrollLeft = pos ? Math.round(pos * this.xScrollNumber) : 0;
+      },
 
+      /** @todo */
+      scrollY(){
+        let pos = parseInt(this.$refs.yScrollbar.style.top);
+        bbn.fn.log(pos);
+        this.$refs.yScroller.scrollTop = pos ? Math.round(pos * this.yScrollNumber) : 0;
+      },
 
-      return createElement('div', {
-        'class': {
-          'bbn-table': true,
-          'k-widget': true
-        }
-      }, [table]);
+      /** @todo */
+      scroll(){
+        bbn.fn.log("SCROLLING...");
+      },
+
+      onResize(){
+        this.updateScrollbars();
+      },
     },
 
     created(){
@@ -801,108 +897,70 @@
       // Adding bbn-column from the slot
       if (vm.$slots.default){
         for ( var node of this.$slots.default ){
-          bbn.fn.log("TRYING TO ADD COLUMN", node);
+          //bbn.fn.log("TRYING TO ADD COLUMN", node);
           if (
             node.componentOptions &&
             (node.componentOptions.tag === 'bbn-column')
           ){
-            bbn.fn.log("ADDING COLUMN", node.componentOptions.propsData)
+            //bbn.fn.log("ADDING COLUMN", node.componentOptions.propsData)
             vm.addColumn(node.componentOptions.propsData);
           }
           else if ( (node.tag === 'bbn-column') && node.data && node.data.attrs ){
-            bbn.fn.log("ADDING COLUMN 2", node.data.attrs)
+            //bbn.fn.log("ADDING COLUMN 2", node.data.attrs)
             vm.addColumn(node.data.attrs);
           }
 
         }
       }
     },
+
     mounted(){
-      var vm = this,
-          $ele = $(this.$el);
-      this.onResize = this.setHeight;
-      /*
-      if ( !$("table", this.$el).length ){
-        $ele.append('<table><thead><tr></tr></thead></table>');
-        var thead = $ele.find("thead tr:first");
-        $.each(vm.columns, function(i, a){
-          thead.append($('<th/>').attr(a));
-        })
-      }
-      else if ( !$ele.find("table:first > tbody > tr").length ){
-        $ele.find("table:first > thead > tr:last > th").each(function (i, col){
-          vm.columns[i] = bbn.fn.getAttributes(col);
-          if ( vm.columns[i].style ){
-            delete vm.columns[i].style;
-          }
-          if ( vm.columns[i].class ){
-            delete vm.columns[i].class;
-          }
+      this.$nextTick(() => {
+        this.updateData();
+        $(this.$refs.xScrollbar).draggable({
+          axis: 'x',
+          start: this.updateScrollbars,
+          drag: this.scrollX,
+          containment: 'parent'
         });
-      }
-      */
-      vm.widgetCfg = vm.getConfig();
-      vm.widget = $ele.find("table:first").addClass("k-grid").DataTable(vm.widgetCfg);
-      vm.$nextTick(() => {
+        $(this.$refs.yScrollbar).draggable({
+          axis: 'y',
+          start: this.updateScrollbars,
+          drag: this.scrollY,
+          containment: 'parent'
+        });
+        $(this.$refs.yScroller).width($(this.$refs.yScroller).prev().width());
+        /*
+        $(this.$el)
+          .find(".bbn-table-main:first")
+          .mCustomScrollbar({axis: "y"});
+        $(this.$el)
+          .children(".bbn-table-scroller")
+          .mCustomScrollbar({axis: "x"});
+          */
 
       })
-      vm.table = $ele.find(".dataTables_scrollBody table:first");
-      let headBar = $ele.find("div.dataTables_scroll:first").prev();
-      if ( headBar.is(".fg-toolbar") ){
-        headBar.addClass("k-header k-grid-toolbar")
-      }
-      let footBar = $ele.find("div.dataTables_scroll:first").next();
-      if ( footBar.is(".fg-toolbar") ){
-        footBar.addClass("k-pager-wrap")
-      }
     },
     watch: {
       editedRow: {
         deep: true,
         handler(newVal, oldVal){
-          if ( typeof(newVal) === 'object' ){
-            var vm = this,
-                change = {};
-            if ( oldVal === false ){
-              let row = vm.getRow(newVal);
-              if ( row ){
-                if ( vm.edit && $.isFunction(vm.edit) ){
-                  vm.edit(newVal, row.index, vm);
-                }
-                vm.originalRow = $.extend({}, row.data);
-                vm.editedTr = row;
-              }
-              vm.$emit("edit", newVal, row.index, vm);
-            }
-            else if ( vm.originalRow !== false ){
-              for ( var n in vm.originalRow ){
-                if ( newVal[n] !== vm.originalRow[n] ){
-                  change[n] = newVal[n];
-                }
-              }
-              if ( bbn.fn.countProperties(change) ){
-                vm.emitInput(vm.editedTr.tr, change, true);
-              }
-              for ( var n in change ){
-                vm.$set(vm.originalRow, n, newVal[n]);
-              }
-            }
-          }
+          bbn.fn.log("editedRow is changing", newVal);
         }
       },
-      source: function(val){
-        var vm = this,
-            data = (typeof val === 'object') && $.isArray(val.data) ? val.data : ( $.isArray(val) ? val : []);
-        vm.$nextTick(function(){
-          if ( this.widget ){
-            this.widget.clear().rows.add(data);
-            this.widget.draw();
-          }
+      currentData(){
+        this.$nextTick(() => {
+          this.updateScrollbars();
+          /*
+          $(this.$el)
+            .children(".bbn-table-scroller")
+            .mCustomScrollbar("update");
+          $(this.$el)
+            .find(".bbn-table-main:first")
+            .mCustomScrollbar("update");
+            */
         })
-      },
-      /*cfg: function(){
-
-       }*/
+      }
     }
   });
 

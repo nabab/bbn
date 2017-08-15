@@ -6,6 +6,5 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "dataTables": ">=1.10.13"
   }
 }

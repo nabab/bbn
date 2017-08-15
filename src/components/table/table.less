@@ -1,18 +1,66 @@
 .bbn-table{
-  height: 100%;
   border: 0;
-
-  table.dataTable tbody tr{
-    background-color: inherit;
+  .bbn-scroller{
+    overflow: hidden;
   }
-  div.dataTables_scrollHead.ui-state-default{
-    background-color: inherit;
-    div.dataTables_scrollHeadInner{
-      background-color: inherit;
+  .bbn-table-head{
+    min-width: 100%;
+    width: auto;
+    table{
+      min-width: 100%;
+      table-layout: fixed;
+      > tbody > tr > td{
+        padding: 1em 0.5em;
+        overflow: hidden;
+        white-space: nowrap;
+      }
     }
   }
-  .bbn-table-toolbar{
-    margin-right: 1em;
-    float: left;
+  .bbn-table-main{
+    min-width: 100%;
+    overflow-y: hidden;
+    overflow-x: visible;
+    table{
+      min-width: 100%;
+      table-layout: fixed;
+      > tbody > tr > td{
+        padding: 0.5em;
+        overflow: hidden;
+      }
+    }
+  }
+  .scrollbar-x{
+    height: 10px;
+    padding: 2px 0;
+    background-color: #FFF;
+    opacity: 0.5;
+    position: absolute;
+    bottom: 37px;
+    left: 10px;
+    right: 20px;
+    .scrollbar{
+      height: 10px;
+      width: 10%;
+      background-color: #000;
+      opacity: 0.8;
+      min-width: 20px;
+    }
+  }
+  .scrollbar-y{
+    width: 10px;
+    padding: 0 2px;
+    background-color: #FFF;
+    opacity: 0.5;
+    position: absolute;
+    bottom: 60px;
+    top: 40px;
+    right: 0px;
+    .scrollbar{
+      width: 10px;
+      height: 10%;
+      background-color: #000;
+      opacity: 0.8;
+      min-height: 20px;
+    }
   }
 }
