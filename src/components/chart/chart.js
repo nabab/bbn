@@ -203,7 +203,7 @@
     data: function(){
       var vm = this;
       if ( (vm.type === 'line') || (vm.type === 'bar') ){
-        if ( !$.isArray(vm.source.series[0]) && (vm.distributeSeries === undefined) ){
+        if ( !Array.isArray(vm.source.series[0]) && (vm.distributeSeries === undefined) ){
           vm.source.series = [vm.source.series];
         }
       }
@@ -752,7 +752,7 @@
               }
             },
             removeAll: true,
-            legendNames: $.isArray(vm.widgetCfg.legend) ? vm.widgetCfg.legend : false
+            legendNames: Array.isArray(vm.widgetCfg.legend) ? vm.widgetCfg.legend : false
           }));
         }
 

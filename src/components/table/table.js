@@ -15,9 +15,37 @@
         type: Number,
         default: 25
       },
-      pagination: {
+      pageable: {
         type: Boolean,
         default: false
+      },
+      sortable: {
+        type: Boolean,
+        default: false
+      },
+      filterable: {
+        type: Boolean,
+        default: false
+      },
+      order: {
+        type: Object,
+        default(){
+          return {};
+        }
+      },
+      filter: {
+        type: Object,
+        default(){
+          return {};
+        }
+      },
+      minimumColumnWidth: {
+        type: Number,
+        default: 25
+      },
+      defaultColumnWidth: {
+        type: Number,
+        default: 150
       },
       paginationType: {
         type: String,
@@ -38,14 +66,19 @@
         type: String
       },
       trClass: {
-        type: [String,Function]
+        type: [String, Function]
       },
       component: {
         type: [String, Boolean],
         default: false
       },
-      fixedLeft: 0,
-      fixedRight: 0,
+      expander: {
+        type: [Object, Function]
+      },
+      fixedDefaultSide: {
+        type: String,
+        default: "left"
+      },
       toolbar: {},
       source: {
         type: [Array, String],
@@ -59,23 +92,12 @@
           return [];
         }
       },
-      cfg: {
-        type: Object,
-        default: function(){
-          return {
-            columns: [],
-            take: 50,
-            skip: 0,
-            currency: ''
-          };
-        }
-      },
       edit: {
         type: Function
       }
     },
     data: function(){
-      return $.extend({
+      return {
         currentData: [],
         limits: [10, 25, 50, 100, 250, 500],
         start: 0,
@@ -93,11 +115,27 @@
         table: false,
         isLoading: false,
         isAjax: typeof this.source === 'string',
-        xScrollNumber: 1,
-        yScrollNumber: 1,
-        currentLimit: this.limit
-
-      }, bbn.vue.treatData(this));
+        /**
+         * Number of fixed columns on the left
+         * @type {number}
+         *
+         */
+        fixedLeft: 0,
+        /**
+         * Number of fixed columns on the right
+         * @type {number}
+         *
+         */
+        fixedRight: 0,
+        currentLimit: this.limit,
+        currentOrder: this.order,
+        tableLeftWidth: 0,
+        tableMainWidth: 0,
+        tableRightWidth: 0,
+        scrollableContainer: null,
+        hiddenScroll: true,
+        initialColumns: this.columns
+      };
     },
     computed: {
       numPages(){
@@ -119,42 +157,134 @@
 
       /** Refresh the current data set */
       updateData(){
-        if ( this.isAjax ){
+        if ( this.isAjax && !this.isLoading ){
           this.isLoading = true;
           this.$forceUpdate();
           this.$nextTick(() => {
-            bbn.fn.post(this.source, {
+            let data = {
               length: this.currentLimit,
               limit: this.currentLimit,
-              start: this.start
-            }, (result) => {
+              start: this.start,
+            };
+            if ( this.sortable ){
+              data.order = this.currentOrder;
+            }
+            bbn.fn.post(this.source, data, (result) => {
               this.isLoading = false;
               if ( !result || result.error ){
                 alert(result || "Error in updateData")
               }
               else{
                 this.currentData = result.data || [];
-                this.total = result.total || 0;
-                this.$forceUpdate();
+                this.total = result.total || result.data.length || 0;
+                if ( result.order ){
+                  this.currentOrder = {};
+                  this.currentOrder[result.order] = result.dir === 'DESC' ? 'DESC' : 'ASC';
+                }
               }
             })
           })
         }
-        else if ( $.isArray(this.source) ){
+        else if ( Array.isArray(this.source) ){
           this.currentData = this.source;
           this.total = this.source.length;
-          this.$forceUpdate();
         }
       },
 
-      /** Renders a column according to config */
+      sort(i){
+        if (
+          !this.isLoading &&
+          this.cols[i] &&
+          this.sortable &&
+          this.cols[i].field &&
+          (this.cols[i].sortable !== false)
+        ){
+          let f = this.cols[i].field;
+          if ( this.currentOrder[f] ){
+            if ( this.currentOrder[f] === 'ASC' ){
+              this.currentOrder[f] = 'DESC';
+            }
+            else{
+              this.currentOrder = {};
+            }
+          }
+          else{
+            this.currentOrder = {};
+            this.currentOrder[f] = 'ASC';
+          }
+          this.updateData();
+        }
+      },
+
+      updateTable(num){
+        let tds = $("table.bbn-table-main > tbody > tr > td.bbn-table-first", this.$el);
+        if ( !num ){
+          num = 0;
+        }
+        bbn.fn.log("trying to update table, attempt " + num);
+        if (
+          (tds.length !== this.currentData.length) ||
+          !this.$refs.scroller
+        ){
+          setTimeout(() =>{
+            this.updateTable(++num);
+          }, 200)
+        }
+        else{
+          this.$nextTick(() => {
+            if ( this.fixedRight || this.fixedLeft ){
+              tds.each((i, td) =>{
+                bbn.fn.adjustHeight(
+                  td,
+                  $("table.bbn-table-data-left:first > tbody > tr:eq(" + i + ") > td.bbn-table-first", this.$el),
+                  $("table.bbn-table-data-right:first > tbody > tr:eq(" + i + ") > td.bbn-table-first", this.$el)
+                );
+              });
+            }
+            if (
+              this.$refs.scroller &&
+              $.isFunction(this.$refs.scroller.calculateSize)
+            ){
+              bbn.fn.log("RESIZING FOR UTABLKE");
+              this.$refs.scroller.calculateSize();
+              if (
+                this.$refs.scrollerY &&
+                $.isFunction(this.$refs.scrollerY.calculateSize)
+              ){
+                bbn.fn.log("SCROLLY HERE");
+                if ( this.scrollableContainer !== this.$refs.scroller.$refs.scrollContainer ){
+                  bbn.fn.log("CHANGING scrollableContainer");
+                  this.scrollableContainer = this.$refs.scroller.$refs.scrollContainer;
+                }
+                this.$refs.scrollerY.calculateSize();
+              }
+            }
+            this.$emit("resize");
+          });
+        }
+      },
+
+      overTr(idx, remove){
+        $(".bbn-table-main tr:eq(" + idx + ")")
+          [remove ? 'removeClass' : 'addClass']("k-grid-header");
+        if ( this.fixedLeft ){
+          $(".bbn-table-data-left tr:eq(" + idx + ")")
+            [remove ? 'removeClass' : 'addClass']("k-grid-header");
+        }
+        if ( this.fixedRight ){
+          $(".bbn-table-data-right tr:eq(" + idx + ")")
+            [remove ? 'removeClass' : 'addClass']("k-grid-header");
+        }
+      },
+
+      /** Renders a cell according to column's config */
       render(data, column, index){
         let field = column && column.field ? column.field : '',
             value = data && column.field ? data[column.field] || '' : '';
 
         if ( column.source ){
           if ( value ){
-            if ( $.isArray(column.source) ){
+            if ( Array.isArray(column.source) ){
               return bbn.fn.get_field(column.source, 'value', value, 'text');
             }
             else if ( column.source[value] !== undefined ){
@@ -201,7 +331,7 @@
       /** Returns header's CSS object */
       headStyles(col){
         let css = {
-          width: this.getWidth(col.width)
+          width: this.getWidth(col.realWidth)
         };
         if ( col.hidden ){
           css.display = 'none';
@@ -365,52 +495,171 @@
         }
       },
 
+      calculateSize(){
+        let leftWidth = 0,
+            mainWidth = 0,
+            rightWidth = 0,
+            fixedLeft = 0,
+            fixedRight = 0,
+            numUnknown = 0;
+        $.each(this.cols, (i, a) => {
+          if ( a.width ){
+            if ( (typeof(a.width) === 'string') && (a.width.substr(-1) === '%') ){
+              a.realWidth = Math.round(this.lastKnownWidth * parseFloat(a.width) / 100);
+            }
+            else{
+              a.realWidth = parseFloat(a.width);
+            }
+            if ( a.realWidth < this.minimumColumnWidth ){
+              a.realWidth = this.minimumColumnWidth;
+            }
+          }
+          else{
+            a.realWidth = this.defaultColumnWidth;
+            numUnknown++;
+          }
+          if ( a.fixed ){
+            if ( (a.fixed === 'right') || (this.defaultFixedSide === 'right') ){
+              fixedRight++;
+              rightWidth += a.realWidth;
+            }
+            else{
+              fixedLeft++;
+              leftWidth += a.realWidth;
+            }
+          }
+          else{
+            mainWidth += a.realWidth;
+          }
+        });
+        let toFill = this.$el.clientWidth
+          - (
+            leftWidth
+            + mainWidth
+            + rightWidth
+          );
+        bbn.fn.log("THERE IS NOT TO FILL", toFill, numUnknown, this.$el.clientWidth, leftWidth, mainWidth, rightWidth);
+        // We must arrive to 100% minimum
+        if ( toFill > 0 ){
+          bbn.fn.log("THERE IS TO FILL", toFill, numUnknown);
+          // If we have unknown width we fill these columns
+          leftWidth = 0;
+          mainWidth = 0;
+          rightWidth = 0;
+          if ( numUnknown ){
+            let newWidth = Math.round(
+              toFill
+              / numUnknown
+              * 100
+            ) / 100;
+            if ( newWidth < this.minimumColumnWidth ){
+              newWidth = this.minimumColumnWidth;
+            }
+            $.each(this.cols, (i, a) => {
+              if ( !a.width ){
+                a.realWidth = newWidth + this.defaultColumnWidth;
+              }
+              if ( a.fixed ){
+                if ( (a.fixed === 'right') || (this.defaultFixedSide === 'right') ){
+                  rightWidth += a.realWidth;
+                }
+                else{
+                  leftWidth += a.realWidth;
+                }
+              }
+              else{
+                mainWidth += a.realWidth;
+              }
+            });
+          }
+          // Otherwise we dispatch it through the existing column
+          else{
+            let bonus = Math.round(toFill / this.cols.length * 100) / 100;
+            $.each(this.cols, (i, a) => {
+              a.realWidth += bonus;
+              if ( a.fixedRight || (a.fixed && (this.fixedDefaultSide === 'right')) ){
+                rightWidth += bonus;
+              }
+              else if ( a.fixedLeft || a.fixed ){
+                leftWidth += bonus;
+              }
+              else{
+                mainWidth += bonus;
+              }
+            })
+          }
+        }
+        this.fixedLeft = fixedLeft;
+        this.fixedRight = fixedRight;
+        this.tableLeftWidth = leftWidth;
+        this.tableMainWidth = mainWidth;
+        this.tableRightWidth = rightWidth;
+      },
+
       /** @todo */
       getWidth(w){
         if ( typeof(w) === 'number' ){
-          return w + 'px';
+          return (w > 19 ? w : 20 ) + 'px';
         }
         if ( bbn.fn.isDimension(w) ){
           return w;
         }
-        return 'auto';
+        return '100px';
+      },
 
+      isNotFixed(idx){
+        return (idx >= this.fixedLeft) &&
+          (idx < (this.cols.length - this.fixedRight));
+      },
+
+      setFixedColumns(){
+        let fixed = true;
+        this.fixedLeft = 0;
+        this.fixedLeftWidth = 0;
+        this.fixedRight = 0;
+        this.fixedRightWidth = 0;
+        $.each(this.cols, (i, a) => {
+          if ( !a.hidden ){
+            if ( a.fixed && fixed ){
+              this.fixedLeft++;
+              this.fixedLeftWidth += (a.width ? a.width : 100);
+            }
+            else if ( !a.fixed && fixed ){
+              fixed = false;
+            }
+            else if ( a.fixed ){
+              this.fixedRight++;
+              this.fixedRightWidth += (a.width ? a.width : 100);
+            }
+            else if ( this.fixedRight ){
+              this.fixedRight = 0;
+            }
+          }
+        });
+        return this;
       },
 
       /** @todo */
       getColumns(){
         const vm = this;
-        var res = [],
-            /**
-             * Number of fixed columns on the left
-             * @type {number}
-             *
-             */
-            fixedLeft = 0,
-            /**
-             * Number of fixed columns on the right
-             * @type {number}
-             */
-            fixedRight = 0,
-            /**
-             * When false, will stop to look for fixed left columns
-             * @type {boolean}
-             */
+        let res = [],
             fixed = true;
+        this.fixedLeft = 0;
+        this.fixedRight = 0;
         $.each(vm.cols, function(i, a){
           bbn.fn.log(a);
 
           if ( a.fixed && fixed ){
-            fixedLeft++;
+            this.fixedLeft++;
           }
           else if ( !a.fixed && fixed ){
             fixed = false;
           }
           else if ( a.fixed ){
-            fixedRight++;
+            this.fixedRight++;
           }
-          else if ( fixedRight ){
-            fixedRight = 0;
+          else if ( this.fixedRight ){
+            this.fixedRight = 0;
           }
           var r = {
             data: a.field
@@ -445,7 +694,7 @@
             if ( obj ){
               r.render = function(data, type, row){
                 if ( data ){
-                  if ( $.isArray(obj[a.source]) ){
+                  if ( Array.isArray(obj[a.source]) ){
                     return bbn.fn.get_field(obj[a.source], 'value', data, 'text');
                   }
                   else if ( obj[a.source][data] !== undefined ){
@@ -501,28 +750,6 @@
                   return data && (data !== 'false') && (data !== '0') ? bbn._("Yes") : bbn._("No");
                 };
                 break;
-            }
-          }
-          else if ( a.buttons ){
-            let buttons = a.buttons;
-            if ( typeof(a.buttons) === 'string' ){
-              try{
-                buttons = eval(a.buttons);
-              }
-              catch ( e ){
-                bbn.fn.log("Error parsing buttons", a.buttons, e);
-              }
-            }
-
-            if ( $.isArray(buttons) ){
-              r.render = function (data, field, row){
-                return vm.buttons2String(buttons, field || '', row);
-              };
-            }
-            else if ( $.isFunction(buttons) ){
-              r.render = function (data, field, row){
-                return vm.buttons2String(buttons(data, field, row), field || '', row);
-              };
             }
           }
           else if ( a.render ){
@@ -588,7 +815,6 @@
                         tmp += ');';
                       }
                     }
-                    bbn.fn.log(tmp);
                   }
                 }
                 //bbn.fn.log(tmp);
@@ -768,10 +994,10 @@
             if ( vm.$options.propsData.toolbar ){
               var tb = vm.$options.propsData.toolbar,
                   tbEle = $ele.find(".fg-toolbar:first");
-              if ( !$.isArray(tb) && (typeof(tb) === 'object') ){
+              if ( !Array.isArray(tb) && (typeof(tb) === 'object') ){
                 tb = [tb];
               }
-              if ( $.isArray(tb) ){
+              if ( Array.isArray(tb) ){
                 var target = $('<div class="bbn-table-toolbar"/>').prependTo(tbEle);
                 $.each(tb, function(i, a){
                   var tmp = JSON.stringify(a);
@@ -816,10 +1042,10 @@
               type: "POST"
             };
           }
-          else if ( $.isArray(vm.$options.propsData.source) ){
+          else if ( Array.isArray(vm.$options.propsData.source) ){
             cfg.data = JSON.parse(JSON.stringify(vm.$options.propsData.source));
           }
-          else if ( (typeof vm.$options.propsData.source === 'object') && $.isArray(vm.$options.propsData.source.data) ){
+          else if ( (typeof vm.$options.propsData.source === 'object') && Array.isArray(vm.$options.propsData.source.data) ){
             cfg.data = JSON.parse(JSON.stringify(vm.$options.propsData.source.data));
           }
         }
@@ -844,55 +1070,36 @@
         vm.cols.push(obj);
       },
 
-      /** @todo */
-      updateScrollbars(){
-        if ( !this.cols.length ){
-          this.xScrollNumber = 1;
-        }
-        else{
-          let total = this.$refs.xScroller.scrollWidth,
-              visiblePart = this.$refs.xScrollbarContainer.clientWidth,
-              scrollSize = Math.round(visiblePart / total * visiblePart);
-          this.$refs.xScrollbar.style.width = scrollSize + 'px';
-          this.xScrollNumber = Math.ceil((total - visiblePart)*100 / (visiblePart - scrollSize)) / 100;
-        }
-        if ( !this.total ){
-          this.yScrollNumber = 1;
-        }
-        else{
-          let total = this.$refs.yScroller.scrollHeight,
-              visiblePart = this.$refs.yScrollbarContainer.clientHeight,
-              scrollSize = Math.round(visiblePart / total * visiblePart);
-          this.$refs.yScrollbar.style.height = scrollSize + 'px';
-          this.yScrollNumber = Math.ceil((total - visiblePart)*100 / (visiblePart - scrollSize)) / 100;
-        }
-      },
-
-      /** @todo */
-      scrollX(){
-        let pos = parseInt(this.$refs.xScrollbar.style.left);
-        bbn.fn.log(pos);
-        this.$refs.xScroller.scrollLeft = pos ? Math.round(pos * this.xScrollNumber) : 0;
-      },
-
-      /** @todo */
-      scrollY(){
-        let pos = parseInt(this.$refs.yScrollbar.style.top);
-        bbn.fn.log(pos);
-        this.$refs.yScroller.scrollTop = pos ? Math.round(pos * this.yScrollNumber) : 0;
-      },
-
-      /** @todo */
-      scroll(){
-        bbn.fn.log("SCROLLING...");
-      },
-
       onResize(){
-        this.updateScrollbars();
+        if ( this.$refs.scrollerY ){
+          this.$refs.scrollerY.onResize();
+        }
+        if ( this.$refs.scroller ){
+          this.$refs.scroller.onResize();
+        }
+        this.updateTable();
+        this.$emit("resize");
       },
+
+      dataScrollContents(){
+        if ( !this.fixedLeft && !this.fixedRight ){
+          return null;
+        }
+        let r = [];
+        if ( this.fixedLeft && this.$refs.leftScroller && this.$refs.leftScroller.$refs.scrollContainer ){
+          r.push(this.$refs.leftScroller.$refs.scrollContainer);
+        }
+        if ( this.$refs.scroller ){
+          r.push(this.$refs.scroller.$refs.scrollContainer);
+        }
+        if ( this.fixedRight && this.$refs.rightScroller && this.$refs.rightScroller.$refs.scrollContainer ){
+          r.push(this.$refs.rightScroller.$refs.scrollContainer);
+        }
+        return r;
+      }
     },
 
-    created(){
+     created(){
       var vm = this;
       // Adding bbn-column from the slot
       if (vm.$slots.default){
@@ -905,40 +1112,25 @@
             //bbn.fn.log("ADDING COLUMN", node.componentOptions.propsData)
             vm.addColumn(node.componentOptions.propsData);
           }
-          else if ( (node.tag === 'bbn-column') && node.data && node.data.attrs ){
+          else if (
+            (node.tag === 'bbn-column') &&
+            node.data && node.data.attrs
+          ){
+            vm.initialColumns.push(node.data.attrs);
             //bbn.fn.log("ADDING COLUMN 2", node.data.attrs)
-            vm.addColumn(node.data.attrs);
           }
-
         }
       }
+      //this.setFixedColumns();
     },
 
     mounted(){
+      this.cols = this.initialColumns;
+      this.calculateSize();
+      this.$forceUpdate();
       this.$nextTick(() => {
+        this.selfEmit();
         this.updateData();
-        $(this.$refs.xScrollbar).draggable({
-          axis: 'x',
-          start: this.updateScrollbars,
-          drag: this.scrollX,
-          containment: 'parent'
-        });
-        $(this.$refs.yScrollbar).draggable({
-          axis: 'y',
-          start: this.updateScrollbars,
-          drag: this.scrollY,
-          containment: 'parent'
-        });
-        $(this.$refs.yScroller).width($(this.$refs.yScroller).prev().width());
-        /*
-        $(this.$el)
-          .find(".bbn-table-main:first")
-          .mCustomScrollbar({axis: "y"});
-        $(this.$el)
-          .children(".bbn-table-scroller")
-          .mCustomScrollbar({axis: "x"});
-          */
-
       })
     },
     watch: {
@@ -950,15 +1142,8 @@
       },
       currentData(){
         this.$nextTick(() => {
-          this.updateScrollbars();
-          /*
-          $(this.$el)
-            .children(".bbn-table-scroller")
-            .mCustomScrollbar("update");
-          $(this.$el)
-            .find(".bbn-table-main:first")
-            .mCustomScrollbar("update");
-            */
+          bbn.fn.log("WATCHER DATA");
+          this.updateTable();
         })
       }
     }

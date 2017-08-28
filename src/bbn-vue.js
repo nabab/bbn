@@ -122,8 +122,8 @@
       'radio',
       'rte',
       'scroll',
-      'scrollx',
-      'scrolly',
+      'scroll-x',
+      'scroll-y',
       'search',
       'slider',
       'splitter',
@@ -150,7 +150,7 @@
           value = vm.widgetOptions.dataValueField || vm.sourceValue;
       let transform = (src) => {
         let type = typeof(src),
-            isArray = $.isArray(src);
+            isArray = Array.isArray(src);
         if ( (type === 'object') && !isArray ){
           let tmp = [];
           $.each(src, (n, a) => {
@@ -678,7 +678,7 @@
                   bbn.fn.log("EMITTING FROM RESIZE EMITTER", this.$el);
                 }
               }
-            }, 100);
+            }, 0);
           };
           if ( this.parentResizer ){
             //bbn.fn.log("SETTING EVENT FOR PARENT", this.$el, this.parentResizer);
@@ -690,6 +690,7 @@
           }
           this.resizeEmitter();
         },
+
         unsetResizeEvent(){
           if ( this.resizeEmitter ){
             if ( this.parentResizer ){
@@ -701,12 +702,16 @@
               $(window).off("resize", this.resizeEmitter);
             }
           }
+        },
+
+        selfEmit(){
+          if ( this.parentResizer ){
+            this.parentResizer.$emit("resize");
+          }
         }
       },
       mounted(){
-        this.$nextTick(() => {
-          this.setResizeEvent();
-        })
+        this.setResizeEvent();
       },
       beforeDestroy(){
         this.unsetResizeEvent();
@@ -796,7 +801,7 @@
     },
 
     getComponents(cp, ar){
-      if ( !$.isArray(ar) ){
+      if ( !Array.isArray(ar) ){
         ar = [];
       }
       $.each(cp.$children, function(i, obj){

@@ -1,132 +1,426 @@
-<div class="bbn-table bbn-full-screen k-grid">
-  <div class="bbn-w-100 bbn-scroller" v-bbn-fill-height ref="xScroller">
-    <div class="k-header bbn-table-head bbn-block">
-      <table class="k-grid">
-        <colgroup>
-          <col v-for="(col, i) in cols"
-               :style="headStyles(col)"
-               :key="i"
-          >
-        </colgroup>
-        <tbody>
-        <tr>
-          <td v-for="(col, i) in cols"
-              class="bbn-c"
-          >
-            <span v-html="col.title" :title="col.fullTitle || col.title"></span>
-          </td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="bbn-table-main" v-bbn-fill-height ref="yScroller" @wheel="scroll">
-      <h3 v-if="isLoading"
-          class="bbn-lpadded"
-          v-html="_('Loading...')"
-      ></h3>
-      <table class="k-grid" v-else-if="currentData.length">
-        <colgroup>
-          <col v-for="(col, i) in cols"
-               :style="headStyles(col)"
-               :key="i"
-          >
-        </colgroup>
-        <tbody>
-        <component v-if="component"
-                   v-for="(d, i) in currentData"
-                   :key="i"
-                   :is="component"
-                   :source="d"
-        ></component>
-        <tr v-if="!component"
-            v-for="(d, i) in currentData"
-            :key="i"
-            :class="trClass ? trClass(d) : ''"
-        >
-          <td v-for="(col, j) in cols"
-              :style="bodyStyles(col)"
-          >
-            <component v-if="col.component" :source="d"></component>
-            <div v-else-if="col.buttons">
-              <bbn-button v-for="(button, j) in col.buttons"
-                          :key="j"
-                          :url="button.url"
-                          :text="button.text"
-                          :title="button.title"
-                          :icon="button.icon"
-                          :notext="button.notext"
-                          @click="button.command ? button.command(d, col, i) : false"
-              ></bbn-button>
-            </div>
-            <div v-else v-html="render(d, col, i)"></div>
-          </td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-  <div class="scrollbar-x" ref="xScrollbarContainer" v-show="xScrollNumber > 1.05">
-    <div class="scrollbar" ref="xScrollbar"></div>
-  </div>
-  <div class="scrollbar-y" ref="yScrollbarContainer" v-show="yScrollNumber > 1.05">
-    <div class="scrollbar" ref="yScrollbar"></div>
-  </div>
-  <!-- Footer -->
-  <div class="k-pager-wrap k-grid-pager k-widget k-floatwrap">
-    <div class="bbn-iblock" v-if="pagination">
-      <bbn-button icon="fa fa-angle-double-left"
-                  :notext="true"
-                  aria-label="Aller à la première page"
-                  title="Aller à la première page"
-                  :disabled="isLoading || (currentPage == 1)"
-                  @click="currentPage = 1"
-      ></bbn-button>
-      <bbn-button icon="fa fa-angle-left"
-                  :notext="true"
-                  aria-label="Aller à la page précédente"
-                  title="Aller à la page précédente"
-                  :disabled="isLoading || (currentPage == 1)"
-                  @click="currentPage--"
-      ></bbn-button>
-      Page
-      <bbn-numeric v-if="currentData.length"
-                   v-model="currentPage"
-                   :min="1"
-                   :max="numPages"
-                   style="width: 6em"
-                   :disabled="isLoading"
-      ></bbn-numeric>
-      de {{numPages}}
-      <bbn-button icon="fa fa-angle-right"
-                  :notext="true"
-                  aria-label="Aller à la page suivante"
-                  title="Aller à la page suivante"
-                  :disabled="isLoading || (currentPage == numPages)"
-                  @click="currentPage++"
-      ></bbn-button>
-      <bbn-button icon="fa fa-angle-double-right"
-                  :notext="true"
-                  aria-label="Aller à la dernière page"
-                  title="Aller à la dernière page"
-                  @click="currentPage = numPages"
-                  :disabled="isLoading || (currentPage == numPages)"
-      ></bbn-button>
-    </div>
-    <span class="k-pager-sizes k-label">
-      <bbn-dropdown :source="limits" v-model="currentLimit" @change="currentPage = 1"></bbn-dropdown>
-      <span>articles par page</span>
-    </span>
-    <a href="javascript:"
-       v-if="isAjax"
-       class="k-pager-refresh k-link"
-       title="Actualiser"
-       @click="updateData()"
-    >
-      <span class="k-icon k-i-reload"></span>
-    </a>
-    <span class="k-pager-info k-label">
-      Afficher les items {{start+1}} - {{start ? start + currentLimit : currentLimit}} de {{total}}
-    </span>
-  </div>
+<div class="bbn-table bbn-full-screen">
   
+  <div class="bbn-full-screen"
+       v-if="cols.length"
+  >
+    <div class="bbn-table-container"
+         v-bbn-fill-height
+    >
+      <div class="bbn-table-titles k-header">
+        <!-- Fixed left titles -->
+        <div class="bbn-table-first-cell bbn-table-part k-header"
+             :style="{width: tableLeftWidth + 'px'}"
+             v-if="fixedLeft"
+        >
+          <!-- First column - always fixed - if there is an expander -->
+          <div class="bbn-table-expanders bbn-block"
+               v-if="expander"
+          >
+          </div>
+          <div class="bbn-block">
+            <!-- Fixed columns' container on the left -->
+            <table :style="{width: tableLeftWidth + 'px'}">
+              <colgroup>
+                <col v-for="(col, i) in cols"
+                     v-if="col.fixed && (col.fixed !== 'right') && (fixedDefaultSide !== 'right')"
+                     :style="headStyles(col)"
+                     :key="i"
+                >
+              </colgroup>
+              <tbody>
+              <!-- Fixed titles -->
+              <tr class="k-widget k-header">
+                <td v-for="(col, i) in cols"
+                    v-if="col.fixed && (col.fixed !== 'right') && (fixedDefaultSide !== 'right')"
+                    class="bbn-c"
+                >
+                  <a href="javascript:;"
+                     :disabled="!sortable || !col.sortable || col.buttons"
+                     @click="sort(i)"
+                  >
+                  <span v-if="col.encoded"
+                        v-text="col.title"
+                        :title="col.fullTitle || col.title"
+                  ></span>
+                    <span v-else
+                          v-html="col.title"
+                          :title="col.fullTitle || col.title"
+                    ></span>
+                  </a>
+                  <i v-if="sortable && (col.sortable !== false) && !col.buttons && order && col.field && currentOrder[col.field]"
+                     :class="{
+                     'bbn-table-sortable-icon': true,
+                     fa: true,
+                     'fa-caret-up': currentOrder[col.field] === 'ASC',
+                     'fa-caret-down': currentOrder[col.field] === 'DESC',
+                   }"></i>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="bbn-table-part k-header"
+             v-bbn-fill-width
+             ref="mainTitles"
+        >
+          <div class="bbn-block">
+            <!-- Non fixed titles -->
+            <table :style="{width: tableMainWidth + 'px'}">
+              <colgroup>
+                <col v-for="(col, i) in cols"
+                     v-if="!col.fixed"
+                     :style="headStyles(col)"
+                     :key="i"
+                >
+              </colgroup>
+              <tbody>
+              <tr class="k-widget k-header">
+                <td v-for="(col, i) in cols"
+                    v-if="!col.fixed"
+                    class="bbn-c"
+                >
+                  <a href="javascript:;"
+                     :disabled="!sortable || !col.sortable || col.buttons"
+                     @click="sort(i)"
+                  >
+                  <span v-if="col.encoded"
+                        v-text="col.title"
+                        :title="col.fullTitle || col.title"
+                  ></span>
+                    <span v-else
+                          v-html="col.title"
+                          :title="col.fullTitle || col.title"
+                    ></span>
+                  </a>
+                  <i v-if="sortable && (col.sortable !== false) && !col.buttons && order && col.field && currentOrder[col.field]"
+                     :class="{
+                     'bbn-table-sortable-icon': true,
+                     fa: true,
+                     'fa-caret-up': currentOrder[col.field] === 'ASC',
+                     'fa-caret-down': currentOrder[col.field] === 'DESC',
+                   }"></i>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Fixed columns' container on the right -->
+        <div class="bbn-table-part k-header"
+             :style="{width: tableRightWidth + 'px'}"
+             ref="fixedRight"
+             v-if="fixedRight"
+        >
+          <!-- Fixed titles -->
+          <table :style="{width: tableRightWidth + 'px'}">
+            <colgroup>
+              <col v-for="(col, i) in cols"
+                   v-if="col.fixed && ((col.fixed === 'right') || ((fixedDefaultSide === 'right') && (col.fixed !== 'left')))"
+                   :style="headStyles(col)"
+                   :key="i"
+              >
+            </colgroup>
+            <tbody>
+            <tr class="k-widget k-header">
+              <td v-for="(col, i) in cols"
+                  v-if="col.fixed && ((col.fixed === 'right') || ((fixedDefaultSide === 'right') && (col.fixed !== 'left')))"
+                  class="bbn-c"
+              >
+                <a href="javascript:;"
+                   :disabled="!sortable || !col.sortable || col.buttons"
+                   @click="sort(i)"
+                >
+                  <span v-if="col.encoded"
+                        v-text="col.title"
+                        :title="col.fullTitle || col.title"
+                  ></span>
+                  <span v-else
+                        v-html="col.title"
+                        :title="col.fullTitle || col.title"
+                  ></span>
+                </a>
+                <i v-if="sortable && (col.sortable !== false) && !col.buttons && order && col.field && currentOrder[col.field]"
+                   :class="{
+                     'bbn-table-sortable-icon': true,
+                     fa: true,
+                     'fa-caret-up': currentOrder[col.field] === 'ASC',
+                     'fa-caret-down': currentOrder[col.field] === 'DESC',
+                   }"></i>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div class="bbn-table-data"
+           v-bbn-fill-height
+      >
+        <!-- Fixed left data + expanders -->
+        <div class="bbn-table-part"
+             v-if="fixedLeft"
+             ref="fixedLeftData"
+             :style="{width: tableLeftWidth + 'px'}"
+        >
+          <h3 v-if="isLoading"> </h3>
+          <!-- Fixed data -->
+          <bbn-scroll v-else-if="currentData.length"
+                      ref="leftScroller"
+                      axis="none"
+                      :scroll-also="dataScrollContents"
+          >
+            <table class="bbn-table-data-left"
+                   :style="{width: tableLeftWidth + 'px'}"
+            >
+              <colgroup>
+                <col v-for="(col, i) in cols"
+                     v-if="col.fixed && (col.fixed !== 'right') && (fixedDefaultSide !== 'right')"
+                     :style="headStyles(col)"
+                     :key="i"
+                >
+              </colgroup>
+              <tbody>
+              <tr v-for="(d, i) in currentData"
+                  :key="i"
+                  @mouseenter="overTr(i)"
+                  @mouseleave="overTr(i, true)"
+                  :class="'k-widget' + (trClass ? ' ' + trClass(d) : '')"
+              >
+                <td v-for="(col, j) in cols"
+                    :class="j === 0 ? 'bbn-table-first' : ''"
+                    v-if="col.fixed && (col.fixed !== 'right') && (fixedDefaultSide !== 'right')"
+                    :style="bodyStyles(col)"
+                    :key="j"
+                >
+                  <component v-if="col.component"
+                             :is="col.component"
+                             :source="d"
+                  ></component>
+                  <div v-else-if="col.buttons">
+                    <bbn-button v-for="(button, j) in col.buttons"
+                                :key="j"
+                                :url="button.url"
+                                :text="button.text"
+                                :title="button.title"
+                                :icon="button.icon"
+                                :notext="button.notext"
+                                @click="button.command ? button.command(d, col, i) : false"
+                    ></bbn-button>
+                  </div>
+                  <div v-else="col.encoded" v-text="render(d, col, i)"></div>
+                  <div v-else v-html="render(d, col, i)"></div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </bbn-scroll>
+        </div>
+        <!-- Main data -->
+        <div class="bbn-table-part"
+             v-bbn-fill-width
+        >
+          <!-- Loading message -->
+          <h3 v-if="isLoading"
+              class="bbn-lpadded"
+              v-html="_('Loading...')"
+          ></h3>
+          
+          <!-- Table container with yScrolling -->
+          <bbn-scroll v-else-if="currentData.length"
+                      axis="x"
+                      ref="scroller"
+                      :scroll-also="[$refs.mainTitles]"
+          >
+            <div class="bbn-block" ref="mainData">
+              <!-- Damn table -->
+              <table class="bbn-table-main"
+                     :style="{width: tableMainWidth + 'px'}"
+              >
+                <!-- Columns -->
+                <colgroup>
+                  <col v-for="(col, i) in cols"
+                       v-if="!col.fixed"
+                       :style="headStyles(col)"
+                       :key="i"
+                  >
+                </colgroup>
+                <tbody>
+                <tr v-for="(d, i) in currentData"
+                    @mouseenter="overTr(i)"
+                    @mouseleave="overTr(i, true)"
+                    :key="i"
+                    :class="'k-widget' + (trClass ? ' ' + trClass(d) : '')"
+                >
+                  <td v-for="(col, j) in cols"
+                      v-if="!col.fixed && !col.fixedLeft && !col.fixedRight"
+                      :class="{
+                        'bbn-table-first': j === fixedLeft
+                      }"
+                      :style="bodyStyles(col)"
+                      :key="j"
+                  >
+                    <component v-if="col.component"
+                               :is="col.component"
+                               :source="d"
+                    ></component>
+                    <div v-else-if="col.buttons">
+                      <bbn-button v-for="(button, j) in col.buttons"
+                                  :key="j"
+                                  :url="button.url"
+                                  :class="button.classes"
+                                  :text="button.text"
+                                  :title="button.title"
+                                  :icon="button.icon"
+                                  :notext="button.notext"
+                                  @click="button.command ? button.command(d, col, i) : false"
+                      ></bbn-button>
+                    </div>
+                    <div v-else v-html="render(d, col, i)"></div>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </bbn-scroll>
+  
+          <h3 v-else
+              class="bbn-lpadded"
+              v-html="_('No data')"
+          ></h3>
+        </div>
+        <!-- Fixed right data -->
+        <div class="bbn-table-part"
+             v-if="fixedRight"
+             :style="{width: tableRightWidth + 'px'}"
+             ref="fixedRightData"
+        >
+          <h3 v-if="isLoading"> </h3>
+          <!-- Fixed data -->
+          <bbn-scroll v-else-if="currentData.length"
+                      ref="rightScroller"
+                      :scroll-also="dataScrollContents"
+                      axis="none"
+          >
+            <table class="bbn-table-data-right"
+                   :style="{width: tableRightWidth + 'px'}"
+            >
+              <colgroup>
+                <col v-for="(col, i) in cols"
+                     v-if="col.fixed && ((col.fixed === 'right') || ((fixedDefaultSide === 'right') && (col.fixed !== 'left')))"
+                     :style="headStyles(col)"
+                     :key="i"
+                >
+              </colgroup>
+              <tbody>
+              <tr v-for="(d, i) in currentData"
+                  :key="i"
+                  :class="'k-widget' + (trClass ? ' ' + trClass(d) : '')"
+                  @mouseenter="overTr(i)"
+                  @mouseleave="overTr(i, true)"
+              >
+                <td v-for="(col, j) in cols"
+                    v-if="col.fixed && ((col.fixed === 'right') || ((fixedDefaultSide === 'right') && (col.fixed !== 'left')))"
+                    :class="j === (cols.length - fixedRight) ? 'bbn-table-first' : ''"
+                    :style="bodyStyles(col)"
+                    :key="j"
+                >
+                  <component v-if="col.component"
+                             :is="col.component"
+                             :source="d"
+                  ></component>
+                  <div v-else-if="col.buttons">
+                  <span style="margin-right: 3px"
+                        v-for="(button, j) in col.buttons"
+                        :key="j">
+                    <bbn-button :url="button.url"
+                                :text="button.text"
+                                :title="button.title"
+                                :icon="button.icon"
+                                :notext="button.notext"
+                                @click="button.command ? button.command(d, col, i) : false"
+                    ></bbn-button>
+                  </span>
+                  </div>
+                  <div v-else v-html="render(d, col, i)"></div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </bbn-scroll>
+        </div>
+        <bbn-scroll-y v-if="currentData.length"
+                      ref="scrollerY"
+                      :container="$refs.scroller"
+                      :scroll-also="dataScrollContents"
+                      :hidden="hiddenScroll"
+        ></bbn-scroll-y>
+      </div>
+    </div>
+      
+      
+      <!-- Footer -->
+    <div class="k-pager-wrap k-grid-pager k-widget k-floatwrap">
+      <div class="bbn-iblock"
+           v-if="pageable"
+      >
+        <bbn-button icon="fa fa-angle-double-left"
+                    :notext="true"
+                    aria-label="Aller à la première page"
+                    title="Aller à la première page"
+                    :disabled="isLoading || (currentPage == 1)"
+                    @click="currentPage = 1"
+        ></bbn-button>
+        <bbn-button icon="fa fa-angle-left"
+                    :notext="true"
+                    aria-label="Aller à la page précédente"
+                    title="Aller à la page précédente"
+                    :disabled="isLoading || (currentPage == 1)"
+                    @click="currentPage--"
+        ></bbn-button>
+        Page
+        <bbn-numeric v-if="currentData.length"
+                     v-model="currentPage"
+                     :min="1"
+                     :max="numPages"
+                     style="width: 6em"
+                     :disabled="isLoading"
+        ></bbn-numeric>
+        de {{numPages}}
+        <bbn-button icon="fa fa-angle-right"
+                    :notext="true"
+                    aria-label="Aller à la page suivante"
+                    title="Aller à la page suivante"
+                    :disabled="isLoading || (currentPage == numPages)"
+                    @click="currentPage++"
+        ></bbn-button>
+        <bbn-button icon="fa fa-angle-double-right"
+                    :notext="true"
+                    aria-label="Aller à la dernière page"
+                    title="Aller à la dernière page"
+                    @click="currentPage = numPages"
+                    :disabled="isLoading || (currentPage == numPages)"
+        ></bbn-button>
+      </div>
+      <span class="k-pager-sizes k-label">
+        <bbn-dropdown :source="limits"
+                      v-model.number="currentLimit"
+                      @change="currentPage = 1"
+                      :disabled="isLoading"
+        ></bbn-dropdown>
+        <span>articles par page</span>
+      </span>
+      <a href="javascript:"
+         v-if="isAjax"
+         class="k-pager-refresh k-link"
+         title="Actualiser"
+         @click="updateData"
+      >
+        <span class="k-icon k-i-reload"></span>
+      </a>
+      <span class="k-pager-info k-label">
+        Afficher les items {{start+1}} - {{start ? (start + currentLimit > total ? total : start + currentLimit) : currentLimit}} de {{total}}
+      </span>
+    </div>
+  </div>
 </div>

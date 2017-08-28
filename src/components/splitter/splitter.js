@@ -75,7 +75,9 @@
     },
     mounted(){
       this.build();
-      this.resize();
+      this.$nextTick(() => {
+        this.resize();
+      })
     },
     updated(){
       this.resize();

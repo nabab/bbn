@@ -28,14 +28,14 @@
   <div class="content">
     <component v-if="component" :is="component" :source="source"></component>
     <div v-else-if="content" v-html="content"></div>
-    <ul v-else-if="items && items.length">
-      <li v-for="(it, idx) in items" v-if="currentLimit ? idx < currentLimit : true">
+    <ul v-else-if="currentItems">
+      <li v-for="(it, idx) in currentItems" v-if="currentLimit ? idx < currentLimit : true">
         <component v-if="itemComponent" :is="itemComponent" :source="it"></component>
         <span v-else v-html="it"></span>
       </li>
     </ul>
     <div v-else><slot>Nothing to display</slot></div>
-    <div v-if="0 && zoomable && (items && items.length)" class="zoom">
+    <div v-if="0 && zoomable && (currentItems && currentItems.length)" class="zoom">
       <i class="fa fa-arrows-alt" @click="zoom"></i>
     </div>
   </div>

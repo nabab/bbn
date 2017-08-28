@@ -20,6 +20,9 @@
         type: [String, Number],
         default: bbn._("Untitled")
       },
+      fullTitle: {
+        type: String
+      },
       icon: {
         type: String
       },
@@ -33,7 +36,7 @@
         type: String
       },
       fixed: {
-        type: Boolean,
+        type: [Boolean, String],
         default: false
       },
       hidden: {
@@ -42,6 +45,10 @@
       encoded: {
         type: Boolean,
         default: false
+      },
+      sortable: {
+        type: Boolean,
+        default: true
       },
       buttons: {
         type: [Array, Function]

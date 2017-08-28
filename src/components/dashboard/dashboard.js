@@ -1,14 +1,14 @@
 /**
  * Created by BBN on 15/02/2017.
  */
-(function($, bbn, kendo){
+(function($, bbn){
   "use strict";
 
   /**
    * Classic input with normalized appearance
    */
   Vue.component('bbn-dashboard', {
-    mixins: [bbn.vue.optionComponent],
+    mixins: [bbn.vue.resizerComponent],
     template: "#bbn-tpl-component-dashboard",
     props: {
       components: {
@@ -34,11 +34,10 @@
     },
     computed: {
       widgets: function(){
-        var vm = this;
-        return $.map(vm.source, function(a){
-          a.hidden = a.hidden ? true : false;
+        return $.map(this.source, (a) => {
+          a.hidden = !!a.hidden;
           if ( !a.key ){
-            a.key = a.uid ? a.uid : vm.makeId();
+            a.key = a.uid ? a.uid : this.makeId();
           }
           return a;
         })
@@ -58,12 +57,12 @@
         return this.toggleWidget(name, key, false);
       },
       toggleWidget: function(e, key, hidden){
-        var vm = this,
-            //vueObj = bbn.vue.findByKey(vm, key, '.bbn-widget'),
-            idx = bbn.fn.search(vm.source, "key", key);
+        let idx = bbn.fn.search(this.source, "key", key);
+        bbn.fn.log("FOUND?");
         if ( idx > -1 ){
+          bbn.fn.log("FOUND", key, idx, this.source[idx]);
           this.updateWidget(key, {
-            hidden: typeof(hidden) !== "boolean" ? hidden : (vm.source[idx].hidden ? false : true)
+            hidden: typeof(hidden) !== "boolean" ? hidden : !!this.source[idx].hidden
           });
         }
       },
@@ -73,9 +72,7 @@
       },
       
       paint: function(){
-        var vm = this,
-            cfg = vm.getOptions(),
-            $ele = $(vm.$el),
+        let $ele = $(this.$refs.container),
             actualWidth = $ele.innerWidth(),
             num = 1,
             steps = [800, 1150, 1550, 2200, 3000];
@@ -87,45 +84,44 @@
             return false;
           }
         });
-        if ( cfg.sortable && !$ele.hasClass("ui-sortable") ){
-          var oldIdx = false;
+        if ( this.sortable && !$ele.hasClass("ui-sortable") ){
+          let oldIdx = false;
           $ele.sortable({
             placeholder: "bbn-widget bbn-bg-grey bbn-widget-placeholder",
             opacity: 0.5,
             forcePlaceholderSize: true,
             handle: "div.k-header h4",
-            start: function(e, ui){
+            start: (e, ui) => {
               oldIdx = ui.item.index(".bbn-widget:not(.bbn-widget-placeholder)");
             },
-            stop: function(e, ui){
+            stop: (e, ui) => {
               if ( oldIdx !== false ){
-                var newIdx = ui.item.index(".bbn-widget:not(.bbn-widget-placeholder)");
+                let newIdx = ui.item.index(".bbn-widget:not(.bbn-widget-placeholder)");
                 if ( newIdx !== oldIdx ){
-                  if ( vm.url ){
+                  if ( this.url ){
                     try {
-                      var tmp = vm.$children[oldIdx].$vnode.data.key;
+                      let tmp = this.$children[oldIdx].$vnode.data.key;
+                      bbn.fn.post(this.url + 'move', {
+                        id: tmp,
+                        index: newIdx
+                      }, (d) => {
+                        if ( d.success ){
+                          this.isRefreshing = true;
+                          this.$nextTick(() => {
+                            this.isRefreshing = false;
+                          })
+                        }
+                        else{
+                          $ele.sortable("cancel");
+                        }
+                      });
                     }
                     catch (e){
                       new Error(bbn._("Impossible to find the idea"));
                     }
-                    bbn.fn.post(vm.url + 'move', {
-                      id: tmp,
-                      index: newIdx
-                    }, function(d){
-                      if ( d.success ){
-                        vm.isRefreshing = true;
-                        //bbn.fn.move(vm.source, newIdx, oldIdx);
-                        vm.$nextTick(function(){
-                          vm.isRefreshing = false;
-                        })
-                      }
-                      else{
-                        $ele.sortable("cancel");
-                      }
-                    });
                   }
                   else{
-                    bbn.fn.move(vm.source, oldIdx, newIdx);
+                    bbn.fn.move(this.source, oldIdx, newIdx);
                     bbn.fn.log("NO SAVING BECAUSE NO URL");
                   }
                 }
@@ -140,32 +136,33 @@
         });
       },
       
-      updateMenu: function(){
-        var vm = this,
-            tab = bbn.vue.closest(vm, ".bbn-tab");
+      updateMenu(){
+        let tab = bbn.vue.closest(this, ".bbn-tab");
         if ( tab ){
-          if ( vm.menu.length ){
-            $.each(vm.menu, function(i, a){
+          if ( this.menu.length ){
+            $.each(this.menu, function(i, a){
               tab.deleteMenu(a);
             });
           }
-          vm.menu = [];
-          vm.menu.push(tab.addMenu({
+          this.menu = [];
+          this.menu.push(tab.addMenu({
             text: bbn._("Widgets"),
             mode: 'options',
-            items: $.map(vm.source, function(a){
+            items: $.map(this.source, (a) => {
               return {
                 disabled: !a.closable,
                 selected: !a.hidden,
                 text: a.text,
-                click: function(e, idx, obj){
-                  if ( vm.source[idx] && (vm.source[idx].closable !== false) ){
-                    var key = a.key,
-                        obj = bbn.vue.getChildByKey(vm, key, '.bbn-widget');
+                click: (e, idx, obj) => {
+                  bbn.fn.log("OK1");
+                  if ( this.source[idx] && (vm.source[idx].closable !== false) ){
+                    bbn.fn.log("OK2");
+                    let key = a.key,
+                        obj = bbn.vue.getChildByKey(this, key, '.bbn-widget');
                     if ( obj ){
                       //obj.close();
                     }
-                    vm.toggleWidget(e, key, vm.source[idx].hidden ? false : true);
+                    this.toggleWidget(e, key, this.source[idx].hidden ? false : true);
                   }
                 }
               }
@@ -175,6 +172,7 @@
       },
       
       updateWidget(key, cfg){
+        /*
         var vm = this,
             idx = bbn.fn.search(vm.widgets, "key", key),
             params = {id: key, cfg: cfg},
@@ -191,6 +189,7 @@
               delete params.cfg[n];
             }
           }
+
           if ( bbn.fn.countProperties(params.cfg) ){
             if ( vm.url ){
               return bbn.fn.post(vm.url + 'save', params).then((d) => {
@@ -198,33 +197,43 @@
                   for ( var n in params.cfg ){
                     vm.$set(vm.source[idx], n, params.cfg[n]);
                   }
+                  vm.$forceUpdate();
                 }
               })
             }
             else{
-
               let resolvedProm = Promise.resolve('ok');
               return resolvedProm.then(()=>{
                 vm.$set(vm.source[idx], n, params.cfg[n]);
+                vm.$forceUpdate();
               })
             }
           }
         }
         bbn.fn.log(cfg);
         new Error("No corresponding widget found for key " + key);
+        */
+      },
+
+      resizeScroll(){
+        if ( this.$refs.scroll ){
+          this.$refs.scroll.$emit('resize')
+        }
       }
     },
 
-    mounted: function(){
-      var vm = this;
-      vm.paint();
+    mounted(){
+      this.paint();
+      this.updateMenu();
+      setTimeout(() => {
+        this.resizeScroll()
+      }, 500);
       //vm.emitInputMenu();
     },
 
-    updated: function(){
-      var vm = this;
-      vm.paint();
+    updated(){
+      this.paint();
     }
   });
 
-})(jQuery, bbn, kendo);
+})(jQuery, bbn);

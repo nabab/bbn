@@ -1,0 +1,9 @@
+<div class="bbn-tree2">
+  <ul class="bbn-tree2" v-if="items.length">
+    <bbn-tree-node v-for="it in items"
+                   :key="it[sourceValue]"
+                   v-bind="it"
+    ></bbn-tree-node>
+  </ul>
+  <h3 v-else v-html="_('No items to show')"></h3>
+</div>

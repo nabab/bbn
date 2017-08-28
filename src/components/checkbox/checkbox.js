@@ -47,7 +47,7 @@
       bbn.fn.log(this);
     },
     mounted(){
-      if ( $.isArray(this.value) ){
+      if ( Array.isArray(this.value) ){
         this.checked = $.inArray(this.initialValue, this.value) > -1 ? true : false;
         this.$emit("input", this.checked);
       }

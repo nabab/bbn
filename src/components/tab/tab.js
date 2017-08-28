@@ -8,6 +8,7 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-tab', {
+    mixins: [bbn.vue.resizerComponent],
     props: {
       title: {
         type: [String, Number],
@@ -212,6 +213,7 @@
           vm.isComponent = false;
         }
       }
+
       if ( vm.isComponent ){
         children.push(createElement(vm.name, {
           props: {
@@ -232,10 +234,7 @@
         }));
       }
       else{
-        children.push(createElement('div', {
-          'class': {
-            'bbn-100': true
-          },
+        children.push(createElement('bbn-scroll', {
           domProps: {
             innerHTML: (vm.css ? '<style>' + vm.css + '</style>' : '') + vm.content
           }
@@ -246,10 +245,8 @@
 
     mounted: function(){
       this.tabNav = bbn.vue.closest(this, ".bbn-tabnav");
-      bbn.fn.analyzeContent(this.$parent.$el);
       if ( !this.isComponent ){
         this.onMount(this.$el, this.source);
-        bbn.fn.analyzeContent(this.$el, true);
       }
     },
     watch: {
@@ -261,13 +258,8 @@
           }
           else{
             bbn.fn.log("TabNav selected has changed - old: " + oldVal + " new: " + newVal + " for URL " + vm.url);
-            bbn.fn.analyzeContent(vm.$el, true);
           }
         }
-      },
-      content: function(){
-        var ele = this.$el;
-        bbn.fn.analyzeContent(ele, true);
       },
       source: {
         deep: true,

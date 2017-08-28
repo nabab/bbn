@@ -1,0 +1,20 @@
+<!--<div class="bbn-tree"></div>-->
+<li class="" v-if="sourceValue">
+  <span class="fancytree-node fancytree-exp-n fancytree-ico-c">
+    <span class="fancytree-expander"></span>
+    <span v-if="icon" :class="fancytree-custom-icon ' + icon"></span>
+    <span v-else-if="is_parent" class="fancytree-custom-icon fa fa-folder"></span>
+    <span v-else class="fancytree-custom-icon fa fa-file-o"></span>
+
+    <span class="fancytree-title">
+      <span v-html="text"></span>
+      <span v-if="code" class="bbn-grey" v-html="' (' + code + ')'"></span>
+    </span>
+  </span>
+  <ul v-if="num_children">
+    <bbn-tree-node v-for="it in items"
+                   :key="it[sourceValue]"
+                   v-bind="it"
+    ></bbn-tree-node>
+  </ul>
+</li>

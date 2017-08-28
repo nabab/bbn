@@ -1,36 +1,23 @@
-<div :class="['bbn-scroll', theme==='dark' ? 'theme-dark' : 'theme-light', classes ? ' ' + classes : '']"
-     ref="scrollContainer"
->
-  <div ref="scrollContent"
-       :style="{
-        'margin-top': top * -1 + 'px',
-        'margin-left': left * -1 + 'px'
-        }"
-       @wheel="scroll"
-       @touchstart="startDrag"
-       @touchmove="onDrag"
-       @touchend="stopDrag"
+<div class="bbn-scroll">
+  <div class="bbn-scroll-container"
+       ref="scrollContainer"
+       @scroll="$emit('scroll')"
   >
-    <slot></slot>
+    <div class="bbn-block"
+         ref="scrollContent"
+         style="min-width: 100%; min-height: 100%"
+    >
+      <slot></slot>
+    </div>
   </div>
-  <bbn-scrolly v-if="ready && ((axis === 'both') || (axis === 'y'))"
-                      :content="{ height: scrollContentHeight }"
-                      :container="{ height: scrollContainerHeight }"
-                      :scrolling="{ v: vMovement }"
-                      :dragging-from-parent="dragging"
-                      :on-change-position="handleChangePosition"
-                      :show="show"
-                      @vertical="moveTheScrollbar"
+  <bbn-scroll-x v-if="(axis === 'both') || (axis === 'x')"
+                ref="xScroller"
+                :scrollAlso="scrollAlso"
   >
-  </bbn-scrolly>
-  <bbn-scrollx v-if="ready && ((axis === 'both') || (axis === 'x'))"
-                        :content="{ width: scrollContentWidth }"
-                        :container="{ width: scrollContainerWidth }"
-                        :scrolling="{ h: hMovement }"
-                        :dragging-from-parent="dragging"
-                        :on-change-position="handleChangePosition"
-                        :show="show"
-                        @horizontal="moveTheScrollbar"
+  </bbn-scroll-x>
+  <bbn-scroll-y v-if="(axis === 'both') || (axis === 'y')"
+                ref="yScroller"
+                :scrollAlso="scrollAlso"
   >
-  </bbn-scrollx>
+  </bbn-scroll-y>
 </div>

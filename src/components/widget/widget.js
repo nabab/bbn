@@ -13,20 +13,59 @@
     template: "#bbn-tpl-component-widget",
     props: {
       uid: {},
-      content: {},
-      url: {},
-      limit: {},
-      start: {},
-      total: {},
-      template: {},
-      component: {},
-      itemComponent: {},
-      title: {},
-      buttonsLeft: {},
-      buttonsRight: {},
-      zoomable: {},
-      closable: {},
-      sortable: {},
+      content: {
+        type: String
+      },
+      url: {
+        type: String
+      },
+      limit: {
+        type: Number
+      },
+      start: {
+        type: Number,
+        default: 0
+      },
+      total: {
+        type: Number,
+        default: 0
+      },
+      template: {
+
+      },
+      component: {
+        type: String
+      },
+      itemComponent: {
+        type: String
+      },
+      title: {
+        type: String
+      },
+      buttonsLeft: {
+        type: Array,
+        default(){
+          return [];
+        }
+      },
+      buttonsRight: {
+        type: Array,
+        default(){
+          return [];
+        }
+      },
+      zoomable: {
+        type: Boolean,
+        default: true
+      },
+      closable: {
+        type: Boolean,
+        default: true
+      },
+      sortable: {
+        type: Boolean,
+        default: true
+      },
       source: {
         type: Object,
         default: function(){
@@ -39,43 +78,54 @@
           return [];
         }
       },
-      top: {},
       menu: {
         type: Array,
         default: function(){
           return [];
         }
       },
-      bottom: {},
       position: {
         type: String
       },
+      top: {},
+      bottom: {},
       opened: {}
+    },
+    data: function(){
+      return {
+        dashBoard: bbn.vue.closest(this, "bbn-dashboard"),
+        currentLimit: this.limit,
+        currentItems: this.items,
+        currentStart: this.start,
+        currentContent: this.content || false,
+        lang: {
+          close: bbn._("Close")
+        }
+      };
     },
     computed: {
       hasMenu: function(){
         return this.finalMenu.length ? true : false;
       },
       finalMenu: function(){
-        var vm = this,
-            tmp = vm.menu.slice();
-        if ( vm.url ){
+        let tmp = this.menu.slice();
+        if ( this.url ){
           tmp.unshift({
             text: bbn._("Reload"),
             icon: "fa fa-refresh",
-            click: function(){
-              vm.reload();
+            click: () => {
+              this.reload();
             }
           });
         }
-        if ( vm.limit ){
-          var items = [];
-          $.each(limits, function(i, a){
+        if ( this.currentLimit ){
+          let items = [];
+          $.each(limits, (i, a) => {
             items.push({
               text: a.toString() + " " + bbn._("Items"),
-              selected: a === vm.currentLimit,
-              click: function(){
-                vm.setLimit(a);
+              selected: a === this.currentLimit,
+              click: () => {
+                this.currentLimit = a;
               }
             })
           });
@@ -91,68 +141,39 @@
     methods: {
       _: bbn._,
       close: function(){
-        var vm = this,
-            $ele = $(vm.$el);
-        vm.$emit("close", vm.uid, vm);
-        /*
-        $ele.bbn("animateCss", "zoomOut", function () {
-          $(this).hide();
-          vm.$emit("close", $ele.attr("data-bbn-type") || null, vm);
-        })
-        */
+        this.$emit("close", this.uid, this);
       },
       zoom: function(){
-        var vm = this,
-            o = vm.getOptions(),
-            $ele = $(vm.$el);
-
-      },
-      getOptions: function(){
-        var vm = this,
-            o = bbn.vue.getOptions(this);
-        return o;
       },
       reload: function(){
-        var vm = this;
-        vm.items.splice(0, vm.items.length);
-        vm.$nextTick(function(){
-          vm.load();
+        this.currentItems = [];
+        this.$nextTick(() => {
+          this.load();
         })
       },
       load: function(){
-        var vm = this,
-            o = vm.getOptions();
-        if ( o.url ){
-          var params = {
-            key: vm.uid
+        if ( this.url ){
+          let params = {
+            key: this.uid
           };
-          if ( o.limit ){
-            params.limit = o.limit;
-            if ( o.start ){
-              params.start = o.start;
+          if ( this.currentLimit ){
+            params.limit = this.currentLimit;
+            if ( this.start !== undefined ){
+              params.start = this.currentStart;
             }
           }
-          bbn.fn.post(o.url, params, function(d){
+          bbn.fn.post(this.url, params, (d) => {
             if ( d.success && d.data ){
-              if ( vm.dashBoard ){
-                var idx = bbn.fn.search(vm.dashBoard.source, "key", vm.uid);
-                if ( idx > -1 ){
-                  if ( d.data.limit && vm.currentLimit ){
-                    delete d.data.limit;
-                  }
-                  vm.dashBoard.updateWidget(vm.uid, d.data);
-                }
+              if ( d.data.items !== undefined ){
+                this.currentItems = d.data.items;
               }
-              /*
-               var topSrc = vm;
-               while ( topSrc.$parent && (topSrc.$parent.source !== undefined) ){
-               topSrc = topSrc.$parent;
-               }
-               topSrc.$set(vm.$parent.source, "items", d.items);
-               topSrc.$set(vm.$parent.source, "num", d.num);
-               //vm.$set(vm, "num", d.num);
-               //vm.$forceUpdate();
-               */
+              if ( d.data.limit ){
+                this.currentLimit = d.data.limit;
+              }
+              if ( d.data.start !== undefined ){
+                this.currentStart = d.data.start;
+              }
+              this.$emit("loaded");
             }
           })
         }
@@ -170,31 +191,17 @@
           tmp = tmp.$parent;
         }
       },
-      setLimit: function(limit){
-        var vm = this;
-        vm.currentLimit = limit;
-        if ( vm.dashBoard ){
-          vm.dashBoard.updateWidget(vm.uid, {limit: limit}).then(() => {
-            vm.reload();
-          });
-        }
-        else{
-          vm.reload();
-        }
-      },
-    },
-    data: function(){
-      return $.extend(bbn.vue.treatData(this), {
-        dashBoard: bbn.vue.closest(this, ".bbn-dashboard"),
-        currentLimit: this.limit,
-        lang: {
-          close: bbn._("Close")
-        }
-      });
     },
     mounted: function(){
       this.load();
     },
+    watch: {
+      currentLimit(){
+        if ( this.currentItems ){
+          this.reload();
+        }
+      }
+    }
   });
 
 })(jQuery, bbn, kendo);

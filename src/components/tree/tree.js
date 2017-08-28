@@ -4,40 +4,6 @@
 (function($, bbn){
   "use strict";
 
-  var transform = function(data){
-        return $.map(data, function(v){
-          var r = {
-            title: v.text,
-            /** @todo apply a function on the icons for removing all which only have 'cogs' (without fa fa-) */
-            data: {}
-          };
-          if ( v.icon && v.icon.length ){
-            r.icon = v.icon;
-          }
-          else {
-            r.icon = v.icon ? 'fa fa-cog' : false
-          }
-          if ( v.code ){
-            r.title += ' <span class="bbn-grey">' + v.code + '</span>';
-          }
-          if ( v.items ){
-            r.children = transform(v.items);
-          }
-          else if ( v.num_children ){
-            r.lazy = true;
-          }
-          for ( var n in v ){
-            r.data[n] = v[n];
-          }
-          return r;
-        });
-      },
-      src = function(url, id){
-        return bbn.fn.post(url + '/' + id).promise().then(function(d){
-          return transform(d.data);
-        });
-      };
-
   Vue.component('bbn-tree', {
     mixins: [bbn.vue.fullComponent],
     template: '#bbn-tpl-component-tree',
@@ -89,47 +55,81 @@
       }, bbn.vue.treatData(this));
     },
     methods: {
-      build: function(){
-        var vm = this,
-            cfg = $.extend({
+      _transform(data){
+        return $.map(data, (v) => {
+          var r = {
+            title: v.text,
+            /** @todo apply a function on the icons for removing all which only have 'cogs' (without fa fa-) */
+            data: {}
+          };
+          if ( v.icon && v.icon.length ){
+            r.icon = v.icon;
+          }
+          else {
+            r.icon = v.icon ? 'fa fa-cog' : false
+          }
+          if ( v.code ){
+            r.title += ' <span class="bbn-grey">' + v.code + '</span>';
+          }
+          if ( v.items ){
+            r.children = this._transform(v.items);
+          }
+          else if ( v.num_children ){
+            r.lazy = true;
+          }
+          for ( var n in v ){
+            r.data[n] = v[n];
+          }
+          return r;
+        });
+      },
+      _src(url, id){
+        return bbn.fn.post(url + '/' + id).promise().then((d) => {
+          setTimeout(() => {
+            this.$emit("load");
+          }, 500);
+          return this._transform(d.data);
+        });
+      },
+      build(){
+        let cfg = $.extend({
               extensions: this.extensions,
               keydown: function (e, d) {
                 if ((e.key === 'Enter') || (e.key === ' ')) {
                   $(d.node.li).find("span.fancytree-title").click();
                 }
               },
-            }, vm.getOptions());
+            }, this.getOptions());
 
-        if ( vm.select && $.isFunction(vm.select) ){
-          cfg.click = function (e, d){
+        if ( this.select && $.isFunction(this.select) ){
+          cfg.click = (e, d) => {
             if ( d.targetType === 'title' ){
-              return vm.select(d.node.data.id, d.node.data, d.node);
+              return this.select(d.node.data.id, d.node.data, d.node);
             }
           };
         }
-        else if ( vm.ivalue !== undefined ){
+        else if ( this.ivalue !== undefined ){
           // Load code from the list
           cfg.click = function (e, d){
             if ( d.targetType === 'title' ){
-              bbn.fn.log("click", e, d);
-              vm.ivalue = d.node.data.text;
-              vm.currentSelection = d.node.data.text;
-              vm.emitInput(d.node.data.id);
+              this.ivalue = d.node.data.text;
+              this.currentSelection = d.node.data.text;
+              this.emitInput(d.node.data.id);
               bbn.fn.closePopup();
             }
           };
         }
         if ( typeof(cfg.source) === 'string' ){
-          var url = cfg.source;
-          cfg.source = function(){
-            return src(url, cfg.root);
+          let url = cfg.source;
+          cfg.source = () => {
+            return this._src(url, cfg.root);
           };
-          cfg.lazyLoad = function(e, d){
-            d.result = src(url, d.node.data.id);
+          cfg.lazyLoad = (e, d) => {
+            d.result = this._src(url, d.node.data.id);
           };
         }
-        else if ( $.isArray(cfg.source) ){
-          cfg.source = transform(vm.source);
+        else if ( Array.isArray(cfg.source) ){
+          cfg.source = this._transform(this.source);
         }
         cfg.renderNode = (e, n) => {
           if ( n.node.data.bcolor ){
@@ -172,7 +172,7 @@
         };
         cfg.disabled = false;
         $(this.$el).fancytree(cfg);
-        vm.widget = $(this.$el).fancytree("getTree");
+        this.widget = $(this.$el).fancytree("getTree");
       }
     },
     mounted: function(){
