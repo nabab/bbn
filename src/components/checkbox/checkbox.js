@@ -27,11 +27,18 @@
       label: {
         type: String,
       },
+      checked: {
+        type: Boolean,
+        default: false
+      }
+    },
+    model: {
+      prop: "checked",
+      event: "change"
     },
     data(){
       return {
         initialValue: this.value ? this.value : false,
-        checked: false
       };
     },
     methods: {

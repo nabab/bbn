@@ -1,16 +1,18 @@
 <div class="bbn-code bbn-100">
-  <div class="bbn-100"
-       ref="code"
-       @focus="focus($event)"
-       @blur="blur($event)"
-       @keydown="keydown($event)"
-       @keyup="keyup($event)"
-       @mouseenter="over($event)"
-       @mouseleave="out($event)"
-       @scroll="scroll($event)"
-  ></div>
-  <input class="bbn-100"
-         ref="element"
+  <div class="bbn-full-screen">
+    <bbn-scroll>
+      <div ref="code"
+           @focus="focus($event)"
+           @blur="blur($event)"
+           @keydown="keydown($event)"
+           @keyup="keyup($event)"
+           @mouseenter="over($event)"
+           @mouseleave="out($event)"
+           @scroll="scroll($event)"
+      ></div>
+    </bbn-scroll>
+  </div>
+  <input ref="element"
          type="hidden"
          :value="value"
          :name="name"

@@ -11,6 +11,14 @@
     template: "#bbn-tpl-component-popup",
     mixins: [bbn.vue.resizerComponent],
     props: {
+      defaultWidth: {
+        type: [String, Number],
+        default: '70%'
+      },
+      defaultHeight: {
+        type: [String, Number],
+        default: '70%'
+      },
       untitled: {
         type: String,
         default: bbn._("Untitled")
@@ -42,7 +50,7 @@
             if ( !d.content && (typeof(arguments[i]) === 'string') ){
               d.content = arguments[i];
             }
-            else if ( bbn.fn.isDimension(arguments[i]) || (arguments[i] === 'auto') ){
+            else if ( bbn.fn.isDimension(arguments[i]) ){
               if ( !d.width ){
                 d.width = arguments[i];
               }
@@ -86,6 +94,66 @@
         return false;
       },
 
+      load(obj){
+        let d = {};
+        if ( typeof(obj) !== 'object' ){
+          for ( let i = 0; i < arguments.length; i++ ){
+            if ( !d.url && (typeof(arguments[i]) === 'string') ){
+              d.url = arguments[i];
+            }
+            else if ( bbn.fn.isDimension(arguments[i]) || (arguments[i] === 'auto') ){
+              if ( !d.width ){
+                d.width = arguments[i];
+              }
+              else if ( !d.height ){
+                d.height = arguments[i];
+              }
+            }
+            else if ( $.isFunction(arguments[i]) ){
+              if ( !d.open ){
+                d.open = arguments[i];
+              }
+              else if ( !d.close ){
+                d.close = arguments[i];
+              }
+            }
+            else if ( typeof(arguments[i]) === 'object' ){
+              if ( !d.data ){
+                d.data = arguments[i];
+              }
+              else if ( !d.options ){
+                d.options = arguments[i];
+              }
+            }
+          }
+          if ( !d.height ){
+            d.height = false;
+          }
+        }
+        else{
+          d = obj;
+        }
+        if ( d.url ){
+          bbn.fn.post(d.url, d.data || {}, (r) => {
+            if ( r.content || r.title ){
+              if ( r.script ){
+                var tmp = eval(r.script);
+                if ( $.isFunction(tmp) ){
+                  d.open = tmp;
+                }
+              }
+              $.extend(d, r);
+              delete d.url;
+              delete d.data;
+              this.source.push(d);
+            }
+          })
+        }
+        else{
+          new Error("You must give a URL in order to load a popup")
+        }
+      },
+
       getObject(from){
         let a = $.extend({}, from);
         if ( !a.ref ){
@@ -98,13 +166,13 @@
           a.content = ' ';
         }
         if ( !a.width ){
-          a.width = 'auto';
+          a.width = this.defaultWidth;
         }
         else if ( typeof(a.width) === 'number' ){
           a.width = a.width.toString() + 'px';
         }
         if ( !a.height ){
-          a.height = 'auto';
+          a.height = this.defaultHeight;
         }
         else if ( typeof(a.height) === 'number' ){
           a.height = a.height.toString() + 'px';
@@ -118,7 +186,7 @@
           if ( !force && $.isFunction(this.popups[idx].close) ){
             ((ele, data) => {
               ok = this.popups[idx].close(this, idx);
-            })($(".k-window", this.$el).eq(idx), this.popups[idx].data || {});
+            })($(".bbn-popup-unit", this.$el).eq(idx), this.popups[idx].data || {});
           }
           if ( ok !== false ){
             this.source.splice(idx, 1);
@@ -130,11 +198,11 @@
         if ( this.popups[idx] ){
           this.$nextTick(() => {
             bbn.fn.log("CENTERING " + idx.toString());
-            let ele = $(".k-window", this.$el).eq(idx);
+            let ele = $(".bbn-popup-unit", this.$el).eq(idx);
             bbn.fn.center(ele);
             if ( !ele.hasClass("ui-draggable") ){
               ele.draggable({
-                handle: ".k-window-title",
+                handle: ".bbn-popup-title > span",
                 containment: ".bbn-popup"
               }).resizable({
                 handles: "se",

@@ -69,7 +69,6 @@
       bbn.fn.log("VALUE", this.value);
       this.widget = new JSONEditor(this.$refs.element, cfg);
       this.widget.setText(this.value);
-      this.$emit("ready", this.value);
     },
     data(){
       return $.extend({

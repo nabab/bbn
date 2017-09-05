@@ -13,11 +13,13 @@
   <bbn-scroll-x v-if="(axis === 'both') || (axis === 'x')"
                 ref="xScroller"
                 :scrollAlso="scrollAlso"
+                :initial="x"
   >
   </bbn-scroll-x>
   <bbn-scroll-y v-if="(axis === 'both') || (axis === 'y')"
                 ref="yScroller"
                 :scrollAlso="scrollAlso"
+                :initial="y"
   >
   </bbn-scroll-y>
 </div>

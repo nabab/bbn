@@ -249,6 +249,7 @@
         this.onMount(this.$el, this.source);
       }
     },
+    /* Is it useful????
     watch: {
       selected: function(newVal, oldVal){
         if ( newVal && !oldVal ){
@@ -268,6 +269,7 @@
         }
       }
     }
+    */
   });
 
 })(jQuery, bbn, kendo);

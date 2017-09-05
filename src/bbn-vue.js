@@ -103,6 +103,7 @@
       'dropdown',
       'dropdowntreeview',
       'fisheye',
+      'footer',
       'form',
       'initial',
       'input',
@@ -119,6 +120,7 @@
       'notification',
       'numeric',
       'popup',
+      'popup-footer',
       'radio',
       'rte',
       'scroll',
@@ -134,6 +136,7 @@
       'timepicker',
       'toolbar',
       'tree',
+      'tree-node',
       'treemenu',
       'tree-input',
       'upload',
@@ -319,11 +322,11 @@
         Vue.component(name, (resolve, reject) => {
           bbn.fn.post(url, (r) => {
             if ( r.script ){
-              if ( r.content ){
-                $(document.body).append('<script type="text/x-template" id="bbn-tpl-component-' + name + '">' + r.content + '</script>');
-              }
               if ( r.css ){
                 $(document.head).append('<style>' + r.css + '</style>');
+              }
+              if ( r.content ){
+                $(document.body).append('<script type="text/x-template" id="bbn-tpl-component-' + name + '">' + r.content + '</script>');
               }
               //let data = r.data || {};
               eval(r.script);
@@ -395,9 +398,11 @@
           this.$emit('focus', e)
         },
         keyup(e){
+          e.stopImmediatePropagation();
           this.$emit('keyup', e)
         },
         keydown(e){
+          e.stopImmediatePropagation();
           this.$emit('keydown', e)
         },
         change(e){
@@ -473,6 +478,15 @@
       }
     },
 
+    memoryComponent: {
+      props: {
+        memory: {
+          type: [Object, Function]
+        },
+
+      }
+    },
+
     inputComponent: {
       props: {
         value: {},
@@ -506,6 +520,9 @@
           this.$emit('input', val);
         }
       },
+      mounted(){
+        this.$emit("ready");
+      },
       watch:{
         disabled(newVal){
           if ( this.widget && $.isFunction(this.widget.enable) ){
@@ -533,6 +550,7 @@
         },
         value(newVal){
           if ( this.widget && (this.widget.value !== undefined) ){
+            bbn.fn.log("Widget change");
             if ( $.isFunction(this.widget.value) ){
               if ( this.widget.value() !== newVal ){
                 this.widget.value(newVal);

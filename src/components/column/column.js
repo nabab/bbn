@@ -50,6 +50,18 @@
         type: Boolean,
         default: true
       },
+      filterable: {
+        type: Boolean,
+        default: true
+      },
+      resizable: {
+        type: Boolean,
+        default: true
+      },
+      showable: {
+        type: Boolean,
+        default: true
+      },
       buttons: {
         type: [Array, Function]
       },

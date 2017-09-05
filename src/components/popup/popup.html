@@ -12,34 +12,41 @@
     <transition-group name="custom-classes-transition"
                       enter-active-class="animated fadeIn"
                       leave-active-class="animated fadeOut"
+                      tag="div"
+                      class="bbn-100"
     >
-      <div class="k-widget k-window"
+      <div class="k-widget bbn-popup-unit"
            v-for="(popup, i) in popups"
            :key="popup.ref"
            :style="{
-             width: popup.width,
-             height: popup.height,
+             width: popup.maximized ? '100%' : popup.width,
+             height: popup.maximized ? '100%' : popup.height,
              zIndex: zIndex + i
            }"
       >
-        <div class="k-window-titlebar k-header" style="margin-top: -30px;">
+        <div class="k-header bbn-popup-title">
            &nbsp;
-          <span class="k-window-title" v-html="popup.title"></span>
-          <div class="k-window-actions">
-            <a role="button" href="#" class="k-window-action k-link" @click="close(i)">
-              <span class="k-icon k-i-close"></span>
-            </a>
+          <span v-html="popup.title"></span>
+          <div class="bbn-popup-actions">
+            <i :class="'zmdi zmdi-window-' + (popup.maximized ? 'restore' : 'maximize')"
+               @click="popup.maximized = !popup.maximized; $forceUpdate(); center(i)"
+               :title="_('Full screen')"
+            ></i>
+            <i class="fa fa-times"
+               @click="close(i)"
+               :title="_('Close')"
+            ></i>
           </div>
         </div>
-        <div class="bbn-popup-div k-window-content k-content" tabindex="0">
+        <div class="bbn-w-100" v-bbn-fill-height tabindex="0">
           <component v-if="popup.component"
                      :is="popup.component"
                      :source="popup.source"
           ></component>
-          <div class="bbn-100"
-               v-else-if="popup.content"
-               v-html="popup.content"
-          ></div>
+          <bbn-scroll v-else-if="popup.content"
+          >
+            <div class="bbn-block bbn-w-100" v-html="popup.content"></div>
+          </bbn-scroll>
         </div>
       </div>
     </transition-group>

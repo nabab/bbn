@@ -33,7 +33,7 @@
   Vue.component('bbn-context', {
     props: {
       source: {
-        type: Array
+        type: [Function, Array]
       },
       tag: {
         type: String,
@@ -47,7 +47,8 @@
     computed: {
       dataSource: function(){
         if ( this.source ){
-          return mapper(this.source);
+          //bbn.fn.log("source exists", this.source());
+          return mapper($.isFunction(this.source) ? this.source() : this.source);
         }
         return [];
       }
@@ -60,13 +61,11 @@
     methods: {
       clickItem(e){
         const vm = this;
-        e.preventDefault();
-        e.stopImmediatePropagation();
+        bbn.fn.log("context click", vm);
         let vlist = vm.$root.vlist || (window.appui ? window.appui.vlist : false);
-        if ( vm.source && (vlist !== undefined) ){
-          bbn.fn.log("context click", vm);
+        if ( vm.dataSource && (vlist !== undefined) ){
           vlist.push({
-            items: vm.source,
+            items: vm.dataSource,
             left: e.clientX ? e.clientX : vm.$el.offsetLeft,
             top: e.clientY ? e.clientY : vm.$el.offsetTop
           });
@@ -74,39 +73,32 @@
       },
     },
     render: function(createElement){
-      var vm = this,
-          res = {
-            data: {},
-            children: []
-          };
-      if ( vm.$slots.default ){
-        for ( var node of vm.$slots.default ){
-          if ( node.tag ){
-            res = node;
-            break;
-          }
-        }
-      }
-      let ev = {};
-      if ( vm.context ){
-        ev.contextmenu = vm.clickItem
-      }
-      else{
-        ev.click = vm.clickItem;
-      }
-      if ( !res.tag ){
-        res.tag = vm.tag;
-      }
-
       return createElement(
-        res.tag,
-        $.extend(res.data, {
+        this.tag,
+        $.extend({
           "class": {
             "bbn-context": true
           },
-          on: ev
+          on: {
+            click: (e) => {
+              if ( !this.context ){
+                bbn.fn.log("is not context", e);
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                this.clickItem(e);
+              }
+            },
+            contextmenu: (e) => {
+              if ( this.context ){
+                bbn.fn.log("is context");
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                this.clickItem(e);
+              }
+            }
+          }
         }, true),
-        res.children
+        this.$slots.default
       );
     }
   });

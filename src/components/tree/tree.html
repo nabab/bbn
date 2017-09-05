@@ -1,1 +1,26 @@
-<div class="bbn-tree"></div>
+<div class="bbn-tree" @keydown="keyNav">
+  <bbn-scroll v-if="items.length"
+              ref="scroll"
+  >
+    <ul @mousemove="drag" class="root">
+      <bbn-tree-node ref="root"
+                     :source="items"
+                     text=""
+                     :icon="false"
+                     :num="items.length"
+                     :initial="true"
+                     :expanded="true"
+                     :level="0"
+      ></bbn-tree-node>
+    </ul>
+    <ul class="helper"
+        ref="helper"
+        :style="{
+          display: dragging ? 'block' : 'none'
+        }"
+    ></ul>
+  </bbn-scroll>
+  <h3 v-else
+      v-html="_('No items to show')"
+  ></h3>
+</div>

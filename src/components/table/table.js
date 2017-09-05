@@ -27,6 +27,34 @@
         type: Boolean,
         default: false
       },
+      resizable: {
+        type: Boolean,
+        default: false
+      },
+      showable: {
+        type: Boolean,
+        default: false
+      },
+      groupable: {
+        type: Boolean,
+        default: false
+      },
+      serverPaging: {
+        type: Boolean,
+        default: true
+      },
+      serverSorting: {
+        type: Boolean,
+        default: true
+      },
+      serverFiltering: {
+        type: Boolean,
+        default: true
+      },
+      serverGrouping: {
+        type: Boolean,
+        default: true
+      },
       order: {
         type: Object,
         default(){
@@ -94,11 +122,21 @@
       },
       edit: {
         type: Function
+      },
+      groupBy: {
+        type: Number
+      },
+      expanded: {
+        type: Array,
+        default(){
+          return [];
+        }
       }
     },
     data: function(){
       return {
         currentData: [],
+        group: this.groupBy === undefined ? false : this.groupBy,
         limits: [10, 25, 50, 100, 250, 500],
         start: 0,
         total: 0,
@@ -111,35 +149,45 @@
         originalRow: false,
         editedRow: false,
         editedTr: false,
-        cols: [],
+        cols: this.columns.slice(),
         table: false,
         isLoading: false,
         isAjax: typeof this.source === 'string',
-        /**
-         * Number of fixed columns on the left
-         * @type {number}
-         *
-         */
-        fixedLeft: 0,
-        /**
-         * Number of fixed columns on the right
-         * @type {number}
-         *
-         */
-        fixedRight: 0,
         currentLimit: this.limit,
         currentOrder: this.order,
         tableLeftWidth: 0,
         tableMainWidth: 0,
         tableRightWidth: 0,
+        colsLeft: [],
+        colsMain: [],
+        colsRight: [],
         scrollableContainer: null,
         hiddenScroll: true,
-        initialColumns: this.columns
+        currentExpanded: []
       };
     },
     computed: {
       numPages(){
         return Math.ceil(this.total/this.currentLimit);
+      },
+      numVisible(){
+        return this.cols.length - bbn.fn.count(this.cols, {hidden: true}) + (this.hasExpander ? 1 : 0);
+      },
+      numLeftVisible(){
+        return this.colsLeft.length - bbn.fn.count(this.colsLeft, {hidden: true});
+      },
+      numMainVisible(){
+        return this.colsMain.length - bbn.fn.count(this.colsMain, {hidden: true});
+      },
+      numRightVisible(){
+        return this.colsRight.length - bbn.fn.count(this.colsRight, {hidden: true});
+      },
+      scroller:{
+        get(){
+          return this.$refs.scroller instanceof Vue ? this.$refs.scroller : null;
+        },
+        set(){
+        },
       },
       currentPage: {
         get(){
@@ -149,7 +197,66 @@
           this.start = val > 1 ? (val-1) * this.currentLimit : 0;
           this.updateData();
         }
-      }
+      },
+      currentSet(){
+        let res = [],
+            isGroup = false,
+            currentGroupValue,
+            currentLink,
+            data = this.currentData.slice(),
+            o,
+            realIndex = 0,
+            end = data.length,
+            i = 0;
+        if (
+          (this.group !== false) &&
+          (!this.isAjax  || !this.serverGrouping) &&
+          this.cols[this.group] &&
+          this.cols[this.group].field
+        ){
+          isGroup = true;
+          if ( !this.currentOrder[this.cols[this.group].field] ){
+            data = bbn.fn.order(data, this.cols[this.group].field);
+          }
+          else{
+            data = bbn.fn.multiorder(data, this.currentOrder);
+          }
+        }
+        if ( this.pageable && (!this.isAjax || !this.serverPaging) ){
+          i = this.start;
+          end = this.start + this.currentLimit > data.length ? data.length : this.start + this.currentLimit;
+        }
+        while ( i < end ){
+          let a = data[i];
+          if ( isGroup && (currentGroupValue !== a[this.cols[this.group].field]) ){
+            currentGroupValue = a[this.cols[this.group].field];
+            res.push({group: true, index: i, value: currentGroupValue, data: a});
+            currentLink = i;
+            realIndex++;
+          }
+          o = {index: i, data: a};
+          if ( isGroup ){
+            o.isGrouped = true;
+            o.link = currentLink;
+          }
+          res.push(o);
+          realIndex++;
+          if ( this.expander && (
+              !$.isFunction(this.expander) ||
+              ($.isFunction(this.expander) && this.expander(a))
+            )
+          ){
+            res.push({index: i, expander: true, data: a});
+            realIndex++;
+          }
+          i++;
+        }
+        return res;
+      },
+      hasExpander(){
+        return this.expander || (this.groupable && (typeof(this.group) === 'number') && this.cols[this.group]);
+      },
+
     },
     methods: {
       /** i18n */
@@ -179,7 +286,7 @@
                 this.total = result.total || result.data.length || 0;
                 if ( result.order ){
                   this.currentOrder = {};
-                  this.currentOrder[result.order] = result.dir === 'DESC' ? 'DESC' : 'ASC';
+                  this.currentOrder[result.order] = (result.dir || '').toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
                 }
               }
             })
@@ -217,61 +324,63 @@
       },
 
       updateTable(num){
-        let tds = $("table.bbn-table-main > tbody > tr > td.bbn-table-first", this.$el);
         if ( !num ){
           num = 0;
         }
-        bbn.fn.log("trying to update table, attempt " + num);
-        if (
-          (tds.length !== this.currentData.length) ||
-          !this.$refs.scroller
-        ){
-          setTimeout(() =>{
-            this.updateTable(++num);
-          }, 200)
-        }
-        else{
-          this.$nextTick(() => {
-            if ( this.fixedRight || this.fixedLeft ){
-              tds.each((i, td) =>{
-                bbn.fn.adjustHeight(
-                  td,
-                  $("table.bbn-table-data-left:first > tbody > tr:eq(" + i + ") > td.bbn-table-first", this.$el),
-                  $("table.bbn-table-data-right:first > tbody > tr:eq(" + i + ") > td.bbn-table-first", this.$el)
-                );
-              });
-            }
-            if (
-              this.$refs.scroller &&
-              $.isFunction(this.$refs.scroller.calculateSize)
-            ){
-              bbn.fn.log("RESIZING FOR UTABLKE");
-              this.$refs.scroller.calculateSize();
-              if (
-                this.$refs.scrollerY &&
-                $.isFunction(this.$refs.scrollerY.calculateSize)
-              ){
-                bbn.fn.log("SCROLLY HERE");
-                if ( this.scrollableContainer !== this.$refs.scroller.$refs.scrollContainer ){
-                  bbn.fn.log("CHANGING scrollableContainer");
-                  this.scrollableContainer = this.$refs.scroller.$refs.scrollContainer;
-                }
-                this.$refs.scrollerY.calculateSize();
+        if ( !this.isLoading && (num < 25) ){
+          let tds = $("table.bbn-table-main:first > tbody > tr > td:first-child", this.$el);
+          bbn.fn.log("trying to update table, attempt " + num, tds);
+          if (
+            (tds.length !== this.currentSet.length) ||
+            !this.$refs.scroller
+          ){
+            setTimeout(() => {
+              this.updateTable(++num);
+            }, 200)
+          }
+          else{
+            this.$nextTick(() => {
+              if ( this.colsLeft.length || this.colsRight.length ){
+                tds.each((i, td) =>{
+                  bbn.fn.adjustHeight(
+                    td,
+                    $("table.bbn-table-data-left:first > tbody > tr:eq(" + i + ") > td:first-child", this.$el),
+                    $("table.bbn-table-data-right:first > tbody > tr:eq(" + i + ") > td:first-child", this.$el)
+                  );
+                });
               }
-            }
-            this.$emit("resize");
-          });
+              if (
+                this.$refs.scroller &&
+                $.isFunction(this.$refs.scroller.onResize)
+              ){
+                bbn.fn.log("RESIZING FOR UTABLKE");
+                this.$refs.scroller.onResize();
+                if (
+                  this.$refs.scrollerY &&
+                  $.isFunction(this.$refs.scrollerY.onResize)
+                ){
+                  bbn.fn.log("SCROLLY HERE");
+                  if ( this.scrollableContainer !== this.$refs.scroller.$refs.scrollContainer ){
+                    bbn.fn.log("CHANGING scrollableContainer");
+                    this.scrollableContainer = this.$refs.scroller.$refs.scrollContainer;
+                  }
+                  this.$refs.scrollerY.onResize();
+                }
+              }
+              this.$emit("resize");
+            });
+          }
         }
       },
 
       overTr(idx, remove){
         $(".bbn-table-main tr:eq(" + idx + ")")
           [remove ? 'removeClass' : 'addClass']("k-grid-header");
-        if ( this.fixedLeft ){
+        if ( this.colsLeft.length ){
           $(".bbn-table-data-left tr:eq(" + idx + ")")
             [remove ? 'removeClass' : 'addClass']("k-grid-header");
         }
-        if ( this.fixedRight ){
+        if ( this.colsRight.length ){
           $(".bbn-table-data-right tr:eq(" + idx + ")")
             [remove ? 'removeClass' : 'addClass']("k-grid-header");
         }
@@ -280,7 +389,7 @@
       /** Renders a cell according to column's config */
       render(data, column, index){
         let field = column && column.field ? column.field : '',
-            value = data && column.field ? data[column.field] || '' : '';
+            value = data && column.field ? data[column.field] || '' : undefined;
 
         if ( column.source ){
           if ( value ){
@@ -323,7 +432,7 @@
           }
         }
         else if ( column.render ){
-          return column.render(value, index, data)
+          return column.render(data, index, column, value)
         }
         return value;
       },
@@ -496,40 +605,42 @@
       },
 
       calculateSize(){
+        return;
         let leftWidth = 0,
             mainWidth = 0,
             rightWidth = 0,
-            fixedLeft = 0,
-            fixedRight = 0,
             numUnknown = 0;
         $.each(this.cols, (i, a) => {
-          if ( a.width ){
-            if ( (typeof(a.width) === 'string') && (a.width.substr(-1) === '%') ){
-              a.realWidth = Math.round(this.lastKnownWidth * parseFloat(a.width) / 100);
-            }
-            else{
-              a.realWidth = parseFloat(a.width);
-            }
-            if ( a.realWidth < this.minimumColumnWidth ){
-              a.realWidth = this.minimumColumnWidth;
-            }
+          if ( a.hidden ){
+            a.realWidth = 0;
           }
           else{
-            a.realWidth = this.defaultColumnWidth;
-            numUnknown++;
-          }
-          if ( a.fixed ){
-            if ( (a.fixed === 'right') || (this.defaultFixedSide === 'right') ){
-              fixedRight++;
-              rightWidth += a.realWidth;
+            if ( a.width ){
+              if ( (typeof(a.width) === 'string') && (a.width.substr(-1) === '%') ){
+                a.realWidth = Math.round(this.lastKnownWidth * parseFloat(a.width) / 100);
+              }
+              else{
+                a.realWidth = parseFloat(a.width);
+              }
+              if ( a.realWidth < this.minimumColumnWidth ){
+                a.realWidth = this.minimumColumnWidth;
+              }
             }
             else{
-              fixedLeft++;
-              leftWidth += a.realWidth;
+              a.realWidth = this.defaultColumnWidth;
+              numUnknown++;
             }
-          }
-          else{
-            mainWidth += a.realWidth;
+            if ( a.fixed ){
+              if ( (a.fixed === 'right') || (this.defaultFixedSide === 'right') ){
+                rightWidth += a.realWidth;
+              }
+              else{
+                leftWidth += a.realWidth;
+              }
+            }
+            else{
+              mainWidth += a.realWidth;
+            }
           }
         });
         let toFill = this.$el.clientWidth
@@ -556,19 +667,21 @@
               newWidth = this.minimumColumnWidth;
             }
             $.each(this.cols, (i, a) => {
-              if ( !a.width ){
-                a.realWidth = newWidth + this.defaultColumnWidth;
-              }
-              if ( a.fixed ){
-                if ( (a.fixed === 'right') || (this.defaultFixedSide === 'right') ){
-                  rightWidth += a.realWidth;
+              if ( !a.hidden ){
+                if ( !a.width ){
+                  a.realWidth = newWidth + this.defaultColumnWidth;
+                }
+                if ( a.fixed ){
+                  if ( (a.fixed === 'right') || (this.defaultFixedSide === 'right') ){
+                    rightWidth += a.realWidth;
+                  }
+                  else{
+                    leftWidth += a.realWidth;
+                  }
                 }
                 else{
-                  leftWidth += a.realWidth;
+                  mainWidth += a.realWidth;
                 }
-              }
-              else{
-                mainWidth += a.realWidth;
               }
             });
           }
@@ -576,21 +689,21 @@
           else{
             let bonus = Math.round(toFill / this.cols.length * 100) / 100;
             $.each(this.cols, (i, a) => {
-              a.realWidth += bonus;
-              if ( a.fixedRight || (a.fixed && (this.fixedDefaultSide === 'right')) ){
-                rightWidth += bonus;
-              }
-              else if ( a.fixedLeft || a.fixed ){
-                leftWidth += bonus;
-              }
-              else{
-                mainWidth += bonus;
+              if ( !a.hidden ){
+                a.realWidth += bonus;
+                if ( a.fixedRight || (a.fixed && (this.fixedDefaultSide === 'right')) ){
+                  rightWidth += bonus;
+                }
+                else if ( a.fixedLeft || a.fixed ){
+                  leftWidth += bonus;
+                }
+                else{
+                  mainWidth += bonus;
+                }
               }
             })
           }
         }
-        this.fixedLeft = fixedLeft;
-        this.fixedRight = fixedRight;
         this.tableLeftWidth = leftWidth;
         this.tableMainWidth = mainWidth;
         this.tableRightWidth = rightWidth;
@@ -607,60 +720,13 @@
         return '100px';
       },
 
-      isNotFixed(idx){
-        return (idx >= this.fixedLeft) &&
-          (idx < (this.cols.length - this.fixedRight));
-      },
-
-      setFixedColumns(){
-        let fixed = true;
-        this.fixedLeft = 0;
-        this.fixedLeftWidth = 0;
-        this.fixedRight = 0;
-        this.fixedRightWidth = 0;
-        $.each(this.cols, (i, a) => {
-          if ( !a.hidden ){
-            if ( a.fixed && fixed ){
-              this.fixedLeft++;
-              this.fixedLeftWidth += (a.width ? a.width : 100);
-            }
-            else if ( !a.fixed && fixed ){
-              fixed = false;
-            }
-            else if ( a.fixed ){
-              this.fixedRight++;
-              this.fixedRightWidth += (a.width ? a.width : 100);
-            }
-            else if ( this.fixedRight ){
-              this.fixedRight = 0;
-            }
-          }
-        });
-        return this;
-      },
-
       /** @todo */
       getColumns(){
         const vm = this;
         let res = [],
             fixed = true;
-        this.fixedLeft = 0;
-        this.fixedRight = 0;
         $.each(vm.cols, function(i, a){
-          bbn.fn.log(a);
-
-          if ( a.fixed && fixed ){
-            this.fixedLeft++;
-          }
-          else if ( !a.fixed && fixed ){
-            fixed = false;
-          }
-          else if ( a.fixed ){
-            this.fixedRight++;
-          }
-          else if ( this.fixedRight ){
-            this.fixedRight = 0;
-          }
+          bbn.fn.log("getColumns", a);
           var r = {
             data: a.field
           };
@@ -881,190 +947,6 @@
       },
 
       /** @todo */
-      getFixedColumns(columns){
-        const vm = this;
-        var res = {},
-          /**
-           * Number of fixed columns on the left
-           * @type {number}
-           *
-           */
-          fixedLeft = 0,
-          /**
-           * Number of fixed columns on the right
-           * @type {number}
-           */
-          fixedRight = 0;
-
-        for ( var i = 0; i < columns.length; i++ ){
-          if ( columns[i].fixed ){
-            fixedLeft++;
-          }
-          else{
-            break;
-          }
-        }
-        for ( var i = columns.length - 1; i >= 0; i-- ){
-          if ( columns[i].fixed ){
-            fixedRight++;
-          }
-          else{
-            break;
-          }
-        }
-        if ( fixedLeft ){
-          res.fixedColumns = {
-            leftColumns: fixedLeft
-          }
-        }
-        if ( fixedRight ){
-          if ( !res.fixedColumns ){
-            res.fixedColumns = {};
-          }
-          res.fixedColumns.rightColumns = fixedRight;
-        }
-        return res;
-      },
-
-      /** @todo */
-      setHeight(){
-        const vm = this;
-        // Height calculation
-        var $ele = $(vm.$el),
-            h = $ele.height();
-        $ele.children().height(h).children(".fg-toolbar").each(function(){
-          $(this).find("select:visible:not('." + vm.selectDone +"')")
-            .addClass(vm.selectDone)
-            .kendoDropDownList();
-          h -= $(this).outerHeight(true) || 0;
-        });
-        h -= ($ele.find(".dataTables_scrollHead:first").outerHeight(true) || 0);
-        h -= ($ele.find(".dataTables_scrollFoot:first").outerHeight(true) || 0);
-        h = Math.round(h);
-        bbn.fn.log("H", h, ($ele.find(".dataTables_scrollHead:first").outerHeight(true) || 0), ($ele.find(".dataTables_scrollFoot:first").outerHeight(true) || 0));
-        $(".dataTables_scrollBody", vm.$el)
-        //.add($(settings.nScrollBody).siblings())
-          .height(h)
-          .css({maxHeight: h + "px"});
-      },
-
-      /** @todo */
-      getConfig(){
-        var
-          /**
-           * @type {bbn-table}
-           */
-          vm = this,
-          /**
-           * @type {HTMLElement}
-           */
-          $ele = $(this.$el),
-          /**
-           * Columns configuration
-           * @type {[]}
-           */
-          columns = vm.getColumns();
-        /**
-         * The widget configuration
-         * @type {{pageLength, asStripeClasses: [*], scrollY: number, scrollX: boolean, scrollCollapse: boolean, drawCallback: drawCallback}}
-         */
-        var cfg = {
-          info: vm.info,
-          paging: vm.pagination,
-          searching: vm.search,
-          /** @property Number of records to show */
-          pageLength: this.cfg.take || 25,
-          //lengthChange: false,
-          /** @property Classes added on columns */
-          asStripeClasses: ["", "k-alt"],
-          /** @property The height of the table's body */
-          scrollY: 300,
-          /** @property  */
-          deferRender: true,
-          /** @property Do not expand cells to the whole table's height */
-          scrollCollapse: true,
-          /** @property Resize and restyle functions after draw */
-          drawCallback: function(settings){
-            // Be sure all is drawn
-            // We need to resize the table to fit the container
-            // Kendo styling
-            $ele.find(".dataTables_filter input").addClass("k-textbox");
-            $ele.find(".DTFC_Blocker:first").addClass("k-header");
-            // Toolbar
-            if ( vm.$options.propsData.toolbar ){
-              var tb = vm.$options.propsData.toolbar,
-                  tbEle = $ele.find(".fg-toolbar:first");
-              if ( !Array.isArray(tb) && (typeof(tb) === 'object') ){
-                tb = [tb];
-              }
-              if ( Array.isArray(tb) ){
-                var target = $('<div class="bbn-table-toolbar"/>').prependTo(tbEle);
-                $.each(tb, function(i, a){
-                  var tmp = JSON.stringify(a);
-                  if ( ($.inArray(tmp, vm.toolbarDone) === -1) && a.text && a.click ){
-                    vm.toolbarDone.push(tmp);
-                    target.append(
-                      $('<button class="k-button"' + (a.disabled ? ' disabled="disabled"' : '' ) + '>' +
-                        ( a.icon ? '<i class="' + a.icon + '" title="' + a.text + '"></i> &nbsp; ' : '' ) +
-                        ( a.notext ? '' : a.text ) +
-                        '</button>').click(function(){
-                        if ( $.isFunction(a.click) ){
-                          return a.click(vm);
-                        }
-                        else if ( typeof(a.click) === 'string' ){
-                          if ( $.isFunction(vm.$parent[a.click]) ){
-                            return vm.$parent[a.click](vm);
-                          }
-                          // Otherwise we check if there is a default function defined by the component
-                          else if ( $.isFunction(vm[a.click]) ){
-                            return vm[a.click](vm);
-                          }
-                        }
-                      })
-                    )
-                  }
-                })
-              }
-            }
-
-            vm.setHeight(settings);
-          }
-        };
-        if ( vm.pagination ){
-          cfg.pageLength = vm.limit;
-        }
-        if ( vm.$options.propsData.source ){
-          if ( typeof(vm.$options.propsData.source) === 'string' ){
-            cfg.processing = true;
-            cfg.serverSide =  true;
-            cfg.ajax = {
-              url: vm.$options.propsData.source,
-              type: "POST"
-            };
-          }
-          else if ( Array.isArray(vm.$options.propsData.source) ){
-            cfg.data = JSON.parse(JSON.stringify(vm.$options.propsData.source));
-          }
-          else if ( (typeof vm.$options.propsData.source === 'object') && Array.isArray(vm.$options.propsData.source.data) ){
-            cfg.data = JSON.parse(JSON.stringify(vm.$options.propsData.source.data));
-          }
-        }
-        if ( vm.$options.propsData.toolbar === false ){
-          cfg.sDom = "t";
-        }
-        if ( vm.$options.propsData.xscroll ){
-          cfg.scrollX = true;
-        }
-        if ( columns.length ){
-          cfg.columns = columns;
-        }
-        // Fixed columns
-        $.extend(cfg, vm.getFixedColumns(columns));
-        cfg.rowCallback = vm.rowCallback;
-        return cfg;
-      },
-
-      /** @todo */
       addColumn(obj){
         const vm = this;
         vm.cols.push(obj);
@@ -1082,20 +964,167 @@
       },
 
       dataScrollContents(){
-        if ( !this.fixedLeft && !this.fixedRight ){
+        if ( !this.colsLeft.length && !this.colsRight.length ){
           return null;
         }
         let r = [];
-        if ( this.fixedLeft && this.$refs.leftScroller && this.$refs.leftScroller.$refs.scrollContainer ){
+        if ( this.colsLeft.length && this.$refs.leftScroller && this.$refs.leftScroller.$refs.scrollContainer ){
           r.push(this.$refs.leftScroller.$refs.scrollContainer);
         }
         if ( this.$refs.scroller ){
           r.push(this.$refs.scroller.$refs.scrollContainer);
         }
-        if ( this.fixedRight && this.$refs.rightScroller && this.$refs.rightScroller.$refs.scrollContainer ){
+        if ( this.colsRight.length && this.$refs.rightScroller && this.$refs.rightScroller.$refs.scrollContainer ){
           r.push(this.$refs.rightScroller.$refs.scrollContainer);
         }
         return r;
+      },
+
+      isExpanded(d){
+        if ( !this.expander && (this.group === false) ){
+          return true;
+        }
+        if ( this.expander ){
+          return $.inArray(d.index, this.currentExpanded) > -1;
+        }
+        else{
+          if ( $.inArray(d.index, this.currentExpanded) > -1 ){
+            return true;
+          }
+          if ( d.isGrouped && ($.inArray(d.link, this.currentExpanded) > -1) ){
+            return true;
+          }
+          return false;
+        }
+      },
+
+      toggleExpanded(idx){
+        if ( this.currentData[idx] ){
+          let i = $.inArray(idx, this.currentExpanded);
+          if ( i > -1 ){
+            this.currentExpanded.splice(i, 1);
+          }
+          else{
+            this.currentExpanded.push(idx);
+          }
+          this.$nextTick(() => {
+            this.updateTable();
+          })
+        }
+      },
+
+      rowHasExpander(d){
+        if ( this.hasExpander ){
+          if ( !$.isFunction(this.expander) ){
+            return true;
+          }
+          return !!this.expander(d);
+        }
+        return false;
+      },
+
+      init(){
+        let colsLeft = [],
+            colsMain = [],
+            colsRight = [],
+            leftWidth = 0,
+            mainWidth = 0,
+            rightWidth = 0,
+            numUnknown = 0;
+        if ( this.hasExpander ){
+          colsLeft.push({
+            title: ' ',
+            width: 25,
+            realWidth: 25
+          });
+          leftWidth = 25;
+        }
+        $.each(this.cols, (i, a) => {
+          if ( !this.groupable || (this.group !== i) ){
+            if ( a.hidden ){
+              a.realWidth = 0;
+            }
+            else{
+              if ( a.width ){
+                if ( (typeof(a.width) === 'string') && (a.width.substr(-1) === '%') ){
+                  a.realWidth = Math.round(this.lastKnownWidth * parseFloat(a.width) / 100);
+                }
+                else{
+                  a.realWidth = parseFloat(a.width);
+                }
+                if ( a.realWidth < this.minimumColumnWidth ){
+                  a.realWidth = this.minimumColumnWidth;
+                }
+              }
+              else{
+                a.realWidth = this.defaultColumnWidth;
+                numUnknown++;
+              }
+            }
+            if ( a.fixed ){
+              if (
+                (a.fixed !== 'right') &&
+                ((this.fixedDefaultSide !== 'right') || (a.fixed === 'left'))
+              ){
+                colsLeft.push(a);
+              }
+              else{
+                colsRight.push(a);
+              }
+            }
+            else{
+              colsMain.push(a);
+            }
+          }
+        });
+        let toFill = this.$el.clientWidth
+          - (
+            bbn.fn.sum(colsLeft, 'realWidth')
+            + bbn.fn.sum(colsMain, 'realWidth')
+            + bbn.fn.sum(colsRight, 'realWidth')
+          );
+        bbn.fn.log("THERE IS NOT TO FILL", toFill, numUnknown, this.$el.clientWidth, leftWidth, mainWidth, rightWidth);
+        // We must arrive to 100% minimum
+        if ( toFill > 0 ){
+          bbn.fn.log("THERE IS TO FILL", toFill, numUnknown);
+          if ( numUnknown ){
+            let newWidth = Math.round(
+              toFill
+              / numUnknown
+              * 100
+            ) / 100;
+            if ( newWidth < this.minimumColumnWidth ){
+              newWidth = this.minimumColumnWidth;
+            }
+            $.each(this.cols, (i, a) => {
+              if ( !a.hidden ){
+                if ( !a.width ){
+                  a.realWidth = newWidth + this.defaultColumnWidth;
+                }
+              }
+            });
+          }
+          // Otherwise we dispatch it through the existing column
+          else{
+            let bonus = Math.round(
+              toFill / (
+                // We don't dispatch to the expander column
+                this.hasExpander ? this.numVisible - 1 : this.numVisible
+              ) * 100
+            ) / 100;
+            $.each(this.cols, (i, a) => {
+              if ( !a.hidden && (!this.hasExpander || (i !== 0)) ){
+                a.realWidth += bonus;
+              }
+            })
+          }
+        }
+        this.tableLeftWidth = bbn.fn.sum(colsLeft, 'realWidth');
+        this.tableMainWidth = bbn.fn.sum(colsMain, 'realWidth');
+        this.tableRightWidth = bbn.fn.sum(colsRight, 'realWidth');
+        this.colsLeft = colsLeft;
+        this.colsMain = colsMain;
+        this.colsRight = colsRight;
       }
     },
 
@@ -1116,17 +1145,15 @@
             (node.tag === 'bbn-column') &&
             node.data && node.data.attrs
           ){
-            vm.initialColumns.push(node.data.attrs);
+            vm.cols.push(node.data.attrs);
             //bbn.fn.log("ADDING COLUMN 2", node.data.attrs)
           }
         }
       }
-      //this.setFixedColumns();
     },
 
     mounted(){
-      this.cols = this.initialColumns;
-      this.calculateSize();
+      this.init();
       this.$forceUpdate();
       this.$nextTick(() => {
         this.selfEmit();
@@ -1145,6 +1172,12 @@
           bbn.fn.log("WATCHER DATA");
           this.updateTable();
         })
+      },
+      cols: {
+        deep: true,
+        handler(){
+          this.init();
+        }
       }
     }
   });

@@ -1,20 +1,76 @@
 <!--<div class="bbn-tree"></div>-->
-<li class="" v-if="sourceValue">
-  <span class="fancytree-node fancytree-exp-n fancytree-ico-c">
-    <span class="fancytree-expander"></span>
-    <span v-if="icon" :class="fancytree-custom-icon ' + icon"></span>
-    <span v-else-if="is_parent" class="fancytree-custom-icon fa fa-folder"></span>
-    <span v-else class="fancytree-custom-icon fa fa-file-o"></span>
-
-    <span class="fancytree-title">
-      <span v-html="text"></span>
-      <span v-if="code" class="bbn-grey" v-html="' (' + code + ')'"></span>
+<li :class="'bbn-tree-node' + (cls ? ' ' + cls : '') + (isSelected ? ' ' + selectedClass : '') + (isActive ? ' ' + activeClass : '')">
+  <span :class="{
+    node: true,
+    'no-component': !component
+  }"
+        @mouseover="mouseOver"
+  >
+    <span class="expander">
+      <!-- If there are no children we leave the white space -->
+      <span v-if="!numChildren"> </span>
+      <i v-else-if="isExpanded"
+         class="fa fa-caret-down"
+         @click="isExpanded = false"
+      ></i>
+      <i v-else
+         class="fa fa-caret-right"
+         @click="isExpanded = true"
+      ></i>
     </span>
+    <component v-if="component"
+               is="component"
+               :source="data"
+    ></component>
+    <bbn-context v-else
+                 :context="true"
+                 :source="getMenu"
+    >
+      <span class="selectable"
+            @mousedown="startDrag"
+            tabindex="0"
+      >
+        <span class="icon">
+          <!-- If icon is specifically false we leave the white space -->
+          <span v-if="icon === false"></span>
+          <i v-else-if="icon"
+             :class="icon"
+             :style="iconStyle"
+          ></i>
+          <i v-else-if="numChildren"
+             class="zmdi zmdi-folder-outline"
+             :style="iconStyle"
+          ></i>
+          <i v-else
+             class="fa fa-file"
+             :style="iconStyle"
+          ></i>
+        </span>
+        <span class="title">
+          <span v-html="text"></span>
+        </span>
+      </span>
+    </bbn-context>
   </span>
-  <ul v-if="num_children">
-    <bbn-tree-node v-for="it in items"
-                   :key="it[sourceValue]"
-                   v-bind="it"
-    ></bbn-tree-node>
-  </ul>
+  <div v-if="numChildren"
+       class="bbn-block"
+       style="overflow: hidden; width: 100%"
+  >
+    <transition name="bbn-tree-toggle"
+                @after-enter="onOpen"
+                @after-leave="onClose"
+    >
+      <ul v-show="isExpanded">
+        <bbn-tree-node v-for="(it, i) in items"
+                       :text="it.text"
+                       :key="i"
+                       :data="toData(it)"
+                       :icon="it.icon"
+                       :num="it.num"
+                       :source="it.items"
+                       :level="level+1"
+        ></bbn-tree-node>
+      </ul>
+    </transition>
+  </div>
 </li>

@@ -1,29 +1,22 @@
 .bbn-loading{
   font-size: small;
   text-align: left;
-  padding: 2em 3em;
-  .bbn-notification-info{
-    text-align: right;
-    margin-top: 0.5em;
-    opacity: 0.8;
+  vertical-align: bottom;
+  white-space: nowrap;
+  overflow: hidden;
+  span{
+    display: inline-block;
+    height: 100%;
+    line-height: 100%;
+  }
+  i{
+    font-size: 16px;
   }
   /** loader */
-  .loader {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border-color: inherit;
-    border-width: 4px;
-    border-style: solid;
-    top: 50%;
-    animation: loader 4s infinite ease;
-    margin-right: 15px;
+  .content{
+    padding-left: 2em;
   }
-  .loader-inner {
-    vertical-align: top;
-    display: inline-block;
-    width: 100%;
-    background-color: #FBFBFB;
-    animation: loader-inner 4s infinite ease-in;
+  .loader {
+    margin-right: 0.2em
   }
 }

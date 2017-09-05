@@ -8,54 +8,59 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-treemenu', {
-    mixins: [bbn.vue.optionComponent, bbn.vue.resizerComponent],
+    mixins: [bbn.vue.resizerComponent],
     template: "#bbn-tpl-component-treemenu",
     props: {
       placeholder: {
         type: String,
         default: "Search"
       },
-      source: {},
-      fisheye: {},
-      top: {},
-      bottom: {},
-      position: {
-        type: String
-      },
-      opened: {},
-      cfg: {
-        type: Object,
-        default: function(){
-          return {
-            fisheye: false,
-            data: [],
-            top: "0px",
-            bottom: "0px",
-            position: "left",
-            opened: false
-          };
+      source: {
+        type: [String, Number],
+        default(){
+          return [];
         }
-      }
+      },
+      fisheye: {
+        type: Vue
+      },
+      top: {
+        type: Number,
+        default: 0
+      },
+      bottom: {
+        type: Number,
+        default: 0
+      },
+      position: {
+        type: String,
+        default: 'left'
+      },
+      opened: {
+        type: Boolean,
+        default: false
+      },
     },
     data(){
+      let isAjax = !Array.isArray(this.source)
       return {
-        widgetName: "fancytree",
-        isOpened: false,
-        hasBeenOpened: false
+        isOpened: this.opened,
+        hasBeenOpened: false,
+        posTop: this.top,
+        posBottom: this.bottom,
+        isAjax: isAjax,
+        items: isAjax ? [] : this.source,
       };
     },
-    computed: {
-      treeSource(){
-        return [];
-      },
-    },
     methods: {
+      map(a){
+
+      },
       _position(){
-        let cfg = this.getOptions();
         $(this.$el)
           .animate($.extend({
-            top: cfg.top,
-            bottom: cfg.bottom
+            top: this.posTop + 'px',
+            bottom: this.posBottom + 'px'
           }, this.posObject()), 200);
       },
       _disconnect_menu(){
@@ -64,78 +69,71 @@
         }
       },
       _connect_menu(){
-        if ( this.fisheye && $.fn.fisheye ){
-          let fisheye = bbn.vue.retrieveRef(this, this.fisheye);
-          if ( fisheye ){
-            if ( this.draggable ){
-              try{
-                this.draggable.draggable("destroy");
-              }
-              catch(e){
-                new Error("no draggable")
-              }
+        if ( this.fisheye ){
+          let $fisheye = $(this.fisheye.$el);
+          if ( this.draggable ){
+            try{
+              this.draggable.draggable("destroy");
             }
-            this.draggable = $(this.$el).find("li")
-              .filter(function (){
-                return $(this).find("li").length ? false : true;
-              })
-              .draggable({
-                cursorAt: {top: 1, left: 0},
-                zIndex: 15000,
-                helper: (e) => {
-                  bbn.fn.log(e);
-                  var ele = $(e.currentTarget),
-                      t   = ele.is("li") ? ele : ele.closest("li"),
-                      i   = t.find("i,span.fancytree-custom-icon").first(),
-                      r   = $('<div id="bbn_menu2dock_helper" class="appui-xxxl"/>');
-                  r.append(i.clone(false));
-                  return r;
-                },
-                scroll: false,
-                revert: true,
-                revertDuration: 0,
-                containment: "window",
-                appendTo: document.body,
-                start(e, ui){
-                  //e.stopImmediatePropagation();
-                  $(fisheye.$el).fisheye("disable");
-                },
-                stop: function (e, ui){
-                  $(fisheye.$el).fisheye("enable");
-                }
-              });
-
-            if ( this.droppable ){
-              this.droppable.droppable("destroy");
+            catch(e){
+              new Error("no draggable")
             }
-            this.droppable = $(fisheye.$el).droppable({
-              accept: 'li',
-              activeClass: 'active',
-              hoverClass: 'ready',
-              drop: (e, ui) => {
-                var dataItem = $.ui.fancytree.getNode(ui.draggable[0]).data,
-                    obj = {
-                      icon: dataItem.icon,
-                      text: dataItem.text,
-                      url: dataItem.link,
-                      id: dataItem.id
-                    };
-                fisheye.insert(obj);
+          }
+          this.draggable = $(this.$el).find("li")
+            .filter(function (){
+              return $(this).find("li").length ? false : true;
+            })
+            .draggable({
+              cursorAt: {top: 1, left: 0},
+              zIndex: 15000,
+              helper: (e) => {
+                bbn.fn.log(e);
+                var ele = $(e.currentTarget),
+                    t   = ele.is("li") ? ele : ele.closest("li"),
+                    i   = t.find("i,span.fancytree-custom-icon").first(),
+                    r   = $('<div id="bbn_menu2dock_helper" class="appui-xxxl"/>');
+                r.append(i.clone(false));
+                return r;
+              },
+              scroll: false,
+              revert: true,
+              revertDuration: 0,
+              containment: "window",
+              appendTo: document.body,
+              start(e, ui){
+                //e.stopImmediatePropagation();
+                $fisheye.fisheye("disable");
+              },
+              stop: function (e, ui){
+                $fisheye.fisheye("enable");
               }
             });
-            bbn.fn.log("Connecting menu", $(this.$el).find("li").length, this.draggable);
+          if ( this.droppable ){
+            this.droppable.droppable("destroy");
           }
-
+          this.droppable = $fisheye.droppable({
+            accept: 'li',
+            activeClass: 'active',
+            hoverClass: 'ready',
+            drop: (e, ui) => {
+              var dataItem = $.ui.fancytree.getNode(ui.draggable[0]).data,
+                  obj = {
+                    icon: dataItem.icon,
+                    text: dataItem.text,
+                    url: dataItem.link,
+                    id: dataItem.id
+                  };
+              this.fisheye.insert(obj);
+            }
+          });
+          bbn.fn.log("Connecting menu", $(this.$el).find("li").length, this.draggable);
         }
       },
 
       posObject(){
-        if ( this.cfg.position === 'right' ){
-          return {right: this.isOpened ? 0 : -($(this.$el).width() + 40)};
-        }
-        else{
-          return {left: this.isOpened ? 0 : -($(this.$el).width() + 40)};
-        }
+        let o = {};
+        o[this.position === 'right' ? 'right' : 'left'] = this.isOpened ? 0 : -($(this.$el).width() + 40);
+        return o;
       },
       show(){
         this.isOpened = true;
@@ -166,7 +164,7 @@
           })
         }
       },
-      go(id, data, node){
+      go(data, node, tree){
         if ( data.link ){
           appui.$refs.tabnav.load(data.link);
         }
@@ -177,10 +175,6 @@
       }
     },
     mounted(){
-      let cfg = this.getOptions();
-      if ( cfg.opened ){
-        this.isOpened = true;
-      }
       this._position();
       /*
       $(vm.$refs.search).keyup(function (e) {

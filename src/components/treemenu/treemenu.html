@@ -8,18 +8,13 @@
                @keyup="search($event.target.value)"></bbn-input>
   </div>
   <div class="bbn-w-100" v-bbn-fill-height>
-    <bbn-scroll v-if="hasBeenOpened"
-                v-show="isOpened"
-                ref="scroll"
-    >
-      <bbn-tree :source="source"
-                min-expand-level="2"
-                ref="tree"
-                @load="resizeScroll"
-                :extensions="['filter']"
-                :select="go"
-      ></bbn-tree>
-    </bbn-scroll>
+    <bbn-tree :source="source"
+              :autoload="false"
+              :opened="true"
+              ref="tree"
+              @load="resizeScroll"
+              @select="go"
+    ></bbn-tree>
   </div>
 </div>
 

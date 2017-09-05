@@ -7,24 +7,24 @@
                   :key="w.key"
                   enter-active-class="animated zoomIn"
                   leave-active-class="animated zoomOut">
-        <bbn-widget
-                @close="hideWidget($event, w.key)"
-                v-if="!w.hidden"
-                @loaded="resizeScroll"
-                :uid="w.key"
-                :key="w.key"
-                :component="w.component"
-                :item-component="w.itemComponent"
-                :items="w.items ? w.items : []"
-                :limit="w.limit ? w.limit : false"
-                :title="w.text"
-                :url="w.url ? w.url : false"
-                :closable="w.closable"
-                :zoomable="w.zoomable"
-                :buttons-left="w.buttonsLeft"
-                :buttons-right="w.buttonsRight"
-                :content="w.content"
-                :source="w">
+        <bbn-widget @close="hideWidget($event, w.key)"
+                    v-if="!w.hidden"
+                    @loaded="resizeScroll"
+                    :uid="w.key"
+                    :key="w.key"
+                    :component="w.component"
+                    :item-component="w.itemComponent"
+                    :items="w.items ? w.items : []"
+                    :limit="w.limit ? w.limit : null"
+                    :title="w.text"
+                    :url="w.url ? w.url : false"
+                    :closable="w.closable"
+                    :zoomable="w.zoomable"
+                    :buttons-left="w.buttonsLeft"
+                    :buttons-right="w.buttonsRight"
+                    :content="w.content"
+                    :source="w"
+        >
         </bbn-widget>
       </transition>
       <slot></slot>

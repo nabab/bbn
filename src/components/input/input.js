@@ -8,7 +8,7 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-input', {
-    mixins: [bbn.vue.fullComponent],
+    mixins: [bbn.vue.eventsComponent, bbn.vue.inputComponent],
     template: '#bbn-tpl-component-input',
     props: {
       autocomplete: {},
@@ -44,9 +44,9 @@
       }
     },
     data: function(){
-      return $.extend({
+      return {
         widgetName: "input",
-      }, bbn.vue.treatData(this));
+      };
     },
     mounted: function(){
       let $ele = $(this.$el),
@@ -105,7 +105,6 @@
 			if ( this.type === 'hidden' ){
 				$ele.hide();
 			}
-      this.$emit("ready", this.value);
     }
   });
 

@@ -2,13 +2,26 @@
   position: absolute !important;
   top: 0px;
   left: 0px;
-  .k-window{
-    max-width: 100%;
-    max-height: ~"-webkit-calc(100% - 30px)";
-    max-height: ~"-moz-calc(100% - 30px)";
-    max-height: ~"calc(100% - 30px)";
-    .k-window-title{
+  max-width: 100%;
+  .bbn-popup-title{
+    height: 1.1em;
+    width: 100%;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    padding: .4em 0;
+    font-size: 1.2em;
+    white-space: nowrap;
+    min-height: 16px;
+    > span{
       cursor: move;
+    }
+    .bbn-popup-actions{
+      position: absolute;
+      right: 3px;
+      top: 3px;
+      i{
+        cursor: pointer;
+      }
     }
   }
   .k-overlay{

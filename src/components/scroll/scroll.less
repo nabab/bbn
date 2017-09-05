@@ -3,11 +3,15 @@
   width: 100%;
   overflow: hidden;
   position: relative;
-  .bbn-scroll-container {
-    height: 100%;
-    width: 100%;
+  > .bbn-scroll-container {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: -18px;
+    bottom: -18px;
     overflow: scroll;
-    padding-right: 18px;
-    padding-bottom: 18px;
+    > .bbn-block{
+
+    }
   }
 }

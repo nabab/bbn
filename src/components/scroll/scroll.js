@@ -25,6 +25,14 @@
         default(){
           return [];
         }
+      },
+      x: {
+        type: [Number, Object],
+        default: 0
+      },
+      y: {
+        type: [Number, Object],
+        default: 0
       }
     },
     data() {
@@ -40,7 +48,19 @@
         if ( this.$refs.yScroller ){
           this.$refs.yScroller.onResize();
         }
+      },
+      scrollTo(x, y, animate){
+        if ( this.$refs.xScroller ){
+          //this.$refs.xScroller.scrollTo(x, animate);
+        }
+        if ( this.$refs.yScroller ){
+          this.$refs.yScroller.scrollTo(y, animate);
+        }
       }
+    },
+    mounted(){
+      this.scrollTo(0, false, true);
+      this.onResize();
     },
     watch: {
       show(newVal, oldVal){
