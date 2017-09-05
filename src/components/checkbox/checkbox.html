@@ -1,4 +1,4 @@
-<div class="bbn-iblock bbn-checkbox"
+<span class="bbn-iblock bbn-checkbox"
      @click="click"
      @focus="focus($event)"
      @blur="blur($event)"
@@ -9,9 +9,9 @@
          ref="element"
          class="k-checkbox"
          type="checkbox"
-         :checked="checked"
+
          :disabled="disabled"
          :required="required"
-  > &nbsp;
+  >
   <label class="k-checkbox-label" :for="id" v-text="label"></label>
-</div>
+</span>

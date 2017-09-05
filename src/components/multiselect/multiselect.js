@@ -5,7 +5,7 @@
   "use strict";
 
   Vue.component('bbn-multiselect', {
-    mixins: [bbn.vue.fullComponent],
+    mixins: [bbn.vue.fullComponent, bbn.vue.dataSourceComponent],
     template: '#bbn-tpl-component-multiselect',
     props: {
       source: {

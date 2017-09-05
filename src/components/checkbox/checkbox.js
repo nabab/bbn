@@ -45,16 +45,16 @@
       click(e){
         bbn.fn.log("CLICK", this);
         this.checked = this.checked ? false : true;
-        this.$forceUpdate();
-        this.$emit("change", this.checked ? this.initialValue : false);
-        this.$emit("input", this.checked ? this.initialValue : false);
+        /*this.$forceUpdate();
+        this.$emit("change", this.checked ? this.value : false);
+        this.$emit("input", this.checked ? this.value : false);*/
       }
     },
     beforeMount(){
       bbn.fn.log(this);
     },
     mounted(){
-      if ( Array.isArray(this.value) ){
+      /*if ( Array.isArray(this.value) ){
         this.checked = $.inArray(this.initialValue, this.value) > -1 ? true : false;
         this.$emit("input", this.checked);
       }
@@ -62,11 +62,12 @@
         this.checked = this.value;
       }
       else{
+        //this.checked = this.initialValue === this.value;
         this.checked = this.initialValue === this.value;
         this.$emit("input", this.initialValue);
       }
       this.$forceUpdate();
-      this.$emit("ready", this.checked);
+      this.$emit("ready", this.checked);*/
     }
   });
 })(jQuery, bbn, kendo);
