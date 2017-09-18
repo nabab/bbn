@@ -22,11 +22,20 @@
     td{
       padding: 1em 0.5em;
       white-space: nowrap;
+      i.fa.fa-filter{
+        position: absolute;
+        top: 4px;
+        left: 2px;
+      }
+    }
+  }
+  div.bbn-table-data{
+    tr.k-widget{
+      box-sizing: border-box;
     }
   }
   > div > div.bbn-table-container{
-    width: 100%;
-    > div.bbn-table-titles,div.bbn-table-data{
+    > div.bbn-table-titles, > div.bbn-table-data{
       width: 100%;
       position: relative;
       > div.bbn-table-part{
@@ -41,5 +50,10 @@
         bottom: 0px;
       }
     }
+  }
+  div.bbn-table-floating-filter{
+    position: fixed;
+    width: 400px;
+    height: 200px;
   }
 }

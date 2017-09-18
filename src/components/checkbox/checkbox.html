@@ -1,17 +1,22 @@
 <span class="bbn-iblock bbn-checkbox"
-     @click="click"
-     @focus="focus($event)"
-     @blur="blur($event)"
+      @click="click"
+      @focus="focus"
+      @blur="blur"
+      @keyup.prevent="keyup"
+      @keydown.prevent="keydown"
+      tabindex="0"
 >
-  <input :value="initialValue"
-         :name="name"
+  <input :name="name"
+         :value="value"
          :id="id"
          ref="element"
          class="k-checkbox"
          type="checkbox"
-
          :disabled="disabled"
          :required="required"
+         :true-value="value"
+         false-value=""
+         :checked="checked"
   >
   <label class="k-checkbox-label" :for="id" v-text="label"></label>
 </span>

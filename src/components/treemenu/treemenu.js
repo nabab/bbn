@@ -44,6 +44,7 @@
     data(){
       let isAjax = !Array.isArray(this.source)
       return {
+        searchExp: '',
         isOpened: this.opened,
         hasBeenOpened: false,
         posTop: this.top,
@@ -164,9 +165,9 @@
           })
         }
       },
-      go(data, node, tree){
-        if ( data.link ){
-          appui.$refs.tabnav.load(data.link);
+      go(node){
+        if ( node && node.data && node.data.link ){
+          bbn.fn.link(node.data.link);
         }
         this.hide();
       },
@@ -211,6 +212,7 @@
         if ( newVal ){
           if ( !this.hasBeenOpened ){
             this.hasBeenOpened = true;
+            this.$refs.tree.load();
           }
         }
         this.$nextTick(() => {

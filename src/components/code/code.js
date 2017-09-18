@@ -16,19 +16,58 @@
       getMode = (mode) => {
         var tmp = {
           php: {
-            mode: 'application/x-httpd-php',
-            cfg: {}
+            mode: {
+              name: 'php',
+              tags: {
+                script: [
+                  ["type", /^text\/(x-)?template$/, 'text/x-php'],
+                  ["type", /^text\/html$/, 'text/x-php']
+                ],
+                style: [
+                  ["type", /^text\/(x-)?less$/, 'text/x-less'],
+                  ["type", /^text\/(x-)?scss$/, 'text/x-scss'],
+                  [null, null, {name: 'css'}]
+                ],
+              }
+            },
+            cfg: {
+              autoCloseBrackets: true,
+              autoCloseTags: true,
+              extraKeys: {
+                "Ctrl-J": "toMatchingTag"
+              }
+            }
+          },
+          html: {
+            mode: {
+              name: 'htmlmixed',
+              tags: {
+                script: [
+                  ["type", /^text\/(x-)?template$/, 'htmlmixed'],
+                  ["type", /^text\/html$/, 'htmlmixed']
+                ],
+                style: [
+                  ["type", /^text\/(x-)?less$/, 'text/x-less'],
+                  ["type", /^text\/(x-)?scss$/, 'text/x-scss'],
+                  [null, null, {name: 'css'}]
+                ],
+              }
+            },
+            cfg: {
+              autoCloseTags: true,
+              extraKeys: {
+                "Ctrl-J": "toMatchingTag"
+              }
+            }
           },
           js: {
-            mode: "javascript",
+            mode: {
+              name: 'javascript'
+            },
             cfg: {
               lint: true,
               lintWith: CodeMirror.javascriptValidator,
-              gutters: [
-                "CodeMirror-linenumbers",
-                "CodeMirror-foldgutter",
-                "CodeMirror-lint-markers"
-              ],
+              autoCloseBrackets: true,
               /*
                extraKeys: {
                "'.'": function(cm){
@@ -38,51 +77,48 @@
                */
             }
           },
-          css: {
-            mode: "text/css",
+          json: {
+            mode: {
+              name: 'javascript',
+              json: true
+            },
             cfg: {
-              lint: true,
-              gutters: [
-                "CodeMirror-linenumbers",
-                "CodeMirror-foldgutter",
-                "CodeMirror-lint-markers"
-              ]
+              lint: true
+            }
+          },
+          css: {
+            mode: {
+              name: 'css'
+            },
+            cfg: {
+              lint: true
             }
           },
           less: {
-            mode: "text/x-less",
+            mode: {
+              name: 'css',
+              less: true
+            },
             cfg: {
-              lint: true,
-              gutters: [
-                "CodeMirror-linenumbers",
-                "CodeMirror-foldgutter",
-                "CodeMirror-lint-markers"
-              ]
-            }
-          },
-          json: {
-            mode: "application/json",
-            cfg: {
-              lint: true,
-              gutters: [
-                "CodeMirror-linenumbers",
-                "CodeMirror-foldgutter",
-                "CodeMirror-lint-markers"
-              ]
-            }
-          },
-          html: {
-            mode: "html",
-            autoCloseTags: true,
-            extraKeys: {
-              "Ctrl-J": "toMatchingTag"
+              lint: true
             }
           },
           vue: {
             mode: "text/x-vue",
+            cfg: {}
           }
         };
-        return tmp[mode] ? tmp[mode] : false;
+        if ( tmp[mode] ){
+          tmp[mode].cfg.gutters = [
+            "CodeMirror-linenumbers",
+            "CodeMirror-foldgutter"
+          ];
+          if ( tmp[mode].cfg.lint ){
+            tmp[mode].cfg.gutters.push("CodeMirror-lint-markers")
+          }
+          return tmp[mode];
+        }
+        return false;
       };
 
   Vue.component('bbn-code', {

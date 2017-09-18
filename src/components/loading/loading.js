@@ -70,7 +70,9 @@
       end: function(url, id, data, errorThrown){
         let idx = bbn.fn.search(this.data, "id", id);
         if ( idx > -1 ){
-          bbn.fn.log("errorThrown", errorThrown);
+          if ( errorThrown ){
+            bbn.fn.log("Error Thrown!", errorThrown);
+          }
           this.data.splice(idx, 1, $.extend(this.data[idx], {
             isLoading: false,
             isError: typeof(errorThrown) === 'string',

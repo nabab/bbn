@@ -1,20 +1,25 @@
 <div class="bbn-iblock bbn-radio">
-  <div class="bbn-iblock"
-       v-for="d in dataSource"
+  <div :class="{'bbn-iblock': !vertical, 'bbn-nl': vertical}"
+       v-for="(d, idx) in dataSource"
   >
     <input :value="d.value"
            ref="element"
-           :name="name" ref="checkbox"
+           :name="name"
            class="k-radio"
            type="radio"
            :disabled="disabled"
            :required="required"
-           :id="'bbn_input_' + name + '_' + d.value"
+           :id="'bbn_input_' + name + '_' + idx"
+					 @change="changed($event)"
+           v-model="checked"
     >
     <label class="k-radio-label"
            v-text="d.text"
-           :for="'bbn_input_' + name + \'_\' + d.value"
+           :for="'bbn_input_' + name + '_' + idx"
     ></label>
-    <div class="bbn-iblock" v-html="separator"></div>
+		<div v-if="dataSource[idx+1] && getSeparator">
+			<div v-if="vertical" class="bbn-block" v-html="getSeparator"></div>
+			<div v-else class="bbn-iblock" v-html="getSeparator"></div>
+		</div>
   </div>
 </div>

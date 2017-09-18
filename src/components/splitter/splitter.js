@@ -58,6 +58,9 @@
           }
         });
         this.widget = $(this.$el).kendoSplitter(cfg).data("kendoSplitter");
+        this.$nextTick(() => {
+          this.resize();
+        })
       },
       resize(){
         if ( this.widget ){
@@ -75,9 +78,6 @@
     },
     mounted(){
       this.build();
-      this.$nextTick(() => {
-        this.resize();
-      })
     },
     updated(){
       this.resize();

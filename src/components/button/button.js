@@ -26,10 +26,27 @@
         type: String,
       },
       disabled: {
-        type: Boolean,
+        type: [Boolean, Function],
         default: false
+      },
+      command: {
+        type: Function
       }
     },
+    computed: {
+      isDisabled(){
+        return typeof(this.disabled) === 'function' ?
+          this.disabled() : this.disabled
+      }
+    },
+    methods: {
+      click(e){
+        if ( this.command ){
+          this.command(e);
+        }
+        this.$emit('click', e);
+      }
+    }
   });
 
 })(jQuery, bbn, kendo);

@@ -36,6 +36,10 @@
       return bbn.vue.treatData(this);
     },
     methods: {
+      changeHidden(e){
+        bbn.fn.log("changeHidden", e);
+        bbn.fn.log(e.target.value, this.value);
+      }
     },
     mounted: function(){
       let cfg = this.getOptions(),
@@ -49,5 +53,12 @@
       });
       this.$emit("ready", this.value);
     },
+    watch: {
+      value(newVal){
+        if ( this.widget.trumbowyg('html') !== newVal ){
+          this.widget.trumbowyg('html', newVal);
+        }
+      }
+    }
   });
 })(jQuery);

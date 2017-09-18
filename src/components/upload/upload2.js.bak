@@ -1,0 +1,260 @@
+/**
+ * Created by BBN on 13/06/2017.
+ */
+(($, bbn) => {
+  "use strict";
+
+  Vue.component('bbn-upload', {
+    mixins: [bbn.vue.fullComponent],
+    template: '<div class="bbn-upload" ref="upload"><upload-template></upload-template></div>',
+    props: {
+      source: {
+        type: Array
+      },
+      saveUrl: {
+        type: String
+      },
+      removeUrl: {
+        type: String
+      },
+      autoUpload : {
+        type: Boolean
+      },
+      multiple: {
+        type: Boolean
+      },
+      enabled: {
+        type: Boolean
+      },
+      success: {},
+      error: {},
+      delete: {},
+      thumbNot : {
+        type: String
+      },
+      thumbWaiting: {
+        type: String
+      },
+      cfg: {
+        type: Object,
+        default(){
+          return {
+            source: [],
+            enabled: true,
+            autoUpload: true,
+            multiple: true,
+            request: {
+              endpoint: ''
+            },
+            deleteFile: {
+              enabled: false,
+              endpoint: '',
+              forceConfirm: true,
+              method: 'POST',
+              confirmMessage: bbn._('Are you sure you want to delete') + " {filename}?"
+            },
+            callbacks: {},
+            validation: {
+              stopOnFirstInvalidFile: true
+            },
+            thumbnails: {
+              placeholders: {
+                notAvailablePath: null,
+                waitingPath: null
+              }
+            }
+          };
+        }
+      }
+    },
+    components: {
+      'upload-template': {
+        template: '#bbn-tpl-component-upload',
+        methods: {
+          enable(val){
+            const $inp = $("input[name=qqfile]", this.$el);
+            if ( val ){
+              $inp.removeAttr('disabled');
+            }
+            else {
+              $inp.attr('disabled', 'disabled');
+            }
+          }
+        },
+        computed: {
+          dropHereText(){
+            return this.enabled ? this.text.dropHere : '';
+          }
+        },
+        watch: {
+          enabled(val){
+            this.enable(val);
+          }
+        },
+        data(){
+          return $.extend({
+            text: {
+              uploadButton: bbn._('Upload a file'),
+              dropHere: bbn._('Drop files here'),
+              processingDropped: bbn._('Processing dropped files...'),
+              retry: bbn._('Retry'),
+              editFilename: bbn._('Edit filename'),
+              delete: bbn._('Delete'),
+              pause: bbn._('Pause'),
+              continue: bbn._('Continue'),
+              close: bbn._('Close'),
+              no: bbn._('No'),
+              yes: bbn._('Yes'),
+              cancel: bbn._('Cancel'),
+              ok: bbn._('OK')
+            }
+          }, this.$parent.widgetCfg, this.$parent.getOptions());
+        },
+        /*created(){
+          $.extend(
+            this.src,
+            this.$parent.widgetCfg,
+            this.$parent.getOptions(),
+            {text: {
+              uploadButton: bbn._('Upload a file'),
+              dropHere: bbn._('Drop files here'),
+              processingDropped: bbn._('Processing dropped files...'),
+              retry: bbn._('Retry'),
+              editFilename: bbn._('Edit filename'),
+              delete: bbn._('Delete'),
+              pause: bbn._('Pause'),
+              continue: bbn._('Continue'),
+              close: bbn._('Close'),
+              no: bbn._('No'),
+              yes: bbn._('Yes'),
+              cancel: bbn._('Cancel'),
+              ok: bbn._('OK')
+            }}
+          );
+        },*/
+        mounted(){
+          this.$nextTick(() => {
+            this.widget = new qq.FineUploader($.extend({
+              element: this.$el,
+              template: this.$el,
+            }, this.$data));
+            this.enable(this.enabled);
+            this.$emit("ready", this.value);
+          });
+        }
+      }
+    },
+    methods: {
+      getOptions(){
+        const cfg = bbn.vue.getOptions(this);
+
+        if ( cfg.saveUrl && cfg.saveUrl.length ){
+          cfg.request.endpoint = cfg.saveUrl;
+        }
+        if ( cfg.removeUrl && cfg.removeUrl.length ){
+          cfg.deleteFile.endpoint = cfg.removeUrl;
+          cfg.deleteFile.enabled = true;
+        }
+        if ( cfg.thumbNot && cfg.thumbNot.length ){
+          cfg.thumbnails.placeholders.notAvailablePath = cfg.thumbNot;
+        }
+        if ( cfg.thumbWaiting && cfg.thumbWaiting.length ){
+          cfg.thumbnails.placeholders.waitingPath = cfg.thumbWaiting;
+        }
+        if ( $.isFunction(cfg.success) ){
+          cfg.callbacks.onComplete = (id, name, errorReason, xhr) => {
+            bbn.fn.log('onComplete', id, name, errorReason, xhr);
+            cfg.success();
+          };
+        }
+        if ( $.isFunction(cfg.error) ){
+          cfg.callbacks.onError = (id, name, errorReason, xhr) => {
+            bbn.fn.log('onError', id, name, errorReason, xhr);
+            cfg.error();
+          };
+        }
+        if ( $.isFunction(cfg.delete) ){
+          cfg.callbacks.onDelete = (id, name, errorReason, xhr) => {
+            bbn.fn.log('onDelete', id, name, errorReason, xhr);
+            cfg.delete();
+          };
+        }
+
+        cfg.callbacks.onValidate = (d) => {
+          const files = this.widget.getUploads({
+            status: [
+              qq.status.SUBMITTED,
+              qq.status.QUEUED,
+              qq.status.UPLOADING,
+              qq.status.UPLOAD_RETYRING,
+              qq.status.UPLOAD_FAILED,
+              qq.status.UPLOAD_SUCCESSFUL,
+              qq.status.PAUSED
+            ]
+          });
+          if ( bbn.fn.search(files, 'name', d.name) > -1 ){
+            bbn.fn.alert('The file ' + d.name + ' already exists!');
+            return false;
+          }
+        };
+
+        cfg.callbacks.onSubmitDelete = (id) => {
+          this.widget.setDeleteFileParams({filename: this.widget.getName(id)}, id);
+        };
+
+        return cfg;
+      },
+    },
+    /*data(){
+      return bbn.vue.treatData(this);
+    },*/
+    mounted(){
+
+      //const opt = this.getOptions();
+
+
+
+/*      this.templateVue = new Vue({
+        el: $($("#bbn-tpl-component-upload").get(0).innerHTML).get(0),
+        data(){
+          return opt;
+        },
+        methods: {
+          enable(val){
+            const $inp = $("input[name=qqfile]", this.$el);
+            if ( val ){
+              $inp.removeAttr('disabled');
+            }
+            else {
+              $inp.attr('disabled', 'disabled');
+            }
+          }
+        },
+        computed: {
+          dropHereText(){
+            return this.enabled ? this.text.dropHere : '';
+          }
+        },
+        watch: {
+          enabled(val){
+            this.enable(val);
+          }
+        },
+        mounted(){
+          this.widget = new qq.FineUploader($.extend(opt, {
+            element: this.$el,
+            template: this.$el,
+          }));
+          this.enable(this.enabled);
+          this.$emit("ready", this.value);
+        }
+      });*/
+    },
+    watch: {
+      /*enabled(val){
+        this.$children[0].enabled = val;
+      }*/
+    }
+  });
+
+})(jQuery, bbn);

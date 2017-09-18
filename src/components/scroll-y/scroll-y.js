@@ -193,7 +193,6 @@
           !this.dragging &&
           (e.target.scrollTop !== this.currentScroll)
         ){
-          bbn.fn.log("changing position", e, now, this.lastAdjust);
           this.lastAdjust = now;
           this._changePosition(Math.round(e.target.scrollTop / this.contentHeight * 100));
         }
@@ -286,11 +285,11 @@
           }
           num -= 20;
         }
-        bbn.fn.log("scrollTo", num);
         if ( num !== null ){
           if ( num < 0 ){
             num = 0;
           }
+          bbn.fn.log("scrollToY", num);
           this._changePosition(100 / this.contentHeight * num, animate);
         }
       }

@@ -64,14 +64,10 @@
     },
     methods: {
       autocompleteSearch(e){
-        bbn.fn.log("VAL", e.target.value);
         this.filterValue = e.target.value;
         if ( !this.force ){
           this.emitInput(this.filterValue);
         }
-      },
-      autocompleteBlur(e) {
-        bbn.fn.log("BLUR", e.target.value, this.widget);
       },
       listHeight(){
         let $ele = $(this.$refs.element),

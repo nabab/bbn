@@ -32,7 +32,7 @@
           bbn.fn.log(e);
           vm.$emit("input", e.sender.value());
 					if ( $.isFunction(vm.change) ){
-						vm.change();
+						vm.change(e.sender.value());
 					}
         };
         if ( this.template ){

@@ -5,70 +5,163 @@ div.bbn-tabnav {
   height: 100%;
   box-sizing: border-box;
   &.k-tabstrip-scrollable{
-    >ul{
+    > div > ul{
       margin: 0 2.5em;
     }
   }
-  >ul.k-tabstrip-items {
-    position: relative;
-    border-bottom-style: solid;
-    border-bottom-width: 1px;
-    li.k-item {
-      margin: 0 !important;
-      span.k-link {
-        padding-right: 1.25em !important;
-        padding-left: 1.25em !important;
-      }
-      div.bbn-tabnav-icons{
-        display: block;
-        position: absolute;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        i.fa {
+  > div{
+    > ul.k-tabstrip-items {
+      position: relative;
+      border-bottom-style: solid;
+      border-bottom-width: 1px;
+      li.k-item {
+        margin: 0 !important;
+        span.k-link {
+          padding-right: 1.25em !important;
+          padding-left: 1.25em !important;
+        }
+        div.bbn-tabnav-icons {
+          display: block;
           position: absolute;
           right: 0;
-          margin: 0;
-          cursor: pointer;
-          font-size: 1em;
-        }
-        i.fa-times-circle {
           top: 0;
-          padding-left: 0.2em;
-        }
-        i.fa-caret-down {
           bottom: 0;
-          padding-left: 0.2em;
-          padding-top: 0.2em;
-          padding-right: 0.15em;
+          i.fa {
+            position: absolute;
+            right: 0;
+            margin: 0;
+            cursor: pointer;
+            font-size: 1em;
+          }
+          i.fa-times-circle {
+            top: 0;
+            padding-left: 0.2em;
+          }
+          i.fa-caret-down {
+            bottom: 0;
+            padding-left: 0.2em;
+            padding-top: 0.2em;
+            padding-right: 0.15em;
+            display: none;
+          }
+        }
+        div.bbn-tabnav-selected {
           display: none;
+          position: absolute;
+          bottom: 0.15em;
+          left: 1.15em;
+          right: 1.15em;
+          height: 0.25em;
+        }
+        &.k-item.bbn-tabnav-static div.bbn-tabnav-icons i.fa-times-circle {
+          display: none
+        }
+        &.k-item.k-state-active {
+          div.bbn-tabnav-icons i.fa-caret-down {
+            display: block
+          }
+          div.bbn-tabnav-selected {
+            display: block;
+          }
         }
       }
-      div.bbn-tabnav-selected{
-        display: none;
-        position: absolute;
-        bottom: 0.15em;
-        left: 1.15em;
-        right: 1.15em;
-        height: 0.25em;
-      }
     }
-    li.k-item.bbn-tabnav-static div.bbn-tabnav-icons i.fa-times-circle{
-      display: none
-    }
-    li.k-item.k-state-active {
-      div.bbn-tabnav-icons i.fa-caret-down{
-        display: block
-      }
-      div.bbn-tabnav-selected{
+    > div.bbn-tab {
+      display: none;
+      position: relative !important;
+      &.bbn-tab-selected{
         display: block;
       }
     }
+    > div.bbn-loader {
+      align-items: center;
+      justify-content: center;
+      opacity: 0.5;
+      background-color: black;
+      color: white;
+      div.loader-animation {
+        margin-top: 2em;
+        h1 {
+          font-size: 3.5em !important;
+          text-align: center;
+          margin-top: 1em;
+          color: white;
+        }
+        .sk-cube-grid {
+          width: 120px;
+          height: 120px;
+          margin: auto;
+          .sk-cube {
+            width: 33%;
+            height: 33%;
+            float: left;
+            background-color: white;
+            -webkit-animation: sk-cubeGridScaleDelay 1.3s infinite ease-in-out;
+            animation: sk-cubeGridScaleDelay 1.3s infinite ease-in-out;
+            &.sk-cube1 {
+              -webkit-animation-delay: 0.2s;
+              animation-delay: 0.2s;
+            }
+            &.sk-cube2 {
+              -webkit-animation-delay: 0.3s;
+              animation-delay: 0.3s;
+            }
+            &.sk-cube3 {
+              -webkit-animation-delay: 0.4s;
+              animation-delay: 0.4s;
+            }
+            &.sk-cube4 {
+              -webkit-animation-delay: 0.1s;
+              animation-delay: 0.1s;
+            }
+            &.sk-cube5 {
+              -webkit-animation-delay: 0.2s;
+              animation-delay: 0.2s;
+            }
+            &.sk-cube6 {
+              -webkit-animation-delay: 0.3s;
+              animation-delay: 0.3s;
+            }
+            &.sk-cube7 {
+              -webkit-animation-delay: 0s;
+              animation-delay: 0s;
+            }
+            &.sk-cube8 {
+              -webkit-animation-delay: 0.1s;
+              animation-delay: 0.1s;
+            }
+            &.sk-cube9 {
+              -webkit-animation-delay: 0.2s;
+              animation-delay: 0.2s;
+            }
+          }
+        }
+      }
+    }
+    > span.k-button{
+      top: 0.4em;
+      position: absolute;
+    }
   }
-  > .k-content {
-    border: none;
-    margin: 0;
-    padding: 0;
+}
+@-webkit-keyframes sk-cubeGridScaleDelay {
+  0%, 70%, 100% {
+    -webkit-transform: scale3D(1, 1, 1);
+    transform: scale3D(1, 1, 1);
+  }
+  35% {
+    -webkit-transform: scale3D(0, 0, 1);
+    transform: scale3D(0, 0, 1);
+  }
+}
+@keyframes sk-cubeGridScaleDelay {
+  0%, 70%, 100% {
+    -webkit-transform: scale3D(1, 1, 1);
+    transform: scale3D(1, 1, 1);
+  }
+  35% {
+    -webkit-transform: scale3D(0, 0, 1);
+    transform: scale3D(0, 0, 1);
   }
 }
 ul.ui-tabNav-menu{

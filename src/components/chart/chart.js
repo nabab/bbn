@@ -5,7 +5,7 @@
  * Time: 15:45
  */
 
-(function($, bbn){
+(($, bbn) => {
   "use strict";
 
   /**
@@ -17,17 +17,20 @@
     props: {
       source: {},
       type: {
-        type: String
+        type: String,
+        default: 'line'
       },
+      /**
+       * String = the same title to axixs X and Y.
+       * Object = {x: 'titlex', y: 'titley'}
+       */
 			title: {
-        type: String
+        type: [String, Object],
+        default(){
+          return '';
+        }
       },
-      titleX: {
-        type: String
-      },
-      titleY: {
-        type: String
-      },
+
       width: {
         type: String
       },
@@ -47,7 +50,8 @@
         type: [Boolean, Number]
       },
       fullWidth: {
-        type: Boolean
+        type: Boolean,
+        default: true
       },
       showArea: {
         type: Boolean
@@ -56,10 +60,24 @@
         type: Boolean
       },
       axisX: {
-        type: Object
+        type: Object,
+        default(){
+          return {
+            showLabel: true,
+            showGrid: true,
+            position: 'end'
+          }
+        }
       },
       axisY: {
-        type: Object
+        type: Object,
+        default(){
+          return {
+            showLabel: true,
+            showGrid: true,
+            position: 'start'
+          }
+        }
       },
       showLabelX: {
         type: Boolean
@@ -86,7 +104,8 @@
         type: Boolean
       },
       animation: {
-        type: [Boolean, Number]
+        type: [Boolean, Number],
+        default: false
       },
       // set it to 0 (zero) for stacked bars
       barsDistance: {
@@ -126,7 +145,8 @@
         type: Boolean
       },
       tooltip: {
-        type: Boolean
+        type: Boolean,
+        default: true
       },
       pointLabel: {
         type: Boolean
@@ -179,7 +199,7 @@
       },*/
       cfg: {
         type: Object,
-        default: function(){
+        default(){
           return {
             type: 'line',
             fullWidth: true,
@@ -201,189 +221,308 @@
       }
     },
     data: function(){
-      var vm = this;
-      if ( (vm.type === 'line') || (vm.type === 'bar') ){
-        if ( !Array.isArray(vm.source.series[0]) && (vm.distributeSeries === undefined) ){
-          vm.source.series = [vm.source.series];
+      if ( this.isLine || this.isBar ){
+        if ( !Array.isArray(this.source.series[0]) && (this.distributeSeries === undefined) ){
+          this.source.series = [this.source.series];
         }
       }
-      return bbn.vue.treatData(vm);
+
+      return {
+
+      };
+
+    },
+    computed: {
+      isLine(){
+        return this.type === 'line';
+      },
+      isBar(){
+        return this.type === 'bar';
+      },
+      isPie(){
+        return this.type === 'pie';
+      },
+      plugins(){
+        let plugins = [];
+
+        // tooltip
+        if ( this.tooltip ){
+          plugins.push(Chartist.plugins.tooltip({
+            currency: this.currency || false
+          }));
+        }
+
+        // axis X/Y title
+        if ( !this.isPie && this.title ){
+          plugins.push(Chartist.plugins.ctAxisTitle({
+            axisX: {
+              axisTitle: typeof this.title === 'string' ? this.title : ( (typeof this.title === 'object') && this.title.x ? this.title.x : ''),
+              axisClass: 'ct-axis-title',
+              offset: {
+                x: 0,
+                y: 30
+              },
+              textAnchor: 'middle'
+            },
+            axisY: {
+              axisTitle: typeof this.title === 'string' ? this.title : ( (typeof this.title === 'object') && this.title.y ? this.title.y : ''),
+              axisClass: 'ct-axis-title',
+              offset: {
+                x: 0,
+                y: 0
+              },
+              textAnchor: 'middle',
+              flipTitle: false
+            }
+          }));
+        }
+
+        // Point Label
+        if ( this.pointLabel ){
+          plugins.push(Chartist.plugins.ctPointLabels());
+        }
+
+        // Legend
+        if ( this.legend ){
+          plugins.push(Chartist.plugins.legend({
+            onClick(a, b){
+              const $rect = $("div.rect", b.target);
+              if ( $rect.hasClass('inactive') ){
+                $rect.removeClass('inactive');
+              }
+              else {
+                $rect.addClass('inactive');
+              }
+            },
+            removeAll: true,
+            legendNames: Array.isArray(this.legend) ? this.legend : false
+          }));
+        }
+
+        // Thresold
+        /** @todo  it's not compatible with our colors system and legend */
+        /*if ( (this.isLine || this.isBar) && (typeof this.threshold === 'number') ){
+          plugins.push(Chartist.plugins.ctThreshold({
+            threshold: this.threshold
+          }));
+        }*/
+
+        // Zoom
+        /** @todo problems with scale x axis */
+        /*if ( this.zoom && this.isLine ){
+          this.trasformData();
+          this.axisX.type =  Chartist.AutoScaleAxis;
+          this.axisX.divisor = this.getLabelsLength();
+          this.axisY.type =  Chartist.AutoScaleAxis;
+          plugins.push(Chartist.plugins.zoom({
+            onZoom(chart, reset) {
+              this.resetZoom = reset;
+            }
+          }));
+        }*/
+
+        return plugins;
+      },
+      lineCfg(){
+        let cfg = {
+          axisX: {
+            showLabel: true,
+            showGrid: true,
+            position: 'end'
+          },
+          axisY: {
+            showLabel: true,
+            showGrid: true,
+            position: 'start'
+          }
+        };
+        if (  this.step ){
+          cfg.lineSmooth = Chartist.Interpolation.step();
+        }
+        return this.isLine ? $.extend(cfg, this.lineBarCommon()) : {};
+      },
+      barCfg(){
+        let cfg = {
+          axisX: {
+            showLabel: true,
+            showGrid: true,
+            position: 'end'
+          },
+          axisY: {
+            showLabel: true,
+            showGrid: true,
+            position: 'start'
+          }
+        };
+        // Bars distance
+        if ( typeof this.barsDistance === 'number' ){
+          cfg.seriesBarDistance = this.barsDistance;
+        }
+        return this.isBar ? $.extend(cfg, this.lineBarCommon()) : {};
+      },
+      pieCfg(){
+        let cfg = {};
+        // Donut
+        if ( typeof this.donut === 'number' ){
+          cfg.donutWidth = this.donut;
+          cfg.donut = true;
+        }
+        // Padding
+        if ( this.padding ){
+          cfg.chartPadding = this.padding;
+        }
+        return this.isPie ? cfg : {};
+      },
+      widgetCfg(){
+        let cfg = {
+          type: this.type,
+          fullWidth: this.fullWidth,
+          tooltip: this.tooltip,
+          chartPadding: {},
+          plugins: this.plugins
+        };
+        if ( this.isLine ){
+          $.extend(true, cfg, this.lineCfg);
+        }
+        if ( this.isBar ){
+          $.extend(true, cfg, this.barCfg);
+        }
+        if ( this.isPie ){
+          $.extend(true, cfg, this.pieCfg);
+        }
+        return cfg;
+      }
     },
     methods: {
-      pieChart: function(){
-        var vm = this;
+      pieChart(){
         /** @todo To fix animation problem with pie chart (donut: false) */
-        // Donut
-        if ( $.isNumeric(vm.widgetCfg.donut) ){
-          vm.widgetCfg.donutWidth = vm.widgetCfg.donut;
-          vm.widgetCfg.donut = true;
-        }
-        // Remove axes
-        delete vm.widgetCfg.axisX;
-        delete vm.widgetCfg.axisY;
-        // Padding
-        if ( vm.widgetCfg.padding ){
-          vm.widgetCfg.chartPadding = vm.widgetCfg.padding;
-          delete vm.widgetCfg.padding;
-        }
         // Create widget
-        vm.widget = new Chartist.Pie(vm.$el, vm.widgetCfg.source, vm.widgetCfg);
+        this.widget = new Chartist.Pie(this.$el, this.source, this.widgetCfg);
         // Animations
-        vm.pieAnimation();
+        this.pieAnimation();
       },
-      lineChart: function(){
-        var vm = this;
-        // Common configuration
-        vm.lineBarCommon();
-        // Line step
-        if (  vm.widgetCfg.step ){
-          vm.widgetCfg.lineSmooth = Chartist.Interpolation.step();
-          delete vm.widgetCfg.step;
-        }
-
+      lineChart(){
         // Create widget
-        vm.widget = new Chartist.Line(vm.$el, vm.widgetCfg.source, vm.widgetCfg);
+        this.widget = new Chartist.Line(this.$el, this.source, this.widgetCfg);
         // Animations
-        vm.lineAnimation();
+        this.lineAnimation();
       },
-      barChart: function(){
-        var vm = this;
-        // Common configuration
-        vm.lineBarCommon();
-        // Bars distance
-        if ( $.isNumeric(vm.widgetCfg.barsDistance) ){
-          vm.widgetCfg.seriesBarDistance = vm.widgetCfg.barsDistance;
-          delete vm.widgetCfg.barsDistance;
-        }
+      barChart(){
         // Create widget
-        vm.widget = new Chartist.Bar(vm.$el, vm.widgetCfg.source, vm.widgetCfg);
+        this.widget = new Chartist.Bar(this.$el, this.source, this.widgetCfg);
         // Animations
-        vm.barAnimation();
+        this.barAnimation();
       },
-      lineBarCommon: function(){
-        var vm = this;
+      lineBarCommon(){
+        let cfg = {};
         // Set background color
-        if ( vm.widgetCfg.backgroundColor ){
-          $(vm.$el).css('backgroundColor', vm.widgetCfg.backgroundColor);
+        if ( this.backgroundColor ){
+          $(this.$el).css('backgroundColor', this.backgroundColor);
         }
-
         // Axis X
         // showGridX
-        if ( vm.widgetCfg.showGridX !== undefined ){
-          vm.widgetCfg.axisX.showGrid = vm.widgetCfg.showGridX;
-          delete vm.widgetCfg.showGridX;
+        if ( this.showGridX !== undefined ){
+          cfg.axisX.showGrid = this.showGridX;
         }
         // showLabelX
-        if ( vm.widgetCfg.showLabelX !== undefined ){
-          vm.widgetCfg.axisX.showLabel = vm.widgetCfg.showLabelX;
-          delete vm.widgetCfg.showLabelX;
+        if ( this.showLabelX !== undefined ){
+          cfg.axisX.showLabel = this.showLabelX;
         }
         // reverseLabelX
-        if ( vm.widgetCfg.reverseLabelX ){
-          vm.widgetCfg.axisX.position = 'start';
-          delete vm.widgetCfg.reverseLabelX;
+        if ( this.reverseLabelX ){
+          cfg.axisX.position = 'start';
         }
         // Date format
-        if ( vm.widgetCfg.dateFormat ){
-          vm.widgetCfg.axisX.labelInterpolationFnc = function(date, idx){
-						if ( vm.widgetCfg.odd ){
-							return idx % 2 > 0 ? moment(date).format(vm.widgetCfg.dateFormat) : null;	
+        if ( this.dateFormat ){
+          cfg.axisX.labelInterpolationFnc = (date, idx) => {
+						if ( this.odd ){
+							return idx % 2 > 0 ? moment(date).format(this.dateFormat) : null;
 						}
-						if ( vm.widgetCfg.even ){
-							return idx % 2 === 0 ? moment(date).format(vm.widgetCfg.dateFormat) : null;	
+						if ( this.even ){
+							return idx % 2 === 0 ? moment(date).format(this.dateFormat) : null;
 						}
-            return moment(date).format(vm.widgetCfg.dateFormat);
+            return moment(date).format(this.dateFormat);
           };
         }
 				// Odd labels
-				if ( vm.widgetCfg.odd && !vm.widgetCfg.even && !vm.widgetCfg.dateFormat ){
-					vm.widgetCfg.axisX.labelInterpolationFnc = function(val, idx){
+				if ( this.odd && !this.even && !this.dateFormat ){
+					cfg.axisX.labelInterpolationFnc = (val, idx) => {
             return idx % 2 > 0 ? val : null;
           };
 				}
 				// Even labels
-				if ( vm.widgetCfg.even && !vm.widgetCfg.odd && !vm.widgetCfg.dateFormat ){
-					vm.widgetCfg.axisX.labelInterpolationFnc = function(val, idx){
+				if ( this.even && !this.odd && !this.dateFormat ){
+					cfg.axisX.labelInterpolationFnc = function(val, idx){
             return idx % 2 === 0 ? val : null;
           };
 				}
         // Axis Y
         // showGridY
-        if ( vm.widgetCfg.showGridY !== undefined ){
-          vm.widgetCfg.axisY.showGrid = vm.widgetCfg.showGridY;
-          delete vm.widgetCfg.showGridY;
+        if ( this.showGridY !== undefined ){
+          cfg.axisY.showGrid = this.showGridY;
         }
         // showLabelY
-        if ( vm.widgetCfg.showLabelY !== undefined ){
-          vm.widgetCfg.axisY.showLabel = vm.widgetCfg.showLabelY;
-          delete vm.widgetCfg.showLabelY;
+        if ( this.showLabelY !== undefined ){
+          cfg.axisY.showLabel = this.showLabelY;
         }
         // reverseLabelY
-        if ( vm.widgetCfg.reverseLabelY ){
-          vm.widgetCfg.axisY.position = 'end';
-          delete vm.widgetCfg.reverseLabelY;
+        if ( this.reverseLabelY ){
+          cfg.axisY.position = 'end';
         }
         // max (high)
-        if ( vm.widgetCfg.max !== undefined ){
-          vm.widgetCfg.high = vm.widgetCfg.max;
-          delete vm.widgetCfg.max;
+        if ( this.max !== undefined ){
+          cfg.high = this.max;
         }
         // min (low)
-        if ( vm.widgetCfg.min !== undefined ){
-          vm.widgetCfg.low = -vm.widgetCfg.min;
-          delete vm.widgetCfg.min;
+        if ( this.min !== undefined ){
+          cfg.low = -this.min;
         }
         // onlyInteger
-        if ( vm.widgetCfg.onlyInteger ){
-          vm.widgetCfg.axisY.onlyInteger = true;
+        if ( this.onlyInteger ){
+          cfg.axisY.onlyInteger = true;
         }
-
         // Padding
-        if ( vm.widgetCfg.padding ){
-          vm.widgetCfg.chartPadding = {
-            top: vm.widgetCfg.padding,
-            right: vm.widgetCfg.padding,
-            bottom: vm.widgetCfg.padding,
-            left: vm.widgetCfg.padding
+        if ( this.padding ){
+          cfg.chartPadding = {
+            top: this.padding,
+            right: this.padding,
+            bottom: this.padding,
+            left: this.padding
           };
-          delete vm.widgetCfg.padding;
         }
         // Top padding
-        if ( vm.widgetCfg.paddingTop ){
-          vm.widgetCfg.chartPadding.top = vm.widgetCfg.paddingTop;
-          delete vm.widgetCfg.paddingTop;
+        if ( this.paddingTop ){
+          cfg.chartPadding.top = this.paddingTop;
         }
         // Right padding
-        if ( vm.widgetCfg.paddingRight ){
-          vm.widgetCfg.chartPadding.right = vm.widgetCfg.paddingRight;
-          delete vm.widgetCfg.paddingRight;
+        if ( this.paddingRight ){
+          cfg.chartPadding.right = this.paddingRight;
         }
         // Bottom padding
-        if ( vm.widgetCfg.paddingBottom ){
-          vm.widgetCfg.chartPadding.bottom = vm.widgetCfg.paddingBottom;
-          delete vm.widgetCfg.paddingBottom;
+        if ( this.paddingBottom ){
+          cfg.chartPadding.bottom = this.paddingBottom;
         }
         // Left padding
-        if ( vm.widgetCfg.paddingLeft ){
-          vm.widgetCfg.chartPadding.left = vm.widgetCfg.paddingLeft;
-          delete vm.widgetCfg.paddingLeft;
+        if ( this.paddingLeft ){
+          cfg.chartPadding.left = this.paddingLeft;
         }
+        return cfg;
       },
-      getColorIdx: function(c){
+
+      getColorIdx(c){
         return c.element._node.parentElement.className.baseVal.replace('ct-series ', '').slice(-1).charCodeAt()-97;
       },
-      lineAnimation: function(){
-        var vm = this;
-        if ( vm.widgetCfg.animation ){
-          var seq = 0,
-              delays = $.isNumeric(vm.widgetCfg.animation) ? vm.widgetCfg.animation : 20,
+      lineAnimation(){
+        if ( this.animation ){
+          let seq = 0,
+              delays = $.isNumeric(this.animation) ? this.animation : 20,
               durations = 500;
           // Once the chart is fully created we reset the sequence
-          vm.widget.on('created', function(){
+          this.widget.on('created', () => {
             seq = 0;
           });
           // On each drawn element by Chartist we use the Chartist.Svg API to trigger SMIL animations
-          vm.widget.on('draw', function(chartData){
+          this.widget.on('draw', (chartData) => {
             seq++;
             if ( (chartData.type === 'line') || (chartData.type === 'area') ){
               // If the drawn element is a line we do a simple opacity fade in. This could also be achieved using CSS3 animations.
@@ -450,7 +589,7 @@
             }
             else if ( chartData.type === 'grid' ){
               // Using chartData.axis we get x or y which we can use to construct our animation definition objects
-              var pos1Animation = {
+              let pos1Animation = {
                     begin: seq * delays,
                     dur: durations,
                     from: chartData[chartData.axis.units.pos + '1'] - 30,
@@ -479,19 +618,18 @@
           });
         }
       },
-      barAnimation: function(){
-        var vm = this;
-        if ( vm.widgetCfg.animation ){
-          var delays = $.isNumeric(vm.widgetCfg.animation) ? vm.widgetCfg.animation : 500,
+      barAnimation(){
+        if ( this.animation ){
+          let delays = $.isNumeric(this.animation) ? this.animation : 500,
               durations = 500;
-          vm.widget.on('draw', function(chartData){
+          this.widget.on('draw', (chartData) => {
             if ( chartData.type === 'bar' ){
               chartData.element.attr({
                 style: 'stroke-width: 0px'
               });
-              for ( var s = 0; s < chartData.series.length; ++s) {
+              for ( let s = 0; s < chartData.series.length; ++s) {
                 if ( chartData.seriesIndex === s ){
-                  var ax = {
+                  let ax = {
                     y2: {
                       begin:  s * delays,
                       dur:    durations,
@@ -507,7 +645,7 @@
                       fill:  'freeze'
                     }
                   };
-                  if ( vm.widgetCfg.horizontalBars ){
+                  if ( this.horizontalBars ){
                     ax.x2 = ax.y2;
                     ax.x2.from = chartData.x1;
                     ax.x2.to = chartData.x2;
@@ -542,7 +680,7 @@
             }
             else if ( chartData.type === 'grid' ){
               // Using chartData.axis we get x or y which we can use to construct our animation definition objects
-              var pos1Animation = {
+              let pos1Animation = {
                     begin: delays,
                     dur: durations,
                     from: chartData[chartData.axis.units.pos + '1'] - 30,
@@ -571,22 +709,21 @@
           });
         }
       },
-      pieAnimation: function(){
-        var vm = this;
-        if ( vm.widgetCfg.animation ){
-          vm.widget.on('draw', function(chartData){
+      pieAnimation(){
+        if ( this.animation ){
+          this.widget.on('draw', (chartData) => {
             if ( chartData.type === 'slice' ){
               // Get the total path length in order to use for dash array animation
-              var pathLength = chartData.element._node.getTotalLength();
+              let pathLength = chartData.element._node.getTotalLength();
               // Set a dasharray that matches the path length as prerequisite to animate dashoffset
               chartData.element.attr({
                 'stroke-dasharray': pathLength + 'px ' + pathLength + 'px'
               });
               // Create animation definition while also assigning an ID to the animation for later sync usage
-              var animationDefinition = {
+              let animationDefinition = {
                 'stroke-dashoffset': {
                   id: 'anim' + chartData.index,
-                  dur: vm.widgetCfg.animation && $.isNumeric(vm.widgetCfg.animation) ? vm.widgetCfg.animation : 500,
+                  dur: $.isNumeric(this.animation) ? this.animation : 500,
                   from: -pathLength + 'px',
                   to: '0px',
                   easing: Chartist.Svg.Easing.easeOutQuint,
@@ -609,19 +746,18 @@
           });
         }
       },
-      setColor: function(){
-        var vm = this;
-        if ( typeof vm.widgetCfg.color === 'string' ){
-          vm.widgetCfg.color = [vm.widgetCfg.color];
+      setColor(){
+        if ( typeof this.color === 'string' ){
+          this.color = [this.color];
         }
-        vm.widget.on('draw', function(chartData, b){
+        this.widget.on('draw', (chartData, b) => {
           /** @todo To fix error on bar with animation */
           if ( (chartData.type === 'line') ||
             (chartData.type === 'point') ||
             (chartData.type === 'bar') ||
             ( chartData.type === 'area' )
           ){
-            var color = vm.widgetCfg.color[vm.widgetCfg.legend ? vm.getColorIdx(chartData) : chartData.seriesIndex];
+            let color = this.color[this.legend ? this.getColorIdx(chartData) : chartData.seriesIndex];
             if ( color ){
               chartData.element.attr({
                 style: ( chartData.type === 'area' ? 'fill: ' : 'stroke: ') + color + ( chartData.type === 'area' ? '; fill-opacity: 0.1; stroke: none' : '')
@@ -629,29 +765,28 @@
             }
           }
           if ( chartData.type === 'slice' ){
-            var color = vm.widgetCfg.color[vm.widgetCfg.legend ? vm.getColorIdx(chartData) : chartData.index];
+            let color = this.color[this.legend ? this.getColorIdx(chartData) : chartData.index];
             if ( color ){
               chartData.element.attr({
-                style: (vm.widgetCfg.donut ? 'stroke: ' : 'fill: ') + color
+                style: (this.donut ? 'stroke: ' : 'fill: ') + color
               });
             }
           }
         });
       },
-      setLabelColor: function(){
-        var vm = this;
-        vm.widget.on('draw', function(chartData){
-          var color = '';
+      setLabelColor(){
+        this.widget.on('draw', (chartData) => {
+          let color = '';
           if ( (chartData.type === 'label') ){
-            if ( vm.widgetCfg.labelColor ){
-              color = vm.widgetCfg.labelColor;
+            if ( this.labelColor ){
+              color = this.labelColor;
             }
-            if ( vm.widgetCfg.type !== 'pie' ){
-              if ( vm.widgetCfg.labelColorX && (chartData.axis.units.pos === 'x') ){
-                color = vm.widgetCfg.labelColorX;
+            if ( !this.isPie ){
+              if ( this.labelColorX && (chartData.axis.units.pos === 'x') ){
+                color = this.labelColorX;
               }
-              else if ( vm.widgetCfg.labelColorY && (chartData.axis.units.pos === 'y') ){
-                color = vm.widgetCfg.labelColorY;
+              else if ( this.labelColorY && (chartData.axis.units.pos === 'y') ){
+                color = this.labelColorY;
               }
               $(chartData.element._node.children[0]).css('color', color);
             }
@@ -663,140 +798,53 @@
           }
         });
       },
-      setGridColor: function(){
-        var vm = this;
-        vm.widget.on('draw', function(chartData){
+      setGridColor(){
+        this.widget.on('draw', (chartData) => {
           if ( chartData.type === 'grid' ){
             chartData.element.attr({
-              style: 'stroke: ' + vm.widgetCfg.gridColor
+              style: 'stroke: ' + this.gridColor
             });
           }
         });
       },
-      /*trasformData: function(){
-        var vm = this;
-        $.each(vm.widgetCfg.source.series, function(i, v){
-          vm.widgetCfg.source.series[i] = $.map(v, function(el, idx){
-            if ( (typeof el !== 'object') && vm.widgetCfg.source.labels[idx] ){
+      /*trasformData(){
+        $.each(this.source.series, (i, v) => {
+          this.source.series[i] = $.map(v, (el, idx) => {
+            if ( (typeof el !== 'object') && this.source.labels[idx] ){
               return {
-                x: vm.widgetCfg.source.labels[idx],
+                x: this.source.labels[idx],
                 y: el
               };
             }
             return el;
           })
         });
-        vm.widgetCfg.source.labels = [];
+        this.source.labels = [];
       },
-      getLabelsLength : function(){
-        var vm = this,
-            length = 0;
-        $.each(vm.widgetCfg.source.series, function(i,v){
+      getLabelsLength(){
+        let length = 0;
+        $.each(this.source.series, (i,v) => {
           length = v.length > length ? v.length : length;
         });
         return length;
       },*/
-      addPlugins: function(){
-        var vm = this;
 
-        // tooltip
-        if ( vm.widgetCfg.tooltip ){
-          vm.widgetCfg.plugins.push(Chartist.plugins.tooltip({
-            currency: vm.widgetCfg.currency || false
-          }));
-          delete vm.widgetCfg.tooltip;
-        }
-
-        // axis X/Y title
-        if ( vm.widgetCfg.titleX || vm.widgetCfg.titleY ){
-          vm.widgetCfg.plugins.push(
-            Chartist.plugins.ctAxisTitle({
-              axisX: {
-                axisTitle: vm.widgetCfg.titleX || '',
-                axisClass: 'ct-axis-title',
-                offset: {
-                  x: 0,
-                  y: 30
-                },
-                textAnchor: 'middle'
-              },
-              axisY: {
-                axisTitle: vm.widgetCfg.titleY || '',
-                axisClass: 'ct-axis-title',
-                offset: {
-                  x: 0,
-                  y: 0
-                },
-                textAnchor: 'middle',
-                flipTitle: false
-              }
-            })
-          );
-        }
-
-        // Point Label
-        if ( vm.widgetCfg.pointLabel ){
-          vm.widgetCfg.plugins.push(Chartist.plugins.ctPointLabels());
-        }
-
-        // Legend
-        if ( vm.widgetCfg.legend ){
-          vm.widgetCfg.plugins.push(Chartist.plugins.legend({
-            onClick: function(a,b){
-              var $rect = $("div.rect", b.target);
-              if ( $rect.hasClass('inactive') ){
-                $rect.removeClass('inactive');
-              }
-              else {
-                $rect.addClass('inactive');
-              }
-            },
-            removeAll: true,
-            legendNames: Array.isArray(vm.widgetCfg.legend) ? vm.widgetCfg.legend : false
-          }));
-        }
-
-        // Thresold
-        /** @todo  it's not compatible with our colors system and legend */
-        /*if ( (vm.isLine || vm.isBar) && $.isNumeric(vm.widgetCfg.threshold) ){
-          vm.widgetCfg.plugins.push(Chartist.plugins.ctThreshold({
-            threshold: vm.widgetCfg.threshold
-          }));
-        }*/
-
-        // Zoom
-        /** @todo problems with scale x axis */
-        /*if ( vm.widgetCfg.zoom && vm.isLine ){
-          vm.trasformData();
-          vm.widgetCfg.axisX.type =  Chartist.AutoScaleAxis;
-          vm.widgetCfg.axisX.divisor = vm.getLabelsLength();
-          vm.widgetCfg.axisY.type =  Chartist.AutoScaleAxis;
-          vm.widgetCfg.plugins.push(
-            Chartist.plugins.zoom({
-              onZoom : function(chart, reset) {
-                vm.resetZoom = reset;
-              }
-            })
-          );
-        }*/
-      },
-      widgetDraw: function(){
-        var vm = this,
-            externaLabel = vm.widget.options.labelDirection === 'explode',
+      widgetDraw(){
+        let externaLabel = this.widget.options.labelDirection === 'explode',
             yOffset = externaLabel ? 15 : 7.5,
             p = 1,
             idDef = bbn.fn.randomString(),
             defs = false;
-        vm.widget.on('draw', function(chartData){
-          var tmp = 1;
+        this.widget.on('draw', (chartData) => {
+          let tmp = 1;
           // Insert linebreak to labels
-          if ( vm.isPie ){
+          if ( this.isPie ){
             if ( chartData.type === 'label' ){
-              var lb = chartData.text.split("\n"),
+              let lb = chartData.text.split("\n"),
                   text = '';
               if ( lb.length ){
                 text = '<tspan>' + lb[0] + '</tspan>';
-                $.each(lb, function(i, v){
+                $.each(lb, (i, v) => {
                   if ( i > 0 ){
                     text += '<tspan dy="' + yOffset + '" x="' + chartData.x + '">' + v + '</tspan>';
                     chartData.y -= yOffset;
@@ -809,7 +857,7 @@
             }
             if ( externaLabel && ( tmp > p) ){
               p = tmp;
-              //vm.widget.update(vm.widget.data, {chartPadding: (vm.widget.options.chartPadding ? vm.widget.options.chartPadding : 0) + (p*yOffset)}, true);
+              //this.widget.update(this.widget.data, {chartPadding: (this.widget.options.chartPadding ? this.widget.options.chartPadding : 0) + (p*yOffset)}, true);
             }
             if ( chartData.type === 'slice' ){
               if ( !defs ){
@@ -824,21 +872,17 @@
           }
         });
       },
-      widgetCreated: function(){
-        var vm = this;
-        vm.widget.on('created', function(chartData){
-
-
-
+      widgetCreated(){
+        this.widget.on('created', (chartData) => {
           // Set the right colors to legend
-          if ( vm.widgetCfg.legend ){
-            var colors = [];
-            $("g.ct-series", vm.widget.container).each(function(i,v){
-              if ( vm.isBar ){
+          if ( this.legend ){
+            let colors = [];
+            $("g.ct-series", this.widget.container).each((i,v) => {
+              if ( this.isBar ){
                 colors.push($("line.ct-bar", v).first().css('stroke'));
               }
               else {
-                $("path", v).each(function(k,p){
+                $("path", v).each((k, p) => {
                   if ( $(p).hasClass('ct-line') ||
                     $(p).hasClass('ct-slice-pie') ||
                     $(p).hasClass('ct-slice-donut')
@@ -848,8 +892,8 @@
                 })
               }
             });
-            setTimeout(function(){
-              $("ul.ct-legend li", vm.widget.container).each(function(i,v){
+            setTimeout(() => {
+              $("ul.ct-legend li", this.widget.container).each((i, v) => {
                 if ( !$("div.rect", v).length ){
                   $(v).prepend('<div class="rect" style="background-color: ' + colors[i] +'; border-color: ' + colors[i] + '"></div>');
                 }
@@ -857,73 +901,61 @@
             }, 100);
           }
           // Set the right colors to point labels
-          if ( (vm.widgetCfg.type !== 'pie') && (vm.widgetCfg.labelColor || vm.widgetCfg.labelColorY) ){
-            $("g.ct-series text.ct-label", vm.widget.container).css('stroke', vm.widgetCfg.labelColorY || vm.widgetCfg.labelColor);
+          if ( !this.isPie && (this.labelColor || this.labelColorY) ){
+            $("g.ct-series text.ct-label", this.widget.container).css('stroke', this.labelColorY || this.labelColor);
           }
           // Reset zoom
-          /*if ( vm.widgetCfg.zoom && vm.isLine ){
-            $(vm.widget.container).dblclick(function(){
-              if ( vm.resetZoom && $.isFunction(vm.resetZoom) ){
-                vm.resetZoom();
+          /*if ( this.zoom && this.isLine ){
+            $(this.widget.container).dblclick(() => {
+              if ( this.resetZoom && $.isFunction(this.resetZoom) ){
+                this.resetZoom();
               }
             });
           }*/
         });
       }
     },
-    mounted: function(){
-      var vm = this;
-      if ( vm.widget ){
-        vm.widget.destroy();
-        vm.widget = false;
+    mounted(){
+      if ( this.widget ){
+        this.widget.destroy();
+        this.widget = false;
       }
-
-      vm.isLine = vm.widgetCfg.type === 'line';
-      vm.isBar = vm.widgetCfg.type === 'bar';
-      vm.isPie = vm.widgetCfg.type === 'pie';
 
       // Set width
-      if ( vm.widgetCfg.width && (typeof vm.widgetCfg.width === 'string') ){
-        $(vm.$el).width(vm.widgetCfg.width);
-        vm.widgetCfg.width = '100%';
+      if ( this.width && (typeof this.width === 'string') ){
+        $(this.$el).width(this.width);
+        this.width = '100%';
       }
-
-      // Add Plugins
-      vm.addPlugins();
 
       // Widget configuration
-      switch ( vm.widgetCfg.type ){
-        // Pie type
-        case 'pie':
-          vm.pieChart();
-          break;
-        // Line type
-        case 'line':
-          vm.lineChart();
-          break;
-          // Bar type
-        case 'bar':
-          vm.barChart();
-          break;
+      if ( this.isPie ){
+        this.pieChart();
+      }
+      else if ( this.isBar ){
+        this.barChart();
+      }
+      else {
+        this.lineChart();
       }
 
+
       // Set items color
-      if ( vm.widgetCfg.color ){
-        vm.setColor();
+      if ( this.color ){
+        this.setColor();
       }
       // Set labels color
-      if ( vm.widgetCfg.labelColor || vm.widgetCfg.labelColorX || vm.widgetCfg.labelColorY ){
-        vm.setLabelColor();
+      if ( this.labelColor || this.labelColorX || this.labelColorY ){
+        this.setLabelColor();
       }
       // Set grid color
-      if ( vm.widgetCfg.gridColor ){
-        vm.setGridColor();
+      if ( this.gridColor ){
+        this.setGridColor();
       }
 
       // Operations to be performed during the widget draw
-      vm.widgetDraw();
+      this.widgetDraw();
       // Operations to be performed after widget creation
-      vm.widgetCreated();
+      this.widgetCreated();
     }
   });
 

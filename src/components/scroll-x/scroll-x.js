@@ -124,7 +124,7 @@
           else{
             this.realContainer.scrollLeft = this.currentScroll;
             $.each(this.scrollableElements(), (i, a) => {
-              if ( a !== this.realContainer ){
+              if ( a && (a !== this.realContainer) ){
                 a.scrollLeft = this.currentScroll;
               }
             });
@@ -275,19 +275,19 @@
         }
         else if ( val instanceof HTMLElement ){
           let $container = $(val).offsetParent();
-          num = $(val).position().top;
+          num = $(val).position().left;
           while ( $container[0] !== this.scroller.$refs.scrollContent ){
-            num += $container.position().top;
+            num += $container.position().left;
             $container = $container.offsetParent();
           }
           num -= 20;
         }
-        bbn.fn.log("scrollTo", num);
         if ( num !== null ){
           if ( num < 0 ){
             num = 0;
           }
-          this._changePosition(100 / this.contentHeight * num, animate);
+          bbn.fn.log("scrollToX", num);
+          this._changePosition(100 / this.contentWidth * num, animate);
         }
       }
     },

@@ -51,7 +51,7 @@
       },
       scrollTo(x, y, animate){
         if ( this.$refs.xScroller ){
-          //this.$refs.xScroller.scrollTo(x, animate);
+          this.$refs.xScroller.scrollTo(x, animate);
         }
         if ( this.$refs.yScroller ){
           this.$refs.yScroller.scrollTo(y, animate);

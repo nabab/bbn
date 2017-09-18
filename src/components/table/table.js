@@ -4,6 +4,8 @@
 (function($, bbn){
   "use strict";
 
+  const METHODS4BUTTONS = ['insert', 'select', 'edit', 'add', 'delete'];
+
   /**
    * Classic input with normalized appearance
    */
@@ -11,6 +13,9 @@
     template: '#bbn-tpl-component-table',
     mixins: [bbn.vue.resizerComponent],
     props: {
+      map: {
+        type: Function
+      },
       limit: {
         type: Number,
         default: 25
@@ -27,6 +32,10 @@
         type: Boolean,
         default: false
       },
+      multifilter: {
+        type: Boolean,
+        default: false
+      },
       resizable: {
         type: Boolean,
         default: false
@@ -38,6 +47,9 @@
       groupable: {
         type: Boolean,
         default: false
+      },
+      editable: {
+        type: [Boolean, String, Function]
       },
       serverPaging: {
         type: Boolean,
@@ -56,9 +68,9 @@
         default: true
       },
       order: {
-        type: Object,
+        type: Array,
         default(){
-          return {};
+          return [];
         }
       },
       filter: {
@@ -67,9 +79,13 @@
           return {};
         }
       },
+      selection: {
+        type: [Boolean, Function],
+        default: false
+      },
       minimumColumnWidth: {
         type: Number,
-        default: 25
+        default: 30
       },
       defaultColumnWidth: {
         type: Number,
@@ -96,18 +112,19 @@
       trClass: {
         type: [String, Function]
       },
-      component: {
-        type: [String, Boolean],
-        default: false
-      },
-      expander: {
-        type: [Object, Function]
-      },
+
+      // Vue components
+      component: {},
+      expander: {},
+      editor: {},
+
       fixedDefaultSide: {
         type: String,
         default: "left"
       },
-      toolbar: {},
+      toolbar: {
+        type: [String, Array, Function]
+      },
       source: {
         type: [Array, String],
         default(){
@@ -120,9 +137,6 @@
           return [];
         }
       },
-      edit: {
-        type: Function
-      },
       groupBy: {
         type: Number
       },
@@ -131,20 +145,32 @@
         default(){
           return [];
         }
+      },
+      data: {
+        type: Object,
+        default(){
+          return {};
+        }
       }
     },
     data: function(){
+      let editable = $.isFunction(this.editable) ? this.editable() : this.editable;
       return {
+        selectedRows: [],
         currentData: [],
         group: this.groupBy === undefined ? false : this.groupBy,
         limits: [10, 25, 50, 100, 250, 500],
         start: 0,
         total: 0,
+        editMode: editable === true ? (this.editor ? 'popup' : 'inline') : (editable === 'popup' ? 'popup' : 'inline'),
         buttonCls: 'bbn-table-command-',
         buttonDone: 'bbn-table-button',
         selectDone: 'bbn-table-select',
         widgetName: "DataTable",
         toolbarDone: [],
+        currentFilter: false,
+        floatingFilterX: 0,
+        floatingFilterY: 0,
         tmpRow: false,
         originalRow: false,
         editedRow: false,
@@ -161,12 +187,49 @@
         colsLeft: [],
         colsMain: [],
         colsRight: [],
+        colButtons: false,
         scrollableContainer: null,
         hiddenScroll: true,
-        currentExpanded: []
+        currentExpanded: [],
+        popups: []
       };
     },
     computed: {
+      toolbarButtons(){
+        let r = [],
+            ar = [];
+        if ( this.toolbar ){
+          ar = $.isFunction(this.toolbar) ?
+            this.toolbar() : (
+              Array.isArray(this.toolbar) ? this.toolbar.slice() : []
+            );
+          if ( !Array.isArray(ar) ){
+            ar = [];
+          }
+          $.each(ar, (i, a) => {
+            let o = $.extend({}, a);
+            if ( o.command && (typeof(o.command) === 'string') ){
+              if ( $.inArray(o.command, METHODS4BUTTONS) > -1 ){
+                o.command = this[a.command];
+              }
+            }
+            r.push(o);
+          });
+        }
+        return r;
+      },
+      isTmpValid(){
+        let ok = true;
+        if ( this.tmpRow ){
+          $.each(this.columns, (i, a) => {
+            if ( a.field && a.required && !this.tmpRow[a.field] ){
+              ok = false;
+              return false;
+            }
+          })
+        }
+        return ok;
+      },
       numPages(){
         return Math.ceil(this.total/this.currentLimit);
       },
@@ -207,7 +270,8 @@
             o,
             realIndex = 0,
             end = data.length,
-            i = 0;
+            i = 0,
+            tmpIsDone = false;
         if (
           (this.group !== false) &&
           (!this.isAjax  || !this.serverGrouping) &&
@@ -215,7 +279,8 @@
           this.cols[this.group].field
         ){
           isGroup = true;
-          if ( !this.currentOrder[this.cols[this.group].field] ){
+          let pos = bbn.fn.search(this.currentOrder, {field: this.cols[this.group].field});
+          if ( pos !== 0 ){
             data = bbn.fn.order(data, this.cols[this.group].field);
           }
           else{
@@ -226,6 +291,15 @@
           i = this.start;
           end = this.start + this.currentLimit > data.length ? data.length : this.start + this.currentLimit;
         }
+        if ( this.tmpRow ){
+          res.push({
+            index: -1,
+            data: this.tmpRow,
+            selected: false,
+            expander: true,
+            isTmp: true
+          });
+        }
         while ( i < end ){
           let a = data[i];
           if ( isGroup && (currentGroupValue !== a[this.cols[this.group].field]) ){
@@ -235,9 +309,19 @@
             realIndex++;
           }
           o = {index: i, data: a};
+          if ( this.selection ){
+            o.selected = $.inArray(this.selectedRows, i) > -1;
+            o.selection = true;
+          }
           if ( isGroup ){
             o.isGrouped = true;
             o.link = currentLink;
+          }
+          else if ( this.expander && (
+            !$.isFunction(this.expander) ||
+            ($.isFunction(this.expander) && this.expander(a))
+          ) ){
+            o.expander = true;
           }
           res.push(o);
           realIndex++;
@@ -246,7 +330,7 @@
               ($.isFunction(this.expander) && this.expander(a))
             )
           ){
-            res.push({index: i, expander: true, data: a});
+            res.push({index: i, data: a, expansion: true});
             realIndex++;
           }
           i++;
@@ -255,12 +339,163 @@
       },
       hasExpander(){
         return this.expander || (this.groupable && (typeof(this.group) === 'number') && this.cols[this.group]);
-      },
-
+      }
     },
     methods: {
-      /** i18n */
-      _: bbn._,
+      checkFilterWindow(e){
+        if ( this.currentFilter ){
+          if (
+            (e.clientX < this.floatingFilterX) ||
+            (e.clientX > this.floatingFilterX + 400) ||
+            (e.clientY < this.floatingFilterY) ||
+            (e.clientY > this.floatingFilterY + 200)
+          ){
+            this.currentFilter = false;
+          }
+        }
+      },
+      getFilterOptions(){
+        let o = {type: 'string', multi: false};
+        if ( this.currentFilter && this.currentFilter.field ){
+          o.column = this.currentFilter.field;
+          if ( this.currentFilter.filter ){
+            o.component = this.currentFilter.filter;
+          }
+          else if ( this.currentFilter.source ){
+            o.type = 'enums';
+            o.component = 'bbn-dropdown';
+          }
+          else if ( this.currentFilter.type ){
+            switch ( this.currentFilter.type ){
+              case 'number':
+                o.type = 'number';
+                o.component = 'bbn-numeric';
+                break;
+              case 'date':
+                o.type = 'date';
+                o.component = 'bbn-datepicker';
+                break;
+              case 'time':
+                o.type = 'date';
+                o.component = 'bbn-timepicker';
+                break;
+              case 'datetime':
+                o.type = 'date';
+                o.component = 'bbn-datetimepicker';
+                break;
+            }
+          }
+          else{
+
+          }
+        };
+        if ( o.type && bbn.var.filters[o.type] ){
+          o.operators = bbn.var.filters[o.type];
+        }
+        return o
+      },
+      openMultiFilter(){
+        this.$refs.popup.open({
+          title: bbn._('Multi Filter'),
+          component: {
+            template: `<bbn-filter v-bind="source"></bbn-filter>`,
+            props: ['source']
+          },
+          source: {
+            fields: this.columns,
+            conditions: this.filter,
+            concat: this.concat
+          }
+        });
+      },
+      showFilter(col, ev){
+        bbn.fn.log(ev);
+        this.floatingFilterX = ev.pageX - 10 < 0 ? 0 : (ev.pageX - 10 + 600 > this.lastKnownWidth ? this.lastKnownWidth - 600 : ev.pageX - 10);
+        this.floatingFilterY = ev.pageY - 10 < 0 ? 0 : (ev.pageY - 10 + 200 > this.lastKnownHeight ? this.lastKnownHeight - 200 : ev.pageY - 10);
+        this.currentFilter = col;
+      },
+      edit(row, title, options){
+        if ( !this.editable ){
+          throw new Error("The table is not editable, you cannot use the edit function in bbn-table");
+          return;
+        }
+        if ( !row ){
+          this._addTmp();
+          row = this.tmpRow;
+        }
+        this.editedRow = row;
+        if ( this.editMode === 'popup' ){
+          let popup = $.extend({
+            source: row,
+            title: title ? title : bbn._('Untitled')
+          }, options ? options : {});
+          if ( this.editor ){
+            popup.component = this.editor;
+          }
+          popup.afterClose = () => {
+            this._removeTmp();
+            this.editedRow = false;
+          };
+          this.$refs.popup.open(popup);
+        }
+      },
+
+      /** @todo */
+      remove(where){
+        var vm = this,
+            res = this.getRow(where);
+        if ( res ){
+          res.obj.remove();
+          vm.widget.draw();
+        }
+      },
+
+      save(){
+
+      },
+
+      select(){},
+
+      /** @todo */
+      add(data){
+        this.widget.rows().add([data]);
+        this.widget.draw();
+      },
+
+      delete(){},
+
+      insert(data){
+        this._addTmp(data);
+        this.edit(this.tmpRow);
+      },
+
+      checkSelection(index){
+        bbn.fn.log("checkSelection");
+        let idx = $.inArray(index, this.selectedRows),
+            isSelected = false;
+        if ( idx > -1 ){
+          this.$emit('unselect', this.currentData[index]);
+          this.selectedRows.splice(idx, 1);
+        }
+        else{
+          this.$emit('select', this.currentData[index]);
+          this.selectedRows.push(index);
+          isSelected = true;
+        }
+        this.$emit('toggle', isSelected, this.currentData[index]);
+      },
+
+      _execCommand(button, data, col, index){
+        if ( button.command ){
+          if ( $.isFunction(button.command) ){
+            button.command(data, col, index);
+          }
+          else if ( (typeof(button.command) === 'string') && ($.inArray(button.command, METHODS4BUTTONS) > -1) ){
+            this[button.command](data, col, index);
+          }
+        }
+        return () => {return false;}
+      },
 
       /** Refresh the current data set */
       updateData(){
@@ -272,28 +507,33 @@
               length: this.currentLimit,
               limit: this.currentLimit,
               start: this.start,
+              data: this.data || {}
             };
             if ( this.sortable ){
               data.order = this.currentOrder;
             }
             bbn.fn.post(this.source, data, (result) => {
               this.isLoading = false;
-              if ( !result || result.error ){
-                alert(result || "Error in updateData")
+              if (
+                !result ||
+                result.error ||
+                ((result.success !== undefined) && !result.success)
+              ){
+                alert(result && result.error ? result.error : "Error in updateData");
               }
               else{
-                this.currentData = result.data || [];
+                this.currentData = this._map(result.data || []);
                 this.total = result.total || result.data.length || 0;
                 if ( result.order ){
-                  this.currentOrder = {};
-                  this.currentOrder[result.order] = (result.dir || '').toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+                  this.currentOrder = [];
+                  this.currentOrder.push({field: result.order, dir: (result.dir || '').toUpperCase() === 'DESC' ? 'DESC' : 'ASC'});
                 }
               }
             })
           })
         }
         else if ( Array.isArray(this.source) ){
-          this.currentData = this.source;
+          this.currentData = this._map(this.source);
           this.total = this.source.length;
         }
       },
@@ -306,18 +546,18 @@
           this.cols[i].field &&
           (this.cols[i].sortable !== false)
         ){
-          let f = this.cols[i].field;
-          if ( this.currentOrder[f] ){
-            if ( this.currentOrder[f] === 'ASC' ){
-              this.currentOrder[f] = 'DESC';
+          let f = this.cols[i].field,
+              pos = bbn.fn.search(this.currentOrder, {field: f});
+          if ( pos > -1 ){
+            if ( this.currentOrder[pos].dir === 'ASC' ){
+              this.currentOrder[pos].dir = 'DESC';
             }
             else{
-              this.currentOrder = {};
+              this.currentOrder = [];
             }
           }
           else{
-            this.currentOrder = {};
-            this.currentOrder[f] = 'ASC';
+            this.currentOrder = [{field: f, dir: 'ASC'}];
           }
           this.updateData();
         }
@@ -328,60 +568,59 @@
           num = 0;
         }
         if ( !this.isLoading && (num < 25) ){
-          let tds = $("table.bbn-table-main:first > tbody > tr > td:first-child", this.$el);
-          bbn.fn.log("trying to update table, attempt " + num, tds);
-          if (
-            (tds.length !== this.currentSet.length) ||
-            !this.$refs.scroller
-          ){
-            setTimeout(() => {
-              this.updateTable(++num);
-            }, 200)
-          }
-          else{
-            this.$nextTick(() => {
-              if ( this.colsLeft.length || this.colsRight.length ){
-                tds.each((i, td) =>{
+          this.$nextTick(() => {
+            let trs = $("table.bbn-table-main:first > tbody > tr", this.$el);
+            bbn.fn.log("trying to update table, attempt " + num, trs);
+            if ( this.colsLeft.length || this.colsRight.length ){
+              trs.each((i, tr) =>{
+                if ( $(tr).is(":visible") ){
                   bbn.fn.adjustHeight(
-                    td,
-                    $("table.bbn-table-data-left:first > tbody > tr:eq(" + i + ") > td:first-child", this.$el),
-                    $("table.bbn-table-data-right:first > tbody > tr:eq(" + i + ") > td:first-child", this.$el)
+                    tr,
+                    $("table.bbn-table-data-left:first > tbody > tr:eq(" + i + ")", this.$el),
+                    $("table.bbn-table-data-right:first > tbody > tr:eq(" + i + ")", this.$el)
                   );
-                });
-              }
-              if (
-                this.$refs.scroller &&
-                $.isFunction(this.$refs.scroller.onResize)
-              ){
-                bbn.fn.log("RESIZING FOR UTABLKE");
-                this.$refs.scroller.onResize();
-                if (
-                  this.$refs.scrollerY &&
-                  $.isFunction(this.$refs.scrollerY.onResize)
-                ){
-                  bbn.fn.log("SCROLLY HERE");
-                  if ( this.scrollableContainer !== this.$refs.scroller.$refs.scrollContainer ){
-                    bbn.fn.log("CHANGING scrollableContainer");
-                    this.scrollableContainer = this.$refs.scroller.$refs.scrollContainer;
-                  }
-                  this.$refs.scrollerY.onResize();
                 }
+              });
+            }
+            if (
+              this.$refs.scroller &&
+              $.isFunction(this.$refs.scroller.onResize)
+            ){
+              bbn.fn.log("RESIZING FOR UTABLKE");
+              this.$refs.scroller.onResize();
+              if (
+                this.$refs.scrollerY &&
+                $.isFunction(this.$refs.scrollerY.onResize)
+              ){
+                bbn.fn.log("SCROLLY HERE");
+                if ( this.scrollableContainer !== this.$refs.scroller.$refs.scrollContainer ){
+                  bbn.fn.log("CHANGING scrollableContainer");
+                  this.scrollableContainer = this.$refs.scroller.$refs.scrollContainer;
+                }
+                this.$refs.scrollerY.onResize();
               }
-              this.$emit("resize");
-            });
-          }
+            }
+            this.$emit("resize");
+          });
         }
       },
 
-      overTr(idx, remove){
-        $(".bbn-table-main tr:eq(" + idx + ")")
+      _map(data){
+        if ( this.map ){
+          return $.map(data, this.map)
+        }
+        return data;
+      },
+
+      _overTr(idx, remove){
+        $(".bbn-table-main:first > tbody > tr[index=" + idx + "]", this.$el)
           [remove ? 'removeClass' : 'addClass']("k-grid-header");
         if ( this.colsLeft.length ){
-          $(".bbn-table-data-left tr:eq(" + idx + ")")
+          $(".bbn-table-data-left:first > tbody > tr[index=" + idx + "]", this.$el)
             [remove ? 'removeClass' : 'addClass']("k-grid-header");
         }
         if ( this.colsRight.length ){
-          $(".bbn-table-data-right tr:eq(" + idx + ")")
+          $(".bbn-table-data-right:first > tbody > tr[index=" + idx + "]", this.$el)
             [remove ? 'removeClass' : 'addClass']("k-grid-header");
         }
       },
@@ -391,17 +630,8 @@
         let field = column && column.field ? column.field : '',
             value = data && column.field ? data[column.field] || '' : undefined;
 
-        if ( column.source ){
-          if ( value ){
-            if ( Array.isArray(column.source) ){
-              return bbn.fn.get_field(column.source, 'value', value, 'text');
-            }
-            else if ( column.source[value] !== undefined ){
-              return column.source[value];
-            }
-            return bbn._("<em>?</em>");
-          }
-          return "<em>-</em>";
+        if ( column.render ){
+          return column.render(data, index, column, value)
         }
         else if ( column.type ){
           switch ( column.type ){
@@ -431,14 +661,23 @@
               return value && (value !== 'false') && (value !== '0') ? bbn._("Yes") : bbn._("No");
           }
         }
-        else if ( column.render ){
-          return column.render(data, index, column, value)
+        else if ( column.source ){
+          if ( value ){
+            if ( Array.isArray(column.source) ){
+              return bbn.fn.get_field(column.source, 'value', value, 'text');
+            }
+            else if ( column.source[value] !== undefined ){
+              return column.source[value];
+            }
+            return bbn._("<em>?</em>");
+          }
+          return "<em>-</em>";
         }
         return value;
       },
 
       /** Returns header's CSS object */
-      headStyles(col){
+      _headStyles(col){
         let css = {
           width: this.getWidth(col.realWidth)
         };
@@ -449,7 +688,7 @@
       },
 
       /** Returns body's CSS object */
-      bodyStyles(col){
+      _bodyStyles(col){
         return {};
       },
 
@@ -505,37 +744,25 @@
       },
 
       /** @todo */
-      defaultDataSet(data){
-        let res = [];
+      _defaultRow(data){
+        let res = {};
+        if ( !data ){
+          data = {};
+        }
         $.each(this.cols, function(i, a){
           if ( a.field ){
-            res.push(data[a.field] !== undefined ? data[a.field] : (a.default !== undefined ? a.default : ''));
-          }
-          else{
-            res.push('');
+            if ( data[a.field] !== undefined ){
+              res[a.field] = data[a.field];
+            }
+            else if ( a.default ){
+              res[a.field] = $.isFunction(a.default) ? a.default() : a.default;
+            }
+            else{
+              res[a.field] = '';
+            }
           }
         });
         return res;
-      },
-
-      /** @todo */
-      defaultRow(data){
-        let data2 = this.defaultDataSet(data);
-        let res = '<tr role="row">';
-        if ( data2 ){
-          $.each(data2, (i, v) => {
-            res += '<td>' + v + '</td>';
-          })
-        }
-        res += '</tr>';
-        bbn.fn.log(data2, res);
-        return res;
-      },
-
-      /** @todo */
-      add(data){
-        this.widget.rows().add([data]);
-        this.widget.draw();
       },
 
       /** @todo */
@@ -561,47 +788,46 @@
         }
       },
 
-      /** @todo */
-      remove(where){
-        var vm = this,
-            res = this.getRow(where);
-        if ( res ){
-          res.obj.remove();
-          vm.widget.draw();
-        }
-      },
 
-      /** @todo */
-      addTmp(data){
-        var vm = this;
-        if ( vm.tmpRow ){
-          vm.removeTmp();
-        }
-        let row = $(this.defaultRow());
-        bbn.fn.log(row, vm.table, vm.table.find("tbody:first"));
-        vm.table.find("tbody:first").prepend(row);
-        //vm.tmpRow = vm.widget.rows.add([vm.defaultDataSet(data)]);
-        //vm.widget.draw();
-      },
-
-      /** @todo */
-      removeTmp(){
-        var vm = this;
-        if ( vm.tmpRow ){
-          vm.tmpRow.remove();
-          vm.tmpRow = false;
-          vm.widget.draw();
-        }
-      },
-
-      /** @todo */
-      editTmp(data, update){
+      cancel(){
         if ( this.tmpRow ){
-          if ( update ){
-            data = $.extend({}, this.tmpRow.data(), data);
-          }
-          this.tmpRow.data(data);
+          this._removeTmp();
         }
+      },
+
+      /** @todo */
+      _addTmp(data){
+        this._removeTmp().tmpRow = this._defaultRow(data);
+        this.$nextTick(() => {
+          this.updateTable();
+        });
+        this.$refs.scrollerY.scrollTo(0, true);
+        return this;
+      },
+
+      /** @todo */
+      _removeTmp(){
+        if ( this.tmpRow ){
+          this.tmpRow = false;
+          this.$nextTick(() => {
+            this.updateTable();
+          });
+        }
+        return this;
+      },
+
+      /** @todo */
+      editTmp(data){
+        if ( this.tmpRow ){
+          data = $.extend(this.tmpRow, data);
+        }
+        return this;
+      },
+
+      saveTmp(){},
+
+      changeTmp(e){
+        bbn.fn.log("changeTmp", arguments)
       },
 
       calculateSize(){
@@ -742,7 +968,77 @@
           if ( a.width ){
             r.width = typeof(a.width) === 'number' ? a.width + 'px' : a.width;
           }
-          if ( a.source ){
+          if ( a.render ){
+            if ( $.isFunction(a.render) ){
+              r.render = a.render;
+            }
+            else{
+              var v = vm;
+              while ( v ){
+                if ( v[a.render] && $.isFunction(v[a.render]) ){
+                  r.render = function(data, type, row){
+                    return v[a.render](data, a.field, row);
+                  };
+                  break;
+                }
+                else{
+                  v = v.$parent;
+                }
+              }
+            }
+            if ( !r.render ){
+              r.render = function(data, type, row){
+                var tmp = '(function(',
+                    i = 0,
+                    num = bbn.fn.countProperties(row);
+                for ( var n in row ){
+                  tmp += n;
+                  i++;
+                  if ( i !== num ){
+                    tmp += ', ';
+                  }
+                  else{
+                    tmp += '){ return (' + a.render + '); })(';
+                    i = 0;
+                    for ( var n in row ){
+                      if ( typeof(row[n]) === 'string' ){
+                        tmp += '"' + row[n].replace(/\"/g, '\\"') + '"';
+                      }
+                      else if ( typeof(row[n]) === "object" ){
+                        tmp += JSON.stringify(row[n]);
+                      }
+                      else if ( row[n] === null ){
+                        tmp += 'null'
+                      }
+                      else if ( row[n] === true ){
+                        tmp += 'true'
+                      }
+                      else if ( row[n] === false ){
+                        tmp += 'false'
+                      }
+                      else if ( row[n] === 0 ){
+                        tmp += '0';
+                      }
+                      else{
+                        tmp += row[n];
+                      }
+                      i++;
+
+                      if ( i !== num ){
+                        tmp += ', ';
+                      }
+                      else{
+                        tmp += ');';
+                      }
+                    }
+                  }
+                }
+                //bbn.fn.log(tmp);
+                return eval(tmp);
+              }
+            }
+          }
+          else if ( a.source ){
             let obj = a.source;
             /** @todo Remove this case now that we have reactive properties */
             if ( typeof(a.source) === 'string' ){
@@ -818,132 +1114,9 @@
                 break;
             }
           }
-          else if ( a.render ){
-            if ( $.isFunction(a.render) ){
-              r.render = a.render;
-            }
-            else{
-              var v = vm;
-              while ( v ){
-                if ( v[a.render] && $.isFunction(v[a.render]) ){
-                  r.render = function(data, type, row){
-                    return v[a.render](data, a.field, row);
-                  };
-                  break;
-                }
-                else{
-                  v = v.$parent;
-                }
-              }
-            }
-            if ( !r.render ){
-              r.render = function(data, type, row){
-                var tmp = '(function(',
-                    i = 0,
-                    num = bbn.fn.countProperties(row);
-                for ( var n in row ){
-                  tmp += n;
-                  i++;
-                  if ( i !== num ){
-                    tmp += ', ';
-                  }
-                  else{
-                    tmp += '){ return (' + a.render + '); })(';
-                    i = 0;
-                    for ( var n in row ){
-                      if ( typeof(row[n]) === 'string' ){
-                        tmp += '"' + row[n].replace(/\"/g, '\\"') + '"';
-                      }
-                      else if ( typeof(row[n]) === "object" ){
-                        tmp += JSON.stringify(row[n]);
-                      }
-                      else if ( row[n] === null ){
-                        tmp += 'null'
-                      }
-                      else if ( row[n] === true ){
-                        tmp += 'true'
-                      }
-                      else if ( row[n] === false ){
-                        tmp += 'false'
-                      }
-                      else if ( row[n] === 0 ){
-                        tmp += '0';
-                      }
-                      else{
-                        tmp += row[n];
-                      }
-                      i++;
-
-                      if ( i !== num ){
-                        tmp += ', ';
-                      }
-                      else{
-                        tmp += ');';
-                      }
-                    }
-                  }
-                }
-                //bbn.fn.log(tmp);
-                return eval(tmp);
-              }
-            }
-          }
           res.push(r);
         });
         return res;
-      },
-
-      /** @todo */
-      rowCallback(row, data, dataIndex){
-        const vm = this;
-        if ( vm.$options.propsData.trClass ){
-          bbn.fn.log("trClass : ", vm.$options.propsData.trClass);
-          if ( $.isFunction(vm.$options.propsData.trClass) ){
-            var cls = vm.$options.propsData.trClass(data);
-            if ( cls ){
-              $(row).addClass(cls);
-            }
-          }
-          else{
-            $(row).addClass(vm.$options.propsData.trClass);
-          }
-        }
-        if ( vm.$options.propsData.trCSS ){
-          bbn.fn.log("trStyle : ", vm.$options.propsData.trCSS);
-          if ( $.isFunction(vm.$options.propsData.trCSS) ){
-            var cls = vm.$options.propsData.trCSS(data);
-            if ( cls && (cls instanceof Object) ){
-              $(row).css(cls);
-            }
-          }
-          else if ( vm.$options.propsData.trCSS instanceof Object ){
-            $(row).css(vm.$options.propsData.trCSS);
-          }
-        }
-        vm.$nextTick(() => {
-          new Vue({
-            el: row,
-            data: data,
-            methods: {
-              command(fn, field){
-                bbn.fn.log(arguments);
-                let vm0 = vm;
-                while ( vm0 ){
-                  if ( vm0 && vm0.$el && $.isFunction(vm0[fn]) ){
-                    return vm0[fn](field ? data[field] : '', dataIndex, data);
-                  }
-                  vm0 = vm0.$parent;
-                }
-                throw new Error("Impossible to find the command " + fn)
-              }
-            },
-            mounted(){
-              const vm2 = this;
-              vm.$nextTick(() => {
-              })
-            }
-          });
-        });
       },
 
       /** @todo */
@@ -959,6 +1132,7 @@
         if ( this.$refs.scroller ){
           this.$refs.scroller.onResize();
         }
+        this.init();
         this.updateTable();
         this.$emit("resize");
       },
@@ -1023,6 +1197,32 @@
         return false;
       },
 
+      isSelected(index){
+        return this.selection && ($.inArray(index, this.selectedRows) > -1);
+      },
+
+      hasTd(data, tdIndex){
+        if ( data.selection ){
+          if ( tdIndex === 0 ){
+            return false;
+          }
+          else if ( data.group || data.expander ){
+            if ( tdIndex === 1 ){
+              return false;
+            }
+          }
+        }
+        else if ( data.group || data.expander ){
+          if ( tdIndex === 0 ){
+            return false;
+          }
+        }
+        else if ( data.expansion ){
+          return false;
+        }
+        return true;
+      },
+
       init(){
         let colsLeft = [],
             colsMain = [],
@@ -1030,17 +1230,26 @@
             leftWidth = 0,
             mainWidth = 0,
             rightWidth = 0,
-            numUnknown = 0;
+            numUnknown = 0,
+            colButtons = false;
+        if ( this.selection ){
+          colsLeft.push({
+            title: ' ',
+            width: this.minimumColumnWidth,
+            realWidth: this.minimumColumnWidth
+          });
+        }
         if ( this.hasExpander ){
           colsLeft.push({
             title: ' ',
-            width: 25,
-            realWidth: 25
+            width: this.minimumColumnWidth,
+            realWidth: this.minimumColumnWidth
           });
-          leftWidth = 25;
+          leftWidth = this.minimumColumnWidth;
         }
         $.each(this.cols, (i, a) => {
           if ( !this.groupable || (this.group !== i) ){
+            a.index = i;
             if ( a.hidden ){
               a.realWidth = 0;
             }
@@ -1059,6 +1268,9 @@
               else{
                 a.realWidth = this.defaultColumnWidth;
                 numUnknown++;
+              }
+              if ( a.buttons ){
+                colButtons = i;
               }
             }
             if ( a.fixed ){
@@ -1125,10 +1337,67 @@
         this.colsLeft = colsLeft;
         this.colsMain = colsMain;
         this.colsRight = colsRight;
-      }
+        this.colButtons = colButtons;
+      },
+
+      getEditableComponent(col, data){
+        if ( col.editor ){
+          return col.editor;
+        }
+        if ( col.type ){
+          switch ( col.type ){
+            case "date":
+              return 'bbn-datepicker';
+            case "email":
+              return 'bbn-input';
+            case "url":
+              return 'bbn-input';
+            case "number":
+              return 'bbn-numeric';
+            case "money":
+              return 'bbn-numeric';
+            case "bool":
+            case "boolean":
+              return 'bbn-checkbox';
+          }
+        }
+        if ( col.source ){
+          return 'bbn-dropdown';
+        }
+        return 'bbn-input';
+      },
+
+      getEditableOptions(col, data){
+        let res = col.options ? (
+          $.isFunction(col.options) ? col.options(col, data) : col.options
+        ) : {};
+        if ( col.type ){
+          switch ( col.type ){
+            case "date":
+              break;
+            case "email":
+              $.extend(res, {type: 'email'});
+              break;
+            case "url":
+              $.extend(res, {type: 'url'});
+              break;
+            case "number":
+              break;
+            case "money":
+              break;
+            case "bool":
+            case "boolean":
+              break;
+          }
+        }
+        if ( col.source ){
+          $.extend(res, {source: col.source});
+        }
+        return res;
+      },
     },
 
-     created(){
+    created(){
       var vm = this;
       // Adding bbn-column from the slot
       if (vm.$slots.default){
@@ -1163,7 +1432,7 @@
     watch: {
       editedRow: {
         deep: true,
-        handler(newVal, oldVal){
+        handler(newVal){
           bbn.fn.log("editedRow is changing", newVal);
         }
       },
@@ -1177,6 +1446,136 @@
         deep: true,
         handler(){
           this.init();
+        }
+      }
+    },
+    components: {
+      'bbn-columns': {
+        template: '#bbn-tpl-component-column',
+        props: {
+          width: {
+            type: [String, Number],
+          },
+          render: {
+            type: [String, Function]
+          },
+          title: {
+            type: [String, Number],
+            default: bbn._("Untitled")
+          },
+          ftitle: {
+            type: String
+          },
+          icon: {
+            type: String
+          },
+          cls: {
+            type: String
+          },
+          type: {
+            type: String
+          },
+          field: {
+            type: String
+          },
+          fixed: {
+            type: [Boolean, String],
+            default: false
+          },
+          hidden: {
+            type: Boolean
+          },
+          encoded: {
+            type: Boolean,
+            default: false
+          },
+          sortable: {
+            type: Boolean,
+            default: true
+          },
+          filterable: {
+            type: Boolean,
+            default: true
+          },
+          resizable: {
+            type: Boolean,
+            default: true
+          },
+          showable: {
+            type: Boolean,
+            default: true
+          },
+          buttons: {
+            type: [Array, Function]
+          },
+          source: {
+            type: [Array, Object, String]
+          },
+          required: {
+            type: Boolean,
+          },
+          options: {
+            type: [Object, Function],
+            default(){
+              return {};
+            }
+          },
+          editor: {
+            type: [String, Object]
+          }
+        },
+
+        methods: {
+        },
+
+        data: function(){
+          var vm = this,
+              r = bbn.vue.treatData(vm).widgetCfg || {};
+          if ( vm.$options && vm.$options.props ){
+            for ( var n in r ){
+              if ( vm.$options.props[n] !== undefined ){
+                delete r[n];
+              }
+            }
+          }
+          r.table = null;
+          r.isComponent = null;
+          r.name = bbn.fn.randomString(20, 15).toLowerCase();
+          r.isMounted = false;
+          return r;
+        },
+
+        mounted(){
+
+        },
+
+        beforeDestroyed(){
+
+        },
+
+        watch: {
+          selected: function(newVal, oldVal){
+            if ( newVal && !oldVal ){
+              var vm = this;
+              if ( vm.load ){
+                vm.$parent.load(vm.url);
+              }
+              else{
+                bbn.fn.log("TabNav selected has changed - old: " + oldVal + " new: " + newVal + " for URL " + vm.url);
+                bbn.fn.analyzeContent(vm.$el, true);
+              }
+            }
+          },
+          content: function(){
+            var ele = this.$el;
+            bbn.fn.analyzeContent(ele, true);
+          },
+          source: {
+            deep: true,
+            handler: function(){
+              this.$forceUpdate();
+            }
+          }
         }
       }
     }

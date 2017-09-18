@@ -9,7 +9,7 @@
         @mouseenter="over($event)"
         @mouseleave="out($event)"
         :type="type"
-        :disabled="disabled"
+        :disabled="isDisabled"
         :title="text && notext ? text : (title ? title : '')"
 >
   <i v-if="icon" :class="icon"> </i>

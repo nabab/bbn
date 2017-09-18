@@ -6,7 +6,7 @@
     >
       <div class="k-overlay"
            v-if="popups.length"
-           :style="{zIndex: zIndex + num - 1}"
+           :style="{zIndex: zIndex + popups.length - 1}"
       ></div>
     </transition>
     <transition-group name="custom-classes-transition"
@@ -15,40 +15,49 @@
                       tag="div"
                       class="bbn-100"
     >
-      <div class="k-widget bbn-popup-unit"
-           v-for="(popup, i) in popups"
-           :key="popup.ref"
-           :style="{
-             width: popup.maximized ? '100%' : popup.width,
-             height: popup.maximized ? '100%' : popup.height,
-             zIndex: zIndex + i
-           }"
+      <bbn-window inline-template
+                  v-for="(popup, i) in popups"
+                  :key="popup.uid"
+                  :ref="popup.uid"
+                  :index="i"
+                  v-bind="popup"
+                  @close="items.splice(popup.index, 1)"
       >
-        <div class="k-header bbn-popup-title">
-           &nbsp;
-          <span v-html="popup.title"></span>
-          <div class="bbn-popup-actions">
-            <i :class="'zmdi zmdi-window-' + (popup.maximized ? 'restore' : 'maximize')"
-               @click="popup.maximized = !popup.maximized; $forceUpdate(); center(i)"
-               :title="_('Full screen')"
-            ></i>
-            <i class="fa fa-times"
-               @click="close(i)"
-               :title="_('Close')"
-            ></i>
+        <div class="bbn-window k-widget bbn-popup-unit"
+             :style="{
+                    width: isMaximized ? '100%' : realWidth,
+                    height: isMaximized ? '100%' : realHeight,
+                    zIndex: $parent.$parent.$props.zIndex + index
+                  }"
+        >
+          <div class="k-header bbn-popup-title">
+            &nbsp;
+            <span v-html="title"></span>
+            <div class="bbn-popup-actions">
+              <i v-if="maximizable"
+                 :class="'zmdi zmdi-window-' + (maximized ? 'restore' : 'maximize')"
+                 @click="isMaximized = !isMaximized; $forceUpdate(); center(index)"
+                 :title="_('Full screen')"
+              ></i>
+              <i v-if="closable !== false"
+                 class="fa fa-times"
+                 @click="close()"
+                 :title="_('Close')"
+              ></i>
+            </div>
+          </div>
+          <div class="bbn-w-100" v-bbn-fill-height tabindex="0">
+            <component v-if="component"
+                       :is="component"
+                       :source="source"
+            ></component>
+            <bbn-scroll v-else-if="content"
+            >
+              <div class="bbn-block bbn-w-100" v-html="content"></div>
+            </bbn-scroll>
           </div>
         </div>
-        <div class="bbn-w-100" v-bbn-fill-height tabindex="0">
-          <component v-if="popup.component"
-                     :is="popup.component"
-                     :source="popup.source"
-          ></component>
-          <bbn-scroll v-else-if="popup.content"
-          >
-            <div class="bbn-block bbn-w-100" v-html="popup.content"></div>
-          </bbn-scroll>
-        </div>
-      </div>
+      </bbn-window>
     </transition-group>
   </div>
 </div>

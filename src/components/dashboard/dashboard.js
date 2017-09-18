@@ -155,7 +155,7 @@
                 text: a.text,
                 click: (e, idx, obj) => {
                   bbn.fn.log("OK1");
-                  if ( this.source[idx] && (vm.source[idx].closable !== false) ){
+                  if ( this.source[idx] && (this.source[idx].closable !== false) ){
                     bbn.fn.log("OK2");
                     let key = a.key,
                         obj = bbn.vue.getChildByKey(this, key, '.bbn-widget');

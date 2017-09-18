@@ -42,12 +42,21 @@
       };
     },
     methods: {
+      change(){
+        bbn.fn.info("CHANGE FROM CHECKBOX", this);
+      },
       click(e){
+        //this.isChecked = !this.isChecked;
         bbn.fn.log("CLICK", this);
-        this.checked = this.checked ? false : true;
+        this.$emit("input", this.checked ? this.value : false);
+        this.$emit("change", this.checked ? this.value : false);
+        //this.checked = this.checked ? false : true;
         /*this.$forceUpdate();
         this.$emit("change", this.checked ? this.value : false);
-        this.$emit("input", this.checked ? this.value : false);*/
+        */
+      },
+      keyup(e){
+        bbn.fn.log("keyup", e);
       }
     },
     beforeMount(){

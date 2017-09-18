@@ -97,11 +97,13 @@
       'colorpicker',
       'combo',
       'context',
+      'countdown',
       'dashboard',
       'datepicker',
       'datetimepicker',
       'dropdown',
       'dropdowntreeview',
+      'filter',
       'fisheye',
       'footer',
       'form',
@@ -109,7 +111,6 @@
       'input',
       'json-editor',
       'list',
-      'loader',
       'loading',
       'markdown',
       'masked',
@@ -120,7 +121,6 @@
       'notification',
       'numeric',
       'popup',
-      'popup-footer',
       'radio',
       'rte',
       'scroll',
@@ -129,14 +129,12 @@
       'search',
       'slider',
       'splitter',
-      'tab',
       'table',
       'tabnav',
       'textarea',
       'timepicker',
       'toolbar',
       'tree',
-      'tree-node',
       'treemenu',
       'tree-input',
       'upload',
@@ -256,7 +254,6 @@
         obj = {};
       }
       let r = {};
-      bbn.fn.log("getOptioons2");
       return $.extend(obj, r, this.widgetOptions);
     },
 
@@ -509,15 +506,33 @@
           default: false
         },
         size: {
-          type: Number
+          type: [Number, String]
         },
         maxlength: {
           type: [String, Number]
+        },
+        validation: {
+          type: [Function]
+        },
+        type: {
+          type: String
         },
       },
       methods: {
         emitInput(val){
           this.$emit('input', val);
+        },
+        isValid(val){
+          if ( this.validation ){
+            if ( this.type ){
+
+            }
+            if ( this.validation(val) ){
+              return (!this.required || val);
+            }
+            return false;
+          }
+          return (!this.required || val);
         }
       },
       mounted(){
@@ -550,7 +565,6 @@
         },
         value(newVal){
           if ( this.widget && (this.widget.value !== undefined) ){
-            bbn.fn.log("Widget change");
             if ( $.isFunction(this.widget.value) ){
               if ( this.widget.value() !== newVal ){
                 this.widget.value(newVal);
@@ -593,7 +607,7 @@
         }
       },
       beforeDestroy(){
-        bbn.fn.log("Default destroy");
+        //bbn.fn.log("Default destroy");
         //this.destroy();
       },
       methods: {
@@ -624,7 +638,7 @@
           */
         },
         build(){
-          bbn.fn.log("Default build");
+          bbn.fn.info("CLASSIC BUILD");
         },
         getWidgetCfg(){
           const vm = this;
@@ -851,7 +865,7 @@
           // Executing directive's function
           $(el).data(dName, () => {
             if ( bbn.fn[fName](el, true) ){
-              bbn.fn.log("Emitting from vnode", vnode.context.$el);
+              bbn.fn.log("Emitting from vnode", vnode);
               vnode.context.$emit("resize")
             }
           });

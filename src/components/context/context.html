@@ -1,0 +1,8 @@
+<component :is="tag"
+           class="bbn-context"
+           @click.prevent.stop="clickItem"
+           @contextmenu.prevent.stop="clickItem"
+           @mousedown.prevent.stop="() => {return false}"
+>
+  <slot></slot>
+</component>

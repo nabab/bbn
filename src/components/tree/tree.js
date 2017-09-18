@@ -4,57 +4,76 @@
 (function($, bbn){
   "use strict";
 
-  const nodeProperties = ["selected", "selectedClass", "activeClass", "expanded", "tooltip", "icon", "selectable", "text", "data", "cls", "component", "num", "source", "level", "initial"];
+  const NODEPROPERTIES = ["selected", "selectedClass", "activeClass", "expanded", "tooltip", "icon", "selectable", "text", "data", "cls", "component", "num", "source", "level", "items"];
 
   Vue.component('bbn-tree', {
     template: '#bbn-tpl-component-tree',
+    // The events that will be emitted by this component
+    _emitter: ['dragstart', 'drag', 'dragend', 'select', 'open'],
     props: {
-      autoload: {
-        type: Boolean,
-        default: true
-      },
+      // The level until which the tree must be opened
       minExpandLevel: {
         type: Number,
         default: 0
       },
+      // True if the whole tree must be opened
       opened: {
         type: Boolean,
         default: false
       },
+      // A function for mapping the tree data
       map: {
         type: Function,
       },
+      // The data to send to the server
+      data: {
+        type: Object,
+        default(){
+          return {};
+        }
+      },
+      // An array of objects representing the nodes
       source: {
         Type: [Array, String]
       },
+      // Set to false if the source shouldn't be loaded at mount time
+      autoload: {
+        type: Boolean,
+        default: true
+      },
+      // The class given to the node (or a function returning the class name)
       cls: {
         type: [Function, String]
       },
+      // A component for the node
       component: {
-        type: [Function, String]
+        type: [Function, String, Object]
       },
+      // The data field used as UID
       uid: {
         Type: String
       },
+      // Set to true for having the nodes draggable
       draggable: {
         type: Boolean,
         default: false
       },
-      target: {
-        type: Boolean,
-        default: false
-      },
-      root: {
-        type: [String, Number]
-      },
+      // An array (or a function returning one) of elements for the node context menu
       menu: {
         type: [Array, Function]
       },
+      // An string (or a function returning one) for the icon's color
       iconColor: {
         type: [String, Function]
       },
-      connectTo: {
-        type: [Function, Array, Vue]
+      // The value of the UID to send for the root tree
+      root: {
+        type: [String, Number]
+      },
+      // The hierarchy level, root is 0, and for each generation 1 is added to the level
+      level: {
+        type: Number,
+        default: 0
       },
       startDrag: {
         type: [Function],
@@ -67,9 +86,10 @@
         default(){
           return true
         }
-      },
+      }
     },
-    data: function(){
+
+    data(){
       let items = [];
       if ( typeof(this.source) !== 'string' ){
         if ( this.map ){
@@ -82,27 +102,112 @@
         }
       }
       return {
-        url: false,
+        // Only for the origin tree
+        isRoot: false,
+        // The parent node if not root
+        node: false,
+        // The parent tree if not root
+        tree: false,
+        // The URL where to pick the data from if isAjax
+        url: typeof(this.source) === 'string' ? this.source : false,
+        // Is the data provided from the server side
         isAjax: typeof(this.source) === 'string',
+        // True when the data is currently loading in the tree (unique to the root)
         isLoading: false,
+        // True when the data is currently loading in the current tree
+        loading: false,
+        // True once the data of the tree has been loaded
+        isLoaded: false,
+        // True once the component is mounted
+        isMounted: false,
+        // The actual list of items (nodes)
         items: items,
-        isInit: false,
+        // The currently active node component object
         activeNode: false,
+        // The currently selected node component object
         selectedNode: false,
+        // The component node object over which the mouse is now
         overNode: false,
+        // dragging state, true if an element is being dragged
         dragging: false
       };
     },
-    beforeMount(){
-      if ( this.isAjax === 'string' ){
-        this.url = this.source;
-        if ( this.autoload ){
-          this.load();
-        }
-      }
-    },
+
     methods: {
+
+      // Resize the root scroller
+      resize(){
+        this.tree.$refs.scroll.onResize();
+      },
+
+      // Make the root tree resize and emit an open event
+      onOpen(){
+        this.resize();
+        this.$emit('open');
+        this.tree.$emit('open', this);
+      },
+
+      // Make the root tree resize and emit a close event
+      onClose(){
+        this.resize();
+        this.$emit('close');
+        this.tree.$emit('close', this);
+      },
+
+      // Find a node based on its props
+      _findNode(props, node){
+        let ret = false;
+        if ( node.numChildren && !node.isExpanded ){
+          node.isExpanded = true;
+        }
+        if ( node.$children && node.numChildren && node.isExpanded && Object.keys(props) ){
+          $.each(node.$children, (i, n) => {
+            if ( n.data ){
+              let tmp = {};
+              $.each(Object.keys(props), (j, k) => {
+                if ( n.data[k] === undefined ){
+                  return true;
+                }
+                tmp[k] = n.data[k];
+              });
+              if ( JSON.stringify(tmp) === JSON.stringify(props) ){
+                ret = n;
+              }
+            }
+          });
+        }
+        return ret;
+      },
+
+      // Find a node based on path
+      getNode(arr, node){
+        node = node || this.$refs.root;
+        if ( arr ){
+          if ( !Array.isArray(arr) ){
+            arr = [arr];
+          }
+          arr = arr.map((v) => {
+            if ( (typeof v === 'number') || (typeof v === 'string') ){
+              return {idx: v}
+            }
+            /*else if ( Array.isArray(v) ){
+
+            }
+            else if ( typeof arr === 'object' ){
+
+            }*/
+            return v;
+          });
+          arr.forEach((v) => {
+            node = this._findNode(v, node);
+          });
+          return node;
+        }
+      },
+
+      // Returns the menu of a given node
       getMenu(node){
+        let idx = $(node.$el).index();
         let menu = [];
         if ( this.isAjax ){
           menu.push({
@@ -114,7 +219,7 @@
           })
         }
         if ( this.menu ){
-          let m2 = $.isFunction(this.menu) ? this.menu(this) : this.menu;
+          let m2 = $.isFunction(this.menu) ? this.menu(node, idx) : this.menu;
           if ( m2.length ){
             $.each(m2, function(i, a){
               menu.push(a);
@@ -123,26 +228,39 @@
         }
         return menu;
       },
-      dataToSend(node){
+
+      // Returns an object with the data to send for a given node
+      // If UID has been given obj will only have this prop other the whole data object
+      dataToSend(){
         // The final object to send
         let r = {};
         // If the uid field is defined
         if ( this.uid ){
           // If an item has been given we send the corresponding data, or otherwise an empty string
-          r[this.uid] = node && node.data && node.data[this.uid] ? node.data[this.uid] : (this.root ? this.root : '');
+          if ( this.node ){
+            r[this.uid] = this.node.data && this.node.data[this.uid] ? this.node.data[this.uid] : '';
+          }
+          else if ( this.isRoot ){
+            r[this.uid] = this.root ? this.root : '';
+          }
         }
-        else if ( node && node.data ){
-          r = node.data;
+        else if ( this.node ){
+          r = this.node.data;
+        }
+        else{
+          r = this.data;
         }
         return r;
       },
+
+      // Makes an object out of the given properties, adding to data all non existing props
       normalize(obj){
         let r = {
           data: {}
         };
         if ( obj.text || obj.icon ){
           for ( var n in obj ){
-            if ( $.inArray(n, nodeProperties) > -1 ){
+            if ( $.inArray(n, NODEPROPERTIES) > -1 ){
               r[n] = obj[n];
             }
             else{
@@ -153,16 +271,18 @@
         }
         return false;
       },
+
+      // Manages the key navigation inside the tree
       keyNav(e){
         e.preventDefault();
         e.stopImmediatePropagation();
-        if ( this.activeNode ){
+        if ( this.tree.activeNode ){
           let idx = false,
               min = 1,
-              max = this.activeNode.$parent.$children.length - 1,
-              parent = this.activeNode.$parent;
-          $.each(this.activeNode.$parent.$children, (i, a) => {
-            if ( a === this.activeNode ){
+              max = this.tree.activeNode.$parent.$children.length - 1,
+              parent = this.tree.activeNode.$parent;
+          $.each(this.tree.activeNode.$parent.$children, (i, a) => {
+            if ( a === this.tree.activeNode ){
               idx = i;
               return false;
             }
@@ -171,12 +291,12 @@
           switch ( e.key ){
             case 'Enter':
             case ' ':
-              this.activeNode.isSelected = !this.activeNode.isSelected;
+              this.tree.activeNode.isSelected = !this.tree.activeNode.isSelected;
               break;
             case 'PageDown':
             case 'End':
-              if ( this.activeNode ){
-                this.activeNode.isActive = false;
+              if ( this.tree.activeNode ){
+                this.tree.activeNode.isActive = false;
               }
               let node = this.$refs.root;
               while ( node.$children.length && node.isExpanded ){
@@ -187,8 +307,8 @@
 
             case 'PageUp':
             case 'Home':
-              if ( this.activeNode ){
-                this.activeNode.isActive = false;
+              if ( this.tree.activeNode ){
+                this.tree.activeNode.isActive = false;
               }
               if ( this.$refs.root.$children[1] ){
                 this.$refs.root.$children[1].isActive = true;
@@ -196,29 +316,29 @@
               break;
 
             case 'ArrowLeft':
-              if ( this.activeNode.isExpanded ){
-                this.activeNode.isExpanded = false;
+              if ( this.tree.activeNode.isExpanded ){
+                this.tree.activeNode.isExpanded = false;
               }
-              else if ( this.activeNode.$parent !== this.$refs.root ){
-                this.activeNode.$parent.isActive = true;
+              else if ( this.tree.activeNode.$parent !== this.$refs.root ){
+                this.tree.activeNode.$parent.isActive = true;
               }
               break;
             case 'ArrowRight':
-              if ( !this.activeNode.isExpanded ){
-                this.activeNode.isExpanded = true;
+              if ( !this.tree.activeNode.isExpanded ){
+                this.tree.activeNode.isExpanded = true;
               }
               break;
             case 'ArrowDown':
-              if ( this.activeNode.isExpanded && (this.activeNode.items.length > 1) ){
-                this.activeNode.$children[1].isActive = true;
+              if ( this.tree.activeNode.isExpanded && (this.tree.activeNode.items.length > 1) ){
+                this.tree.activeNode.$children[1].isActive = true;
               }
               else if ( idx < max ){
                 bbn.fn.log("ORKING");
                 parent.$children[idx+1].isActive = true;
               }
               else {
-                let c = this.activeNode,
-                    p = this.activeNode.$parent;
+                let c = this.tree.activeNode,
+                    p = this.tree.activeNode.$parent;
                 while ( (p.level > 0) && !p.$children[idx+1] ){
                   c = p;
                   p = p.$parent;
@@ -254,7 +374,7 @@
                   parent.isActive = true;
                 }
                 /*
-                let c = this.activeNode.$parent,
+                let c = this.tree.activeNode.$parent,
                     p = c.$parent,
                     idx = false;
 
@@ -270,89 +390,79 @@
               }
               break;
           }
-          bbn.fn.log("TEST TREE", e, this.activeNode)
+          bbn.fn.log("TEST TREE", e, this.tree.activeNode)
         }
-        else if ( this.selectedNode ){
-          this.activeNode = this.selectedNode;
+        else if ( this.tree.selectedNode ){
+          this.tree.activeNode = this.tree.selectedNode;
         }
       },
-      reload(treeNode){
-        treeNode.items = [];
-        this.$nextTick(() => {
-          this.load(treeNode);
-        })
-      },
-      load(treeNode){
-        bbn.fn.log("treeNode", treeNode);
+
+      // Reloads a node already loaded
+      reload(){
         if ( this.isAjax ){
-          this.isLoading = true;
-          bbn.fn.post(this.source, this.dataToSend(treeNode), (res) => {
-            this.isLoading = false;
-            if ( res.data ){
-              if ( treeNode ){
-                if ( this.map ){
-                  treeNode.items = $.map(res.data || [], this.map);
-                }
-                else{
-                  treeNode.items = res.data;
-                }
-                treeNode.numChildren = treeNode.items.length;
-              }
-              else{
-                if ( this.map ){
-                  this.items = $.map(res.data || [], this.map);
-                }
-                else{
-                  this.items = res.data;
-                }
-                this.$nextTick(() => {
-                  this.isInit = true;
-                });
-              }
-            }
+          this.items = [];
+          this.isLoaded = false
+          this.$nextTick(() => {
+            this.load();
           })
         }
       },
-      select(node){
-        if ( this.selectedNode ){
-          this.selectedNode.isSelected = false;
+
+      // Loads a node
+      load(){
+        // It must be Ajax and not being already in loading state
+        if ( this.isAjax && !this.tree.isLoading && !this.isLoaded ){
+          this.tree.isLoading = true;
+          this.loading = true;
+          bbn.fn.post(this.tree.url, this.dataToSend(), (res) => {
+            this.tree.isLoading = false;
+            this.loading = false;
+            if ( res.data ){
+              bbn.fn.log(res.data);
+              if ( this.tree.map ){
+                this.items = $.map(
+                  res.data || [],
+                  this.tree.map
+                );
+              }
+              else{
+                this.items = res.data;
+              }
+            }
+            this.isLoaded = true;
+          })
         }
-        this.selectedNode = node;
-        bbn.fn.log(node, this);
-        this.$emit('select', node.data, node, this);
       },
-      unselect(node){
-        if ( this.selectedNode === node ){
-          this.selectedNode = false;
+
+      // Unselects the currently selected node
+      unselect(){
+        if ( this.tree.selectedNode ){
+          this.tree.selectedNode.isSelected = false;
         }
-        bbn.fn.log("unselecting", node);
       },
-      activate(node){
-        if ( this.activeNode ){
-          this.activeNode.isActive = false;
+
+      // Deactivate the active node
+      deactivateAll(){
+        if ( this.tree.activeNode ){
+          this.tree.activeNode.isActive = true;
         }
-        this.activeNode = node;
-        this.$emit('activate', this);
       },
-      deactivate(node){
-        if ( node.isActive ){
-          node.isActive = false;
-        }
-        this.$emit('deactivate', this);
-      },
+
+      // Returns true if the first argument node descends from the second
       isNodeOf(childNode, parentNode){
-        childNode = childNode.$parent;
-        while ( childNode && (childNode !== this.root) ){
+        childNode = bbn.vue.closest(childNode, 'bbn-tree-node');
+        while ( childNode ){
           if ( childNode === parentNode ){
             return true;
           }
-          childNode = childNode.$parent;
+          childNode = bbn.vue.closest(childNode, 'bbn-tree-node');
         }
         return false;
       },
+
+      // Moves a node to or inside a tree
       move(node, target, index){
         if ( this.endDrag(this, node, target, index) ){
-          alert('move');
           let idx = $(node.$el).index();
           if ( idx > -1 ){
             let params = $.extend({}, node.$options.propsData);
@@ -367,8 +477,10 @@
           bbn.fn.log(idx, node.$options.propsData, target.$options.propsData, node, target);
         }
       },
+
+      // dragging action
       drag(e){
-        if ( this.dragging ){
+        if ( this.tree.dragging ){
           e.preventDefault();
           e.stopImmediatePropagation();
           $(this.$el).find(".dropping").removeClass("dropping");
@@ -383,13 +495,13 @@
             left += p.left;
             $container = $container.offsetParent();
           }
-          this.$refs.helper.style.left = left + 'px';
-          this.$refs.helper.style.top = top + 'px';
+          this.tree.$refs.helper.style.left = left + 'px';
+          this.tree.$refs.helper.style.top = top + 'px';
           let ok = false;
           if (
             this.overNode &&
-            (this.dragging !== this.overNode) &&
-            !this.isNodeOf(this.overNode, this.dragging)
+            (this.tree.dragging !== this.overNode) &&
+            !this.isNodeOf(this.overNode, this.tree.dragging)
           ){
             let $t = $(e.target);
             $t.parents().each((i, a) => {
@@ -409,15 +521,266 @@
             this.overNode = false;
           }
         }
+      },
+
+      // Returns an object with all the unknown properties of the node component
+      toData(data){
+        let r = {};
+        for ( let n in data ){
+          if ( $.inArray(n, NODEPROPERTIES) === -1 ){
+            r[n] = data[n];
+          }
+        }
+        return r;
       }
     },
-    mounted: function(){
-      this.load();
+
+    // Definition of the root tree and parent node
+    created(){
+      let cp = bbn.vue.closest(this, 'bbn-tree');
+      if ( !cp ){
+        this.isRoot = true;
+        this.node = false;
+        this.tree = this;
+      }
+      else{
+        while ( cp && cp.level ){
+          cp = bbn.vue.closest(cp, 'bbn-tree');
+        }
+        if ( cp && !cp.level ){
+          this.tree = cp;
+          this.isAjax = this.tree.isAjax;
+        }
+        this.node = bbn.vue.closest(this, 'bbn-tree-node');
+      }
+      if ( !this.isAjax || this.items.length ){
+        this.isLoaded = true;
+      }
     },
+
+    mounted: function(){
+      if ( this.isRoot && this.autoload ){
+        this.load();
+      }
+      this.isMounted = true;
+    },
+
     watch: {
       activeNode(newVal){
         if ( newVal ){
           this.$refs.scroll.scrollTo(0, newVal.$el);
+        }
+      }
+    },
+
+    components: {
+      'bbn-tree-node': {
+        name: 'bbn-tree-node',
+
+        props: {
+          // True if the node is the one selected
+          selected:{
+            type: Boolean,
+            default: false
+          },
+          // True if the node is expanded (opened)
+          expanded:{
+            type: Boolean,
+            default: false
+          },
+          // A message to show as tooltip
+          tooltip: {
+            type: String
+          },
+          // The icon - or not
+          icon:{
+            type: [Boolean, String]
+          },
+          // True if the node is selectable
+          selectable: {
+            type: Boolean,
+            default: true
+          },
+          // The text inside the node, its title
+          text: {
+            type: String
+          },
+          // The data attached to the node
+          data: {
+            type: Object,
+            default(){
+              return {};
+            }
+          },
+          // A class to give to the node
+          cls: {
+            type: [String]
+          },
+          // A component for the node
+          component: {
+            type: [String, Function, Vue]
+          },
+          // The number of children of the node
+          num: {
+            type: Number
+          },
+          // The list of children from the node
+          source: {
+            type: Array,
+            default(){
+              return [];
+            }
+          },
+          // Node's level (see tree)
+          level: {
+            type: Number,
+            default: 1
+          },
+        },
+
+        data: function(){
+          return {
+            // The parent tree
+            parent: false,
+            // The root tree
+            tree: false,
+            // Sanitized list of items
+            items: this.source.slice(),
+            isSelected: this.selected,
+            isActive: false,
+            isExpanded: this.expanded,
+            numChildren: this.num !== undefined ? this.num : this.source.length,
+            animation: this.level > 0,
+            isMounted: false
+          }
+        },
+        computed: {
+          iconStyle(){
+            let style = {};
+            if ( this.tree.iconColor ){
+              style.color = $.isFunction(this.tree.iconColor) ? this.tree.iconColor(this) : this.tree.iconColor;
+            }
+            return style;
+          },
+          menu(){
+            return this.getMenu()
+          }
+        },
+        methods: {
+          resize(){
+            this.parent.resize();
+          },
+          getMenu(){
+            return this.tree.getMenu(this);
+          },
+          beforeEnter(){
+            if ( this.animation ){
+              alert("beforeEnter " + $(this.$refs.container).height());
+            }
+          },
+          enter(){
+            if ( this.animation ){
+              alert("enter " + $(this.$refs.container).height());
+            }
+          },
+          afterEnter(){
+            if ( this.animation ){
+              alert("afterEnter " + $(this.$refs.container).height());
+            }
+          },
+          startDrag(e){
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            this.tree.dragging = this;
+            $(document.body).one('mouseup', this.endDrag);
+            this.tree.$refs.helper.innerHTML = this.$el.outerHTML;
+          },
+          endDrag(e){
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            if (
+              this.tree.overNode &&
+              (this.tree.dragging !== this.tree.overNode) &&
+              !this.tree.isNodeOf(this.tree.overNode, this.tree.dragging)
+            ){
+              this.tree.move(this, this.tree.overNode);
+            }
+            this.tree.dragging = false;
+            this.isSelected = !this.isSelected;
+          },
+          mouseOver(){
+            this.tree.overNode = this;
+          },
+        },
+        created(){
+          this.parent = bbn.vue.closest(this, 'bbn-tree');
+          this.tree = this.parent.tree || this.parent;
+        },
+        mounted(){
+          if ( this.tree.opened ){
+            this.isExpanded = true;
+          }
+          else if ( this.level < this.tree.minExpandLevel ){
+            this.isExpanded = true;
+          }
+          this.$nextTick(() => {
+            if ( !this.animation ){
+              setTimeout(() => {
+                this.animation = true;
+              }, 500)
+            }
+            this.isMounted = true;
+            $(this.$el)
+              .draggable({
+                containment: this.tree.$refs.scroll.$refs.scrollContent,
+                appendTo: this.tree.$refs.scroll.$refs.scrollContent,
+                helper: "clone",
+                opacity: 0.6,
+                drag: (e, ui) => {
+                  let posY = ui.top;
+                  bbn.fn.log(e.pageY, e, ui);
+                }
+              })
+              .children(".node")
+              .droppable({
+                accept: '.bbn-tree-node',
+                hoverClass: 'dropping'
+              });
+          })
+        },
+        watch: {
+          isExpanded(newVal){
+            if ( newVal ){
+              if ( this.numChildren && !this.$refs.tree[0].isLoaded ){
+                bbn.fn.info("FROM IS_EXPANDED");
+                this.$refs.tree[0].load();
+              }
+              else{
+                this.resize();
+              }
+            }
+            else{
+              bbn.fn.log("isExpanded false", this.tree.isNodeOf(this.tree.selectedNode, this));
+              if ( this.tree.selectedNode && this.tree.isNodeOf(this.tree.selectedNode, this) ){
+                this.isSelected = true;
+              }
+              this.resize();
+            }
+          },
+          isSelected(newVal){
+            if ( this.tree.selectedNode ){
+              this.tree.selectedNode.isSelected = false;
+            }
+            this.tree.selectedNode = this;
+            this.tree.$emit(newVal ? 'select' : 'unselect', this);
+          },
+          isActive(newVal){
+            if ( this.tree.activeNode ){
+              this.tree.selectedNode.isActive = false;
+            }
+            this.tree.activeNode = this;
+            this.tree.$emit(newVal ? 'activate' : 'deactivate', this);
+          }
         }
       }
     }

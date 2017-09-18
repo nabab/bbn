@@ -5,13 +5,13 @@
 	width: 100%;
 	height: 100%;
 	list-style: none;
-	> div.bbn-scroll > div.bbn-scroll-container > div.bbn-block > ul.root > li > span.node {
-		display: none;
-	}
 	ul{
 		list-style: none;
-		padding: 0 0 0 16px;
+		padding: 0;
 		margin: 0;
+		&.bbn-tree-child {
+			padding-left: 16px;
+		}
 	}
 	ul.helper{
 		position: absolute;
@@ -26,5 +26,57 @@
 	}
 	.bbn-tree-toggle-enter, .bbn-tree-toggle-leave-to{
 		max-height: 0;
+	}
+	.bbn-tree-node{
+		clear: both;
+		margin: 0;
+		box-sizing: content-box;
+		span.node{
+			display: inline-block;
+			white-space: nowrap;
+			height: auto;
+			min-height: 18px;
+			&.dropping{
+				background-color: green;
+				color: white;
+			}
+			&.no-component{
+				span{
+					height: 100%;
+					display: inline-block;
+				}
+				.selectable{
+					cursor: pointer;
+					padding: 1px;
+				}
+				.expander{
+					width: 18px;
+					i{
+						cursor: pointer;
+					}
+				}
+				.icon{
+					width: 18px;
+					i{
+						font-size: 18px;
+					}
+				}
+				.title{
+					padding-left: 0.3em;
+					white-space: nowrap;
+				}
+			}
+		}
+		&.selected > span.node > span > span.selectable{
+			border: 1px solid blue;
+			padding: 0;
+			background-color: blue;
+			color: white;
+		}
+		&.active > span.node > span > span.selectable{
+			border: 1px dotted #CCC !important;
+			padding: 0;
+			color: white;
+		}
 	}
 }

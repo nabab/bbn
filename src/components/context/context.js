@@ -7,33 +7,14 @@
   /**
    * Classic input with normalized appearance
    */
-  var mapper = function(ar){
-    var r = [];
-    $.each(ar, function(i, a){
-      r[i] = {
-        encoded: false,
-        text: '<span class="bbn-context-li' +
-          (a.disabled ? ' disabled' : '') +
-          (a.hidden ? ' hidden' : '') +
-          '">' +
-          (a.icon || a.selected ? '<i class="' + ( a.icon ? a.icon : 'fa fa-check') + '"></i>' : '<i class="fa"> </i>' ) +
-          a.text +
-          '</span>',
-      };
-      if ( a.click ){
-        r[i].click = a.click;
-      }
-      if ( a.items ){
-        r[i].items = mapper(a.items);
-      }
-    });
-    return r;
-  };
-
   Vue.component('bbn-context', {
+    template: '#bbn-tpl-component-context',
     props: {
       source: {
-        type: [Function, Array]
+        type: [Function, Array],
+        default(){
+          return []
+        }
       },
       tag: {
         type: String,
@@ -42,64 +23,38 @@
       context: {
         type: Boolean,
         default: false
+      },
+      mode: {
+        type: String,
+        default: 'free'
       }
     },
-    computed: {
-      dataSource: function(){
-        if ( this.source ){
-          //bbn.fn.log("source exists", this.source());
-          return mapper($.isFunction(this.source) ? this.source() : this.source);
-        }
-        return [];
-      }
-    },
-    data: function(){
-      return $.extend({
-        widgetName: "kendoContextMenu",
-      }, bbn.vue.treatData(this));
+    data(){
+      return {
+        items: this.source
+      };
     },
     methods: {
       clickItem(e){
-        const vm = this;
-        bbn.fn.log("context click", vm);
-        let vlist = vm.$root.vlist || (window.appui ? window.appui.vlist : false);
-        if ( vm.dataSource && (vlist !== undefined) ){
-          vlist.push({
-            items: vm.dataSource,
-            left: e.clientX ? e.clientX : vm.$el.offsetLeft,
-            top: e.clientY ? e.clientY : vm.$el.offsetTop
-          });
+        if (
+          ((e.type === 'contextmenu') && this.context) ||
+          ((e.type === 'click') && !this.context)
+        ){
+          bbn.fn.log("context click", this, e);
+          let vlist = this.$root.vlist || (window.appui ? window.appui.vlist : undefined);
+          if ( this.items.length && (vlist !== undefined) ){
+            let x, y;
+            x = (x = e.clientX ? e.clientX : this.$el.offsetLeft) < 5 ? 0 : x - 5;
+            y = (y = e.clientY ? e.clientY : this.$el.offsetTop) < 5 ? 0 : y - 5;
+            vlist.push({
+              mode: this.mode,
+              items: this.items,
+              left: x,
+              top: y
+            });
+          }
         }
       },
-    },
-    render: function(createElement){
-      return createElement(
-        this.tag,
-        $.extend({
-          "class": {
-            "bbn-context": true
-          },
-          on: {
-            click: (e) => {
-              if ( !this.context ){
-                bbn.fn.log("is not context", e);
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                this.clickItem(e);
-              }
-            },
-            contextmenu: (e) => {
-              if ( this.context ){
-                bbn.fn.log("is context");
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                this.clickItem(e);
-              }
-            }
-          }
-        }, true),
-        this.$slots.default
-      );
     }
   });
 
