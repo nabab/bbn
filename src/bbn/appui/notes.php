@@ -175,23 +175,49 @@ class notes extends bbn\models\cls\db
     return $res;
   }
 
-  public function browse($limit = 100, $start = 0){
-    if ( $user = bbn\user::get_instance() ){
-      $cf =& $this->class_cfg;
+  public function browse($table_post){
+    if ( isset($table_post['limit']) && ($user = bbn\user::get_instance()) ){
       /** @var bbn\db $db */
       $db =& $this->db;
-      $sql = "
-      SELECT {$db->tsn($cf['tables']['versions'], 1)}.*,
-      {$db->tsn($cf['tables']['notes'], 1)}.*
-      FROM {$db->tsn($cf['tables']['versions'], 1)}
-        JOIN {$db->tsn($cf['tables']['notes'], 1)}
-          ON {$db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'], 1)} = {$db->cfn($cf['arch']['versions']['id_note'], $cf['tables']['versions'], 1)}
-      WHERE {$db->cfn($cf['arch']['notes']['creator'], $cf['tables']['notes'], 1)} = ?
-      OR {$db->cfn($cf['arch']['versions']['id_user'], $cf['tables']['versions'], 1)} = ?
-      GROUP BY {$db->cfn($cf['arch']['versions']['id_note'], $cf['tables']['versions'], 1)}
-      ORDER BY {$db->cfn($cf['arch']['versions']['creation'], $cf['tables']['versions'], 1)} DESC
-      LIMIT $start, $limit";
-      return $this->db->get_rows($sql, $user->get_id(), $user->get_id());
+      $cf =& $this->class_cfg;
+      $grid = new grid($this->db, $table_post, [
+        'filters' => [
+          'logic' => 'AND',
+          'conditions' => [[
+            'field' => $db->cfn($cf['arch']['notes']['active'], $cf['tables']['notes']),
+            'operator' => 'eq',
+            'value' => 1
+          ], [
+            'logic' => 'OR',
+            'conditions' => [[
+              'field' => $db->cfn($cf['arch']['notes']['private'], $cf['tables']['notes']),
+              'operator' => 'eq',
+              'value' => 0
+            ], [
+              'field' => $db->cfn($cf['arch']['notes']['creator'], $cf['tables']['notes']),
+              'operator' => 'eq',
+              'value' => $user->get_id()
+            ], [
+              'field' => $db->cfn($cf['arch']['versions']['id_user'], $cf['tables']['versions']),
+              'operator' => 'eq',
+              'value' => $user->get_id()
+            ]]
+          ]]
+        ],
+        'query' => "
+          SELECT {$db->tsn($cf['tables']['versions'], 1)}.*,
+          {$db->tsn($cf['tables']['notes'], 1)}.*
+          FROM {$db->tsn($cf['tables']['versions'], 1)}
+            JOIN {$db->tsn($cf['tables']['notes'], 1)}
+              ON {$db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'], 1)} = {$db->cfn($cf['arch']['versions']['id_note'], $cf['tables']['versions'], 1)}",
+        'count' => "
+          SELECT COUNT(DISTINCT {$db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'], 1)})
+          FROM {$db->tsn($cf['tables']['versions'], 1)}
+            JOIN {$db->tsn($cf['tables']['notes'], 1)}
+              ON {$db->cfn($cf['arch']['notes']['id'], $cf['tables']['notes'], 1)} = {$db->cfn($cf['arch']['versions']['id_note'], $cf['tables']['versions'], 1)}",
+        'group_by' => $db->cfn($cf['arch']['versions']['id_note'], $cf['tables']['versions'])
+      ]);
+      return $grid->get_datatable();
     }
   }
 

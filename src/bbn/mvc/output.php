@@ -106,6 +106,10 @@ class output {
       (($this->mode === 'public') && empty($this->obj)) ){
       $this->mode = '';
     }
+    else if ( !empty($this->obj->content) && !empty($this->obj->help) ){
+      $Parsedown = new \Parsedown();
+      $this->obj->help = $Parsedown->text($this->obj->help);
+    }
     //die(var_dump($this->mode, $this->obj));
 
     switch ( $this->mode ){

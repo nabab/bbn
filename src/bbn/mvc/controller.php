@@ -842,6 +842,9 @@ class controller implements api{
 			else if ( is_array($a) ){
 				$data = $a;
 			}
+      else if ( is_int($a) ){
+        $ttl = $a;
+      }
 			else if ( is_bool($a) ){
 				$die = $a;
 			}
@@ -855,7 +858,7 @@ class controller implements api{
 		if ( !isset($data) ){
 			$data = $this->data;
 		}
-		$m = $this->mvc->get_cached_model($path, $data, $this);
+		$m = $this->mvc->get_cached_model($path, $data, $this, $ttl);
 		if ( !is_array($m) && !$die ){
 			die("$path is an invalid model");
 		}
@@ -879,9 +882,12 @@ class controller implements api{
 			else if ( is_array($a) ){
 				$data = $a;
 			}
-			else if ( is_bool($a) ){
-				$die = $a;
-			}
+      else if ( is_int($a) ){
+        $ttl = $a;
+      }
+      else if ( is_bool($a) ){
+        $die = $a;
+      }
 		}
 		if ( !isset($path) ){
 			$path = $this->path;
@@ -889,10 +895,13 @@ class controller implements api{
 		else if ( strpos($path, './') === 0 ){
 			$path = $this->say_dir().substr($path, 1);
 		}
-		if ( !isset($data) ){
-			$data = $this->data;
-		}
-		$this->mvc->set_cached_model($path, $data, $this);
+    if ( !isset($data) ){
+      $data = $this->data;
+    }
+    if ( !isset($ttl) ){
+      $ttl = 10;
+    }
+		$this->mvc->set_cached_model($path, $data, $this, $ttl);
 		return $this;
 	}
 
@@ -925,20 +934,33 @@ class controller implements api{
     return $this->obj;
 	}
 
-	/**
-	 * Checks if data exists
-	 *
-	 * @return bool
-	 */
-	public function has_data($data=null)
-	{
-		if ( is_null($data) ){
-			$data = $this->data;
-		}
-		return ( is_array($data) && (count($data) > 0) ) ? 1 : false;
-	}
+  /**
+   * Checks if data exists
+   *
+   * @return bool
+   */
+  public function has_data($data=null)
+  {
+    if ( is_null($data) ){
+      $data = $this->data;
+    }
+    return ( is_array($data) && (count($data) > 0) ) ? 1 : false;
+  }
 
-	/**
+  /**
+   * Checks if there is ny HTML content in the object
+   *
+   * @return bool
+   */
+  public function has_content()
+  {
+    if ( !is_object($this->obj) ){
+      return false;
+    }
+    return !empty($this->obj->content);
+  }
+
+  /**
 	 * Returns the rendered result from the current mvc if successufully processed
 	 * process() (or check()) must have been called before.
 	 *

@@ -180,21 +180,34 @@ class model extends bbn\models\cls\db{
 		return $this;
 	}
 
-  public function set_cache(array $data = null, $spec=''){
+	protected function _cache_name($data, $spec){
     if ( $this->path ){
-      $d = $this->get($data);
-      $this->cache_set($this->path.(empty($spec) ? '' : '-'.$spec), '', $d);
+      $cn = 'models/'.$this->path;
+      if ( $spec ){
+        $cn .= '/'.$spec;
+      }
+      if ( $data ){
+        $cn .= '/'.md5(serialize($data));
+      }
+      return $cn;
     }
   }
 
-  public function get_from_cache(array $data = null, $spec=''){
+  public function set_cache(array $data = null, $spec='', $ttl = 10){
     if ( $this->path ){
-      if ( $this->cache_has($this->path.(empty($spec) ? '' : '-'.$spec)) ){
-        return $this->cache_get($this->path.(empty($spec) ? '' : '-'.$spec));
+      $d = $this->get($data);
+      $this->cache_set($this->_cache_name($data, $spec), '', $d, $ttl);
+    }
+  }
+
+  public function get_from_cache(array $data = null, $spec='', $ttl = 10){
+    if ( $cn = $this->_cache_name($data, $spec) ){
+      if ( $this->cache_has($cn) ){
+        return $this->cache_get($cn);
       }
-      $this->set_cache($data, $spec);
-      if ( $this->cache_has($this->path.(empty($spec) ? '' : '-'.$spec)) ){
-        return $this->cache_get($this->path.(empty($spec) ? '' : '-'.$spec));
+      $this->set_cache($data, $spec, $ttl);
+      if ( $this->cache_has($cn) ){
+        return $this->cache_get($cn);
       }
       return false;
     }

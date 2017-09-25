@@ -418,15 +418,14 @@ class mvc implements mvc\api{
     }
     if (
       ($name = $this->plugin_name($plugin)) &&
-      ($route = $this->router->route($path, 'html', BBN_APP_PATH.'plugins/'.$name.'/html/'))
+      ($file = $this->router->route($path, $mode, BBN_APP_PATH.'plugins/'.$name.'/'.$mode.'/'))
     ){
-      $view = new mvc\view($route);
+      $view = new mvc\view($file);
       if ( $view->check() ){
-        return empty($data) ? $view->get() : $view->get($data);
+        return is_array($data) ? $view->get($data) : $view->get();
       }
       return '';
     }
-    die('Error with the plugin view '.$path.' for '.$name.' ('.$plugin.')');
   }
 
   /**
@@ -460,13 +459,13 @@ class mvc implements mvc\api{
    * @params array data to send to the model
    * @return array|false A data model
    */
-  public function get_cached_model($path, array $data, mvc\controller $ctrl){
+  public function get_cached_model($path, array $data, mvc\controller $ctrl, $ttl = 10){
     if ( is_null($data) ){
       $data = $this->data;
     }
     if ( $route = $this->router->route($path, 'model') ){
       $model = new mvc\model($this->db, $route, $ctrl, $this);
-      return $model->get_from_cache($data);
+      return $model->get_from_cache($data, '', $ttl);
     }
     return [];
   }
@@ -478,13 +477,13 @@ class mvc implements mvc\api{
    * @params array data to send to the model
    * @return array|false A data model
    */
-  public function set_cached_model($path, array $data, mvc\controller $ctrl){
+  public function set_cached_model($path, array $data, mvc\controller $ctrl, $ttl = 10){
     if ( is_null($data) ){
       $data = $this->data;
     }
     if ( $route = $this->router->route($path, 'model') ){
       $model = new mvc\model($this->db, $route, $ctrl, $this);
-      return $model->set_cache($data);
+      return $model->set_cache($data, '', $ttl);
     }
     return [];
   }
@@ -520,6 +519,13 @@ class mvc implements mvc\api{
     }
 	}
 
+	public function has_content(){
+    if ( $this->check() && $this->controller ){
+      return $this->controller->has_content();
+    }
+    return false;
+  }
+
   public function output(){
     if ( $this->check() && $this->controller ){
       $obj = $this->controller->get();
@@ -532,6 +538,9 @@ class mvc implements mvc\api{
 			if ( (gettype($obj) !== 'object') || (get_class($obj) !== 'stdClass') ){
 				die(x::dump("Unexpected output: ".gettype($obj)));
 			}
+			if ( $this->obj ){
+			  $obj = \bbn\x::merge_objects($obj, $this->obj);
+      }
       $output = new mvc\output($obj, $this->get_mode());
       $output->run();
     }
