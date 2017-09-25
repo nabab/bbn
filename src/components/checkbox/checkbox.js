@@ -8,13 +8,21 @@
     mixins: [bbn.vue.eventsComponent],
     props: {
       value: {
-        default: 1
+        default: true
       },
       name: {
-        type: String
+        type: String,
+        default: null
       },
       id: {
-        type: String
+        type: String,
+        default(){
+          return bbn.fn.randomString(10, 25);
+        }
+      },
+      modelValue: {
+        type: [String, Boolean, Array, Number],
+        default: undefined
       },
       required: {
         type: Boolean,
@@ -30,53 +38,56 @@
       checked: {
         type: Boolean,
         default: false
-      }
+      },
+      model: {}
     },
     model: {
-      prop: "checked",
-      event: "change"
+      prop: 'modelValue',
+      event: 'input'
     },
-    data(){
-      return {
-        initialValue: this.value ? this.value : false,
-      };
+    computed: {
+      state () {
+        if ( this.modelValue === undefined ){
+          return this.checked;
+        }
+        if ( Array.isArray(this.modelValue) ){
+          return this.modelValue.indexOf(this.value) > -1;
+        }
+        return !!this.modelValue;
+      }
     },
     methods: {
       change(){
-        bbn.fn.info("CHANGE FROM CHECKBOX", this);
+        this.toggle();
       },
-      click(e){
-        //this.isChecked = !this.isChecked;
-        bbn.fn.log("CLICK", this);
-        this.$emit("input", this.checked ? this.value : false);
-        this.$emit("change", this.checked ? this.value : false);
-        //this.checked = this.checked ? false : true;
-        /*this.$forceUpdate();
-        this.$emit("change", this.checked ? this.value : false);
-        */
-      },
-      keyup(e){
-        bbn.fn.log("keyup", e);
+      toggle(){
+        let value;
+        if ( Array.isArray(this.modelValue) ){
+          value = this.modelValue.slice(0);
+          if ( this.state ){
+            value.splice(value.indexOf(this.value), 1);
+          }
+          else {
+            value.push(this.value);
+          }
+        }
+        else {
+          value = !this.state;
+        }
+        this.$emit('input', value);
       }
     },
-    beforeMount(){
-      bbn.fn.log(this);
+    watch: {
+      checked(newValue){
+        if ( newValue !== this.state ){
+          this.toggle();
+        }
+      }
     },
     mounted(){
-      /*if ( Array.isArray(this.value) ){
-        this.checked = $.inArray(this.initialValue, this.value) > -1 ? true : false;
-        this.$emit("input", this.checked);
+      if ( this.checked && !this.state ){
+        this.toggle();
       }
-      else if ( typeof(this.value) === 'boolean' ){
-        this.checked = this.value;
-      }
-      else{
-        //this.checked = this.initialValue === this.value;
-        this.checked = this.initialValue === this.value;
-        this.$emit("input", this.initialValue);
-      }
-      this.$forceUpdate();
-      this.$emit("ready", this.checked);*/
     }
   });
 })(jQuery, bbn, kendo);

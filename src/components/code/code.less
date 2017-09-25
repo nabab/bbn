@@ -10,7 +10,7 @@
 }
 .bbn-code{
   position: relative;
-  overflow: hidden;
+  overflow: auto;
   height: 100%;
   .CodeMirror {
     height: 100%;
@@ -19,5 +19,11 @@
     font-family: "Fira Code";
     font-feature-settings: "calt" 1;
     text-rendering: optimizeLegibility;
+  }
+  .theme-button{
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    z-index: 3;
   }
 }

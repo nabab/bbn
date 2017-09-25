@@ -96,6 +96,16 @@
     },
 
     methods: {
+      getTabColor(idx){
+        if ( this.tabs[idx].fcolor ){
+          return this.tabs[idx].fcolor;
+        }
+        let el = this.$refs['title-' + idx];
+        if ( el ){
+          return window.getComputedStyle(el[0] || el).color;
+        }
+        return 'black';
+      },
       scrollTabs(dir){
         let ul = this.$refs.tabgroup;
         if ( ul.scrollWidth > ul.clientWidth ){
@@ -104,7 +114,6 @@
               position = ul.scrollLeft,
               max = total - visible,
               newPos = false;
-          bbn.fn.log(dir, total, visible, position, max, '----------');
           if ( (dir === 'left') && (position > 0) ){
             newPos = position - 300 < 0 ? 0 : position - 300;
           }
@@ -448,19 +457,30 @@
             )
           )
         ){
-            index = vm.search(obj.url);
+          index = vm.search(obj.url);
           if ( !obj.menu ){
             obj.menu = [];
-            if ( vm.autoload ){
-              obj.menu.push({
-                text: bbn._("Reload"),
-                key: "reload",
-                icon: "fa fa-refresh",
-                click: function(a){
-                  vm.reload(obj.idx);
-                }
-              });
-            }
+          }
+          if ( obj.help ){
+            obj.menu.push({
+              text: bbn._("Help"),
+              key: "help",
+              icon: "zmdi zmdi-info",
+              click: () => {
+                let tab = this.getVue(obj.idx);
+                tab.getPopup().open('<div class="bbn-padded">' + obj.help + '<div>', bbn._("Help") + ': ' + obj.title);
+              }
+            })
+          }
+          if ( vm.autoload ){
+            obj.menu.push({
+              text: bbn._("Reload"),
+              key: "reload",
+              icon: "fa fa-refresh",
+              click: () => {
+                this.reload(obj.idx);
+              }
+            });
           }
           if ( index !== false ){
             obj.idx = index;
@@ -477,7 +497,6 @@
             if ( idx === undefined ){
               obj.idx = vm.tabs.length;
               vm.tabs.push(obj);
-              bbn.fn.log("ADDING", obj);
             }
             else{
               obj.idx = idx;
@@ -492,11 +511,6 @@
               vm.activateIndex(0);
             }
           }
-          // We give the selected DIV a background color which corresponds to the color of the tab's text
-          // (which might be undefined, so this action is necessary)
-          vm.$nextTick(function(){
-            $(vm.$refs['selector-' + obj.idx]).css("backgroundColor", $(vm.$refs['tab-' + obj.idx]).css("color"));
-          })
         }
       },
 
@@ -537,6 +551,12 @@
             //vm.$nextTick(() => vm.activate(d.url));
           }
         })
+      },
+
+      getMenuFn(idx){
+        return () => {
+          return this.tabs[idx].menu || [];
+        }
       },
 
       reload(idx){
@@ -1002,6 +1022,9 @@
               return {};
             }
           },
+          help: {
+            type: String
+          },
           script: {},
           static: {
             type: [Boolean, Number],
@@ -1097,8 +1120,10 @@
               var menu = vm.$parent.tabs[vm.idx].menu || [],
                   idx = bbn.fn.search(menu, "key", key);
               if ( idx > -1 ){
+                bbn.fn.log("deleteMenu", idx, menu);
                 menu.splice(idx, 1);
                 vm.$parent.$set(vm.$parent.tabs[vm.idx], "menu", menu);
+                vm.$parent.$forceUpdate();
                 return true;
               }
             }

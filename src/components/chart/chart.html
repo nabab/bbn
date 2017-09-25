@@ -1,3 +1,16 @@
-<div class="bbn-chart bbn-margin bbn-padded ct-chart"
-     :title="title"
-></div>
+<div class="bbn-chart k-content"
+     :style="{
+      width: width,
+      height: height,
+      backgroundColor: backgroundColor
+     }"
+>
+  <h4 v-if="title"
+      v-text="title"
+      class="bbn-middle"
+  ></h4>
+  <div ref="chart"
+       class="bbn-w-100 ct-chart"
+       v-bbn-fill-height
+  ></div>
+</div>

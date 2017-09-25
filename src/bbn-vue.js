@@ -80,6 +80,49 @@
   });
 */
 
+  const
+    editorOperators = {
+      string: {
+        'contains': bbn._('Contient'),
+        'eq': bbn._('Est'),
+        'neq': bbn._('N’est pas'),
+        'startswith': bbn._('Commence par'),
+        'doesnotcontain': bbn._('Ne contient pas'),
+        'endswith': bbn._('Se termine par'),
+        'isempty': bbn._('Est vide'),
+        'isnotempty': bbn._('N’est pas vide')
+      },
+      number: {
+        'eq': bbn._('Est égal à'),
+        'neq': bbn._('N’est pas égal à'),
+        'gte': bbn._('Est supérieur ou égal à'),
+        'gt': bbn._('Est supérieur à'),
+        'lte': bbn._('Est inférieur ou égal à'),
+        'lt': bbn._('Est inférieur à'),
+      },
+      date: {
+        'eq': bbn._('Est égal à'),
+        'neq': bbn._('N’est pas égal à'),
+        'gte': bbn._('Est postérieur ou égal à'),
+        'gt': bbn._('Est postérieur à'),
+        'lte': bbn._('Est antérieur ou égal à'),
+        'lt': bbn._('Est antérieur à'),
+      },
+      enums: {
+        'eq': bbn._('Est égal à'),
+        'neq': bbn._('N’est pas égal à'),
+      },
+      boolean: {
+        'istrue': bbn._('Est vrai'),
+        'isfalse': bbn._('Est faux')
+      }
+    },
+    editorNullOps = {
+      'isnull': bbn._('Est nul'),
+      'isnotnull': bbn._('N’est pas nul')
+    },
+    editorNoValueOperators = ['', 'isnull', 'isnotnull', 'isempty', 'isnotempty', 'istrue', 'isfalse'];
+
   bbn.vue = {
     defaultLocalURL: false,
     defaultLocalPrefix: '',
@@ -88,59 +131,60 @@
     localPrefix: '',
     loadingComponents: [],
     loadedComponents: [],
-    existingComponents: [
-      'autocomplete',
-      'button',
-      'chart',
-      'checkbox',
-      'code',
-      'colorpicker',
-      'combo',
-      'context',
-      'countdown',
-      'dashboard',
-      'datepicker',
-      'datetimepicker',
-      'dropdown',
-      'dropdowntreeview',
-      'filter',
-      'fisheye',
-      'footer',
-      'form',
-      'initial',
-      'input',
-      'json-editor',
-      'list',
-      'loading',
-      'markdown',
-      'masked',
-      'menu',
-      'menu-button',
-      'message',
-      'multiselect',
-      'notification',
-      'numeric',
-      'popup',
-      'radio',
-      'rte',
-      'scroll',
-      'scroll-x',
-      'scroll-y',
-      'search',
-      'slider',
-      'splitter',
-      'table',
-      'tabnav',
-      'textarea',
-      'timepicker',
-      'toolbar',
-      'tree',
-      'treemenu',
-      'tree-input',
-      'upload',
-      'vlist',
-      'widget'
-    ],
+    components: {
+      autocomplete: {},
+      button: {},
+      chart: {},
+      checkbox: {},
+      code: {},
+      colorpicker: {},
+      combo: {},
+      context: {},
+      countdown: {},
+      dashboard: {},
+      datepicker: {},
+      datetimepicker: {},
+      dropdown: {},
+      dropdowntreeview: {},
+      filter: {},
+      fisheye: {},
+      footer: {},
+      form: {},
+      initial: {},
+      input: {},
+      'json-editor': {},
+      list: {},
+      loading: {},
+      markdown: {},
+      masked: {},
+      menu: {},
+      'menu-button': {},
+      message: {},
+      multiselect: {},
+      notification: {},
+      numeric: {},
+      operator: {},
+      popup: {},
+      radio: {},
+      rte: {},
+      scroll: {},
+      'scroll-x': {},
+      'scroll-y': {},
+      search: {},
+      slider: {},
+      splitter: {},
+      table: {},
+      tabnav: {},
+      textarea: {},
+      timepicker: {},
+      toolbar: {},
+      tree: {},
+      treemenu: {},
+      'tree-input': {},
+      upload: {},
+      vlist: {},
+      widget: {}
+    },
     /**
      * Makes the dataSource variable suitable to be used by the kendo UI widget
      * @param vm Vue object
@@ -216,6 +260,16 @@
       else{
         return [];
       }
+    },
+
+    initDefaults(defaults, cpName){
+      if ( !bbn.vue.components[cpName] ){
+        throw new Error("Impossible to find the component " + cpName);
+      }
+      if ( typeof defaults !== 'object' ){
+        throw new Error("The default object sent is not an object " + cpName);
+      }
+      bbn.vue.components[cpName].defaults = $.extend(true, defaults, bbn.vue.components[cpName].defaults);
     },
 
     isKendo(vm){
@@ -338,7 +392,7 @@
 
     defineComponents(){
       if ( !bbn.vue.loadedComponents.length && !bbn.vue.isNodeJS ){
-        $.each(bbn.vue.existingComponents, (i, a) => {
+        for ( let a in bbn.vue.components ){
           bbn.vue.loadedComponents.push('bbn-' + a);
           /** @var string bbn_root_url */
           /** @var string bbn_root_dir */
@@ -379,7 +433,105 @@
                 })
               })
           });
-        });
+        }
+      }
+    },
+
+    localStorageComponent: {
+      computed: {
+        storage(){
+          return window.store || false;
+        }
+      },
+      methods: {
+        _getStorageRealName(name){
+          return bbn.env.path + '-' + this.$options.name + '-' + (this.id ? this.id + '-' : '') + name;
+        },
+        hasStorage(){
+          return !!this.storage;
+        },
+        getStorage(name){
+          if ( this.hasStorage() ){
+            return this.storage.get(this._getStorageRealName(name))
+          }
+        },
+        setStorage(name, value){
+          if ( this.hasStorage() ){
+            return this.storage.set(this._getStorageRealName(name), value)
+          }
+        },
+      }
+    },
+
+    dataEditorComponent: {
+      methods: {
+        editorOperatorType(col){
+          if ( col.field ){
+
+          }
+        },
+        editorHasNoValue(operator){
+          return $.inArray(operator, editorNoValueOperators) > -1;
+        },
+        editorGetComponentOptions(col){
+          let o = {
+            type: 'string',
+            component: 'bbn-input',
+            multi: false,
+            componentOptions:  {}
+          };
+          if ( col && col.field ){
+            o.field = col.field;
+            if ( col.filter ){
+              o.component = col.filter;
+            }
+            else if ( col.source ){
+              o.type = 'enums';
+              o.component = 'bbn-dropdown';
+              o.componentOptions.source = col.source;
+            }
+            else if ( col.type ){
+              switch ( col.type ){
+                case 'number':
+                  o.type = 'number';
+                  o.component = 'bbn-numeric';
+                  break;
+                case 'date':
+                  o.type = 'date';
+                  o.component = 'bbn-datepicker';
+                  break;
+                case 'time':
+                  o.type = 'date';
+                  o.component = 'bbn-timepicker';
+                  break;
+                case 'datetime':
+                  o.type = 'date';
+                  o.component = 'bbn-datetimepicker';
+                  break;
+              }
+            }
+            if ( col.componentOptions ){
+              $.extend(o.componentOptions, col.componentOptions);
+            }
+            if ( o.type && this.editorOperators[o.type] ){
+              o.operators = this.editorOperators[o.type];
+            }
+            o.fields = [col];
+          }
+          return o
+        },
+
+      },
+      computed: {
+        editorOperators(){
+          return editorOperators;
+        },
+        editorNullOps(){
+          return editorNullOps;
+        },
+        editorNoValueOperators(){
+          return editorNoValueOperators;
+        }
       }
     },
 
@@ -395,11 +547,9 @@
           this.$emit('focus', e)
         },
         keyup(e){
-          e.stopImmediatePropagation();
           this.$emit('keyup', e)
         },
         keydown(e){
-          e.stopImmediatePropagation();
           this.$emit('keydown', e)
         },
         change(e){
@@ -702,10 +852,8 @@
                   this.lastKnownWidth = w;
                   resize = 1;
                 }
-                if ( $.isFunction(this.onResize) ){
-                  this.onResize();
-                }
                 if ( resize ){
+                  this.onResize();
                   this.$emit("resize");
                   bbn.fn.log("EMITTING FROM RESIZE EMITTER", this.$el);
                 }

@@ -4,8 +4,7 @@
             keep-alive
 >
   <div class="bbn-scroll-y"
-       v-if="realContainer && (contentHeight > containerHeight)"
-       v-show="show && height"
+       v-show="realContainer && (contentHeight > containerHeight) && show && height"
        @click="jump"
        ref="scrollRail"
        @mouseover="$emit('mouseover')"

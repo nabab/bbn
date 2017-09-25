@@ -23,7 +23,6 @@
         type: Object,
         default: function(){
           return {
-            autoDownloadFontAwesome: false,
             spellChecker: false,
             indentWithTabs: true,
             initialValue: '',
@@ -55,7 +54,6 @@
       }
     },
     mounted(){
-      const vm = this;
       let cfg = $.extend(vm.getOptions(), {
         change: function(e){
           vm.emitInput(vm.widget.value());

@@ -406,7 +406,6 @@
       center(idx){
         if ( this.items[idx] ){
           this.$nextTick(() => {
-            bbn.fn.log("CENTERING " + idx.toString());
             let ele = $(".bbn-popup-unit", this.$el).eq(idx);
             bbn.fn.center(ele);
             if ( !ele.hasClass("ui-draggable") ){
@@ -430,6 +429,10 @@
                   }
                 });
               }
+            }
+            let scroll = this.getWindow(idx).$refs.scroll;
+            if ( scroll.length ){
+              scroll[0].onResize();
             }
           })
         }
@@ -552,6 +555,13 @@
               }
             }
           },
+          beforeClose(fn){
+            for ( let i = 0; i < arguments.length; i++ ){
+              if ( typeof arguments[i] === 'function' ){
+                this.closingFunctions.unshift(arguments[i])
+              }
+            }
+          },
           removeClose(fn){
             if ( !fn ){
               this.closingFunctions = [];
@@ -579,6 +589,11 @@
         },
         mounted(){
           this.popup = this.$parent.$parent;
+          setTimeout(() => {
+            if ( this.$refs.scroll ){
+              this.$refs.scroll[0].onResize();
+            }
+          }, 1000)
         }
       }
     }

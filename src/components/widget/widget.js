@@ -151,7 +151,13 @@
           this.load();
         })
       },
+      updateDashboard(){
+        if ( !this.dashboard ) {
+          this.dashboard = bbn.vue.closest(this, "bbn-dashboard");
+        }
+      },
       load: function(){
+        this.updateDashboard();
         if ( this.url ){
           let params = {
             key: this.uid
@@ -196,10 +202,12 @@
       this.load();
     },
     watch: {
-      currentLimit(){
-        if ( this.currentItems ){
-          this.reload();
+      currentLimit(newVal){
+        this.updateDashboard();
+        if ( this.dashboard ){
+          this.dashboard.updateWidget(this.uid, {limit: newVal})
         }
+        this.reload();
       }
     }
   });

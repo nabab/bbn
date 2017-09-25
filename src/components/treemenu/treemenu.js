@@ -172,7 +172,7 @@
         this.hide();
       },
       resizeScroll(){
-        this.$refs.scroll.$emit('resize')
+        this.$refs.scroll.onResize()
       }
     },
     mounted(){

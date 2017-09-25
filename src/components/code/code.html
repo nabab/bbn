@@ -1,5 +1,6 @@
 <div class="bbn-code bbn-100">
-  <div ref="code"
+  <div class="bbn-100"
+       ref="code"
        @focus="focus($event)"
        @blur="blur($event)"
        @keydown="keydown($event)"
@@ -15,10 +16,10 @@
          :disabled="disabled"
          :required="required"
   >
-  <div style="position: absolute; width: 25px; height: 25px"
-       class="bbn-bg-black bbn-p bbn-middle"
+  <div class="bbn-bg-black bbn-p bbn-middle theme-button"
+       v-if="themeButton"
        ref="theme_button"
   >
-    <i class="fa fa-navicon"> </i>
+    <i class="fa fa-navicon" @click="nextTheme()"> </i>
   </div>
 </div>

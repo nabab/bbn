@@ -1,4 +1,5 @@
 div.bbn-tabnav {
+  border: 0 !important;
   overflow: hidden;
   position: relative;
   width: 100%;
@@ -10,13 +11,14 @@ div.bbn-tabnav {
     }
   }
   > div{
-    > ul.k-tabstrip-items {
+    > ul.bbn-tabnav-tabs{
       position: relative;
       border-bottom-style: solid;
       border-bottom-width: 1px;
       li.k-item {
         margin: 0 !important;
         span.k-link {
+          color: inherit;
           padding-right: 1.25em !important;
           padding-left: 1.25em !important;
         }

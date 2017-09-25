@@ -31,7 +31,7 @@
     },
     data(){
       return {
-        items: this.source
+        items: $.isFunction(this.source) ? this.source() : this.source
       };
     },
     methods: {
@@ -55,6 +55,14 @@
           }
         }
       },
+    },
+    watch: {
+      source: {
+        deep: true,
+        handler(){
+          this.items = $.isFunction(this.source) ? this.source() : this.source
+        }
+      }
     }
   });
 

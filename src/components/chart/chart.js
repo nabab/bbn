@@ -25,29 +25,40 @@
        * Object = {x: 'titlex', y: 'titley'}
        */
 			title: {
-        type: [String, Object],
-        default(){
-          return '';
-        }
+        type: String,
+        default: ''
       },
-
+      titleX: {
+			  type: String,
+        default: undefined
+      },
+      titleY: {
+			  type: String,
+        default: undefined
+      },
       width: {
-        type: String
+        type: String,
+        default: '100%'
       },
       height: {
-        type: String
+        type: String,
+        default: '100%'
       },
       showPoint: {
-        type: Boolean
+        type: Boolean,
+        default: true
       },
       showLine: {
-        type: Boolean
+        type: Boolean,
+        default: true
       },
       lineSmooth: {
-        type: Boolean
+        type: Boolean,
+        default: false
       },
       donut: {
-        type: [Boolean, Number]
+        type: [Boolean, Number],
+        default: false
       },
       fullWidth: {
         type: Boolean,
@@ -57,33 +68,28 @@
         type: Boolean
       },
       showLabel: {
-        type: Boolean
+        type: Boolean,
+        default: true
       },
       axisX: {
         type: Object,
         default(){
-          return {
-            showLabel: true,
-            showGrid: true,
-            position: 'end'
-          }
+          return {};
         }
       },
       axisY: {
         type: Object,
         default(){
-          return {
-            showLabel: true,
-            showGrid: true,
-            position: 'start'
-          }
+          return {};
         }
       },
       showLabelX: {
-        type: Boolean
+        type: Boolean,
+        default: true
       },
       reverseLabelX: {
-        type: Boolean
+        type: Boolean,
+        default: false
       },
 			odd: {
         type: Boolean
@@ -92,16 +98,20 @@
         type: Boolean
       },
       showGridX: {
-        type: Boolean
+        type: Boolean,
+        default: true
       },
       showLabelY: {
-        type: Boolean
+        type: Boolean,
+        default: true
       },
       reverseLabelY: {
-        type: Boolean
+        type: Boolean,
+        default: false
       },
       showGridY: {
-        type: Boolean
+        type: Boolean,
+        default: true
       },
       animation: {
         type: [Boolean, Number],
@@ -109,7 +119,8 @@
       },
       // set it to 0 (zero) for stacked bars
       barsDistance: {
-        type: Number
+        type: Number,
+        default: undefined
       },
       horizontalBars: {
         type: Boolean
@@ -130,26 +141,31 @@
         type: String
       },
       backgroundColor: {
-        type: String
+        type: String,
+        default: 'inherit'
       },
       gridColor: {
         type: String
       },
       max: {
-        type: Number
+        type: Number,
+        default: undefined
       },
       min: {
-        type: Number
+        type: Number,
+        default: undefined
       },
       onlyInteger: {
-        type: Boolean
+        type: Boolean,
+        default: false
       },
       tooltip: {
         type: Boolean,
         default: true
       },
       pointLabel: {
-        type: Boolean
+        type: Boolean,
+        default: false
       },
       legend: {
         type: [Boolean, Array]
@@ -158,32 +174,43 @@
         type: Number
       },*/
       step: {
-        type: Boolean
+        type: Boolean,
+        default: false
       },
       dateFormat: {
         type: String
       },
-      /** @todo To fix labels position (labelDirection: explode) on pie chart (responsive and not)*/
       labelOffset: {
-        type: Number
+        type: Number,
+        default: 0
       },
-      labelDirection: {
-        type: String
+      labelExternal: {
+        type: Boolean,
+        default: false
+      },
+      labelWrap: {
+        type: [Boolean, Number],
+        default: false
       },
       padding: {
-        type: Number
+        type: Number,
+        default: undefined
       },
       paddingTop: {
-        type: Number
+        type: Number,
+        default: undefined
       },
       paddingRight: {
-        type: Number
+        type: Number,
+        default: undefined
       },
       paddingBottom: {
-        type: Number
+        type: Number,
+        default: undefined
       },
       paddingLeft: {
-        type: Number
+        type: Number,
+        default: undefined
       },
       /** @todo add this to labels */
       currency: {
@@ -200,39 +227,20 @@
       cfg: {
         type: Object,
         default(){
-          return {
-            type: 'line',
-            fullWidth: true,
-            tooltip: true,
-            axisX: {
-              showLabel: true,
-              showGrid: true,
-              position: 'end'
-            },
-            axisY: {
-              showLabel: true,
-              showGrid: true,
-              position: 'start'
-            },
-            chartPadding: {},
-            plugins: []
-          };
+          return {};
         }
       }
-    },
-    data: function(){
-      if ( this.isLine || this.isBar ){
-        if ( !Array.isArray(this.source.series[0]) && (this.distributeSeries === undefined) ){
-          this.source.series = [this.source.series];
-        }
-      }
-
-      return {
-
-      };
-
     },
     computed: {
+      data(){
+        let data = this.source;
+        if ( this.isLine || this.isBar ){
+          if ( !Array.isArray(data.series[0]) && !this.distributeSeries ){
+            data.series = [data.series];
+          }
+        }
+        return data;
+      },
       isLine(){
         return this.type === 'line';
       },
@@ -244,19 +252,17 @@
       },
       plugins(){
         let plugins = [];
-
         // tooltip
         if ( this.tooltip ){
           plugins.push(Chartist.plugins.tooltip({
             currency: this.currency || false
           }));
         }
-
         // axis X/Y title
-        if ( !this.isPie && this.title ){
+        if ( !this.isPie && (this.titleX || this.titleY) ){
           plugins.push(Chartist.plugins.ctAxisTitle({
             axisX: {
-              axisTitle: typeof this.title === 'string' ? this.title : ( (typeof this.title === 'object') && this.title.x ? this.title.x : ''),
+              axisTitle: this.titleX || '',
               axisClass: 'ct-axis-title',
               offset: {
                 x: 0,
@@ -265,7 +271,7 @@
               textAnchor: 'middle'
             },
             axisY: {
-              axisTitle: typeof this.title === 'string' ? this.title : ( (typeof this.title === 'object') && this.title.y ? this.title.y : ''),
+              axisTitle: this.titleY || '',
               axisClass: 'ct-axis-title',
               offset: {
                 x: 0,
@@ -276,12 +282,10 @@
             }
           }));
         }
-
         // Point Label
         if ( this.pointLabel ){
           plugins.push(Chartist.plugins.ctPointLabels());
         }
-
         // Legend
         if ( this.legend ){
           plugins.push(Chartist.plugins.legend({
@@ -298,7 +302,6 @@
             legendNames: Array.isArray(this.legend) ? this.legend : false
           }));
         }
-
         // Thresold
         /** @todo  it's not compatible with our colors system and legend */
         /*if ( (this.isLine || this.isBar) && (typeof this.threshold === 'number') ){
@@ -306,7 +309,6 @@
             threshold: this.threshold
           }));
         }*/
-
         // Zoom
         /** @todo problems with scale x axis */
         /*if ( this.zoom && this.isLine ){
@@ -320,67 +322,191 @@
             }
           }));
         }*/
-
         return plugins;
       },
       lineCfg(){
         let cfg = {
-          axisX: {
-            showLabel: true,
-            showGrid: true,
-            position: 'end'
-          },
-          axisY: {
-            showLabel: true,
-            showGrid: true,
-            position: 'start'
-          }
+          lineSmooth: this.step && this.showLine ? Chartist.Interpolation.step() : this.lineSmooth,
+          showPoint: this.showPoint,
+          showLine: this.showLine,
+          pointLabel: this.pointLabel
         };
-        if (  this.step ){
-          cfg.lineSmooth = Chartist.Interpolation.step();
-        }
-        return this.isLine ? $.extend(cfg, this.lineBarCommon()) : {};
+        return this.isLine ? $.extend(true, cfg, this.lineBarCommon) : {};
       },
       barCfg(){
         let cfg = {
-          axisX: {
-            showLabel: true,
-            showGrid: true,
-            position: 'end'
-          },
-          axisY: {
-            showLabel: true,
-            showGrid: true,
-            position: 'start'
-          }
+          seriesBarDistance: this.barsDistance
         };
-        // Bars distance
-        if ( typeof this.barsDistance === 'number' ){
-          cfg.seriesBarDistance = this.barsDistance;
+        return this.isBar ? $.extend(true, cfg, this.lineBarCommon) : {};
+      },
+      lineBarCommon(){
+        if ( this.isLine || this.isBar ){
+          let cfg = {
+            chartPadding: {
+              top: this.paddingTop || this.padding,
+              right: this.paddingRight || this.padding,
+              bottom: this.paddingBottom || this.padding,
+              left: this.paddingLeft || this.padding
+            },
+            axisX: $.extend(true, {
+              showLabel: this.showLabelX,
+              showGrid: this.showGridX,
+              position: this.reverseLabelX ? 'start' : 'end'
+            }, this.axisX),
+            axisY: $.extend(true, {
+              showLabel: this.showLabelY,
+              showGrid: this.showGridY,
+              position: this.reverseLabelY ? 'end' : 'start',
+              onlyInteger: this.onlyInteger,
+              high: this.max,
+              low: this.min ? -this.min : undefined
+            }, this.axisY)
+          };
+          // Axis X
+          // Date format
+          if ( this.dateFormat ){
+            cfg.axisX.labelInterpolationFnc = (date, idx) => {
+              if ( this.odd ){
+                return idx % 2 > 0 ? moment(date).format(this.dateFormat) : null;
+              }
+              if ( this.even ){
+                return idx % 2 === 0 ? moment(date).format(this.dateFormat) : null;
+              }
+              return moment(date).format(this.dateFormat);
+            };
+          }
+          // Odd labels
+          if ( this.odd && !this.even && !this.dateFormat ){
+            cfg.axisX.labelInterpolationFnc = (val, idx) => {
+              return idx % 2 > 0 ? val : null;
+            };
+          }
+          // Even labels
+          if ( this.even && !this.odd && !this.dateFormat ){
+            cfg.axisX.labelInterpolationFnc = function(val, idx){
+              return idx % 2 === 0 ? val : null;
+            };
+          }
+          return cfg;
         }
-        return this.isBar ? $.extend(cfg, this.lineBarCommon()) : {};
+        return {};
       },
       pieCfg(){
-        let cfg = {};
-        // Donut
+        let cfg = {
+              donut: !!this.donut,
+              chartPadding: this.padding,
+              showLabel: this.showLabel,
+              labelDirection: this.labelExternal ? 'explode' : 'neutral',
+              labelOffset: this.labelOffset,
+              labelInterpolationFnc: (value) => {
+                if ( this.labelWrap ){
+                  let ret = '',
+                      labelWrap = typeof this.labelWrap === 'number' ? this.labelWrap : 25,
+                      tmp,
+                      cont = 0,
+                      arr,
+                      spl = (text) => {
+                        let r = '',
+                            idx = labelWrap;
+                        if ( text.length <= labelWrap ){
+                          return text;
+                        }
+                        for ( let i = labelWrap; i < text.length; i += labelWrap ){
+                          if ( i === labelWrap ){
+                            r += text.slice(0, i) + "\n"
+                          }
+                          r += text.slice(idx, i) + "\n";
+                          idx = i;
+                        }
+                        return r + text.slice(idx);
+                      };
+                  if ( typeof value === 'number' ){
+                    value = value.toString();
+                  }
+                  if ( value.length <= labelWrap ){
+                    return value;
+                  }
+                  if ( value.indexOf('\n') !== -1 ){
+                    arr = value.split('\n');
+                    arr.forEach((a, i) => {
+                      ret += spl(a) + (arr[i+1] ? '\n' : '');
+                    });
+                    return ret;
+                  }
+                  return spl(value);
+
+
+                  /*if ( this.labelWrap ){
+                    let ret = '',
+                        labelWrap = typeof this.labelWrap === 'number' ? this.labelWrap : 25,
+                        tmp,
+                        cont = 0;
+                    if ( typeof value === 'number' ){
+                      value = value.toString();
+                    }
+                    if ( value.length <= labelWrap ){
+                      return value;
+                    }
+                    tmp = value.split(" ");
+                    tmp.forEach((t) => {
+                      while ( t.length ){
+                        if ( cont ){
+                          let b = t.slice(0, cont);
+                          t = t.slice(cont);
+                          if ( b.length < cont ){
+                            cont -= b.length;
+                          }
+                          else {
+                            cont = 0;
+                          }
+                          ret +=  b + (cont ? ' ' : "\n");
+                        }
+                        if ( t.length ){
+                          let a = t.slice(0, labelWrap-1);
+                          if ( a.length < labelWrap ){
+                            cont = labelWrap - a.length;
+                          }
+                          ret += a + (cont ? ' ' : '');
+                          if ( cont ){
+                            cont--;
+                          }
+                          t = t.slice(labelWrap-1);
+                        }
+                      }
+                    });
+                    return ret;
+                  }
+                  else {
+                    return value;
+                  }*/
+                }
+                else {
+                  return value;
+                }
+              }
+            };
         if ( typeof this.donut === 'number' ){
           cfg.donutWidth = this.donut;
-          cfg.donut = true;
         }
-        // Padding
-        if ( this.padding ){
-          cfg.chartPadding = this.padding;
+        else if ( this.donut ){
+          cfg.donutWidth = '100%';
+        }
+        // Force donut if animation is active
+        if ( this.animation ){
+          cfg.donut = true;
+          cfg.donutWidth = '100%';
         }
         return this.isPie ? cfg : {};
       },
       widgetCfg(){
-        let cfg = {
+        let cfg = $.extend(true, {
           type: this.type,
           fullWidth: this.fullWidth,
+          width: this.width,
+          height: this.height,
           tooltip: this.tooltip,
-          chartPadding: {},
           plugins: this.plugins
-        };
+        }, this.cfg);
         if ( this.isLine ){
           $.extend(true, cfg, this.lineCfg);
         }
@@ -395,120 +521,23 @@
     },
     methods: {
       pieChart(){
-        /** @todo To fix animation problem with pie chart (donut: false) */
         // Create widget
-        this.widget = new Chartist.Pie(this.$el, this.source, this.widgetCfg);
+        this.widget = new Chartist.Pie(this.$refs.chart, this.data, this.widgetCfg);
         // Animations
         this.pieAnimation();
       },
       lineChart(){
         // Create widget
-        this.widget = new Chartist.Line(this.$el, this.source, this.widgetCfg);
+        this.widget = new Chartist.Line(this.$refs.chart, this.data, this.widgetCfg);
         // Animations
         this.lineAnimation();
       },
       barChart(){
         // Create widget
-        this.widget = new Chartist.Bar(this.$el, this.source, this.widgetCfg);
+        this.widget = new Chartist.Bar(this.$refs.chart, this.data, this.widgetCfg);
         // Animations
         this.barAnimation();
       },
-      lineBarCommon(){
-        let cfg = {};
-        // Set background color
-        if ( this.backgroundColor ){
-          $(this.$el).css('backgroundColor', this.backgroundColor);
-        }
-        // Axis X
-        // showGridX
-        if ( this.showGridX !== undefined ){
-          cfg.axisX.showGrid = this.showGridX;
-        }
-        // showLabelX
-        if ( this.showLabelX !== undefined ){
-          cfg.axisX.showLabel = this.showLabelX;
-        }
-        // reverseLabelX
-        if ( this.reverseLabelX ){
-          cfg.axisX.position = 'start';
-        }
-        // Date format
-        if ( this.dateFormat ){
-          cfg.axisX.labelInterpolationFnc = (date, idx) => {
-						if ( this.odd ){
-							return idx % 2 > 0 ? moment(date).format(this.dateFormat) : null;
-						}
-						if ( this.even ){
-							return idx % 2 === 0 ? moment(date).format(this.dateFormat) : null;
-						}
-            return moment(date).format(this.dateFormat);
-          };
-        }
-				// Odd labels
-				if ( this.odd && !this.even && !this.dateFormat ){
-					cfg.axisX.labelInterpolationFnc = (val, idx) => {
-            return idx % 2 > 0 ? val : null;
-          };
-				}
-				// Even labels
-				if ( this.even && !this.odd && !this.dateFormat ){
-					cfg.axisX.labelInterpolationFnc = function(val, idx){
-            return idx % 2 === 0 ? val : null;
-          };
-				}
-        // Axis Y
-        // showGridY
-        if ( this.showGridY !== undefined ){
-          cfg.axisY.showGrid = this.showGridY;
-        }
-        // showLabelY
-        if ( this.showLabelY !== undefined ){
-          cfg.axisY.showLabel = this.showLabelY;
-        }
-        // reverseLabelY
-        if ( this.reverseLabelY ){
-          cfg.axisY.position = 'end';
-        }
-        // max (high)
-        if ( this.max !== undefined ){
-          cfg.high = this.max;
-        }
-        // min (low)
-        if ( this.min !== undefined ){
-          cfg.low = -this.min;
-        }
-        // onlyInteger
-        if ( this.onlyInteger ){
-          cfg.axisY.onlyInteger = true;
-        }
-        // Padding
-        if ( this.padding ){
-          cfg.chartPadding = {
-            top: this.padding,
-            right: this.padding,
-            bottom: this.padding,
-            left: this.padding
-          };
-        }
-        // Top padding
-        if ( this.paddingTop ){
-          cfg.chartPadding.top = this.paddingTop;
-        }
-        // Right padding
-        if ( this.paddingRight ){
-          cfg.chartPadding.right = this.paddingRight;
-        }
-        // Bottom padding
-        if ( this.paddingBottom ){
-          cfg.chartPadding.bottom = this.paddingBottom;
-        }
-        // Left padding
-        if ( this.paddingLeft ){
-          cfg.chartPadding.left = this.paddingLeft;
-        }
-        return cfg;
-      },
-
       getColorIdx(c){
         return c.element._node.parentElement.className.baseVal.replace('ct-series ', '').slice(-1).charCodeAt()-97;
       },
@@ -624,8 +653,13 @@
               durations = 500;
           this.widget.on('draw', (chartData) => {
             if ( chartData.type === 'bar' ){
+              let color = this.color[this.legend ? this.getColorIdx(chartData) : chartData.seriesIndex],
+                  style = chartData.element.attr('style');
+              if ( color ){
+                style = (style || '') + ' stroke: ' + color + ' !important;';
+              }
               chartData.element.attr({
-                style: 'stroke-width: 0px'
+                style: style + ' stroke-width: 0px'
               });
               for ( let s = 0; s < chartData.series.length; ++s) {
                 if ( chartData.seriesIndex === s ){
@@ -713,6 +747,16 @@
         if ( this.animation ){
           this.widget.on('draw', (chartData) => {
             if ( chartData.type === 'slice' ){
+              let style = chartData.element.attr('style'),
+                  color;
+              if ( this.color && Array.isArray(this.color) ){
+                color = this.color[this.legend ? this.getColorIdx(chartData) : chartData.index];
+                if ( color ){
+                  chartData.element.attr({
+                    style: (style || '') + ' stroke: ' + color + ' !important;'
+                  });
+                }
+              }
               // Get the total path length in order to use for dash array animation
               let pathLength = chartData.element._node.getTotalLength();
               // Set a dasharray that matches the path length as prerequisite to animate dashoffset
@@ -751,24 +795,25 @@
           this.color = [this.color];
         }
         this.widget.on('draw', (chartData, b) => {
-          /** @todo To fix error on bar with animation */
+          let style = chartData.element.attr('style'),
+              color;
           if ( (chartData.type === 'line') ||
             (chartData.type === 'point') ||
-            (chartData.type === 'bar') ||
+            ((chartData.type === 'bar') && !this.animation) ||
             ( chartData.type === 'area' )
           ){
-            let color = this.color[this.legend ? this.getColorIdx(chartData) : chartData.seriesIndex];
+            color = this.color[this.legend ? this.getColorIdx(chartData) : chartData.seriesIndex];
             if ( color ){
               chartData.element.attr({
-                style: ( chartData.type === 'area' ? 'fill: ' : 'stroke: ') + color + ( chartData.type === 'area' ? '; fill-opacity: 0.1; stroke: none' : '')
+                style: (style || '') + (chartData.type === 'area' ? ' fill: ' : ' stroke: ') + color + (chartData.type === 'area' ? '; fill-opacity: 0.1; stroke: none' : '')
               });
             }
           }
           if ( chartData.type === 'slice' ){
-            let color = this.color[this.legend ? this.getColorIdx(chartData) : chartData.index];
-            if ( color ){
+            color = this.color[this.legend ? this.getColorIdx(chartData) : chartData.index];
+            if ( color && (this.isLine || this.isBar || (this.isPie && !this.animation)) ){
               chartData.element.attr({
-                style: (this.donut ? 'stroke: ' : 'fill: ') + color
+                style: (style || '') + ' fill: ' + color
               });
             }
           }
@@ -828,10 +873,8 @@
         });
         return length;
       },*/
-
       widgetDraw(){
-        let externaLabel = this.widget.options.labelDirection === 'explode',
-            yOffset = externaLabel ? 15 : 7.5,
+        let yOffset = this.labelExternal ? 15 : 7.5,
             p = 1,
             idDef = bbn.fn.randomString(),
             defs = false;
@@ -848,14 +891,14 @@
                   if ( i > 0 ){
                     text += '<tspan dy="' + yOffset + '" x="' + chartData.x + '">' + v + '</tspan>';
                     chartData.y -= yOffset;
-                    chartData.element._node.attributes.dy.value -= yOffset;
+                    chartData.element._node.attributes.dy.value -= (this.labelExternal ? yOffset-10 : yOffset);
                   }
                 });
               }
               chartData.element._node.innerHTML = text;
               tmp = lb.length > p ? lb.length : tmp;
             }
-            if ( externaLabel && ( tmp > p) ){
+            if ( this.labelExternal && ( tmp > p) ){
               p = tmp;
               //this.widget.update(this.widget.data, {chartPadding: (this.widget.options.chartPadding ? this.widget.options.chartPadding : 0) + (p*yOffset)}, true);
             }
@@ -916,47 +959,40 @@
       }
     },
     mounted(){
-      if ( this.widget ){
-        this.widget.destroy();
-        this.widget = false;
-      }
-
-      // Set width
-      if ( this.width && (typeof this.width === 'string') ){
-        $(this.$el).width(this.width);
-        this.width = '100%';
-      }
-
-      // Widget configuration
-      if ( this.isPie ){
-        this.pieChart();
-      }
-      else if ( this.isBar ){
-        this.barChart();
-      }
-      else {
-        this.lineChart();
-      }
-
-
-      // Set items color
-      if ( this.color ){
-        this.setColor();
-      }
-      // Set labels color
-      if ( this.labelColor || this.labelColorX || this.labelColorY ){
-        this.setLabelColor();
-      }
-      // Set grid color
-      if ( this.gridColor ){
-        this.setGridColor();
-      }
-
-      // Operations to be performed during the widget draw
-      this.widgetDraw();
-      // Operations to be performed after widget creation
-      this.widgetCreated();
+      this.$nextTick(() => {
+        if ( this.widget ){
+          this.widget.destroy();
+          this.widget = false;
+        }
+        setTimeout(() => {
+          // Widget configuration
+          if ( this.isPie ){
+            this.pieChart();
+          }
+          else if ( this.isBar ){
+            this.barChart();
+          }
+          else {
+            this.lineChart();
+          }
+          // Set items color
+          if ( this.color ){
+            this.setColor();
+          }
+          // Set labels color
+          if ( this.labelColor || this.labelColorX || this.labelColorY ){
+            this.setLabelColor();
+          }
+          // Set grid color
+          if ( this.gridColor ){
+            this.setGridColor();
+          }
+          // Operations to be performed during the widget draw
+          this.widgetDraw();
+          // Operations to be performed after widget creation
+          this.widgetCreated();
+        }, 100);
+      });
     }
   });
-
 })(jQuery, bbn);

@@ -44,20 +44,32 @@
               >
             </colgroup>
             <tbody>
+            <tr v-if="titleGroups"
+                class="k-widget k-header"
+            >
+              <td v-for="col in titleGroupsCells('left')"
+                  :colspan="col.colspan"
+                  :class="col.cls"
+                  :style="col.style"
+                  v-html="col.text"></td>
+            </tr>
             <!-- Fixed titles -->
             <tr class="k-widget k-header">
               <td v-for="(col, i) in colsLeft"
                   v-show="!col.hidden"
                   class="bbn-c"
               >
-                <a v-if="filterable && (col.filterable !== false) && !col.buttons && col.field"
-                   href="javascript:;"
-                   @click="showFilter(col, $event, $event.pageY)"
-                >
-                  <i class="fa fa-filter"
-                  ></i>
-                </a>
+                <i :class="{
+                  fa: true,
+                  'fa-filter': true,
+                  'bbn-p': true,
+                  'bbn-red': hasFilter(col)
+                }"
+                   v-if="filterable && (col.filterable !== false) && !col.buttons && col.field"
+                   @click="showFilter(col, $event)"
+                ></i>
                 <a href="javascript:;"
+                   class="k-link"
                    v-if="sortable && (col.sortable !== false) && !col.buttons"
                    @click="sort(i)"
                 >
@@ -108,19 +120,33 @@
               >
             </colgroup>
             <tbody>
+            <tr v-if="titleGroups"
+                class="k-widget k-header"
+            >
+              <td v-for="col in titleGroupsCells()"
+                  :colspan="col.colspan"
+                  :class="col.cls"
+                  :style="col.style"
+                  v-html="col.text"></td>
+            </tr>
             <tr class="k-widget k-header">
               <td v-for="(col, i) in colsMain"
                   v-show="!col.hidden"
                   class="bbn-c"
               >
-                <i class="fa fa-filter appui-p"
+                <i :class="{
+                  fa: true,
+                  'fa-filter': true,
+                  'bbn-p': true,
+                  'bbn-red': hasFilter(col)
+                }"
                    v-if="filterable && (col.filterable !== false) && !col.buttons && col.field"
                    @click="showFilter(col, $event)"
-                  ></i>
-                </i>
+                ></i>
                 <a href="javascript:;"
+                   class="k-link"
                    v-if="sortable && (col.sortable !== false) && !col.buttons"
-                   @click="sort(i)"
+                   @click="sort(col)"
                 >
                   <span v-if="col.encoded"
                         v-text="col.title"
@@ -141,12 +167,12 @@
                         :title="col.ftitle || col.title"
                   ></span>
                 </span>
-                <i v-if="sortable && (col.sortable !== false) && !col.buttons && order && col.field && currentOrder[col.field]"
+                <i v-if="isSorted(col)"
                    :class="{
                    'bbn-table-sortable-icon': true,
                    fa: true,
-                   'fa-caret-up': currentOrder[col.field] === 'ASC',
-                   'fa-caret-down': currentOrder[col.field] === 'DESC',
+                   'fa-caret-up': isSorted(col).dir === 'ASC',
+                   'fa-caret-down': isSorted(col).dir === 'DESC',
                  }"></i>
               </td>
             </tr>
@@ -170,17 +196,31 @@
               >
             </colgroup>
             <tbody>
+            <tr v-if="titleGroups"
+                class="k-widget k-header"
+            >
+              <td v-for="col in titleGroupsCells('right')"
+                  :colspan="col.colspan"
+                  :class="col.cls"
+                  :style="col.style"
+                  v-html="col.text"></td>
+            </tr>
             <tr class="k-widget k-header">
               <td v-for="(col, i) in colsRight"
                   v-show="!col.hidden"
                   class="bbn-c"
               >
-                <bbn-context v-if="filterable && (col.filterable !== false) && !col.buttons && col.field">
-                  <i @click="showFilter(col)"
-                     class="fa fa-filter"
-                  ></i>
-                </bbn-context>
+                <i :class="{
+                  fa: true,
+                  'fa-filter': true,
+                  'bbn-p': true,
+                  'bbn-red': hasFilter(col)
+                }"
+                   v-if="filterable && (col.filterable !== false) && !col.buttons && col.field"
+                   @click="showFilter(col, $event)"
+                ></i>
                 <a href="javascript:;"
+                   class="k-link"
                    v-if="sortable && (col.sortable !== false) && !col.buttons"
                    @click="sort(i)"
                 >
@@ -246,12 +286,12 @@
               </colgroup>
               <tbody>
               <tr v-for="(d, i) in currentSet"
-                  v-if="d.group || d.expander || isExpanded(d)"
+                  v-if="d.group || d.expander || isExpanded(d) || d.aggregated"
                   :key="i"
                   :index="d.index"
                   @mouseenter="_overTr(d.index)"
                   @mouseleave="_overTr(d.index, true)"
-                  :class="'k-widget' + (trClass ? ' ' + trClass(d.data) : '') + (d.index % 2 ? ' k-alt' : '')"
+                  :class="'k-widget' + (trClass ? ' ' + trClass(d.data) : '') + (d.index % 2 ? ' k-alt' : '') + (d.aggregated || d.groupAggregated ? ' k-header' : '')"
               >
                 <td v-if="selection" :colspan="d.expansion ? colsLeft.length : 1">
                   <bbn-checkbox v-if="!d.expansion && ((typeof(selection) !== 'function') || selection(d))"
@@ -266,8 +306,8 @@
                      @click="toggleExpanded(d.index)"
                   ></i>
                 </td>
-                <td v-if="d.group && (colsLeft.length > 1)" :colspan="colsLeft.length - (selection ? 1 : 2)">
-                <td v-else-if="d.expansion && !selection" :colspan="colsLeft.length">
+                <td v-if="d.group && (colsLeft.length > 1)" :colspan="numLeftVisible - (selection ? 1 : 2)">
+                <td v-else-if="d.expansion && !selection" :colspan="numLeftVisible">
                   &nbsp;
                 </td>
                 <td v-for="(col, j) in colsLeft"
@@ -303,32 +343,24 @@
                     <div v-else-if="!col.buttons" v-html="render(d.data, col, d.index)"></div>
                     <div v-else> </div>
                   </div>
+                  <div v-else-if="d.aggregated && ((colsLeft[j+1] && (colsLeft[j+1].field === isAggregated)) || (colsMain[0] && (colsMain[0].field === isAggregated)))"
+                       class="bbn-b"
+                       v-html="aggregateExp[d.name]"
+                  ></div>
+                  <div v-else-if="d.aggregated && (col.field !== isAggregated)"> </div>
+                  <div v-else-if="d.groupAggregated && ((colsLeft[j+1] && (colsLeft[j+1].field === isAggregated)) || (colsMain[0] && (colsMain[0].field === isAggregated)))"
+                       class="bbn-b"
+                       v-html="aggregateExp[d.name]"
+                  ></div>
+                  <div v-else-if="d.groupAggregated && (col.field !== isAggregated)"> </div>
                   <component v-else-if="col.component"
                              :is="col.component"
-                             :source="d.data"
+                             :source="col.mapper ? col.mapper(d.data) : d.data"
                   ></component>
-                  <div v-else-if="Array.isArray(col.buttons)">
-                    <bbn-button v-for="(button, j) in col.buttons"
-                                :key="j"
-                                :url="button.url"
-                                :class="button.classes"
-                                :text="button.text"
-                                :title="button.title"
-                                :icon="button.icon"
-                                :notext="button.notext"
-                                @click="_execCommand(button, d.data, col, d.index)"
-                    ></bbn-button>
-                  </div>
                   <div v-else-if="col.buttons">
-                    <bbn-button v-for="(button, j) in col.buttons(d.data, col, d.index)"
+                    <bbn-button v-for="(button, j) in (Array.isArray(col.buttons) ? col.buttons : col.buttons(d.data, col, d.index))"
                                 :key="j"
-                                :url="button.url"
-                                :class="button.classes"
-                                :text="button.text"
-                                :title="button.title"
-                                :icon="button.icon"
-                                :notext="button.notext"
-                                @click="_execCommand(button, d.data, col, d.index)"
+                                v-bind="button"
                     ></bbn-button>
                   </div>
                   <div v-else v-html="render(d.data, col, d.index)"></div>
@@ -370,13 +402,14 @@
                 </colgroup>
                 <tbody>
                 <tr v-for="(d, i) in currentSet"
-                    v-if="d.group || d.expander || isExpanded(d)"
+                    v-if="d.group || d.expander || isExpanded(d) || d.aggregated || (isExpanded(d) && d.groupAggregated)"
                     :key="i"
                     :index="d.index"
                     @mouseenter="_overTr(d.index)"
                     @mouseleave="_overTr(d.index, true)"
-                    :class="'k-widget' + (trClass ? ' ' + trClass(d.data) : '') + (d.index % 2 ? ' k-alt' : '')"
+                    :class="'k-widget' + (trClass ? ' ' + trClass(d.data) : '') + (d.index % 2 ? ' k-alt' : '') + (d.aggregated || d.groupAggregated ? ' k-header' : '')"
                 >
+                  <!-- Checkboxes -->
                   <td v-if="!colsLeft.length && selection">
                     <bbn-checkbox v-if="(typeof(selection) !== 'function') || selection(d)"
                                   v-model="d.selected"
@@ -384,7 +417,7 @@
                                   @change="checkSelection(d.index)"
                     ></bbn-checkbox>
                   </td>
-                  <td v-if="d.group" :colspan="colsMain.length">
+                  <td v-if="d.group" :colspan="numMainVisible">
                     <component v-if="cols[group].component"
                                :is="cols[group].component"
                                :source="d.data"
@@ -399,7 +432,7 @@
                     <div v-else v-html="expander(d.data, d.index)"></div>
                   </td>
                   <td v-for="(col, j) in colsMain"
-                      v-if="!d.group && !d.expansion"
+                      v-if="hasTd(d, colsLeft.length + j)"
                       v-show="!col.hidden"
                       :style="_bodyStyles(col)"
                       :key="j"
@@ -431,37 +464,33 @@
                       <div v-else-if="!col.buttons" v-html="render(d.data, col, d.index)"></div>
                       <div v-else> </div>
                     </div>
+                    <div v-else-if="d.aggregated && colsMain[j+1] && (colsMain[j+1].field === isAggregated)"
+                         class="bbn-b"
+                         v-html="aggregateExp[d.name]"
+                    ></div>
+                    <div v-else-if="d.aggregated && ((colsMain[j+1] && (colsMain[j+1].field === isAggregated)) || (colsRight[0] && (colsRight[0].field === isAggregated)))"
+                         class="bbn-b"
+                         v-html="aggregateExp[d.name]"
+                    ></div>
+                    <div v-else-if="d.aggregated && (col.field !== isAggregated)"> </div>
+                    <div v-else-if="d.groupAggregated && ((colsMain[j+1] && (colsMain[j+1].field === isAggregated)) || (colsRight[0] && (colsRight[0].field === isAggregated)))"
+                         class="bbn-b"
+                         v-html="aggregateExp[d.name]"
+                    ></div>
+                    <div v-else-if="d.groupAggregated && (col.field !== isAggregated)"> </div>
                     <component v-else-if="col.component"
                                :is="col.component"
-                               :source="d.data"
+                               :source="col.mapper ? col.mapper(d.data) : d.data"
                     ></component>
-                    <div v-else-if="Array.isArray(col.buttons)">
-                      <bbn-button v-for="(button, j) in col.buttons"
-                                  :key="j"
-                                  :url="button.url"
-                                  :class="button.classes"
-                                  :text="button.text"
-                                  :title="button.title"
-                                  :icon="button.icon"
-                                  :notext="button.notext"
-                                  @click="_execCommand(button, d.data, col, d.index)"
-                      ></bbn-button>
-                    </div>
                     <div v-else-if="col.buttons">
-                      <bbn-button v-for="(button, j) in col.buttons(d.data, col, d.index)"
+                      <bbn-button v-for="(button, j) in (Array.isArray(col.buttons) ? col.buttons : col.buttons(d.data, col, d.index))"
                                   :key="j"
-                                  :url="button.url"
-                                  :class="button.classes"
-                                  :text="button.text"
-                                  :title="button.title"
-                                  :icon="button.icon"
-                                  :notext="button.notext"
-                                  @click="_execCommand(button, d.data, col, d.index)"
+                                  v-bind="button"
                       ></bbn-button>
                     </div>
                     <div v-else v-html="render(d.data, col, d.index)"></div>
                   </td>
-                  <td v-if="d.expanded" :colspan="colsMain.length">Expander</td>
+                  <td v-if="d.expanded" :colspan="numMainVisible">Expander</td>
                 </tr>
                 </tbody>
               </table>
@@ -498,18 +527,18 @@
               </colgroup>
               <tbody>
               <tr v-for="(d, i) in currentSet"
-                  v-if="d.group || d.expander || isExpanded(d)"
+                  v-if="d.group || d.expander || isExpanded(d) || d.aggregated"
                   :key="i"
-                  :class="'k-widget' + (trClass ? ' ' + trClass(d.data) : '') + (d.index % 2 ? ' k-alt' : '')"
+                  :class="'k-widget' + (trClass ? ' ' + trClass(d.data) : '') + (d.index % 2 ? ' k-alt' : '') + (d.aggregated || d.groupAggregated ? ' k-header' : '')"
                   :index="d.index"
                   @mouseenter="_overTr(d.index)"
                   @mouseleave="_overTr(d.index, true)"
               >
-                <td v-if="d.group || d.expansion" :colspan="colsRight.length">
+                <td v-if="d.group || d.expansion" :colspan="numRightVisible">
                   &nbsp;
                 </td>
                 <td v-for="(col, j) in colsRight"
-                    v-if="!d.group && !d.expansion"
+                    v-if="hasTd(d, colsLeft.length + colsMain.length + j)"
                     v-show="!col.hidden"
                     :style="_bodyStyles(col)"
                     :key="j"
@@ -541,32 +570,24 @@
                     <div v-else-if="!col.buttons" v-html="render(d.data, col, d.index)"></div>
                     <div v-else> </div>
                   </div>
+                  <div v-else-if="d.aggregated && colsRight[j+1] && (colsRight[j+1].field === isAggregated)"
+                       class="bbn-b"
+                       v-html="aggregateExp[d.name]"
+                  ></div>
+                  <div v-else-if="d.aggregated && (col.field !== isAggregated)"> </div>
+                  <div v-else-if="d.groupAggregated && colsRight[j+1] && (colsRight[j+1].field === isAggregated)"
+                       class="bbn-b"
+                       v-html="aggregateExp[d.name]"
+                  ></div>
+                  <div v-else-if="d.groupAggregated && (col.field !== isAggregated)"> </div>
                   <component v-else-if="col.component"
                              :is="col.component"
-                             :source="d"
+                             :source="col.mapper ? col.mapper(d.data) : d.data"
                   ></component>
-                  <div v-else-if="Array.isArray(col.buttons)">
-                    <bbn-button v-for="(button, j) in col.buttons"
-                                :key="j"
-                                :url="button.url"
-                                :class="button.classes"
-                                :text="button.text"
-                                :title="button.title"
-                                :icon="button.icon"
-                                :notext="button.notext"
-                                @click="_execCommand(button, d.data, col, d.index)"
-                    ></bbn-button>
-                  </div>
                   <div v-else-if="col.buttons">
-                    <bbn-button v-for="(button, j) in col.buttons(d.data, col, d.index)"
+                    <bbn-button v-for="(button, j) in (Array.isArray(col.buttons) ? col.buttons : col.buttons(d.data, col, d.index))"
                                 :key="j"
-                                :url="button.url"
-                                :class="button.classes"
-                                :text="button.text"
-                                :title="button.title"
-                                :icon="button.icon"
-                                :notext="button.notext"
-                                @click="_execCommand(button, d.data, col, d.index)"
+                                v-bind="button"
                     ></bbn-button>
                   </div>
                   <div v-else v-html="render(d, col, i)"></div>
@@ -580,7 +601,7 @@
         <!-- Right vertical scroller -->
         <bbn-scroll-y v-if="currentData.length"
                       ref="scrollerY"
-                      :scroller="scroller"
+                      :scroller="$refs.scroller"
                       :scroll-also="dataScrollContents"
                       :hidden="hiddenScroll"
         ></bbn-scroll-y>
@@ -589,7 +610,7 @@
     </div>
       
     <!-- Footer -->
-    <div class="k-pager-wrap k-grid-pager k-widget k-floatwrap">
+    <div class="bbn-table-footer k-pager-wrap k-grid-pager k-widget k-floatwrap">
       <div class="bbn-iblock"
            v-if="pageable"
       >
@@ -643,6 +664,14 @@
       >
         <span class="k-icon k-i-reload"></span>
       </a>
+      <a href="javascript:"
+         v-if="filterable && multifilter"
+         class="k-pager-refresh k-link"
+         :title="_('Multi Filter')"
+         @click="openMultiFilter"
+      >
+        <i class="k-icon zmdi zmdi-filter-list bbn-xl"></i>
+      </a>
       <span class="k-pager-info k-label"
             v-if="pageable"
             v-text="_('Display items') + ' ' + (start+1) + '-' + (start + currentLimit > total ? total : start + currentLimit) + ' ' + _('of') + ' ' + total"
@@ -653,14 +682,6 @@
             v-text="total ? _('Total') + ': ' + total + ' ' + _('items') : _('No item')"
       >
       </span>
-      <a href="javascript:"
-         v-if="filterable && multifilter"
-         class="k-pager-refresh k-link"
-         :title="_('Multi Filter')"
-         @click="openMultiFilter"
-      >
-        <i class="fa fa-filter"></i>
-      </a>
     </div>
   </div>
   <div v-if="currentFilter"
@@ -671,6 +692,8 @@
        }"
   >
     <bbn-filter v-bind="getFilterOptions()"
+                @set="onSetFilter"
+                @unset="onUnsetFilter"
     ></bbn-filter>
   </div>
   

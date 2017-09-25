@@ -89,7 +89,16 @@
           highlightFirst: this.highlightFirst,
           virtual: this.virtual,
           select: e => {
-            this.emitInput(e.dataItem.toJSON()[e.sender.options.dataValueField]);
+            bbn.fn.log("SELECT", e);
+            let d = e.dataItem.toJSON();
+            if ( [e.sender.options.dataValueField] ){
+              if ( d[[e.sender.options.dataValueField]] === undefined ){
+                throw new Error("The value field \"" + e.sender.options.dataValueField + "\" doesn't exist in the dataItem");
+              }
+              d = d[[e.sender.options.dataValueField]];
+            }
+            this.emitInput(d);
+            this.$emit('change', d);
           }
         };
         if ( this.template ){

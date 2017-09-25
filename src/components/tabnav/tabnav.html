@@ -45,14 +45,15 @@
         <div class="bbn-tabnav-selected"
              :ref="'selector-' + tabIndex"
              :style="{
-                backgroundColor: tab.bcolor ? tab.bcolor : null
+                backgroundColor: getTabColor(tabIndex)
               }"
         ></div>
         <div class="bbn-tabnav-icons">
           <i class="fa fa-times-circle bbn-p" @click="close(tabIndex)"></i>
           <bbn-context class="fa fa-caret-down bbn-p"
                        tag="i"
-                       :source="tab.menu"
+                       :source="getMenuFn(tabIndex)"
+                       :ref="'menu-' + tabIndex"
           ></bbn-context>
         </div>
       </li>

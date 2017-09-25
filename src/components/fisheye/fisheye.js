@@ -157,7 +157,7 @@
           itemsText: 'span',
           container: 'ul',
           valign: 'top'
-        })
+        });
       },
     },
     data: function(){
@@ -171,6 +171,9 @@
 
     mounted: function(){
       this.setup();
+      setTimeout(() => {
+        $(this.$el).trigger('mousemove');
+      }, 1000)
     },
 
     updated: function(){

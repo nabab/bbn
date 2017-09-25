@@ -92,6 +92,9 @@
             return this.template(e);
           };
         }
+        else{
+          cfg.template = '<span>#= text #</span>'
+        }
         if ( cfg.dataSource && !Array.isArray(cfg.dataSource) ){
           cfg.dataSource.options.serverFiltering = true;
           cfg.dataSource.options.serverGrouping = true;

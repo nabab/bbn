@@ -27,7 +27,7 @@
       },
       history: {
         type: Number,
-        default: 20
+        default: 100
       },
       loadIcon: {
         type: String,
@@ -67,18 +67,15 @@
         }
       },
 
-      end: function(url, id, data, errorThrown){
+      end: function(url, id, data, res){
         let idx = bbn.fn.search(this.data, "id", id);
         if ( idx > -1 ){
-          if ( errorThrown ){
-            bbn.fn.log("Error Thrown!", errorThrown);
-          }
           this.data.splice(idx, 1, $.extend(this.data[idx], {
             isLoading: false,
-            isError: typeof(errorThrown) === 'string',
-            isSuccess: typeof(errorThrown) !== 'string',
-            isPage: (typeof(errorThrown) === 'object') && !!errorThrown.content && !!errorThrown.title,
-            error: typeof(errorThrown) === 'string' ? errorThrown : false,
+            isError: typeof(res) === 'string',
+            isSuccess: typeof(res) !== 'string',
+            isPage: (typeof(res) === 'object') && !!res.content && !!res.title,
+            error: typeof(res) === 'string' ? res : false,
             length: (new Date()).getTime() - this.data[idx].time
           }));
         }

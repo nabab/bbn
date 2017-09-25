@@ -91,14 +91,16 @@
       },
 
       onDrag(e) {
-        if ( this.realContainer && this.dragging ){
+        if ( this.realContainer && this.dragging && this.containerHeight ){
           e.preventDefault();
           e.stopPropagation();
           e = e.changedTouches ? e.changedTouches[0] : e;
           let yMovement = e.pageY - this.start;
-          let yMovementPercentage = yMovement / this.containerHeight * 100;
+          let yMovementPercentage = yMovement ? Math.round(yMovement / this.containerHeight * 1000000) / 10000 : 0;
           this.start = e.pageY;
-          this._changePosition(this.top + yMovementPercentage);
+          if ( yMovementPercentage ){
+            this._changePosition(this.top + yMovementPercentage);
+          }
         }
       },
 
@@ -108,8 +110,8 @@
 
       // Effectively change the scroll and bar position and sets variables
       scrollContainer(top, animate){
-        if ( this.realContainer ){
-          this.currentScroll = Math.round(this.contentHeight * top / 100);
+        if ( this.realContainer && this.contentHeight ){
+          this.currentScroll = top ? Math.round(this.contentHeight * top / 100 * 10000) / 10000 : 0;
           if ( animate && (this.realContainer.scrollTop !== this.currentScroll) ){
             $.each(this.scrollableElements(), (i, a) => {
               if ( a !== this.realContainer ){
@@ -173,7 +175,9 @@
           this.contentHeight = this.realContainer.children[0] ? this.realContainer.children[0].clientHeight : this.containerHeight;
           // The scrollbar is only visible if needed, i.e. the content is larger than the container
           if ( this.contentHeight - this.tolerance > this.containerHeight ){
+            let old = this.height;
             this.height = this.containerHeight / this.contentHeight * 100;
+            this._changePosition(old ? Math.round(this.top * (old/this.height) * 10000)/10000 : 0);
           }
           else{
             this.height = 0;
@@ -194,13 +198,21 @@
           (e.target.scrollTop !== this.currentScroll)
         ){
           this.lastAdjust = now;
-          this._changePosition(Math.round(e.target.scrollTop / this.contentHeight * 100));
+          if ( e.target.scrollTop ){
+            this._changePosition(Math.round(e.target.scrollTop / this.contentHeight * 1000000)/10000);
+          }
+          else{
+            this._changePosition(0);
+          }
         }
         this.overContent();
       },
 
       // Sets all event listeners
       initContainer(){
+        if ( !this.realContainer && this.scroller ){
+          this.realContainer = this.scroller.$refs.scrollContainer || false;
+        }
         if ( this.realContainer ){
           this.onResize();
           let $cont = $(this.realContainer);

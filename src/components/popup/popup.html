@@ -52,6 +52,7 @@
                        :source="source"
             ></component>
             <bbn-scroll v-else-if="content"
+                        ref="scroll"
             >
               <div class="bbn-block bbn-w-100" v-html="content"></div>
             </bbn-scroll>

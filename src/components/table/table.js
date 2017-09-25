@@ -11,8 +11,12 @@
    */
   Vue.component('bbn-table', {
     template: '#bbn-tpl-component-table',
-    mixins: [bbn.vue.resizerComponent],
+    mixins: [bbn.vue.resizerComponent, bbn.vue.dataEditorComponent, bbn.vue.localStorageComponent],
     props: {
+      titleGroups: {
+        type: Object
+      },
+      // A function to transform the data
       map: {
         type: Function
       },
@@ -73,10 +77,13 @@
           return [];
         }
       },
-      filter: {
+      filters: {
         type: Object,
         default(){
-          return {};
+          return {
+            logic: 'AND',
+            conditions: []
+          };
         }
       },
       selection: {
@@ -114,13 +121,21 @@
       },
 
       // Vue components
-      component: {},
-      expander: {},
-      editor: {},
+      component: {
 
+      },
+      expander: {
+
+      },
+      editor: {
+        type: [String, Object]
+      },
       fixedDefaultSide: {
         type: String,
         default: "left"
+      },
+      uid: {
+        type: [String, Number, Array]
       },
       toolbar: {
         type: [String, Array, Function]
@@ -147,15 +162,38 @@
         }
       },
       data: {
-        type: Object,
+        type: [Object, Function],
         default(){
           return {};
         }
-      }
+      },
+      footer: {
+        type: [String, Object]
+      },
+      groupFooter: {
+        type: [String, Object]
+      },
+      aggregateExp: {
+        type: Object,
+        default(){
+          return {
+            tot: bbn._('Total'),
+            med: bbn._('Average'),
+            num: bbn._('Count'),
+            max: bbn._('Maximum'),
+            min: bbn._('Minimum'),
+          };
+        }
+      },
     },
-    data: function(){
+    data(){
       let editable = $.isFunction(this.editable) ? this.editable() : this.editable;
       return {
+        currentFilter: false,
+        floatingFilterX: 0,
+        floatingFilterY: 0,
+        floatingFilterTimeOut: 0,
+        currentFilters: this.filters,
         selectedRows: [],
         currentData: [],
         group: this.groupBy === undefined ? false : this.groupBy,
@@ -168,9 +206,6 @@
         selectDone: 'bbn-table-select',
         widgetName: "DataTable",
         toolbarDone: [],
-        currentFilter: false,
-        floatingFilterX: 0,
-        floatingFilterY: 0,
         tmpRow: false,
         originalRow: false,
         editedRow: false,
@@ -191,7 +226,8 @@
         scrollableContainer: null,
         hiddenScroll: true,
         currentExpanded: [],
-        popups: []
+        popups: [],
+        isAggregated: false
       };
     },
     computed: {
@@ -270,8 +306,21 @@
             o,
             realIndex = 0,
             end = data.length,
-            i = 0,
-            tmpIsDone = false;
+            aggregates = {
+              tot: 0,
+              num: 0,
+              min: false,
+              max: false,
+              groups: []
+            },
+            aggregateModes = [],
+            i = 0;
+        if ( this.isAggregated ){
+          let idx = bbn.fn.search(this.cols, {field: this.isAggregated});
+          if ( idx > -1 ){
+            aggregateModes = this.cols[idx].aggregate;
+          }
+        }
         if (
           (this.group !== false) &&
           (!this.isAjax  || !this.serverGrouping) &&
@@ -334,79 +383,248 @@
             realIndex++;
           }
           i++;
+          // Group or just global aggregation
+          if ( aggregateModes.length ){
+            aggregates.num++;
+            aggregates.tot += parseFloat(a[this.isAggregated]);
+            if ( aggregates.min === false ){
+              aggregates.min = parseFloat(a[this.isAggregated]);
+            }
+            else if ( aggregates.min > parseFloat(a[this.isAggregated]) ){
+              aggregates.min = parseFloat(a[this.isAggregated])
+            }
+            if ( aggregates.max === false ){
+              aggregates.max = parseFloat(a[this.isAggregated]);
+            }
+            else if ( aggregates.max < parseFloat(a[this.isAggregated]) ){
+              aggregates.max = parseFloat(a[this.isAggregated])
+            }
+            if ( isGroup ){
+              let searchRes = bbn.fn.search(aggregates.groups, {value: currentGroupValue});
+              if ( searchRes === -1 ){
+                searchRes = aggregates.groups.length;
+                aggregates.groups.push({
+                  value: currentGroupValue,
+                  tot: 0,
+                  num: 0,
+                  min: false,
+                  max: false,
+                });
+              }
+              let b = aggregates.groups[searchRes];
+              b.num++;
+              b.tot += parseFloat(a[this.isAggregated]);
+              if ( b.min === false ){
+                b.min = parseFloat(a[this.isAggregated]);
+              }
+              else if ( b.min > parseFloat(a[this.isAggregated]) ){
+                b.min = parseFloat(a[this.isAggregated])
+              }
+              if ( b.max === false ){
+                b.max = parseFloat(a[this.isAggregated]);
+              }
+              else if ( b.max < parseFloat(a[this.isAggregated]) ){
+                b.max = parseFloat(a[this.isAggregated])
+              }
+              if ( !data[i] || (currentGroupValue !== data[i][this.cols[this.group].field]) ){
+                let b = aggregates.groups[aggregates.groups.length-1];
+                b.med = b.tot / b.num;
+                $.each(aggregateModes, (k, c) => {
+                  let tmp = {};
+                  tmp[this.isAggregated] = b[c];
+                  res.push({
+                    index: i-1,
+                    groupAggregated: true,
+                    link: currentLink,
+                    value: currentGroupValue,
+                    name: c,
+                    data: $.extend({}, a, tmp)
+                  });
+                });
+              }
+            }
+            if ( i === end ){
+              aggregates.med = aggregates.tot / aggregates.num;
+              $.each(aggregateModes, (k, c) => {
+                let tmp = {};
+                tmp[this.isAggregated] = aggregates[c];
+                res.push({
+                  index: i,
+                  aggregated: true,
+                  name: c,
+                  data: $.extend({}, a, tmp)
+                });
+              });
+            }
+          }
         }
         return res;
       },
       hasExpander(){
-        return this.expander || (this.groupable && (typeof(this.group) === 'number') && this.cols[this.group]);
+        return this.expander || (
+          this.groupable &&
+          (typeof this.group === 'number') &&
+          this.cols[this.group]
+        );
       }
     },
     methods: {
+      titleGroupsCells(type){
+        if ( this.titleGroups ){
+          let cols = this.colsMain;
+          if ( type === 'left' ){
+            cols = this.colsLeft;
+          }
+          else if ( type === 'right' ){
+            cols = this.colsRight;
+          }
+          let cells = [],
+              group = false;
+          $.each(cols, (i, a) => {
+            if ( a.group === group ){
+              cells[cells.length-1].colspan++;
+            }
+            else{
+              if ( this.titleGroups[a.group] ){
+                cells.push({
+                  text: this.titleGroups[a.group].text || ' ',
+                  style: this.titleGroups[a.group].style || {},
+                  cls: this.titleGroups[a.group].class || '',
+                  colspan: 1
+                });
+              }
+              else if ( this.titleGroups.default ){
+                cells.push({
+                  text: this.titleGroups.default.text || ' ',
+                  style: this.titleGroups.default.style || {},
+                  cls: this.titleGroups.default.class || '',
+                  colspan: 1
+                });
+              }
+              else{
+                cells.push({
+                  text: ' ',
+                  style: '',
+                  cls: '',
+                  colspan: 1
+                });
+              }
+              group = a.group;
+            }
+          });
+          return cells;
+        }
+      },
+      hasFilter(col){
+        if ( col.field ){
+          for ( let i = 0; i < this.currentFilters.conditions.length; i++ ){
+            if ( this.currentFilters.conditions[i].field === col.field ){
+              return true;
+            }
+          }
+        }
+        return false;
+      },
+      onSetFilter(filter){
+        if ( filter && filter.field && filter.operator ){
+          this.currentFilters.conditions.push(filter);
+          //bbn.fn.log("TABLE", filter)
+        }
+      },
+      onUnsetFilter(filter){
+        bbn.fn.log("onUnset", filter);
+        this.removeFilter(filter);
+      },
+      removeFilter(condition){
+        if ( condition.time ){
+          bbn.fn.log("There is the time", condition);
+          let del = (arr) => {
+            let idx = bbn.fn.search(arr, {time: condition.time});
+            bbn.fn.log("Is there the index?", idx);
+            if ( idx > -1 ){
+              if ( arr[idx].conditions && arr[idx].conditions.length ){
+                bbn.fn.confirm(bbn._("Êtes-vous sûr de vouloir supprimer ce groupe de conditions?"), () => {
+                  arr.splice(idx, 1);
+                })
+              }
+              else{
+                arr.splice(idx, 1);
+                bbn.fn.log("It seems to be deleted", arr);
+              }
+              return true;
+            }
+            for ( let i = 0; i < arr.length; i++ ){
+              if ( arr[i].conditions ){
+                if ( del(arr[i].conditions) ){
+                  return true;
+                }
+              }
+            }
+          };
+          if ( del(this.currentFilters.conditions) ){
+            this.$forceUpdate();
+          }
+        }
+      },
       checkFilterWindow(e){
         if ( this.currentFilter ){
           if (
             (e.clientX < this.floatingFilterX) ||
-            (e.clientX > this.floatingFilterX + 400) ||
+            (e.clientX > this.floatingFilterX + 600) ||
             (e.clientY < this.floatingFilterY) ||
             (e.clientY > this.floatingFilterY + 200)
           ){
-            this.currentFilter = false;
+            if ( !this.floatingFilterTimeOut ){
+              this.floatingFilterTimeOut = setTimeout(() => this.currentFilter = false, 500);
+            }
+          }
+          else{
+            clearTimeout(this.floatingFilterTimeOut);
+            this.floatingFilterTimeOut = 0;
           }
         }
       },
       getFilterOptions(){
-        let o = {type: 'string', multi: false};
-        if ( this.currentFilter && this.currentFilter.field ){
-          o.column = this.currentFilter.field;
-          if ( this.currentFilter.filter ){
-            o.component = this.currentFilter.filter;
+        if ( this.currentFilter ){
+          let o = this.editorGetComponentOptions(this.currentFilter);
+          if ( o.field ){
+            o.conditions = this.getColFilters(this.currentFilter);
           }
-          else if ( this.currentFilter.source ){
-            o.type = 'enums';
-            o.component = 'bbn-dropdown';
-          }
-          else if ( this.currentFilter.type ){
-            switch ( this.currentFilter.type ){
-              case 'number':
-                o.type = 'number';
-                o.component = 'bbn-numeric';
-                break;
-              case 'date':
-                o.type = 'date';
-                o.component = 'bbn-datepicker';
-                break;
-              case 'time':
-                o.type = 'date';
-                o.component = 'bbn-timepicker';
-                break;
-              case 'datetime':
-                o.type = 'date';
-                o.component = 'bbn-datetimepicker';
-                break;
-            }
-          }
-          else{
-
-          }
-        };
-        if ( o.type && bbn.var.filters[o.type] ){
-          o.operators = bbn.var.filters[o.type];
+          return o;
         }
-        return o
       },
       openMultiFilter(){
         this.$refs.popup.open({
           title: bbn._('Multi Filter'),
           component: {
-            template: `<bbn-filter v-bind="source"></bbn-filter>`,
-            props: ['source']
+            template: `<bbn-scroll><bbn-filter v-bind="source" @change="changeConditions"></bbn-filter></bbn-scroll>`,
+            props: ['source'],
+            methods: {
+              changeConditions(o){
+                bbn.vue.closest(this, 'bbn-table').currentFilters.logic = o.logic;
+                bbn.fn.log("changeConditions", o)
+              }
+            },
           },
           source: {
-            fields: this.columns,
-            conditions: this.filter,
-            concat: this.concat
+            fields: $.grep(this.cols, (a) => {
+              return a.filterable !== false;
+            }),
+            conditions: this.currentFilters.conditions,
+            logic: this.currentFilters.logic
           }
         });
+      },
+      getColFilters(col){
+        let r= [];
+        if ( col.field ){
+          $.each(this.currentFilters.conditions, (i, a) => {
+            if ( a.field === col.field ){
+              r.push(a);
+            }
+          })
+        }
+        return r;
       },
       showFilter(col, ev){
         bbn.fn.log(ev);
@@ -417,7 +635,6 @@
       edit(row, title, options){
         if ( !this.editable ){
           throw new Error("The table is not editable, you cannot use the edit function in bbn-table");
-          return;
         }
         if ( !row ){
           this._addTmp();
@@ -426,13 +643,17 @@
         this.editedRow = row;
         if ( this.editMode === 'popup' ){
           let popup = $.extend({
-            source: row,
+            source: {
+              row: row,
+              data: $.isFunction(this.data) ? this.data() : this.data
+            },
             title: title ? title : bbn._('Untitled')
           }, options ? options : {});
           if ( this.editor ){
             popup.component = this.editor;
           }
           popup.afterClose = () => {
+            this.currentData.push($.extend({}, this.tmpRow));
             this._removeTmp();
             this.editedRow = false;
           };
@@ -462,7 +683,24 @@
         this.widget.draw();
       },
 
-      delete(){},
+      delete(index, confirm){
+        if ( this.currentData[index] ){
+          let ev = $.Event('delete');
+          this.$emit('beforeDelete', this.currentData[index], ev);
+          if ( !ev.isDefaultPrevented() ){
+            if ( confirm ){
+              this.$refs.popup.confirm(confirm, () => {
+                this.currentData.splice(index, 1);
+                this.$emit('delete', this.currentData[index], ev);
+              })
+            }
+            else{
+              this.currentData.splice(index, 1);
+              this.$emit('delete', this.currentData[index], ev);
+            }
+          }
+        }
+      },
 
       insert(data){
         this._addTmp(data);
@@ -486,12 +724,19 @@
       },
 
       _execCommand(button, data, col, index){
+        return;
+        bbn.fn.warning("_execCommand");
+        bbn.fn.info("_execCommand");
         if ( button.command ){
+          bbn.fn.warning("exists");
           if ( $.isFunction(button.command) ){
+            bbn.fn.warning("isFunction");
             button.command(data, col, index);
+            return;
           }
           else if ( (typeof(button.command) === 'string') && ($.inArray(button.command, METHODS4BUTTONS) > -1) ){
-            this[button.command](data, col, index);
+            bbn.fn.warning("isString");
+            return this[button.command](data, col, index);
           }
         }
         return () => {return false;}
@@ -501,16 +746,20 @@
       updateData(){
         if ( this.isAjax && !this.isLoading ){
           this.isLoading = true;
+          this._removeTmp();
+          this.editedRow = false;
           this.$forceUpdate();
           this.$nextTick(() => {
             let data = {
-              length: this.currentLimit,
               limit: this.currentLimit,
               start: this.start,
-              data: this.data || {}
+              data: this.data ? ($.isFunction(this.data) ? this.data() : this.data) : {}
             };
             if ( this.sortable ){
               data.order = this.currentOrder;
+            }
+            if ( this.filterable ){
+              data.filters = this.currentFilters;
             }
             bbn.fn.post(this.source, data, (result) => {
               this.isLoading = false;
@@ -538,15 +787,29 @@
         }
       },
 
-      sort(i){
+      isSorted(col){
+        if (
+          this.sortable &&
+          (col.sortable !== false) &&
+          !col.buttons &&
+          col.field
+        ){
+          let idx = bbn.fn.search(this.currentOrder, {field: col.field});
+          if ( idx > -1 ){
+            return this.currentOrder[idx];
+          }
+        }
+        return false;
+      },
+
+      sort(col){
         if (
           !this.isLoading &&
-          this.cols[i] &&
           this.sortable &&
-          this.cols[i].field &&
-          (this.cols[i].sortable !== false)
+          col.field &&
+          (col.sortable !== false)
         ){
-          let f = this.cols[i].field,
+          let f = col.field,
               pos = bbn.fn.search(this.currentOrder, {field: f});
           if ( pos > -1 ){
             if ( this.currentOrder[pos].dir === 'ASC' ){
@@ -649,8 +912,8 @@
             case "number":
               return value ? kendo.toString(parseInt(value), "n0") + ( a.unit || this.unit ? " " + ( column.unit || this.unit ) : "") : '-';
             case "money":
-              return data ?
-                bbn.fn.money(data) + (
+              return value ?
+                bbn.fn.money(value) + (
                   column.unit || this.currency ?
                     " " + ( column.unit || this.currency )
                     : ""
@@ -693,57 +956,6 @@
       },
 
       /** @todo */
-      getRow(where){
-        var vm = this,
-            retrieved = false,
-            res = this.widget.row(function(idx, data, tr){
-              if ( !retrieved ){
-                var cfg = {
-                  idx: idx,
-                  data: data,
-                  tr: tr
-                };
-                switch ( typeof(where) ){
-                  case 'object':
-                    // DOM Element
-                    if ( bbn.fn.isDom(where) ){
-                      if ( tr === where ){
-                        retrieved = cfg;
-                        return true;
-                      }
-                      return false;
-                    }
-                    else{
-                      var ok = true;
-                      for ( var n in where ){
-                        if ( where[n] !== data[n] ){
-                          ok = false;
-                        }
-                      }
-                      if ( ok ){
-                        retrieved = cfg;
-                      }
-                      return ok;
-                    }
-                    break;
-
-                  case 'number':
-                    if ( where === idx ){
-                      retrieved = cfg;
-                      return true;
-                    }
-                    return false;
-                    break;
-                }
-              }
-            });
-        if ( retrieved ){
-          retrieved.obj = res;
-        }
-        return retrieved;
-      },
-
-      /** @todo */
       _defaultRow(data){
         let res = {};
         if ( !data ){
@@ -754,7 +966,7 @@
             if ( data[a.field] !== undefined ){
               res[a.field] = data[a.field];
             }
-            else if ( a.default ){
+            else if ( a.default !== undefined ){
               res[a.field] = $.isFunction(a.default) ? a.default() : a.default;
             }
             else{
@@ -763,29 +975,6 @@
           }
         });
         return res;
-      },
-
-      /** @todo */
-      update(where, data, update){
-        bbn.fn.log(where);
-        var res = this.getRow(where);
-        bbn.fn.log("UPDATE", res, where);
-        if ( res ){
-          if ( update ){
-            data = $.extend({}, res.obj.data(), data);
-          }
-          res.obj.data(data);
-        }
-      },
-
-      /** @todo */
-      editRow(where){
-        let vm = this,
-            row = vm.getRow(where);
-        bbn.fn.log("editRow");
-        if ( row ){
-          vm.editedRow = row.data;
-        }
       },
 
 
@@ -825,115 +1014,6 @@
       },
 
       saveTmp(){},
-
-      changeTmp(e){
-        bbn.fn.log("changeTmp", arguments)
-      },
-
-      calculateSize(){
-        return;
-        let leftWidth = 0,
-            mainWidth = 0,
-            rightWidth = 0,
-            numUnknown = 0;
-        $.each(this.cols, (i, a) => {
-          if ( a.hidden ){
-            a.realWidth = 0;
-          }
-          else{
-            if ( a.width ){
-              if ( (typeof(a.width) === 'string') && (a.width.substr(-1) === '%') ){
-                a.realWidth = Math.round(this.lastKnownWidth * parseFloat(a.width) / 100);
-              }
-              else{
-                a.realWidth = parseFloat(a.width);
-              }
-              if ( a.realWidth < this.minimumColumnWidth ){
-                a.realWidth = this.minimumColumnWidth;
-              }
-            }
-            else{
-              a.realWidth = this.defaultColumnWidth;
-              numUnknown++;
-            }
-            if ( a.fixed ){
-              if ( (a.fixed === 'right') || (this.defaultFixedSide === 'right') ){
-                rightWidth += a.realWidth;
-              }
-              else{
-                leftWidth += a.realWidth;
-              }
-            }
-            else{
-              mainWidth += a.realWidth;
-            }
-          }
-        });
-        let toFill = this.$el.clientWidth
-          - (
-            leftWidth
-            + mainWidth
-            + rightWidth
-          );
-        bbn.fn.log("THERE IS NOT TO FILL", toFill, numUnknown, this.$el.clientWidth, leftWidth, mainWidth, rightWidth);
-        // We must arrive to 100% minimum
-        if ( toFill > 0 ){
-          bbn.fn.log("THERE IS TO FILL", toFill, numUnknown);
-          // If we have unknown width we fill these columns
-          leftWidth = 0;
-          mainWidth = 0;
-          rightWidth = 0;
-          if ( numUnknown ){
-            let newWidth = Math.round(
-              toFill
-              / numUnknown
-              * 100
-            ) / 100;
-            if ( newWidth < this.minimumColumnWidth ){
-              newWidth = this.minimumColumnWidth;
-            }
-            $.each(this.cols, (i, a) => {
-              if ( !a.hidden ){
-                if ( !a.width ){
-                  a.realWidth = newWidth + this.defaultColumnWidth;
-                }
-                if ( a.fixed ){
-                  if ( (a.fixed === 'right') || (this.defaultFixedSide === 'right') ){
-                    rightWidth += a.realWidth;
-                  }
-                  else{
-                    leftWidth += a.realWidth;
-                  }
-                }
-                else{
-                  mainWidth += a.realWidth;
-                }
-              }
-            });
-          }
-          // Otherwise we dispatch it through the existing column
-          else{
-            let bonus = Math.round(toFill / this.cols.length * 100) / 100;
-            $.each(this.cols, (i, a) => {
-              if ( !a.hidden ){
-                a.realWidth += bonus;
-                if ( a.fixedRight || (a.fixed && (this.fixedDefaultSide === 'right')) ){
-                  rightWidth += bonus;
-                }
-                else if ( a.fixedLeft || a.fixed ){
-                  leftWidth += bonus;
-                }
-                else{
-                  mainWidth += bonus;
-                }
-              }
-            })
-          }
-        }
-        this.tableLeftWidth = leftWidth;
-        this.tableMainWidth = mainWidth;
-        this.tableRightWidth = rightWidth;
-      },
 
       /** @todo */
       getWidth(w){
@@ -1121,8 +1201,10 @@
 
       /** @todo */
       addColumn(obj){
-        const vm = this;
-        vm.cols.push(obj);
+        if ( obj.aggregate && !$.isArray(obj.aggregate) ){
+          obj.aggregate = [obj.aggregate];
+        }
+        this.cols.push(obj);
       },
 
       onResize(){
@@ -1165,7 +1247,7 @@
           if ( $.inArray(d.index, this.currentExpanded) > -1 ){
             return true;
           }
-          if ( d.isGrouped && ($.inArray(d.link, this.currentExpanded) > -1) ){
+          if ( (d.isGrouped || d.groupAggregated) && ($.inArray(d.link, this.currentExpanded) > -1) ){
             return true;
           }
           return false;
@@ -1212,12 +1294,12 @@
             }
           }
         }
-        else if ( data.group || data.expander ){
+        if ( data.group || data.expander ){
           if ( tdIndex === 0 ){
             return false;
           }
         }
-        else if ( data.expansion ){
+        if ( data.group || data.expansion ){
           return false;
         }
         return true;
@@ -1231,7 +1313,8 @@
             mainWidth = 0,
             rightWidth = 0,
             numUnknown = 0,
-            colButtons = false;
+            colButtons = false,
+            isAggregated = false;
         if ( this.selection ){
           colsLeft.push({
             title: ' ',
@@ -1249,6 +1332,9 @@
         }
         $.each(this.cols, (i, a) => {
           if ( !this.groupable || (this.group !== i) ){
+            if ( a.aggregate && a.field ){
+              isAggregated = a.field;
+            }
             a.index = i;
             if ( a.hidden ){
               a.realWidth = 0;
@@ -1338,6 +1424,7 @@
         this.colsMain = colsMain;
         this.colsRight = colsRight;
         this.colButtons = colButtons;
+        this.isAggregated = isAggregated;
       },
 
       getEditableComponent(col, data){
@@ -1414,7 +1501,7 @@
             (node.tag === 'bbn-column') &&
             node.data && node.data.attrs
           ){
-            vm.cols.push(node.data.attrs);
+            this.addColumn(node.data.attrs);
             //bbn.fn.log("ADDING COLUMN 2", node.data.attrs)
           }
         }
@@ -1447,7 +1534,14 @@
         handler(){
           this.init();
         }
-      }
+      },
+      currentFilters: {
+        deep: true,
+        handler(){
+          this.currentFilter = false;
+          this.updateData();
+        }
+      },
     },
     components: {
       'bbn-columns': {
@@ -1493,6 +1587,10 @@
             type: Boolean,
             default: true
           },
+          editable: {
+            type: Boolean,
+            default: true
+          },
           filterable: {
             type: Boolean,
             default: true
@@ -1504,6 +1602,9 @@
           showable: {
             type: Boolean,
             default: true
+          },
+          nullable: {
+            type: Boolean,
           },
           buttons: {
             type: [Array, Function]
@@ -1522,61 +1623,23 @@
           },
           editor: {
             type: [String, Object]
-          }
-        },
-
-        methods: {
-        },
-
-        data: function(){
-          var vm = this,
-              r = bbn.vue.treatData(vm).widgetCfg || {};
-          if ( vm.$options && vm.$options.props ){
-            for ( var n in r ){
-              if ( vm.$options.props[n] !== undefined ){
-                delete r[n];
-              }
-            }
-          }
-          r.table = null;
-          r.isComponent = null;
-          r.name = bbn.fn.randomString(20, 15).toLowerCase();
-          r.isMounted = false;
-          return r;
-        },
-
-        mounted(){
-
-        },
-
-        beforeDestroyed(){
-
-        },
-
-        watch: {
-          selected: function(newVal, oldVal){
-            if ( newVal && !oldVal ){
-              var vm = this;
-              if ( vm.load ){
-                vm.$parent.load(vm.url);
-              }
-              else{
-                bbn.fn.log("TabNav selected has changed - old: " + oldVal + " new: " + newVal + " for URL " + vm.url);
-                bbn.fn.analyzeContent(vm.$el, true);
-              }
-            }
           },
-          content: function(){
-            var ele = this.$el;
-            bbn.fn.analyzeContent(ele, true);
+          maxLength: {
+            type: Number
           },
-          source: {
-            deep: true,
-            handler: function(){
-              this.$forceUpdate();
-            }
+          sqlType: {
+            type: String
+          },
+          aggregate: {
+            type: [String, Array]
+          },
+          component: {
+            type: [String, Object]
+          },
+          mapper: {
+            type: Function
           }
-        }
+        },
       }
     }
   });

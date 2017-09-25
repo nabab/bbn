@@ -61,7 +61,7 @@
     },
     methods: {
       // Sets the left position
-      _changePosition(next, animate){
+      _changePosition(next, animate, force){
         let left;
         if ( next < 0 ){
           left = 0;
@@ -74,7 +74,7 @@
         }
         if (
           (typeof(left) === 'number') &&
-          (left !== this.left)
+          ((left !== this.left) || force)
         ){
           this.scrollContainer(left, animate);
         }
@@ -91,14 +91,16 @@
       },
 
       onDrag(e) {
-        if ( this.realContainer && this.dragging ){
+        if ( this.realContainer && this.dragging && this.containerWidth ){
           e.preventDefault();
           e.stopPropagation();
           e = e.changedTouches ? e.changedTouches[0] : e;
           let xMovement = e.pageX - this.start;
-          let xMovementPercentage = xMovement / this.containerWidth * 100;
+          let xMovementPercentage = xMovement ? Math.round(xMovement / this.containerWidth * 1000000) / 10000 : 0;
           this.start = e.pageX;
-          this._changePosition(this.left + xMovementPercentage);
+          if ( xMovementPercentage ){
+            this._changePosition(this.left + xMovementPercentage);
+          }
         }
       },
 
@@ -108,8 +110,8 @@
 
       // Effectively change the scroll and bar position and sets variables
       scrollContainer(left, animate){
-        if ( this.realContainer ){
-          this.currentScroll = Math.round(this.contentWidth * left / 100);
+        if ( this.realContainer && this.contentWidth ){
+          this.currentScroll = left ? Math.round(this.contentWidth * left / 100 * 10000) / 10000 : 0;
           if ( animate && (this.realContainer.scrollLeft !== this.currentScroll) ){
             $.each(this.scrollableElements(), (i, a) => {
               if ( a !== this.realContainer ){
@@ -124,7 +126,7 @@
           else{
             this.realContainer.scrollLeft = this.currentScroll;
             $.each(this.scrollableElements(), (i, a) => {
-              if ( a && (a !== this.realContainer) ){
+              if ( a !== this.realContainer ){
                 a.scrollLeft = this.currentScroll;
               }
             });
@@ -173,11 +175,16 @@
           this.contentWidth = this.realContainer.children[0] ? this.realContainer.children[0].clientWidth : this.containerWidth;
           // The scrollbar is only visible if needed, i.e. the content is larger than the container
           if ( this.contentWidth - this.tolerance > this.containerWidth ){
+            let old = this.width;
             this.width = this.containerWidth / this.contentWidth * 100;
+            this._changePosition(old ? Math.round(this.left * (old/this.width) * 10000)/10000 : 0);
           }
           else{
-            this.width = 0 ;
+            this.width = 0;
           }
+        }
+        else{
+          this.initContainer();
         }
       },
 
@@ -191,13 +198,21 @@
           (e.target.scrollLeft !== this.currentScroll)
         ){
           this.lastAdjust = now;
-          this._changePosition(Math.round(e.target.scrollLeft / this.contentWidth * 100));
+          if ( e.target.scrollLeft ){
+            this._changePosition(Math.round(e.target.scrollLeft / this.contentWidth * 1000000)/10000);
+          }
+          else{
+            this._changePosition(0);
+          }
         }
         this.overContent();
       },
 
       // Sets all event listeners
       initContainer(){
+        if ( !this.realContainer && this.scroller ){
+          this.realContainer = this.scroller.$refs.scrollContainer || false;
+        }
         if ( this.realContainer ){
           this.onResize();
           let $cont = $(this.realContainer);
@@ -261,8 +276,8 @@
         if ( this.$refs.scrollSlider ){
           this.dragging = true;
           $(this.$refs.scrollSlider).animate({
-            height: this.height + '%',
-            top: this.top + '%'
+            width: this.width + '%',
+            left: this.left + '%'
           }, () => {
             this.dragging = false;
           })
@@ -286,7 +301,7 @@
           if ( num < 0 ){
             num = 0;
           }
-          bbn.fn.log("scrollToX", num);
+          bbn.fn.log("scrollToY", num);
           this._changePosition(100 / this.contentWidth * num, animate);
         }
       }

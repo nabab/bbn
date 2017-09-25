@@ -14,6 +14,7 @@
       disabled: {},
       script: {},
       fields: {},
+
       confirm: {
         type: [String, Function]
       },
@@ -47,6 +48,11 @@
           return ['submit', 'cancel'];
         }
       },
+      // This is the proper data used in the form
+      source: {
+        type: Object
+      },
+      // This is additional data to be sent by the form
       data: {
         type: Object
       },
@@ -55,7 +61,7 @@
         default: true
       },
       // That will be a form schema generating the inputs
-      source: {
+      schema: {
         type: Object,
         default: function(){
           return {};
@@ -131,14 +137,14 @@
         return false;
       },
       _post(){
-        bbn.fn.post(this.action, this.data, (d) => {
-          this.$emit('success', d);
-          let p = this._getPopup();
+        bbn.fn.post(this.action, $.extend(true, {}, this.data, this.source), (d) => {
+          this.originalData = this.source;
           if ( this.successMessage && p ){
             p.alert(this.successMessage);
             bbn.fn.info(this.successMessage, p);
           }
-          this.originalData = this.data;
+          this.$emit('success', d);
+          let p = this._getPopup();
           if ( p ){
             p.close();
           }
@@ -157,7 +163,7 @@
         return res;
       },
       getData(){
-        return this.sendModel ? this.data : bbn.fn.formdata(this.$el);
+        return this.sendModel ? this.source : bbn.fn.formdata(this.$el);
       },
       isModified(){
         let data = this.getData(this.$el) || {};
@@ -171,7 +177,9 @@
       closePopup(window, ev){
         if ( this.window ){
           if ( this.confirmLeave && this.isModified() ){
-            ev.preventDefault();
+            if ( ev ){
+              ev.preventDefault();
+            }
             this.window.popup.confirm(this.confirmLeave, () => {
               this.reset();
               this.window.close(true);
@@ -270,7 +278,7 @@
       this.init();
     },
     watch: {
-      data: {
+      source: {
         deep: true,
         handler(newVal){
           this.$emit('input', newVal);

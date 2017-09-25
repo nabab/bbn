@@ -35,11 +35,20 @@
       left: {},
       right: {},
       top: {},
-      bottom: {}
+      bottom: {},
+      mapper: {
+        type: Function
+      }
     },
     data(){
+      let items = $.isFunction(this.source) ? this.source() : this.source.slice();
+      if ( this.mapper ){
+        $.map(items, (a) => {
+          return this.mapper(a);
+        })
+      }
       return {
-        items: $.isFunction(this.source) ? this.source() : this.source.slice(),
+        items: items,
         currentIndex: false
       };
     },
