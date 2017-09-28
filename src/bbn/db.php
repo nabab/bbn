@@ -1154,11 +1154,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
         $num_values = 0;
         foreach ( $args as $i => $arg ){
           if ( !is_array($arg) ){
-            array_push($this->last_params['values'], $arg);
+            $this->last_params['values'][] = $arg;
             $num_values++;
           }
           else if ( isset($arg[2]) ){
-            array_push($this->last_params['values'], $arg[2]);
+            $this->last_params['values'][] = $arg[2];
             $num_values++;
           }
         }

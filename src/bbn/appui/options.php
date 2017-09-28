@@ -1635,7 +1635,7 @@ class options extends bbn\models\cls\db
             $c['id_alias'] => $it[$c['id_alias']],
             $c['value'] => $it[$c['value']],
             $c['num'] => $it[$c['num']],
-            $c['cfg'] => $it[$c['cfg']],
+            $c['cfg'] => is_array($it[$c['cfg']]) ? json_encode($it[$c['cfg']]) : $it[$c['cfg']],
             $c['active'] => 1
           ], [
             $c['id'] => $id,
@@ -1655,7 +1655,7 @@ class options extends bbn\models\cls\db
               $c['id_alias'] => $it[$c['id_alias']],
               $c['value'] => $it[$c['value']],
               $c['num'] => $it[$c['num']],
-              $c['cfg'] => $it[$c['cfg']]
+              $c['cfg'] => is_array($it[$c['cfg']]) ? json_encode($it[$c['cfg']]) : $it[$c['cfg']]
             ], [
               $c['id'] => $id
             ]);
@@ -1671,7 +1671,7 @@ class options extends bbn\models\cls\db
           $c['id_alias'] => $it[$c['id_alias']],
           $c['value'] => $it[$c['value']],
           $c['num'] => $it[$c['num']],
-          $c['cfg'] => $it[$c['cfg']],
+          $c['cfg'] => is_array($it[$c['cfg']]) ? json_encode($it[$c['cfg']]) : $it[$c['cfg']],
           $c['active'] => 1
         ]))
       ){
