@@ -39,7 +39,15 @@ class output {
         unset($this->obj->prescript);
       }
       else if ( !BBN_IS_DEV ){
-        $this->obj->prescript = \JShrink\Minifier::minify($this->obj->prescript);
+        try{
+          $tmp = \JShrink\Minifier::minify($this->obj->prescript);
+        }
+        catch ( \RuntimeException $e ){
+          \bbn\x::log($this->obj->prescript, 'js_shrink');
+        }
+        if ( $tmp ){
+          $this->obj->prescript = $tmp;
+        }
       }
     }
     if ( isset($this->obj->script) ){
@@ -47,7 +55,16 @@ class output {
         unset($this->obj->script);
       }
       else if ( !BBN_IS_DEV ){
-        $this->obj->script = \JShrink\Minifier::minify($this->obj->script);
+        try{
+          $tmp = \JShrink\Minifier::minify($this->obj->script);
+        }
+        catch ( \RuntimeException $e ){
+          \bbn\x::log($this->obj->script, 'js_shrink');
+        }
+        if ( $tmp ){
+          $this->obj->script = $tmp;
+        }
+
       }
     }
     if ( isset($this->obj->postscript) ){
@@ -55,7 +72,15 @@ class output {
         unset($this->obj->postscript);
       }
       else if ( !BBN_IS_DEV ){
-        $this->obj->postscript = \JShrink\Minifier::minify($this->obj->postscript);
+        try{
+          $tmp = \JShrink\Minifier::minify($this->obj->postscript);
+        }
+        catch ( \RuntimeException $e ){
+          \bbn\x::log($this->obj->postscript, 'js_shrink');
+        }
+        if ( $tmp ){
+          $this->obj->postscript = $tmp;
+        }
       }
     }
     if ( empty($this->obj->content) || ( ($this->mode === 'file') || ($this->mode === 'image') ) ){
