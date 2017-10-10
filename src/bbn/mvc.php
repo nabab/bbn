@@ -119,7 +119,7 @@ class mvc implements mvc\api{
 
 	// These strings are forbidden to use in URL
 	public static
-    $reserved = ['index', '_private', '_common', '_htaccess'];
+    $reserved = ['_private', '_common', '_htaccess'];
 
   public static function include_model($bbn_inc_file, $model){
     if ( is_file($bbn_inc_file) ){

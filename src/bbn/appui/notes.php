@@ -66,30 +66,32 @@ class notes extends bbn\models\cls\db
     self::optional_init();
   }
 
-  public function add_media($id_note, $content, $title = '', $type='file', $private = false){
+  public function add_media($id_note, $name, $content = null, $title = '', $type='file', $private = false){
     if ( $this->exists($id_note) &&
-      !empty($content) &&
+      !empty($name) &&
       ($id_type = self::get_option_id($type, 'media')) &&
       ($usr = bbn\user::get_instance())
     ){
       $ok = false;
       switch ( $type ){
         case 'file':
-          if ( is_file($content) ){
-            $file = basename($content);
+        case 'link':
+          if ( is_file($name) ){
+            $file = basename($name);
             if ( empty($title) ){
-              $title = basename($content);
+              $title = basename($name);
             }
             $ok = 1;
           }
-        break;
+          break;
       }
       if ( $ok ){
         $this->db->insert('bbn_medias', [
           'id_user' => $usr->get_id(),
           'type' => $id_type,
           'title' => $title,
-          'content' => $file,
+          'name' => $file,
+          'content' => $content,
           'private' => $private ? 1 : 0
         ]);
         $id = $this->db->last_id();
@@ -102,11 +104,11 @@ class notes extends bbn\models\cls\db
         if ( isset($file) ){
           $path = BBN_DATA_PATH.'media/'.$id;
           bbn\file\dir::create_path($path);
-          $ext = bbn\str::file_ext($content, true);
+          $ext = bbn\str::file_ext($name, true);
           $filename = $ext[0];
           $extension = $ext[1];
           $length = strlen($filename);
-          if ( $files = bbn\file\dir::get_files(dirname($content)) ){
+          if ( $files = bbn\file\dir::get_files(dirname($name)) ){
             foreach ( $files as $f ){
               if (
                 (strlen($ext[0]) > $length) &&

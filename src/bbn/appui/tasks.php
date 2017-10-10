@@ -86,8 +86,8 @@ class tasks extends bbn\models\cls\db{
       $this->mgr = new bbn\user\manager($user);
       $this->_get_references();
       //die(var_dump(BBN_APP_PATH, $this->references));
-      if ( defined("BBN_APP_PATH") && is_file(BBN_APP_PATH.'plugins/bbn-task/reference.php') ){
-        $f = include(BBN_APP_PATH.'plugins/bbn-task/reference.php');
+      if ( defined("BBN_APP_PATH") && is_file(BBN_APP_PATH.'plugins/appui-task/reference.php') ){
+        $f = include(BBN_APP_PATH.'plugins/appui-task/reference.php');
         if ( is_callable($f) ){
           $this->template = $f;
         }
@@ -734,6 +734,20 @@ class tasks extends bbn\models\cls\db{
             }
           }
         }
+        if ( !empty($cfg['links']) ){
+          foreach ( $cfg['links'] as $f ){
+            $ext = \bbn\str::file_ext($f, true);
+            if ( !preg_match('/_h[\d]+/i', substr($ext[0], 0)) ){
+              $note->add_media(
+                $r,
+                $f['image'],
+                json_encode(['url' => $f['url'], 'description' => $f['desc']]),
+                $f['title'],
+                'link'
+              );
+            }
+          }
+        }
         $this->add_log($id_task, 'comment_insert', [$this->id_user, empty($cfg['title']) ? $cfg['text'] : $cfg['title']]);
       }
       return $r;
@@ -918,6 +932,10 @@ class tasks extends bbn\models\cls\db{
 
   public function unsubscribe($id){
     return $this->db->delete('bbn_tasks_cc', ['id_user' => $this->id_user, 'id_task' => $id]);
+  }
+
+  public function ping($id){
+    return $this->add_log($id, 'task_ping');
   }
 
 }
