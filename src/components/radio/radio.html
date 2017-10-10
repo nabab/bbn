@@ -3,23 +3,25 @@
        v-for="(d, idx) in dataSource"
   >
     <input :value="d.value"
-           ref="element"
            :name="name"
            class="k-radio"
            type="radio"
            :disabled="disabled"
            :required="required"
-           :id="'bbn_input_' + name + '_' + idx"
-					 @change="changed($event)"
-           v-model="checked"
+           :id="id + '_' + idx"
+					 @change="changed(d.value)"
+           :checked="d.value === modelValue"
     >
     <label class="k-radio-label"
            v-text="d.text"
-           :for="'bbn_input_' + name + '_' + idx"
+           :for="id + '_' + idx"
     ></label>
-		<div v-if="dataSource[idx+1] && getSeparator">
-			<div v-if="vertical" class="bbn-block" v-html="getSeparator"></div>
-			<div v-else class="bbn-iblock" v-html="getSeparator"></div>
+		<div v-if="dataSource[idx+1] && getSeparator"
+         :class="{
+          'bbn-w-100': vertical,
+          'bbn-iblock': !vertical
+          }"
+         v-html="getSeparator">
 		</div>
   </div>
 </div>

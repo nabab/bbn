@@ -38,6 +38,10 @@
       checked: {
         type: Boolean,
         default: false
+      },
+      contrary: {
+        type: Boolean,
+        default: false
       }
     },
     model: {

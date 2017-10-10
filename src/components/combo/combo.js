@@ -11,7 +11,8 @@
     template: '#bbn-tpl-component-combo',
     props: {
       delay: {
-        type: Number
+        type: Number,
+        default: 200
       },
       clearButton: {
         type: Boolean,
@@ -19,7 +20,10 @@
       },
       filter: {
         type: String,
-        default: "startswith"
+        default: "contains"
+      },
+      group: {
+        type: String
       },
       minLength: {
         type: Number
@@ -34,7 +38,7 @@
       },
       suggest: {
         type: Boolean,
-        default: false
+        default: true
       },
       highlightFirst: {
         type: Boolean,
@@ -77,9 +81,8 @@
           clearButton: this.clearButton,
           ignoreCase: this.ignoreCase,
           highlightFirst: this.highlightFirst,
-          virtual: this.virtual,
           cascade: this.cascade,
-          syncValueAndText: this.syncTyped,
+          autoWidth: true,
           change: () => {
             this.emitInput(this.$refs.element.value)
           }
@@ -99,7 +102,13 @@
           cfg.dataSource.options.serverFiltering = true;
           cfg.dataSource.options.serverGrouping = true;
         }
-        return bbn.vue.getOptions2(this, cfg);
+        else if ( this.group ){
+          cfg.dataSource = {
+            data: cfg.dataSource,
+            group: this.group
+          };
+        }
+        return cfg;
       }
     },
     mounted: function(){

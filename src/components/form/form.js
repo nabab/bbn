@@ -72,6 +72,9 @@
       sendModel: {
         type: Boolean,
         default: true
+      },
+      validation: {
+        type: Function
       }
     },
     data(){
@@ -80,7 +83,7 @@
         popup: false,
         popupIndex: false,
         tab: false,
-        originalData: false,
+        originalData: {},
         realButtons: (() => {
           let r = [];
           $.each(this.buttons.slice(), (i, a) => {
@@ -152,6 +155,11 @@
           this.$emit('failure', xhr, textStatus, errorThrown)
         });
       },
+      _execCommand(button, ev){
+        if ( button.command ){
+          button.command(this.source, this, ev)
+        }
+      },
       getModifications(){
         let data = this.getData(this.$el) || {},
             res = {};
@@ -199,7 +207,7 @@
       cancel(){
         this.reset();
       },
-      submit(){
+      submit(force){
         let ok = true;
         $(this.$el).find("input,select,textarea").filter("[name]").each((i, a) => {
           let $a = $(a);
@@ -211,21 +219,29 @@
               $a.closest(":visible").focus();
             }
             ok = false;
-            return false;
           }
         });
         if ( ok ){
           $.each((i, a) => {
-            if ( $.isFunction(a.isValid) ){
+            if ( $.isFunction(a.isValid) && !a.isValid() ){
               ok = false;
-              return false;
             }
           });
+        }
+        if ( ok && this.validation ){
+          ok = this.validation(this.source, this.originalData)
         }
         if ( !ok ){
           return false;
         }
         let cf = false;
+        if ( !force ){
+          let ev = $.Event('submit');
+          this.$emit('submit', ev, this);
+          if ( ev.isDefaultPrevented() ){
+            return false;
+          }
+        }
         if ( this.confirm ){
           if ( $.isFunction(this.confirm) ){
             cf = this.confirm(this);
@@ -251,7 +267,7 @@
       reset(){
         bbn.fn.log("reset");
         $.each(this.originalData, (name, val) => {
-          this.$set(this.data, name, val);
+          this.$set(this.source, name, val);
         });
         this.$forceUpdate();
       },

@@ -101,8 +101,8 @@
           return this.tabs[idx].fcolor;
         }
         let el = this.$refs['title-' + idx];
-        if ( el ){
-          return window.getComputedStyle(el[0] || el).color;
+        if ( el && (!$.isArray(el) || el.length) ){
+          return window.getComputedStyle(el[0] ? el[0] : el).color;
         }
         return 'black';
       },
@@ -428,15 +428,21 @@
         */
       },
 
-      close(idx){
+      close(idx, force){
+        bbn.fn.log("CLOSING", idx);
         if ( this.tabs[idx] ){
-          this.$emit('close', idx);
-          this.tabs.splice(idx, 1);
-          if ( !this.tabs.length ){
-            this.selected = false;
+          let ev = $.Event();
+          if ( !force ){
+            this.$emit('close', idx, ev);
           }
-          else if ( !this.tabs[idx] ){
-            this.activateIndex(idx - 1);
+          if ( !ev.isDefaultPrevented() || force ){
+            this.tabs.splice(idx, 1);
+            this.selected = false;
+            if ( this.tabs.length ){
+              this.$nextTick(() => {
+                this.activateIndex(this.tabs[idx] ? idx : idx - 1);
+              })
+            }
           }
         }
       },
@@ -466,7 +472,7 @@
               text: bbn._("Help"),
               key: "help",
               icon: "zmdi zmdi-info",
-              click: () => {
+              command: () => {
                 let tab = this.getVue(obj.idx);
                 tab.getPopup().open('<div class="bbn-padded">' + obj.help + '<div>', bbn._("Help") + ': ' + obj.title);
               }
@@ -477,7 +483,7 @@
               text: bbn._("Reload"),
               key: "reload",
               icon: "fa fa-refresh",
-              click: () => {
+              command: () => {
                 this.reload(obj.idx);
               }
             });
@@ -813,7 +819,7 @@
             'k-button': true,
             'k-button-icon': true,
             'k-button-bare': true,
-            
+
             'k-tabstrip-next': true
           },
           on: {
@@ -967,7 +973,7 @@
             }
           }
         }
-        //this.$forceUpdate();
+        this.$forceUpdate();
         //bbn.fn.log("A change in tabs")
         //var vm = this;
       },
@@ -1160,7 +1166,7 @@
             if ( this.isComponent ){
               bbn.fn.extend(res ? res : {}, {
                 name: this.name,
-                template: '<div class="bbn-100">' + this.content + '</div>',
+                template: '<div class="bbn-full-screen">' + this.content + '</div>',
                 methods: {
                   getTab: () => {
                     return this;

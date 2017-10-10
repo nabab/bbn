@@ -199,13 +199,13 @@
         return false;
       },
       // Gets the options for the editor
-      getOptions(){
+      getOptions: function(){
         let tmp,
             cfg = $.extend({}, baseCfg, {
               mode: this.mode,
               theme: this.currentTheme,
               value: this.value
-            }, this.cfg);
+            });
 
         if ( tmp = this.getMode(this.mode) ){
           cfg = $.extend(true, cfg, tmp);

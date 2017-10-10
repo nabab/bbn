@@ -55,8 +55,7 @@
         currentScroll: 0,
         moveTimeout: 0,
         show: this.hidden === 'auto' ? false : !this.hidden,
-        scroll: this.initial,
-        lastAdjust: 0
+        scroll: this.initial
       }
     },
     methods: {
@@ -151,9 +150,9 @@
         }
       },
 
-      // Emits vertical event
+      // Emits scroll event
       normalize(){
-        this.$emit('vertical');
+        this.$emit('scroll');
       },
 
       // Gets the array of scrollable elements according to scrollAlso attribute
@@ -190,14 +189,11 @@
 
       // Sets the variables when the content is scrolled with mouse
       adjust(e){
-        let now = (new Date()).getTime();
         if (
-          ((now - this.lastAdjust) > 20) &&
           this.realContainer &&
           !this.dragging &&
           (e.target.scrollLeft !== this.currentScroll)
         ){
-          this.lastAdjust = now;
           if ( e.target.scrollLeft ){
             this._changePosition(Math.round(e.target.scrollLeft / this.contentWidth * 1000000)/10000);
           }
@@ -274,12 +270,12 @@
 
       animateBar(){
         if ( this.$refs.scrollSlider ){
-          this.dragging = true;
+          //this.dragging = true;
           $(this.$refs.scrollSlider).animate({
             width: this.width + '%',
             left: this.left + '%'
           }, () => {
-            this.dragging = false;
+            //this.dragging = false;
           })
         }
       },

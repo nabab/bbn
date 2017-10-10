@@ -14,11 +14,14 @@
     mixins: [bbn.vue.resizerComponent, bbn.vue.dataEditorComponent, bbn.vue.localStorageComponent],
     props: {
       titleGroups: {
-        type: Object
+        type: [Array, Function]
       },
       // A function to transform the data
       map: {
         type: Function
+      },
+      popup: {
+        type: Vue
       },
       limit: {
         type: Number,
@@ -138,7 +141,7 @@
         type: [String, Number, Array]
       },
       toolbar: {
-        type: [String, Array, Function]
+        type: [String, Array, Function, Object]
       },
       source: {
         type: [Array, String],
@@ -185,10 +188,14 @@
           };
         }
       },
+      loadedConfig: {
+        type: Object
+      }
     },
     data(){
       let editable = $.isFunction(this.editable) ? this.editable() : this.editable;
       return {
+        savedConfig: false,
         currentFilter: false,
         floatingFilterX: 0,
         floatingFilterY: 0,
@@ -210,7 +217,7 @@
         originalRow: false,
         editedRow: false,
         editedTr: false,
-        cols: this.columns.slice(),
+        cols: [],
         table: false,
         isLoading: false,
         isAjax: typeof this.source === 'string',
@@ -231,6 +238,23 @@
       };
     },
     computed: {
+      isSaved(){
+        return this.savedConfig === JSON.stringify(this.currentConfig);
+      },
+      currentConfig(){
+        let hidden = [];
+        $.each(this.cols, (i, a) => {
+          if ( a.hidden ){
+            hidden.push(i);
+          }
+        });
+        return {
+          limit: this.currentLimit,
+          order: this.currentOrder,
+          filters: this.currentFilters,
+          hidden: hidden
+        }
+      },
       toolbarButtons(){
         let r = [],
             ar = [];
@@ -469,6 +493,23 @@
       }
     },
     methods: {
+      getPopup(){
+        return this.popup ? this.popup : this.$refs.popup;
+      },
+      _checkHeaders(){
+        if ( this.titleGroups ){
+          let x = this.$refs.scroller.$refs.xScroller.currentScroll,
+              cols = this.titleGroupsCells(),
+              tot = 0;
+          $.each(cols, (i, a) => {
+            if ( tot + a.width > x ){
+              $(".bbn-table-title-group", this.$refs.titleGroup[i]).css({left: tot < x ? x - tot : 0});
+              return false;
+            }
+            tot += (a.width + a.colspan);
+          })
+        }
+      },
       titleGroupsCells(type){
         if ( this.titleGroups ){
           let cols = this.colsMain;
@@ -479,37 +520,52 @@
             cols = this.colsRight;
           }
           let cells = [],
-              group = false;
+              group = null,
+              corresp = {};
           $.each(cols, (i, a) => {
-            if ( a.group === group ){
-              cells[cells.length-1].colspan++;
-            }
-            else{
-              if ( this.titleGroups[a.group] ){
-                cells.push({
-                  text: this.titleGroups[a.group].text || ' ',
-                  style: this.titleGroups[a.group].style || {},
-                  cls: this.titleGroups[a.group].class || '',
-                  colspan: 1
-                });
-              }
-              else if ( this.titleGroups.default ){
-                cells.push({
-                  text: this.titleGroups.default.text || ' ',
-                  style: this.titleGroups.default.style || {},
-                  cls: this.titleGroups.default.class || '',
-                  colspan: 1
-                });
+            if ( !a.hidden ){
+              if ( a.group === group ){
+                cells[cells.length-1].colspan++;
+                cells[cells.length-1].width += a.realWidth;
               }
               else{
-                cells.push({
-                  text: ' ',
-                  style: '',
-                  cls: '',
-                  colspan: 1
-                });
+                if ( corresp[a.group] === undefined ){
+                  let idx = bbn.fn.search(this.titleGroups, 'value', a.group);
+                  if ( idx > -1 ){
+                    corresp[a.group] = idx;
+                  }
+                }
+                if ( corresp[a.group] !== undefined ){
+                  cells.push({
+                    text: this.titleGroups[corresp[a.group]].text || '&nbsp;',
+                    style: this.titleGroups[corresp[a.group]].style || {},
+                    cls: this.titleGroups[corresp[a.group]].cls || '',
+                    colspan: 1,
+                    width: a.realWidth
+                  });
+                }
+                /*
+                else if ( this.titleGroups.default ){
+                  cells.push({
+                    text: this.titleGroups.default.text || '&nbsp;',
+                    style: this.titleGroups.default.style || {},
+                    cls: this.titleGroups.default.cls || '',
+                    colspan: 1,
+                    width: a.realWidth
+                  });
+                }
+                */
+                else{
+                  cells.push({
+                    text: '&nbsp;',
+                    style: '',
+                    cls: '',
+                    colspan: 1,
+                    width: a.realWidth
+                  });
+                }
+                group = a.group;
               }
-              group = a.group;
             }
           });
           return cells;
@@ -594,7 +650,7 @@
         }
       },
       openMultiFilter(){
-        this.$refs.popup.open({
+        this.getPopup().open({
           title: bbn._('Multi Filter'),
           component: {
             template: `<bbn-scroll><bbn-filter v-bind="source" @change="changeConditions"></bbn-filter></bbn-scroll>`,
@@ -608,7 +664,7 @@
           },
           source: {
             fields: $.grep(this.cols, (a) => {
-              return a.filterable !== false;
+              return (a.filterable !== false) && !a.buttons;
             }),
             conditions: this.currentFilters.conditions,
             logic: this.currentFilters.logic
@@ -628,9 +684,124 @@
       },
       showFilter(col, ev){
         bbn.fn.log(ev);
-        this.floatingFilterX = ev.pageX - 10 < 0 ? 0 : (ev.pageX - 10 + 600 > this.lastKnownWidth ? this.lastKnownWidth - 600 : ev.pageX - 10);
-        this.floatingFilterY = ev.pageY - 10 < 0 ? 0 : (ev.pageY - 10 + 200 > this.lastKnownHeight ? this.lastKnownHeight - 200 : ev.pageY - 10);
+        this.floatingFilterX = ev.pageX - 10 < 0 ? 0 : (ev.pageX - 10 + 600 > this.$el.clientWidth ? this.$el.clientWidth - 600 : ev.pageX - 10);
+        this.floatingFilterY = ev.pageY - 10 < 0 ? 0 : (ev.pageY - 10 + 200 > this.$el.clientHeight ? this.$el.clientHeight - 200 : ev.pageY - 10);
         this.currentFilter = col;
+      },
+      pickableColumnList(){
+        return $.map(this.cols.slice(), (i, a) => {
+          return a.showable !== false;
+        })
+      },
+      openColumnsPicker(){
+        this.getPopup().open({
+          title: bbn._('Columns\' picker'),
+          component: {
+            template: `
+<div class="bbn-table-column-picker bbn-full-screen">
+  <bbn-scroll ref="scroll">
+    <div class="bbn-padded">
+      <ul v-if="source.titleGroups">
+        <li v-for="(tg, idx) in source.titleGroups">
+          <h3>
+            <bbn-checkbox :value="true"
+                          :checked="allVisible(tg.value)"
+                          @change="checkAll(tg.value)"
+                          :label="tg.text"
+            ></bbn-checkbox>
+          </h3>
+          <ul>
+            <li v-for="(col, i) in source.cols"
+                v-if="!col.fixed && (col.group === tg.value) && (col.showable !== false)"
+            >
+              <bbn-checkbox :value="true"
+                            :checked="!col.hidden"
+                            @change="check(col, i)"
+                            :label="col.ftitle || col.title"
+                            :contrary="true"
+              ></bbn-checkbox>
+            </li>
+          </ul> 
+        </li>  
+      </ul>
+      <ul v-else>
+        <li v-for="(col, i) in source.cols"
+            v-if="!col.fixed && (col.showable !== false)"
+        >
+          <bbn-checkbox :value="true"
+                        v-model="col.hidden"
+                        @change="check(col, i)"
+                        :label="col.ftitle || col.title"
+                        :contrary="true"
+          ></bbn-checkbox>
+        </li>
+      </ul>
+    </div>
+  </bbn-scroll>
+</div>
+`,
+            props: ['source'],
+            data(){
+              return {
+                table: false
+              }
+            },
+            methods: {
+              allVisible(group){
+                let ok = true;
+                bbn.fn.log("allVisible", group);
+                $.each(this.source.cols, (i, a) => {
+                  if (
+                    (a.showable !== false) &&
+                    (a.group === group) &&
+                    !a.fixed &&
+                    a.hidden
+                  ){
+                    ok = false;
+                    bbn.fn.log("NOT ALL VISIBLE!!!!!!!!!!!!!!!!!!!!!!", a);
+                    return false;
+                  }
+                });
+                return ok;
+              },
+              check(col, index){
+                col.hidden = !col.hidden;
+                this.table.show(index, col.hidden);
+              },
+              checkAll(group){
+                let show = null,
+                    shown = [];
+                $.each(this.source.cols, (i, a) => {
+                  if ( (a.showable !== false) && (a.group === group) && !a.fixed ){
+                    if ( show === null ){
+                      show = !a.hidden;
+                    }
+                    if ( ((a.hidden === true) && !show) || (!a.hidden && show) ){
+                      shown.push(i);
+                    }
+                    a.hidden = show;
+                  }
+                });
+                if ( shown.length ){
+                  this.table.show(shown, show);
+                }
+                this.$forceUpdate();
+              }
+            },
+            created(){
+              this.table = bbn.vue.closest(this, 'bbn-table');
+            },
+            mounted(){
+              setTimeout(() => {
+                this.$refs.scroll.onResize()
+              }, 500)
+            }
+          },
+          source: {
+            cols: this.cols,
+            titleGroups: this.titleGroups
+          }
+        });
       },
       edit(row, title, options){
         if ( !this.editable ){
@@ -657,7 +828,7 @@
             this._removeTmp();
             this.editedRow = false;
           };
-          this.$refs.popup.open(popup);
+          this.getPopup().open(popup);
         }
       },
 
@@ -671,8 +842,12 @@
         }
       },
 
-      save(){
-
+      save(preventEmit){
+        this.setStorage('default', this.currentConfig);
+        this.savedConfig = JSON.stringify(this.currentConfig);
+        if ( preventEmit ){
+          this.$emit('save', this.currentConfig);
+        }
       },
 
       select(){},
@@ -689,7 +864,7 @@
           this.$emit('beforeDelete', this.currentData[index], ev);
           if ( !ev.isDefaultPrevented() ){
             if ( confirm ){
-              this.$refs.popup.confirm(confirm, () => {
+              this.getPopup().confirm(confirm, () => {
                 this.currentData.splice(index, 1);
                 this.$emit('delete', this.currentData[index], ev);
               })
@@ -724,18 +899,12 @@
       },
 
       _execCommand(button, data, col, index){
-        return;
-        bbn.fn.warning("_execCommand");
-        bbn.fn.info("_execCommand");
         if ( button.command ){
-          bbn.fn.warning("exists");
           if ( $.isFunction(button.command) ){
-            bbn.fn.warning("isFunction");
             button.command(data, col, index);
             return;
           }
           else if ( (typeof(button.command) === 'string') && ($.inArray(button.command, METHODS4BUTTONS) > -1) ){
-            bbn.fn.warning("isString");
             return this[button.command](data, col, index);
           }
         }
@@ -1199,6 +1368,13 @@
         return res;
       },
 
+      reset(){
+        this.currentFilters = this.filters;
+        this.currentOrder = this.order;
+        this.currentLimit = this.limit;
+
+      },
+
       /** @todo */
       addColumn(obj){
         if ( obj.aggregate && !$.isArray(obj.aggregate) ){
@@ -1381,10 +1557,9 @@
             + bbn.fn.sum(colsMain, 'realWidth')
             + bbn.fn.sum(colsRight, 'realWidth')
           );
-        bbn.fn.log("THERE IS NOT TO FILL", toFill, numUnknown, this.$el.clientWidth, leftWidth, mainWidth, rightWidth);
         // We must arrive to 100% minimum
         if ( toFill > 0 ){
-          bbn.fn.log("THERE IS TO FILL", toFill, numUnknown);
+          bbn.fn.log("bbn-table", "THERE IS TO FILL", toFill, numUnknown);
           if ( numUnknown ){
             let newWidth = Math.round(
               toFill
@@ -1417,14 +1592,37 @@
             })
           }
         }
-        this.tableLeftWidth = bbn.fn.sum(colsLeft, 'realWidth');
-        this.tableMainWidth = bbn.fn.sum(colsMain, 'realWidth');
-        this.tableRightWidth = bbn.fn.sum(colsRight, 'realWidth');
+        this.tableLeftWidth = bbn.fn.sum(colsLeft, 'realWidth', {hidden: true}, '!==') + this.numLeftVisible;
+        this.tableMainWidth = bbn.fn.sum(colsMain, 'realWidth', {hidden: true}, '!==') + this.numMainVisible;
+        this.tableRightWidth = bbn.fn.sum(colsRight, 'realWidth', {hidden: true}, '!==') + this.numRightVisible;
         this.colsLeft = colsLeft;
         this.colsMain = colsMain;
         this.colsRight = colsRight;
         this.colButtons = colButtons;
         this.isAggregated = isAggregated;
+        this.$nextTick(() => {
+          this.updateTable();
+            this.$nextTick(() => {
+            if ( this.$refs.scroller ){
+              this.$refs.scroller.onResize();
+            }
+          })
+        })
+      },
+
+      show(colIndexes, hide){
+        if ( !$.isArray(colIndexes) ){
+          colIndexes = [colIndexes];
+        }
+        $.each(colIndexes, (i, colIndex) => {
+          if ( this.cols[colIndex] ){
+            if ( (this.cols[colIndex].hidden && !hide) || (!this.cols[colIndex].hidden && hide) ){
+              this.cols[colIndex].hidden = hide;
+            }
+          }
+        });
+        this.$forceUpdate();
+        this.init();
       },
 
       getEditableComponent(col, data){
@@ -1485,27 +1683,50 @@
     },
 
     created(){
-      var vm = this;
       // Adding bbn-column from the slot
-      if (vm.$slots.default){
-        for ( var node of this.$slots.default ){
+      if (this.$slots.default){
+        for ( let node of this.$slots.default ){
           //bbn.fn.log("TRYING TO ADD COLUMN", node);
           if (
             node.componentOptions &&
             (node.componentOptions.tag === 'bbn-column')
           ){
             //bbn.fn.log("ADDING COLUMN", node.componentOptions.propsData)
-            vm.addColumn(node.componentOptions.propsData);
+            this.addColumn(node.componentOptions.propsData);
           }
           else if (
             (node.tag === 'bbn-column') &&
             node.data && node.data.attrs
           ){
             this.addColumn(node.data.attrs);
-            //bbn.fn.log("ADDING COLUMN 2", node.data.attrs)
           }
         }
       }
+      if ( this.columns.length ){
+        $.each(this.columns.slice(), (i, a) => {
+          this.addColumn(a);
+        })
+      }
+      let cfg = this.getStorage('default');
+      if ( !cfg ){
+        cfg = this.loadedConfig;
+      }
+      if ( cfg && cfg.limit ){
+        if ( this.filterable && cfg.filters ){
+          this.currentFilters = cfg.filters;
+        }
+        this.currentLimit = cfg.limit;
+        if ( this.sortable ){
+          this.currentOrder = cfg.order;
+        }
+        if ( cfg.hidden ){
+          $.each(cfg.hidden, (i, a) => {
+            this.cols[a].hidden = true;
+          })
+        }
+        this.$forceUpdate();
+      }
+      this.savedConfig = JSON.stringify(this.currentConfig);
     },
 
     mounted(){
@@ -1516,18 +1737,15 @@
         this.updateData();
       })
     },
+    updated(){
+      this.updateTable();
+    },
     watch: {
       editedRow: {
         deep: true,
         handler(newVal){
           bbn.fn.log("editedRow is changing", newVal);
         }
-      },
-      currentData(){
-        this.$nextTick(() => {
-          bbn.fn.log("WATCHER DATA");
-          this.updateTable();
-        })
       },
       cols: {
         deep: true,
@@ -1559,6 +1777,9 @@
           },
           ftitle: {
             type: String
+          },
+          tcomponent: {
+            type: [String, Object]
           },
           icon: {
             type: String
@@ -1638,6 +1859,9 @@
           },
           mapper: {
             type: Function
+          },
+          group: {
+            type: String
           }
         },
       }

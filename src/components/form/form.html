@@ -2,16 +2,17 @@
       :disabled="disabled"
       :method="method"
       :autocomplete="autocomplete"
-      class="bbn-form k-edit-form-container"
+      class="bbn-form k-edit-form-container bbn-flex-height"
       @submit.prevent="submit"
 >
   <div v-if="fixedFooter"
-       class="bbn-w-100"
-       v-bbn-fill-height
+       class="bbn-w-100 bbn-flex-fill"
   >
-    <bbn-scroll>
-      <slot></slot>
-    </bbn-scroll>
+    <div class="bbn-full-screen">
+      <bbn-scroll>
+        <slot></slot>
+      </bbn-scroll>
+    </div>
   </div>
   <slot v-else></slot>
   <div class="footer bbn-footer k-header" v-if="hasFooter">
@@ -21,19 +22,22 @@
                   :style="{visibility: modified ? 'visible' : 'hidden'}"
                   :key="i"
                   v-bind="button"
+                  @click="submit()"
       ></bbn-button>
       <bbn-button v-else-if="button.command === reset"
                   :style="{visibility: modified ? 'visible' : 'hidden'}"
                   :key="i"
-                  v-bind="button"
+                  @click="reset()"
       ></bbn-button>
       <bbn-button v-else-if="button.command === cancel"
                   :key="i"
                   v-bind="button"
+                  @click="cancel()"
       ></bbn-button>
       <bbn-button v-else
                   :key="i"
                   v-bind="button"
+                  @click="_execCommand(button, $event)"
       ></bbn-button>
     </template>
   </div>

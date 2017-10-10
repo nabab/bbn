@@ -17,7 +17,8 @@
         type: String
       },
       url: {
-        type: String
+        type: [String, Boolean],
+        default: false
       },
       limit: {
         type: Number
@@ -34,10 +35,10 @@
 
       },
       component: {
-        type: String
+        type: [String, Object]
       },
       itemComponent: {
-        type: String
+        type: [String, Object]
       },
       title: {
         type: String

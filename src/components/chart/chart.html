@@ -1,4 +1,4 @@
-<div class="bbn-chart k-content"
+<div class="bbn-chart bbn-flex-height"
      :style="{
       width: width,
       height: height,
@@ -9,8 +9,8 @@
       v-text="title"
       class="bbn-middle"
   ></h4>
-  <div ref="chart"
-       class="bbn-w-100 ct-chart"
-       v-bbn-fill-height
-  ></div>
+  <div class="bbn-w-100 bbn-flex-fill">
+    <div ref="chart"
+         class="bbn-full-screen ct-chart"></div>
+  </div>
 </div>

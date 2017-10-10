@@ -13,6 +13,9 @@
       filterValue: {},
       template: {},
       valueTemplate: {},
+      group: {
+        type: String
+      },
       cfg: {
         type: Object,
         default(){
@@ -45,6 +48,9 @@
             return this.valueTemplate(e)
           }
         }
+        cfg.dataTextField = this.sourceText || this.widgetOptions.dataTextField || 'text';
+        cfg.dataValueField = this.sourceValue || this.widgetOptions.dataValueField || 'value';
+        cfg.valuePrimitive = true;
         return cfg;
       }
     },
@@ -61,6 +67,7 @@
       if ( this.placeholder ){
         cfg.optionLabel = this.placeholder;
       }
+      bbn.fn.log("DROPDOWN", cfg);
       this.widget = $(this.$refs.element).kendoDropDownList(cfg).data("kendoDropDownList");
       if ( !cfg.optionLabel && cfg.dataSource.length && !this.value ){
         this.widget.select(0);
@@ -71,6 +78,14 @@
     computed: {
       dataSource(){
         if ( this.source ){
+          if ( this.group ){
+            return {
+              data: bbn.vue.toKendoDataSource(this),
+              group: {
+                field: this.group
+              }
+            }
+          }
           return bbn.vue.toKendoDataSource(this);
         }
         return [];

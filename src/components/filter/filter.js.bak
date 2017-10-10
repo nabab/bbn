@@ -3,7 +3,7 @@
  */
 (function($, bbn, kendo){
   "use strict";
-/**@todo add prefix for flexbox and inline flex http://ptb2.me/flexbox/ also for justify content and align items*/
+
   const
     get_operator_type = function(field){
       if ( typeof field === 'object' ){
@@ -121,7 +121,7 @@
     },
     data(){
       return {
-        currentLogic: this.logic,
+        currentLogic: this.logic
       };
     },
     mounted(){
@@ -181,20 +181,7 @@
               this.editorOperators[get_operator_type(f)][cd.operator] +
               ' <em>';
             if ( cd.value ){
-              if ( cd.value === true ){
-                st += 'true';
-              }
-              else if ( f.source ){
-                if ( $.isArray() ){
-                  st += bbn.fn.get_field(f.source, 'value', cd.value, 'text');
-                }
-                else if ( typeof f.source === 'object' ){
-                  st += f.source[cd.value];
-                }
-              }
-              else{
-                st += cd.value;
-              }
+              st += cd.value === true ? 'true' : cd.value;
             }
             else if ( cd.value === 0 ){
               st += '0';
@@ -207,11 +194,7 @@
         }
         return st;
       },
-      delete_full_condition(idx){
-        this.conditions.splice(idx, 1);
-      },
       delete_condition: function(condition){
-        bbn.fn.log(condition);
         if ( condition.time ){
           bbn.fn.log("There is the time", condition);
           let del = (arr) => {

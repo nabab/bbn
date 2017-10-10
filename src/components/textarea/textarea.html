@@ -2,7 +2,7 @@
           :value="value"
           :name="name"
           ref="element"
-          @input="update($event.target.value)"
+          @input="emitInput($event.target.value)"
           @click="click($event)"
           @focus="focus($event)"
           @blur="blur($event)"

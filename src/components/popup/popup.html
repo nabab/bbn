@@ -12,10 +12,12 @@
     <transition-group name="custom-classes-transition"
                       enter-active-class="animated fadeIn"
                       leave-active-class="animated fadeOut"
+                      :duration="{ enter: 500, leave: 200 }"
                       tag="div"
                       class="bbn-100"
     >
       <bbn-window inline-template
+                  v-if="showPopup"
                   v-for="(popup, i) in popups"
                   :key="popup.uid"
                   :ref="popup.uid"
@@ -23,12 +25,13 @@
                   v-bind="popup"
                   @close="items.splice(popup.index, 1)"
       >
-        <div class="bbn-window k-widget bbn-popup-unit"
+        <div class="bbn-window k-widget bbn-popup-unit bbn-flex-height"
              :style="{
                     width: isMaximized ? '100%' : realWidth,
                     height: isMaximized ? '100%' : realHeight,
                     zIndex: $parent.$parent.$props.zIndex + index
                   }"
+             @keyup.esc="close()"
         >
           <div class="k-header bbn-popup-title">
             &nbsp;
@@ -46,7 +49,7 @@
               ></i>
             </div>
           </div>
-          <div class="bbn-w-100" v-bbn-fill-height tabindex="0">
+          <div class="bbn-w-100 bbn-flex-fill" tabindex="0">
             <component v-if="component"
                        :is="component"
                        :source="source"

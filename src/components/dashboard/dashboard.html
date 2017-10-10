@@ -1,4 +1,4 @@
-<div class="bbn-dashboard bbn-100">
+<div class="bbn-dashboard bbn-full-screen">
   <bbn-scroll ref="scroll">
     <div :class="'bbn-masonry bbn-margin' + (sortable ? ' bbn-dashboard-sortable' : '')"
          ref="container"
@@ -12,20 +12,10 @@
         <bbn-widget @close="hideWidget(w.key)"
                     v-if="!w.hidden"
                     @loaded="resizeScroll"
+                    v-bind="w"
                     :uid="w.key"
                     :key="w.key"
-                    :component="w.component"
-                    :item-component="w.itemComponent"
-                    :items="w.items ? w.items : []"
-                    :limit="w.limit ? w.limit : null"
-                    :title="w.text"
-                    :url="w.url ? w.url : false"
-                    :closable="w.closable"
-                    :zoomable="w.zoomable"
-                    :buttons-left="w.buttonsLeft"
-                    :buttons-right="w.buttonsRight"
-                    :content="w.content"
-                    :source="w"
+                    :title="w.title ? w.title : (w.text ? w.text : '')"
         >
         </bbn-widget>
       </transition>

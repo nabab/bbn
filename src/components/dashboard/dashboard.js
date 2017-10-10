@@ -151,7 +151,7 @@
               disabled: !a.closable,
               selected: !a.hidden,
               text: a.text,
-              click: (e, idx) => {
+              command: (e, idx) => {
                 if ( a.closable !== false ){
                   this.toggleWidget(a.key);
                 }

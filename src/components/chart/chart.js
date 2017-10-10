@@ -21,8 +21,8 @@
         default: 'line'
       },
       /**
-       * String = the same title to axixs X and Y.
-       * Object = {x: 'titlex', y: 'titley'}
+       * String => the same title to axixs X and Y.
+       * Object => {x: 'titlex', y: 'titley'}
        */
 			title: {
         type: String,
@@ -84,7 +84,7 @@
         }
       },
       showLabelX: {
-        type: Boolean,
+        type: [Boolean, Function],
         default: true
       },
       reverseLabelX: {
@@ -102,7 +102,7 @@
         default: true
       },
       showLabelY: {
-        type: Boolean,
+        type: [Boolean, Function],
         default: true
       },
       reverseLabelY: {
@@ -160,7 +160,7 @@
         default: false
       },
       tooltip: {
-        type: Boolean,
+        type: [Boolean, Function],
         default: true
       },
       pointLabel: {
@@ -170,6 +170,8 @@
       legend: {
         type: [Boolean, Array]
       },
+      customLegend: {},
+
       /*threshold: {
         type: Number
       },*/
@@ -255,7 +257,8 @@
         // tooltip
         if ( this.tooltip ){
           plugins.push(Chartist.plugins.tooltip({
-            currency: this.currency || false
+            currency: this.currency || false,
+            transformTooltipTextFnc: $.isFunction(this.tooltip) ? this.tooltip : undefined
           }));
         }
         // axis X/Y title
@@ -299,7 +302,7 @@
               }
             },
             removeAll: true,
-            legendNames: Array.isArray(this.legend) ? this.legend : false
+            legendNames: Array.isArray(this.legendFixed) ? this.legendFixed : false
           }));
         }
         // Thresold
@@ -323,6 +326,26 @@
           }));
         }*/
         return plugins;
+      },
+      legendFixed(){
+        if ( Array.isArray(this.legend) && (typeof this.legend[0] === 'object') ){
+          return $.map(this.legend, (l, i) => {
+            return l.text || null;
+          });
+        }
+        else {
+          return this.legend;
+        }
+      },
+      legendTitles(){
+        if ( Array.isArray(this.legend) && (typeof this.legend[0] === 'object') ){
+          return $.map(this.legend, (l, i) => {
+            return l.title || (l.text || null) ;
+          });
+        }
+        else {
+          return this.legend;
+        }
       },
       lineCfg(){
         let cfg = {
@@ -349,12 +372,12 @@
               left: this.paddingLeft || this.padding
             },
             axisX: $.extend(true, {
-              showLabel: this.showLabelX,
+              showLabel: $.isFunction(this.showLabelX) ? true : this.showLabelX,
               showGrid: this.showGridX,
               position: this.reverseLabelX ? 'start' : 'end'
             }, this.axisX),
             axisY: $.extend(true, {
-              showLabel: this.showLabelY,
+              showLabel: $.isFunction(this.showLabelY) ? true : this.showLabelY,
               showGrid: this.showGridY,
               position: this.reverseLabelY ? 'end' : 'start',
               onlyInteger: this.onlyInteger,
@@ -386,6 +409,15 @@
             cfg.axisX.labelInterpolationFnc = function(val, idx){
               return idx % 2 === 0 ? val : null;
             };
+          }
+          // Custom axisX label
+          if ( $.isFunction(this.showLabelX) ){
+            cfg.axisX.labelInterpolationFnc = this.showLabelX;
+          }
+          // Custom axisY label
+          if ( $.isFunction(this.showLabelY) ){
+            cfg.axisY.labelInterpolationFnc = this.showLabelY;
+            cfg.axisY.offset = 100;
           }
           return cfg;
         }
@@ -520,6 +552,40 @@
       }
     },
     methods: {
+      init(){
+        if ( this.widget ){
+          this.widget.detach();
+          this.widget = false;
+        }
+        setTimeout(() => {
+          // Widget configuration
+          if ( this.isPie ){
+            this.pieChart();
+          }
+          else if ( this.isBar ){
+            this.barChart();
+          }
+          else {
+            this.lineChart();
+          }
+          // Set items color
+          if ( this.color ){
+            this.setColor();
+          }
+          // Set labels color
+          if ( this.labelColor || this.labelColorX || this.labelColorY ){
+            this.setLabelColor();
+          }
+          // Set grid color
+          if ( this.gridColor ){
+            this.setGridColor();
+          }
+          // Operations to be performed during the widget draw
+          this.widgetDraw();
+          // Operations to be performed after widget creation
+          this.widgetCreated();
+        }, 100);
+      },
       pieChart(){
         // Create widget
         this.widget = new Chartist.Pie(this.$refs.chart, this.data, this.widgetCfg);
@@ -937,6 +1003,9 @@
             });
             setTimeout(() => {
               $("ul.ct-legend li", this.widget.container).each((i, v) => {
+                if ( Array.isArray(this.legendTitles) ){
+                  $(v).attr('title', this.legendTitles[i]);
+                }
                 if ( !$("div.rect", v).length ){
                   $(v).prepend('<div class="rect" style="background-color: ' + colors[i] +'; border-color: ' + colors[i] + '"></div>');
                 }
@@ -958,40 +1027,14 @@
         });
       }
     },
+    watch: {
+      source(val){
+        this.init();
+      },
+    },
     mounted(){
       this.$nextTick(() => {
-        if ( this.widget ){
-          this.widget.destroy();
-          this.widget = false;
-        }
-        setTimeout(() => {
-          // Widget configuration
-          if ( this.isPie ){
-            this.pieChart();
-          }
-          else if ( this.isBar ){
-            this.barChart();
-          }
-          else {
-            this.lineChart();
-          }
-          // Set items color
-          if ( this.color ){
-            this.setColor();
-          }
-          // Set labels color
-          if ( this.labelColor || this.labelColorX || this.labelColorY ){
-            this.setLabelColor();
-          }
-          // Set grid color
-          if ( this.gridColor ){
-            this.setGridColor();
-          }
-          // Operations to be performed during the widget draw
-          this.widgetDraw();
-          // Operations to be performed after widget creation
-          this.widgetCreated();
-        }, 100);
+        this.init();
       });
     }
   });

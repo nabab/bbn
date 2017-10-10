@@ -1,4 +1,4 @@
-<div class="bbn-scroll">
+<div class="bbn-scroll bbn-full-screen">
   <div class="bbn-scroll-container"
        ref="scrollContainer"
        @scroll="$emit('scroll')"
@@ -14,12 +14,14 @@
                 ref="xScroller"
                 :scrollAlso="scrollAlso"
                 :initial="x"
+                @scroll="$emit('horizontal')"
   >
   </bbn-scroll-x>
   <bbn-scroll-y v-if="(axis === 'both') || (axis === 'y')"
                 ref="yScroller"
                 :scrollAlso="scrollAlso"
                 :initial="y"
+                @scroll="$emit('vertical')"
   >
   </bbn-scroll-y>
 </div>

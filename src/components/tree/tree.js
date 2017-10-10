@@ -213,7 +213,7 @@
           menu.push({
             text: bbn._("Refresh"),
             icon: 'fa fa-refresh',
-            click: () => {
+            command: () => {
               this.reload(node);
             }
           })
@@ -222,7 +222,13 @@
           let m2 = $.isFunction(this.menu) ? this.menu(node, idx) : this.menu;
           if ( m2.length ){
             $.each(m2, function(i, a){
-              menu.push(a);
+              menu.push({
+                text: a.text,
+                icon: a.icon ? a.icon : '',
+                command: a.command ? () => {
+                  a.command(node)
+                } : false
+              });
             })
           }
         }

@@ -50,8 +50,8 @@
     },
     methods: {
       onClick: function(it){
-        if ( it.click && $.isFunction(it.click) ){
-          it.click();
+        if ( it.command && $.isFunction(it.command) ){
+          it.command();
         }
       },
 

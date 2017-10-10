@@ -10,7 +10,7 @@
   $.trumbowyg.svgPath = bbn_root_url + 'lib/Trumbowyg/v2.5.1/dist/ui/icons.svg';
 
   Vue.component('bbn-rte', {
-    mixins: [bbn.vue.fullComponent],
+    mixins: [bbn.vue.inputComponent],
     template: '#bbn-tpl-component-rte',
     props: {
       pinned: {},
@@ -18,7 +18,9 @@
       left: {},
       bottom: {},
       right: {},
-      height:{},
+      height:{
+        type: [String, Number]
+      },
       cfg: {
         type: Object,
         default: function(){
@@ -32,23 +34,24 @@
         }
       }
     },
-    data: function(){
-      return bbn.vue.treatData(this);
-    },
     methods: {
       changeHidden(e){
         bbn.fn.log("changeHidden", e);
         bbn.fn.log(e.target.value, this.value);
       }
     },
+
     mounted: function(){
       let cfg = this.getOptions(),
           $ele = $(this.$refs.element);
+      if ( this.height ){
+        $(this.$el).css('height', this.height);
+      }
       this.widget = $ele.trumbowyg({
         lang: 'fr',
         resetCss: true
       });
-      $ele.on("tbwchange", (e) => {
+      $ele.on("tbwchange tbwpaste", (e) => {
         this.emitInput(e.target.value)
       });
       this.$emit("ready", this.value);

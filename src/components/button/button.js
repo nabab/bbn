@@ -29,9 +29,6 @@
         type: [Boolean, Function],
         default: false
       },
-      command: {
-        type: Function
-      }
     },
     computed: {
       isDisabled(){
@@ -41,9 +38,6 @@
     },
     methods: {
       click(e){
-        if ( this.command ){
-          this.command(e);
-        }
         this.$emit('click', e);
       }
     }

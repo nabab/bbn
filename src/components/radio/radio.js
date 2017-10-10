@@ -4,9 +4,10 @@
 (function($, bbn, kendo){
   "use strict";
   Vue.component('bbn-radio', {
-    mixins: [bbn.vue.inputComponent, bbn.vue.dataSourceComponent],
+    mixins: [bbn.vue.eventsComponent, bbn.vue.dataSourceComponent],
     template: '#bbn-tpl-component-radio',
     props: {
+      value: {},
       separator: {
         type: String
       },
@@ -14,6 +15,24 @@
 				type: Boolean,
 				default: false
 			},
+      id: {
+        type: String,
+        default(){
+          return bbn.fn.randomString(10, 25);
+        }
+      },
+      required: {
+        type: Boolean,
+        default: false
+      },
+      disabled: {
+        type: Boolean,
+        default: false
+      },
+      name: {
+        type: String,
+        default: null
+      },
       source: {
         default(){
           return [{
@@ -25,18 +44,14 @@
           }];
         }
       },
-      label: {
-        type: String,
-      }
-    },
-    data(){
-      return {
-        checked: this.value,
+      modelValue: {
+        type: [String, Boolean, Number],
+        default: undefined
       }
     },
     model: {
-      prop: 'checked',
-      event: 'change'
+      prop: 'modelValue',
+      event: 'input'
     },
     computed: {
       dataSource(){
@@ -45,22 +60,22 @@
         }
         return [];
       },
-			getSeparator(){
-				if ( !this.vertical && !this.separator ){
-					return '<span style="margin-left: 2em">&nbsp;</span>';
-				}
-				return this.separator;
-			}
+      getSeparator(){
+        if ( this.vertical && !this.separator ){
+          return '<div style="margin-bottom: 0.5em"></div>'
+        }
+        if ( !this.vertical && !this.separator ){
+          return '<span style="margin-left: 2em">&nbsp;</span>'
+        }
+        return this.separator;
+      }
     },
 		methods: {
-			changed(e){
-
-				//this.$emit('check', e.target.value);
+			changed(val){
+				this.$emit('input', val);
+        this.$emit('change', val);
 			}
-		},
-    mounted(){
-      //this.$emit("ready", this.checked);
-    }
+		}
   });
 
 })(jQuery, bbn, kendo);

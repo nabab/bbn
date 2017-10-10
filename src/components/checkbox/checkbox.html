@@ -8,16 +8,17 @@
          class="k-checkbox"
          :required="required"
          :disabled="disabled"
-         @change="change"
+         @change="toggle"
          :checked="state"
          ref="element"
   >
   <label class="k-checkbox-label"
          :for="id"
-         v-text="label"
+         v-html="label"
          @focus="focus"
          @blur="blur"
          @keyup="keyup"
          @keydown.space="$refs.element.click()"
+         @click="click"
   ></label>
 </span>

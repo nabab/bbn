@@ -216,8 +216,7 @@
     },
     methods: {
       getOptions(){
-        var vm = this,
-            cfg = bbn.vue.getOptions(vm),
+        var cfg = bbn.vue.getOptions(this),
 						opt = {};
 				if ( cfg.disabled ){
 					opt.enable = false;
@@ -225,7 +224,7 @@
 				if ( cfg.placeholder ){
 					opt.optionLabel = cfg.placeholder;
 				}
-        opt.change = function(){
+        opt.change = () => {
 					if ( $.isFunction(cfg.change) ){
 						return cfg.change();
 					}
@@ -238,10 +237,10 @@
 				}
 				opt.treeview = $.extend(cfg.treeview, {
 					dataSource: new kendo.data.HierarchicalDataSource({
-						data: vm.source,
+						data: this.source,
 						schema: {
 							model: {
-								id: vm.widgetCfg.dataValueField || 'value',
+								id: this.widgetCfg.dataValueField || 'value',
 								hasChildren: 'is_parent',
 								children: 'items',
 								fields: {
@@ -251,11 +250,11 @@
 							}
 						}
 					}),
-					select: function(e){
+					select(e){
 						var dt = e.sender.dataItem(e.node);
 						if ( dt ){
-							vm.widget.value(dt[vm.widgetCfg.dataValueField || 'value']);
-							vm.$emit("input", dt[vm.widgetCfg.dataValueField || 'value']);
+							this.widget.value(dt[this.widgetCfg.dataValueField || 'value']);
+							this.$emit("input", dt[this.widgetCfg.dataValueField || 'value']);
 						}
 					}
 				});
@@ -268,7 +267,7 @@
       }, bbn.vue.treatData(this));
     },
     mounted(){
-      let cfg = vm.getOptions();
+      let cfg = this.getOptions();
 
       this.widget = $(this.$el).kendoDropDownTreeView(cfg).data("kendoDropDownTreeView");
 

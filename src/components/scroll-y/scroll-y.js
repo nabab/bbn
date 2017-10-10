@@ -55,8 +55,7 @@
         currentScroll: 0,
         moveTimeout: 0,
         show: this.hidden === 'auto' ? false : !this.hidden,
-        scroll: this.initial,
-        lastAdjust: 0
+        scroll: this.initial
       }
     },
     methods: {
@@ -171,16 +170,20 @@
       // Calculates all the proportions based on content
       onResize() {
         if ( this.realContainer ){
-          this.containerHeight = $(this.realContainer).height();
-          this.contentHeight = this.realContainer.children[0] ? this.realContainer.children[0].clientHeight : this.containerHeight;
-          // The scrollbar is only visible if needed, i.e. the content is larger than the container
-          if ( this.contentHeight - this.tolerance > this.containerHeight ){
-            let old = this.height;
-            this.height = this.containerHeight / this.contentHeight * 100;
-            this._changePosition(old ? Math.round(this.top * (old/this.height) * 10000)/10000 : 0);
-          }
-          else{
-            this.height = 0;
+          let tmp1 = $(this.realContainer).height(),
+              tmp2 = this.realContainer.children[0] ? this.realContainer.children[0].clientHeight : this.containerHeight;
+          if ( (tmp1 !== this.containerHeight) || (tmp2 !== this.contentHeight) ){
+            this.containerHeight = tmp1;
+            this.contentHeight = tmp2;
+            // The scrollbar is only visible if needed, i.e. the content is larger than the container
+            if ( this.contentHeight - this.tolerance > this.containerHeight ){
+              let old = this.height;
+              this.height = this.containerHeight / this.contentHeight * 100;
+              this._changePosition(old ? Math.round(this.top * (old/this.height) * 10000)/10000 : 0);
+            }
+            else{
+              this.height = 0;
+            }
           }
         }
         else{
@@ -190,14 +193,11 @@
 
       // Sets the variables when the content is scrolled with mouse
       adjust(e){
-        let now = (new Date()).getTime();
         if (
-          ((now - this.lastAdjust) > 20) &&
           this.realContainer &&
           !this.dragging &&
           (e.target.scrollTop !== this.currentScroll)
         ){
-          this.lastAdjust = now;
           if ( e.target.scrollTop ){
             this._changePosition(Math.round(e.target.scrollTop / this.contentHeight * 1000000)/10000);
           }
@@ -274,12 +274,12 @@
 
       animateBar(){
         if ( this.$refs.scrollSlider ){
-          this.dragging = true;
+          //this.dragging = true;
           $(this.$refs.scrollSlider).animate({
             height: this.height + '%',
             top: this.top + '%'
           }, () => {
-            this.dragging = false;
+            //this.dragging = false;
           })
         }
       },

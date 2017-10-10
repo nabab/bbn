@@ -1,11 +1,15 @@
 .bbn-filter:first-child{
   border-top: 0 !important;
-}
-.bbn-filter{
-  //border-radius: 25px;
   padding: 1em;
-  margin: 0.5em 0;
-  border-top: 2px grey solid;
+}
+.bbn-form-full{
+  margin: 0 0 0.5em 0 ;
+}
+
+.bbn-filter{
+  padding: 0em 0.4em;
+  margin: 0.3em 0;
+  border-left: 2px solid;
   float: left;
   clear: right;
   h3{
@@ -17,10 +21,6 @@
     padding-right: 3em;
     padding: 0;
     margin: 0;
-  }
-  .bbn-filter-buttons{
-    clear: both;
-    float: left;
   }
   .bbn-form-label{
     width: 2.7em !important;
@@ -35,14 +35,12 @@
     width: 5em;
   }
   .bbn-filter-bordered{
-    border-radius: 15px;
-    padding: 1em;
     margin: 0;
-    border: 1px blue solid;
     .bbn-filter-main{
-      margin: 0 5em;
+      margin: 0 1em;
     }
   }
+
   .bbn-filter-items{
     position: relative;
     float: left;
@@ -61,14 +59,15 @@
       }
     }
     .bbn-filter-buttons{
-      position: absolute;
-      top: 0.7em; right: 1em;
+      float: left;
+      clear: left;
+      max-height: 1em;
+      margin-left:0.5em;
     }
     .bbn-filter-logic{
+      width: 3em;
       font-weight: bold;
-      position: absolute;
-      top: 1em; left: 1em;
-      color: blue;
+      float: left;
     }
   }
   .bbn-filter-bordered.bbn-filter-or{
@@ -77,12 +76,14 @@
       color: green;
     }
   }
-  .bbn-filter-bordered.bbn-filter-temp{
-    border-style: dashed;
-  }
   .bbn-filter-items::after{
     content: "";
     clear: both;
     display: table;
   }
 }
+.padding{
+  padding-left: 0.1em;
+  padding-right: 0.1em;
+}
+

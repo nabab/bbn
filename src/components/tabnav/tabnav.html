@@ -7,7 +7,7 @@
        'k-tabstrip-scrollable': scrollable
      }"
 >
-  <div class="bbn-100" v-if="isMounted">
+  <div class="bbn-flex-height" v-if="isMounted">
     <ul ref="tabgroup"
         :class="{
           'k-reset': true,
@@ -58,15 +58,14 @@
         </div>
       </li>
     </ul>
-    <template v-for="(tab, tabIndex) in tabs"
-    >
+    <template v-for="(tab, tabIndex) in tabs">
       <bbn-loader inline-template
                   v-if="tab.load || (!tab.selected && !tab.loaded)"
                   :ref="'container' + tabIndex"
                   :source="tab"
-                  :key="tabIndex"
+                  :key="tab.url"
       >
-        <div class="bbn-loader" v-bbn-fill-height v-show="source.selected">
+        <div class="bbn-loader bbn-flex-fill" v-show="source.selected">
           <div class="loader-animation" v-if="source.selected">
             <div class="sk-cube-grid">
               <div class="sk-cube sk-cube1"></div>
@@ -87,24 +86,26 @@
                v-else
                v-bind="tab"
                :ref="'container-' + tabIndex"
-               :key="tabIndex"
+               :key="tab.url"
                @ready="tab.loaded = true"
       >
         <div :class="{
+               'bbn-flex-fill': true,
                'bbn-tab': true,
                'k-content': true,
                'bbn-w-100': true,
                'bbn-tab-selected': !!selected
              }"
-             v-bbn-fill-height
         >
           <component v-if="isComponent"
                      :is="name"
                      :source="source"
+                     ref="component"
           ></component>
           <component v-else-if="component"
                      :is="component"
                      :source="source"
+                     ref="component"
                      v-bind="componentAttributes"
           ></component>
           <bbn-scroll v-else>

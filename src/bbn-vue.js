@@ -10,76 +10,6 @@
     }
   });
 
-  Vue.directive('bbn-fill-height', {
-    bind(el, binding, vnode, oldVnode){
-      //bbn.fn.log("BOUNMD!!!", el, "FROM");
-    },
-    inserted(el, binding, vnode){
-      bbn.vue.setResizeDirective(binding.name, el, vnode);
-    },
-    updated(el, binding, vnode, oldVnode){
-      //bbn.fn.log("UPDATED FILL HEIGHT");
-      //bbn.fn.fillHeight(el);
-    },
-    componentUpdated(el, binding, vnode, oldVnode){
-      //bbn.fn.log("UPDATED COMPONENT FILL HEIGHT");
-      //bbn.fn.fillHeight(el);
-    },
-    unbind(el, binding, vnode, oldVnode){
-      bbn.vue.unsetResizeDirective(binding.name, el, vnode);
-    }
-  });
-
-  Vue.directive('bbn-fill-width', {
-    inserted(el, binding, vnode, oldVnode){
-      bbn.vue.setResizeDirective(binding.name, el, vnode);
-    },
-    updated(el, binding, vnode, oldVnode){
-      //bbn.fn.log("UPDATED FILL WIDTH");
-      //bbn.fn.fillWidth(el);
-    },
-    componentUpdated(el, binding, vnode, oldVnode){
-      //bbn.fn.log("UPDATED COMPONENT FILL WIDTH");
-      //bbn.fn.fillWidth(el);
-    },
-    unbind(el, binding, vnode, oldVnode){
-      //bbn.fn.log("UNBOUND FILL WIDTH");
-      if ( vnode.componentInstance ){
-        let fn = $(el).data("bbnVueFillWidth");
-        if ( fn ){
-          /** We pick the closest resizable element, i.e. one which  */
-          let closestResizable = bbn.vue.is(vnode.componentInstance, ".bbn-resize-emitter") ? vnode.componentInstance : bbn.vue.closest(vnode.componentInstance, ".bbn-resize-emitter");
-          if ( closestResizable ){
-            /** We put the listener */
-            closestResizable.$off("resize", fn);
-          }
-          else{
-            $(window).off("resize", fn);
-          }
-        }
-      }
-    }
-  });
-
-  /*
-  Vue.directive('bbn-resizable', {
-    inserted(el, binding, vnode, oldVnode){
-      $(el).addClass(".bbn-resizable");
-      let closestResizable = false;
-      if ( vnode.componentInstance ){
-        closestResizable = bbn.vue.is(vnode.componentInstance, ".bbn-resizable") ? vnode.componentInstance : bbn.vue.closest(vnode.componentInstance, ".bbn-resizable");
-        if ( closestResizable ){
-          closestResizable.$on("resize", () => {
-            bbn.fn.log("Emiting resize", el);
-            this.$emit("resize");
-          })
-        }
-      }
-      bbn.fn.log("INSERTED RESIZABLE", el, binding, vnode, oldVnode, rt);
-    }
-  });
-*/
-
   const
     editorOperators = {
       string: {
@@ -191,8 +121,8 @@
      * @returns object
      */
     toKendoDataSource(vm){
-      let text = vm.widgetOptions.dataTextField || vm.sourceText,
-          value = vm.widgetOptions.dataValueField || vm.sourceValue;
+      let text = vm.sourceText || vm.widgetOptions.dataTextField || 'text',
+          value = vm.sourceValue || vm.widgetOptions.dataValueField || 'value';
       let transform = (src) => {
         let type = typeof(src),
             isArray = Array.isArray(src);
@@ -202,6 +132,9 @@
             let tmp2 = {};
             tmp2[text] = (typeof a) === 'string' ? a : n;
             tmp2[value] = n;
+            if ( vm.group && a[vm.group] ){
+              tmp2[vm.group] = a[vm.group];
+            }
             tmp.push(tmp2);
           });
           return tmp;
@@ -400,7 +333,7 @@
             let url = bbn_root_url + bbn_root_dir + 'components/' + a + "/?component=1";
 
             if ( bbn.env.isDev ){
-              url += '&test';
+              url += '&test=1';
             }
             bbn.fn.ajax(url, "script")
               .then((res) => {
@@ -445,7 +378,7 @@
       },
       methods: {
         _getStorageRealName(name){
-          return bbn.env.path + '-' + this.$options.name + '-' + (this.id ? this.id + '-' : '') + name;
+          return bbn.env.path + '-' + this.$options.name + '-' + (this.id ? this.id + '-' : '') + (name || 'default');
         },
         hasStorage(){
           return !!this.storage;
@@ -493,6 +426,7 @@
             else if ( col.type ){
               switch ( col.type ){
                 case 'number':
+                case 'money':
                   o.type = 'number';
                   o.component = 'bbn-numeric';
                   break;
@@ -590,12 +524,8 @@
       methods: {
         getOptions(obj){
           let cfg = bbn.vue.getOptions2(this, obj);
-          if ( this.widgetOptions.dataTextField || this.sourceText ){
-            cfg.dataTextField = this.widgetOptions.dataTextField || this.sourceText;
-          }
-          if ( this.widgetOptions.dataValueField || this.sourceValue ){
-            cfg.dataValueField = this.widgetOptions.dataValueField || this.sourceValue;
-          }
+          cfg.dataTextField = this.sourceText || this.widgetOptions.dataTextField || 'text';
+          cfg.dataValueField = this.sourceValue || this.widgetOptions.dataValueField || 'value';
           cfg.dataSource = this.dataSource;
           return cfg;
         },
@@ -872,6 +802,7 @@
         },
 
         unsetResizeEvent(){
+          return;
           if ( this.resizeEmitter ){
             if ( this.parentResizer ){
               //bbn.fn.log("UNSETTING EVENT FOR PARENT", this.$el, this.parentResizer);

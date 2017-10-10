@@ -119,13 +119,14 @@
             this.$set(this.items[idx], "selected", true);
 
           }
-          if ( this.items[idx].click ){
-            if ( typeof(this.items[idx].click) === 'string' ){
+          if ( this.items[idx].command ){
+            bbn.fn.log()
+            if ( typeof(this.items[idx].command) === 'string' ){
               bbn.fn.log("CLICK IS STRING", this);
             }
-            else if ( $.isFunction(this.items[idx].click) ){
+            else if ( $.isFunction(this.items[idx].command) ){
               bbn.fn.log("CLICK IS FUNCTION", this);
-              this.items[idx].click(e, idx, JSON.parse(JSON.stringify(this.items[idx])));
+              this.items[idx].command(e, idx, JSON.parse(JSON.stringify(this.items[idx])));
             }
           }
           if ( this.mode !== 'options' ){

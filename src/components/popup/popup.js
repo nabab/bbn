@@ -216,6 +216,7 @@
         let win = this.getWindow(idx);
         if ( this.items[idx] && win ){
           win.close(idx, force);
+          this.$forceUpdate();
         }
       },
 
@@ -353,18 +354,18 @@
           }
           o.component = {
             template: `
-<div class="bbn-100 bbn-lg">
-  <div class="bbn-w-100" v-bbn-fill-height>
+<div class="bbn-100 bbn-lg bbn-flex-height">
+  <div class="bbn-w-100 bbn-flex-fill">
     <div class="bbn-lpadded">` + o.content + `</div>
   </div>
   <div class="bbn-popup-footer">
     <bbn-button class="bbn-bg-white bbn-black"
-                @click="yes"
+                @click="yes()"
                 icon="fa fa-check-circle"
                 text="` + o.yesText + `"
     ></bbn-button>
     <bbn-button class="bbn-bg-black bbn-white"
-                @click="no"
+                @click="no()"
                 icon="fa fa-times-circle"
                 text="` + o.noText + `"
     ></bbn-button>
@@ -378,6 +379,7 @@
             },
             methods: {
               yes(){
+                bbn.fn.log(this.window);
                 this.window.close(true);
                 if ( onYes ){
                   onYes();
@@ -431,7 +433,7 @@
               }
             }
             let scroll = this.getWindow(idx).$refs.scroll;
-            if ( scroll.length ){
+            if ( scroll && scroll.length ){
               scroll[0].onResize();
             }
           })
@@ -508,6 +510,9 @@
             type: Function
           },
           afterClose: {
+            type: Function
+          },
+          open: {
             type: Function
           },
           source: {
@@ -589,11 +594,16 @@
         },
         mounted(){
           this.popup = this.$parent.$parent;
+          /*
           setTimeout(() => {
             if ( this.$refs.scroll ){
               this.$refs.scroll[0].onResize();
+            };
+            if ( this.open ){
+              //this.open(this);
             }
           }, 1000)
+          */
         }
       }
     }
