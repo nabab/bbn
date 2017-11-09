@@ -21,84 +21,176 @@ use bbn;
 class permissions extends bbn\models\cls\basic
 {
   use bbn\models\tts\retriever,
-      bbn\models\tts\optional;
-
-	private static
-					/** @var int */
-					$is_init = false,
-					/** @var int the ID of the root option for the permission (it should have the option's root as id_parent and bbn_permissions as code */
-					$root,
-          $current_permission = false;
+      bbn\models\tts\optional,
+      bbn\models\tts\current;
 
   protected
-          $options,
+          $opt,
           $pref,
           $user;
 
-  private static function _set_current(int $current){
-    self::$current_permission = $current;
+  /**
+   * @param string|null $id_option
+   * @param string $type
+   * @return null|string
+   */
+  private function _get_id_option(string $id_option = null, $type = 'page'): ?string
+  {
+    if ( $id_option && !bbn\str::is_uid($id_option) ){
+      $id_option = $this->from_path($id_option, $type);
+    }
+    else if ( null === $id_option ){
+      $id_option = $this->get_current();
+    }
+    if ( bbn\str::is_uid($id_option) ){
+      return $id_option;
+    }
+    return null;
   }
 
-	/**
-   * Constructor
-   *
-	 * @return self
-	 */
-	public function __construct(){
-		$this->options = bbn\appui\options::get_instance();
-    $this->pref = bbn\user\preferences::get_instance();
-    $this->user = bbn\user::get_instance();
+  /**
+   * permissions constructor.
+   */
+  public function __construct()
+  {
+		if ( !($this->opt = bbn\appui\options::get_instance()) ){
+      die('Impossible to construct permissions: you need to instantiate options before');
+    }
+    if ( !($this->pref = bbn\user::get_instance()) ){
+      die('Impossible to construct permissions: you need to instantiate user before');
+    }
+    if ( !($this->pref = bbn\user\preferences::get_instance()) ){
+      die('Impossible to construct permissions: you need to instantiate preferences before');
+    }
     self::retriever_init($this);
     self::optional_init();
 	}
 
-  public function set_current_permission(int $current){
-    self::_set_current($current);
-    return $this;
-  }
-
-  public function get_current_permission(){
-    return self::$current_permission;
+  /**
+   * Returns the option's ID corresponds to the given path.
+   *
+   * @param string $path
+   * @param string $type
+   * @return null|string
+   */
+  public function from_path(string $path, $type = 'page'): ?string
+  {
+    $parent = null;
+    if ( $root = $this->opt->from_code($type, self::$option_root_id) ){
+      $parts = explode('/', $path);
+      $parent = $root;
+      foreach ( $parts as $i => $p ){
+        $is_not_last = $i < (count($parts) - 1);
+        if ( !empty($p) ){
+          $prev_parent = $parent;
+          $parent = $this->opt->from_code($p.($is_not_last ? '/' : ''), $prev_parent);
+          if ( !$parent && $is_not_last ){
+            $parent = $this->opt->from_code($p, $prev_parent);
+          }
+        }
+      }
+    }
+    return $parent ?: null;
   }
 
   /**
-   * Return the list of permissions existing in the given option
+   * Returns the result of appui\options::options filtered with only the ones authorized to the current user.
    *
-   * @param $id_option
+   * @param string|null $id_option
+   * @param string $type
+   * @return array|null
+   */
+  public function options(string $id_option = null, string $type = 'page'): ?array
+  {
+    if (
+      ($id_option = $this->_get_id_option($id_option, $type)) &&
+      ($os = $this->opt->options(func_get_args()))
+    ){
+      $res = [];
+      foreach ( $os as $o ){
+        if ( $this->pref->has($o['id']) ){
+          $res[] = $o;
+        }
+      }
+      return $res;
+    }
+    return null;
+  }
+
+  /**
+   * Returns the result of appui\options::full_options filtered with only the ones authorized to the current user.
+   *
+   * @param string|null $id_option
+   * @param string $type
+   * @return array|null
+   */
+  public function full_options(string $id_option = null, string $type = 'page'): ?array
+  {
+    if (
+      ($id_option = $this->_get_id_option($id_option, $type)) &&
+      ($os = $this->opt->full_options(func_get_args()))
+    ){
+      $res = [];
+      foreach ( $os as $o ){
+        if ( ($ids = $this->pref->retrieve_ids($o['id'])) && ($cfg = $this->pref->get($ids[0])) ){
+          $res[] = bbn\x::merge_arrays($o, $cfg);
+        }
+      }
+      return $res;
+    }
+    return null;
+  }
+
+  /**
+   * Returns the full list of permissions existing in the given option
+   *
+   * @param null|string $id_option
+   * @param string $type
+   * @return null|array
+   */
+  public function get_all(string $id_option = null, string $type = 'page'): ?array
+  {
+    if ( $id_option = $this->_get_id_option($id_option, $type) ){
+      return $this->pref->options($id_option ?: $this->get_current());
+    }
+    return null;
+  }
+
+  /**
+   * Returns the full list of permissions existing in the given option with all the current user's preferences
+   *
+   * @param null|string $id_option
    * @param string $type
    * @return array|bool|false
    */
-  public function get_all($id_option, string $type = 'page'){
-    if ( !bbn\str::is_integer($id_option) ){
-      $id_option = $this->from_path($id_option, $type);
+  public function get_full($id_option = null, string $type = 'page'): ?array
+  {
+    if ( $id_option = $this->_get_id_option($id_option, $type) ){
+      return $this->pref->full_options($id_option ?: $this->get_current());
     }
-    if ( bbn\str::is_integer($id_option) ){
-      return $this->pref->full_options($id_option);
-    }
-    return false;
+    return null;
   }
 
   /**
-   * Return the list of permissions authorized in the given option
+   * Returns an option combined with its sole/first permission
    *
-   * @param $id_option
+   * @param string $id_option
    * @param string $type
-   * @param int|null $id_user
-   * @param int|null $id_group
    * @param bool $force
    * @return array|bool
    */
-  public function get($id_option, string $type = 'page', int $id_user = null, int $id_group = null, bool $force = false){
+  public function get(string $id_option = null, string $type = 'page', bool $force = false): ?array
+  {
     if ( $all = $this->get_all($id_option, $type) ){
       $r = [];
       foreach ( $all as $a ){
-        if ( $this->has($a['id'], '', $id_user, $id_group, $force) ){
+        if ( $this->has($a['id'], '', $force) ){
           $r[] = $a;
         }
       }
       return $r;
     }
-    return false;
+    return null;
   }
 
   /**
@@ -106,32 +198,20 @@ class permissions extends bbn\models\cls\basic
    *
    * @param mixed $id_option
    * @param string $type
-   * @param int|null $id_user
-   * @param int|null $id_group
    * @param bool $force
    * @return bool
    */
-  public function has($id_option, string $type = 'page', int $id_user = null, int $id_group = null, bool $force = false){
-    if ( !$force && $this->user ){
-      // User is admin
-      if ( !$id_group && !$id_user && ($this->user->get_group() === 1) ){
+  public function has(string $id_option = null, string $type = 'page', bool $force = false): bool
+  {
+    if ( !$force && $this->user && $this->user->is_admin() ){
+      return true;
+    }
+    if ( $id_option = $this->_get_id_option($id_option, $type) ){
+      $option = $this->opt->option($id_option);
+      if ( !empty($option['public']) ){
         return true;
       }
-      if ( $this->user->is_admin() ){
-        return true;
-      }
-    }
-    if ( !bbn\str::is_integer($id_option) ){
-      $id_option = $this->from_path($id_option, $type);
-    }
-    if ( bbn\str::is_integer($id_option) ){
-      if ( $id_option ){
-        $option = $this->options->option($id_option);
-        if ( !empty($option['public']) ){
-          return true;
-        }
-        return $this->pref->has($id_option, $id_user ?: $this->user->get_id(), $id_group ?: $this->user->get_group(), $force);
-      }
+      return $this->pref->has($id_option, $force);
     }
     return false;
   }
@@ -141,73 +221,11 @@ class permissions extends bbn\models\cls\basic
    *
    * @param string $path
    * @param string $type
-   * @return bool
+   * @return null|string
    */
-  public function is(string $path, string $type = 'page'){
-    return $this->from_path($path, $type) ?: false;
-  }
-
-  /**
-   * Returns the option's ID corresponds to the given path.
-   *
-   * @param string $path
-   * @param string $type
-   * @return bool
-   */
-  public function from_path(string $path, $type = 'page'){
-    $parent = null;
-    if ( $root = $this->options->from_code($type, self::$option_root_id) ){
-      $parts = explode('/', $path);
-      $num = count($parts);
-      foreach ( $parts as $i => $p ){
-        if ( !empty($p) ){
-          if ( is_null($parent) ){
-            $parent = $root;
-          }
-          $prev_parent = $parent;
-          $parent = $this->options->from_code($p.($i < $num-1 ? '/' : ''), $parent);
-          if ( !$parent && ($i < $num-1) ){
-            $parent = $this->options->from_code($p, $prev_parent);
-          }
-        }
-      }
-    }
-    return $parent ?: false;
-  }
-
-
-  /**
-   * Grants a new permission to a user or a group
-   * @param $id_option
-   * @param string $type
-   * @param null $id_user
-   * @param null $id_group
-   * @return bool
-   */
-  public function add($id_option, $type = 'page', $id_user = null, $id_group = null){
-    if ( !bbn\str::is_integer($id_option) ){
-      $id_option = $this->from_path($id_option, $type);
-    }
-    return $this->pref->set($id_option, [], $id_user, $id_group);
-  }
-
-  /**
-   * Deletes a preference for a path or an ID.
-   *
-   * @param $id_option
-   * @param string $type
-   * @param int|null $id_user
-   * @param int|null $id_group
-   * @return array
-   */
-  public function remove($id_option, string $type = 'page', int $id_user = null, int $id_group = null){
-    if ( !bbn\str::is_integer($id_option) ){
-      $id_option = $this->from_path($id_option, $type);
-    }
-    if ( bbn\str::is_integer($id_option) ){
-      return $this->pref->delete($id_option, $id_user, $id_group);
-    }
-    return false;
+  public function is(string $path, string $type = 'page'): ?string
+  {
+    return $this->from_path($path, $type) ?: null;
   }
 
   /**
@@ -216,12 +234,13 @@ class permissions extends bbn\models\cls\basic
    * @param array $arr
    * @return array
    */
-  public function customize(array $arr){
+  public function customize(array $arr): array
+  {
     $res = [];
     if ( isset($arr[0]) ){
       foreach ( $arr as $a ){
         if ( isset($a['id']) && $this->has($a['id']) ){
-          array_push($res, $a);
+          $res[] = $a;
         }
       }
     }
@@ -233,28 +252,71 @@ class permissions extends bbn\models\cls\basic
           if ( !isset($res['items']) ){
             $res['items'] = [];
           }
-          array_push($res['items'], $a);
+          $res['items'][] = $a;
         }
       }
     }
     return $res;
   }
 
-  public function read_option($id_option, $id_user = null, $id_group = null){
-    if ( bbn\str::is_integer($id_option) ){
-      $root = self::get_option_id('options');
-      $id_to_check = $this->options->from_code('opt'.$id_option, $root);
-      return $this->has($id_to_check, 'options', $id_user, $id_group);
+  /**
+   * Grants a new permission to a user or a group
+   * @param null|string $id_option
+   * @param string $type
+   * @return int
+   */
+  public function add(string $id_option, string $type = 'page'): ?int
+  {
+    if ( $id_option = $this->_get_id_option($id_option, $type) ){
+      return $this->pref->set($id_option, []);
     }
-    return false;
+    return null;
   }
 
-  public function write_option($id_option, $id_user = null, $id_group = null){
-    if ( bbn\str::is_integer($id_option) ){
-      $root = self::get_option_id('opt'.$id_option, 'options');
-      $id_to_check = $this->options->from_code('write', $root);
-      return $this->has($id_to_check, 'options', $id_user, $id_group);
+  /**
+   * Deletes a preference for a path or an ID.
+   *
+   * @param null|string $id_option
+   * @param string $type
+   * @return null|int
+   */
+  public function remove($id_option, string $type = 'page'): ?int
+  {
+    if ( $id_option = $this->_get_id_option($id_option, $type) ){
+      return $this->pref->delete($id_option);
     }
-    return false;
+    return null;
+  }
+
+  /**
+   * Checks if the category represented by the given option ID is readable by the current user
+   *
+   * @param string|null $id_option
+   * @return bool|null
+   */
+  public function read_option(string $id_option = null): ?bool
+  {
+    if ( bbn\str::is_uid($id_option) ){
+      $root = self::get_option_id('options');
+      $id_to_check = $this->opt->from_code('opt'.$id_option, $root);
+      return $this->has($id_to_check, 'options');
+    }
+    return null;
+  }
+
+  /**
+   * Checks if the category represented by the given option ID is writable by the current user
+   *
+   * @param string|null $id_option
+   * @return bool|null
+   */
+  public function write_option(string $id_option): ?bool
+  {
+    if ( bbn\str::is_uid($id_option) ){
+      $root = self::get_option_id('opt'.$id_option, 'options');
+      $id_to_check = $this->opt->from_code('write', $root);
+      return $this->has($id_to_check, 'options');
+    }
+    return null;
   }
 }

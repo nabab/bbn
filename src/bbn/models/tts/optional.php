@@ -61,7 +61,7 @@ trait optional
     self::optional_init();
     $opt = bbn\appui\options::get_instance();
     $args = func_get_args();
-    array_push($args, self::$option_root_id);
+    $args[] = self::$option_root_id;
     return $opt->from_code($args);
   }
 
@@ -69,7 +69,7 @@ trait optional
     self::optional_init();
     $opt = bbn\appui\options::get_instance();
     $args = func_get_args();
-    array_push($args, self::$option_root_id);
+    $args[] = self::$option_root_id;
     return array_flip($opt->get_codes($args));
   }
 
@@ -77,7 +77,7 @@ trait optional
     self::optional_init();
     $opt = bbn\appui\options::get_instance();
     $args = func_get_args();
-    array_push($args, self::$option_root_id);
+    $args[] = self::$option_root_id;
     if ( $tree = $opt->full_tree($args) ){
       return $tree['items'] ?: [];
     }
@@ -88,7 +88,7 @@ trait optional
     self::optional_init();
     $opt = bbn\appui\options::get_instance();
     $args = func_get_args();
-    array_push($args, self::$option_root_id);
+    $args[] = self::$option_root_id;
     return $opt->full_options($args);
   }
 
@@ -96,7 +96,7 @@ trait optional
     self::optional_init();
     $opt = bbn\appui\options::get_instance();
     $args = func_get_args();
-    array_push($args, self::$option_root_id);
+    $args[] = self::$option_root_id;
     if ( $id = $opt->from_code($args) ){
       return $opt->text_value_options($id);
     }

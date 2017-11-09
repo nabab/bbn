@@ -103,7 +103,6 @@ class session
       //
       $this->fetch();
     }
-    return $this;
   }
 
   protected function open(){

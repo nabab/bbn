@@ -183,86 +183,88 @@ trait triggers {
    */
   private function _sel($table, $fields = [], $where = [], $order = false, $limit = 100, $start = 0)
   {
-    if ( !is_array($table) ){
-      $table = [$table];
-    }
-    $tables_fields = [];
-    $tables_full = [];
-    foreach ( $table as $tab ){
-      $tables_fields[$tab] = array_keys($this->modelize($tab)['fields']);
-      array_push($tables_full, $this->tfn($tab));
-    }
-    if ( !is_array($fields) ){
-      $fields = [$fields];
-    }
-    foreach ( $fields as $i => $field ){
-      if ( !strpos($field, '.') ){
-        $tab = [];
-        foreach ( $tables_fields as $t => $f ){
-          if ( in_array($field, $f) ){
-            array_push($tab, $t);
+    if ( $this->check() ){
+      if ( !is_array($table) ){
+        $table = [$table];
+      }
+      $tables_fields = [];
+      $tables_full = [];
+      foreach ( $table as $tab ){
+        $tables_fields[$tab] = array_keys($this->modelize($tab)['fields']);
+        $tables_full[] = $this->tfn($tab);
+      }
+      if ( !is_array($fields) ){
+        $fields = [$fields];
+      }
+      foreach ( $fields as $i => $field ){
+        if ( !strpos($field, '.') ){
+          $tab = [];
+          foreach ( $tables_fields as $t => $f ){
+            if ( in_array($field, $f) ){
+              array_push($tab, $t);
+            }
+          }
+          if ( count($tab) === 1 ){
+            $fields[$i] = $this->cfn($field, $tab[0]);
+          }
+          else if ( count($tab) > 1 ){
+            $this->error('Error! Duplicate field name, you must insert the fields with their fullname.');
+          }
+          else {
+            $this->error("Error! The column '$field' doesn't exist in '".implode(", ", $table)." / ".\bbn\x::get_dump($tables_fields), \bbn\x::get_dump($tables_full));
           }
         }
-        if ( count($tab) === 1 ){
-          $fields[$i] = $this->cfn($field, $tab[0]);
-        }
-        else if ( count($tab) > 1 ){
-          $this->error('Error! Duplicate field name, you must insert the fields with their fullname.');
-        }
-        else {
-          $this->error("Error! The column '$field' doesn't exist in '".implode(", ", array_keys($tables_fields)));
-        }
       }
-    }
-    $cfg = [
-      'moment' => 'before',
-      'kind' => 'select',
-      'table' => $tables_full
-    ];
-    $cfg['where'] = $this->where_cfg($where, $cfg['table']);
-    $cfg['hash'] = $this->make_hash(
-      'select',
-      serialize($cfg['table']),
-      serialize($fields),
-      serialize($this->get_where($cfg['where'], $cfg['table'])),
-      serialize($order),
-      $limit,
-      $start
-    );
-    if ( isset($this->queries[$cfg['hash']]) ){
-      $cfg['sql'] = $this->queries[$this->queries[$cfg['hash']]]['statement'];
-    }
-    else{
-      $cfg['sql'] = $this->language->get_select($table, $fields, $cfg['where']['final'], $order, $limit, $start);
-    }
-
-    $cfg['values'] = array_values($fields);
-    if ( $cfg['sql'] ){
-      if ( $this->triggers_disabled ){
-        if ( count($cfg['where']['values']) > 0 ){
-          $r = $this->query($cfg['sql'], $cfg['hash'], $cfg['where']['values']);
-        }
-        else{
-          $r = $this->query($cfg['sql'], $cfg['hash']);
-        }
+      $cfg = [
+        'moment' => 'before',
+        'kind' => 'select',
+        'table' => $tables_full
+      ];
+      $cfg['where'] = $this->where_cfg($where, $cfg['table']);
+      $cfg['hash'] = $this->make_hash(
+        'select',
+        serialize($cfg['table']),
+        serialize($fields),
+        serialize($this->get_where($cfg['where'], $cfg['table'])),
+        serialize($order),
+        $limit,
+        $start
+      );
+      if ( isset($this->queries[$cfg['hash']], $this->queries[$this->queries[$cfg['hash']]]) ){
+        $cfg['sql'] = $this->queries[$this->queries[$cfg['hash']]]['statement'];
       }
       else{
-        $cfg = $this->_trigger($cfg);
-        $r = false;
-        if ( $cfg['run'] ){
+        $cfg['sql'] = $this->language->get_select($table, $fields, $cfg['where']['final'], $order, $limit, $start);
+      }
+
+      $cfg['values'] = array_values($fields);
+      if ( $cfg['sql'] ){
+        if ( $this->triggers_disabled ){
           if ( count($cfg['where']['values']) > 0 ){
             $r = $this->query($cfg['sql'], $cfg['hash'], $cfg['where']['values']);
           }
-          else {
+          else{
             $r = $this->query($cfg['sql'], $cfg['hash']);
           }
         }
-        if ( ($r && $cfg['trig']) || !empty($cfg['force']) ){
-          $cfg['moment'] = 'after';
-          $this->_trigger($cfg);
+        else{
+          $cfg = $this->_trigger($cfg);
+          $r = false;
+          if ( $cfg['run'] ){
+            if ( count($cfg['where']['values']) > 0 ){
+              $r = $this->query($cfg['sql'], $cfg['hash'], $cfg['where']['values']);
+            }
+            else {
+              $r = $this->query($cfg['sql'], $cfg['hash']);
+            }
+          }
+          if ( ($r && $cfg['trig']) || !empty($cfg['force']) ){
+            $cfg['moment'] = 'after';
+            $this->_trigger($cfg);
+          }
         }
+        return $r;
       }
-      return $r;
     }
   }
 
@@ -314,15 +316,18 @@ trait triggers {
       $i = 0;
       foreach ( $w as $k => $v ){
         // arrays with [ field_name => value, field_name => value...] (equal assumed)
+        if ( strpos($k, '.') ){
+          $k = explode('.', $k)[1];
+        }
         if ( is_string($k) ){
-          $v = [$k, is_string($v) ? 'LIKE' : '=', $v];
+          $v = [$k, is_string($v) && !\bbn\str::is_uid($v) ? 'LIKE' : '=', $v];
         }
         if ( is_array($v) ){
           if ( !strpos($v[0], '.') && count($table) ){
             $tab = [];
             foreach ($tables_fields as $t => $f){
-              if (in_array($v[0], $f)){
-                array_push($tab, $t);
+              if ( in_array($v[0], $f, true) ){
+                $tab[] = $t;
               }
             }
             if (count($tab) === 1){
@@ -338,30 +343,31 @@ trait triggers {
               );
             }
           }
-          // arrays with [ field_name => value]
-          if ( count($v) === 2 ){
-            array_push($r['fields'], $v[0]);
-            array_push($r['values'], $v[1]);
-            $r['keyval'][$v[0]] = $v[1];
-            array_push($r['final'], [$v[0], is_string($v[1]) ? 'LIKE' : '=', $v[1]]);
+          if (
+            $model['fields'] &&
+            $model['fields'][$this->csn($v[0])] &&
+            ($model['fields'][$this->csn($v[0])]['type'] === 'binary') &&
+            \bbn\str::is_uid($v[2]) 
+          ){
+            $v[2] = hex2bin($v[2]);
           }
           // arrays with [ field_name, operator, value]
-          else if ( count($v) === 3 ){
-            array_push($r['fields'], $v[0]);
-            array_push($r['values'], $v[2]);
+          if ( count($v) === 3 ){
+            $r['fields'][] = $v[0];
+            $r['values'][] = $v[2];
             if ( ($v[1] === '=') || !isset($r['keyval'][$v[0]]) ){
               $r['keyval'][$v[0]] = $v[2];
             }
-            array_push($r['final'], [$v[0], $v[1], $v[2]]);
+            $r['final'][] = [$v[0], $v[1], $v[2]];
           }
           // arrays with [ field_name, operator, value, bool] value is a DB function/column (unescaped)
           else if ( count($v) === 4 ){
-            array_push($r['fields'], $v[0]);
-            array_push($r['values'], $v[2]);
+            $r['fields'][] = $v[0];
+            $r['values'][] = $v[2];
             if ( ($v[1] === '=') || !isset($r['keyval'][$v[0]]) ){
               $r['keyval'][$v[0]] = $v[2];
             }
-            array_push($r['final'], [$v[0], $v[1], $v[2], $v[3]]);
+            $r['final'][] = [$v[0], $v[1], $v[2], $v[3]];
           }
           else{
             $this->log("Not enough argument for a where", $v);
@@ -370,7 +376,7 @@ trait triggers {
         else{
           $this->log("Incorrect where", $v, $r);
         }
-        array_push($r['unique'], [$r['final'][$i][0], $r['final'][$i][1]]);
+        $r['unique'][] = [$r['final'][$i][0], $r['final'][$i][1]];
         $i++;
       }
     }
@@ -523,6 +529,16 @@ trait triggers {
    */
   public function insert($table, array $values, $ignore = false)
   {
+    // Twice the arguments
+    if ( !bbn\x::is_assoc($values) ){
+      $res = 0;
+      foreach ( $values as $v ){
+        $res += $this->insert($table, $v, $ignore);
+      }
+      return $res;
+    }
+    $values = $this->check_for_primary($table, $values);
+    $values = $this->parse_uids($table, $values);
     $keys = array_keys($values);
     // $values is an array of arrays to insert
     if ( isset($keys[0]) && ($keys[0] === 0) ){
@@ -553,6 +569,55 @@ trait triggers {
     return $affected;
   }
 
+  public function parse_uids($table, $values){
+    $model = $this->modelize($table);
+    foreach ( $values as $k => $v ){
+      if (
+        $model['fields'][$k] &&
+        ($model['fields'][$k]['type'] === 'binary') &&
+        ($model['fields'][$k]['maxlength'] === 16) &&
+        \bbn\str::is_uid($v) &&
+        !\bbn\str::is_buid($v)
+      ){
+        if ( empty($model['fields'][$k]['null']) || !is_null($v) ){
+          $values[$k] = hex2bin($v);
+        }
+      }
+    }
+    return $values;
+  }
+
+  public function check_for_primary($table, $values){
+    $model = $this->modelize($table);
+    if ( isset($model['keys']['PRIMARY']) && (count($model['keys']['PRIMARY']['columns']) === 1) ){
+      $prim = $model['keys']['PRIMARY']['columns'][0];
+      if ( !isset($values[$prim]) && (!isset($model['fields'][$prim]['extra']) || ($model['fields'][$prim]['extra'] !==
+            'auto_increment')) ){
+        $maxlength = (int)$model['fields'][$prim]['maxlength'];
+        switch ( $model['fields'][$prim]['type'] ){
+          case 'int':
+            $values[$prim] = random_int(
+              ceil(10 ** ($maxlength > 3 ? $maxlength - 3 : 1) / 2),
+              ceil(10 ** ($maxlength > 3 ? $maxlength : 1) / 2)
+            );
+            break;
+          case 'binary':
+            if ( $maxlength === 16 ){
+              $values[$prim] = hex2bin($this->add_uid());
+              /*
+              $values[$prim] = hex2bin(empty($model['keys']['PRIMARY']['ref_table']) ?
+                $this->get_uid() :
+                $this->add_uid($model['keys']['PRIMARY']['ref_table'], $model['keys']['PRIMARY']['ref_column'])
+              );
+              */
+            }
+            break;
+        }
+      }
+    }
+    return $values;
+  }
+
   /**
    * If not exist inserts row(s) in a table, else update.
    *
@@ -580,6 +645,7 @@ trait triggers {
       }
       return $res;
     }
+    $values = $this->parse_uids($table, $values);
     $table = $this->tfn($table);
     $keys = $this->get_keys($table);
     $unique = [];
@@ -628,6 +694,7 @@ trait triggers {
    */
   public function update($table, array $values, array $where, $ignore=false)
   {
+    $values = $this->parse_uids($table, $values);
     $where = $this->where_cfg($where, $table, $values);
     $vals = [];
     foreach ( $values as $k => $v ){

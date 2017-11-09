@@ -17,6 +17,8 @@ trait dbconfig
   protected
     /** @var array */
     $class_cfg,
+    /** @var array */
+    $fields,
     /** @var string */
     $class_table,
     /** @var string */
@@ -31,18 +33,16 @@ trait dbconfig
     $cfg = bbn\x::merge_arrays(self::$_defaults, $cfg);
 
     if ( !isset($cfg['tables'], $cfg['table'], $cfg['arch']) ){
-      die("The class ".get_class($this)."is not configured properly to work with trait dbconfig");
+      die('The class '.get_class($this).' is not configured properly to work with trait dbconfig');
     }
 
+    $this->class_table = $cfg['table'];
     // We completely replace the table structure, no merge
-    if ( !empty($cfg['arch']) ){
-      foreach ( $cfg['arch'] as $t => $a ){
-        if ( $cfg['tables'][$t] === $cfg['table'] ){
-          $this->class_table_index = $t;
-        }
+    foreach ( $cfg['arch'] as $t => $a ){
+      if ( $cfg['tables'][$t] === $cfg['table'] ){
+        $this->class_table_index = $t;
       }
     }
-    $this->class_table = $cfg['table'];
     /*
      * The selection comprises the defined fields of the users table
      * Plus a bunch of user-defined additional fields in the same table
@@ -52,10 +52,26 @@ trait dbconfig
     return $this;
   }
 
+  /**
+   * @param $id
+   * @return bool
+   */
   public function exists($id){
     return $this->db->count($this->class_table, [
       $this->class_cfg['arch'][$this->class_table_index]['id'] => $id
     ]) ? true : false;
+  }
+
+  /**
+   * Return the
+   * @return mixed
+   */
+  public function get_class_cfg(){
+    return $this->class_cfg;
+  }
+
+  public function get_fields(){
+    return $this->fields;
   }
 
 

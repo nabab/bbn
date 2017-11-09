@@ -135,8 +135,6 @@ class output {
       $Parsedown = new \Parsedown();
       $this->obj->help = $Parsedown->text($this->obj->help);
     }
-    //die(var_dump($this->mode, $this->obj));
-
     switch ( $this->mode ){
 
       case 'public':

@@ -309,7 +309,7 @@ class mysql implements bbn\db\engines
               $r[$f]['type'] = 'varchar';
             }
             if ( preg_match_all('/\((.*?)\)/', $row['Type'], $matches) ){
-              $r[$f]['maxlength'] = $matches[1][0];
+              $r[$f]['maxlength'] = (int)$matches[1][0];
             }
             if ( !isset($r[$f]['type']) ){
               $r[$f]['type'] = ( strpos($row['Type'], '(') ) ? substr($row['Type'],0,strpos($row['Type'], '(')) : $row['Type'];
@@ -904,5 +904,9 @@ class mysql implements bbn\db\engines
       $this->db->change($cur);
     }
     return $r;
+  }
+
+  public function get_uid(){
+    return $this->db->get_one("SELECT unhex(replace(uuid(),'-',''))");
   }
 }

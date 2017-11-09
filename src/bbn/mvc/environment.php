@@ -94,7 +94,7 @@ class environment {
   private function _init(){
     // When using CLI a first parameter can be used as route,
     // a second JSON encoded can be used as $this->post
-    if ( $this->cli ){
+    if ( php_sapi_name() === 'cli' ){
       $this->mode = 'cli';
       $this->get_cli();
     }
@@ -150,7 +150,6 @@ class environment {
   public function __construct($url=false){
     if ( !self::$initiated ){
       self::_initialize();
-      $this->cli = (php_sapi_name() === 'cli');
       $this->_init();
     }
 
@@ -180,6 +179,12 @@ class environment {
   public function is_cli(){
     if ( !isset($this->cli) ){
       $this->cli = (php_sapi_name() === 'cli');
+      if ( $this->cli ){
+        $opt = getopt('', ['cli']);
+        if ( isset($opt['cli']) ){
+          $this->cli = 'direct';
+        }
+      }
     }
     return $this->cli;
   }
@@ -203,6 +208,9 @@ class environment {
   public function get_cli(){
     global $argv;
     if ( $this->is_cli() ){
+      if ( $this->is_cli() === 'direct' ){
+        array_shift($argv);
+      }
       $this->post = [];
       if ( isset($argv[1]) ){
         $this->set_params($argv[1]);

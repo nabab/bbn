@@ -20,11 +20,9 @@ use bbn;
  */
 abstract class db extends basic
 {
-	protected
-		/**
-		 * @var bbn\db
-		 */
-		$db;
+  /** @var bbn\db */
+	protected $db;
+
 
 	public function __construct(bbn\db $db){
 		$this->db = $db;

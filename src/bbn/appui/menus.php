@@ -20,8 +20,9 @@ class menus extends bbn\models\cls\basic{
     /** @var bbn\appui\options The options object */
     $options;
 
-  public function __construct(bbn\appui\options $o, $r){
-    $this->options = $o;
+  public function __construct(){
+    $this->options = bbn\appui\options::get_instance();
+    $this->pref = bbn\user\preferences::get_instance();
     $this->cache_init();
     self::optional_init();
   }
@@ -46,27 +47,28 @@ class menus extends bbn\models\cls\basic{
     self::$public_root = self::$public_root . '|' . $rel_path;
   }
 
-  private function _adapt($ar, bbn\user\preferences $pref, $prepath = false){
-    $tmp = $this->_filter($ar, $pref);
+  private function _adapt($ar, $prepath = false){
+    $tmp = $this->_filter($ar, $this->pref);
     foreach ( $tmp as $i => $it ){
       if ( !empty($it['items']) ){
-        $tmp[$i]['items'] = $this->_adapt($it['items'], $pref, $prepath);
+        $tmp[$i]['items'] = $this->_adapt($it['items'], $prepath);
       }
     }
     $res = [];
     foreach ( $tmp as $i => $it ){
       if ( !empty($it['items']) || !empty($it['id_permission']) ){
-        array_push($res, $it);
+        $res[] = $it;
       }
     }
     return $res;
   }
 
-  private function _filter($ar, bbn\user\preferences $pref){
+  private function _filter($ar){
     $usr = bbn\user::get_instance();
     if ( is_object($usr) && $usr->is_admin() ){
       return $ar;
     }
+    $pref = $this->pref;
     return array_filter($ar, function($a)use($pref){
       if ( !empty($a['public']) ){
         return true;
@@ -99,7 +101,7 @@ class menus extends bbn\models\cls\basic{
       if ( !empty($menu['items']) ){
         $res['items'] = [];
         foreach ( $menu['items'] as $m ){
-          array_push($res['items'], $this->_arrange($m, $prepath));
+          $res['items'][] = $this->_arrange($m, $prepath);
         }
       }
       return $res;
@@ -112,10 +114,10 @@ class menus extends bbn\models\cls\basic{
    * @return bool|false|int
    */
   public function from_path($path){
-    if ( !bbn\str::is_integer($path) ){
+    if ( !bbn\str::is_uid($path) ){
       $path = $this->options->from_code($path, self::$option_root_id);
     }
-    return bbn\str::is_integer($path) ? $path : false;
+    return bbn\str::is_uid($path) ? $path : false;
   }
 
   /**
@@ -124,7 +126,7 @@ class menus extends bbn\models\cls\basic{
    * @return int|boolean
    */
   public function to_path($id){
-    if ( bbn\str::is_integer($id) ){
+    if ( bbn\str::is_uid($id) ){
       return $this->options->to_path($id, '', $this->_get_public_root());
     }
     return false;
@@ -134,20 +136,20 @@ class menus extends bbn\models\cls\basic{
     $id = $this->from_path($id);
   }
 
-  public function add_shortcut($id, bbn\user\preferences $pref){
+  public function add_shortcut($id){
     if ( $id_menu = $this->from_path('shortcuts') ){
-      return $pref->set_link($id, $id_menu);
+      return $this->pref->set_link($id, $id_menu);
     }
   }
 
-  public function remove_shortcut($id, bbn\user\preferences $pref){
+  public function remove_shortcut($id){
     if ( $id_menu = $this->from_path('shortcuts') ){
-      return $pref->unset_link($id);
+      return $this->pref->set_link($id, null);
     }
   }
 
   public function tree($id, $prepath = false){
-    if ( $id = $this->from_path($id) ){
+    if ( $id = $this->from_path($id, self::$option_root_id) ){
       if ( $this->cache_has($id, __FUNCTION__) ){
         return $this->cache_get($id, __FUNCTION__);
       }
@@ -158,26 +160,26 @@ class menus extends bbn\models\cls\basic{
     }
   }
 
-  public function custom_tree($id, bbn\user\preferences $pref, $prepath = false){
+  public function custom_tree($id, $prepath = false){
     if ( $tree = $this->tree($id, $prepath) ){
-      return $this->_adapt($tree, $pref, $prepath);
+      return $this->_adapt($tree, $this->pref, $prepath);
     }
   }
   
-  public function shortcuts(bbn\user\preferences $pref){
+  public function shortcuts(){
     if ( $id_menu = $this->from_path('shortcuts') ){
-      $ids = $pref->get_links($id_menu);
+      $links = $this->pref->get_links($id_menu);
       $res = [];
-      foreach ( $ids as $id ){
-        if ( ($o = $this->options->option($id)) &&
+      foreach ( $links as $link ){
+        if ( ($o = $this->options->option($link['id_option'])) &&
           ($url = $this->to_path($o['id_alias']))
         ){
-          array_push($res, [
-            'id' => $id,
+          $res[] = [
+            'id' => $link['id_option'],
             'url' => $url,
             'text' => $o['text'],
             'icon' => $o['icon']
-          ]);
+          ];
         }
       }
       return $res;

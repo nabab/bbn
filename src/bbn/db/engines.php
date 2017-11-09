@@ -18,7 +18,7 @@ namespace bbn\db;
  * @version 0.2r89
  */
 interface engines
-{	
+{
  /**
 	* Fetches the database and returns an array of several arrays of rows text-indexed
 	* 
@@ -244,4 +244,10 @@ interface engines
    * @return array
    */
   public function status(string $table = '', string $database = '');
+
+  /**
+   * Returns a binary UUID
+   * @return binary
+   */
+  public function get_uid();
 }

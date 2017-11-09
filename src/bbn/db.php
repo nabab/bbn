@@ -3,7 +3,6 @@
  * @package db
  */
 namespace bbn;
-use bbn\db\query;
 
 /**
  * Database Class
@@ -97,11 +96,15 @@ class db extends \PDO implements db\actions, db\api, db\engines
     /**
      * @var mixed $max_queries
      */
-      $max_queries = 100,
+      $max_queries = 50,
     /**
      * @var mixed $last_insert_id
      */
       $last_insert_id,
+    /**
+     * @var mixed $last_insert_id
+     */
+      $id_just_inserted,
     /**
      * @var mixed $hash_contour
      */
@@ -241,7 +244,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
             $tmp = $this->language->get_databases();
             break;
         }
-        if ( !$tmp ){
+        if ( !is_array($tmp) ){
           die("Erreur avec la table $item ou le mode $mode");
         }
         if ( $tmp ){
@@ -653,10 +656,19 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public function set_last_insert_id($id=''){
     if ( $id === '' ){
-      $id = $this->lastInsertId();
-      if ( is_string($id) && str::is_integer($id) ){
-        $id = (int)$id;
+      if ( $this->id_just_inserted ){
+        $id = $this->id_just_inserted;
+        $this->id_just_inserted = null;
       }
+      else{
+        $id = $this->lastInsertId();
+        if ( is_string($id) && str::is_integer($id) ){
+          $id = (int)$id;
+        }
+      }
+    }
+    else{
+      $this->id_just_inserted = $id;
     }
     $this->last_insert_id = $id;
     return $this;
@@ -691,7 +703,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * // (String) `db_example`.`table_users`
    * ```
    *
-   * @param $table The table's name
+   * @param string $table The table's name
    * @param bool $escaped If set to true the returned string will be escaped
    * @return string | false
    */
@@ -965,6 +977,20 @@ class db extends \PDO implements db\actions, db\api, db\engines
     return false;
   }
 
+  public function get_uid()
+  {
+    //return hex2bin(str_replace('-', '', \bbn\x::make_uid()));
+    return $this->language->get_uid();
+  }
+
+  public function add_uid($uid_table = 'bbn_uids', $uid_col = 'uid'){
+    $uid = $this->get_uid();
+    if ( 1 ){//|| $this->query("INSERT INTO `$uid_table` (`$uid_col`) VALUES (?)", hex2bin($uid)) ){
+      $this->set_last_insert_id($uid);
+      return $uid;
+    }
+  }
+
   /**
    * Adds the specs of a query to the $queries object.
    *
@@ -985,7 +1011,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
         'exe_time' => 0,
         'prepared' => false
     ];
-    if ( count($this->queries[$hash]) > $this->max_queries ){
+    while ( count($this->queries) > $this->max_queries ){
       array_shift($this->queries);
     }
   }
@@ -1037,6 +1063,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
   public function enable_keys(){
     $this->language->enable_keys();
     return $this;
+  }
+
+  public function flush(){
+    $num = count($this->queries);
+    $this->queries = [];
+    return $num;
   }
 
   /**
@@ -1122,7 +1154,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
         $args = $args[0];
       }
 
-      if ( is_string($args[0]) ){
+      if ( !empty($args[0]) && is_string($args[0]) ){
 
         // The first argument is the statement
         $statement = trim(array_shift($args));
@@ -2088,9 +2120,9 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * ```
    *
    * @param string $table The table's name
-   * @return array | false
+   * @return null|array
    */
-  public function modelize($table = '', $force = false)
+  public function modelize($table = '', $force = false): ?array
   {
     $r = [];
     $tables = false;
@@ -2113,7 +2145,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       }
       return $r;
     }
-    return false;
+    return null;
   }
 
   public function fmodelize($table = '', $force = false){

@@ -180,6 +180,9 @@ class mvc implements mvc\api{
    * @return string
    */
   public static function include_controller(string $bbn_inc_file, mvc\controller $ctrl, $bbn_is_super = false){
+    if ( $ctrl->is_cli() === 'direct' ){
+      return require($bbn_inc_file);
+    }
     ob_start();
     $r = require($bbn_inc_file);
     $output = ob_get_contents();
@@ -538,8 +541,8 @@ class mvc implements mvc\api{
 			if ( (gettype($obj) !== 'object') || (get_class($obj) !== 'stdClass') ){
 				die(x::dump("Unexpected output: ".gettype($obj)));
 			}
-			if ( $this->obj ){
-			  $obj = \bbn\x::merge_objects($obj, $this->obj);
+			if ( x::count_properties($this->obj) ){
+			  $obj = x::merge_objects($obj, $this->obj);
       }
       $output = new mvc\output($obj, $this->get_mode());
       $output->run();

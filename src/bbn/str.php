@@ -59,10 +59,9 @@ class str
    * @param mixed $case The case to convert to ("lower" or "upper"), default being title case.
    * @return string
    */
-  public static function change_case($st, $case = false)
-  {
+  public static function change_case($st, $case = 'x'){
     $st = self::cast($st);
-    $case = substr(strtolower($case), 0, 1);
+    $case = substr(strtolower((string)$case), 0, 1);
     switch ( $case ){
       case "l":
         $case = MB_CASE_LOWER;
@@ -716,16 +715,21 @@ class str
    */
   public static function correct_types($st){
     if ( is_string($st) ){
-      $st = trim($st);
-      if ( self::is_integer($st) && ((substr($st, 0, 1) !== '0') || ($st === '0')) ){
-        $tmp = (int)$st;
-        if ( ($tmp < PHP_INT_MAX) && ($tmp > -PHP_INT_MAX) ){
-          return $tmp;
-        }
+      if ( \bbn\str::is_buid($st) ){
+        $st = bin2hex($st);
       }
-      // If it's a decimal, not ending with a zero
-      else if ( self::is_decimal($st) && (substr($st, -1) !== '0') ){
-        return (float)$st;
+      else{
+        $st = trim($st);
+        if ( self::is_integer($st) && ((substr($st, 0, 1) !== '0') || ($st === '0')) ){
+          $tmp = (int)$st;
+          if ( ($tmp < PHP_INT_MAX) && ($tmp > -PHP_INT_MAX) ){
+            return $tmp;
+          }
+        }
+        // If it's a decimal, not ending with a zero
+        else if ( self::is_decimal($st) && (substr($st, -1) !== '0') ){
+          return (float)$st;
+        }
       }
     }
     else if ( is_array($st) ){
@@ -740,6 +744,20 @@ class str
       }
     }
     return $st;
+  }
+
+  public static function is_uid($st){
+    return is_string($st) && (strlen($st) === 32) && ctype_xdigit($st);// && !mb_detect_encoding($st);
+  }
+
+  public static function is_buid($st){
+    if ( is_string($st) && (strlen($st) === 16) && !ctype_print($st) && !ctype_space($st) ){
+      $enc = mb_detect_encoding($st, ['8bit', 'UTF-8']);
+      if ( !$enc || ($enc === '8bit') ){
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -1096,10 +1114,21 @@ class str
    */
   public static function export($o, $remove_empty=false, $lev=1){
     $st = '';
-    if ( is_object($o) && ($cls = get_class($o)) && ($cls !== 'stdClass') ){
-      $st .= "Object ".get_class($o).PHP_EOL;
+    if ( is_object($o) && ($cls = get_class($o)) && (strpos($cls, 'stdClass') === false) ){
+      $st .= "Object ".$cls.PHP_EOL;
+      /*
+      $o = array_filter((array)$o, function($k) use ($cls){
+        if ( strpos($k, '*') === 0 ){
+          return false;
+        }
+        if ( strpos($k, $cls) === 0 ){
+          return false;
+        }
+        return true;
+      }, ARRAY_FILTER_USE_KEY);
+      */
     }
-    if ( is_object($o) || is_array($o) ){
+    else if ( is_object($o) || is_array($o) ){
       $is_assoc = (is_object($o) || x::is_assoc($o));
       //$st .= $is_assoc ? '{' : '[';
       $st .= is_object($o) ? '{' : '[';
@@ -1116,8 +1145,7 @@ class str
           $st .= self::export($v, $remove_empty, $lev+1);
         }
         else if ( is_object($v) ){
-          $cls = get_class($v);
-          $st .= "Object $cls: df ".self::export($v, $remove_empty, $lev+1);
+          $st .= "Object $cls: ".self::export($v, $remove_empty, $lev+1);
         }
         else if ( $v === 0 ){
           $st .= '0';

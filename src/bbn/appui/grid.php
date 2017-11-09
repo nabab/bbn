@@ -34,11 +34,14 @@ class grid extends bbn\models\cls\basic
     $group_by,
     $count,
     $num = 0,
-    $prefilters = [];
+    $prefilters = [],
+    $fields = [],
+    $additional_fields = [];
 
 
   public function __construct(bbn\db $db, array $post, $cfg){
     $this->db = $db;
+    // Mandatory configuration coming from the table component
     if ( is_array($post) ){
       $this->start = isset($post['start']) &&
               bbn\str::is_number($post['start']) ?
@@ -48,31 +51,37 @@ class grid extends bbn\models\cls\basic
               bbn\str::is_number($post['limit']) ) ?
                       $post['limit'] : 20;
 
-      $this->filters = $post['filters'] ?: [];
-      $this->order = $post['order'] ?: [];
+      $this->filters = $post['filters'] ?? [];
+      $this->order = $post['order'] ?? [];
+      // Simple configuration using a string
       if ( is_string($cfg) ){
         // If there is a space it is a query
         if ( strrpos($cfg, ' ') ){
           $this->query = $cfg;
         }
+        // Otherwise it is a table
         else{
           if ( $this->query = $this->db->get_select($cfg) ){
             $this->table = $cfg;
           }
         }
       }
+      // Full configuration
       else if ( is_array($cfg) ){
         if ( !empty($cfg['query']) ){
           $this->query = $cfg['query'];
         }
         if ( !empty($cfg['table']) ){
           $this->table = $cfg['table'];
-          if ( !isset($cfg['fields']) ){
+          if ( empty($cfg['fields']) ){
             $cols = array_keys($this->db->get_columns($this->table));
             $table = $this->table;
             $this->fields = array_combine($cols, array_map(function($a) use ($table){
               return $table.'.'.$a;
             }, $cols));
+          }
+          else{
+            $this->fields = $cfg['fields'];
           }
           if ( !$this->query ){
             $this->query = $this->db->get_select($this->table, !empty($cfg['columns']) ? $cfg['columns'] : []);
@@ -213,7 +222,7 @@ class grid extends bbn\models\cls\basic
 
   public function where()
   {
-    if ( $this->check() && isset($this->cfg['filter']) ){
+    if ( isset($this->cfg['filter']) && $this->check() ){
       return $this->filter($this->cfg['filter']);
     }
     return '';
@@ -232,19 +241,18 @@ class grid extends bbn\models\cls\basic
     if (
       is_string($f) && (
         in_array($f, $this->fields, true) ||
-        in_array($f, $this->additional_fields)
+        in_array($f, $this->additional_fields, true)
       )
     ){
-      return (
+      if (
         $this->table &&
-        !in_array($f, $this->additional_fields)
-      ) ?
-        $this->db->col_full_name($f, $this->table, 1) :
-        (
-          strpos($f, '.') ?
-            $this->db->col_full_name($f, null, 1) :
-            $this->db->col_simple_name($f, 1)
-        );
+        !in_array($f, $this->additional_fields, true)
+      ){
+        return $this->db->col_full_name($f, $this->table, 1);
+      }
+      return strpos($f, '.') ?
+        $this->db->col_full_name($f, null, 1) :
+        $this->db->col_simple_name($f, 1);
     }
     return false;
   }
@@ -286,28 +294,49 @@ class grid extends bbn\models\cls\basic
           if ( !$array ){
             $res .= $pre.$field." ";
           }
+          $is_number = bbn\str::is_number($f['value']);
+          $is_uid = false;
+          if ( !$is_number && bbn\str::is_uid($f['value']) ){
+            $is_uid = true;
+          }
           switch ( $f['operator'] ){
             case 'eq':
               if ( $array ){
-                array_push($res, [$field, bbn\str::is_number($f['value']) ? ' = ' : 'LIKE', $f['value']]);
+                $res[] = [$field, $is_number || $is_uid ? '=' : 'LIKE', $f['value']];
               }
               else{
-                $res .= bbn\str::is_number($f['value']) ? "= ".$f['value'] : "LIKE '".$this->db->escape_value($f['value'])."'";
+                if ( $is_number ){
+                  $res .= '= '.$f['value'];
+                }
+                else if ( $is_uid ){
+                  $res .= "= UNHEX('".$this->db->escape_value($f['value'])."')";
+                }
+                else{
+                  $res .= "LIKE '".$this->db->escape_value($f['value'])."'";
+                }
               }
               break;
 
             case 'neq':
               if ( $array ){
-                array_push($res, [$field, bbn\str::is_number($f['value']) ? '!=' : 'NOT LIKE', $f['value']]);
+                $res[] = [$field, $is_number || $is_uid ? '!=' : 'NOT LIKE', $f['value']];
               }
               else{
-                $res .= bbn\str::is_number($f['value']) ? "!= ".$f['value'] : "NOT LIKE '".$this->db->escape_value($f['value'])."'";
+                if ( $is_number ){
+                  $res .= '!= '.$f['value'];
+                }
+                else if ( $is_uid ){
+                  $res .= "!= UNHEX('".$this->db->escape_value($f['value'])."')";
+                }
+                else{
+                  $res .= "NOT LIKE '".$this->db->escape_value($f['value'])."'";
+                }
               }
               break;
 
             case 'startswith':
               if ( $array ){
-                array_push($res, [$field, 'LIKE', $f['value'].'%']);
+                $res[] = [$field, 'LIKE', $f['value'].'%'];
               }
               else{
                 $res .= "LIKE '".$this->db->escape_value($f['value'])."%'";
@@ -316,7 +345,7 @@ class grid extends bbn\models\cls\basic
 
             case 'endswith':
               if ( $array ){
-                array_push($res, [$field, 'LIKE', '%'.$f['value']]);
+                $res[] = [$field, 'LIKE', '%'.$f['value']];
               }
               else{
                 $res .= "LIKE '%".$this->db->escape_value($f['value'])."'";
@@ -325,7 +354,7 @@ class grid extends bbn\models\cls\basic
 
             case 'gte':
               if ( $array ){
-                array_push($res, [$field, '>=', $f['value']]);
+                $res[] = [$field, '>=', $f['value']];
               }
               else{
                 $res .= ">= '".$this->db->escape_value($f['value'])."'";
@@ -334,7 +363,7 @@ class grid extends bbn\models\cls\basic
 
             case 'gt':
               if ( $array ){
-                array_push($res, [$field, '>', $f['value']]);
+                $res[] = [$field, '>', $f['value']];
               }
               else{
                 $res .= "> '".$this->db->escape_value($f['value'])."'";
@@ -343,7 +372,7 @@ class grid extends bbn\models\cls\basic
 
             case 'lte':
               if ( $array ){
-                array_push($res, [$field, '<=', $f['value']]);
+                $res[] = [$field, '<=', $f['value']];
               }
               else{
                 $res .= "<= '".$this->db->escape_value($f['value'])."'";
@@ -352,15 +381,17 @@ class grid extends bbn\models\cls\basic
 
             case 'lt':
               if ( $array ){
-                array_push($res, [$field, '<', $f['value']]);
+                $res[] = [$field, '<', $f['value']];
               }
               else{
                 $res .= "< '".$this->db->escape_value($f['value'])."'";
               }
               break;
 
+              /** @todo Check if it is working with an array */
             case 'isnull':
               if ( $array ){
+                $res[] = [$field, 'IS NULL', null];
               }
               else{
                 $res .= "IS NULL";
@@ -369,6 +400,7 @@ class grid extends bbn\models\cls\basic
 
             case 'isnotnull':
               if ( $array ){
+                $res[] = [$field, 'IS NOT NULL', null];
               }
               else{
                 $res .= "IS NOT NULL";
@@ -377,7 +409,7 @@ class grid extends bbn\models\cls\basic
 
             case 'isempty':
               if ( $array ){
-                array_push($res, [$field, 'LIKE', '']);
+                $res[] = [$field, 'LIKE', ''];
               }
               else{
                 $res .= "LIKE ''";
@@ -386,7 +418,7 @@ class grid extends bbn\models\cls\basic
 
             case 'isnotempty':
               if ( $array ){
-                array_push($res, [$field, 'NOT LIKE', '']);
+                $res[] = [$field, 'NOT LIKE', ''];
               }
               else{
                 $res .= "NOT LIKE ''";
@@ -395,7 +427,7 @@ class grid extends bbn\models\cls\basic
 
             case 'doesnotcontain':
               if ( $array ){
-                array_push($res, [$field, 'NOT LIKE', '%'.$f['value'].'%']);
+                $res[] = [$field, 'NOT LIKE', '%'.$f['value'].'%'];
               }
               else{
                 $res .= "NOT LIKE '%".$this->db->escape_value($f['value'])."%'";
@@ -405,7 +437,7 @@ class grid extends bbn\models\cls\basic
             case 'contains':
             default:
               if ( $array ){
-                array_push($res, [$field, 'LIKE', '%'.$f['value'].'%']);
+                $res[] = [$field, 'LIKE', '%'.$f['value'].'%'];
               }
               else{
                 $res .= "LIKE '%".$this->db->escape_value($f['value'])."%'";

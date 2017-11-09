@@ -285,7 +285,7 @@ class sqlite implements bbn\db\engines
             $r[$f]['type'] = 'TEXT';
           }
           if ( preg_match_all('/\((.*?)\)/', $row['type'], $matches) ){
-            $r[$f]['maxlength'] = $matches[1][0];
+            $r[$f]['maxlength'] = (int)$matches[1][0];
           }
           if ( !isset($r[$f]['type']) ){
             $r[$f]['type'] = 'TEXT';
@@ -820,5 +820,9 @@ class sqlite implements bbn\db\engines
       $this->db->change($cur);
     }
     return $r;
+  }
+
+  public function get_uid(){
+    return hex2bin(\bbn\x::make_uid());
   }
 }

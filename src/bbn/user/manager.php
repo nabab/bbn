@@ -121,7 +121,7 @@ You can click the following link to access directly your account:<br>
    * @param bool $adm
    * @return array|false
    */
-  public function groups($adm=false){
+  public function groups(){
     $a =& $this->class_cfg['arch'];
     $t =& $this->class_cfg['tables'];
     $id = $this->db->cfn($a['groups']['id'], $t['groups'], 1);
@@ -138,7 +138,6 @@ You can click the following link to access directly your account:<br>
         LEFT JOIN $users
           ON $id_group = $id
           AND $active = 1
-          ".( $adm ? '' : "WHERE $id > 1" )."
       GROUP BY $id");
   }
 
@@ -201,7 +200,7 @@ You can click the following link to access directly your account:<br>
 
   public function get_user($id){
     $u = $this->class_cfg['arch']['users'];
-    if ( bbn\str::is_integer($id) ){
+    if ( bbn\str::is_uid($id) ){
       $where = [$u['id'] => $id];
     }
     else{

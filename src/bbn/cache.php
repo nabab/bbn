@@ -81,7 +81,7 @@ class cache{
    */
   public static function make_hash($value){
     if ( is_object($value) || is_array($value) ){
-      $value = json_encode($value);
+      $value = serialize($value);
     }
     return md5($value);
   }
@@ -334,7 +334,7 @@ class cache{
             'expire' => $ttl ? time() + $ttl : 0,
             'value' => $val
           ];
-          return file_put_contents($file, json_encode($value)) ? true : false;
+          return file_put_contents($file, serialize($value)) ? true : false;
       }
     }
   }
@@ -363,8 +363,9 @@ class cache{
           return $this->obj->get($it);
         case 'files':
           $file = self::_file($it, $this->path);
-          $t = file_get_contents($file);
-          return $t ? json_decode($t, true) : false;
+          if ( $t = file_get_contents($file) ){
+            return unserialize($t, ['allowed_classes' => true]);
+          }
       }
     }
     return false;

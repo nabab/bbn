@@ -430,7 +430,7 @@ class tasks extends bbn\models\cls\db{
       WHERE id_task = ?
       GROUP BY bbn_tasks_notes.id_note
       ORDER BY MAX(bbn_notes_versions.creation)",
-      $id_task);
+      hex2bin($id_task));
   }
 
   private function _format_where(array $cfg){
@@ -551,7 +551,7 @@ class tasks extends bbn\models\cls\db{
         if ( !empty($w[2]) ){
           if ( $w[0] === 'my_user' ){
             $query .= " AND user_role.id_user = ?";
-            array_push($args1, $w[2]);
+            array_push($args1, hex2bin($w[2]));
             $join .= "
         JOIN bbn_tasks_roles AS user_role
           ON user_role.id_task = bbn_tasks.id";
@@ -560,7 +560,7 @@ class tasks extends bbn\models\cls\db{
             $usr_table = $usr->get_tables()['users'];
             $usr_fields = $usr->get_fields('users');
             $query .= " AND `".$usr_table."`.`".$usr_fields['id_group']."` = ? ";
-            array_push($args1, $w[2]);
+            array_push($args1, hex2bin($w[2]));
             $join .= "
         JOIN bbn_tasks_roles AS group_role
           ON group_role.id_task = bbn_tasks.id
@@ -586,17 +586,21 @@ class tasks extends bbn\models\cls\db{
     if ( !empty($order) ){
       $order = "ORDER BY ".substr($order, 0, -2);
     }
+    $args0 = [
+      hex2bin($this->id_state('closed')),
+      hex2bin($this->id_user)
+    ];
     $sql = "
       SELECT my_role.role, bbn_tasks.*,
       FROM_UNIXTIME(MAX(bbn_tasks_logs.chrono)) AS `last_action`,
       COUNT(children.id) AS num_children,
       COUNT(DISTINCT bbn_tasks_notes.id_note) AS num_notes,
       {$this->references_select}
-      IF(bbn_tasks.`state`=".$this->id_state('closed').", MAX(bbn_tasks_logs.chrono), UNIX_TIMESTAMP()) - MIN(bbn_tasks_logs.chrono) AS duration
+      IF(bbn_tasks.`state` = ?, MAX(bbn_tasks_logs.chrono), UNIX_TIMESTAMP()) - MIN(bbn_tasks_logs.chrono) AS duration
       FROM bbn_tasks
         LEFT JOIN bbn_tasks_roles AS my_role
           ON my_role.id_task = bbn_tasks.id
-          AND my_role.id_user = {$this->id_user}
+          AND my_role.id_user = ?
         LEFT JOIN bbn_tasks_roles
           ON bbn_tasks_roles.id_task = bbn_tasks.id
         JOIN bbn_tasks_logs
@@ -614,11 +618,9 @@ class tasks extends bbn\models\cls\db{
       $having
       $order";
     //die(bbn\x::dump($sql));
-
     if ( !isset($args) ){
-      $args = array_merge($args1, $args2);
+      $args = array_merge($args0, $args1, $args2);
     }
-    //bbn\x::dump($sql);
     $data = $this->db->get_rows($sql." LIMIT $start, $num", $args);
     /** @var bbn\user $user */
     $user = bbn\user::get_instance();
@@ -736,7 +738,7 @@ class tasks extends bbn\models\cls\db{
         }
         if ( !empty($cfg['links']) ){
           foreach ( $cfg['links'] as $f ){
-            $ext = \bbn\str::file_ext($f, true);
+            $ext = \bbn\str::file_ext($f['image'], true);
             if ( !preg_match('/_h[\d]+/i', substr($ext[0], 0)) ){
               $note->add_media(
                 $r,
@@ -760,7 +762,7 @@ class tasks extends bbn\models\cls\db{
       $data = [
         'id_task' => $id_task,
         'id_user' => $this->id_user,
-        'action' => is_int($action) ? $action : $this->id_action($action),
+        'action' => \bbn\str::is_uid($action) ? $action : $this->id_action($action),
         'value' => empty($value) ? '' : json_encode($value),
         'chrono' => microtime(true)
       ];
@@ -788,13 +790,13 @@ class tasks extends bbn\models\cls\db{
 
   public function add_role($id_task, $role, $id_user = null){
     if ( $this->exists($id_task) ){
-      if ( !bbn\str::is_integer($role) ){
-        if ( substr($role, -1) !== 's' ){
+      if ( !bbn\str::is_uid($role) ){
+        /*if ( substr($role, -1) !== 's' ){
           $role .= 's';
-        }
+        }*/
         $role = $this->id_role($role);
       }
-      if ( bbn\str::is_integer($role) && ($id_user || $this->id_user) ){
+      if ( bbn\str::is_uid($role) && ($id_user || $this->id_user) ){
         if ( $this->db->insert('bbn_tasks_roles', [
           'id_task' => $id_task,
           'id_user' => $id_user ?: $this->id_user,

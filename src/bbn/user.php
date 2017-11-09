@@ -166,11 +166,7 @@ class user extends models\cls\basic
     /** @var array */
     $cfg,
     /** @var array */
-    $sess_cfg,
-    /** @var array */
-    $fields,
-    /** @var bool */
-    $has_preference = false;
+    $sess_cfg;
 
 	public
     /** @var db */
@@ -279,7 +275,7 @@ class user extends models\cls\basic
    * @return $this
    */
   private function _sess_info($id_session = null){
-    if ( !is_int($id_session) ){
+    if ( !str::is_uid($id_session) ){
       $id_session = $this->get_id_session();
     }
     else{
@@ -287,7 +283,7 @@ class user extends models\cls\basic
     }
     if (
       empty($cfg) &&
-      is_int($id_session) &&
+      str::is_uid($id_session) &&
       ($id = $this->get_session('id')) &&
       ($d = $this->db->rselect(
         $this->class_cfg['tables']['sessions'],
@@ -459,6 +455,7 @@ class user extends models\cls\basic
    * @return mixed
    */
   private function _get_session($attr){
+    //die(\bbn\x::hdump(self::$sn, $this->session->has(self::$sn), $attr, $this->session->get(self::$sn)));
     if ( $this->session->has(self::$sn) ){
       return $attr ?
         $this->session->get(self::$sn, $attr) :
@@ -525,6 +522,9 @@ class user extends models\cls\basic
         }
       }
     }
+    else{
+      die(var_dump($this->get_error()));
+    }
     return $this->auth;
   }
 
@@ -559,11 +559,6 @@ class user extends models\cls\basic
       ], [
         $this->class_cfg['arch']['sessions']['id'] => $this->get_id_session()
       ]);
-      if ( $this->preferences ){
-        $this->preferences->set_user($this->id);
-        /** @todo Redo this!!! Bad! */
-        $this->preferences->set_group($this->get_session('id_group'));
-      }
     }
     return $this;
   }
@@ -643,8 +638,7 @@ class user extends models\cls\basic
 
     // Creating the session's variables if they don't exist yet
     $this->_init_session();
-
-    $this->preferences = user\preferences::get_preferences();
+    self::retriever_init($this);
 
     $f =& $this->class_cfg['fields'];
 
@@ -674,9 +668,6 @@ class user extends models\cls\basic
     }
     else if ( $this->check_session() ){
 
-    }
-    if ( $this->get_id() ){
-      self::retriever_init($this);
     }
   }
 
@@ -827,6 +818,7 @@ class user extends models\cls\basic
   public function save_session(){
     $p =& $this->class_cfg['arch']['sessions'];
     $id_session = $this->get_id_session();
+    //die(var_dump($id_session, $this->check()));
     if ( $id_session && $this->check() ){
       $res = $this->db->update($this->class_cfg['tables']['sessions'], [
         $p['id_user'] => $this->id,
@@ -1097,7 +1089,7 @@ class user extends models\cls\basic
       if ( is_null($usr) ){
         $usr = $this->get_session();
       }
-      else if ( str::is_integer($usr) ){
+      else if ( str::is_uid($usr) ){
         $mgr = $this->get_manager();
         $usr = $mgr->get_user($usr);
       }

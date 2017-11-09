@@ -255,16 +255,7 @@ class x
     if ( is_string($ar) ){
       return json_decode($ar);
     }
-    if (is_object($ar) ){
-      $ar = self::to_array($ar);
-    }
-    if ( count($ar) === 0 ){
-      return new \stdClass();
-    }
-    if ( ($r = json_encode($ar)) ){
-      return json_decode($r);
-    }
-    return false;
+    return (object)$ar;
   }
 
   /**
@@ -288,25 +279,14 @@ class x
     if ( is_string($obj) ){
       return json_decode($obj, 1);
     }
-    if ( is_object($obj) || is_array($obj) ){
-      foreach ( $obj as $i => $o ){
-        if ( is_array($o) || is_object($o) ){
-          if ( is_array($obj) ){
-            $obj[$i] = self::to_array($o);
-          }
-          else{
-            $obj->$i = self::to_array($o);
-          }
-        }
-      }
-    }
-    return (array) $obj;
+    return (array)$obj;
   }
 
   public static function js_object($obj){
     $value_arr = [];
     $replace_keys = [];
 
+    //$obj = \bbn\x::convert_uids($obj);
     $transform = function($o, $idx = 0) use(&$transform, &$value_arr, &$replace_keys){
       foreach( $o as $key => &$value ){
         $idx++;
@@ -1060,29 +1040,41 @@ class x
    * @return void
    */
   public static function sort_by(&$ar, $key, $dir = ''){
-    usort($ar, function($a, $b) use($key, $dir){
-      if ( !is_array($key) ){
-        $key = [$key];
+    $args = func_get_args();
+    array_shift($args);
+    if ( is_string($key) ){
+      $args = [[
+        'key' => $key,
+        'dir' => $dir
+      ]];
+    }
+    usort($ar, function($a, $b) use($args){
+      foreach ( $args as $arg ){
+        $key = $arg['key'];
+        $dir = $arg['dir'] ?? 'asc';
+        if ( !is_array($key) ){
+          $key = [$key];
+        }
+        $v1 = self::pick($a, $key);
+        $v2 = self::pick($b, $key);
+        $a1 = strtolower($dir) === 'desc' ? ($v2 ?? null) : ($v1 ?? null);
+        $a2 = strtolower($dir) === 'desc' ? ($v1 ?? null) : ($v2 ?? null);
+        if ( !str::is_number($v1, $v2) ){
+          $a1 = str_replace('.', '0', str_replace('_', '1', str::change_case($a1, 'lower')));
+          $a2 = str_replace('.', '0', str_replace('_', '1', str::change_case($a2, 'lower')));
+          $cmp = strcmp($a1, $a2);
+          if ( !empty($cmp) ){
+            return $cmp;
+          }
+        }
+        if ( $a1 > $a2 ){
+          return 1;
+        }
+        else if ( $a1 < $a2 ){
+          return -1;
+        }
       }
-      $v1 = self::pick($a, $key);
-      $v2 = self::pick($b, $key);
-      if ( !isset($v1, $v2) ){
-        return 0;
-      }
-      $a1 = strtolower($dir) === 'desc' ? $v2 : $v1;
-      $a2 = strtolower($dir) === 'desc' ? $v1 : $v2;
-      if ( !str::is_number($v1, $v2) ){
-        $a1 = str_replace('.', '0', str_replace('_', '1', str::change_case($a1, 'lower')));
-        $a2 = str_replace('.', '0', str_replace('_', '1', str::change_case($a2, 'lower')));
-        return strcmp($a1, $a2);
-      }
-      if ( $a1 > $a2 ){
-        return 1;
-      }
-      else if ($a1 == $a2){
-        return 0;
-      }
-      return -1;
+      return 0;
     });
   }
 
@@ -1351,5 +1343,90 @@ class x
         }
       }
     }
+  }
+
+  public static function count_properties($obj){
+    return count(get_object_vars($obj));
+  }
+
+  public static function make_uid($binary = false){
+    /** @todo This is temporary */
+    $string_base_convert  = function($numstring, $frombase, $tobase) {
+
+      $chars = "0123456789abcdefghijklmnopqrstuvwxyz";
+      $tostring = substr($chars, 0, $tobase);
+
+      $length = strlen($numstring);
+      $result = '';
+      for ($i = 0; $i < $length; $i++) {
+        $number[$i] = strpos($chars, $numstring{$i});
+      }
+      do {
+        $divide = 0;
+        $newlen = 0;
+        for ($i = 0; $i < $length; $i++) {
+          $divide = $divide * $frombase + $number[$i];
+          if ($divide >= $tobase) {
+            $number[$newlen++] = (int)($divide / $tobase);
+            $divide = $divide % $tobase;
+          } elseif ($newlen > 0) {
+            $number[$newlen++] = 0;
+          }
+        }
+        $length = $newlen;
+        $result = $tostring{$divide} . $result;
+      }
+      while ($newlen != 0);
+      return $result;
+    };
+
+    $generate_uid = function() use ($string_base_convert) {
+      $version = "0001";
+      $offset = 12219292800;
+      list($usec, $sec) = explode(" ", microtime());;
+      $gregorianseconds = $sec + $offset;
+      $nano100s = substr($usec, 2, 7);
+      $gregorian = $gregorianseconds . $nano100s;
+      $bin = $string_base_convert ($gregorian,10,2);
+      $binpad =  str_pad($bin, 60, "0", STR_PAD_LEFT);
+      $clockseq = random_bytes(4);
+
+#random clock seq
+      $clockseqhex = str_pad($string_base_convert("$clockseq",10,16), 4, "0", STR_PAD_LEFT);
+
+      $time_low = (substr($binpad, -32));
+      $time_low_hex = str_pad($string_base_convert ($time_low,2,16), 8, "0", STR_PAD_LEFT);
+
+      $time_mid = (substr($binpad, -48, 16));
+      $time_mid_hex = str_pad($string_base_convert ($time_mid,2,16), 4, "0", STR_PAD_LEFT);
+
+      $time_hi = (substr($binpad, 0, 12));
+      $time_hi_and_version = $version . $time_hi;
+      $time_hi_and_version_hex = str_pad($string_base_convert ($time_hi_and_version,2,16), 4, "0", STR_PAD_LEFT);
+
+      $components = [
+        $time_low_hex,
+        $time_mid_hex,
+        $time_hi_and_version_hex,
+        $clockseqhex,
+        defined('BBN_FINGERPRINT') ? substr(md5(BBN_FINGERPRINT), 0, 12) : 'a2c4b6d6e8f1'
+      ];
+
+      return strtoupper(implode("-", $components));
+
+    };
+    return $binary ? hex2bin($generate_uid()) : $generate_uid();
+  }
+
+  public static function convert_uids($st){
+    if ( is_array($st) || is_object($st) ){
+      foreach ( $st as &$s ){
+        $s = self::convert_uids($s);
+      }
+    }
+    else if ( \bbn\str::is_uid($st) ){
+      $st = bin2hex($st);
+    }
+    return $st;
   }
 }
