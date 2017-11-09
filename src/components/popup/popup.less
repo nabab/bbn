@@ -1,9 +1,56 @@
 .bbn-popup{
-  position: absolute;
+  position: absolute !important;
   top: 0px;
   left: 0px;
-  right: 0px;
-  bottom: 0px;
-  z-index: 14;
-  display: none;
+  max-width: 100%;
+  .k-overlay{
+    opacity: 0.5;
+    position: absolute;
+  }
+  .fade-enter-active, .fade-leave-active {
+    transition: opacity .5s;
+    opacity: 0.5;
+  }
+  .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    opacity: 0
+  }
+  .ui-resizable-handle {
+    z-index: auto !important;
+  }
+  .bbn-window{
+    .bbn-popup-header{
+      position: relative;
+      /** Codemirror highest zIndex: 6 */
+      .bbn-popup-title{
+        height: 1.1em;
+        width: 100%;
+        border-bottom-style: solid;
+        border-bottom-width: 1px;
+        padding: .4em 0;
+        font-size: 1.2em;
+        white-space: nowrap;
+        min-height: 16px;
+        > span{
+          cursor: move;
+        }
+        .bbn-popup-actions{
+          position: absolute;
+          right: 3px;
+          top: 3px;
+          i{
+            cursor: pointer;
+          }
+        }
+      }
+    }
+    .bbn-popup-footer{
+      clear: both;
+      text-align: right;
+      border-width: 1px 0 0;
+      border-style: solid;
+      position: relative;
+      padding: .6em;
+      bottom: 0;
+    }
+  }
 }

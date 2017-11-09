@@ -8,7 +8,7 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-splitter', {
-    mixins: [bbn.vue.optionComponent],
+    mixins: [bbn.vue.optionComponent, bbn.vue.resizerComponent],
     template: '#bbn-tpl-component-splitter',
     props: {
       orientation: {
@@ -23,20 +23,25 @@
         }
       }
     },
+    data(){
+      return {
+        resizeTimeout: false
+      };
+    },
     methods: {
-      i18n(text){
-        return bbn._(text);
-      },
       build(){
-        const vm = this;
         let cfg = this.getOptions();
-        cfg.resize = function(){
-          bbn.fn.log("RESIZING FROM CFG");
-          bbn.fn.analyzeContent(vm.$el, true);
-          bbn.fn.propagateResize(vm.$el);
+        /*
+        cfg.resize = () => {
+          clearTimeout(this.resizeTimeout);
+          this.resizeTimeout = setTimeout(() => {
+            this.$emit("resize");
+            bbn.fn.log("Emitting from splitter", this.$el);
+          }, 250);
         };
+        */
         cfg.panes = [];
-        $.each(vm.$el.children, function(i, a){
+        $.each(this.$el.children, (i, a) => {
           if ( bbn.fn.tagName(a) === 'div' ){
             var $pane = $(a),
                 o = {
@@ -52,7 +57,18 @@
             cfg.panes.push(o);
           }
         });
-        vm.widget = $(vm.$el).kendoSplitter(cfg).data("kendoSplitter");
+        this.widget = $(this.$el).kendoSplitter(cfg).data("kendoSplitter");
+        this.$nextTick(() => {
+          this.resize();
+        })
+      },
+      resize(){
+        if ( this.widget ){
+          this.widget.resize();
+        }
+      },
+      onResize(){
+        this.resize();
       }
     },
     data(){
@@ -61,29 +77,23 @@
       }, bbn.vue.treatData(this));
     },
     mounted(){
-      const vm = this;
-      vm.build();
-      vm.widget.resize();
+      this.build();
     },
     updated(){
-      const vm = this;
-      vm.widget.resize();
+      this.resize();
     },
     watch: {
       orientation(newVal, oldVal){
-        const vm = this,
-              accepted = ['horizontal', 'vertical'];
+        const accepted = ['horizontal', 'vertical'];
         bbn.fn.log("Changing orientation", newVal, oldVal);
         if ( (newVal!== oldVal) && ($.inArray(newVal, accepted) > -1) ){
-          vm.widget.element
+          this.widget.element
             .children(".k-splitbar").remove()
             .end()
             .children(".k-pane").css({width: "", height: "", top: "", left: ""});
-          vm.widget.destroy();
-          vm.build();
-          vm.$nextTick(() => {
-            vm.widget.trigger("resize");
-          })
+          this.widget.destroy();
+          this.build();
+          this.resize();
         }
       }
     }

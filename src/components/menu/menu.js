@@ -18,7 +18,7 @@
   };
 
   Vue.component('bbn-menu', {
-    mixins: [bbn.vue.vueComponent, bbn.vue.dataSourceComponent],
+    mixins: [bbn.vue.fullComponent, bbn.vue.dataSourceComponent],
     template: "#bbn-tpl-component-menu",
     props: {
       source: {

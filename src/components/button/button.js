@@ -19,6 +19,9 @@
         type: Boolean,
         default: false
       },
+      url: {
+        type: String
+      },
       icon: {
         type: String,
       },
@@ -26,10 +29,26 @@
         type: String,
       },
       disabled: {
-        type: Boolean,
+        type: [Boolean, Function],
         default: false
+      },
+    },
+    computed: {
+      isDisabled(){
+        return typeof(this.disabled) === 'function' ?
+          this.disabled() : this.disabled
       }
     },
+    methods: {
+      click(e){
+        if ( this.url ){
+          bbn.fn.link(this.url);
+        }
+        else{
+          this.$emit('click', e);
+        }
+      }
+    }
   });
 
 })(jQuery, bbn, kendo);

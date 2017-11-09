@@ -60,7 +60,7 @@
         if ( cfg.dataUrlField && data[cfg.dataUrlField] ){
           tpl += '<a href="' + data[cfg.dataUrlField] + '">';
         }
-        if ( !$.isArray(cfg.dataTextField) ){
+        if ( !Array.isArray(cfg.dataTextField) ){
           cfg.dataTextField = [cfg.dataTextField];
         }
         $.each(cfg.dataTextField, function(i, v){

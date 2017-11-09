@@ -185,7 +185,7 @@
   ui.plugin(dropDownTreeView);
 
   Vue.component('bbn-dropdowntreeview', {
-    mixins: [bbn.vue.vueComponent],
+    mixins: [bbn.vue.fullComponent],
     template: '#bbn-tpl-component-dropdowntreeview',
     props: {
       source: {
@@ -215,9 +215,8 @@
       }
     },
     methods: {
-      getOptions: function(){
-        var vm = this,
-            cfg = bbn.vue.getOptions(vm),
+      getOptions(){
+        var cfg = bbn.vue.getOptions(this),
 						opt = {};
 				if ( cfg.disabled ){
 					opt.enable = false;
@@ -225,7 +224,7 @@
 				if ( cfg.placeholder ){
 					opt.optionLabel = cfg.placeholder;
 				}
-        opt.change = function(){
+        opt.change = () => {
 					if ( $.isFunction(cfg.change) ){
 						return cfg.change();
 					}
@@ -238,10 +237,10 @@
 				}
 				opt.treeview = $.extend(cfg.treeview, {
 					dataSource: new kendo.data.HierarchicalDataSource({
-						data: vm.source,
+						data: this.source,
 						schema: {
 							model: {
-								id: vm.widgetCfg.dataValueField || 'value',
+								id: this.widgetCfg.dataValueField || 'value',
 								hasChildren: 'is_parent',
 								children: 'items',
 								fields: {
@@ -251,11 +250,11 @@
 							}
 						}
 					}),
-					select: function(e){
+					select(e){
 						var dt = e.sender.dataItem(e.node);
 						if ( dt ){
-							vm.widget.value(dt[vm.widgetCfg.dataValueField || 'value']);
-							vm.$emit("input", dt[vm.widgetCfg.dataValueField || 'value']);
+							this.widget.value(dt[this.widgetCfg.dataValueField || 'value']);
+							this.$emit("input", dt[this.widgetCfg.dataValueField || 'value']);
 						}
 					}
 				});
@@ -267,19 +266,19 @@
         widgetName: "kendoDropDownTreeView"
       }, bbn.vue.treatData(this));
     },
-    mounted: function(){
-      var vm = this,
-					cfg = vm.getOptions();
+    mounted(){
+      let cfg = this.getOptions();
 
-      vm.widget = $(vm.$el).kendoDropDownTreeView(cfg).data("kendoDropDownTreeView");
-      
+      this.widget = $(this.$el).kendoDropDownTreeView(cfg).data("kendoDropDownTreeView");
+
 			/*if ( !cfg.optionLabel && vm.widget.treeview().dataSource.data().length && !vm.value ){
         vm.widget.select(0);
         vm.widget.trigger("change");
       }*/
+      this.$emit("ready", this.value);
     },
     watch:{
-      source: function(newSource){
+      source(newSource){
         this.widget.treeview().dataSource.data(newSource);
       }
     }

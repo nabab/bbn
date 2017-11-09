@@ -8,7 +8,7 @@
    * Classic textarea with normalized appearance
    */
   Vue.component('bbn-textarea', {
-    mixins: [bbn.vue.vueComponent],
+    mixins: [bbn.vue.inputComponent, bbn.vue.eventsComponent],
     template: '#bbn-tpl-component-textarea',
     props: {
 			rows: {
@@ -29,22 +29,16 @@
     },
     methods: {
       clear: function(){
-        this.update('');
+        this.emitInput('');
       }
     },
-    data: function(){
-      return $.extend({
-        widgetName: "textarea",
-      }, bbn.vue.treatData(this));
-    },
     mounted: function(){
-      var vm = this,
-          $ele = $(vm.$el),
-          cfg = vm.getOptions();
+      let $ele = $(this.$el);
 
       if ( this.disabled ){
         $ele.addClass("k-state-disabled");
       }
+      this.$emit("ready", this.value);
     }
   });
 

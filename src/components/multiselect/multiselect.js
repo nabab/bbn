@@ -5,7 +5,7 @@
   "use strict";
 
   Vue.component('bbn-multiselect', {
-    mixins: [bbn.vue.vueComponent],
+    mixins: [bbn.vue.fullComponent, bbn.vue.dataSourceComponent],
     template: '#bbn-tpl-component-multiselect',
     props: {
       source: {
@@ -31,14 +31,18 @@
       }, bbn.vue.treatData(this));
     },
     mounted: function(){
-      var vm = this,
-          cfg = vm.getOptions();
-      if ( vm.disabled ){
+      let cfg = this.getOptions();
+      if ( this.disabled ){
         cfg.enable = false;
       }
-      vm.widget = $(vm.$refs.element).kendoMultiSelect(cfg).data("kendoMultiSelect");
+      if ( this.template ){
+        cfg.template = e => {
+          return this.template(e);
+        };
+      }
+      this.widget = $(this.$refs.element).kendoMultiSelect(cfg).data("kendoMultiSelect");
       if ( cfg.sortable ){
-        vm.widget.tagList.kendoSortable({
+        this.widget.tagList.kendoSortable({
           hint:function(element) {
             return element.clone().addClass("hint");
           },
@@ -47,6 +51,7 @@
           }
         });
       }
+      this.$emit("ready", this.value);
     },
     computed: {
       dataSource: function(){

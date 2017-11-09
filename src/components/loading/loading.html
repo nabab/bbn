@@ -1,1 +1,63 @@
-<div class="bbn-loading"></div>
+<div class="bbn-loading bbn-100 bbn-unselectable">
+  <span class="content" v-if="id">
+    <span class="buttons" v-if="data.length">
+      <i :title="_('History informations')"
+         :class="{
+           'bbn-p': false,
+           'bbn-lg': true,
+           'fa': true,
+           'fa-info-circle': true
+         }"
+      ></i>
+      <i :title="_('Delete history')"
+         :class="{
+           'bbn-p': data.length,
+           'bbn-lg': true,
+           'fa': true,
+           'fa-times-circle-o': true,
+           'bbn-invisible': !data.length
+         }"
+         @click="data = []"
+      ></i>
+      <i :title="_('Previous Ajax call')"
+         :class="{
+           'bbn-p': selected < data.length - 1,
+           'bbn-lg': true,
+           'fa': true,
+           'fa-angle-left': true,
+           'bbn-invisible': selected >= data.length - 1
+         }"
+         @click="selected++"
+      ></i>
+      <i :title="_('Next Ajax call')"
+         :class="{
+           'bbn-p': selected > 0,
+           'bbn-lg': true,
+           'fa': true,
+           'fa-angle-right': true,
+           'bbn-invisible': selected <= 0
+         }"
+         @click="selected--"
+      ></i>
+      <i :title="_('Play current calls')"
+         :class="{
+           'bbn-p': selected > 0,
+           'bbn-lg': true,
+           'fa': true,
+           'fa-play': true,
+           'bbn-invisible': selected <= 0
+         }"
+         @click="selected = 0"
+      ></i>
+    </span>
+    <span class="loader">
+      <span v-if="isLoading" v-html="loadIcon" class="bbn-blue"></span>
+      <i v-else-if="isError" class="fa fa-warning bbn-red"></i>
+      <i v-else-if="isSuccess" class="fa fa-check bbn-green"></i>
+    </span>
+    <a :href="isPage ? text : 'javascript:;'" :title="text + ' ' + (isLoading ? _('Loading...') : _('Loaded in') + ' ' + length + 'ms')" :style="isPage ? '' : 'color: inherit; cursor: default'">
+      <span class="text" v-if="encoded" v-text="text"></span>
+      <span class="text" v-else v-html="text"></span>
+    </a>
+  </span>
+</div>

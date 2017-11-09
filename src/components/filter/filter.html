@@ -1,0 +1,141 @@
+
+<div class="bbn-filter" :style="'border-left-color:' + border_color">
+  <h3 v-if="first"
+      v-html="_('Où les conditions suivantes sont vraies')"
+  ></h3>
+  <!-- List of the validated conditions -->
+  <div class="bbn-form-full"
+       v-for="(condition, idx) in conditions">
+    <div :class="'bbn-filter-items bbn-filter-bordered bbn-filter-' + (currentLogic === 'OR' ? 'or' : 'and')"
+         style="display: inline-flex; align-items: baseline">
+      <div class="bbn-filter-logic" v-if="multi">
+          <span v-if="idx"
+                v-text="currentLogic"
+          ></span>
+          <bbn-dropdown v-else
+                        class="bbn-s"
+                        :source="[{
+                          text: _('ET'),
+                          value: 'AND'
+                        }, {
+                          text: _('OU'),
+                          value: 'OR'
+                        }]"
+                        v-model="currentLogic"
+                        name="logic"
+                        style="max-width: 5em"
+                        ref="logic"
+                        @change="$emit('change', {logic: currentLogic, conditions: conditions})"
+          >
+          </bbn-dropdown>
+        </div>
+      <div :style="condition.conditions ? 'display: flex; flex-direction: column;' : 'display: flex;  flex-direction: row; align-items: baseline' ">
+        <div class="bbn-filter-buttons"
+             style="display: inline-flex;"
+        >
+          <i class="bbn-p bbn-lg fa fa-minus-circle"
+             @mouseover="over"
+             @mouseout="out"
+             :title="_('Delete this condition')"
+             ref="minus"
+             @click="delete_full_condition(idx)"
+          > </i>
+          <i class="bbn-p bbn-lg fa fa-plus-circle"
+             v-if="multi"
+             @mouseover="$event.target.style.color = 'red'"
+             @mouseout="$event.target.style.color = null"
+             :title="_('Add new condition')"
+             ref="plus"
+             @click="add_group(idx)"
+             v-show="!condition.conditions"
+          > </i>
+        </div>
+        <div class="bbn-filter-main">
+        <div v-if="condition.operator">
+          <span v-html="condition_text(condition)"></span>
+        </div>
+        <bbn-filter v-else-if="condition.logic"
+                    :fields="fields"
+                    :conditions="condition.conditions"
+                    :logic="condition.logic"
+                    @change="(d) => {condition.logic = d.logic}"
+                    :num="num + 1"
+                    :idx="idx"
+        ></bbn-filter>
+      </div>
+      </div>
+    </div>
+  </div>
+  <!-- Form for a new condition -->
+  <div class="bbn-form-full">
+    <div class="flexbox" style="display: inline-flex;"
+      :class="{
+      'bbn-filter-bordered': fields.length > 1,
+      'bbn-filter-items': true,
+      'bbn-filter-temp': true,
+      'bbn-filter-or': currentLogic === 'OR',
+      'bbn-filter-and': currentLogic === 'AND',
+    }">
+      <!-- Showing the logic (AND/OR) if there are already conditions -->
+      <div class="bbn-filter-logic"
+           v-text="conditions.length ? currentLogic : ''"
+           v-if="multi"
+      ></div>
+
+      <div class="bbn-filter-main">
+        <bbn-filter-form inline-template
+                         :type="type"
+                         :fields="fields"
+                         :field="field"
+                         :component="component"
+                         :component-options="componentOptions"
+                         @validate="setCondition"
+        >
+          <div class="bbn-w-100 bbn-filter-form">
+            <!-- Condition creation line -->
+            <div v-if="columns.length > 1"
+                 class="bbn-block padding bbn-db-column">
+              <bbn-combo :source="columns"
+                         v-model="currentField"
+                         name="field[]"
+                         :placeholder="_('Pick a field')"
+                         ref="column"
+              ></bbn-combo>
+            </div>
+            <div v-else-if="field"
+                 class="bbn-block padding bbn-db-column"
+                 v-html="currentField"
+            ></div>
+            <div class="bbn-block padding bbn-db-operator">
+              <bbn-operator name="operator[]"
+                            :disabled="!currentField"
+                            :type="currentType"
+                            v-model="currentOperator"
+                            ref="operator"
+              ></bbn-operator>
+            </div>
+            <div :class="(no_value ? 'bbn-hidden ' : '') + 'bbn-block padding bbn-db-value'">
+              <component v-if="type && currentComponent"
+                         :is="currentComponent"
+                         :disabled="no_value"
+                         name="value"
+                         v-model="currentValue"
+                         ref="value"
+                         v-bind="currentComponentOptions"
+              ></component>
+            </div>
+            <div class="bbn-block padding bbn-db-column">
+              <bbn-button :disabled="!currentOperator"
+                          @click="validate()"
+                          title="Validate"
+                          ref="check"
+              >
+                <i class="fa fa-check"> </i>
+              </bbn-button>
+            </div>
+          </div>
+        </bbn-filter-form>
+      </div>
+    </div>
+  </div>
+</div>

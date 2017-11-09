@@ -8,10 +8,14 @@
 
   Vue.component('bbn-autocomplete', {
     template: '#bbn-tpl-component-autocomplete',
-    mixins: [bbn.vue.vueComponent, bbn.vue.dataSourceComponent],
+    mixins: [bbn.vue.fullComponent, bbn.vue.dataSourceComponent],
     props: {
+      id: {
+        type: String
+      },
       delay: {
-        type: Number
+        type: Number,
+        default: 200
       },
       clearButton: {
         type: Boolean,
@@ -36,12 +40,16 @@
         type: Boolean,
         default: false
       },
+      highlightFirst: {
+        type: Boolean,
+        default: true
+      },
       ignoreCase: {
         type: Boolean,
         default: true
       },
       template: {
-        type: [String, Function]
+        type: [Function]
       },
       virtual: {
         type: [Boolean, Object],
@@ -56,14 +64,10 @@
     },
     methods: {
       autocompleteSearch(e){
-        bbn.fn.log("VAL", e.target.value);
         this.filterValue = e.target.value;
         if ( !this.force ){
           this.emitInput(this.filterValue);
         }
-      },
-      autocompleteBlur(e) {
-        bbn.fn.log("BLUR", e.target.value, this.widget);
       },
       listHeight(){
         let $ele = $(this.$refs.element),
@@ -73,49 +77,47 @@
       },
       getOptions(){
         let cfg = {
-              dataSource: this.dataSource,
-              dataTextField: this.sourceText,
-              dataValueField: this.sourceValue,
-              filter: this.filter,
-              suggest: this.suggest,
-              clearButton: this.clearButton,
-              ignoreCase: this.ignoreCase,
-              virtual: this.virtual
-            };
-
+          valuePrimitive: true,
+          dataSource: this.dataSource,
+          dataTextField: this.sourceText,
+          dataValueField: this.sourceValue,
+          delay: this.delay,
+          filter: this.filter,
+          suggest: this.suggest,
+          clearButton: this.clearButton,
+          ignoreCase: this.ignoreCase,
+          highlightFirst: this.highlightFirst,
+          virtual: this.virtual,
+          select: e => {
+            bbn.fn.log("SELECT", e);
+            let d = e.dataItem.toJSON();
+            if ( [e.sender.options.dataValueField] ){
+              if ( d[[e.sender.options.dataValueField]] === undefined ){
+                throw new Error("The value field \"" + e.sender.options.dataValueField + "\" doesn't exist in the dataItem");
+              }
+              d = d[[e.sender.options.dataValueField]];
+            }
+            this.emitInput(d);
+            this.$emit('change', d);
+          }
+        };
         if ( this.template ){
-          cfg.template = (e) => {
+          cfg.template = e => {
             return this.template(e);
           };
         }
-        if ( this.delay ){
-          cfg.delay = this.delay;
-        }
-
-        if ( cfg.dataSource && !$.isArray(cfg.dataSource) ){
+        if ( cfg.dataSource && !Array.isArray(cfg.dataSource) ){
           cfg.dataSource.options.serverFiltering = true;
           cfg.dataSource.options.serverGrouping = true;
         }
-        $.extend(cfg, this.widgetOptions);
-        cfg.select = (e) => {
-          bbn.fn.log("SELECT", e.dataItem.toJSON()[cfg.dataValueField]);
-          this.emitInput(e.dataItem.toJSON()[cfg.dataValueField]);
-        };
-        /*
-        if ( !cfg.height ){
-          cfg.height = this.listHeight();
-        }
-        else{
-          bbn.fn.log("Height is defined: " + cfg.height);
-        }
-        */
-        return cfg;
+        return bbn.vue.getOptions2(this, cfg);
       }
     },
     mounted(){
       let $ele = $(this.$refs.element);
       this.widget = $ele.kendoAutoComplete(this.getOptions()).data("kendoAutoComplete");
-      bbn.fn.log("OPTIONS", this.getOptions());
+      this.$emit("ready", this.value);
+      /** @todo You have to remove this event onDestroy */
       $(window).resize(() => {
         this.widget.setOptions({
           height: this.listHeight()

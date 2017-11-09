@@ -28,7 +28,7 @@
   };
 
   Vue.component('bbn-tree-input', {
-    mixins: [bbn.vue.vueComponent],
+    mixins: [bbn.vue.fullComponent],
     template: '#bbn-tpl-component-tree-input',
     props: {
       extensions:{
@@ -97,7 +97,7 @@
       }
     },
     mounted: function(){
-
+      this.$emit("ready", this.value);
     }
   });
 

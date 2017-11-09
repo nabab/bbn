@@ -1,1 +1,111 @@
-<div class="bbn-tree"></div>
+<div class="bbn-tree" v-on="isRoot ? {keydown:keyNav} : {}">
+
+  <div class="loader" v-if="loading">
+    Loading...
+  </div>
+  
+  <component v-else-if="isLoaded"
+             :is="isRoot ? 'bbn-scroll' : 'div'"
+             ref="scroll"
+  >
+    <transition name="bbn-tree-toggle"
+                @after-enter="onOpen"
+                @after-leave="onClose"
+    >
+      <ul v-show="items.length && (isRoot || $parent.isExpanded)"
+          :class="{
+          'bbn-tree-child': !!level,
+          root: isRoot
+        }"
+      >
+        <bbn-tree-node inline-template
+                       v-for="(it, i) in items"
+                       :text="it.text"
+                       :key="i"
+                       :data="toData(it)"
+                       :icon="it.icon"
+                       :num="it.num"
+                       :source="it.items ? it.items : []"
+                       :level="level"
+        >
+          <li :class="'bbn-tree-node' + (cls ? ' ' + cls : '') + (isSelected ? ' selected' : '') + (isActive ? ' active' : '')"
+          >
+            <span :class="{
+                    node: true,
+                    'no-component': !component
+                  }"
+                  @mouseover.stop="mouseOver"
+            >
+              <span class="expander">
+                <!-- If there are no children we leave the white space -->
+                <span v-if="!numChildren || (level < tree.minExpandLevel)"> </span>
+                <i v-else-if="isExpanded"
+                   class="fa fa-caret-down"
+                   @click="isExpanded = false"
+                ></i>
+                <i v-else
+                   class="fa fa-caret-right"
+                   @click="isExpanded = true"
+                   @mouseover="if ( tree.dragging ){ isExpanded = true; }"
+                ></i>
+              </span>
+              <component v-if="component"
+                         :is="component"
+                         :source="data"
+              ></component>
+              <bbn-context v-else
+                           :context="true"
+                           :source="getMenu"
+              >
+                <span class="selectable"
+                      @mousedown.left="if(tree.draggable){startDrag($event);}"
+                      @mouseup.left="if(!tree.realDragging){isSelected = !isSelected}"
+                      tabindex="0"
+                >
+                  <span class="icon">
+                    <!-- If icon is specifically false we leave the white space -->
+                    <span v-if="icon === false"></span>
+                    <i v-else-if="icon"
+                       :class="icon"
+                       :style="iconStyle"
+                    ></i>
+                    <i v-else-if="numChildren"
+                       class="zmdi zmdi-folder-outline"
+                       :style="iconStyle"
+                    ></i>
+                    <i v-else
+                       class="fa fa-file"
+                       :style="iconStyle"
+                    ></i>
+                  </span>
+                  <span class="title">
+                    <span v-html="text"></span>
+                  </span>
+                </span>
+              </bbn-context>
+            </span>
+            <bbn-tree v-if="numChildren"
+                      ref="tree"
+                      :num="numChildren"
+                      :source="items"
+                      :level="level + 1"
+            >
+            </bbn-tree>
+          </li>
+        </bbn-tree-node>
+      </ul>
+    </transition>
+    <div class="bbn-tree-helper-container"
+         v-if="draggable && isRoot"
+         ref="helperContainer">
+      <ul class="bbn-tree-helper"
+          ref="helper"
+          v-show="!!tree.realDragging"
+      ></ul>
+    </div>
+  </component>
+  <h3 v-else-if="isRoot"
+      v-html="_('No items to show')"
+  ></h3>
+
+</div>

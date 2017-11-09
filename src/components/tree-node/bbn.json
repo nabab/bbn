@@ -1,0 +1,11 @@
+{
+  "name": "markdown",
+  "version": "0.0.1",
+  "authors": [
+    "Thomas Nabet <thomas.nabet@gmail.com>"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "fancytree": ">=0.4"
+  }
+}

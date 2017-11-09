@@ -1,20 +1,45 @@
 /**
  * Created by BBN on 15/02/2017.
  */
-(function($, bbn){
+(function($, bbn, kendo){
   "use strict";
 
   /**
-   * Classic input with normalized appearance
+   * @component
+   * @param {string} url - The URL on which the tabNav will be initialized.
+   * @param {boolean} autoload - Defines if the tab will be automatically loaded based on URLs. False by default
+   * except if it is true for the parent.
+   * @param {string} orientation - The position of the tabs' titles: top (default) or bottom.
+   * @param {string} root - The root URL of the tabNav, will be only taken into account for the top parents'
+   * tabNav, will be automatically calculated for the children.
+   * @param {boolean} scrollable - Sets if the tabs' titles will be scrollable in case they have a greater width
+   * than the page (true), or if they will be shown multilines (false, default).
+   * @param {array} source - The tabs shown at init.
+   * @param {string} currentURL - The URL to which the tabnav currently corresponds (its selected tab).
+   * @param {string} baseURL - The parent TabNav's URL (if any) on top of which the tabNav has been built.
+   * @param {array} parents - The tabs shown at init.
+   * @param {array} tabs - The tabs configuration and state.
+   * @param {boolean} parentTab - If the tabNav has a tabNav parent, the tab Vue object in which it stands, false
+   * otherwise.
+   * @param {boolean|number} selected - The index of the currently selected tab, and false otherwise.
    */
   Vue.component('bbn-tab', {
+    template: '#bbn-tpl-component-tab',
+    mixins: [bbn.vue.resizerComponent],
     props: {
       title: {
         type: [String, Number],
         default: bbn._("Untitled")
       },
+      hasPopups: {
+        type: Boolean,
+        default: false
+      },
       componentAttributes: {
-        type: Object
+        type: Object,
+        default(){
+          return {}
+        }
       },
       idx: {},
       component: {},
@@ -70,24 +95,30 @@
           vm.tabNav.activate(url);
         }
       },
+      popup(){
+        this.$refs.popup.open.apply(this.$refs.popup, arguments)
+      },
+      getComponent(){
+        return this.$children[1] || this.$children[0]
+      },
       getSubTabNav(ele){
         if ( !ele ){
           ele = this;
         }
         var recurse = function(el){
-              if ( el.$options && el.$options._componentTag && (el.$options._componentTag === "bbn-tabnav") ){
-                return el;
+          if ( el.$options && el.$options._componentTag && (el.$options._componentTag === "bbn-tabnav") ){
+            return el;
+          }
+          if ( el.$children ){
+            for ( var i = 0; i < el.$children.length; i++ ){
+              var r = recurse(el.$children[i]);
+              if ( r ){
+                return r;
               }
-              if ( el.$children ){
-                for ( var i = 0; i < el.$children.length; i++ ){
-                  var r = recurse(el.$children[i]);
-                  if ( r ){
-                    return r;
-                  }
-                }
-              }
-              return false;
-            };
+            }
+          }
+          return false;
+        };
         return recurse(ele);
       },
       addMenu(obj){
@@ -128,102 +159,60 @@
     },
 
     data: function(){
-      var vm = this,
-          r = bbn.vue.treatData(vm).widgetCfg || {};
-      if ( vm.$options && vm.$options.props ){
-        for ( var n in r ){
-          if ( vm.$options.props[n] !== undefined ){
-            delete r[n];
-          }
-        }
-      }
-      r.tabNav = null;
-      r.isComponent = null;
-      r.name = bbn.fn.randomString(20, 15).toLowerCase();
-      r.isMounted = false;
-      return r;
+      return {
+        tabNav: null,
+        isComponent: null,
+        name: bbn.fn.randomString(20, 15).toLowerCase(),
+        isMounted: false,
+        popups: []
+      };
     },
 
-    render: function(createElement){
-      var vm = this,
-          ele = {
-            'class': {
-              'bbn-tab': true,
-              'k-content': true,
-              'bbn-full-height': true,
-              'bbn-w-100': true,
-              'bbn-tab-selected': !!vm.selected
-            }
-          },
-          children = [],
-          res = null;
-      if ( vm.isComponent === null ){
-        vm.onMount = function(){
+    created(){
+      if ( this.isComponent === null ){
+        this.onMount = () => {
           return false;
         };
-        if ( vm.script ){
-          res = eval(vm.script);
+        let res;
+        if ( this.script ){
+          res = typeof this.script === 'string' ? eval(this.script) : this.script;
           if ( $.isFunction(res) ){
-            vm.onMount = res;
-            vm.isComponent = false;
+            this.onMount = res;
+            this.isComponent = false;
           }
           else if ( typeof(res) === 'object' ){
-            vm.isComponent = true;
+            this.isComponent = true;
           }
         }
-        if ( vm.isComponent ){
-          $.extend(res, {
-            name: vm.name,
-            template: '<div class="bbn-100">' + vm.content + '</div>',
+        if ( this.isComponent ){
+          bbn.fn.extend(res ? res : {}, {
+            name: this.name,
+            template: '<div class="bbn-100">' + this.content + '</div>',
+            methods: {
+              getTab: () => {
+                return this;
+              },
+              popup: this.popup,
+              addMenu: this.addMenu,
+              deleteMenu: this.deleteMenu
+            },
             props: ['source']
           });
-          vm.$options.components[vm.name] = res;
+          this.$options.components[this.name] = res;
         }
         else{
-          vm.isComponent = false;
+          this.isComponent = false;
         }
       }
-      if ( vm.isComponent ){
-        children.push(createElement(vm.name, {
-          props: {
-            source: vm.source
-          }
-        }));
-        if ( vm.css ){
-          children.push(createElement('style', {
-            domProps: {
-              innerHTML: vm.css
-            }
-          }));
-        }
-      }
-      else if ( !vm.content && vm.component ){
-        children.push(createElement(vm.component, {
-          props: vm.componentAttributes ? vm.componentAttributes : {source: vm.source}
-        }));
-      }
-      else{
-        children.push(createElement('div', {
-          'class': {
-            'bbn-100': true
-          },
-          domProps: {
-            innerHTML: (vm.css ? '<style>' + vm.css + '</style>' : '') + vm.content
-          }
-        }));
-      }
-      return createElement('div', ele, children)
     },
 
     mounted: function(){
-      const vm = this;
-      vm.tabNav = bbn.vue.closest(vm, ".bbn-tabnav");
-      bbn.fn.analyzeContent(vm.$parent.$el);
-      if ( !vm.isComponent ){
-        vm.onMount(vm.$el, vm.source);
+      this.tabNav = bbn.vue.closest(this, ".bbn-tabnav");
+      if ( !this.isComponent ){
+        this.onMount(this.$el, this.source);
       }
-      bbn.fn.analyzeContent(this.$el, true);
     },
+    /* Is it useful????
     watch: {
       selected: function(newVal, oldVal){
         if ( newVal && !oldVal ){
@@ -233,13 +222,8 @@
           }
           else{
             bbn.fn.log("TabNav selected has changed - old: " + oldVal + " new: " + newVal + " for URL " + vm.url);
-            bbn.fn.analyzeContent(vm.$el, true);
           }
         }
-      },
-      content: function(){
-        var ele = this.$el;
-        bbn.fn.analyzeContent(ele, true);
       },
       source: {
         deep: true,
@@ -248,6 +232,7 @@
         }
       }
     }
+    */
   });
 
 })(jQuery, bbn, kendo);

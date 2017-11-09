@@ -1,7 +1,9 @@
 div.bbn-vlist{
-  z-index: 15000;
   position: fixed !important;
   overflow: auto;
+  left: -1000px;
+  /** Popup zIndex: 7 */
+  z-index: 100;
   .k-menu .k-animation-container .k-animation-container,
   .k-menu .k-menu-group .k-menu-group,
   .k-menu-vertical .k-animation-container,
@@ -14,6 +16,17 @@ div.bbn-vlist{
       display: inline-block;
       width: 1.8em;
       text-align: left;
+    }
+    .text{
+      i{
+        margin-right: 1em;
+      }
+      &.disabled i{
+        opacity: 0.5;
+      }
+      &.hidden i{
+        opacity: 0 !important;
+      }
     }
   }
   >ul.options li .space i{

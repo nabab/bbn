@@ -49,7 +49,7 @@
   ui.plugin(MaskedDatePicker);
 
   Vue.component('bbn-datepicker', {
-    mixins: [bbn.vue.vueComponent],
+    mixins: [bbn.vue.fullComponent],
     template: '#bbn-tpl-component-datepicker',
     props: {
       cfg: {
@@ -110,6 +110,7 @@
           }
         }))
         .data("kendoDatePicker");
+      this.$emit("ready", this.value);
     }
   });
 

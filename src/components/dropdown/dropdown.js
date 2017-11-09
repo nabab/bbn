@@ -8,14 +8,17 @@
 
   Vue.component('bbn-dropdown', {
     template: '#bbn-tpl-component-dropdown',
-    mixins: [bbn.vue.vueComponent, bbn.vue.dataSourceComponent],
+    mixins: [bbn.vue.fullComponent, bbn.vue.dataSourceComponent],
     props: {
       filterValue: {},
       template: {},
       valueTemplate: {},
+      group: {
+        type: String
+      },
       cfg: {
         type: Object,
-        default: function(){
+        default(){
           return {
             dataTextField: 'text',
             dataValueField: 'value',
@@ -25,62 +28,71 @@
       }
     },
     methods: {
-      getOptions: function(){
+      getOptions(){
         var vm = this,
             cfg = bbn.vue.getOptions(vm);
         cfg.change = function(e){
           bbn.fn.log(e);
           vm.$emit("input", e.sender.value());
 					if ( $.isFunction(vm.change) ){
-						vm.change();
+						vm.change(e.sender.value());
 					}
         };
-
-        if ( cfg.template ){
-          var tmp = cfg.template;
-          cfg.template = function(e){
-            return tmp(e);
+        if ( this.template ){
+          cfg.template = e => {
+            return this.template(e);
+          };
+        }
+        if ( this.valueTemplate ){
+          cfg.valueTemplate = e => {
+            return this.valueTemplate(e)
           }
         }
-        if ( cfg.valueTemplate ){
-          var tmp = cfg.valueTemplate;
-          cfg.valueTemplate = function(e){
-            return tmp(e);
-          }
-        }
+        cfg.dataTextField = this.sourceText || this.widgetOptions.dataTextField || 'text';
+        cfg.dataValueField = this.sourceValue || this.widgetOptions.dataValueField || 'value';
+        cfg.valuePrimitive = true;
         return cfg;
       }
     },
-    data: function(){
+    data(){
       return $.extend({
         widgetName: "kendoDropDownList"
       }, bbn.vue.treatData(this));
     },
-    mounted: function(){
-      var vm = this,
-          cfg = vm.getOptions();
-      if ( vm.disabled ){
+    mounted(){
+      let cfg = this.getOptions();
+      if ( this.disabled ){
         cfg.enable = false;
       }
-      if ( vm.placeholder ){
-        cfg.optionLabel = vm.placeholder;
+      if ( this.placeholder ){
+        cfg.optionLabel = this.placeholder;
       }
-      vm.widget = $(vm.$refs.element).kendoDropDownList(cfg).data("kendoDropDownList");
-      if ( !cfg.optionLabel && cfg.dataSource.length && !vm.value ){
-        vm.widget.select(0);
-        vm.widget.trigger("change");
+      bbn.fn.log("DROPDOWN", cfg);
+      this.widget = $(this.$refs.element).kendoDropDownList(cfg).data("kendoDropDownList");
+      if ( !cfg.optionLabel && cfg.dataSource.length && !this.value ){
+        this.widget.select(0);
+        this.widget.trigger("change");
       }
+      this.$emit("ready", this.value);
     },
     computed: {
-      dataSource: function(){
+      dataSource(){
         if ( this.source ){
+          if ( this.group ){
+            return {
+              data: bbn.vue.toKendoDataSource(this),
+              group: {
+                field: this.group
+              }
+            }
+          }
           return bbn.vue.toKendoDataSource(this);
         }
         return [];
       }
     },
     watch:{
-      source: function(newDataSource){
+      source(newDataSource){
         bbn.fn.log("Changed DS", this.dataSource);
         this.widget.setDataSource(this.dataSource);
       }

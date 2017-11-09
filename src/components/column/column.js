@@ -8,7 +8,7 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-column', {
-    //template: '#bbn-tpl-component-column',
+    template: '#bbn-tpl-component-column',
     props: {
       width: {
         type: [String, Number],
@@ -19,6 +19,9 @@
       title: {
         type: [String, Number],
         default: bbn._("Untitled")
+      },
+      ftitle: {
+        type: String
       },
       icon: {
         type: String
@@ -33,16 +36,46 @@
         type: String
       },
       fixed: {
+        type: [Boolean, String],
+        default: false
+      },
+      hidden: {
         type: Boolean
       },
       encoded: {
-        type: Boolean
+        type: Boolean,
+        default: false
+      },
+      sortable: {
+        type: Boolean,
+        default: true
+      },
+      filterable: {
+        type: Boolean,
+        default: true
+      },
+      resizable: {
+        type: Boolean,
+        default: true
+      },
+      showable: {
+        type: Boolean,
+        default: true
       },
       buttons: {
         type: [Array, Function]
       },
       source: {
         type: [Array, Object, String]
+      },
+      required: {
+        type: Boolean,
+      },
+      options: {
+        type: [Object, Function],
+        default(){
+          return {};
+        }
       }
     },
 
@@ -66,24 +99,14 @@
       return r;
     },
 
-    render: function(createElement){
-      var vm = this;
-      return createElement("div", {
-        'class': {
-          'bbn-column': true
-        }
-      });
+    mounted(){
+
     },
 
-    mounted: function(){
-      const vm = this;
-      vm.tabNav = bbn.vue.closest(vm, ".bbn-tabnav");
-      bbn.fn.analyzeContent(vm.$parent.$el);
-      if ( !vm.isComponent ){
-        vm.onMount(vm.$el, vm.source);
-      }
-      bbn.fn.analyzeContent(this.$el, true);
+    beforeDestroyed(){
+
     },
+
     watch: {
       selected: function(newVal, oldVal){
         if ( newVal && !oldVal ){

@@ -1,0 +1,25 @@
+<transition name="custom-classes-transition"
+            enter-active-class="animated fadeIn"
+            leave-active-class="animated fadeOut"
+            keep-alive
+>
+  <div class="bbn-scroll-x"
+       v-if="realContainer && (contentWidth > containerWidth)"
+       v-show="show && width"
+       @click="jump"
+       ref="scrollRail"
+       @mouseover="$emit('mouseover')"
+       @mouseenter="inSlider"
+       @mouseleave="outSlider"
+  >
+    <div class="bbn-scroll-slider"
+         :style="{
+           width: width + '%',
+           left: left + '%'
+         }"
+         ref="scrollSlider"
+         @touchstart.passive="startDrag"
+         @mousedown="startDrag"
+    ></div>
+  </div>
+</transition>

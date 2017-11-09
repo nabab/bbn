@@ -7,10 +7,21 @@
   Vue.component('bbn-form', {
     template: '#bbn-tpl-component-form',
     props: {
-      autocomplete: {},
+      autocomplete: {
+        type: Boolean,
+        default: false
+      },
       disabled: {},
       script: {},
       fields: {},
+
+      confirm: {
+        type: [String, Function]
+      },
+      confirmLeave: {
+        type: [Boolean, String, Function],
+        default: bbn._("Are you sure you want to discard the changes you made in this form?")
+      },
       action: {
         type: String,
         default: '.'
@@ -21,78 +32,281 @@
       failure: {
         type: Function
       },
+      successMessage: {
+        type: [String, Function]
+      },
+      failureMessage: {
+        type: [String, Function]
+      },
       method: {
         type: String,
         default: 'post'
       },
-      cfg: {
-        type: Object,
-        default: function(){
-          return {
-            autocomplete: false,
-            method: "POST",
-            action: "."
-          };
+      buttons: {
+        type: Array,
+        default(){
+          return ['submit', 'cancel'];
         }
       },
+      // This is the proper data used in the form
       source: {
+        type: Object
+      },
+      // This is additional data to be sent by the form
+      data: {
+        type: Object
+      },
+      fixedFooter: {
+        type: Boolean,
+        default: true
+      },
+      // That will be a form schema generating the inputs
+      schema: {
         type: Object,
         default: function(){
           return {};
         }
+      },
+      // Sets if it is the data property which must be sent, or the content of the named fields
+      // (in this case names are not necessary on form inputs)
+      sendModel: {
+        type: Boolean,
+        default: true
+      },
+      validation: {
+        type: Function
       }
     },
     data(){
       return {
-        originalData: false
+        modified: false,
+        popup: false,
+        popupIndex: false,
+        tab: false,
+        originalData: {},
+        realButtons: (() => {
+          let r = [];
+          $.each(this.buttons.slice(), (i, a) => {
+            let t = typeof(a);
+            if ( t === 'string' ){
+              switch ( a ){
+                case 'submit':
+                  r.push({
+                    text: bbn._('Submit'),
+                    icon: 'fa fa-check-circle',
+                    command: this.submit
+                  });
+                  break;
+                case 'cancel':
+                  r.push({
+                    text: bbn._('Cancel'),
+                    icon: 'fa fa-times-circle',
+                    command: this.cancel
+                  });
+                  break;
+                case 'reset':
+                  r.push({
+                    text: bbn._('Reset'),
+                    icon: 'fa fa-refresh',
+                    command: this.reset
+                  });
+                  break;
+              }
+            }
+            else if ( t === 'object' ){
+              r.push(a);
+            }
+          });
+          return r;
+        })()
       };
     },
     computed: {
-      isModified(){
-        let vm = this,
-            data = bbn.fn.formdata();
-        if ( vm.originalData === false ){
-          return false;
+      hasFooter(){
+        return !!((this.$slots.footer && this.$slots.footer.length) || this.realButtons.length);
+      }
+    },
+    methods: {
+      _getPopup(){
+        if ( this.window ){
+          return this.window.popup;
         }
-        for ( var n in data ){
-          if ( data[n] !== vm.originalData[n] ){
+        if ( this.tab && this.tab.$refs.popup ){
+          return this.tab.$refs.popup.length ? this.tab.$refs.popup[0] : this.tab.$refs.popup;
+        }
+        if ( this.$root.$refs.popup ){
+          return this.$root.$refs.popup.length ? this.$root.$refs.popup[0] : this.$root.$refs.popup;
+        }
+        return false;
+      },
+      _post(){
+        bbn.fn.post(this.action, $.extend(true, {}, this.data, this.source), (d) => {
+          this.originalData = this.source;
+          if ( this.successMessage && p ){
+            p.alert(this.successMessage);
+            bbn.fn.info(this.successMessage, p);
+          }
+          this.$emit('success', d);
+          let p = this._getPopup();
+          if ( p ){
+            p.close();
+          }
+        }, (xhr, textStatus, errorThrown) => {
+          this.$emit('failure', xhr, textStatus, errorThrown)
+        });
+      },
+      _execCommand(button, ev){
+        if ( button.command ){
+          button.command(this.source, this, ev)
+        }
+      },
+      getModifications(){
+        let data = this.getData(this.$el) || {},
+            res = {};
+        for ( let n in data ){
+          if ( (this.sendModel && (data[n] !== this.originalData[n])) || (!this.sendModel && (data[n] != this.originalData[n])) ){
+            res[n] = data[n];
+          }
+        }
+        return res;
+      },
+      getData(){
+        return this.sendModel ? this.source : bbn.fn.formdata(this.$el);
+      },
+      isModified(){
+        let data = this.getData(this.$el) || {};
+        for ( let n in data ){
+          if ( (this.sendModel && (data[n] !== this.originalData[n])) || (!this.sendModel && (data[n] != this.originalData[n])) ){
             return true;
           }
         }
         return false;
-      }
-    },
-    methods: {
+      },
+      closePopup(window, ev){
+        if ( this.window ){
+          if ( this.confirmLeave && this.isModified() ){
+            if ( ev ){
+              ev.preventDefault();
+            }
+            this.window.popup.confirm(this.confirmLeave, () => {
+              this.reset();
+              this.window.close(true);
+            })
+          }
+        }
+      },
+      closeTab(url, check){
+        if ( this.tab && (url === this.tab.url) ){
+          check.prevent = true;
+          this.tab.popup.confirm(this.confirmLeave, () => {
+            this.reset();
+            this.tab.tabNav.close(this.tab.idx, true);
+          });
+        }
+      },
       cancel(){
-
-        return bbn.fn.cancel(this.$el);
+        this.reset();
+        if ( this.window ){
+          this.window.close(true);
+        }
       },
-      change(prop, value){
-        let vm = this;
-        vm.$set(vm.source, prop, value);
-        vm.$emit('change', prop, value);
+      submit(force){
+        let ok = true;
+        $(this.$el).find("input,select,textarea").filter("[name]").each((i, a) => {
+          let $a = $(a);
+          if ( a.required && !$a.val() ){
+            if ( $a.is(":visible") ){
+              $a.focus();
+            }
+            else{
+              $a.closest(":visible").focus();
+            }
+            ok = false;
+          }
+        });
+        if ( ok ){
+          $.each((i, a) => {
+            if ( $.isFunction(a.isValid) && !a.isValid() ){
+              ok = false;
+            }
+          });
+        }
+        if ( ok && this.validation ){
+          ok = this.validation(this.source, this.originalData)
+        }
+        if ( !ok ){
+          return false;
+        }
+        let cf = false;
+        if ( !force ){
+          let ev = $.Event('submit');
+          this.$emit('submit', ev, this);
+          if ( ev.isDefaultPrevented() ){
+            return false;
+          }
+        }
+        if ( this.confirm ){
+          if ( $.isFunction(this.confirm) ){
+            cf = this.confirm(this);
+          }
+          else{
+            cf = this.confirm;
+          }
+          if ( cf ){
+            let popup = this._getPopup();
+            if ( popup ){
+              bbn.fn.info("POPUP!", popup);
+              popup.confirm(cf, () => {
+                popup.close();
+                this._post();
+              });
+            }
+          }
+        }
+        if ( !cf ){
+          this._post();
+        }
       },
-      submit: function(){
-        return bbn.fn.submit(this.$el);
+      reset(){
+        bbn.fn.log("reset");
+        $.each(this.originalData, (name, val) => {
+          this.$set(this.source, name, val);
+        });
+        this.$forceUpdate();
       },
-      reset: function(){
-        let vm = this;
+      init(){
+        if ( this.$options.propsData.script ){
+          $(this.$el).data("script", this.$options.propsData.script);
+        }
+        this.originalData = $.extend({}, this.getData());
+        this.$nextTick(() => {
+          if ( !this.window ){
+            this.window = bbn.vue.closest(this, "bbn-window");
+            if ( this.window ){
+              this.window.addClose(this.closePopup);
+            }
+            else if ( !this.tab ){
+              this.tab = bbn.vue.closest(this, ".bbn-tab");
+              if ( this.tab ){
+                this.tab.tabNav.$once("close", this.closeTab);
+              }
+            }
+          }
+          $("input:visible:first", this.$el).focus();
+        });
       }
     },
     mounted(){
-      var vm = this;
-      if ( this.$options.propsData.script ){
-        $(this.$el).data("script", this.$options.propsData.script);
+      this.init();
+    },
+    watch: {
+      source: {
+        deep: true,
+        handler(newVal){
+          this.$emit('input', newVal);
+          this.modified = this.isModified();
+        }
       }
-      vm.$nextTick(() => {
-        $(vm.$el).on('input', ':input[name]', function(e){
-          vm.change(this.name, this.value);
-          if ( !vm.isModified && (this.value !== vm.originalData[this.name]) ){
-            vm.isModified = true;
-          }
-        });
-        vm.originalData = bbn.fn.formdata(vm.$el);
-      });
     }
   });
 

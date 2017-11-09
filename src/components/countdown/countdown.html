@@ -1,0 +1,23 @@
+<span class="bbn-iblock bbn-countdown">
+  <span v-text="year + ' ' + (year > 1 ? _('years') : _('year')) + ' '"
+        v-if="year"
+  ></span>
+  <span v-text="month + ' ' + (month > 1 ? _('months') : _('month')) + ' '"
+        v-if="month"
+  ></span>
+  <span v-text="day + ' ' + (day > 1 ? _('days') : _('day')) + ' '"
+        v-if="day"
+  ></span>
+  <span v-text="hour + ' ' + (hour > 1 ? _('hours') : _('hour')) + ' '"
+        v-if="hour"
+  ></span>
+  <span v-text="minute + ' ' + (minute > 1 ? _('minutes') : _('minute')) + ' '"
+        v-if="minute"
+  ></span>
+  <span v-text="second + ' ' + (second > 1 ? _('seconds') : _('second')) + ' '"
+        v-if="second"
+  ></span>
+  <span v-text="millisecond + ' ' + (millisecond > 1 ? _('milliseconds') : _('millisecond')) + ' '"
+        v-if="millisecond"
+  ></span>
+</span>

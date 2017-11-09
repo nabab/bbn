@@ -8,136 +8,143 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-treemenu', {
-    mixins: [bbn.vue.optionComponent],
+    mixins: [bbn.vue.resizerComponent],
     template: "#bbn-tpl-component-treemenu",
     props: {
       placeholder: {
         type: String,
         default: "Search"
       },
-      source: {},
-      fisheye: {},
-      top: {},
-      bottom: {},
-      position: {
-        type: String
-      },
-      opened: {},
-      cfg: {
-        type: Object,
-        default: function(){
-          return {
-            fisheye: false,
-            data: [],
-            top: "0px",
-            bottom: "0px",
-            position: "left",
-            opened: false
-          };
+      source: {
+        type: [String, Number],
+        default(){
+          return [];
         }
-      }
+      },
+      fisheye: {
+        type: Vue
+      },
+      top: {
+        type: Number,
+        default: 0
+      },
+      bottom: {
+        type: Number,
+        default: 0
+      },
+      position: {
+        type: String,
+        default: 'left'
+      },
+      opened: {
+        type: Boolean,
+        default: false
+      },
+    },
+    data(){
+      let isAjax = !Array.isArray(this.source)
+      return {
+        searchExp: '',
+        isOpened: this.opened,
+        hasBeenOpened: false,
+        posTop: this.top,
+        posBottom: this.bottom,
+        isAjax: isAjax,
+        items: isAjax ? [] : this.source,
+      };
     },
     methods: {
-      _position: function(){
-        var vm = this,
-            cfg = vm.getOptions();
-        $(vm.$el)
-          .animate($.extend({
-            top: cfg.top,
-            bottom: cfg.bottom
-          }, vm.posObject()), 200);
-        bbn.fn.analyzeContent(vm.$el, true);
+      map(a){
+
       },
-      _disconnect_menu: function(){
-        var vm = this;
-        if ( vm.draggable ){
-          vm.draggable.draggable("destroy");
+      _position(){
+        $(this.$el)
+          .animate($.extend({
+            top: this.posTop + 'px',
+            bottom: this.posBottom + 'px'
+          }, this.posObject()), 200);
+      },
+      _disconnect_menu(){
+        if ( this.draggable ){
+          this.draggable.draggable("destroy");
         }
       },
-      _connect_menu: function(){
-        var vm = this;
-        if ( vm.fisheye && $.fn.fisheye ){
-          var fisheye = bbn.vue.retrieveRef(vm, vm.fisheye);
-          if ( fisheye ){
-            if ( vm.draggable ){
-              try{
-                vm.draggable.draggable("destroy");
-              }
-              catch(e){
-                new Error("no draggable")
-              }
+      _connect_menu(){
+        if ( this.fisheye ){
+          let $fisheye = $(this.fisheye.$el);
+          if ( this.draggable ){
+            try{
+              this.draggable.draggable("destroy");
             }
-            vm.draggable = $(vm.$el).find("li")
-              .filter(function (){
-                return $(this).find("li").length ? false : true;
-              })
-              .draggable({
-                cursorAt: {top: 1, left: 0},
-                zIndex: 15000,
-                helper: function (e){
-                  bbn.fn.log(e);
-                  var ele = $(e.currentTarget),
-                      t   = ele.is("li") ? ele : ele.closest("li"),
-                      i   = t.find("i,span.fancytree-custom-icon").first(),
-                      r   = $('<div id="bbn_menu2dock_helper" class="appui-xxxl"/>');
-                  r.append(i.clone(false));
-                  return r;
-                },
-                scroll: false,
-                revert: true,
-                revertDuration: 0,
-                containment: "window",
-                appendTo: document.body,
-                start: function (e, ui){
-                  //e.stopImmediatePropagation();
-                  $(fisheye.$el).fisheye("disable");
-                },
-                stop: function (e, ui){
-                  $(fisheye.$el).fisheye("enable");
-                }
-              });
-
-            if ( vm.droppable ){
-              vm.droppable.droppable("destroy");
+            catch(e){
+              new Error("no draggable")
             }
-            vm.droppable = $(fisheye.$el).droppable({
-              accept: 'li',
-              activeClass: 'active',
-              hoverClass: 'ready',
-              drop: function (e, ui) {
-                var dataItem = $.ui.fancytree.getNode(ui.draggable[0]).data,
-                    obj = {
-                      icon: dataItem.icon,
-                      text: dataItem.text,
-                      url: dataItem.link,
-                      id: dataItem.id
-                    };
-                fisheye.insert(obj);
+          }
+          this.draggable = $(this.$el).find("li")
+            .filter(function (){
+              return $(this).find("li").length ? false : true;
+            })
+            .draggable({
+              cursorAt: {top: 1, left: 0},
+              zIndex: 15000,
+              helper: (e) => {
+                bbn.fn.log(e);
+                var ele = $(e.currentTarget),
+                    t   = ele.is("li") ? ele : ele.closest("li"),
+                    i   = t.find("i,span.fancytree-custom-icon").first(),
+                    r   = $('<div id="bbn_menu2dock_helper" class="appui-xxxl"/>');
+                r.append(i.clone(false));
+                return r;
+              },
+              scroll: false,
+              revert: true,
+              revertDuration: 0,
+              containment: "window",
+              appendTo: document.body,
+              start(e, ui){
+                //e.stopImmediatePropagation();
+                $fisheye.fisheye("disable");
+              },
+              stop: function (e, ui){
+                $fisheye.fisheye("enable");
               }
             });
-            bbn.fn.log("Connecting menu", $(vm.$el).find("li").length, vm.draggable);
+          if ( this.droppable ){
+            this.droppable.droppable("destroy");
           }
-
+          this.droppable = $fisheye.droppable({
+            accept: 'li',
+            activeClass: 'active',
+            hoverClass: 'ready',
+            drop: (e, ui) => {
+              var dataItem = $.ui.fancytree.getNode(ui.draggable[0]).data,
+                  obj = {
+                    icon: dataItem.icon,
+                    text: dataItem.text,
+                    url: dataItem.link,
+                    id: dataItem.id
+                  };
+              this.fisheye.insert(obj);
+            }
+          });
+          bbn.fn.log("Connecting menu", $(this.$el).find("li").length, this.draggable);
         }
       },
 
-      posObject: function(){
-        if ( this.cfg.position === 'right' ){
-          return {right: this.isOpened ? 0 : -($(this.$el).width() + 40)};
-        }
-        else{
-          return {left: this.isOpened ? 0 : -($(this.$el).width() + 40)};
-        }
+      posObject(){
+        let o = {};
+        o[this.position === 'right' ? 'right' : 'left'] = this.isOpened ? 0 : -($(this.$el).width() + 40);
+        return o;
       },
-      show: function(){
+      show(){
         this.isOpened = true;
         this._position();
       },
-      hide: function(){
+      hide(){
         this.isOpened = false;
         this._position();
       },
-      toggle: function(){
+      toggle(){
         if ( this.isOpened ){
           this.hide();
         }
@@ -145,45 +152,31 @@
           this.show();
         }
       },
-      search: function(v){
-        var vm = this;
+      search(v){
         if (!v.length) {
-          vm.$refs.tree.widget.clearFilter()
+          this.$refs.tree.widget.clearFilter()
         }
         else {
           v = bbn.fn.removeAccents(v).toLowerCase();
-          vm.$refs.tree.widget.filterNodes(function(a) {
+          this.$refs.tree.widget.filterNodes((a) => {
             var txt = bbn.fn.removeAccents($('<div/>').html(a.title).text()).toLowerCase();
             bbn.fn.log(txt, txt.indexOf(v));
             return txt.indexOf(v) > -1;
           })
         }
       },
-      go: function(id, data, node){
-        if ( data.link ){
-          appui.$refs.tabnav.load(data.link);
+      go(node){
+        if ( node && node.data && node.data.link ){
+          bbn.fn.link(node.data.link);
         }
         this.hide();
-      }
-    },
-    computed: {
-      treeSource: function(){
-        return [];
       },
-    },
-    data: function(){
-      return $.extend({
-        widgetName: "fancytree",
-        isOpened: false
-      }, bbn.vue.treatData(this));
-    },
-    mounted: function(){
-      var vm = this,
-          cfg = vm.getOptions();
-      if ( cfg.opened ){
-        vm.isOpened = true;
+      resizeScroll(){
+        this.$refs.scroll.onResize()
       }
-      vm._position();
+    },
+    mounted(){
+      this._position();
       /*
       $(vm.$refs.search).keyup(function (e) {
         var v = $(this).val();
@@ -201,27 +194,33 @@
       });
       */
 
-      $(document.body).on("mousedown touch", "*", function(e){
+      $(document.body).on("mousedown touch", "*", (e) => {
         var $t = $(e.target);
-        if ( vm.isOpened &&
+        if ( this.isOpened &&
           !$t.closest(".bbn-treemenu").length &&
           !$t.closest(".bbn-menu-button").length
         ){
+          bbn.fn.log("DEFAULT PREVENTED ON MOUSEDOWN AND TOUCH");
           e.preventDefault();
           e.stopImmediatePropagation();
-          vm.toggle();
+          this.toggle();
         }
       })
     },
     watch: {
-      isOpened: function(newVal, oldVal){
-        var vm = this;
-        vm.$nextTick(function(){
+      isOpened(newVal, oldVal){
+        if ( newVal ){
+          if ( !this.hasBeenOpened ){
+            this.hasBeenOpened = true;
+            this.$refs.tree.load();
+          }
+        }
+        this.$nextTick(() => {
           if ( newVal && !oldVal ){
-            vm._connect_menu();
+            this._connect_menu();
           }
           else if ( !newVal && oldVal ){
-            vm._disconnect_menu();
+            this._disconnect_menu();
           }
         });
       }

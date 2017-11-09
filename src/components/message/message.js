@@ -222,6 +222,7 @@
     },
     mounted(){
       const vm = this;
+      /*
       setInterval(function(){
         if ( vm.num && !vm.isShown ){
           for ( var n in vm.todo ){
@@ -236,6 +237,7 @@
           }
         }
       }, 1000);
+      */
       return this;
     },
 

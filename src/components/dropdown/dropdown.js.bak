@@ -5,8 +5,8 @@
   "use strict";
 
   Vue.component('bbn-dropdown', {
-    mixins: [bbn.vue.vueComponent],
-    template: '<input class="bbn-dropdown" :value="value" ref="dropdown" @input="update($event.target.value)" @click="click($event)" @focus="focus($event)" @blur="blur($event)" :disabled="disabled ? true : false" :required="required ? true : false" :name="name">',
+    mixins: [bbn.vue.fullComponent],
+    template: '<input class="bbn-dropdown" :value="value" ref="dropdown" @input="update($event.target.value)" @click="click($event)" @focus="focus($event)" @blur="blur($event)" :disabled="disabled" :required="required" :name="name">',
     props: {
       source: {
         type: [String, Array, Object]

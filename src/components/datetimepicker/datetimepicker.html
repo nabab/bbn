@@ -1,12 +1,21 @@
 <span class="bbn-datetimepicker">
   <input :value="ivalue"
          ref="element"
-         :disabled="disabled ? true : false"
-         :required="required ? true : false"
-         :placeholder="placeholder">
+         :disabled="disabled"
+         :required="required"
+         :placeholder="placeholder"
+         @click="click($event)"
+         @focus="focus($event)"
+         @blur="blur($event)"
+         @change="change($event)"
+         @keydown="keydown($event)"
+         @keyup="keyup($event)"
+         @mouseenter="over($event)"
+         @mouseleave="out($event)"
+  >
   <input :value="value"
          ref="idatetimepicker"
          :name="name"
-         :disabled="disabled ? true : false"
+         :disabled="disabled"
          type="hidden">
 </span>

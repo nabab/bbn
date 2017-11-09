@@ -1,28 +1,25 @@
-<div class="bbn-dashboard bbn-masonry bbn-margin">
-  <transition name="custom-classes-transition"
-              :duration="{enter: isRefreshing ? 0 : 500, leave: isRefreshing ? 0 : 500}"
-              v-for="(w, index) in widgets"
-              :key="w.key"
-              enter-active-class="animated zoomIn"
-              leave-active-class="animated zoomOut">
-    <bbn-widget
-            @close="hideWidget($event, w.key)"
-            v-if="!w.hidden"
-            :uid="w.key"
-            :key="w.key"
-            :component="w.component"
-            :item-component="w.itemComponent"
-            :items="w.items ? w.items : []"
-            :limit="w.limit ? w.limit : false"
-            :title="w.text"
-            :url="w.url ? w.url : false"
-            :closable="w.closable"
-            :zoomable="w.zoomable"
-            :buttons-left="w.buttonsLeft"
-            :buttons-right="w.buttonsRight"
-            :content="w.content"
-            :source="w">
-    </bbn-widget>
-  </transition>
-  <slot></slot>
+<div class="bbn-dashboard bbn-full-screen">
+  <bbn-scroll ref="scroll">
+    <div :class="'bbn-masonry bbn-margin' + (sortable ? ' bbn-dashboard-sortable' : '')"
+         ref="container"
+    >
+      <transition name="custom-classes-transition"
+                  :duration="{enter: isRefreshing ? 0 : 500, leave: isRefreshing ? 0 : 500}"
+                  v-for="(w, index) in widgets"
+                  :key="w.key"
+                  enter-active-class="animated zoomIn"
+                  leave-active-class="animated zoomOut">
+        <bbn-widget @close="hideWidget(w.key)"
+                    v-if="!w.hidden"
+                    @loaded="resizeScroll"
+                    v-bind="w"
+                    :uid="w.key"
+                    :key="w.key"
+                    :title="w.title ? w.title : (w.text ? w.text : '')"
+        >
+        </bbn-widget>
+      </transition>
+      <slot></slot>
+    </div>
+  </bbn-scroll>
 </div>

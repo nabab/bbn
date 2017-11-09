@@ -1,9 +1,92 @@
 .bbn-table{
-  height: 100%;
-  border: 0;
-
-  .bbn-table-toolbar{
-    margin-right: 1em;
-    float: left;
+  .bbn-table-column-picker{
+    ul{
+      list-style: none;
+    }
+  }
+  table.bbn-table-t{
+    outline: 0;
+    width: auto;
+    table-layout: fixed;
+    border-collapse: collapse;
+    > tbody > tr > td{
+      border-width: 0px;
+      border-right: 1px solid;
+      border-right-color: inherit;
+      padding: 0.5em;
+      overflow: hidden;
+      vertical-align: top;
+      position: relative;
+    }
+  }
+  div.bbn-table-part{
+    height: 100%;
+    position: relative;
+  }
+  div.bbn-table-titles {
+    height: 40px;
+    &.bbn-table-titles-group {
+      height: 79px;
+    }
+    tr{
+      height: 39px;
+      td{
+        padding: 0.5em;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        .bbn-table-title-group{
+          position: absolute;
+          left: 0px;
+          margin-left: 20px;
+        }
+        a.k-link{
+          color: inherit;
+        }
+        i.fa.fa-filter{
+          position: absolute;
+          top: 1px;
+          left: 0px;
+        }
+      }
+    }
+  }
+  div.bbn-table-data{
+    tr.k-widget{
+      box-sizing: border-box;
+    }
+  }
+  div.bbn-table-footer{
+    clear: both;
+    overflow: hidden;
+    position: relative;
+    border-style: solid;
+    border-width: 1px;
+    line-height: 2em;
+    padding: .333em .25em;
+    a.k-link{
+      color: inherit;
+    }
+  }
+  > div > div.bbn-table-container{
+    > div.bbn-table-titles, > div.bbn-table-data{
+      width: 100%;
+      position: relative;
+      > div.bbn-table-part{
+        overflow: hidden;
+        float: left;
+        height: 100%;
+        position: relative;
+      }
+      i.bbn-table-sortable-icon{
+        position: absolute;
+        left: 50%;
+        bottom: 0px;
+      }
+    }
+  }
+  div.bbn-table-floating-filter{
+    position: fixed;
+    width: 600px;
+    height: 200px;
   }
 }

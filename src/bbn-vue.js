@@ -10,6 +10,49 @@
     }
   });
 
+  const
+    editorOperators = {
+      string: {
+        'contains': bbn._('Contient'),
+        'eq': bbn._('Est'),
+        'neq': bbn._('N’est pas'),
+        'startswith': bbn._('Commence par'),
+        'doesnotcontain': bbn._('Ne contient pas'),
+        'endswith': bbn._('Se termine par'),
+        'isempty': bbn._('Est vide'),
+        'isnotempty': bbn._('N’est pas vide')
+      },
+      number: {
+        'eq': bbn._('Est égal à'),
+        'neq': bbn._('N’est pas égal à'),
+        'gte': bbn._('Est supérieur ou égal à'),
+        'gt': bbn._('Est supérieur à'),
+        'lte': bbn._('Est inférieur ou égal à'),
+        'lt': bbn._('Est inférieur à'),
+      },
+      date: {
+        'eq': bbn._('Est égal à'),
+        'neq': bbn._('N’est pas égal à'),
+        'gte': bbn._('Est postérieur ou égal à'),
+        'gt': bbn._('Est postérieur à'),
+        'lte': bbn._('Est antérieur ou égal à'),
+        'lt': bbn._('Est antérieur à'),
+      },
+      enums: {
+        'eq': bbn._('Est égal à'),
+        'neq': bbn._('N’est pas égal à'),
+      },
+      boolean: {
+        'istrue': bbn._('Est vrai'),
+        'isfalse': bbn._('Est faux')
+      }
+    },
+    editorNullOps = {
+      'isnull': bbn._('Est nul'),
+      'isnotnull': bbn._('N’est pas nul')
+    },
+    editorNoValueOperators = ['', 'isnull', 'isnotnull', 'isempty', 'isnotempty', 'istrue', 'isfalse'];
+
   bbn.vue = {
     defaultLocalURL: false,
     defaultLocalPrefix: '',
@@ -18,72 +61,80 @@
     localPrefix: '',
     loadingComponents: [],
     loadedComponents: [],
-    existingComponents: [
-      'autocomplete',
-      'button',
-      'chart',
-      'checkbox',
-      'code',
-      'colorpicker',
-      'combo',
-      'context',
-      'dashboard',
-      'datepicker',
-      'datetimepicker',
-      'dropdown',
-      'dropdowntreeview',
-      'fisheye',
-      'form',
-      'initial',
-      'input',
-      'json-editor',
-      'list',
-      'loader',
-      'loading',
-      'markdown',
-      'masked',
-      'menu',
-      'menu-button',
-      'message',
-      'multiselect',
-      'notification',
-      'numeric',
-      'popup',
-      'radio',
-      'rte',
-      'search',
-      'slider',
-      'splitter',
-      'tab',
-      'table',
-      'tabnav',
-      'textarea',
-      'timepicker',
-      'toolbar',
-      'tree',
-      'treemenu',
-      'tree-input',
-      'upload',
-      'vlist',
-      'widget'
-    ],
+    components: {
+      autocomplete: {},
+      button: {},
+      chart: {},
+      checkbox: {},
+      code: {},
+      colorpicker: {},
+      combo: {},
+      context: {},
+      countdown: {},
+      dashboard: {},
+      datepicker: {},
+      datetimepicker: {},
+      dropdown: {},
+      dropdowntreeview: {},
+      filter: {},
+      fisheye: {},
+      footer: {},
+      form: {},
+      initial: {},
+      input: {},
+      'json-editor': {},
+      list: {},
+      loading: {},
+      markdown: {},
+      masked: {},
+      menu: {},
+      'menu-button': {},
+      message: {},
+      multiselect: {},
+      notification: {},
+      numeric: {},
+      operator: {},
+      popup: {},
+      radio: {},
+      rte: {},
+      scroll: {},
+      'scroll-x': {},
+      'scroll-y': {},
+      search: {},
+      slider: {},
+      splitter: {},
+      table: {},
+      tabnav: {},
+      textarea: {},
+      timepicker: {},
+      toolbar: {},
+      tree: {},
+      treemenu: {},
+      'tree-input': {},
+      upload: {},
+      vlist: {},
+      widget: {}
+    },
     /**
      * Makes the dataSource variable suitable to be used by the kendo UI widget
      * @param vm Vue object
      * @returns object
      */
     toKendoDataSource(vm){
-      let text = vm.widgetOptions.dataTextField || vm.sourceText,
-          value = vm.widgetOptions.dataValueField || vm.sourceValue;
+      let text = vm.sourceText || vm.widgetOptions.dataTextField || 'text',
+          value = vm.sourceValue || vm.widgetOptions.dataValueField || 'value';
       let transform = (src) => {
         let type = typeof(src),
-            isArray = $.isArray(src);
+            isArray = Array.isArray(src);
         if ( (type === 'object') && !isArray ){
           let tmp = [];
           $.each(src, (n, a) => {
             let tmp2 = {};
             tmp2[text] = (typeof a) === 'string' ? a : n;
             tmp2[value] = n;
+            if ( vm.group && a[vm.group] ){
+              tmp2[vm.group] = a[vm.group];
+            }
             tmp.push(tmp2);
           });
           return tmp;
@@ -144,6 +195,16 @@
       }
     },
 
+    initDefaults(defaults, cpName){
+      if ( !bbn.vue.components[cpName] ){
+        throw new Error("Impossible to find the component " + cpName);
+      }
+      if ( typeof defaults !== 'object' ){
+        throw new Error("The default object sent is not an object " + cpName);
+      }
+      bbn.vue.components[cpName].defaults = $.extend(true, defaults, bbn.vue.components[cpName].defaults);
+    },
+
     isKendo(vm){
       return (vm.widgetName.indexOf("kendo") === 0);
     },
@@ -155,6 +216,7 @@
      * @returns {{}}
      */
     treatData(vm){
+
       let cfg = {};
       if ( vm.$options.props.cfg && (vm.$options.props.cfg.default !== undefined) ){
         $.extend(cfg, $.isFunction(vm.$options.props.cfg.default) ? vm.$options.props.cfg.default() : vm.$options.props.cfg.default);
@@ -174,12 +236,23 @@
       };
     },
 
+    getOptions2(vm, obj){
+      if ( !obj || (typeof(obj) !== 'object') ){
+        obj = {};
+      }
+      let r = {};
+      return $.extend(obj, r, this.widgetOptions);
+    },
+
     /**
      *
      * @param vm Vue object
      * @returns {{}}
      */
-    getOptions(vm){
+    getOptions(vm, obj){
+      if ( !obj || (typeof(obj) !== 'object') ){
+        obj = {};
+      }
       let tmp = bbn.vue.treatData(vm),
           r = tmp.widgetCfg;
       if ( r.source && vm.widgetName && (vm.widgetName.indexOf("kendo") === 0) ){
@@ -192,7 +265,7 @@
       if ( r.name ){
         delete r.name;
       }
-      return r;
+      return $.extend(obj, r);
     },
 
     setComponentRule(url, prefix){
@@ -233,11 +306,11 @@
         Vue.component(name, (resolve, reject) => {
           bbn.fn.post(url, (r) => {
             if ( r.script ){
-              if ( r.content ){
-                $(document.body).append('<script type="text/x-template" id="bbn-tpl-component-' + name + '">' + r.content + '</script>');
-              }
               if ( r.css ){
                 $(document.head).append('<style>' + r.css + '</style>');
+              }
+              if ( r.content ){
+                $(document.body).append('<script type="text/x-template" id="bbn-tpl-component-' + name + '">' + r.content + '</script>');
               }
               //let data = r.data || {};
               eval(r.script);
@@ -252,7 +325,7 @@
 
     defineComponents(){
       if ( !bbn.vue.loadedComponents.length && !bbn.vue.isNodeJS ){
-        $.each(bbn.vue.existingComponents, (i, a) => {
+        for ( let a in bbn.vue.components ){
           bbn.vue.loadedComponents.push('bbn-' + a);
           /** @var string bbn_root_url */
           /** @var string bbn_root_dir */
@@ -260,7 +333,7 @@
             let url = bbn_root_url + bbn_root_dir + 'components/' + a + "/?component=1";
 
             if ( bbn.env.isDev ){
-              url += '&test';
+              url += '&test=1';
             }
             bbn.fn.ajax(url, "script")
               .then((res) => {
@@ -293,7 +366,106 @@
                 })
               })
           });
-        });
+        }
+      }
+    },
+
+    localStorageComponent: {
+      computed: {
+        storage(){
+          return window.store || false;
+        }
+      },
+      methods: {
+        _getStorageRealName(name){
+          return window.location.pathname + '-' + this.$options.name + '-' + (this.id ? this.id + '-' : '') + (name || 'default');
+        },
+        hasStorage(){
+          return !!this.storage;
+        },
+        getStorage(name){
+          if ( this.hasStorage() ){
+            return this.storage.get(this._getStorageRealName(name))
+          }
+        },
+        setStorage(name, value){
+          if ( this.hasStorage() ){
+            return this.storage.set(this._getStorageRealName(name), value)
+          }
+        },
+      }
+    },
+
+    dataEditorComponent: {
+      methods: {
+        editorOperatorType(col){
+          if ( col.field ){
+
+          }
+        },
+        editorHasNoValue(operator){
+          return $.inArray(operator, editorNoValueOperators) > -1;
+        },
+        editorGetComponentOptions(col){
+          let o = {
+            type: 'string',
+            component: 'bbn-input',
+            multi: false,
+            componentOptions:  {}
+          };
+          if ( col && col.field ){
+            o.field = col.field;
+            if ( col.filter ){
+              o.component = col.filter;
+            }
+            else if ( col.source ){
+              o.type = 'enums';
+              o.component = 'bbn-dropdown';
+              o.componentOptions.source = col.source;
+            }
+            else if ( col.type ){
+              switch ( col.type ){
+                case 'number':
+                case 'money':
+                  o.type = 'number';
+                  o.component = 'bbn-numeric';
+                  break;
+                case 'date':
+                  o.type = 'date';
+                  o.component = 'bbn-datepicker';
+                  break;
+                case 'time':
+                  o.type = 'date';
+                  o.component = 'bbn-timepicker';
+                  break;
+                case 'datetime':
+                  o.type = 'date';
+                  o.component = 'bbn-datetimepicker';
+                  break;
+              }
+            }
+            if ( col.componentOptions ){
+              $.extend(o.componentOptions, col.componentOptions);
+            }
+            if ( o.type && this.editorOperators[o.type] ){
+              o.operators = this.editorOperators[o.type];
+            }
+            o.fields = [col];
+          }
+          return o
+        },
+
+      },
+      computed: {
+        editorOperators(){
+          return editorOperators;
+        },
+        editorNullOps(){
+          return editorNullOps;
+        },
+        editorNoValueOperators(){
+          return editorNoValueOperators;
+        }
       }
     },
 
@@ -317,6 +489,18 @@
         change(e){
           this.$emit('change', e)
         },
+        over(e){
+          this.$emit('over', e);
+          setTimeout(() => {
+            this.$emit('hover', true, e);
+          }, 0)
+        },
+        out(e){
+          this.$emit('out', e);
+          setTimeout(() => {
+            this.$emit('hover', false, e);
+          }, 0)
+        },
       }
     },
 
@@ -337,10 +521,46 @@
           default: "value"
         }
       },
+      methods: {
+        getOptions(obj){
+          let cfg = bbn.vue.getOptions2(this, obj);
+          cfg.dataTextField = this.sourceText || this.widgetOptions.dataTextField || 'text';
+          cfg.dataValueField = this.sourceValue || this.widgetOptions.dataValueField || 'value';
+          cfg.dataSource = this.dataSource;
+          return cfg;
+        },
+        getOptions2(obj){
+          let cfg = bbn.vue.getOptions2(this, obj);
+          if ( this.widgetOptions.dataTextField || this.sourceText ){
+            cfg.dataTextField = this.widgetOptions.dataTextField || this.sourceText;
+          }
+          if ( this.widgetOptions.dataValueField || this.sourceValue ){
+            cfg.dataValueField = this.widgetOptions.dataValueField || this.sourceValue;
+          }
+          cfg.dataSource = this.dataSource;
+          return cfg;
+        }
+      },
       computed: {
         dataSource(){
           return bbn.vue.toKendoDataSource(this)
         }
+      },
+      watch:{
+        source: function(newDataSource){
+          if ( this.widget ){
+            this.widget.setDataSource(this.dataSource);
+          }
+        }
+      }
+    },
+
+    memoryComponent: {
+      props: {
+        memory: {
+          type: [Object, Function]
+        },
+
       }
     },
 
@@ -366,16 +586,37 @@
           default: false
         },
         size: {
-          type: Number
+          type: [Number, String]
         },
         maxlength: {
           type: [String, Number]
+        },
+        validation: {
+          type: [Function]
+        },
+        type: {
+          type: String
         },
       },
       methods: {
         emitInput(val){
           this.$emit('input', val);
+        },
+        isValid(val){
+          if ( this.validation ){
+            if ( this.type ){
+
+            }
+            if ( this.validation(val) ){
+              return (!this.required || val);
+            }
+            return false;
+          }
+          return (!this.required || val);
         }
+      },
+      mounted(){
+        this.$emit("ready");
       },
       watch:{
         disabled(newVal){
@@ -446,7 +687,7 @@
         }
       },
       beforeDestroy(){
-        bbn.fn.log("Default destroy");
+        //bbn.fn.log("Default destroy");
         //this.destroy();
       },
       methods: {
@@ -477,11 +718,114 @@
           */
         },
         build(){
-          bbn.fn.log("Default build");
+          bbn.fn.info("CLASSIC BUILD");
         },
         getWidgetCfg(){
           const vm = this;
         },
+      }
+    },
+
+    // These components will emit a resize event when their closest parent of the same kind gets really resized
+    resizerComponent: {
+      data(){
+        return {
+          // The closest resizer parent
+          parentResizer: false,
+          // The listener on the closest resizer parent
+          resizeEmitter: false,
+          // Height
+          lastKnownHeight: false,
+          // Width
+          lastKnownWidth: false
+        };
+      },
+      methods: {
+        // a function can be executed just before the resize event is emitted
+        onResize(){
+          return;
+        },
+        setResizeEvent(){
+          // The timeout used in the listener
+          let resizeTimeout;
+          // This class will allow to recognize the element to listen to
+          $(this.$el).addClass("bbn-resize-emitter");
+          this.parentResizer = bbn.vue.closest(this, ".bbn-resize-emitter");
+          // Setting initial dimensions
+          this.lastKnownHeight = this.parentResizer ? Math.round($(this.parentResizer.$el).innerHeight()) : bbn.env.height;
+          this.lastKnownWidth = this.parentResizer ? Math.round($(this.parentResizer.$el).innerWidth()) : bbn.env.width;
+          // Creating the callback function which will be used in the timeout in the listener
+          this.resizeEmitter = () => {
+            // Removing previous timeout
+            clearTimeout(resizeTimeout);
+            // Creating a new one
+            resizeTimeout = setTimeout(() => {
+              if ( $(this.$el).is(":visible") ){
+                // Checking if the parent hasn't changed (case where the child is mounted before)
+                let tmp = bbn.vue.closest(this, ".bbn-resize-emitter");
+                if ( tmp !== this.parentResizer ){
+                  // In that case we reset
+                  this.unsetResizeEvent();
+                  this.setResizeEvent();
+                  tmp.$emit("resize");
+                  bbn.fn.log("Emitting from new element", tmp.$el);
+                  return;
+                }
+                let resize = false,
+                    h      = this.parentResizer ? Math.round($(this.parentResizer.$el).innerHeight()) : bbn.env.height,
+                    w      = this.parentResizer ? Math.round($(this.parentResizer.$el).innerWidth()) : bbn.env.width;
+                if ( h && (this.lastKnownHeight !== h) ){
+                  this.lastKnownHeight = h;
+                  resize = 1;
+                }
+                if ( w && (this.lastKnownWidth !== w) ){
+                  this.lastKnownWidth = w;
+                  resize = 1;
+                }
+                if ( resize ){
+                  this.onResize();
+                  this.$emit("resize");
+                  bbn.fn.log("EMITTING FROM RESIZE EMITTER", this.$el);
+                }
+              }
+            }, 0);
+          };
+          if ( this.parentResizer ){
+            //bbn.fn.log("SETTING EVENT FOR PARENT", this.$el, this.parentResizer);
+            this.parentResizer.$on("resize", this.resizeEmitter);
+          }
+          else{
+            //bbn.fn.log("SETTING EVENT FOR WINDOW", this.$el);
+            $(window).on("resize", this.resizeEmitter);
+          }
+          this.resizeEmitter();
+        },
+
+        unsetResizeEvent(){
+          return;
+          if ( this.resizeEmitter ){
+            if ( this.parentResizer ){
+              //bbn.fn.log("UNSETTING EVENT FOR PARENT", this.$el, this.parentResizer);
+              this.parentResizer.$off("resize", this.resizeEmitter);
+            }
+            else{
+              //bbn.fn.log("UNSETTING EVENT FOR WINDOW", this.$el);
+              $(window).off("resize", this.resizeEmitter);
+            }
+          }
+        },
+
+        selfEmit(){
+          if ( this.parentResizer ){
+            this.parentResizer.$emit("resize");
+          }
+        }
+      },
+      mounted(){
+        this.setResizeEvent();
+      },
+      beforeDestroy(){
+        this.unsetResizeEvent();
       }
     },
 
@@ -503,9 +847,21 @@
       return false;
     },
 
+    is(vm, selector){
+      if ( selector && vm ){
+        if ( vm.$el && $(vm.$el).is(selector) ){
+          return true;
+        }
+        if ( vm.$vnode && vm.$vnode.componentOptions && (vm.$vnode.componentOptions.tag === selector) ){
+          return true;
+        }
+      }
+      return false;
+    },
+
     closest(vm, selector){
-      while ( vm && vm.$parent ){
-        if ( vm.$parent.$el && $(vm.$parent.$el).is(selector) ){
+      while ( vm && vm.$parent && (vm !== vm.$parent) ){
+        if ( bbn.vue.is(vm.$parent, selector) ){
           return vm.$parent;
         }
         vm = vm.$parent;
@@ -521,11 +877,10 @@
           obj.$vnode &&
           obj.$vnode.data &&
           obj.$vnode.data.key &&
-          (obj.$vnode.data.key=== key)
+          (obj.$vnode.data.key === key)
         ){
           if ( selector ){
-            return $(obj.$el).is(selector) ||
-              (obj.$vnode.componentOptions && (obj.$vnode.componentOptions.tag === selector)) ? obj : false;
+            return bbn.vue.is(obj, selector) ? obj : false;
           }
           return obj;
         }
@@ -533,12 +888,150 @@
       return false;
     },
 
+    find(cp, selector){
+      let cps = bbn.vue.getComponents(cp);
+      for ( let i = 0; i < cps.length; i++ ){
+        if ( bbn.vue.is(cps[i], selector) ){
+          return cps[i];
+        }
+      }
+    },
+
+    findAll(cp, selector){
+      let cps = bbn.vue.getComponents(cp),
+          res = [];
+      for ( let i = 0; i < cps.length; i++ ){
+        if (
+          $(cps[i].$el).is(selector) ||
+          (cps[i].$vnode.componentOptions && (cps[i].$vnode.componentOptions.tag === selector))
+        ){
+          res.push(cps[i]);
+        }
+      }
+      return res;
+    },
+
+    getComponents(cp, ar){
+      if ( !Array.isArray(ar) ){
+        ar = [];
+      }
+      $.each(cp.$children, function(i, obj){
+        ar.push(obj)
+        if ( obj.$children ){
+          bbn.vue.getComponents(obj, ar);
+        }
+      });
+      return ar;
+    },
+
+    setResizeDirective(name, el, vnode){
+      let fName,
+          dName;
+      if ( name === 'bbn-fill-height' ){
+        fName = 'fillHeight';
+        dName = 'bbnVueFillHeight';
+      }
+      else if ( name === 'bbn-fill-width' ){
+        fName = 'fillWidth';
+        dName = 'bbnVueFillWidth';
+      }
+      // The function we'll use on el
+      if ( fName ){
+        // We add the directive's name as class
+        $(el).addClass(name);
+        // vnode.context is the object
+        if ( vnode.context ){
+          // Executing directive's function
+          $(el).data(dName, () => {
+            if ( bbn.fn[fName](el, true) ){
+              bbn.fn.log("Emitting from vnode", vnode);
+              vnode.context.$emit("resize")
+            }
+          });
+          /** We pick the closest resizable element, i.e. one which  */
+          let closestResizable = bbn.vue.is(vnode.context, ".bbn-resize-emitter") ? vnode.context : bbn.vue.closest(vnode.context, ".bbn-resize-emitter");
+          $(el).data(dName + 'Parent', closestResizable);
+          if ( closestResizable ){
+            /** We put the listener */
+            closestResizable.$on("resize", () => {
+              let tmp = bbn.vue.is(vnode.context, ".bbn-resize-emitter") ? vnode.context : bbn.vue.closest(vnode.context, ".bbn-resize-emitter");
+              if ( tmp !== $(el).data(dName + 'Parent') ){
+                let fn = $(el).data(dName);
+                if ( fn ){
+                  /** We put the listener */
+                  $(el).data(dName + 'Parent').$off("resize", fn);
+                }
+                bbn.vue.setResizeDirective(name, el, vnode);
+                bbn.fn.log("Emitting from DIRECTIVE PARENT", vnode.context.$el);
+                tmp.$emit("resize");
+                return;
+              }
+              $(el).data(dName)();
+            });
+            setTimeout(() => {
+              closestResizable.$emit("resize");
+            }, 10)
+          }
+          else{
+            $(window).on("resize", () => {
+              let tmp = bbn.vue.is(vnode.context, ".bbn-resize-emitter") ? vnode.context : bbn.vue.closest(vnode.context, ".bbn-resize-emitter");
+              if ( tmp ){
+                let fn = $(el).data(dName);
+                if ( fn ){
+                  /** We put the listener */
+                  $(window).off("resize", fn);
+
+                }
+                bbn.vue.setResizeDirective(name, el, vnode);
+                bbn.fn.log("EMITTING FROM NEW DIRECTIVE", tmp.$el)
+                tmp.$emit("resize");
+                return;
+              }
+              //bbn.fn.log("resizing", el, "FROM WINDOW");
+              $(el).data(dName)();
+            });
+            setTimeout(() => {
+              $(window).trigger("resize");
+            }, 10)
+          }
+        }
+        else{
+          bbn.fn[fName](el);
+        }
+
+      }
+    },
+
+    unsetResizeDirective(name, el, vnode, target){
+      let dName;
+      if ( name === 'bbn-fill-height' ){
+        dName = 'bbnVueFillHeight';
+      }
+      else if ( name === 'bbn-fill-width' ){
+        dName = 'bbnVueFillWidth';
+      }
+      if ( dName && vnode.context ){
+        let fn = $(el).data(dName);
+        if ( fn ){
+          /** We pick the closest resizable element, i.e. one which  */
+          let closestResizable = bbn.vue.is(vnode.context, ".bbn-resize-emitter") ? vnode.context: bbn.vue.closest(vnode.context, ".bbn-resize-emitter");
+          if ( closestResizable ){
+            /** We put the listener */
+            closestResizable.$off("resize", fn);
+          }
+          else{
+            $(window).off("resize", fn);
+          }
+        }
+      }
+    },
+
     makeUID(){
       return bbn.fn.randomString(32);
     }
   };
 
-  bbn.vue.vueComponent = bbn.fn.extend({}, bbn.vue.inputComponent, bbn.vue.optionComponent, bbn.vue.eventsComponent, bbn.vue.widgetComponent);
+  bbn.vue.fullComponent = bbn.fn.extend({}, bbn.vue.inputComponent, bbn.vue.optionComponent, bbn.vue.eventsComponent, bbn.vue.widgetComponent);
 
   bbn.vue.defineComponents()
 

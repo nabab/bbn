@@ -1,12 +1,12 @@
-<span class="bbn-masked">
+<span class="bbn-masked k-textbox">
   <input ref="element"
-         :disabled="disabled ? true : false"
-         :required="required ? true : false"
+         :disabled="disabled"
+         :required="required"
          @keyup="update(widget.raw())">
   <input :value="value"
          ref="real_masked"
          :name="name"
-         :disabled="disabled ? true : false"
+         :disabled="disabled"
          type="hidden"
   >
 </span>

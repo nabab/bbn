@@ -24,7 +24,8 @@
    * @param {boolean|number} selected - The index of the currently selected tab, and false otherwise.
    */
   Vue.component('bbn-tabnav', {
-    //template: '#bbn-tpl-component-tabnav',
+    template: '#bbn-tpl-component-tabnav',
+    mixins: [bbn.vue.resizerComponent],
     props: {
        url: {
         type: String,
@@ -55,23 +56,14 @@
     },
 
     data(){
-      var vm = this,
-          r = bbn.vue.treatData(vm).widgetCfg || {};
-      if ( vm.$options && vm.$options.props ){
-        for ( var n in r ){
-          if ( vm.$options.props[n] !== undefined ){
-            delete r[n];
-          }
-        }
-      }
-      var baseURL = vm.root;
+      let baseURL = this.root;
       while ( baseURL.substr(-1) === '/' ){
         baseURL = baseURL.substr(0, baseURL.length-1);
       }
       while ( baseURL.substr(0, 1) === '/' ){
         baseURL = baseURL.substr(1);
       }
-      return $.extend({
+      return {
         _bbnTabNav: {
           started: false,
           titles: '',
@@ -84,7 +76,7 @@
         parentTab: false,
         selected: false,
         isMounted: false
-      }, r);
+      };
     },
 
     computed: {
@@ -104,14 +96,24 @@
     },
 
     methods: {
-      scrollTabs(dir, ul){
+      getTabColor(idx){
+        if ( this.tabs[idx].fcolor ){
+          return this.tabs[idx].fcolor;
+        }
+        let el = this.$refs['title-' + idx];
+        if ( el && (!$.isArray(el) || el.length) ){
+          return window.getComputedStyle(el[0] ? el[0] : el).color;
+        }
+        return 'black';
+      },
+      scrollTabs(dir){
+        let ul = this.$refs.tabgroup;
         if ( ul.scrollWidth > ul.clientWidth ){
           let total = ul.scrollWidth,
               visible = ul.clientWidth,
               position = ul.scrollLeft,
               max = total - visible,
               newPos = false;
-          bbn.fn.log(dir, total, visible, position, max, '----------');
           if ( (dir === 'left') && (position > 0) ){
             newPos = position - 300 < 0 ? 0 : position - 300;
           }
@@ -272,6 +274,15 @@
         }
       },
 
+      getVue(idx){
+        if ( this.isValidIndex(idx) && this.$refs['container-' + idx] ){
+          return $.isArray(this.$refs['container-' + idx]) ?
+            this.$refs['container-' + idx][0] :
+            this.$refs['container-' + idx];
+        }
+        return false;
+      },
+
       getTab(idx){
         if ( this.isValidIndex(idx) && this.$refs['tab-' + idx] ){
           return this.$refs['tab-' + idx];
@@ -280,16 +291,13 @@
       },
 
       getContainer(idx){
-        if ( this.isValidIndex(idx) && this.$refs['container-' + idx] ){
-          return this.$refs['container-' + idx];
-        }
-        return false;
+        let c = this.getVue(idx);
+        return c ? c.$el : false;
       },
 
       getSubTabNav(idx){
-        var vm = this;
-        if ( vm.isValidIndex(idx) ){
-          var tab = bbn.vue.getChildByKey(vm, vm.tabs[idx].url, 'bbn-tab');
+        if ( this.isValidIndex(idx) ){
+          let tab = this.getVue(idx);
           if ( tab ){
             return tab.getSubTabNav();
           }
@@ -319,7 +327,6 @@
           return vm.activateDefault();
         }
         idx = vm.getIndex(url);
-        bbn.fn.log("ACTIVATE", url, idx);
         // No index found: loading or error
         if ( !vm.isValidIndex(idx) ){
           for ( var i = 0; i < vm.tabs.length; i++ ){
@@ -327,7 +334,6 @@
               ((url + '/').indexOf(vm.tabs[i].url) === 0) &&
               (subtab = vm.getSubTabNav(i))
             ){
-              bbn.fn.log("SUBTAB", subtab);
               vm.selected = i;
               return subtab.activate(url);
             }
@@ -339,7 +345,6 @@
             vm.load(url);
           }
           else{
-            bbn.fn.log(vm.$el);
             new Error(
               "Impossible to find an index for " + url + " in element with baseURL " +
               vm.getFullBaseURL()
@@ -349,17 +354,18 @@
         // Index exists but content not loaded yet
         else if ( vm.tabs[idx].load && !vm.tabs[idx].disabled ){
           //vm.selected = idx;
-          vm.load(url);
+          vm.load(url, force);
         }
         else if ( !vm.tabs[idx].disabled ){
           var subtab = vm.getSubTabNav(idx);
-          if ( subtab && subtab.rendered ){
+          if ( subtab && subtab.isMounted ){
             subtab.activate(vm.getFullBaseURL() + url);
           }
           vm.selected = idx;
         }
 
-        return;
+        return this;
+        /*
         var // actual tab
           $tab = vm.getTab(idx),
           // Container
@@ -416,17 +422,43 @@
           //bbn.fn.log("NOT ACTIVATED WITH " + url, vm.$el, vm.list);
         }
         return this;
+        */
       },
 
-      close(idx){
-        var vm = this;
-        if ( vm.tabs[idx] ){
-          vm.tabs.splice(idx, 1);
-          if ( !vm.tabs.length ){
-            vm.selected = false;
+      close(idx, force){
+        bbn.fn.log("CLOSING", idx);
+        if ( this.tabs[idx] && !this.tabs[idx].static ){
+          let ev = $.Event();
+          if ( !force ){
+            this.$emit('close', idx, ev);
           }
-          else if ( !vm.tabs[idx] ){
-            vm.activateIndex(idx - 1);
+          if ( !ev.isDefaultPrevented() || force ){
+            this.tabs.splice(idx, 1);
+            if ( this.selected > idx ){
+              this.selected--;
+            }
+            else if ( this.selected === idx ){
+              this.selected = false;
+              if ( this.tabs.length ){
+                this.activateIndex(this.tabs[idx] ? idx : idx - 1);
+              }
+            }
+          }
+        }
+      },
+
+      closeAll(){
+        for ( let i = this.tabs.length - 1; i >= 0; i-- ){
+          if ( !this.tabs[i].static ){
+            this.close(i);
+          }
+        }
+      },
+
+      closeAllBut(idx){
+        for ( let i = this.tabs.length - 1; i >= 0; i-- ){
+          if ( !this.tabs[i].static && (i !== idx) ){
+            this.close(i);
           }
         }
       },
@@ -450,16 +482,6 @@
           index = vm.search(obj.url);
           if ( !obj.menu ){
             obj.menu = [];
-            if ( vm.autoload ){
-              obj.menu.push({
-                text: bbn._("Reload"),
-                key: "reload",
-                icon: "fa fa-refresh",
-                click: function(a){
-                  vm.reload(obj.idx);
-                }
-              });
-            }
           }
           if ( index !== false ){
             obj.idx = index;
@@ -476,7 +498,6 @@
             if ( idx === undefined ){
               obj.idx = vm.tabs.length;
               vm.tabs.push(obj);
-              bbn.fn.log("ADDING", obj);
             }
             else{
               obj.idx = idx;
@@ -491,11 +512,6 @@
               vm.activateIndex(0);
             }
           }
-          // We give the selected DIV a background color which corresponds to the color of the tab's text
-          // (which might be undefined, so this action is necessary)
-          vm.$nextTick(function(){
-            $(vm.$refs['selector-' + obj.idx]).css("backgroundColor", $(vm.$refs['tab-' + obj.idx]).css("color"));
-          })
         }
       },
 
@@ -538,6 +554,69 @@
         })
       },
 
+      getMenuFn(idx){
+        let items = (($.isFunction(this.tabs[idx].menu) ? this.tabs[idx].menu() : this.tabs[idx].menu) || []).slice();
+        let others = false;
+        $.each(this.tabs, (i, a) => {
+          if ( (i !== idx) && !a.static ){
+            others = true;
+            return false;
+          }
+        })
+        if ( this.tabs[idx].help ){
+          items.push({
+            text: bbn._("Help"),
+            key: "help",
+            icon: "zmdi zmdi-info",
+            command: () => {
+              let tab = this.getVue(idx);
+              tab.getPopup().open('<div class="bbn-padded">' + this.tabs[idx].help + '<div>', bbn._("Help") + ': ' + this.tabs[idx].title);
+            }
+          })
+        }
+        if ( this.autoload ){
+          items.push({
+            text: bbn._("Reload"),
+            key: "reload",
+            icon: "fa fa-refresh",
+            command: () => {
+              this.reload(idx);
+            }
+          });
+        }
+        if ( !this.tabs[idx].static ){
+          items.push({
+            text: bbn._("Close"),
+            key: "close",
+            icon: "zmdi zmdi-close",
+            command: () => {
+              this.close(idx);
+            }
+          })
+        }
+        if ( others ){
+          items.push({
+            text: bbn._("Close Others"),
+            key: "close_others",
+            icon: "zmdi zmdi-close-circle-o",
+            command: () => {
+              this.closeAllBut(idx);
+            }
+          })
+        }
+        if ( others && !this.tabs[idx].static ){
+          items.push({
+            text: bbn._("Close All"),
+            key: "close_all",
+            icon: "zmdi zmdi-close-circle",
+            command: () => {
+              this.closeAll();
+            }
+          })
+        }
+        return items;
+      },
+
       reload(idx){
         var vm = this;
         vm.$set(vm.tabs[idx], "load", true);
@@ -555,7 +634,6 @@
             /** @todo Check if it's right */
             bbn.fn.log("checkTabsHeight change");
             // Previous code (shit!)
-            vm.resize();
           }
           vm.tabsHeight = h;
         }
@@ -623,6 +701,7 @@
 
     },
 
+    /*
     render(createElement){
       var vm = this;
 
@@ -730,7 +809,8 @@
             }),
           ])
         ]));
-        if ( obj.load || ((vm.selected !== i) && obj.component) ){
+        // Rendering only the loader if load is true or if the tab doesn't need yet to be rendered
+        if ( obj.load || (!obj.selected && !obj.loaded) ){
           containers.push(createElement('bbn-loader', {
             ref: 'container-' + i,
             props: {
@@ -744,6 +824,10 @@
             props: obj,
             key: obj.url
           }));
+          // If the tab is rendered for the first time, we set it as loaded
+          if ( !obj.load && !obj.loaded ){
+            obj.loaded = true;
+          }
         }
       });
 
@@ -787,7 +871,7 @@
             'k-button': true,
             'k-button-icon': true,
             'k-button-bare': true,
-            
+
             'k-tabstrip-next': true
           },
           on: {
@@ -819,21 +903,27 @@
         }
       }, containers);
     },
+    */
 
     created(){
-      var vm = this;
       // Adding bbn-tab from the slot
-      if (vm.$slots.default){
+      if ( this.$slots.default ){
         for ( var node of this.$slots.default ){
+          bbn.fn.info("NODE", node);
           if (
-            node.componentOptions &&
-            (node.componentOptions.tag === 'bbn-tab') &&
-            node.componentOptions.propsData.url
+            node &&
+            (node.tag === 'bbn-tab') &&
+            node.data.attrs.url
           ){
-            vm.add(node.componentOptions.propsData);
+            this.add(node.data.attrs);
           }
         }
       }
+      $.each(this.source, (i, obj) => {
+        if ( obj.url ){
+          this.add(obj);
+        }
+      });
     },
 
     mounted(){
@@ -891,6 +981,7 @@
 
       vm.activate(vm.parseURL(bbn.env.path), true);
       vm.isMounted = true;
+      vm.$emit("ready");
     },
 
     watch: {
@@ -905,10 +996,12 @@
               vm.$set(vm.tabs[i], "selected", (i === newVal));
             }
           });
+          vm.navigate();
           vm.$nextTick(() => {
+            vm.$emit("resize");
+            bbn.fn.log("EMITTING FROM TABNAV");
             bbn.fn.analyzeContent(vm.$el, true);
           })
-          vm.navigate();
         }
       },
       currentURL(newVal, oldVal){
@@ -925,53 +1018,252 @@
             ){
               vm.$set(vm.tabs[vm.selected], "current", newVal);
             }
-            bbn.fn.log("CHECKING PARENTS");
+            // CHECKING PARENTS
             if ( vm.parents.length ){
               bbn.fn.log("CHANGING URL");
               vm.parents[0].$set(vm.parents[0], "currentURL", vm.baseURL + newVal);
             }
           }
         }
-        //this.$forceUpdate();
+        this.$forceUpdate();
         //bbn.fn.log("A change in tabs")
         //var vm = this;
       },
-      tabs:{
-        deep: true,
-        handler(newVal){
-          const vm = this;
-          let test = vm.$data._bbnTabNav;
-          // Checking if there are changes in the titles in order to recheck the measures of the tabs
-          if ( !test.started ){
-            test.started = true;
-            test.num = newVal.length;
-            let tmp = '';
-            $.each(newVal, function(i, a){
-              tmp += a.title;
-            });
-            test.titles = bbn.fn.md5(tmp);
-          }
-          else{
-            // If a tab is added or removed the usual actions will take place, no need for this
-            let tmp = '';
-            $.each(newVal, function(i, a){
-              tmp += a.title;
-            });
-            tmp = bbn.fn.md5(tmp);
-            if ( test.num === newVal.length ){
-              if ( test.titles !== tmp ){
-                // Check if width/height have changed
-                bbn.fn.log("TO DO: Check the tabs' dimensions");
-              }
+    },
+    components: {
+      'bbn-loader': {
+        name: 'bbn-loader',
+        props: ['source']
+      },
+      'bbn-tab': {
+        name: 'bbn-tab',
+        mixins: [bbn.vue.resizerComponent],
+        props: {
+          title: {
+            type: [String, Number],
+            default: bbn._("Untitled")
+          },
+          hasPopups: {
+            type: Boolean,
+            default: false
+          },
+          componentAttributes: {
+            type: Object,
+            default(){
+              return {}
+            }
+          },
+          idx: {},
+          component: {},
+          icon: {
+            type: String
+          },
+          content: {
+            type: String,
+            default: ""
+          },
+          load: {
+            type: Boolean,
+            default: false
+          },
+          selected: {
+            type: [Boolean, Number],
+            default: false
+          },
+          css: {
+            type: String,
+            default: ""
+          },
+          source: {
+            type: [Array, Object],
+            default: function(){
+              return {};
+            }
+          },
+          help: {
+            type: String
+          },
+          script: {},
+          static: {
+            type: [Boolean, Number],
+            default: false
+          },
+          pinned: {
+            type: [Boolean, Number],
+            default: false
+          },
+          url: {
+            type: [String, Number]
+          },
+          current: {
+            type: [String, Number]
+          },
+          real: {
+            type: String
+          },
+        },
+
+        methods: {
+          setCurrent(url){
+            const vm = this;
+            if ( url.indexOf(vm.url) === 0 ){
+              vm.tabNav.activate(url);
+            }
+          },
+          getPopup(){
+            return Array.isArray(this.$refs.popup) ? this.$refs.popup[0] : this.$refs.popup;
+          },
+          popup(){
+            if ( arguments.length ){
+              this.getPopup().open.apply(this.getPopup(), arguments)
             }
             else{
-              test.num = newVal.length;
+              return this.getPopup();
             }
-            test.titles = tmp;
+          },
+          getComponent(){
+            for ( let i = 0; i < this.$children.length; i++ ){
+              if ( this.$children[i].$options._componentTag !== 'bbn-popup' ){
+                return this.$children[i];
+              }
+            }
+            return false;
+          },
+          getSubTabNav(ele){
+            if ( ele === undefined ){
+              ele = this;
+            }
+
+            var recurse = function(el){
+              if ( el.$options && el.$options._componentTag && (el.$options._componentTag === "bbn-tabnav") ){
+                return el;
+              }
+              if ( el.$children ){
+                for ( var i = 0; i < el.$children.length; i++ ){
+                  var r = recurse(el.$children[i]);
+                  if ( r ){
+                    return r;
+                  }
+                }
+              }
+              return false;
+            };
+            return recurse(ele);
+          },
+          addMenu(obj){
+            if (
+              (this.idx > -1) &&
+              obj.text &&
+              this.$parent.tabs &&
+              this.$parent.tabs[this.idx]
+            ){
+              let menu = this.$parent.tabs[this.idx].menu || [];
+              if ( !obj.key ){
+                obj.key = bbn.fn.randomInt(99,99999999999);
+              }
+              if ( $.isFunction(menu) ){
+                menu = () => {
+                  let items = menu() || [];
+                  items.push(obj);
+                  return items;
+                };
+              }
+              else{
+                menu.push(obj)
+              }
+              this.$parent.$set(this.$parent.tabs[this.idx], "menu", menu);
+              return obj.key;
+            }
+            return false;
+          },
+          deleteMenu(key){
+            if (
+              (this.idx > -1) &&
+              this.$parent.tabs &&
+              this.$parent.tabs[this.idx]
+            ){
+              let menu = this.$parent.tabs[this.idx].menu || [];
+              if ( $.isFunction(menu) ){
+                menu = () => {
+                  let items = menu() || [];
+                  let idx = bbn.fn.search(items, "key", key);
+                  if ( idx > -1 ){
+                    items.splice(idx, 1);
+                    this.$parent.$set(this.$parent.tabs[this.idx], "menu", items);
+                    this.$parent.$forceUpdate();
+                    return true;
+                  }
+                };
+              }
+              else{
+                let idx = bbn.fn.search(menu, "key", key);
+                if ( idx > -1 ){
+                  menu.splice(idx, 1);
+                  this.$parent.$set(this.$parent.tabs[this.idx], "menu", menu);
+                  this.$parent.$forceUpdate();
+                  return true;
+                }
+              }
+            }
+            return false;
           }
-          if ( (newVal.idx === vm.selected) && (newVal.current !== vm.currentURL) ){
-            vm.currentURL = newVal.current;
+        },
+
+        data(){
+          return {
+            tabNav: null,
+            isComponent: null,
+            name: bbn.fn.randomString(20, 15).toLowerCase(),
+            isMounted: false,
+            popups: []
+          };
+        },
+
+        created(){
+          if ( this.isComponent === null ){
+            this.onMount = () => {
+              return false;
+            };
+            let res;
+            if ( this.script ){
+              res = typeof this.script === 'string' ? eval(this.script) : this.script;
+              if ( $.isFunction(res) ){
+                this.onMount = res;
+                this.isComponent = false;
+              }
+              else if ( typeof(res) === 'object' ){
+                this.isComponent = true;
+              }
+            }
+            if ( this.isComponent ){
+              bbn.fn.extend(res ? res : {}, {
+                name: this.name,
+                template: '<div class="bbn-full-screen">' + this.content + '</div>',
+                methods: {
+                  getTab: () => {
+                    return this;
+                  },
+                  popup: this.popup,
+                  addMenu: this.addMenu,
+                  deleteMenu: this.deleteMenu
+                },
+                props: ['source']
+              });
+              this.$options.components[this.name] = res;
+            }
+            else{
+              this.isComponent = false;
+            }
           }
+        },
+
+        mounted: function(){
+          this.tabNav = bbn.vue.closest(this, ".bbn-tabnav");
+          if ( !this.isComponent ){
+            this.onMount(this.$el, this.source);
+          }
+          this.isMounted = true;
+          this.$emit("ready");
         }
       }
     }

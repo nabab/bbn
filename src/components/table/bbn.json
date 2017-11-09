@@ -6,6 +6,6 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "dataTables": ">=1.10.13"
+    "perfect-scrollbar": ">=0.7.1"
   }
 }

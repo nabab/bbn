@@ -7,12 +7,12 @@
   /**
    * Classic input with normalized appearance
    */
-  var isClicked = false;
+  let isClicked = false;
   Vue.component('bbn-vlist', {
     template: '#bbn-tpl-component-vlist',
     props: {
-      items: {
-        type: Array
+      source: {
+        type: [Function, Array]
       },
       maxHeight: {
         type: String,
@@ -35,126 +35,127 @@
       left: {},
       right: {},
       top: {},
-      bottom: {}
+      bottom: {},
+      mapper: {
+        type: Function
+      }
     },
-    data: function(){
+    data(){
+      let items = $.isFunction(this.source) ? this.source() : this.source.slice();
+      if ( this.mapper ){
+        $.map(items, (a) => {
+          return this.mapper(a);
+        })
+      }
       return {
-        menu: this.items,
+        items: items,
         currentIndex: false
       };
     },
     methods: {
-      getStyles: function(){
-        var vm = this;
+      getStyles(){
         return {
-          left: vm.right > 0 ? '' : vm.left + 'px',
-          right: vm.right > 0 ? vm.right + 'px' : '',
-          top: vm.bottom > 0 ? '' : vm.top + 'px',
-          bottom: vm.bottom > 0 ? vm.bottom + 'px' : '',
-          maxHeight: vm.maxHeight
+          left: this.right > 0 ? '' : this.left + 'px',
+          right: this.right > 0 ? this.right + 'px' : '',
+          top: this.bottom > 0 ? '' : this.top + 'px',
+          bottom: this.bottom > 0 ? this.bottom + 'px' : '',
+          maxHeight: this.maxHeight
         };
       },
       leaveList: function(e){
-        if ( e ){
-          e.preventDefault();
-          e.stopImmediatePropagation();
-        }
         if ( !isClicked ){
           this.close();
         }
       },
-      beforeClick: function(){
+      beforeClick(){
         isClicked = true;
       },
-      afterClick: function(){
-        var vm = this;
+      afterClick(){
         setTimeout(function(){
           isClicked = false;
         })
       },
 
-      over: function(idx){
-        var vm = this;
-        if ( vm.currentIndex !== idx ){
+      over(idx){
+        if ( this.currentIndex !== idx ){
               this.currentIndex = idx;
-          if ( vm.items[idx].items ){
-            var $item = $(vm.$el).find(" > ul > li").eq(idx),
+          if ( this.items[idx].items ){
+            var $item = $(this.$el).find(" > ul > li").eq(idx),
                 offset = $item.offset(),
-                h = $(vm.$root.$el).height(),
-                w = $(vm.$root.$el).width();
-            vm.$set(vm.menu[idx], "right", offset.left > (w * 0.6) ? Math.round(w - offset.left) : '');
-            vm.$set(vm.menu[idx], "left", offset.left <= (w * 0.6) ? Math.round(offset.left + $item[0].clientWidth) : '');
-            vm.$set(vm.menu[idx], "bottom", offset.top > (h * 0.6) ? Math.round(offset.top + $item[0].clientHeight) : '');
-            vm.$set(vm.menu[idx], "top", offset.top <= (h * 0.6) ? Math.round(offset.top) : '');
-            vm.$set(vm.menu[idx], "maxHeight", (offset.top > (h * 0.6) ? Math.round(offset.top + $item[0].clientHeight) : Math.round(h - offset.top)) + 'px');
+                h = $(this.$root.$el).height(),
+                w = $(this.$root.$el).width();
+            this.$set(this.items[idx], "right", offset.left > (w * 0.6) ? Math.round(w - offset.left) : '');
+            this.$set(this.items[idx], "left", offset.left <= (w * 0.6) ? Math.round(offset.left + $item[0].clientWidth) : '');
+            this.$set(this.items[idx], "bottom", offset.top > (h * 0.6) ? Math.round(offset.top + $item[0].clientHeight) : '');
+            this.$set(this.items[idx], "top", offset.top <= (h * 0.6) ? Math.round(offset.top) : '');
+            this.$set(this.items[idx], "maxHeight", (offset.top > (h * 0.6) ? Math.round(offset.top + $item[0].clientHeight) : Math.round(h - offset.top)) + 'px');
           }
         }
       },
-      close: function(e){
+      close(e){
         this.currentIndex = false;
       },
-      closeAll: function(){
+      closeAll(){
         this.close();
         if ( this.$parent ){
           this.$emit("closeall");
         }
       },
-      select: function(e, idx){
-        var vm = this;
+      select(e, idx){
         bbn.fn.log("SELECT");
         if ( e ){
           e.preventDefault();
           e.stopImmediatePropagation();
         }
-        if ( !vm.menu[idx].items ){
-          if ( vm.mode === 'options' ){
-            vm.$set(vm.items[idx], "selected", vm.items[idx].selected ? false : true);
+        if ( !this.items[idx].items ){
+          if ( this.mode === 'options' ){
+            this.$set(this.items[idx], "selected", this.items[idx].selected ? false : true);
           }
-          else if ( (vm.mode === 'selection') && !vm.items[idx].selected ){
-            var prev = bbn.fn.search(vm.items, "selected", true);
+          else if ( (this.mode === 'selection') && !this.items[idx].selected ){
+            var prev = bbn.fn.search(this.items, "selected", true);
             if ( prev > -1 ){
-              vm.$set(vm.items[prev], "selected", false);
+              this.$set(this.items[prev], "selected", false);
             }
-            vm.$set(vm.items[idx], "selected", true);
+            this.$set(this.items[idx], "selected", true);
 
           }
-          if ( vm.menu[idx].click ){
-            if ( typeof(vm.menu[idx].click) === 'string' ){
-              bbn.fn.log("CLICK IS STRING", vm);
+          if ( this.items[idx].command ){
+            bbn.fn.log()
+            if ( typeof(this.items[idx].command) === 'string' ){
+              bbn.fn.log("CLICK IS STRING", this);
             }
-            else if ( $.isFunction(vm.menu[idx].click) ){
-              bbn.fn.log("CLICK IS FUNCTION", vm);
-              vm.menu[idx].click(e, idx, JSON.parse(JSON.stringify(vm.menu[idx])));
+            else if ( $.isFunction(this.items[idx].command) ){
+              bbn.fn.log("CLICK IS FUNCTION", this);
+              this.items[idx].command(e, idx, JSON.parse(JSON.stringify(this.items[idx])));
             }
           }
-          if ( vm.mode !== 'options' ){
-            vm.close();
-            if ( vm.parent ){
-              vm.$emit("closeall");
+          if ( this.mode !== 'options' ){
+            this.close();
+            if ( this.parent ){
+              this.$emit("closeall");
             }
           }
         }
       }
     },
-    mounted: function(){
-      const vm = this;
-      vm.$nextTick(function(){
+    mounted(){
+      this.$nextTick(() => {
         let style = {},
-            h = $(vm.$el).children().height();
-        if ( vm.bottom ){
-          if ( vm.bottom - h < 0 ){
+            h = $(this.$el).children().height();
+        if ( this.bottom ){
+          if ( this.bottom - h < 0 ){
             style.top = '0px';
           }
           else{
-            style.top = Math.round(vm.bottom - h) + 'px';
+            style.top = Math.round(this.bottom - h) + 'px';
           }
           style.height = Math.round(h + 2) + 'px';
-          $(vm.$el).css(style)
+          $(this.$el).css(style)
         }
       })
     },
     watch:{
-      currentIndex: function(newVal){
+      currentIndex(newVal){
         if ( (newVal === false) && !this.parent ){
           this.$emit("close");
         }

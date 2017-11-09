@@ -50,7 +50,7 @@
 
 
   Vue.component('bbn-timepicker', {
-    mixins: [bbn.vue.vueComponent],
+    mixins: [bbn.vue.fullComponent],
     template: '#bbn-tpl-component-timepicker',
     props: {
       cfg: {
@@ -100,15 +100,15 @@
       }, bbn.vue.treatData(this));
     },
     mounted: function(){
-      var vm = this;
-      vm.widget = $(this.$refs.element)
-        .kendoMaskedTimePicker($.extend(vm.getOptions(), {
-          change: function(e){
-            vm.emitInput(kendo.toString(vm.widget.value(), "HH:mm:ss"));
+      this.widget = $(this.$refs.element)
+        .kendoMaskedTimePicker($.extend(this.getOptions(), {
+          change: (e) => {
+            this.emitInput(kendo.toString(this.widget.value(), "HH:mm:ss"));
             return true;
           }
         }))
         .data("kendoTimePicker");
+      this.$emit("ready", this.value);
     }
   });
 

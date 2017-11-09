@@ -2,7 +2,6 @@
   position: relative;
   .ct-legend {
     position: relative;
-    z-index: 10;
     list-style: none;
     text-align: center;
     li {
@@ -75,13 +74,15 @@
     }
   }
 
-  .ct-chart-pie {
-    filter: drop-shadow(1px 1px 6px #000);
+  .ct-chart-pie, .ct-chart-donut {
+//    filter: drop-shadow(1px 1px 6px #000);
 
     .ct-label{
-      font-size: 100%;
-      fill: black;
+      font-size: 100% !important;
+      fill: black !important;
+      dominant-baseline: text-before-edge;
     }
+
   }
 
   .ct-chart-pie:hover{
