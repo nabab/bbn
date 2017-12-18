@@ -6,6 +6,6 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "fancytree": ">=0.4"
+    "vue-sortable": ">=0.1.3"
   }
 }

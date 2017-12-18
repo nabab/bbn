@@ -4,8 +4,5 @@
   "authors": [
     "Thomas Nabet <thomas.nabet@gmail.com>"
   ],
-  "license": "MIT",
-  "dependencies": {
-    "perfect-scrollbar": ">=0.7.1"
-  }
+  "license": "MIT"
 }

@@ -8,7 +8,7 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-menu-button', {
-    template: '#bbn-tpl-component-menu-button',
+    mixins: [bbn.vue.basicComponent],
     props: {
       icon: {
         type: String

@@ -1,5 +1,13 @@
-<div class="k-widget k-block bbn-treemenu">
+<div :class="[{'k-widget': true, 'k-block': true}, componentClass]">
   <div class="bbn-flex-height">
+    <div class="bbn-block bbn-w-100 bbn-vpadded bbn-c" v-if="menus && menus.length">
+      <!--bbn-search name="search" style="width: 80%" ref="search" :placeholder="placeholder"></bbn-search-->
+      <bbn-dropdown v-model="currentMenu"
+                    :source="menus"
+                    style="width: 80%"
+                    ref="dropdown"
+      ></bbn-dropdown>
+    </div>
     <div class="bbn-block bbn-w-100 bbn-vpadded bbn-c" v-if="search">
       <!--bbn-search name="search" style="width: 80%" ref="search" :placeholder="placeholder"></bbn-search-->
       <bbn-input name="search"
@@ -7,18 +15,21 @@
                  style="width: 80%"
                  ref="search"
                  :placeholder="placeholder"
-                 @keyup="search($event.target.value)"
       ></bbn-input>
     </div>
     <div class="bbn-w-100 bbn-flex-fill">
       <div class="bbn-full-screen">
         <bbn-tree :source="source"
+                  :map="mapSrc"
+                  :data="getData"
                   :autoload="false"
                   :opened="true"
                   :min-expand-level="1"
                   ref="tree"
                   @load="resizeScroll"
+                  :filter-string="searchExp"
                   @select="go"
+                  :menu="getMenu"
         ></bbn-tree>
       </div>
     </div>

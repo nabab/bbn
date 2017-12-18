@@ -5,8 +5,7 @@
   "use strict";
 
   Vue.component('bbn-toolbar', {
-    mixins: [bbn.vue.optionComponent, bbn.vue.widgetComponent],
-    template: '#bbn-tpl-component-toolbar',
+    mixins: [bbn.vue.basicComponent, bbn.vue.optionComponent, bbn.vue.widgetComponent],
     props: {
       items: {
         type: Array

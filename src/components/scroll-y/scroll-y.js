@@ -1,17 +1,17 @@
 /**
  * Created by BBN on 10/07/2017.
  */
-(function($, bbn){
+(function($, bbn, Vue){
   "use strict";
 
   Vue.component('bbn-scroll-y', {
-    template: '#bbn-tpl-component-scroll-y',
+    mixins: [bbn.vue.basicComponent],
     props: {
       /* Must be an instance of bbn-scroll */
       scroller: {
         type: Vue,
         default(){
-          let tmp = bbn.vue.closest(this, "bbn-scroll");
+          let tmp = bbn.vue.closest(this, 'bbn-scroll');
           return tmp ? tmp : null;
         }
       },
@@ -56,11 +56,11 @@
         moveTimeout: 0,
         show: this.hidden === 'auto' ? false : !this.hidden,
         scroll: this.initial
-      }
+      };
     },
     methods: {
       // Sets the top position
-      _changePosition(next, animate, force){
+      _changePosition(next, animate, force, origin){
         let top;
         if ( next < 0 ){
           top = 0;
@@ -75,7 +75,7 @@
           (typeof(top) === 'number') &&
           ((top !== this.top) || force)
         ){
-          this.scrollContainer(top, animate);
+          this.scrollContainer(top, animate, origin);
         }
       },
 
@@ -103,32 +103,36 @@
         }
       },
 
-      stopDrag(e) {
-        this.dragging = false
+      stopDrag() {
+        this.dragging = false;
       },
 
       // Effectively change the scroll and bar position and sets variables
-      scrollContainer(top, animate){
+      scrollContainer(top, animate, origin){
         if ( this.realContainer && this.contentHeight ){
           this.currentScroll = top ? Math.round(this.contentHeight * top / 100 * 10000) / 10000 : 0;
-          if ( animate && (this.realContainer.scrollTop !== this.currentScroll) ){
+          if ( animate ){
             $.each(this.scrollableElements(), (i, a) => {
-              if ( a !== this.realContainer ){
+              if ( (a !== this.realContainer) && (a !== origin) && (a.scrollTop !== this.currentScroll) ){
                 $(a).animate({scrollTop: this.currentScroll}, "fast");
               }
             });
-            $(this.realContainer).animate({scrollTop: this.currentScroll}, "fast", () => {
-              this.top = top;
-              this.normalize();
-            });
+            if ( (origin !== this.realContainer) && (this.realContainer.scrollTop !== this.currentScroll) ){
+              $(this.realContainer).animate({scrollTop: this.currentScroll}, "fast", () => {
+                this.top = top;
+                this.normalize();
+              });
+            }
           }
-          else{
-            this.realContainer.scrollTop = this.currentScroll;
+          else {
             $.each(this.scrollableElements(), (i, a) => {
-              if ( a !== this.realContainer ){
+              if ( (a !== this.realContainer) && (a !== origin) && (a.scrollTop !== this.currentScroll) ){
                 a.scrollTop = this.currentScroll;
               }
             });
+            if ( (origin !== this.realContainer) && (this.realContainer.scrollTop !== this.currentScroll) ){
+              this.realContainer.scrollTop = this.currentScroll;
+            }
             this.top = top;
             this.normalize();
           }
@@ -170,8 +174,8 @@
       // Calculates all the proportions based on content
       onResize() {
         if ( this.realContainer ){
-          let tmp1 = $(this.realContainer).height(),
-              tmp2 = this.realContainer.children[0] ? this.realContainer.children[0].clientHeight : this.containerHeight;
+          let tmp1 = $(this.realContainer).height() - 18,
+              tmp2 = this.realContainer.children[0] ? this.realContainer.children[0].clientHeight : this.containerHeight - 18;
           if ( (tmp1 !== this.containerHeight) || (tmp2 !== this.contentHeight) ){
             this.containerHeight = tmp1;
             this.contentHeight = tmp2;
@@ -199,7 +203,7 @@
           (e.target.scrollTop !== this.currentScroll)
         ){
           if ( e.target.scrollTop ){
-            this._changePosition(Math.round(e.target.scrollTop / this.contentHeight * 1000000)/10000);
+            this._changePosition(Math.round(e.target.scrollTop / this.contentHeight * 1000000)/10000, false, false, e.target);
           }
           else{
             this._changePosition(0);
@@ -213,16 +217,16 @@
         if ( !this.realContainer && this.scroller ){
           this.realContainer = this.scroller.$refs.scrollContainer || false;
         }
-        if ( this.realContainer ){
+        if ( this.realContainer && this.scroller ){
           this.onResize();
           let $cont = $(this.realContainer);
           this.scroller.$off("resize", this.onResize);
           this.scroller.$on("resize", this.onResize);
-          $cont.off("scroll", this.adjust);
-          $cont.off("mousemove", this.overContent);
+          this.scroller.$off("scroll", this.adjust);
           this.scrollTo(this.initial);
-          $cont.scroll(this.adjust);
-          $cont.mousemove(this.overContent);
+          this.scroller.$on("scroll", this.adjust);
+          this.scroller.$off("mousemove", this.overContent);
+          this.scroller.$on("mousemove", this.overContent);
           $.each(this.scrollableElements(), (i, a) => {
             $(a).off("scroll", this.adjust);
             $(a).off("mousemove", this.overContent);
@@ -233,14 +237,16 @@
       },
 
       // When the mouse is over the content
-      overContent(e){
+      overContent(){
         clearTimeout(this.moveTimeout);
-        this.show = true;
+        if ( !this.show ){
+          this.show = true;
+        }
         this.moveTimeout = setTimeout(() => {
           if ( !this.isOverSlider ){
             this.hideSlider();
           }
-        }, 1000)
+        }, 1000);
       },
 
       // When the mouse enters over the slider
@@ -303,6 +309,7 @@
           }
           bbn.fn.log("scrollToY", num);
           this._changePosition(100 / this.contentHeight * num, animate);
+          this.animateBar();
         }
       }
     },
@@ -322,6 +329,8 @@
       document.addEventListener("touchmove", this.onDrag);
       document.addEventListener("mouseup", this.stopDrag);
       document.addEventListener("touchend", this.stopDrag);
+      this.onResize();
+      this.$emit('ready');
     },
     beforeDestroy() {
       $(this.realContainer).off("scroll", this.adjust);
@@ -337,4 +346,4 @@
     },
   });
 
-})(jQuery, bbn);
+})(jQuery, bbn, Vue);

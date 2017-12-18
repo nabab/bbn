@@ -24,8 +24,7 @@
    * @param {boolean|number} selected - The index of the currently selected tab, and false otherwise.
    */
   Vue.component('bbn-tabnav', {
-    template: '#bbn-tpl-component-tabnav',
-    mixins: [bbn.vue.resizerComponent],
+    mixins: [bbn.vue.basicComponent, bbn.vue.resizerComponent, bbn.vue.localStorageComponent, bbn.vue.closeComponent],
     props: {
        url: {
         type: String,
@@ -46,6 +45,17 @@
       scrollable: {
         type: Boolean,
         default: false
+      },
+      confirmLeave: {
+        type: [Boolean, String, Function],
+        default: bbn._("Are you sure you want to discard the changes you made in this tab?")
+      },
+      hideAdvertUrl: {
+        type: String
+      },
+      historyMaxLength: {
+        type: Number,
+        default: 10
       },
       source: {
         type: Array,
@@ -69,6 +79,7 @@
           titles: '',
           num: 0
         },
+        history: [],
         currentURL: '',
         baseURL: baseURL ? baseURL + '/' : '',
         tabs: [],
@@ -93,6 +104,20 @@
         }
         return base;
       },
+      unsavedTabs(){
+        return $.map(this.tabs, (v) => {
+          if ( v.isUnsaved ){
+            return {
+              idx: v.idx,
+              url: v.url
+            }
+          }
+          return null;
+        });
+      },
+      isUnsaved(){
+        return !!this.unsavedTabs.length;
+      }
     },
 
     methods: {
@@ -316,8 +341,10 @@
             idx,
             tab,
             subtab;
+        bbn.fn.info(url);
         //bbn.fn.log("url before parse: " + url);
         url = vm.parseURL(url);
+        bbn.fn.log(url, this.getFullBaseURL());
         //bbn.fn.log("url after parse: " + url);
         // either the requested url or the url corresponding to the target index
 
@@ -335,12 +362,12 @@
               (subtab = vm.getSubTabNav(i))
             ){
               vm.selected = i;
-              return subtab.activate(url);
+              return subtab.activate(vm.getFullBaseURL() + url);
             }
           }
           // autoload is set to true we launch the link function which will activate the newly created tab
           if ( vm.autoload ){
-            //alert(url);
+            //alert(this.baseURL + '----NOT VALID----' + url);
             //bbn.fn.log("link from autoload: " + url);
             vm.load(url);
           }
@@ -352,7 +379,8 @@
           }
         }
         // Index exists but content not loaded yet
-        else if ( vm.tabs[idx].load && !vm.tabs[idx].disabled ){
+        else if ( vm.tabs[idx].load && !vm.tabs[idx].disabled && (vm.tabs[idx].load !== false) ){
+          //alert(this.baseURL + '----VALID----' + url);
           //vm.selected = idx;
           vm.load(url, force);
         }
@@ -426,30 +454,61 @@
       },
 
       close(idx, force){
-        bbn.fn.log("CLOSING", idx);
-        if ( this.tabs[idx] && !this.tabs[idx].static ){
+        bbn.fn.log("CLOSING", idx, this.selected);
+        if ( this.tabs[idx] && !this.tabs[idx].static && !this.tabs[idx].pinned ){
           let ev = $.Event();
-          if ( !force ){
+          if ( this.isUnsaved &&
+            this.tabs[idx].isUnsaved &&
+            this.unsavedTabs.length &&
+            !ev.isDefaultPrevented() &&
+            !force
+          ){
+            ev.preventDefault();
+            bbn.fn.confirm(this.confirmLeave, () => {
+              $.each(this.unsavedTabs, (i, t) => {
+                let forms = bbn.vue.findAll(this.getVue(t.idx), 'bbn-form');
+                if ( Array.isArray(forms) && forms.length ){
+                  $.each(forms, (k, f) => {
+                    f.reset();
+                  });
+                }
+              });
+              this.$nextTick(() => {
+                this.$emit('close', idx, ev);
+                this.close(idx, true);
+              });
+            });
+          }
+          else if ( !force ){
             this.$emit('close', idx, ev);
           }
           if ( !ev.isDefaultPrevented() || force ){
             this.tabs.splice(idx, 1);
             if ( this.selected > idx ){
-              this.selected--;
+              this.selected = this.selected - 1;
             }
             else if ( this.selected === idx ){
               this.selected = false;
               if ( this.tabs.length ){
+                $.each(this.history, (i, a) => {
+                  let tmp = this.getIndex(a);
+                  bbn.fn.log("GETTING INDEX...", tmp, a);
+                  if ( tmp !== false ){
+                    idx = tmp;
+                    return false;
+                  }
+                });
                 this.activateIndex(this.tabs[idx] ? idx : idx - 1);
               }
             }
+            this.setConfig();
           }
         }
       },
 
       closeAll(){
         for ( let i = this.tabs.length - 1; i >= 0; i-- ){
-          if ( !this.tabs[i].static ){
+          if ( !this.tabs[i].static && !this.tabs[i].pinned ){
             this.close(i);
           }
         }
@@ -457,7 +516,7 @@
 
       closeAllBut(idx){
         for ( let i = this.tabs.length - 1; i >= 0; i-- ){
-          if ( !this.tabs[i].static && (i !== idx) ){
+          if ( !this.tabs[i].static && !this.tabs[i].pinned && (i !== idx) ){
             this.close(i);
           }
         }
@@ -480,6 +539,7 @@
           )
         ){
           index = vm.search(obj.url);
+          obj.isUnsaved = false;
           if ( !obj.menu ){
             obj.menu = [];
           }
@@ -522,10 +582,15 @@
 
       load(url){
         const vm = this;
-        var idx = vm.search(url),
+        let idx = vm.search(url),
             finalURL = vm.fullBaseURL + url;
-        if ( vm.isValidIndex(idx) && vm.tabs[idx].real ){
-          finalURL = vm.tabs[idx].real;
+        if ( vm.isValidIndex(idx) ){
+          if ( vm.tabs[idx].real ){
+            finalURL = vm.tabs[idx].real;
+          }
+          if ( vm.tabs[idx].load === false ){
+            return;
+          }
         }
         return bbn.fn.post(finalURL, {_bbn_baseURL: vm.fullBaseURL}, (d) => {
           if ( d.content ){
@@ -534,7 +599,7 @@
             }
             d.url = vm.parseURL(d.url);
             d.loaded = true;
-            d.load = false;
+            d.load = null;
             idx = vm.search(d.url);
             if ( d.data !== undefined ){
               d.source = $.extend({}, d.data);
@@ -554,6 +619,20 @@
         })
       },
 
+      pin(idx){
+        if ( this.isValidIndex(idx) ){
+          this.$set(this.tabs[idx], "pinned", true);
+          this.setConfig();
+        }
+      },
+
+      unpin(idx){
+        if ( this.isValidIndex(idx) ){
+          this.$set(this.tabs[idx], "pinned", false);
+          this.setConfig();
+        }
+      },
+
       getMenuFn(idx){
         let items = (($.isFunction(this.tabs[idx].menu) ? this.tabs[idx].menu() : this.tabs[idx].menu) || []).slice();
         let others = false;
@@ -569,8 +648,18 @@
             key: "help",
             icon: "zmdi zmdi-info",
             command: () => {
-              let tab = this.getVue(idx);
-              tab.getPopup().open('<div class="bbn-padded">' + this.tabs[idx].help + '<div>', bbn._("Help") + ': ' + this.tabs[idx].title);
+              let tab = this.getVue(idx),
+                  span = $('<span/>').html(this.tabs[idx].title),
+                  title = span.text();
+              if ( !title && span.find("[title]").length ){
+                title = span.find("[title]").attr("title");
+              }
+              tab.getPopup().open({
+                content: '<div class="bbn-padded bbn-lg">' + this.tabs[idx].help + '<div>',
+                title: bbn._("Help") + ': ' + title,
+                width: '90%',
+                height: '90%'
+              });
             }
           })
         }
@@ -585,14 +674,34 @@
           });
         }
         if ( !this.tabs[idx].static ){
-          items.push({
-            text: bbn._("Close"),
-            key: "close",
-            icon: "zmdi zmdi-close",
-            command: () => {
-              this.close(idx);
-            }
-          })
+          if ( !this.tabs[idx].pinned ){
+            items.push({
+              text: bbn._("Pin"),
+              key: "pin",
+              icon: "fa fa-thumb-tack",
+              command: () => {
+                this.pin(idx);
+              }
+            });
+            items.push({
+              text: bbn._("Close"),
+              key: "close",
+              icon: "zmdi zmdi-close",
+              command: () => {
+                this.close(idx);
+              }
+            })
+          }
+          else{
+            items.push({
+              text: bbn._("Unpin"),
+              key: "pin",
+              icon: "fa fa-thumb-tack",
+              command: () => {
+                this.unpin(idx);
+              }
+            });
+          }
         }
         if ( others ){
           items.push({
@@ -618,10 +727,16 @@
       },
 
       reload(idx){
-        var vm = this;
-        vm.$set(vm.tabs[idx], "load", true);
-        vm.$nextTick(function(){
-          vm.activateIndex(idx);
+        let subtabnav = this.getSubTabNav(idx);
+        if ( subtabnav && subtabnav.autoload ){
+          let cfg = this.getConfig(subtabnav);
+          if ( cfg && cfg.tabs ){
+            this.$set(this.tabs[idx], "cfg", cfg);
+          }
+        }
+        this.$set(this.tabs[idx], "load", true);
+        this.$nextTick(() => {
+          this.activateIndex(idx);
         })
       },
 
@@ -699,217 +814,60 @@
 
       },
 
-    },
-
-    /*
-    render(createElement){
-      var vm = this;
-
-      if ( !vm.rendered ){
-        vm.rendered = true;
-        // Examine the default slot, and if there are any parse
-        // them and add the data to the workingList
-        $.each(vm.source, function(i, obj){
+      getConfig(tabnav){
+        let cfg = {
+          baseURL: tabnav.baseURL,
+          tabs: []
+        };
+        $.each(tabnav.tabs, (i, obj) => {
           if ( obj.url ){
-            vm.add(obj);
+            let res = {
+              url: obj.url,
+              load: true,
+              title: obj.title ? obj.title : bbn._('Untitled'),
+              static: !!obj.static,
+              pinned: !!obj.pinned,
+              current: obj.current ? obj.current : obj.url,
+              cfg: {}
+            };
+            if ( obj.bcolor ){
+              res.bcolor = obj.bcolor;
+            }
+            if ( obj.fcolor ){
+              res.fcolor = obj.fcolor;
+            }
+            let subtabnav = tabnav.getSubTabNav(i);
+            if ( subtabnav && subtabnav.autoload ){
+              res.cfg = this.getConfig(subtabnav);
+            }
+            cfg.tabs.push(res);
           }
         });
-      }
-
-      var tabs = [],
-          containers = [];
-      $.each(vm.tabs, (i, obj) => {
-        var cfg = {
-              ref: "tab-" + i,
-              'class': {
-                'k-item': true,
-                'k-state-default': true,
-                'bbn-tabnav-static': !!obj.static,
-                'k-state-active': obj.selected,
-                'k-last': i === (vm.tabs.length - 1),
-                'k-first': i === 0
-              },
-              on: {
-                click: function(){
-                  if ( i !== vm.selected ){
-                    vm.activateIndex(i)
-                  }
-                }
-              }
-            },
-            title_cfg = {
-              ref: "title-" + i,
-              'class': {
-                'k-link': true
-              },
-              domProps: {
-                innerHTML: obj.title
-              }
-            },
-            selected_cfg = {
-              ref: "selector-" + i,
-              'class': {
-                'bbn-tabnav-selected': true
-              },
-            };
-        if ( obj.bcolor ){
-          cfg.style = {
-            backgroundColor: obj.bcolor
-          };
-        }
-        if ( obj.fcolor ){
-          if ( !cfg.style ){
-            cfg.style = {};
-          }
-          cfg.style.color = obj.fcolor;
-          title_cfg.style = {
-            color: obj.fcolor
-          };
-          selected_cfg.style = {
-            backgroundColor: obj.fcolor
-          };
-        }
-        tabs.push(createElement('li', cfg, [
-          createElement('span', {
-            ref: "spinner-" + i,
-            'class': {
-              'k-loading': true,
-              'k-complete': true
-            }
-          }),
-          createElement('span', title_cfg),
-          createElement('div', selected_cfg),
-          createElement('div', {
-            'class': {
-              'bbn-tabnav-icons': true
-            }
-          }, [
-            createElement('i', {
-              'class': {
-                fa: true,
-                'fa-times-circle': true,
-                'bbn-p': true
-              },
-              on: {
-                click: function(){
-                  vm.close(i)
-                }
-              }
-            }),
-            createElement('bbn-context', {
-              'class': {
-                fa: true,
-                'fa-caret-down': true,
-                'bbn-p': true
-              },
-              props: {
-                tag: 'i',
-                source: obj.menu || []
-              },
-            }),
-          ])
-        ]));
-        // Rendering only the loader if load is true or if the tab doesn't need yet to be rendered
-        if ( obj.load || (!obj.selected && !obj.loaded) ){
-          containers.push(createElement('bbn-loader', {
-            ref: 'container-' + i,
-            props: {
-              source: obj
-            }
-          }));
-        }
-        else{
-          containers.push(createElement('bbn-tab', {
-            ref: 'container-' + i,
-            props: obj,
-            key: obj.url
-          }));
-          // If the tab is rendered for the first time, we set it as loaded
-          if ( !obj.load && !obj.loaded ){
-            obj.loaded = true;
-          }
-        }
-      });
-
-      let ulCfg = {
-        'class': {
-          'k-reset': true,
-          'k-tabstrip-items': true,
-          'k-header': true,
-          'bbn-tabnav-tabs': true
-        },
-        ref: 'tabgroup'
+        return cfg;
       },
-      ulNode = createElement('ul', ulCfg, tabs);
 
-      containers.unshift(ulNode);
+      _getStorageRealName(){
+        return 'tabnav' + (this.baseURL ? '-' + this.baseURL : '');
+      },
 
-      if ( vm.scrollable ){
-        containers.push(createElement('span', {
-          'class': {
-            'k-button': true,
-            'k-button-icon': true,
-            'k-button-bare': true,
-            'k-tabstrip-prev': true
-          },
-          on: {
-            click: function(e){
-              vm.scrollTabs('left', ulNode.elm);
-            }
+      setConfig(){
+        if ( this.autoload ){
+          if ( this.parents.length ){
+            return this.parents[0].setConfig();
           }
-        }, [
-          createElement('i', {
-            'class': {
-              'fa': true,
-              'fa-angle-left': true,
-              'bbn-p': true
-            }
-          })
-        ]));
-        containers.push(createElement('span', {
-          'class': {
-            'k-button': true,
-            'k-button-icon': true,
-            'k-button-bare': true,
-
-            'k-tabstrip-next': true
-          },
-          on: {
-            click: function(e){
-              vm.scrollTabs('right', ulNode.elm);
-            }
+          else{
+            let cfg = this.getConfig(this);
+            this.setStorage(cfg);
           }
-        }, [
-          createElement('i', {
-            'class': {
-              'fa': true,
-              'fa-angle-right': true,
-              'bbn-p': true
-            }
-          })
-        ]));
-      }
-
-
-      return createElement('div', {
-        'class': {
-          'bbn-tabnav': true,
-          'k-widget': true,
-          'k-header': true,
-          'k-tabstrip': true,
-          'k-floatwrap': true,
-          'k-tabstrip-top': true,
-          'k-tabstrip-scrollable': vm.scrollable
         }
-      }, containers);
+      },
+
     },
-    */
 
     created(){
       // Adding bbn-tab from the slot
       if ( this.$slots.default ){
-        for ( var node of this.$slots.default ){
-          bbn.fn.info("NODE", node);
+        for ( let node of this.$slots.default ){
           if (
             node &&
             (node.tag === 'bbn-tab') &&
@@ -919,47 +877,53 @@
           }
         }
       }
-      $.each(this.source, (i, obj) => {
-        if ( obj.url ){
-          this.add(obj);
-        }
-      });
     },
 
     mounted(){
-      var vm = this,
-          parent = vm.$parent;
+      let parent = this.$parent;
       // Looking for a parent tabnav to put in parentTab && parents props
       while ( parent ){
         if (
           parent.$vnode &&
           parent.$vnode.componentOptions
         ){
-          if ( !vm.parentTab && (parent.$vnode.componentOptions.tag === 'bbn-tab') ){
-            vm.parentTab = parent;
+          if ( !this.parentTab && (parent.$vnode.componentOptions.tag === 'bbn-tab') ){
+            this.parentTab = parent;
           }
           else if ( parent.$vnode.componentOptions.tag === 'bbn-tabnav' ){
-            vm.parents.push(parent);
+            this.parents.push(parent);
           }
         }
         parent = parent.$parent;
       }
       // If there is a parent tabnav we automatically give the proper baseURL
-      if ( vm.parents.length ){
-        var tmp = vm.parents[0].getURL(vm.parentTab.idx);
-        if ( vm.baseURL !== (tmp + '/') ) {
-          vm.baseURL = tmp + '/';
+      let cfg;
+      if ( this.parents.length ){
+        var tmp = this.parents[0].getURL(this.parentTab.idx);
+        if ( this.baseURL !== (tmp + '/') ) {
+          this.baseURL = tmp + '/';
 
           /*
-          if (vm.parents.autoload && (tmp.indexOf(vm.baseURL) === 0)) {
-            vm.parents.setURL(vm.baseURL, vm.$el);
-            vm.currentURL = tmp.substr(vm.baseURL.length + 1);
+          if (this.parents.autoload && (tmp.indexOf(this.baseURL) === 0)) {
+            this.parents.setURL(this.baseURL, this.$el);
+            this.currentURL = tmp.substr(this.baseURL.length + 1);
           }
           */
         }
+        if ( this.parentTab.cfg ){
+          cfg = this.parentTab.cfg;
+        }
       }
+      else{
+        cfg = this.getStorage()
+      }
+      $.each(!this.autoload || !cfg || !cfg.tabs ? this.source : cfg.tabs, (i, obj) => {
+        if ( obj.url ){
+          this.add(obj);
+        }
+      });
       // We make the tabs reorderable
-      var $tabgroup = $(vm.$refs.tabgroup),
+      let $tabgroup = $(this.$refs.tabgroup),
           reorderable = $tabgroup.data('kendoDraggable');
       if ( reorderable ) {
         reorderable.destroy();
@@ -979,29 +943,31 @@
       });
       // Giving colors
 
-      vm.activate(vm.parseURL(bbn.env.path), true);
-      vm.isMounted = true;
-      vm.$emit("ready");
+      this.activate(this.parseURL(bbn.env.path), true);
+      this.isMounted = true;
+      this.$emit("ready");
     },
 
     watch: {
       selected(newVal){
-        var vm = this;
-        if ( vm.tabs[newVal] ){
-          if ( vm.currentURL !== vm.tabs[newVal].current ){
-            vm.currentURL = vm.tabs[newVal].current;
+        if ( this.tabs[newVal] ){
+          if ( this.currentURL !== this.tabs[newVal].current ){
+            this.currentURL = this.tabs[newVal].current;
           }
-          $.each(vm.tabs, function(i, a){
-            if ( vm.tabs[i].selected !== (i === newVal) ){
-              vm.$set(vm.tabs[i], "selected", (i === newVal));
+          $.each(this.tabs, (i, a) => {
+            if ( this.tabs[i].selected !== (i === newVal) ){
+              this.$set(this.tabs[i], "selected", (i === newVal));
             }
           });
-          vm.navigate();
-          vm.$nextTick(() => {
-            vm.$emit("resize");
-            bbn.fn.log("EMITTING FROM TABNAV");
-            bbn.fn.analyzeContent(vm.$el, true);
-          })
+          let historyIndex = $.inArray(this.tabs[newVal].url, this.history);
+          if ( historyIndex > -1 ){
+            this.history.splice(historyIndex, 1);
+          }
+          if ( this.history.length >= this.historyMaxLength ){
+            this.history.pop();
+          }
+          this.history.unshift(this.tabs[newVal].url);
+          this.navigate();
         }
       },
       currentURL(newVal, oldVal){
@@ -1023,12 +989,24 @@
               bbn.fn.log("CHANGING URL");
               vm.parents[0].$set(vm.parents[0], "currentURL", vm.baseURL + newVal);
             }
+            else if ( this.autoload && this.isMounted ){
+              this.setConfig();
+            }
           }
         }
         this.$forceUpdate();
         //bbn.fn.log("A change in tabs")
         //var vm = this;
       },
+      isUnsaved(val){
+        if ( this.parentTab &&
+          this.parentTab.tabNav &&
+          this.parentTab.tabNav.tabs &&
+          this.parentTab.tabNav.tabs[this.parentTab.tabNav.selected]
+        ){
+          this.parentTab.tabNav.tabs[this.parentTab.tabNav.selected].isUnsaved = val;
+        }
+      }
     },
     components: {
       'bbn-loader': {
@@ -1080,6 +1058,9 @@
               return {};
             }
           },
+          advert: {
+            type: [String, Vue]
+          },
           help: {
             type: String
           },
@@ -1101,6 +1082,9 @@
           real: {
             type: String
           },
+          cfg: {
+            type: Object
+          }
         },
 
         methods: {
@@ -1110,15 +1094,31 @@
               vm.tabNav.activate(url);
             }
           },
+          setTitle(title){
+            if ( this.tabNav ){
+              this.tabNav.$set(this.tabNav.tabs[this.idx], 'title', title);
+            }
+          },
+          setColor(bcolor, fcolor){
+            if ( this.tabNav ){
+              if ( bcolor ){
+                this.tabNav.$set(this.tabNav.tabs[this.idx], 'bcolor', bcolor);
+              }
+              if ( fcolor ){
+                this.tabNav.$set(this.tabNav.tabs[this.idx], 'fcolor', fcolor);
+              }
+            }
+          },
           getPopup(){
             return Array.isArray(this.$refs.popup) ? this.$refs.popup[0] : this.$refs.popup;
           },
           popup(){
+            let popup = this.getPopup();
             if ( arguments.length ){
-              this.getPopup().open.apply(this.getPopup(), arguments)
+              return popup.open.apply(popup, arguments)
             }
             else{
-              return this.getPopup();
+              return popup;
             }
           },
           getComponent(){
@@ -1257,13 +1257,36 @@
           }
         },
 
-        mounted: function(){
+        mounted(){
           this.tabNav = bbn.vue.closest(this, ".bbn-tabnav");
           if ( !this.isComponent ){
             this.onMount(this.$el, this.source);
           }
+          if ( this.advert ){
+            let ad = {};
+            if ( this.advert instanceof Vue ){
+              ad.component = this.advert;
+            }
+            else if ( typeof this.advert === 'object' ){
+              ad = this.advert;
+            }
+            else if ( typeof this.advert === 'string' ){
+              ad.content = this.advert;
+            }
+            this.popup.advert(ad);
+          }
           this.isMounted = true;
           this.$emit("ready");
+        },
+
+        watch: {
+          selected(newVal){
+            if ( newVal ){
+              this.$nextTick(() => {
+                this.$emit("resize", true);
+              })
+            }
+          }
         }
       }
     }

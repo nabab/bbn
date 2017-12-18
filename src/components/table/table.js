@@ -4,14 +4,13 @@
 (function($, bbn){
   "use strict";
 
-  const METHODS4BUTTONS = ['insert', 'select', 'edit', 'add', 'delete'];
+  const METHODS4BUTTONS = ['insert', 'select', 'edit', 'add', 'copy', 'delete'];
 
   /**
    * Classic input with normalized appearance
    */
   Vue.component('bbn-table', {
-    template: '#bbn-tpl-component-table',
-    mixins: [bbn.vue.resizerComponent, bbn.vue.dataEditorComponent, bbn.vue.localStorageComponent],
+    mixins: [bbn.vue.basicComponent, bbn.vue.resizerComponent, bbn.vue.dataEditorComponent, bbn.vue.localStorageComponent],
     props: {
       titleGroups: {
         type: [Array, Function]
@@ -48,6 +47,10 @@
         default: false
       },
       showable: {
+        type: Boolean,
+        default: false
+      },
+      savable: {
         type: Boolean,
         default: false
       },
@@ -122,7 +125,9 @@
       trClass: {
         type: [String, Function]
       },
-
+      confirmMessage: {
+        type: [String, Function]
+      },
       // Vue components
       component: {
 
@@ -158,8 +163,11 @@
       groupBy: {
         type: Number
       },
+      expandedValues: {
+        type: [Array, Function]
+      },
       expanded: {
-        type: Array,
+        type: [Boolean, Array],
         default(){
           return [];
         }
@@ -195,16 +203,25 @@
     data(){
       let editable = $.isFunction(this.editable) ? this.editable() : this.editable;
       return {
+        ready: false,
+        currentConfig: {},
         savedConfig: false,
-        initialConfig: false,
+        defaultConfig: this.loadedConfig ? this.loadedConfig : {
+          filters: this.filters,
+          limit: this.limit,
+          order: this.order,
+          hidden: this.hidden || [],
+        },
         currentFilter: false,
         floatingFilterX: 0,
         floatingFilterY: 0,
         floatingFilterTimeOut: 0,
         currentFilters: this.filters,
-        selectedRows: [],
-        currentData: [],
+        currentLimit: this.limit,
+        currentOrder: this.order,
         currentHidden: this.hidden || [],
+        currentData: [],
+        selectedRows: [],
         group: this.groupBy === undefined ? false : this.groupBy,
         limits: [10, 25, 50, 100, 250, 500],
         start: 0,
@@ -223,8 +240,6 @@
         table: false,
         isLoading: false,
         isAjax: typeof this.source === 'string',
-        currentLimit: this.limit,
-        currentOrder: this.order,
         tableLeftWidth: 0,
         tableMainWidth: 0,
         tableRightWidth: 0,
@@ -234,9 +249,12 @@
         colButtons: false,
         scrollableContainer: null,
         hiddenScroll: true,
-        currentExpanded: [],
         popups: [],
-        isAggregated: false
+        isAggregated: false,
+        currentOverTr: false,
+        updaterTimeout: false,
+        allExpanded: this.expanded === true ? true : false,
+        currentExpanded: false
       };
     },
     computed: {
@@ -247,44 +265,7 @@
         return this.jsonConfig === this.savedConfig;
       },
       isChanged(){
-        return this.jsonConfig !== this.initialConfig;
-      },
-      currentConfig: {
-        get(){
-          return {
-            limit: this.currentLimit,
-            order: this.currentOrder,
-            filters: this.currentFilters,
-            hidden: this.currentHidden
-          };
-        },
-        set(cfg){
-          if ( !cfg ){
-            cfg = this.loadedConfig;
-          }
-          if ( cfg && cfg.limit ){
-            if ( this.filterable && cfg.filters ){
-              this.currentFilters = cfg.filters;
-            }
-            this.currentLimit = cfg.limit;
-            if ( this.sortable ){
-              this.currentOrder = cfg.order;
-            }
-            if ( cfg.hidden !== undefined ){
-              $.each(cfg.hidden, (i, a) => {
-                this.cols[a].hidden = true;
-              });
-              this.currentHidden = cfg.hidden;
-            }
-            this.setStorage({
-              limit: this.currentLimit,
-              order: this.currentOrder,
-              filters: this.currentFilters,
-              hidden: this.currentHidden
-            });
-            //this.$forceUpdate();
-          }
-        }
+        return JSON.stringify(this.currentConfig) !== this.initialConfig;
       },
       toolbarButtons(){
         let r = [],
@@ -299,9 +280,9 @@
           }
           $.each(ar, (i, a) => {
             let o = $.extend({}, a);
-            if ( o.command && (typeof(o.command) === 'string') ){
-              if ( $.inArray(o.command, METHODS4BUTTONS) > -1 ){
-                o.command = this[a.command];
+            if ( o.command ){
+              o.command = () => {
+                this._execCommand(a);
               }
             }
             r.push(o);
@@ -378,14 +359,13 @@
         }
         if (
           (this.group !== false) &&
-          (!this.isAjax  || !this.serverGrouping) &&
           this.cols[this.group] &&
           this.cols[this.group].field
         ){
           isGroup = true;
           let pos = bbn.fn.search(this.currentOrder, {field: this.cols[this.group].field});
           if ( pos !== 0 ){
-            data = bbn.fn.order(data, this.cols[this.group].field);
+            data = bbn.fn.order(data, this.cols[this.group].field, 'asc');
           }
           else{
             data = bbn.fn.multiorder(data, this.currentOrder);
@@ -394,6 +374,10 @@
         if ( this.pageable && (!this.isAjax || !this.serverPaging) ){
           i = this.start;
           end = this.start + this.currentLimit > data.length ? data.length : this.start + this.currentLimit;
+        }
+        let isInit = this.currentExpanded === false;
+        if ( isInit ){
+          this.currentExpanded = [];
         }
         if ( this.tmpRow ){
           res.push({
@@ -404,13 +388,43 @@
             isTmp: true
           });
         }
+        let currentGroupIndex = -1,
+            currentGroupNum;
         while ( i < end ){
           let a = data[i];
           if ( isGroup && (currentGroupValue !== a[this.cols[this.group].field]) ){
             currentGroupValue = a[this.cols[this.group].field];
-            res.push({group: true, index: i, value: currentGroupValue, data: a});
+            if ( currentGroupIndex > -1 ){
+              let idx = bbn.fn.search(res, {index: currentGroupIndex});
+              res[idx].num = currentGroupNum;
+            }
+            currentGroupNum = 1;
+            currentGroupIndex = i;
+            let tmp = {group: true, index: i, value: currentGroupValue, data: a};
+            if ( isInit ){
+              if ( this.expandedValues ){
+                if ( $.isFunction(this.expandedValues) ){
+                  if ( this.expandedValues(currentGroupValue) ){
+                    this.currentExpanded.push(tmp.index);
+                  }
+                }
+                else if ( $.inArray(currentGroupValue, this.expandedValues) > -1 ){
+                  this.currentExpanded.push(tmp.index);
+                }
+              }
+              else if ( this.expanded === true ){
+                this.currentExpanded.push(tmp.index);
+              }
+              else if ( $.isArray(this.expanded) && ($.inArray(tmp.index, this.expanded) > -1) ){
+                this.currentExpanded.push(tmp.index);
+              }
+            }
+            res.push(tmp);
             currentLink = i;
             realIndex++;
+          }
+          else{
+            currentGroupNum++;
           }
           o = {index: i, data: a};
           if ( this.selection ){
@@ -513,6 +527,18 @@
             }
           }
         }
+        if ( currentGroupIndex > -1 ){
+          let idx = bbn.fn.search(res, {index: currentGroupIndex});
+          res[idx].num = currentGroupNum;
+        }
+        if ( isInit ){
+          this.$nextTick(() => {
+            this.updateTable()
+          });
+          setTimeout(() => {
+            this.updateTable()
+          }, 1000);
+        }
         return res;
       },
       hasExpander(){
@@ -524,26 +550,22 @@
       }
     },
     methods: {
+
       _map(data){
-        if ( this.map ){
-          return $.map(data, this.map)
-        }
-        return data;
+        return this.map ? $.map(data, this.map) : data;
       },
-
       _overTr(idx, remove){
-        $(".bbn-table-main:first > tbody > tr[index=" + idx + "]", this.$el)
-          [remove ? 'removeClass' : 'addClass']("k-grid-header");
-        if ( this.colsLeft.length ){
-          $(".bbn-table-data-left:first > tbody > tr[index=" + idx + "]", this.$el)
-            [remove ? 'removeClass' : 'addClass']("k-grid-header");
+        if ( remove ){
+          setTimeout(() => {
+            if ( this.currentOverTr === idx ){
+              this.currentOverTr = false
+            }
+          }, 100)
         }
-        if ( this.colsRight.length ){
-          $(".bbn-table-data-right:first > tbody > tr[index=" + idx + "]", this.$el)
-            [remove ? 'removeClass' : 'addClass']("k-grid-header");
+        else{
+          this.currentOverTr = idx;
         }
       },
-
       /** Returns header's CSS object */
       _headStyles(col){
         let css = {
@@ -554,18 +576,14 @@
         }
         return css;
       },
-
       /** Returns body's CSS object */
       _bodyStyles(col){
         return {};
       },
-
       /** @todo */
-      _defaultRow(data){
-        let res = {};
-        if ( !data ){
-          data = {};
-        }
+      _defaultRow(initialData){
+        let res = {},
+            data = initialData ? $.extend(true, {}, initialData) : {};
         $.each(this.cols, function(i, a){
           if ( a.field ){
             if ( data[a.field] !== undefined ){
@@ -577,11 +595,19 @@
             else{
               res[a.field] = '';
             }
+            if ( $.isArray(res[a.field]) ){
+              res[a.field] = res[a.field].splice();
+            }
+            else if ( res[a.field] instanceof(Date) ){
+              res[a.field] = new Date(res[a.field].getTime());
+            }
+            else if ( typeof res[a.field] === 'object' ){
+              res[a.field] = $.extend(true, {}, res[a.field]);
+            }
           }
         });
         return res;
       },
-
       /** @todo */
       _addTmp(data){
         this._removeTmp().tmpRow = this._defaultRow(data);
@@ -593,7 +619,6 @@
         }
         return this;
       },
-
       /** @todo */
       _removeTmp(){
         if ( this.tmpRow ){
@@ -604,7 +629,6 @@
         }
         return this;
       },
-
       _checkHeaders(){
         if ( this.titleGroups ){
           let x = this.$refs.scroller.$refs.xScroller.currentScroll,
@@ -619,24 +643,38 @@
           })
         }
       },
-
       _execCommand(button, data, col, index){
         if ( button.command ){
           if ( $.isFunction(button.command) ){
-            button.command(data, col, index);
-            return;
+            return button.command(data, col, index);
           }
-          else if ( (typeof(button.command) === 'string') && ($.inArray(button.command, METHODS4BUTTONS) > -1) ){
-            return this[button.command](data, col, index);
+          else if ( typeof(button.command) === 'string' ){
+            switch ( button.command ){
+              case 'insert':
+                return this.insert(data, bbn._('New row creation'));
+                break;
+              case 'select':
+                return this.select();
+                break;
+              case 'edit':
+                return this.edit(data, bbn._('Row edition'));
+                break;
+              case 'add':
+                return this.add(data);
+                break;
+              case 'copy':
+                return this.copy(data, bbn._('Row copy'));
+                break;
+              case 'delete':
+                return this.delete(index);
+            }
           }
         }
-        return () => {return false;}
+        return false;
       },
-
       getPopup(){
-        return this.popup ? this.popup : this.$refs.popup;
+        return this.popup || bbn.vue.closest(this, 'bbn-tab').getPopup();
       },
-
       titleGroupsCells(type){
         if ( this.titleGroups ){
           let cols = this.colsMain;
@@ -710,7 +748,18 @@
       },
       onSetFilter(filter){
         if ( filter && filter.field && filter.operator ){
-          this.currentFilters.conditions.push(filter);
+          if ( this.multi ){
+            this.currentFilters.conditions.push(filter);
+          }
+          else if ( filter.field ){
+            let idx = bbn.fn.search(this.currentFilters.conditions, {field: filter.field});
+            if ( idx > -1 ){
+              this.currentFilters.conditions.splice(idx, 1, filter);
+            }
+            else{
+              this.currentFilters.conditions.push(filter);
+            }
+          }
           //bbn.fn.log("TABLE", filter)
         }
       },
@@ -773,6 +822,11 @@
           if ( o.field ){
             o.conditions = this.getColFilters(this.currentFilter);
           }
+          if ( o.conditions.length ){
+            o.value = o.conditions[0].value;
+            o.operator = o.conditions[0].operator;
+          }
+          o.multi = false;
           return o;
         }
       },
@@ -821,6 +875,7 @@
         })
       },
       openColumnsPicker(){
+        let table = this;
         this.getPopup().open({
           title: bbn._('Columns\' picker'),
           component: {
@@ -831,18 +886,16 @@
       <ul v-if="source.titleGroups">
         <li v-for="(tg, idx) in source.titleGroups">
           <h3>
-            <bbn-checkbox :value="true"
-                          :checked="allVisible(tg.value)"
+            <bbn-checkbox :checked="allVisible(tg.value)"
                           @change="checkAll(tg.value)"
                           :label="tg.text"
             ></bbn-checkbox>
           </h3>
           <ul>
             <li v-for="(col, i) in source.cols"
-                v-if="!col.fixed && (col.group === tg.value) && (col.showable !== false)"
+                v-if="!col.fixed && (col.group === tg.value) && (col.showable !== false) && (col.title || col.ftitle)"
             >
-              <bbn-checkbox :value="true"
-                            :checked="!col.hidden"
+              <bbn-checkbox :checked="!col.hidden"
                             @change="check(col, i)"
                             :label="col.ftitle || col.title"
                             :contrary="true"
@@ -853,10 +906,9 @@
       </ul>
       <ul v-else>
         <li v-for="(col, i) in source.cols"
-            v-if="!col.fixed && (col.showable !== false)"
+            v-if="!col.fixed && (col.showable !== false) && (col.title || col.ftitle)"
         >
-          <bbn-checkbox :value="true"
-                        v-model="col.hidden"
+          <bbn-checkbox :checked="!col.hidden"
                         @change="check(col, i)"
                         :label="col.ftitle || col.title"
                         :contrary="true"
@@ -870,7 +922,7 @@
             props: ['source'],
             data(){
               return {
-                table: false
+                table: table
               }
             },
             methods: {
@@ -892,36 +944,30 @@
                 return ok;
               },
               check(col, index){
-                col.hidden = !col.hidden;
-                this.table.show(index, col.hidden);
+                this.table.show([index], !col.hidden);
               },
               checkAll(group){
-                let show = null,
+                let show = true,
                     shown = [];
                 $.each(this.source.cols, (i, a) => {
                   if ( (a.showable !== false) && (a.group === group) && !a.fixed ){
-                    if ( show === null ){
-                      show = !a.hidden;
+                    if ( a.hidden ){
+                      show = false;
+                      return false;
                     }
-                    if ( ((a.hidden === true) && !show) || (!a.hidden && show) ){
+                  }
+                });
+                $.each(this.source.cols, (i, a) => {
+                  if ( (a.showable !== false) && (a.group === group) && !a.fixed ){
+                    if ( (a.hidden && !show) || (!a.hidden && show) ){
                       shown.push(i);
                     }
-                    a.hidden = show;
                   }
                 });
                 if ( shown.length ){
                   this.table.show(shown, show);
                 }
-                this.$forceUpdate();
               }
-            },
-            created(){
-              this.table = bbn.vue.closest(this, 'bbn-table');
-            },
-            mounted(){
-              setTimeout(() => {
-                this.$refs.scroll.onResize()
-              }, 500)
             }
           },
           source: {
@@ -940,15 +986,31 @@
         }
         this.editedRow = row;
         if ( this.editMode === 'popup' ){
+          if ( typeof(title) === 'object' ){
+            options = title;
+            title = options.title || null;
+          }
           let popup = $.extend({}, options ? options : {}, {
             source: {
               row: row,
               data: $.isFunction(this.data) ? this.data() : this.data
             },
-            title: title ? title : bbn._('Untitled')
+            title: title || bbn._('Row edition')
           });
           if ( this.editor ){
             popup.component = this.editor;
+          }
+          else if ( this.url ){
+            let me = this;
+            popup.component = {
+              data(){
+                return {
+                  fields: me.cols,
+                  data: row
+                }
+              },
+              template: '<bbn-form action="' + this.url + '" :schema="fields" :source="data"></bbn-form>'
+            };
           }
           popup.afterClose = () => {
           //  this.currentData.push($.extend({}, this.tmpRow)); // <-- Error. This add a new row into table when it's in edit mode
@@ -959,29 +1021,78 @@
           this.getPopup().open(popup);
         }
       },
+      getConfig(){
+        return {
+          limit: this.currentLimit,
+          order: this.currentOrder,
+          filters: this.currentFilters,
+          hidden: this.currentHidden
+        };
+      },
+      getColumnsConfig(){
+        return JSON.parse(JSON.stringify(this.cols));
+      },
+      setConfig(cfg, no_storage){
+        if ( cfg === false ){
+          cfg = this.defaultConfig;
+        }
+        else if ( cfg === true ){
+          cfg = this.getConfig();
+        }
+        if ( cfg && cfg.limit ){
+          if ( this.filterable && cfg.filters && (this.currentFilters !== cfg.filters) ){
+            this.currentFilters = cfg.filters;
+          }
+          if ( this.pageable && (this.currentLimit !== cfg.limit) ){
+            this.currentLimit = cfg.limit;
+          }
+          if ( this.sortable && (this.currentOrder !== cfg.order) ){
+            this.currentOrder = cfg.order;
+          }
+          if ( this.showable ){
+            if ( (cfg.hidden !== undefined) && (cfg.hidden !== this.currentHidden) ){
+              this.currentHidden = cfg.hidden;
+            }
+            /*
+            $.each(this.cols, (i, a) => {
+              let hidden = ($.inArray(i, this.currentHidden) > -1);
+              bbn.fn.info("HIDDEN");
+              bbn.fn.log(a.hidden, hidden);
+              if ( a.hidden !== hidden ){
+                this.$set(this.cols[i], "hidden", hidden);
+              }
+            });
+            */
+          }
+          this.currentConfig = {
+            limit: this.currentLimit,
+            order: this.currentOrder,
+            filters: this.currentFilters,
+            hidden: this.currentHidden
+          };
+          if ( !no_storage ){
+            this.setStorage(this.currentConfig);
+          }
 
-      /** @todo */
-      remove(where){
-        var vm = this,
-            res = this.getRow(where);
-        if ( res ){
-          res.obj.remove();
-          vm.widget.draw();
+          this.$forceUpdate();
         }
       },
-
+      /** @todo */
+      remove(where){
+        let idx;
+        while ( (idx = bbn.fn.search(this.currentData, where)) > -1 ){
+          this.currentData.splice(idx, 1);
+        }
+      },
       save(){
         this.savedConfig = this.jsonConfig;
       },
-
       select(){},
-
       /** @todo */
       add(data){
         this.widget.rows().add([data]);
         this.widget.draw();
       },
-
       delete(index, confirm){
         if ( this.currentData[index] ){
           let ev = $.Event('delete');
@@ -1000,12 +1111,23 @@
           }
         }
       },
-
       insert(data, title, options){
-        this._addTmp(data);
+        let d = $.extend({}, data);
+        if ( this.uid && d[this.uid] ){
+          delete d[this.uid];
+        }
+        this._addTmp(d);
         this.edit(this.tmpRow, title, options);
       },
-
+      copy(data, title, options){
+        bbn.fn.log("copy", arguments);
+        let r = $.extend({}, data);
+        if ( this.uid && r[this.uid] ){
+          delete r[this.uid];
+        }
+        this._addTmp(r);
+        this.edit(this.tmpRow, title, options);
+      },
       checkSelection(index){
         bbn.fn.log("checkSelection");
         let idx = $.inArray(index, this.selectedRows),
@@ -1021,9 +1143,9 @@
         }
         this.$emit('toggle', isSelected, this.currentData[index]);
       },
-
       /** Refresh the current data set */
       updateData(){
+        this.currentExpanded = false;
         if ( this.isAjax && !this.isLoading ){
           this.isLoading = true;
           this._removeTmp();
@@ -1063,10 +1185,12 @@
         }
         else if ( Array.isArray(this.source) ){
           this.currentData = this._map(this.source);
+          if ( this.currentOrder.length ){
+            this.currentData = bbn.fn.order(this.source, this.currentOrder[0].field, this.currentOrder[0].dir);
+          }
           this.total = this.source.length;
         }
       },
-
       isSorted(col){
         if (
           this.sortable &&
@@ -1081,7 +1205,6 @@
         }
         return false;
       },
-
       sort(col){
         if (
           !this.isLoading &&
@@ -1106,15 +1229,15 @@
           this.updateData();
         }
       },
-
       updateTable(num){
         if ( !num ){
           num = 0;
         }
         if ( !this.isLoading && (num < 25) ){
-          this.$nextTick(() => {
+          clearTimeout(this.updaterTimeout);
+          this.updaterTimeout = setTimeout(() => {
             let trs = $("table.bbn-table-main:first > tbody > tr", this.$el);
-            bbn.fn.log("trying to update table, attempt " + num, trs);
+            bbn.fn.log("trying to update table, attempt " + num);
             if ( this.colsLeft.length || this.colsRight.length ){
               trs.each((i, tr) =>{
                 if ( $(tr).is(":visible") ){
@@ -1130,7 +1253,6 @@
               this.$refs.scroller &&
               $.isFunction(this.$refs.scroller.onResize)
             ){
-              bbn.fn.log("RESIZING FOR UTABLKE");
               this.$refs.scroller.onResize();
               if (
                 this.$refs.scrollerY &&
@@ -1145,10 +1267,9 @@
               }
             }
             this.$emit("resize");
-          });
+          }, 100);
         }
       },
-
       /** Renders a cell according to column's config */
       render(data, column, index){
         let field = column && column.field ? column.field : '',
@@ -1199,13 +1320,11 @@
         }
         return value;
       },
-
       cancel(){
         if ( this.tmpRow ){
           this._removeTmp();
         }
       },
-
       /** @todo */
       editTmp(data){
         if ( this.tmpRow ){
@@ -1213,9 +1332,7 @@
         }
         return this;
       },
-
       saveTmp(){},
-
       /** @todo */
       getWidth(w){
         if ( typeof(w) === 'number' ){
@@ -1226,7 +1343,6 @@
         }
         return '100px';
       },
-
       /** @todo */
       getColumns(){
         const vm = this;
@@ -1399,11 +1515,15 @@
         });
         return res;
       },
-
       reset(){
-        this.currentConfig = JSON.parse(this.initialConfig);
+        this.ready = false;
+        this.setConfig(false);
+        this.$forceUpdate();
+        this.$nextTick(() => {
+          this.ready = true;
+          this.init();
+        })
       },
-
       /** @todo */
       addColumn(obj){
         if ( obj.aggregate && !$.isArray(obj.aggregate) ){
@@ -1411,19 +1531,10 @@
         }
         this.cols.push(obj);
       },
-
       onResize(){
-        if ( this.$refs.scrollerY ){
-          this.$refs.scrollerY.onResize();
-        }
-        if ( this.$refs.scroller ){
-          this.$refs.scroller.onResize();
-        }
         this.init();
         this.updateTable();
-        this.$emit("resize");
       },
-
       dataScrollContents(){
         if ( !this.colsLeft.length && !this.colsRight.length ){
           return null;
@@ -1440,7 +1551,6 @@
         }
         return r;
       },
-
       isExpanded(d){
         if ( !this.expander && (this.group === false) ){
           return true;
@@ -1458,9 +1568,11 @@
           return false;
         }
       },
-
       toggleExpanded(idx){
         if ( this.currentData[idx] ){
+          if ( this.allExpanded ){
+            this.allExpanded = false;
+          }
           let i = $.inArray(idx, this.currentExpanded);
           if ( i > -1 ){
             this.currentExpanded.splice(i, 1);
@@ -1473,7 +1585,6 @@
           })
         }
       },
-
       rowHasExpander(d){
         if ( this.hasExpander ){
           if ( !$.isFunction(this.expander) ){
@@ -1483,11 +1594,9 @@
         }
         return false;
       },
-
       isSelected(index){
         return this.selection && ($.inArray(index, this.selectedRows) > -1);
       },
-
       hasTd(data, tdIndex){
         if ( data.selection ){
           if ( tdIndex === 0 ){
@@ -1509,14 +1618,11 @@
         }
         return true;
       },
-
       init(){
         let colsLeft = [],
             colsMain = [],
             colsRight = [],
             leftWidth = 0,
-            mainWidth = 0,
-            rightWidth = 0,
             numUnknown = 0,
             colButtons = false,
             isAggregated = false;
@@ -1535,7 +1641,6 @@
           });
           leftWidth = this.minimumColumnWidth;
         }
-        this.currentHidden = [];
         $.each(this.cols, (i, a) => {
           if ( !this.groupable || (this.group !== i) ){
             if ( a.aggregate && a.field ){
@@ -1544,7 +1649,6 @@
             a.index = i;
             if ( a.hidden ){
               a.realWidth = 0;
-              this.currentHidden.push(i);
             }
             else{
               if ( a.width ){
@@ -1559,7 +1663,7 @@
                 }
               }
               else{
-                a.realWidth = this.defaultColumnWidth;
+                a.realWidth = this.minimumColumnWidth;
                 numUnknown++;
               }
               if ( a.buttons ){
@@ -1589,11 +1693,11 @@
             + bbn.fn.sum(colsRight, 'realWidth')
           );
         // We must arrive to 100% minimum
-        if ( toFill > 0 ){
+        if ( toFill > this.cols.length - this.currentHidden.length ){
           bbn.fn.log("bbn-table", "THERE IS TO FILL", toFill, numUnknown);
           if ( numUnknown ){
             let newWidth = Math.round(
-              toFill
+              (toFill - (this.cols.length - this.currentHidden.length))
               / numUnknown
               * 100
             ) / 100;
@@ -1603,7 +1707,7 @@
             $.each(this.cols, (i, a) => {
               if ( !a.hidden ){
                 if ( !a.width ){
-                  a.realWidth = newWidth + this.defaultColumnWidth;
+                  a.realWidth = newWidth + this.minimumColumnWidth;
                 }
               }
             });
@@ -1640,7 +1744,6 @@
           })
         })
       },
-
       show(colIndexes, hide){
         if ( !$.isArray(colIndexes) ){
           colIndexes = [colIndexes];
@@ -1648,24 +1751,20 @@
         $.each(colIndexes, (i, colIndex) => {
           if ( this.cols[colIndex] ){
             if ( (this.cols[colIndex].hidden && !hide) || (!this.cols[colIndex].hidden && hide) ){
-              this.$set(this.cols[colIndex], "hidden", hide);
               let idx = $.inArray(colIndex, this.currentHidden);
-              if ( hide ){
-                if ( idx === -1 ){
-                  this.currentHidden.push(colIndex);
-                }
+              if ( hide && (idx === -1) ){
+                this.currentHidden.push(colIndex);
               }
-              else{
-                if ( idx > -1 ){
-                  this.currentHidden.splice(idx, 1);
-                }
+              else if ( !hide && (idx > -1) ){
+                this.currentHidden.splice(idx, 1);
               }
             }
           }
         });
+        this.$forceUpdate();
+        this.setConfig(true);
         this.init();
       },
-
       getEditableComponent(col, data){
         if ( col.editor ){
           return col.editor;
@@ -1692,7 +1791,6 @@
         }
         return 'bbn-input';
       },
-
       getEditableOptions(col, data){
         let res = col.options ? (
           $.isFunction(col.options) ? col.options(col, data) : col.options
@@ -1724,6 +1822,7 @@
     },
 
     created(){
+      bbn.fn.warning("IS IT HERE?");
       // Adding bbn-column from the slot
       if (this.$slots.default){
         for ( let node of this.$slots.default ){
@@ -1748,26 +1847,22 @@
           this.addColumn(a);
         })
       }
-      this.currentConfig = this.loadedConfig;
+      this.setConfig(false, true);
       this.initialConfig = this.jsonConfig;
       this.savedConfig = this.jsonConfig;
       let cfg = this.getStorage();
-      if ( cfg && cfg.limit ){
-        this.currentConfig = cfg;
-      }
+      this.setConfig(cfg ? cfg : false, true);
     },
 
     mounted(){
+      this.ready = true;
       this.init();
       this.$forceUpdate();
       this.$nextTick(() => {
-        this.selfEmit();
         this.updateData();
-      })
+      });
     },
-    updated(){
-      this.updateTable();
-    },
+
     watch: {
       editedRow: {
         deep: true,
@@ -1781,25 +1876,36 @@
           this.init();
         }
       },
+      currentLimit(){
+        this.setConfig(true);
+      },
       currentFilters: {
         deep: true,
         handler(){
           this.currentFilter = false;
           this.updateData();
-          this.setStorage(null, this.currentConfig);
+          this.setConfig(true);
+          this.$forceUpdate();
         }
       },
       currentOrder: {
         deep: true,
         handler(){
+          this.setConfig(true);
           this.$forceUpdate();
-          this.setStorage(null, this.currentConfig);
+        }
+      },
+      currentHidden: {
+        deep: true,
+        handler(){
+          bbn.fn.log("CHaNGE IN CURRENT HIDEDEN");
+          this.setConfig(true);
+          this.$forceUpdate();
         }
       }
     },
     components: {
       'bbn-columns': {
-        template: '#bbn-tpl-component-column',
         props: {
           width: {
             type: [String, Number],
@@ -1904,4 +2010,4 @@
     }
   });
 
-})(jQuery, bbn);
+})(window.jQuery, bbn);

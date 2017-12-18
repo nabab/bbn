@@ -8,8 +8,7 @@
    * Classic textarea with normalized appearance
    */
   Vue.component('bbn-textarea', {
-    mixins: [bbn.vue.inputComponent, bbn.vue.eventsComponent],
-    template: '#bbn-tpl-component-textarea',
+    mixins: [bbn.vue.basicComponent, bbn.vue.inputComponent, bbn.vue.eventsComponent],
     props: {
 			rows: {
 				type: Number

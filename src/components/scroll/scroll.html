@@ -1,11 +1,12 @@
-<div class="bbn-scroll bbn-full-screen">
+<div :class="[{'bbn-full-screen': true}, componentClass]"
+>
   <div class="bbn-scroll-container"
        ref="scrollContainer"
-       @scroll="$emit('scroll')"
+       @scroll="$emit('scroll', $event)"
   >
-    <div class="bbn-block"
+    <div class="bbn-block bbn-scroll-content"
          ref="scrollContent"
-         style="min-width: 100%; min-height: 100%"
+         @mousemove="$emit('mousemove', $event)"
     >
       <slot></slot>
     </div>

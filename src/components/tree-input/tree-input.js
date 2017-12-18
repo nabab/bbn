@@ -28,8 +28,7 @@
   };
 
   Vue.component('bbn-tree-input', {
-    mixins: [bbn.vue.fullComponent],
-    template: '#bbn-tpl-component-tree-input',
+    mixins: [bbn.vue.basicComponent, bbn.vue.fullComponent],
     props: {
       extensions:{
         type: Array,

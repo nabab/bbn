@@ -5,8 +5,7 @@
   "use strict";
 
   Vue.component('bbn-scroll', {
-    template: '#bbn-tpl-component-scroll',
-    mixins: [bbn.vue.resizerComponent],
+    mixins: [bbn.vue.basicComponent, bbn.vue.resizerComponent],
     props: {
       classes: {
         type: String,
@@ -14,7 +13,7 @@
       },
       speed: {
         type: Number,
-        default: 53
+        default: 50
       },
       axis: {
         type: String,
@@ -41,6 +40,17 @@
       }
     },
     methods: {
+      scrollTo(x, y, animate){
+        if ( !y && (typeof x === HTMLElement) ){
+          y = x;
+        }
+        if ( this.$refs.xScroller ){
+          this.$refs.xScroller.scrollTo(x, animate);
+        }
+        if ( this.$refs.yScroller ){
+          this.$refs.yScroller.scrollTo(y, animate);
+        }
+      },
       onResize() {
         if ( this.$refs.xScroller ){
           this.$refs.xScroller.onResize();
@@ -48,19 +58,10 @@
         if ( this.$refs.yScroller ){
           this.$refs.yScroller.onResize();
         }
-      },
-      scrollTo(x, y, animate){
-        if ( this.$refs.xScroller ){
-          this.$refs.xScroller.scrollTo(x, animate);
-        }
-        if ( this.$refs.yScroller ){
-          this.$refs.yScroller.scrollTo(y, animate);
-        }
       }
     },
     mounted(){
-      this.scrollTo(0, false, true);
-      this.onResize();
+      this.$emit('ready');
     },
     watch: {
       show(newVal, oldVal){

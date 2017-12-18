@@ -1,4 +1,4 @@
-<span class="bbn-iblock bbn-countdown">
+<span :class="[{'bbn-iblock': true}, componentClass]">
   <span v-text="year + ' ' + (year > 1 ? _('years') : _('year')) + ' '"
         v-if="year"
   ></span>

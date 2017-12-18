@@ -7,8 +7,7 @@
   var vc;
   Vue.component('bbn-upload', {
     //mixins: [bbn.vue.fullComponent],
-    mixins: [bbn.vue.inputComponent],
-    template: '#bbn-tpl-component-upload',
+    mixins: [bbn.vue.basicComponent, bbn.vue.inputComponent],
     props: {
       value: {
         type: [Array, String],

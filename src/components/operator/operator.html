@@ -1,4 +1,5 @@
-<div class="bbn-operator bbn-iblock">
+<div :class="[{'bbn-iblock': true}, componentClass]"
+>
   <bbn-dropdown :name="name"
                 ref="element"
                 :disabled="disabled"

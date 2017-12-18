@@ -1,4 +1,5 @@
-<div class="bbn-iblock bbn-tree-input">
+<div :class="[{'bbn-iblock':true}, componentClass]"
+>
   <input :value="ivalue"
          ref="element"
          class="k-textbox"

@@ -4,13 +4,16 @@
 (function($, bbn){
   "use strict";
 
-  const NODEPROPERTIES = ["selected", "selectedClass", "activeClass", "expanded", "tooltip", "icon", "selectable", "text", "data", "cls", "component", "num", "source", "level", "items"];
+  const NODE_PROPERTIES = ["selected", "selectedClass", "activeClass", "expanded", "tooltip", "icon", "selectable", "text", "data", "cls", "component", "num", "source", "level", "items"];
 
   Vue.component('bbn-tree', {
-    template: '#bbn-tpl-component-tree',
+    mixins: [bbn.vue.basicComponent, bbn.vue.localStorageComponent],
     // The events that will be emitted by this component
     _emitter: ['dragstart', 'drag', 'dragend', 'select', 'open'],
     props: {
+      filterString: {
+        type: String
+      },
       // The level until which the tree must be opened
       minExpandLevel: {
         type: Number,
@@ -27,7 +30,7 @@
       },
       // The data to send to the server
       data: {
-        type: Object,
+        type: [Object, Function],
         default(){
           return {};
         }
@@ -90,22 +93,17 @@
       // Helper to transform data when passing from one tree to another
       transferData: {
         type: Function
-      }
-
+      },
+      path: {
+        type: Array,
+        default(){
+          return [];
+        }
+      },
+      value: {}
     },
 
     data(){
-      let items = [];
-      if ( typeof(this.source) !== 'string' ){
-        if ( this.map ){
-          $.each(this.source, (i, a) => {
-            items.push(this.map(a));
-          })
-        }
-        else if ( this.source.length ){
-          items = this.source.slice();
-        }
-      }
       return {
         // Only for the origin tree
         isRoot: false,
@@ -126,7 +124,7 @@
         // True once the component is mounted
         isMounted: false,
         // The actual list of items (nodes)
-        items: items,
+        items: this.getItems(),
         // The currently active node component object
         activeNode: false,
         // The currently selected node component object
@@ -154,9 +152,42 @@
 
     methods: {
 
+      getItems(){
+        let items = [];
+        if ( typeof(this.source) !== 'string' ){
+          if ( this.map ){
+            $.each(this.source, (i, a) =>{
+              items.push(this.map(a));
+            })
+          }
+          else if ( this.source.length ){
+            items = this.source.slice();
+          }
+        }
+        return items;
+      },
+      reset(){
+        if ( this.isAjax ){
+          this.isLoaded = false;
+        }
+        this.items = [];
+        this.$forceUpdate();
+        this.$nextTick(() => {
+          if ( this.isAjax ){
+            this.load();
+          }
+          else{
+            this.items = this.getItems();
+            this.$forceUpdate();
+          }
+        })
+      },
+
       // Resize the root scroller
       resize(){
-        this.tree.$refs.scroll.onResize();
+        if ( this.tree.$refs.scroll ){
+          this.tree.$refs.scroll.onResize();
+        }
       },
 
       // Make the root tree resize and emit an open event
@@ -202,22 +233,16 @@
       getNode(arr, node){
         node = node || this.$refs.root;
         if ( arr ){
-          if ( !Array.isArray(arr) ){
+          if ( !$.isArray(arr) ){
             arr = [arr];
           }
           arr = arr.map((v) => {
             if ( (typeof v === 'number') || (typeof v === 'string') ){
               return {idx: v}
             }
-            /*else if ( Array.isArray(v) ){
-
-            }
-            else if ( typeof arr === 'object' ){
-
-            }*/
             return v;
           });
-          arr.forEach((v) => {
+          $.each(arr, (i, v) => {
             node = this._findNode(v, node);
           });
           return node;
@@ -228,7 +253,16 @@
       getMenu(node){
         let idx = $(node.$el).index();
         let menu = [];
-        if ( this.isAjax ){
+        if ( node.numChildren ){
+          menu.push({
+            text: node.isExpanded ? bbn._("Close") : bbn._("Open"),
+            icon: node.isExpanded ? 'fa fa-arrow-circle-up' : 'fa fa-arrow-circle-down',
+            command: () => {
+              node.isExpanded = !node.isExpanded;
+            }
+          });
+        }
+        if ( this.isAjax && node.numChildren && node.$refs.tree && node.$refs.tree[0].isLoaded ){
           menu.push({
             text: bbn._("Refresh"),
             icon: 'fa fa-refresh',
@@ -258,19 +292,23 @@
       // If UID has been given obj will only have this prop other the whole data object
       dataToSend(){
         // The final object to send
-        let r = {};
+        let r = {},
+            uid = this.uid || this.tree.uid;
         // If the uid field is defined
-        if ( this.uid ){
+        if ( uid ){
           // If an item has been given we send the corresponding data, or otherwise an empty string
           if ( this.node ){
-            r[this.uid] = this.node.data && this.node.data[this.uid] ? this.node.data[this.uid] : '';
+            r[uid] = this.node.data && this.node.data[uid] ? this.node.data[uid] : '';
           }
           else if ( this.isRoot ){
-            r[this.uid] = this.root ? this.root : '';
+            r[uid] = this.root ? this.root : '';
           }
         }
         else if ( this.node ){
           r = this.node.data;
+        }
+        else if ( $.isFunction(this.data) ){
+          r = this.data();
         }
         else{
           r = this.data;
@@ -284,12 +322,14 @@
           data: {}
         };
         if ( obj.text || obj.icon ){
-          for ( var n in obj ){
-            if ( $.inArray(n, NODEPROPERTIES) > -1 ){
-              r[n] = obj[n];
-            }
-            else{
-              r.data[n] = obj[n];
+          for ( let n in obj ){
+            if ( obj.hasOwnProperty(n) && (typeof n === 'string') ){
+              if ( $.inArray(n, NODE_PROPERTIES) > -1 ){
+                r[n] = obj[n];
+              }
+              else{
+                r.data[n] = obj[n];
+              }
             }
           }
           return r;
@@ -415,7 +455,6 @@
               }
               break;
           }
-          bbn.fn.log("TEST TREE", e, this.tree.activeNode)
         }
         else if ( this.tree.selectedNode ){
           this.tree.activeNode = this.tree.selectedNode;
@@ -423,14 +462,46 @@
       },
 
       // Reloads a node already loaded
-      reload(){
+      reload(node){
         if ( this.isAjax ){
-          this.items = [];
-          this.isLoaded = false
-          this.$nextTick(() => {
-            this.load();
-          })
+          if ( !node ){
+            if ( this.isRoot ){
+              this.items = [];
+              this.isLoaded = false;
+              this.$nextTick(() => {
+                this.load();
+              })
+            }
+            else{
+              this.node.isExpanded = false;
+              this.node.$refs.tree[0].isLoaded = false;
+              this.node.$forceUpdate();
+              this.$nextTick(() => {
+                this.node.isExpanded = true;
+              })
+            }
+          }
+          else if ( node.$refs.tree ){
+            node.isExpanded = false;
+            node.$refs.tree[0].isLoaded = false;
+            node.$forceUpdate();
+            this.$nextTick(() => {
+              node.isExpanded = true;
+            })
+          }
         }
+      },
+
+      mapper(fn, data){
+        let res = [];
+        $.each(data, (i, a) => {
+          let tmp = fn(a);
+          if ( tmp.items ){
+            tmp.items = this.mapper(fn, tmp.items);
+          }
+          res.push(tmp);
+        });
+        return res;
       },
 
       // Loads a node
@@ -444,17 +515,49 @@
             this.loading = false;
             if ( res.data ){
               if ( this.tree.map ){
-                this.items = $.map(
-                  res.data || [],
-                  this.tree.map
-                );
+                this.items = this.mapper(this.tree.map, res.data);
               }
               else{
-                this.items = res.data
+                this.items = res.data;
               }
             }
             this.isLoaded = true;
           })
+        }
+      },
+
+      openPath(){
+        if ( this.path.length ){
+          let path = this.path.slice(),
+              criteria = path.shift(),
+              idx = -1;
+          if ( typeof(criteria) === 'object' ){
+            idx = bbn.fn.search(this.items, criteria);
+          }
+          else if ( this.tree.uid ){
+            let cr = {};
+            cr[this.tree.uid] = criteria;
+            idx = bbn.fn.search(this.items, cr);
+          }
+          else if ( typeof(criteria) === 'number' ){
+            idx = criteria;
+          }
+          bbn.fn.log("OopenPath", path, idx, criteria, this.items);
+          if ( idx > -1 ){
+            $.each(this.items, (i, a) => {
+              if ( i !== idx ){
+                this.$set(this.items[idx], "path", []);
+                this.$set(this.items[idx], "path", []);
+              }
+            })
+            if ( path.length ){
+              this.$children[idx].isExpanded = true;
+              this.$children[idx].path = path;
+            }
+            else{
+              this.$set(this.items[idx], "selected", true);
+            }
+          }
         }
       },
 
@@ -486,20 +589,28 @@
 
       // Moves a node to or inside a tree
       move(node, target, index){
-        bbn.fn.log("dfb", node, target, index)
-        let idx = $(node.$el).index();
+        let idx = $(node.$el).index(),
+            parent = node.parent;
         if ( idx > -1 ){
-          let params = $.extend({}, node.$options.propsData);
-          node.parent.items.splice(idx, 1);
-          target.items.push(params);
-          target.numChildren++;
-          if ( !target.isExpanded ){
-            target.isExpanded = true;
+          if ( !target.numChildren ){
+            target.numChildren = 1;
+            target.$forceUpdate();
           }
-
-          target.$forceUpdate();
+          else{
+            target.numChildren++;
+          }
+          this.$nextTick(() => {
+            let targetTree = target.$refs.tree[0];
+            parent.numChildren--;
+            let params = parent.items.splice(idx, 1)[0];
+            targetTree.items.push(params);
+            if ( !targetTree.isExpanded ){
+              targetTree.isExpanded = true;
+            }
+            parent.$forceUpdate();
+            target.$forceUpdate();
+          });
         }
-        bbn.fn.log(idx, node.$options.propsData, target.$options.propsData, node, target);
       },
 
       /*
@@ -553,7 +664,7 @@
       toData(data){
         let r = {};
         for ( let n in data ){
-          if ( $.inArray(n, NODEPROPERTIES) === -1 ){
+          if ( $.inArray(n, NODE_PROPERTIES) === -1 ){
             r[n] = data[n];
           }
         }
@@ -588,6 +699,9 @@
       if ( this.isRoot && this.autoload ){
         this.load();
       }
+      else if ( this.isExpanded ){
+        this.load();
+      }
       this.isMounted = true;
     },
 
@@ -596,6 +710,20 @@
         if ( newVal ){
           this.$refs.scroll.scrollTo(0, newVal.$el);
         }
+      },
+      path(newVal){
+        bbn.fn.log("Change path", newVal);
+        this.$emit('pathChange');
+      },
+      items: {
+        deep: true,
+        handler(){
+          this.resize();
+        }
+      },
+      source(){
+        this.reset();
+        this.load();
       }
     },
 
@@ -604,6 +732,9 @@
         name: 'bbn-tree-node',
 
         props: {
+          filterString: {
+            type: String
+          },
           // True if the node is the one selected
           selected:{
             type: Boolean,
@@ -636,6 +767,13 @@
             type: Object,
             default(){
               return {};
+            }
+          },
+          // The opened path if there is one
+          path: {
+            type: Array,
+            default(){
+              return [];
             }
           },
           // A class to give to the node
@@ -675,12 +813,14 @@
             tree: false,
             // Sanitized list of items
             items: this.source.slice(),
-            isSelected: !!this.selected,
             isActive: false,
+            isSelected: !!this.selected,
             isExpanded: this.expanded,
             numChildren: this.num !== undefined ? this.num : this.source.length,
             animation: this.level > 0,
             isMounted: false,
+            isMatch: true,
+            numMatches: 0
           }
         },
         computed: {
@@ -708,7 +848,7 @@
 
           },
           resize(){
-            this.parent.resize();
+            this.tree.resize();
           },
           getMenu(){
             return this.tree.getMenu(this);
@@ -731,13 +871,16 @@
           startDrag(e){
             e.preventDefault();
             e.stopImmediatePropagation();
+            this.tree.dragging = this;
             if ( this.tree.droppableTrees.length ){
               $.each(this.tree.droppableTrees, (i, a) => {
-                a.dragging = this;
+                if ( a !== this.tree ){
+                  a.dragging = this;
+                }
               });
-              $(document.body).one('mouseup', this.endDrag);
-              $(document.body).on("mousemove", this.drag);
             }
+            $(document.body).one('mouseup', this.endDrag);
+            $(document.body).on("mousemove", this.drag);
           },
           drag(e){
             bbn.fn.log("DS");
@@ -767,7 +910,8 @@
                 if (
                   a.overNode &&
                   (a.dragging !== a.overNode) &&
-                  !a.isNodeOf(a.overNode, this.dragging)
+                  !a.isNodeOf(a.overNode, this.tree.dragging) &&
+                  (!a.overNode.$refs.tree || (a.overNode.$refs.tree[0] !== this.parent))
                 ){
                   let $t = $(e.target);
                   $t.parents().each((i, b) => {
@@ -801,22 +945,27 @@
             if ( this.tree.realDragging ){
               $(this.tree.$refs.helper).appendTo(this.tree.$refs.helperContainer).empty();
               this.tree.realDragging = false;
-              for ( let a of this.tree.droppableTrees ){
-                if (
-                  a.overNode &&
-                  (this.tree.dragging !== a.overNode) &&
-                  !a.isNodeOf(a.overNode, this.tree.dragging)
-                ){
-                  $(a.overNode.$el).children("span.node").removeClass("dropping");
-                  let ev = $.Event("dragEnd");
-                  a.tree.$emit("dragEnd", this, ev, a.overNode);
-                  if ( !ev.isDefaultPrevented() ){
-                    if ( a === this.tree ){
-                      this.tree.move(this, a.overNode);
+              if ( this.tree.droppableTrees.length ){
+                for ( let a of this.tree.droppableTrees ){
+                  if (
+                    a.overNode &&
+                    (this.tree.dragging !== a.overNode) &&
+                    !a.isNodeOf(a.overNode, this.tree.dragging)
+                  ){
+                    $(a.overNode.$el).children("span.node").removeClass("dropping");
+                    let ev = $.Event("dragEnd");
+                    a.tree.$emit("dragEnd", ev, this, a.overNode);
+                    if ( !ev.isDefaultPrevented() ){
+                      if ( a === this.tree ){
+                        this.tree.move(this, a.overNode);
+                      }
                     }
-                    bbn.fn.log("MOVE", a, this);
                   }
                 }
+              }
+              else{
+                let ev = $.Event("dragEnd");
+                this.tree.$emit("dragEnd", this, ev);
               }
             }
             $(document.body).off("mousemove", this.drag);
@@ -836,6 +985,48 @@
           mouseOver(){
             this.tree.overNode = this;
           },
+          checkPath(){
+            if ( this.tree.path.length > this.level ){
+              let item = this.tree.path.slice(this.level, this.level + 1)[0],
+                  type = typeof item,
+                  match = false;
+              if ( (type === 'object') && (bbn.fn.search([this.data], item) === 0) ){
+                match = true;
+              }
+              else if ( this.tree.uid && this.data[this.tree.uid] && (this.data[this.tree.uid] === item) ){
+                match = true;
+              }
+              else if ( (type === 'number') && (this.idx === item) ){
+                match = true;
+              }
+              if ( match ){
+                if ( this.tree.path.length > (this.level + 1) ){
+                  this.isExpanded = true;
+                }
+                else{
+                  this.isSelected = true;
+                  this.tree.$refs.scroll.scrollTo(0, this.$el);
+                }
+              }
+            }
+          },
+          getPath(numeric){
+            let r = [],
+                parent = this;
+            while ( parent ){
+              if ( this.tree.uid ){
+                r.unshift(parent.data[this.tree.uid]);
+              }
+              else if ( numeric ){
+                r.unshift(parent.index);
+              }
+              else{
+                r.unshift(parent.data);
+              }
+              parent = bbn.vue.closest(parent, 'bbn-tree-node');
+            }
+            return r;
+          }
         },
         created(){
           this.parent = bbn.vue.closest(this, 'bbn-tree');
@@ -855,7 +1046,13 @@
               }, 500)
             }
             this.isMounted = true;
-            this.$emit('mounted');
+            this.tree.$on('pathChange', () => {
+              this.checkPath();
+            });
+            this.$nextTick(() => {
+              this.checkPath();
+            });
+            this.resize();
             /*
             $(this.$el)
               .draggable({
@@ -881,7 +1078,6 @@
           isExpanded(newVal){
             if ( newVal ){
               if ( this.numChildren && !this.$refs.tree[0].isLoaded ){
-                bbn.fn.info("FROM IS_EXPANDED");
                 this.$refs.tree[0].load();
               }
               else{
@@ -889,7 +1085,6 @@
               }
             }
             else{
-              bbn.fn.log("isExpanded false", this.tree.isNodeOf(this.tree.selectedNode, this));
               if ( this.tree.selectedNode && this.tree.isNodeOf(this.tree.selectedNode, this) ){
                 this.isSelected = true;
               }
@@ -901,8 +1096,9 @@
               this.tree.selectedNode.isSelected = false;
             }
             if ( newVal ){
+              let ev = $.Event('select');
+              this.tree.$emit('select', this, ev);
               this.tree.selectedNode = this;
-              this.tree.$emit('select', this);
             }
             else{
               this.tree.$emit('unselect', this);
@@ -914,6 +1110,22 @@
             }
             this.tree.activeNode = this;
             this.tree.$emit(newVal ? 'activate' : 'deactivate', this);
+          },
+          filterString(newVal){
+            this.numMatches = 0;
+            if ( !newVal ){
+              this.isMatch = true;
+            }
+            else{
+              this.isMatch = bbn.fn.compare(this.text, newVal, 'icontains');
+              if ( this.isMatch ){
+                let vm = this;
+                while ( vm.parent && vm.parent.node ){
+                  vm.parent.node.numMatches++;
+                  vm = vm.parent;
+                }
+              }
+            }
           }
         }
       }

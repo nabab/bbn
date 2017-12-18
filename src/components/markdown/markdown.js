@@ -11,8 +11,7 @@
   "use strict";
 
   Vue.component('bbn-markdown', {
-    mixins: [bbn.vue.fullComponent],
-    template: '#bbn-tpl-component-markdown',
+    mixins: [bbn.vue.basicComponent, bbn.vue.fullComponent],
     methods: {
       test: function(){
         bbn.fn.log("test");

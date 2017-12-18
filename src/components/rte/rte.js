@@ -10,8 +10,7 @@
   $.trumbowyg.svgPath = bbn_root_url + 'lib/Trumbowyg/v2.5.1/dist/ui/icons.svg';
 
   Vue.component('bbn-rte', {
-    mixins: [bbn.vue.inputComponent],
-    template: '#bbn-tpl-component-rte',
+    mixins: [bbn.vue.basicComponent, bbn.vue.inputComponent],
     props: {
       pinned: {},
       top: {},
@@ -20,6 +19,25 @@
       right: {},
       height:{
         type: [String, Number]
+      },
+      buttons: {
+        type: Array,
+        default(){
+          return [
+            ['viewHTML'],
+            ['undo', 'redo'], // Only supported in Blink browsers
+            ['formatting'],
+            ['strong', 'em', 'underline', 'del'],
+            ['superscript', 'subscript'],
+            ['link'],
+            ['insertImage'],
+            ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'],
+            ['unorderedList', 'orderedList'],
+            ['horizontalRule'],
+            ['removeformat'],
+            ['fullscreen']
+          ];
+        }
       },
       cfg: {
         type: Object,
@@ -49,7 +67,8 @@
       }
       this.widget = $ele.trumbowyg({
         lang: 'fr',
-        resetCss: true
+        resetCss: true,
+        btns: this.buttons
       });
       $ele.on("tbwchange tbwpaste", (e) => {
         this.emitInput(e.target.value)

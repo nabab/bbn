@@ -1,4 +1,5 @@
-<span class="bbn-masked k-textbox">
+<span :class="[{'k-textbox': true}, componentClass]"
+>
   <input ref="element"
          :disabled="disabled"
          :required="required"

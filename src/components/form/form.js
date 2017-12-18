@@ -5,16 +5,23 @@
   "use strict";
 
   Vue.component('bbn-form', {
-    template: '#bbn-tpl-component-form',
+    mixins: [bbn.vue.basicComponent],
     props: {
       autocomplete: {
+        type: Boolean,
+        default: false
+      },
+      prefilled: {
         type: Boolean,
         default: false
       },
       disabled: {},
       script: {},
       fields: {},
-
+      blank: {
+        type: Boolean,
+        default: false
+      },
       confirm: {
         type: [String, Function]
       },
@@ -62,9 +69,9 @@
       },
       // That will be a form schema generating the inputs
       schema: {
-        type: Object,
+        type: Array,
         default: function(){
-          return {};
+          return [];
         }
       },
       // Sets if it is the data property which must be sent, or the content of the named fields
@@ -140,8 +147,11 @@
         return false;
       },
       _post(){
-        bbn.fn.post(this.action, $.extend(true, {}, this.data, this.source), (d) => {
+        bbn.fn[this.blank ? 'post_out' : 'post'](this.action, $.extend(true, {}, this.data, this.source), (d) => {
           this.originalData = this.source;
+          if ( this.tab && this.tab.tabNav ){
+            this.tab.tabNav.tabs[this.tab.tabNav.selected].isUnsaved = this.isModified();
+          }
           if ( this.successMessage && p ){
             p.alert(this.successMessage);
             bbn.fn.info(this.successMessage, p);
@@ -174,13 +184,7 @@
         return this.sendModel ? this.source : bbn.fn.formdata(this.$el);
       },
       isModified(){
-        let data = this.getData(this.$el) || {};
-        for ( let n in data ){
-          if ( (this.sendModel && (data[n] !== this.originalData[n])) || (!this.sendModel && (data[n] != this.originalData[n])) ){
-            return true;
-          }
-        }
-        return false;
+        return this.prefilled || !bbn.fn.isSame($.extend(true, {}, this.getData(this.$el)) || {}, $.extend(true, {}, this.originalData));
       },
       closePopup(window, ev){
         if ( this.window ){
@@ -189,45 +193,33 @@
               ev.preventDefault();
             }
             this.window.popup.confirm(this.confirmLeave, () => {
-              this.reset();
-              this.window.close(true);
+              if ( this.reset() ){
+                this.$nextTick(() => {
+                  this.window.close(true);
+                });
+              }
             })
           }
         }
       },
-      closeTab(url, check){
-        if ( this.tab && (url === this.tab.url) ){
-          check.prevent = true;
-          this.tab.popup.confirm(this.confirmLeave, () => {
-            this.reset();
-            this.tab.tabNav.close(this.tab.idx, true);
-          });
-        }
-      },
       cancel(){
-        this.reset();
-        if ( this.window ){
-          this.window.close(true);
+        let ev = $.Event();
+        this.$emit('cancel', ev, this);
+        if ( !ev.isDefaultPrevented() ){
+          this.reset();
+          if ( this.window ){
+            this.window.close();
+          }
         }
       },
       submit(force){
         let ok = true;
-        $(this.$el).find("input,select,textarea").filter("[name]").each((i, a) => {
-          let $a = $(a);
-          if ( a.required && !$a.val() ){
-            if ( $a.is(":visible") ){
-              $a.focus();
-            }
-            else{
-              $a.closest(":visible").focus();
-            }
-            ok = false;
-          }
-        });
         if ( ok ){
-          $.each((i, a) => {
+          let elems = bbn.vue.findAll(this, '.bbn-input-component');
+          $.each(elems, (i, a) => {
             if ( $.isFunction(a.isValid) && !a.isValid() ){
               ok = false;
+              return false;
             }
           });
         }
@@ -273,24 +265,26 @@
           this.$set(this.source, name, val);
         });
         this.$forceUpdate();
+        return true;
+      },
+      reinit(){
+        this.originalData = $.extend(true, {}, this.getData());
+        this.modified = this.isModified();
       },
       init(){
         if ( this.$options.propsData.script ){
           $(this.$el).data("script", this.$options.propsData.script);
         }
-        this.originalData = $.extend({}, this.getData());
+        this.originalData = $.extend(true, {}, this.getData());
         this.$nextTick(() => {
           if ( !this.window ){
             this.window = bbn.vue.closest(this, "bbn-window");
             if ( this.window ){
               this.window.addClose(this.closePopup);
             }
-            else if ( !this.tab ){
-              this.tab = bbn.vue.closest(this, ".bbn-tab");
-              if ( this.tab ){
-                this.tab.tabNav.$once("close", this.closeTab);
-              }
-            }
+          }
+          if ( !this.tab ){
+            this.tab = bbn.vue.closest(this, ".bbn-tab");
           }
           $("input:visible:first", this.$el).focus();
         });
@@ -305,6 +299,9 @@
         handler(newVal){
           this.$emit('input', newVal);
           this.modified = this.isModified();
+          if ( this.tab && this.tab.tabNav ){
+            this.tab.tabNav.tabs[this.tab.tabNav.selected].isUnsaved = this.modified;
+          }
         }
       }
     }

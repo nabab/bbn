@@ -8,7 +8,7 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-context', {
-    template: '#bbn-tpl-component-context',
+    mixins: [bbn.vue.basicComponent],
     props: {
       source: {
         type: [Function, Array],

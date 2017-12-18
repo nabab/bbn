@@ -49,8 +49,7 @@
   ui.plugin(MaskedDatePicker);
 
   Vue.component('bbn-datepicker', {
-    mixins: [bbn.vue.fullComponent],
-    template: '#bbn-tpl-component-datepicker',
+    mixins: [bbn.vue.basicComponent, bbn.vue.fullComponent],
     props: {
       cfg: {
         type: Object,

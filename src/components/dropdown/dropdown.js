@@ -7,8 +7,7 @@
   kendo.ui.DropDownList.prototype.options.autoWidth = true;
 
   Vue.component('bbn-dropdown', {
-    template: '#bbn-tpl-component-dropdown',
-    mixins: [bbn.vue.fullComponent, bbn.vue.dataSourceComponent],
+    mixins: [bbn.vue.basicComponent, bbn.vue.inputComponent, bbn.vue.dataSourceComponent],
     props: {
       filterValue: {},
       template: {},
@@ -32,7 +31,6 @@
         var vm = this,
             cfg = bbn.vue.getOptions(vm);
         cfg.change = function(e){
-          bbn.fn.log(e);
           vm.$emit("input", e.sender.value());
 					if ( $.isFunction(vm.change) ){
 						vm.change(e.sender.value());
@@ -60,6 +58,7 @@
       }, bbn.vue.treatData(this));
     },
     mounted(){
+      const vm = this;
       let cfg = this.getOptions();
       if ( this.disabled ){
         cfg.enable = false;
@@ -67,7 +66,12 @@
       if ( this.placeholder ){
         cfg.optionLabel = this.placeholder;
       }
-      bbn.fn.log("DROPDOWN", cfg);
+      cfg.dataBound = (e) => {
+        if ( !e.sender.options.optionLabel && e.sender.dataSource.data().length && !vm.value ){
+          e.sender.select(0);
+          e.sender.trigger("change");
+        }
+      };
       this.widget = $(this.$refs.element).kendoDropDownList(cfg).data("kendoDropDownList");
       if ( !cfg.optionLabel && cfg.dataSource.length && !this.value ){
         this.widget.select(0);
@@ -92,8 +96,7 @@
       }
     },
     watch:{
-      source(newDataSource){
-        bbn.fn.log("Changed DS", this.dataSource);
+      source(){
         this.widget.setDataSource(this.dataSource);
       }
     }

@@ -8,8 +8,7 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-popup', {
-    template: "#bbn-tpl-component-popup",
-    mixins: [bbn.vue.resizerComponent],
+    mixins: [bbn.vue.basicComponent, bbn.vue.resizerComponent],
     props: {
       defaultWidth: {
         type: [String, Number],
@@ -68,6 +67,16 @@
         items: [],
         showPopup: false
       }
+    },
+
+    computed: {
+      popups(){
+        let r = [];
+        $.each(this.items, (i, a) => {
+          r.push(this.getObject($.extend({index: i}, a)));
+        });
+        return r;
+      },
     },
 
     methods: {
@@ -175,6 +184,7 @@
               delete d.url;
               delete d.data;
               this.items.push(d);
+              this.makeWindows();
             }
           })
         }
@@ -410,6 +420,7 @@
           this.$nextTick(() => {
             let ele = $(".bbn-popup-unit", this.$el).eq(idx);
             bbn.fn.center(ele);
+            /*
             if ( !ele.hasClass("ui-draggable") ){
               if ( this.popups[idx].draggable !== false ){
                 ele.draggable({
@@ -423,19 +434,25 @@
                   containment: ".bbn-popup",
                   resize: () => {
                     bbn.fn.redraw(ele, true);
-                    this.$emit("resize");
+                    this.selfEmit();
                   },
                   stop: () => {
                     this.center(idx);
-                    this.$emit("resize");
+                    this.selfEmit();
                   }
                 });
               }
             }
             let scroll = this.getWindow(idx).$refs.scroll;
-            if ( scroll && scroll.length ){
-              scroll[0].onResize();
+            if ( scroll ){
+              if ( scroll[0] ){
+                scroll[0].onResize();
+              }
+              else{
+                scroll.onResize();
+              }
             }
+            */
           })
         }
       },
@@ -462,17 +479,8 @@
       }
     },
 
-    computed: {
-      popups(){
-        let r = [];
-        $.each(this.items, (i, a) => {
-          r.push(this.getObject($.extend({index: i}, a)));
-        });
-        return r;
-      },
-    },
-
     mounted(){
+
       $.each(this.popups, (i, a) => {
         this.open(a);
       })
@@ -487,6 +495,7 @@
     components: {
       'bbn-window': {
         name: 'bbn-window',
+        mixins: [bbn.vue.basicComponent, bbn.vue.resizerComponent],
         props: {
           width: {
             type: [String, Number]
@@ -510,6 +519,9 @@
             type: Function
           },
           afterClose: {
+            type: Function
+          },
+          beforeClose: {
             type: Function
           },
           open: {
@@ -536,6 +548,14 @@
           },
           content: {
             type: String
+          },
+          draggable: {
+            type: Boolean,
+            default: true
+          },
+          resizable: {
+            type: Boolean,
+            default: true
           }
         },
         data(){
@@ -545,10 +565,33 @@
           }
           return {
             isMaximized: this.maximized,
-            realWidth: typeof this.width === 'number' ? this.width + 'px' : this.width,
-            realHeight: typeof this.height === 'number' ? this.height + 'px' : this.height,
+            widthUnit: (typeof this.width === 'string') && (this.width.substr(-1) === '%') ? '%' : 'px',
+            realWidth: parseInt(this.width),
+            heightUnit: (typeof this.height === 'string') && (this.height.substr(-1) === '%') ? '%' : 'px',
+            realHeight: parseInt(this.height),
             closingFunctions: fns,
             popup: false
+          }
+        },
+
+        computed: {
+          top(){
+            if ( !this.popup || this.isMaximized ){
+              return 0;
+            }
+            if ( this.heightUnit === '%' ){
+              return Math.round((100 - parseInt(this.realHeight)) / 2);
+            }
+            return Math.round((this.popup.lastKnownHeight - parseInt(this.realHeight)) / 2);
+          },
+          left(){
+            if ( !this.popup || this.isMaximized ){
+              return 0;
+            }
+            if ( this.widthUnit === '%' ){
+              return Math.round((100 - parseInt(this.realWidth)) / 2);
+            }
+            return Math.round((this.popup.lastKnownWidth - parseInt(this.realWidth)) / 2);
           }
         },
 
@@ -557,13 +600,6 @@
             for ( let i = 0; i < arguments.length; i++ ){
               if ( typeof arguments[i] === 'function' ){
                 this.closingFunctions.push(arguments[i])
-              }
-            }
-          },
-          beforeClose(fn){
-            for ( let i = 0; i < arguments.length; i++ ){
-              if ( typeof arguments[i] === 'function' ){
-                this.closingFunctions.unshift(arguments[i])
               }
             }
           },
@@ -580,6 +616,14 @@
           close(force){
             let ev = $.Event('close');
             if ( !force ){
+              ev = $.Event('beforeClose');
+              this.popup.$emit('beforeClose', ev, this);
+              if ( ev.isDefaultPrevented() ){
+                return;
+              }
+              if ( this.beforeClose && (this.beforeClose(this) === false) ){
+                return;
+              }
               $.each(this.closingFunctions, (i, a) => {
                 a(this, ev);
               });
@@ -590,10 +634,36 @@
                 this.afterClose(this);
               }
             }
+          },
+          center(){
+            this.popup.center(this.index);
           }
         },
+        created(){
+          this.popup = bbn.vue.closest(this, 'bbn-popup');
+        },
         mounted(){
-          this.popup = this.$parent.$parent;
+          if ( this.draggable ){
+            $(this.$el).draggable({
+              handle: ".bbn-popup-title",
+              containment: ".bbn-popup"
+            });
+          }
+          if ( this.resizable ){
+            $(this.$el).resizable({
+              handles: "se",
+              containment: ".bbn-popup",
+              resize: () => {
+                this.selfEmit();
+              },
+              stop: () => {
+                this.realWidth = parseFloat($(this.$el).css("width"));
+                this.realHeight = parseFloat($(this.$el).css("height"));
+                //this.center();
+                this.selfEmit();
+              }
+            });
+          }
           /*
           setTimeout(() => {
             if ( this.$refs.scroll ){
@@ -604,6 +674,11 @@
             }
           }, 1000)
           */
+        },
+        watch: {
+          isMaximized(){
+            //; $forceUpdate(); center(index)
+          }
         }
       }
     }

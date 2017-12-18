@@ -1,12 +1,11 @@
 /**
  * Created by BBN on 10/02/2017.
  */
-(function($, bbn, kendo){
+(($, bbn, kendo) => {
   "use strict";
 
   Vue.component('bbn-colorpicker', {
-    mixins: [bbn.vue.fullComponent],
-    template: '#bbn-tpl-component-colorpicker',
+    mixins: [bbn.vue.basicComponent, bbn.vue.fullComponent],
     props: {
       value: {
         type: String
@@ -25,7 +24,7 @@
       },
       titleSize: {
         type: Object,
-        default: function(){
+        default(){
           return {
             width: 14,
             height: 14
@@ -37,7 +36,7 @@
       },
       cfg: {
         type: Object,
-        default: function(){
+        default(){
           return {
             buttons: true,
             clearButton: false,
@@ -55,23 +54,23 @@
       build(){
         bbn.fn.log("colorpicker builder", this.$refs.element);
       },
-      getOptions: function(){
+      getOptions(){
         const vm  = this;
         let cfg = bbn.vue.getOptions(vm);
-        cfg.change = function (e){
+        cfg.change = (e) => {
           vm.change(e);
           vm.emitInput(e.sender.value());
         };
         return cfg;
       }
     },
-    mounted: function(){
+    mounted(){
       this.widget = $(this.$refs.element)
         .kendoColorPicker(this.getOptions())
         .data("kendoColorPicker");
       this.$emit("ready", this.value);
     },
-    data: function(){
+    data(){
       return $.extend({
         widgetName: "kendoColorPicker"
       }, bbn.vue.treatData(this));

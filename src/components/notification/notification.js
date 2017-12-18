@@ -8,8 +8,7 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-notification', {
-    mixins: [bbn.vue.optionComponent],
-    template: '#bbn-tpl-component-notification',
+    mixins: [bbn.vue.basicComponent, bbn.vue.optionComponent],
     props: {
       pinned: {},
       top: {},

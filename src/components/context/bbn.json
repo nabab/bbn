@@ -4,8 +4,5 @@
   "authors": [
     "Thomas Nabet <thomas.nabet@gmail.com>"
   ],
-  "license": "MIT",
-  "dependencies": {
-    "fancytree": ">=0.4"
-  }
+  "license": "MIT"
 }

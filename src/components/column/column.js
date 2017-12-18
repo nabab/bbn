@@ -1,14 +1,14 @@
 /**
  * Created by BBN on 15/02/2017.
  */
-(function($, bbn){
+(($, bbn) => {
   "use strict";
 
   /**
    * Classic input with normalized appearance
    */
   Vue.component('bbn-column', {
-    template: '#bbn-tpl-component-column',
+    mixins: [bbn.vue.basicComponent],
     props: {
       width: {
         type: [String, Number],
@@ -78,11 +78,7 @@
         }
       }
     },
-
-    methods: {
-    },
-
-    data: function(){
+    data(){
       var vm = this,
           r = bbn.vue.treatData(vm).widgetCfg || {};
       if ( vm.$options && vm.$options.props ){
@@ -98,17 +94,8 @@
       r.isMounted = false;
       return r;
     },
-
-    mounted(){
-
-    },
-
-    beforeDestroyed(){
-
-    },
-
     watch: {
-      selected: function(newVal, oldVal){
+      selected(newVal, oldVal){
         if ( newVal && !oldVal ){
           var vm = this;
           if ( vm.load ){
@@ -120,13 +107,13 @@
           }
         }
       },
-      content: function(){
+      content(){
         var ele = this.$el;
         bbn.fn.analyzeContent(ele, true);
       },
       source: {
         deep: true,
-        handler: function(){
+        handler(){
           this.$forceUpdate();
         }
       }

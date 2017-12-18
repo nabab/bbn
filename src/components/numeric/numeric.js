@@ -5,8 +5,7 @@
   "use strict";
 
   Vue.component('bbn-numeric', {
-    mixins: [bbn.vue.fullComponent],
-    template: '#bbn-tpl-component-numeric',
+    mixins: [bbn.vue.basicComponent, bbn.vue.fullComponent],
     props: {
       decimals: {
         type: [Number, String]

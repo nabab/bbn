@@ -1,27 +1,35 @@
-<div class="bbn-iblock bbn-radio">
-  <div :class="{'bbn-iblock': !vertical, 'bbn-nl': vertical}"
-       v-for="(d, idx) in dataSource"
+<div :class="['bbn-iblock', componentClass]"
+>
+  <input class="bbn-hidden"
+         ref="element"
+         :value="modelValue"
+         :disabled="disabled"
+         :required="required"
   >
-    <input :value="d.value"
+  <div :class="{'bbn-iblock': !vertical, 'bbn-nl': vertical}"
+       v-for="(d, idx) in source"
+  >
+    <input :value="d[sourceValue]"
            :name="name"
            class="k-radio"
            type="radio"
            :disabled="disabled || d.disabled"
            :required="required"
            :id="id + '_' + idx"
-					 @change="changed(d.value)"
-           :checked="d.value === modelValue"
+					 @change="changed(d[sourceValue], $event)"
+           :checked="d[sourceValue] === modelValue"
     >
     <label class="k-radio-label"
-           v-text="d.text"
+           v-html="render ? render(d) : d[sourceText]"
            :for="id + '_' + idx"
     ></label>
-		<div v-if="dataSource[idx+1] && getSeparator"
+		<div v-if="(source[idx+1] !== undefined) && getSeparator"
          :class="{
           'bbn-w-100': vertical,
           'bbn-iblock': !vertical
           }"
-         v-html="getSeparator">
+         v-html="getSeparator"
+    >
 		</div>
   </div>
 </div>

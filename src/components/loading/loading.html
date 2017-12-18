@@ -1,4 +1,5 @@
-<div class="bbn-loading bbn-100 bbn-unselectable">
+<div :class="[{'bbn-100': true, 'bbn-unselectable': true}, componentClass]"
+>
   <span class="content" v-if="id">
     <span class="buttons" v-if="data.length">
       <i :title="_('History informations')"

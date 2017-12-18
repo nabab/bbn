@@ -1,6 +1,7 @@
-<div class="bbn-loader bbn-100">
+<div :class="[{'bbn-full-screen': true, 'bbn-padded': true, 'bbn-middle': true}, componentClass]"
+>
   <div class="loader-animation">
-    <div class="sk-cube-grid">
+    <div class="sk-cube-grid" v-show="minHeight">
       <div class="sk-cube sk-cube1"></div>
       <div class="sk-cube sk-cube2"></div>
       <div class="sk-cube sk-cube3"></div>
@@ -11,6 +12,7 @@
       <div class="sk-cube sk-cube8"></div>
       <div class="sk-cube sk-cube9"></div>
     </div>
-    <h1 v-text="'Loading...'"></h1>
+    <h1 :class="'dots ' + fontClass">Loading<span>.</span><span>.</span><span>.</span></h1>
+
   </div>
 </div>

@@ -7,8 +7,7 @@
   kendo.ui.ComboBox.prototype.options.autoWidth = true;
 
   Vue.component('bbn-combo', {
-    mixins: [bbn.vue.fullComponent, bbn.vue.dataSourceComponent],
-    template: '#bbn-tpl-component-combo',
+    mixins: [bbn.vue.basicComponent, bbn.vue.inputComponent, bbn.vue.eventsComponent, bbn.vue.dataSourceComponent],
     props: {
       delay: {
         type: Number,
@@ -55,6 +54,9 @@
       cascade: {
         type: [Boolean, Object],
         default: false
+      },
+      template: {
+        type: [Function]
       },
       cfg: {
         type: Object,

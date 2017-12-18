@@ -8,12 +8,11 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-fisheye', {
-    mixins: [bbn.vue.optionComponent],
-    template: "#bbn-tpl-component-fisheye",
+    mixins: [bbn.vue.basicComponent, bbn.vue.optionComponent],
     props: {
       value: {
         type: Array,
-        default: function(){
+        default(){
           return [];
         }
       },
@@ -28,14 +27,13 @@
       delUrl: {},
       insUrl: {},
       top: {},
-      menu: {},
       bottom: {},
       position: {
         type: String
       },
       cfg: {
         type: Object,
-        default: function(){
+        default(){
           return {
             minIndex: 0,
             bin_url: false,
@@ -48,36 +46,44 @@
         }
       }
     },
+
+    data(){
+      return $.extend({
+        menu: false,
+        widget: false,
+        binEle: false,
+        droppableBin: false,
+        droppable: false
+      }, bbn.vue.treatData(this));
+    },
+
     methods: {
-      onClick: function(it){
+      onClick(it){
         if ( it.command && $.isFunction(it.command) ){
           it.command();
         }
       },
 
-      insert: function(obj){
-        var vm = this;
+      add(obj){
         if (
-          vm.insUrl &&
+          this.insUrl &&
           (typeof(obj) === 'object') &&
           obj.url &&
           obj.icon &&
           obj.text &&
           obj.id
         ){
-          bbn.fn.post(vm.insUrl, {id: obj.id}, function(d){
-            if (d.success) {
-              var index = -1;
-              $.each(vm.value, function(i, a){
+          bbn.fn.post(this.insUrl, {id: obj.id}, (d) => {
+            if ( d.success ){
+              obj.id_option = obj.id;
+              obj.id = d.id;
+              let idx = -1;
+              $.each(this.value, function(i, a){
                 if ( a.id ){
-                  index = i;
+                  idx = i;
                 }
               });
-              var newSelected = index + 1;
-              if ( newSelected < vm.minIndex ){
-                newSelected = vm.minIndex;
-              }
-              vm.value.splice(newSelected, 0, obj);
+              this.value.splice((idx + 1) < this.minIndex ? idx + 1 : this.minIndex, 0, obj);
             }
             else{
               new Error(bbn._("The shortcut has failed to be inserted"));
@@ -86,7 +92,20 @@
         }
       },
 
-      setup: function(){
+      remove(id){
+        if ( id && this.delUrl ){
+          bbn.fn.post(this.delUrl, {id: id}, (d) => {
+            if ( d.success ){
+              let idx = bbn.fn.search(this.value, "id", id);
+              if ( idx > -1 ){
+                this.value.splice(idx, 1)
+              }
+            }
+          });
+        }
+      },
+
+      setup(){
         var vm = this,
             $ele = $(vm.$el);
 
@@ -103,19 +122,8 @@
             accept: "li",
             hoverClass: "k-state-hover",
             activeClass: "k-state-active",
-            drop: function (e, ui) {
-              var id = parseInt(ui.draggable.attr("data-id"));
-              if ( id ){
-                bbn.fn.post(vm.delUrl, {id: id}, function (d) {
-                  if (d.success) {
-                    $ele.fisheye("remove", id);
-                    var idx = bbn.fn.search(vm.items, "id", id);
-                    if ( idx > -1 ){
-                      vm.items.splice(idx, 1)
-                    }
-                  }
-                });
-              }
+            drop: (e, ui) => {
+              this.remove(ui.draggable.attr("data-id"))
             }
           });
 
@@ -160,20 +168,11 @@
         });
       },
     },
-    data: function(){
-      return $.extend({
-        widget: false,
-        binEle: false,
-        droppableBin: false,
-        droppable: false
-      }, bbn.vue.treatData(this));
-    },
-
     mounted: function(){
       this.setup();
       setTimeout(() => {
         $(this.$el).trigger('mousemove');
-      }, 1000)
+      }, 1000);
     },
 
     updated: function(){

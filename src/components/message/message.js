@@ -8,8 +8,7 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-message', {
-    mixins: [bbn.vue.optionComponent],
-    template: '#bbn-tpl-component-message',
+    mixins: [bbn.vue.basicComponent, bbn.vue.optionComponent],
     props:{
       position: {},
       cfg: {

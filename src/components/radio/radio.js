@@ -4,8 +4,7 @@
 (function($, bbn, kendo){
   "use strict";
   Vue.component('bbn-radio', {
-    mixins: [bbn.vue.eventsComponent, bbn.vue.dataSourceComponent],
-    template: '#bbn-tpl-component-radio',
+    mixins: [bbn.vue.basicComponent, bbn.vue.inputComponent, bbn.vue.eventsComponent, bbn.vue.dataSourceComponent],
     props: {
       value: {},
       separator: {
@@ -33,7 +32,19 @@
         type: String,
         default: null
       },
+      render: {
+        type: Function
+      },
+      sourceText: {
+        type: String,
+        default: 'text'
+      },
+      sourceValue: {
+        type: String,
+        default: 'value'
+      },
       source: {
+        type: Array,
         default(){
           return [{
             text: bbn._("Yes"),
@@ -54,12 +65,6 @@
       event: 'input'
     },
     computed: {
-      dataSource(){
-        if ( this.source ){
-          return bbn.vue.toKendoDataSource(this);
-        }
-        return [];
-      },
       getSeparator(){
         if ( this.vertical && !this.separator ){
           return '<div style="margin-bottom: 0.5em"></div>'
@@ -71,7 +76,7 @@
       }
     },
 		methods: {
-			changed(val){
+			changed(val, e){
 				this.$emit('input', val);
         this.$emit('change', val);
 			}

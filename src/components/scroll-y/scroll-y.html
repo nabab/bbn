@@ -1,9 +1,8 @@
 <transition name="custom-classes-transition"
             enter-active-class="animated fadeIn"
             leave-active-class="animated fadeOut"
-            keep-alive
 >
-  <div class="bbn-scroll-y"
+  <div :class="componentClass"
        v-show="realContainer && (contentHeight > containerHeight) && show && height"
        @click="jump"
        ref="scrollRail"

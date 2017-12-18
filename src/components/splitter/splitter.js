@@ -8,8 +8,7 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-splitter', {
-    mixins: [bbn.vue.optionComponent, bbn.vue.resizerComponent],
-    template: '#bbn-tpl-component-splitter',
+    mixins: [bbn.vue.basicComponent, bbn.vue.optionComponent, bbn.vue.resizerComponent],
     props: {
       orientation: {
         type: String

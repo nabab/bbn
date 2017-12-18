@@ -9,7 +9,7 @@
    */
   let isClicked = false;
   Vue.component('bbn-vlist', {
-    template: '#bbn-tpl-component-vlist',
+    mixins: [bbn.vue.basicComponent],
     props: {
       source: {
         type: [Function, Array]
@@ -49,16 +49,42 @@
       }
       return {
         items: items,
-        currentIndex: false
+        currentIndex: false,
+        currentHeight: 0,
+        currentWidth: 0
       };
     },
     methods: {
       getStyles(){
+        let left = this.right > 0 ? '' : (this.left + 'px'),
+            right = this.right > 0 ? '' : (this.right + 'px'),
+            top = this.bottom > 0 ? '' : (this.top + 'px'),
+            bottom = this.bottom > 0 ? '' : (this.bottom + 'px');
+        if ( this.currentHeight ){
+          let tW = bbn.env.width,
+              tH = bbn.env.height;
+          if ( this.right && ((this.right - this.currentWidth) < 0) ){
+            left = '0px';
+            right = '';
+          }
+          else if ( this.left && ((this.left + this.currentWidth) > tW) ){
+            right = '0px';
+            left = '';
+          }
+          if ( this.bottom && ((this.bottom - this.currentHeight) < 0) ){
+            top = '0px';
+            bottom: '';
+          }
+          else if ( this.top && ((this.top + this.currentHeight) > tH) ){
+            bottom = '0px';
+            top = '';
+          }
+        }
         return {
-          left: this.right > 0 ? '' : this.left + 'px',
-          right: this.right > 0 ? this.right + 'px' : '',
-          top: this.bottom > 0 ? '' : this.top + 'px',
-          bottom: this.bottom > 0 ? this.bottom + 'px' : '',
+          left: left,
+          right: right,
+          top: top,
+          bottom: bottom,
           maxHeight: this.maxHeight
         };
       },
@@ -101,13 +127,8 @@
           this.$emit("closeall");
         }
       },
-      select(e, idx){
-        bbn.fn.log("SELECT");
-        if ( e ){
-          e.preventDefault();
-          e.stopImmediatePropagation();
-        }
-        if ( !this.items[idx].items ){
+      select(idx){
+        if ( !this.items[idx].disabled && !this.items[idx].items ){
           if ( this.mode === 'options' ){
             this.$set(this.items[idx], "selected", this.items[idx].selected ? false : true);
           }
@@ -126,7 +147,7 @@
             }
             else if ( $.isFunction(this.items[idx].command) ){
               bbn.fn.log("CLICK IS FUNCTION", this);
-              this.items[idx].command(e, idx, JSON.parse(JSON.stringify(this.items[idx])));
+              this.items[idx].command(idx, JSON.parse(JSON.stringify(this.items[idx])));
             }
           }
           if ( this.mode !== 'options' ){
@@ -140,6 +161,9 @@
     },
     mounted(){
       this.$nextTick(() => {
+        this.currentHeight = $(this.$el).children().height();
+        this.currentWidth = $(this.$el).children().width();
+          /*
         let style = {},
             h = $(this.$el).children().height();
         if ( this.bottom ){
@@ -152,6 +176,7 @@
           style.height = Math.round(h + 2) + 'px';
           $(this.$el).css(style)
         }
+          */
       })
     },
     watch:{

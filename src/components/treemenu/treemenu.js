@@ -1,28 +1,27 @@
 /**
  * Created by BBN on 15/02/2017.
  */
-(function($, bbn, kendo){
+(($, bbn) => {
   "use strict";
 
   /**
    * Classic input with normalized appearance
    */
   Vue.component('bbn-treemenu', {
-    mixins: [bbn.vue.resizerComponent],
-    template: "#bbn-tpl-component-treemenu",
+    mixins: [bbn.vue.basicComponent, bbn.vue.resizerComponent],
     props: {
       placeholder: {
         type: String,
         default: "Search"
       },
       source: {
-        type: [String, Number],
+        type: [String, Array, Function],
         default(){
           return [];
         }
       },
-      fisheye: {
-        type: Vue
+      shortcuts: {
+        type: [Function, Vue]
       },
       top: {
         type: Number,
@@ -40,6 +39,17 @@
         type: Boolean,
         default: false
       },
+      search: {
+        type: Boolean,
+        default: true
+      },
+      menus: {
+        type: Array,
+        default(){
+          return [];
+        }
+      },
+      current: {}
     },
     data(){
       let isAjax = !Array.isArray(this.source)
@@ -51,11 +61,34 @@
         posBottom: this.bottom,
         isAjax: isAjax,
         items: isAjax ? [] : this.source,
+        currentMenu: this.current
       };
     },
     methods: {
-      map(a){
+      getMenu(node){
+        if ( !this.shortcuts || node.numChildren ){
+          return [];
+        }
+        let obj = {
+          url: node.data.link,
+          icon: node.icon,
+          text: node.text,
+          id: node.data.id
+        },
+            menu = this;
+        return [{
+          text: bbn._('Create a shortcut'),
+          icon: 'fa fa-external-link-square',
+          command(){
+            if ( menu.shortcuts ){
+              let sc = $.isFunction(menu.shortcuts) ? menu.shortcuts() : menu.shortcuts;
+              if ( sc ){
+                sc.add(obj);
+              }
+            }
 
+          }
+        }]
       },
       _position(){
         $(this.$el)
@@ -64,73 +97,6 @@
             bottom: this.posBottom + 'px'
           }, this.posObject()), 200);
       },
-      _disconnect_menu(){
-        if ( this.draggable ){
-          this.draggable.draggable("destroy");
-        }
-      },
-      _connect_menu(){
-        if ( this.fisheye ){
-          let $fisheye = $(this.fisheye.$el);
-          if ( this.draggable ){
-            try{
-              this.draggable.draggable("destroy");
-            }
-            catch(e){
-              new Error("no draggable")
-            }
-          }
-          this.draggable = $(this.$el).find("li")
-            .filter(function (){
-              return $(this).find("li").length ? false : true;
-            })
-            .draggable({
-              cursorAt: {top: 1, left: 0},
-              zIndex: 15000,
-              helper: (e) => {
-                bbn.fn.log(e);
-                var ele = $(e.currentTarget),
-                    t   = ele.is("li") ? ele : ele.closest("li"),
-                    i   = t.find("i,span.fancytree-custom-icon").first(),
-                    r   = $('<div id="bbn_menu2dock_helper" class="appui-xxxl"/>');
-                r.append(i.clone(false));
-                return r;
-              },
-              scroll: false,
-              revert: true,
-              revertDuration: 0,
-              containment: "window",
-              appendTo: document.body,
-              start(e, ui){
-                //e.stopImmediatePropagation();
-                $fisheye.fisheye("disable");
-              },
-              stop: function (e, ui){
-                $fisheye.fisheye("enable");
-              }
-            });
-          if ( this.droppable ){
-            this.droppable.droppable("destroy");
-          }
-          this.droppable = $fisheye.droppable({
-            accept: 'li',
-            activeClass: 'active',
-            hoverClass: 'ready',
-            drop: (e, ui) => {
-              var dataItem = $.ui.fancytree.getNode(ui.draggable[0]).data,
-                  obj = {
-                    icon: dataItem.icon,
-                    text: dataItem.text,
-                    url: dataItem.link,
-                    id: dataItem.id
-                  };
-              this.fisheye.insert(obj);
-            }
-          });
-          bbn.fn.log("Connecting menu", $(this.$el).find("li").length, this.draggable);
-        }
-      },
-
       posObject(){
         let o = {};
         o[this.position === 'right' ? 'right' : 'left'] = this.isOpened ? 0 : -($(this.$el).width() + 40);
@@ -152,79 +118,66 @@
           this.show();
         }
       },
-      search(v){
-        if (!v.length) {
-          this.$refs.tree.widget.clearFilter()
+      mapSrc(data){
+        if ( data.items && data.items.length ){
+          data.cls = 'bbn-lg';
+          data.selectable = false;
         }
-        else {
-          v = bbn.fn.removeAccents(v).toLowerCase();
-          this.$refs.tree.widget.filterNodes((a) => {
-            var txt = bbn.fn.removeAccents($('<div/>').html(a.title).text()).toLowerCase();
-            bbn.fn.log(txt, txt.indexOf(v));
-            return txt.indexOf(v) > -1;
-          })
-        }
+        return data;
       },
-      go(node){
+      go(node, event){
+        event.preventDefault();
         if ( node && node.data && node.data.link ){
           bbn.fn.link(node.data.link);
+          this.hide();
         }
-        this.hide();
       },
       resizeScroll(){
-        this.$refs.scroll.onResize()
-      }
-    },
-    mounted(){
-      this._position();
-      /*
-      $(vm.$refs.search).keyup(function (e) {
-        var v = $(this).val();
-        if (!v.length) {
-          md.wid.clearFilter()
+        if ( this.$refs.scroll ){
+          this.$refs.scroll.onResize()
         }
-        else {
-          v = bbn.fn.removeAccents(v).toLowerCase();
-          md.wid.filterNodes(function (a) {
-            var txt = bbn.fn.removeAccents($('<div/>').html(a.title).text()).toLowerCase();
-            bbn.fn.log(txt, txt.indexOf(v));
-            return txt.indexOf(v) > -1;
-          })
-        }
-      });
-      */
-
-      $(document.body).on("mousedown touch", "*", (e) => {
-        var $t = $(e.target);
+      },
+      reset(){
+        this.$refs.tree.reset();
+        this.$refs.tree.load();
+      },
+      getData(){
+        return {menu: this.currentMenu};
+      },
+      checkMouseDown(e){
+        let $t = $(e.target);
         if ( this.isOpened &&
           !$t.closest(".bbn-treemenu").length &&
+          !$t.closest(".k-list-container").length &&
           !$t.closest(".bbn-menu-button").length
         ){
-          bbn.fn.log("DEFAULT PREVENTED ON MOUSEDOWN AND TOUCH");
           e.preventDefault();
           e.stopImmediatePropagation();
           this.toggle();
         }
-      })
+      }
+    },
+    mounted(){
+      this.onResize();
+      this._position();
     },
     watch: {
-      isOpened(newVal, oldVal){
+      isOpened(newVal){
         if ( newVal ){
           if ( !this.hasBeenOpened ){
             this.hasBeenOpened = true;
             this.$refs.tree.load();
           }
+          $(document.body).on("mousedown touch", "*", this.checkMouseDown)
         }
-        this.$nextTick(() => {
-          if ( newVal && !oldVal ){
-            this._connect_menu();
-          }
-          else if ( !newVal && oldVal ){
-            this._disconnect_menu();
-          }
-        });
+        else{
+          $(document.body).off("mousedown touch", "*", this.checkMouseDown)
+        }
+      },
+      currentMenu(){
+        this.reset()
       }
     }
   });
 
-})(jQuery, bbn, kendo);
+})(jQuery, bbn);

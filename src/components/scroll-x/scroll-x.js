@@ -5,7 +5,7 @@
   "use strict";
 
   Vue.component('bbn-scroll-x', {
-    template: '#bbn-tpl-component-scroll-x',
+    mixins: [bbn.vue.basicComponent],
     props: {
       /* Must be an instance of bbn-scroll */
       scroller: {
@@ -60,7 +60,7 @@
     },
     methods: {
       // Sets the left position
-      _changePosition(next, animate, force){
+      _changePosition(next, animate, force, origin){
         let left;
         if ( next < 0 ){
           left = 0;
@@ -75,7 +75,7 @@
           (typeof(left) === 'number') &&
           ((left !== this.left) || force)
         ){
-          this.scrollContainer(left, animate);
+          this.scrollContainer(left, animate, origin);
         }
       },
 
@@ -108,27 +108,31 @@
       },
 
       // Effectively change the scroll and bar position and sets variables
-      scrollContainer(left, animate){
+      scrollContainer(left, animate, origin){
         if ( this.realContainer && this.contentWidth ){
           this.currentScroll = left ? Math.round(this.contentWidth * left / 100 * 10000) / 10000 : 0;
-          if ( animate && (this.realContainer.scrollLeft !== this.currentScroll) ){
+          if ( animate ){
             $.each(this.scrollableElements(), (i, a) => {
-              if ( a !== this.realContainer ){
+              if ( (a !== this.realContainer) && (a !== origin) && (a.scrollTop !== this.currentScroll) ){
                 $(a).animate({scrollLeft: this.currentScroll}, "fast");
               }
             });
-            $(this.realContainer).animate({scrollLeft: this.currentScroll}, "fast", () => {
-              this.left = left;
-              this.normalize();
-            });
+            if ( (origin !== this.realContainer) && (this.realContainer.scrollLeft !== this.currentScroll) ){
+              $(this.realContainer).animate({scrollLeft: this.currentScroll}, "fast", () => {
+                this.left = left;
+                this.normalize();
+              });
+            }
           }
           else{
-            this.realContainer.scrollLeft = this.currentScroll;
             $.each(this.scrollableElements(), (i, a) => {
-              if ( a !== this.realContainer ){
+              if ( (a !== this.realContainer) && (a !== origin) && (a.scrollLeft !== this.currentScroll) ){
                 a.scrollLeft = this.currentScroll;
               }
             });
+            if ( (origin !== this.realContainer) && (this.realContainer.scrollLeft !== this.currentScroll) ){
+              this.realContainer.scrollLeft = this.currentScroll;
+            }
             this.left = left;
             this.normalize();
           }
@@ -168,18 +172,22 @@
       },
 
       // Calculates all the proportions based on content
-      onResize() {
+      onResize(){
         if ( this.realContainer ){
-          this.containerWidth = $(this.realContainer).width();
-          this.contentWidth = this.realContainer.children[0] ? this.realContainer.children[0].clientWidth : this.containerWidth;
-          // The scrollbar is only visible if needed, i.e. the content is larger than the container
-          if ( this.contentWidth - this.tolerance > this.containerWidth ){
-            let old = this.width;
-            this.width = this.containerWidth / this.contentWidth * 100;
-            this._changePosition(old ? Math.round(this.left * (old/this.width) * 10000)/10000 : 0);
-          }
-          else{
-            this.width = 0;
+          let tmp1 = $(this.realContainer).width() - 18,
+              tmp2 = this.realContainer.children[0] ? this.realContainer.children[0].clientWidth : this.containerWidth - 18;
+          if ( (tmp1 !== this.containerWidth) || (tmp2 !== this.contentWidth) ){
+            this.containerWidth = tmp1;
+            this.contentWidth = tmp2;
+            // The scrollbar is only visible if needed, i.e. the content is larger than the container
+            if ( this.contentWidth - this.tolerance > this.containerWidth ){
+              let old = this.width;
+              this.width = this.containerWidth / this.contentWidth * 100;
+              this._changePosition(old ? Math.round(this.left * (old / this.width) * 10000) / 10000 : 0);
+            }
+            else{
+              this.width = 0;
+            }
           }
         }
         else{
@@ -195,7 +203,7 @@
           (e.target.scrollLeft !== this.currentScroll)
         ){
           if ( e.target.scrollLeft ){
-            this._changePosition(Math.round(e.target.scrollLeft / this.contentWidth * 1000000)/10000);
+            this._changePosition(Math.round(e.target.scrollLeft / this.contentWidth * 1000000)/10000, false, false, e.target);
           }
           else{
             this._changePosition(0);
@@ -204,12 +212,16 @@
         this.overContent();
       },
 
+      adjustBar(){
+
+      },
+
       // Sets all event listeners
       initContainer(){
         if ( !this.realContainer && this.scroller ){
           this.realContainer = this.scroller.$refs.scrollContainer || false;
         }
-        if ( this.realContainer ){
+        if ( this.realContainer && this.scroller ){
           this.onResize();
           let $cont = $(this.realContainer);
           this.scroller.$off("resize", this.onResize);
@@ -220,9 +232,9 @@
           $cont.scroll(this.adjust);
           $cont.mousemove(this.overContent);
           $.each(this.scrollableElements(), (i, a) => {
-            $(a).off("scroll", this.adjust);
+            $(a).off("scroll", this.adjustBar);
             $(a).off("mousemove", this.overContent);
-            $(a).scroll(this.adjust);
+            $(a).scroll(this.adjustBar);
             $(a).mousemove(this.overContent);
           });
         }
@@ -231,7 +243,9 @@
       // When the mouse is over the content
       overContent(e){
         clearTimeout(this.moveTimeout);
-        this.show = true;
+        if ( !this.show ){
+          this.show = true;
+        }
         this.moveTimeout = setTimeout(() => {
           if ( !this.isOverSlider ){
             this.hideSlider();
@@ -297,7 +311,6 @@
           if ( num < 0 ){
             num = 0;
           }
-          bbn.fn.log("scrollToY", num);
           this._changePosition(100 / this.contentWidth * num, animate);
         }
       }
@@ -318,6 +331,8 @@
       document.addEventListener("touchmove", this.onDrag);
       document.addEventListener("mouseup", this.stopDrag);
       document.addEventListener("touchend", this.stopDrag);
+      this.onResize();
+      this.$emit('ready');
     },
     beforeDestroy() {
       $(this.realContainer).off("scroll", this.adjust);

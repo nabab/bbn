@@ -8,7 +8,7 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-loading', {
-    template: '#bbn-tpl-component-loading',
+    mixins: [bbn.vue.basicComponent],
     props: {
       encoded: {
         type: Boolean,

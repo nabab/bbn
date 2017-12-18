@@ -8,7 +8,7 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-initial', {
-    mixins: [bbn.vue.optionComponent],
+    mixins: [bbn.vue.basicComponent, bbn.vue.optionComponent],
     props: {
       userId: {},
       userName: {},
@@ -24,7 +24,7 @@
       radius: {},
       cfg: {
         type: Object,
-        default: function(){
+        default(){
           return {
             width: 40,
             height: 40,
@@ -39,42 +39,41 @@
         }
       }
     },
-    data: function(){
-      var vm = this;
+    data(){
       return $.extend({
         users: bbn.users ? bbn.users : []
-      }, bbn.vue.treatData(vm))
+      }, bbn.vue.treatData(this))
     },
-    render: function(createElement){
-      var vm = this,
-          opt = {};
-      if ( vm.userName || vm.name ){
+    render(createElement){
+      let opt = {
+        'class': this.componentClass
+      };
+      if ( this.userName || this.name ){
         opt.attrs = {
-          title: vm.userName ? vm.userName : vm.name
+          title: this.userName ? this.userName : this.name
         };
       }
       return createElement('img', opt);
     },
     methods: {
-      getOptions: function(){
-        var vm = this,
-            cfg = bbn.vue.getOptions(vm);
+      getOptions(){
+        let cfg = bbn.vue.getOptions(this);
         if ( cfg.letters ){
           cfg.charCount = cfg.letters.length;
         }
         else if ( bbn.users ){
-          var name = cfg.userName ? cfg.userName : false;
+          let name = cfg.userName ? cfg.userName : false;
           if ( !name && cfg.userId ){
             name = bbn.fn.get_field(bbn.users, "value", cfg.userId, "text");
           }
           if ( name ){
-            var tmp = bbn.fn.removeEmpty(name.split(" ")),
+            let tmp = bbn.fn.removeEmpty(name.split(" ")),
                 max = cfg.charCount || 3;
             if ( (tmp.length > max) && (tmp[0].length <= 3) ){
               tmp.shift();
             }
             cfg.letters = '';
-            for ( var i = 0; i < tmp.length; i++ ){
+            for ( let i = 0; i < tmp.length; i++ ){
               if ( !cfg.charCount || (cfg.letters.length <= cfg.charCount) ){
                 cfg.letters += tmp[i].substr(0, 1);
               }
@@ -88,7 +87,7 @@
           cfg.charCount = cfg.letters.length;
         }
         if ( !cfg.fontSize ){
-          var baseSize = cfg.height / cfg.charCount;
+          let baseSize = cfg.height / cfg.charCount;
           cfg.fontSize = Math.round(baseSize + bbn.fn.percent(15*cfg.charCount, baseSize));
         }
         if ( !cfg.name ){
@@ -97,10 +96,8 @@
         return cfg;
       }
     },
-    mounted: function(){
-      var vm = this,
-          cfg = vm.getOptions();
-      $(vm.$el).initial(cfg);
+    mounted(){
+      $(this.$el).initial(this.getOptions());
     },
   });
 

@@ -5,8 +5,7 @@
   "use strict";
 
   Vue.component('bbn-multiselect', {
-    mixins: [bbn.vue.fullComponent, bbn.vue.dataSourceComponent],
-    template: '#bbn-tpl-component-multiselect',
+    mixins: [bbn.vue.basicComponent, bbn.vue.fullComponent, bbn.vue.dataSourceComponent],
     props: {
       source: {
         type: [String, Array, Object]
@@ -16,7 +15,7 @@
       },
       cfg: {
         type: Object,
-        default: function(){
+        default(){
           return {
             dataTextField: 'text',
             dataValueField: 'value',
@@ -25,28 +24,45 @@
         }
       }
     },
-    data: function(){
+    data(){
       return $.extend({
         widgetName: "kendoMultiSelect"
       }, bbn.vue.treatData(this));
     },
-    mounted: function(){
+    methods: {
+      getOptions(){
+        let cfg = bbn.vue.getOptions(this),
+            vm = this;
+        cfg.change = (e) => {
+          vm.$emit("input", e.sender.value());
+          if ( $.isFunction(vm.change) ){
+            vm.change(e.sender.value());
+          }
+        };
+        if ( this.template ){
+          cfg.itemTemplate = e => {
+            return vm.template(e);
+          };
+        }
+        cfg.dataTextField = this.sourceText || this.widgetOptions.dataTextField || 'text';
+        cfg.dataValueField = this.sourceValue || this.widgetOptions.dataValueField || 'value';
+        cfg.valuePrimitive = true;
+        cfg.autoWidth= true;
+        return cfg;
+      }
+    },
+    mounted(){
       let cfg = this.getOptions();
       if ( this.disabled ){
         cfg.enable = false;
       }
-      if ( this.template ){
-        cfg.template = e => {
-          return this.template(e);
-        };
-      }
       this.widget = $(this.$refs.element).kendoMultiSelect(cfg).data("kendoMultiSelect");
       if ( cfg.sortable ){
         this.widget.tagList.kendoSortable({
-          hint:function(element) {
+          hint(element) {
             return element.clone().addClass("hint");
           },
-          placeholder:function(element) {
+          placeholder(element) {
             return element.clone().addClass("placeholder").html('<div style="width:50px; text-align: center; padding: 0"> ... </div>');
           }
         });
@@ -54,7 +70,7 @@
       this.$emit("ready", this.value);
     },
     computed: {
-      dataSource: function(){
+      dataSource(){
         if ( this.source ){
           return bbn.vue.toKendoDataSource(this);
         }
@@ -62,7 +78,7 @@
       }
     },
     watch:{
-      source: function(newDataSource){
+      source(newDataSource){
         bbn.fn.log("Changed DS", this.dataSource);
         this.widget.setDataSource(this.dataSource);
       }

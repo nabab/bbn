@@ -1,8 +1,12 @@
-<div class="bbn-popup bbn-100" v-show="showPopup" :style="{zIndex: zIndex}">
+<div :class="['bbn-100', componentClass]"
+     v-show="showPopup"
+     :style="{zIndex: zIndex}"
+>
   <div class="bbn-100">
     <transition name="fade"
                 @after-leave="showPopup = false"
                 @before-enter="showPopup = true"
+                :duration="{enter: 100, leave: 200}"
     >
       <div class="k-overlay"
            v-if="popups.length"
@@ -12,7 +16,7 @@
     <transition-group name="custom-classes-transition"
                       enter-active-class="animated fadeIn"
                       leave-active-class="animated fadeOut"
-                      :duration="{ enter: 300, leave: 200 }"
+                      :duration="{enter: 300, leave: 200}"
                       tag="div"
                       class="bbn-100"
     >
@@ -27,9 +31,11 @@
       >
         <div class="bbn-window k-widget bbn-popup-unit bbn-flex-height"
              :style="{
-                    width: isMaximized ? '100%' : realWidth,
-                    height: isMaximized ? '100%' : realHeight,
-                    zIndex: $parent.$parent.$props.zIndex + index
+                    width: isMaximized ? '100%' : realWidth + widthUnit,
+                    height: isMaximized ? '100%' : realHeight + heightUnit,
+                    zIndex: $parent.$parent.$props.zIndex + index,
+                    top: top + heightUnit,
+                    left: left + widthUnit
                   }"
              @keyup.esc="close()"
         >
@@ -38,13 +44,13 @@
               <span v-html="title"></span>
               <div class="bbn-popup-actions">
                 <i v-if="maximizable"
-                   :class="'zmdi zmdi-window-' + (maximized ? 'restore' : 'maximize')"
-                   @click="isMaximized = !isMaximized; $forceUpdate(); center(index)"
+                   :class="'zmdi bbn-lg zmdi-window-' + (isMaximized ? 'restore' : 'maximize')"
+                   @click.stop.prevent="isMaximized = !isMaximized"
                    :title="_('Full screen')"
                 ></i>
                 <i v-if="closable !== false"
-                   class="fa fa-times"
-                   @click="close()"
+                   class="fa bbn-lg fa-times"
+                   @click.stop.prevent="close()"
                    :title="_('Close')"
                 ></i>
               </div>

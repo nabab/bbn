@@ -1,4 +1,4 @@
-<button class="k-button bbn-button"
+<button :class="[{'k-button': true}, componentClass]"
         ref="element"
         @click.prevent="click($event)"
         @focus="focus($event)"

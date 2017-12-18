@@ -63,10 +63,11 @@
 
 
   Vue.component('bbn-filter', {
-    template: '#bbn-tpl-component-filter',
-    mixins: [bbn.vue.dataEditorComponent],
+    mixins: [bbn.vue.basicComponent, bbn.vue.dataEditorComponent],
     name: 'bbn-filter',
     props: {
+      value: {},
+      operator: {},
       // Pre-existing conditions
       conditions: {
         type: Array,
@@ -122,6 +123,8 @@
     data(){
       return {
         currentLogic: this.logic,
+        currentValue: this.value !== undefined ? this.value : null,
+        currentOperator: this.operator !== undefined ? this.value : null
       };
     },
     mounted(){
@@ -208,7 +211,7 @@
         return st;
       },
       delete_full_condition(idx){
-        this.conditions.splice(idx, 1);
+        this.$emit('unset', this.conditions.splice(idx, 1));
       },
       delete_condition: function(condition){
         bbn.fn.log(condition);

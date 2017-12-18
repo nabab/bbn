@@ -11,8 +11,7 @@
   "use strict";
 
   Vue.component('bbn-json-editor', {
-    mixins: [bbn.vue.fullComponent],
-    template: '#bbn-tpl-component-json-editor',
+    mixins: [bbn.vue.basicComponent, bbn.vue.fullComponent],
     methods: {
       getOptions(){
         const vm = this;

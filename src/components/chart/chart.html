@@ -1,4 +1,4 @@
-<div class="bbn-chart bbn-flex-height"
+<div :class="['bbn-flex-height', componentClass]"
      :style="{
       width: width,
       height: height,
@@ -11,6 +11,7 @@
   ></h4>
   <div class="bbn-w-100 bbn-flex-fill">
     <div ref="chart"
-         class="bbn-full-screen ct-chart"></div>
+         class="ct-chart bbn-full-screen"
+    ></div>
   </div>
 </div>

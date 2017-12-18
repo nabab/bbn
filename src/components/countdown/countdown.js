@@ -28,7 +28,7 @@
   }];
 
   Vue.component('bbn-countdown', {
-    template: '#bbn-tpl-component-countdown',
+    mixins: [bbn.vue.basicComponent],
     props: {
       precision: {
         type: String,

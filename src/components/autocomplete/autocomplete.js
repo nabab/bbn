@@ -7,8 +7,7 @@
   kendo.ui.AutoComplete.prototype.options.autoWidth = true;
 
   Vue.component('bbn-autocomplete', {
-    template: '#bbn-tpl-component-autocomplete',
-    mixins: [bbn.vue.fullComponent, bbn.vue.dataSourceComponent],
+    mixins: [bbn.vue.basicComponent, bbn.vue.inputComponent, bbn.vue.eventsComponent, bbn.vue.dataSourceComponent],
     props: {
       id: {
         type: String

@@ -14,13 +14,16 @@ div.bbn-tabnav {
     > ul.bbn-tabnav-tabs{
       position: relative;
       border-bottom-style: solid;
-      border-bottom-width: 1px;
+      border-bottom-width: 3px;
       li.k-item {
         margin: 0 !important;
         span.k-link {
           color: inherit;
           padding-right: 1.25em !important;
           padding-left: 1.25em !important;
+          &.bbn-tabnav-unsaved::after {
+            content: '*';
+          }
         }
         div.bbn-tabnav-icons {
           display: block;
@@ -174,26 +177,6 @@ ul.ui-tabNav-menu{
   }
 }
 
-ul.fancytree-container,.ui-fancytree{
-  border-width: 0 !important;
-  border-style: none !important;
-  border-color: transparent !important;
-  border: 0 !important;
-  color: inherit !important;
-  background-color: inherit !important;
-  li,span.fancytree-title{
-    color: inherit !important;
-  }
-  li,span.fancytree-title{
-    background-color: inherit !important;
-  }
-  .fancytree-active{
-    span.fancytree-title{
-      background-color: #3875D7 !important;
-      color: #EEE !important;
-    }
-  }
-}
 div.bbn-tabnav-icons{
   display: none;
 }

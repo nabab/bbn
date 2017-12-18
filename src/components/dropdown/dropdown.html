@@ -1,6 +1,5 @@
-<span class="bbn-dropdown">
+<span :class="componentClass">
   <input :value="value"
-         style="width: inherit"
          ref="element"
          @input="update($event.target.value)"
          @click="click($event)"

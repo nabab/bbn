@@ -50,8 +50,7 @@
 
 
   Vue.component('bbn-datetimepicker', {
-    mixins: [bbn.vue.fullComponent],
-    template: '#bbn-tpl-component-datetimepicker',
+    mixins: [bbn.vue.basicComponent, bbn.vue.fullComponent],
     props: {
       cfg: {
         type: Object,

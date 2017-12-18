@@ -50,8 +50,7 @@
 
 
   Vue.component('bbn-timepicker', {
-    mixins: [bbn.vue.fullComponent],
-    template: '#bbn-tpl-component-timepicker',
+    mixins: [bbn.vue.basicComponent, bbn.vue.fullComponent],
     props: {
       cfg: {
         type: Object,

@@ -12,8 +12,7 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-chart', {
-    mixins: [bbn.vue.optionComponent],
-    template: "#bbn-tpl-component-chart",
+    mixins: [bbn.vue.basicComponent, bbn.vue.optionComponent],
     props: {
       source: {},
       type: {
@@ -329,7 +328,7 @@
       },
       legendFixed(){
         if ( Array.isArray(this.legend) && (typeof this.legend[0] === 'object') ){
-          return $.map(this.legend, (l, i) => {
+          return $.map(this.legend, (l) => {
             return l.text || null;
           });
         }
@@ -466,51 +465,6 @@
                     return ret;
                   }
                   return spl(value);
-
-
-                  /*if ( this.labelWrap ){
-                    let ret = '',
-                        labelWrap = typeof this.labelWrap === 'number' ? this.labelWrap : 25,
-                        tmp,
-                        cont = 0;
-                    if ( typeof value === 'number' ){
-                      value = value.toString();
-                    }
-                    if ( value.length <= labelWrap ){
-                      return value;
-                    }
-                    tmp = value.split(" ");
-                    tmp.forEach((t) => {
-                      while ( t.length ){
-                        if ( cont ){
-                          let b = t.slice(0, cont);
-                          t = t.slice(cont);
-                          if ( b.length < cont ){
-                            cont -= b.length;
-                          }
-                          else {
-                            cont = 0;
-                          }
-                          ret +=  b + (cont ? ' ' : "\n");
-                        }
-                        if ( t.length ){
-                          let a = t.slice(0, labelWrap-1);
-                          if ( a.length < labelWrap ){
-                            cont = labelWrap - a.length;
-                          }
-                          ret += a + (cont ? ' ' : '');
-                          if ( cont ){
-                            cont--;
-                          }
-                          t = t.slice(labelWrap-1);
-                        }
-                      }
-                    });
-                    return ret;
-                  }
-                  else {
-                    return value;
-                  }*/
                 }
                 else {
                   return value;
@@ -947,6 +901,9 @@
         this.widget.on('draw', (chartData) => {
           let tmp = 1;
           // Insert linebreak to labels
+          if ( this.isLine ){
+            
+          }
           if ( this.isPie ){
             if ( chartData.type === 'label' ){
               let lb = chartData.text.split("\n"),
@@ -1002,6 +959,13 @@
               }
             });
             setTimeout(() => {
+              let legendHeight = $('ul.ct-legend:not(.ct-legend-inside)', this.widget.container).height(),
+                  svgHeight = $('svg', this.widget.container).height(),
+                  contHeight = $(this.widget.container).height();
+              if ( (legendHeight + svgHeight) > contHeight ){
+                this.widget.update(false, {height: contHeight - legendHeight}, true);
+                return;
+              }
               $("ul.ct-legend li", this.widget.container).each((i, v) => {
                 if ( Array.isArray(this.legendTitles) ){
                   $(v).attr('title', this.legendTitles[i]);

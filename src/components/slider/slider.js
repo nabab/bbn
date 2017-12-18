@@ -5,7 +5,7 @@
   "use strict";
 
   Vue.component('bbn-slider', {
-    template: '#bbn-tpl-component-slider',
+    mixins: [bbn.vue.basicComponent],
     props: {
       orientation: {},
       disabled: {},

@@ -8,8 +8,7 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-input', {
-    mixins: [bbn.vue.eventsComponent, bbn.vue.inputComponent],
-    template: '#bbn-tpl-component-input',
+    mixins: [bbn.vue.basicComponent, bbn.vue.eventsComponent, bbn.vue.inputComponent],
     props: {
       autocomplete: {},
       type: {

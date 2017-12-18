@@ -185,8 +185,7 @@
   ui.plugin(dropDownTreeView);
 
   Vue.component('bbn-dropdowntreeview', {
-    mixins: [bbn.vue.fullComponent],
-    template: '#bbn-tpl-component-dropdowntreeview',
+    mixins: [bbn.vue.basicComponent, bbn.vue.fullComponent],
     props: {
       source: {
         type: Array

@@ -1,5 +1,6 @@
-<span class="k-textbox bbn-input">
+<span :class="componentClass">
   <input v-if="type === 'email'"
+         class="k-textbox"
          :value="value"
          type="email"
          :name="name"
@@ -23,6 +24,7 @@
          @mouseleave="out"
   >
   <input v-else-if="type === 'hidden'"
+         class="k-textbox"
          :value="value"
          type="email"
          :name="name"
@@ -46,6 +48,7 @@
          @mouseleave="out"
   >
   <input v-else-if="type === 'month'"
+         class="k-textbox"
          :value="value"
          type="month"
          :name="name"
@@ -69,6 +72,7 @@
          @mouseleave="out"
   >
   <input v-else-if="type === 'number'"
+         class="k-textbox"
          :value="value"
          type="number"
          :name="name"
@@ -92,6 +96,7 @@
          @mouseleave="out"
   >
   <input v-else-if="type === 'tel'"
+         class="k-textbox"
          :value="value"
          type="tel"
          :name="name"
@@ -115,6 +120,7 @@
          @mouseleave="out"
   >
   <input v-else-if="type === 'url'"
+         class="k-textbox"
          :value="value"
          type="url"
          :name="name"
@@ -138,6 +144,7 @@
          @mouseleave="out"
   >
   <input v-else-if="type === 'password'"
+         class="k-textbox"
          :value="value"
          type="password"
          :name="name"
@@ -161,6 +168,7 @@
          @mouseleave="out"
   >
   <input v-else
+         class="k-textbox"
          :value="value"
          :name="name"
          ref="element"

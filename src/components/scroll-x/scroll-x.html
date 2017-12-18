@@ -1,9 +1,8 @@
 <transition name="custom-classes-transition"
             enter-active-class="animated fadeIn"
             leave-active-class="animated fadeOut"
-            keep-alive
 >
-  <div class="bbn-scroll-x"
+  <div :class="componentClass"
        v-if="realContainer && (contentWidth > containerWidth)"
        v-show="show && width"
        @click="jump"

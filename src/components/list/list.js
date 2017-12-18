@@ -8,8 +8,7 @@
    * Classic input with normalized appearance
    */
   Vue.component('bbn-list', {
-    mixins: [bbn.vue.optionComponent, bbn.vue.widgetComponent, bbn.vue.dataSourceComponent],
-    template: '#bbn-tpl-component-list',
+    mixins: [bbn.vue.basicComponent, bbn.vue.optionComponent, bbn.vue.widgetComponent, bbn.vue.dataSourceComponent],
     props: {
       expandMode: {
         type: String

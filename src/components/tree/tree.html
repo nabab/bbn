@@ -1,4 +1,4 @@
-<div class="bbn-tree" v-on="isRoot ? {keydown:keyNav} : {}">
+<div :class="componentClass" v-on="isRoot ? {keydown:keyNav} : {}">
 
   <div class="loader" v-if="loading">
     Loading...
@@ -22,18 +22,27 @@
                        v-for="(it, i) in items"
                        :text="it.text"
                        :key="i"
+                       :idx="i"
                        :data="toData(it)"
+                       :cls="it.cls"
                        :icon="it.icon"
+                       :expanded="it.expanded"
+                       :selectable="it.selectable === undefined ? true : it.selectable"
+                       :selected="it.selected"
                        :num="it.num"
                        :source="it.items ? it.items : []"
                        :level="level"
+                       :filter-string="tree.filterString"
         >
-          <li :class="'bbn-tree-node' + (cls ? ' ' + cls : '') + (isSelected ? ' selected' : '') + (isActive ? ' active' : '')"
+          <li :class="{
+                       'bbn-tree-node': true,
+                       'bbn-unselectable': true,
+                       selected: isSelected,
+                       active: isActive
+                      }"
+              v-show="isMatch || numMatches"
           >
-            <span :class="{
-                    node: true,
-                    'no-component': !component
-                  }"
+            <span :class="'node' + (component ? '' : ' no-component') + (cls ? ' ' + cls : '')"
                   @mouseover.stop="mouseOver"
             >
               <span class="expander">
@@ -59,7 +68,7 @@
               >
                 <span class="selectable"
                       @mousedown.left="if(tree.draggable){startDrag($event);}"
-                      @mouseup.left="if(!tree.realDragging){isSelected = !isSelected}"
+                      @mouseup.left="if(!tree.realDragging && selectable){isSelected = !isSelected}"
                       tabindex="0"
                 >
                   <span class="icon">
@@ -104,8 +113,7 @@
       ></ul>
     </div>
   </component>
-  <h3 v-else-if="isRoot"
-      v-html="_('No items to show')"
-  ></h3>
-
+  <h2 v-else-if="isRoot"
+      v-html="_('No items...')"
+  ></h2>
 </div>

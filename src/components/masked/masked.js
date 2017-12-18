@@ -5,8 +5,7 @@
   "use strict";
 
   Vue.component('bbn-masked', {
-    mixins: [bbn.vue.fullComponent],
-    template: '#bbn-tpl-component-masked',
+    mixins: [bbn.vue.basicComponent, bbn.vue.fullComponent],
     props: {
       mask: {
         type: String

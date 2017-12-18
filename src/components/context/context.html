@@ -1,5 +1,5 @@
 <component :is="tag"
-           class="bbn-context"
+           :class="componentClass"
            @click.prevent.stop="clickItem"
            @contextmenu.prevent.stop="clickItem"
            @mousedown.prevent.stop="() => {return false}"

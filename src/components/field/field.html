@@ -1,0 +1,8 @@
+<component :is="renderedComponent"
+           v-bind="renderedOptions"
+           :class="componentClass"
+
+
+>
+  <div v-if="renderedContent" v-html="renderedContent"></div>
+</component>

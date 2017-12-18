@@ -1,5 +1,5 @@
 
-<div class="bbn-filter" :style="'border-left-color:' + border_color">
+<div :class="componentClass" :style="'border-left-color:' + border_color">
   <h3 v-if="first"
       v-html="_('Où les conditions suivantes sont vraies')"
   ></h3>
@@ -9,27 +9,29 @@
     <div :class="'bbn-filter-items bbn-filter-bordered bbn-filter-' + (currentLogic === 'OR' ? 'or' : 'and')"
          style="display: inline-flex; align-items: baseline">
       <div class="bbn-filter-logic" v-if="multi">
-          <span v-if="idx"
-                v-text="currentLogic"
-          ></span>
-          <bbn-dropdown v-else
-                        class="bbn-s"
-                        :source="[{
-                          text: _('ET'),
-                          value: 'AND'
-                        }, {
-                          text: _('OU'),
-                          value: 'OR'
-                        }]"
-                        v-model="currentLogic"
-                        name="logic"
-                        style="max-width: 5em"
-                        ref="logic"
-                        @change="$emit('change', {logic: currentLogic, conditions: conditions})"
-          >
-          </bbn-dropdown>
-        </div>
-      <div :style="condition.conditions ? 'display: flex; flex-direction: column;' : 'display: flex;  flex-direction: row; align-items: baseline' ">
+        <span v-if="idx"
+              v-text="currentLogic"
+        ></span>
+        <bbn-dropdown v-else
+                      class="bbn-s"
+                      :source="[{
+                        text: _('ET'),
+                        value: 'AND'
+                      }, {
+                        text: _('OU'),
+                        value: 'OR'
+                      }]"
+                      v-model="currentLogic"
+                      name="logic"
+                      style="max-width: 5em"
+                      ref="logic"
+                      @change="$emit('change', {logic: currentLogic, conditions: conditions})"
+        >
+        </bbn-dropdown>
+      </div>
+      <div :style="condition.conditions ? 'display: flex; flex-direction: column;' : 'display: flex;  flex-direction: row; align-items: baseline'"
+           v-if="multi"
+      >
         <div class="bbn-filter-buttons"
              style="display: inline-flex;"
         >
@@ -38,7 +40,7 @@
              @mouseout="out"
              :title="_('Delete this condition')"
              ref="minus"
-             @click="delete_full_condition(idx)"
+             @click="delete_condition(condition)"
           > </i>
           <i class="bbn-p bbn-lg fa fa-plus-circle"
              v-if="multi"
@@ -51,18 +53,18 @@
           > </i>
         </div>
         <div class="bbn-filter-main">
-        <div v-if="condition.operator">
-          <span v-html="condition_text(condition)"></span>
+          <div v-if="condition.operator">
+            <span v-html="condition_text(condition)"></span>
+          </div>
+          <bbn-filter v-else-if="condition.logic"
+                      :fields="fields"
+                      :conditions="condition.conditions"
+                      :logic="condition.logic"
+                      @change="(d) => {condition.logic = d.logic}"
+                      :num="num + 1"
+                      :idx="idx"
+          ></bbn-filter>
         </div>
-        <bbn-filter v-else-if="condition.logic"
-                    :fields="fields"
-                    :conditions="condition.conditions"
-                    :logic="condition.logic"
-                    @change="(d) => {condition.logic = d.logic}"
-                    :num="num + 1"
-                    :idx="idx"
-        ></bbn-filter>
-      </div>
       </div>
     </div>
   </div>
@@ -84,6 +86,8 @@
 
       <div class="bbn-filter-main">
         <bbn-filter-form inline-template
+                         :value="value"
+                         :operator="operator"
                          :type="type"
                          :fields="fields"
                          :field="field"
@@ -126,7 +130,7 @@
             </div>
             <div class="bbn-block padding bbn-db-column">
               <bbn-button :disabled="!currentOperator"
-                          @click="validate()"
+                          @click="validate"
                           title="Validate"
                           ref="check"
               >

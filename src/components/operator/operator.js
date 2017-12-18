@@ -4,8 +4,7 @@
 (function($, bbn, kendo){
   "use strict";
   Vue.component('bbn-operator', {
-    template: '#bbn-tpl-component-operator',
-    mixins: [bbn.vue.dataEditorComponent, bbn.vue.inputComponent],
+    mixins: [bbn.vue.basicComponent, bbn.vue.dataEditorComponent, bbn.vue.inputComponent],
     name: 'bbn-operator',
     props: {
       type: {

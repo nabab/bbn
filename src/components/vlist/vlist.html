@@ -1,15 +1,17 @@
-<div class="bbn-vlist k-animation-container"
+<div :class="[{'k-animation-container': true}, componentClass]"
      :style="getStyles()"
 >
   <ul :class="'k-widget k-popup k-group k-reset ' + mode + (parent ? ' k-menugroup' : ' k-menu k-menu-vertical k-context-menu')"
       @mouseleave.stop.prevent="leaveList($event)"
   >
     <li v-for="(li, idx) in items"
+        v-show="!li.hidden"
         :class="{
           'k-item': true,
           'k-state-default': true,
           'k-state-hover': currentIndex === idx,
           selected: li.selected ? true : false,
+          'k-state-disabled': !!li.disabled,
           'k-first': idx === 0,
           'k-last': idx === items.length - 1
         }"
@@ -19,7 +21,7 @@
     >
       <span class="k-link"
             @mousedown="beforeClick"
-            @click.stop.prevent="select($event, idx)"
+            @click.stop.prevent="select(idx)"
             @mouseup="afterClick"
       >
         <span class="space" v-if="(mode === 'selection') || (mode === 'options')">
@@ -29,13 +31,7 @@
         <span class="space" v-if="!noIcon">
           <i v-if="li.icon" :class="li.icon + ' bbn-lg'"></i>
         </span>
-        <span class="text">
-          <span :class="{
-            'text': true,
-            'disabled': !!li.disabled,
-            'hidden': !!li.hidden
-          }" v-html="li.text"></span>
-        </span>
+        <span class="text" v-html="li.text"></span>
         <span v-if="li.items && li.items.length"
               class="k-icon k-i-arrow-60-right"
         ></span>

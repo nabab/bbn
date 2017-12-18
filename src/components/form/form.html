@@ -2,7 +2,7 @@
       :disabled="disabled"
       :method="method"
       :autocomplete="autocomplete"
-      class="bbn-form k-edit-form-container bbn-flex-height"
+      :class="['k-edit-form-container', 'bbn-flex-height', 'bbn-full-screen', componentClass]"
       @submit.prevent="submit"
 >
   <div v-if="fixedFooter"
@@ -10,6 +10,27 @@
   >
     <div class="bbn-full-screen">
       <bbn-scroll>
+        <div class="bbn-grid-fields bbn-padded" v-if="schema && schema.length">
+          <template v-for="field in schema"
+                    v-if="field.field && !field.buttons && (field.editable !== false)"
+          >
+            <component v-if="field.lineComponent"
+                       :is="field.lineComponent"
+                       :source="source"
+            ></component>
+            <template v-else>
+              <div v-html="field.title" :title="field.ftitle || field.title || field.field"></div>
+              <component v-if="field.editor"
+                         :is="field.editor"
+                         v-model="source[field.field]"
+              ></component>
+              <bbn-input v-else
+                         v-model="source[field.field]"
+              ></bbn-input>
+            </template>
+  
+          </template>
+        </div>
         <slot></slot>
       </bbn-scroll>
     </div>
@@ -19,13 +40,13 @@
     <slot name="footer"></slot>
     <template v-for="(button, i) in realButtons">
       <bbn-button v-if="button.command === submit"
-                  :style="{visibility: modified ? 'visible' : 'hidden'}"
+                  :style="{visibility: modified || prefilled ? 'visible' : 'hidden'}"
                   :key="i"
                   v-bind="button"
                   @click="submit()"
       ></bbn-button>
       <bbn-button v-else-if="button.command === reset"
-                  :style="{visibility: modified ? 'visible' : 'hidden'}"
+                  :style="{visibility: modified || prefilled ? 'visible' : 'hidden'}"
                   :key="i"
                   @click="reset()"
       ></bbn-button>
