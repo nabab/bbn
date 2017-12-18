@@ -82,7 +82,6 @@ class project extends bbn\models\cls\db{
         hex2bin($this->id),
         hex2bin(self::get_id_asset_path()));
     }
-
   }
 
   public function get_langs(){
