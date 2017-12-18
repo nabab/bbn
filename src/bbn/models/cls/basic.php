@@ -79,8 +79,8 @@ abstract class basic
 
   public function log(){
 		if ( $this->is_debug() ){
-			$ar = func_get_args();
-			$cn = bbn\str::encode_filename(str_replace('\\', '_', get_class($this)));
+			$ar = \func_get_args();
+			$cn = bbn\str::encode_filename(str_replace('\\', '_', \get_class($this)));
 			foreach ( $ar as $a ){
 				bbn\x::log($a, $cn);
 			}
@@ -93,7 +93,7 @@ abstract class basic
 	 * @return void 
 	 */
 	public function __call($name, $arguments){
-	  $class = get_class($this);
+	  $class = \get_class($this);
     $this->log(["Wrong method used for the class $class: $name with the following arguments:", $arguments]);
     die(var_dump(["Wrong method used for the class $class: $name with the following arguments:", $arguments]));
 	}

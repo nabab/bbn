@@ -60,7 +60,7 @@ class hash
 			$this->hash = '';
 		$h = explode(self::$separator,$this->hash);
 		$j = 0;
-		for ( $i = 0; $i < ( count($h) - 1 ); $i += 2 )
+		for ( $i = 0; $i < ( \count($h) - 1 ); $i += 2 )
 		{
 			$this->keys[$j] = $h[$i];
 			$this->values[$j] = $h[$i+1];
@@ -73,7 +73,7 @@ class hash
 	 */
 	public function add($pair, $replace=1)
 	{
-		if ( is_array($pair) )
+		if ( \is_array($pair) )
 		{
 			if ( isset($pair[0]) && isset($pair[1]) )
 			{
@@ -139,7 +139,7 @@ class hash
 	public function output()
 	{
 		$h = '';
-		if ( count($this->values) > 0 )
+		if ( \count($this->values) > 0 )
 		{
 			foreach ( $this->values as $k => $v )
 				$h.= $this->keys[$k].'/'.$v.'/';

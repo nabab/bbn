@@ -13,10 +13,10 @@ class square
 			$this->change = $this->db->current;
 			$this->db->change('bbn');
 		}
-		if ( is_int($schema) ){
+		if ( \is_int($schema) ){
 			$cond = " WHERE bbn_sites.id = $schema ";
 		}
-		else if ( is_string($schema) ){
+		else if ( \is_string($schema) ){
 			$cond = " WHERE bbn_sites.bbn_db LIKE '$schema' ";
 		}
 		if ( $tmp = $this->db->get_row("SELECT * FROM bbn_sites $cond LIMIT 1") ){
@@ -42,10 +42,10 @@ class square
 	public function get_table($id)
 	{
 		$smenu = false;
-		if ( is_int($id) ){
+		if ( \is_int($id) ){
 			$cond = " WHERE bbn_smenus.id = $id ";
 		}
-		else if ( is_string($id) ){
+		else if ( \is_string($id) ){
       if ( strpos($id, '.') ){
         $id = explode('.', $id)[1];
       }
@@ -91,7 +91,7 @@ class square
 		if ( $this->change ){
 			$this->db->change('bbn');
 		}
-		if ( is_string($id) && strpos($id, '.') && ( $x = explode('.', $id) ) && ( count($x) === 2 ) && bbn\str::check_name($x[0],$x[1]) ){
+		if ( \is_string($id) && strpos($id, '.') && ( $x = explode('.', $id) ) && ( \count($x) === 2 ) && bbn\str::check_name($x[0],$x[1]) ){
 			$id = $this->get_var("
 				SELECT bbn_fields.id
 				FROM bbn_fields
@@ -101,7 +101,7 @@ class square
 				WHERE bbn_fields.bbn_name LIKE '$x[1]'
 				LIMIT 1");
 		}
-		if ( is_int($id) || ctype_digit($id) ){
+		if ( \is_int($id) || ctype_digit($id) ){
 			if ( $tmp = $this->db->get_row("
         SELECT id, bbn_position, bbn_name, bbn_tit, bbn_id_form, bbn_mand
         FROM bbn_fields
@@ -144,7 +144,7 @@ class square
 	{
 		$tmp = [];
 		$field = '';
-		if ( !is_array($cfg) ){
+		if ( !\is_array($cfg) ){
 			$cfg = [];
 		}
 		switch ( $id )
@@ -185,9 +185,9 @@ class square
 			$tmp['field'] = 'dropdown';
 			$tmp['options']['type'] = 'number';
             //die(var_dump($cfg['options']));
-			if ( isset($cfg['options']['db'],$cfg['params'][0]) && is_object($cfg['options']['db']) ){
+			if ( isset($cfg['options']['db'],$cfg['params'][0]) && \is_object($cfg['options']['db']) ){
 				$p = explode('.', $cfg['params'][0]);
-				if ( count($p) === 2 ){
+				if ( \count($p) === 2 ){
 					$table = $p[0];
 					$field = $p[1];
 					$select = "`$table`.`$field`";
@@ -236,7 +236,7 @@ class square
 			break;
 			
 			case 12:
-			if ( count($cfg['params']) === 2 ){
+			if ( \count($cfg['params']) === 2 ){
 				$tmp['field'] = 'numeric';
 				$tmp['options']['min'] = $cfg['params'][0];
 				$tmp['options']['max'] = $cfg['params'][1];

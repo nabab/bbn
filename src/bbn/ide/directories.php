@@ -153,7 +153,7 @@ class directories {
     if ( ($pos = strpos($tab, '_ctrl')) ){
       // Fix the right path
       $bits = explode('/', $path);
-      $count = strlen(substr($tab, 0, $pos));
+      $count = \strlen(substr($tab, 0, $pos));
       if ( !empty($bits) ){
         while ( $count >= 0 ){
           array_pop($bits);
@@ -219,7 +219,7 @@ class directories {
     $res = [];
     foreach ( $dirs as $i => $d ){
       if ( !empty($d['tabs']) &&
-        defined('BBN_APP_PATH')
+        \defined('BBN_APP_PATH')
       ){
         $d['real_path'] = $this->decipher_path($d['path']);
         $d['prefix'] = strpos($d['real_path'], BBN_APP_PATH) === 0 ? '' : false;
@@ -249,7 +249,7 @@ class directories {
       $root = $this->get_root_path($i);
       if ( strpos($file, $root) === 0 ){
         $res = $i . '/';
-        $bits = explode('/', substr($file, strlen($root)));
+        $bits = explode('/', substr($file, \strlen($root)));
         // MVC
         if ( !empty($d['tabs']) ){
           $tab_path = array_shift($bits);
@@ -292,11 +292,11 @@ class directories {
     $url = self::real_to_url($file);
     $dir = self::dir(self::dir_from_url($url));
     if ( !empty($dir) &&
-      defined($dir['bbn_path'])
+      \defined($dir['bbn_path'])
     ){
       $bbn_p = constant($dir['bbn_path']);
       if ( strpos($file, $bbn_p) === 0 ){
-        $f = substr($file, strlen($bbn_p));
+        $f = substr($file, \strlen($bbn_p));
         $timer->stop('real_to_id');
         bbn\x::log($timer->results(), "directories");
         return bbn\str::parse_path($dir['bbn_path'].'/'.$f);
@@ -313,10 +313,10 @@ class directories {
       if ( !empty($d['bbn_path']) ){
         $bbn_p = constant($d['bbn_path']);
         if ( strpos($file, $bbn_p) === 0 ){
-          $p = substr($file, strlen($bbn_p));
+          $p = substr($file, \strlen($bbn_p));
           if ( strpos($p, $d['code']) === 0 ){
             die(var_dump($file, $bbn_p, $p));
-            $len_tmp = count(explode('/', $d['code']));
+            $len_tmp = \count(explode('/', $d['code']));
             if ( $len_tmp > $len ){
               $len = $len_tmp;
               $bbn_path = $d['bbn_path'];
@@ -341,7 +341,7 @@ class directories {
       ($dir = $this->dir($dn)) &&
       ($res = $this->get_root_path($dn))
     ){
-      $bits = explode('/', substr($url, strlen($dn), strlen($url)));
+      $bits = explode('/', substr($url, \strlen($dn), \strlen($url)));
       if ( !empty($dir['tabs']) && !empty($bits) ){
         // Tab's nane
         $tab = array_pop($bits);
@@ -401,7 +401,7 @@ class directories {
     $dir = false;
     foreach ( $this->dirs() as $i => $d ){
       if ( (strpos($url, $i) === 0) &&
-        (strlen($i) > strlen($dir) )
+        (\strlen($i) > \strlen($dir) )
       ){
         $dir = $i;
         break;
@@ -478,7 +478,7 @@ class directories {
     $constant = $bits[0];
     /** @var string $path The path that will be returned */
     $path = '';
-    if ( defined($constant) ){
+    if ( \defined($constant) ){
       $path .= constant($constant);
       array_shift($bits);
     }
@@ -499,7 +499,7 @@ class directories {
       'path' => bbn\str::parse_path($data['path']),
       'fcolor' => $data['fcolor'],
       'bcolor' => $data['bcolor'],
-      'outputs' => strlen($data['outputs']) ? $data['outputs'] : NULL,
+      'outputs' => \strlen($data['outputs']) ? $data['outputs'] : NULL,
       'files' => $data['files'],
       'position' => $data['position']
     ]) ){
@@ -519,7 +519,7 @@ class directories {
       'path' => bbn\str::parse_path($data['path']),
       'fcolor' => $data['fcolor'],
       'bcolor' => $data['bcolor'],
-      'outputs' => strlen($data['outputs']) ? $data['outputs'] : NULL,
+      'outputs' => \strlen($data['outputs']) ? $data['outputs'] : NULL,
       'files' => $data['files'],
       'position' => $data['position']
     ], ['id' => $data['id']]) ){
@@ -554,7 +554,7 @@ class directories {
     $cats = [];
     $r = [];
     foreach ( $all as $a ){
-      if ( defined($a['bbn_path']) ){
+      if ( \defined($a['bbn_path']) ){
         $k = $a['bbn_path'] . '/' . ($a['code'] === '/' ? '' : $a['code']);
         if ( !isset($cats[$a['id_alias']]) ){
           unset($a['alias']['cfg']);
@@ -689,14 +689,14 @@ class directories {
 
     if ( $file && $dir ){
       /** @var array $dir_cfg The directory configuration from DB */
-      if ( is_array($dir) ){
+      if ( \is_array($dir) ){
         $dir_cfg = $dir;
         $dir = $dir_cfg['value'] ?? $dir_cfg['path'];
       }
       else{
         $dir_cfg = $this->dir($dir);
       }
-      if ( !is_array($dir_cfg) ){
+      if ( !\is_array($dir_cfg) ){
         die(\bbn\x::dump("Problem with the function directories::dir with argument ".$dir));
       }
       $res = $this->get_file($file, $dir, $tab, $dir_cfg, $pref);
@@ -878,7 +878,7 @@ class directories {
     if ( ($file = bbn\str::parse_path($file)) &&
       ($real = $this->url_to_real($file)) &&
       ($dir = $this->dir($this->dir_from_url($file))) &&
-      defined('BBN_USER_PATH')
+      \defined('BBN_USER_PATH')
     ){
       $id_file = $this->real_to_id($real);
       $ext = bbn\str::file_ext($real, 1);
@@ -1115,7 +1115,7 @@ class directories {
             if ( $is_file ){
               foreach ( $t['extensions'] as $e ){
                 $tmp = $real . $name . '.' . $e['ext'];
-                if ( file_exists($tmp) && !in_array($tmp, $delete) ){
+                if ( file_exists($tmp) && !\in_array($tmp, $delete) ){
                   array_push($delete, $tmp);
                   if ( $t['url'] === 'php' ){
                     $del_perm = $tmp;
@@ -1125,7 +1125,7 @@ class directories {
             }
             else {
               $real .= $name;
-              if ( file_exists($real) && !in_array($real, $delete) ){
+              if ( file_exists($real) && !\in_array($real, $delete) ){
                 array_push($delete, $real);
                 if ( $t['url'] === 'php' ){
                   $del_perm = $real;
@@ -1185,7 +1185,7 @@ class directories {
   public function export($dir, $path, $name, $type = 'file'){
     if ( ($cfg = $this->dir($dir)) &&
       ($root = $this->get_root_path($dir)) &&
-      defined('BBN_USER_PATH')
+      \defined('BBN_USER_PATH')
     ){
       $is_file = $type === 'file';
       $wtype = $is_file ? 'file' : 'directory';
@@ -1598,7 +1598,7 @@ class directories {
    */
   public function real_to_perm($file, $type='file'){
     if ( !empty($file) &&
-      defined('BBN_APP_PATH') &&
+      \defined('BBN_APP_PATH') &&
       // It must be a controller
       (strpos($file, '/mvc/public/') !== false)
     ){
@@ -1607,9 +1607,9 @@ class directories {
       foreach ( $this->routes as $i => $r ){
         if ( strpos($file, $r) === 0 ){
           // Remove route
-          $f = substr($file, strlen($r), strlen($file));
+          $f = substr($file, \strlen($r), \strlen($file));
           // Remove /mvc/public
-          $f = substr($f, strlen('/mvc/public'), strlen($f));
+          $f = substr($f, \strlen('/mvc/public'), \strlen($f));
           // Add the route's name to path
           $f = $i . $f;
           break;
@@ -1620,7 +1620,7 @@ class directories {
         $root_path = BBN_APP_PATH.'mvc/public/';
         if ( strpos($file, $root_path) === 0 ){
           // Remove root path
-          $f = substr($file, strlen($root_path), strlen($file));
+          $f = substr($file, \strlen($root_path), \strlen($file));
         }
       }
       $id_parent = $this->options->from_code('page', 'bbn_permissions');
@@ -1646,7 +1646,7 @@ class directories {
    */
   public function create_perm_by_real($file, $type='file'){
     if ( !empty($file) &&
-      defined('BBN_APP_PATH') &&
+      \defined('BBN_APP_PATH') &&
       file_exists($file) &&
       // It must be a controller
       (strpos($file, '/mvc/public/') !== false)
@@ -1656,9 +1656,9 @@ class directories {
       foreach ( $this->routes as $i => $r ){
         if ( strpos($file, $r) === 0 ){
           // Remove route
-          $f = substr($file, strlen($r), strlen($file));
+          $f = substr($file, \strlen($r), \strlen($file));
           // Remove /mvc/public
-          $f = substr($f, strlen('/mvc/public'), strlen($f));
+          $f = substr($f, \strlen('/mvc/public'), \strlen($f));
           // Add the route's name to path
           $f = $i . $f;
         }
@@ -1668,7 +1668,7 @@ class directories {
         $root_path = BBN_APP_PATH.'mvc/public/';
         if ( strpos($file, $root_path) === 0 ){
           // Remove root path
-          $f = substr($file, strlen($root_path), strlen($file));
+          $f = substr($file, \strlen($root_path), \strlen($file));
         }
       }
       if ( !empty($f) ){
@@ -1756,7 +1756,7 @@ class directories {
   private function get_history($path, $cfg, $all, $mvc=false ){
     if ( !empty($path) &&
       !empty($cfg) &&
-      is_array($all)
+      \is_array($all)
     ){
       // Get all files in the path
       if ( $files = bbn\file\dir::get_files($path) ){
@@ -1820,14 +1820,14 @@ class directories {
     if ( !empty($url) &&
       ( $dir = $this->dir_from_url($url) ) &&
       ( $dir_cfg = $this->dir($dir) ) &&
-      defined('BBN_USER_PATH')
+      \defined('BBN_USER_PATH')
     ){
       $res = [];
       $all = [];
       // IDE backup path
       $path = BBN_USER_PATH."ide/backup/$dir";
       // Remove dir name from url
-      $file = substr($url, strlen($dir), strlen($url));
+      $file = substr($url, \strlen($dir), \strlen($url));
       // MVC
       if ( !empty($dir_cfg['tabs']) ){
         foreach ( $dir_cfg['tabs'] as $t ){
@@ -1867,7 +1867,7 @@ class directories {
   }
 
   public function history_clear($url=''){
-    if ( defined('BBN_USER_PATH') ){
+    if ( \defined('BBN_USER_PATH') ){
       $path = BBN_USER_PATH.'ide/backup/';
     }
     if ( !empty($url) &&
@@ -1875,7 +1875,7 @@ class directories {
       ( $dir_cfg = $this->dir($dir) )
     ){
       // Remove dir name from url
-      $file = substr($url, strlen($dir), strlen($url));
+      $file = substr($url, \strlen($dir), \strlen($url));
       $path .= $dir . $file;
     }
     if ( is_dir($path) &&
@@ -1892,7 +1892,7 @@ class directories {
    * @return array
    */
   public function modes($type = false){
-    if ( defined('BBN_DATA_PATH') ){
+    if ( \defined('BBN_DATA_PATH') ){
       $r = [
         'html' => [
           'name' => 'HTML',

@@ -54,26 +54,26 @@ class ftp extends bbn\models\cls\basic
 	 */
 	public function __construct($cfg=array())
 	{
-		if ( is_array($cfg) )
+		if ( \is_array($cfg) )
 		{
 			$this->dir = $cfg['dir'] ?? '';
 			if ( isset($cfg['host']) ){
 				$this->host = $cfg['host'];
 			}
-			else if ( defined('BBN_FTP_HOST') ){
+			else if ( \defined('BBN_FTP_HOST') ){
 				$this->host = BBN_FTP_HOST;
 			}
 			if ( isset($cfg['login']) ){
 				$this->login = $cfg['login'];
 			}
-			else if ( defined('BBN_FTP_LOGIN') ){
+			else if ( \defined('BBN_FTP_LOGIN') ){
 				$this->login = BBN_FTP_LOGIN;
 			}
 			if ( isset($cfg['pass']) ){
 				// $this->pass = bbn\util\enc::decrypt($cfg['pass']);
         $this->pass = $cfg['pass'];
 			}
-			else if ( defined('BBN_FTP_PASS') ){
+			else if ( \defined('BBN_FTP_PASS') ){
 				$this->pass = bbn\util\enc::decrypt(BBN_FTP_PASS);
 			}
 			if (
@@ -89,19 +89,19 @@ class ftp extends bbn\models\cls\basic
             return;
           }
           else{
-            $this->error = defined('BBN_IMPOSSIBLE_TO_FIND_THE_SPECIFIED_FOLDER') ?
+            $this->error = \defined('BBN_IMPOSSIBLE_TO_FIND_THE_SPECIFIED_FOLDER') ?
               BBN_IMPOSSIBLE_TO_FIND_THE_SPECIFIED_FOLDER : 'Impossible to find the specified folder';
           }
         }
         else
         {
           $this->cn = false;
-          $this->error = defined('BBN_IMPOSSIBLE_TO_CONNECT_TO_THE_FTP_HOST') ?
+          $this->error = \defined('BBN_IMPOSSIBLE_TO_CONNECT_TO_THE_FTP_HOST') ?
             BBN_IMPOSSIBLE_TO_CONNECT_TO_THE_FTP_HOST : 'Impossible to connect to the FTP host';
         }
       }
       else{
-        $this->error = defined('BBN_IMPOSSIBLE_TO_FIND_THE_FTP_HOST') ?
+        $this->error = \defined('BBN_IMPOSSIBLE_TO_FIND_THE_FTP_HOST') ?
           BBN_IMPOSSIBLE_TO_FIND_THE_FTP_HOST : 'Unable to find the FTP host';
       }
 		}
@@ -124,7 +124,7 @@ class ftp extends bbn\models\cls\basic
         ];
         if ( @ftp_chdir($this->cn, $path.'/'.$ele['basename']) ){
           $num = ftp_nlist($this->cn, '.');
-          $ele['num'] = count($num);
+          $ele['num'] = \count($num);
           $ele['type'] = 'dir';
           @ftp_cdup($this->cn);
         }
@@ -184,11 +184,11 @@ class ftp extends bbn\models\cls\basic
       return '/';
     }
 		$new = explode('../',$path);
-		$nnew = count($new);
+		$nnew = \count($new);
 		if ( $nnew > 1 )
 		{
 			$cur = explode('/',$this->dir);
-			$ncur = count($cur);
+			$ncur = \count($cur);
 			if ( $cur[$ncur-1] == '' )
 			{
 				array_pop($cur);
@@ -221,7 +221,7 @@ class ftp extends bbn\models\cls\basic
 			return $path;
 		else if ( $path == '.' )
 			return $this->dir;
-		else if ( strlen($path) > 0 )
+		else if ( \strlen($path) > 0 )
 		{
 			if ( substr($path,-1) != '/' )
 				$path .= '/';
@@ -271,12 +271,12 @@ class ftp extends bbn\models\cls\basic
 			$path = $this->dir;
 			if ( $this->cdDir($dir) ){
 				$this->cdDir($path);
-				$this->error = defined('BBN_DIRECTORY_EXISTS') ?
+				$this->error = \defined('BBN_DIRECTORY_EXISTS') ?
 					BBN_DIRECTORY_EXISTS : 'The directory exists';
 				return $this->error;
 			}
 			else if ( $create == 1 && $this->mkDir($dir) ){
-				$this->error = defined('BBN_DIRECTORY_CREATED') ?
+				$this->error = \defined('BBN_DIRECTORY_CREATED') ?
 					BBN_DIRECTORY_CREATED : 'The directory has been created';
 				return $this->error;
 			}
@@ -290,12 +290,12 @@ class ftp extends bbn\models\cls\basic
 	public function mkDir($dir){
 		if ( $dir = $this->checkPath($dir) ){
 			if ( $this->checkDir($dir) ){
-				$this->error = defined('BBN_DIRECTORY_EXISTS') ?
+				$this->error = \defined('BBN_DIRECTORY_EXISTS') ?
 					BBN_DIRECTORY_EXISTS : 'The directory exists';
 				return $this->error;
 			}
 			else if ( ftp_mkdir($this->cn, $dir) ){
-				$this->error = defined('BBN_DIRECTORY_CREATED') ?
+				$this->error = \defined('BBN_DIRECTORY_CREATED') ?
 					BBN_DIRECTORY_CREATED : 'The directory has been created';
 				return $this->error;
 			}
@@ -381,7 +381,7 @@ class ftp extends bbn\models\cls\basic
       $dir = dirname($path);
       $ext = \bbn\str::file_ext($path);
       $file = basename($path);
-      if ( is_array($files = $this->listFiles($dir)) ){
+      if ( \is_array($files = $this->listFiles($dir)) ){
         foreach ( $files as $f ){
           if ( $f['basename'] === $file ){
             return true;

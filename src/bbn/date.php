@@ -20,7 +20,7 @@ class date
   private static $windows = null;
   
   public static function is_windows(){
-    if ( is_null(self::$windows) ){
+    if ( \is_null(self::$windows) ){
       self::$windows = x::is_windows();
     }
     return self::$windows;

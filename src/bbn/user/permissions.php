@@ -80,7 +80,7 @@ class permissions extends bbn\models\cls\basic
       $parts = explode('/', $path);
       $parent = $root;
       foreach ( $parts as $i => $p ){
-        $is_not_last = $i < (count($parts) - 1);
+        $is_not_last = $i < (\count($parts) - 1);
         if ( !empty($p) ){
           $prev_parent = $parent;
           $parent = $this->opt->from_code($p.($is_not_last ? '/' : ''), $prev_parent);
@@ -104,7 +104,7 @@ class permissions extends bbn\models\cls\basic
   {
     if (
       ($id_option = $this->_get_id_option($id_option, $type)) &&
-      ($os = $this->opt->options(func_get_args()))
+      ($os = $this->opt->options(\func_get_args()))
     ){
       $res = [];
       foreach ( $os as $o ){
@@ -128,7 +128,7 @@ class permissions extends bbn\models\cls\basic
   {
     if (
       ($id_option = $this->_get_id_option($id_option, $type)) &&
-      ($os = $this->opt->full_options(func_get_args()))
+      ($os = $this->opt->full_options(\func_get_args()))
     ){
       $res = [];
       foreach ( $os as $o ){
@@ -268,7 +268,7 @@ class permissions extends bbn\models\cls\basic
   public function add(string $id_option, string $type = 'page'): ?int
   {
     if ( $id_option = $this->_get_id_option($id_option, $type) ){
-      return $this->pref->set($id_option, []);
+      return $this->pref->set_by_option($id_option, []);
     }
     return null;
   }

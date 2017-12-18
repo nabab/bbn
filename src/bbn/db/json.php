@@ -39,15 +39,15 @@ class json implements db\api
   {
     $cfg['engine'] = 'json';
     if ( !isset($cfg['host']) ){
-      $cfg['host'] = defined('BBN_DB_HOST') ? BBN_DB_HOST : '127.0.0.1';
+      $cfg['host'] = \defined('BBN_DB_HOST') ? BBN_DB_HOST : '127.0.0.1';
     }
-    if ( !isset($cfg['user']) && defined('BBN_DB_USER') ){
-      $cfg['user'] = defined('BBN_DB_USER') ? BBN_DB_USER : 'root';
+    if ( !isset($cfg['user']) && \defined('BBN_DB_USER') ){
+      $cfg['user'] = \defined('BBN_DB_USER') ? BBN_DB_USER : 'root';
     }
     if ( !isset($cfg['pass']) ){
-      $cfg['pass'] = defined('BBN_DB_PASS') ? BBN_DB_PASS : '';
+      $cfg['pass'] = \defined('BBN_DB_PASS') ? BBN_DB_PASS : '';
     }
-    if ( !isset($cfg['db']) && defined('BBN_DATABASE') ){
+    if ( !isset($cfg['db']) && \defined('BBN_DATABASE') ){
       $cfg['db'] = BBN_DATABASE;
     }
 		if ( isset($cfg['db']) )
@@ -88,7 +88,7 @@ class json implements db\api
 	 */
 	public function escape($item)
 	{
-    if ( is_string($item) && ($item = trim($item)) ){
+    if ( \is_string($item) && ($item = trim($item)) ){
       $items = explode(".", str_replace("`", "", $item));
       $r = [];
       foreach ( $items as $m ){
@@ -111,13 +111,13 @@ class json implements db\api
 	 */
 	public function table_full_name($table, $escaped=false)
 	{
-    if ( is_string($table) && ($table = trim($table)) ){
+    if ( \is_string($table) && ($table = trim($table)) ){
       $mtable = explode(".", str_replace("`", "", $table));
-      if ( count($mtable) === 3 ){
+      if ( \count($mtable) === 3 ){
         $db = trim($mtable[0]);
         $table = trim($mtable[1]);
       }
-      else if ( count($mtable) === 2 ){
+      else if ( \count($mtable) === 2 ){
         $db = trim($mtable[0]);
         $table = trim($mtable[1]);
       }
@@ -141,9 +141,9 @@ class json implements db\api
 	 */
   public function table_simple_name($table, $escaped=false)
   {
-    if ( is_string($table) && ($table = trim($table)) ){
+    if ( \is_string($table) && ($table = trim($table)) ){
       $mtable = explode(".", str_replace("`", "", $table));
-      switch ( count($mtable) ){
+      switch ( \count($mtable) ){
         case 1:
           $table = $mtable[0];
           break;
@@ -171,9 +171,9 @@ class json implements db\api
 	 */
   public function col_full_name($col, $table='', $escaped=false)
   {
-    if ( is_string($col) && ($col = trim($col)) ){
+    if ( \is_string($col) && ($col = trim($col)) ){
       $mcol = explode(".", str_replace("`", "", $col));
-      if ( count($mcol) > 1 ){
+      if ( \count($mcol) > 1 ){
         $col = array_pop($mcol);
         $table = array_pop($mcol);
         $ok = 1;
@@ -199,7 +199,7 @@ class json implements db\api
 	 */
   public function col_simple_name($col, $escaped=false)
   {
-    if ( is_string($col) && ($col = trim($col)) ){
+    if ( \is_string($col) && ($col = trim($col)) ){
       $mcol = explode(".", str_replace("`", "", $col));
       $col = end($mcol);
       if ( bbn\str::check_name($col) ){
@@ -259,8 +259,8 @@ class json implements db\api
           $r[$f] = [
             'position' => $p++,
             'null' => $row['Null'] === 'NO' ? 0 : 1,
-            'key' => in_array($row['Key'], ['PRI', 'UNI', 'MUL']) ? $row['Key'] : null,
-            'default_value' => is_null($row['Default']) && $row['Null'] !== 'NO' ? 'NULL' : $row['Default'],
+            'key' => \in_array($row['Key'], ['PRI', 'UNI', 'MUL']) ? $row['Key'] : null,
+            'default_value' => \is_null($row['Default']) && $row['Null'] !== 'NO' ? 'NULL' : $row['Default'],
             'extra' => $row['Extra'],
             'signed' => 0,
             'maxlength' => 0
@@ -274,7 +274,7 @@ class json implements db\api
           else{
             preg_match_all('/(.*?)\(/', $row['Type'], $real_type);
             if ( isset($real_type[1][0]) &&
-                    in_array($real_type[1][0], self::$numeric_types) ){
+                    \in_array($real_type[1][0], self::$numeric_types) ){
               if ( strpos($row['Type'], 'unsigned') ){
                 $row['Type'] = trim(str_replace('unsigned','',$row['Type']));
               }
@@ -370,11 +370,11 @@ class json implements db\api
 	 * @return string
 	 */
   public function get_order($order, $table = '', $aliases = []){
-    if ( is_string($order) ){
+    if ( \is_string($order) ){
       $order = [$order];
     }
     $r = '';
-    if ( is_array($order) && count($order) > 0 ){
+    if ( \is_array($order) && \count($order) > 0 ){
       $r .= PHP_EOL . "ORDER BY ";
       if ( !empty($table) ){
         $cfg = $this->db->modelize($table);
@@ -387,11 +387,11 @@ class json implements db\api
           else{
             $dir = 'ASC';
           }
-          if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($direction)]) || in_array($this->col_simple_name($direction), $aliases) ){
+          if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($direction)]) || \in_array($this->col_simple_name($direction), $aliases) ){
             $r .= $this->escape($direction)." $dir," . PHP_EOL;
           }
         }
-        else if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($col)]) || in_array($this->col_simple_name($col), $aliases) ){
+        else if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($col)]) || \in_array($this->col_simple_name($col), $aliases) ){
           $r .= "`$col` " . ( strtolower($direction) === 'desc' ? 'DESC' : 'ASC' ) . "," . PHP_EOL;
         }
       }
@@ -404,16 +404,16 @@ class json implements db\api
 	 * @return string
 	 */
   public function get_limit($limit, $start = 0){
-    if ( is_array($limit) ){
+    if ( \is_array($limit) ){
       $args = $limit;
     }
     else{
-      $args = func_get_args();
-      if ( is_array($args[0]) ){
+      $args = \func_get_args();
+      if ( \is_array($args[0]) ){
         $args = $args[0];
       }
     }
-    if ( count($args) === 2 &&
+    if ( \count($args) === 2 &&
             bbn\str::is_number($args[0], $args[1]) &&
             ($args[0] > 0) ){
       return " LIMIT $args[1], $args[0]";
@@ -441,7 +441,7 @@ class json implements db\api
 	 */
 	public function get_delete($table, array $where, $ignore = false, $php = false)
 	{
-		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 && count($where) > 0 ){
+		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && \count($m['fields']) > 0 && \count($where) > 0 ){
 			$r = '';
 			if ( $php ){
 				$r .= '$db->query("';
@@ -461,7 +461,7 @@ class json implements db\api
 	 */
 	public function get_select($table, array $fields = [], array $where = [], $order = [], $limit = false, $start = 0, $php = false)
 	{
-		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
+		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && \count($m['fields']) > 0 )
 		{
 			$r = '';
 			if ( $php ){
@@ -469,7 +469,7 @@ class json implements db\api
 			}
       $aliases = [];
 			$r .= "SELECT \n";
-			if ( count($fields) > 0 ){
+			if ( \count($fields) > 0 ){
 				foreach ( $fields as $k => $c ){
 					if ( !isset($m['fields'][$c]) ){
 						die("The column $c doesn't exist in $table");
@@ -491,7 +491,7 @@ class json implements db\api
 				}
 			}
 			$r = substr($r,0,strrpos($r,','))."\nFROM $table";
-			if ( count($where) > 0 ){
+			if ( \count($where) > 0 ){
         $r .= $this->db->get_where($where, $table, $aliases);
       }
       $r .= PHP_EOL . $this->get_order($order, $table, $aliases);
@@ -515,7 +515,7 @@ class json implements db\api
 		if ( $php ){
 			$r .= '$db->query("';
 		}
-		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 ){
+		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && \count($m['fields']) > 0 ){
 			$r .= "INSERT ";
 			if ( $ignore ){
 				$r .= "IGNORE ";
@@ -523,7 +523,7 @@ class json implements db\api
 			$r .= "INTO $table (\n";
 			$i = 0;
 			
-			if ( count($fields) > 0 ){
+			if ( \count($fields) > 0 ){
 				foreach ( $fields as $k ){
 					if ( !isset($m['fields'][$k]) ){
 						die("The column $k doesn't exist in $table");
@@ -548,7 +548,7 @@ class json implements db\api
 			}
 			$r = substr($r,0,strrpos($r,',')).")\nVALUES (\n";
 			$i = 0;
-			if ( count($fields) > 0 ){
+			if ( \count($fields) > 0 ){
 				foreach ( $fields as $k ){
 					if ( stripos($m['fields'][$k]['type'],'INT') !== false ){
 						$r .= "%u, ";
@@ -599,7 +599,7 @@ class json implements db\api
 	 */
 	public function get_update($table, array $fields = [], array $where = [], $php = false)
 	{
-		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 ){
+		if ( ( $table = $this->table_full_name($table, 1) ) && ( $m = $this->db->modelize($table) ) && \count($m['fields']) > 0 ){
       $r = '';
       if ( $php ){
         $r .= '$db->query("';
@@ -607,7 +607,7 @@ class json implements db\api
 			$r .= "UPDATE $table SET ";
 			$i = 0;
 
-			if ( count($fields) > 0 ){
+			if ( \count($fields) > 0 ){
 				foreach ( $fields as $k ){
 					if ( !isset($m['fields'][$k]) ){
 						die("The column $k doesn't exist in $table");
@@ -629,7 +629,7 @@ class json implements db\api
 				$r .= "\",\n";
 				$i = 0;
 				foreach ( array_keys($m['fields']) as $k ){
-					if ( !in_array($k, $where) && ( count($fields) === 0 || in_array($k,$fields) ) ){
+					if ( !\in_array($k, $where) && ( \count($fields) === 0 || \in_array($k,$fields) ) ){
 						$r .= "\$d['$k'],\n";
 					}
 				}
@@ -650,7 +650,7 @@ class json implements db\api
 	*/
 	public function get_column_values($table, $field,  array $where = [], $limit = false, $start = 0, $php = false)
   {
-		if ( bbn\str::check_name($field) && ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
+		if ( bbn\str::check_name($field) && ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && \count($m['fields']) > 0 )
 		{
 			$r = '';
 			if ( $php ){
@@ -680,7 +680,7 @@ class json implements db\api
 	*/
 	public function get_values_count($table, $field, array $where = [], $limit, $start, $php = false)
   {
-		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
+		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && \count($m['fields']) > 0 )
 		{
 			$r = '';
 			if ( $php ){
@@ -690,7 +690,7 @@ class json implements db\api
         die("The column $field doesn't exist in $table");
       }
 			$r .= "SELECT COUNT(*) AS num, `$field` AS val FROM $table";
-			if ( count($where) > 0 ){
+			if ( \count($where) > 0 ){
         $r .= PHP_EOL . $this->db->get_where($where, $table);
       }
       $r .= PHP_EOL . "GROUP BY `$field`";
@@ -711,11 +711,11 @@ class json implements db\api
 	 */
 	public function create_db_index($table, $column, $unique = false, $length = null)
 	{
-    if ( !is_array($column) ){
+    if ( !\is_array($column) ){
       $column = [$column];
     }
-    if ( !is_null($length) ){
-      if ( !is_array($length) ){
+    if ( !\is_null($length) ){
+      if ( !\is_array($length) ){
         $length = [$length];
       }
     }
@@ -726,7 +726,7 @@ class json implements db\api
       }
       $iname .= '_'.$c;
       $column[$i] = "`".$column[$i]."`";
-      if ( is_int($length[$i]) && $length[$i] > 0 ){
+      if ( \is_int($length[$i]) && $length[$i] > 0 ){
         $column[$i] .= "(".$length[$i].")";
       }
     }

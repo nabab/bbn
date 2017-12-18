@@ -28,7 +28,7 @@ use bbn;
  * @version 0.2r89
  */
 
-if ( !defined('BBN_MAX_DATA_ROWS') ){
+if ( !\defined('BBN_MAX_DATA_ROWS') ){
   define('BBN_MAX_DATA_ROWS', 500);
 }
 
@@ -203,7 +203,7 @@ class mapperv2 extends bbn\models\cls\cache{
         }
          * 
          */
-        if ( count($params) > 0 ){
+        if ( \count($params) > 0 ){
           if ( isset($cfg['select']) ){
             $cfg['select'] .= "/".implode("/", $params);
           }
@@ -220,7 +220,7 @@ class mapperv2 extends bbn\models\cls\cache{
         if ( !empty($obj['description']) ){
           $cfg['description'] = $obj['description'];
         }
-        if ( !is_null($obj['table']) ){
+        if ( !\is_null($obj['table']) ){
           $cfg['table'] = $obj['table'];
         }
         $fields = $this->db->rselect_all(
@@ -232,25 +232,25 @@ class mapperv2 extends bbn\models\cls\cache{
         foreach ( $fields as $k => $f ){
           $fields[$k] = json_decode($f['configuration'], 1);
           if ( isset($fields[$k]['sql']) ){
-            if ( (count($params) % 2) === 0 && isset($chplouif) ){
+            if ( (\count($params) % 2) === 0 && isset($chplouif) ){
               $fields[$k]['data'] = $this->db->get_rows($fields[$k]['sql'], $params[2]);
             }
             else{
               $fields[$k]['data'] = $this->db->get_rows($fields[$k]['sql']);
             }
           }
-          if ( !is_null($f['column']) ){
+          if ( !\is_null($f['column']) ){
             $fields[$k]['column'] = $f['column'];
           }
         }
         $cfg['elements'] = $fields;
       }
-      else if ( is_array($id) ){
+      else if ( \is_array($id) ){
         $cfg = $id;
       }
       else{
         if ( $class === 'form' ){
-          if ( is_object($params) ){
+          if ( \is_object($params) ){
             $cfg = $this->get_default_form_config($id, $params);
           }
           else {
@@ -274,7 +274,7 @@ class mapperv2 extends bbn\models\cls\cache{
 		if ( $this->db &&
             ($cfg = $this->db->modelize($table)) &&
             isset($cfg['keys']['PRIMARY']) &&
-            count($cfg['keys']['PRIMARY']['columns']) === 1 &&
+            \count($cfg['keys']['PRIMARY']['columns']) === 1 &&
             ($table = $this->db->table_full_name($table)) ){
 
       $id = bbn\str::genpwd();
@@ -295,7 +295,7 @@ class mapperv2 extends bbn\models\cls\cache{
 
       array_shift($args);
       $where = [];
-      for ( $i = 0; $i < (count($args) - 1); $i++ ){
+      for ( $i = 0; $i < (\count($args) - 1); $i++ ){
         if ( isset($cfg['fields'][$args[$i]]) ){
           array_push($where, [$args[$i], '=', $args[$i+1]]);
         }
@@ -417,7 +417,7 @@ class mapperv2 extends bbn\models\cls\cache{
               }
             }
           }
-          if ( is_array($ref) && ($ref_table_cfg = $this->db->modelize($ref['table'])) ){
+          if ( \is_array($ref) && ($ref_table_cfg = $this->db->modelize($ref['table'])) ){
             // Arguments for select
             $cols = false;
             foreach ( $ref_table_cfg['fields'] as $name => $def ){
@@ -429,7 +429,7 @@ class mapperv2 extends bbn\models\cls\cache{
                 break;
               }
             }
-            if ( $cols && (count($cols) > 1) ){
+            if ( $cols && (\count($cols) > 1) ){
               if ( $this->db->count($ref['table']) < 500 ){
                 $r['values'] = $this->db->rselect_all($ref['table'], $cols);
                 $r['field'] = 'dropdown';
@@ -587,7 +587,7 @@ class mapperv2 extends bbn\models\cls\cache{
           }
         }
         // Case where the column is a reference to another
-				if (  is_array($ref) && ($ref_table_cfg = $this->db->modelize($ref['table'])) ){
+				if (  \is_array($ref) && ($ref_table_cfg = $this->db->modelize($ref['table'])) ){
           // Arguments for select
           $cols = [$ref['column']];
           // Looking for the first varchar column as the text
@@ -723,7 +723,7 @@ class mapperv2 extends bbn\models\cls\cache{
       if ( bbn\appui\history::$is_used && isset($schema[bbn\appui\history::$htable]) ){
         $tab_history = 1;
       }
-      if ( !is_array($schema) ){
+      if ( !\is_array($schema) ){
 
         die(var_dump("THIS IS NOT AN ARRAY", $schema));
       }
@@ -783,7 +783,7 @@ class mapperv2 extends bbn\models\cls\cache{
 				}
 			}
       foreach ( $schema as $t => $vars ){
-        if ( isset($vars['keys']) && is_array($vars['keys']) ){
+        if ( isset($vars['keys']) && \is_array($vars['keys']) ){
           foreach ( $vars['keys'] as $k => $arr ){
             $pos = 1;
             foreach ( $arr['columns'] as $c ){
@@ -792,7 +792,7 @@ class mapperv2 extends bbn\models\cls\cache{
                 'key' => $k,
                 'column' => $t.'.'.$c,
                 'position' => $pos,
-                'ref_column' => is_null($arr['ref_column']) ? null : $arr['ref_db'].'.'.$arr['ref_table'].'.'.$arr['ref_column']
+                'ref_column' => \is_null($arr['ref_column']) ? null : $arr['ref_db'].'.'.$arr['ref_table'].'.'.$arr['ref_column']
               ]);
               $pos++;
             }
@@ -837,7 +837,7 @@ class mapperv2 extends bbn\models\cls\cache{
 	 */
 	public function create_tables(){
 		if ( $this->db ){
-      if ( !in_array($this->prefix.'tables', $this->db->get_tables()) ){
+      if ( !\in_array($this->prefix.'tables', $this->db->get_tables()) ){
         $this->db->disable_keys();
         return $this->db->query("
         -- DROP TABLE IF EXISTS `{$this->prefix}clients`;

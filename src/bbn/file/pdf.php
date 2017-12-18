@@ -68,7 +68,7 @@ EOF
   
 	private function check()
   {
-    return ( get_class($this->pdf) === 'mPDF' );
+    return ( \get_class($this->pdf) === 'mPDF' );
   }
   public function __construct($cfg=null)
 	{
@@ -89,7 +89,7 @@ EOF
     
     $this->pdf->SetImportUse();
     
-    if ( is_string($cfg) ){
+    if ( \is_string($cfg) ){
       $this->add_page($cfg);
     }
     return $this;
@@ -104,7 +104,7 @@ EOF
   }
   
   public function reset_config($cfg){
-    if ( is_array($cfg) ){
+    if ( \is_array($cfg) ){
       $this->cfg = bbn\x::merge_arrays(self::$default_cfg, $cfg);
     }
     else{
@@ -192,7 +192,7 @@ EOF
 
   public function import($files){
     if ( $this->check() ){
-      if ( !is_array($files) ){
+      if ( !\is_array($files) ){
         $files = [$files];
       }
       $this->pdf->SetImportUse();
@@ -237,7 +237,7 @@ EOF
    * @param array $fonts
    */
   public function add_fonts(array $fonts){
-    if ( !defined('BBN_LIB_PATH') ){
+    if ( !\defined('BBN_LIB_PATH') ){
       die('You must define BBN_LIB_PATH!');
     }
     if ( !is_dir(BBN_LIB_PATH . 'mpdf/mpdf/ttfonts/') ){

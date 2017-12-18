@@ -40,16 +40,16 @@ class sqlite implements bbn\db\engines
   public function get_connection($cfg=[])
   {
     $cfg['engine'] = 'sqlite';
-    if ( !isset($cfg['db']) && defined('BBN_DATABASE') ){
+    if ( !isset($cfg['db']) && \defined('BBN_DATABASE') ){
       $cfg['db'] = BBN_DATABASE;
     }
-    if ( isset($cfg['db']) && strlen($cfg['db']) > 1 ){
+    if ( isset($cfg['db']) && \strlen($cfg['db']) > 1 ){
       if ( is_file($cfg['db']) ){
         $pathinfo = pathinfo($cfg['db']);
         $cfg['host'] = $pathinfo['dirname'].DIRECTORY_SEPARATOR;
         $cfg['db'] = $pathinfo['basename'];
       }
-      else if ( defined("BBN_DATA_PATH") && is_dir(BBN_DATA_PATH.'db') && strpos($cfg['db'], "/") === false ){
+      else if ( \defined("BBN_DATA_PATH") && is_dir(BBN_DATA_PATH.'db') && strpos($cfg['db'], "/") === false ){
         $cfg['host'] = BBN_DATA_PATH.'db'.DIRECTORY_SEPARATOR;
         if ( !is_file(BBN_DATA_PATH.'db'.DIRECTORY_SEPARATOR.$cfg['db']) && strpos($cfg['db'], ".") === false ){
           $cfg['db'] .= '.sqlite';
@@ -95,7 +95,7 @@ class sqlite implements bbn\db\engines
 	 */
 	public function escape($item)
 	{
-    if ( is_string($item) && ($item = trim($item)) ){
+    if ( \is_string($item) && ($item = trim($item)) ){
       $items = explode('.', str_replace('"', '', $item));
       $r = [];
       foreach ( $items as $m ){
@@ -118,9 +118,9 @@ class sqlite implements bbn\db\engines
 	 */
 	public function table_full_name($table, $escaped=false)
 	{
-    if ( is_string($table) && ($table = trim($table)) ){
+    if ( \is_string($table) && ($table = trim($table)) ){
       $mtable = explode('.', str_replace('"', '', $table));
-      if ( count($mtable) === 2 ){
+      if ( \count($mtable) === 2 ){
         $db = trim($mtable[0]);
         $table = trim($mtable[1]);
       }
@@ -149,7 +149,7 @@ class sqlite implements bbn\db\engines
 	 */
   public function table_simple_name($table, $escaped=false)
   {
-    if ( is_string($table) && ($table = trim($table)) ){
+    if ( \is_string($table) && ($table = trim($table)) ){
       $mtable = explode('.', str_replace('"', '', $table));
       $table = end($mtable);
       if ( bbn\str::check_name($table) ){
@@ -169,14 +169,14 @@ class sqlite implements bbn\db\engines
 	 */
   public function col_full_name($col, $table='', $escaped=false)
   {
-    if ( is_string($col) && ($col = trim($col)) ){
+    if ( \is_string($col) && ($col = trim($col)) ){
       $mcol = explode('.', str_replace('"', '', $col));
       if ( !empty($table) ){
         $table = $this->table_simple_name($table);
         $col = end($mcol);
         $ok = 1;
       }
-      else if ( count($mcol) > 1 ){
+      else if ( \count($mcol) > 1 ){
         $col = array_pop($mcol);
         $table = array_pop($mcol);
         $ok = 1;
@@ -197,7 +197,7 @@ class sqlite implements bbn\db\engines
 	 */
   public function col_simple_name($col, $escaped=false)
   {
-    if ( is_string($col) && ($col = trim($col)) ){
+    if ( \is_string($col) && ($col = trim($col)) ){
       $mcol = explode('.', str_replace('"', '', $col));
       $col = end($mcol);
       if ( bbn\str::check_name($col) ){
@@ -345,11 +345,11 @@ class sqlite implements bbn\db\engines
 	 * @return string
 	 */
   public function get_order($order, $table = '', $aliases = []){
-    if ( is_string($order) ){
+    if ( \is_string($order) ){
       $order = [$order];
     }
     $r = '';
-    if ( is_array($order) && count($order) > 0 ){
+    if ( \is_array($order) && \count($order) > 0 ){
       $r .= PHP_EOL . "ORDER BY ";
       if ( !empty($table) ){
         $cfg = $this->db->modelize($table);
@@ -362,11 +362,11 @@ class sqlite implements bbn\db\engines
           else{
             $dir = 'ASC';
           }
-          if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($direction)]) || in_array($this->col_simple_name($direction), $aliases) ){
+          if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($direction)]) || \in_array($this->col_simple_name($direction), $aliases) ){
             $r .= $this->escape($direction)." COLLATE NOCASE $dir," . PHP_EOL;
           }
         }
-        else if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($col)]) || in_array($this->col_simple_name($col), $aliases) ){
+        else if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($col)]) || \in_array($this->col_simple_name($col), $aliases) ){
           $r .= "`$col` COLLATE NOCASE " . ( strtolower($direction) === 'desc' ? 'DESC' : 'ASC' ) . "," . PHP_EOL;
         }
       }
@@ -379,16 +379,16 @@ class sqlite implements bbn\db\engines
 	 * @return string
 	 */
   public function get_limit($limit, $start = 0){
-    if ( is_array($limit) ){
+    if ( \is_array($limit) ){
       $args = $limit;
     }
     else{
-      $args = func_get_args();
-      if ( is_array($args[0]) ){
+      $args = \func_get_args();
+      if ( \is_array($args[0]) ){
         $args = $args[0];
       }
     }
-    if ( count($args) === 2 && bbn\str::is_number($args[0], $args[1]) ){
+    if ( \count($args) === 2 && bbn\str::is_number($args[0], $args[1]) ){
       return " LIMIT $args[1], $args[0]";
     }
     if ( bbn\str::is_number($args[0]) ){
@@ -445,7 +445,7 @@ class sqlite implements bbn\db\engines
 	 */
   public function get_select($table, array $fields = [], array $where = [], $order = [], $limit = false, $start = 0, $php = false){
     // Tables are an array
-    if ( !is_array($table) ){
+    if ( !\is_array($table) ){
       $table = [$table];
     }
     /** @var array $tables_fields List of all the fields' names indexed by table */
@@ -465,22 +465,22 @@ class sqlite implements bbn\db\engines
       $aliases = [];
       $r .= "SELECT \n";
       // Columns are specified
-      if ( count($fields) > 0 ){
+      if ( \count($fields) > 0 ){
         foreach ( $fields as $k => $c ){
           // Here there is no full name
           if ( !strpos($c, '.') ){
             // So we look into the tables to check if there is the field
             $tab = [];
             foreach ( $tables_fields as $t => $f ){
-              if ( in_array($c, $f) ){
+              if ( \in_array($c, $f) ){
                 array_push($tab, $t);
               }
             }
             // If the same column is passed twice in its short form
-            if ( count($tab) === 1 ){
+            if ( \count($tab) === 1 ){
               $c = $this->col_full_name($c, $tab[0]);
             }
-            else if ( count($tab) > 1 ){
+            else if ( \count($tab) > 1 ){
               $this->db->error('Error! Duplicate field name, you must insert the fields with their fullname.');
             }
             else {
@@ -525,7 +525,7 @@ class sqlite implements bbn\db\engines
 	{
     if ( ($table = $this->table_full_name($table, 1)) &&
       ($m = $this->db->modelize($table)) &&
-      (count($m['fields']) > 0)
+      (\count($m['fields']) > 0)
     ){
       $r = '';
       if ( $php ){
@@ -538,7 +538,7 @@ class sqlite implements bbn\db\engines
 			$r .= 'INTO '.$table.' ('.PHP_EOL;
 			$i = 0;
 			
-			if ( count($fields) > 0 ){
+			if ( \count($fields) > 0 ){
 				foreach ( $fields as $k ){
 					if ( !isset($m['fields'][$k]) ){
             $this->db->error("Error in Insert query creation: the column $k doesn't exist in $table");
@@ -563,7 +563,7 @@ class sqlite implements bbn\db\engines
 			}
 			$r = substr($r,0,strrpos($r,',')).')'.PHP_EOL.'VALUES ('.PHP_EOL;
 			$i = 0;
-			if ( count($fields) > 0 ){
+			if ( \count($fields) > 0 ){
 				foreach ( $fields as $k ){
           $r .= '?, ';
 					$i++;
@@ -606,7 +606,7 @@ class sqlite implements bbn\db\engines
 	{
     if ( ($table = $this->table_full_name($table, 1)) &&
       ($m = $this->db->modelize($table)) &&
-      (count($m['fields']) > 0)
+      (\count($m['fields']) > 0)
     ){
       $r = '';
       if ( $php ){
@@ -618,7 +618,7 @@ class sqlite implements bbn\db\engines
       }
       $r .= "$table SET ";
 
-			if ( count($fields) > 0 ){
+			if ( \count($fields) > 0 ){
 				foreach ( $fields as $k ){
           if ( !isset($m['fields'][$this->db->csn($k)]) ){
             $this->db->error("Error in Update query creation: the column $k doesn't exist in $table");
@@ -640,7 +640,7 @@ class sqlite implements bbn\db\engines
 			if ( $php ){
 				$r .= '\','.PHP_EOL;
 				foreach ( array_keys($m['fields']) as $k ){
-					if ( !in_array($k, $where) && ( count($fields) === 0 || in_array($k,$fields) ) ){
+					if ( !\in_array($k, $where) && ( \count($fields) === 0 || \in_array($k,$fields) ) ){
 						$r .= '$d[\''.$k.'\'],'.PHP_EOL;
 					}
 				}
@@ -667,7 +667,7 @@ class sqlite implements bbn\db\engines
     if ( bbn\str::check_name($csn) &&
       ($table = $this->table_full_name($table, 1)) &&
       ($m = $this->db->modelize($table)) &&
-      (count($m['fields']) > 0)
+      (\count($m['fields']) > 0)
     ){
       if ( !isset($m['fields'][$csn]) ){
         $this->db->error("Error in collecting values: the column $field doesn't exist in $table");
@@ -691,7 +691,7 @@ class sqlite implements bbn\db\engines
 	*/
 	public function get_values_count($table, $field, array $where = [], $limit, $start, $php = false)
   {
-		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
+		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && \count($m['fields']) > 0 )
 		{
 			$r = '';
 			if ( $php ){
@@ -701,7 +701,7 @@ class sqlite implements bbn\db\engines
         $this->db->error("Error in values' count: the column $field doesn't exist in $table");
       }
 			$r .= 'SELECT COUNT(*) AS num, "'.$field.'" AS val FROM '.$table;
-			if ( count($where) > 0 ){
+			if ( \count($where) > 0 ){
         $r .= PHP_EOL . $this->db->get_where($where, $table);
       }
       $r .= PHP_EOL . 'GROUP BY "'.$field.'"';
@@ -722,11 +722,11 @@ class sqlite implements bbn\db\engines
 	 */
 	public function create_db_index($table, $column, $unique = false, $length = null)
 	{
-    if ( !is_array($column) ){
+    if ( !\is_array($column) ){
       $column = [$column];
     }
-    if ( !is_null($length) ){
-      if ( !is_array($length) ){
+    if ( !\is_null($length) ){
+      if ( !\is_array($length) ){
         $length = [$length];
       }
     }
@@ -737,7 +737,7 @@ class sqlite implements bbn\db\engines
       }
       $iname .= '_'.$c;
       $column[$i] = "`".$column[$i]."`";
-      if ( is_int($length[$i]) && $length[$i] > 0 ){
+      if ( \is_int($length[$i]) && $length[$i] > 0 ){
         $column[$i] .= "(".$length[$i].")";
       }
     }

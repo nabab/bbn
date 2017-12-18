@@ -50,7 +50,7 @@ class observer extends bbn\models\cls\cache
         return $this->sess->get(self::$sess_index);
       }
       return array_filter($this->sess->get(self::$sess_index), function($a){
-        return !is_array($a);
+        return !\is_array($a);
       });
     }
   }

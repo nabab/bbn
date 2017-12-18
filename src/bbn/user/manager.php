@@ -57,7 +57,7 @@ You can click the following link to access directly your account:<br>
     unset($fields['id'], $fields['active'], $fields['cfg']);
     $this->list_fields = [];
     foreach ( $fields as $n => $f ){
-      if ( !in_array($f, $this->list_fields) ){
+      if ( !\in_array($f, $this->list_fields) ){
         $this->list_fields[$n] = $f;
       }
     }
@@ -76,8 +76,8 @@ You can click the following link to access directly your account:<br>
   
   public function find_sessions($id_user=null, $minutes = 5)
   {
-    if ( is_int($minutes) ){
-      if ( is_null($id_user) ){
+    if ( \is_int($minutes) ){
+      if ( \is_null($id_user) ){
         return $this->db->get_rows("
           SELECT *
           FROM `{$this->class_cfg['tables']['sessions']}`
@@ -106,7 +106,7 @@ You can click the following link to access directly your account:<br>
 	 */
   public function __construct(bbn\user $obj)
   {
-    if ( is_object($obj) && method_exists($obj, 'get_class_cfg') ){
+    if ( \is_object($obj) && method_exists($obj, 'get_class_cfg') ){
       $this->usrcls = $obj;
       $this->class_cfg = $this->usrcls->get_class_cfg();
       if ( !$this->list_fields ){
@@ -178,23 +178,25 @@ You can click the following link to access directly your account:<br>
     $sql = "SELECT ";
     $done = [];
     foreach ( $arch['users'] as $n => $f ){
-      if ( !in_array($f, $done) ){
+      if ( !\in_array($f, $done) ){
         $sql .= $db->cfn($f, $tables['users'], 1).', ';
         array_push($done, $f);
       }
     }
+    $gr = !empty($group_id) && \bbn\str::is_uid($group_id) ?
+      "AND " . $db->cfn($arch['groups']['id'], $tables['groups'], 1) . " = '" . hex2bin($group_id) ."'" : '';
     $sql .= "
       MAX({$db->cfn($s['last_activity'], $tables['sessions'], 1)}) AS {$db->csn($s['last_activity'], 1)},
       COUNT({$db->cfn($s['sess_id'], $tables['sessions'])}) AS {$db->csn($s['sess_id'], 1)}
       FROM {$db->escape($tables['users'])}
         JOIN {$db->tsn($tables['groups'], 1)}
           ON {$db->cfn($arch['users']['id_group'], $tables['users'], 1)} = {$db->cfn($arch['groups']['id'], $tables['groups'], 1)}
+          $gr
         LEFT JOIN {$db->tsn($tables['sessions'])}
           ON {$db->cfn($s['id_user'], $tables['sessions'], 1)} = {$db->cfn($arch['users']['id'], $tables['users'], 1)}
       WHERE {$db->cfn($arch['users']['active'], $tables['users'], 1)} = 1
       GROUP BY {$db->cfn($arch['users']['id'], $tables['users'], 1)}
       ORDER BY {$db->cfn($sort, $tables['users'], 1)}";
-
     return $db->get_rows($sql);
   }
 
@@ -251,10 +253,10 @@ You can click the following link to access directly your account:<br>
   }
 
   public function get_name($user, $full = true){
-    if ( !is_array($user) ){
+    if ( !\is_array($user) ){
       $user = $this->get_user($user);
     }
-    if ( is_array($user) ){
+    if ( \is_array($user) ){
       $idx = 'email';
       if ( !empty($this->class_cfg['arch']['users']['username']) ){
         $idx = 'username';
@@ -280,7 +282,7 @@ You can click the following link to access directly your account:<br>
     $cfg[$u['active']] = 1;
     $cfg[$u['cfg']] = '{}';
     foreach ( $cfg as $k => $v ){
-      if ( !in_array($k, $fields) ){
+      if ( !\in_array($k, $fields) ){
         unset($cfg[$k]);
       }
     }
@@ -312,7 +314,7 @@ You can click the following link to access directly your account:<br>
     $fields = array_unique(array_values($this->class_cfg['arch']['users']));
     $cfg[$u['active']] = 1;
     foreach ( $cfg as $k => $v ){
-      if ( !in_array($k, $fields) ){
+      if ( !\in_array($k, $fields) ){
         unset($cfg[$k]);
       }
     }
@@ -350,7 +352,7 @@ You can click the following link to access directly your account:<br>
     }
     if ( $usr = $this->get_user($id_user) ){
       // Expiration date
-      if ( !is_int($exp) || ($exp < 1) ){
+      if ( !\is_int($exp) || ($exp < 1) ){
         $exp = time() + $this->hotlink_length;
       }
       $hl =& $this->class_cfg['arch']['hotlinks'];

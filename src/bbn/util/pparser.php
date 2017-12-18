@@ -38,7 +38,7 @@ class pparser
         $this->stack = [];
 
         $this->string = $string;
-        $this->length = strlen($this->string);
+        $this->length = \strlen($this->string);
         // look at each character
         for ($this->position=0; $this->position < $this->length; $this->position++){
             switch ($this->string[$this->position]){

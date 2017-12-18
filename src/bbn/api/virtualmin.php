@@ -88,7 +88,7 @@ class virtualmin {
               if ( $v['binary'] && $args[$k] ){
                 $url_part .= "&$k";
               }
-              else if ( is_array($v) && $v['multiple'] ){
+              else if ( \is_array($v) && $v['multiple'] ){
                 foreach ( $args[$k] as $w ){
                   $url_part .= "&$k=$w";
                 }
@@ -111,7 +111,7 @@ class virtualmin {
         $args = $this->process_parameters($arguments[0]);
         $url_part = $cmd_name;
         foreach ( $args as $k => $v ){
-          if ( is_array($v) ){
+          if ( \is_array($v) ){
             foreach ( $v as $w ){
               $url_part .= "&$k=$w";
             }
@@ -220,7 +220,7 @@ class virtualmin {
         if (isset($result_array['data'])){
           if ( isset($result_array['data'][0], $result_array['data'][0]['name']) &&
             ($result_array['data'][0]['name'] === 'Warning') ){
-            $result_array['data'] = array_slice($result_array['data'], 1);
+            $result_array['data'] = \array_slice($result_array['data'], 1);
           }
           return $result_array['data'];
         }
@@ -240,7 +240,7 @@ class virtualmin {
   private function process_parameters($param){
     foreach ($param as $key => $val){
       //$val is an array
-      if (is_array($val)){
+      if (\is_array($val)){
         $param[$key] = $this->process_parameters($val);
       }
       else {

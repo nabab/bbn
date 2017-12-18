@@ -17,13 +17,13 @@ use bbn;
  * @todo Groups and hotlinks features
  * @todo Implement Cache for session requests' results?
  */
-if ( !defined('BBN_FINGERPRINT') ){
+if ( !\defined('BBN_FINGERPRINT') ){
   die('define BBN_FINGERPRINT');
 }
-if ( !defined('BBN_SESS_NAME') ){
+if ( !\defined('BBN_SESS_NAME') ){
   die('define BBN_SESS_NAME');
 }
-if ( !defined('BBN_SESS_LIFETIME') ){
+if ( !\defined('BBN_SESS_LIFETIME') ){
   die('define BBN_SESS_LIFETIME');
 }
 ini_set('session.gc_maxlifetime', BBN_SESS_LIFETIME);
@@ -69,14 +69,14 @@ class session
       // The value is the first argument
       $value = array_shift($args);
       // Except if it's an array and there is only one argument
-      if ( !count($args) && is_array($value) && bbn\x::is_assoc($value) ){
+      if ( !count($args) && \is_array($value) && bbn\x::is_assoc($value) ){
         $this->data = bbn\x::merge_arrays($this->data, $value);
       }
       else{
         $var =& $this->data;
         foreach ( $args as $i => $a ){
-          if ( $i === (count($args) - 1) ){
-            if ( is_null($value) ){
+          if ( $i === (\count($args) - 1) ){
+            if ( \is_null($value) ){
               unset($var[$a]);
             }
             else{
@@ -97,10 +97,9 @@ class session
       self::singleton_init($this);
       $this->open();
       if ( !isset($_SESSION[self::$name]) ){
-        $_SESSION[self::$name] = is_array($defaults) ? $defaults : [];
+        $_SESSION[self::$name] = \is_array($defaults) ? $defaults : [];
       }
       $this->id = session_id();
-      //
       $this->fetch();
     }
   }
@@ -121,7 +120,7 @@ class session
 
   public function get(){
     if ( $this->id ){
-      return $this->_get_value(func_get_args());
+      return $this->_get_value(\func_get_args());
     }
   }
 
@@ -130,20 +129,20 @@ class session
       $this->open();
       $this->data = $_SESSION[self::$name];
       $this->close();
-      if ( is_null($arg) ){
+      if ( \is_null($arg) ){
         return $this->data;
       }
-      return $this->_get_value(func_get_args());
+      return $this->_get_value(\func_get_args());
     }
   }
 
   public function has(){
-    return !is_null($this->_get_value(func_get_args()));
+    return !\is_null($this->_get_value(\func_get_args()));
   }
 
   public function set($val){
     if ( $this->id ){
-      $this->_set_value(func_get_args());
+      $this->_set_value(\func_get_args());
       $this->open();
       $_SESSION[self::$name] = $this->data;
       $this->close();
@@ -153,7 +152,7 @@ class session
 
   public function uset($val){
     if ( $this->id ){
-      $args = func_get_args();
+      $args = \func_get_args();
       array_unshift($args, null);
       $this->_set_value($args);
       $this->open();
@@ -165,9 +164,9 @@ class session
 
   public function transform(callable $fn){
     if ( $this->id ){
-      $args = func_get_args();
+      $args = \func_get_args();
       array_shift($args);
-      $transformed = call_user_func($fn, $this->_get_value($args));
+      $transformed = \call_user_func($fn, $this->_get_value($args));
       array_unshift($args, $transformed);
       $this->_set_value($args);
       $this->open();
@@ -178,22 +177,22 @@ class session
   }
 
   public function work(callable $fn){
-    return call_user_func_array([$this, 'transform'], func_get_args());
+    return \call_user_func_array([$this, 'transform'], \func_get_args());
   }
 
 
   public function push($value){
     if ( $this->id ){
-      $args = func_get_args();
+      $args = \func_get_args();
       array_shift($args);
-      $var = call_user_func_array([$this, 'get'], $args);
-      if ( !is_array($var) ){
+      $var = \call_user_func_array([$this, 'get'], $args);
+      if ( !\is_array($var) ){
         $var = [];
       }
-      if ( !in_array($value, $var) ){
+      if ( !\in_array($value, $var) ){
         array_push($var, $value);
         array_unshift($args, $var);
-        call_user_func_array([$this, 'set'], $args);
+        \call_user_func_array([$this, 'set'], $args);
       }
       return $this;
     }
@@ -202,15 +201,15 @@ class session
   public function destroy(){
     if ( $this->id ){
       $this->open();
-      $args = func_get_args();
+      $args = \func_get_args();
       $var =& $_SESSION[self::$name];
       $var2 =& $var;
       foreach ( $args as $i => $a ){
-        if ( !is_array($var) ){
+        if ( !\is_array($var) ){
           $var = [];
         }
         if ( !isset($var[$a]) ){
-          if ( count($args) >= $i ){
+          if ( \count($args) >= $i ){
             $var[$a] = [];
           }
           else{

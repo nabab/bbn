@@ -35,7 +35,7 @@ class form extends element
 	public function __construct($cfg)
 	{
     if ( $cfg ){
-      if (is_string($cfg) ){
+      if (\is_string($cfg) ){
         $cfg = [
             'tag' => 'form',
             'attr' => [

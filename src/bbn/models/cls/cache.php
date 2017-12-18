@@ -33,7 +33,7 @@ abstract class cache extends bbn\models\cls\basic
   public function __construct(bbn\db $db){
     $this->db = $db;
 		$this->cacher = bbn\cache::get_engine();
-		$this->_cache_prefix = bbn\str::encode_filename(str_replace('\\', '/', get_class($this))).'/';
+		$this->_cache_prefix = bbn\str::encode_filename(str_replace('\\', '/', \get_class($this))).'/';
 	}
 
 	protected function _cache_name($uid, $method = ''){

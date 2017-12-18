@@ -36,7 +36,12 @@ class view{
      * @var null|string
      */
     $ext,
-		/**
+    /**
+     * Included files (only for LESS)
+     * @var null|string
+     */
+    $checkers,
+    /**
 		 * The content the view file.
 		 * @var null|string
 		 */
@@ -54,6 +59,7 @@ class view{
     if ( router::is_mode($info['mode']) ){
       $this->ext = $info['ext'];
       $this->file = $info['file'];
+      $this->checkers = $info['checkers'] ?? [];
     }
 	}
 
@@ -69,12 +75,19 @@ class view{
 	public function get(array $data=null)
 	{
 		if ( $this->check() ){
-			if ( is_null($this->content) ){
+			if ( \is_null($this->content) ){
 				$this->content = file_get_contents($this->file);
 			}
 			if ( empty($this->content) ){
 				return '';
 			}
+			if ( $this->checkers ){
+			  $st = '';
+			  foreach ( $this->checkers as $chk ){
+			    $st .= file_get_contents($chk);
+        }
+        $this->content = $st.$this->content;
+      }
       switch ( $this->ext ){
         case 'js':
 					return $this->content;

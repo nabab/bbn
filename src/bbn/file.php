@@ -70,7 +70,7 @@ class file extends models\cls\basic
    */
   public function __construct($file)
   {
-    if ( is_array($file) )
+    if ( \is_array($file) )
     {
       if ( isset($file['name'],$file['tmp_name']) )
       {
@@ -80,14 +80,14 @@ class file extends models\cls\basic
         $file = $file['tmp_name'];
       }
     }
-    else if ( is_string($file) )
+    else if ( \is_string($file) )
     {
       $file = trim($file);
       if ( strrpos($file,'/') !== false )
       {
         /* The -2 in strrpos means that if there is a final /, it will be kept in the file name */
         $this->name = substr($file,strrpos($file,'/',-2)+1);
-        $this->path = substr($file,0,-strlen($this->name));
+        $this->path = substr($file,0,-\strlen($this->name));
         if ( substr($this->path,0,2) == '//' )
           $this->path = 'http://'.substr($this->path,2);
       }
@@ -98,7 +98,7 @@ class file extends models\cls\basic
       }
     }
     $this->get_extension();
-    if ( is_string($file) && is_file($file) ){
+    if ( \is_string($file) && is_file($file) ){
       $this->file = $file;
     }
     else{

@@ -197,13 +197,13 @@ class db extends \PDO implements db\actions, db\api, db\engines
     $h = str::encode_filename($this->host);
     switch ( $mode ){
       case 'columns':
-        $r = "bbn/db/".$this->engine."/".$h."/".str_replace(".", "/", $this->tfn($item));
+        $r = 'bbn/db/'.$this->engine.'/'.$h.'/'.str_replace('.', '/', $this->tfn($item));
         break;
       case 'tables':
-        $r = "bbn/db/".$this->engine."/".$h."/".($item ? $item : $this->db->current);
+        $r = 'bbn/db/'.$this->engine.'/'.$h.'/'.($item ?: $this->db->current);
         break;
       case 'databases':
-        $r = "bbn/db/".$this->engine."/".$h."/_bbn-database";
+        $r = 'bbn/db/'.$this->engine.'/'.$h.'/_bbn-database';
         break;
     }
     return $r;
@@ -229,7 +229,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
           case 'columns':
             $keys = $this->language->get_keys($item);
             $cols = $this->language->get_columns($item);
-            if ( is_array($keys) && is_array($cols) ){
+            if ( \is_array($keys) && \is_array($cols) ){
               $tmp = [
                   'keys' => $keys['keys'],
                   'cols' => $keys['cols'],
@@ -244,8 +244,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
             $tmp = $this->language->get_databases();
             break;
         }
-        if ( !is_array($tmp) ){
-          die("Erreur avec la table $item ou le mode $mode");
+        if ( !\is_array($tmp) ){
+          die("Error in table $item or mode $mode");
         }
         if ( $tmp ){
           $this->cacher->set($cache_name, $tmp, $this->cache_renewal);
@@ -339,7 +339,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       }
     }
     array_push($msg,self::$line);
-    if ( is_string($e) ){
+    if ( \is_string($e) ){
       array_push($msg, $e);
     }
     else if ( method_exists($e, "getMessage") ){
@@ -358,7 +358,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
     }
     $this->log(implode(PHP_EOL, $msg));
     if ( $this->on_error === self::E_DIE ){
-      die(implode('<br>', $msg));
+      die(\defined('BBN_IS_PROD') && BBN_IS_PROD ? 'Database error' : implode(PHP_EOL, $msg));
     }
   }
 
@@ -388,7 +388,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
     return false;
   }
   /**
-   * Constructor
+   * rructor
    * @todo Thomas fais ton taf!!
    *
    * ```php
@@ -399,7 +399,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public function __construct($cfg=[])
   {
-    if ( !isset($cfg['engine']) && defined('BBN_DB_ENGINE') ){
+    if ( !isset($cfg['engine']) && \defined('BBN_DB_ENGINE') ){
       $cfg['engine'] = BBN_DB_ENGINE;
     }
     if ( isset($cfg['engine']) ){
@@ -416,7 +416,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       if ( $cfg = $this->language->get_connection($cfg) ){
         $this->qte = $this->language->qte;
         try{
-          call_user_func_array('parent::__construct', $cfg['args']);
+          \call_user_func_array('parent::__construct', $cfg['args']);
           $this->current = $cfg['db'];
           $this->engine = $cfg['engine'];
           $this->host = isset($cfg['host']) ? $cfg['host'] : '127.0.0.1';
@@ -431,7 +431,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
         }
         catch ( \PDOException $e ){
           x::log("Impossible to create the connection for ".$cfg['engine']."/".$cfg['db'], 'db');
-          die(var_dump($e));
+          die(\defined('bbn_IS_DEV') && BBN_IS_DEV ? var_dump($e) : 'Impossible to create the database connection');
         }
       }
     }
@@ -461,7 +461,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
         if ( ($t['ref_table'] === $table) &&
             ($t['ref_column'] === $col) &&
             ($t['ref_db'] === $db) &&
-            (count($t['columns']) === 1)
+            (\count($t['columns']) === 1)
         ){
           if ( !isset($res[$tn]) ){
             $res[$tn] = [$t['columns'][0]];
@@ -485,7 +485,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
 
   public function log($st){
-    $args = func_get_args();
+    $args = \func_get_args();
     foreach ( $args as $a ){
       x::log($a, 'db');
     }
@@ -635,7 +635,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *
    */
   public function escape_value($value, $esc = "'"){
-    if ( is_string($value) ){
+    if ( \is_string($value) ){
       return str_replace('%', '\\%', $esc === '"' ?
           str::escape_dquotes($value) :
           str::escape_squotes($value));
@@ -662,7 +662,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       }
       else{
         $id = $this->lastInsertId();
-        if ( is_string($id) && str::is_integer($id) ){
+        if ( \is_string($id) && str::is_integer($id) ){
           $id = (int)$id;
         }
       }
@@ -834,8 +834,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   private function make_hash()
   {
-    $args = func_get_args();
-    if ( (count($args) === 1) && is_array($args[0]) ){
+    $args = \func_get_args();
+    if ( (\count($args) === 1) && \is_array($args[0]) ){
       $args = $args[0];
     }
     $st = '';
@@ -897,7 +897,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   public function has_id_increment($table){
     if ( $model = $this->modelize($table) ){
       if ( isset($model['keys']['PRIMARY']) &&
-          (count($model['keys']['PRIMARY']['columns']) === 1) &&
+          (\count($model['keys']['PRIMARY']['columns']) === 1) &&
           ($model['fields'][$model['keys']['PRIMARY']['columns'][0]]['extra'] === 'auto_increment') ){
         return 1;
       }
@@ -938,7 +938,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
     if ( !count($r) ){
       return false;
     }
-    if ( isset($r['BRACKET']) && (count($r) === 1) ){
+    if ( isset($r['BRACKET']) && (\count($r) === 1) ){
       return false;
     }
     return $r;
@@ -972,7 +972,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   public function last_id()
   {
     if ( $this->last_insert_id ){
-      return $this->last_insert_id;
+      return str::is_buid($this->last_insert_id) ? bin2hex($this->last_insert_id) : $this->last_insert_id;
     }
     return false;
   }
@@ -983,12 +983,10 @@ class db extends \PDO implements db\actions, db\api, db\engines
     return $this->language->get_uid();
   }
 
-  public function add_uid($uid_table = 'bbn_uids', $uid_col = 'uid'){
+  public function add_uid($uid_table = 'bbn_history_uids', $uid_col = 'uid'){
     $uid = $this->get_uid();
-    if ( 1 ){//|| $this->query("INSERT INTO `$uid_table` (`$uid_col`) VALUES (?)", hex2bin($uid)) ){
-      $this->set_last_insert_id($uid);
-      return $uid;
-    }
+    $this->set_last_insert_id($uid);
+    return $uid;
   }
 
   /**
@@ -1003,15 +1001,15 @@ class db extends \PDO implements db\actions, db\api, db\engines
   private function add_query($hash, $statement, $sequences, $placeholders, $options)
   {
     $this->queries[$hash] = [
-        'statement' => $statement,
-        'sequences' => $sequences,
-        'placeholders' => $placeholders,
-        'options' => $options,
-        'num' => 0,
-        'exe_time' => 0,
-        'prepared' => false
+      'statement' => $statement,
+      'sequences' => $sequences,
+      'placeholders' => $placeholders,
+      'options' => $options,
+      'num' => 0,
+      'exe_time' => 0,
+      'prepared' => false
     ];
-    while ( count($this->queries) > $this->max_queries ){
+    while ( \count($this->queries) > $this->max_queries ){
       array_shift($this->queries);
     }
   }
@@ -1028,7 +1026,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @param string $db The database's name
    * @return db
    */
-  public function change($db){
+  public function change($db)
+  {
     if ( $this->language->change($db) ){
       $this->current = $db;
     }
@@ -1045,7 +1044,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *
    * @return db
    */
-  public function disable_keys(){
+  public function disable_keys()
+  {
     $this->language->disable_keys();
     return $this;
   }
@@ -1060,13 +1060,14 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *
    * @return db
    */
-  public function enable_keys(){
+  public function enable_keys(): self
+  {
     $this->language->enable_keys();
     return $this;
   }
 
   public function flush(){
-    $num = count($this->queries);
+    $num = \count($this->queries);
     $this->queries = [];
     return $num;
   }
@@ -1125,8 +1126,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public function raw_query(){
     if ( $this->check() ){
-      $args = func_get_args();
-      return call_user_func_array('parent::query', $args);
+      $args = \func_get_args();
+      return \call_user_func_array('parent::query', $args);
     }
   }
 
@@ -1146,37 +1147,37 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public function query(){
     if ( $this->check() ){
-      $args = func_get_args();
+      $args = \func_get_args();
       if ( !$this->fancy ){
-        return call_user_func_array('parent::query', $args);
+        return \call_user_func_array('parent::query', $args);
       }
-      if ( count($args) === 1 && is_array($args[0]) ){
+      if ( \count($args) === 1 && \is_array($args[0]) ){
         $args = $args[0];
       }
 
-      if ( !empty($args[0]) && is_string($args[0]) ){
+      if ( !empty($args[0]) && \is_string($args[0]) ){
 
         // The first argument is the statement
         $statement = trim(array_shift($args));
         $hash = $this->make_hash($statement);
 
         // Sending a hash as second argument from statement generating functions will bind it to the statement
-        if ( isset($args[0]) && is_string($args[0]) &&
-            ( strlen($args[0]) === ( 32 + 2*strlen($this->hash_contour) ) ) &&
+        if ( isset($args[0]) && \is_string($args[0]) &&
+            ( \strlen($args[0]) === ( 32 + 2*\strlen($this->hash_contour) ) ) &&
             ( strpos($args[0], $this->hash_contour) === 0 ) &&
-            ( substr($args[0],-strlen($this->hash_contour)) === $this->hash_contour ) ){
+            ( substr($args[0],-\strlen($this->hash_contour)) === $this->hash_contour ) ){
           $hash_sent = array_shift($args);
         }
 
         // Case where drivers are arguments
-        if ( isset($args[0]) && is_array($args[0]) && !array_key_exists(0,$args[0]) ){
+        if ( isset($args[0]) && \is_array($args[0]) && !array_key_exists(0,$args[0]) ){
           $driver_options = array_shift($args);
         }
 
         // Case where values are argument
         else if ( isset($args[0]) &&
-            is_array($args[0]) &&
-            (count($args) === 1) ){
+            \is_array($args[0]) &&
+            (\count($args) === 1) ){
           $args = $args[0];
         }
         if ( !isset($driver_options) ){
@@ -1185,7 +1186,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
         $this->last_params['values'] = [];
         $num_values = 0;
         foreach ( $args as $i => $arg ){
-          if ( !is_array($arg) ){
+          if ( !\is_array($arg) ){
             $this->last_params['values'][] = $arg;
             $num_values++;
           }
@@ -1202,7 +1203,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
                 $hash,
                 $statement,
                 $sequences,
-                isset($exp[1]) && is_array($exp[1]) ? count($exp[1]) : 0,
+                isset($exp[1]) && \is_array($exp[1]) ? \count($exp[1]) : 0,
                 $driver_options);
             if ( isset($hash_sent) ){
               $this->queries[$hash_sent] = $hash;
@@ -1221,20 +1222,20 @@ class db extends \PDO implements db\actions, db\api, db\engines
             }
           }
           else{
-            die("Impossible to parse the query $statement");
+            die(\defined('bbn_IS_DEV') && BBN_IS_DEV ? "Impossible to parse the query $statement" : 'Impossible to parse the query');
           }
         }
-        else if ( is_string($this->queries[$hash]) ){
+        else if ( \is_string($this->queries[$hash]) ){
           $hash = $this->queries[$hash];
         }
         /* If the number of values is inferior to the number of placeholders we fill the values with the last given value */
         if ( $num_values < $this->queries[$hash]['placeholders'] ){
           $this->last_params['values'] = array_merge($this->last_params['values'], array_fill($num_values, $this->queries[$hash]['placeholders'] - $num_values, end($this->last_params['values'])));
-          $num_values = count($this->last_params['values']);
+          $num_values = \count($this->last_params['values']);
         }
         /* The number of values must match the number of placeholders to bind */
         if ( $num_values !== $this->queries[$hash]['placeholders'] ){
-          $this->error('Incorrect arguments count (your values: '.$num_values.', in the statement: '.$this->queries[$hash]['placeholders']."\n\n".$statement."\n\n".'start of values'.print_r($this->last_params['values'], 1).'Arguments:'.print_r(func_get_args(),1));
+          $this->error('Incorrect arguments count (your values: '.$num_values.', in the statement: '.$this->queries[$hash]['placeholders']."\n\n".$statement."\n\n".'start of values'.print_r($this->last_params['values'], 1).'Arguments:'.print_r(\func_get_args(),1));
           exit;
         }
         $q =& $this->queries[$hash];
@@ -1314,7 +1315,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return string | false
    */
   public function get_val($table, $field_to_get, $field_to_check='', $value=''){
-    if ( is_array($field_to_check) ){
+    if ( \is_array($field_to_check) ){
       $where = $field_to_check;
     }
     else if ( !empty($field_to_check) && !empty($value) ){
@@ -1361,7 +1362,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public function new_id($table, $min = 1){
     $tab = $this->modelize($table);
-    if ( count($tab['keys']['PRIMARY']['columns']) !== 1 ){
+    if ( \count($tab['keys']['PRIMARY']['columns']) !== 1 ){
       die("Error! Unique numeric primary key doesn't exist");
     }
     else if (
@@ -1392,6 +1393,70 @@ class db extends \PDO implements db\actions, db\api, db\engines
     }
   }
 
+  public function random_value($col, $table){
+    $tab = $this->modelize($table);
+    if ( isset($tab['fields'][$col]) ){
+      switch ( $tab['fields'][$col]['type'] ){
+        case 'int':
+          if ( ($tab['fields'][$col]['maxlength'] === 1) && !$tab['fields'][$col]['signed'] ){
+            $val = microtime(true) % 2 === 0 ? 1 : 0;
+          }
+          else {
+            $max = 10 ** $tab['fields'][$col]['maxlength'] - 1;
+            if ( $max > mt_getrandmax() ){
+              $max = mt_getrandmax();
+            }
+            if ( $tab['fields'][$col]['signed'] ){
+              $max = $max / 2;
+            }
+            $min = $tab['fields'][$col]['signed'] ? -$max : 0;
+            $val = random_int($min, $max);
+          }
+          break;
+        case 'float':
+        case 'double':
+        case 'decimal':
+          break;
+        case 'varchar':
+          break;
+        case 'text':
+          break;
+        case 'date':
+          break;
+        case 'datetime':
+          break;
+        case 'timestamp':
+          break;
+        case 'time':
+          break;
+        case 'year':
+          break;
+        case 'blob':
+          break;
+        case 'binary':
+          break;
+        case 'varbinary':
+          break;
+        case 'enum':
+          break;
+      }
+      if ( isset($val) ){
+        foreach ( $tab['keys'] as $key => $cfg ){
+          if (
+            $cfg['unique'] &&
+            \in_array($col, $cfg['columns'], true) &&
+            \is_null($cfg['ref_column']) &&
+            (\count($cfg['columns']) === 1) &&
+            $this->select_one($table, $col, [$col => $val])
+          ){
+            return $this->random_value($col, $table);
+          }
+        }
+      }
+      return $val;
+    }
+  }
+
   /**
    * Return the integer which will be the next incremented ID in the given table.
    *
@@ -1405,7 +1470,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public function next_id($table){
     $tab = $this->modelize($table);
-    if ( count($tab['keys']['PRIMARY']['columns']) !== 1 ){
+    if ( \count($tab['keys']['PRIMARY']['columns']) !== 1 ){
       die("Error! Unique numeric primary key doesn't exist");
     }
     if ( $id_field = $tab['keys']['PRIMARY']['columns'][0] ){
@@ -1433,7 +1498,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return array | false
    */
   public function fetch($query){
-    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
+    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
       return $r->fetch();
     }
     return false;
@@ -1469,7 +1534,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return array | false
    */
   public function fetchAll($query){
-    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
+    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
       return $r->fetchAll();
     }
     return false;
@@ -1484,8 +1549,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public function fetchColumn($query, $num=0)
   {
-    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
-      return $r->fetchColumn(is_int($num) ? $num : 0);
+    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
+      return $r->fetchColumn(\is_int($num) ? $num : 0);
     }
     return false;
   }
@@ -1507,7 +1572,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *
    */
   public function fetchObject($query){
-    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
+    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
       return $r->fetchObject();
     }
     return false;
@@ -1526,7 +1591,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return string | int | false
    */
   public function get_one(){
-    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
+    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
       return $r->fetchColumn(0);
     }
     return false;
@@ -1546,7 +1611,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return string | int | false
    */
   public function get_var(){
-    return call_user_func_array([$this, "get_one"], func_get_args());
+    return \call_user_func_array([$this, "get_one"], \func_get_args());
   }
 
 
@@ -1568,7 +1633,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *
    */
   public function get_row(){
-    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
+    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
       return $r->get_row();
     }
     return false;
@@ -1596,7 +1661,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return array | false
    */
   public function get_rows(){
-    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
+    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
       return $r->get_rows();
     }
     return [];
@@ -1619,7 +1684,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return array | false
    */
   public function get_irow(){
-    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
+    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
       return $r->get_irow();
     }
     return false;
@@ -1649,7 +1714,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public function get_irows()
   {
-    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
+    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
       return $r->get_irows();
     }
     return [];
@@ -1686,13 +1751,13 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return array | false
    */
   public function get_key_val(){
-    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
+    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
       $rows = $r->get_rows();
       // At least 2 columns
-      if ( (count($rows) > 0) && (count($rows[0]) > 1) ){
+      if ( (\count($rows) > 0) && (\count($rows[0]) > 1) ){
         $cols = array_keys($rows[0]);
         $idx = array_shift($cols);
-        $num_cols = count($cols);
+        $num_cols = \count($cols);
         $res = [];
         foreach ( $rows as $d ){
           $index = $d[$idx];
@@ -1735,7 +1800,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   public function select_all_by_keys($table, $fields = [], $where = [], $order = false, $start = 0){
     if ( $sql = $this->get_select($table, $fields, $where, $order, $start) ){
       $where = $this->where_cfg($where, $table);
-      if ( count($where['values']) > 0 ){
+      if ( \count($where['values']) > 0 ){
         return $this->get_key_val($sql, $where['values']);
       }
       else {
@@ -1767,7 +1832,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return array
    */
   public function get_by_columns(){
-    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
+    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
       return $r->get_by_columns();
     }
     return false;
@@ -1786,7 +1851,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return array | false
    */
   public function get_col_array(){
-    if ( $r = call_user_func_array([$this, 'get_by_columns'], func_get_args()) ){
+    if ( $r = \call_user_func_array([$this, 'get_by_columns'], \func_get_args()) ){
       return array_values(current($r));
     }
     return [];
@@ -1807,7 +1872,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return object
    */
   public function get_obj(){
-    return $this->get_object(func_get_args());
+    return $this->get_object(\func_get_args());
   }
 
   /**
@@ -1826,7 +1891,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return object | false
    */
   public function get_object(){
-    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
+    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
       return $r->get_object();
     }
     return false;
@@ -1863,7 +1928,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public function get_objects()
   {
-    if ( $r = call_user_func_array([$this, 'query'], func_get_args()) ){
+    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
       return $r->get_objects();
     }
     return [];
@@ -1886,8 +1951,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
     $where = $this->get_where($where_arr, $table);
     if ($table = $this->tfn($table, 1) ){
       $sql = "SELECT COUNT(*) FROM ".$table.$where;
-      if ( count($where_arr['values']) > 0 ){
-        return call_user_func_array([$this, "get_one"], array_merge([$sql], $where_arr['values']));
+      if ( \count($where_arr['values']) > 0 ){
+        return \call_user_func_array([$this, "get_one"], array_merge([$sql], $where_arr['values']));
       }
       else{
         return $this->get_one($sql);
@@ -2129,18 +2194,18 @@ class db extends \PDO implements db\actions, db\api, db\engines
     if ( empty($table) || $table === '*' ){
       $tables = $this->get_tables($this->current);
     }
-    else if ( is_string($table) ){
+    else if ( \is_string($table) ){
       $tables = [$table];
     }
-    else if ( is_array($table) ){
+    else if ( \is_array($table) ){
       $tables = $table;
     }
-    if ( is_array($tables) ){
+    if ( \is_array($tables) ){
       foreach ( $tables as $t ){
         $full = $this->tfn($t);
         $r[$full] = $this->_get_cache($full, 'columns', $force);
       }
-      if ( count($r) === 1 ){
+      if ( \count($r) === 1 ){
         return end($r);
       }
       return $r;
@@ -2149,7 +2214,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   public function fmodelize($table = '', $force = false){
-    if ( $res = call_user_func_array([$this, 'modelize'], func_get_args()) ){
+    if ( $res = \call_user_func_array([$this, 'modelize'], \func_get_args()) ){
       foreach ( $res['fields'] as $n => $f ){
         $res['fields'][$n]['name'] = $n;
         $res['fields'][$n]['keys'] = [];
@@ -2370,7 +2435,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   public function get_unique_primary($table){
     if ( ($keys = $this->get_keys($table)) &&
         isset($keys['keys']['PRIMARY']) &&
-        (count($keys['keys']['PRIMARY']['columns']) === 1) ){
+        (\count($keys['keys']['PRIMARY']['columns']) === 1) ){
       return $keys['keys']['PRIMARY']['columns'][0];
     }
     return false;
@@ -2432,14 +2497,14 @@ class db extends \PDO implements db\actions, db\api, db\engines
       $where = $this->where_cfg($where, $table, $aliases);
     }
     $st = '';
-    if ( count($where['final']) > 0 ){
-      if ( !is_array($table) ){
+    if ( \count($where['final']) > 0 ){
+      if ( !\is_array($table) ){
         $table = [$table];
       }
       if ( !empty($table) ){
         foreach ( $table as $tab ){
           $m = $this->modelize($table);
-          if ( !$m || count($m['fields']) === 0 ){
+          if ( !$m || \count($m['fields']) === 0 ){
             /*
             * @todo  check the fields against the table's model and the aliases
             */
@@ -2451,7 +2516,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       $operators = $cls::$operators;
       foreach ( $where['final'] as $w ){
         // 2 parameters, we use equal
-        if ( count($w) >= 3 && in_array(strtolower($w[1]), $operators) ){
+        if ( \count($w) >= 3 && \in_array(strtolower($w[1]), $operators) ){
           // 4 parameters, it's a SQL function, no escaping no binding
           if ( isset($w[3]) ){
             $st .= 'AND '.$this->escape($w[0]).' '.$w[1].' '.$w[2].' ';
@@ -2693,10 +2758,10 @@ class db extends \PDO implements db\actions, db\api, db\engines
   public function get_field_values($table, $field,  array $where = [], $limit = false, $start = 0){
     if ( $statement = $this->language->get_column_values($table, $field, $where, [], $limit, $start) ){
       $w = $this->where_cfg($where, $table);
-      $args = count($w['values']) ? array_merge([$statement], $w['values']) : [$statement];
-      $r = call_user_func_array([$this, 'get_by_columns'], $args);
-      if ( $r ){
-        return $r[$field];
+      $args = \count($w['values']) ? array_merge([$statement], $w['values']) : [$statement];
+      $r = \call_user_func_array([$this, 'get_by_columns'], $args);
+      if ( \is_array($r) ){
+        return $r[$field] ?: [];
       }
     }
   }
@@ -2741,10 +2806,10 @@ class db extends \PDO implements db\actions, db\api, db\engines
     }
     $column = $this->cfn($column);
     $bits = explode(".", $column);
-    if ( count($bits) === 2 ){
+    if ( \count($bits) === 2 ){
       array_unshift($bits, $this->current);
     }
-    if ( count($bits) !== 3 ){
+    if ( \count($bits) !== 3 ){
 
       return false;
     }
@@ -2782,10 +2847,10 @@ class db extends \PDO implements db\actions, db\api, db\engines
     }
     $column = $this->cfn($column);
     $bits = explode(".", $column);
-    if ( count($bits) === 2 ){
+    if ( \count($bits) === 2 ){
       array_unshift($bits, $this->current);
     }
-    if ( count($bits) !== 3 ){
+    if ( \count($bits) !== 3 ){
 
       return false;
     }
@@ -2806,17 +2871,17 @@ class db extends \PDO implements db\actions, db\api, db\engines
                   // Has a reference
                   !empty($k2['ref_column']) &&
                   // A unique reference
-                  (count($k2['columns']) === 1) &&
+                  (\count($k2['columns']) === 1) &&
                   // To a table with a primary
                   isset($schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']]) &&
                   // which is a sole column
-                  (count($schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']]) === 1) &&
+                  (\count($schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']]) === 1) &&
                   // We retrieve the key name
                   ($key_name = $schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']][0]) &&
                   // which is unique
                   !empty($schema[$this->tfn($k2['ref_table'])]['keys'][$key_name]['unique']) &&
                   // and refers to a single column
-                  (count($k['columns']) === 1)
+                  (\count($k['columns']) === 1)
               ){
                 if ( !isset($refs[$t]) ){
                   $refs[$t] = ['column' => $k['columns'][0], 'refs' => []];

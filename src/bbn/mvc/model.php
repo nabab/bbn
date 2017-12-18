@@ -92,7 +92,7 @@ class model extends bbn\models\cls\db{
 	}
 
   public function get(array $data=null){
-    if ( is_null($data) ){
+    if ( \is_null($data) ){
       $data = [];
     }
     $this->data = $data;
@@ -100,35 +100,35 @@ class model extends bbn\models\cls\db{
   }
 
   public function get_content(){
-    return call_user_func_array([$this->ctrl, 'get_content'], func_get_args());
+    return \call_user_func_array([$this->ctrl, 'get_content'], \func_get_args());
   }
 
   public function get_model(){
-    return call_user_func_array([$this->ctrl, 'get_model'], func_get_args());
+    return \call_user_func_array([$this->ctrl, 'get_model'], \func_get_args());
   }
 
   public function get_cached_model(){
-    return call_user_func_array([$this->ctrl, 'get_cached_model'], func_get_args());
+    return \call_user_func_array([$this->ctrl, 'get_cached_model'], \func_get_args());
   }
 
   public function get_plugin_model($path, $data = []){
-    return call_user_func_array([$this->ctrl, 'get_plugin_model'], func_get_args());
+    return \call_user_func_array([$this->ctrl, 'get_plugin_model'], \func_get_args());
   }
 
   public function has_plugin(){
-    return call_user_func_array([$this->ctrl, 'has_plugin'], func_get_args());
+    return \call_user_func_array([$this->ctrl, 'has_plugin'], \func_get_args());
   }
 
   public function is_plugin(){
-    return call_user_func_array([$this->ctrl, 'is_plugin'], func_get_args());
+    return \call_user_func_array([$this->ctrl, 'is_plugin'], \func_get_args());
   }
 
   public function plugin_path(){
-    return call_user_func_array([$this->ctrl, 'plugin_path'], func_get_args());
+    return \call_user_func_array([$this->ctrl, 'plugin_path'], \func_get_args());
   }
 
   public function plugin_url(){
-    return call_user_func_array([$this->ctrl, 'plugin_url'], func_get_args());
+    return \call_user_func_array([$this->ctrl, 'plugin_url'], \func_get_args());
   }
   /**
 	 * Checks if data exists or if a specific index exists in the data
@@ -137,13 +137,13 @@ class model extends bbn\models\cls\db{
 	 */
 	public function has_data($idx=null)
 	{
-    if ( !is_array($this->data) ){
+    if ( !\is_array($this->data) ){
       return false;
     }
-    if ( is_null($idx) ){
+    if ( \is_null($idx) ){
       return !empty($this->data);
     }
-    $args = func_get_args();
+    $args = \func_get_args();
     foreach ( $args as $arg ){
       if ( !isset($this->data[$idx]) ){
         return false;
@@ -171,9 +171,9 @@ class model extends bbn\models\cls\db{
 	 */
 	public function add_data(array $data)
 	{
-		$ar = func_get_args();
+		$ar = \func_get_args();
 		foreach ( $ar as $d ){
-			if ( is_array($d) ){
+			if ( \is_array($d) ){
 				$this->data = $this->has_data() ? array_merge($this->data,$d) : $d;
 			}
 		}

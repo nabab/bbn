@@ -249,7 +249,7 @@ class mapper extends bbn\models\cls\db{
         }
          * 
          */
-        if ( count($params) > 0 ){
+        if ( \count($params) > 0 ){
           if ( isset($cfg['select']) ){
             $cfg['select'] .= "/".implode("/", $params);
           }
@@ -266,7 +266,7 @@ class mapper extends bbn\models\cls\db{
         if ( !empty($obj['description']) ){
           $cfg['description'] = $obj['description'];
         }
-        if ( !is_null($obj['table']) ){
+        if ( !\is_null($obj['table']) ){
           $cfg['table'] = $obj['table'];
         }
         $fields = $this->db->rselect_all(
@@ -278,25 +278,25 @@ class mapper extends bbn\models\cls\db{
         foreach ( $fields as $k => $f ){
           $fields[$k] = json_decode($f['configuration'], 1);
           if ( isset($fields[$k]['sql']) ){
-            if ( (count($params) % 2) === 0 && isset($chplouif) ){
+            if ( (\count($params) % 2) === 0 && isset($chplouif) ){
               $fields[$k]['data'] = $this->db->get_rows($fields[$k]['sql'], $params[2]);
             }
             else{
               $fields[$k]['data'] = $this->db->get_rows($fields[$k]['sql']);
             }
           }
-          if ( !is_null($f['column']) ){
+          if ( !\is_null($f['column']) ){
             $fields[$k]['column'] = $f['column'];
           }
         }
         $cfg['elements'] = $fields;
       }
-      else if ( is_array($id) ){
+      else if ( \is_array($id) ){
         $cfg = $id;
       }
       else{
         if ( $class === 'form' ){
-          if ( is_object($params) ){
+          if ( \is_object($params) ){
             $cfg = $this->get_default_form_config($id, $params);
           }
           else {
@@ -320,7 +320,7 @@ class mapper extends bbn\models\cls\db{
 		if ( $this->db &&
             ($cfg = $this->db->modelize($table)) &&
             isset($cfg['keys']['PRIMARY']) &&
-            count($cfg['keys']['PRIMARY']['columns']) === 1 &&
+            \count($cfg['keys']['PRIMARY']['columns']) === 1 &&
             ($table = $this->db->table_full_name($table)) ){
 
       $id = bbn\str::genpwd();
@@ -341,7 +341,7 @@ class mapper extends bbn\models\cls\db{
 
       array_shift($args);
       $where = [];
-      for ( $i = 0; $i < (count($args) - 1); $i++ ){
+      for ( $i = 0; $i < (\count($args) - 1); $i++ ){
         if ( isset($cfg['fields'][$args[$i]]) ){
           array_push($where, [$args[$i], '=', $args[$i+1]]);
         }
@@ -463,7 +463,7 @@ class mapper extends bbn\models\cls\db{
               }
             }
           }
-          if ( is_array($ref) && ($ref_table_cfg = $this->db->modelize($ref['table'])) ){
+          if ( \is_array($ref) && ($ref_table_cfg = $this->db->modelize($ref['table'])) ){
             // Arguments for select
             $cols = false;
             foreach ( $ref_table_cfg['fields'] as $name => $def ){
@@ -475,7 +475,7 @@ class mapper extends bbn\models\cls\db{
                 break;
               }
             }
-            if ( $cols && (count($cols) > 1) ){
+            if ( $cols && (\count($cols) > 1) ){
               if ( $this->db->count($ref['table']) < 500 ){
                 $r['values'] = $this->db->rselect_all($ref['table'], $cols);
                 $r['field'] = 'dropdown';
@@ -569,11 +569,11 @@ class mapper extends bbn\models\cls\db{
     if ( $this->db && ($full_table = $this->db->table_full_name($table)) ){
 
       $table = explode(".",$full_table);
-      if ( count($table) === 1 ){
+      if ( \count($table) === 1 ){
         array_unshift($table, $this->client_db);
       }
       $cfg = [];
-      if ( count($table) === 2 ){
+      if ( \count($table) === 2 ){
         $db = trim($table[0]);
         $table = trim($table[1]);
 
@@ -644,7 +644,7 @@ class mapper extends bbn\models\cls\db{
             }
           }
         }
-				if ( is_array($ref) && $ref_table_cfg = $this->db->modelize($ref['table']) ){
+				if ( \is_array($ref) && $ref_table_cfg = $this->db->modelize($ref['table']) ){
           // Arguments for select
           $cols = [$ref['column']];
           foreach ( $ref_table_cfg['fields'] as $name => $def ){
@@ -771,7 +771,7 @@ class mapper extends bbn\models\cls\db{
       if ( bbn\appui\history::$is_used && isset($schema[bbn\appui\history::$htable]) ){
         $tab_history = 1;
       }
-      if ( !is_array($schema) ){
+      if ( !\is_array($schema) ){
 
         die(var_dump("THIS IS NOT AN ARRAY", $schema));
       }
@@ -828,7 +828,7 @@ class mapper extends bbn\models\cls\db{
 				}
 			}
       foreach ( $schema as $t => $vars ){
-        if ( isset($vars['keys']) && is_array($vars['keys']) ){
+        if ( isset($vars['keys']) && \is_array($vars['keys']) ){
           foreach ( $vars['keys'] as $k => $arr ){
             $pos = 1;
             foreach ( $arr['columns'] as $c ){
@@ -838,7 +838,7 @@ class mapper extends bbn\models\cls\db{
                 'table' => $t,
                 'column' => $t.'.'.$c,
                 'position' => $pos,
-                'ref_column' => is_null($arr['ref_column']) ? null : $arr['ref_db'].'.'.$arr['ref_table'].'.'.$arr['ref_column'],
+                'ref_column' => \is_null($arr['ref_column']) ? null : $arr['ref_db'].'.'.$arr['ref_table'].'.'.$arr['ref_column'],
                 'unique' => $arr['unique']
               ]);
               $pos++;
@@ -884,7 +884,7 @@ class mapper extends bbn\models\cls\db{
 	 */
 	public function create_tables(){
 		if ( $this->db ){
-      if ( !in_array($this->prefix.'tables', $this->db->get_tables()) ){
+      if ( !\in_array($this->prefix.'tables', $this->db->get_tables()) ){
         $this->db->disable_keys();
         return $this->db->query("
         -- DROP TABLE IF EXISTS `{$this->prefix}clients`;

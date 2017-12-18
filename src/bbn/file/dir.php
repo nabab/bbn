@@ -54,7 +54,7 @@ class dir extends bbn\models\cls\basic
 	public static function has_file($dir)
 	{
     $dir = self::clean($dir);
-    $as = func_get_args();
+    $as = \func_get_args();
     array_shift($as);
     foreach ( $as as $a ){
       if ( !file_exists($dir.'/'.$a) ){
@@ -159,7 +159,7 @@ class dir extends bbn\models\cls\basic
           }
 				}
 			}
-      if ( count($files) > 0 ){
+      if ( \count($files) > 0 ){
         bbn\x::sort($files);
       }
 			return $files;
@@ -228,7 +228,7 @@ class dir extends bbn\models\cls\basic
 	   $all = [];
 	   $dir = self::clean($dir);
 	   $dirs = self::get_dirs($dir);
-	   if ( is_array($dirs) ){
+	   if ( \is_array($dirs) ){
 	     if ( $type && (strpos($type, 'file') === 0) ){
 	       $all = self::get_files($dir, false, $hidden);
 	     }
@@ -243,12 +243,12 @@ class dir extends bbn\models\cls\basic
 	     }
 	     else{
 	       $files = self::get_files($dir, false, $hidden);
-	       if ( is_array($files) ){
+	       if ( \is_array($files) ){
 	         $all = array_merge($dirs, $files);
 	       }
 	     }
 	     foreach ( $dirs as $d ){
-	       $all = array_merge(is_array($all) ? $all : [], self::scan($d, $type, $hidden));
+	       $all = array_merge(\is_array($all) ? $all : [], self::scan($d, $type, $hidden));
 	     }
 	   }
 	   return $all;
@@ -415,7 +415,7 @@ class dir extends bbn\models\cls\basic
     $r = [];
     $dir = self::clean($dir);
     $dirs = self::get_dirs($dir, $hidden);
-    if ( is_array($dirs) ){
+    if ( \is_array($dirs) ){
       foreach ( $dirs as $d ){
         $x = [
           'name' => $d,
@@ -423,7 +423,7 @@ class dir extends bbn\models\cls\basic
           'num_children' => 0,
           'items' => self::get_tree($d, $only_dir, $filter, $hidden)
         ];
-        $x['num_children'] = count($x['items']);
+        $x['num_children'] = \count($x['items']);
         if ( is_callable($filter) ){
           if ( $filter($x) ){
             array_push($r, $x);
@@ -468,12 +468,12 @@ class dir extends bbn\models\cls\basic
 		* @return string|false
 		*/
 	public static function create_path($dir, $chmod=false){
-    if ( !$dir || !is_string($dir) ){
+    if ( !$dir || !\is_string($dir) ){
       return false;
     }
     if ( !is_dir($dir) ){
       $bits = explode('/', $dir);
-      $num = count($bits);
+      $num = \count($bits);
       $path = empty($bits[0]) ? '/' : '';
       foreach ( $bits as $i => $b ){
         if ( !empty($b) ){
@@ -527,7 +527,7 @@ class dir extends bbn\models\cls\basic
             $file_name = bbn\str::file_ext($dest, 1);
             $file = $file_name[0].$st;
             if ( $length > 0 ){
-              $len = strlen(bbn\str::cast($i));
+              $len = \strlen(bbn\str::cast($i));
               if ( $len > $length ){
                 return false;
               }

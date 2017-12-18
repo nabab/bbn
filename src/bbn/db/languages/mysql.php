@@ -44,15 +44,15 @@ class mysql implements bbn\db\engines
   {
     $cfg['engine'] = 'mysql';
     if ( !isset($cfg['host']) ){
-      $cfg['host'] = defined('BBN_DB_HOST') ? BBN_DB_HOST : '127.0.0.1';
+      $cfg['host'] = \defined('BBN_DB_HOST') ? BBN_DB_HOST : '127.0.0.1';
     }
-    if ( !isset($cfg['user']) && defined('BBN_DB_USER') ){
-      $cfg['user'] = defined('BBN_DB_USER') ? BBN_DB_USER : 'root';
+    if ( !isset($cfg['user']) && \defined('BBN_DB_USER') ){
+      $cfg['user'] = \defined('BBN_DB_USER') ? BBN_DB_USER : 'root';
     }
     if ( !isset($cfg['pass']) ){
-      $cfg['pass'] = defined('BBN_DB_PASS') ? BBN_DB_PASS : '';
+      $cfg['pass'] = \defined('BBN_DB_PASS') ? BBN_DB_PASS : '';
     }
-    if ( !isset($cfg['db']) && defined('BBN_DATABASE') ){
+    if ( !isset($cfg['db']) && \defined('BBN_DATABASE') ){
       $cfg['db'] = BBN_DATABASE;
     }
 		if ( isset($cfg['db']) )
@@ -93,7 +93,7 @@ class mysql implements bbn\db\engines
 	 */
 	public function escape($item)
 	{
-    if ( is_string($item) && ($item = trim($item)) ){
+    if ( \is_string($item) && ($item = trim($item)) ){
       $items = explode(".", str_replace("`", "", $item));
       $r = [];
       foreach ( $items as $m ){
@@ -116,13 +116,13 @@ class mysql implements bbn\db\engines
 	 */
 	public function table_full_name($table, $escaped=false)
 	{
-    if ( is_string($table) && ($table = trim($table)) ){
+    if ( \is_string($table) && ($table = trim($table)) ){
       $mtable = explode(".", str_replace("`", "", $table));
-      if ( count($mtable) === 3 ){
+      if ( \count($mtable) === 3 ){
         $db = trim($mtable[0]);
         $table = trim($mtable[1]);
       }
-      else if ( count($mtable) === 2 ){
+      else if ( \count($mtable) === 2 ){
         $db = trim($mtable[0]);
         $table = trim($mtable[1]);
       }
@@ -146,9 +146,9 @@ class mysql implements bbn\db\engines
 	 */
   public function table_simple_name($table, $escaped=false)
   {
-    if ( is_string($table) && ($table = trim($table)) ){
+    if ( \is_string($table) && ($table = trim($table)) ){
       $mtable = explode(".", str_replace("`", "", $table));
-      switch ( count($mtable) ){
+      switch ( \count($mtable) ){
         case 1:
           $table = $mtable[0];
           break;
@@ -176,9 +176,9 @@ class mysql implements bbn\db\engines
 	 */
   public function col_full_name($col, $table='', $escaped=false)
   {
-    if ( is_string($col) && ($col = trim($col)) ){
+    if ( \is_string($col) && ($col = trim($col)) ){
       $mcol = explode(".", str_replace("`", "", $col));
-      if ( count($mcol) > 1 ){
+      if ( \count($mcol) > 1 ){
         $col = array_pop($mcol);
         $table = array_pop($mcol);
         $ok = 1;
@@ -204,7 +204,7 @@ class mysql implements bbn\db\engines
 	 */
   public function col_simple_name($col, $escaped=false)
   {
-    if ( is_string($col) && ($col = trim($col)) ){
+    if ( \is_string($col) && ($col = trim($col)) ){
       $mcol = explode(".", str_replace("`", "", $col));
       $col = end($mcol);
       if ( bbn\str::check_name($col) ){
@@ -264,8 +264,8 @@ class mysql implements bbn\db\engines
           $r[$f] = [
             'position' => $p++,
             'null' => $row['Null'] === 'NO' ? 0 : 1,
-            'key' => in_array($row['Key'], ['PRI', 'UNI', 'MUL']) ? $row['Key'] : null,
-            'default_value' => is_null($row['Default']) && $row['Null'] !== 'NO' ? 'NULL' : $row['Default'],
+            'key' => \in_array($row['Key'], ['PRI', 'UNI', 'MUL']) ? $row['Key'] : null,
+            'default_value' => \is_null($row['Default']) && $row['Null'] !== 'NO' ? 'NULL' : $row['Default'],
             'extra' => $row['Extra'],
             'signed' => 0,
             'maxlength' => 0
@@ -275,7 +275,7 @@ class mysql implements bbn\db\engines
             if (
               preg_match_all('/\((.*?)\)/', $row['Type'], $matches) &&
               !empty($matches[1]) &&
-              is_string($matches[1][0]) &&
+              \is_string($matches[1][0]) &&
               ($matches[1][0][0] === "'")
             ){
               $r[$f]['values'] = explode("','", substr($matches[1][0], 1, -1));
@@ -288,7 +288,7 @@ class mysql implements bbn\db\engines
           else{
             preg_match_all('/(.*?)\(/', $row['Type'], $real_type);
             if ( isset($real_type[1][0]) &&
-                    in_array($real_type[1][0], self::$numeric_types) ){
+                    \in_array($real_type[1][0], self::$numeric_types) ){
               if ( strpos($row['Type'], 'unsigned') ){
                 $row['Type'] = trim(str_replace('unsigned','',$row['Type']));
               }
@@ -384,11 +384,11 @@ class mysql implements bbn\db\engines
 	 * @return string
 	 */
   public function get_order($order, $table = '', $aliases = []){
-    if ( is_string($order) ){
+    if ( \is_string($order) ){
       $order = [$order];
     }
     $r = '';
-    if ( is_array($order) && count($order) > 0 ){
+    if ( \is_array($order) && \count($order) > 0 ){
       $r .= PHP_EOL . "ORDER BY ";
       if ( !empty($table) ){
         $cfg = $this->db->modelize($table);
@@ -401,11 +401,11 @@ class mysql implements bbn\db\engines
           else{
             $dir = 'ASC';
           }
-          if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($direction)]) || in_array($this->col_simple_name($direction), $aliases) ){
+          if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($direction)]) || \in_array($this->col_simple_name($direction), $aliases) ){
             $r .= $this->escape($direction)." $dir," . PHP_EOL;
           }
         }
-        else if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($col)]) || in_array($this->col_simple_name($col), $aliases) ){
+        else if ( !isset($cfg) || isset($cfg['fields'][$this->col_simple_name($col)]) || \in_array($this->col_simple_name($col), $aliases) ){
           $r .= "`$col` " . ( strtolower($direction) === 'desc' ? 'DESC' : 'ASC' ) . "," . PHP_EOL;
         }
       }
@@ -418,16 +418,16 @@ class mysql implements bbn\db\engines
 	 * @return string
 	 */
   public function get_limit($limit, $start = 0){
-    if ( is_array($limit) ){
+    if ( \is_array($limit) ){
       $args = $limit;
     }
     else{
-      $args = func_get_args();
-      if ( is_array($args[0]) ){
+      $args = \func_get_args();
+      if ( \is_array($args[0]) ){
         $args = $args[0];
       }
     }
-    if ( count($args) === 2 &&
+    if ( \count($args) === 2 &&
             bbn\str::is_number($args[0], $args[1]) &&
             ($args[0] > 0) ){
       return " LIMIT $args[1], $args[0]";
@@ -475,7 +475,7 @@ class mysql implements bbn\db\engines
 	 */
   public function get_select($table, array $fields = [], array $where = [], $order = [], $limit = false, $start = 0, $php = false){
     // Tables are an array
-    if ( !is_array($table) ){
+    if ( !\is_array($table) ){
       $table = [$table];
     }
     /** @var array $tables_fields List of all the fields' names indexed by table */
@@ -495,22 +495,22 @@ class mysql implements bbn\db\engines
       $aliases = [];
       $r .= "SELECT \n";
       // Columns are specified
-      if ( count($fields) > 0 ){
+      if ( \count($fields) > 0 ){
         foreach ( $fields as $k => $c ){
           // Here there is no full name
           if ( !strpos($c, '.') ){
             // So we look into the tables to check if there is the field
             $tab = [];
             foreach ( $tables_fields as $t => $f ){
-              if ( in_array($c, $f) ){
+              if ( \in_array($c, $f) ){
                 array_push($tab, $t);
               }
             }
             // If the same column is passed twice in its short form
-            if ( count($tab) === 1 ){
+            if ( \count($tab) === 1 ){
               $c = $this->col_full_name($c, $tab[0]);
             }
-            else if ( count($tab) > 1 ){
+            else if ( \count($tab) > 1 ){
               $this->db->error('Error! Duplicate field name, you must insert the fields with their fullname.');
             }
             else {
@@ -557,7 +557,7 @@ class mysql implements bbn\db\engines
 		if ( $php ){
 			$r .= '$db->query("';
 		}
-		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 ){
+		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && \count($m['fields']) > 0 ){
 			$r .= "INSERT ";
 			if ( $ignore ){
 				$r .= "IGNORE ";
@@ -565,7 +565,7 @@ class mysql implements bbn\db\engines
 			$r .= "INTO $table (\n";
 			$i = 0;
 
-			if ( count($fields) > 0 ){
+			if ( \count($fields) > 0 ){
 				foreach ( $fields as $k ){
 					if ( !isset($m['fields'][$k]) ){
             $this->db->error("Error in Insert query creation: the column $k doesn't exist in $table");
@@ -590,7 +590,7 @@ class mysql implements bbn\db\engines
 			}
 			$r = substr($r,0,strrpos($r,',')).")\nVALUES (\n";
 			$i = 0;
-			if ( count($fields) > 0 ){
+			if ( \count($fields) > 0 ){
 				foreach ( $fields as $k ){
           $r .= "?, ";
 					$i++;
@@ -632,7 +632,7 @@ class mysql implements bbn\db\engines
 	public function get_update($table, array $fields = [], array $where = [], $ignore = false, $php = false){
 		if ( ($table = $this->table_full_name($table, 1)) &&
       ($m = $this->db->modelize($table)) &&
-      (count($m['fields']) > 0)
+      (\count($m['fields']) > 0)
     ){
       $r = '';
       if ( $php ){
@@ -644,7 +644,7 @@ class mysql implements bbn\db\engines
       }
       $r .= "$table SET ";
 
-			if ( count($fields) > 0 ){
+			if ( \count($fields) > 0 ){
 				foreach ( $fields as $k ){
 					if ( !isset($m['fields'][$this->db->csn($k)]) ){
             $this->db->error("Error in Update query creation: the column $k doesn't exist in $table");
@@ -666,7 +666,7 @@ class mysql implements bbn\db\engines
       if ( $php ){
 				$r .= "\",\n";
 				foreach ( array_keys($m['fields']) as $k ){
-					if ( !in_array($k, $where['fields']) && ( count($fields) === 0 || in_array($k,$fields) ) ){
+					if ( !\in_array($k, $where['fields']) && ( \count($fields) === 0 || \in_array($k,$fields) ) ){
 						$r .= "\$d['$k'],\n";
 					}
 				}
@@ -692,7 +692,7 @@ class mysql implements bbn\db\engines
 		if ( bbn\str::check_name($csn) &&
       ($m = $this->db->modelize($table)) &&
       ($table = $this->table_full_name($table, 1)) &&
-      (count($m['fields']) > 0)
+      (\count($m['fields']) > 0)
     ){
       if ( !isset($m['fields'][$csn]) ){
         $this->db->error("Error in collecting values: the column $field doesn't exist in $table");
@@ -716,7 +716,7 @@ class mysql implements bbn\db\engines
 	*/
 	public function get_values_count($table, $field, array $where = [], $limit = false, $start = 0, $php = false)
   {
-		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && count($m['fields']) > 0 )
+		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && \count($m['fields']) > 0 )
 		{
 			$r = '';
 			if ( $php ){
@@ -726,7 +726,7 @@ class mysql implements bbn\db\engines
         $this->db->error("Error in values' count: the column $field doesn't exist in $table");
       }
 			$r .= "SELECT COUNT(*) AS num, `$field` AS val FROM $table";
-      if ( count($where) > 0 ){
+      if ( \count($where) > 0 ){
         $r .= PHP_EOL . $this->db->get_where($where, $table);
       }
       $r .= PHP_EOL . "GROUP BY `$field`";
@@ -747,11 +747,11 @@ class mysql implements bbn\db\engines
 	 */
 	public function create_db_index($table, $column, $unique = false, $length = null)
 	{
-    if ( !is_array($column) ){
+    if ( !\is_array($column) ){
       $column = [$column];
     }
-    if ( !is_null($length) ){
-      if ( !is_array($length) ){
+    if ( !\is_null($length) ){
+      if ( !\is_array($length) ){
         $length = [$length];
       }
     }
@@ -762,7 +762,7 @@ class mysql implements bbn\db\engines
       }
       $iname .= '_'.$c;
       $column[$i] = "`".$column[$i]."`";
-      if ( is_int($length[$i]) && $length[$i] > 0 ){
+      if ( \is_int($length[$i]) && $length[$i] > 0 ){
         $column[$i] .= "(".$length[$i].")";
       }
     }

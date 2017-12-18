@@ -68,7 +68,7 @@ class environment {
       $tmp = explode('/', bbn\str::parse_path($path));
       foreach ( $tmp as $t ){
         if ( !empty($t) || bbn\str::is_number($t) ){
-          if ( in_array($t, bbn\mvc::$reserved, true) ){
+          if ( \in_array($t, bbn\mvc::$reserved, true) ){
             die('The controller you are asking for contains one of the following reserved strings: ' .
               implode(', ', bbn\mvc::$reserved));
           }
@@ -103,7 +103,7 @@ class environment {
       if ( !isset($this->post) ){
         $this->get_post();
       }
-      if ( count($this->post) ){
+      if ( \count($this->post) ){
         self::_dot_to_array($this->post);
         /** @todo Remove the json parameter from the bbn.js functions */
         if ( isset($this->post['appui']) && ($this->post['appui'] !== 'json') ){
@@ -119,7 +119,7 @@ class environment {
           return $a;
         });
       }
-      else if ( count($_FILES) ){
+      else if ( \count($_FILES) ){
         $this->set_mode(BBN_DEFAULT_MODE);
       }
       // If no post, assuming to be a DOM document
@@ -139,7 +139,7 @@ class environment {
           $this->set_params($url);
         }
         else{
-          $this->set_params(substr($url, strlen(BBN_CUR_PATH)));
+          $this->set_params(substr($url, \strlen(BBN_CUR_PATH)));
         }
       }
     }
@@ -157,11 +157,11 @@ class environment {
 
   public function set_prepath($path){
     $path = bbn\x::remove_empty(explode('/', $path));
-    if ( count($path) ){
+    if ( \count($path) ){
       foreach ($path as $p){
         if ($this->params[0] === $p){
           array_shift($this->params);
-          $this->url = substr($this->url, strlen($p)+1);
+          $this->url = substr($this->url, \strlen($p)+1);
         }
         else {
           die("The prepath $p doesn't seem to correspond to the current path {$this->url}");
@@ -223,7 +223,7 @@ class environment {
             }, $json);
           }
           else{
-            for ( $i = 2, $iMax = count($argv); $i < $iMax; $i++ ){
+            for ( $i = 2, $iMax = \count($argv); $i < $iMax; $i++ ){
               $this->post[] = $argv[$i];
             }
           }
@@ -236,7 +236,7 @@ class environment {
   public function get_get(){
     if ( !isset($this->get) ){
       $this->get = [];
-      if ( count($_GET) > 0 ){
+      if ( \count($_GET) > 0 ){
         $this->get = array_map(function($a){
           return bbn\str::correct_types($a);
         }, $_GET);
@@ -247,10 +247,10 @@ class environment {
 
   private static function _set_index(array $keys, array &$arr, $val){
     $new_arr =& $arr;
-    while ( count($keys) ){
+    while ( \count($keys) ){
       $var = array_shift($keys);
       if ( !isset($new_arr[$var]) ){
-        $new_arr[$var] = count($keys) ? [] : $val;
+        $new_arr[$var] = \count($keys) ? [] : $val;
         $new_arr =& $new_arr[$var];
       }
     }
@@ -258,11 +258,11 @@ class environment {
   }
 
   private static function _dot_to_array(&$val){
-    if ( is_array($val) ){
+    if ( \is_array($val) ){
       $to_unset = [];
       foreach ( $val as $key => $v ){
         $keys = explode('.', $key);
-        if ( count($keys) > 1 ){
+        if ( \count($keys) > 1 ){
           self::_set_index($keys, $val, $v);
           $to_unset[] = $key;
         }
@@ -290,14 +290,14 @@ class environment {
     if ( !isset($this->files) ){
       $this->files = [];
       // Rebuilding the $_FILES array into $this->files in a more logical structure
-      if ( count($_FILES) > 0 ){
+      if ( \count($_FILES) > 0 ){
         // Some devices send multiple files with the same name
         $names = [];
         foreach ( $_FILES as $n => $f ){
-          if ( is_array($f['name']) ){
+          if ( \is_array($f['name']) ){
             $this->files[$n] = [];
             foreach ( $f['name'] as $i => $v ){
-              while ( in_array($v, $names, true) ){
+              while ( \in_array($v, $names, true) ){
                 if ( !isset($j) ){
                   $j = 0;
                 }

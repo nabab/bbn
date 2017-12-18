@@ -35,7 +35,7 @@ class cron extends bbn\models\cls\basic{
           $timeout = 50;
 
   public function __construct(bbn\mvc\controller $ctrl, $cfg = []){
-    if ( is_array($cfg) ){
+    if ( \is_array($cfg) ){
       $this->ctrl = $ctrl;
       $this->db = $ctrl->db;
       $vars = get_class_vars('\\bbn\appui\\cron');
@@ -122,7 +122,7 @@ class cron extends bbn\models\cls\basic{
   }
 
   public function get_next_date($frequency, $tm = false){
-    if ( is_string($frequency) && (strlen($frequency) >= 2) ){
+    if ( \is_string($frequency) && (\strlen($frequency) >= 2) ){
       if ( !$tm ){
         $tm = time();
       }
@@ -169,7 +169,7 @@ class cron extends bbn\models\cls\basic{
         FROM {$this->table}
         WHERE `active` = 1
         AND `next` < ?".
-        ( is_int($id_cron) ? " AND `id` = $id_cron" : "" )."
+        ( \is_int($id_cron) ? " AND `id` = $id_cron" : "" )."
         ORDER BY `priority` ASC, `next` ASC
         LIMIT 1",
         date('Y-m-d H:i:s'))) ){
@@ -180,7 +180,7 @@ class cron extends bbn\models\cls\basic{
   }
 
   public function is_running($id_cron){
-    if ( $this->check() && is_int($id_cron) ){
+    if ( $this->check() && \is_int($id_cron) ){
       return $this->db->get_one("
         SELECT COUNT(*)
         FROM {$this->jtable}
@@ -191,7 +191,7 @@ class cron extends bbn\models\cls\basic{
   }
 
   private function get_runner($id_cron){
-    if ( $this->check() && is_int($id_cron) ){
+    if ( $this->check() && \is_int($id_cron) ){
       $d = $this->db->get_row("
         SELECT *
         FROM {$this->jtable}
@@ -233,7 +233,7 @@ class cron extends bbn\models\cls\basic{
     $done = [];
     while ( ($time < $this->timeout) &&
            ($cron = $this->get_next()) &&
-           !in_array($cron['id'], $done) ){
+           !\in_array($cron['id'], $done) ){
       if ( $ctx = $this->run($cron['id']) ){
         $time += $ctx;
       }
@@ -243,7 +243,7 @@ class cron extends bbn\models\cls\basic{
   }
 
   public function is_timeout($id_cron){
-    if ( $this->check() && is_int($id_cron) && $this->is_running($id_cron)){
+    if ( $this->check() && \is_int($id_cron) && $this->is_running($id_cron)){
       $c = $this->get_cron($id_cron);
       $r = $this->get_runner($id_cron);
       if ( (strtotime($r['start']) + $c['cfg']['timeout']) < time() ){

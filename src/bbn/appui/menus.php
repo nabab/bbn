@@ -18,7 +18,9 @@ class menus extends bbn\models\cls\basic{
 
   protected
     /** @var bbn\appui\options The options object */
-    $options;
+    $options,
+    /** @var bbn\user\preferences The preferences object */
+    $pref;
 
   public function __construct(){
     $this->options = bbn\appui\options::get_instance();
@@ -35,7 +37,7 @@ class menus extends bbn\models\cls\basic{
   }
 
   private function _get_public_root(){
-    if ( is_null(self::$id_public_root) &&
+    if ( \is_null(self::$id_public_root) &&
       ($id = $this->options->from_path(self::$public_root, '|', BBN_APPUI))
     ){
       self::_set_public_root($id);
@@ -65,7 +67,7 @@ class menus extends bbn\models\cls\basic{
 
   private function _filter($ar){
     $usr = bbn\user::get_instance();
-    if ( is_object($usr) && $usr->is_admin() ){
+    if ( \is_object($usr) && $usr->is_admin() ){
       return $ar;
     }
     $pref = $this->pref;
@@ -95,7 +97,7 @@ class menus extends bbn\models\cls\basic{
         $res['id_permission'] = $menu['id_alias'];
         $res['link'] = $this->options->to_path($menu['id_alias'], '', $this->_get_public_root());
         if ( $prepath && (strpos($res['link'], $prepath) === 0) ){
-          $res['link'] = substr($res['link'], strlen($prepath));
+          $res['link'] = substr($res['link'], \strlen($prepath));
         }
       }
       if ( !empty($menu['items']) ){
@@ -138,18 +140,26 @@ class menus extends bbn\models\cls\basic{
 
   public function add_shortcut($id){
     if ( $id_menu = $this->from_path('shortcuts') ){
-      return $this->pref->set_link($id, $id_menu);
+      return $this->pref->add_link($id, $id_menu);
     }
   }
 
   public function remove_shortcut($id){
     if ( $id_menu = $this->from_path('shortcuts') ){
-      return $this->pref->set_link($id, null);
+      $pref = $this->pref->get($id);
+      // Case where the shortcut is coming directly from the menu
+      if ( $this->options->is_parent($pref['id_option'], $this->get_option_root()) ){
+        return $this->pref->delete($id);
+      }
+      // Otherwise it comes from the permissions
+      else{
+        return $this->pref->set_link($id);
+      }
     }
   }
 
-  public function tree($id, $prepath = false){
-    if ( $id = $this->from_path($id, self::$option_root_id) ){
+  public function tree($code, $prepath = false){
+    if ( $id = $this->options->from_code($code, 'menus', self::$option_root_id) ){
       if ( $this->cache_has($id, __FUNCTION__) ){
         return $this->cache_get($id, __FUNCTION__);
       }
@@ -165,7 +175,7 @@ class menus extends bbn\models\cls\basic{
       return $this->_adapt($tree, $this->pref, $prepath);
     }
   }
-  
+
   public function shortcuts(){
     if ( $id_menu = $this->from_path('shortcuts') ){
       $links = $this->pref->get_links($id_menu);
@@ -175,7 +185,8 @@ class menus extends bbn\models\cls\basic{
           ($url = $this->to_path($o['id_alias']))
         ){
           $res[] = [
-            'id' => $link['id_option'],
+            'id' => $link['id'],
+            'id_option' => $link['id_option'],
             'url' => $url,
             'text' => $o['text'],
             'icon' => $o['icon']
@@ -186,4 +197,93 @@ class menus extends bbn\models\cls\basic{
     }
   }
 
+  public function get_id_menu($id): ?string
+  {
+    $parents = $this->options->parents($id);
+    $root = $this->get_option_root();
+    foreach ($parents as $i => $val) {
+      if ( $val === $root ){
+        return $parents[$i + 2];
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Delete  chache for menu
+   * @param $id
+   * @return int|boolean
+   */
+  public function remove(string $id){
+    if( $id_menu = $this->get_id_menu($id) ){
+      $this->options->remove($id);
+      $this->cache_delete($id_menu);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Add menu and delete  chache for menu
+   * @param string $id_parent
+   * @param array $cfg
+   * @return null|string
+   * @internal param $id
+   */
+  public function add(string $id_parent, array $cfg): ?string
+  {
+    if( $id_menu = $this->get_id_menu($id_parent) ){
+      $cfg['id_parent'] = $id_parent;
+      if ( $res = $this->options->add($cfg) ){
+        $this->cache_delete($id_menu);
+      }
+      return $res;
+    }
+    return null;
+  }
+
+  /**
+   * Set menu and delete chache for menu
+   * @param string $id
+   * @param array $cfg
+   * @return bool|int
+   */
+  public function set(string $id, array $cfg){
+    if( $id_menu = $this->get_id_menu($id) ){
+      if ( $res = $this->options->set($id, $cfg) ){
+        $this->cache_delete($id_menu);
+      }
+      return $res;
+    }
+  }
+  /**
+   * Set text and delete  chache for menu
+   * @param string $id
+   * @param array $cfg
+   * @return bool|int
+   */
+  public function set_text(string $id, string $cfg)
+  {
+    if( $id_menu = $this->get_id_menu($id) ){
+      if ( $res = $this->options->set_text($id, $cfg) ){
+        $this->cache_delete($id_menu);
+      }
+      return $res;
+    }
+  }
+
+  public function get_options_menus(){
+    $items = $this->options->full_options('menus', self::$option_root_id);
+    $res = [];
+    foreach ( $items as $it ){
+      $res[] = [
+        'text' => $it['text'],
+        'value' => $it['id']
+      ];
+    }
+    return $res;
+  }
+
+
 }
+

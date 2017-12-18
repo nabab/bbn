@@ -29,7 +29,7 @@ class notification extends bbn\models\cls\db
 
 
   public function insert($title, $content, array $users){
-    if ( is_string($title) && !empty($title) && is_string($content) && !empty($content) ){
+    if ( \is_string($title) && !empty($title) && \is_string($content) && !empty($content) ){
       $this->db->insert(self::$tc, [
         self::$c['title'] => $title,
         self::$c['content'] => $content,
@@ -66,7 +66,7 @@ class notification extends bbn\models\cls\db
         GROUP BY {$this->db->cfn(self::$c['id_user'], self::$t)}, {$this->db->cfn(self::$c['id_content'], self::$t)}
         HAVING {$this->db->cfn(self::$c['creation'], self::$tc)} >= MAX(apst_users_sessions.creation)",
         $id_user);
-      if ( $self && count($list) ){
+      if ( $self && \count($list) ){
         foreach ( $list as $l ){
           $this->db->update(self::$t, [
             self::$c['sent'] => date('Y-m-d H:i:s')
@@ -93,7 +93,7 @@ class notification extends bbn\models\cls\db
       $id_user = $user->get_id();
       $self = 1;
     }
-    if ( $id_user && is_int($limit) && is_int($start) ){
+    if ( $id_user && \is_int($limit) && \is_int($start) ){
       $list = $this->db->get_rows("SELECT ".self::$tc.".*, ".self::$t.".*
         FROM ".self::$t."
           JOIN ".self::$tc."
@@ -105,7 +105,7 @@ class notification extends bbn\models\cls\db
         HAVING {$this->db->cfn(self::$c['creation'], self::$tc)} >= MAX(apst_users_sessions.creation)
         LIMIT $start, $limit",
         104);
-      if ( $self && count($list) ){
+      if ( $self && \count($list) ){
         foreach ( $list as $l ){
           $this->db->update(self::$t, [
             self::$c['sent'] => date('Y-m-d H:i:s')

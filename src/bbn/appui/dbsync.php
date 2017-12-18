@@ -31,7 +31,7 @@ class dbsync
   final public static function __callStatic($name, $arguments)
   {
     if ( ($name === 'cbf1') || ($name === 'cbf2') ){
-      return call_user_func_array(self::$methods[$name], $arguments);
+      return \call_user_func_array(self::$methods[$name], $arguments);
     }
   }
 
@@ -44,7 +44,7 @@ class dbsync
   }
 
   private static function log(){
-    $args = func_get_args();
+    $args = \func_get_args();
     foreach ( $args as $a ){
       bbn\x::log($a, 'dbsync');
     }
@@ -54,7 +54,7 @@ class dbsync
     if ( empty($dbs) ){
       $dbs = self::$default_cfg;
     }
-    else if ( is_string($dbs) ){
+    else if ( \is_string($dbs) ){
       $db = $dbs;
       $dbs = self::$default_cfg;
       $dbs['db'] = $db;
@@ -77,10 +77,10 @@ class dbsync
     self::$db = $db;
     self::def($dbs, $dbs_table);
     self::$tables = $tables;
-    if ( count(self::$tables) === 0 ){
+    if ( \count(self::$tables) === 0 ){
       self::$tables = self::$db->get_tables();
     }
-    if ( is_array(self::$tables) ){
+    if ( \is_array(self::$tables) ){
       foreach ( self::$tables as $i => $t ){
         self::$tables[$i] = self::$db->table_full_name($t);
       }
@@ -93,13 +93,13 @@ class dbsync
 	}
 
   public static function first_call(){
-    if ( is_array(self::$dbs) ){
+    if ( \is_array(self::$dbs) ){
       self::$dbs = new bbn\db(self::$dbs);
     }
     if ( bbn\appui\history::$is_used ){
       self::$has_history = 1;
     }
-    if ( (self::$dbs->engine === 'sqlite') && !in_array(self::$dbs_table, self::$dbs->get_tables()) ){
+    if ( (self::$dbs->engine === 'sqlite') && !\in_array(self::$dbs_table, self::$dbs->get_tables()) ){
       self::$dbs->query('
         CREATE TABLE "dbsync" (
           "id" INTEGER PRIMARY KEY  NOT NULL ,
@@ -117,7 +117,7 @@ class dbsync
         CREATE INDEX "state" "dbsync" ("state");
       ');
     }
-    else if ( (self::$dbs->engine === 'mysql') && !in_array(self::$dbs_table, self::$dbs->get_tables()) ){
+    else if ( (self::$dbs->engine === 'mysql') && !\in_array(self::$dbs_table, self::$dbs->get_tables()) ){
       self::$dbs->query("
         CREATE TABLE IF NOT EXISTS `dbsync` (
           `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -144,7 +144,7 @@ class dbsync
 	 * @return bool
 	 */
   public static function check(){
-    return ( is_object(self::$db) && is_object(self::$dbs) && self::$db->check() && self::$dbs->check() );
+    return ( \is_object(self::$db) && \is_object(self::$dbs) && self::$db->check() && self::$dbs->check() );
   }
 
   public static function disable(){
@@ -172,7 +172,7 @@ class dbsync
     if ( !self::$disabled &&
       self::check() &&
       ($table = self::$db->tfn($cfg['table'])) &&
-      in_array($table, self::$tables)
+      \in_array($table, self::$tables)
     ){
       if ( ($cfg['moment'] === 'before') &&
         ($cfg['kind'] === 'insert') &&
@@ -268,7 +268,7 @@ class dbsync
         self::cbf1($d);
       }
       $vals = json_decode($d['vals'], 1);
-      if ( !is_array($vals) ){
+      if ( !\is_array($vals) ){
         $to_log['num_problems']++;
         array_push($to_log['problems'], "Hey, look urgently at the row $d[id]!");
       }
@@ -345,7 +345,7 @@ class dbsync
           ['chrono', '>=', $d['chrono']],
           ['chrono', '<', $next_time],
         ]);
-      if ( count($each) > 0 ){
+      if ( \count($each) > 0 ){
         $to_log['num_problems']++;
         array_push($to_log['problems'], "Conflict!", $d);
         foreach ( $each as $e ){

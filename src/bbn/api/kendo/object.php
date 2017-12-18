@@ -18,7 +18,7 @@ class object
     if ( isset($cfg['fn']) ){
       foreach ( $cfg as $i => $v ){
         if ( ($i !== 'fn') && ($i !== 'args') ){
-          if ( is_array($v) && isset($v['fn']) && !isset($v[0]) ){
+          if ( \is_array($v) && isset($v['fn']) && !isset($v[0]) ){
             $cfg[$i] = $this->_execute($v);
           }
         }
@@ -28,7 +28,7 @@ class object
       
       foreach ( $cfg as $i => $v ){
         if ( ($i !== 'fn') && ($i !== 'args') ){
-          if ( is_array($v) && isset($v['fn']) && isset($v[0]) ){
+          if ( \is_array($v) && isset($v['fn']) && isset($v[0]) ){
             $tmp = [];
             $a = 0;
             
@@ -38,13 +38,13 @@ class object
                 // Merging the parameters in case there's some args
                 $tmp[$a] = $this->_build(array_merge($v, $w));
                 
-                if ( is_array($w) ){
+                if ( \is_array($w) ){
                   foreach ( $w as $j => $x ){
                     if ( ($j !== 'fn') && ($j !== 'args') ){
-                      if ( is_array($x) && isset($x['fn']) ){
+                      if ( \is_array($x) && isset($x['fn']) ){
                         $x = $this->_execute($x);
                       }
-                      if ( is_array($x) && isset($x[0]) ){
+                      if ( \is_array($x) && isset($x[0]) ){
                         if ( $j === 'values' ){
                           $tmp[$a]->$j($x);
                         }
@@ -55,7 +55,7 @@ class object
                         }
                       }
                       else{
-                        if ( !is_string($j) ){
+                        if ( !\is_string($j) ){
                           die(print_r($w,1).var_dump($a,$j));
                         }
                         $tmp[$a]->$j($x);
@@ -69,7 +69,7 @@ class object
             }
           }
           else{
-            if ( is_array($v) && isset($v[0]) ){
+            if ( \is_array($v) && isset($v[0]) ){
               if ( ($i === 'values') || ($i === 'data') ){
                 $r->$i($v);
               }
@@ -79,8 +79,8 @@ class object
                 }
               }
             }
-            else if ( is_array($v) && isset($v['args']) ){
-              call_user_func_array([$r, $i], $v['args']);
+            else if ( \is_array($v) && isset($v['args']) ){
+              \call_user_func_array([$r, $i], $v['args']);
             }
             else{
               $r->$i($v);

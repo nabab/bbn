@@ -140,7 +140,7 @@ class grid // extends object
               $col->addCommandItem($c);
             }
           }
-          if ( count(bbn\x::to_array($col)) > 0 ){
+          if ( \count(bbn\x::to_array($col)) > 0 ){
             $this->grid->addColumn($col);
           }
         }

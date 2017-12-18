@@ -151,7 +151,7 @@ class input extends element
   public function __construct($cfg)
 	{
     
-    if ( is_string($cfg) ){
+    if ( \is_string($cfg) ){
       $cfg = [
           'field' => 'text',
           'attr' => [

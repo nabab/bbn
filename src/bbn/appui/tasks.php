@@ -86,7 +86,7 @@ class tasks extends bbn\models\cls\db{
       $this->mgr = new bbn\user\manager($user);
       $this->_get_references();
       //die(var_dump(BBN_APP_PATH, $this->references));
-      if ( defined("BBN_APP_PATH") && is_file(BBN_APP_PATH.'plugins/appui-task/reference.php') ){
+      if ( \defined("BBN_APP_PATH") && is_file(BBN_APP_PATH.'plugins/appui-task/reference.php') ){
         $f = include(BBN_APP_PATH.'plugins/appui-task/reference.php');
         if ( is_callable($f) ){
           $this->template = $f;
@@ -186,7 +186,7 @@ class tasks extends bbn\models\cls\db{
             $values[$i] = '<strong>'.$v.'</strong>';
           }
           array_unshift($values, $action);
-          return call_user_func_array("sprintf", $values);
+          return \call_user_func_array("sprintf", $values);
         }
       }
       return $action;
@@ -235,7 +235,7 @@ class tasks extends bbn\models\cls\db{
     ];
     if ( !isset($orders_ok[$order]) ||
       !bbn\str::is_integer($limit, $start) ||
-      (!is_null($parent) && !bbn\str::is_integer($parent))
+      (!\is_null($parent) && !bbn\str::is_integer($parent))
     ){
       return false;
     }
@@ -254,7 +254,7 @@ class tasks extends bbn\models\cls\db{
         }
       }
     }
-    $where = count($where) ? implode( " OR ", $where) : '';
+    $where = \count($where) ? implode( " OR ", $where) : '';
     $sql = "
     SELECT `role`, bbn_tasks.*,
     FROM_UNIXTIME(MIN(bbn_tasks_logs.chrono)) AS `first`,
@@ -277,7 +277,7 @@ class tasks extends bbn\models\cls\db{
       (empty($where) ? '' : " AND ($where)")."
     AND bbn_tasks.active = 1 
     AND bbn_tasks.id_alias IS NULL
-    AND bbn_tasks.id_parent ".( is_null($parent) ? "IS NULL" : "= $parent" )." 
+    AND bbn_tasks.id_parent ".( \is_null($parent) ? "IS NULL" : "= $parent" )." 
     GROUP BY bbn_tasks_roles.id_task
     LIMIT $start, $limit";
 
@@ -354,7 +354,7 @@ class tasks extends bbn\models\cls\db{
     bbn\x::sort_by($res, $order, $dir);
     return [
       'data' => $res,
-      'total' => count($res)
+      'total' => \count($res)
     ];
   }
 
@@ -393,7 +393,7 @@ class tasks extends bbn\models\cls\db{
       $info['notes'] = $with_comments ? $this->get_comments($id) : $this->get_comments_ids($id);
       $info['children'] = $this->db->rselect_all('bbn_tasks', [], ['id_parent' => $id, 'active' => 1]);
       $info['aliases'] = $this->db->rselect_all('bbn_tasks', ['id', 'title'], ['id_alias' => $id, 'active' => 1]);
-      $info['num_children'] = count($info['children']);
+      $info['num_children'] = \count($info['children']);
       if ( $info['num_children'] ){
         $info['has_children'] = 1;
         foreach ( $info['children'] as $i => $c ){
@@ -408,7 +408,7 @@ class tasks extends bbn\models\cls\db{
         foreach ( $this->references as $table => $ref ){
           foreach ( $ref['refs'] as $j => $r ){
             if ( $id_ref = $this->db->select_one($table, $j, [$ref['column'] => $id]) ){
-              $info['reference'] = $this->template === false ? $id_ref : call_user_func($this->template, $this->db, $id_ref, $table);
+              $info['reference'] = $this->template === false ? $id_ref : \call_user_func($this->template, $this->db, $id_ref, $table);
               break;
             }
           }
@@ -436,7 +436,7 @@ class tasks extends bbn\models\cls\db{
   private function _format_where(array $cfg){
     $res = [];
     foreach ( $cfg as $i => $c ){
-      if ( is_array($c) ){
+      if ( \is_array($c) ){
         array_push($res, $c);
       }
       else if ( ($i === 'text') || ($i === 'title') ){
@@ -495,7 +495,7 @@ class tasks extends bbn\models\cls\db{
           $args = [$w[2]];
           break;
         }
-        else if ( is_array($w[2]) ){
+        else if ( \is_array($w[2]) ){
           $query .= "AND ( ";
           foreach ( $w[2] as $j => $v ){
             if ( $j ){
@@ -527,7 +527,7 @@ class tasks extends bbn\models\cls\db{
         }
       }
       else if ( isset($fields['nums'][$w[0]]) ){
-        if ( is_int($w[2]) ){
+        if ( \is_int($w[2]) ){
           $query .= " AND ".$fields['nums'][$w[0]]." $w[1] ? ";
           array_push($args1, $w[2]);
         }
@@ -570,7 +570,7 @@ class tasks extends bbn\models\cls\db{
         }
       }
       else if ( isset($fields['refs'][$w[0]]) ){
-        if ( is_int($w[2]) ){
+        if ( \is_int($w[2]) ){
           $having .= " AND ".$fields['refs'][$w[0]]." $w[1] ? ";
           array_push($args1, $w[2]);
         }
@@ -628,7 +628,7 @@ class tasks extends bbn\models\cls\db{
       if ( $this->template ){
         if ( $d['reference'] ){
           /** @todo How do I get the t1able with the way I made the request??! */
-          $data[$i]['reference'] = call_user_func($this->template, $this->db, $d['reference'], '');
+          $data[$i]['reference'] = \call_user_func($this->template, $this->db, $d['reference'], '');
         }
       }
     }
@@ -724,14 +724,14 @@ class tasks extends bbn\models\cls\db{
           foreach ( $cfg['files'] as $f ){
             $ext = \bbn\str::file_ext($f, true);
             if (
-              (strlen($ext[0]) < $length) ||
+              (\strlen($ext[0]) < $length) ||
               ($ext[1] !== $extension) ||
               (strpos($ext[0], $filename) !== 0) ||
               !preg_match('/_h[\d]+/i', substr($ext[0], $length))
             ){
               $filename = $ext[0];
               $extension = $ext[1];
-              $length = strlen($filename);
+              $length = \strlen($filename);
               $note->add_media($r, $f);
             }
           }

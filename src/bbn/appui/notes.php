@@ -9,7 +9,7 @@
 namespace bbn\appui;
 use bbn;
 
-if ( !defined('BBN_DATA_PATH') ){
+if ( !\defined('BBN_DATA_PATH') ){
   die("The constant BBN_DATA_PATH must be defined in order to use note");
 }
 
@@ -107,11 +107,11 @@ class notes extends bbn\models\cls\db
           $ext = bbn\str::file_ext(basename($name), true);
           $filename = $ext[0];
           $extension = $ext[1];
-          $length = strlen($filename);
+          $length = \strlen($filename);
           if ( $files = bbn\file\dir::get_files(dirname($name)) ){
             foreach ( $files as $f ){
               if (
-                (strlen($ext[0]) > $length) &&
+                (\strlen($ext[0]) > $length) &&
                 preg_match('/_h[\d]+/i', substr($ext[0], $length))
               ){
                 rename($f, $path.DIRECTORY_SEPARATOR.$ext[0].'.'.$ext[1]);
@@ -159,10 +159,10 @@ class notes extends bbn\models\cls\db
     if ( $old = $this->db->rselect('bbn_notes', [], ['id' => $id]) ){
       $ok = false;
       $new = [];
-      if ( !is_null($private) && ($private != $old['private']) ){
+      if ( !\is_null($private) && ($private != $old['private']) ){
         $new['private'] = $private;
       }
-      if ( !is_null($locked) && ($locked != $old['locked']) ){
+      if ( !\is_null($locked) && ($locked != $old['locked']) ){
         $new['locked'] = $locked;
       }
       if ( !empty($new) ){
@@ -195,24 +195,29 @@ class notes extends bbn\models\cls\db
     return $this->db->get_var("SELECT MAX(version) FROM bbn_notes_versions WHERE id_note = ?", hex2bin($id));
   }
 
-  public function get($id, $version = false){
-    if ( !is_int($version) ){
+  public function get($id, $version = false, $simple = false){
+    if ( !\is_int($version) ){
       $version = $this->latest($id);
     }
     if ( $res = $this->db->rselect('bbn_notes_versions', [], [
       'id_note' => $id,
       'version' => $version
     ]) ){
-      if ( $medias = $this->db->get_column_values('bbn_notes_medias', 'id_media', [
-        'id_note' => $id
-      ]) ){
-        $res['medias'] = [];
-        foreach ( $medias as $m ){
-          if ( $med = $this->db->rselect('bbn_medias', [], ['id' => $m]) ){
-            if ( \bbn\str::is_json($med['content']) ){
-              $med['content'] = json_decode($med['content']);
+      if ( $simple ){
+        unset($res['content']);
+      }
+      else{
+        if ( $medias = $this->db->get_column_values('bbn_notes_medias', 'id_media', [
+          'id_note' => $id
+        ]) ){
+          $res['medias'] = [];
+          foreach ( $medias as $m ){
+            if ( $med = $this->db->rselect('bbn_medias', [], ['id' => $m]) ){
+              if ( \bbn\str::is_json($med['content']) ){
+                $med['content'] = json_decode($med['content']);
+              }
+              array_push($res['medias'], $med);
             }
-            array_push($res['medias'], $med);
           }
         }
       }
@@ -220,12 +225,12 @@ class notes extends bbn\models\cls\db
     return $res;
   }
 
-  public function browse($table_post){
-    if ( isset($table_post['limit']) && ($user = bbn\user::get_instance()) ){
+  public function browse($cfg){
+    if ( isset($cfg['limit']) && ($user = bbn\user::get_instance()) ){
       /** @var bbn\db $db */
       $db =& $this->db;
       $cf =& $this->class_cfg;
-      $grid = new grid($this->db, $table_post, [
+      $grid = new grid($this->db, $cfg, [
         'filters' => [
           'logic' => 'AND',
           'conditions' => [[
@@ -287,4 +292,5 @@ class notes extends bbn\models\cls\db
     }
     return false;
   }
+
 }

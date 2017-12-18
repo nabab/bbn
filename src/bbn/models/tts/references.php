@@ -21,7 +21,7 @@ trait references
   protected $db;
 
   private function _get_references(){
-    if ( is_null($this->references) ){
+    if ( \is_null($this->references) ){
       if ( $refs = $this->db->find_relations('bbn_tasks.id') ){
         $this->references = array_filter($refs, function($a, $k){
           return strpos($k, 'bbn_tasks') !== 0;

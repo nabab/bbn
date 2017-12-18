@@ -74,7 +74,7 @@ class mailbox{
       while( list($key, $val) = each($mboxes) ){
         $name = imap_utf7_decode($val->name);
         $name_arr = explode('}', $name);
-        $j = count($name_arr) - 1;
+        $j = \count($name_arr) - 1;
         $mbox_name = $name_arr[$j];
         if( $mbox_name == "" ){
           continue; // the DIRECTORY itself
@@ -216,7 +216,7 @@ class mailbox{
   }
 
   public function __construct($cfg){
-    if ( is_array($cfg) ){
+    if ( \is_array($cfg) ){
       $this->type = empty($cfg['type']) ? '' : $cfg['type'];
       $this->host = $cfg['host'];
       $this->login = $cfg['login'];
@@ -430,7 +430,7 @@ class mailbox{
    */
   public function reopen_mbox($mbox){
     if ( $this->is_connected() ){
-      if ( in_array($mbox, $this->get_all_names_mboxes()) ){
+      if ( \in_array($mbox, $this->get_all_names_mboxes()) ){
         return imap_reopen($this->stream, $this->mbParam . $mbox);
       }
       else {
@@ -710,7 +710,7 @@ class mailbox{
   public function mbox_exists($name){
     if ( $this->is_connected() && !empty($name) ){
       $names = $this->get_all_names_mboxes();
-      if ( !empty($names) && in_array($name, $names) ){
+      if ( !empty($names) && \in_array($name, $names) ){
         return true;
       }
     }

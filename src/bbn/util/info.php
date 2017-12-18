@@ -33,14 +33,14 @@ trait info
 		}
 		if ( self::$cli )
 		{
-			if ( is_string($st) )
+			if ( \is_string($st) )
 				echo $st."\n";
 			else
 				var_dump($st)."\n";
 		}
 		else
 		{
-			if ( is_string($st) )
+			if ( \is_string($st) )
 				array_push(self::$info,$st);
 			else
 				array_push(self::$info,print_r($st,true));
@@ -55,11 +55,11 @@ trait info
 	 */
 	public static function log($st,$file='misc')
 	{
-		if ( defined('BBN_DATA_PATH') ){
+		if ( \defined('BBN_DATA_PATH') ){
 			$log_file = BBN_DATA_PATH.'logs/'.$file.'.log';
 			$i = debug_backtrace()[0];
 			$r = "[".date('d/m/Y H:i:s')."]\t".$i['file']." - line ".$i['line']."\n";
-			if ( !is_string($st) )
+			if ( !\is_string($st) )
 				$r .= print_r($st,true);
 			else
 				$r .= $st;

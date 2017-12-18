@@ -4,14 +4,14 @@
 namespace bbn\ide;
 use bbn;
 
-if ( !defined('BBN_DATA_PATH') ){
+if ( !\defined('BBN_DATA_PATH') ){
   die("Your constant BBN_DATA_PATH is not defined");
 }
 
 class actions {
 
   private function is_mvc($dirs){
-    if ( isset($dirs['files']) && count($dirs['files']) ){
+    if ( isset($dirs['files']) && \count($dirs['files']) ){
       return ( isset($dirs['files'][0], $dirs['files'][0]['title']) && ($dirs['files'][0]['title'] === 'CTRL') ) || isset($dirs['files']['CTRL']);
     }
     return false;
@@ -40,8 +40,8 @@ class actions {
           foreach ( $dirs['files'] as $f ){
             if ( $f['url'] === end($args) ){
               if ( $f['url'] === '_ctrl' ){
-                $arg = array_slice($args, 0 , count($args)-2);
-                $new_path = count($arg) > 0 ? implode("/", $arg).'/_ctrl.'.$f['ext'] : '_ctrl.'.$f['ext'];
+                $arg = \array_slice($args, 0 , \count($args)-2);
+                $new_path = \count($arg) > 0 ? implode("/", $arg).'/_ctrl.'.$f['ext'] : '_ctrl.'.$f['ext'];
               }
               // If MVC file is not controller and no content, we delete the file
               else if ( empty($data['code']) && ($f['url'] !== 'php') ){
@@ -50,7 +50,7 @@ class actions {
                 return ['path' => $new_path];
               }
               else{
-                $arg = array_slice($args, 0 , count($args)-1);
+                $arg = \array_slice($args, 0 , \count($args)-1);
                 $new_path = substr(implode("/", $arg), 0 , -3).$f['ext'];
               }
               $new_path = $f['fpath'].$new_path;
@@ -141,7 +141,7 @@ class actions {
       return 1;
     }
     if ( isset($_SESSION[BBN_SESS_NAME]['ide']) &&
-      in_array($data, $_SESSION[BBN_SESS_NAME]['ide']['list']) ){
+      \in_array($data, $_SESSION[BBN_SESS_NAME]['ide']['list']) ){
       unset($_SESSION[BBN_SESS_NAME]['ide']['list'][array_search($data, $_SESSION[BBN_SESS_NAME]['ide']['list'])]);
       return 1;
     }
@@ -165,14 +165,14 @@ class actions {
           if ( $data['name'] != '_ctrl' ){
             foreach ( $cfg[$data['dir']]['files'] as $f ){
               $p = $f['fpath'] . substr($data['path'], 0, -3) . $f['ext'];
-              if ( file_exists($p) && !in_array($p, $delete) ){
+              if ( file_exists($p) && !\in_array($p, $delete) ){
                 array_push($delete, $p);
               }
             }
           }
           else {
             $p = $cfg[$data['dir']]['files']['CTRL']['fpath'].$data['path'];
-            if ( file_exists($p) && !in_array($p, $delete) ){
+            if ( file_exists($p) && !\in_array($p, $delete) ){
               array_push($delete, $p);
             }
           }
@@ -181,7 +181,7 @@ class actions {
           foreach ( $dirs['files'] as $f ){
             if ( $f['ext'] === bbn\str::file_ext($data['path']) ){
               $p = $f['fpath'] . $data['path'];
-              if ( file_exists($p) && !in_array($p, $delete) ){
+              if ( file_exists($p) && !\in_array($p, $delete) ){
                 array_push($delete, $p);
               }
             }
@@ -198,14 +198,14 @@ class actions {
               $p_mvc = $f['fpath'] . $data['path'];
               $p_mvc2 = $f['fpath'];
             }
-            if ( is_dir($p) && !in_array($p, $delete) ){
+            if ( is_dir($p) && !\in_array($p, $delete) ){
               array_push($delete, $p);
             }
           }
         }
         else {
           $p = $cfg[$data['dir']]['root_path'].$data['path'];
-          if ( is_dir($p) && !in_array($p, $delete) ){
+          if ( is_dir($p) && !\in_array($p, $delete) ){
             array_push($delete, $p);
           }
         }
@@ -454,7 +454,7 @@ class actions {
             'dir' => $data['dir'],
             'file' => $data['path']
           ];
-          if ( in_array($sess, $_SESSION[BBN_SESS_NAME]['ide']['list']) ){
+          if ( \in_array($sess, $_SESSION[BBN_SESS_NAME]['ide']['list']) ){
             unset($_SESSION[BBN_SESS_NAME]['ide']['list'][array_search($sess, $_SESSION[BBN_SESS_NAME]['ide']['list'])]);
             array_push($_SESSION[BBN_SESS_NAME]['ide']['list'], [
               'dir' => $data['dir'],

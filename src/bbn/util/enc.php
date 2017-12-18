@@ -23,13 +23,13 @@ class enc
 
   private static function get_key($key = ''){
     if ( empty($key) ){
-      $key = defined('BBN_ENCRYPTION_KEY') ? BBN_ENCRYPTION_KEY : 'dsjfjsdvcb34YhXZLW';
+      $key = \defined('BBN_ENCRYPTION_KEY') ? BBN_ENCRYPTION_KEY : 'dsjfjsdvcb34YhXZLW';
     }
     return hash( 'sha256', $key);
   }
 
   private static function get_iv($size){
-    $key = defined('BBN_ENCRYPTION_KEY') ? BBN_ENCRYPTION_KEY : 'dsjfjsdvcb34YhXZLW';
+    $key = \defined('BBN_ENCRYPTION_KEY') ? BBN_ENCRYPTION_KEY : 'dsjfjsdvcb34YhXZLW';
     return substr(hash( 'sha256', 'bbn_'.$key), 0, $size);
   }
 
@@ -68,7 +68,7 @@ class enc
     $iv_size = openssl_cipher_iv_length($method);
     $iv = self::get_iv($iv_size);
     return base64_encode(openssl_encrypt( $string, $method, $key, 0, $iv));
-    $key_size = strlen($key);
+    $key_size = \strlen($key);
     if ( $key_size > $iv_size ){
       $key = substr($key, 0, $iv_size);
     }
@@ -86,7 +86,7 @@ class enc
 	public static function decrypt($encpass, $key='')
 	{
 		if ( empty($key) ){
-			if ( defined('BBN_ENCRYPTION_KEY') ){
+			if ( \defined('BBN_ENCRYPTION_KEY') ){
 				$key = BBN_ENCRYPTION_KEY;
 			}
 			else{
@@ -95,7 +95,7 @@ class enc
 		}
 		$encpass = base64_decode($encpass);
     $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB); /* get vector size on ECB mode */
-    $key_size = strlen($key);
+    $key_size = \strlen($key);
     if ( $key_size > $iv_size ){
       $key = substr($key, 0, $iv_size);
     }

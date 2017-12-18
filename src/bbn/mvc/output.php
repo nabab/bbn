@@ -25,7 +25,7 @@ class output {
    */
   public function run()
   {
-    if ( count((array)$this->obj) === 0 ){
+    if ( \count((array)$this->obj) === 0 ){
       header('HTTP/1.0 404 Not Found');
       exit();
     }
@@ -85,10 +85,10 @@ class output {
     }
     if ( empty($this->obj->content) || ( ($this->mode === 'file') || ($this->mode === 'image') ) ){
       if (!empty($this->obj->file)){
-        if (is_string($this->obj->file) && is_file($this->obj->file)){
+        if (\is_string($this->obj->file) && is_file($this->obj->file)){
           $this->obj->file = new bbn\file($this->obj->file);
         }
-        if (is_object($this->obj->file) &&
+        if (\is_object($this->obj->file) &&
           method_exists($this->obj->file, 'download') &&
           method_exists($this->obj->file, 'test') &&
           $this->obj->file->test()
@@ -97,10 +97,10 @@ class output {
         }
       }
       else if (!empty($this->obj->img)){
-        if (is_string($this->obj->img) && is_file($this->obj->img)){
+        if (\is_string($this->obj->img) && is_file($this->obj->img)){
           $this->obj->img = new bbn\file\image($this->obj->img);
         }
-        if (is_object($this->obj->img) &&
+        if (\is_object($this->obj->img) &&
           method_exists($this->obj->img, 'display') &&
           method_exists($this->obj->img, 'test') &&
           $this->obj->img->test()
@@ -163,7 +163,7 @@ class output {
         break;
 
       case 'image':
-        if ( isset($this->obj->img) && is_object($this->obj->img) ){
+        if ( isset($this->obj->img) && \is_object($this->obj->img) ){
           $this->obj->img->display();
         }
         else{
@@ -174,7 +174,7 @@ class output {
         break;
 
       case 'file':
-        if ( isset($this->obj->file) && is_object($this->obj->file) && method_exists($this->obj->file, 'download') ){
+        if ( isset($this->obj->file) && \is_object($this->obj->file) && method_exists($this->obj->file, 'download') ){
           $this->obj->file->download();
         }
         else{

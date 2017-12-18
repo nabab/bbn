@@ -96,7 +96,7 @@ class router {
     $routes = [];
 
   public static function is_mode($mode){
-    return in_array($mode, self::$types);
+    return \in_array($mode, self::$types);
   }
 
   /**
@@ -137,7 +137,7 @@ class router {
     }
     $prepath = $this->get_prepath();
     if ( $prepath && (strpos($path, $prepath.'/') === 0) ){
-      $path = substr($path, strlen($prepath));
+      $path = substr($path, \strlen($prepath));
     }
     if ( !isset($this->routes['root'][$path]) ){
       die("The alternative root $path doesn't exist!");
@@ -152,12 +152,12 @@ class router {
   }
 
   private function has_route($path){
-    return is_string($path) && isset($this->routes['alias'][$path]);
+    return \is_string($path) && isset($this->routes['alias'][$path]);
   }
 
   private function get_route($path){
     if ( $this->has_route($path) ){
-      if ( is_array($this->routes['alias'][$path]) ){
+      if ( \is_array($this->routes['alias'][$path]) ){
         return $this->routes['alias'][$path][0];
       }
       else{
@@ -174,8 +174,8 @@ class router {
   private function get_known($path, $mode){
     if ( $this->is_known($path, $mode) ){
       if (
-        in_array($mode, self::$controllers, true) &&
-        is_string(self::$known[$mode][$path]) &&
+        \in_array($mode, self::$controllers, true) &&
+        \is_string(self::$known[$mode][$path]) &&
         isset(self::$known[$mode][self::$known[$mode][$path]])
       ){
         $path = self::$known[$mode][$path];
@@ -187,7 +187,7 @@ class router {
   }
 
   private function set_known(array $o){
-    if ( !isset($o['mode'], $o['path'], $o['file']) || !self::is_mode($o['mode']) || !is_string($o['path']) || !is_string($o['file']) ){
+    if ( !isset($o['mode'], $o['path'], $o['file']) || !self::is_mode($o['mode']) || !\is_string($o['path']) || !\is_string($o['file']) ){
       return false;
     }
     $mode = $o['mode'];
@@ -195,35 +195,47 @@ class router {
     $root = $this->get_root($mode);
 
     if ( !isset(self::$known[$mode][$path]) ){
-      if ( in_array($mode, self::$controllers) ){
-        self::$known[$mode][$path] = $o;
-        self::$known[$mode][$path]['checkers'] = [];
+      self::$known[$mode][$path] = $o;
+      $s =& self::$known[$mode][$path];
+      if ( isset($o['ext']) && ($o['ext'] === 'less') ){
+        $checker_file = '_mixins.less';
+      }
+      else if ( isset($o['ext']) && ($o['mode'] === 'model') ){
+        $checker_file = '_data.php';
+      }
+      else if ( \in_array($mode, self::$controllers, true) ){
+        $checker_file = '_ctrl.php';
+      }
+      if ( !empty($checker_file) ){
+        $s['checkers'] = [];
         $tmp = $path;
-        while ( strlen($tmp) > 0 ){
+        while ( \strlen($tmp) > 0 ){
           //$this->log("WHILE", $tmp);
-          $tmp = $this->parse(dirname($tmp));
-          $ctrl = ( $tmp === '.' ? '' : $tmp.'/' ).'_ctrl.php';
+          $tmp = $this->parse(\dirname($tmp));
+
+          $checker = ( $tmp === '.' ? '' : $tmp.'/' ).$checker_file;
           if ( $this->alt_root ){
             if ( strpos($tmp, $this->alt_root) === 0 ){
               $alt_ctrl = $this->get_alt_root($mode).
-                ( strlen($tmp) === strlen($this->alt_root) ?
-                  '' : substr($tmp, strlen($this->alt_root)+1).'/'
-                ).'_ctrl.php';
+                ( \strlen($tmp) === \strlen($this->alt_root) ?
+                  '' : substr($tmp, \strlen($this->alt_root)+1).'/'
+                ).$checker_file;
               //$this->log("ALT", $alt_ctrl);
-              if ( is_file($alt_ctrl) && !in_array($alt_ctrl, self::$known[$mode][$path]['checkers']) ){
-                array_unshift(self::$known[$mode][$path]['checkers'], $alt_ctrl);
+              if ( is_file($alt_ctrl) && !\in_array($alt_ctrl, $s['checkers'], true) ){
+                array_unshift($s['checkers'], $alt_ctrl);
               }
             }
           }
-          if ( is_file($root.$ctrl) && !in_array($root.$ctrl, self::$known[$mode][$path]['checkers']) ){
-            array_unshift(self::$known[$mode][$path]['checkers'], $root.$ctrl);
+          if ( is_file($root.$checker) && !\in_array($root.$checker, $s['checkers'], true) ){
+            array_unshift($s['checkers'], $root.$checker);
           }
           if ( $tmp === '.' ){
             $tmp = '';
           }
         }
-        if ( $o['path'] !== $o['request'] ){
-          self::$known[$mode][$o['request']] = $o['path'];
+        if ( isset($o['request']) && ($o['path'] !== $o['request']) ){
+          //self::$known[$mode][$o['request']] = $o['path'];
+          self::$known[$mode][$o['request']] = $s;
         }
       }
       else if ( !empty($o['ext']) ){
@@ -254,7 +266,7 @@ class router {
     /** @var string $real_path The application path */
     $real_path = null;
     // We go through the path, removing a bit each time until we find the corresponding file
-    while (strlen($tmp) > 0){
+    while (\strlen($tmp) > 0){
       // We might already know it!
       if ($this->is_known($tmp, $mode)){
         return $this->get_known($tmp, $mode);
@@ -281,7 +293,7 @@ class router {
         }
         // If an alternative root exists (plugin), we look into it for the same
         else if ( $this->alt_root && (strpos($tmp, $this->alt_root) === 0) ){
-          $name = substr($tmp, strlen($this->alt_root)+1);
+          $name = substr($tmp, \strlen($this->alt_root)+1);
           // Corresponding file
           if ( file_exists($this->get_alt_root($mode).$name.'.php') ){
             $plugin = $this->alt_root;
@@ -336,7 +348,15 @@ class router {
         // if $tmp is a plugin root index setting $this->alt_root and rerouting to reprocess the path
         else if ( isset($this->routes['root'][$tmp]) ){
           $this->set_alt_root($tmp);
-          return $this->route(substr($path, strlen($tmp)+1), $mode);
+          if ( file_exists($this->get_alt_root($mode).'/index.php') ){
+            $plugin = $this->alt_root;
+            $real_path = $tmp.'/index';
+            $file = $this->get_alt_root($mode).'/index.php';
+            $root = $this->get_alt_root($mode);
+          }
+          else{
+            return $this->route(substr($path, \strlen($tmp)+1), $mode);
+          }
         }
       }
       if ( $file ){
@@ -398,8 +418,8 @@ class router {
       if ( is_file($root.$path.'.'.$t) ){
         $file = $root . $path . '.' . $t;
       }
-      else if ( $alt_path && is_file($alt_root.substr($path, strlen($alt_path)+1).'.'.$t) ){
-        $file = $alt_root . substr($path, strlen($alt_path)+1) . '.' . $t;
+      else if ( $alt_path && is_file($alt_root.substr($path, \strlen($alt_path)+1).'.'.$t) ){
+        $file = $alt_root . substr($path, \strlen($alt_path)+1) . '.' . $t;
         $plugin = $alt_path;
       }
       if ( $file ){
@@ -432,6 +452,10 @@ class router {
       }
     }
     return false;
+  }
+
+  public function reset(){
+    $this->alt_root = false;
   }
 
   public function add_routes(array $routes){
@@ -470,7 +494,7 @@ class router {
       }
 
       // We only try to retrieve a file path through a whole URL for controllers
-      if ( in_array($mode, self::$controllers, true) ){
+      if ( \in_array($mode, self::$controllers, true) ){
         $this->mode = $mode;
         //$this->log($path);
         return $this->find_controller($path, $mode);
@@ -488,7 +512,7 @@ class router {
   public function fetch_dir($path, $mode){
 
     // Only for views and models
-    if ( self::is_mode($mode) && !in_array($mode, self::$controllers) ){
+    if ( self::is_mode($mode) && !\in_array($mode, self::$controllers) ){
 
 
       // If there is a prepath defined we prepend it to the path
@@ -512,7 +536,7 @@ class router {
         }
         else if (
           $alt_path &&
-          ($dir2 = $this->parse($alt_root.substr($path, strlen($alt_path)+1))) &&
+          ($dir2 = $this->parse($alt_root.substr($path, \strlen($alt_path)+1))) &&
           (strpos($dir2, $alt_root) === 0) &&
           is_dir($dir2)
         ){
@@ -522,7 +546,7 @@ class router {
           $res = [];
           $files = bbn\file\dir::get_files($dir);
           foreach ( $files as $f ){
-            if ( in_array(bbn\str::file_ext($f), self::$filetypes[$mode], true) ){
+            if ( \in_array(bbn\str::file_ext($f), self::$filetypes[$mode], true) ){
               $res[] = $path.'/'.bbn\str::file_ext($f, true)[0];
             }
           }

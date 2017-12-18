@@ -129,7 +129,7 @@ class controller implements api{
 	}
 
   public function reset(array $info, $data = false){
-    if ( defined('BBN_CUR_PATH') && isset($info['mode'], $info['path'], $info['file'], $info['request'], $info['root']) ){
+    if ( \defined('BBN_CUR_PATH') && isset($info['mode'], $info['path'], $info['file'], $info['request'], $info['root']) ){
       $this->path = $info['path'];
       $this->plugin = $info['plugin'];
       $this->request = $info['request'];
@@ -138,7 +138,7 @@ class controller implements api{
       $this->arguments = $info['args'];
       $this->checkers = $info['checkers'];
       $this->mode = $info['mode'];
-      $this->data = is_array($data) ? $data : [];
+      $this->data = \is_array($data) ? $data : [];
       // When using CLI a first parameter can be used as route,
       // a second JSON encoded can be used as $this->post
       $this->db = $this->mvc->get_db();
@@ -227,7 +227,7 @@ class controller implements api{
   public function say_local_path()
   {
     if ( ($pp = $this->get_prepath()) && (strpos($this->path, $pp) === 0) ){
-      return substr($this->path, strlen($pp));
+      return substr($this->path, \strlen($pp));
     }
     return $this->path;
   }
@@ -250,7 +250,7 @@ class controller implements api{
   public function say_local_route()
   {
     if ( ($pp = $this->get_prepath()) && (strpos($this->request, $pp) === 0) ){
-      return substr($this->request, strlen($pp));
+      return substr($this->request, \strlen($pp));
     }
     return $this->request;
   }
@@ -271,7 +271,7 @@ class controller implements api{
 				($prepath = $this->get_prepath()) &&
 				(strpos($p, $prepath) === 0)
 			){
-				return substr($p, strlen($prepath));
+				return substr($p, \strlen($prepath));
 			}
       return $p;
     }
@@ -296,8 +296,8 @@ class controller implements api{
 		if ( empty($model) && $this->has_data() ){
 			$model = $this->data;
 		}
-		if ( is_string($view) ){
-			return is_array($model) ? bbn\tpl::render($view, $model) : $view;
+		if ( \is_string($view) ){
+			return \is_array($model) ? bbn\tpl::render($view, $model) : $view;
 		}
 		die(bbn\x::hdump("Problem with the template", $view, $this->path, $this->mode));
 	}
@@ -320,8 +320,8 @@ class controller implements api{
 	 */
 	public function reroute($path='', $post = false, $arguments = false)
 	{
-	  if ( !in_array($path, $this->reroutes) && ($this->path !== $path) ){
-      array_push($this->reroutes, $path);
+	  if ( !\in_array($path, $this->reroutes) && ($this->path !== $path) ){
+      $this->reroutes[] = $path;
       $this->mvc->reroute($path, $post, $arguments);
       $this->is_rerouted = 1;
     }
@@ -356,7 +356,7 @@ class controller implements api{
 	 * @return $this
 	 */
 	public function add_script($script){
-		if ( is_object($this->obj) ){
+		if ( \is_object($this->obj) ){
 			if ( !isset($this->obj->script) ){
 				$this->obj->script = '';
 			}
@@ -397,7 +397,7 @@ class controller implements api{
 					break;
 				}
 			}
-      if ( ($log = ob_get_contents()) && is_string($log) ){
+      if ( ($log = ob_get_contents()) && \is_string($log) ){
 			  $this->obj->content = $log;
       }
       ob_end_clean();
@@ -415,7 +415,7 @@ class controller implements api{
         $this->is_rerouted = false;
         return $this->control();
       }
-			if ( is_object($this->obj) && !isset($this->obj->content) && !empty($output) ){
+			if ( \is_object($this->obj) && !isset($this->obj->content) && !empty($output) ){
 				$this->obj->content = $output;
 			}
       $this->is_controlled = 1;
@@ -430,7 +430,7 @@ class controller implements api{
 	 * @return $this
 	 */
 	public function process(){
-		if ( is_null($this->is_controlled) ){
+		if ( \is_null($this->is_controlled) ){
 			$this->control();
 		}
 		return $this;
@@ -443,7 +443,7 @@ class controller implements api{
 	 * @return string|false
 	 */
 	public function get_js($path='', array $data=null, $encapsulated = true){
-    if ( is_array($path) ){
+    if ( \is_array($path) ){
       $data = $path;
       $path = '';
     }
@@ -487,14 +487,14 @@ class controller implements api{
    * @return string|false
    */
   public function get_view_group($files='', array $data=null, $mode = 'html'){
-    if ( !is_array($files) ){
+    if ( !\is_array($files) ){
       if ( !($tmp = $this->mvc->fetch_dir($files, $mode)) ){
         $this->error("Impossible to get files from directory $files");
         return false;
       }
       $files = $tmp;
     }
-    if ( is_array($files) && count($files) ){
+    if ( \is_array($files) && \count($files) ){
       $st = '';
       foreach ( $files as $f ){
         if ( $tmp = $this->get_view($f, $mode, $data) ){
@@ -507,29 +507,61 @@ class controller implements api{
   }
 
   /**
-	 * This will get a CSS view encapsulated in a scoped style tag.
-	 *
-	 * @param string $path
-	 * @return string|false
-	 */
-	public function get_css($path=''){
+   * This will get a CSS view encapsulated in a scoped style tag.
+   *
+   * @param string $path
+   * @return string|false
+   */
+  public function get_css($path=''){
     if ( $r = $this->get_view($path, 'css') ){
       return \CssMin::minify($r);
     }
     return false;
-	}
+  }
 
-	/**
-	 * This will get and compile a LESS view encapsulated in a scoped style tag.
-	 *
-	 * @param string $path
-	 * @return string|false
-	 */
-	public function get_less($path=''){
+  /**
+   * This will get and compile a LESS view encapsulated in a scoped style tag.
+   *
+   * @param string $path
+   * @return string|false
+   */
+  public function get_less($path=''){
     if ( $r = $this->get_view($path, 'css', false) ){
       return \CssMin::minify($r);
     }
-	}
+  }
+
+  /**
+   * This will get a CSS view encapsulated in a scoped style tag.
+   *
+   * @param string $path
+   * @return string|false
+   */
+  public function add_css($path=''){
+    if ( $css = $this->get_css($path) ){
+      if ( !isset($this->obj->css) ){
+        $this->obj->css = '';
+      }
+      $this->obj->css .= $css;
+    }
+    return $this;
+  }
+
+  /**
+   * This will get and compile a LESS view encapsulated in a scoped style tag.
+   *
+   * @param string $path
+   * @return string|false
+   */
+  public function add_less($path=''){
+    if ( $css = $this->get_less($path) ){
+      if ( !isset($this->obj->css) ){
+        $this->obj->css = '';
+      }
+      $this->obj->css .= $css;
+    }
+    return $this;
+  }
 
   /**
    * This will add a javascript view to $this->obj->script
@@ -540,16 +572,16 @@ class controller implements api{
    * @return string|false
    */
   public function add_js(){
-    $args = func_get_args();
+    $args = \func_get_args();
     $has_path = false;
     foreach ( $args as $i => $a ){
       if ( $new_data = $this->retrieve_var($a) ){
         $this->js_data($new_data);
       }
-      else if ( is_string($a) ){
+      else if ( \is_string($a) ){
         $has_path = 1;
       }
-      else if ( is_array($a) ){
+      else if ( \is_array($a) ){
         $this->js_data($a);
       }
     }
@@ -557,7 +589,7 @@ class controller implements api{
       array_unshift($args, $this->path);
     }
     array_push($args, 'js');
-    if ( $r = call_user_func_array([$this, 'get_view'], $args) ){
+    if ( $r = \call_user_func_array([$this, 'get_view'], $args) ){
       $this->add_script($r);
     }
     return $this;
@@ -601,16 +633,16 @@ class controller implements api{
       if ( $new_data = $this->retrieve_var($a) ){
         $r['data'] = $new_data;
       }
-      else if ( is_string($a) && !isset($r['path']) ){
-        $r['path'] = strlen($a) ? $a : $this->path;
+      else if ( \is_string($a) && !isset($r['path']) ){
+        $r['path'] = \strlen($a) ? $a : $this->path;
       }
-      else if ( is_string($a) && router::is_mode($a) && !isset($r['mode']) ){
+      else if ( \is_string($a) && router::is_mode($a) && !isset($r['mode']) ){
         $r['mode'] = $a;
       }
-      else if ( is_array($a) && !isset($r['data']) ){
+      else if ( \is_array($a) && !isset($r['data']) ){
         $r['data'] = $a;
       }
-      else if ( is_bool($a) && !isset($r['die']) ){
+      else if ( \is_bool($a) && !isset($r['die']) ){
         $r['die'] = $a;
       }
     }
@@ -642,7 +674,7 @@ class controller implements api{
 	 */
 	public function get_view()
 	{
-    $args = $this->get_arguments(func_get_args());
+    $args = $this->get_arguments(\func_get_args());
 		/*if ( !isset($args['mode']) ){
       $v = $this->mvc->get_view($args['path'], 'html', $args['data']);
       if ( !$v ){
@@ -677,7 +709,7 @@ class controller implements api{
   }
 /*
   public function get_php(){
-    $args = $this->get_arguments(func_get_args());
+    $args = $this->get_arguments(\func_get_args());
     $v = $this->mvc->get_view($args['path'], 'php', $args['data']);
     if ( !$v && $args['die'] ){
       die("Impossible to find the PHP view $args[path]");
@@ -686,7 +718,7 @@ class controller implements api{
   }
 
   public function get_html(){
-    $args = $this->get_arguments(func_get_args());
+    $args = $this->get_arguments(\func_get_args());
     $v = $this->mvc->get_view($args['path'], 'html', $args['data']);
     if ( !$v && $args['die'] ){
       die("Impossible to find the HTML view $args[path]");
@@ -695,19 +727,27 @@ class controller implements api{
   }
 */
 	private function retrieve_var($var){
-		if ( is_string($var) && (substr($var, 0, 1) === '$') && isset($this->data[substr($var, 1)]) ){
+		if ( \is_string($var) && (substr($var, 0, 1) === '$') && isset($this->data[substr($var, 1)]) ){
 			return $this->data[substr($var, 1)];
 		}
 		return false;
 	}
 
+	public function action(){
+	  $this->obj = $this->add_data(['res' => ['success' => false]])->add_data($this->post)->get_object_model('', $this->data);
+  }
+
   /**
    * @param string $title
    * @param null|array $data
    */
-  public function combo($title = null, $data = null){
+  public function combo($title = null, $data = null, $cached = null)
+  {
 		$this->obj->css = $this
-      ->add_data($this->get_model(bbn\x::merge_arrays($this->post, $this->data)))
+      ->add_data($cached ?
+        $this->get_cached_model(bbn\x::merge_arrays($this->post, $this->data), $cached) :
+        $this->get_model(bbn\x::merge_arrays($this->post, $this->data))
+      )
       ->get_less($this->path, false);
 		if ( $new_title = $this->retrieve_var($title) ){
 			$this->set_title($new_title);
@@ -718,7 +758,7 @@ class controller implements api{
 		if ( $tmp = $this->retrieve_var($data) ){
 		  $data = $tmp;
     }
-    else if ( !is_array($data) ){
+    else if ( !\is_array($data) ){
       $data = $data === true ? $this->data : [];
     }
 		if ( $this->mode === 'dom' ){
@@ -738,7 +778,7 @@ class controller implements api{
    */
   public function get_content($file_name){
     if ( $this->check_path($file_name) &&
-      defined('BBN_DATA_PATH') &&
+      \defined('BBN_DATA_PATH') &&
       is_file(BBN_DATA_PATH.$file_name)
     ){
       return file_get_contents(BBN_DATA_PATH.$file_name);
@@ -786,16 +826,16 @@ class controller implements api{
 	 * @return array|false A data model
 	 */
 	public function get_model(){
-    $args = func_get_args();
+    $args = \func_get_args();
     $die = false;
     foreach ( $args as $a ){
-      if ( is_string($a) && strlen($a) ){
+      if ( \is_string($a) && \strlen($a) ){
         $path = $a;
       }
-      else if ( is_array($a) ){
+      else if ( \is_array($a) ){
         $data = $a;
       }
-      else if ( is_bool($a) ){
+      else if ( \is_bool($a) ){
         $die = $a;
       }
     }
@@ -809,10 +849,10 @@ class controller implements api{
       $data = $this->data;
     }
 		$m = $this->mvc->get_model($path, $data, $this);
-		if ( is_object($m) ){
+		if ( \is_object($m) ){
 			$m = bbn\x::to_array($m);
 		}
-    if ( !is_array($m) ){
+    if ( !\is_array($m) ){
 			if ( $die ){
 				die("$path is an invalid model");
 			}
@@ -833,19 +873,19 @@ class controller implements api{
 	 * @return array|false A data model
 	 */
 	public function get_cached_model(){
-		$args = func_get_args();
+		$args = \func_get_args();
 		$die = 1;
 		foreach ( $args as $a ){
-			if ( is_string($a) && strlen($a) ){
+			if ( \is_string($a) && \strlen($a) ){
 				$path = $a;
 			}
-			else if ( is_array($a) ){
+			else if ( \is_array($a) ){
 				$data = $a;
 			}
-      else if ( is_int($a) ){
+      else if ( \is_int($a) ){
         $ttl = $a;
       }
-			else if ( is_bool($a) ){
+			else if ( \is_bool($a) ){
 				$die = $a;
 			}
 		}
@@ -859,7 +899,7 @@ class controller implements api{
 			$data = $this->data;
 		}
 		$m = $this->mvc->get_cached_model($path, $data, $this, $ttl);
-		if ( !is_array($m) && !$die ){
+		if ( !\is_array($m) && !$die ){
 			die("$path is an invalid model");
 		}
 		return $m;
@@ -873,19 +913,19 @@ class controller implements api{
 	 * @return $this
 	 */
 	public function set_cached_model(){
-		$args = func_get_args();
+		$args = \func_get_args();
 		$die = 1;
 		foreach ( $args as $a ){
-			if ( is_string($a) && strlen($a) ){
+			if ( \is_string($a) && \strlen($a) ){
 				$path = $a;
 			}
-			else if ( is_array($a) ){
+			else if ( \is_array($a) ){
 				$data = $a;
 			}
-      else if ( is_int($a) ){
+      else if ( \is_int($a) ){
         $ttl = $a;
       }
-      else if ( is_bool($a) ){
+      else if ( \is_bool($a) ){
         $die = $a;
       }
 		}
@@ -906,8 +946,8 @@ class controller implements api{
 	}
 
 	public function get_object_model(){
-    $m = call_user_func_array([$this, 'get_model'], func_get_args());
-    if ( is_array($m) ){
+    $m = \call_user_func_array([$this, 'get_model'], \func_get_args());
+    if ( \is_array($m) ){
       return bbn\x::to_object($m);
     }
   }
@@ -934,6 +974,11 @@ class controller implements api{
     return $this->obj;
 	}
 
+	public function transform(callable $fn): void
+  {
+    $this->obj = $fn($this->obj);
+  }
+
   /**
    * Checks if data exists
    *
@@ -941,10 +986,10 @@ class controller implements api{
    */
   public function has_data($data=null)
   {
-    if ( is_null($data) ){
+    if ( \is_null($data) ){
       $data = $this->data;
     }
-    return ( is_array($data) && (count($data) > 0) ) ? 1 : false;
+    return ( \is_array($data) && (\count($data) > 0) ) ? 1 : false;
   }
 
   /**
@@ -954,7 +999,7 @@ class controller implements api{
    */
   public function has_content()
   {
-    if ( !is_object($this->obj) ){
+    if ( !\is_object($this->obj) ){
       return false;
     }
     return !empty($this->obj->content);
@@ -1018,9 +1063,9 @@ class controller implements api{
 	 * @return $this
 	 */
 	public function add_data(array $data){
-		$ar = func_get_args();
+		$ar = \func_get_args();
 		foreach ( $ar as $d ){
-			if ( is_array($d) ){
+			if ( \is_array($d) ){
 				$this->data = $this->has_data() ? array_merge($this->data, $d) : $d;
 			}
 		}

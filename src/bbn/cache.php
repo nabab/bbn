@@ -80,7 +80,7 @@ class cache{
    * @return string
    */
   public static function make_hash($value){
-    if ( is_object($value) || is_array($value) ){
+    if ( \is_object($value) || \is_array($value) ){
       $value = serialize($value);
     }
     return md5($value);
@@ -101,7 +101,7 @@ class cache{
     if ( str::is_integer($ttl) ){
       return $ttl;
     }
-    if ( is_string($ttl) ){
+    if ( \is_string($ttl) ){
       switch ( $ttl ){
         case 'xxs':
           return 30;
@@ -159,7 +159,7 @@ class cache{
       }
     }
     else {
-      $this->path = defined("BBN_DATA_PATH") ? BBN_DATA_PATH : file\dir::clean(sys_get_temp_dir());
+      $this->path = \defined("BBN_DATA_PATH") ? BBN_DATA_PATH : file\dir::clean(sys_get_temp_dir());
       if ( substr($this->path, -1) !== '/' ){
         $this->path .= '/';
       }
@@ -199,7 +199,7 @@ class cache{
    * @return bool|int|string
    */
   public function delete(string $it){
-    if ( self::$type && is_string($it) ){
+    if ( self::$type && \is_string($it) ){
       switch ( self::$type ){
         case 'apc':
           return apc_delete($it);
@@ -450,7 +450,7 @@ class cache{
               return $cache->has($a);
           });
           $dirs = file\dir::get_dirs($this->path.($dir ? '/'.$dir : ''));
-          if ( count($dirs) ){
+          if ( \count($dirs) ){
             foreach ( $dirs as $d ){
               $res = $this->items($dir ? $dir.'/'.basename($d) : basename($d));
               foreach ( $res as $r ){

@@ -19,7 +19,7 @@ trait common {
    * @return bool
    */
   private function check_path(){
-    $ar = func_get_args();
+    $ar = \func_get_args();
     foreach ( $ar as $a ){
       $b = bbn\str::parse_path($a, true);
       if ( empty($b) && !empty($a) ){
@@ -31,15 +31,15 @@ trait common {
   }
 
   private function error($msg){
-    $msg = "Error from ".get_class($this).": ".$msg;
+    $msg = "Error from ".\get_class($this).": ".$msg;
     $this->log($msg, 'mvc');
     die($msg);
   }
 
   public function log(){
     if ( bbn\mvc::get_debug() ){
-      $ar = func_get_args();
-      bbn\x::log(count($ar) > 1 ? $ar : $ar[0], 'mvc');
+      $ar = \func_get_args();
+      bbn\x::log(\count($ar) > 1 ? $ar : $ar[0], 'mvc');
     }
   }
 

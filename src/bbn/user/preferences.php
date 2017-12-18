@@ -35,14 +35,15 @@ class preferences extends bbn\models\cls\db
   protected static
 		/** @var array */
 		$_defaults = [
-			'table' => 'bbn_user_options',
+			'table' => 'bbn_users_options',
       'tables' => [
-        'user_options' => 'bbn_user_options'
+        'user_options' => 'bbn_users_options'
       ],
 			'arch' => [
 			  'user_options' => [
           'id' => 'id',
           'id_option' => 'id_option',
+          'num' => 'num',
           'id_user' => 'id_user',
           'id_group' => 'id_group',
           'id_alias' => 'id_alias',
@@ -90,7 +91,7 @@ class preferences extends bbn\models\cls\db
       return null;
     }
     if ( $id_option && !bbn\str::is_uid($id_option) ){
-      $id_option = call_user_func_array([$this->opt, 'from_path'], func_get_args());
+      $id_option = \call_user_func_array([$this->opt, 'from_path'], \func_get_args());
     }
     if ( $id_option && bbn\str::is_uid($id_option) ){
       return $id_option;
@@ -107,9 +108,8 @@ class preferences extends bbn\models\cls\db
    */
   private function _insert(string $id_option, array $cfg): int
   {
-    if ( $json = $this->get_cfg(false, $cfg) ){
-      $json = json_encode($json);
-    }
+		$json = ($tmp = $this->get_cfg(false, $cfg)) ? json_encode($json) : null;
+
     return $this->db->insert($this->class_cfg['table'], [
       'id_option' => $id_option,
       'text' => $cfg['text'] ?? null,
@@ -134,6 +134,7 @@ class preferences extends bbn\models\cls\db
       $col_id = $this->db->csn($this->fields['id'], true);
       $table = $this->db->tsn($this->class_cfg['table'], true);
       $id_opt = $this->db->csn($this->fields['id_option'], true);
+      $num = $this->db->csn($this->fields['num'], true);
       $text = $this->db->csn($this->fields['text'], true);
       $user = $this->db->csn($this->fields['id_user'], true);
       $group = $this->db->csn($this->fields['id_group'], true);
@@ -158,10 +159,10 @@ SELECT $col_id
 FROM $table
 WHERE $id_opt = UNHEX(?)
 AND ($cond)
-ORDER BY $text
+ORDER BY IFNULL($num, $text)
 MYSQL;
       array_unshift($args, $sql);
-      return call_user_func_array([$this->db, 'get_col_array'], $args);
+      return \call_user_func_array([$this->db, 'get_col_array'], $args);
     }
     return null;
   }
@@ -169,12 +170,12 @@ MYSQL;
   /**
    * Gets the preferences which have the option's $id as id_link
    *
-   * @param string $id
+   * @param string $id_link
    * @return array|null
    */
-  private function _get_links(string $id, string $id_user = null, string $id_group = null): ?array
+  private function _get_links(string $id_lnk, string $id_user = null, string $id_group = null): ?array
   {
-    if ( $id = $this->_get_id_option($id) ){
+    if ( $id_lnk = $this->_get_id_option($id_lnk) ){
       $col_id = $this->db->csn($this->fields['id'], true);
       $table = $this->db->tsn($this->class_cfg['table'], true);
       $id_opt = $this->db->csn($this->fields['id_option'], true);
@@ -184,7 +185,7 @@ MYSQL;
       $group = $this->db->csn($this->fields['id_group'], true);
       $public = $this->db->csn($this->fields['public'], true);
       $cond = [];
-      $args = [$id];
+      $args = [$id_lnk];
       if ( null !== $id_user ){
         $cond[] = "$user = UNHEX(?)";
         $args[] = $id_user;
@@ -205,7 +206,8 @@ WHERE $id_link = UNHEX(?)
 AND ($cond)
 ORDER BY $text
 MYSQL;
-      return $this->db->get_rows($sql, $id, $this->id_user, $this->id_group);
+      array_unshift($args, $sql);
+      return \call_user_func_array([$this->db, 'get_rows'], $args);
     }
     return null;
   }
@@ -363,10 +365,10 @@ MYSQL;
       if ( bbn\str::is_json($cfg) ){
         $cfg = json_decode($cfg, 1);
       }
-      if ( is_array($cfg) ){
+      if ( \is_array($cfg) ){
         $new = [];
         foreach ( $cfg as $k => $v){
-          if ( !in_array($k, $this->fields, true) ){
+          if ( !\in_array($k, $this->fields, true) ){
             $new[$k] = $v;
           }
         }
@@ -444,6 +446,8 @@ MYSQL;
       $id_opt = $this->db->cfn($this->fields['id_option'], $this->class_table, true);
       $id_user = $this->db->cfn($this->fields['id_user'], $this->class_table, true);
       $id_group = $this->db->cfn($this->fields['id_group'], $this->class_table, true);
+      $num = $this->db->cfn($this->fields['num'], $this->class_table, true);
+      $text = $this->db->cfn($this->fields['text'], $this->class_table, true);
       $id_alias = $this->db->cfn($this->fields['id_alias'], $this->class_table, true);
       $public = $this->db->cfn($this->fields['public'], $this->class_table, true);
       $sql = <<< MYSQL
@@ -455,6 +459,7 @@ WHERE $id_opt = UNHEX(?)
 AND ($id_user = UNHEX(?)
 OR $id_group = UNHEX(?)
 OR $public = 1)
+ORDER BY IFNULL($num, $text)
 MYSQL;
       if ( $rows =  $this->db->get_rows($sql, $id_option, $this->id_user, $this->id_group) ){
         return $with_config ? array_map(function($a){
@@ -472,7 +477,7 @@ MYSQL;
 
   public function option(): ?array
   {
-    if ( $o = $this->opt->option(func_get_args()) ){
+    if ( $o = $this->opt->option(\func_get_args()) ){
       if ( ($ids = $this->retrieve_ids($o['id'])) && ($cfg = $this->get($ids[0])) ){
         $o = bbn\x::merge_arrays($o, $cfg);
       }
@@ -493,7 +498,7 @@ MYSQL;
 
 
   public function items($code){
-    if ( $items = $this->opt->items(func_get_args()) ){
+    if ( $items = $this->opt->items(\func_get_args()) ){
       $res = [];
       foreach ( $items as $i => $it ){
         $res[] = ['id' => $it, 'num' => $i + 1];
@@ -514,7 +519,7 @@ MYSQL;
 
   public function options($code): ?array
   {
-    if ( $list = $this->items(func_get_args()) ){
+    if ( $list = $this->items(\func_get_args()) ){
       $res = [];
       foreach ( $list as $i => $li ){
         $res[$i] = $this->opt->option($li);
@@ -527,7 +532,7 @@ MYSQL;
 
   public function full_options($code): ?array
   {
-    if ( $ops = $this->opt->full_options(func_get_args()) ){
+    if ( $ops = $this->opt->full_options(\func_get_args()) ){
       foreach ( $ops as &$o ){
         $o['items'] = $this->get_all($o['id']);
       }
@@ -743,6 +748,36 @@ MYSQL;
     ], [
       $this->fields['id'] => $id
     ]);
+  }
+
+  /**
+   * Sets (or unsets) the id_link field of the given preference and returns the result of the executed query
+   *
+   * @param string $id_option
+   * @param string $id_link
+   * @return null|string The inserted or updated preference's ID
+   */
+  public function add_link(string $id_option, string $id_link): ?string
+  {
+    $id = $this->db->select_one($this->class_cfg['table'], $this->fields['id'], [
+      $this->fields['id_user'] => $this->id_user,
+      $this->fields['id_option'] => $id_option
+    ]);
+    if ( $id ){
+      if ( $this->db->update($this->class_cfg['table'], [
+        $this->fields['id_link'] => $id_link
+      ], ['id' => $id]) ){
+        return $id;
+      }
+    }
+    else if ( $this->db->insert($this->class_cfg['table'], [
+      $this->fields['id_user'] => $this->id_user,
+      $this->fields['id_option'] => $id_option,
+      $this->fields['id_link'] => $id_link
+    ]) ){
+      return $this->db->last_id();
+    }
+    return null;
   }
 
   /**

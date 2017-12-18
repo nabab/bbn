@@ -169,7 +169,7 @@ class element
   private static function _init(){
     if ( !self::$validator ){
       self::$validator = new \JsonSchema\Validator();
-      if ( is_string(self::$schema) ){
+      if ( \is_string(self::$schema) ){
         self::$schema = json_decode(self::$schema);
       }
     }
@@ -190,22 +190,22 @@ class element
 	 * @return array
 	 */
   private static function cast(array $cfg, $schema=null){
-    if ( is_null($schema) && is_object(static::$schema) ){
+    if ( \is_null($schema) && \is_object(static::$schema) ){
       $schema = static::$schema;
     }
-    if ( is_object($schema) && is_array($cfg) && isset($schema->properties) ){
+    if ( \is_object($schema) && \is_array($cfg) && isset($schema->properties) ){
       foreach ( $schema->properties as $k => $p ){
         if ( empty($cfg[$k]) ){
           unset($cfg[$k]);
         }
-        else if ( is_object($p) ){
-          if ( is_string($cfg[$k]) && $p->type === 'integer' ){
+        else if ( \is_object($p) ){
+          if ( \is_string($cfg[$k]) && $p->type === 'integer' ){
             $cfg[$k] = (int)$cfg[$k];
           }
-          else if ( is_int($cfg[$k]) && $p->type === 'boolean' ){
+          else if ( \is_int($cfg[$k]) && $p->type === 'boolean' ){
             $cfg[$k] = (bool)$cfg[$k];
           }
-          else if ( is_array($cfg[$k]) ){
+          else if ( \is_array($cfg[$k]) ){
             $cfg[$k] = self::cast($cfg[$k], $p);
           }
         }
@@ -230,7 +230,7 @@ class element
 	 * @return bool
 	 */
   public static function check_config($cfg){
-    if ( !is_array($cfg) ){
+    if ( !\is_array($cfg) ){
       self::$error = "The configuration is not a valid array";
       return false;
     }
@@ -264,10 +264,10 @@ class element
 	 * @return string
 	 */
   public static function css_to_string($css){
-    if ( is_string($css) ){
+    if ( \is_string($css) ){
       return ' style="'.bbn\str::escape_dquotes($css).'"';
     }
-    else if ( is_array($css) && count($css) > 0 ){
+    else if ( \is_array($css) && \count($css) > 0 ){
       $st = '';
       foreach ( $css as $prop => $val ){
         $st .= $prop.':'.$val.';';
@@ -292,7 +292,7 @@ class element
     }
     else{
       $cls = explode(" ", $this->attr['class']);
-      if ( !in_array($class, $cls) ){
+      if ( !\in_array($class, $cls) ){
         $this->attr['class'] .= ' '.$class;
       }
     }
@@ -306,13 +306,13 @@ class element
   public function __construct($cfg)
 	{
     self::_init();
-    if ( is_string($cfg) && !empty($cfg) ){
+    if ( \is_string($cfg) && !empty($cfg) ){
       // Looking for classes, IDs, or name (|) in the string
       preg_match_all("/([\\.|\\||#]{1})([A-z0-9-]+)/", $cfg, $m);
       $classes = [];
       $id = false;
       $name = false;
-      if ( isset($m[0], $m[1], $m[2]) && count($m[0]) > 0 ){
+      if ( isset($m[0], $m[1], $m[2]) && \count($m[0]) > 0 ){
         foreach ( $m[1] as $k => $v ){
           if ( $v === '.' ){
             array_push($classes, $m[2][$k]);
@@ -327,11 +327,11 @@ class element
       }
       // Looking for the tag (mandatory)
       preg_match_all("/^([A-z0-9-]+)/", $cfg, $n);
-      if ( isset($n[0]) && count($n[0]) > 0 ){
+      if ( isset($n[0]) && \count($n[0]) > 0 ){
         $cfg = ['tag' => $n[0][0]];
-        if ( (count($classes) > 0) || $id || $name ){
+        if ( (\count($classes) > 0) || $id || $name ){
           $cfg['attr'] = [];
-          if ( count($classes) > 0 ){
+          if ( \count($classes) > 0 ){
             $cfg['attr']['class'] = implode(" ", $classes);
           }
           if ( $id ){
@@ -349,7 +349,7 @@ class element
         if ( $key === 'tag' ){
           $this->tag = strtolower($val);
         }
-        else if ( property_exists(get_called_class(), $key) ){
+        else if ( property_exists(\get_called_class(), $key) ){
           $this->$key = $val;
         }
       }
@@ -376,13 +376,13 @@ class element
   {
     $this->cfg = [];
     foreach ( $this as $key => $var ){
-      if ( $key !== 'cfg' && !is_null($var) ){
-        if ( is_array($var) ){
+      if ( $key !== 'cfg' && !\is_null($var) ){
+        if ( \is_array($var) ){
           foreach ( $var as $k => $v ){
             if ( !isset($this->cfg[$key]) ){
               $this->cfg[$key] = [];
             }
-            if ( !is_null($v) ){
+            if ( !\is_null($v) ){
               $this->cfg[$key][$k] = $v;
             }
           }
@@ -402,32 +402,32 @@ class element
    */
   public function append($ele)
   {
-    $args = func_get_args();
+    $args = \func_get_args();
     foreach ( $args as $ele ){
       if ( !isset($this->content) ){
-        if ( is_array($ele) && isset($ele[0]) ){
+        if ( \is_array($ele) && isset($ele[0]) ){
           $this->content = $ele;
         }
         else{
-          $this->content = is_object($ele) ? [$ele] : $ele;
+          $this->content = \is_object($ele) ? [$ele] : $ele;
         }
       }
-      else if ( is_array($this->content) ){
-        if ( is_array($ele) ){
+      else if ( \is_array($this->content) ){
+        if ( \is_array($ele) ){
           array_merge($this->content, $ele);
         }
         else{
           array_push($this->content, $ele);
         }
       }
-      else if ( is_string($this->content) ){
-        if ( is_array($ele) ){
+      else if ( \is_string($this->content) ){
+        if ( \is_array($ele) ){
           foreach ( $ele as $e ){
             $this->content .= $e->html();
           }
         }
         else{
-          $this->content .= is_object($ele) ? $ele->html() : $ele;
+          $this->content .= \is_object($ele) ? $ele->html() : $ele;
         }
       }
     }
@@ -442,9 +442,9 @@ class element
 	{
     $this->update();
 		$tmp = bbn\x::remove_empty($this->cfg);
-    if ( isset($tmp['content']) && is_array($tmp['content']) ){
+    if ( isset($tmp['content']) && \is_array($tmp['content']) ){
       foreach ( $tmp['content'] as $i => $c ){
-        if ( is_object($c) ){
+        if ( \is_object($c) ){
           if (method_exists($c, 'get_config') ){
             $tmp['content'][$i] = $c->get_config();
           }
@@ -497,7 +497,7 @@ class element
           $r .= '{';
           foreach ( $this->cfg['widget']['options'] as $n => $o ){
             $r .= '"'.$n.'":';
-            if ( is_string($o) ){
+            if ( \is_string($o) ){
               $o = trim($o);
               if ( (strpos($o, 'function(') === 0) ){
                 $r .= $o;
@@ -506,7 +506,7 @@ class element
                 $r .= '"'.bbn\str::escape_dquotes($o).'"';
               }
             }
-            else if ( is_bool($o) ){
+            else if ( \is_bool($o) ){
               $r .= $o ? 'true' : 'false';
             }
             else{
@@ -533,12 +533,12 @@ class element
     if ( !empty($this->script) ){
       $r .= $this->script.PHP_EOL;
     }
-    if ( is_array($this->content) ){
+    if ( \is_array($this->content) ){
       foreach ( $this->content as $c ){
-        if ( is_array($c) ){
+        if ( \is_array($c) ){
           $c = new bbn\html\element($c);
         }
-        if (is_object($c) && method_exists($c, 'script') ){
+        if (\is_object($c) && method_exists($c, 'script') ){
           $r .= $c->script();
         }
       }
@@ -548,8 +548,8 @@ class element
 	
   public function attr($arr)
   {
-    $args = func_get_args();
-    if ( is_array($arr) ){
+    $args = \func_get_args();
+    if ( \is_array($arr) ){
       foreach ( $arr as $k => $v ){
         if ( $k === 'class' ){
           $this->add_class($v);
@@ -559,7 +559,7 @@ class element
         }
       }
     }
-    else if ( (count($args) === 2) && is_string($args[0]) && is_string($args[1]) ){
+    else if ( (\count($args) === 2) && \is_string($args[0]) && \is_string($args[1]) ){
       if ( $args[0] === 'class' ){
         $this->add_class($args[1]);
       }
@@ -567,7 +567,7 @@ class element
         $this->attr[$args[0]] = $args[1];
       }
     }
-    else if ( is_string($arr) && isset($this->attr[$arr]) ){
+    else if ( \is_string($arr) && isset($this->attr[$arr]) ){
       return $this->attr[$arr];
     }
     return $this;
@@ -575,7 +575,7 @@ class element
   
   public function text($txt=null)
   {
-    if ( !is_null($txt) ){
+    if ( !\is_null($txt) ){
       $this->text = strip_tags($txt);
       return $this;
     }
@@ -584,10 +584,10 @@ class element
   
   public function content($c=null)
   {
-    if ( is_null($c) ){
+    if ( \is_null($c) ){
       return $this->content;
     }
-    else if ( is_array($c) || is_string($c) ){
+    else if ( \is_array($c) || \is_string($c) ){
       $this->content = $c;
       return $this;
     }
@@ -607,19 +607,19 @@ class element
 			$html .= '<'.$this->tag;
 
       foreach ( $this->attr as $key => $val ){
-        if ( is_string($key) ){
+        if ( \is_string($key) ){
           $html .= ' '.htmlspecialchars($key).'="';
           if ( is_numeric($val) ){
             $html .= $val;
           }
-          else if (is_string($val) ){
+          else if (\is_string($val) ){
             $html .= htmlspecialchars($val);
           }
           $html .= '"';
         }
       }
 			
-      if ( count($this->css) > 0 ){
+      if ( \count($this->css) > 0 ){
 				$html .= self::css_to_string($this->css);
 			}
       if ( $this->xhtml ){
@@ -628,7 +628,7 @@ class element
       $html .= '>';
 
 			
-			if ( !in_array($this->tag, self::$self_closing_tags) ){
+			if ( !\in_array($this->tag, self::$self_closing_tags) ){
 
         if ( isset($this->text) ){
           $html .= $this->text;
@@ -636,12 +636,12 @@ class element
         
         if ( isset($this->content) ){
           // @todo: Add the ability to imbricate elements
-          if ( is_string($this->content) ){
+          if ( \is_string($this->content) ){
             $html .= $this->content;
           }
-          else if ( is_array($this->content) ){
+          else if ( \is_array($this->content) ){
             foreach ( $this->content as $c ){
-              if ( is_array($c) ){
+              if ( \is_array($c) ){
                 $c = new bbn\html\element($c);
               }
               $html .= $c->html($with_js);

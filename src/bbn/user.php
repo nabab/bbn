@@ -16,7 +16,7 @@ namespace bbn;
  * @todo Groups and hotlinks features
  * @todo Implement Cache for session requests' results?
  */
-if ( !defined('BBN_DATA_PATH') ){
+if ( !\defined('BBN_DATA_PATH') ){
   die("BBN_DATA_PATH must be defined");
 }
 class user extends models\cls\basic
@@ -296,7 +296,7 @@ class user extends models\cls\basic
     ){
       $cfg = json_decode($d['cfg'], true);
     }
-    if ( is_array($cfg) ){
+    if ( \is_array($cfg) ){
       $this->sess_cfg = $cfg;
     }
     else{
@@ -436,12 +436,12 @@ class user extends models\cls\basic
    */
   private function _set_session($attr){
     if ( $this->session->has(self::$sn) ){
-      $args = func_get_args();
-      if ( (count($args) === 2) && is_string($args[0]) ){
+      $args = \func_get_args();
+      if ( (\count($args) === 2) && \is_string($args[0]) ){
         $attr = [$args[0] => $args[1]];
       }
       foreach ( $attr as $key => $val ){
-        if ( is_string($key) ){
+        if ( \is_string($key) ){
           $this->session->set($val, self::$sn, $key);
         }
       }
@@ -533,8 +533,8 @@ class user extends models\cls\basic
    * @return $this $this
    */
   private function _init_dir($create = false){
-    if ( defined('BBN_DATA_PATH') && $this->get_id() ){
-      if ( !defined('BBN_USER_PATH') ){
+    if ( \defined('BBN_DATA_PATH') && $this->get_id() ){
+      if ( !\defined('BBN_USER_PATH') ){
         define('BBN_USER_PATH', BBN_DATA_PATH.'users/'.$this->get_id().'/');
       }
       if ( $create ){
@@ -746,12 +746,12 @@ class user extends models\cls\basic
           ($key !== $this->fields['cfg']) &&
           ($key !== 'auth') &&
           ($key !== 'pass') &&
-          in_array($key, $this->fields)
+          \in_array($key, $this->fields)
         ){
           $update[$key] = $val;
         }
       }
-      if ( count($update) > 0 ){
+      if ( \count($update) > 0 ){
         $r = $this->db->update(
                 $this->class_cfg['tables']['users'],
                 $update,
@@ -779,12 +779,12 @@ class user extends models\cls\basic
 	 */
   public function set_session($attr){
     if ( $this->session->has(self::$un) ){
-      $args = func_get_args();
-      if ( (count($args) === 2) && is_string($args[0]) ){
+      $args = \func_get_args();
+      if ( (\count($args) === 2) && \is_string($args[0]) ){
         $attr = [$args[0] => $args[1]];
       }
       foreach ( $attr as $key => $val ){
-        if ( is_string($key) ){
+        if ( \is_string($key) ){
           $this->session->set($val, self::$un, $key);
         }
       }
@@ -900,12 +900,12 @@ class user extends models\cls\basic
    */
   public function set_cfg($attr){
     if ( isset($this->cfg) ){
-      $args = func_get_args();
-      if ( (count($args) === 2) && is_string($attr) ){
+      $args = \func_get_args();
+      if ( (\count($args) === 2) && \is_string($attr) ){
         $attr = [$args[0] => $args[1]];
       }
       foreach ( $attr as $key => $val ){
-        if ( is_string($key) ){
+        if ( \is_string($key) ){
           $this->cfg[$key] = $val;
         }
       }
@@ -920,8 +920,8 @@ class user extends models\cls\basic
    */
   public function unset_cfg($attr){
     if ( isset($this->cfg) ){
-      $args = func_get_args();
-      if ( is_string($attr) ){
+      $args = \func_get_args();
+      if ( \is_string($attr) ){
         $attr = [$attr];
       }
       foreach ( $attr as $key ){
@@ -1086,7 +1086,7 @@ class user extends models\cls\basic
    */
   public function get_name($usr = null){
     if ( $this->auth ){
-      if ( is_null($usr) ){
+      if ( \is_null($usr) ){
         $usr = $this->get_session();
       }
       else if ( str::is_uid($usr) ){

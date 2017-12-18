@@ -21,16 +21,16 @@ namespace bbn;
 
 use bbn\mvc\router;
 
-if ( !defined("BBN_DEFAULT_MODE") ){
+if ( !\defined("BBN_DEFAULT_MODE") ){
 	define("BBN_DEFAULT_MODE", 'public');
 }
 
 // Correspond to the path after the URL to the application's public root (set to '/' for a domain's root)
-if ( !defined("BBN_CUR_PATH") ){
+if ( !\defined("BBN_CUR_PATH") ){
 	die("BBN_CUR_PATH must be defined");
 }
 
-if ( !defined("BBN_APP_PATH") ){
+if ( !\defined("BBN_APP_PATH") ){
 	die("BBN_APP_PATH must be defined");
 }
 
@@ -126,10 +126,10 @@ class mvc implements mvc\api{
       ob_start();
       $d = include($bbn_inc_file);
       ob_end_clean();
-      if ( is_object($d) ){
+      if ( \is_object($d) ){
         $d = x::to_array($d);
       }
-      if ( !is_array($d) ){
+      if ( !\is_array($d) ){
         return false;
       }
       return $d;
@@ -159,7 +159,7 @@ class mvc implements mvc\api{
   {
     if ( $bbn_inc_content ){
       ob_start();
-      if ( count($bbn_inc_data) ){
+      if ( \count($bbn_inc_data) ){
         foreach ( $bbn_inc_data as $bbn_inc_key => $bbn_inc_val ){
           $$bbn_inc_key = $bbn_inc_val;
         }
@@ -227,7 +227,7 @@ class mvc implements mvc\api{
   }
 
   private function route($url = false){
-    if ( is_null($this->info) ){
+    if ( \is_null($this->info) ){
       $this->info = $this->get_route($this->get_url(), $this->get_mode());
     }
     return $this;
@@ -251,7 +251,7 @@ class mvc implements mvc\api{
 	public function __construct($db = null, $routes = []){
     self::singleton_init($this);
     $this->env = new mvc\environment();
-		if ( is_object($db) && ( $class = get_class($db) ) && ( $class === 'PDO' || strpos($class, '\db') !== false ) ){
+		if ( \is_object($db) && ( $class = \get_class($db) ) && ( $class === 'PDO' || strpos($class, '\db') !== false ) ){
 			$this->db = $db;
 		}
 		else{
@@ -259,7 +259,7 @@ class mvc implements mvc\api{
 		}
 		$this->inc = new \stdClass();
     $this->o = $this->inc;
-    if ( is_array($routes) && isset($routes['root']) ){
+    if ( \is_array($routes) && isset($routes['root']) ){
       $roots = array_map(function($a){
         if ( !empty($a['path']) && (substr($a['path'], -1) !== '/') ){
           $a['path'] .= '/';
@@ -303,7 +303,7 @@ class mvc implements mvc\api{
   }
 
   public function plugin_url($plugin){
-    return $this->has_plugin($plugin) ? substr($this->plugins[$plugin]['url'], strlen($this->root)) : false;
+    return $this->has_plugin($plugin) ? substr($this->plugins[$plugin]['url'], \strlen($this->root)) : false;
   }
 
   public function plugin_name($path){
@@ -371,6 +371,7 @@ class mvc implements mvc\api{
 		$this->is_routed = false;
 		$this->is_controlled = null;
     $this->info = null;
+    $this->router->reset();
 		$this->route();
     $this->info['args'] = $arguments;
     $this->controller->reset($this->info);
@@ -390,18 +391,16 @@ class mvc implements mvc\api{
     if ( !router::is_mode($mode) ){
       die("Incorrect mode $path $mode");
     }
+    $view = null;
     if ( isset(self::$loaded_views[$mode][$path]) ){
       $view = self::$loaded_views[$mode][$path];
     }
-    else if ( $file = $this->router->route($path, $mode) ){
-      if ( $mode === 'html' ){
-        //die(var_dump("jokjkl", $file, is_file($file['file']), file_get_contents($file['file'])));
-      }
-      $view = new mvc\view($file);
+    else if ( $info = $this->router->route($path, $mode) ){
+      $view = new mvc\view($info);
       self::$loaded_views[$mode][$path] = $view;
     }
-    if ( isset($view) && $view->check() ){
-      return is_array($data) ? $view->get($data) : $view->get();
+    if ( \is_object($view) && $view->check() ){
+      return \is_array($data) ? $view->get($data) : $view->get();
     }
     return '';
   }
@@ -425,7 +424,7 @@ class mvc implements mvc\api{
     ){
       $view = new mvc\view($file);
       if ( $view->check() ){
-        return is_array($data) ? $view->get($data) : $view->get();
+        return \is_array($data) ? $view->get($data) : $view->get();
       }
       return '';
     }
@@ -463,7 +462,7 @@ class mvc implements mvc\api{
    * @return array|false A data model
    */
   public function get_cached_model($path, array $data, mvc\controller $ctrl, $ttl = 10){
-    if ( is_null($data) ){
+    if ( \is_null($data) ){
       $data = $this->data;
     }
     if ( $route = $this->router->route($path, 'model') ){
@@ -481,7 +480,7 @@ class mvc implements mvc\api{
    * @return array|false A data model
    */
   public function set_cached_model($path, array $data, mvc\controller $ctrl, $ttl = 10){
-    if ( is_null($data) ){
+    if ( \is_null($data) ){
       $data = $this->data;
     }
     if ( $route = $this->router->route($path, 'model') ){
@@ -511,7 +510,7 @@ class mvc implements mvc\api{
 	public function process(){
     if ( $this->check() ){
       $this->obj = new \stdClass();
-      if ( !is_array($this->info)){
+      if ( !\is_array($this->info)){
         $this->log("No info in MVC", $this->info);
         die("No info in MVC");
       }
@@ -529,17 +528,23 @@ class mvc implements mvc\api{
     return false;
   }
 
+  public function transform(callable $fn){
+    if ( $this->check() && $this->controller ){
+      $this->controller->transform($fn);
+    }
+  }
+
   public function output(){
     if ( $this->check() && $this->controller ){
       $obj = $this->controller->get();
       if ($this->is_cli()){
         die(isset($obj->content) ? $obj->content : "no output");
       }
-      if ( is_array($obj) ){
+      if ( \is_array($obj) ){
         $obj = x::to_object($obj);
       }
-			if ( (gettype($obj) !== 'object') || (get_class($obj) !== 'stdClass') ){
-				die(x::dump("Unexpected output: ".gettype($obj)));
+			if ( (\gettype($obj) !== 'object') || (\get_class($obj) !== 'stdClass') ){
+				die(x::dump("Unexpected output: ".\gettype($obj)));
 			}
 			if ( x::count_properties($this->obj) ){
 			  $obj = x::merge_objects($obj, $this->obj);

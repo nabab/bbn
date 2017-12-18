@@ -42,7 +42,7 @@ class grid extends bbn\models\cls\basic
   public function __construct(bbn\db $db, array $post, $cfg){
     $this->db = $db;
     // Mandatory configuration coming from the table component
-    if ( is_array($post) ){
+    if ( \is_array($post) ){
       $this->start = isset($post['start']) &&
               bbn\str::is_number($post['start']) ?
                       $post['start'] : 0;
@@ -54,7 +54,7 @@ class grid extends bbn\models\cls\basic
       $this->filters = $post['filters'] ?? [];
       $this->order = $post['order'] ?? [];
       // Simple configuration using a string
-      if ( is_string($cfg) ){
+      if ( \is_string($cfg) ){
         // If there is a space it is a query
         if ( strrpos($cfg, ' ') ){
           $this->query = $cfg;
@@ -67,7 +67,7 @@ class grid extends bbn\models\cls\basic
         }
       }
       // Full configuration
-      else if ( is_array($cfg) ){
+      else if ( \is_array($cfg) ){
         if ( !empty($cfg['query']) ){
           $this->query = $cfg['query'];
         }
@@ -229,7 +229,7 @@ class grid extends bbn\models\cls\basic
   }
 
   public function get_field($f, $array = false){
-    if ( is_array($f) && isset($f['field']) ){
+    if ( \is_array($f) && isset($f['field']) ){
       $f = $f['field'];
     }
     if ( empty($this->fields) || $array ){
@@ -239,14 +239,14 @@ class grid extends bbn\models\cls\basic
       return strpos($this->fields[$f], '.') ? $this->db->col_full_name($this->fields[$f], null, $array ? false : true) : $this->db->col_simple_name($this->fields[$f], $array ? false : true);
     }
     if (
-      is_string($f) && (
-        in_array($f, $this->fields, true) ||
-        in_array($f, $this->additional_fields, true)
+      \is_string($f) && (
+        \in_array($f, $this->fields, true) ||
+        \in_array($f, $this->additional_fields, true)
       )
     ){
       if (
         $this->table &&
-        !in_array($f, $this->additional_fields, true)
+        !\in_array($f, $this->additional_fields, true)
       ){
         return $this->db->col_full_name($f, $this->table, 1);
       }
@@ -260,8 +260,8 @@ class grid extends bbn\models\cls\basic
   public function filter(array $filters = null, $array = false){
     $res = $array ? [] : '';
     if ( null === $filters ){
-      $num1 = empty($this->prefilters) ? 0 : count($this->prefilters['conditions']);
-      $num2 = empty($this->filters) ? 0 : count($this->filters['conditions']);
+      $num1 = empty($this->prefilters) ? 0 : \count($this->prefilters['conditions']);
+      $num2 = empty($this->filters) ? 0 : \count($this->filters['conditions']);
       \bbn\x::log('start', 'filters');
       if ( ($num1 || $num2) && $this->check() ){
         \bbn\x::log('num1 or num2', 'filters');

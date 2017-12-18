@@ -120,7 +120,7 @@ class builder
 	 */
 	public function __construct( array $cfg = null )
 	{
-		if ( is_array($cfg) ){
+		if ( \is_array($cfg) ){
       $this->parameters = $cfg;
       $this->_defaults = bbn\x::merge_arrays($this->_defaults, $cfg);
 		}
@@ -174,7 +174,7 @@ class builder
 	
   public function load_config($cfg)
   {
-    if ( $this->data['db'] && isset($cfg['data']['db']) && is_string($cfg['data']['db']) ){
+    if ( $this->data['db'] && isset($cfg['data']['db']) && \is_string($cfg['data']['db']) ){
       $cfg['data']['db'] = $this->data['db'];
     }
     foreach ( $cfg as $c ){
@@ -206,8 +206,8 @@ class builder
 	 */
 	public function option($opt)
 	{
-		$args = func_get_args();
-		if ( is_array($opt) && isset($opt[0], $this->_defaults[$opt[0]]) ){
+		$args = \func_get_args();
+		if ( \is_array($opt) && isset($opt[0], $this->_defaults[$opt[0]]) ){
 			$this->_current_cfg[$opt[0]] = $opt[1];
 		}
 		else if ( isset($args[0], $args[1], $this->_defaults[$args[0]]) ){
@@ -298,14 +298,14 @@ class builder
   public function space($cfg=null, $force=false)
   {
     $this->record('space', $cfg);
-    if ( !is_null($cfg) ){
-      if ( is_string($cfg) ){
+    if ( !\is_null($cfg) ){
+      if ( \is_string($cfg) ){
         $cfg = [
             'text' => $cfg
         ];
       }
     }
-    if ( !is_array($cfg) ){
+    if ( !\is_array($cfg) ){
       $cfg = [];
     }
     $cfg['tag'] = 'div';
@@ -326,7 +326,7 @@ class builder
     $cont = new element('div');
     $ele = $this->button($cfg, 1);
     // Submit by default!
-    if ( $this->_root_element && !is_string($ele->attr('type')) ){
+    if ( $this->_root_element && !\is_string($ele->attr('type')) ){
       $ele->attr('type', 'submit');
     }
     $cont->add_class(self::$field_class)->append($ele);
@@ -347,7 +347,7 @@ class builder
   public function fieldset($title=null, $force=false)
   {
     $this->record('fieldset', $title);
-    if ( is_array($title) ){
+    if ( \is_array($title) ){
 
       $title['tag'] = 'fieldset';
       if ( isset($title['legend']) ){
@@ -368,7 +368,7 @@ class builder
       $fieldset = new element('fieldset');
       $fieldset->add_class("bbn-section k-widget");
 
-      if ( !is_null($title) ){
+      if ( !\is_null($title) ){
         $legend = new element('legend');
         $legend->text($title);
         $fieldset->append($legend);
@@ -477,7 +477,7 @@ class builder
 	 */
 	public function input($cfg=array())
 	{
-		if ( is_array($cfg) && isset($cfg['attr']['name']) ){
+		if ( \is_array($cfg) && isset($cfg['attr']['name']) ){
       
       self::give_id($cfg);
       if ( isset($cfg['field']) ){
@@ -503,7 +503,7 @@ class builder
           if ( $count <= self::max_values_at_once ){
             if ( $ds = $db->get_irows($cfg['data']['sql']) ){
               foreach ( $ds as $d ){
-                if ( count($d) > 1 ){
+                if ( \count($d) > 1 ){
                   array_push($cfg['widget']['options']['dataSource'], [
                       'value' => $d[0],
                       'text' => $d[1]
@@ -519,7 +519,7 @@ class builder
             $cfg['field'] = 'autocomplete';
           }
         }
-        else if ( is_array($cfg['data']) && (count($cfg['data']) > 0) ){
+        else if ( \is_array($cfg['data']) && (\count($cfg['data']) > 0) ){
           if ( isset($cfg['data'][0]) ){
             $cfg['widget']['options']['dataSource'] = $cfg['data'];
           }
@@ -539,7 +539,7 @@ class builder
         }
 			}
 
-      if ( is_array($cfg) ){
+      if ( \is_array($cfg) ){
         // Size calculation
         if ( isset($cfg['attr']['maxlength']) && !isset($cfg['attr']['size']) ){
           if ( $cfg['attr']['maxlength'] <= 20 ){
@@ -554,7 +554,7 @@ class builder
 
 
         $cfg = array_filter($cfg, function($a){
-          return !( is_array($a) && count($a) === 0 );
+          return !( \is_array($a) && \count($a) === 0 );
         });
 
       }
@@ -587,7 +587,7 @@ class builder
   
   public function button($cfg, $force=false)
   {
-    if ( is_string($cfg) ){
+    if ( \is_string($cfg) ){
       $cfg = [
           'text' => $cfg
       ];

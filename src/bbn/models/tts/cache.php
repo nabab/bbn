@@ -17,15 +17,19 @@ trait cache
   protected $cache_engine;
 
   protected function cache_init(){
-    if ( is_null($this->cache_engine) ){
+    if ( \is_null($this->cache_engine) ){
       $this->cache_engine = bbn\cache::get_engine();
-      $this->_cache_prefix = bbn\str::encode_filename(str_replace('\\', '/', get_class($this)), true).'/';
+      $this->_cache_prefix = bbn\str::encode_filename(str_replace('\\', '/', \get_class($this)), true).'/';
     }
   }
 
   protected function _cache_name($uid, $method = ''){
-    return $this->_cache_prefix.(string)$uid.
-    (empty($method) ? '' : '/'.(string)$method);
+    /*
+    if ( \bbn\str::is_uid($uid) ){
+      $uid = implode('/', str_split((string)$uid, 2));
+    }
+    */
+    return $this->_cache_prefix.'/'.$uid.(empty($method) ? '' : '/'.(string)$method);
   }
 
   protected function cache_delete_all(){

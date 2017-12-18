@@ -82,7 +82,7 @@ class button extends element
 	 */
   public function __construct($cfg)
 	{
-    if ( is_string($cfg) ){
+    if ( \is_string($cfg) ){
       $cfg = [
           'type' => 'submit',
           'text' => $cfg

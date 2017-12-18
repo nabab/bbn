@@ -36,7 +36,7 @@ class str
    */
   public static function cast($st)
   {
-    if ( is_array($st) || is_object($st) ){
+    if ( \is_array($st) || \is_object($st) ){
       return '';
     }
     return (string)$st;
@@ -257,9 +257,9 @@ class str
    * @return string
    */
   public static function clean($st, $mode='all'){
-    if ( is_array($st) ){
+    if ( \is_array($st) ){
       reset($st);
-      $i = count($st);
+      $i = \count($st);
       if ( trim($st[0]) == '' ){
         array_splice($st,0,1);
         $i--;
@@ -334,7 +334,7 @@ class str
       $ends = [];
       // The string gets cut at $max
       $st = mb_substr($st, 0, $max);
-      while ( in_array(substr($st, -1), $chars) ){
+      while ( \in_array(substr($st, -1), $chars) ){
         $st = substr($st, 0, -1);
       }
       $st .= '...';
@@ -364,22 +364,22 @@ class str
     $allowed = '-_.,';
 
     // Arguments order doesn't matter
-    $args = func_get_args();
+    $args = \func_get_args();
     foreach ( $args as $i => $a ){
       if ( $i > 0 ){
-        if ( is_string($a) ){
+        if ( \is_string($a) ){
           $extension = $a;
         }
-        else if ( is_int($a) ){
+        else if ( \is_int($a) ){
           $maxlength = $a;
         }
-        else if ( is_bool($a) ){
+        else if ( \is_bool($a) ){
           $is_path = $a;
         }
       }
     }
 
-    if ( !is_int($maxlength) ){
+    if ( !\is_int($maxlength) ){
       $maxlength = mb_strlen($st);
     }
 
@@ -391,10 +391,10 @@ class str
       $extension &&
       (self::file_ext($st) === self::change_case($extension, 'lower'))
     ){
-      $st = substr($st, 0, -(strlen($extension)+1));
+      $st = substr($st, 0, -(\strlen($extension)+1));
     }
     else if ( $extension = self::file_ext($st) ){
-      $st = substr($st, 0, -(strlen($extension)+1));
+      $st = substr($st, 0, -(\strlen($extension)+1));
     }
     for ( $i = 0; $i < $maxlength; $i++ ){
       if ( mb_ereg_match('[A-z0-9\\'.$allowed.']', mb_substr($st,$i,1)) ){
@@ -445,7 +445,7 @@ class str
     $st = self::remove_accents(self::cast($st));
     $res = '';
 
-    if ( !is_int($maxlength) ){
+    if ( !\is_int($maxlength) ){
       $maxlength = mb_strlen($st);
     }
 
@@ -537,10 +537,10 @@ class str
           $mdp .= mt_rand(0,9);
           break;
         case 2:
-          $mdp .= chr(mt_rand(65,90));
+          $mdp .= \chr(mt_rand(65,90));
           break;
         case 3:
-          $mdp .= chr(mt_rand(97,122));
+          $mdp .= \chr(mt_rand(97,122));
           break;
       }
     }
@@ -559,7 +559,7 @@ class str
    * @return bool
    */
   public static function is_json($st){
-    if ( is_string($st) && !empty($st) &&
+    if ( \is_string($st) && !empty($st) &&
       ( (substr($st, 0, 1) === '{') || (substr($st, 0, 1) === '[') )){
       json_decode($st);
       return (json_last_error() == JSON_ERROR_NONE);
@@ -587,14 +587,14 @@ class str
    */
   public static function is_number()
   {
-    $args = func_get_args();
+    $args = \func_get_args();
     foreach ( $args as $a ){
-      if ( is_string($a) || (abs($a) > PHP_INT_MAX) ){
+      if ( \is_string($a) || (abs($a) > PHP_INT_MAX) ){
         if ( !preg_match('/^-?(?:\d+|\d*\.\d+)$/', $a) ){
           return false;
         }
       }
-      else if ( !is_int($a) && !is_float($a) ){
+      else if ( !\is_int($a) && !\is_float($a) ){
         return false;
       }
     }
@@ -619,14 +619,14 @@ class str
    */
   public static function is_integer()
   {
-    $args = func_get_args();
+    $args = \func_get_args();
     foreach ( $args as $a ){
-      if ( is_string($a) || (abs($a) > PHP_INT_MAX) ){
+      if ( \is_string($a) || (abs($a) > PHP_INT_MAX) ){
         if ( !preg_match('/^-?(\d+)$/', (string)$a) ){
           return false;
         }
       }
-      else if ( !is_int($a) ){
+      else if ( !\is_int($a) ){
         return false;
       }
     }
@@ -650,9 +650,9 @@ class str
    */
   public static function is_clean_path()
   {
-    $args = func_get_args();
+    $args = \func_get_args();
     foreach ( $args as $a ){
-      if ( is_string($a) ){
+      if ( \is_string($a) ){
         if ( (strpos($a, '../') !== false) || (strpos($a, '..\\') !== false) ){
           return false;
         }
@@ -682,14 +682,14 @@ class str
    */
   public static function is_decimal()
   {
-    $args = func_get_args();
+    $args = \func_get_args();
     foreach ( $args as $a ){
-      if ( is_string($a) ){
+      if ( \is_string($a) ){
         if ( !preg_match('/^-?(\d*\.\d+)$/', $a) ){
           return false;
         }
       }
-      else if ( !is_float($a) ){
+      else if ( !\is_float($a) ){
         return false;
       }
     }
@@ -714,7 +714,7 @@ class str
    * @return mixed
    */
   public static function correct_types($st){
-    if ( is_string($st) ){
+    if ( \is_string($st) ){
       if ( \bbn\str::is_buid($st) ){
         $st = bin2hex($st);
       }
@@ -732,12 +732,12 @@ class str
         }
       }
     }
-    else if ( is_array($st) ){
+    else if ( \is_array($st) ){
       foreach ( $st as $k => $v ){
         $st[$k] = self::correct_types($v);
       }
     }
-    else if ( is_object($st) ){
+    else if ( \is_object($st) ){
       $vs = get_object_vars($st);
       foreach ( $vs as $k => $v ){
         $st->$k = self::correct_types($v);
@@ -747,11 +747,11 @@ class str
   }
 
   public static function is_uid($st){
-    return is_string($st) && (strlen($st) === 32) && ctype_xdigit($st);// && !mb_detect_encoding($st);
+    return \is_string($st) && (\strlen($st) === 32) && ctype_xdigit($st);// && !mb_detect_encoding($st);
   }
 
   public static function is_buid($st){
-    if ( is_string($st) && (strlen($st) === 16) && !ctype_print($st) && !ctype_space($st) ){
+    if ( \is_string($st) && (\strlen($st) === 16) && !ctype_print($st) && !ctype_space($st) ){
       $enc = mb_detect_encoding($st, ['8bit', 'UTF-8']);
       if ( !$enc || ($enc === '8bit') ){
         return true;
@@ -786,7 +786,7 @@ class str
     {
       $isValid = true;
       $atIndex = mb_strrpos($email, "@");
-      if (is_bool($atIndex) && !$atIndex)
+      if (\is_bool($atIndex) && !$atIndex)
       {
         $isValid = false;
       }
@@ -884,8 +884,8 @@ class str
    */
   public static function parse_path(string $path, $allow_parent = false)
   {
-    $path = str_replace('\\', '/', strval($path));
-    $path = str_replace('/./', '/', strval($path));
+    $path = str_replace('\\', '/', \strval($path));
+    $path = str_replace('/./', '/', \strval($path));
     while ( strpos($path, '//') !== false ){
       $path = str_replace('//', '/', $path);
     }
@@ -948,7 +948,7 @@ class str
    */
   public static function check_name(){
 
-    $args = func_get_args();
+    $args = \func_get_args();
     // Each argument must be a string starting with a letter, and having only one character made of letters, numbers and underscores
     foreach ( $args as $a ){
       $a = self::cast($a);
@@ -974,10 +974,10 @@ class str
    */
   public static function check_filename(){
 
-    $args = func_get_args();
+    $args = \func_get_args();
     // Each argument must be a string starting with a letter, and having than one character made of letters, numbers and underscores
     foreach ( $args as $a ){
-      if ( !is_string($a) || (strpos($a, '/') !== false) || (strpos($a, '\\') !== false) ){
+      if ( !\is_string($a) || (strpos($a, '/') !== false) || (strpos($a, '\\') !== false) ){
         return false;
       }
     }
@@ -1002,7 +1002,7 @@ class str
    */
   public static function has_slash(){
 
-    $args = func_get_args();
+    $args = \func_get_args();
     // Each argument must be a string starting with a letter, and having than one character made of letters, numbers and underscores
     foreach ( $args as $a ){
       if ( (strpos($a, '/') !== false) || (strpos($a, '\\') !== false) ){
@@ -1069,8 +1069,8 @@ class str
   public static function make_readable($o)
   {
     $is_array = false;
-    if ( is_object($o) ){
-      $class = get_class($o);
+    if ( \is_object($o) ){
+      $class = \get_class($o);
       if ( $class === 'stdClass' ){
         $is_array = 1;
       }
@@ -1078,7 +1078,7 @@ class str
         return $class;
       }
     }
-    if ( is_array($o) || $is_array ){
+    if ( \is_array($o) || $is_array ){
       $r = [];
       foreach ( $o as $k => $v ){
         $r[$k] = self::make_readable($v);
@@ -1114,7 +1114,7 @@ class str
    */
   public static function export($o, $remove_empty=false, $lev=1){
     $st = '';
-    if ( is_object($o) && ($cls = get_class($o)) && (strpos($cls, 'stdClass') === false) ){
+    if ( \is_object($o) && ($cls = \get_class($o)) && (strpos($cls, 'stdClass') === false) ){
       $st .= "Object ".$cls.PHP_EOL;
       /*
       $o = array_filter((array)$o, function($k) use ($cls){
@@ -1128,35 +1128,41 @@ class str
       }, ARRAY_FILTER_USE_KEY);
       */
     }
-    else if ( is_object($o) || is_array($o) ){
-      $is_assoc = (is_object($o) || x::is_assoc($o));
+    else if ( \is_object($o) || \is_array($o) ){
+      $is_assoc = (\is_object($o) || x::is_assoc($o));
       //$st .= $is_assoc ? '{' : '[';
-      $st .= is_object($o) ? '{' : '[';
+      $st .= \is_object($o) ? '{' : '[';
       $st .= PHP_EOL;
       foreach ( $o as $k => $v ){
-        if ( $remove_empty && ( ( is_string($v) && empty($v) ) || ( is_array($v) && count($v) === 0 ) ) ){
+        if ( $remove_empty && ( ( \is_string($v) && empty($v) ) || ( \is_array($v) && \count($v) === 0 ) ) ){
           continue;
         }
         $st .= str_repeat('    ', $lev);
         if ( $is_assoc ){
-          $st .= ( is_string($k) ? '\''.self::escape_squote($k).'\'' : $k ). ' => ';
+          $st .= ( \is_string($k) ? '\''.self::escape_squote($k).'\'' : $k ). ' => ';
         }
-        if ( is_array($v) ){
+        if ( \is_array($v) ){
           $st .= self::export($v, $remove_empty, $lev+1);
         }
-        else if ( is_object($v) ){
-          $st .= "Object $cls: ".self::export($v, $remove_empty, $lev+1);
+        else if ( \is_object($v) ){
+          $cls = get_class($v);
+          if ( $cls === '\\stdClass' ){
+            $st .= self::export($v, $remove_empty, $lev+1);
+          }
+          else{
+            $st .= 'Object '.$cls;
+          }
         }
         else if ( $v === 0 ){
           $st .= '0';
         }
-        else if ( is_null($v) ){
+        else if ( \is_null($v) ){
           $st .= 'null';
         }
-        else if ( is_bool($v) ){
+        else if ( \is_bool($v) ){
           $st .= $v === false ? 'false' : 'true';
         }
-        else if ( is_int($v) || is_float($v) ){
+        else if ( \is_int($v) || \is_float($v) ){
           $st .= $v;
         }
         else if ( !$remove_empty || !empty($v) ){
@@ -1166,7 +1172,7 @@ class str
       }
       $st .= str_repeat('    ', $lev-1);
       //$st .= $is_assoc ? '}' : ']';
-      $st .= is_object($o) ? '}' : ']';
+      $st .= \is_object($o) ? '}' : ']';
       return $st;
     }
     return $o;
@@ -1190,7 +1196,7 @@ class str
   public static function replace_once($search, $replace, $subject){
     $pos = strpos($subject, $search);
     if ($pos !== false){
-      return substr_replace($subject, $replace, $pos, strlen($search));
+      return substr_replace($subject, $replace, $pos, \strlen($search));
     }
     return $subject;
   }

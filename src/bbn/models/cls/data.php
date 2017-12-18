@@ -36,7 +36,7 @@ abstract class data extends cache{
 
   private static function _init($obj, bbn\db $db){
     if ( empty(self::$table) ){
-      die("You have no table configured for your class ".get_class($obj));
+      die("You have no table configured for your class ".\get_class($obj));
     }
     if ( self::$primary = $db->get_primary(self::$table) ){
       self::$columns = $db->get_columns(self::$table);
@@ -64,7 +64,7 @@ abstract class data extends cache{
     if ( $this->is_ok() ){
       if (
         ($name !== 'db') &&
-        in_array($name, self::$_bbn_protected_properties, true) &&
+        \in_array($name, self::$_bbn_protected_properties, true) &&
         method_exists($this, 'get_'.$name)
       ){
         return $this->{'get_'.$name}();
@@ -82,7 +82,7 @@ abstract class data extends cache{
     if ( $this->is_ok() ){
       if (
         ($name !== 'db') &&
-        in_array($name, self::$_bbn_protected_properties, true) &&
+        \in_array($name, self::$_bbn_protected_properties, true) &&
         method_exists($this, 'set_'.$name)
       ){
         $this->{'set_'.$name}($value);
@@ -97,7 +97,7 @@ abstract class data extends cache{
     if ( $this->is_ok() ){
       if (
         ($name !== 'db') &&
-        in_array($name, self::$_bbn_protected_properties, true) &&
+        \in_array($name, self::$_bbn_protected_properties, true) &&
         method_exists($this, 'isset_'.$name)
       ){
         return $this->{'isset_'.$name}();
@@ -112,7 +112,7 @@ abstract class data extends cache{
     if ( $this->is_ok() ){
       if (
         ($name !== 'db') &&
-        in_array($name, self::$_bbn_protected_properties, true) &&
+        \in_array($name, self::$_bbn_protected_properties, true) &&
         method_exists($this, 'unset_'.$name)
       ){
         $this->{'unset_'.$name}();
@@ -130,7 +130,7 @@ abstract class data extends cache{
 
   protected function update($change, $val = ''){
     if ( $this->is_ok() ){
-      if ( !is_array($change) ){
+      if ( !\is_array($change) ){
         $change = [$change => $val];
       }
       return $this->db->update('$table', $change, ['$primary' => $this->$primary]);

@@ -72,7 +72,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
   }
 
   public function __construct($cfg){
-    if ( !defined('BBN_ADMIN_EMAIL') || !defined('BBN_IS_DEV') ){
+    if ( !\defined('BBN_ADMIN_EMAIL') || !\defined('BBN_IS_DEV') ){
       die("You must provide the constants BBN_ADMIN_EMAIL and BBN_IS_DEV to use the mail class...");
     }
     if ( !isset($cfg['from']) && isset($cfg['user']) ){
@@ -84,7 +84,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
     $this->mailer = new \PHPMailer();
     $this->mailer->isSMTP();
     if ( !empty($cfg['ssl']) ){
-      if ( is_array($cfg['ssl']) ){
+      if ( \is_array($cfg['ssl']) ){
         $this->mailer->SMTPOptions = ['ssl' => $cfg['ssl']];
       }
       else{
@@ -165,7 +165,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
       $this->template = file_get_contents($file);
       $this->path = dirname($file);
     }
-    else if ( is_string($file) ){
+    else if ( \is_string($file) ){
       $this->template = $file;
       $this->path = BBN_DATA_PATH;
     }
@@ -189,7 +189,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
     else{
       foreach ( self::$dest_fields as $dest_field ){
         if ( isset($cfg[$dest_field]) ){
-          if ( !is_array($cfg[$dest_field]) ){
+          if ( !\is_array($cfg[$dest_field]) ){
             $cfg[$dest_field] = array_map(function($a){
               return trim($a);
             }, explode(";", $cfg[$dest_field]));
@@ -231,7 +231,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
         $cfg['text'] = '';
       }
       if ( isset($cfg['attachments']) ){
-        if ( is_string($cfg['attachments']) ){
+        if ( \is_string($cfg['attachments']) ){
           $cfg['attachments'] = [$cfg['attachments']];
         }
         foreach ( $cfg['attachments'] as $att ){
@@ -243,7 +243,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
       if ( !isset($renderer) ){
         $renderer = tpl::renderer($this->template);
       }
-      $ar['url'] = defined('BBN_URL') ? BBN_URL : '';
+      $ar['url'] = \defined('BBN_URL') ? BBN_URL : '';
       $ar['text'] = $cfg['text'];
       $ar['text'] = $renderer($ar);
       self::set_content($ar['text']);

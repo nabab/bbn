@@ -90,7 +90,7 @@ class query extends \PDOStatement implements actions
 		if ( $this->res === null || $args !== null )
 		{
 			$this->res = 1;
-			if ( is_array( $args ) ){
+			if ( \is_array( $args ) ){
 				try{
 					return parent::execute($args);
 				}
@@ -98,9 +98,9 @@ class query extends \PDOStatement implements actions
 					$this->db->error($e);
 				}
 			}
-			else if ( !is_null($args) )
+			else if ( !\is_null($args) )
 			{
-				$args = func_get_args();
+				$args = \func_get_args();
 				try{
 					return eval( 'return parent::execute( $args );' );
 				}
@@ -110,7 +110,7 @@ class query extends \PDOStatement implements actions
 			}
 			else
 			{
-				if ( isset($this->values) && is_array($this->values) ){
+				if ( isset($this->values) && \is_array($this->values) ){
           foreach ( $this->values as $i => $v )
           {
             if ( \bbn\str::is_buid($v) ){
@@ -120,10 +120,10 @@ class query extends \PDOStatement implements actions
               if ( is_int ($v) ){
                 $param = \PDO::PARAM_INT;
               }
-              else if ( is_bool($v) ){
+              else if ( \is_bool($v) ){
                 $param = \PDO::PARAM_BOOL;
               }
-              else if ( is_null($v) ){
+              else if ( \is_null($v) ){
                 $param = \PDO::PARAM_NULL;
               }
               else{
@@ -200,7 +200,7 @@ class query extends \PDOStatement implements actions
 					try
 					{
 						$q = $this->db->prepare($sql);
-						if ( !empty($this->values) && is_array($this->values) && count($this->values) > 0 ){
+						if ( !empty($this->values) && \is_array($this->values) && \count($this->values) > 0 ){
 							$v = $this->values;
 							$q->values = array_splice($v, $start_value, $num_values);
 							$start_value += $num_values;
@@ -209,7 +209,7 @@ class query extends \PDOStatement implements actions
 							$this->num += (int)$q->fetchColumn();
 						}
 						/* In case there is some group by that split the results, we request the full set of results
-							$n = count($q->fetchAll());
+							$n = \count($q->fetchAll());
 							if ( $n > $this->num && $this->num > 0 ){
 							$this->num = $n + 1;
 							}
@@ -361,7 +361,7 @@ class query extends \PDOStatement implements actions
 	 */
 	public function get_obj()
 	{
-		return $this->get_object(func_get_args());
+		return $this->get_object(\func_get_args());
 	}
 
 	/**

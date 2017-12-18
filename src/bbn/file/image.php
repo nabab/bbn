@@ -83,17 +83,17 @@ class image extends bbn\file
    */
   public static function jpg2pdf($jpg, $pdf){
     if ( class_exists('\\Imagick') ){
-      if ( is_array($jpg) ){
+      if ( \is_array($jpg) ){
         $img = new \Imagick();
         $img->setResolution(200, 200);
-        if ( count($jpg) === 1 ){
+        if ( \count($jpg) === 1 ){
           $img->readImage($jpg[0]);
         }
         else {
           $img->readImages($jpg);
         }
         $img->setImageFormat('pdf');
-        if ( count($jpg) === 1 ){
+        if ( \count($jpg) === 1 ){
           $img->writeImage($pdf);
         }
         else {
@@ -156,9 +156,9 @@ class image extends bbn\file
           $img = self::remove_alpha_imagick($img);
           $filename = $dir.$f[0];
           if ( $pages_number > 1 ){
-            $l = strlen((string)$i);
+            $l = \strlen((string)$i);
             if ( $l < $pages_number ){
-              $filename .= '-'.str_repeat('0', strlen($pages_number) - $l).$i;
+              $filename .= '-'.str_repeat('0', \strlen($pages_number) - $l).$i;
             }
           }
           $filename .= '.'.$f[1];
@@ -166,7 +166,7 @@ class image extends bbn\file
             array_push($r, $filename);
           }
         }
-        if ( count($r) === $pages_number ){
+        if ( \count($r) === $pages_number ){
           return $r;
         }
       }
@@ -181,7 +181,7 @@ class image extends bbn\file
 	public function __construct($file)
 	{
 		parent::__construct($file);
-		if ( !in_array($this->get_extension(),bbn\file\image::$allowed_extensions) )
+		if ( !\in_array($this->get_extension(),bbn\file\image::$allowed_extensions) )
 		{
 			$this->name = false;
 			$this->path = false;
@@ -295,12 +295,12 @@ class image extends bbn\file
           }
           catch ( \Exception $e ){
             $this->img = false;
-            $this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+            $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
               BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
           }
         }
         else if ( function_exists('imagecreatefrom'.$this->ext2) ){
-          if ( $this->img = call_user_func('imagecreatefrom'.$this->ext2,$this->file) ){
+          if ( $this->img = \call_user_func('imagecreatefrom'.$this->ext2,$this->file) ){
             imageinterlace($this->img, true);
             $this->w = imagesx($this->img);
             $this->h = imagesy($this->img);
@@ -309,18 +309,18 @@ class image extends bbn\file
             }
           }
           else{
-            $this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+            $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
               BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
           }
         }
         else{
-          $this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+          $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
             BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
         }
       }
     }
     else{
-      $this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+      $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
         BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
     }
     return $this;
@@ -348,7 +348,7 @@ class image extends bbn\file
 				$this->img->destroy();
 			}
 			else{
-				call_user_func('image'.$this->ext2, $this->img);
+				\call_user_func('image'.$this->ext2, $this->img);
 				imagedestroy($this->img);
 			}
 		}
@@ -383,13 +383,13 @@ class image extends bbn\file
 				}
 				catch ( \Exception $e ){
 					die(var_dump($dest, $this->file));
-          $this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+          $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
             BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
         }
       }
 			else if ( function_exists('image'.$this->ext2) ){
-        if ( !call_user_func('image'.$this->ext2, $this->img, $dest) ){
-          $this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+        if ( !\call_user_func('image'.$this->ext2, $this->img, $dest) ){
+          $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
             BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
         }
 			}
@@ -469,7 +469,7 @@ class image extends bbn\file
 	{
 		$max_w = false;
 		$max_h = false;
-		if ( is_array($w) ){
+		if ( \is_array($w) ){
 			$max_w = isset($w['max_w']) ? $w['max_w'] : false;
 			$max_h = isset($w['max_h']) ? $w['max_h'] : false;
 			$crop = isset($w['crop']) ? $w['crop'] : false;
@@ -567,12 +567,12 @@ class image extends bbn\file
 						$this->h = $h2;
 					}
 					else{
-						$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+						$this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 							BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 					}
 				}
 				else{
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+					$this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -600,7 +600,7 @@ class image extends bbn\file
 	public function autoresize($w=BBN_MAX_WIDTH, $h=BBN_MAX_HEIGHT)
 	{
 		if ( !$w ){
-			$w = defined('BBN_MAX_WIDTH') ? BBN_MAX_WIDTH : self::$max_width;
+			$w = \defined('BBN_MAX_WIDTH') ? BBN_MAX_WIDTH : self::$max_width;
 		}
 		if ( $this->test() && is_numeric($w) && is_numeric($h) )
 		{
@@ -612,7 +612,7 @@ class image extends bbn\file
 			}
 		}
 		else{
-			$this->error = defined('BBN_ARGUMENTS_MUST_BE_NUMERIC') ?
+			$this->error = \defined('BBN_ARGUMENTS_MUST_BE_NUMERIC') ?
 				BBN_ARGUMENTS_MUST_BE_NUMERIC : 'Arguments must be numeric';
 		}
 		return $this;
@@ -640,10 +640,10 @@ class image extends bbn\file
 	public function crop($w, $h, $x, $y)
 	{
 		if ( $this->test() ){
-			$args = func_get_args();
+			$args = \func_get_args();
 			foreach ( $args as $arg ){
 				if ( !is_numeric($arg) ){
-					$this->error = defined('BBN_ARGUMENTS_MUST_BE_NUMERIC') ?
+					$this->error = \defined('BBN_ARGUMENTS_MUST_BE_NUMERIC') ?
 						BBN_ARGUMENTS_MUST_BE_NUMERIC : 'Arguments must be numeric';
 				}
 			}
@@ -655,7 +655,7 @@ class image extends bbn\file
 			}
 			if ( class_exists('\\Imagick') ){
 				if ( !$this->img->cropImage($w,$h,$x,$y) ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+					$this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -671,7 +671,7 @@ class image extends bbn\file
 					$this->img = $img;
 				}
 				else{
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+					$this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -717,7 +717,7 @@ class image extends bbn\file
 				}
 			}
 			else{
-				$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+				$this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 					BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 			}
 		}
@@ -745,12 +745,12 @@ class image extends bbn\file
 				if ( $mode == 'v' )
 				{
 					if ( !$this->img->flipImage() ){
-						$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+						$this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 							BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 					}
 				}
 				else if ( !$this->img->flopImage() ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+					$this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -815,7 +815,7 @@ class image extends bbn\file
 			{
 				$p = ( $val == '-' ) ? 90 : 110;
 				if ( !$this->img->modulateImage($p,100,100) ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+					$this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -823,7 +823,7 @@ class image extends bbn\file
 			{
 				$p = ( $val == '-' ) ? -20 : 20;
 				if ( !imagefilter($this->img,IMG_FILTER_BRIGHTNESS,-20) ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+					$this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -851,7 +851,7 @@ class image extends bbn\file
 			{
 				$p = ( $val == '-' ) ? 0 : 1;
 				if ( !$this->img->contrastImage($p) ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+					$this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -859,7 +859,7 @@ class image extends bbn\file
 			{
 				$p = ( $val == '-' ) ? -20 : 20;
 				if ( !imagefilter($this->img,IMG_FILTER_CONTRAST,-20) ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+					$this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -884,14 +884,14 @@ class image extends bbn\file
 			if ( class_exists('\\Imagick') )
 			{
 				if ( !$this->img->modulateImage(100,0,100) ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+					$this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
 			else if ( function_exists('imagefilter') )
 			{
 				if ( !imagefilter($this->img,IMG_FILTER_GRAYSCALE) ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+					$this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -916,14 +916,14 @@ class image extends bbn\file
 			if ( class_exists('\\Imagick') )
 			{
 				if ( !$this->img->negateImage(false) ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+					$this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
 			else if ( function_exists('imagefilter') )
 			{
 				if ( !imagefilter($this->img,IMG_FILTER_NEGATE) ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+					$this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -947,7 +947,7 @@ class image extends bbn\file
 		if ( $this->test() ){
 			if ( class_exists('\\Imagick') ){
 				if ( !$this->img->polaroidImage(new \ImagickDraw(), 0) ){
-					$this->error = defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
+					$this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?
 						BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
 				}
 			}
@@ -1030,7 +1030,7 @@ class image extends bbn\file
 			else
 			{
 				ob_start();
-				call_user_func('image'.$this->ext2,$this->img);
+				\call_user_func('image'.$this->ext2,$this->img);
 				$m = ob_get_contents();
 				ob_end_clean();
 			}

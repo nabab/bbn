@@ -33,7 +33,7 @@ trait dbconfig
     $cfg = bbn\x::merge_arrays(self::$_defaults, $cfg);
 
     if ( !isset($cfg['tables'], $cfg['table'], $cfg['arch']) ){
-      die('The class '.get_class($this).' is not configured properly to work with trait dbconfig');
+      die('The class '.\get_class($this).' is not configured properly to work with trait dbconfig');
     }
 
     $this->class_table = $cfg['table'];

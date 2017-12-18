@@ -8,7 +8,7 @@ class tpl {
   static private $engine, $tmp;
 
   static public function renderer(string $st){
-    if ( !defined('BBN_DATA_PATH') ){
+    if ( !\defined('BBN_DATA_PATH') ){
       $dir = sys_get_temp_dir();
       if ( !@mkdir($dir.'/tmp') && !is_dir($dir.'/tmp') ){
         die('Impossible to create the template directory in '.$dir);
