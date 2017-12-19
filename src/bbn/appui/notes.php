@@ -130,8 +130,8 @@ class notes extends bbn\models\cls\db
     if ( ($usr = bbn\user::get_instance()) &&
       $this->db->insert('bbn_notes', [
         'id_parent' => $parent,
-        'private' => $private ? 1 : 0,
-        'locked' => $locked ? 1 : 0,
+        'private' => !empty($private) ? 1 : 0,
+        'locked' => !empty($locked) ? 1 : 0,
         'creator' => $usr->get_id()
       ]) &&
       ($id_note = $this->db->last_id()) &&

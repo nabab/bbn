@@ -78,14 +78,23 @@ class history
       $db = self::_get_db();
       $id = $db->last_id();
       $last = self::$db->last();
+      if ( \bbn\str::is_uid($cfg['old']) && self::$db->count(self::$table_uids, ['uid' => $cfg['old']]) ){
+        $cfg['ref'] = $cfg['old'];
+        $cfg['val'] = null;
+      }
+      else{
+        $cfg['ref'] = null;
+        $cfg['val'] = $cfg['old'];
+      }
       // New row in the history table
       if ( $res = $db->insert(self::$table, [
-        'operation' => $cfg['operation'],
-        'line' => $cfg['line'],
-        'column' => $cfg['column'],
-        'old' => $cfg['old'] ?? null,
-        'chrono' => self::$date ?: $cfg['chrono'],
-        'id_user' => self::$user
+        'opr' => $cfg['operation'],
+        'uid' => $cfg['line'],
+        'col' => $cfg['column'],
+        'val' => $cfg['val'],
+        'ref' => $cfg['ref'],
+        'tst' => self::$date ?: $cfg['chrono'],
+        'usr' => self::$user
       ]) ){
         // Set back the original last ID
         $db->set_last_insert_id($id);
@@ -109,7 +118,7 @@ class history
       ($databases_class = self::_get_databases()) &&
       ($model = $databases_class->modelize($table))
     ){
-      $col = $db->escape('column');
+      $col = $db->escape('col');
       $where_ar = [];
       foreach ( $model['fields'] as $k => $f ){
         if ( !empty($f['id_option']) ){
@@ -376,14 +385,14 @@ class history
       $tab_uids = $db->escape(self::$table_uids);
       $uid = $db->cfn('uid', self::$table_uids, true);
       $id_tab = $db->cfn('id_table', self::$table_uids, true);
-      $line = $db->cfn('line', self::$table, true);
-      $chrono = $db->cfn('chrono', self::$table, true);
+      $uid2 = $db->cfn('uid', self::$table, true);
+      $chrono = $db->cfn('tst', self::$table, true);
       $order = $dir && (bbn\str::change_case($dir, 'lower') === 'asc') ? 'ASC' : 'DESC';
       $sql = <<< MYSQL
-SELECT DISTINCT($line)
+SELECT DISTINCT($uid)
 FROM $tab_uids
   JOIN $tab
-    ON $uid = $line
+    ON $uid = $uid2
 WHERE $id_tab = ? 
 ORDER BY $chrono $order
 LIMIT $start, $limit
@@ -412,9 +421,8 @@ MYSQL;
       $uid = $db->cfn('uid', self::$table_uids, true);
       $deletion = $db->cfn('deletion', self::$table_uids, true);
       $id_tab = $db->cfn('id_table', self::$table_uids, true);
-      $line = $db->escape('line');
-      $operation = $db->escape('operation');
-      $chrono = $db->escape('chrono');
+      $line = $db->escape('uid', self::$table);
+      $chrono = $db->escape('tst');
       $sql = <<< MYSQL
 SELECT DISTINCT($line)
 FROM $tab_uids

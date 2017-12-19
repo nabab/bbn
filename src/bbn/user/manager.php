@@ -137,7 +137,6 @@ You can click the following link to access directly your account:<br>
       FROM $groups
         LEFT JOIN $users
           ON $id_group = $id
-          AND $active = 1
       GROUP BY $id");
   }
 
@@ -486,8 +485,7 @@ You can click the following link to access directly your account:<br>
   public function group_num_users($id_group){
     $u =& $this->class_cfg['arch']['users'];
     return $this->db->count($this->class_cfg['tables']['users'], [
-      $u['id_group'] => $id_group,
-      $u['active'] => 1
+      $u['id_group'] => $id_group
     ]);
   }
 
