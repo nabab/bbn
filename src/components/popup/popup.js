@@ -64,8 +64,7 @@
 
     data: function(){
       return {
-        items: [],
-        showPopup: false
+        items: []
       }
     },
 
@@ -76,6 +75,9 @@
           r.push(this.getObject($.extend({index: i}, a)));
         });
         return r;
+      },
+      showPopup(){
+        return this.items.length > 0;
       },
     },
 
@@ -419,7 +421,7 @@
         if ( this.items[idx] ){
           this.$nextTick(() => {
             let ele = $(".bbn-popup-unit", this.$el).eq(idx);
-            bbn.fn.center(ele);
+            //bbn.fn.center(ele);
             /*
             if ( !ele.hasClass("ui-draggable") ){
               if ( this.popups[idx].draggable !== false ){
@@ -461,7 +463,7 @@
         this.$forceUpdate();
         this.$nextTick(() => {
           $.each(this.items, (i, a) => {
-            this.center(i);
+            //this.center(i);
           })
         })
       },
@@ -520,6 +522,9 @@
           },
           afterClose: {
             type: Function
+          },
+          footer: {
+            type: [Function, String, Object]
           },
           beforeClose: {
             type: Function
@@ -629,10 +634,13 @@
               });
             }
             if ( !ev.isDefaultPrevented() ){
-              this.$emit("close", this);
-              if ( this.afterClose ){
-                this.afterClose(this);
-              }
+              this.$el.style.display = 'block';
+              this.$nextTick(() => {
+                this.$emit("close", this);
+                if ( this.afterClose ){
+                  this.afterClose(this);
+                }
+              })
             }
           },
           center(){
@@ -664,6 +672,14 @@
               }
             });
           }
+          this.$nextTick(() => {
+            this.$el.style.display = 'block';
+            if ( this.$refs.scroll && this.$refs.scroll[0] ){
+              this.$nextTick(() => {
+                this.$refs.scroll[0].onResize();
+              })
+            }
+          })
           /*
           setTimeout(() => {
             if ( this.$refs.scroll ){

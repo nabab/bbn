@@ -1,4 +1,4 @@
-<div :class="['bbn-100', componentClass]"
+<!--div :class="['bbn-100', componentClass]"
      v-show="showPopup"
      :style="{zIndex: zIndex}"
 >
@@ -72,4 +72,69 @@
       </bbn-window>
     </transition-group>
   </div>
+</div-->
+<div :class="['bbn-100', componentClass]"
+     v-show="showPopup"
+     :style="{zIndex: zIndex}"
+>
+  <bbn-window inline-template
+              v-if="showPopup"
+              v-for="(popup, i) in popups"
+              :key="popup.uid"
+              :ref="popup.uid"
+              :index="i"
+              v-bind="popup"
+              @close="items.splice(popup.index, 1)"
+  >
+    <div class="w3-modal">
+      <div class="w3-modal-content w3-animate-zoom bbn-flex-height"
+           :style="{
+                width: isMaximized ? '100%' : realWidth + widthUnit,
+                height: isMaximized ? '100%' : realHeight + heightUnit,
+                zIndex: $parent.$parent.$props.zIndex + index,
+              }"
+           @keyup.esc="close()">
+        <header class="w3-container k-header">
+          <div class="w3-display-topright">
+            <span v-if="maximizable || 21"
+                  class="w3-button">
+              <i :class="'zmdi bbn-lg zmdi-window-' + (isMaximized ? 'restore' : 'maximize')"
+                 @click.stop.prevent="isMaximized = !isMaximized"
+                 :title="_('Full screen')"
+              ></i>
+            </span>
+            <span v-if="closable !== false"
+                  class="w3-button">
+              <i class="fa bbn-lg fa-times"
+                 @click.stop.prevent="close()"
+                 :title="_('Close')"
+              ></i>
+            </span>
+          </div>
+          <h3 v-html="title"></h3>
+        </header>
+      
+        <div class="w3-container bbn-flex-fill">
+          <component v-if="component"
+                     :is="component"
+                     :source="source"
+          ></component>
+          <bbn-scroll v-else-if="content"
+                      ref="scroll"
+          >
+            <div class="bbn-block bbn-w-100" v-html="content"></div>
+          </bbn-scroll>
+        </div>
+        <footer class="w3-container w3-teal" v-if="footer">
+          <component v-if="typeof footer === 'object'"
+                     :is="footer">
+          </component>
+          <bbn-scroll v-else ref="scroll">
+            <div class="bbn-block bbn-w-100" v-html="footer"></div>
+          </bbn-scroll>
+        </footer>
+    
+      </div>
+    </div>
+  </bbn-window>
 </div>

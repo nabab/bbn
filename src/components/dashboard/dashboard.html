@@ -23,7 +23,9 @@
       >
         <div class="k-block bbn-widget">
           <div class="k-header header">
-            <h4 class="ui-sortable-handle" v-html="title"></h4>
+            <div class="bbn-full-screen">
+              <h5 class="ui-sortable-handle" v-html="title"></h5>
+            </div>
             <span class="button button-left">
               <i v-if="closable"
                  :title="_('Close')"
