@@ -1,0 +1,14 @@
+<div v-if="$parent.currentOrientation"
+     :class="[componentClass, {'bbn-flex-fill': !currentSize}]"
+     :style="{
+      width: ($parent.currentOrientation === 'horizontal') ? (currentSize ? currentSize : 'auto') : '100%',
+      height: ($parent.currentOrientation === 'vertical') ? (currentSize ? currentSize : 'auto') : '100%'
+    }"
+     v-show="!currentHidden">
+  <div class="bbn-full-screen" :style="{overflow: overflow}">
+    <bbn-scroll v-if="scrollable">
+      <slot></slot>
+    </bbn-scroll>
+    <slot v-else></slot>
+  </div>
+</div>

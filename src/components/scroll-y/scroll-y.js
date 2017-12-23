@@ -173,7 +173,9 @@
 
       // Calculates all the proportions based on content
       onResize() {
+        bbn.fn.info("ON RESIZE!");
         if ( this.realContainer ){
+          bbn.fn.log("real");
           let tmp1 = $(this.realContainer).height() - 18,
               tmp2 = this.realContainer.children[0] ? this.realContainer.children[0].clientHeight : this.containerHeight - 18;
           if ( (tmp1 !== this.containerHeight) || (tmp2 !== this.contentHeight) ){
@@ -191,6 +193,7 @@
           }
         }
         else{
+          bbn.fn.log("not real");
           this.initContainer();
         }
       },

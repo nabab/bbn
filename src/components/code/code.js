@@ -131,6 +131,9 @@
         "Ctrl-.": function(cm) { bbn.vue.tern.selectName(cm); }
       }
     },
+    coffee: {
+      mode: 'text/coffeescript'
+    },
     json: {
       mode: {
         name: 'javascript',
@@ -145,6 +148,12 @@
     },
     less: {
       mode: "text/x-less",
+      extraKeys: {
+        "Ctrl-Space": "autocomplete",
+      }
+    },
+    scss: {
+      mode: "text/x-scss",
       extraKeys: {
         "Ctrl-Space": "autocomplete",
       }

@@ -335,6 +335,9 @@
                     :index="d.index"
                     @mouseenter="_overTr(d.index)"
                     @mouseleave="_overTr(d.index, true)"
+                    tabindex="0"
+                    @focusin="focusRow(d.index)"
+                    @focusout="blurRow(d.index)"
                     :class="'k-widget' + (trClass ? ' ' + trClass(d.data) : '') + (d.index % 2 ? ' k-alt' : '') + (d.aggregated || d.groupAggregated ? ' k-header' : '') + (currentOverTr === d.index ? ' k-state-hover' : '')"
                 >
                   <td v-if="selection" :colspan="d.expansion ? colsLeft.length : 1">
@@ -363,17 +366,13 @@
                       :key="j"
                       :class="col.cls"
                   >
-                    <div v-if="editable && d.isTmp"
-                         :style="{
-                        height: editMode === 'inline' ? '200px' : 'auto'
-                       }"
-                    >
+                    <div v-if="editable && d.isEdited">
                       <div v-if="(editMode === 'inline') && (col.index === colButtons)">
                         <bbn-button :text="_('Save')"
-                                    :disabled="!isTmpValid"
+                                    :disabled="!isEditedValid"
                                     icon="fa fa-save"
                                     :notext="true"
-                                    @click="save"
+                                    @click="$emit('saveItem', editedRow)"
                         ></bbn-button>
                         <bbn-button :text="_('Cancel')"
                                     icon="fa fa-times"
@@ -384,7 +383,7 @@
                       <component v-else-if="(editMode === 'inline') && col.field && (col.editable !== false)"
                                  v-bind="getEditableOptions(col, d.data)"
                                  :is="getEditableComponent(col, d.data)"
-                                 v-model="currentData[d.index][col.field]"
+                                 v-model="editedRow[col.field]"
                                  style="width: 100%"
                       ></component>
                       <div v-else-if="!col.buttons" v-html="render(d.data, col, d.index)"></div>
@@ -452,6 +451,9 @@
                   <tr v-for="(d, i) in currentSet"
                       v-if="d.group || d.expander || isExpanded(d) || d.aggregated || (isExpanded(d) && d.groupAggregated)"
                       :key="i"
+                      tabindex="0"
+                      @focusin="focusRow(d.index)"
+                      @focusout="blurRow(d.index)"
                       :index="d.index"
                       @mouseenter="_overTr(d.index)"
                       @mouseleave="_overTr(d.index, true)"
@@ -486,17 +488,13 @@
                         :class="col.cls"
                         :key="j"
                     >
-                      <div v-if="editable && d.isTmp"
-                           :style="{
-                        height: editMode === 'inline' ? '200px' : 'auto'
-                       }"
-                      >
+                      <div v-if="editable && d.isEdited">
                         <div v-if="(editMode === 'inline') && (col.index === colButtons)">
                           <bbn-button :text="_('Save')"
-                                      :disabled="!isTmpValid"
+                                      :disabled="!isEditedValid"
                                       icon="fa fa-save"
                                       :notext="true"
-                                      @click="save"
+                                      @click="$emit('saveItem', editedRow)"
                           ></bbn-button>
                           <bbn-button :text="_('Cancel')"
                                       icon="fa fa-times"
@@ -507,7 +505,7 @@
                         <component v-else-if="(editMode === 'inline') && col.field && (col.editable !== false)"
                                    v-bind="getEditableOptions(col, d.data)"
                                    :is="getEditableComponent(col, d.data)"
-                                   v-model="currentData[d.index][col.field]"
+                                   v-model="editedRow[col.field]"
                                    style="width: 100%"
                         ></component>
                         <div v-else-if="!col.buttons" v-html="render(d.data, col, d.index)"></div>
@@ -582,6 +580,9 @@
                     :key="i"
                     :class="'k-widget' + (trClass ? ' ' + trClass(d.data) : '') + (d.index % 2 ? ' k-alt' : '') + (d.aggregated || d.groupAggregated ? ' k-header' : '') + (currentOverTr === d.index ? ' k-state-hover' : '')"
                     :index="d.index"
+                    tabindex="0"
+                    @focusin="focusRow(d.index)"
+                    @focusout="blurRow(d.index)"
                     @mouseenter="_overTr(d.index)"
                     @mouseleave="_overTr(d.index, true)"
                 >
@@ -595,17 +596,13 @@
                       :class="col.cls"
                       :key="j"
                   >
-                    <div v-if="editable && d.isTmp"
-                         :style="{
-                        height: editMode === 'inline' ? '200px' : 'auto'
-                       }"
-                    >
+                    <div v-if="editable && d.isEdited">
                       <div v-if="(editMode === 'inline') && (col.index === colButtons)">
                         <bbn-button :text="_('Save')"
-                                    :disabled="!isTmpValid"
+                                    :disabled="!isEditedValid"
                                     icon="fa fa-save"
                                     :notext="true"
-                                    @click="save"
+                                    @click="$emit('saveItem', editedRow)"
                         ></bbn-button>
                         <bbn-button :text="_('Cancel')"
                                     icon="fa fa-times"
@@ -616,7 +613,7 @@
                       <component v-else-if="(editMode === 'inline') && col.field && (col.editable !== false)"
                                  v-bind="getEditableOptions(col, d.data)"
                                  :is="getEditableComponent(col, d.data)"
-                                 v-model="currentData[d.index][col.field]"
+                                 v-model="editedRow[col.field]"
                                  style="width: 100%"
                       ></component>
                       <div v-else-if="!col.buttons" v-html="render(d.data, col, d.index)"></div>
@@ -665,7 +662,7 @@
     
     <!-- Footer -->
     <div class="bbn-table-footer k-grid-pager k-widget k-floatwrap"
-         v-if="pageable || savable || filterable || isAjax || showable"
+         v-if="pageable || saveable || filterable || isAjax || showable"
     >
       <div class="bbn-block"
            v-if="pageable"
@@ -720,7 +717,7 @@
               v-text="total ? _('Total') + ': ' + total + ' ' + _('items') : _('No item')"
         ></span>
         &nbsp;
-        <bbn-button v-if="savable"
+        <bbn-button v-if="saveable"
                     :disabled="isSaved"
                     :title="_('Save current configuration')"
                     @click="$emit('save', currentConfig)"

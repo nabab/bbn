@@ -14,16 +14,21 @@
         type: [Object, Array],
         default: function(){
           return {};
-        }
+        },
       },
+      loadingText: {
+        types: [String],
+        default: 'Loading'
+      }
     },
     data(){
       return{
         minHeight: false,
         fontClass: 'bbn-small',
-        height: false
+        height: false,
       }
     },
+
     methods: {
       onResize(){
         this.height = $(this.$el).height();

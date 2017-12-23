@@ -177,14 +177,29 @@
           bbn.fn.post(d.url, d.data || {}, (r) => {
             if ( r.content || r.title ){
               if ( r.script ){
-                var tmp = eval(r.script);
+                let tmp = eval(r.script);
                 if ( $.isFunction(tmp) ){
                   d.open = tmp;
+                }
+                // anonymous vuejs component initialization
+                else if ( typeof(tmp) === 'object' ){
+                  bbn.fn.extend(tmp, {
+                    name: bbn.fn.randomString(20, 15).toLowerCase(),
+                    template: '<div class="bbn-full-screen">' + (r.content || '') + '</div>',
+                    props: ['source']
+                  });
+                  this.$options.components[tmp.name] = tmp;
+                  d.component = this.$options.components[tmp.name];
+                  d.source = r.data || [];
                 }
               }
               $.extend(d, r);
               delete d.url;
               delete d.data;
+              if ( !d.uid ){
+                d.uid = 'bbn-popup-' + bbn.fn.timestamp().toString()
+              }
+              d.index = this.items.length;
               this.items.push(d);
               this.makeWindows();
             }
@@ -474,7 +489,8 @@
             idx = this.popups.length - 1;
           }
           if ( this.popups[idx] ){
-            return bbn.vue.getChildByKey(this.$children[0], this.popups[idx].uid);
+            //return bbn.vue.getChildByKey(this.$children[0], this.popups[idx].uid);
+            return bbn.vue.getChildByKey(this, this.popups[idx].uid);
           }
         }
         return false;
@@ -643,53 +659,36 @@
               })
             }
           },
-          center(){
-            this.popup.center(this.index);
+          onShow(){
+            this.selfEmit(true);
+            if ( this.draggable ){
+              $(this.$el).draggable({
+                handle: ".bbn-popup-title",
+                containment: ".bbn-popup"
+              });
+            }
+            if ( this.resizable ){
+              $(this.$el).resizable({
+                handles: "se",
+                containment: ".bbn-popup",
+                resize: () => {
+                  this.selfEmit();
+                },
+                stop: () => {
+                  this.realWidth = parseFloat($(this.$el).css("width"));
+                  this.realHeight = parseFloat($(this.$el).css("height"));
+                  //this.center();
+                  this.selfEmit();
+                }
+              });
+            }
           }
         },
         created(){
           this.popup = bbn.vue.closest(this, 'bbn-popup');
         },
         mounted(){
-          if ( this.draggable ){
-            $(this.$el).draggable({
-              handle: ".bbn-popup-title",
-              containment: ".bbn-popup"
-            });
-          }
-          if ( this.resizable ){
-            $(this.$el).resizable({
-              handles: "se",
-              containment: ".bbn-popup",
-              resize: () => {
-                this.selfEmit();
-              },
-              stop: () => {
-                this.realWidth = parseFloat($(this.$el).css("width"));
-                this.realHeight = parseFloat($(this.$el).css("height"));
-                //this.center();
-                this.selfEmit();
-              }
-            });
-          }
-          this.$nextTick(() => {
-            this.$el.style.display = 'block';
-            if ( this.$refs.scroll && this.$refs.scroll[0] ){
-              this.$nextTick(() => {
-                this.$refs.scroll[0].onResize();
-              })
-            }
-          })
-          /*
-          setTimeout(() => {
-            if ( this.$refs.scroll ){
-              this.$refs.scroll[0].onResize();
-            };
-            if ( this.open ){
-              //this.open(this);
-            }
-          }, 1000)
-          */
+          this.$el.style.display = 'block';
         },
         watch: {
           isMaximized(){

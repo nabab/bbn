@@ -1,6 +1,18 @@
 .bbn-splitter{
   box-sizing: border-box !important;
-  &.k-splitter{
-    height: 100%;
+  .resizer {
+    position: absolute;
+    background-color: #CCC;
+    z-index: 1;
+    &.vertical {
+      width: 100%;
+      height: 5px;
+      left: 0px;
+    }
+    &.horizontal {
+      height: 100%;
+      width: 5px;
+      top: 0px;
+    }
   }
 }

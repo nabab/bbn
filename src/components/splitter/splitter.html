@@ -1,5 +1,22 @@
-<div :class="[{'bbn-100': true}, componentClass]"
-     @resize="resize"
->
-  <slot></slot>
+<div :class="[{'bbn-full-screen': true}, componentClass]">
+  <div v-show="currentOrientation && (currentOrientation !== 'auto')"
+       :class="{
+        'bbn-flex-height': currentOrientation === 'vertical',
+        'bbn-flex-width': currentOrientation === 'horizontal',
+       }"
+       :style="{
+        width: currentOrientation === 'vertical' ? '100%' : null,
+        height: currentOrientation === 'horizontal' ? '100%' : null,
+       }"
+       ref="container"
+  >
+    <slot></slot>
+    <div v-for="pane in resizers"
+         :class="'k-header resizer bbn-middle ' + currentOrientation + (resizable ? ' bbn-p' : '')"
+         :style="{top: pane.top + 'px', left: pane.left + 'px'}"
+    >
+      <i v-if="collapsible && (pane.collapsible !== false)"
+         :class="'fa fa-caret-' + (pane.collapsed ? (currentOrientation === 'horizontal' ? 'right' : 'bottom') : (currentOrientation === 'horizontal' ? 'left' : 'top'))"></i>
+    </div>
+  </div>
 </div>

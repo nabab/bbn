@@ -50,7 +50,7 @@
         type: Boolean,
         default: false
       },
-      savable: {
+      saveable: {
         type: Boolean,
         default: false
       },
@@ -210,7 +210,7 @@
           filters: this.filters,
           limit: this.limit,
           order: this.order,
-          hidden: this.hidden || [],
+          hidden: this.hidden || null,
         },
         currentFilter: false,
         floatingFilterX: 0,
@@ -254,7 +254,8 @@
         currentOverTr: false,
         updaterTimeout: false,
         allExpanded: this.expanded === true ? true : false,
-        currentExpanded: false
+        currentExpanded: false,
+        focusedRow: false
       };
     },
     computed: {
@@ -290,7 +291,7 @@
         }
         return r;
       },
-      isTmpValid(){
+      isEditedValid(){
         let ok = true;
         if ( this.tmpRow ){
           $.each(this.columns, (i, a) => {
@@ -334,6 +335,9 @@
         }
       },
       currentSet(){
+        if ( !this.cols.length ){
+          return [];
+        }
         let res = [],
             isGroup = false,
             currentGroupValue,
@@ -385,7 +389,7 @@
             data: this.tmpRow,
             selected: false,
             expander: true,
-            isTmp: true
+            isEdited: true
           });
         }
         let currentGroupIndex = -1,
@@ -427,6 +431,9 @@
             currentGroupNum++;
           }
           o = {index: i, data: a};
+          if ( a === this.editedRow ){
+            o.isEdited = true;
+          }
           if ( this.selection ){
             o.selected = $.inArray(this.selectedRows, i) > -1;
             o.selection = true;
@@ -1053,16 +1060,12 @@
             if ( (cfg.hidden !== undefined) && (cfg.hidden !== this.currentHidden) ){
               this.currentHidden = cfg.hidden;
             }
-            /*
             $.each(this.cols, (i, a) => {
               let hidden = ($.inArray(i, this.currentHidden) > -1);
-              bbn.fn.info("HIDDEN");
-              bbn.fn.log(a.hidden, hidden);
               if ( a.hidden !== hidden ){
                 this.$set(this.cols[i], "hidden", hidden);
               }
             });
-            */
           }
           this.currentConfig = {
             limit: this.currentLimit,
@@ -1090,8 +1093,7 @@
       select(){},
       /** @todo */
       add(data){
-        this.widget.rows().add([data]);
-        this.widget.draw();
+        this.currentData.push(data);
       },
       delete(index, confirm){
         if ( this.currentData[index] ){
@@ -1112,7 +1114,7 @@
         }
       },
       insert(data, title, options){
-        let d = $.extend({}, data);
+        let d = data ? $.extend({}, data) : {};
         if ( this.uid && d[this.uid] ){
           delete d[this.uid];
         }
@@ -1819,10 +1821,32 @@
         }
         return res;
       },
+      focusRow(rowIdx){
+        if ( (this.editable === 'inline') && (this.focusedRow !== rowIdx) ){
+          this.focusedRow = rowIdx;
+          if ( this.editedRow !== this.currentData[rowIdx] ){
+            this.edit(this.currentData[rowIdx]);
+          }
+          bbn.fn.log("focus ok");
+        }
+      },
+      blurRow(rowIdx){
+        if ( (this.editable === 'inline') && (this.editedRow === this.currentData[rowIdx]) ){
+          if ( this.colButtons === false ){
+            this.save();
+          }
+          this.focusedRow = false;
+          setTimeout(() => {
+            if ( !this.focusRow ){
+              this.editedRow = false;
+            }
+          }, 300)
+          bbn.fn.log("blur ok");
+        }
+      },
     },
 
     created(){
-      bbn.fn.warning("IS IT HERE?");
       // Adding bbn-column from the slot
       if (this.$slots.default){
         for ( let node of this.$slots.default ){
@@ -1831,14 +1855,13 @@
             node.componentOptions &&
             (node.componentOptions.tag === 'bbn-column')
           ){
-            //bbn.fn.log("ADDING COLUMN", node.componentOptions.propsData)
             this.addColumn(node.componentOptions.propsData);
           }
           else if (
             (node.tag === 'bbn-column') &&
             node.data && node.data.attrs
           ){
-            this.addColumn(node.data.attrs);
+            this.addColumn($.extend({}, node.data.attrs));
           }
         }
       }
@@ -1846,6 +1869,15 @@
         $.each(this.columns.slice(), (i, a) => {
           this.addColumn(a);
         })
+      }
+      if ( this.defaultConfig.hidden === null ){
+        let tmp = [];
+        $.each(this.cols, (i, a) => {
+          if ( a.hidden ){
+            tmp.push(i);
+          }
+        });
+        this.defaultConfig.hidden = tmp;
       }
       this.setConfig(false, true);
       this.initialConfig = this.jsonConfig;

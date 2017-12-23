@@ -598,9 +598,13 @@
               d.url = url;
             }
             d.url = vm.parseURL(d.url);
+
             d.loaded = true;
             d.load = null;
+            /** @todo Why is it here? */
+            this.$emit('tabLoaded', d.data, d.url, vm.tabs[idx]);
             idx = vm.search(d.url);
+            d.menu = vm.tabs[idx] && vm.tabs[idx].menu ? vm.tabs[idx].menu : undefined;
             if ( d.data !== undefined ){
               d.source = $.extend({}, d.data);
               delete d.data;
@@ -641,7 +645,7 @@
             others = true;
             return false;
           }
-        })
+        });
         if ( this.tabs[idx].help ){
           items.push({
             text: bbn._("Help"),

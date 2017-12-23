@@ -10,15 +10,23 @@
   Vue.component('bbn-fisheye', {
     mixins: [bbn.vue.basicComponent, bbn.vue.optionComponent],
     props: {
-      value: {
+      source: {
         type: Array,
         default(){
           return [];
         }
       },
-      minIndex: {
-        type: Number,
-        default: 0
+      fixedLeft: {
+        type: Array,
+        default(){
+          return [];
+        }
+      },
+      fixedRight: {
+        type: Array,
+        default(){
+          return [];
+        }
       },
       zIndex: {
         type: Number,
@@ -26,35 +34,41 @@
       },
       delUrl: {},
       insUrl: {},
-      top: {},
-      bottom: {},
-      position: {
-        type: String
+      top: {
+        type: [Number, String],
+        default: '0px'
       },
-      cfg: {
-        type: Object,
-        default(){
-          return {
-            minIndex: 0,
-            bin_url: false,
-            value: [],
-            top: "0px",
-            bottom: "0px",
-            position: "left",
-            opened: false
-          };
-        }
+      bottom: {
+        type: [Number, String],
+        default: '0px'
+      },
+      position: {
+        type: String,
+        default: 'left'
       }
     },
 
     data(){
-      return $.extend({
+      return {
+        currentData: this.source.slice(),
         menu: false,
         widget: false,
         binEle: false,
-        droppableBin: false,
-        droppable: false
-      }, bbn.vue.treatData(this));
+        droppableBin: false
+      };
+    },
+
+    computed: {
+      items(){
+        let items = this.fixedLeft.slice();
+        $.each(this.currentData, (i, a) => {
+          items.push(a);
+        });
+        $.each(this.fixedRight, (i, a) => {
+          items.push(a);
+        });
+        return items;
+      }
     },
 
     methods: {
@@ -77,13 +91,7 @@
             if ( d.success ){
               obj.id_option = obj.id;
               obj.id = d.id;
-              let idx = -1;
-              $.each(this.value, function(i, a){
-                if ( a.id ){
-                  idx = i;
-                }
-              });
-              this.value.splice((idx + 1) < this.minIndex ? idx + 1 : this.minIndex, 0, obj);
+              this.currentData.push(obj);
             }
             else{
               new Error(bbn._("The shortcut has failed to be inserted"));
@@ -96,9 +104,9 @@
         if ( id && this.delUrl ){
           bbn.fn.post(this.delUrl, {id: id}, (d) => {
             if ( d.success ){
-              let idx = bbn.fn.search(this.value, "id", id);
+              let idx = bbn.fn.search(this.currentData, "id", id);
               if ( idx > -1 ){
-                this.value.splice(idx, 1)
+                this.currentData.splice(idx, 1)
               }
             }
           });

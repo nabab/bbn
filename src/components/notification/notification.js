@@ -15,6 +15,18 @@
       left: {},
       bottom: {},
       right: {},
+      successMessage: {
+        type: [String, Function],
+        default: bbn._('Success')
+      },
+      warningMessage: {
+        type: [String, Function],
+        default: bbn._('Warning')
+      },
+      errorMessage: {
+        type: [String, Function],
+        default: bbn._('Error')
+      },
       cfg: {
         type: Object,
         default: function(){
@@ -60,22 +72,37 @@
           var cfg = vm.tplCfg;
           return '<div class="bbn-notification k-notification-wrap ' +
             '">' +
-            ( type && cfg[type] ? '<div class="bbn-notification-close k-i-close k-button" title="' + bbn.lng.close + '"><i class="fa fa-times"> </i></div>' : '' ) +
-            ( type && cfg[type] ? '<i class="bbn-notification-icon fa fa-' + cfg[type].icon + '"> </i>' : '<span class="bbn-notification-icon loader"><span class="loader-inner"></span></span> ' ) +
+/*            ( type && cfg[type] ? '<div class="bbn-notification-close k-i-close k-button" title="' + bbn.lng.close + '"><i class="fa fa-times"> </i></div>' : '' ) +
+            ( type && cfg[type] ? '<i class="bbn-notification-icon fa fa-' + cfg[type].icon + '"> </i>' : '<span class="bbn-notification-icon loader"><span class="loader-inner"></span></span> ' ) + */
             ( obj.title ? '<span class="bbn-b">' + obj.title + '</span><hr>' : '' ) +
             ( obj.content ? obj.content : ( obj.text ? obj.text : bbn.lng.loading ) ) +
             '</div>';
         }
         bbn.fn.log("Bad argument for notification template");
       },
+      _sanitize(obj, type){
+        if ( typeof obj === 'string' ){
+          obj = {text: obj};
+        }
+        else if ( !obj ){
+          obj = {};
+        }
+        if ( !obj.text ){
+          obj.text = $.isFunction(this[type + 'Message']) ? this[type + 'Message'](obj) : this[type + 'Message']
+        }
+        if ( !obj.text ){
+          obj.text = '';
+        }
+        return obj;
+      },
       success: function (obj, timeout){
-        return this.show(obj, "success", timeout ? timeout : 2000);
+        return this.show(this._sanitize(obj, "success"), "success", timeout ? timeout : 2000);
       },
       error: function (obj, timeout){
-        return this.show(obj, "error", timeout ? timeout : 5000);
+        return this.show(this._sanitize(obj, "error"), "error", timeout ? timeout : 5000);
       },
       warning: function (obj, timeout){
-        return this.show(obj, "warning");
+        return this.show(this._sanitize(obj, "warning"), "warning", timeout ? timeout : 5000);
       },
       show: function (obj, type, timeout){
         if ( typeof(obj) === 'string' ){
