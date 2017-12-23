@@ -96,6 +96,7 @@
       notification: {},
       numeric: {},
       operator: {},
+      pane: {},
       popup: {},
       progressbar:{},
       radio: {},
