@@ -19,12 +19,10 @@
 namespace bbn\appui;
 use bbn;
 
-class grid extends bbn\models\cls\basic
+class grid extends bbn\models\cls\cache
 {
-
 	private
     /* @var db The DB connection */
-    $db = false,
     $start,
     $limit,
     $order,
@@ -36,95 +34,143 @@ class grid extends bbn\models\cls\basic
     $num = 0,
     $prefilters = [],
     $fields = [],
-    $additional_fields = [];
+    $additional_fields = [],
+    $cache_uid,
+    $query_time = 0,
+    $count_time = 0,
+    $chrono,
+    $data = [];
 
 
+  /**
+   * grid constructor.
+   * @param bbn\db $db
+   * @param array $post Mandatory configuration from the table component
+   * @param $cfg
+   */
   public function __construct(bbn\db $db, array $post, $cfg){
-    $this->db = $db;
+    parent::__construct($db);
     // Mandatory configuration coming from the table component
-    if ( \is_array($post) ){
-      $this->start = isset($post['start']) &&
-              bbn\str::is_number($post['start']) ?
-                      $post['start'] : 0;
+    $this->start = isset($post['start']) &&
+            bbn\str::is_number($post['start']) ?
+                    $post['start'] : 0;
 
-      $this->limit = ( isset($post['limit']) &&
-              bbn\str::is_number($post['limit']) ) ?
-                      $post['limit'] : 20;
+    $this->limit = ( isset($post['limit']) &&
+            bbn\str::is_number($post['limit']) ) ?
+                    $post['limit'] : 20;
 
-      $this->filters = $post['filters'] ?? [];
-      $this->order = $post['order'] ?? [];
-      // Simple configuration using a string
-      if ( \is_string($cfg) ){
-        // If there is a space it is a query
-        if ( strrpos($cfg, ' ') ){
-          $this->query = $cfg;
-        }
-        // Otherwise it is a table
-        else{
-          if ( $this->query = $this->db->get_select($cfg) ){
-            $this->table = $cfg;
-          }
-        }
+    $this->filters = $post['filters'] ?? [];
+    $this->order = $post['order'] ?? [];
+    // Simple configuration using a string
+    if ( \is_string($cfg) ){
+      // If there is a space it is a query
+      if ( strrpos($cfg, ' ') ){
+        $this->query = $cfg;
       }
-      // Full configuration
-      else if ( \is_array($cfg) ){
-        if ( !empty($cfg['query']) ){
-          $this->query = $cfg['query'];
-        }
-        if ( !empty($cfg['table']) ){
-          $this->table = $cfg['table'];
-          if ( empty($cfg['fields']) ){
-            $cols = array_keys($this->db->get_columns($this->table));
-            $table = $this->table;
-            $this->fields = array_combine($cols, array_map(function($a) use ($table){
-              return $table.'.'.$a;
-            }, $cols));
-          }
-          else{
-            $this->fields = $cfg['fields'];
-          }
-          if ( !$this->query ){
-            $this->query = $this->db->get_select($this->table, !empty($cfg['columns']) ? $cfg['columns'] : []);
-          }
-        }
-        if ( $this->query ){
-          // Additional filters
-          if ( !empty($cfg['filters']) ){
-            $this->prefilters = isset($cfg['filters']['logic']) ? $cfg['filters'] : [
-              'logic' => 'AND',
-              'conditions' => $cfg['filters']
-            ];
-            if ( \bbn\x::is_assoc($this->prefilters['conditions']) ){
-              $this->prefilters['conditions'] = [];
-              foreach ( $cfg['filters'] as $col => $val ){
-                if ( $val === null ){
-                  $this->prefilters['conditions'][] = [
-                    'field' => $col,
-                    'operator' => 'isnull'
-                  ];
-                }
-                else{
-                  $this->prefilters['conditions'][] = [
-                    'field' => $col,
-                    'operator' => 'eq',
-                    'value' => $val
-                  ];
-                }
-              }
-            }
-          }
-          if ( !empty($cfg['group_by']) ){
-            $this->group_by = $cfg['group_by'];
-          }
-          if ( !empty($cfg['count']) ){
-            $this->count = $cfg['count'];
-          }
-          if ( !empty($cfg['num']) ){
-            $this->num = $cfg['num'];
-          }
+      // Otherwise it is a table
+      else{
+        if ( $this->query = $this->db->get_select($cfg) ){
+          $this->table = $cfg;
         }
       }
     }
+    // Full configuration
+    else if ( \is_array($cfg) ){
+      if ( !empty($cfg['query']) ){
+        $this->query = $cfg['query'];
+      }
+      if ( !empty($cfg['table']) ){
+        $this->table = $cfg['table'];
+        if ( empty($cfg['fields']) ){
+          $cols = array_keys($this->db->get_columns($this->table));
+          $table = $this->table;
+          $this->fields = array_combine($cols, array_map(function($a) use ($table){
+            return $table.'.'.$a;
+          }, $cols));
+        }
+        else{
+          $this->fields = $cfg['fields'];
+        }
+        if ( !$this->query ){
+          $this->query = $this->db->get_select($this->table, !empty($cfg['columns']) ? $cfg['columns'] : []);
+        }
+      }
+      if ( $this->query ){
+        // Additional filters
+        if ( !empty($cfg['filters']) ){
+          $this->prefilters = isset($cfg['filters']['logic']) ? $cfg['filters'] : [
+            'logic' => 'AND',
+            'conditions' => $cfg['filters']
+          ];
+          if ( \bbn\x::is_assoc($this->prefilters['conditions']) ){
+            $this->prefilters['conditions'] = [];
+            foreach ( $cfg['filters'] as $col => $val ){
+              if ( $val === null ){
+                $this->prefilters['conditions'][] = [
+                  'field' => $col,
+                  'operator' => 'isnull'
+                ];
+              }
+              else{
+                $this->prefilters['conditions'][] = [
+                  'field' => $col,
+                  'operator' => 'eq',
+                  'value' => $val
+                ];
+              }
+            }
+          }
+        }
+        if ( !empty($cfg['group_by']) ){
+          $this->group_by = $cfg['group_by'];
+        }
+        if ( !empty($cfg['count']) ){
+          $this->count = $cfg['count'];
+        }
+        if ( !empty($cfg['num']) ){
+          $this->num = $cfg['num'];
+        }
+      }
+    }
+    $this->cache_uid = md5(serialize([
+      'filters' => $this->filters,
+      'query' => $this->query,
+      'table' => $this->table,
+      'group_by' => $this->group_by,
+      'count' => $this->count
+    ]));
+    $this->chrono = new bbn\util\timer();
+  }
+
+  protected function get_cache(){
+    return parent::cache_get($this->cache_uid);
+  }
+
+  protected function set_cache($data){
+    $max = 600;
+    if ( isset($data['time']) ){
+      if ( $data['time'] < 0.01 ){
+        $ttl = 3;
+      }
+      else if ( $data['time'] < 0.1 ){
+        $ttl = 10;
+      }
+      else if ( $data['time'] < 0.5 ){
+        $ttl = 30;
+      }
+      else {
+        $ttl = ceil($data['time'] * 60);
+      }
+      if ( $ttl > $max ){
+        $ttl = $max;
+      }
+      $this->cache_set($this->cache_uid, '', $data, $ttl);
+    }
+    return $this;
+  }
+
+  public function flush(){
+    $this->data = [];
   }
 
   public function get_select(){
@@ -167,8 +213,12 @@ class grid extends bbn\models\cls\basic
 
   public function get_data(){
     if ( $sql = $this->get_select() ){
+      $this->chrono->start();
       $q = $this->db->query($sql);
-      return $q->get_rows();
+      $rows = $q->get_rows();
+      $this->query_time = $this->chrono->measure();
+      $this->chrono->stop();
+      return $rows;
     }
   }
 
@@ -176,8 +226,20 @@ class grid extends bbn\models\cls\basic
     if ( $this->num && !$force ){
       return $this->num;
     }
+    if ( !$force && ($cache = $this->get_cache()) ){
+      $this->count_time = $cache['time'];
+      $this->num = $cache['num'];
+      return $this->num;
+    }
+    $this->chrono->start();
     if ( $count = $this->get_count() ){
       $this->num = $this->db->get_one($count);
+      $this->count_time = $this->chrono->measure();
+      $this->chrono->stop();
+      $this->set_cache([
+        'num' => $this->num,
+        'time' => $this->count_time
+      ]);
       return $this->num;
     }
     return 0;
@@ -188,11 +250,14 @@ class grid extends bbn\models\cls\basic
       'data' => [],
       'total' => 0,
       'success' => true,
-      'error' => false
+      'error' => false,
+      'time' => []
     ];
     if ( $this->db->check() && ($total = $this->get_total()) ){
       $r['total'] = $total;
       $r['data'] = $this->get_data();
+      $r['time']['query'] = $this->query_time;
+      $r['time']['count'] = $this->count_time;
     }
     if ( !$this->db->check() ){
       $r['success'] = false;
@@ -281,16 +346,17 @@ class grid extends bbn\models\cls\basic
     if ( !empty($filters['conditions']) && $this->check() ){
       $logic = isset($filters['logic']) && ($filters['logic'] === 'OR') ? 'OR' : 'AND';
       foreach ( $filters['conditions'] as $f ){
-        $pre = empty($res) ? " ( " : " $logic ";
-        if ( isset($f['logic']) ){
+        if ( isset($f['logic']) && !empty($f['conditions']) ){
+          $pre = empty($res) ? " ( " : " $logic ";
           if ( $array ){
             $res = \bbn\x::merge_arrays($res, $this->filter($f, true));
           }
-          else{
-            $res .= $pre.$this->filter($f);
+          else if ( $tmp = $this->filter($f) ){
+            $res .= $pre.$tmp;
           }
         }
         else if ( $field = $this->get_field($f, $array) ){
+          $pre = empty($res) ? " ( " : " $logic ";
           if ( !$array ){
             $res .= $pre.$field." ";
           }

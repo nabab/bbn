@@ -1311,7 +1311,7 @@ class x
 
         // Enclose fields containing $delimiter, $enclosure or whitespace
         if ( $encloseAll || preg_match( "/(?:${delimiter_esc}|${enclosure_esc}|\s)/", $field ) ){
-          $output[] = $enclosure . str_replace($enclosure, $enclosure . $enclosure, $field) . $enclosure;
+          $output[] = $enclosure . str_replace($enclosure, '\\' . $enclosure, $field) . $enclosure;
         }
         else {
           $output[] = $field;
@@ -1359,6 +1359,39 @@ class x
 
   public static function count_properties($obj){
     return \count(get_object_vars($obj));
+  }
+
+  public static function to_excel(array $data, string $file, bool $with_titles = true): bool
+  {
+    $checked = false;
+    $todo = [];
+    foreach ( $data as $d ){
+      if ( !$checked && self::is_assoc($d) ){
+        if ( $with_titles ){
+          $line1 = [];
+          $line2 = [];
+          foreach ( $d as $k => $v ){
+            $line1[] = $k;
+            $line2[] = '';
+          }
+          $todo[] = $line1;
+          $todo[] = $line2;
+        }
+        $checked = true;
+      }
+      $todo[] = array_values($d);
+    }
+    if ( count($todo) ){
+      $objPHPExcel = new \PHPExcel();
+      $objPHPExcel->getActiveSheet()->fromArray($todo, NULL, 'A1');
+      $objPHPExcel->getDefaultStyle()
+                  ->getNumberFormat()
+                  ->setFormatCode(\PHPExcel_Style_NumberFormat::FORMAT_TEXT);
+      $ow = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+      $ow->save($file);
+      return \is_file($file);
+    }
+    return false;
   }
 
   public static function make_uid($binary = false){

@@ -459,9 +459,9 @@ MYSQL;
       $tab_uids = $db->escape(self::$table_uids);
       $uid = $db->cfn('uid', self::$table_uids, true);
       $id_tab = $db->cfn('id_table', self::$table_uids, true);
-      $id_col = $db->cfn('column', self::$table, true);
-      $line = $db->escape('line');
-      $chrono = $db->escape('chrono');
+      $id_col = $db->cfn('col', self::$table, true);
+      $line = $db->escape('uid');
+      $chrono = $db->escape('tst');
       if ( $column ){
         $where = $db->escape('column').
           ' = UNHEX("'.$db->escape_value(
@@ -504,11 +504,11 @@ MYSQL;
       ($db = self::_get_db())
     ){
       $tab = $db->escape(self::$table);
-      $line = $db->escape('line');
-      $operation = $db->escape('operation');
-      $chrono = $db->escape('chrono');
+      $line = $db->escape('uid');
+      $operation = $db->escape('opr');
+      $chrono = $db->escape('tst');
       if ( $column ){
-        $where = $db->escape('column').
+        $where = $db->escape('col').
           ' = UNHEX("'.$db->escape_value(
             bbn\str::is_uid($column) ? $column : $dbc->column_id($column, $table)
           ).'")';
@@ -540,7 +540,7 @@ MYSQL;
    */
   public static function get_next_value(string $table, string $id, $from_when, $column){
     if ( $r = self::get_next_update($table, $id, $from_when, $column) ){
-      return $r['old'];
+      return $r['ref'] ?: $r['val'];
     }
     return false;
   }
@@ -554,7 +554,7 @@ MYSQL;
    */
   public static function get_prev_value(string $table, string $id, $from_when, $column){
     if ( $r = self::get_prev_update($table, $id, $from_when, $column) ){
-      return $r['old'];
+      return $r['ref'] ?: $r['val'];
     }
     return false;
   }
@@ -577,6 +577,7 @@ MYSQL;
       ($model = $dbc->modelize($table)) &&
       ($table = self::get_table_cfg($table))
     ){
+
       if ( $when >= time() ){
         return $db->rselect($table, $columns, [
           self::$structures[$table]['primary'] => $id
@@ -591,12 +592,13 @@ MYSQL;
       $r = [];
       foreach ( $columns as $col ){
         if ( isset($model['fields'][$col], $model['fields'][$col]['id_option']) ){
-          $r[$col] = $db->select_one(self::$table, 'old', [
-            'line' => $id,
-            'column' => $model['fields'][$col]['id_option'],
-            'operation' => 'UPDATE',
-            ['chrono', '>', $when]
+          $r[$col] = $db->rselect(self::$table, ['val', 'ref'], [
+            'uid' => $id,
+            'col' => $model['fields'][$col]['id_option'],
+            'opr' => 'UPDATE',
+            ['tst', '>', $when]
           ]);
+          $r[$col] = $r[$col]['ref'] ?: ($r[$col]['val'] ?: false);
         }
         if ( $r[$col] === false ){
           $r[$col] = $db->get_val($table, $col, [
@@ -644,10 +646,10 @@ MYSQL;
       ($table = self::get_table_cfg($table)) &&
       ($id_col = self::get_id_column(self::$structures[$table]['primary'], $table))
     ){
-      if ( $r = $db->rselect(self::$table, ['date' => 'chrono', 'user' => 'id_user'], [
-        'line' => $id,
-        'column' => $id_col,
-        'operation' => 'INSERT'
+      if ( $r = $db->rselect(self::$table, ['date' => 'tst', 'user' => 'usr'], [
+        'uid' => $id,
+        'col' => $id_col,
+        'opr' => 'INSERT'
       ]) ){
         return $r;
       }
@@ -668,17 +670,17 @@ MYSQL;
         $column &&
         ($id_col = self::get_id_column($column, $table))
       ){
-        return self::$db->select_one(self::$table, 'chrono', [
-          'line' => $id,
-          'column' => $id_col
+        return self::$db->select_one(self::$table, 'tst', [
+          'uid' => $id,
+          'col' => $id_col
         ], [
-          'chrono' => 'DESC'
+          'tst' => 'DESC'
         ]);
       }
       else if ( !$column && ($where = self::_get_table_where($table)) ){
         $tab = $db->escape(self::$table);
-        $chrono = $db->escape('chrono');
-        $line = $db->escape('line');
+        $chrono = $db->escape('tst');
+        $line = $db->escape('uid');
         $sql = <<< MYSQL
 SELECT $chrono
 FROM $tab
@@ -712,17 +714,18 @@ MYSQL;
         if ( $q = self::$db->rselect_all(
           self::$table,
           [
-            'date' => 'chrono',
-            'user' => 'id_user',
-            'old',
-            'column',
-            'id'
+            'date' => 'tst',
+            'user' => 'usr',
+            'val',
+            'col',
+            //'id'
           ],[
-            ['line', '=', $id],
-            ['column', 'LIKE', $table.'.'.( $col ? $col : '%' )],
-            ['operation', 'LIKE', $p]
+            ['uid', '=', $id],
+            //['col', 'LIKE', $table.'.'.( $col ? $col : '%' )],
+            ['col', '=', $col],
+            ['opr', 'LIKE', $p]
           ],[
-            'chrono' => 'desc'
+            'tst' => 'desc'
           ]
         ) ){
           $r[$k] = $q;
@@ -745,8 +748,8 @@ MYSQL;
       ($where = self::_get_table_where($table))
     ){
       $tab = $db->escape(self::$table);
-      $line = $db->escape('line');
-      $chrono = $db->escape('chrono');
+      $line = $db->escape('uid');
+      $chrono = $db->escape('tst');
       $sql = <<< MYSQL
 SELECT *
 FROM $tab

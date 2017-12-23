@@ -148,7 +148,7 @@ class menus extends bbn\models\cls\basic{
     if ( $id_menu = $this->from_path('shortcuts') ){
       $pref = $this->pref->get($id);
       // Case where the shortcut is coming directly from the menu
-      if ( $this->options->is_parent($pref['id_option'], $this->get_option_root()) ){
+      if ( $id_menu === $pref['id_option'] ){
         return $this->pref->delete($id);
       }
       // Otherwise it comes from the permissions

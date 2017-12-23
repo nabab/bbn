@@ -1525,10 +1525,10 @@ class options extends bbn\models\cls\db
    * // (string) bbn_ide
    * ```
    *
-   * @param int $id The options' ID
+   * @param string $id The options' ID
    * @return string|null|false The code value, null is none, false if option not found
    */
-  public function code($id): ?string
+  public function code(string $id): ?string
   {
     if ( bbn\str::is_uid($id) ){
       return $this->db->get_val($this->class_cfg['table'], $this->class_cfg['arch']['options']['code'], $this->class_cfg['arch']['options']['id'], $id);
@@ -1679,7 +1679,9 @@ class options extends bbn\models\cls\db
       $parts = [];
       while ( $id && ($id !== $root) ){
         array_unshift($parts, $code);
-        $id = $this->get_id_parent($id);
+        if ( !($id = $this->get_id_parent($id)) ){
+          return null;
+        }
         $code = $this->code($id);
       }
       return $parts;

@@ -61,6 +61,7 @@ class project extends bbn\models\cls\db{
     return $this->lang;
   }
 
+
   public function get_id(){
     return $this->id;
   }
@@ -84,7 +85,7 @@ class project extends bbn\models\cls\db{
     }
   }
 
-  public function get_langs(){
+  public function get_langs_id(){
     if ( $this->check() ){
       return $this->db->get_field_values('bbn_projects_assets', 'id_option', [
         'id_project' => $this->id,
@@ -93,5 +94,46 @@ class project extends bbn\models\cls\db{
     }
   }
 
+  public function get_langs_text(){
+    if ( !empty($this->get_langs_id() ) ){
+      $tmp = [];
+      foreach ( $this->get_langs_id()  as $t ){
+        $tmp[] = options::get_instance()->text($t);
+      }
+      return $tmp;
+    }
+  }
 
+  public function get_langs_code(){
+    if ( !empty($this->get_langs_id() ) ){
+      $tmp = [];
+      foreach ( $this->get_langs_id()  as $t ){
+        $tmp[] = options::get_instance()->code($t);
+      }
+      return $tmp;
+    }
+  }
+
+
+  public function get_langs(){
+    $tmp = $this->get_langs_id();
+    if ( !empty($tmp ) ){
+      $res = [];
+      $lang = $this->get_lang();
+      foreach ( $tmp as $t ){
+        $o = options::get_instance()->option($t);
+        $res[$o['code']] = [
+          'id' => $o['id'],
+          'code' => $o['code'],
+          'text' => $o['text'],
+          'default' => $o['code'] === $lang
+        ];
+      }
+      return $res;
+    }
+  }
+	
+
+	
+	
 }

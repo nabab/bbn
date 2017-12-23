@@ -33,10 +33,16 @@ abstract class cache extends bbn\models\cls\basic
   public function __construct(bbn\db $db){
     $this->db = $db;
 		$this->cacher = bbn\cache::get_engine();
-		$this->_cache_prefix = bbn\str::encode_filename(str_replace('\\', '/', \get_class($this))).'/';
+		$this->_cache_prefix = str_replace('\\', '/', \get_class($this)).'/';
 	}
 
 	protected function _cache_name($uid, $method = ''){
+    if ( is_array($uid) ){
+      $uid = md5(serialize($uid));
+    }
+    else if ( is_object($uid) ){
+      $uid = md5(json_encode($uid));
+    }
 		return $this->_cache_prefix.(string)$uid.
 			(empty($method) ? '' : '-'.(string)$method);
 	}
@@ -60,9 +66,7 @@ abstract class cache extends bbn\models\cls\basic
 		return $this;
 	}
 
-	public function cache_has($uid, $method = ''){
-		return $this->cache_get($uid, $method) ? true : false;
-	}
-
-
+  public function cache_has($uid, $method = ''){
+    return $this->cache_get($uid, $method) ? true : false;
+  }
 }

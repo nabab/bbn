@@ -139,7 +139,7 @@ class databases extends bbn\models\cls\cache
     }
     //var_dump("P{ARENT", $host, $this->o->from_code('dbs', $host));
     if ( \bbn\str::is_uid($host) && ($id_parent = $this->o->from_code('dbs', $host)) ){
-      return $this->o->from_code($db, $id_parent);
+      return $this->o->from_code($db ?: $this->db->current, $id_parent);
     }
     return false;
   }
@@ -283,6 +283,123 @@ class databases extends bbn\models\cls\cache
     return false;
   }
 
+  public function table_from_item(string $id_keycol): ?string
+  {
+    if ( $table = $this->table_id_from_item($id_keycol) ){
+      return $this->o->code($table);
+    }
+    return null;
+  }
+
+  public function table_id_from_item(string $id_keycol): ?string
+  {
+    if (
+      bbn\str::is_uid($id_keycol) &&
+      ($id_cols = $this->o->get_id_parent($id_keycol)) &&
+      ($id_table = $this->o->get_id_parent($id_cols))
+    ){
+      return $id_table;
+    }
+    return null;
+  }
+
+  public function db_from_table(string $id_table): ?string
+  {
+    if ( $id_db = $this->db_id_from_table($id_table) ){
+      return $this->o->code($id_db);
+    }
+    return null;
+  }
+
+  public function db_id_from_table(string $id_table): ?string
+  {
+    if (
+      bbn\str::is_uid($id_table) &&
+      ($id_tables = $this->o->get_id_parent($id_table)) &&
+      ($id_db = $this->o->get_id_parent($id_tables))
+    ){
+      return $id_db;
+    }
+    return null;
+  }
+
+  public function host_from_db(string $id_db): ?string
+  {
+    if ( $id_host = $this->host_id_from_db($id_db) ){
+      return $this->o->code($id_host);
+    }
+    return null;
+  }
+
+  public function host_id_from_db(string $id_db): ?string
+  {
+    if (
+      bbn\str::is_uid($id_db) &&
+      ($id_dbs = $this->o->get_id_parent($id_db)) &&
+      ($id_host = $this->o->get_id_parent($id_dbs))
+    ){
+      return $id_host;
+    }
+    return null;
+  }
+
+  public function host_from_item(string $id_keycol): ?string
+  {
+    if ( $id_host = $this->host_id_from_item($id_keycol) ){
+      return $this->o->code($id_host);
+    }
+    return null;
+  }
+
+  public function host_id_from_item(string $id_keycol): ?string
+  {
+    if (
+      ($id_table = $this->table_id_from_item($id_keycol)) &&
+      ($id_host = $this->host_id_from_table($id_table))
+    ){
+      return $id_host;
+    }
+    return null;
+  }
+
+  public function db_from_item(string $id_keycol): ?string
+  {
+    if ( $id_db = $this->db_id_from_item($id_keycol) ){
+      return $this->o->code($id_db);
+    }
+    return null;
+  }
+
+  public function db_id_from_item(string $id_keycol): ?string
+  {
+    if (
+      ($id_table = $this->table_id_from_item($id_keycol)) &&
+      ($id_db = $this->db_id_from_table($id_table))
+    ){
+      return $id_db;
+    }
+    return null;
+  }
+
+  public function host_from_table(string $id_table): ?string
+  {
+    if ( $id_host = $this->host_id_from_table($id_table) ){
+      return $this->o->code($id_host);
+    }
+    return null;
+  }
+
+  public function host_id_from_table(string $id_table): ?string
+  {
+    if (
+      ($id_db = $this->db_id_from_table($id_table)) &&
+      ($id_host = $this->host_id_from_db($id_db))
+    ){
+      return $id_host;
+    }
+    return null;
+  }
+
   /**
    * @param string $column
    * @param mixed $table
@@ -292,7 +409,7 @@ class databases extends bbn\models\cls\cache
    */
   public function column_id(string $column, string $table, string $db = '', string $host = ''){
     if ( \bbn\str::is_uid($table) ){
-      $table = $this->o->from_code($this->db->csn($column), $table);
+      return $this->o->from_code($this->db->csn($column), $table);
     }
     return self::get_option_id($this->db->csn($column), 'columns', $this->db->tsn($table), 'tables', $db ?: $this->db->current, 'dbs', $host ?: $this->db->host, 'hosts');
   }

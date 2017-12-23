@@ -87,7 +87,7 @@ class i18n extends bbn\models\cls\db{
     foreach ( $this->parser->getIterator() as $r => $tr ){
       $this->translations[] = $tr->getOriginal();
     }
-    return $this->translations;
+    return array_unique($this->translations);
   }
 
   public function update_db(){
@@ -96,10 +96,12 @@ class i18n extends bbn\models\cls\db{
     }
   }
 
-  public function lore(){
-    $o = bbn\appui\options::get_instance();
-    $o->from_code('appui');
+  public function insert(){
+    foreach ( $this->result() as $st ){
+      $this->db->insert_ignore();
+    }
   }
+
 
 
 }
