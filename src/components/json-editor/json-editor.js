@@ -39,6 +39,10 @@
         type: String,
         default: "{}"
       },
+      mode: {
+        type: String,
+        default: 'tree'
+      },
       cfg: {
         type: Object,
         default(){

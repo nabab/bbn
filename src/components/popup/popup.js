@@ -529,6 +529,10 @@
             type: Boolean,
             default: true
           },
+          scrollable: {
+            type: Boolean,
+            default: true
+          },
           maximized: {
             type: Boolean,
             default: false

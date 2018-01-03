@@ -99,7 +99,7 @@
              @keyup.esc="close()">
           <header class="w3-container k-header">
             <div class="w3-display-topright">
-            <span v-if="maximizable || 21"
+            <span v-if="maximizable !== false"
                   @click.stop.prevent="isMaximized = !isMaximized"
                   class="w3-button">
               <i :class="'zmdi bbn-lg zmdi-window-' + (isMaximized ? 'restore' : 'maximize')"
@@ -122,6 +122,10 @@
                        :is="component"
                        :source="source"
             ></component>
+            <div v-else-if="content && (scrollable === false)"
+                 class="bbn-full-screen"
+                 v-html="content">
+            </div>
             <bbn-scroll v-else-if="content"
                         ref="scroll"
             >
