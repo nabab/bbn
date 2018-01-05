@@ -4,6 +4,7 @@
  */
 namespace bbn\appui;
 use bbn;
+use PHPMailer\PHPMailer\Exception;
 use PhpOffice\PhpWord\Element\PageBreakTest;
 
 /**
@@ -692,9 +693,10 @@ class options extends bbn\models\cls\db
       $c =& $this->class_cfg['arch']['options'];
       if ( bbn\str::is_uid($opt[$c['id_alias']]) && $this->exists($opt[$c['id_alias']]) ){
         if ( $opt[$c['id_alias']] === $id ){
-          die("Impossible to have the same ID as ALIAS, check out ID $id");
+          die(var_dump("Impossible to have the same ID as ALIAS, check out ID", $id));
         }
-        $opt['alias'] = $this->option($opt[$c['id_alias']]);
+        $opt['alias'] = $this->native_option($opt[$c['id_alias']]);
+        $this->_set_value($opt['alias']);
       }
       return $opt;
     }
@@ -796,6 +798,7 @@ class options extends bbn\models\cls\db
   public function text_value_options($id = null, string $text = 'text', string $value = 'value'): ?array
   {
     $res = [];
+
     if ( $cfg = $this->get_cfg($id) ){
       if ( !empty($cfg['show_code']) ){
         $opts = $this->full_options($id);
