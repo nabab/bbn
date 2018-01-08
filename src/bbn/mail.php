@@ -234,9 +234,10 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
         if ( \is_string($cfg['attachments']) ){
           $cfg['attachments'] = [$cfg['attachments']];
         }
-        foreach ( $cfg['attachments'] as $att ){
+        foreach ( $cfg['attachments'] as $name => $att ){
           if ( is_file($att) ){
-            $this->mailer->AddAttachment($att);
+            // 2nd parameter is the file's name in the mail
+            $this->mailer->AddAttachment($att, is_int($name) ? '' : $name);
           }
         }
       }
