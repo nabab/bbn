@@ -218,6 +218,9 @@ class mvc implements mvc\api{
     self::$db_in_controller = $r ? true : false;
   }
 
+  /**
+   * @return bool
+   */
   public static function get_debug(){
     return self::$is_debug;
   }
@@ -554,10 +557,15 @@ class mvc implements mvc\api{
     }
   }
 
-  public function get_db(){
+  /**
+   * @return bool
+   */
+  public function get_db(): ?db
+  {
     if ( self::$db_in_controller && $this->db ){
       return $this->db;
     }
+    return null;
   }
 
   public function set_prepath($path){

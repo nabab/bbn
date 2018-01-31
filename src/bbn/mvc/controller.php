@@ -66,8 +66,7 @@ class controller implements api{
 
   public
     /**
-     * The db connection if accepted by the mvc class
-     * @var bbn\db
+     * The db connection if accepted by the mvc class.
      */
     $db,
     /**
@@ -141,6 +140,7 @@ class controller implements api{
       $this->data = \is_array($data) ? $data : [];
       // When using CLI a first parameter can be used as route,
       // a second JSON encoded can be used as $this->post
+      /** @var bbn\db db */
       $this->db = $this->mvc->get_db();
       $this->inc = $this->mvc->inc;
       $this->post = $this->mvc->get_post();
@@ -293,11 +293,12 @@ class controller implements api{
 	 * @return void
 	 */
 	public function render($view, $model=''){
-		if ( empty($model) && $this->has_data() ){
+    if ( empty($model) && $this->has_data() ){
 			$model = $this->data;
 		}
+
 		if ( \is_string($view) ){
-			return \is_array($model) ? bbn\tpl::render($view, $model) : $view;
+      return \is_array($model) ? bbn\tpl::render($view, $model) : $view;
 		}
 		die(bbn\x::hdump("Problem with the template", $view, $this->path, $this->mode));
 	}

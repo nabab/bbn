@@ -82,7 +82,7 @@ class masks extends bbn\models\cls\db {
     return null;
   }
 
-  public function  get_default($id_type){
+  public function get_default($id_type){
     if ( $id_note = $this->db->select_one('bbn_notes_masks', 'id_note', [
       'id_type' => $id_type,
       'def' => 1
@@ -189,7 +189,7 @@ class masks extends bbn\models\cls\db {
   }
 
   public function get_by_cat($cat){
-    $id = $this->db->select_one('bbn_notes_masks', 'id', ['categorie' => $cat, 'defaut' => 1]);
+    $id = $this->db->select_one('bbn_notes_masks', 'id_note', ['id_type' => $cat, 'def' => 1]);
     return $this->get($id);
   }
 

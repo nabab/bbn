@@ -42,6 +42,8 @@
 
 namespace bbn;
 
+use PHPMailer\PHPMailer\PHPMailer;
+
 class mail extends models\cls\basic
 {
   private static
@@ -81,7 +83,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
     if ( !isset($cfg['host'], $cfg['from']) || !str::is_domain($cfg['host']) || !str::is_email($cfg['from'])){
       die("A host name and a \"From\" eMail address must be provided");
     }
-    $this->mailer = new \PHPMailer();
+    $this->mailer = new PHPMailer();
     $this->mailer->isSMTP();
     if ( !empty($cfg['ssl']) ){
       if ( \is_array($cfg['ssl']) ){
@@ -179,7 +181,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
   public function send($cfg){
     $valid = false;
     $r = false;
-    if ( !BBN_IS_PROD ){
+    if ( !defined('BBN_IS_PROD') || !BBN_IS_PROD ){
       $cfg['to'] = BBN_ADMIN_EMAIL;
       $cfg['cc'] = '';
       $cfg['bcc'] = '';
@@ -195,7 +197,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
             }, explode(";", $cfg[$dest_field]));
           }
           foreach ( $cfg[$dest_field] as $dest ){
-            if ( \PHPMailer::validateAddress($dest) ){
+            if ( PHPMailer::validateAddress($dest) ){
               switch ( $dest_field ){
                 case "to":
                   $this->mailer->AddAddress($dest);

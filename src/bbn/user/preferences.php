@@ -108,13 +108,12 @@ class preferences extends bbn\models\cls\db
    */
   private function _insert(string $id_option, array $cfg): int
   {
-		$json = ($tmp = $this->get_cfg(false, $cfg)) ? json_encode($json) : null;
-
+    $json = ($tmp = $this->get_cfg(false, $cfg)) ? json_encode($tmp) : NULL;
     return $this->db->insert($this->class_cfg['table'], [
       'id_option' => $id_option,
-      'text' => $cfg['text'] ?? null,
-      'id_link' => $cfg['id_link'] ?? null,
-      'id_alias' => $cfg['id_alias'] ?? null,
+      'text' => $cfg['text'] ?? NULL,
+      'id_link' => $cfg['id_link'] ?? NULL,
+      'id_alias' => $cfg['id_alias'] ?? NULL,
       'id_user' => $this->id_user,
       'cfg' => $json
     ]);
@@ -352,10 +351,10 @@ MYSQL;
    * @param null|array $cfg
    * @return null|array
    */
-  public function get_cfg(string $id = null, array $cfg = null): ?array
+  public function get_cfg(string $id = NULL, array $cfg = NULL): ?array
   {
     if (
-      (null !== $cfg) ||
+      (NULL !== $cfg) ||
       ($cfg = $this->db->select_one(
         $this->class_cfg['table'],
         $this->fields['cfg'],
@@ -375,7 +374,7 @@ MYSQL;
         return $new;
       }
     }
-    return null;
+    return NULL;
   }
 
   /**
@@ -390,7 +389,7 @@ MYSQL;
   }
 
   /**
-   * Returns the current user's preference based on the given id_option, his own profile and his group's
+   * Returns the current user's preference based on the given id, his own profile and his group's
    * @param string $id
    * @param bool $with_config
    * @return array|null
@@ -435,13 +434,14 @@ MYSQL;
   public function get_all(string $id_option = null, bool $with_config = true): ?array
   {
     if ( $id_option = $this->_get_id_option($id_option) ){
+
       $fields = $this->fields;
       if ( !$with_config ){
         unset($fields['cfg']);
       }
       $table = $this->db->tsn($this->class_table, true);
       $cols = implode(', ', array_map(function($a) use($table){
-        return "IFNULL(aliases.$a, $table.$a) AS $a";
+        return $a === $this->fields['id'] ? "$table.$a" : "IFNULL(aliases.$a, $table.$a) AS $a";
       }, $fields));
       $id_opt = $this->db->cfn($this->fields['id_option'], $this->class_table, true);
       $id_user = $this->db->cfn($this->fields['id_user'], $this->class_table, true);
@@ -471,6 +471,7 @@ MYSQL;
           return $a;
         }, $rows) : $rows;
       }
+      return [];
     }
     return null;
   }
@@ -624,9 +625,9 @@ MYSQL;
   public function update(string $id, array $cfg): int
   {
     return $this->db->update($this->class_cfg['table'], [
-      'text' => $cfg['text'] ?? null,
-      'id_link' => $cfg['id_link'] ?? null,
-      'id_alias' => $cfg['id_alias'] ?? null,
+      'text' => $cfg['text'] ?? NULL,
+      'id_link' => $cfg['id_link'] ?? NULL,
+      'id_alias' => $cfg['id_alias'] ?? NULL,
       'id_user' => $this->id_user,
       'cfg' => json_encode($this->get_cfg(false, $cfg))
     ], [
@@ -645,7 +646,7 @@ MYSQL;
   {
     return ($id_option = $this->_get_id_option($id_option)) ?
       $this->_insert($id_option, $cfg) :
-      null;
+      NULL;
   }
 
   /**

@@ -301,11 +301,13 @@ class db extends \PDO implements db\actions, db\api, db\engines
         break;
       case 'delete':
         $hash = $this->make_hash('delete', $table, serialize($keypairs['unique']), $arg4);
+
         if ( isset($this->queries[$hash]) ){
           $sql = $this->queries[$this->queries[$hash]]['statement'];
         }
         else{
           $sql = $this->language->get_delete($table, $keypairs['final']);
+         // die(var_dump($sql, $hash) );
         }
         break;
     }

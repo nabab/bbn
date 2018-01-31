@@ -80,10 +80,10 @@ class history
       $last = self::$db->last();
       if ( \bbn\str::is_uid($cfg['old']) && self::$db->count(self::$table_uids, ['uid' => $cfg['old']]) ){
         $cfg['ref'] = $cfg['old'];
-        $cfg['val'] = null;
+        $cfg['val'] = NULL;
       }
       else{
-        $cfg['ref'] = null;
+        $cfg['ref'] = NULL;
         $cfg['val'] = $cfg['old'];
       }
       // New row in the history table
@@ -969,11 +969,18 @@ MYSQL;
                   ]);
                 }
               }
-              else{
-                self::$db->insert(self::$table_uids, [
+              else {
+                if ( self::$db->insert(self::$table_uids, [
                   'uid' => $cfg['values'][$s['primary']],
                   'id_table' => $s['id']
-                ]);
+                ]) ){
+                  $cfg['history'][] = [
+                    'operation' => 'INSERT',
+                    'column' => $s['fields'][$s['primary']]['id_option'],
+                    'line' => $cfg['values'][$s['primary']],
+                    'chrono' => microtime(true)
+                  ];
+                }
                 self::$db->set_last_insert_id($cfg['values'][$s['primary']]);
               }
             }
@@ -990,8 +997,8 @@ MYSQL;
                   self::$column => $cfg['values'][self::$column] ? 0 : 1
                 ])
               ){
-                $cfg['special'] = $cfg['values'][self::$column] ? 'restore': 'delete';
-                if ( $cfg['values'][self::$column] ){
+                $cfg['special'] = !empty($cfg['values'][self::$column]) ? 'RESTORE' : 'DELETE';
+                if ( !empty($cfg['values'][self::$column]) ){
                   $where[self::$column] = 0;
                 }
               }
@@ -1002,22 +1009,29 @@ MYSQL;
                   ($row[$k] !== $v) &&
                   isset($s['fields'][$k])
                 ){
-                  if ( (null !== $row[$k]) && ($s['fields'][$k]['type'] === 'binary') ){
-                    $row[$k] = base64_encode($row[$k]);
+                  if ( $k === self::$column ){
+                    $cfg['history'][] = [
+                      'operation' => $cfg['special'],
+                      'column' => $s['fields'][self::$column]['id_option'],
+                      'line' => $cfg['where']['keyval'][$primary],
+                      'old' => NULL,
+                      'chrono' => $time
+                    ];
                   }
-                  $cfg['history'][] = [
-                    'operation' => 'UPDATE',
-                    'column' => $s['fields'][$k]['id_option'],
-                    'line' => $cfg['where']['keyval'][$primary],
-                    'old' => $row[$k],
-                    'chrono' => $time
-                  ];
+                  else {
+                    $cfg['history'][] = [
+                      'operation' => 'UPDATE',
+                      'column' => $s['fields'][$k]['id_option'],
+                      'line' => $cfg['where']['keyval'][$primary],
+                      'old' => $row[$k],
+                      'chrono' => $time
+                    ];
+                  }
                 }
               }
-              //die(var_dump("---------------------------", $cfg, $row, $s));
             }
             // Case where the primary is not defined, we'll update each primary instead
-            else{
+            else {
               $ids = self::$db->get_column_values($table, $s['primary'], $cfg['where']['final']);
               // We won't execute the after trigger
               $cfg['trig'] = false;
@@ -1051,26 +1065,19 @@ MYSQL;
             ]) ){
               $cfg['trig'] = 1;
               // And we insert into the history table
+              $cfg['history'][] = [
+                'operation' => 'DELETE',
+                'column' => $s['fields'][self::$column]['id_option'],
+                'line' => $cfg['where']['keyval'][$db->cfn($s['primary'], $table)],
+                'old' => NULL,
+                'chrono' => microtime(true)
+              ];
             }
             break;
         }
       }
       else if ( ($cfg['moment'] === 'after') && !empty($cfg['history']) && !empty($cfg['run']) ){
-        if ( isset($cfg['special']) ){
-          $last = self::$db->last();
-          if ( $cfg['special'] === 'restore' ){
-            self::$db->update(self::$table_uids, [
-              'deletion' => null
-            ], ['uid' => $cfg['history'][0]['line']]);
-          }
-          else if ( $cfg['special'] === 'restore' ){
-            self::$db->update(self::$table_uids, [
-              'deletion' => microtime(true)
-            ], ['uid' => $cfg['history'][0]['line']]);
-          }
-          self::$db->last_query = $last;
-        }
-        foreach ($cfg['history'] as $i => $h){
+        foreach ($cfg['history'] as $h){
           self::_insert($h);
         }
       }

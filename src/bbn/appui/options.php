@@ -244,6 +244,7 @@ class options extends bbn\models\cls\db
     if ( empty($where) ){
       $where = [$c['active'] => 1];
     }
+    /** @todo Checkout */
     if ( $hist = $this->_has_history() ){
       bbn\appui\history::disable();
     }

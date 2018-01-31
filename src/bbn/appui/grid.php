@@ -301,6 +301,7 @@ class grid extends bbn\models\cls\cache
       return strpos($f, '.') ? $this->db->col_full_name($f, null, $array ? false : true) : $this->db->col_simple_name($f, $array ? false : true);
     }
     else if ( isset($this->fields[$f]) ){
+      return $this->fields[$f];
       return strpos($this->fields[$f], '.') ? $this->db->col_full_name($this->fields[$f], null, $array ? false : true) : $this->db->col_simple_name($this->fields[$f], $array ? false : true);
     }
     if (
@@ -422,6 +423,9 @@ class grid extends bbn\models\cls\cache
               if ( $array ){
                 $res[] = [$field, '>=', $f['value']];
               }
+              else if ( $is_number ){
+                $res .= '>= '.$f['value'];
+              }
               else{
                 $res .= ">= '".$this->db->escape_value($f['value'])."'";
               }
@@ -430,6 +434,9 @@ class grid extends bbn\models\cls\cache
             case 'gt':
               if ( $array ){
                 $res[] = [$field, '>', $f['value']];
+              }
+              else if ( $is_number ){
+                $res .= '> '.$f['value'];
               }
               else{
                 $res .= "> '".$this->db->escape_value($f['value'])."'";
@@ -440,6 +447,9 @@ class grid extends bbn\models\cls\cache
               if ( $array ){
                 $res[] = [$field, '<=', $f['value']];
               }
+              else if ( $is_number ){
+                $res .= '<= '.$f['value'];
+              }
               else{
                 $res .= "<= '".$this->db->escape_value($f['value'])."'";
               }
@@ -448,6 +458,9 @@ class grid extends bbn\models\cls\cache
             case 'lt':
               if ( $array ){
                 $res[] = [$field, '<', $f['value']];
+              }
+              else if ( $is_number ){
+                $res .= '< '.$f['value'];
               }
               else{
                 $res .= "< '".$this->db->escape_value($f['value'])."'";
