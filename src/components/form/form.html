@@ -8,32 +8,32 @@
   <div v-if="fixedFooter"
        class="bbn-w-100 bbn-flex-fill"
   >
-    <div class="bbn-full-screen">
-      <bbn-scroll>
-        <div class="bbn-grid-fields bbn-padded" v-if="schema && schema.length">
-          <template v-for="field in schema"
-                    v-if="field.field && !field.buttons && (field.editable !== false)"
-          >
-            <component v-if="field.lineComponent"
-                       :is="field.lineComponent"
-                       :source="source"
+    <bbn-scroll>
+      <div class="bbn-grid-fields bbn-padded" v-if="schema && schema.length">
+        <template v-for="field in schema"
+                  v-if="field.field && !field.buttons && (field.editable !== false)"
+        >
+          <component v-if="field.lineComponent"
+                     :is="field.lineComponent"
+                     :source="source"
+          ></component>
+          <template v-else>
+            <div v-html="field.title" :title="field.ftitle || field.title || field.field"></div>
+            <component v-if="field.editor"
+                       :is="field.editor"
+                       v-model="source[field.field]"
             ></component>
-            <template v-else>
-              <div v-html="field.title" :title="field.ftitle || field.title || field.field"></div>
-              <component v-if="field.editor"
-                         :is="field.editor"
-                         v-model="source[field.field]"
-              ></component>
-              <bbn-input v-else
-                         v-model="source[field.field]"
-              ></bbn-input>
-            </template>
-  
+            <bbn-field v-else
+                       v-bind="field"
+                       mode="write"
+                       v-model="source[field.field]"
+            ></bbn-field>
           </template>
-        </div>
-        <slot></slot>
-      </bbn-scroll>
-    </div>
+
+        </template>
+      </div>
+      <slot></slot>
+    </bbn-scroll>
   </div>
   <slot v-else></slot>
   <div class="footer bbn-footer k-header" v-if="hasFooter">

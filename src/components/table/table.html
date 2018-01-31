@@ -10,8 +10,9 @@
          ref="toolbar"
          style="min-height: 30px"
     >
-      <div v-if="toolbarButtons.length">
+      <div v-if="toolbarButtons.length" class="bbn-vspadded">
          <bbn-button v-for="(button, i) in toolbarButtons"
+                     class="bbn-hsmargin"
                      :key="i"
                      v-bind="button"
                      @click="_execCommand(button, i)"
@@ -338,7 +339,7 @@
                     tabindex="0"
                     @focusin="focusRow(d.index)"
                     @focusout="blurRow(d.index)"
-                    :class="'k-widget' + (trClass ? ' ' + trClass(d.data) : '') + (d.index % 2 ? ' k-alt' : '') + (d.aggregated || d.groupAggregated ? ' k-header' : '') + (currentOverTr === d.index ? ' k-state-hover' : '')"
+                    :class="fullTrClass(d)"
                 >
                   <td v-if="selection" :colspan="d.expansion ? colsLeft.length : 1">
                     <bbn-checkbox v-if="!d.expansion && ((typeof(selection) !== 'function') || selection(d))"
@@ -364,7 +365,7 @@
                       v-show="!col.hidden"
                       :style="_bodyStyles(col)"
                       :key="j"
-                      :class="col.cls"
+                      :class="currentClass(col, d.data, d.index)"
                   >
                     <div v-if="editable && d.isEdited">
                       <div v-if="(editMode === 'inline') && (col.index === colButtons)">
@@ -411,6 +412,11 @@
                                   @click="_execCommand(button, d.data, col, d.index)"
                       ></bbn-button>
                     </div>
+                    <bbn-field v-else-if="col.field && !col.render"
+                               v-bind="col"
+                               :value="d.data[col.field]"
+                               :data="d.data">
+                    </bbn-field>
                     <div v-else v-html="render(d.data, col, d.index)"></div>
                   </td>
                 </tr>
@@ -457,7 +463,7 @@
                       :index="d.index"
                       @mouseenter="_overTr(d.index)"
                       @mouseleave="_overTr(d.index, true)"
-                      :class="'k-widget' + (trClass ? ' ' + trClass(d.data) : '') + (d.index % 2 ? ' k-alt' : '') + (d.aggregated || d.groupAggregated ? ' k-header' : '') + (currentOverTr === d.index ? ' k-state-hover' : '')"
+                      :class="fullTrClass(d)"
                   >
                     <!-- Checkboxes -->
                     <td v-if="!colsLeft.length && selection">
@@ -485,7 +491,7 @@
                         v-if="hasTd(d, colsLeft.length + j)"
                         v-show="!col.hidden"
                         :style="_bodyStyles(col)"
-                        :class="col.cls"
+                        :class="currentClass(col, d.data, d.index)"
                         :key="j"
                     >
                       <div v-if="editable && d.isEdited">
@@ -537,6 +543,11 @@
                                     @click="_execCommand(button, d.data, col, d.index)"
                         ></bbn-button>
                       </div>
+                      <bbn-field v-else-if="col.field && !col.render"
+                                 v-bind="col"
+                                 :value="d.data[col.field]"
+                                 :data="d.data">
+                      </bbn-field>
                       <div v-else v-html="render(d.data, col, d.index)"></div>
                     </td>
                     <td v-if="d.expanded" :colspan="numMainVisible">Expander</td>
@@ -578,8 +589,7 @@
                 <tr v-for="(d, i) in currentSet"
                     v-if="d.group || d.expander || isExpanded(d) || d.aggregated"
                     :key="i"
-                    :class="'k-widget' + (trClass ? ' ' + trClass(d.data) : '') + (d.index % 2 ? ' k-alt' : '') + (d.aggregated || d.groupAggregated ? ' k-header' : '') + (currentOverTr === d.index ? ' k-state-hover' : '')"
-                    :index="d.index"
+                    :class="fullTrClass(d)"
                     tabindex="0"
                     @focusin="focusRow(d.index)"
                     @focusout="blurRow(d.index)"
@@ -593,7 +603,7 @@
                       v-if="hasTd(d, colsLeft.length + colsMain.length + j)"
                       v-show="!col.hidden"
                       :style="_bodyStyles(col)"
-                      :class="col.cls"
+                      :class="currentClass(col, d.data, d.index)"
                       :key="j"
                   >
                     <div v-if="editable && d.isEdited">
@@ -641,6 +651,11 @@
                                   @click="_execCommand(button, d.data, col, d.index)"
                       ></bbn-button>
                     </div>
+                    <bbn-field v-else-if="col.field && !col.render"
+                               v-bind="col"
+                               :value="d.data[col.field]"
+                               :data="d.data">
+                    </bbn-field>
                     <div v-else v-html="render(d, col, i)"></div>
                   </td>
                 </tr>

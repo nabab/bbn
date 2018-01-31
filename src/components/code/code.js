@@ -235,17 +235,36 @@
         bbn.fn.log(cfg);
         return cfg;
       },
-
+      //to place the cursor in a defined point
+      cursorPosition(lineCode, position){
+        let ctrl = false;
+        if ( lineCode <= this.widget.doc.lineCount()-1 ){
+          if ( position <= this.widget.doc.lineInfo(lineCode).text.length ){
+            ctrl = true;
+          }
+        }
+        if ( ctrl ){
+          this.$nextTick(()=>{
+            this.widget.focus();
+            this.widget.setCursor({line: lineCode, ch: position});
+          });
+        }
+        else{
+          return false
+        }
+      },
       // Returns an object with the selections, the marks (folding) and the value
-      getState: function(){
+      getState(){
         if ( this.widget ){
           let doc = this.widget.getDoc(),
               selections = doc.listSelections(),
               marks = doc.getAllMarks(),
+              info = doc.getCursor(),
               res = {
                 selections: [],
                 marks: [],
-                value: this.widget.getValue()
+                line: info.line,
+                char: info.ch
               };
           if ( marks ){
             // We reverse the array in order to start in the last folded parts in case of nesting
@@ -264,7 +283,26 @@
         }
         return false;
       },
-
+      //loading the state, such as loading last state saved 
+      loadState( obj ){
+        this.widget.focus();
+        let doc = this.widget.getDoc();
+        if ( obj.marks && obj.marks.length ){
+          for(let mark of obj.marks){
+            this.widget.foldCode(mark.line, 0);
+          }
+        }
+        if( obj.line && obj.char && !obj.selections.length){
+          this.cursorPosition(obj.line, obj.char);
+        }
+        else{
+          if ( obj.selections && obj.selections.length ){
+            for ( let i = 0; i < obj.selections.length; i++ ){
+              doc.setSelection(obj.selections);
+            }
+          }
+        }
+      },
       nextTheme(){
         themeIndex++;
         if ( themeIndex >= themes.length ){
@@ -374,7 +412,7 @@
       if ( this.mode === 'js' ){
         this.widget.on("cursorActivity", function(cm) { bbn.vue.tern.updateArgHints(cm); });
       }
-      this.$emit("ready", this.value);
+      //this.$emit("ready", this.value);
     },
 
     watch: {

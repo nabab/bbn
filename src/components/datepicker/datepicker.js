@@ -103,6 +103,8 @@
           });
       vm.widget = $(vm.$refs.element)
         .kendoMaskedDatePicker($.extend(vm.getOptions(), {
+          min: vm.min ? ( (typeof vm.min === 'string') ? new Date(vm.min) : vm.min) : undefined,
+          max: vm.max ? ( (typeof vm.max === 'string') ? new Date(vm.max) : vm.max) : undefined,
           change: function(e){
             vm.emitInput(kendo.toString(vm.widget.value(), "yyyy-MM-dd"));
             return true;
@@ -110,6 +112,28 @@
         }))
         .data("kendoDatePicker");
       this.$emit("ready", this.value);
+    },
+    watch: {
+      min(newVal){
+       if ( newVal ){
+         if ( typeof newVal === 'string' ){
+           newVal = new Date(newVal);
+         }
+         this.widget.setOptions({
+           min: newVal
+         });
+       }
+      },
+      max(newVal){
+        if ( newVal ){
+          if ( typeof newVal === 'string' ){
+            newVal = new Date(newVal);
+          }
+          this.widget.setOptions({
+            max: newVal
+          });
+        }
+      }
     }
   });
 

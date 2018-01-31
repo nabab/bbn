@@ -207,31 +207,34 @@
       // Find a node based on its props
       _findNode(props, node){
         let ret = false;
-        if ( node.numChildren && !node.isExpanded ){
-          node.isExpanded = true;
-        }
-        if ( node.$children && node.numChildren && node.isExpanded && Object.keys(props) ){
-          $.each(node.$children, (i, n) => {
-            if ( n.data ){
-              let tmp = {};
-              $.each(Object.keys(props), (j, k) => {
-                if ( n.data[k] === undefined ){
-                  return true;
+        if ( node ){
+          if ( node.numChildren && !node.isExpanded ){
+            node.isExpanded = true;
+          }
+          if ( node.$children && node.numChildren && node.isExpanded && Object.keys(props) ){
+            $.each(node.$children, (i, n) => {
+              if ( n.data ){
+                let tmp = {};
+                $.each(Object.keys(props), (j, k) => {
+                  if ( n.data[k] === undefined ){
+                    return true;
+                  }
+                  tmp[k] = n.data[k];
+                });
+                if ( JSON.stringify(tmp) === JSON.stringify(props) ){
+                  ret = n;
                 }
-                tmp[k] = n.data[k];
-              });
-              if ( JSON.stringify(tmp) === JSON.stringify(props) ){
-                ret = n;
               }
-            }
-          });
+            });
+          }
         }
         return ret;
       },
 
       // Find a node based on path
-      getNode(arr, node){
-        node = node || this.$refs.root;
+      getNode(arr, context){
+        let root = context || this.$refs.root;
+
         if ( arr ){
           if ( !$.isArray(arr) ){
             arr = [arr];
@@ -242,8 +245,9 @@
             }
             return v;
           });
+          let node = false;
           $.each(arr, (i, v) => {
-            node = this._findNode(v, node);
+            node = this._findNode(v, root);
           });
           return node;
         }
@@ -714,12 +718,6 @@
       path(newVal){
         bbn.fn.log("Change path", newVal);
         this.$emit('pathChange');
-      },
-      items: {
-        deep: true,
-        handler(){
-          this.resize();
-        }
       },
       source(){
         this.reset();

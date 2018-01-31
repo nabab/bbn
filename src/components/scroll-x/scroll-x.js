@@ -58,6 +58,11 @@
         scroll: this.initial
       }
     },
+    computed: {
+      realWidth(){
+        return this.containerWidth ? this.containerWidth / 100 * this.width : 0;
+      }
+    },
     methods: {
       // Sets the left position
       _changePosition(next, animate, force, origin){
@@ -113,7 +118,7 @@
           this.currentScroll = left ? Math.round(this.contentWidth * left / 100 * 10000) / 10000 : 0;
           if ( animate ){
             $.each(this.scrollableElements(), (i, a) => {
-              if ( (a !== this.realContainer) && (a !== origin) && (a.scrollTop !== this.currentScroll) ){
+              if ( (a !== this.realContainer) && (a !== origin) && (a.scrollLeft !== this.currentScroll) ){
                 $(a).animate({scrollLeft: this.currentScroll}, "fast");
               }
             });
@@ -141,14 +146,24 @@
 
       // When the users jumps by clicking the scrollbar
       jump(e) {
+        bbn.fn.log("JUMP");
         if ( this.realContainer ){
+          bbn.fn.log("JUMP 1");
           let isRail = e.target === this.$refs.scrollRail;
           if ( isRail ){
             let position = this.$refs.scrollSlider.getBoundingClientRect();
             // Calculate the horizontal Movement
             let xMovement = e.pageX - position.left;
-            let centerize = this.width / 2;
-            let xMovementPercentage = xMovement / this.containerWidth * 100 - centerize;
+            let centerize = 0;
+            bbn.fn.log("JUMP 2", xMovement);
+            if ( Math.abs(xMovement) > (this.realWidth - 20) ){
+              xMovement = xMovement > 0 ? (this.realWidth - 20) : - (this.realWidth - 20);
+            }
+            else{
+              centerize = (xMovement > 0 ? 1 : -1) * this.width / 2;
+            }
+            bbn.fn.log("JUMP 3", position, e, xMovement, centerize);
+            let xMovementPercentage = xMovement / this.containerWidth * 100 + centerize;
             this._changePosition(this.left + xMovementPercentage, true);
           }
         }

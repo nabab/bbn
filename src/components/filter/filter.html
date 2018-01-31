@@ -115,6 +115,7 @@
                             :disabled="!currentField"
                             :type="currentType"
                             v-model="currentOperator"
+                            :is-null="currentFullField.nullable"
                             ref="operator"
               ></bbn-operator>
             </div>

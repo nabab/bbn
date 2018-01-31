@@ -14,6 +14,9 @@
 				type: Boolean,
 				default: false
 			},
+      step: {
+        type: Number
+      },
       id: {
         type: String,
         default(){
@@ -79,7 +82,15 @@
 			changed(val, e){
 				this.$emit('input', val);
         this.$emit('change', val);
-			}
+			},
+      getStyle(){
+			  if ( this.step && !this.vertical ){
+			    return 'display: grid; grid-template-columns: ' + 'auto '.repeat(this.step) + ';';
+        }
+        else {
+			    return '';
+        }
+      }
 		}
   });
 

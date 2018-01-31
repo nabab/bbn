@@ -58,6 +58,11 @@
         scroll: this.initial
       };
     },
+    computed: {
+      realHeight(){
+        return this.containerHeight ? this.containerHeight / 100 * this.height : 0;
+      }
+    },
     methods: {
       // Sets the top position
       _changePosition(next, animate, force, origin){
@@ -147,8 +152,14 @@
             let position = this.$refs.scrollSlider.getBoundingClientRect();
             // Calculate the horizontal Movement
             let yMovement = e.pageY - position.top;
-            let centerize = this.height / 2;
-            let yMovementPercentage = yMovement / this.containerHeight * 100 - centerize;
+            let centerize = 0;
+            if ( Math.abs(yMovement) > (this.realHeight - 20) ){
+              yMovement = yMovement > 0 ? (this.realHeight - 20) : - (this.realHeight - 20);
+            }
+            else{
+              centerize = (yMovement > 0 ? 1 : -1) * this.height / 2;
+            }
+            let yMovementPercentage = yMovement / this.containerHeight * 100 + centerize;
             this._changePosition(this.top + yMovementPercentage, true);
           }
         }

@@ -1,8 +1,17 @@
-<component :is="renderedComponent"
+<component v-if="mode === 'write'"
+           :is="renderedComponent"
+           v-bind="renderedOptions"
+           v-model="currentValue"
+           :class="componentClass"
+           @input=""
+
+>
+  <div v-if="renderedContent" v-html="renderedContent"></div>
+</component>
+<component v-else
+           :is="renderedComponent"
            v-bind="renderedOptions"
            :class="componentClass"
-
-
 >
   <div v-if="renderedContent" v-html="renderedContent"></div>
 </component>

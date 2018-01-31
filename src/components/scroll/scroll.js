@@ -61,6 +61,13 @@
       }
     },
     mounted(){
+      /** @todo WTF?? Obliged to execute the following hack to not have scrollLeft and scrollTop when we open a
+       *  popup a 2nd time.
+       */
+      this.$refs.scrollContainer.style.position = 'relative';
+      setTimeout(() => {
+        this.$refs.scrollContainer.style.position = 'absolute';
+      }, 0)
       this.$emit('ready');
     },
     watch: {

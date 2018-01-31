@@ -15,6 +15,9 @@
       group: {
         type: String
       },
+      placeholder: {
+        type: String
+      },
       cfg: {
         type: Object,
         default(){

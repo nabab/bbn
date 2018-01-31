@@ -41,6 +41,10 @@
       label: {
         type: String,
       },
+      contrary: {
+        type: Boolean,
+        default: false
+      },
       checked: {
         type: Boolean,
         default: false

@@ -1,7 +1,7 @@
 /**
  * Created by BBN on 15/02/2017.
  */
-(function($, bbn, kendo){
+(function($, bbn){
   "use strict";
 
   /**
@@ -15,15 +15,14 @@
         default: 'hidden'
       },
       size: {
-        type: [String, Number]
+        type: [String, Number],
+        default: ''
       },
       resizable: {
-        type: Boolean,
-        default: false
+        type: Boolean
       },
       collapsible: {
-        type: Boolean,
-        default: false
+        type: Boolean
       },
       collapsed: {
         type: Boolean,
@@ -32,33 +31,30 @@
       scrollable: {
         type: Boolean,
         default: false
+      },
+      min: {
+        type: Number,
+        default: 20
+      },
+      max: {
+        type: Number,
+        default: 10000
       }
     },
     data(){
       return {
-        resizeTimeout: false,
         currentHidden: this.collapsed,
         checker: false
       };
     },
-    computed: {
-      currentSize(){
-        if ( typeof(this.size) === 'number' ){
-          return this.size + 'px'
-        }
-        return this.size;
+    watch:{
+      collapsed(val){
+        this.currentHidden = val;
       }
     },
-    methods: {
+    beforeMount(){
+      this.$parent.init();
     },
-    mounted(){
-      this.selfEmit(true);
-    },
-    updated(){
-      this.selfEmit(true);
-    },
-    watch: {
-    }
   });
 
-})(jQuery, bbn, kendo);
+})(jQuery, bbn);

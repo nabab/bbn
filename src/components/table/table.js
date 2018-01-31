@@ -216,7 +216,7 @@
         floatingFilterX: 0,
         floatingFilterY: 0,
         floatingFilterTimeOut: 0,
-        currentFilters: this.filters,
+        currentFilters: $.extend({}, this.filters),
         currentLimit: this.limit,
         currentOrder: this.order,
         currentHidden: this.hidden || [],
@@ -259,6 +259,15 @@
       };
     },
     computed: {
+      shownFields(){
+        let r = [];
+        $.each(this.cols, (i, a) => {
+          if ( a.field && !a.hidden ){
+            r.push(a.field);
+          }
+        });
+        return r;
+      },
       jsonConfig(){
         return JSON.stringify(this.currentConfig);
       },
@@ -805,6 +814,17 @@
           }
         }
       },
+      fullTrClass(d){
+        return 'k-widget' +
+          (this.trClass ? ' ' + this.trClass(d.data) : '') +
+          (d.index % 2 ? ' k-alt' : '') +
+          (d.aggregated || d.groupAggregated ? ' k-header' : '') +
+          (this.currentOverTr === d.index ? ' k-state-hover' : '')
+      },
+      unsetFilter(){
+        this.currentFilters = $.extend({}, this.filters);
+        this.currentFilter = false;
+      },
       checkFilterWindow(e){
         if ( this.currentFilter ){
           if (
@@ -888,7 +908,7 @@
           component: {
             template: `
 <div class="bbn-table-column-picker bbn-full-screen">
-  <bbn-scroll ref="scroll">
+  <bbn-form ref="scroll" :source="formData" @success="applyColumnsShown">
     <div class="bbn-padded">
       <ul v-if="source.titleGroups">
         <li v-for="(tg, idx) in source.titleGroups">
@@ -902,7 +922,7 @@
             <li v-for="(col, i) in source.cols"
                 v-if="!col.fixed && (col.group === tg.value) && (col.showable !== false) && (col.title || col.ftitle)"
             >
-              <bbn-checkbox :checked="!col.hidden"
+              <bbn-checkbox :checked="shownCols[i]"
                             @change="check(col, i)"
                             :label="col.ftitle || col.title"
                             :contrary="true"
@@ -915,7 +935,7 @@
         <li v-for="(col, i) in source.cols"
             v-if="!col.fixed && (col.showable !== false) && (col.title || col.ftitle)"
         >
-          <bbn-checkbox :checked="!col.hidden"
+          <bbn-checkbox :checked="shownCols[i]"
                         @change="check(col, i)"
                         :label="col.ftitle || col.title"
                         :contrary="true"
@@ -923,16 +943,41 @@
         </li>
       </ul>
     </div>
-  </bbn-scroll>
+  </bbn-form>
 </div>
 `,
             props: ['source'],
             data(){
+              let shownColumns = $.map(this.source.cols, (a) => {
+                return !a.hidden;
+              });
               return {
-                table: table
+                table: table,
+                formData: {changed: false},
+                shownCols: shownColumns
               }
             },
             methods: {
+              applyColumnsShown(){
+                let toShow = [],
+                    toHide = [];
+                $.each(this.source.cols, (i, a) => {
+                  if ( a.hidden == this.shownCols[i] ){
+                    if ( this.shownCols[i] ){
+                      toShow.push(i);
+                    }
+                    else{
+                      toHide.push(i);
+                    }
+                  }
+                });
+                if ( toShow.length ){
+                  table.show(toShow);
+                }
+                if ( toHide.length ){
+                  table.show(toHide, true);
+                }
+              },
               allVisible(group){
                 let ok = true;
                 bbn.fn.log("allVisible", group);
@@ -940,39 +985,38 @@
                   if (
                     (a.showable !== false) &&
                     (a.group === group) &&
-                    !a.fixed &&
-                    a.hidden
+                    !a.fixed
                   ){
-                    ok = false;
-                    bbn.fn.log("NOT ALL VISIBLE!!!!!!!!!!!!!!!!!!!!!!", a);
-                    return false;
+                    if ( !this.shownCols[i] ){
+                      ok = false;
+                      bbn.fn.log("NOT ALL VISIBLE!!!!!!!!!!!!!!!!!!!!!!", a);
+                      return false;
+                    }
                   }
                 });
                 return ok;
               },
               check(col, index){
-                this.table.show([index], !col.hidden);
+                this.$set(this.shownCols, index, !this.shownCols[index]);
               },
               checkAll(group){
-                let show = true,
+                let show = !this.allVisible(group),
                     shown = [];
                 $.each(this.source.cols, (i, a) => {
                   if ( (a.showable !== false) && (a.group === group) && !a.fixed ){
-                    if ( a.hidden ){
-                      show = false;
-                      return false;
+                    if ( this.shownCols[i] != show ){
+                      this.shownCols.splice(i, 1, show);
                     }
                   }
                 });
-                $.each(this.source.cols, (i, a) => {
-                  if ( (a.showable !== false) && (a.group === group) && !a.fixed ){
-                    if ( (a.hidden && !show) || (!a.hidden && show) ){
-                      shown.push(i);
-                    }
-                  }
-                });
-                if ( shown.length ){
-                  this.table.show(shown, show);
+                this.$forceUpdate();
+              }
+            },
+            watch: {
+              shownCols: {
+                deep: true,
+                handler(){
+                  this.formData.changed = true;
                 }
               }
             }
@@ -1016,7 +1060,7 @@
                   data: row
                 }
               },
-              template: '<bbn-form action="' + this.url + '" :schema="fields" :source="data"></bbn-form>'
+              template: '<bbn-form action="' + this.url + '" :schema="fields" :source="data" :data="{action: \'' + (this.tmpRow ? 'insert' : 'update') + '\'}"></bbn-form>'
             };
           }
           popup.afterClose = () => {
@@ -1086,6 +1130,7 @@
         while ( (idx = bbn.fn.search(this.currentData, where)) > -1 ){
           this.currentData.splice(idx, 1);
         }
+        this.$forceUpdate();
       },
       save(){
         this.savedConfig = this.jsonConfig;
@@ -1165,6 +1210,9 @@
             if ( this.filterable ){
               data.filters = this.currentFilters;
             }
+            if ( this.showable ){
+              data.fields = this.shownFields;
+            }
             bbn.fn.post(this.source, data, (result) => {
               this.isLoading = false;
               if (
@@ -1193,6 +1241,13 @@
           this.total = this.source.length;
         }
       },
+      currentClass(column, data, index){
+        if ( column.cls ){
+          return $.isFunction(column.cls) ? column.cls(data, index) : column.cls;
+        }
+        return '';
+      },
+
       isSorted(col){
         if (
           this.sortable &&
@@ -1241,15 +1296,19 @@
             let trs = $("table.bbn-table-main:first > tbody > tr", this.$el);
             bbn.fn.log("trying to update table, attempt " + num);
             if ( this.colsLeft.length || this.colsRight.length ){
-              trs.each((i, tr) =>{
-                if ( $(tr).is(":visible") ){
-                  bbn.fn.adjustHeight(
-                    tr,
-                    $("table.bbn-table-data-left:first > tbody > tr:eq(" + i + ")", this.$el),
-                    $("table.bbn-table-data-right:first > tbody > tr:eq(" + i + ")", this.$el)
-                  );
-                }
-              });
+              let trsLeft = $("table.bbn-table-data-left:first > tbody > tr", this.$el);
+              let trsRight = $("table.bbn-table-data-right:first > tbody > tr", this.$el);
+              if ( trsLeft.length || trsRight.length ){
+                trs.each((i, tr) =>{
+                  if ( $(tr).is(":visible") ){
+                    bbn.fn.adjustHeight(
+                      tr,
+                      trsLeft[i],
+                      trsRight[i]
+                    );
+                  }
+                });
+              }
             }
             if (
               this.$refs.scroller &&
@@ -1274,51 +1333,9 @@
       },
       /** Renders a cell according to column's config */
       render(data, column, index){
-        let field = column && column.field ? column.field : '',
-            value = data && column.field ? data[column.field] || '' : undefined;
-
+        let value = data && column.field ? data[column.field] || '' : undefined;
         if ( column.render ){
           return column.render(data, index, column, value)
-        }
-        else if ( column.type ){
-          switch ( column.type ){
-            case "date":
-              if ( column.format ){
-                return value ? (new moment(value)).format(a.format) : '-';
-              }
-              else{
-                return value ? bbn.fn.fdate(value) : '-';
-              }
-            case "email":
-              return value ? '<a href="mailto:' + value + '">' + value + '</a>' : '-';
-            case "url":
-              return value ? '<a href="' + value + '">' + value + '</a>' : '-';
-            case "number":
-              return value ? kendo.toString(parseInt(value), "n0") + ( a.unit || this.unit ? " " + ( column.unit || this.unit ) : "") : '-';
-            case "money":
-              return value ?
-                bbn.fn.money(value) + (
-                  column.unit || this.currency ?
-                    " " + ( column.unit || this.currency )
-                    : ""
-                )
-                : '-';
-            case "bool":
-            case "boolean":
-              return value && (value !== 'false') && (value !== '0') ? bbn._("Yes") : bbn._("No");
-          }
-        }
-        else if ( column.source ){
-          if ( value ){
-            if ( Array.isArray(column.source) ){
-              return bbn.fn.get_field(column.source, 'value', value, 'text');
-            }
-            else if ( column.source[value] !== undefined ){
-              return column.source[value];
-            }
-            return bbn._("<em>?</em>");
-          }
-          return "<em>-</em>";
         }
         return value;
       },
@@ -1351,7 +1368,6 @@
         let res = [],
             fixed = true;
         $.each(vm.cols, function(i, a){
-          bbn.fn.log("getColumns", a);
           var r = {
             data: a.field
           };
@@ -1618,9 +1634,13 @@
         if ( data.group || data.expansion ){
           return false;
         }
+        if ( data.hidden ){
+          return false;
+        }
         return true;
       },
-      init(){
+      init(with_data){
+        this.ready = true;
         let colsLeft = [],
             colsMain = [],
             colsRight = [],
@@ -1671,29 +1691,27 @@
               if ( a.buttons ){
                 colButtons = i;
               }
-            }
-            if ( a.fixed ){
-              if (
-                (a.fixed !== 'right') &&
-                ((this.fixedDefaultSide !== 'right') || (a.fixed === 'left'))
-              ){
-                colsLeft.push(a);
+              if ( a.fixed ){
+                if (
+                  (a.fixed !== 'right') &&
+                  ((this.fixedDefaultSide !== 'right') || (a.fixed === 'left'))
+                ){
+                  colsLeft.push(a);
+                }
+                else{
+                  colsRight.push(a);
+                }
               }
               else{
-                colsRight.push(a);
+                colsMain.push(a);
               }
-            }
-            else{
-              colsMain.push(a);
             }
           }
         });
-        let toFill = this.$el.clientWidth
-          - (
-            bbn.fn.sum(colsLeft, 'realWidth')
-            + bbn.fn.sum(colsMain, 'realWidth')
-            + bbn.fn.sum(colsRight, 'realWidth')
-          );
+        let sumLeft = bbn.fn.sum(colsLeft, 'realWidth'),
+            sumMain = bbn.fn.sum(colsMain, 'realWidth'),
+            sumRight = bbn.fn.sum(colsRight, 'realWidth'),
+            toFill = this.$el.clientWidth - (sumLeft + sumMain + sumRight);
         // We must arrive to 100% minimum
         if ( toFill > this.cols.length - this.currentHidden.length ){
           bbn.fn.log("bbn-table", "THERE IS TO FILL", toFill, numUnknown);
@@ -1729,9 +1747,9 @@
             })
           }
         }
-        this.tableLeftWidth = bbn.fn.sum(colsLeft, 'realWidth', {hidden: true}, '!==') + this.numLeftVisible;
-        this.tableMainWidth = bbn.fn.sum(colsMain, 'realWidth', {hidden: true}, '!==') + this.numMainVisible;
-        this.tableRightWidth = bbn.fn.sum(colsRight, 'realWidth', {hidden: true}, '!==') + this.numRightVisible;
+        this.tableLeftWidth = sumLeft + colsLeft.length;
+        this.tableMainWidth = sumMain + colsMain.length;
+        this.tableRightWidth = sumRight + colsRight.length;
         this.colsLeft = colsLeft;
         this.colsMain = colsMain;
         this.colsRight = colsRight;
@@ -1739,11 +1757,11 @@
         this.isAggregated = isAggregated;
         this.$nextTick(() => {
           this.updateTable();
+          if ( with_data ){
             this.$nextTick(() => {
-            if ( this.$refs.scroller ){
-              this.$refs.scroller.onResize();
-            }
-          })
+              this.updateData();
+            })
+          }
         })
       },
       show(colIndexes, hide){
@@ -1765,7 +1783,7 @@
         });
         this.$forceUpdate();
         this.setConfig(true);
-        this.init();
+        this.init(true);
       },
       getEditableComponent(col, data){
         if ( col.editor ){
@@ -1887,7 +1905,6 @@
     },
 
     mounted(){
-      this.ready = true;
       this.init();
       this.$forceUpdate();
       this.$nextTick(() => {
@@ -1938,106 +1955,7 @@
     },
     components: {
       'bbn-columns': {
-        props: {
-          width: {
-            type: [String, Number],
-          },
-          render: {
-            type: [String, Function]
-          },
-          title: {
-            type: [String, Number],
-            default: bbn._("Untitled")
-          },
-          ftitle: {
-            type: String
-          },
-          tcomponent: {
-            type: [String, Object]
-          },
-          icon: {
-            type: String
-          },
-          cls: {
-            type: String
-          },
-          type: {
-            type: String
-          },
-          field: {
-            type: String
-          },
-          fixed: {
-            type: [Boolean, String],
-            default: false
-          },
-          hidden: {
-            type: Boolean
-          },
-          encoded: {
-            type: Boolean,
-            default: false
-          },
-          sortable: {
-            type: Boolean,
-            default: true
-          },
-          editable: {
-            type: Boolean,
-            default: true
-          },
-          filterable: {
-            type: Boolean,
-            default: true
-          },
-          resizable: {
-            type: Boolean,
-            default: true
-          },
-          showable: {
-            type: Boolean,
-            default: true
-          },
-          nullable: {
-            type: Boolean,
-          },
-          buttons: {
-            type: [Array, Function]
-          },
-          source: {
-            type: [Array, Object, String]
-          },
-          required: {
-            type: Boolean,
-          },
-          options: {
-            type: [Object, Function],
-            default(){
-              return {};
-            }
-          },
-          editor: {
-            type: [String, Object]
-          },
-          maxLength: {
-            type: Number
-          },
-          sqlType: {
-            type: String
-          },
-          aggregate: {
-            type: [String, Array]
-          },
-          component: {
-            type: [String, Object]
-          },
-          mapper: {
-            type: Function
-          },
-          group: {
-            type: String
-          }
-        },
+        props: bbn.vue.fieldProperties,
       }
     }
   });

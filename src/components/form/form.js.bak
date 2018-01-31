@@ -30,7 +30,8 @@
         default: bbn._("Are you sure you want to discard the changes you made in this form?")
       },
       action: {
-        type: String
+        type: String,
+        default: '.'
       },
       success: {
         type: Function
@@ -146,33 +147,23 @@
         return false;
       },
       _post(){
-        if ( this.action ){
-          bbn.fn[this.blank ? 'post_out' : 'post'](this.action, $.extend(true, {}, this.data, this.source), (d) => {
-            this.originalData = this.source;
-            if ( this.tab && this.tab.tabNav ){
-              this.tab.tabNav.tabs[this.tab.tabNav.selected].isUnsaved = this.isModified();
-            }
-            if ( this.successMessage && p ){
-              p.alert(this.successMessage);
-              bbn.fn.info(this.successMessage, p);
-            }
-            this.$emit('success', d);
-            let p = this._getPopup();
-            if ( p ){
-              p.close();
-            }
-          }, (xhr, textStatus, errorThrown) => {
-            this.$emit('failure', xhr, textStatus, errorThrown)
-          });
-        }
-        else{
+        bbn.fn[this.blank ? 'post_out' : 'post'](this.action, $.extend(true, {}, this.data, this.source), (d) => {
           this.originalData = this.source;
-          this.$emit('success', this.source);
+          if ( this.tab && this.tab.tabNav ){
+            this.tab.tabNav.tabs[this.tab.tabNav.selected].isUnsaved = this.isModified();
+          }
+          if ( this.successMessage && p ){
+            p.alert(this.successMessage);
+            bbn.fn.info(this.successMessage, p);
+          }
+          this.$emit('success', d);
           let p = this._getPopup();
           if ( p ){
             p.close();
           }
-        }
+        }, (xhr, textStatus, errorThrown) => {
+          this.$emit('failure', xhr, textStatus, errorThrown)
+        });
       },
       _execCommand(button, ev){
         if ( button.command ){
@@ -193,7 +184,7 @@
         return this.sendModel ? this.source : bbn.fn.formdata(this.$el);
       },
       isModified(){
-        return this.prefilled || !bbn.fn.isSame($.extend(true, {}, this.getData(this.$el) || {}), $.extend(true, {}, this.originalData));
+        return this.prefilled || !bbn.fn.isSame($.extend(true, {}, this.getData(this.$el)) || {}, $.extend(true, {}, this.originalData));
       },
       closePopup(window, ev){
         if ( this.window ){
@@ -306,6 +297,7 @@
       source: {
         deep: true,
         handler(newVal){
+bbn.fn.log('asdasda');
           this.$emit('input', newVal);
           this.modified = this.isModified();
           if ( this.tab && this.tab.tabNav ){

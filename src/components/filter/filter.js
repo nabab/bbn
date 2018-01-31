@@ -325,6 +325,15 @@
             }
             return r;
           },
+          currentFullField(){
+            if ( this.currentField ){
+              let idx = bbn.fn.search(this.fields, {field: this.currentField});
+              if ( idx > -1 ){
+                return this.fields[idx];
+              }
+            }
+            return {};
+          }
         },
         methods: {
           validate(){

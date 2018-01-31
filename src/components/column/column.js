@@ -27,7 +27,7 @@
         type: String
       },
       cls: {
-        type: String
+        type: [Function, String]
       },
       type: {
         type: String

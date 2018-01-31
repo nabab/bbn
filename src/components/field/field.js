@@ -9,80 +9,19 @@
    */
   Vue.component('bbn-field', {
     mixins: [bbn.vue.basicComponent],
-    props: {
-      data: {},
+    props: $.extend({
       value: {},
       mode: {
         type: String,
         default: 'read'
       },
-      render: {
-        type: [String, Function]
-      },
-      title: {
-        type: [String, Number],
-        default: bbn._("Untitled")
-      },
-      ftitle: {
-        type: String
-      },
-      icon: {
-        type: String
-      },
-      cls: {
-        type: String
-      },
-      type: {
-        type: String
-      },
-      field: {
-        type: String
-      },
-      encoded: {
-        type: Boolean,
-        default: false
-      },
-      editable: {
-        type: Boolean,
-        default: true
-      },
-      nullable: {
-        type: Boolean,
-      },
-      source: {
-        type: [Array, Object, String]
-      },
-      required: {
-        type: Boolean,
-      },
-      index: {
-        type: Number,
-        default: 0
-      },
-      options: {
-        type: [Object, Function],
-        default(){
-          return {};
-        }
-      },
-      editor: {
-        type: [String, Object]
-      },
-      maxLength: {
-        type: Number
-      },
-      sqlType: {
-        type: String
-      },
-      component: {
-        type: [String, Object]
-      },
-    },
+    }, bbn.vue.fieldProperties),
     data(){
       return {
         renderedComponent: false,
         renderedContent: '',
-        renderedOptions: {}
+        renderedOptions: {},
+        currentValue: this.value === undefined ? (this.data && this.field && (this.value === undefined) ? this.data[this.field] || '' : '') : this.value
       }
     },
     computed: {
@@ -146,53 +85,87 @@
             else{
               this.renderedComponent  = 'bbn-input'
             }
+            /*
             if( this.renderedComponent !== undefined){
               this.renderedOptions.value = this.value
             }
+            */
           }
           else {
-
             if ( this.component ){
               this.renderedComponent = this.component;
-              this.renderedContent = this.render(this.actualData, this.index, this.field, this.value);
+              this.renderedOptions = this.options;
             }
-            else if ( this.render !== undefined ){
+            else{
               this.renderedComponent = 'div';
-              this.renderedContent = this.render(this.actualData, this.index, this.field, this.value);
-            }
-            else if ( this.type ){
-              switch ( this.type ){
-                case "date":
-                  return this.renderedComponent = 'bbn-datepicker';
-                case "time":
-                  return this.renderedComponent = 'bbn-timepicker';
-                case "email":
-                  this.renderedComponent ='bbn-input';
-                  break;
-                case "url":
-                  return this.renderedComponent = 'bbn-input';
-                case "number":
-                  return this.renderedComponent = 'bbn-numeric';
-                case "money":
-                  return this.renderedComponent = 'bbn-numeric';
-                case "bool":
-                case "boolean":
-                  return this.renderedComponent = 'bbn-checkbox';
+              if ( this.render !== undefined ){
+                this.renderedContent = this.render(this.actualData, this.index, this.field, this.value);
+              }
+              else if ( this.icon ){
+                this.renderedComponent = 'div';
+                this.renderedContent = '<i class="' + this.icon + '"> </i>'
+              }
+              else if ( this.type ){
+                switch ( this.type ){
+                  case "date":
+                    if ( this.format ){
+                      this.renderedContent = this.currentValue ? (new moment(this.currentValue)).format(this.format) : '-';
+                    }
+                    else{
+                      this.renderedContent = this.currentValue ? bbn.fn.fdate(this.currentValue) : '-';
+                    }
+                    break;
+                  case "email":
+                    this.renderedContent = this.currentValue ? '<a href="mailto:' + this.currentValue + '">' + this.currentValue + '</a>' : '-';
+                    break;
+                  case "url":
+                    this.renderedContent = this.currentValue ? '<a href="' + this.currentValue + '">' + this.currentValue + '</a>' : '-';
+                    break;
+                  case "number":
+                    this.renderedContent = this.currentValue ? kendo.toString(parseInt(this.currentValue), "n0") + ( this.unit ? " " + this.unit : "") : '-';
+                    break;
+                  case "money":
+                    this.renderedContent = this.currentValue ?
+                      bbn.fn.money(this.currentValue) + (
+                        this.currency || this.unit ?
+                          " " + ( this.currency || this.unit )
+                          : ""
+                      )
+                      : '-';
+                    break;
+                  case "bool":
+                  case "boolean":
+                    this.renderedContent = this.currentValue && (this.currentValue !== 'false') && (this.currentValue !== '0') ? bbn._("Yes") : bbn._("No");
+                    break;
+                }
+              }
+              else if ( this.source ){
+                let idx = bbn.fn.search(this.source, {value: this.value});
+                this.renderedContent = idx > -1 ? this.source[idx].text : '-';
+              }
+              else if ( this.value ){
+                this.renderedContent = this.value;
               }
             }
+            /*
             if( this.renderedComponent !== undefined){
               this.renderedOptions.value = this.value
             }
+            */
           }
         }
       },
     },
     watch:{
-     /* value(val, oldVal){
+      currentValue(val){
+        this.$emit('input', val);
+        this.init();
+      },
+      value(val, oldVal){
         if(val !== oldVal){
-          return renderedOptions.
+          this.init();
         }
-      }*/
+      }
     },
     created(){
       this.init();

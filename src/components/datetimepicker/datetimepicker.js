@@ -62,6 +62,9 @@
           }
         }
       },
+      mask: {
+        type: String
+      },
       max: {
         type: [Date, String]
       },
@@ -92,15 +95,40 @@
       }, bbn.vue.treatData(this));
     },
     mounted(){
-      this.widget = $(this.$refs.element)
-        .kendoMaskedDateTimePicker($.extend(this.getOptions(), {
+      let vm = this;
+      vm.widget = $(vm.$refs.element)
+        .kendoMaskedDateTimePicker($.extend(vm.getOptions(), {
+          min: vm.min ? ( (typeof vm.min === 'string') ? new Date(vm.min) : vm.min) : undefined,
+          max: vm.max ? ( (typeof vm.max === 'string') ? new Date(vm.max) : vm.max) : undefined,
           change: () => {
-            this.emitInput(kendo.toString(this.widget.value(), "yyyy-MM-dd HH:mm:ss"));
+            vm.emitInput(kendo.toString(vm.widget.value(), "yyyy-MM-dd HH:mm:ss"));
             return true;
           }
         }))
         .data("kendoDateTimePicker");
       this.$emit("ready", this.value);
+    },
+    watch: {
+      min(newVal){
+        if ( newVal ){
+          if ( typeof newVal === 'string' ){
+            newVal = new Date(newVal);
+          }
+          this.widget.setOptions({
+            min: newVal
+          });
+        }
+      },
+      max(newVal){
+        if ( newVal ){
+          if ( typeof newVal === 'string' ){
+            newVal = new Date(newVal);
+          }
+          this.widget.setOptions({
+            max: newVal
+          });
+        }
+      }
     }
   });
 

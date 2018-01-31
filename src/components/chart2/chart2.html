@@ -1,0 +1,17 @@
+<div :class="['bbn-flex-height', componentClass]"
+     :style="{
+      width: width,
+      height: height,
+      backgroundColor: backgroundColor
+     }"
+>
+  <h4 v-if="title"
+      v-text="title"
+      class="bbn-middle"
+  ></h4>
+  <div class="bbn-w-100 bbn-flex-fill">
+    <div ref="chart"
+         class="bbn-full-screen"
+    ></div>
+  </div>
+</div>

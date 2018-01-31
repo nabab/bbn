@@ -65,6 +65,7 @@
       autocomplete: {},
       button: {},
       chart: {},
+      chart2: {},
       checkbox: {},
       code: {},
       colorpicker: {},
@@ -125,30 +126,39 @@
      */
     toKendoDataSource(vm){
       let text = vm.sourceText || vm.widgetOptions.dataTextField || 'text',
-          value = vm.sourceValue || vm.widgetOptions.dataValueField || 'value';
+          value = vm.sourceValue || vm.widgetOptions.dataValueField || 'value',
+          nullable = vm.nullable || false,
+          res = [];
       let transform = (src) => {
         let type = typeof(src),
             isArray = Array.isArray(src);
         if ( (type === 'object') && !isArray ){
-          let tmp = [];
           $.each(src, (n, a) => {
-            let tmp2 = {};
-            tmp2[text] = (typeof a) === 'string' ? a : n;
-            tmp2[value] = n;
+            let tmp = {};
+            tmp[text] = (typeof a) === 'string' ? a : n;
+            tmp[value] = n;
             if ( vm.group && a[vm.group] ){
-              tmp2[vm.group] = a[vm.group];
+              tmp[vm.group] = a[vm.group];
             }
-            tmp.push(tmp2);
+            res.push(tmp);
           });
-          return tmp;
         }
         else if ( isArray && src.length && (typeof(src[0]) !== 'object') ){
-          return $.map(src, (a) => {
+          res = $.map(src, (a) => {
             let tmp = {};
             tmp[text] = a;
             tmp[value] = a;
             return tmp;
           });
+        }
+        else{
+          res = src;
+        }
+        if ( nullable && res.length ){
+          let tmp = {};
+          tmp[text] = '';
+          tmp[value] = null;
+          res.unshift(tmp)
         }
         return src;
       };
@@ -633,12 +643,16 @@
           type: String,
           default: "value"
         },
+        nullable: {
+          type: Boolean,
+          default: false
+        },
         componentClass: {
           type: Array,
           default(){
             return [];
           }
-        }
+        },
       },
       methods: {
         getOptions(obj){
@@ -1081,6 +1095,107 @@
       }
     },
 
+    fieldProperties: {
+      width: {
+        type: [String, Number],
+      },
+      render: {
+        type: [String, Function]
+      },
+      title: {
+        type: [String, Number],
+        default: bbn._("Untitled")
+      },
+      ftitle: {
+        type: String
+      },
+      tcomponent: {
+        type: [String, Object]
+      },
+      icon: {
+        type: String
+      },
+      cls: {
+        type: String
+      },
+      type: {
+        type: String
+      },
+      field: {
+        type: String
+      },
+      fixed: {
+        type: [Boolean, String],
+        default: false
+      },
+      hidden: {
+        type: Boolean
+      },
+      encoded: {
+        type: Boolean,
+        default: false
+      },
+      sortable: {
+        type: Boolean,
+        default: true
+      },
+      editable: {
+        type: Boolean,
+        default: true
+      },
+      filterable: {
+        type: Boolean,
+        default: true
+      },
+      resizable: {
+        type: Boolean,
+        default: true
+      },
+      showable: {
+        type: Boolean,
+        default: true
+      },
+      nullable: {
+        type: Boolean,
+      },
+      buttons: {
+        type: [Array, Function]
+      },
+      source: {
+        type: [Array, Object, String]
+      },
+      required: {
+        type: Boolean,
+      },
+      options: {
+        type: [Object, Function],
+        default(){
+          return {};
+        }
+      },
+      editor: {
+        type: [String, Object]
+      },
+      maxLength: {
+        type: Number
+      },
+      sqlType: {
+        type: String
+      },
+      aggregate: {
+        type: [String, Array]
+      },
+      component: {
+        type: [String, Object]
+      },
+      mapper: {
+        type: Function
+      },
+      group: {
+        type: String
+      }
+    },
+
     retrieveRef(vm, path){
       let bits = path.split("."),
           target = vm,
@@ -1170,38 +1285,43 @@
       return ar;
     },
 
-    find(cp, selector){
-      let cps = bbn.vue.getComponents(cp);
-      if ( cps ){
-        for ( let i = 0; i < cps.length; i++ ){
-          if ( bbn.vue.is(cps[i], selector) ){
-            return cps[i];
+    find(vm, selector, index){
+      let vms = bbn.vue.getComponents(vm);
+      let realIdx = 0;
+      index = parseInt(index);
+      if ( vms ){
+        for ( let i = 0; i < vms.length; i++ ){
+          if ( bbn.vue.is(vms[i], selector) ){
+            if ( realIdx === index ){
+              return vms[i];
+            }
+            realIdx++;
           }
         }
       }
     },
 
-    findAll(cp, selector){
-      let cps = bbn.vue.getComponents(cp),
+    findAll(vm, selector, only_children){
+      let vms = bbn.vue.getComponents(vm, only_children),
           res = [];
-      for ( let i = 0; i < cps.length; i++ ){
+      for ( let i = 0; i < vms.length; i++ ){
         if (
-          $(cps[i].$el).is(selector) ||
-          (cps[i].$vnode.componentOptions && (cps[i].$vnode.componentOptions.tag === selector))
+          $(vms[i].$el).is(selector) ||
+          (vms[i].$vnode.componentOptions && (vms[i].$vnode.componentOptions.tag === selector))
         ){
-          res.push(cps[i]);
+          res.push(vms[i]);
         }
       }
       return res;
     },
 
-    getComponents(cp, ar){
+    getComponents(vm, ar, only_children){
       if ( !Array.isArray(ar) ){
         ar = [];
       }
-      $.each(cp.$children, function(i, obj){
+      $.each(vm.$children, function(i, obj){
         ar.push(obj)
-        if ( obj.$children ){
+        if ( !only_children && obj.$children ){
           bbn.vue.getComponents(obj, ar);
         }
       });
@@ -1212,8 +1332,8 @@
       return bbn.fn.randomString(32);
     },
 
-    getRoot(cp){
-      let e = cp;
+    getRoot(vm){
+      let e = vm;
       while ( e.$parent ){
         e = e.$parent;
       }

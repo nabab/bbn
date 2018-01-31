@@ -5,7 +5,7 @@
   "use strict";
 
   Vue.component('bbn-numeric', {
-    mixins: [bbn.vue.basicComponent, bbn.vue.fullComponent],
+    mixins: [bbn.vue.basicComponent, bbn.vue.eventsComponent, bbn.vue.inputComponent],
     props: {
       decimals: {
         type: [Number, String]
@@ -44,10 +44,10 @@
       this.widget = $(this.$refs.element).kendoNumericTextBox($.extend(this.getOptions(), {
         value: this.value,
         spin: (e) => {
-          this.$emit('input', e.sender.value());
+          this.emitInput(e.sender.value());
         },
         change: (e) => {
-          this.$emit('input', e.sender.value());
+          this.emitInput(e.sender.value());
         }
       })).data("kendoNumericTextBox");
       this.$emit("ready", this.value);
