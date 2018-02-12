@@ -19,7 +19,7 @@ class tasks extends bbn\models\cls\db{
   protected
     $template = false,
     $id_user,
-    $is_admin,
+    $is_dev,
     $user;
 
 
@@ -82,7 +82,7 @@ class tasks extends bbn\models\cls\db{
     if ( $user = bbn\user::get_instance() ){
       $this->user = $user->get_name();
       $this->id_user = $user->get_id();
-      $this->is_admin = $user->is_admin();
+      $this->is_dev = $user->is_dev();
       $this->mgr = new bbn\user\manager($user);
       $this->_get_references();
       //die(var_dump(BBN_APP_PATH, $this->references));

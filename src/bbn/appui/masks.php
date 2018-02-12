@@ -51,13 +51,14 @@ class masks extends bbn\models\cls\db {
     return null;
   }
 
-  public function get_all($id_type = null){
+  public function get_all($id_type = null, $simple = true){
+    
     $all = $id_type ? $this->db->get_column_values('bbn_notes_masks', 'id_note', [
       'id_type' => $id_type
     ]) : $this->db->get_column_values('bbn_notes_masks', 'id_note');
     $r = [];
     foreach ( $all as $a ){
-      $r[] = $this->get($a);
+      $r[] = $this->get($a, $simple);
     }
     return $r;
   }
@@ -134,10 +135,12 @@ class masks extends bbn\models\cls\db {
   }
 
   public function update(array $cfg){
-    if ( !empty($cfg['id']) && !empty($cfg['nom']) && !empty($cfg['categorie']) && !empty($cfg['titre']) && !empty($cfg['texte']) ){
-      $id = $cfg['id'];
+    if ( !empty($cfg['id_note']) && !empty($cfg['id_user']) && !empty($cfg['id_type']) && !empty($cfg['title']) &&
+      !empty
+      ($cfg['content']) ){
+      $id_note = $cfg['id'];
       unset($cfg['id']);
-      $this->db->update('bbn_notes_masks', $cfg, ['id' => $id]);
+      $this->db->update('bbn_notes_masks', $cfg, ['id_note' => $id_note]);
     }
   }
 
@@ -158,7 +161,7 @@ class masks extends bbn\models\cls\db {
   }
 
   public function get_categories(){
-
+    return self::get_options();
   }
 
 

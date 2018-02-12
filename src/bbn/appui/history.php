@@ -445,14 +445,14 @@ MYSQL;
    * @param null $column
    * @return null|array
    */
-  public static function get_next_update(string $table, string $id, $from_when, $column = null): ?array
+  public static function get_next_update(string $table, string $id, $from_when, $column = null)
   {
     if (
       bbn\str::check_name($table) &&
       ($date = self::valid_date($from_when)) &&
       ($db = self::_get_db()) &&
       ($dbc = self::_get_databases()) &&
-      ($id_table = $dbc->table_id($table, self::$db->current))
+      ($id_table = $dbc->table_id($table)) &&
       ($id_column = $dbc->column_id(self::$column, $id_table))
     ){
       $tab = $db->escape(self::$table);
@@ -460,30 +460,30 @@ MYSQL;
       $uid = $db->cfn('uid', self::$table_uids, true);
       $id_tab = $db->cfn('id_table', self::$table_uids, true);
       $id_col = $db->cfn('col', self::$table, true);
-      $line = $db->escape('uid');
+      $line = $db->cfn('uid', self::$table, true);
       $chrono = $db->escape('tst');
       if ( $column ){
-        $where = $db->escape('column').
-          ' = UNHEX("'.$db->escape_value(
-            bbn\str::is_uid($id) ? $id : $dbc->column_id($column, $table, $db->current)
-          ).'")';
+        $where = $id_col. ' = UNHEX("'.$db->escape_value(
+          bbn\str::is_uid($column) ? $column : $dbc->column_id($column, $id_table)
+        ).'")';
       }
-      else{
-        $where = self::_get_table_where($table);
+      else {
+        $w = self::_get_table_where($table);
+        $where = $id_col." != UNHEX('$id_column') " . ($w ?: '');
       }
       $sql = <<< MYSQL
 SELECT $tab.*
 FROM $tab_uids
   JOIN $tab
     ON $uid = $line
-WHERE $uid = ?
-AND $id_tab = ? 
-AND $id_col != ?
-AND $chrono > ?
+WHERE $where
+  AND $uid = ?
+  AND $id_tab = ? 
+  AND $chrono > ?
 ORDER BY $chrono ASC
 LIMIT 1
 MYSQL;
-      return $db->get_row($sql, $id, $id_table, $id_column, $date);
+      return $db->get_row($sql, hex2bin($id), hex2bin($id_table), $date);
     }
     return null;
   }

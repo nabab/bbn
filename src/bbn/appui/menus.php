@@ -67,7 +67,7 @@ class menus extends bbn\models\cls\basic{
 
   private function _filter($ar){
     $usr = bbn\user::get_instance();
-    if ( \is_object($usr) && $usr->is_admin() ){
+    if ( \is_object($usr) && $usr->is_dev() ){
       return $ar;
     }
     $pref = $this->pref;
@@ -282,6 +282,10 @@ class menus extends bbn\models\cls\basic{
       ];
     }
     return $res;
+  }
+
+  public function delete_cache($id_menu){
+    return $this->cache_delete($id_menu);
   }
 
 

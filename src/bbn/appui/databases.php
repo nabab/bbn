@@ -409,7 +409,7 @@ class databases extends bbn\models\cls\cache
    */
   public function column_id(string $column, string $table, string $db = '', string $host = ''){
     if ( \bbn\str::is_uid($table) ){
-      return $this->o->from_code($this->db->csn($column), $table);
+      return $this->o->from_code($this->db->csn($column), 'columns', $table);
     }
     return self::get_option_id($this->db->csn($column), 'columns', $this->db->tsn($table), 'tables', $db ?: $this->db->current, 'dbs', $host ?: $this->db->host, 'hosts');
   }

@@ -2098,6 +2098,7 @@ class options extends bbn\models\cls\db
           }
           $p++;
         }
+        $this->delete_cache($parent, true);
         $this->delete_cache($id);
         return $pos;
       }

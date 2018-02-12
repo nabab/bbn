@@ -874,6 +874,7 @@ class x
    * @return bool|int
    */
   public static function find(array $ar, array $where){
+    //die(var_dump($where));
     if ( !empty($where) ){
       foreach ( $ar as $i => $v ){
         $ok = 1;
@@ -1394,73 +1395,28 @@ class x
     return false;
   }
 
-  public static function make_uid($binary = false){
-    /** @todo This is temporary */
-    $string_base_convert  = function($numstring, $frombase, $tobase) {
+  public static function make_uid($binary = false, $hyphens = false){
+    $tmp = sprintf($hyphens ? '%04x%04x-%04x-%04x-%04x-%04x%04x%04x' : '%04x%04x%04x%04x%04x%04x%04x%04x',
 
-      $chars = "0123456789abcdefghijklmnopqrstuvwxyz";
-      $tostring = substr($chars, 0, $tobase);
+      // 32 bits for "time_low"
+      mt_rand(0, 0xffff), mt_rand(0, 0xffff),
 
-      $length = \strlen($numstring);
-      $result = '';
-      for ($i = 0; $i < $length; $i++) {
-        $number[$i] = strpos($chars, $numstring{$i});
-      }
-      do {
-        $divide = 0;
-        $newlen = 0;
-        for ($i = 0; $i < $length; $i++) {
-          $divide = $divide * $frombase + $number[$i];
-          if ($divide >= $tobase) {
-            $number[$newlen++] = (int)($divide / $tobase);
-            $divide = $divide % $tobase;
-          } elseif ($newlen > 0) {
-            $number[$newlen++] = 0;
-          }
-        }
-        $length = $newlen;
-        $result = $tostring{$divide} . $result;
-      }
-      while ($newlen != 0);
-      return $result;
-    };
+      // 16 bits for "time_mid"
+      mt_rand(0, 0xffff),
 
-    $generate_uid = function() use ($string_base_convert) {
-      $version = "0001";
-      $offset = 12219292800;
-      list($usec, $sec) = explode(" ", microtime());;
-      $gregorianseconds = $sec + $offset;
-      $nano100s = substr($usec, 2, 7);
-      $gregorian = $gregorianseconds . $nano100s;
-      $bin = $string_base_convert ($gregorian,10,2);
-      $binpad =  str_pad($bin, 60, "0", STR_PAD_LEFT);
-      $clockseq = random_bytes(4);
+      // 16 bits for "time_hi_and_version",
+      // four most significant bits holds version number 4
+      mt_rand(0, 0x0fff) | 0x4000,
 
-#random clock seq
-      $clockseqhex = str_pad($string_base_convert("$clockseq",10,16), 4, "0", STR_PAD_LEFT);
+      // 16 bits, 8 bits for "clk_seq_hi_res",
+      // 8 bits for "clk_seq_low",
+      // two most significant bits holds zero and one for variant DCE1.1
+      mt_rand(0, 0x3fff) | 0x8000,
 
-      $time_low = (substr($binpad, -32));
-      $time_low_hex = str_pad($string_base_convert ($time_low,2,16), 8, "0", STR_PAD_LEFT);
-
-      $time_mid = (substr($binpad, -48, 16));
-      $time_mid_hex = str_pad($string_base_convert ($time_mid,2,16), 4, "0", STR_PAD_LEFT);
-
-      $time_hi = (substr($binpad, 0, 12));
-      $time_hi_and_version = $version . $time_hi;
-      $time_hi_and_version_hex = str_pad($string_base_convert ($time_hi_and_version,2,16), 4, "0", STR_PAD_LEFT);
-
-      $components = [
-        $time_low_hex,
-        $time_mid_hex,
-        $time_hi_and_version_hex,
-        $clockseqhex,
-        \defined('BBN_FINGERPRINT') ? substr(md5(BBN_FINGERPRINT), 0, 12) : 'a2c4b6d6e8f1'
-      ];
-
-      return strtoupper(implode("-", $components));
-
-    };
-    return $binary ? hex2bin($generate_uid()) : $generate_uid();
+      // 48 bits for "node"
+      mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+    );
+    return $binary ? hex2bin($tmp) : $tmp;
   }
 
   public static function convert_uids($st){

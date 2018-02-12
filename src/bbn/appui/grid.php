@@ -34,7 +34,7 @@ class grid extends bbn\models\cls\cache
     $num = 0,
     $prefilters = [],
     $fields = [],
-    $additional_fields = [],
+    $extra_fields = [],
     $cache_uid,
     $query_time = 0,
     $count_time = 0,
@@ -93,9 +93,16 @@ class grid extends bbn\models\cls\cache
         }
         if ( !$this->query ){
           $this->query = $this->db->get_select($this->table, !empty($cfg['columns']) ? $cfg['columns'] : []);
+          if ( $i = strpos($this->query, 'WHERE 1') ){
+            $this->query = substr($this->query, 0, $i);
+          }
         }
       }
       if ( $this->query ){
+        // Additional fields (not in the result but accepted for filtering and ordering
+        if ( isset($cfg['extra_fields']) ){
+          $this->extra_fields = $cfg['extra_fields'];
+        }
         // Additional filters
         if ( !empty($cfg['filters']) ){
           $this->prefilters = isset($cfg['filters']['logic']) ? $cfg['filters'] : [
@@ -307,12 +314,12 @@ class grid extends bbn\models\cls\cache
     if (
       \is_string($f) && (
         \in_array($f, $this->fields, true) ||
-        \in_array($f, $this->additional_fields, true)
+        \in_array($f, $this->extra_fields, true)
       )
     ){
       if (
         $this->table &&
-        !\in_array($f, $this->additional_fields, true)
+        !\in_array($f, $this->extra_fields, true)
       ){
         return $this->db->col_full_name($f, $this->table, 1);
       }
@@ -332,15 +339,15 @@ class grid extends bbn\models\cls\cache
       if ( ($num1 || $num2) && $this->check() ){
         \bbn\x::log('num1 or num2', 'filters');
         if ( $num1 && $num2 ){
-          \bbn\x::log('num1 and num2', 'filters');
+          \bbn\x::log(['num1 and num2' => $filters], 'filters');
           $filters = [
             'logic' => 'AND',
             'conditions' => [$this->prefilters, $this->filters]
           ];
         }
         else{
-          \bbn\x::log('num1 or num2 bis', 'filters');
           $filters = $num1 ? $this->prefilters : $this->filters;
+          \bbn\x::log(['num1 or num2 bis' => $filters], 'filters');
         }
       }
     }

@@ -288,7 +288,7 @@ MYSQL;
    */
   public function has(string $id_option = null, bool $force = false): bool
   {
-    if ( !$force && $this->user->is_admin() ){
+    if ( !$force && $this->user->is_dev() ){
       return true;
     }
     return (bool)$this->retrieve_ids($id_option);
@@ -416,8 +416,8 @@ MYSQL;
       if ( $row = $this->db->get_row($sql, $id, $this->id_user, $this->id_group) ){
         $cfg = $row['cfg'];
         unset($row['cfg']);
-        if ( $cfg && $with_config ){
-          $row = bbn\x::merge_arrays(json_decode($cfg, true), $row);
+        if ( ($cfg = json_decode($cfg, true)) && $with_config ){
+          $row = bbn\x::merge_arrays($cfg, $row);
         }
         return $row;
       }
@@ -465,8 +465,8 @@ MYSQL;
         return $with_config ? array_map(function($a){
           $cfg = $a['cfg'];
           unset($a['cfg']);
-          if ( $cfg ){
-            $a = bbn\x::merge_arrays(json_decode($cfg, true), $a);
+          if ( ($cfg = json_decode($cfg, true)) ){
+            $a = bbn\x::merge_arrays($cfg, $a);
           }
           return $a;
         }, $rows) : $rows;

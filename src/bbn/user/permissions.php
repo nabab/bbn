@@ -203,7 +203,7 @@ class permissions extends bbn\models\cls\basic
    */
   public function has(string $id_option = null, string $type = 'page', bool $force = false): bool
   {
-    if ( !$force && $this->user && $this->user->is_admin() ){
+    if ( !$force && $this->user && $this->user->is_dev() ){
       return true;
     }
     if ( $id_option = $this->_get_id_option($id_option, $type) ){

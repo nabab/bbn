@@ -96,6 +96,7 @@ class user extends models\cls\basic
           'username' => 'username',
           'login' => 'login',
           'admin' => 'admin',
+          'dev' => 'dev',
           'cfg' => 'cfg',
           'active' => 'active'
         ],
@@ -1009,12 +1010,20 @@ class user extends models\cls\basic
     return false;
   }
 
-	/**
-	 * @return boolean
-	 */
+  /**
+   * @return boolean
+   */
   public function is_admin()
   {
-    return $this->get_session('admin') ? true : false;
+    return !!$this->get_session('admin');
+  }
+
+  /**
+   * @return boolean
+   */
+  public function is_dev()
+  {
+    return $this->is_admin() || !!$this->get_session('dev');
   }
 
   public function get_manager($mail = false){

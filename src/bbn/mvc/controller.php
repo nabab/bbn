@@ -296,8 +296,7 @@ class controller implements api{
     if ( empty($model) && $this->has_data() ){
 			$model = $this->data;
 		}
-
-		if ( \is_string($view) ){
+    if ( \is_string($view) ){
       return \is_array($model) ? bbn\tpl::render($view, $model) : $view;
 		}
 		die(bbn\x::hdump("Problem with the template", $view, $this->path, $this->mode));
