@@ -58,6 +58,9 @@ class i18n extends bbn\models\cls\db{
     if ( \in_array($ext, self::$extensions, true) && is_file($file) ){
       $content = file_get_contents($file);
       switch ( $ext ){
+        case 'html':
+          $this->analyze_php($content);
+          break;
         case 'php':
           $this->analyze_php($content);
           break;
@@ -86,6 +89,13 @@ class i18n extends bbn\models\cls\db{
   public function result(){
     foreach ( $this->parser->getIterator() as $r => $tr ){
       $this->translations[] = $tr->getOriginal();
+    }
+    return array_unique($this->translations);
+  }
+
+  public function full_result(){
+    foreach ( $this->parser->getIterator() as $r => $tr ){
+      die(var_dump($tr->getReferences()));
     }
     return array_unique($this->translations);
   }

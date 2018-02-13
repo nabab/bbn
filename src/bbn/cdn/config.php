@@ -280,6 +280,9 @@ class config extends bbn\models\cls\basic
     if ( !empty($parsed['query']) ){
       parse_str($parsed['query'], $params);
     }
+    if ( isset($params, $params['v']) ){
+      unset($params['v']);
+    }
     $this->cfg['params'] = $params ?? [];
     $this->cfg['hash'] = md5($this->cfg['url'].serialize($this->cfg['params']));
     $this->cfg['cache_file'] = BBN_PUBLIC.'cache/'.$this->cfg['hash'].'.cache';

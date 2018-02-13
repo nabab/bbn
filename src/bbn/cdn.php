@@ -272,19 +272,22 @@ JS;
               'js' => $jsc['js'][0]['code']
             ];
             if ( !empty($cp['css']) ){
-              foreach ( $cp['css'] as $css ){
+              $cssc = $this->cp->compile($cp['css'], $c['test']);
+              foreach ( $cssc['css'] as $css ){
+                if ( !isset($css['code']) ){
+                  die(var_dump($css));
+                }
                 if ( $this->cp->has_links($css['code']) ){
                   $includes .= $this->cp->css_links($cp['css'], $c['test']);
                   unset($cp['css']);
                   break;
                 }
               }
-            }
-            if ( !empty($cp['css']) ){
-              $cssc = $this->cp->compile($cp['css'], $c['test']);
-              $codes[$i]['css'] = array_map(function($a){
-                return $a['code'];
-              }, $cssc['css']);
+              if ( isset($cp['css']) ){
+                $codes[$i]['css'] = array_map(function($a){
+                  return $a['code'];
+                }, $cssc['css']);
+              }
             }
 
             // Dependencies links

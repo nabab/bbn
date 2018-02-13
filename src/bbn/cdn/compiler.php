@@ -100,7 +100,7 @@ class compiler extends bbn\models\cls\basic
           }
           catch ( \Exception $e ){
             $this->set_error("Error during LESS compilation with file $file :".$e->getMessage());
-            die($e->getmMssage());
+            die($e->getMessage());
           }
           break;
 
@@ -134,7 +134,7 @@ class compiler extends bbn\models\cls\basic
           }
           catch ( \Exception $e ){
             $this->set_error("Error during SASS compilation with file $file :".$e->getMessage());
-            die($e->getmessage());
+            die($e->getMessage());
           }
           break;
       }

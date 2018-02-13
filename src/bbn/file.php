@@ -126,6 +126,20 @@ class file extends models\cls\basic
     return $this->size;
   }
 
+  public function iterate_lines(){
+    if ( $this->file ){
+      $f = fopen($this->file, 'r');
+      try {
+        while ($line = fgets($f)) {
+          yield $line;
+        }
+      }
+      finally {
+        fclose($f);
+      }
+    }
+  }
+
   /**
    * Return the extension of the file.
    *
