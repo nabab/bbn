@@ -26,76 +26,91 @@ class i18n extends bbn\models\cls\db{
     $this->parser = new \Gettext\Translations();
   }
 
-  public function analyze_php(string $php): self
+  public function analyze_php(string $php): array
   {
+    $res = [];
     if ( $tmp = \Gettext\Translations::fromPhpCodeString($php, ['functions' => ['_' => 'gettext']]) ){
+      foreach ( $tmp->getIterator() as $r => $tr ){
+        $res[] = $tr->getOriginal();
+      }
       $this->parser->mergeWith($tmp);
     }
-    return $this;
+    return array_unique($res);
   }
 
-  public function analyze_js(string $js): self
+  public function analyze_js(string $js): array
   {
-    if ( $tmp = \Gettext\Translations::fromJsCodeString($js, ['functions' => ['_' => 'gettext', 'bbn._' => 
+    $res = [];
+    if ( $tmp = \Gettext\Translations::fromJsCodeString($js, ['functions' => ['_' => 'gettext', 'bbn._' =>
       'gettext']]) ){
+      foreach ( $tmp->getIterator() as $r => $tr ){
+        $res[] = $tr->getOriginal();
+      }
       $this->parser->mergeWith($tmp);
     }
-    return $this;
+    return array_unique($res);
   }
 
-  public function analyze_json(string $js): self
+  public function analyze_json(string $js): array
   {
+    $res = [];
     if ( $tmp = \Gettext\Translations::fromJsonString($js, ['functions' => ['_' => 'gettext', 'bbn._' =>
       'gettext']]) ){
+      foreach ( $tmp->getIterator() as $r => $tr ){
+        $res[] = $tr->getOriginal();
+      }
       $this->parser->mergeWith($tmp);
     }
-    return $this;
+    return array_unique($res);
   }
 
-  public function analyze_file(string $file): self
+  public function analyze_file(string $file): array
   {
+    $res = [];
     $ext = bbn\str::file_ext($file);
     if ( \in_array($ext, self::$extensions, true) && is_file($file) ){
       $content = file_get_contents($file);
       switch ( $ext ){
         case 'html':
-          $this->analyze_php($content);
+          $res = $this->analyze_php($content);
           break;
         case 'php':
-          $this->analyze_php($content);
+          $res = $this->analyze_php($content);
           break;
         case 'js':
-          $this->analyze_js($content);
+          $res = $this->analyze_js($content);
           break;
         case 'json':
-          $this->analyze_json($content);
+          $res = $this->analyze_json($content);
           break;
       }
     }
-    return $this;
+    return $res;
   }
 
-  public function analyse_folder(string $folder = '.', bool $deep = false): self
+  public function analyse_folder(string $folder = '.', bool $deep = false): array
   {
+    $res = [];
     if (  \is_dir($folder) ){
-      $files = $deep ? bbn\file\dir::scan($folder) : bbn\file\dir::get_files($folder);
+      $files = $deep ? bbn\file\dir::scan($folder, 'file') : bbn\file\dir::get_files($folder);
       foreach ( $files as $f ){
-        $this->analyze_file($f);
+        $words = $this->analyze_file($f);
+        foreach ( $words as $word ){
+          if ( !isset($res[$word]) ){
+            $res[$word] = [];
+          }
+          if ( !in_array($f, $res[$word]) ){
+            $res[$word][] = $f;
+          }
+        }
       }
     }
-    return $this;
+    return $res;
   }
 
   public function result(){
     foreach ( $this->parser->getIterator() as $r => $tr ){
       $this->translations[] = $tr->getOriginal();
-    }
-    return array_unique($this->translations);
-  }
-
-  public function full_result(){
-    foreach ( $this->parser->getIterator() as $r => $tr ){
-      die(var_dump($tr->getReferences()));
     }
     return array_unique($this->translations);
   }

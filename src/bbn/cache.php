@@ -306,7 +306,7 @@ class cache{
    * @param int $ttl
    * @return array|bool
    */
-  public function set(string $it, $val, $ttl = 0){
+  public function set(string $it, $val, $ttl = 10){
     if ( self::$type ){
       $ttl = self::ttl($ttl);
       $hash = self::make_hash($val);

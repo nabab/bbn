@@ -67,11 +67,19 @@ class notes extends bbn\models\cls\db
   }
 
   public function add_media($id_note, $name, $content = null, $title = '', $type='file', $private = false){
+    // Case where we give also the version (i.e. not the latest)
+    if ( \is_array($id_note) && (count($id_note) === 2) ){
+      $version = $id_note[1];
+      $id_note = $id_note[0];
+    }
     if ( $this->exists($id_note) &&
       !empty($name) &&
       ($id_type = self::get_option_id($type, 'media')) &&
       ($usr = bbn\user::get_instance())
     ){
+      if ( !isset($version) ){
+        $version = $this->latest($id_note);
+      }
       $ok = false;
       switch ( $type ){
         case 'file':
@@ -97,6 +105,7 @@ class notes extends bbn\models\cls\db
         $id = $this->db->last_id();
         $this->db->insert('bbn_notes_medias', [
           'id_note' => $id_note,
+          'version' => $version,
           'id_media' => $id,
           'id_user' => $usr->get_id(),
           'creation' => date('Y-m-d H:i:s')

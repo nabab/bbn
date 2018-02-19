@@ -70,9 +70,11 @@ class project extends bbn\models\cls\db{
     return $this->name;
   }
 
+
+
   public function get_path(){
     if ( $this->check() ){
-      return $this->db->get_rows("
+      $rows = $this->db->get_rows("
         SELECT bbn_projects_assets.id_option,
         bbn_options.text, bbn_options.code 
         FROM bbn_projects_assets
@@ -83,6 +85,11 @@ class project extends bbn\models\cls\db{
         hex2bin($this->id),
         hex2bin(self::get_id_asset_path()));
     }
+    foreach ( $rows as $i => $row ){
+      $rows[$i]['constant'] = options::get_instance()->parent($rows[$i]['id_option'])['code'];
+    }
+    return $rows;
+
   }
 
   public function get_langs_id(){

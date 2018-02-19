@@ -194,7 +194,7 @@ class model extends bbn\models\cls\db{
   }
 
   public function set_cache(array $data = null, $spec='', $ttl = 10){
-    if ( $this->path ){
+	  if ( $this->path ){
       $d = $this->get($data);
       $this->cache_set($this->_cache_name($data, $spec), '', $d, $ttl);
     }
