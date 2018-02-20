@@ -365,6 +365,23 @@ class controller implements api{
 		return $this;
 	}
 
+	public function register_plugin_classes($plugin_path): self
+  {
+    spl_autoload_register(function($class_name) use ($plugin_path){
+      if (
+        (strpos($class_name,'/') === false) &&
+        (strpos($class_name,'.') === false)
+      ){
+        $cls = explode('\\', $class_name);
+        $path = implode('/', $cls);
+        if ( file_exists($plugin_path.'lib/'.$path.'.php') ){
+          include_once($plugin_path.'lib/'.$path.'.php');
+        }
+      }
+    });
+    return $this;
+  }
+
 	/**
 	 * This will enclose the controller's inclusion
 	 * It can be publicly launched through check()
@@ -375,18 +392,7 @@ class controller implements api{
 		if ( $this->file && !isset($this->is_controlled) ){
       $ok = 1;
       if ( $this->plugin ){
-        spl_autoload_register(function($class_name){
-          if (
-            (strpos($class_name,'/') === false) &&
-            strpos($class_name,'.') === false
-          ){
-            $cls = explode('\\', $class_name);
-            $path = implode('/', $cls);
-            if ( file_exists($this->plugin_path().'lib/'.$path.'.php') ){
-              include_once($this->plugin_path().'lib/'.$path.'.php');
-            }
-          }
-        });
+        $this->register_plugin_classes($this->plugin_path());
       }
 			ob_start();
 			foreach ( $this->checkers as $appui_checker_file ){

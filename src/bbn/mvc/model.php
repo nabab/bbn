@@ -91,6 +91,13 @@ class model extends bbn\models\cls\db{
 		}
 	}
 
+  public function register_plugin_classes($plugin_path): self
+  {
+    $this->register_plugin_classes($plugin_path);
+    return $this;
+  }
+
+
   public function get(array $data=null){
     if ( \is_null($data) ){
       $data = [];

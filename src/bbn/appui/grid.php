@@ -144,6 +144,7 @@ class grid extends bbn\models\cls\cache
       'query' => $this->query,
       'table' => $this->table,
       'group_by' => $this->group_by,
+      'order' => $this->order,
       'count' => $this->count
     ]));
     $this->chrono = new bbn\util\timer();
@@ -302,6 +303,9 @@ class grid extends bbn\models\cls\cache
 
   public function get_field($f, $array = false){
     if ( \is_array($f) && isset($f['field']) ){
+      if ( !empty($f['prefilter']) ){
+        return $f['field'];
+      }
       $f = $f['field'];
     }
     if ( empty($this->fields) || $array ){
@@ -309,23 +313,9 @@ class grid extends bbn\models\cls\cache
     }
     else if ( isset($this->fields[$f]) ){
       return $this->fields[$f];
-      return strpos($this->fields[$f], '.') ? $this->db->col_full_name($this->fields[$f], null, $array ? false : true) : $this->db->col_simple_name($this->fields[$f], $array ? false : true);
     }
-    if (
-      \is_string($f) && (
-        \in_array($f, $this->fields, true) ||
-        \in_array($f, $this->extra_fields, true)
-      )
-    ){
-      if (
-        $this->table &&
-        !\in_array($f, $this->extra_fields, true)
-      ){
-        return $this->db->col_full_name($f, $this->table, 1);
-      }
-      return strpos($f, '.') ?
-        $this->db->col_full_name($f, null, 1) :
-        $this->db->col_simple_name($f, 1);
+    if ( isset($this->extra_fields[$f]) ){
+      return $this->extra_fields[$f];
     }
     return false;
   }
@@ -335,19 +325,21 @@ class grid extends bbn\models\cls\cache
     if ( null === $filters ){
       $num1 = empty($this->prefilters) ? 0 : \count($this->prefilters['conditions']);
       $num2 = empty($this->filters) ? 0 : \count($this->filters['conditions']);
-      \bbn\x::log('start', 'filters');
+      if ( $num1 ){
+        $prefilters = $this->prefilters;
+        array_walk($prefilters['conditions'], function(&$a){
+          $a['prefilter'] = true;
+        });
+      }
       if ( ($num1 || $num2) && $this->check() ){
-        \bbn\x::log('num1 or num2', 'filters');
         if ( $num1 && $num2 ){
-          \bbn\x::log(['num1 and num2' => $filters], 'filters');
           $filters = [
             'logic' => 'AND',
-            'conditions' => [$this->prefilters, $this->filters]
+            'conditions' => [$prefilters, $this->filters]
           ];
         }
         else{
-          $filters = $num1 ? $this->prefilters : $this->filters;
-          \bbn\x::log(['num1 or num2 bis' => $filters], 'filters');
+          $filters = $num1 ? $prefilters : $this->filters;
         }
       }
     }
@@ -357,7 +349,7 @@ class grid extends bbn\models\cls\cache
         if ( isset($f['logic']) && !empty($f['conditions']) ){
           $pre = empty($res) ? " ( " : " $logic ";
           if ( $array ){
-            $res = \bbn\x::merge_arrays($res, $this->filter($f, true));
+            $res = bbn\x::merge_arrays($res, $this->filter($f, true));
           }
           else if ( $tmp = $this->filter($f) ){
             $res .= $pre.$tmp;
