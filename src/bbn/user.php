@@ -1139,4 +1139,34 @@ class user extends models\cls\basic
     }
     return false;
   }
+
+  public function online_count(int $minutes = 2): int
+  {
+    if ( $this->auth ){
+      return $this->db->get_one("
+SELECT COUNT(DISTINCT bbn_users.id)
+FROM bbn_users
+	JOIN bbn_users_sessions
+    ON id_user = bbn_users.id
+    AND last_activity > (NOW() - INTERVAL $minutes MINUTE)
+    ");
+    }
+    return 0;
+  }
+
+  public function online_list(int $minutes = 2): array
+  {
+    if ( $this->auth ){
+      return $this->db->get_col_array("
+SELECT DISTINCT bbn_users.id
+FROM bbn_users
+	JOIN bbn_users_sessions
+    ON id_user = bbn_users.id
+    AND last_activity > (NOW() - INTERVAL $minutes MINUTE)
+    ");
+    }
+    return [];
+  }
+
+
 }

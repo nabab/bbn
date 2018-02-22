@@ -24,11 +24,6 @@ trait cache
   }
 
   protected function _cache_name($uid, $method = ''){
-    /*
-    if ( \bbn\str::is_uid($uid) ){
-      $uid = implode('/', str_split((string)$uid, 2));
-    }
-    */
     return $this->_cache_prefix.'/'.$uid.(empty($method) ? '' : '/'.(string)$method);
   }
 

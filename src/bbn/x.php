@@ -1243,9 +1243,7 @@ class x
    * @return string
    */
   public static function make_tree(array $ar){
-    $id = str::genpwd();
-    return '<div id="'.$id.'"></div><script>$("#'.$id.'").kendoTreeView({dataSource: '.
-      json_encode(self::get_tree($ar)).'});</script>';
+    return "<bbn-tree :source='".\bbn\str::escape_squotes(json_encode(self::get_tree($ar)))."'></bbn-tree>";
   }
 
   /**

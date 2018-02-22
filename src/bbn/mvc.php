@@ -479,6 +479,7 @@ class mvc implements mvc\api{
       $data = $this->data;
     }
     if ( $route = $this->router->route($path, 'model') ){
+      \bbn\x::log([$route], 'testlore');
       $model = new mvc\model($this->db, $route, $ctrl, $this);
       return $model->get_from_cache($data, '', $ttl);
     }
@@ -499,6 +500,25 @@ class mvc implements mvc\api{
     if ( $route = $this->router->route($path, 'model') ){
       $model = new mvc\model($this->db, $route, $ctrl, $this);
       return $model->set_cache($data, '', $ttl);
+    }
+    return [];
+  }
+
+
+  /**
+   * This will unset the model in cache
+   *
+   * @params string path to the model
+   * @params array data to send to the model
+   * @return array|false A data model
+   */
+  public function delete_cached_model($path, array $data, mvc\controller $ctrl){
+    if ( \is_null($data) ){
+      $data = $this->data;
+    }
+    if ( $route = $this->router->route($path, 'model') ){
+      $model = new mvc\model($this->db, $route, $ctrl, $this);
+      return $model->delete_cache($data, '');
     }
     return [];
   }

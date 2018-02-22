@@ -720,15 +720,18 @@ class str
       }
       else{
         $st = trim($st);
-        if ( self::is_integer($st) && ((substr($st, 0, 1) !== '0') || ($st === '0')) ){
-          $tmp = (int)$st;
-          if ( ($tmp < PHP_INT_MAX) && ($tmp > -PHP_INT_MAX) ){
-            return $tmp;
+        // Not starting with a zero or ending with a zero decimal
+        if ( !preg_match('/^0[^.]+|\.[0-9]*0$/', $st) ){
+          if ( self::is_integer($st) && ((substr($st, 0, 1) !== '0') || ($st === '0')) ){
+            $tmp = (int)$st;
+            if ( ($tmp < PHP_INT_MAX) && ($tmp > -PHP_INT_MAX) ){
+              return $tmp;
+            }
           }
-        }
-        // If it's a decimal, not ending with a zero
-        else if ( self::is_decimal($st) && (substr($st, -1) !== '0') ){
-          return (float)$st;
+          // If it's a decimal, not or starting ending with a zero
+          else if ( self::is_decimal($st) ){
+            return (float)$st;
+          }
         }
       }
     }

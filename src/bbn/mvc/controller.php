@@ -872,44 +872,72 @@ class controller implements api{
   }
 
   /**
-	 * This will get the model. There is no order for the arguments.
-	 *
-	 * @params string path to the model
-	 * @params array data to send to the model
-	 * @return array|false A data model
-	 */
-	public function get_cached_model(){
-		$args = \func_get_args();
-		$die = 1;
-		foreach ( $args as $a ){
-			if ( \is_string($a) && \strlen($a) ){
-				$path = $a;
-			}
-			else if ( \is_array($a) ){
-				$data = $a;
-			}
+   * This will get the model. There is no order for the arguments.
+   *
+   * @params string path to the model
+   * @params array data to send to the model
+   * @return array|false A data model
+   */
+  public function get_cached_model(){
+    $args = \func_get_args();
+    $die = 1;
+    foreach ( $args as $a ){
+      if ( \is_string($a) && \strlen($a) ){
+        $path = $a;
+      }
+      else if ( \is_array($a) ){
+        $data = $a;
+      }
       else if ( \is_int($a) ){
         $ttl = $a;
       }
-			else if ( \is_bool($a) ){
-				$die = $a;
-			}
-		}
-		if ( !isset($path) ){
-			$path = $this->path;
-		}
-		else if ( strpos($path, './') === 0 ){
-			$path = $this->say_dir().substr($path, 1);
-		}
-		if ( !isset($data) ){
-			$data = $this->data;
-		}
-		$m = $this->mvc->get_cached_model($path, $data, $this, $ttl);
-		if ( !\is_array($m) && !$die ){
-			die("$path is an invalid model");
-		}
-		return $m;
-	}
+      else if ( \is_bool($a) ){
+        $die = $a;
+      }
+    }
+    if ( !isset($path) ){
+      $path = $this->path;
+    }
+    else if ( strpos($path, './') === 0 ){
+      $path = $this->say_dir().substr($path, 1);
+    }
+    if ( !isset($data) ){
+      $data = $this->data;
+    }
+    $m = $this->mvc->get_cached_model($path, $data, $this, $ttl);
+    if ( !\is_array($m) && !$die ){
+      die("$path is an invalid model");
+    }
+    return $m;
+  }
+
+  /**
+   * This will delete the cached model. There is no order for the arguments.
+   *
+   * @params string path to the model
+   * @params array data to send to the model
+   */
+  public function delete_cached_model(){
+    $args = \func_get_args();
+    foreach ( $args as $a ){
+      if ( \is_string($a) && \strlen($a) ){
+        $path = $a;
+      }
+      else if ( \is_array($a) ){
+        $data = $a;
+      }
+    }
+    if ( !isset($path) ){
+      $path = $this->path;
+    }
+    else if ( strpos($path, './') === 0 ){
+      $path = $this->say_dir().substr($path, 1);
+    }
+    if ( !isset($data) ){
+      $data = $this->data;
+    }
+    return $this->mvc->delete_cached_model($path, $data, $this);
+  }
 
 	/**
 	 * This will get the model. There is no order for the arguments.

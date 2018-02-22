@@ -187,7 +187,7 @@ class model extends bbn\models\cls\db{
 		return $this;
 	}
 
-	protected function _cache_name($data, $spec){
+	protected function _cache_name($data, $spec = ''){
     if ( $this->path ){
       $cn = 'models/'.$this->path;
       if ( $spec ){
@@ -201,9 +201,15 @@ class model extends bbn\models\cls\db{
   }
 
   public function set_cache(array $data = null, $spec='', $ttl = 10){
-	  if ( $this->path ){
+    if ( $this->path ){
       $d = $this->get($data);
       $this->cache_set($this->_cache_name($data, $spec), '', $d, $ttl);
+    }
+  }
+
+  public function delete_cache(array $data = null, $spec=''){
+    if ( $this->path ){
+      $this->cache_delete($this->_cache_name($data, $spec), '');
     }
   }
 
