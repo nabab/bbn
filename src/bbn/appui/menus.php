@@ -217,7 +217,7 @@ class menus extends bbn\models\cls\basic{
   public function remove(string $id){
     if( $id_menu = $this->get_id_menu($id) ){
       $this->options->remove($id);
-      $this->cache_delete($id_menu);
+      $this->delete_cache($id_menu);
       return true;
     }
     return false;
@@ -235,7 +235,7 @@ class menus extends bbn\models\cls\basic{
     if( $id_menu = $this->get_id_menu($id_parent) ){
       $cfg['id_parent'] = $id_parent;
       if ( $res = $this->options->add($cfg) ){
-        $this->cache_delete($id_menu);
+        $this->delete_cache($id_menu);
       }
       return $res;
     }
@@ -250,8 +250,8 @@ class menus extends bbn\models\cls\basic{
    */
   public function set(string $id, array $cfg){
     if( $id_menu = $this->get_id_menu($id) ){
-      if ( $res = $this->options->set($id, $cfg) ){
-        $this->cache_delete($id_menu);
+      if ( $res = $this->options->set($id, $cfg) ){      
+        $this->delete_cache($id_menu);
       }
       return $res;
     }
@@ -266,7 +266,7 @@ class menus extends bbn\models\cls\basic{
   {
     if( $id_menu = $this->get_id_menu($id) ){
       if ( $res = $this->options->set_text($id, $cfg) ){
-        $this->cache_delete($id_menu);
+        $this->delete_cache($id_menu);
       }
       return $res;
     }
@@ -285,9 +285,9 @@ class menus extends bbn\models\cls\basic{
   }
 
   public function delete_cache($id_menu){
+    $this->options->delete_cache($id_menu, true);
     return $this->cache_delete($id_menu);
   }
 
 
 }
-

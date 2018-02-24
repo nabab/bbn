@@ -27,6 +27,7 @@ class grid extends bbn\models\cls\cache
     $limit,
     $order,
     $filters = [],
+    $observer = false,
     $query,
     $table,
     $group_by,
@@ -99,6 +100,9 @@ class grid extends bbn\models\cls\cache
         }
       }
       if ( $this->query ){
+        if ( isset($cfg['observer'], $cfg['observer']['request']) ){
+          $this->observer = $cfg['observer'];
+        }
         // Additional fields (not in the result but accepted for filtering and ordering
         if ( isset($cfg['extra_fields']) ){
           $this->extra_fields = $cfg['extra_fields'];
@@ -253,6 +257,20 @@ class grid extends bbn\models\cls\cache
     return 0;
   }
 
+  public function get_observer():? array
+  {
+    if ( $this->observer ){
+      $obs = new bbn\appui\observer($this->db);
+      if ( $id_obs = $obs->add($this->observer) ){
+        return [
+          'id' => $id_obs,
+          'value' => $obs->get_result($id_obs)
+        ];
+      }
+      return null;
+    }
+  }
+
   public function get_datatable(){
     $r = [
       'data' => [],
@@ -262,6 +280,9 @@ class grid extends bbn\models\cls\cache
       'time' => []
     ];
     if ( $this->db->check() && ($total = $this->get_total()) ){
+      if ( $this->observer ){
+        $r['observer'] = $this->get_observer();
+      }
       $r['total'] = $total;
       $r['data'] = $this->get_data();
       $r['time']['query'] = $this->query_time;

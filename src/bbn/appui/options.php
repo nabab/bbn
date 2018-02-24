@@ -1291,20 +1291,26 @@ class options extends bbn\models\cls\db
             // Keeping in the option cfg properties which don't exist in the parent
             $cfg = array_merge(\is_array($cfg) ? $cfg : [], $parent_cfg);
             $cfg['inherit_from'] = $p;
+            $cfg['frozen'] = 1;
+
+            break;
           }
-          break;
+          else if ( ($parent_cfg['inheritance'] === 'default') && !count($cfg) ){
+            $cfg = $parent_cfg;
+            $cfg['inherit_from'] = $p;
+          }
         }
       }
-      $mandatories = ['show_code', 'show_alias', 'show_value', 'show_icon', 'sortable', 'allow_children'];
+      $mandatories = ['show_code', 'show_alias', 'show_value', 'show_icon', 'sortable', 'allow_children', 'frozen'];
       foreach ( $mandatories as $m ){
-        $cfg[$m] = empty($cfg[$m]) ? null : 1;
+        $cfg[$m] = empty($cfg[$m]) ? 0 : 1;
       }
       $cfg['id'] = $id;
       $mandatories = ['desc', 'inheritance'];
       foreach ( $mandatories as $m ){
         $cfg[$m] = empty($cfg[$m]) ? '' : $cfg[$m];
       }
-      $mandatories = ['model', 'view', 'schema', 'form', 'default_value'];
+      $mandatories = ['controller', 'schema', 'form', 'default_value'];
       foreach ( $mandatories as $m ){
         $cfg[$m] = empty($cfg[$m]) ? null : $cfg[$m];
       }
