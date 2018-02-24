@@ -26,7 +26,7 @@
     "tedivm/jshrink": "dev-master",
     "phpmailer/phpmailer": "dev-master",
     "tijsverkoyen/css-to-inline-styles": "dev-master",
-    "phpdocumentor/reflection-docblock": "2.0.4",
+    "phpdocumentor/reflection-docblock": "dev-master",
     "kasp3r/link-preview": "dev-master",
     "wapmorgan/unified-archive": "dev-master",
     "pear/archive_tar": "dev-master",
