@@ -19,7 +19,7 @@
     "squizlabs/php_codesniffer": "dev-master",
     "natxet/CssMin": "dev-master",
     "sunra/php-simple-html-dom-parser": "dev-master",
-    "leafo/lessphp": "0.4.0",
+    "leafo/lessphp": "0.5.0",
     "richthegeek/phpsass": "dev-master",
     "justinrainbow/json-schema": "dev-master",
     "coffeescript/coffeescript": "dev-master",
@@ -33,7 +33,6 @@
     "alchemy/zippy": "dev-master",
     "gettext/gettext": "dev-master",
     "nesbot/carbon": "dev-master",
-    "gears/pdf": "dev-master",
     "nikic/php-parser": "dev-master",
     "sabre/dav": "dev-master",
     "erusev/parsedown": "dev-master"
