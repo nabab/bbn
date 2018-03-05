@@ -682,7 +682,7 @@ class tasks extends bbn\models\cls\db{
 
   public function get_comments($id_task){
     if ( $this->exists($id_task) ){
-      $note = new bbn\appui\notes($this->db);
+      $note = new \bbn\appui\notes($this->db);
       $ids = $this->get_comments_ids($id_task);
       $r = [];
       foreach ( $ids as $id_note ){
@@ -695,7 +695,7 @@ class tasks extends bbn\models\cls\db{
 
   public function get_comment($id_task, $id_note){
     if ( $this->exists($id_task) ){
-      $note = new bbn\appui\notes($this->db);
+      $note = new \bbn\appui\notes($this->db);
       return $note->get($id_note);
     }
     return false;
@@ -707,10 +707,11 @@ class tasks extends bbn\models\cls\db{
 
   public function comment($id_task, array $cfg){
     if ( $this->exists($id_task) && !empty($cfg) ){
-      $note = new bbn\appui\notes($this->db);
+      $note = new \bbn\appui\notes($this->db);
       $r = $note->insert(
         (empty($cfg['title']) ? '' : $cfg['title']),
-        (empty($cfg['text']) ? '' : $cfg['text'])
+        (empty($cfg['text']) ? '' : $cfg['text']),
+        self::get_option_id('tasks', 'types', 'notes', 'appui')
       );
       if ( $r ){
         $this->db->insert('bbn_tasks_notes', [

@@ -38,6 +38,7 @@ class notes extends bbn\models\cls\db
         'notes' => [
           'id' => 'id',
           'id_parent' => 'id_parent',
+          'id_type' => 'id_type',
           'private' => 'private',
           'creator' => 'creator',
           'active' => 'active'
@@ -135,10 +136,14 @@ class notes extends bbn\models\cls\db
     return false;
   }
 
-  public function insert($title, $content, $private = false, $locked = false, $parent = null){
+  public function insert($title, $content, $type = NULL, $private = false, $locked = false, $parent = NULL){
+    if ( is_null($type) ){
+      $type = self::get_option_id('personal', 'types', 'notes', 'appui');
+    }
     if ( ($usr = bbn\user::get_instance()) &&
       $this->db->insert('bbn_notes', [
         'id_parent' => $parent,
+        'id_type' => $type,
         'private' => !empty($private) ? 1 : 0,
         'locked' => !empty($locked) ? 1 : 0,
         'creator' => $usr->get_id()
@@ -233,6 +238,49 @@ class notes extends bbn\models\cls\db
     }
     return $res;
   }
+
+  public function get_by_type($type = NULL, $id_user = false, $limit = 0, $start = 0){
+    $db =& $this->db;
+    $cf =& $this->class_cfg;
+    $res = [];
+    if ( is_null($type) ){
+      $type = $type = self::get_option_id('personal', 'types', 'notes', 'appui');
+    }
+    if ( \bbn\str::is_uid($type) && is_int($limit) && is_int($start) ){
+      $where = [
+        $cf['arch']['notes']['id_type'] => $type
+      ];
+      if ( \bbn\str::is_uid($id_user) ){
+        $where[$cf['arch']['notes']['creator']] = $id_user;
+      }
+      $notes = $db->rselect_all($cf['table'], [], $where, false, $limit, $start);
+      foreach ( $notes as $note ){
+        if ( $version = $db->rselect($cf['tables']['versions'], [], [
+          'id_note' => $note[$cf['arch']['notes']['id']],
+          'version' => $this->latest($note[$cf['arch']['notes']['id']])
+        ]) ){
+          if ( $medias = $db->get_column_values($cf['tables']['medias'], $cf['arch']['medias']['id_media'], [
+            $cf['arch']['medias']['id_note'] => $note[$cf['arch']['notes']['id']]
+          ]) ){
+            $version['medias'] = [];
+            foreach ( $medias as $m ){
+              if ( $med = $db->rselect('bbn_medias', [], ['id' => $m]) ){
+                if ( \bbn\str::is_json($med['content']) ){
+                  $med['content'] = json_decode($med['content']);
+                }
+                $version['medias'][] = $med;
+              }
+            }
+          }
+          $res[] = $version;
+        }
+      }
+      return $res;
+    }
+    return false;
+  }
+
+
 
   public function browse($cfg){
     if ( isset($cfg['limit']) && ($user = bbn\user::get_instance()) ){

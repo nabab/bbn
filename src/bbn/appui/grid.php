@@ -61,7 +61,7 @@ class grid extends bbn\models\cls\cache
                     $post['limit'] : 20;
 
     $this->filters = $post['filters'] ?? [];
-    $this->order = $post['order'] ?? [];
+    $this->order = $post['order'] ?? ($cfg['order'] ?? []);
     // Simple configuration using a string
     if ( \is_string($cfg) ){
       // If there is a space it is a query
@@ -280,6 +280,12 @@ class grid extends bbn\models\cls\cache
       'time' => []
     ];
     if ( $this->db->check() && ($total = $this->get_total()) ){
+      if ( $this->start ){
+        $r['start'] = $this->start;
+      }
+      if ( $this->limit ){
+        $r['limit'] = $this->limit;
+      }
       if ( $this->observer ){
         $r['observer'] = $this->get_observer();
       }
@@ -392,11 +398,14 @@ class grid extends bbn\models\cls\cache
                 $res[] = [$field, $is_number || $is_uid ? '=' : 'LIKE', $f['value']];
               }
               else{
-                if ( $is_number ){
+                if ( isset($f['exp']) ){
+                  $res .= '= '.$f['exp'];
+                }
+                else if ( $is_number ){
                   $res .= '= '.$f['value'];
                 }
                 else if ( $is_uid ){
-                  $res .= "= UNHEX('".$this->db->escape_value($f['value'])."')";
+                  $res .= "= UNHEX('".$f['value']."')";
                 }
                 else{
                   $res .= "LIKE '".$this->db->escape_value($f['value'])."'";
@@ -409,11 +418,14 @@ class grid extends bbn\models\cls\cache
                 $res[] = [$field, $is_number || $is_uid ? '!=' : 'NOT LIKE', $f['value']];
               }
               else{
-                if ( $is_number ){
+                if ( isset($f['exp']) ){
+                  $res .= '!= '.$f['exp'];
+                }
+                else if ( $is_number ){
                   $res .= '!= '.$f['value'];
                 }
                 else if ( $is_uid ){
-                  $res .= "!= UNHEX('".$this->db->escape_value($f['value'])."')";
+                  $res .= "!= UNHEX('".$f['value']."')";
                 }
                 else{
                   $res .= "NOT LIKE '".$this->db->escape_value($f['value'])."'";
@@ -443,6 +455,9 @@ class grid extends bbn\models\cls\cache
               if ( $array ){
                 $res[] = [$field, '>=', $f['value']];
               }
+              else if ( isset($f['exp']) ){
+                $res .= '>= '.$f['exp'];
+              }
               else if ( $is_number ){
                 $res .= '>= '.$f['value'];
               }
@@ -454,6 +469,9 @@ class grid extends bbn\models\cls\cache
             case 'gt':
               if ( $array ){
                 $res[] = [$field, '>', $f['value']];
+              }
+              else if ( isset($f['exp']) ){
+                $res .= '> '.$f['exp'];
               }
               else if ( $is_number ){
                 $res .= '> '.$f['value'];
@@ -467,6 +485,9 @@ class grid extends bbn\models\cls\cache
               if ( $array ){
                 $res[] = [$field, '<=', $f['value']];
               }
+              else if ( isset($f['exp']) ){
+                $res .= '<= '.$f['exp'];
+              }
               else if ( $is_number ){
                 $res .= '<= '.$f['value'];
               }
@@ -478,6 +499,9 @@ class grid extends bbn\models\cls\cache
             case 'lt':
               if ( $array ){
                 $res[] = [$field, '<', $f['value']];
+              }
+              else if ( isset($f['exp']) ){
+                $res .= '< '.$f['exp'];
               }
               else if ( $is_number ){
                 $res .= '< '.$f['value'];

@@ -28,11 +28,6 @@ class observer extends bbn\models\cls\db
   private static $time_done = false;
 
   /**
-   * @var string The user's UID.
-   */
-  private $id_user;
-
-  /**
    * Sets the time limit (to none) once and for all.
    */
   private static function set_time_limit(): void
@@ -64,31 +59,38 @@ class observer extends bbn\models\cls\db
   /**
    * Executes a request (kept in the observer) and returns its (single) result.
    *
-   * @param string $request
-   * @param array|null $params
+   * @param string $request The SQL Query to be xecuted.
+   * @param string|null $params The base64 encoded of a JSON string of the parameters to send with the query.
    * @return mixed
    */
-  private function _exec(string $request, array $params = null)
+  private function _exec(string $request, string $params = null)
   {
     if ( $this->check() ){
-      $res = $params ? $this->db->get_one($request, $params) : $this->db->get_one($request);
+      $res = !empty($params) ? $this->db->get_one($request, array_map(function($p){
+        return base64_decode($p);
+      }, json_decode($params, true))) : $this->db->get_one($request);
       return md5((string)$res);
     }
     return null;
+  }
+
+  private static function sanitize_params(array $params = null)
+  {
+    return $params ? json_encode(array_map(function($p){return base64_encode($p);}, $params)) : '';
   }
 
   /**
    * Returns the ID of an observer with public = 1 and with similar request and params.
    *
    * @param string $request
-   * @param array|null $params
+   * @param string $params
    * @return null|string
    */
-  private function _get_id(string $request, array $params = null):? string
+  private function _get_id(string $request, string $params):? string
   {
     if ( $this->check() ){
       return $this->db->select_one('bbn_observers', 'id', [
-        'id_string' => $this->get_id_string($request, $params),
+        'id_string' => $this->_get_id_string($request, $params),
         'public' => 1
       ]);
     }
@@ -96,29 +98,29 @@ class observer extends bbn\models\cls\db
   }
 
   /**
-   * Returns the ID of an observer for the current user and with similar request and params.
+   * Returns the ID of an observer for the current token and with similar request and params.
    *
    * @param string $request
-   * @param array|null $params
+   * @param string $params
    * @return null|string
    */
-  private function _get_user_id(string $request, array $params = null):? string
+  private function _get_token_id(string $request, string $params):? string
   {
-    if ( $this->id_user && $this->check() ){
-      $id_string = $this->get_id_string($request, $params);
+    if ( \defined('BBN_USER_TOKEN_ID') && $this->check() ){
+      $id_string = $this->_get_id_string($request, $params);
       return $this->db->get_one(<<<MYSQL
         SELECT o.id
         FROM bbn_observers AS o
           LEFT JOIN bbn_observers AS ro
             ON o.id_alias = ro.id
-        WHERE o.id_user = ?
+        WHERE o.id_token = ?
         AND (
           o.id_string LIKE ?
           OR ro.id_string LIKE ?
         )
 MYSQL
         ,
-        hex2bin($this->id_user),
+        hex2bin(BBN_USER_TOKEN_ID),
         $id_string,
         $id_string);
     }
@@ -135,7 +137,7 @@ MYSQL
    * @param string|null $name
    * @return null|string
    */
-  private function _insert(string $request, array $params = null, int $duration = 30, bool $public = false, string
+  private function _insert(string $request, string $params, int $duration = 30, bool $public = false, string
   $name = null):? string
   {
     if ( $this->check() ){
@@ -145,9 +147,9 @@ MYSQL
       $res = $this->_exec($request, $params);
       if ( $public && $this->db->insert('bbn_observers', [
         'request' => trim($request),
-        'params' => $params ? json_encode($params) : null,
+        'params' => $params ?: null,
         'name' => $name,
-        'id_user' => $public ? null : $this->id_user,
+        'id_token' => $public ? null : BBN_USER_TOKEN_ID,
         'public' => $public ? 1 : 0,
         'result' => md5($res)
       ]) ){
@@ -155,6 +157,18 @@ MYSQL
       }
     }
     return null;
+  }
+
+  /**
+   * Returns the unique string representing the request + the parameters (md5 of concatenated strings).
+   *
+   * @param string $request
+   * @param array|null $params
+   * @return string
+   */
+  private function _get_id_string(string $request, string $params = null): string
+  {
+    return md5(trim($request).$params);
   }
 
   /**
@@ -182,22 +196,6 @@ MYSQL
   public function __construct(bbn\db $db)
   {
     parent::__construct($db);
-    if ( $usr = bbn\user::get_instance() ){
-      $this->id_user = $usr->get_id();
-    }
-
-  }
-
-  /**
-   * Returns the unique string representing the request + the parameters (md5 of concatenated strings).
-   *
-   * @param string $request
-   * @param array|null $params
-   * @return string
-   */
-  public function get_id_string(string $request, array $params = null): string
-  {
-    return md5(trim($request).($params ? json_encode($params) : ''));
   }
 
   /**
@@ -234,56 +232,57 @@ MYSQL
    */
   public function add(array $cfg):? string
   {
-    if ( $this->id_user  && (null !== $cfg['request']) ){
+    if ( \defined('BBN_USER_TOKEN_ID') && (null !== $cfg['request']) ){
       $id_alias = false;
       // We perform the check after the query has been executed.
       if ( $this->check() ){
+        $params = self::sanitize_params($cfg['params'] ?? []);
+        $t = new bbn\util\timer();
+        $t->start();
+        $res = $this->_exec($cfg['request'], $params);
+        $duration = (int)ceil($t->stop() * 1000);
         // If it is a public observer it will be the id_alias and the main observer
         if (
           !empty($cfg['public']) &&
-          !($id_alias = $this->_get_id($cfg['request'], $cfg['params'] ?? null))
+          !($id_alias = $this->_get_id($cfg['request'], $params))
         ){
-          $t = new bbn\util\timer();
-          $t->start();
-          $res = $this->_exec($cfg['request'], $cfg['params'] ?? null);
-          $duration = (int)ceil($t->stop() * 1000);
           if ( $this->db->insert('bbn_observers', [
             'request' => trim($cfg['request']),
-            'params' => null === $cfg['params'] ? null : json_encode($cfg['params']),
+            'params' => $params ?: null,
             'name' => $cfg['name'] ?? null,
             'duration' => $duration,
-            'id_user' => null,
+            'id_token' => null,
             'public' => 1,
             'result' => $res
           ]) ){
             $id_alias = $this->db->last_id();
           }
         }
-        if ( $id_obs = $this->_get_user_id($cfg['request'], $cfg['params']?? null) ){
+        // Getting the ID of the observer corresponding to current token
+        if ( $id_obs = $this->_get_token_id($cfg['request'], $params) ){
+          //
           $this->check_result($id_obs);
           return $id_obs;
         }
         else if ( $id_alias ){
           if ( $this->db->insert('bbn_observers', [
-            'id_user' => $this->id_user,
+            'id_token' => BBN_USER_TOKEN_ID,
             'public' => 0,
-            'id_alias' => $id_alias
+            'id_alias' => $id_alias,
+            'next' => null,
+            'result' => $res
           ]) ){
             return $this->db->last_id();
           }
         }
         else{
-          $t = new bbn\util\timer();
-          $t->start();
-          $res = $this->_exec($cfg['request'], $cfg['params'] ?? null);
-          $duration = (int)ceil($t->stop() * 1000);
           if ( $this->db->insert('bbn_observers', [
             'request' => trim($cfg['request']),
-            'params' => null === $cfg['params'] ? null : json_encode($cfg['params']),
+            'params' => $params ?: null,
             'name' => $cfg['name'] ?? null,
             'duration' => $duration,
-            'id_user' => $this->id_user,
-            'public' => 1,
+            'id_token' => BBN_USER_TOKEN_ID,
+            'public' => 0,
             'result' => $res
           ]) ){
             return $this->db->last_id();
@@ -344,25 +343,39 @@ MYSQL
   /**
    *
    *
-   * @param string|null $id_user
+   * @param string|null $id_token
    * @return array
    */
-  public function get_list(string $id_user = null): array
+  public function get_list(string $id_token = null): array
   {
-    $field = $id_user ? 'id_user' : 'public';
+    $field = $id_token ? 'o.id_token' : 'public';
     $sql = <<<MYSQL
 SELECT o.id, o.id_alias,
 IFNULL(ro.request, o.request) AS request, IFNULL(ro.params, o.params) AS params,
-IFNULL(ro.id_user, o.id_user) AS id_user, IFNULL(ro.public, o.public) AS public,
+IFNULL(ro.id_token, o.id_token) AS id_token, IFNULL(ro.public, o.public) AS public,
 IFNULL(ro.frequency, o.frequency) AS frequency, IFNULL(ro.result, o.result) AS result,
 IFNULL(ro.next, o.next) AS next
 FROM bbn_observers AS o
   LEFT JOIN bbn_observers AS ro
     ON o.id_alias = ro.id
 WHERE $field = ?
-AND next < NOW()
+AND ((o.next < NOW() AND o.next IS NOT NULL)
+OR (ro.next < NOW() AND ro.next IS NOT NULL))
 MYSQL;
-    return $this->db->get_rows($sql, $id_user ?: 1);
+    return $this->db->get_rows($sql, $id_token ? hex2bin($id_token) : 1);
+  }
+
+  /**
+   * Deletes the given observer for the current token
+   * @param string $id
+   * @return int
+   */
+  public function token_delete($id): int
+  {
+    if ( \defined('BBN_USER_TOKEN_ID') && $this->check() ){
+      return $this->db->delete('bbn_observers', ['id' => $id, 'id_token' => BBN_USER_TOKEN_ID]);
+    }
+    return 0;
   }
 
   /**
@@ -383,51 +396,59 @@ MYSQL;
     }
     file_put_contents(self::get_file(), 'running');
     $sql = <<<MYSQL
-SELECT o.id, o.id_user, GROUP_CONCAT(HEX(aliases.id) SEPARATOR ',') AS id_aliases
+SELECT o.id, o.id_token, o.request, o.params,
+GROUP_CONCAT(HEX(aliases.id) SEPARATOR ',') AS aliases,
+GROUP_CONCAT(HEX(aliases.id_token) SEPARATOR ',') AS tokens,
+GROUP_CONCAT(aliases.result SEPARATOR ',') AS results
 FROM bbn_observers AS o
   LEFT JOIN bbn_observers AS aliases
     ON aliases.id_alias = o.id
 WHERE o.id_alias IS NULL
 AND o.next < NOW()
 GROUP BY o.id
+HAVING COUNT(aliases.id) > 0
+OR o.id_token IS NOT NULL
 MYSQL;
 
     $diff = [];
     while ( file_exists(self::get_file()) ){
       foreach ( $this->db->get_rows($sql) as $d ){
+        $aliases = $d['aliases'] ? explode(',', $d['aliases']) : [];
+        $tokens = $d['tokens'] ? explode(',', $d['tokens']) : [];
+        $results = $d['results'] ? explode(',', $d['results']) : [];
+        $real_result = $this->_exec($d['request'], $d['params']);
+        $db_result = $this->get_result($d['id']);
+        // Only if tokens are attached to the
         bbn\x::dump('Really checking');
-        if ( !$this->check_result($d['id']) ){
-          $res = $this->get_result($d['id']);
-          if ( $d['id_user'] ){
-            if ( null === $diff[$d['id_user']] ){
-              $diff[$d['id_user']] = [];
+        if ( $real_result !== $db_result ){
+          $this->db->update('bbn_observers', ['result' => $real_result], ['id' => $d['id']]);
+          if ( $d['id_token'] ){
+            if ( !isset($diff[$d['id_token']]) ){
+              $diff[$d['id_token']] = [];
             }
-            $diff[$d['id_user']][] = [
+            $diff[$d['id_token']][] = [
               'id' => $d['id'],
-              'result' => $res,
+              'result' => $real_result
             ];
           }
-          if ( $d['id_aliases'] ){
-            $aliases = explode(',', $d['id_aliases']);
-            foreach ( $aliases as $a ){
-              if ( $id_user = $this->db->select_one('bbn_observers', 'id_user', [
-                'id' => $a
-              ]) ){
-                if ( null === $diff[$id_user] ){
-                  $diff[$id_user] = [];
-                }
-                $diff[$id_user][] = [
-                  'id' => strtolower($a),
-                  'result' => $res,
-                  'id_user' => $id_user
-                ];
-              }
+        }
+        foreach ( $aliases as $i => $a ){
+          if ( $real_result !== $results[$i] ){
+            $this->db->update('bbn_observers', ['result' => $real_result], ['id' => strtolower($a)]);
+            $t = strtolower($tokens[$i]);
+            if ( !isset($diff[$t]) ){
+              $diff[$t] = [];
             }
+            $diff[$t][] = [
+              'id' => strtolower($a),
+              'result' => $real_result
+            ];
+            bbn\x::dump('Real Diff', $diff[$t], $t);
           }
         }
         $this->_update_next($d['id']);
       }
-      bbn\x::dump('Sleeping and flushing');
+      echo '.';
       $this->db->flush();
       @ob_end_flush();
       sleep(1);

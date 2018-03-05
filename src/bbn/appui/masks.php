@@ -118,7 +118,7 @@ class masks extends bbn\models\cls\db {
   {
     if (
       $this->o->exists($id_type) &&
-      ($id_note = $this->notes->insert($title, $content))
+      ($id_note = $this->notes->insert($title, $content, $this->o->from_code('masks', 'types', 'notes', 'appui')))
     ){
       $data = [
         'id_note' => $id_note,

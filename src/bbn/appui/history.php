@@ -495,7 +495,7 @@ MYSQL;
    * @param null $column
    * @return null|array
    */
-  public static function get_prev_update(string $table, string $id, $from_when, $column = null): ?array
+  public static function get_prev_update(string $table, string $id, $from_when, $column = null): array
   {
     if (
       bbn\str::check_name($table) &&
@@ -566,7 +566,7 @@ MYSQL;
    * @param array $columns
    * @return array|null
    */
-  public static function get_row_back(string $table, string $id, $when, array $columns = []): ?array
+  public static function get_row_back(string $table, string $id, $when, array $columns = []):? array
   {
     if ( !($when = self::valid_date($when)) ){
       self::_report_error("The date $when is incorrect", __CLASS__, __LINE__);
@@ -581,7 +581,7 @@ MYSQL;
       if ( $when >= time() ){
         return $db->rselect($table, $columns, [
           self::$structures[$table]['primary'] => $id
-        ]);
+        ]) ?: null;
       }
       if ( $when < self::get_creation_date($table, $id) ){
         return null;
@@ -663,7 +663,7 @@ MYSQL;
    * @param null $column
    * @return float|null
    */
-  public static function get_last_date(string $table, string $id, $column = null): ?float
+  public static function get_last_date(string $table, string $id, $column = null): float
   {
     if ( $db = self::_get_db() ){
       if (
@@ -936,10 +936,35 @@ MYSQL;
             // (if it exists in active state, DB will return its standard error but it's not this class' problem)
             if ( isset($cfg['values'][$s['primary']]) ){
               // We check if a row exists and get its content
-              if ( $all = self::$db->rselect($table, [], [
+              $all = self::$db->rselect($table, [], [
                 $s['primary'] => $cfg['values'][$s['primary']],
                 self::$column => 0
-              ]) ){
+              ]);
+              if ( empty($all) ){
+                $modelize = $db->modelize(self::get_table_cfg($table));
+                $keys = $modelize['keys'];
+                unset($keys['PRIMARY']);
+                foreach ( $keys as $key ){
+                  if ( !empty($key['unique']) && !empty($key['columns']) ){
+                    $fields = [];
+                    $exit = false;
+                    foreach ( $key['columns'] as $col ){
+                      if ( is_null($cfg['values'][$col]) ){
+                        $exit = true;
+                      }
+                      $fields[$col] = $cfg['values'][$col];
+                    }
+                    if ( $exit ){
+                      continue;
+                    }
+                    $fields[self::$column] = 0;
+                    if ( $all = self::$db->rselect($table, [], $fields) ){
+                      break;
+                    }
+                  }
+                }
+              }
+              if ( !empty($all) ){
                 // We won't execute the after trigger
                 $cfg['trig'] = false;
                 // Real query's execution will be prevented
@@ -964,9 +989,10 @@ MYSQL;
                 $update[self::$column] = 1;
                 if ( \count($update) > 0 ){
                   $cfg['value'] = self::$db->update($table, $update, [
-                    $s['primary'] => $cfg['values'][$s['primary']],
+                    $s['primary'] => !empty($all) ? $all[$s['primary']] : $cfg['values'][$s['primary']],
                     self::$column => 0
                   ]);
+                  self::$db->set_last_insert_id(!empty($all) ? $all[$s['primary']] : $cfg['values'][$s['primary']]);
                 }
               }
               else {

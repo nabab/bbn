@@ -195,7 +195,7 @@ class user extends models\cls\basic
    * Creates a magic string which will be used for hotlinks
    * The hash is stored in the database
    * The key is sent to the user
-   *
+   *7
 	 * @return array
 	 */
   public static function make_magic_string(){
@@ -667,13 +667,14 @@ class user extends models\cls\basic
         $this->set_error(18);
       }
     }
-    else if ( $this->check_session() ){
-
+    else {
+      $this->check_session();
     }
   }
 
   /**
-   * Returns the salt string kept in session
+   * Returns the salt string kept in session.
+   *
    * @return string
    */
   public function get_salt(){
@@ -681,7 +682,8 @@ class user extends models\cls\basic
   }
 
   /**
-   * Confronts the given string with the salt string kept in session
+   * Confronts the given string with the salt string kept in session.
+   *
    * @return boolean
    */
   public function check_salt($salt){
@@ -689,7 +691,8 @@ class user extends models\cls\basic
   }
 
   /**
-   * Returns the current user's configuration
+   * Returns the current user's configuration.
+   *
    * @param string $attr
    * @return mixed
    */
@@ -709,29 +712,45 @@ class user extends models\cls\basic
   }
 
   /**
-   * Returns the current configuration of this very class
+   * Returns the current configuration of this very class.
+   *
    * @return array
    */
-  public function get_class_cfg(){
+  public function get_class_cfg(): array
+  {
     return $this->class_cfg;
   }
 
-  public function get_tables(){
+  /**
+   * Returns the list of tables used by the current class.
+   * @return array
+   */
+  public function get_tables():? array
+  {
     if ( !empty($this->class_cfg) ){
       return $this->class_cfg['tables'];
     }
-    return false;
-  }
-
-  public function get_fields($table=''){
-    if ( !empty($this->class_cfg) ){
-      return empty($table) ? $this->class_cfg['arch'] : ( isset($this->class_cfg['arch'][$table]) ? $this->class_cfg['arch'][$table] : false );
-    }
-    return false;
+    return null;
   }
 
   /**
-   * Changes the data in the user's table
+   * Returns the list of fields of the given table, and if empty the list of fields for each table.
+   * @param string $table
+   * @return array|null
+   */
+  public function get_fields(string $table = ''):? array
+  {
+    if ( !empty($this->class_cfg) ){
+      if ( $table ){
+        return $this->class_cfg['arch'][$table] ?? null;
+      }
+      return $this->class_cfg['arch'];
+    }
+    return null;
+  }
+
+  /**
+   * Changes the data in the user's table.
    *
    * @param array $d The new data
    *
@@ -766,19 +785,34 @@ class user extends models\cls\basic
     return false;
   }
 
-  public function get_password($st){
+
+  /**
+   * Encrypts the given string to match the password.
+   *
+   * @param string $st
+   * @return string
+   */
+  public function get_password(string $st): string
+  {
     return $this->_crypt($st);
   }
 
-  public function is_just_login(){
+  /**
+   * Returns true after the log in moment.
+   *
+   * @return bool
+   */
+  public function is_just_login()
+  {
     return $this->just_login;
   }
 
 	/**
-   * Sets the given attribute(s) in the user's session
+   * Sets the given attribute(s) in the user's session.
+   *
 	 * @return $this
 	 */
-  public function set_session($attr){
+  public function set_session(){
     if ( $this->session->has(self::$un) ){
       $args = \func_get_args();
       if ( (\count($args) === 2) && \is_string($args[0]) ){
@@ -794,7 +828,8 @@ class user extends models\cls\basic
   }
 
 	/**
-   * Returns session property from the session's user array
+   * Returns session property from the session's user array.
+   *
    * @param null|string The property to get
 	 * @return mixed
 	 */
@@ -805,18 +840,22 @@ class user extends models\cls\basic
   }
 
 	/**
-   * Checks if the given attribute exists in the user's session
+   * Checks if the given attribute exists in the user's session.
+   *
 	 * @return bool
 	 */
-  public function has_session($attr){
+  public function has_session($attr): bool
+  {
     return $this->session->has(self::$un, $attr);
   }
 
   /**
-   * Saves the session config in the database
+   * Saves the session config in the database.
+   *
 	 * @return $this
 	 */
-  public function save_session(){
+  public function save_session(): self
+  {
     $p =& $this->class_cfg['arch']['sessions'];
     $id_session = $this->get_id_session();
     //die(var_dump($id_session, $this->check()));
@@ -840,9 +879,13 @@ class user extends models\cls\basic
   }
 
   /**
-	 * @return $this
-	 */
-  public function close_session($with_session = false){
+   * Closes the session in the database, and if $with_session is true, deletes also the session information.
+   *
+   * @param bool $with_session
+   * @return user
+   */
+  public function close_session($with_session = false): self
+  {
     $p =& $this->class_cfg['arch']['sessions'];
     $this->db->update($this->class_cfg['tables']['sessions'], [
         $p['ip_address'] => $this->ip_address,
@@ -870,7 +913,8 @@ class user extends models\cls\basic
    * Returns false if the max number of connections attempts has been reached
    * @return bool
    */
-  public function check_attempts(){
+  public function check_attempts(): bool
+  {
     if ( !isset($this->cfg) ){
       return false;
     }
@@ -886,7 +930,8 @@ class user extends models\cls\basic
    * Saves the user's config in the cfg field of the users' table
    * return connection
    */
-  public function save_cfg(){
+  public function save_cfg()
+  {
     if ( $this->check() ){
       $this->db->update(
           $this->class_cfg['tables']['users'],
@@ -1109,37 +1154,6 @@ class user extends models\cls\basic
     return false;
   }
 
-  /**
-   *
-   * @todo Not used but maybe a good idea
-   * @return void
-   */
-  public function get_token($st)
-  {
-    if ( $this->auth && $this->session->has(self::$sn, 'tokens', $st) ){
-      $this->session->transform(function(&$a) use($st){
-        if ( isset($a['tokens']) ){
-          $a['tokens'][$st] = str::genpwd();
-        }
-      }, self::$sn);
-      return $this->session->get(self::$sn, 'tokens', $st);
-    }
-    return false;
-  }
-
-  /**
-   *
-   * @todo Not used but maybe a good idea
-   * @return void
-   */
-  public function check_token($st, $token)
-  {
-    if ( $this->auth && $this->session->has(self::$sn, 'tokens', $st) ){
-      return $this->session->get(self::$sn, 'tokens', $st) === $token;
-    }
-    return false;
-  }
-
   public function online_count(int $minutes = 2): int
   {
     if ( $this->auth ){
@@ -1166,6 +1180,49 @@ FROM bbn_users
     ");
     }
     return [];
+  }
+
+  public function create_token(){
+    if ( $this->check_session() ){
+      $token = md5(\bbn\str::genpwd());
+      $mt = microtime(true);
+      if ( $this->db->insert('bbn_users_tokens', [
+        'id_session' => $this->get_id_session(),
+        'content' => $token,
+        'creation' => $mt,
+        'last' => $mt
+      ]) ){
+        $id_token = $this->db->last_id();
+        file\dir::create_path(BBN_USER_PATH.'tmp/tokens/'.$id_token);
+        return $token;
+      }
+    }
+    return false;
+  }
+
+  public function get_token_id(string $token):? string
+  {
+    if ( $id_session = $this->get_id_session() ){
+      if ( $id = $this->db->select_one('bbn_users_tokens', 'id', [
+        'id_session' => $id_session,
+        'content' => $token
+      ]) ){
+        $this->refresh_token($id);
+        return $id;
+      }
+    }
+    return null;
+  }
+
+  public function refresh_token($id): int
+  {
+    return $this->db->update('bbn_users_tokens', [
+      'last' => microtime(true)
+    ], [
+      'id' => $id,
+      'id_session' => $this->get_id_session()
+    ]);
+
   }
 
 
