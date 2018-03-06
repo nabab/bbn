@@ -90,8 +90,8 @@ class observer extends bbn\models\cls\db
   {
     if ( $this->check() ){
       return $this->db->select_one('bbn_observers', 'id', [
-        'id_string' => $this->_get_id_string($request, $params),
-        'public' => 1
+        'request' => trim($request),
+        'params' => $params
       ]);
     }
     return null;
@@ -168,7 +168,7 @@ MYSQL
    */
   private function _get_id_string(string $request, string $params = null): string
   {
-    return md5(trim($request).$params);
+    return md5(trim($request).($params ?: ''));
   }
 
   /**

@@ -64,6 +64,18 @@ class i18n extends bbn\models\cls\db{
     return array_unique($res);
   }
 
+  public function analyze_html(string $js): array
+  {
+    $res = [];
+    if ( $tmp = \Gettext\Translations::fromString($js, ['functions' => ['_' => 'gettext']]) ){
+      foreach ( $tmp->getIterator() as $r => $tr ){
+        $res[] = $tr->getOriginal();
+      }
+      $this->parser->mergeWith($tmp);
+    }
+    return array_unique($res);
+  }
+
   public function analyze_file(string $file): array
   {
     $res = [];
@@ -88,7 +100,7 @@ class i18n extends bbn\models\cls\db{
     return $res;
   }
 
-  public function analyse_folder(string $folder = '.', bool $deep = false): array
+  public function analyze_folder(string $folder = '.', bool $deep = false): array
   {
     $res = [];
     if (  \is_dir($folder) ){
@@ -106,6 +118,10 @@ class i18n extends bbn\models\cls\db{
       }
     }
     return $res;
+  }
+
+  public function get_parser(){
+    return $this->parser;
   }
 
   public function result(){
