@@ -97,9 +97,11 @@ class view{
 					return $this->content;
         case 'less':
 			    $less = new \lessc();
-					return $less->compile($this->content);
+			    $less->setImportDir(["/home/thomas/domains/cdn.thomas.lan/public_html/lib/kendo-ui-core/2018.1.117/styles/web"]);
+          return $less->compile($this->content);
         case 'scss':
-					return $this->content;
+          $scss = new \Leafo\ScssPhp\Compiler();
+					return $scss->compile($this->content);
 				case 'html':
 					return empty($data) ? $this->content : bbn\tpl::render($this->content, $data);
         case 'php':

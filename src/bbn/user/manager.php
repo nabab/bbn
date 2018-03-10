@@ -183,7 +183,7 @@ You can click the following link to access directly your account:<br>
       }
     }
     $gr = !empty($group_id) && \bbn\str::is_uid($group_id) ?
-      "AND " . $db->cfn($arch['groups']['id'], $tables['groups'], 1) . " = '" . hex2bin($group_id) ."'" : '';
+      "AND " . $db->cfn($arch['groups']['id'], $tables['groups'], 1) . " = UNHEX('$group_id')" : '';
     $sql .= "
       MAX({$db->cfn($s['last_activity'], $tables['sessions'], 1)}) AS {$db->csn($s['last_activity'], 1)},
       COUNT({$db->cfn($s['sess_id'], $tables['sessions'])}) AS {$db->csn($s['sess_id'], 1)}

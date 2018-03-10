@@ -620,12 +620,27 @@ class controller implements api{
     return $this;
   }
 
-	public function set_title($title){
-		$this->obj->title = $title;
-		return $this;
-	}
+  public function set_title($title){
+    $this->obj->title = $title;
+    return $this;
+  }
 
-	public function js_data($data){
+  public function set_icon(string $icon){
+    $this->obj->icon = $icon;
+    return $this;
+  }
+
+  public function set_color(string $bg = null, string $txt = null){
+    if ( $bg ){
+      $this->obj->bcolor = $bg;
+    }
+    if ( $txt ){
+      $this->obj->fcolor = $txt;
+    }
+    return $this;
+  }
+
+  public function js_data($data){
 		if ( bbn\x::is_assoc($data) ){
 			if ( !isset($this->obj->data) ){
 				$this->obj->data = $data;
@@ -743,8 +758,16 @@ class controller implements api{
 		return false;
 	}
 
-	public function action(){
-	  $this->obj = $this->add_data(['res' => ['success' => false]])->add_data($this->post)->get_object_model('', $this->data);
+  public function action(){
+    $this->obj = $this->add_data(['res' => ['success' => false]])->add_data($this->post)->get_object_model('', $this->data);
+  }
+
+  public function cached_action($ttl = 60){
+    $this->obj = \bbn\x::to_object(
+      $this->add_data(['res' => ['success' => false]])
+           ->add_data($this->post)
+           ->get_cached_model('', $this->data, $ttl)
+    );
   }
 
   /**

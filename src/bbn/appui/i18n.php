@@ -131,6 +131,17 @@ class i18n extends bbn\models\cls\db{
     return array_unique($this->translations);
   }
 
+//get the id of the project from the id_option of a path
+  public function get_id_project($id_option, $projects){
+    foreach( $projects as $i => $p ){
+      foreach ( $projects[$i]['path'] as $idx => $pa ){
+        if ( $projects[$i]['path'][$idx]['id_option'] === $id_option ){
+          return $projects[$i]['id'];
+        }
+      }
+    }
+  }
+
   public function update_db(){
     foreach ( $this->result() as $st ){
       $this->db->insert_ignore();
@@ -142,6 +153,18 @@ class i18n extends bbn\models\cls\db{
       $this->db->insert_ignore();
     }
   }
+
+  //get primaries langs from option
+  public function get_primaries_langs(){
+    $uid_languages =  options::get_instance()->from_code('languages', 'i18n', 'appui');
+    $languages = options::get_instance()->full_tree($uid_languages);
+    $primaries = array_values(array_filter($languages['items'], function($v) {
+      return $v['primary'] == '1';
+    }));
+    return $primaries;
+  }
+
+
 
 
 

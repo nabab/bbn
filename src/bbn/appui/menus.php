@@ -201,9 +201,9 @@ class menus extends bbn\models\cls\basic{
   {
     $parents = $this->options->parents($id);
     $root = $this->get_option_root();
-    foreach ($parents as $i => $val) {
+    foreach ( $parents as $i => $val ){
       if ( $val === $root ){
-        return $parents[$i + 2];
+        return $parents[$i - 2];
       }
     }
     return null;
@@ -249,8 +249,8 @@ class menus extends bbn\models\cls\basic{
    * @return bool|int
    */
   public function set(string $id, array $cfg){
-    if( $id_menu = $this->get_id_menu($id) ){
-      if ( $res = $this->options->set($id, $cfg) ){      
+    if ( $id_menu = $this->get_id_menu($id) ){
+      if ( $res = $this->options->set($id, $cfg) ){
         $this->delete_cache($id_menu);
       }
       return $res;
@@ -285,6 +285,7 @@ class menus extends bbn\models\cls\basic{
   }
 
   public function delete_cache($id_menu){
+    //die(\bbn\x::dump($this->options->text($id_menu)));
     $this->options->delete_cache($id_menu, true);
     return $this->cache_delete($id_menu);
   }

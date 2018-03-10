@@ -274,6 +274,14 @@ class router {
 
       // navigation (we are in dom and dom is default or we are not in dom, i.e. public)
       if ( (($mode === 'dom') && (BBN_DEFAULT_MODE === 'dom')) || ($mode !== 'dom') ){
+        // if $tmp is a plugin root index setting $this->alt_root and rerouting to reprocess the path
+        if ( isset($this->routes['root'][$tmp]) ){
+          $tmp2 = $this->alt_root ?: '';
+          $this->set_alt_root($tmp);
+          if ( !$tmp2 || ($tmp2 !== $this->alt_root) ){
+            return $this->route($path, $mode);
+          }
+        }
         // Checking first if the specific route exists (through $routes['alias'])
         if ( $this->has_route($tmp) ){
           $real_path = $this->get_route($tmp);
@@ -308,11 +316,6 @@ class router {
             $file = $this->get_alt_root($mode).$name.'/home.php';
             $root = $this->get_alt_root($mode);
           }
-        }
-        // if $tmp is a plugin root index setting $this->alt_root and rerouting to reprocess the path
-        else if ( isset($this->routes['root'][$tmp]) ){
-          $this->set_alt_root($tmp);
-          return $this->route($path, $mode);
         }
       }
       // Full DOM requested

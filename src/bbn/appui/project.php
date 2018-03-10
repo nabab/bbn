@@ -89,7 +89,10 @@ class project extends bbn\models\cls\db{
       $rows[$i]['constant'] = options::get_instance()->parent($rows[$i]['id_option'])['code'];
     }
     return $rows;
+  }
 
+  public function get_path_text($t){
+    return  options::get_instance()->text($t);
   }
 
   public function get_langs_id(){

@@ -1264,7 +1264,7 @@ class x
    * @param string $separator
    * @return array
    */
-  public static function from_csv($st, $delimiter = ';', $enclosure = '"', $separator = PHP_EOL){
+  public static function from_csv($st, $delimiter = ',', $enclosure = '"', $separator = PHP_EOL){
     if ( \is_string($st) ){
       $r = [];
       $lines = explode($separator, $st);

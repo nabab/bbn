@@ -195,8 +195,9 @@ class mvc implements mvc\api{
     }
     ob_start();
     $r = require($bbn_inc_file);
-    $output = ob_get_contents();
-    ob_end_clean();
+    if ( $output = ob_get_contents() ){
+      ob_end_clean();
+    }
     if ( $bbn_is_super ){
       return $r ? true : false;
     }

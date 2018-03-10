@@ -280,8 +280,6 @@ class notes extends bbn\models\cls\db
     return false;
   }
 
-
-
   public function browse($cfg){
     if ( isset($cfg['limit']) && ($user = bbn\user::get_instance()) ){
       /** @var bbn\db $db */

@@ -32,21 +32,25 @@ class cron extends bbn\models\cls\basic{
           $mail,
           $ok = false,
           $enabled = true,
-          $timeout = 50;
+          $timeout = 50,
+          $path,
+          $f;
 
   public function __construct(bbn\mvc\controller $ctrl, $cfg = []){
     if ( \is_array($cfg) ){
       $this->ctrl = $ctrl;
-      $this->db = $ctrl->db;
-      $vars = get_class_vars('\\bbn\appui\\cron');
-      foreach ( $cfg as $cf_name => $cf_value ){
-        if ( array_key_exists($cf_name, $vars) ){
-          $this->{$cf_name} = $cf_value;
+      if ( $this->path = $this->ctrl->plugin_data_path() ){
+        $this->db = $ctrl->db;
+        $vars = get_class_vars('\\bbn\appui\\cron');
+        foreach ( $cfg as $cf_name => $cf_value ){
+          if ( array_key_exists($cf_name, $vars) ){
+            $this->{$cf_name} = $cf_value;
+          }
         }
+        $this->timer = new bbn\util\timer();
+        $this->table = $this->prefix.'cron';
+        $this->jtable = $this->prefix.'cron_journal';
       }
-      $this->timer = new bbn\util\timer();
-      $this->table = $this->prefix.'cron';
-      $this->jtable = $this->prefix.'cron_journal';
     }
   }
 
@@ -168,15 +172,32 @@ class cron extends bbn\models\cls\basic{
         SELECT *
         FROM {$this->table}
         WHERE `active` = 1
-        AND `next` < ?".
+        AND `next` < NOW()".
         ( \is_int($id_cron) ? " AND `id` = $id_cron" : "" )."
         ORDER BY `priority` ASC, `next` ASC
-        LIMIT 1",
-        date('Y-m-d H:i:s'))) ){
+        LIMIT 1")) ){
       // Dans cfg: timeout, et soit: latency, minute, hour, day of month, day of week, date
       $data['cfg'] = json_decode($data['cfg'], 1);
       return $data;
     }
+  }
+
+  public function get_next_rows(int $limit = 10, int $sec = 1):? array
+  {
+    if ( $this->check() ){
+      return array_map(function($a){
+        $cfg = $a['cfg'] ? json_decode($a['cfg'], true) : [];
+        unset($a['cfg']);
+        return \bbn\x::merge_arrays($a, $cfg);
+      }, $this->db->get_rows("
+        SELECT *
+        FROM {$this->table}
+        WHERE `active` = 1
+        AND `next` < DATE_ADD(NOW(), INTERVAL $sec SECOND)
+        ORDER BY `priority` ASC, `next` ASC
+        LIMIT $limit"));
+    }
+    return null;
   }
 
   public function is_running($id_cron){

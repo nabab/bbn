@@ -634,7 +634,9 @@ class tasks extends bbn\models\cls\db{
     }
     return [
       'data' => $data,
-      'total' => $this->db->get_one("SELECT COUNT(*) FROM ($sql) AS t", $args)
+      'total' => $this->db->get_one("SELECT COUNT(*) FROM ($sql) AS t", $args),
+      'start' => $start,
+      'limit' => $num
     ];
   }
 

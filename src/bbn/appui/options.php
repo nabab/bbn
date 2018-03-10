@@ -340,16 +340,18 @@ class options extends bbn\models\cls\db
    * @param boolean $deep If sets to true, children's cache will also be deleted
    * @return options
    */
-  public function delete_cache($id = null, $deep = false): self
+  public function delete_cache($id = null, $deep = false, $subs = false): self
   {
     if ( bbn\str::is_uid($id) ){
-      if ( $deep && ($items = $this->items($id)) ){
+      if ( ($deep || !$subs) && ($items = $this->items($id)) ){
         foreach ( $items as $it ){
-          $this->delete_cache($it, true);
+          $this->delete_cache($it, $deep, true);
         }
       }
       $this->cache_delete($id);
-      $this->cache_delete($this->get_id_parent($id));
+      if ( !$subs ){
+        $this->cache_delete($this->get_id_parent($id));
+      }
     }
     else{
       $this->cache_delete_all();

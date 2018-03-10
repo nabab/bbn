@@ -21,37 +21,43 @@ class admin extends bbn\models\cls\db
    * @param $token
    * @return string
    */
-  public function get_user_from_token($token_id): string
+  public function get_user_from_token($token_id):? string
   {
-    return $this->db->get_one(<<<MYSQL
-SELECT bbn_users.id
-FROM bbn_users_tokens
-  JOIN bbn_users_sessions
-    ON bbn_users_tokens.id_session = bbn_users_sessions.id
-  JOIN bbn_users
-    ON bbn_users.id = bbn_users_sessions.id_user
-WHERE bbn_users_tokens.id = ?
+    if ( bbn\str::is_uid($token_id) ){
+      return $this->db->get_one(<<<MYSQL
+  SELECT bbn_users.id
+  FROM bbn_users_tokens
+    JOIN bbn_users_sessions
+      ON bbn_users_tokens.id_session = bbn_users_sessions.id
+    JOIN bbn_users
+      ON bbn_users.id = bbn_users_sessions.id_user
+  WHERE bbn_users_tokens.id = ?
 MYSQL
-      , hex2bin($token_id));
+        , hex2bin($token_id));
+    }
+    return null;
   }
 
   /**
    * @param $id_user
    * @return array
    */
-  public function get_user_tokens($id_user): array
+  public function get_user_tokens($id_user):? array
   {
-    $sql = <<<MYSQL
-SELECT bbn_users_tokens.id, bbn_users_tokens.content
-FROM bbn_users
-  JOIN bbn_users_sessions
-    ON bbn_users_sessions.id_user = bbn_users.id
-  JOIN bbn_users_tokens
-    ON bbn_users_tokens.id_session = bbn_users_sessions.id
-WHERE bbn_users.id = ?
-AND bbn_users_sessions.opened = 1
+    if ( bbn\str::is_uid($id_user) ){
+      $sql = <<<MYSQL
+  SELECT bbn_users_tokens.id, bbn_users_tokens.content
+  FROM bbn_users
+    JOIN bbn_users_sessions
+      ON bbn_users_sessions.id_user = bbn_users.id
+    JOIN bbn_users_tokens
+      ON bbn_users_tokens.id_session = bbn_users_sessions.id
+  WHERE bbn_users.id = ?
+  AND bbn_users_sessions.opened = 1
 MYSQL;
-    return $this->db->get_rows($sql, hex2bin($id_user));
+      return $this->db->get_rows($sql, hex2bin($id_user));
+    }
+    return null;
   }
 
   /**
