@@ -59,7 +59,7 @@ class enc
 
 
   /**
-	 * @return void 
+	 * @return string
 	 */
 	public static function crypt($string, $key='')
 	{
@@ -81,7 +81,7 @@ class enc
 	}
 
 	/**
-	 * @return void 
+	 * @return string
 	 */
 	public static function decrypt($encpass, $key='')
 	{

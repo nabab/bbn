@@ -14,7 +14,7 @@ use bbn;
  * @package bbn\user
  * Way to manipulate and access user tables without using user as argument (without auth, for CLI purpose)
  */
-class admin extends bbn\models\cls\db
+class users extends bbn\models\cls\db
 {
 
   /**
@@ -70,9 +70,40 @@ SELECT bbn_users_tokens.id, id_user
 FROM bbn_users_tokens
   JOIN bbn_users_sessions
     ON bbn_users_sessions.id = id_session
-WHERE FROM_UNIXTIME(`last`) < (NOW() - INTERVAL 10 MINUTE)
+WHERE `last` < (UNIX_TIMESTAMP() - 600)
 MYSQL;
     return $this->db->get_rows($sql);
   }
+
+  public function online_count(int $minutes = 2): int
+  {
+    if ( $this->auth ){
+      return $this->db->get_one("
+SELECT COUNT(DISTINCT bbn_users.id)
+FROM bbn_users
+	JOIN bbn_users_sessions
+    ON id_user = bbn_users.id
+    AND opened = 1
+    AND last_activity > (NOW() - INTERVAL $minutes MINUTE)
+    ");
+    }
+    return 0;
+  }
+
+  public function online_list(int $minutes = 2): array
+  {
+    if ( $this->auth ){
+      return $this->db->get_col_array("
+SELECT DISTINCT bbn_users.id
+FROM bbn_users
+	JOIN bbn_users_sessions
+    ON id_user = bbn_users.id
+    AND opened = 1
+    AND last_activity > (NOW() - INTERVAL $minutes MINUTE)
+    ");
+    }
+    return [];
+  }
+
 
 }

@@ -97,7 +97,6 @@ class view{
 					return $this->content;
         case 'less':
 			    $less = new \lessc();
-			    $less->setImportDir(["/home/thomas/domains/cdn.thomas.lan/public_html/lib/kendo-ui-core/2018.1.117/styles/web"]);
           return $less->compile($this->content);
         case 'scss':
           $scss = new \Leafo\ScssPhp\Compiler();

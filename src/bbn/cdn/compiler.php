@@ -89,6 +89,7 @@ class compiler extends bbn\models\cls\basic
 
         case 'less':
           $less = new \lessc();
+          $less->setImportDir([\dirname(BBN_PUBLIC.$file)]);
           if ( is_file(\dirname(BBN_PUBLIC.$file).'/_def.less') ){
             $c = file_get_contents((\dirname(BBN_PUBLIC.$file).'/_def.less')).$c;
           }
@@ -106,16 +107,17 @@ class compiler extends bbn\models\cls\basic
 
         case 'scss':
           try{
-            $sass = new \SassParser([
-              'cache' => false,
-              'syntax' => 'scss'
-            ]);
-            $c = $sass->toCss($c, false);
+            $scss = new \Leafo\ScssPhp\Compiler();
+            $scss->setImportPaths([\dirname(BBN_PUBLIC.$file)]);
+            if ( is_file(\dirname(BBN_PUBLIC.$file).'/_def.scss') ){
+              $c = file_get_contents((\dirname(BBN_PUBLIC.$file).'/_def.scss')).$c;
+            }
+            $c = $scss->compile($c);
             if ( $c && !$test ){
               $c = $this->minify($c, 'css');
             }
           }
-          catch ( \SassException $e ){
+          catch ( \Exception $e ){
             $this->set_error("Error during SCSS compilation with file $file :".$e->getMessage());
             die($e->getMessage());
           }

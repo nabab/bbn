@@ -53,7 +53,7 @@ class observer extends bbn\models\cls\db
         self::$path = __DIR__.'/';
       }
     }
-    return self::$path.'appui-observer.txt';
+    return self::$path.'plugins/appui-cron/appui-observer.txt';
   }
 
   /**
@@ -224,11 +224,9 @@ MYSQL
         $t->start();
         $res = $this->_exec($request, $params);
         $duration = (int)ceil($t->stop() * 1000);
+        $id_alias = $this->_get_id($request, $params);
         // If it is a public observer it will be the id_alias and the main observer
-        if (
-          !empty($cfg['public']) &&
-          !($id_alias = $this->_get_id($request, $params))
-        ){
+        if ( !empty($cfg['public']) && !$id_alias ){
           if ( $this->db->insert('bbn_observers', [
             'request' => $request,
             'params' => $params ?: null,
@@ -394,15 +392,15 @@ OR o.id_token IS NOT NULL
 MYSQL;
 
     $diff = [];
-    while ( file_exists($file) && file_exists(self::get_file()) ){
+    if ( file_exists($file) && file_exists(self::get_file()) ){
       foreach ( $this->db->get_rows($sql) as $d ){
-        $aliases = $d['aliases'] ? explode(',', $d['aliases']) : [];
-        $tokens = $d['tokens'] ? explode(',', $d['tokens']) : [];
+        $aliases = $d['aliases'] ? array_map(function($a){return strtolower($a);}, explode(',', $d['aliases'])) : [];
+        $tokens = $d['tokens'] ? array_map(function($a){return strtolower($a);}, explode(',', $d['tokens'])) : [];
         $results = $d['results'] ? explode(',', $d['results']) : [];
         $real_result = $this->_exec($d['request'], $d['params']);
         $db_result = $this->get_result($d['id']);
         // Only if tokens are attached to the
-        bbn\x::dump('Really checking');
+        echo '+';
         if ( $real_result !== $db_result ){
           $this->db->update('bbn_observers', ['result' => $real_result], ['id' => $d['id']]);
           if ( $d['id_token'] ){
@@ -417,30 +415,28 @@ MYSQL;
         }
         foreach ( $aliases as $i => $a ){
           if ( $real_result !== $results[$i] ){
-            $this->db->update('bbn_observers', ['result' => $real_result], ['id' => strtolower($a)]);
-            $t = strtolower($tokens[$i]);
+            $this->db->update('bbn_observers', ['result' => $real_result], ['id' => $a]);
+            $t = $tokens[$i];
             if ( !isset($diff[$t]) ){
               $diff[$t] = [];
             }
             $diff[$t][] = [
-              'id' => strtolower($a),
+              'id' => $a,
               'result' => $real_result
             ];
-            bbn\x::dump('Real Diff', $diff[$t], $t);
           }
         }
         $this->_update_next($d['id']);
       }
       echo '.';
       $this->db->flush();
-      @ob_end_flush();
-      sleep(1);
       if ( count($diff) ){
-        bbn\x::dump('Returning diff!');
+        bbn\x::dump('Returning diff!', $diff);
         unlink(self::get_file());
         return $diff;
       }
       @ob_end_flush();
+      return true;
     }
     bbn\x::dump('Canceling observer', $file);
   }

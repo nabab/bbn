@@ -28,6 +28,7 @@ class cron extends bbn\models\cls\basic{
           $prefix = 'bbn_',
           $primary = 'id',
           $date = false,
+          $ctrl,
           $last_rows = false,
           $mail,
           $ok = false,
@@ -36,26 +37,61 @@ class cron extends bbn\models\cls\basic{
           $path,
           $f;
 
-  public function __construct(bbn\mvc\controller $ctrl, $cfg = []){
-    if ( \is_array($cfg) ){
-      $this->ctrl = $ctrl;
-      if ( $this->path = $this->ctrl->plugin_data_path() ){
-        $this->db = $ctrl->db;
-        $vars = get_class_vars('\\bbn\appui\\cron');
-        foreach ( $cfg as $cf_name => $cf_value ){
-          if ( array_key_exists($cf_name, $vars) ){
-            $this->{$cf_name} = $cf_value;
-          }
+  /*
+  private function _exec($file, $data=[]){
+    $this->ctrl->data = $data;
+    $this->obj = new \stdClass();
+    ob_start();
+    $this->ctrl->incl($file, false);
+    $output = ob_get_contents();
+    ob_end_clean();
+    return $output;
+  }
+  */
+  public static function execute($path, string $output = null){
+    if ( $output ){
+      exec(sprintf('php -f router.php %s > %s 2>&1 &', $path, $output));
+    }
+    exec(sprintf('php -f router.php %s 2>&1 /dev/null &', $path));
+  }
+
+  public function __construct(bbn\mvc\controller $ctrl, array $cfg = []){
+    $this->ctrl = $ctrl;
+    // It must be called from a plugin (appui-cron actually)
+    if ( $this->path = $this->ctrl->plugin_data_path() ){
+      $this->db = $ctrl->db;
+      $vars = get_class_vars('\\bbn\appui\\cron');
+      foreach ( $cfg as $cf_name => $cf_value ){
+        if ( array_key_exists($cf_name, $vars) ){
+          $this->{$cf_name} = $cf_value;
         }
-        $this->timer = new bbn\util\timer();
-        $this->table = $this->prefix.'cron';
-        $this->jtable = $this->prefix.'cron_journal';
       }
+      $this->timer = new bbn\util\timer();
+      $this->table = $this->prefix.'cron';
+      $this->jtable = $this->prefix.'cron_journal';
+    }
+  }
+
+  public function poll(){
+    if ( $path = $this->ctrl->plugin_data_path() ){
+      $poller_output = $path.'poller/'.date('YmdHis').'.txt';
+      file_put_contents($path.'.poll', (string)date('Y-m-d H:i:s'));
+      //file_put_contents($path, (string)date('Y-m-d H:i:s'));
+      self::execute($this->ctrl->plugin_url('appui-cron').'/poller', $poller_output);
+    }
+  }
+
+  public function launch(){
+    if ( $path = $this->ctrl->plugin_data_path() ){
+      //$runner_output = $path.'cron/'.date('YmdHis').'.txt';
+      file_put_contents($path.'.cron', (string)date('Y-m-d H:i:s'));
+      //file_put_contents($path, (string)date('Y-m-d H:i:s'));
+      self::execute($this->ctrl->plugin_url('appui-cron').'/cron');
     }
   }
 
   public function check(){
-    if ( $this->table && $this->db ){
+    if ( $this->ctrl && $this->db ){
       return 1;
     }
     return false;
@@ -168,12 +204,13 @@ class cron extends bbn\models\cls\basic{
   }
 
   public function get_next($id_cron = null){
+    var_dump($this->check());
     if ( $this->check() && ($data = $this->db->get_row("
         SELECT *
         FROM {$this->table}
         WHERE `active` = 1
         AND `next` < NOW()".
-        ( \is_int($id_cron) ? " AND `id` = $id_cron" : "" )."
+        ( bbn\str::is_uid($id_cron) ? " AND `id` = '$id_cron'" : '' )."
         ORDER BY `priority` ASC, `next` ASC
         LIMIT 1")) ){
       // Dans cfg: timeout, et soit: latency, minute, hour, day of month, day of week, date
@@ -240,7 +277,7 @@ class cron extends bbn\models\cls\basic{
       }
       else {
         $id = $this->start($cron['id']);
-        $output = $this->_exec($cron['file'], $cron['cfg']);
+        $output = self::execute($cron['file'], $cron['cfg']);
         $time = $this->finish($id, $output);
         bbn\x::dump("Execution of ".$cron['file']." (Journal ID: $id) in $time secs", $output);
         return $time;
@@ -274,13 +311,12 @@ class cron extends bbn\models\cls\basic{
     return false;
   }
 
-  private function _exec($file, $data=[]){
-    $this->ctrl->data = $data;
-    $this->obj = new \stdClass();
-    ob_start();
-    $this->ctrl->incl($file, false);
-    $output = ob_get_contents();
-    ob_end_clean();
-    return $output;
+  public function activate($id_cron){
+    return $this->db->update($this->table, ['active' => 1], ['id' => $id_cron]);
   }
+
+  public function deactivate($id_cron){
+    return $this->db->update($this->table, ['active' => 0], ['id' => $id_cron]);
+  }
+
 }

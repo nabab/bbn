@@ -216,11 +216,7 @@ class environment {
         $this->set_params($argv[1]);
         if ( isset($argv[2]) ){
           if ( !isset($argv[3]) && \bbn\str::is_json($argv[2]) ){
-            $json = json_decode($argv[2], 1);
-            // Data are "normalized" i.e. types are changed through bbn\str::correct_types
-            $this->post = array_map(function ($a){
-              return bbn\str::correct_types($a);
-            }, $json);
+            $this->post = json_decode($argv[2], 1);
           }
           else{
             for ( $i = 2, $iMax = \count($argv); $i < $iMax; $i++ ){
