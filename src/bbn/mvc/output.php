@@ -31,7 +31,14 @@ class output {
     }
 
     if ( $this->mode === 'cli' ){
-      die(isset($this->obj->content) ? $this->obj->content : "no output");
+      if ( !headers_sent() && !$this->obj->content ){
+        exit('No output...');
+      }
+      if ( $this->obj->content ){
+        echo $this->obj->content;
+      }
+      @ob_end_flush();
+      exit();
     }
 
     if ( isset($this->obj->prescript) ){

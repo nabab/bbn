@@ -77,32 +77,58 @@ MYSQL;
 
   public function online_count(int $minutes = 2): int
   {
-    if ( $this->auth ){
       return $this->db->get_one("
 SELECT COUNT(DISTINCT bbn_users.id)
 FROM bbn_users
 	JOIN bbn_users_sessions
     ON id_user = bbn_users.id
     AND opened = 1
-    AND last_activity > (NOW() - INTERVAL $minutes MINUTE)
-    ");
-    }
-    return 0;
+    AND last_activity > (NOW() - INTERVAL $minutes MINUTE)");
   }
 
   public function online_list(int $minutes = 2): array
   {
-    if ( $this->auth ){
-      return $this->db->get_col_array("
+    return $this->db->get_col_array("
 SELECT DISTINCT bbn_users.id
 FROM bbn_users
 	JOIN bbn_users_sessions
     ON id_user = bbn_users.id
     AND opened = 1
+    AND last_activity > (NOW() - INTERVAL $minutes MINUTE)");
+  }
+
+  public function full_online_list(int $minutes = 2): array
+  {
+    $res = [];
+    if ( $users = $this->db->get_rows("
+SELECT bbn_users.*
+FROM bbn_users
+	JOIN bbn_users_sessions
+    ON id_user = bbn_users.id
+    AND opened = 1
     AND last_activity > (NOW() - INTERVAL $minutes MINUTE)
-    ");
+    GROUP BY bbn_users.id")
+    ){
+      foreach ( $users as $user ){
+        $res[] = [
+          'id' => $user['id'],
+          'name' => $user['nom']
+        ];
+      }
     }
-    return [];
+    return $res;
+  }
+
+  public function clean_tokens(): int {
+    $tot = 0;
+    foreach ( $this->get_old_tokens() as $t ){
+      @bbn\file\dir::delete(BBN_DATA_PATH."users/$t[id_user]/tmp/tokens/$t[id]", true);
+      if ( $this->db->delete('bbn_users_tokens', ['id' => $t['id']]) ){
+        $tot++;
+      }
+    }
+    return $tot;
+
   }
 
 

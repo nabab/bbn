@@ -98,6 +98,7 @@ class dir extends bbn\models\cls\basic
 		*/
 	public static function get_dirs($dir, $hidden = false){
     $dir = self::clean($dir);
+    clearstatcache();
 		if ( is_dir($dir) && ((substr(basename($dir), 0, 1) !== '.') || $hidden) ){
 			$dirs = [];
 			$fs = scandir($dir);
@@ -137,6 +138,7 @@ class dir extends bbn\models\cls\basic
 	public static function get_files($dir, $including_dirs = false, $hidden = false)
 	{
     $dir = self::clean($dir);
+    clearstatcache();
     if ( is_dir($dir) && ((substr(basename($dir), 0, 1) !== '.') || $hidden) ){
 			$files = [];
 			$fs = scandir($dir);
@@ -471,6 +473,7 @@ class dir extends bbn\models\cls\basic
     if ( !$dir || !\is_string($dir) ){
       return false;
     }
+    clearstatcache();
     if ( !is_dir($dir) ){
       $bits = explode('/', $dir);
       $num = \count($bits);
@@ -479,7 +482,7 @@ class dir extends bbn\models\cls\basic
         if ( !empty($b) ){
           $path .= $b;
           if ( !is_dir($path) ){
-            if ( !@mkdir($path) ){
+            if ( !mkdir($path) && !is_dir($path) ){
               return false;
             }
             if ( $chmod ){

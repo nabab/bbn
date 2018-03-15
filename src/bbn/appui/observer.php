@@ -59,7 +59,7 @@ class observer extends bbn\models\cls\db
   /**
    * Executes a request (kept in the observer) and returns its (single) result.
    *
-   * @param string $request The SQL Query to be xecuted.
+   * @param string $request The SQL Query to be executed.
    * @param string|null $params The base64 encoded of a JSON string of the parameters to send with the query.
    * @return mixed
    */
@@ -115,7 +115,7 @@ class observer extends bbn\models\cls\db
   private function _get_token_id(string $request, string $params):? string
   {
     if ( \defined('BBN_USER_TOKEN_ID') && $this->check() ){
-      $sql = "
+      $sql = '
         SELECT `o`.`id`
         FROM bbn_observers AS `o`
           LEFT JOIN bbn_observers AS `ro`
@@ -124,13 +124,13 @@ class observer extends bbn\models\cls\db
         AND (
           (
             `o`.`request` LIKE ?
-            AND `o`.`params` ".($params ? 'LIKE ?' : 'IS NULL')."
+            AND `o`.`params` '.($params ? 'LIKE ?' : 'IS NULL').'
           )
           OR (
             `ro`.`request` LIKE ?
-            AND `ro`.`params` ".($params ? 'LIKE ?' : 'IS NULL')."
+            AND `ro`.`params` '.($params ? 'LIKE ?' : 'IS NULL').'
           )
-        )";
+        )';
        $args = [hex2bin(BBN_USER_TOKEN_ID), $request, $request];
        if ( $params ){
          array_splice($args, 2, 0, $params);
@@ -365,37 +365,38 @@ MYSQL;
    *
    * @return array
    */
-  public function observe($file)
+  public function observe()
   {
-    self::set_time_limit();
-    if ( is_file(self::get_file()) ){
-      unlink(self::get_file());
-      sleep(5);
-      if ( is_file(self::get_file()) ){
-        die(bbn\x::dump('Another similar process is already running'));
-      }
-    }
-    file_put_contents(self::get_file(), 'running');
-    $sql = <<<MYSQL
-SELECT o.id, o.id_token, o.request, o.params,
-GROUP_CONCAT(HEX(aliases.id) SEPARATOR ',') AS aliases,
-GROUP_CONCAT(HEX(aliases.id_token) SEPARATOR ',') AS tokens,
-GROUP_CONCAT(aliases.result SEPARATOR ',') AS results
-FROM bbn_observers AS o
-  LEFT JOIN bbn_observers AS aliases
-    ON aliases.id_alias = o.id
-WHERE o.id_alias IS NULL
-AND o.next < NOW()
-GROUP BY o.id
-HAVING COUNT(aliases.id) > 0
-OR o.id_token IS NOT NULL
+    if ( $this->check() ){
+      $sql = <<<MYSQL
+  SELECT o.id, o.id_token, o.request, o.params,
+  GROUP_CONCAT(HEX(aliases.id) SEPARATOR ',') AS aliases,
+  GROUP_CONCAT(HEX(aliases.id_token) SEPARATOR ',') AS tokens,
+  GROUP_CONCAT(aliases.result SEPARATOR ',') AS results
+  FROM bbn_observers AS o
+    LEFT JOIN bbn_observers AS aliases
+      ON aliases.id_alias = o.id
+  WHERE o.id_alias IS NULL
+  AND o.next < NOW()
+  GROUP BY o.id
+  HAVING COUNT(aliases.id) > 0
+  OR o.id_token IS NOT NULL
 MYSQL;
 
-    $diff = [];
-    if ( file_exists($file) && file_exists(self::get_file()) ){
+      $diff = [];
+      //MAX: 2000
+      $this->db->query('SET @@group_concat_max_len = ?', 2000 * 32);
       foreach ( $this->db->get_rows($sql) as $d ){
-        $aliases = $d['aliases'] ? array_map(function($a){return strtolower($a);}, explode(',', $d['aliases'])) : [];
-        $tokens = $d['tokens'] ? array_map(function($a){return strtolower($a);}, explode(',', $d['tokens'])) : [];
+        $aliases = $d['aliases'] ?
+          array_map(function ($a){
+            return strtolower($a);
+          }, explode(',', $d['aliases'])) :
+          [];
+        $tokens = $d['tokens'] ?
+          array_map(function ($a){
+            return strtolower($a);
+          }, explode(',', $d['tokens'])) :
+          [];
         $results = $d['results'] ? explode(',', $d['results']) : [];
         $real_result = $this->_exec($d['request'], $d['params']);
         $db_result = $this->get_result($d['id']);
@@ -404,6 +405,7 @@ MYSQL;
         if ( $real_result !== $db_result ){
           $this->db->update('bbn_observers', ['result' => $real_result], ['id' => $d['id']]);
           if ( $d['id_token'] ){
+            \bbn\x::log(['D', $d], 'error');
             if ( !isset($diff[$d['id_token']]) ){
               $diff[$d['id_token']] = [];
             }
@@ -413,9 +415,11 @@ MYSQL;
             ];
           }
         }
+        \bbn\x::log(['ALIASES', $aliases], 'error');
         foreach ( $aliases as $i => $a ){
           if ( $real_result !== $results[$i] ){
             $this->db->update('bbn_observers', ['result' => $real_result], ['id' => $a]);
+            \bbn\x::log(['T', $a, $tokens[$i], $i], 'error');
             $t = $tokens[$i];
             if ( !isset($diff[$t]) ){
               $diff[$t] = [];
@@ -430,14 +434,10 @@ MYSQL;
       }
       echo '.';
       $this->db->flush();
-      if ( count($diff) ){
-        bbn\x::dump('Returning diff!', $diff);
-        unlink(self::get_file());
-        return $diff;
-      }
       @ob_end_flush();
       return true;
     }
-    bbn\x::dump('Canceling observer', $file);
+    bbn\x::dump('Canceling observer: '.date('H:i:s Y-m-d'));
+    return false;
   }
 }

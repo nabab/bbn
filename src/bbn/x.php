@@ -677,7 +677,12 @@ class x
     if (!\is_array($ar) || \count($ar) == 0) return false;
     $max = current($ar)[$key];
     foreach ( $ar as $a ){
-      if( $a[$key] > $max ){
+      if ( is_float($a['$key']) || is_float($max) ){
+        if ( self::compare_floats($a[$key], $max, '>') ){
+          $max = $a[$key];
+        }
+      }
+      else if( $a[$key] > $max ){
         $max = $a[$key];
       }
     }
@@ -1427,5 +1432,26 @@ class x
       $st = bin2hex($st);
     }
     return $st;
+  }
+
+  public static function compare_floats($v1, $v2, string $operator = '===', int $precision = 4): bool
+  {
+    $v1 = round((float)$v1 * pow(10, $precision));
+    $v2 = round((float)$v2 * pow(10, $precision));
+    switch ($operator ){
+      case '===':
+        return $v1 === $v2;
+      case '==':
+        return $v1 == $v2;
+      case '>=':
+        return $v1 >= $v2;
+      case '<=':
+        return $v1 <= $v2;
+      case '>':
+        return $v1 > $v2;
+      case '<':
+        return $v1 < $v2;
+    }
+    return false;
   }
 }

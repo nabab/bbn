@@ -17,7 +17,7 @@ namespace bbn;
  * @todo Implement Cache for session requests' results?
  */
 if ( !\defined('BBN_DATA_PATH') ){
-  die("BBN_DATA_PATH must be defined");
+  exit('The constant BBN_DATA_PATH must be defined');
 }
 class user extends models\cls\basic
 {
@@ -524,6 +524,7 @@ class user extends models\cls\basic
       }
     }
     else{
+
       die(var_dump($this->get_error()));
     }
     return $this->auth;
@@ -849,6 +850,24 @@ class user extends models\cls\basic
     return $this->session->has(self::$un, $attr);
   }
 
+  public function update_activity(): self
+  {
+    $id_session = $this->get_id_session();
+    //die(var_dump($id_session, $this->check()));
+    if ( $id_session && $this->check() ){
+      $p =& $this->class_cfg['arch']['sessions'];
+      $this->db->update($this->class_cfg['tables']['sessions'], [
+        $p['last_activity'] => date('Y-m-d H:i:s')
+      ], [
+        $p['id'] => $id_session
+      ]);
+    }
+    else{
+      $this->set_error(13);
+    }
+    return $this;
+  }
+
   /**
    * Saves the session config in the database.
    *
@@ -856,11 +875,11 @@ class user extends models\cls\basic
 	 */
   public function save_session(): self
   {
-    $p =& $this->class_cfg['arch']['sessions'];
     $id_session = $this->get_id_session();
     //die(var_dump($id_session, $this->check()));
     if ( $id_session && $this->check() ){
-      $res = $this->db->update($this->class_cfg['tables']['sessions'], [
+      $p =& $this->class_cfg['arch']['sessions'];
+      $this->db->update($this->class_cfg['tables']['sessions'], [
         $p['id_user'] => $this->id,
         $p['sess_id'] => $this->session->get_id(),
         $p['ip_address'] => $this->ip_address,
@@ -945,9 +964,10 @@ class user extends models\cls\basic
    * return connection
    */
   public function set_cfg($attr){
-    if ( isset($this->cfg) ){
+    if ( null !== $this->cfg ){
       $args = \func_get_args();
       if ( (\count($args) === 2) && \is_string($attr) ){
+        /** @var array $attr */
         $attr = [$args[0] => $args[1]];
       }
       foreach ( $attr as $key => $val ){
@@ -965,9 +985,10 @@ class user extends models\cls\basic
    * @return $this
    */
   public function unset_cfg($attr){
-    if ( isset($this->cfg) ){
+    if ( null !== $this->cfg ){
       $args = \func_get_args();
       if ( \is_string($attr) ){
+        /** @var array $attr */
         $attr = [$attr];
       }
       foreach ( $attr as $key ){

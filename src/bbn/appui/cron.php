@@ -52,7 +52,9 @@ class cron extends bbn\models\cls\basic{
     if ( $output ){
       exec(sprintf('php -f router.php %s > %s 2>&1 &', $path, $output));
     }
-    exec(sprintf('php -f router.php %s 2>&1 /dev/null &', $path));
+    else{
+      exec(sprintf('php -f router.php %s > /dev/null 2>&1 &', $path));
+    }
   }
 
   public function __construct(bbn\mvc\controller $ctrl, array $cfg = []){
@@ -75,8 +77,6 @@ class cron extends bbn\models\cls\basic{
   public function poll(){
     if ( $path = $this->ctrl->plugin_data_path() ){
       $poller_output = $path.'poller/'.date('YmdHis').'.txt';
-      file_put_contents($path.'.poll', (string)date('Y-m-d H:i:s'));
-      //file_put_contents($path, (string)date('Y-m-d H:i:s'));
       self::execute($this->ctrl->plugin_url('appui-cron').'/poller', $poller_output);
     }
   }

@@ -64,13 +64,13 @@ class chat
         'public' => $public ? 1 : 0
       ]) ){
         $id_chat = $this->db->last_id();
-        $this->db->insert('bbn_chat_users', [
+        $this->db->insert('bbn_chats_users', [
           'id_chat' => $id_chat,
           'id_user' => $this->user->get_id(),
           'entrance' => microtime(true),
           'admin' => 1
         ]);
-        $this->db->insert('bbn_chat_users', [
+        $this->db->insert('bbn_chats_users', [
           'id_chat' => $id_chat,
           'id_user' => $id_user,
           'entrance' => microtime(true),
@@ -92,7 +92,7 @@ class chat
   public function add_user(string $id_chat, string $id_user): bool
   {
     if ( $this->is_admin($id_chat) ){
-      return (bool)$this->db->insert_ignore('bbn_chat_users', [
+      return (bool)$this->db->insert_ignore('bbn_chats_users', [
         'id_chat' => $id_chat,
         'id_user' => $id_user,
         'entrance' => microtime(true),
@@ -112,7 +112,7 @@ class chat
   public function make_admin(string $id_chat, string $id_user): bool
   {
     if ( $this->is_admin($id_chat) ){
-      return (bool)$this->db->update_ignore('bbn_chat_users', [
+      return (bool)$this->db->update_ignore('bbn_chats_users', [
         'admin' => 1
       ], [
         'id_chat' => $id_chat,
@@ -129,12 +129,12 @@ class chat
    * @param string $id_user
    * @return bool|null
    */
-  public function is_participant(string $id_chat, string $id_user):? bool
+  public function is_participant(string $id_chat, string $id_user = null):? bool
   {
     if ( $this->check() ){
-      return (bool)$this->db->count('bbn_chat_users', [
+      return (bool)$this->db->count('bbn_chats_users', [
         'id_chat' => $id_chat,
-        'id_user' => $id_user
+        'id_user' => $id_user ?: $this->user->get_id()
       ]);
     }
     return null;
@@ -163,7 +163,7 @@ class chat
   public function get_participants(string $id_chat):? array
   {
     if ( $this->check() ){
-      return $this->db->get_field_values('bbn_chat_users', 'id_user', ['id_chat' => $id_chat]);
+      return $this->db->get_field_values('bbn_chats_users', 'id_user', ['id_chat' => $id_chat]);
     }
     return null;
   }
@@ -178,7 +178,6 @@ class chat
   public function talk(string $id_chat, string $message):? int
   {
     if ( $this->check() && ($chat = $this->info($id_chat)) && !$chat['blocked'] ){
-
       $users = $this->get_participants($id_chat);
       if ( \in_array($this->user->get_id(), $users, true) ){
         $time = microtime(true);
@@ -205,7 +204,7 @@ class chat
   public function is_admin($id_chat):? bool
   {
     if ( $this->check() && ($chat = $this->info($id_chat)) && !$chat['blocked'] ){
-      return (bool)$this->db->count('bbn_chat_users', [
+      return (bool)$this->db->count('bbn_chats_users', [
         'id_chat' => $id_chat,
         'id_user' => $this->user->get_id(),
         'admin' => 1
@@ -228,6 +227,36 @@ class chat
     return false;
   }
 
+  public function get_chats():? array
+  {
+    if ( $this->check() ){
+      return $this->db->get_field_values('bbn_chats_users', 'id_chat', ['id_user' => $this->user->get_id()]);
+    }
+  }
+
+
+  public function get_chat_by_user($id_user):? string
+  {
+    if ( $this->check() ){
+      $sql = <<<MYSQL
+SELECT DISTINCT bbn_chats.id
+FROM bbn_chats
+  JOIN bbn_chats_users AS u1
+    ON u1.id_chat = bbn_chats.id
+  JOIN bbn_chats_users AS u2
+    ON u2.id_chat = bbn_chats.id
+WHERE u1.id_user = ?
+AND u2.id_user = ?
+AND bbn_chats.blocked = 0
+LIMIT 1
+MYSQL;
+      if ( !($id_chat = $this->db->get_one($sql, hex2bin($this->user->get_id()), hex2bin($id_user))) ){
+        $id_chat = $this->create($id_user);
+      }
+      return $id_chat ?: null;
+    }
+    return null;
+  }
   /**
    * Returns messages from the given chat sent after $last.
    *
@@ -246,10 +275,10 @@ class chat
         $files = bbn\file\dir::get_files($dir);
         foreach ( $files as $file ){
           $time = (float)basename($file, '.msg');
-        if ( (!$last || ($time > $last)) && ($st = file_get_contents($file)) ){
-          $res['messages'][] = json_decode(bbn\util\enc::decrypt($st), true);
+          if ( (!$last || \bbn\x::compare_floats($time, $last, '>')) && ($st = file_get_contents($file)) ){
+            $res['messages'][] = json_decode(bbn\util\enc::decrypt($st), true);
+          }
         }
-      }
         if ( isset($time) ){
           $res['last'] = $time;
         }

@@ -65,46 +65,18 @@ class enc
 	{
 	  $key = self::get_key($key);
     $method = "AES-256-CBC";
-    $iv_size = openssl_cipher_iv_length($method);
-    $iv = self::get_iv($iv_size);
-    return base64_encode(openssl_encrypt( $string, $method, $key, 0, $iv));
-    $key_size = \strlen($key);
-    if ( $key_size > $iv_size ){
-      $key = substr($key, 0, $iv_size);
-    }
-    else if ( $key_size < $iv_size ){
-      $key = str_pad($key, $iv_size, 'bbn_');
-    }
-		$iv = mcrypt_create_iv($iv_size, MCRYPT_RAND); /* Creating the vector */
-		$cryptedpass = @mcrypt_encrypt (MCRYPT_RIJNDAEL_256, $key, $pass, MCRYPT_MODE_ECB, $iv); /* Encrypting using MCRYPT_RIJNDAEL_256 algorithm */
-		return base64_encode($cryptedpass);
+    return base64_encode(openssl_encrypt($string, $method, $key, 0, openssl_random_pseudo_bytes()));
 	}
 
 	/**
 	 * @return string
 	 */
-	public static function decrypt($encpass, $key='')
+	public static function decrypt($encstring, $key='')
 	{
-		if ( empty($key) ){
-			if ( \defined('BBN_ENCRYPTION_KEY') ){
-				$key = BBN_ENCRYPTION_KEY;
-			}
-			else{
-				$key = 'dsjfjsdvcb34YhXZLW';
-			}
-		}
-		$encpass = base64_decode($encpass);
-    $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB); /* get vector size on ECB mode */
-    $key_size = \strlen($key);
-    if ( $key_size > $iv_size ){
-      $key = substr($key, 0, $iv_size);
-    }
-    else if ( $key_size < $iv_size ){
-      $key = str_pad($key, $iv_size, 'bbn_');
-    }
-		$iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
-		$decryptedpass = @mcrypt_decrypt (MCRYPT_RIJNDAEL_256, $key, $encpass, MCRYPT_MODE_ECB, $iv); /* Decrypting... */
-		return rtrim($decryptedpass);
+    $key = self::get_key($key);
+    $encstring = base64_decode($encstring);
+    $method = "AES-256-CBC";
+		return openssl_decrypt($encstring, $method, $key, 0, openssl_random_pseudo_bytes());
 	}
 
 }
