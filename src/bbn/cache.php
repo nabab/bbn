@@ -225,8 +225,8 @@ class cache{
       if ( is_dir($dir) ){
         return file\dir::delete($dir, $dir === $this->path ? false : true);
       }
-      else if ( is_file($dir) ){
-        unlink($dir);
+      else if ( is_file($dir.'.bbn.cache') ){
+        unlink($dir.'.bbn.cache');
       }
     }
     else if ( self::$type ){

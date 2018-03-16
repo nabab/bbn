@@ -51,11 +51,11 @@ class chat
   /**
    * Creates a new chat with the current userr and another participant.
    *
-   * @param string $id_user
+   * @param array $users
    * @param int $public
    * @return null|string
    */
-  public function create(string $id_user, int $public = 0):? string
+  public function create(array $users, int $public = 0):? string
   {
     if ( $this->check() ){
       if ( $this->db->insert('bbn_chats', [
@@ -70,12 +70,14 @@ class chat
           'entrance' => microtime(true),
           'admin' => 1
         ]);
-        $this->db->insert('bbn_chats_users', [
-          'id_chat' => $id_chat,
-          'id_user' => $id_user,
-          'entrance' => microtime(true),
-          'admin' => 0
-        ]);
+        foreach ( $users as $user ){
+          $this->db->insert('bbn_chats_users', [
+            'id_chat' => $id_chat,
+            'id_user' => $user,
+            'entrance' => microtime(true),
+            'admin' => 0
+          ]);
+        }
         return $id_chat;
       }
     }
@@ -149,7 +151,7 @@ class chat
   public function info($id_chat):? array
   {
     if ( $this->check() ){
-      return $this->db->rselect('bbn_chats', [], ['id' => $id_chat]);
+      return $this->db->rselect('bbn_chats', [], ['id' => $id_chat]) ?: null;
     }
     return null;
   }
@@ -235,9 +237,15 @@ class chat
   }
 
 
-  public function get_chat_by_user($id_user):? string
+  public function get_chat_by_users(array $users):? string
   {
     if ( $this->check() ){
+      $join = '';
+      $args = [hex2bin($this->user->get_id())];
+      foreach ( $users as $i => $u ){
+        $join .= ' JOIN bbn_chats_users AS u'.($i+2).' ON u'.($i+2).'.id_chat = bbn_chats.id ';
+        $args[] = hex2bin($u);
+      }
       $sql = <<<MYSQL
 SELECT DISTINCT bbn_chats.id
 FROM bbn_chats
@@ -250,8 +258,18 @@ AND u2.id_user = ?
 AND bbn_chats.blocked = 0
 LIMIT 1
 MYSQL;
-      if ( !($id_chat = $this->db->get_one($sql, hex2bin($this->user->get_id()), hex2bin($id_user))) ){
-        $id_chat = $this->create($id_user);
+      $id_chat = false;
+      $ids = $this->db->get_col_array($sql, $args);
+      if ( count($ids) ){
+        foreach ( $ids as $id ){
+          if ( count($this->get_participants($id)) === (count($users) + 1) ){
+            $id_chat = $id;
+            break;
+          }
+        }
+      }
+      if ( !$id_chat ){
+        $id_chat = $this->create($users);
       }
       return $id_chat ?: null;
     }

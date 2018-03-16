@@ -946,6 +946,7 @@ class controller implements api{
    */
   public function delete_cached_model(){
     $args = \func_get_args();
+
     foreach ( $args as $a ){
       if ( \is_string($a) && \strlen($a) ){
         $path = $a;

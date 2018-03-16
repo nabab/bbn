@@ -150,7 +150,7 @@ class i18n extends bbn\models\cls\db{
 
   public function insert(){
     foreach ( $this->result() as $st ){
-      $this->db->insert_ignore();
+      $this->db->insert();
     }
   }
 
@@ -163,9 +163,4 @@ class i18n extends bbn\models\cls\db{
     }));
     return $primaries;
   }
-
-
-
-
-
 }

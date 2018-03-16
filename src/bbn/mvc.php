@@ -480,7 +480,6 @@ class mvc implements mvc\api{
       $data = $this->data;
     }
     if ( $route = $this->router->route($path, 'model') ){
-      \bbn\x::log([$route], 'testlore');
       $model = new mvc\model($this->db, $route, $ctrl, $this);
       return $model->get_from_cache($data, '', $ttl);
     }

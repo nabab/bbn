@@ -208,8 +208,8 @@ class model extends bbn\models\cls\db{
   }
 
   public function delete_cache(array $data = null, $spec=''){
-    if ( $this->path ){
-      $this->cache_delete($this->_cache_name($data, $spec), '');
+    if ( $cn = $this->_cache_name($data, $spec) ){
+      $this->cache_delete($cn, '');
     }
   }
 
