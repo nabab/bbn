@@ -298,7 +298,7 @@ class mvc implements mvc\api{
           $this->register_plugin([
             'url' => $url,
             'name' => $route['name'] ?? '',
-            'path' => $route['path'].(substr($a['path'], -1) !== '/' ? '/' : '')
+            'path' => $route['path']
           ]);
         }
       }
