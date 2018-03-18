@@ -43,7 +43,7 @@ class imessages extends \bbn\models\cls\db
         'users' => [
           'id_imessage' => 'id_imessage',
           'id_user' => 'id_user',
-          'saw' => 'saw',
+          'hidden' => 'hidden',
           'moment' => 'moment'
         ]
       ]
@@ -176,11 +176,11 @@ class imessages extends \bbn\models\cls\db
 	        AND {$cfg['table']}.{$cfg['arch']['imessages']['id']} = {$cfg['tables']['users']}.{$cfg['arch']['users']['id_imessage']}
       WHERE (
         {$cfg['table']}.{$cfg['arch']['imessages']['start']} IS NULL
-        OR {$cfg['table']}.{$cfg['arch']['imessages']['start']} >= ?
+        OR {$cfg['table']}.{$cfg['arch']['imessages']['start']} <= ?
       )
       AND (
         {$cfg['table']}.{$cfg['arch']['imessages']['end']} IS NULL
-        OR {$cfg['table']}.{$cfg['arch']['imessages']['end']} < ?
+        OR {$cfg['table']}.{$cfg['arch']['imessages']['end']} > ?
       )
       AND {$cfg['table']}.{$cfg['arch']['imessages']['active']} = 1
       AND (
@@ -193,8 +193,8 @@ class imessages extends \bbn\models\cls\db
       )
       AND {$cfg['table']}.{$cfg['arch']['imessages']['id_option']} = ?
       AND (
-        {$cfg['tables']['users']}.{$cfg['arch']['users']['saw']} IS NULL
-        OR {$cfg['tables']['users']}.{$cfg['arch']['users']['saw']} = 0
+        {$cfg['tables']['users']}.{$cfg['arch']['users']['hidden']} IS NULL
+        OR {$cfg['tables']['users']}.{$cfg['arch']['users']['hidden']} = 0
       )",
       $now,
       $now,
@@ -207,19 +207,42 @@ class imessages extends \bbn\models\cls\db
   }
 
   /**
-   * Sets an user's internal message as saw
+   * Sets an user's internal message as visible
    *
    * @param string $id_imess
    * @param string $id_user
    * @return bool
    */
-  public function set_saw(string $id_imess, string $id_user){
+  public function set_hidden(string $id_imess, string $id_user){
     $cfg =& $this->class_cfg;
     if ( !empty($id_imess) && !empty($id_user) ){
       return !!$this->db->insert_update($cfg['tables']['users'], [
         $cfg['arch']['users']['id_imessage'] => $id_imess,
         $cfg['arch']['users']['id_user'] => $id_user,
-        $cfg['arch']['users']['saw'] => 1,
+        $cfg['arch']['users']['hidden'] => 1,
+        $cfg['arch']['users']['moment'] => date('Y-m-d H:i:s'),
+      ], [
+        $cfg['arch']['users']['id_imessage'] => $id_imess,
+        $cfg['arch']['users']['id_user'] => $id_user
+      ]);
+    }
+    return false;
+  }
+
+  /**
+   * Sets an user's internal message as not visible
+   *
+   * @param string $id_imess
+   * @param string $id_user
+   * @return bool
+   */
+  public function unset_hidden(string $id_imess, string $id_user){
+    $cfg =& $this->class_cfg;
+    if ( !empty($id_imess) && !empty($id_user) ){
+      return !!$this->db->update_ignore($cfg['tables']['users'], [
+        $cfg['arch']['users']['id_imessage'] => $id_imess,
+        $cfg['arch']['users']['id_user'] => $id_user,
+        $cfg['arch']['users']['hidden'] => 0,
         $cfg['arch']['users']['moment'] => date('Y-m-d H:i:s'),
       ], [
         $cfg['arch']['users']['id_imessage'] => $id_imess,
@@ -251,11 +274,11 @@ class imessages extends \bbn\models\cls\db
 	        AND {$cfg['table']}.{$cfg['arch']['imessages']['id']} = {$cfg['tables']['users']}.{$cfg['arch']['users']['id_imessage']}
       WHERE (
         {$cfg['table']}.{$cfg['arch']['imessages']['start']} IS NULL
-        OR {$cfg['table']}.{$cfg['arch']['imessages']['start']} >= ?
+        OR {$cfg['table']}.{$cfg['arch']['imessages']['start']} <= ?
       )
       AND (
         {$cfg['table']}.{$cfg['arch']['imessages']['end']} IS NULL
-        OR {$cfg['table']}.{$cfg['arch']['imessages']['end']} < ?
+        OR {$cfg['table']}.{$cfg['arch']['imessages']['end']} > ?
       )
       AND {$cfg['table']}.{$cfg['arch']['imessages']['active']} = 1
       AND (
@@ -269,8 +292,8 @@ class imessages extends \bbn\models\cls\db
         )
       )
       AND (
-        {$cfg['tables']['users']}.{$cfg['arch']['users']['saw']} IS NULL
-        OR {$cfg['tables']['users']}.{$cfg['arch']['users']['saw']} = 0
+        {$cfg['tables']['users']}.{$cfg['arch']['users']['hidden']} IS NULL
+        OR {$cfg['tables']['users']}.{$cfg['arch']['users']['hidden']} = 0
       )",
       $now,
       $now,

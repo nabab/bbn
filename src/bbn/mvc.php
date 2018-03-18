@@ -256,6 +256,22 @@ class mvc implements mvc\api{
     }
   }
 
+  private function init_locale(){
+    if ( defined('BBN_LOCALE') ){
+      putenv('LANG='.BBN_LANG);
+      setlocale(LC_ALL, '');
+      setlocale(LC_MESSAGES,BBN_LOCALE);
+      setlocale(LC_CTYPE, BBN_LOCALE);
+      //$domains = glob($root.'/'.$locale.'/LC_MESSAGES/messages-*.mo');
+      //$current = basename($domains[0],'.mo');
+      //$timestamp = preg_replace('{messages-}i','',$current);
+      bindtextdomain(BBN_APP_NAME, BBN_APP_PATH.'locale');
+      bind_textdomain_codeset(BBN_APP_NAME, 'UTF-8');
+      textdomain(BBN_APP_NAME);
+    }
+    return $this;
+  }
+
   /**
 	 * This should be called only once from within the app
 	 *
@@ -274,18 +290,20 @@ class mvc implements mvc\api{
 		$this->inc = new \stdClass();
     $this->o = $this->inc;
     if ( \is_array($routes) && isset($routes['root']) ){
-      $roots = array_map(function($a){
-        if ( !empty($a['path']) && (substr($a['path'], -1) !== '/') ){
-          $a['path'] .= '/';
+      foreach ( $routes['root'] as $url => &$route ){
+        if ( !empty($route['path']) && (substr($route['path'], -1) !== '/') ){
+          $route['path'] .= '/';
         }
-        return $a;
-      }, $routes['root']);
-      $routes['root'] = [];
-      foreach ( $roots as $r ){
-        $this->register_plugin($r);
-        $routes['root'][$r['url']] = $r['path'];
+        if ( isset($route['path']) ){
+          $this->register_plugin([
+            'url' => $url,
+            'name' => $route['name'] ?? '',
+            'path' => $route['path'].(substr($a['path'], -1) !== '/' ? '/' : '')
+          ]);
+        }
       }
     }
+    $this->init_locale();
     $this->router = new mvc\router($this, $routes);
     $this->route();
 	}

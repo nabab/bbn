@@ -20,8 +20,8 @@ use bbn;
 if ( !\defined('BBN_FINGERPRINT') ){
   die('define BBN_FINGERPRINT');
 }
-if ( !\defined('BBN_SESS_NAME') ){
-  die('define BBN_SESS_NAME');
+if ( !\defined('BBN_APP_NAME') ){
+  die('define BBN_APP_NAME');
 }
 if ( !\defined('BBN_SESS_LIFETIME') ){
   die('define BBN_SESS_LIFETIME');
@@ -35,7 +35,7 @@ class session
   private static
     /** @var string */
     $fingerprint = BBN_FINGERPRINT,
-    $name = BBN_SESS_NAME;
+    $name = BBN_APP_NAME;
 
   protected
     $data,
@@ -265,8 +265,8 @@ class session
 }
 /*
 $sess = new bbn\user\session();
-$sess->set("value of \$_SESSION[BBN_SESS_NAME][foo][bar1]", "foo", "bar1");
-$sess->set("value of \$_SESSION[BBN_SESS_NAME][foo][bar2]", "foo", "bar2");
+$sess->set("value of \$_SESSION[BBN_APP_NAME][foo][bar1]", "foo", "bar1");
+$sess->set("value of \$_SESSION[BBN_APP_NAME][foo][bar2]", "foo", "bar2");
 $sess->set(10, "myProp");
 $sess->set(10, "myProp2");
 $sess->uset("myProp2");

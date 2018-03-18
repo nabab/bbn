@@ -1156,18 +1156,4 @@ class controller implements api{
 		return $this->obj;
 	}
 
-  public function init_locale($locale, $domain){
-    putenv('LANG='.$locale);
-    setlocale(LC_ALL, '');
-    setlocale(LC_MESSAGES,$locale);
-    setlocale(LC_CTYPE,$locale);
-    //$domains = glob($root.'/'.$locale.'/LC_MESSAGES/messages-*.mo');
-    //$current = basename($domains[0],'.mo');
-    //$timestamp = preg_replace('{messages-}i','',$current);
-    bindtextdomain($domain, $this->say_root().'locale');
-    textdomain($domain);
-    return $this;
-  }
-
-
 }

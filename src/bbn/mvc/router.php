@@ -125,7 +125,7 @@ class router {
       self::is_mode($mode) &&
       isset($this->routes['root'][$path ?: $this->alt_root])
     ){
-      return \bbn\str::parse_path($this->routes['root'][$path ?: $this->alt_root].'/mvc/'.( $mode === 'dom' ? 'public' : $mode ).'/');
+      return bbn\str::parse_path($this->routes['root'][$path ?: $this->alt_root]['path'].'/mvc/'.( $mode === 'dom' ? 'public' : $mode ).'/');
     }
     return false;
   }
@@ -380,10 +380,15 @@ class router {
       $file = $root.'404.php';
     }
     if ( $file ){
+      if ( $plugin && \defined('BBN_LOCALE') && isset($this->routes['root'][$plugin]['name']) ){
+        bindtextdomain($this->routes['root'][$plugin]['name'], $this->routes['root'][$plugin]['path'].'../src/locale');
+        bind_textdomain_codeset($this->routes['root'][$plugin]['name'], 'UTF-8');
+        textdomain($this->routes['root'][$plugin]['name']);
+      }
       return $this->set_known([
         'file' => $file,
         'path' => $real_path,
-        'root' => dirname($root, 2).'/',
+        'root' => \dirname($root, 2).'/',
         'request' => $path,
         'mode' => $mode,
         'plugin' => $plugin,

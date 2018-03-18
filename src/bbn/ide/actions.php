@@ -67,7 +67,7 @@ class actions {
           }
         }
         if ( is_file($new_path) ){
-          $backup = BBN_DATA_PATH.'users/'.$_SESSION[BBN_SESS_NAME]['user']['id'].'/ide/backup/'.date('Y-m-d His').' - Save/'.$dir.'/'.$path;
+          $backup = BBN_DATA_PATH.'users/'.$_SESSION[BBN_APP_NAME]['user']['id'].'/ide/backup/'.date('Y-m-d His').' - Save/'.$dir.'/'.$path;
           //die(bbn\x::dump($f, $new_path, $backup, $dir ));
           bbn\file\dir::create_path(dirname($backup));
           rename($new_path, $backup);
@@ -140,9 +140,9 @@ class actions {
       unset($data['act']);
       return 1;
     }
-    if ( isset($_SESSION[BBN_SESS_NAME]['ide']) &&
-      \in_array($data, $_SESSION[BBN_SESS_NAME]['ide']['list']) ){
-      unset($_SESSION[BBN_SESS_NAME]['ide']['list'][array_search($data, $_SESSION[BBN_SESS_NAME]['ide']['list'])]);
+    if ( isset($_SESSION[BBN_APP_NAME]['ide']) &&
+      \in_array($data, $_SESSION[BBN_APP_NAME]['ide']['list']) ){
+      unset($_SESSION[BBN_APP_NAME]['ide']['list'][array_search($data, $_SESSION[BBN_APP_NAME]['ide']['list'])]);
       return 1;
     }
     return ['data' => "Tab is not in session."];
@@ -449,14 +449,14 @@ class actions {
             return $this->error("Impossible de déplacer le fichier $src");
           }
         }
-        if ( isset($_SESSION[BBN_SESS_NAME]['ide']['list']) ){
+        if ( isset($_SESSION[BBN_APP_NAME]['ide']['list']) ){
           $sess = [
             'dir' => $data['dir'],
             'file' => $data['path']
           ];
-          if ( \in_array($sess, $_SESSION[BBN_SESS_NAME]['ide']['list']) ){
-            unset($_SESSION[BBN_SESS_NAME]['ide']['list'][array_search($sess, $_SESSION[BBN_SESS_NAME]['ide']['list'])]);
-            array_push($_SESSION[BBN_SESS_NAME]['ide']['list'], [
+          if ( \in_array($sess, $_SESSION[BBN_APP_NAME]['ide']['list']) ){
+            unset($_SESSION[BBN_APP_NAME]['ide']['list'][array_search($sess, $_SESSION[BBN_APP_NAME]['ide']['list'])]);
+            array_push($_SESSION[BBN_APP_NAME]['ide']['list'], [
               'dir' => $data['dir'],
               'file' => $dest_file.( empty($ext) ? '.php' : '.'.$ext )
             ]);

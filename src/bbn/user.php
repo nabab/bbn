@@ -1175,6 +1175,26 @@ class user extends models\cls\basic
     return false;
   }
 
+  /**
+   * Returns the written name of this or a user
+   * @return string|false
+   */
+  public function get_email($usr = null){
+    if ( $this->auth ){
+      if ( \is_null($usr) ){
+        $usr = $this->get_session();
+      }
+      else if ( str::is_uid($usr) ){
+        $mgr = $this->get_manager();
+        $usr = $mgr->get_user($usr);
+      }
+      if ( isset($usr[$this->class_cfg['email']]) ){
+        return $usr[$this->class_cfg['email']];
+      }
+    }
+    return false;
+  }
+
   public function create_token(){
     if ( $this->check_session() ){
       $token = md5(\bbn\str::genpwd());
