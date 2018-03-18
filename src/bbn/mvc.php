@@ -295,11 +295,8 @@ class mvc implements mvc\api{
           $route['path'] .= '/';
         }
         if ( isset($route['path']) ){
-          $this->register_plugin([
-            'url' => $url,
-            'name' => $route['name'] ?? '',
-            'path' => $route['path']
-          ]);
+          $route['url'] = $url;
+          $this->register_plugin($route);
         }
       }
     }
