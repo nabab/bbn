@@ -286,6 +286,7 @@ trait triggers {
       return $w;
     }
 
+    $model = [];
     // The shape of the final result
     $r = [
       'fields' => [],
@@ -349,7 +350,7 @@ trait triggers {
           }
           if (
             $model['fields'] &&
-            $model['fields'][$this->csn($v[0])] &&
+            !empty($model['fields'][$this->csn($v[0])]) &&
             ($model['fields'][$this->csn($v[0])]['type'] === 'binary') &&
             \bbn\str::is_uid($v[2]) 
           ){

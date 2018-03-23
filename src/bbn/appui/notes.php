@@ -32,7 +32,8 @@ class notes extends bbn\models\cls\db
       'tables' => [
         'notes' => 'bbn_notes',
         'versions' => 'bbn_notes_versions',
-        'medias' => 'bbn_notes_medias'
+        'nmedias' => 'bbn_notes_medias',
+        'medias' => 'bbn_medias'
       ],
       'arch' => [
         'notes' => [
@@ -51,12 +52,23 @@ class notes extends bbn\models\cls\db
           'id_user' => 'id_user',
           'creation' => 'creation'
         ],
-        'medias' => [
+        'nmedias' => [
+          'id' => 'id',
           'id_media' => 'id_media',
           'id_note' => 'id_note',
+          'version' => 'version',
           'id_user' => 'id_user',
           'comment' => 'comment',
           'creation' => 'creation',
+        ],
+        'medias' => [
+          'id' => 'id',
+          'id_user' => 'id_user',
+          'type' => 'type',
+          'name' => 'name',
+          'title' => 'title',
+          'content' => 'content',
+          'private' => 'private'
         ]
       ]
     ];
@@ -65,75 +77,6 @@ class notes extends bbn\models\cls\db
     parent::__construct($db);
     self::_init_class_cfg(self::$_defaults);
     self::optional_init();
-  }
-
-  public function add_media($id_note, $name, $content = null, $title = '', $type='file', $private = false){
-    // Case where we give also the version (i.e. not the latest)
-    if ( \is_array($id_note) && (count($id_note) === 2) ){
-      $version = $id_note[1];
-      $id_note = $id_note[0];
-    }
-    if ( $this->exists($id_note) &&
-      !empty($name) &&
-      ($id_type = self::get_option_id($type, 'media')) &&
-      ($usr = bbn\user::get_instance())
-    ){
-      if ( !isset($version) ){
-        $version = $this->latest($id_note);
-      }
-      $ok = false;
-      switch ( $type ){
-        case 'file':
-        case 'link':
-          if ( is_file($name) ){
-            $file = basename($name);
-            if ( empty($title) ){
-              $title = basename($name);
-            }
-            $ok = 1;
-          }
-          break;
-      }
-      if ( $ok ){
-        $this->db->insert('bbn_medias', [
-          'id_user' => $usr->get_id(),
-          'type' => $id_type,
-          'title' => $title,
-          'name' => $file,
-          'content' => $content,
-          'private' => $private ? 1 : 0
-        ]);
-        $id = $this->db->last_id();
-        $this->db->insert('bbn_notes_medias', [
-          'id_note' => $id_note,
-          'version' => $version,
-          'id_media' => $id,
-          'id_user' => $usr->get_id(),
-          'creation' => date('Y-m-d H:i:s')
-        ]);
-        if ( isset($file) ){
-          $path = BBN_DATA_PATH.'media/'.$id;
-          bbn\file\dir::create_path($path);
-          $ext = bbn\str::file_ext(basename($name), true);
-          $filename = $ext[0];
-          $extension = $ext[1];
-          $length = \strlen($filename);
-          if ( $files = bbn\file\dir::get_files(dirname($name)) ){
-            foreach ( $files as $f ){
-              if (
-                (\strlen($ext[0]) > $length) &&
-                preg_match('/_h[\d]+/i', substr($ext[0], $length))
-              ){
-                rename($f, $path.DIRECTORY_SEPARATOR.$ext[0].'.'.$ext[1]);
-              }
-            }
-          }
-          rename($name, $path.DIRECTORY_SEPARATOR.$file);
-        }
-        return $id;
-      }
-    }
-    return false;
   }
 
   public function insert($title, $content, $type = NULL, $private = false, $locked = false, $parent = NULL){
@@ -206,29 +149,37 @@ class notes extends bbn\models\cls\db
   }
 
   public function latest($id){
-    return $this->db->get_var("SELECT MAX(version) FROM bbn_notes_versions WHERE id_note = ?", hex2bin($id));
+    $cf =& $this->class_cfg;
+    return $this->db->get_var("
+      SELECT MAX({$cf['arch']['versions']['version']}) 
+      FROM {$cf['tables']['versions']} 
+      WHERE {$cf['arch']['versions']['id_note']} = ?",
+      hex2bin($id)
+    );
   }
 
   public function get($id, $version = false, $simple = false){
+    $cf =& $this->class_cfg;
     if ( !\is_int($version) ){
       $version = $this->latest($id);
     }
-    if ( $res = $this->db->rselect('bbn_notes_versions', [], [
-      'id_note' => $id,
-      'version' => $version
+    if ( $res = $this->db->rselect($cf['tables']['versions'], [], [
+      $cf['arch']['versions']['id_note'] => $id,
+      $cf['arch']['versions']['version'] => $version
     ]) ){
       if ( $simple ){
-        unset($res['content']);
+        unset($res[$cf['arch']['versions']['content']]);
       }
-      else{
-        if ( $medias = $this->db->get_column_values('bbn_notes_medias', 'id_media', [
-          'id_note' => $id
+      else {
+        if ( $medias = $this->db->get_column_values($cf['tables']['nmedias'], $cf['arch']['nmedias']['id_media'], [
+          $cf['arch']['nmedias']['id_note'] => $id,
+          $cf['arch']['nmedias']['version'] => $version
         ]) ){
           $res['medias'] = [];
           foreach ( $medias as $m ){
-            if ( $med = $this->db->rselect('bbn_medias', [], ['id' => $m]) ){
-              if ( \bbn\str::is_json($med['content']) ){
-                $med['content'] = json_decode($med['content']);
+            if ( $med = $this->db->rselect($cf['tables']['medias'], [], [$cf['arch']['medias']['id'] => $m]) ){
+              if ( \bbn\str::is_json($med[$cf['arch']['medias']['content']]) ){
+                $med[$cf['arch']['medias']['content']] = json_decode($med[$cf['arch']['medias']['content']]);
               }
               array_push($res['medias'], $med);
             }
@@ -256,17 +207,18 @@ class notes extends bbn\models\cls\db
       $notes = $db->rselect_all($cf['table'], [], $where, false, $limit, $start);
       foreach ( $notes as $note ){
         if ( $version = $db->rselect($cf['tables']['versions'], [], [
-          'id_note' => $note[$cf['arch']['notes']['id']],
-          'version' => $this->latest($note[$cf['arch']['notes']['id']])
+          $cf['arch']['versions']['id_note'] => $note[$cf['arch']['notes']['id']],
+          $cf['arch']['versions']['version'] => $this->latest($note[$cf['arch']['notes']['id']])
         ]) ){
-          if ( $medias = $db->get_column_values($cf['tables']['medias'], $cf['arch']['medias']['id_media'], [
-            $cf['arch']['medias']['id_note'] => $note[$cf['arch']['notes']['id']]
+          if ( $medias = $db->get_column_values($cf['tables']['nmedias'], $cf['arch']['nmedias']['id_media'], [
+            $cf['arch']['nmedias']['id_note'] => $note[$cf['arch']['notes']['id']],
+            $cf['arch']['nmedias']['version'] => $version[$cf['arch']['versions']['version']],
           ]) ){
             $version['medias'] = [];
             foreach ( $medias as $m ){
-              if ( $med = $db->rselect('bbn_medias', [], ['id' => $m]) ){
-                if ( \bbn\str::is_json($med['content']) ){
-                  $med['content'] = json_decode($med['content']);
+              if ( $med = $db->rselect($cf['tables']['medias'], [], [$cf['arch']['medias']['id'] => $m]) ){
+                if ( \bbn\str::is_json($med[$cf['arch']['medias']['content']]) ){
+                  $med[$cf['arch']['medias']['content']] = json_decode($med[$cf['arch']['medias']['content']]);
                 }
                 $version['medias'][] = $med;
               }
@@ -278,6 +230,77 @@ class notes extends bbn\models\cls\db
       return $res;
     }
     return false;
+  }
+
+  public function add_media($id_note, $name, $content = null, $title = '', $type='file', $private = false){
+    $cf =& $this->class_cfg;
+    // Case where we give also the version (i.e. not the latest)
+    if ( \is_array($id_note) && (count($id_note) === 2) ){
+      $version = $id_note[1];
+      $id_note = $id_note[0];
+    }
+    if ( $this->exists($id_note) &&
+      !empty($name) &&
+      ($id_type = self::get_option_id($type, 'media')) &&
+      ($usr = bbn\user::get_instance())
+    ){
+      if ( !isset($version) ){
+        $version = $this->latest($id_note);
+      }
+      $ok = false;
+      switch ( $type ){
+        case 'file':
+        case 'link':
+          if ( is_file($name) ){
+            $file = basename($name);
+            if ( empty($title) ){
+              $title = basename($name);
+            }
+            $ok = 1;
+          }
+          break;
+      }
+      if ( $ok ){
+        $this->db->insert($cf['tables']['medias'], [
+          $cf['arch']['medias']['id_user'] => $usr->get_id(),
+          $cf['arch']['medias']['type'] => $id_type,
+          $cf['arch']['medias']['title'] => $title,
+          $cf['arch']['medias']['name'] => $file,
+          $cf['arch']['medias']['content'] => $content,
+          $cf['arch']['medias']['private'] => $private ? 1 : 0
+        ]);
+        $id = $this->db->last_id();
+        $this->db->insert($cf['tables']['nmedias'], [
+          $cf['arch']['nmedias']['id_note'] => $id_note,
+          $cf['arch']['nmedias']['version'] => $version,
+          $cf['arch']['nmedias']['id_media'] => $id,
+          $cf['arch']['nmedias']['id_user'] => $usr->get_id(),
+          $cf['arch']['nmedias']['creation'] => date('Y-m-d H:i:s')
+        ]);
+        if ( isset($file) ){
+          rename(
+            $name,
+            bbn\file\dir::create_path(BBN_DATA_PATH.'media/'.$id).DIRECTORY_SEPARATOR.$file
+          );
+        }
+        return $id;
+      }
+    }
+    return false;
+  }
+
+  public function media2version(string $id_media, string $id_note, $version = false){
+    $cf =& $this->class_cfg;
+    return !empty($id_media) &&
+      $this->db->select_one($cf['tables']['medias'], $cf['arch']['medias']['id'], [$cf['arch']['medias']['content']['id'] => $id_media]) &&
+      $this->exists($id_note) &&
+      $this->db->insert($cf['tables']['nmedias'], [
+        $cf['arch']['nmedias']['id_note'] => $id_note,
+        $cf['arch']['nmedias']['version'] => $version ?: $this->latest($id_note),
+        $cf['arch']['nmedias']['id_media'] => $id_media,
+        $cf['arch']['nmedias']['id_user'] => \bbn\user::get_instance()->get_id(),
+        $cf['arch']['nmedias']['creation'] => date('Y-m-d H:i:s')
+      ]);
   }
 
   public function browse($cfg){

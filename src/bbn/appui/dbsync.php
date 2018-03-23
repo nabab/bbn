@@ -193,8 +193,8 @@ class dbsync
           'tab' => self::$db->tsn($table),
           'action' => $cfg['kind'],
           'chrono' => microtime(1),
-          'rows' => empty($cfg['where']) ? '[]' : json_encode($cfg['where']['final']),
-          'vals' => empty($cfg['values']) ? '[]' : json_encode($cfg['values'])
+          'rows' => empty($cfg['where']) ? '[]' : bbn\x::json_base64_encode($cfg['where']['final']),
+          'vals' => empty($cfg['values']) ? '[]' : bbn\x::json_base64_encode($cfg['values'])
         ]);
       }
     }
@@ -267,10 +267,10 @@ class dbsync
       if ( isset(self::$methods['cbf1']) ){
         self::cbf1($d);
       }
-      $vals = json_decode($d['vals'], 1);
+      $vals = \bbn\x::json_base64_decode($d['vals']);
       if ( !\is_array($vals) ){
         $to_log['num_problems']++;
-        array_push($to_log['problems'], "Hey, look urgently at the row $d[id]!");
+        $to_log['problems'][] = "Hey, look urgently at the row $d[id]!";
       }
       else if ( self::$db->insert($d['tab'], $vals) ){
         if ( isset(self::$methods['cbf2']) ){
@@ -285,7 +285,7 @@ class dbsync
       else{
         if ( $num_try > self::$max_retry ){
           $to_log['num_problems']++;
-          array_push($to_log['problems'], "Problem while syncing (insert), check data with status 5 and ID ".$d['id']);
+          $to_log['problems'][] = "Problem while syncing (insert), check data with status 5 and ID ".$d['id'];
           self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
         }
         $retry = 1;
@@ -308,6 +308,8 @@ class dbsync
     ]);
     foreach ( $ds as $i => $d ){
       // Executing the first callback
+      $d['rows'] = bbn\x::json_base64_decode($d['rows']);
+      $d['vals'] = bbn\x::json_base64_decode($d['vals']);
       if ( isset(self::$methods['cbf1']) ){
         self::cbf1($d);
       }
@@ -324,7 +326,7 @@ class dbsync
           if ( $num_try > self::$max_retry ){
             self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
             $to_log['num_problems']++;
-            array_push($to_log['problems'], "Problem while syncing (delete), check data with status 5 and ID ".$d['id']);
+            $to_log['problems'][] = "Problem while syncing (delete), check data with status 5 and ID ".$d['id'];
           }
           $retry = 1;
         }
@@ -355,8 +357,8 @@ class dbsync
               if ( !(self::$db->insert_update(
                       $d['tab'],
                       bbn\x::merge_arrays(
-                              json_decode($e['vals'], 1),
-                              json_decode($d['vals'], 1)
+                        $e['vals'],
+                        $d['vals']
                       )
               )) ){
                 $to_log['num_problems']++;
@@ -367,42 +369,32 @@ class dbsync
           // If it's updated locally and deleted in the twin we restore
           else if ( $e['action'] === 'update' ){
             if ( $d['action'] === 'delete' ){
-              if ( !(self::$db->insert_update(
-                      $d['tab'],
-                      bbn\x::merge_arrays(
-                              json_decode($d['vals'], 1),
-                              json_decode($e['vals'], 1)
-                      )
-              )) ){
+              if ( !self::$db->insert_update($d['tab'], bbn\x::merge_arrays($d['vals'], $e['vals'])) ){
                 $to_log['num_problems']++;
                 array_push($to_log['problems'], "insert_update had a problem");
               }
             }
           // If it's updated locally and in the twin we merge the values for the update
             else if ( $d['action'] === 'update' ){
-              $d['vals'] = json_encode(
-                      bbn\x::merge_arrays(
-                              json_decode($d['vals'], 1),
-                              json_decode($e['vals'], 1)
-                      ));
+              $d['vals'] = bbn\x::merge_arrays($d['vals'], $e['vals']);
             }
           }
         }
       }
       // Proceeding to the actions update is after in case we needed to restore
       if ( $d['action'] === 'update' ){
-        if ( self::$db->update($d['tab'], json_decode($d['vals'], 1), json_decode($d['rows'], 1)) ){
+        if ( self::$db->update($d['tab'], $d['vals'], $d['rows']) ){
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
           $to_log['updated_real']++;
         }
-        else if ( self::$db->select($d['tab'], [], bbn\x::merge_arrays(json_decode($d['rows'], 1), json_decode($d['vals'], 1))) ){
+        else if ( self::$db->select($d['tab'], [], bbn\x::merge_arrays($d['rows'], $d['vals'])) ){
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
         }
         else{
           if ( $num_try > self::$max_retry ){
             self::$dbs->update(self::$dbs_table, ["state" => 5], ["id" => $d['id']]);
             $to_log['num_problems']++;
-            array_push($to_log['problems'], "Problem while syncing (update), check data with status 5 and ID ".$d['id']);
+            $to_log['problems'][] = "Problem while syncing (update), check data with status 5 and ID ".$d['id'];
           }
           $retry = 1;
         }

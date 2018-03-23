@@ -881,11 +881,27 @@ class options extends bbn\models\cls\db
         $res = [];
         foreach ($list as $i){
           $o = $this->option($i);
-          $res[] = [
+          $res[$o['code']] = [
             'id' => $o['id'],
             'code' => $o['code'],
             'text' => $o['text']
           ];
+        }
+        return $res;
+      }
+    }
+    return null;
+  }
+
+  public function code_ids($code = null): ?array
+  {
+    if ( bbn\str::is_uid($id = $this->from_code(\func_get_args())) ){
+      $list = $this->items($id);
+      if ( \is_array($list) ){
+        $res = [];
+        foreach ($list as $i){
+          $o = $this->option($i);
+          $res[$o['code']] = $o['id'];
         }
         return $res;
       }

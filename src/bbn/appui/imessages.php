@@ -252,6 +252,19 @@ class imessages extends \bbn\models\cls\db
     return false;
   }
 
+  public function get_by_perm(string $id_option, $simple = true){
+    $cfg =& $this->class_cfg;
+    $messages = $this->db->get_rows("
+      SELECT {$cfg['table']}.*
+      FROM {$cfg['table']}
+      WHERE {$cfg['table']}.{$cfg['arch']['imessages']['active']} = 1
+      AND {$cfg['table']}.{$cfg['arch']['imessages']['id_option']} = ?",
+      hex2bin($id_option)
+    );
+    // Get and return the imessage's content|title from notes archive
+    return $this->from_notes($messages, $simple);
+  }
+
 
   /**
    * Gets all user's internal messages

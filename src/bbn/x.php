@@ -1454,4 +1454,42 @@ class x
     }
     return false;
   }
+
+  public static function json_base64_encode(array $arr, $json = true)
+  {
+    $res = [];
+    foreach ( $arr as $i => $a ){
+      if ( is_array($a) ){
+        $res[$i] = self::json_base64_encode($a, false);
+      }
+      else if ( is_string($a) ){
+        $res[$i] = base64_encode($a);
+      }
+      else{
+        $res[$i] = $a;
+      }
+    }
+    return $json ? json_encode($res) : $res;
+  }
+
+  public static function json_base64_decode($st):? array
+  {
+    $res = \is_string($st) ? json_decode($st, true) : $st;
+    if ( \is_array($res) ){
+      foreach ( $res as $i => $a ){
+        if ( \is_array($a) ){
+          $res[$i] = self::json_base64_decode($a);
+        }
+        else if ( \is_string($a) ){
+          $res[$i] = base64_decode($a);
+        }
+        else{
+          $res[$i] = $a;
+        }
+      }
+      return $res;
+    }
+    return null;
+  }
+
 }

@@ -78,12 +78,16 @@ class history
       $db = self::_get_db();
       $id = $db->last_id();
       $last = self::$db->last();
-      if ( \bbn\str::is_uid($cfg['old']) && self::$db->count(self::$table_uids, ['uid' => $cfg['old']]) ){
+      if ( !array_key_exists('old', $cfg) ){
+        $cfg['ref'] = null;
+        $cfg['val'] = null;
+      }
+      else if ( \bbn\str::is_uid($cfg['old']) && self::$db->count(self::$table_uids, ['uid' => $cfg['old']]) ){
         $cfg['ref'] = $cfg['old'];
-        $cfg['val'] = NULL;
+        $cfg['val'] = null;
       }
       else{
-        $cfg['ref'] = NULL;
+        $cfg['ref'] = null;
         $cfg['val'] = $cfg['old'];
       }
       // New row in the history table
@@ -495,7 +499,7 @@ MYSQL;
    * @param null $column
    * @return null|array
    */
-  public static function get_prev_update(string $table, string $id, $from_when, $column = null): array
+  public static function get_prev_update(string $table, string $id, $from_when, $column = null):? array
   {
     if (
       bbn\str::check_name($table) &&
