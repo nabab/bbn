@@ -172,8 +172,7 @@ class imessages extends \bbn\models\cls\db
       SELECT {$cfg['table']}.*
       FROM {$cfg['tables']['users']}
         RIGHT JOIN {$cfg['table']}
-	        ON {$cfg['table']}.{$cfg['arch']['imessages']['id_user']} = {$cfg['tables']['users']}.{$cfg['arch']['users']['id_user']}
-	        AND {$cfg['table']}.{$cfg['arch']['imessages']['id']} = {$cfg['tables']['users']}.{$cfg['arch']['users']['id_imessage']}
+	        ON {$cfg['table']}.{$cfg['arch']['imessages']['id']} = {$cfg['tables']['users']}.{$cfg['arch']['users']['id_imessage']}
       WHERE (
         {$cfg['table']}.{$cfg['arch']['imessages']['start']} IS NULL
         OR {$cfg['table']}.{$cfg['arch']['imessages']['start']} <= ?
