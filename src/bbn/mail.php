@@ -256,14 +256,14 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
       if ( $r && !empty($this->imap_string) ){
         $mail_string = $this->mailer->getSentMIMEMessage();
         if ( !is_resource($this->imap) ){
-          $this->imap = imap_open($this->imap_string, $this->imap_user, $this->imap_pass);
+          $this->imap = \imap_open($this->imap_string, $this->imap_user, $this->imap_pass);
         }
-        if ( !is_resource($this->imap) || !imap_append($this->imap, $this->imap_string.$this->imap_sent, $mail_string, "\\Seen") ){
-          $this->log(imap_last_error());
+        if ( !is_resource($this->imap) || !\imap_append($this->imap, $this->imap_string.$this->imap_sent, $mail_string, "\\Seen") ){
+          $this->log(\imap_last_error());
         }
       }
       if ( !$r ){
-        $this->log(imap_last_error());
+        $this->log(\imap_last_error());
       }
     }
     $this->mailer->ClearAllRecipients();

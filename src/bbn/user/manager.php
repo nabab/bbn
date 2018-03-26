@@ -337,7 +337,7 @@ You can click the following link to access directly your account:<br>
   
   /**
    *
-   * @param int $id_user User ID
+   * @param string $id_user User ID
    * @param string $message Type of the message
    * @param int $exp Timestamp of the expiration date
    * @return manager
