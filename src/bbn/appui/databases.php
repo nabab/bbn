@@ -77,7 +77,7 @@ class databases extends bbn\models\cls\cache
           $h['admin'] = $this->admin($a['id']);
         }
         return $h;
-      }, $this->o->code_options($id_parent));
+      }, array_values($this->o->code_options($id_parent)));
     }
     return false;
   }

@@ -1252,11 +1252,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
           //$this->clear_cache();
         }
         try{
-          if ( $q['prepared'] && ( isset($q['sequences']['INSERT']) || isset($q['sequences']['UPDATE']) || isset($q['sequences']['DELETE']) || isset($q['sequences']['DROP']) || isset($q['sequences']['ALTER']) || isset($q['sequences']['CREATE']) ) ){
+          if ( $q['prepared'] && $this->is_write_sequence($q['sequences']) ){
             $r = $q['prepared']->init($this->last_params['values'])->execute();
           }
           else{
-            if ( isset($q['sequences']['INSERT']) || isset($q['sequences']['UPDATE']) || isset($q['sequences']['DELETE']) || isset($q['sequences']['DROP']) || isset($q['sequences']['ALTER']) || isset($q['sequences']['CREATE']) || isset($q['sequences']['TRUNCATE']) ){
+            if ( $this->is_write_sequence($q['sequences']) ){
               if ( $num_values === 0 ){
                 $r = $this->exec($q['statement']);
               }
@@ -1300,6 +1300,10 @@ class db extends \PDO implements db\actions, db\api, db\engines
       }
     }
     return false;
+  }
+
+  public function is_write_sequence($sequences){
+    return isset($sequences['INSERT']) || isset($sequences['UPDATE']) || isset($sequences['DELETE']) || isset($sequences['DROP']) || isset($sequences['ALTER']) || isset($sequences['CREATE']);
   }
 
   /**
@@ -2763,7 +2767,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       $args = \count($w['values']) ? array_merge([$statement], $w['values']) : [$statement];
       $r = \call_user_func_array([$this, 'get_by_columns'], $args);
       if ( \is_array($r) ){
-        return $r[$field] ?: [];
+        return $r[$field] ?? [];
       }
     }
   }
