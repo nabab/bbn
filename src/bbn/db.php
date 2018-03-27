@@ -194,7 +194,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   private function _cache_name($item, $mode){
     $r = false;
-    $h = str::encode_filename($this->host);
+    $h = str::sanitize($this->host);
     switch ( $mode ){
       case 'columns':
         $r = 'bbn/db/'.$this->engine.'/'.$h.'/'.str_replace('.', '/', $this->tfn($item));

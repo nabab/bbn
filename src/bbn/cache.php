@@ -47,6 +47,12 @@ class cache{
     self::$type = $type;
   }
 
+  private static function sanitize($st){
+    $st = mb_ereg_replace("([^\w\s\d\-_~,;\/\[\]\(\).])", '', $st);
+    $st = mb_ereg_replace("([\.]{2,})", '', $st);
+    return $st;
+  }
+
   /**
    * @param string $dir
    * @param string $path
@@ -63,7 +69,7 @@ class cache{
     else if ( substr($dir, -1) === '/' ){
       $dir = substr($dir, 0, -1);
     }
-    return $path.str::encode_filename(str_replace('../', '', str_replace('\\', '/', $dir)), true);
+    return $path.self::sanitize(str_replace('../', '', str_replace('\\', '/', $dir)));
   }
 
   /**
@@ -72,7 +78,7 @@ class cache{
    * @return string
    */
   private static function _file(string $item, string $path){
-    return self::_dir($item, $path).'/'.str::encode_filename(basename($item)).'.bbn.cache';
+    return self::_dir($item, $path).'/'.self::sanitize(basename($item)).'.bbn.cache';
   }
 
   /**

@@ -103,7 +103,7 @@ class i18n extends bbn\models\cls\db{
   public function analyze_folder(string $folder = '.', bool $deep = false): array
   {
     $res = [];
-    die(var_dump(is_dir($folder)));
+
     if (  \is_dir($folder) ){
 
       $files = $deep ? bbn\file\dir::scan($folder, 'file') : bbn\file\dir::get_files($folder);

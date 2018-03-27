@@ -342,6 +342,13 @@ class str
     return $st;
   }
 
+  public static function sanitize($st){
+    $file = mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $st);
+// Remove any runs of periods (thanks falstro!)
+    $file = mb_ereg_replace("([\.]{2,})", '', $file);
+    return $file;
+  }
+
   /**
    * Returns a cross-platform filename for file.
    *
@@ -356,12 +363,11 @@ class str
    * @param bool $is_path Tells if the slashes (/) are authorized in the string
    * @return string
    */
-  public static function encode_filename($st, $maxlength = 50, $extension = null, $is_path = false)
+  public static function encode_filename(string $st, $maxlength = 50, $extension = null, $is_path = false)
   {
-    $st = self::remove_accents(self::cast($st));
-    $res = '';
 
-    $allowed = '-_.,';
+    $st = self::remove_accents(self::cast($st));
+    $allowed = '~\-_.,\(\[\)\]';
 
     // Arguments order doesn't matter
     $args = \func_get_args();
@@ -396,35 +402,12 @@ class str
     else if ( $extension = self::file_ext($st) ){
       $st = substr($st, 0, -(\strlen($extension)+1));
     }
-    for ( $i = 0; $i < $maxlength; $i++ ){
-      if ( mb_ereg_match('[A-z0-9\\'.$allowed.']', mb_substr($st,$i,1)) ){
-        $res .= mb_substr($st,$i,1);
-      }
-      else if ( (mb_strlen($res) > 0) &&
-        (strpos($allowed, mb_substr($res,-1)) === false) &&
-        ($i < ( mb_strlen($st) - 1 ))
-      ){
-        $res .= '_';
-      }
-    }
+    $st = mb_ereg_replace("([^\w\s\d".$allowed.".])", '', $st);
+    $st = mb_ereg_replace("([\.]{2,})", '', $st);
+    $res = mb_substr($st, 0, $maxlength);
     if ( $extension ){
       $res .= '.' . $extension;
     }
-    while ( strpos($res, '__') !== false ){
-      $res = str_replace('__', '_', $res);
-    }
-    if ( substr($res, -1) === '_' ){
-      $res = substr($res, 0, -1);
-    }
-    if ( $is_path ){
-      while ( strpos($res, '//') !== false ){
-        $res = str_replace('//', '/', $res);
-      }
-      if ( substr($res, -1) === '/' ){
-        $res = substr($res, 0, -1);
-      }
-    }
-
     return $res;
   }
 
