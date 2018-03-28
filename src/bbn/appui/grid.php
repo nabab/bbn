@@ -145,6 +145,7 @@ class grid extends bbn\models\cls\cache
     }
     $this->cache_uid = md5(serialize([
       'filters' => $this->filters,
+      'prefilters' => $this->prefilters,
       'query' => $this->query,
       'table' => $this->table,
       'group_by' => $this->group_by,

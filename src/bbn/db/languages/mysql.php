@@ -907,6 +907,6 @@ class mysql implements bbn\db\engines
   }
 
   public function get_uid(){
-    return $this->db->get_one("SELECT unhex(replace(uuid(),'-',''))");
+    return $this->db->get_one("SELECT replace(uuid(),'-','')");
   }
 }
