@@ -813,7 +813,7 @@ class user extends models\cls\basic
    *
 	 * @return $this
 	 */
-  public function set_session(){
+  public function set_session($attr){
     if ( $this->session->has(self::$un) ){
       $args = \func_get_args();
       if ( (\count($args) === 2) && \is_string($args[0]) ){

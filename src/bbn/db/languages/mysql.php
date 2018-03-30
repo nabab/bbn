@@ -907,6 +907,11 @@ class mysql implements bbn\db\engines
   }
 
   public function get_uid(){
-    return $this->db->get_one("SELECT replace(uuid(),'-','')");
+    //return $this->db->get_one("SELECT replace(uuid(),'-','')");
+    $uid = false;
+    while ( !\bbn\str::is_buid(hex2bin($uid)) ){
+      $uid = $this->db->get_one("SELECT replace(uuid(),'-','')");
+    }
+    return $uid;
   }
 }
