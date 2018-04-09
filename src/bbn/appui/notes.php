@@ -70,7 +70,10 @@ class notes extends bbn\models\cls\db
           'content' => 'content',
           'private' => 'private'
         ]
-      ]
+      ],
+			'paths' => [
+				'medias' => BBN_DATA_PATH.'media/'
+			]
     ];
 
   public function __construct(bbn\db $db){
@@ -151,8 +154,8 @@ class notes extends bbn\models\cls\db
   public function latest($id){
     $cf =& $this->class_cfg;
     return $this->db->get_var("
-      SELECT MAX({$cf['arch']['versions']['version']}) 
-      FROM {$cf['tables']['versions']} 
+      SELECT MAX({$cf['arch']['versions']['version']})
+      FROM {$cf['tables']['versions']}
       WHERE {$cf['arch']['versions']['id_note']} = ?",
       hex2bin($id)
     );
@@ -292,7 +295,7 @@ class notes extends bbn\models\cls\db
   public function media2version(string $id_media, string $id_note, $version = false){
     $cf =& $this->class_cfg;
     return !empty($id_media) &&
-      $this->db->select_one($cf['tables']['medias'], $cf['arch']['medias']['id'], [$cf['arch']['medias']['content']['id'] => $id_media]) &&
+      $this->db->select_one($cf['tables']['medias'], $cf['arch']['medias']['id'], [$cf['arch']['medias']['id'] => $id_media]) &&
       $this->exists($id_note) &&
       $this->db->insert($cf['tables']['nmedias'], [
         $cf['arch']['nmedias']['id_note'] => $id_note,
@@ -302,6 +305,30 @@ class notes extends bbn\models\cls\db
         $cf['arch']['nmedias']['creation'] => date('Y-m-d H:i:s')
       ]);
   }
+
+	public function get_medias(string $id_note, $version = false){
+		$cf =& $this->class_cfg;
+		if (
+			$this->exists($id_note) &&
+			($medias = $this->db->get_column_values($cf['tables']['nmedias'], $cf['arch']['nmedias']['id_media'], [
+				$cf['arch']['nmedias']['id_note'] => $id_note,
+				$cf['arch']['nmedias']['version'] => $version ?: $this->latest($id_note),
+			]))
+		){
+			$ret = [];
+			foreach ( $medias as $m ){
+				if ( $med = $this->db->rselect($cf['tables']['medias'], [], [$cf['arch']['medias']['id'] => $m]) ){
+					if ( \bbn\str::is_json($med[$cf['arch']['medias']['content']]) ){
+						$med[$cf['arch']['medias']['content']] = json_decode($med[$cf['arch']['medias']['content']]);
+					}
+					$med['file'] = $cf['paths']['medias'].$med[$cf['arch']['medias']['id']].DIRECTORY_SEPARATOR.$med[$cf['arch']['medias']['name']];
+					$ret[] = $med;
+				}
+			}
+			return $ret;
+		}
+		return [];
+	}
 
   public function browse($cfg){
     if ( isset($cfg['limit']) && ($user = bbn\user::get_instance()) ){
