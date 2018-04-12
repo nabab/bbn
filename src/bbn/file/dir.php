@@ -189,7 +189,7 @@ class dir extends bbn\models\cls\basic
 	{
     $dir = self::clean($dir);
 		if ( is_dir($dir) ){
-			$files = self::get_files($dir, 1);
+			$files = self::get_files($dir, 1, 1);
 			foreach ( $files as $file ){
         self::delete($file);
 			}
