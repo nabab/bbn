@@ -93,7 +93,7 @@ class model extends bbn\models\cls\db{
 
   public function register_plugin_classes($plugin_path): self
   {
-    $this->register_plugin_classes($plugin_path);
+    $this->ctrl->register_plugin_classes($plugin_path);
     return $this;
   }
 

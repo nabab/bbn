@@ -87,7 +87,9 @@ class project extends bbn\models\cls\db{
     }
     foreach ( $rows as $i => $row ){
       $rows[$i]['constant'] = options::get_instance()->parent($rows[$i]['id_option'])['code'];
-    }
+      $rows[$i]['language'] = (string)options::get_instance()->get_prop($rows[$i]['id_option'], 'language');
+      }
+
     return $rows;
   }
 
