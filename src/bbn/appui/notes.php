@@ -72,7 +72,7 @@ class notes extends bbn\models\cls\db
         ]
       ],
 			'paths' => [
-				'medias' => BBN_DATA_PATH.'media/'
+				'medias' => 'media/'
 			]
     ];
 
@@ -321,7 +321,8 @@ class notes extends bbn\models\cls\db
 					if ( \bbn\str::is_json($med[$cf['arch']['medias']['content']]) ){
 						$med[$cf['arch']['medias']['content']] = json_decode($med[$cf['arch']['medias']['content']]);
 					}
-					$med['file'] = $cf['paths']['medias'].$med[$cf['arch']['medias']['id']].DIRECTORY_SEPARATOR.$med[$cf['arch']['medias']['name']];
+					$med['file'] = $cf['paths']['medias'].$med[$cf['arch']['medias']['id']].DIRECTORY_SEPARATOR
+          .$med[$cf['arch']['medias']['name']];
 					$ret[] = $med;
 				}
 			}
