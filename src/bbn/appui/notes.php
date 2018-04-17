@@ -39,8 +39,10 @@ class notes extends bbn\models\cls\db
         'notes' => [
           'id' => 'id',
           'id_parent' => 'id_parent',
+					'id_alias' => 'id_alias',
           'id_type' => 'id_type',
           'private' => 'private',
+					'locked' => 'locked',
           'creator' => 'creator',
           'active' => 'active'
         ],
@@ -82,17 +84,19 @@ class notes extends bbn\models\cls\db
     self::optional_init();
   }
 
-  public function insert($title, $content, $type = NULL, $private = false, $locked = false, $parent = NULL){
+  public function insert($title, $content, $type = NULL, $private = false, $locked = false, $parent = NULL, $alias = NULL){
+		$cf =& $this->class_cfg;
     if ( is_null($type) ){
       $type = self::get_option_id('personal', 'types', 'notes', 'appui');
     }
     if ( ($usr = bbn\user::get_instance()) &&
       $this->db->insert('bbn_notes', [
-        'id_parent' => $parent,
-        'id_type' => $type,
-        'private' => !empty($private) ? 1 : 0,
-        'locked' => !empty($locked) ? 1 : 0,
-        'creator' => $usr->get_id()
+        $cf['arch']['notes']['id_parent'] => $parent,
+				$cf['arch']['notes']['id_alias'] => $alias,
+        $cf['arch']['notes']['id_type'] => $type,
+        $cf['arch']['notes']['private'] => !empty($private) ? 1 : 0,
+        $cf['arch']['notes']['locked'] => !empty($locked) ? 1 : 0,
+        $cf['arch']['notes']['creator'] => $usr->get_id()
       ]) &&
       ($id_note = $this->db->last_id()) &&
       $this->insert_version($id_note, $title, $content)
@@ -103,15 +107,16 @@ class notes extends bbn\models\cls\db
   }
 
   public function insert_version(string $id_note, string $title, string $content){
-    $latest = $this->latest($id_note);
+		$cf =& $this->class_cfg;
+		$latest = $this->latest($id_note);
     return ($usr = bbn\user::get_instance()) &&
       $this->db->insert('bbn_notes_versions', [
-        'id_note' => $id_note,
-        'version' => !empty($latest) ? $latest + 1 : 1,
-        'title' => $title,
-        'content' => $content,
-        'id_user' => $usr->get_id(),
-        'creation' => date('Y-m-d H:i:s')
+        $cf['arch']['versions']['id_note'] => $id_note,
+        $cf['arch']['versions']['version'] => !empty($latest) ? $latest + 1 : 1,
+        $cf['arch']['versions']['title'] => $title,
+        $cf['arch']['versions']['content'] => $content,
+        $cf['arch']['versions']['id_user'] => $usr->get_id(),
+        $cf['arch']['versions']['creation'] => date('Y-m-d H:i:s')
       ]);
   }
 

@@ -94,7 +94,7 @@ class project extends bbn\models\cls\db{
   }
 
   public function get_path_text($t){
-    return  options::get_instance()->text($t);
+    return options::get_instance()->text($t);
   }
 
   public function get_langs_id(){
