@@ -161,7 +161,7 @@ class i18n extends bbn\models\cls\db{
     $uid_languages =  options::get_instance()->from_code('languages', 'i18n', 'appui');
     $languages = options::get_instance()->full_tree($uid_languages);
     $primaries = array_values(array_filter($languages['items'], function($v) {
-      return $v['primary'] == '1';
+      return isset($v['primary']) && ($v['primary'] == '1');
     }));
     return $primaries;
   }

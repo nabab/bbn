@@ -2767,4 +2767,25 @@ class options extends bbn\models\cls\db
     }
     return null;
   }
+
+  public function find_i18n($id = null, $items = true){
+    $res = [];
+    $opts = $this->db->rselect_all($this->class_cfg['table'], ['id', 'id_parent', 'text', 'cfg']);
+    foreach ( $opts as $opt ){
+      $cfg = json_decode($opt['cfg'], true);
+      if ( !empty($cfg['i18n']) ){
+        $opt['language'] = $cfg['i18n'];
+        unset($opt['cfg']);
+        if ( !empty($items) ){
+          $res[] = array_merge($opt, ['items' => array_values(array_filter($opts, function($o) use($opt){
+            return $o['id_parent'] === $opt['id'];
+          }))]);
+        }
+        else {
+          $res[] = $opt;
+        }
+      }
+    }
+    return $res;
+  }
 }
