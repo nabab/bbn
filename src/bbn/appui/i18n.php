@@ -19,11 +19,13 @@ class i18n extends bbn\models\cls\db{
 
   protected
     $parser,
-    $translations = [];
+    $translations = [],
+    $user;
 
   public function __construct(bbn\db $db){
     parent::__construct($db);
     $this->parser = new \Gettext\Translations();
+    $this->user = \bbn\user::get_instance();
   }
 
   public function analyze_php(string $php): array
@@ -164,5 +166,87 @@ class i18n extends bbn\models\cls\db{
       return isset($v['primary']) && ($v['primary'] == '1');
     }));
     return $primaries;
+  }
+
+  /** gets the option with the property i18n setted and its items */
+  public function get_options(){
+    /** @var ( array) $paths get all options having i18n property setted and its items */
+    $paths = options::get_instance()->find_i18n();
+    $res = [];
+    foreach ( $paths as $p => $val ){
+      $res[$p] = [
+        'text'=> $paths[$p]['text'],
+        'opt_language' => $paths[$p]['language'],
+        'strings' => [],
+        'id_option' => $paths[$p]['id']
+      ];
+
+      /** @todo AT THE MOMENT I'M NOT CONSIDERING LANGUAGES OF TRANSLATION */
+      foreach ($paths[$p]['items'] as $i => $value){
+
+        /** check if the opt text is in bbn_i18n and takes translations from db */
+        if ( $exp = $this->db->rselect('bbn_i18n',['id', 'exp', 'lang'] , [
+          'exp' => $paths[$p]['items'][$i]['text'],
+          'lang' => $paths[$p]['language']
+          ]
+        ) ){
+
+          $translated = $this->db->rselect_all('bbn_i18n_exp', ['id_exp', 'expression', 'lang'],  ['id_exp' => $exp['id'] ]);
+          if ( !empty($translated) ){
+          /** @var  $languages the array of languages found in db for the options*/
+            $languages = [];
+            $translated_exp = '';
+
+
+            foreach ($translated as $t => $trans){
+              if ( !in_array($translated[$t]['lang'], $translated) ){
+                $languages[] = $translated[$t]['lang'];
+              }
+              $translated_exp = $translated[$t]['expression'];
+            }
+            if ( !empty($languages) ){
+              foreach($languages as $lang){
+                $res[$p]['strings'][] = [
+                  $lang => [
+                    'id_exp' => $exp['id'],
+                    'original' => $exp['exp'],
+                    'translation_db' => $translated_exp
+                  ]
+                ];
+              }
+            }
+            }
+        }
+        else {
+          if ( $this->db->insert('bbn_i18n', [
+            'exp' => $paths[$p]['items'][$i]['text'],
+            'lang' =>  $paths[$p]['language'],
+            'id_user'=> $this->user->get_id(),
+            'last_modified' => date('H-m-d H:i:s')
+
+          ]) ){
+            $id = $this->db->last_id();
+            $this->db->insert_ignore(
+              'bbn_i18n_exp', [
+                'id_exp' => $id,
+                'expression'=> $paths[$p]['items'][$i]['text'],
+                'lang' => $paths[$p]['language']
+              ]
+            );
+            $res[$p]['strings'][] = [
+              $paths[$p]['language'] => [
+                'id_exp' => $id,
+                'original' => $paths[$p]['items'][$i]['text'],
+                'translation_db' => $paths[$p]['items'][$i]['text']
+              ]
+            ];
+          };
+
+
+        }
+
+      }
+    }
+    return $res;
   }
 }
