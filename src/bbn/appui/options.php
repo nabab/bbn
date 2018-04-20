@@ -2770,7 +2770,12 @@ class options extends bbn\models\cls\db
 
   public function find_i18n($id = null, $items = true){
     $res = [];
-    $opts = $this->db->rselect_all($this->class_cfg['table'], ['id', 'id_parent', 'text', 'cfg']);
+    $opts = $this->db->rselect_all($this->class_cfg['table'], [
+      $this->class_cfg['arch']['options']['id'],
+      $this->class_cfg['arch']['options']['id_parent'],
+      $this->class_cfg['arch']['options']['text'],
+      $this->class_cfg['arch']['options']['cfg']
+    ]);
     foreach ( $opts as $opt ){
       $cfg = json_decode($opt['cfg'], true);
       if ( !empty($cfg['i18n']) ){

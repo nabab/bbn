@@ -168,6 +168,54 @@ class i18n extends bbn\models\cls\db{
     return $primaries;
   }
 
+
+
+  /** get the num of items['text'] in original language and num translations foreach lang in configured langs (for this project I use all primaries as configured langs) */
+  public function get_num_options(){
+    /** @var  $paths takes all options with i18n property setted*/
+    $paths = options::get_instance()->find_i18n();
+    $data = [];
+    /**
+     creates the property data_widget that will have just num of items found for the option + 1 (the text of the option parent), the number of strings translated and the source language indexed to the language
+     */
+    $primaries = $this->get_primaries_langs();
+    foreach ($primaries as $p ){
+      $configured_langs[] = $p['code'];
+    }
+    foreach ( $paths as $p => $val){
+      foreach ( $configured_langs as $lang ) {
+        $count = 0;
+        foreach ( $paths[$p]['items'] as $idx => $item ){
+          if ( $id = $this->db->get_val('bbn_i18n', 'id', [
+            'exp'=> $item['text'],
+            'lang' => $paths[$p]['language']
+          ])){
+            if ( $this->db->get_val('bbn_i18n_exp', 'id_exp', [
+              'id_exp' => $id,
+              'lang' => $lang
+            ]) ){
+              $count ++;
+            }
+          }
+        }
+        $paths[$p]['data_widget']['result'][$lang] = [
+          'num' => count($val['items']) + 1,
+          'num_translations' => $count,
+          'lang' => $lang
+        ];
+      }
+      $paths[$p]['data_widget']['locale_dirs'] = [];
+
+      unset($paths[$p]['items']);
+      $data[] = $paths[$p];
+    }
+    return [
+      'data'=> $data
+    ];
+  }
+
+
+
   /** gets the option with the property i18n setted and its items */
   public function get_options(){
     /** @var ( array) $paths get all options having i18n property setted and its items */
@@ -196,7 +244,6 @@ class i18n extends bbn\models\cls\db{
           /** @var  $languages the array of languages found in db for the options*/
             $languages = [];
             $translated_exp = '';
-
 
             foreach ($translated as $t => $trans){
               if ( !in_array($translated[$t]['lang'], $translated) ){

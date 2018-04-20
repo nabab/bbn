@@ -311,7 +311,7 @@ class notes extends bbn\models\cls\db
       ]);
   }
 
-	public function get_medias(string $id_note, $version = false){
+	public function get_medias(string $id_note, $version = false, $type = false){
 		$cf =& $this->class_cfg;
 		if (
 			$this->exists($id_note) &&
@@ -322,7 +322,10 @@ class notes extends bbn\models\cls\db
 		){
 			$ret = [];
 			foreach ( $medias as $m ){
-				if ( $med = $this->db->rselect($cf['tables']['medias'], [], [$cf['arch']['medias']['id'] => $m]) ){
+				if (
+				  ($med = $this->db->rselect($cf['tables']['medias'], [], [$cf['arch']['medias']['id'] => $m])) &&
+          (empty($type) || (\bbn\str::is_uid($type) && ($type === $med['type'])))
+        ){
 					if ( \bbn\str::is_json($med[$cf['arch']['medias']['content']]) ){
 						$med[$cf['arch']['medias']['content']] = json_decode($med[$cf['arch']['medias']['content']]);
 					}
@@ -397,9 +400,20 @@ class notes extends bbn\models\cls\db
     }
   }
 
-  public function remove($id){
+  /**
+   * @param string $id The note's uid
+   * @param bool $keep Set it to true if you want change active property to 0 instead of delete the row from db
+   * @return bool|int
+   */
+  public function remove(string $id, $keep = false){
     if ( \bbn\str::is_uid($id) ){
-      return $this->db->delete('bbn_notes', ['id' => $id]);
+      $cf =& $this->class_cfg;
+      if ( empty($keep) ){
+        return $this->db->delete($cf['table'], [$cf['arch']['notes']['id'] => $id]);
+      }
+      else {
+        return $this->db->update($cf['table'], [$cf['arch']['notes']['active'] => 0], [$cf['arch']['notes']['id'] => $id]);
+      }
     }
     return false;
   }
