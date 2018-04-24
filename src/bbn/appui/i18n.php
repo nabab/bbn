@@ -174,6 +174,7 @@ class i18n extends bbn\models\cls\db{
   public function get_num_options(){
     /** @var  $paths takes all options with i18n property setted*/
     $paths = options::get_instance()->find_i18n();
+
     $data = [];
     /**
      creates the property data_widget that will have just num of items found for the option + 1 (the text of the option parent), the number of strings translated and the source language indexed to the language
@@ -183,9 +184,18 @@ class i18n extends bbn\models\cls\db{
       $configured_langs[] = $p['code'];
     }
     foreach ( $paths as $p => $val){
+      $parent = options::get_instance()->get_id_parent($paths[$p]['id']);
+
       foreach ( $configured_langs as $lang ) {
         $count = 0;
-        foreach ( $paths[$p]['items'] as $idx => $item ){
+        $items = $paths[$p]['items'];
+        /** push the text of the option into the array of strings */
+        $items[] = [
+          'id' => $paths[$p]['id'],
+          'text' => $paths[$p]['text'],
+          'id_parent' => $parent
+          ];
+        foreach ( $items as $idx => $item ){
           if ( $id = $this->db->get_val('bbn_i18n', 'id', [
             'exp'=> $item['text'],
             'lang' => $paths[$p]['language']
@@ -199,7 +209,7 @@ class i18n extends bbn\models\cls\db{
           }
         }
         $paths[$p]['data_widget']['result'][$lang] = [
-          'num' => count($val['items']) + 1,
+          'num' => count($items),
           'num_translations' => $count,
           'lang' => $lang
         ];

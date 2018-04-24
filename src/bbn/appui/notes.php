@@ -297,6 +297,18 @@ class notes extends bbn\models\cls\db
     return false;
   }
 
+  public function remove_media(string $id_media, string $id_note, $version = false){
+    $cf =& $this->class_cfg;
+    return !empty($id_media) &&
+      $this->db->select_one($cf['tables']['medias'], $cf['arch']['medias']['id'], [$cf['arch']['medias']['id'] => $id_media]) &&
+      $this->exists($id_note) &&
+      $this->db->delete($cf['tables']['nmedias'], [
+        $cf['arch']['nmedias']['id_note'] => $id_note,
+        $cf['arch']['nmedias']['version'] => $version ?: $this->latest($id_note),
+        $cf['arch']['nmedias']['id_media'] => $id_media
+      ]);
+  }
+
   public function media2version(string $id_media, string $id_note, $version = false){
     $cf =& $this->class_cfg;
     return !empty($id_media) &&
