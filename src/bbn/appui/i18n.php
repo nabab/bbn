@@ -177,7 +177,7 @@ class i18n extends bbn\models\cls\db{
 
     $data = [];
     /**
-     creates the property data_widget that will have just num of items found for the option + 1 (the text of the option parent), the number of strings translated and the source language indexed to the language
+    creates the property data_widget that will have just num of items found for the option + 1 (the text of the option parent), the number of strings translated and the source language indexed to the language
      */
     $primaries = $this->get_primaries_langs();
     foreach ($primaries as $p ){
@@ -194,7 +194,7 @@ class i18n extends bbn\models\cls\db{
           'id' => $paths[$p]['id'],
           'text' => $paths[$p]['text'],
           'id_parent' => $parent
-          ];
+        ];
         foreach ( $items as $idx => $item ){
           if ( $id = $this->db->get_val('bbn_i18n', 'id', [
             'exp'=> $item['text'],
@@ -244,14 +244,14 @@ class i18n extends bbn\models\cls\db{
 
         /** check if the opt text is in bbn_i18n and takes translations from db */
         if ( $exp = $this->db->rselect('bbn_i18n',['id', 'exp', 'lang'] , [
-          'exp' => $paths[$p]['items'][$i]['text'],
-          'lang' => $paths[$p]['language']
+            'exp' => $paths[$p]['items'][$i]['text'],
+            'lang' => $paths[$p]['language']
           ]
         ) ){
 
           $translated = $this->db->rselect_all('bbn_i18n_exp', ['id_exp', 'expression', 'lang'],  ['id_exp' => $exp['id'] ]);
           if ( !empty($translated) ){
-          /** @var  $languages the array of languages found in db for the options*/
+            /** @var  $languages the array of languages found in db for the options*/
             $languages = [];
             $translated_exp = '';
 
@@ -272,7 +272,7 @@ class i18n extends bbn\models\cls\db{
                 ];
               }
             }
-            }
+          }
         }
         else {
           if ( $this->db->insert('bbn_i18n', [

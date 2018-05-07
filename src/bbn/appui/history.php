@@ -941,7 +941,9 @@ MYSQL;
             if ( isset($cfg['values'][$s['primary']]) ){
               // We check if a row exists and get its content
               $all = self::$db->rselect($table, [], [
-                $s['primary'] => $cfg['values'][$s['primary']],
+                $s['primary'] => \bbn\str::is_buid($cfg['values'][$s['primary']]) ?
+                  bin2hex($cfg['values'][$s['primary']]) :
+                  $cfg['values'][$s['primary']],
                 self::$column => 0
               ]);
               if ( empty($all) ){
@@ -956,7 +958,9 @@ MYSQL;
                       if ( is_null($cfg['values'][$col]) ){
                         $exit = true;
                       }
-                      $fields[$col] = $cfg['values'][$col];
+                      $fields[$col] = \bbn\str::is_buid($cfg['values'][$col]) ?
+                        bin2hex($cfg['values'][$col]) :
+                        $cfg['values'][$col];
                     }
                     if ( $exit ){
                       continue;

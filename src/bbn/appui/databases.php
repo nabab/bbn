@@ -25,8 +25,21 @@ class databases extends bbn\models\cls\cache
 
   public function connection(string $host, string $db){
     $id_host = !bbn\str::is_uid($host) ? $this->host_id($host) : $host;
+    $db_user = [
+      'code' => BBN_DB_USER,
+      'pass' => BBN_DB_PASS
+    ];
     if ( bbn\str::is_uid($host) ){
       $host = $this->o->code($id_host);
+    }
+    if (
+      ($users = $this->o->from_code('users', $id_host)) &&
+      ($user = $this->o->full_options($users)[0])
+    ){
+      $db_user = [
+        'code' => $user['code'],
+        'pass' => $user['pass']
+      ];
     }
     if ( bbn\str::is_uid($id_host) &&
       !bbn\str::is_uid($host) &&
@@ -34,14 +47,13 @@ class databases extends bbn\models\cls\cache
       !empty($id_host) &&
       !empty($db) &&
       !bbn\str::is_uid($db) &&
-      ($users = $this->o->from_code('users', $id_host)) &&
-      ($user = $this->o->full_options($users)[0])
+      !empty($db_user)
     ){
       $this->db2 = new bbn\db([
         'host' => $host,
         'db' => $db,
-        'user' => $user['code'],
-        'pass' => $user['pass']
+        'user' => $db_user['code'],
+        'pass' => $db_user['pass']
       ]);
       return $this->db2;
     }
