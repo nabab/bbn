@@ -447,7 +447,7 @@ JS;
       $last_modified = time();
       $this->file_mtime = filemtime($this->cfg['cache_file']);
       $c =& $this->cfg;
-      // Only checks if the file exists
+      // Only checks if the file exists and is valid
       if (
         !$real &&
         \is_array($c['content']) &&
@@ -455,6 +455,7 @@ JS;
       ){
         return true;
       }
+      clearstatcache();
       // Real research for last mods and generation timestamps
       if ( $c['is_component'] ){
         foreach ( $c['content'] as $name => $cp ){
@@ -467,7 +468,7 @@ JS;
                 }
               }
               else{
-                die("I can't find the file $f !");
+                die("I can't find the file $f kkk!");
               }
             }
           }
@@ -482,7 +483,8 @@ JS;
             }
           }
           else{
-            die("I can't find the file $f !");
+            \bbn\x::hdump($this->cfg);
+            die("I can't find the file $f  mmm!");
           }
         }
       }

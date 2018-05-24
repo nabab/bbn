@@ -195,7 +195,7 @@ class tasks extends bbn\models\cls\db{
   }
 
   public function get_log($id){
-    $logs = $this->db->rselect_all('bbn_tasks_logs', [], ['id_task' => $id]);
+    $logs = $this->db->rselect_all('bbn_tasks_logs', [], ['id_task' => $id], ['chrono' => 'DESC']);
     $res = [];
     foreach ( $logs as $log ){
       array_push($res, [

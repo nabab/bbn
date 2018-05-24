@@ -176,7 +176,7 @@ class directories {
    * @param string $st
    */
   protected function error($st){
-    bbn\x::log($st, "directories");
+    \bbn\x::log($st, "directories");
     $this->last_error = $st;
   }
 

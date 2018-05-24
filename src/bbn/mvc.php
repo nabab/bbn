@@ -257,17 +257,18 @@ class mvc implements mvc\api{
   }
 
   private function init_locale(){
-    if ( defined('BBN_LOCALE') ){
-      putenv('LANG='.BBN_LANG);
+    if ( defined('BBN_LOCALE') && is_dir(BBN_APP_PATH.'locale') ){
+      putenv('LANG='.BBN_LOCALE);
       setlocale(LC_ALL, '');
       setlocale(LC_MESSAGES,BBN_LOCALE);
       setlocale(LC_CTYPE, BBN_LOCALE);
       //$domains = glob($root.'/'.$locale.'/LC_MESSAGES/messages-*.mo');
       //$current = basename($domains[0],'.mo');
       //$timestamp = preg_replace('{messages-}i','',$current);
-      bindtextdomain(BBN_APP_NAME, BBN_APP_PATH.'locale');
-      bind_textdomain_codeset(BBN_APP_NAME, 'UTF-8');
-      textdomain(BBN_APP_NAME);
+      $name = defined('BBN_APP_NAME') ? BBN_APP_NAME : 'bbn-app';
+      bindtextdomain($name, BBN_APP_PATH.'locale');
+      bind_textdomain_codeset($name, 'UTF-8');
+      textdomain($name);
     }
     return $this;
   }
