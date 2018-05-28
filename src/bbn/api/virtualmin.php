@@ -21,6 +21,8 @@ class virtualmin {
     $pass,
     /** @var  Virtualmin hostname */
     $hostname,
+    /** @var String mode */
+    $mode = 'virtualmin',
     /** @var  Check instance existence */
     $checked = false,
     /** @var  Array of all commands */
@@ -42,6 +44,7 @@ class virtualmin {
     if ( isset($cfg['user'], $cfg['pass']) ){
       $this->user = $cfg['user'];
       $this->pass = $cfg['pass'];
+      $this->mode = $cfg['mode'] === 'cloudmin' ? 'cloudmin' : 'virtualmin';
       $this->hostname = isset($cfg['host']) ? $cfg['host'] : 'localhost';
       $this->checked = true;
       if ( class_exists('\\bbn\\cache') ){
@@ -127,7 +130,7 @@ class virtualmin {
         $url_part .= "'";
         //Concatenating the header url and $url_part to create the full url to be executed
         $url_part = $this->get_header_url() . $url_part;
-        var_dump($url_part);
+        \bbn\x::log($url_part, 'webmin');
         //Calling shell_exec and returning the result array
         return $this->call_shell_exec($url_part);
       }
@@ -200,7 +203,9 @@ class virtualmin {
    * @return string The the header url part to be executed
    */
   private function get_header_url(){
-    return "wget -O - --quiet --http-user=" . $this->user . " --http-passwd=" . $this->pass . " --no-check-certificate 'https://" . $this->hostname . ":10000/virtual-server/remote.cgi?json=1&multiline=&program=";
+    return "wget -O - --quiet --http-user=" . $this->user . " --http-passwd=" . escapeshellarg($this->pass) . " --no-check-certificate 'https://" . $this->hostname . ":10000/".(
+      $this->mode === 'cloudmin' ? 'server-manager' : 'virtual-server'
+    )."/remote.cgi?json=1&multiline=&program=";
   }
 
   /**
@@ -210,6 +215,7 @@ class virtualmin {
    */
   private function call_shell_exec($request){
     //Executing the shell_exec
+    //die(var_dump($this->mode, $request));
     if ( $result = shell_exec($request) ){
       //Decoding the json result into an array
       $result_array = json_decode($result, TRUE);
