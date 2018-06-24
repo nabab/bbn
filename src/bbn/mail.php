@@ -250,7 +250,6 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
       $ar['text'] = $cfg['text'];
       $ar['text'] = $renderer($ar);
       self::set_content($ar['text']);
-
       $this->mailer->msgHTML(self::$content, $this->path, true);
       $r = $this->mailer->send();
       if ( $r && !empty($this->imap_string) ){

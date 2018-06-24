@@ -2256,14 +2256,14 @@ class options extends bbn\models\cls\db
    * @return int|false the number of affected rows or false if no argument or option not found
    */
   public function unset_prop($id, $prop){
-    if ( bbn\str::is_uid($id) && !empty($prop) && ($o = $this->option($id)) ){
+    if ( !empty($prop) && bbn\str::is_uid($id) && ($o = $this->option_no_alias($id)) ){
       if ( \is_string($prop) ){
         $prop = [$prop];
       }
       if ( \is_array($prop) ){
         $change = false;
         foreach ( $prop as $k ){
-          if ( !\in_array($k, $this->class_cfg['arch']['options']) ){
+          if ( !\in_array($k, $this->class_cfg['arch']['options'], true) ){
             $change = true;
             unset($o[$k]);
           }

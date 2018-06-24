@@ -149,11 +149,13 @@ class cron extends bbn\models\cls\basic{
         (($type === 'poll') && !$this->is_poll_active())
       ){
         // Exiting the script if one is missing
-        @unlink($pid);
+        if ( is_file($pid) ){
+          @unlink($pid);
+        }
         exit("GETTING OUT of $type BECAUSE one of the manual files is missing");
       }
       // Loooking for a running PID
-      if ( $file_content = @file_get_contents($pid) ){
+      if ( is_file($pid) && ($file_content = @file_get_contents($pid)) ){
         $pid_content = explode('|', $file_content);
         if ( $pid_content[1] && file_exists('/proc/'.$pid_content[0]) ){
           // If it's currently running we exit
@@ -173,6 +175,13 @@ class cron extends bbn\models\cls\basic{
         $data = $cron->get_data();
         $pid = $this->get_pid_path($data);
         $file_content = @file_get_contents($pid);
+        // Write the error log if an error is present
+        if ( $error = error_get_last() ){
+          @file_put_contents($cron->get_error_log_path($data), \bbn\x::get_dump($error));
+          if ( defined('BBN_DATA_PATH') && is_dir(BBN_DATA_PATH.'logs') ){
+            bbn\x::log([$data, $error], 'cron');
+          }
+        }
         $ok = true;
         // We check if there is a problem with the PID file (it's only debug it shouldn't be necessary)
         if ( $file_content ){
@@ -187,7 +196,9 @@ class cron extends bbn\models\cls\basic{
           // We output the ending time (as all output will be logged in the output file
           echo 'SHUTDOWN '.date('H:i:s');
           // Removing PID file
-          @unlink($pid);
+          if ( is_file($pid) ){
+            @unlink($pid);
+          }
           // And relaunching the continuous tasks if we are in the poller...
           if ( ($data['type'] === 'poll') && $cron->is_poll_active() ){
             $cron->launch_poll();
@@ -204,7 +215,7 @@ class cron extends bbn\models\cls\basic{
       }
       else if ( $type === 'cron' ){
         if ( array_key_exists('id', $this->data) ){
-          echo "Launching task...";
+          echo 'Launching task...';
           $this->run_task($this->data);
         }
         else{
@@ -327,6 +338,15 @@ class cron extends bbn\models\cls\basic{
     return null;
   }
 
+  public function get_error_log_path(array $cfg):? string
+  {
+    if ( isset($cfg['type']) && $this->path ){
+      $dir = isset($cfg['id']) ? bbn\file\dir::create_path($this->path.'error/tasks/'.$cfg['id']) : $this->path.'error/'.$cfg['type'];
+      return $dir ? $dir.'/'.date('Y-m-d-H-i-s').'.txt' : null;
+    }
+    return null;
+  }
+
   /**
    * Returns true if the file data_folder/.active exists, false otherwise.
    * @return bool
@@ -401,7 +421,9 @@ class cron extends bbn\models\cls\basic{
         if ( $this->timer->measure('timeout') > self::$poll_timeout ){
           exit("Ending because of timeout: ".date('H:i:s'));
         }
-        @ob_end_flush();
+        if ( ob_get_contents() ){
+          ob_end_flush();
+        }
       }
     }
   }
@@ -409,7 +431,7 @@ class cron extends bbn\models\cls\basic{
   public function run_task_system(){
     if ( $this->check() ){
       echo "START: ".date('H:i:s').PHP_EOL;
-      @ob_end_flush();
+      ob_end_flush();
       $this->timer->start('timeout');
       $admin = new bbn\user\users($this->db);
       while ( $this->is_cron_active() ){
@@ -429,7 +451,9 @@ class cron extends bbn\models\cls\basic{
         if ( $this->timer->measure('timeout') > self::$cron_timeout ){
           exit("Ending because of timeout: ".date('H:i:s'));
         }
-        @ob_end_flush();
+        if ( ob_get_contents() ){
+          ob_end_flush();
+        }
         sleep(1);
       }
     }

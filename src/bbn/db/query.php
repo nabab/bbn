@@ -117,13 +117,13 @@ class query extends \PDOStatement implements actions
               $this->bindValue($i+1, $v);
             }
             else{
-              if ( is_int ($v) ){
+              if ( \is_int ($v) ){
                 $param = \PDO::PARAM_INT;
               }
               else if ( \is_bool($v) ){
                 $param = \PDO::PARAM_BOOL;
               }
-              else if ( \is_null($v) ){
+              else if ( $v === null ){
                 $param = \PDO::PARAM_NULL;
               }
               else{

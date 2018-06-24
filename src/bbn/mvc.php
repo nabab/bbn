@@ -155,16 +155,9 @@ class mvc implements mvc\api{
     return $this->router->fetch_dir($dir, $mode);
   }
 
-  public static function include_php_view($bbn_inc_content, array $bbn_inc_data = [])
+  public static function include_php_view($bbn_inc_file, $bbn_inc_content, array $bbn_inc_data = [])
   {
-    $randoms = [];
-    $_random = function($i) use (&$randoms){
-      if ( !isset($randoms[$i]) ){
-        $randoms[$i] = md5(\bbn\str::genpwd());
-      }
-      return $randoms[$i];
-    };
-    $fn = function() use($bbn_inc_content, $bbn_inc_data, $_random){
+    $fn = function() use($bbn_inc_file, $bbn_inc_content, $bbn_inc_data){
       if ( $bbn_inc_content ){
         ob_start();
         if ( \count($bbn_inc_data) ){
@@ -174,7 +167,12 @@ class mvc implements mvc\api{
           unset($bbn_inc_key, $bbn_inc_val);
         }
         unset($bbn_inc_data);
-        eval('?>'.$bbn_inc_content);
+        try{
+          eval('?>'.$bbn_inc_content);
+        }
+        catch ( \Exception $e){
+          x::log_error($e->getCode(), $e->getMessage(), $bbn_inc_file, 1);
+        }
         $c = ob_get_contents();
         ob_end_clean();
         return $c;
@@ -405,7 +403,6 @@ class mvc implements mvc\api{
 		$this->route();
     $this->info['args'] = $arguments;
     $this->controller->reset($this->info);
-    $this->log("MVC reroute", $path, $post, $arguments, $this->info);
 		return $this;
 	}
 
@@ -420,6 +417,9 @@ class mvc implements mvc\api{
   public function get_view(string $path = '', string $mode = 'html', array $data=null){
     if ( !router::is_mode($mode) ){
       die("Incorrect mode $path $mode");
+    }
+    if ( ($this->get_mode() === 'dom') && (BBN_DEFAULT_MODE !== 'dom') ){
+      $path .= ($path === '' ? '' : '/').'index';
     }
     $view = null;
     if ( isset(self::$loaded_views[$mode][$path]) ){
@@ -468,6 +468,9 @@ class mvc implements mvc\api{
    * @return array|false A data model
    */
   public function get_model($path, array $data, mvc\controller $ctrl){
+    if ( ($this->get_mode() === 'dom') && (BBN_DEFAULT_MODE !== 'dom') ){
+      $path .= ($path === '' ? '' : '/').'index';
+    }
     if ( $route = $this->router->route($path, 'model') ){
       $model = new mvc\model($this->db, $route, $ctrl, $this);
       return $model->get($data);

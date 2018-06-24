@@ -278,8 +278,8 @@ class i18n extends bbn\models\cls\db{
           if ( $this->db->insert('bbn_i18n', [
             'exp' => $paths[$p]['items'][$i]['text'],
             'lang' =>  $paths[$p]['language'],
-            'id_user'=> $this->user->get_id(),
-            'last_modified' => date('H-m-d H:i:s')
+            //'id_user'=> $this->user->get_id(),
+            //'last_modified' => date('H-m-d H:i:s')
 
           ]) ){
             $id = $this->db->last_id();

@@ -66,9 +66,7 @@ class observer extends bbn\models\cls\db
   private function _exec(string $request, string $params = null)
   {
     if ( $this->check() ){
-      $res = !empty($params) ? $this->db->get_one($request, array_map(function($p){
-        return base64_decode($p);
-      }, json_decode($params, true))) : $this->db->get_one($request);
+      $res = !empty($params) ? $this->db->get_one($request, array_map('base64_decode', json_decode($params))) : $this->db->get_one($request);
       return md5((string)$res);
     }
     return null;
@@ -76,7 +74,7 @@ class observer extends bbn\models\cls\db
 
   private static function sanitize_params(array $params = null)
   {
-    return $params ? json_encode(array_map(function($p){return base64_encode($p);}, $params)) : '';
+    return $params ? json_encode(array_map('base64_encode', $params)) : '';
   }
 
   /**
@@ -387,16 +385,8 @@ MYSQL;
       //MAX: 2000
       $this->db->query('SET @@group_concat_max_len = ?', 2000 * 32);
       foreach ( $this->db->get_rows($sql) as $d ){
-        $aliases = $d['aliases'] ?
-          array_map(function ($a){
-            return strtolower($a);
-          }, explode(',', $d['aliases'])) :
-          [];
-        $tokens = $d['tokens'] ?
-          array_map(function ($a){
-            return strtolower($a);
-          }, explode(',', $d['tokens'])) :
-          [];
+        $aliases = $d['aliases'] ? array_map('strtolower', explode(',', $d['aliases'])) : [];
+        $tokens = $d['tokens'] ? array_map('strtolower', explode(',', $d['tokens'])) : [];
         $results = $d['results'] ? explode(',', $d['results']) : [];
         $real_result = $this->_exec($d['request'], $d['params']);
         $db_result = $this->get_result($d['id']);
@@ -405,7 +395,6 @@ MYSQL;
         if ( $real_result !== $db_result ){
           $this->db->update('bbn_observers', ['result' => $real_result], ['id' => $d['id']]);
           if ( $d['id_token'] ){
-            \bbn\x::log(['D', $d], 'error');
             if ( !isset($diff[$d['id_token']]) ){
               $diff[$d['id_token']] = [];
             }
@@ -415,11 +404,9 @@ MYSQL;
             ];
           }
         }
-        \bbn\x::log(['ALIASES', $aliases], 'error');
         foreach ( $aliases as $i => $a ){
           if ( $real_result !== $results[$i] ){
             $this->db->update('bbn_observers', ['result' => $real_result], ['id' => $a]);
-            \bbn\x::log(['T', $a, $tokens[$i], $i], 'error');
             $t = $tokens[$i];
             if ( !isset($diff[$t]) ){
               $diff[$t] = [];
@@ -430,11 +417,18 @@ MYSQL;
             ];
           }
         }
+        bbn\x::log(['-------------------', $d, $diff], 'error');
         $this->_update_next($d['id']);
       }
       echo '.';
       $this->db->flush();
-      @ob_end_flush();
+      if ( count($diff) ){
+        bbn\x::dump('Returning diff!', $diff);
+        return $diff;
+      }
+      if ( ob_get_contents() ){
+        ob_end_flush();
+      }
       return true;
     }
     bbn\x::dump('Canceling observer: '.date('H:i:s Y-m-d'));

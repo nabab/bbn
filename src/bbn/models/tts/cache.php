@@ -32,8 +32,8 @@ trait cache
     return $this;
   }
 
-  protected function cache_delete($uid){
-    $this->cache_engine->delete_all($this->_cache_name($uid));
+  protected function cache_delete($uid, $method = ''){
+    $this->cache_engine->delete_all($this->_cache_name($uid, $method = ''));
     return $this;
   }
 

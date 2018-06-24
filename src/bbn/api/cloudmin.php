@@ -10,20 +10,19 @@
 namespace bbn\api;
 use bbn;
 
-class virtualmin {
-  use bbn\models\tts\cache;
+class cloudmin {
 
-  const cache_name = 'bbn/api/virtualmin';
+  const cache_name = 'bbn/api/cloudmin';
 
   private
-    /** @var  Virtualmin username */
+    /** @var  Cloudmin username */
     $user,
-    /** @var  Virtualmin password */
+    /** @var  Cloudmin password */
     $pass,
-    /** @var  Virtualmin hostname */
+    /** @var  Cloudmin hostname */
     $hostname,
     /** @var String mode */
-    $mode = 'virtualmin',
+    $mode = 'cloudmin',
     /** @var  Check instance existence */
     $checked = false,
     /** @var  Array of all commands */
@@ -43,22 +42,15 @@ class virtualmin {
    */
   public function __construct(array $cfg){
     if ( isset($cfg['user'], $cfg['pass']) ){
-      self::cache_init();
       $this->user = $cfg['user'];
       $this->pass = $cfg['pass'];
-      $this->mode = $cfg['mode'] === 'cloudmin' ? 'cloudmin' : 'virtualmin';
+      //  TODO ho rimpiazzato
+      //$this->mode = $cfg['mode'] === 'cloudmin' ? 'cloudmin' : 'virtualmin';
+      $this->mode = $mode;
       $this->hostname = isset($cfg['host']) ? $cfg['host'] : 'localhost';
       $this->checked = true;
-      if ( class_exists('\\bbn\\cache') ){
-        $this->cacher = bbn\cache::get_engine();
-        if ( !$this->cacher->has(self::cache_name) ){
-          $this->fetch_commands();
-        }
-        $this->commands = $this->cacher->get(self::cache_name);
-      }
-      else{
-        $this->commands = $this->fetch_commands();
-      }
+      // TODO tolto la cache  e this->commands = $this->fetch_commands
+
     }
   }
 
@@ -69,71 +61,58 @@ class virtualmin {
    */
   public function __call($name, $arguments){
     if ( $this->checked ){
-      $cmd_name = str_replace('_', '-', $name);
-      if ( isset($this->commands[$cmd_name]) ){
-        //Setting the last action performed
-        $this->last_action = $cmd_name;
-        //Defining  the $url_part and the command to be executed
-        $url_part = $cmd_name;
+      $cmd_name = str_replace('-', '_', $name);
 
-        $cmd = $this->commands[$cmd_name];
-        if ( !empty($arguments[0]) ){
-          //Prepping, processing and validating the create user parameters
-          $args = $this->process_parameters($arguments[0]);
-          foreach ( $cmd['args'] as $k => $v ){
-            if ( !empty($v['mandatory']) && !isset($args[$k]) ){
-              if ( (strpos($k, 'pass') === false) &&
-                (!isset($args['pass']) && !isset($args['encpass']) && !isset($args['passfile']))
-              ){
-                var_dump("Parameter $k mandatory for $name!");
-                return false;
+
+      // TODO ho tolto il controllo $this->commands[$cmd_name]
+      // if ( isset($this->commands[$cmd_name]) ){
+
+      //Setting the last action performed
+      $this->last_action = $cmd_name;
+      //Defining  the $url_part and the command to be executed
+      $url_part = $cmd_name;
+
+      if ( !empty($arguments[0]) ){
+        //Prepping, processing and validating the create user parameters
+        $args = $this->process_parameters($arguments[0]);
+
+        // TODO tolto i comandi, messo gli argomenti
+        foreach ( $args as $k => $v ){
+          if ( !empty($v['mandatory']) && !isset($args[$k]) ){
+            if ( (strpos($k, 'pass') === false) &&
+              (!isset($args['pass']) && !isset($args['encpass']) && !isset($args['passfile']))
+            ){
+              var_dump("Parameter $k mandatory for $name!");
+              return false;
+            }
+          }
+          // TODO controlllo se questi valori sono boolean e se nono  a true
+          if ( isset($v) ){
+            if ( is_bool($v['binary']) &&
+              ($v['binary'] == true)
+            ){
+              $url_part .= "&$k";
+            }
+            else if ( \is_array($v) &&
+              is_bool($v['multiple']) &&
+              ($v['multiple'] == true)
+            ){
+              foreach ( $v as $w ){
+                $url_part .= "&$k=$w";
               }
             }
-            if ( isset($args[$k]) ){
-              if ( $v['binary'] && $args[$k] ){
-                $url_part .= "&$k";
-              }
-              else if ( \is_array($v) && $v['multiple'] ){
-                foreach ( $args[$k] as $w ){
-                  $url_part .= "&$k=$w";
-                }
-              }
-              else{
-                $url_part .= "&$k=".$args[$k];
-              }
+            else{
+              $url_part .= "&$k=".$args[$k];
             }
           }
         }
+        // }
         //Concatenating the closing single quote
         $url_part .= "'";
         //Concatenating the header url and $url_part to create the full url to be executed
         $url_part = $this->get_header_url() . $url_part;
-
         //Calling shell_exec and returning the result array
-    //    return $this->call_shell_exec($url_part);
-
-        if ( (strpos($cmd_name, 'list-') !== false) ||
-          (strpos($cmd_name, 'get-') !== false) ||
-          (strpos($cmd_name, 'info') !== false)
-        ){
-          $uid = $this->hostname;
-//  \bbn\x::log(["ss", $arguments], 'cache_delete');
-          if ( !empty($arguments) ){
-            $uid .= md5(json_encode($arguments));
-          }
-          if ( $this->cache_has($uid, $name) ){
-            $result_call = $this->cache_get($uid, $name);
-          }
-          else {
-            $result_call = $this->call_shell_exec($url_part);
-            $this->cache_set($uid, $name, $result_call);
-          }
-        }
-        else{
-          $result_call = $this->call_shell_exec($url_part);
-        }
-        //Calling shell_exec and returning the result array
-        return $result_call;
+        return $this->call_shell_exec($url_part);
       }
       // We force even if we don't have the command in the list
       else if ( !empty($arguments[1]) ){
@@ -157,7 +136,6 @@ class virtualmin {
         //Concatenating the header url and $url_part to create the full url to be executed
         $url_part = $this->get_header_url() . $url_part;
         \bbn\x::log($url_part, 'webmin');
-
         //Calling shell_exec and returning the result array
         return $this->call_shell_exec($url_part);
       }
@@ -167,27 +145,6 @@ class virtualmin {
     }
     return false;
   }
-
-
-  /**
-   * This function allows the cancellation of the cache of the used commands
-   *
-   * @param $uid file cache
-   * @param $method name
-   * @return bool
-   */
-  public function delete_cache($command_name = '', $arguments= false){
-    $uid = $this->hostname;
-    if ( !empty($arguments) ){
-      $uid .= md5(json_encode($arguments));
-    }
-    if ( !empty($this->cache_delete($uid, $command_name)) ){
-      \bbn\x::log([$uid, $command_name], 'cache_delete');
-      return true;
-    }
-    return false;
-  }
-
 
   /**
    * @return array
@@ -250,10 +207,17 @@ class virtualmin {
    * This function is used to get the header url part to be executed
    * @return string The the header url part to be executed
    */
+
+  /*
+  *  TODO ho sostituito questa funzione
   private function get_header_url(){
     return "wget -O - --quiet --http-user=" . $this->user . " --http-passwd=" . escapeshellarg($this->pass) . " --no-check-certificate 'https://" . $this->hostname . ":10000/".(
       $this->mode === 'cloudmin' ? 'server-manager' : 'virtual-server'
     )."/remote.cgi?json=1&multiline=&program=";
+  }
+  */
+  private function get_header_url(){
+    return "wget -O - --quiet --http-user=" . $this->user . " --http-passwd=" . escapeshellarg($this->pass) . " --no-check-certificate 'https://" . $this->hostname . ":10000/server-manager/remote.cgi?json=1&multiline=&program=";
   }
 
   /**
@@ -352,23 +316,9 @@ class virtualmin {
     $url_part .="'";
     //Concatenating the header url and $url_part to create the full url to be executed
     $url_part = $this->get_header_url() . $url_part;
-
-    //test
-    $uid = $this->hostname;
-    if ( !empty($param) ){
-      $uid .= md5(json_encode($param));
-    }
-
-    if ( $this->cache_has($uid, 'list_commands') ){
-      $result_call = $this->cache_get($uid, 'list_commands');
-    }
-    else {
-      $result_call = $this->call_shell_exec($url_part);
-      $this->cache_set($uid, 'list_commands', $result_call);
-    }
-    return $result_call;
+    //Calling shell_exec and returning the result array
+    return $this->call_shell_exec($url_part);
   }
-
 
   /**
    * @param $command

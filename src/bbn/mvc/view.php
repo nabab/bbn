@@ -106,7 +106,7 @@ class view{
         case 'php':
           $dir = getcwd();
           chdir(dirname($this->file));
-          $r = bbn\mvc::include_php_view($this->content, $data ?: []);
+          $r = bbn\mvc::include_php_view($this->file, $this->content, $data ?: []);
           chdir($dir);
           return $r;
       }

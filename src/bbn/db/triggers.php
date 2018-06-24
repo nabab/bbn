@@ -167,7 +167,7 @@ trait triggers {
                   if ( !isset($this->triggers[$k][$m][$t]) ){
                     $this->triggers[$k][$m][$t] = [];
                   }
-                  array_push($this->triggers[$k][$m][$t], $function);
+                  $this->triggers[$k][$m][$t][] = $function;
                 }
               }
             }
@@ -185,82 +185,85 @@ trait triggers {
   /**
    * @returns a selection query
    */
-  private function _sel($table, $fields = [], $where = [], $order = false, $limit = 100, $start = 0)
+  private function _sel()
   {
-    if ( $this->check() ){
-      if ( !\is_array($table) ){
-        $table = [$table];
-      }
+    if ( $this->check() && ($args = \call_user_func_array([$this, 'treat_select_arguments'], func_get_args())) ){
+      /** @var array $tables_fields  All the fields in the table(s). */
       $tables_fields = [];
+      /** @var array $tables_full  Each of the tables' full name. */
       $tables_full = [];
-      foreach ( $table as $tab ){
-        $tables_fields[$tab] = array_keys($this->modelize($tab)['fields']);
-        $tables_full[] = $this->tfn($tab);
+      // Filling $tables_fields and $tables_full
+      foreach ( $args['tables'] as $tab ){
+        if ( $model = $this->modelize($tab) ){
+          $tfn = $this->tfn($tab);
+          $tables_fields[$tfn] = array_keys($model['fields']);
+          $tables_full[] = $tfn;
+        }
       }
-      if ( !\is_array($fields) ){
-        $fields = [$fields];
-      }
-      foreach ( $fields as $i => $field ){
+      // array $fields correction before processing
+      foreach ( $args['fields'] as $i => $field ){
+        // If the name is not full, we look into the selected tables to see to which it belongs
         if ( !strpos($field, '.') ){
           $tab = [];
           foreach ( $tables_fields as $t => $f ){
-            if ( \in_array($field, $f) ){
-              array_push($tab, $t);
+            if ( \in_array($field, $f, true) ){
+              $tab[] = $t;
             }
           }
+          // If the table is found, the selected field is renamed to full
           if ( \count($tab) === 1 ){
-            $fields[$i] = $this->cfn($field, $tab[0]);
+            $args['fields'][$i] = $this->cfn($field, $tab[0]);
           }
           else if ( \count($tab) > 1 ){
             $this->error('Error! Duplicate field name, you must insert the fields with their fullname.');
           }
           else {
-            $this->error("Error! The column '$field' doesn't exist in '".implode(", ", $table)." / ".\bbn\x::get_dump($tables_fields), \bbn\x::get_dump($tables_full));
+            $this->error("Error! The column '$field' doesn't exist in '".implode(", ", $args['table'])." / ".\bbn\x::get_dump($tables_fields), \bbn\x::get_dump($tables_full));
           }
         }
       }
+
       $cfg = [
         'moment' => 'before',
         'kind' => 'select',
         'table' => $tables_full
       ];
-      $cfg['where'] = $this->where_cfg($where, $cfg['table']);
+      $cfg['where'] = $this->where_cfg($args['where'] ?? [], $cfg['table']);
       $cfg['hash'] = $this->make_hash(
         'select',
-        serialize($cfg['table']),
-        serialize($fields),
-        serialize($this->get_where($cfg['where'], $cfg['table'])),
-        serialize($order),
-        $limit,
-        $start
+        serialize($args['tables']),
+        serialize($args['fields']),
+        serialize($this->get_where($cfg['where'] ?? [], $cfg['table'])),
+        serialize($args['order'] ?? []),
+        $args['limit'] ?? null,
+        $args['start'] ?? 0
       );
       if ( isset($this->queries[$cfg['hash']], $this->queries[$this->queries[$cfg['hash']]]) ){
         $cfg['sql'] = $this->queries[$this->queries[$cfg['hash']]]['statement'];
       }
       else{
-        $cfg['sql'] = $this->language->get_select($table, $fields, $cfg['where']['final'], $order, $limit, $start);
+        $cfg['sql'] = $this->language->get_query($args['tables'], $args['fields'], $cfg['where']['final'],
+          $args['order'], $args['limit'], $args['start']);
       }
 
-      $cfg['values'] = array_values($fields);
+      $cfg['values'] = array_values($args['fields']);
       if ( $cfg['sql'] ){
         if ( $this->triggers_disabled ){
+          $query_args = [$cfg['sql'], $cfg['hash']];
           if ( \count($cfg['where']['values']) > 0 ){
-            $r = $this->query($cfg['sql'], $cfg['hash'], $cfg['where']['values']);
+            $query_args[] = $cfg['where']['values'];
           }
-          else{
-            $r = $this->query($cfg['sql'], $cfg['hash']);
-          }
+          $r = \call_user_func_array([$this, 'query'], $query_args);
         }
         else{
           $cfg = $this->_trigger($cfg);
           $r = false;
           if ( $cfg['run'] ){
+            $query_args = [$cfg['sql'], $cfg['hash']];
             if ( \count($cfg['where']['values']) > 0 ){
-              $r = $this->query($cfg['sql'], $cfg['hash'], $cfg['where']['values']);
+              $query_args[] = $cfg['where']['values'];
             }
-            else {
-              $r = $this->query($cfg['sql'], $cfg['hash']);
-            }
+            $r = \call_user_func_array([$this, 'query'], $query_args);
           }
           if ( ($r && $cfg['trig']) || !empty($cfg['force']) ){
             $cfg['moment'] = 'after';
@@ -277,58 +280,180 @@ trait triggers {
    * @return type
    */
   public function where_cfg(array $w, $table = [], $values = []){
-    // Checking this array is not already correctly configured to be where
-    if (
-      $this->check() &&
-      isset($w['bbn_where_cfg'], $w['fields'], $w['values'], $w['final'], $w['keyval'], $w['unique']) &&
-      ($w['bbn_where_cfg'] === 1)
-    ){
-      return $w;
-    }
-
-    $model = [];
-    // The shape of the final result
-    $r = [
-      'fields' => [],
-      'values' => [],
-      'final' => [],
-      'keyval' => [],
-      'unique' => [],
-      'bbn_where_cfg' => 1
-    ];
-
-    if ( \is_array($w) && (\count($w) > 0) ){
-      $tables_fields = [];
-      if ( !\is_array($table) ){
-        $table = empty($table) ? [] : [$table];
+    if ( $this->check() ){
+      // Checking this array is not already correctly configured to be where
+      if (
+        isset($w['bbn_where_cfg'], $w['fields'], $w['values'], $w['final'], $w['keyval'], $w['unique']) &&
+        ($w['bbn_where_cfg'] === 1)
+      ){
+        return $w;
       }
-      /*
-      if ( class_exists('\\bbn\appui\\history', false) && bbn\appui\history::has_history($this) ){
-        $hcol = bbn\appui\history::$hcol;
-        $hcols = [];
-      }
-      */
-      foreach ( $table as $tab ){
-        $model = $this->modelize($tab);
-        $tables_fields[$tab] = array_keys($model['fields']);
+
+      $model = [];
+      // The shape of the final result
+      $r = [
+        'fields' => [],
+        'values' => [],
+        'final' => [],
+        'keyval' => [],
+        'unique' => [],
+        'bbn_where_cfg' => 1
+      ];
+
+      if ( \is_array($w) && (\count($w) > 0) ){
+        $tables_fields = [];
+        if ( !\is_array($table) ){
+          $table = empty($table) ? [] : [$table];
+        }
         /*
-        if ( !empty($hcol) && \in_array($hcol, $tables_fields[$tab]) ){
-          array_push($hcols, $this->cfn($hcol, $tab));
+        if ( class_exists('\\bbn\appui\\history', false) && bbn\appui\history::has_history($this) ){
+          $hcol = bbn\appui\history::$hcol;
+          $hcols = [];
         }
         */
-      }
-      /** @var int $i Numeric index */
-      $i = 0;
-      foreach ( $w as $k => $v ){
-        // arrays with [ field_name => value, field_name => value...] (equal assumed)
-        if ( strpos($k, '.') ){
-          $k = explode('.', $k)[1];
+        foreach ( $table as $tab ){
+          $model = $this->modelize($tab);
+          $tables_fields[$tab] = array_keys($model['fields']);
+          /*
+          if ( !empty($hcol) && \in_array($hcol, $tables_fields[$tab]) ){
+            array_push($hcols, $this->cfn($hcol, $tab));
+          }
+          */
         }
+        /** @var int $i Numeric index */
+        $i = 0;
+        foreach ( $w as $k => $v ){
+          // arrays with [ field_name => value, field_name => value...] (equal assumed)
+          if ( strpos($k, '.') ){
+            $k = explode('.', $k)[1];
+          }
+          if ( \is_string($k) ){
+            $v = [$k, \is_string($v) && !\bbn\str::is_uid($v) && !\bbn\str::is_buid($v) ? 'LIKE' : '=', $v];
+          }
+          if ( \is_array($v) ){
+            if ( !strpos($v[0], '.') && \count($table) ){
+              $tab = [];
+              foreach ($tables_fields as $t => $f){
+                if ( \in_array($v[0], $f, true) ){
+                  $tab[] = $t;
+                }
+              }
+              if (\count($tab) === 1){
+                $v[0] = $this->cfn($v[0], $tab[0]);
+              }
+              else if (\count($tab) > 1){
+                $this->error('Error! Duplicate field name, you must insert the fields with their fullname.');
+              }
+              else {
+                $this->error(
+                  "Error! The column '$v[0]' as mentioned in where doesn't exist in '".
+                  implode(", ", array_keys($tables_fields))."' table(s)", $v, $w
+                );
+              }
+            }
+            if (
+              $model['fields'] &&
+              !empty($model['fields'][$this->csn($v[0])]) &&
+              ($model['fields'][$this->csn($v[0])]['type'] === 'binary') &&
+              \bbn\str::is_uid($v[2])
+            ){
+              $v[2] = hex2bin($v[2]);
+            }
+            // arrays with [ field_name, operator, value]
+            if ( \count($v) === 3 ){
+              $r['fields'][] = $v[0];
+              $r['values'][] = $v[2];
+              if ( ($v[1] === '=') || !isset($r['keyval'][$v[0]]) ){
+                $r['keyval'][$v[0]] = $v[2];
+              }
+              $r['final'][] = [$v[0], $v[1], $v[2]];
+            }
+            // arrays with [ field_name, operator, value, bool] value is a DB function/column (unescaped)
+            else if ( \count($v) === 4 ){
+              $r['fields'][] = $v[0];
+              $r['values'][] = $v[2];
+              if ( ($v[1] === '=') || !isset($r['keyval'][$v[0]]) ){
+                $r['keyval'][$v[0]] = $v[2];
+              }
+              $r['final'][] = [$v[0], $v[1], $v[2], $v[3]];
+            }
+            else{
+              $this->log("Not enough argument for a where", $v);
+            }
+          }
+          else{
+            $this->log("Incorrect where", $v, $r);
+          }
+          $r['unique'][] = [$r['final'][$i][0], $r['final'][$i][1]];
+          $i++;
+        }
+      }
+      /** @todo Pass this into the history class -> possible? */
+      // Automatically select non deleted if history is enabled
+      if ( !empty($table) && !$this->triggers_disabled ){
+        $res = $this->_trigger([
+          'moment' => 'before',
+          'table' => $table,
+          'where' => $r,
+          'kind' => 'where',
+          'values' => $values
+        ]);
+        if ( isset($res['where']) ){
+          $r = $res['where'];
+        }
+      }
+      /*
+       * !empty($hcols)
+      ){
+        foreach ( $hcols as $hc ){
+          if ( !\in_array($hc, $r['fields']) ){
+            array_push($r['fields'], $hc);
+            array_push($r['values'], 1);
+            array_push($r['final'], [$hc, '=', 1]);
+            /** @todo: Check if it is right man!
+            array_push($r['unique'], [$hc, '=']);
+            $r['keyval'][$hc] = 1;
+          }
+        }
+      }
+      */
+      return $r;
+    }
+  }
+
+  private function translate_conditions(array $conditions, array $tables = [], array &$cfg = [
+    'fields' => [],
+    'values' => [],
+    'final' => [],
+    'keyval' => [],
+    'unique' => []
+  ]){
+    $conds = $conditions['conditions'] ?? $conditions;
+    $res = ['logic' => $conditions['logic'] ?? 'AND', 'conditions' => []];
+    $tables_fields = [];
+    foreach ( $tables as $tab ){
+      $model = $this->modelize($tab);
+      $tables_fields[$tab] = array_keys($model['fields']);
+      /*
+      if ( !empty($hcol) && \in_array($hcol, $tables_fields[$tab]) ){
+        array_push($hcols, $this->cfn($hcol, $tab));
+      }
+      */
+    }
+    foreach ( $conds as $k => $v ){
+      if ( \is_array($v) && isset($v['conditions']) ){
+        $res[] = $this->translate_conditions($v, $tables, $cfg);
+      }
+      else{
+        // arrays with [ field_name => value, field_name => value...] (equal assumed)
         if ( \is_string($k) ){
+          if ( strpos($k, '.') ){
+            $k = explode('.', $k)[1];
+          }
           $v = [$k, \is_string($v) && !\bbn\str::is_uid($v) ? 'LIKE' : '=', $v];
         }
-        if ( \is_array($v) ){
-          if ( !strpos($v[0], '.') && \count($table) ){
+        if ( \is_array($v) && !isset($v['operator']) ){
+          if ( !strpos($v[0], '.') && \count($tables) ){
             $tab = [];
             foreach ($tables_fields as $t => $f){
               if ( \in_array($v[0], $f, true) ){
@@ -352,69 +477,75 @@ trait triggers {
             $model['fields'] &&
             !empty($model['fields'][$this->csn($v[0])]) &&
             ($model['fields'][$this->csn($v[0])]['type'] === 'binary') &&
-            \bbn\str::is_uid($v[2]) 
+            \bbn\str::is_uid($v[2])
           ){
             $v[2] = hex2bin($v[2]);
           }
           // arrays with [ field_name, operator, value]
-          if ( \count($v) === 3 ){
-            $r['fields'][] = $v[0];
-            $r['values'][] = $v[2];
-            if ( ($v[1] === '=') || !isset($r['keyval'][$v[0]]) ){
-              $r['keyval'][$v[0]] = $v[2];
+          if ( \count($v) >= 3 ){
+            $v = [
+              'field' => $v[0],
+              'operator' => $v[1],
+              'value' => $v[2]
+            ];
+            $cfg['fields'][] = $v[0];
+            $cfg['values'][] = $v[2];
+            if ( ($v[1] === '=') || !isset($cfg['keyval'][$v[0]]) ){
+              $cfg['keyval'][$v[0]] = $v[2];
             }
-            $r['final'][] = [$v[0], $v[1], $v[2]];
-          }
-          // arrays with [ field_name, operator, value, bool] value is a DB function/column (unescaped)
-          else if ( \count($v) === 4 ){
-            $r['fields'][] = $v[0];
-            $r['values'][] = $v[2];
-            if ( ($v[1] === '=') || !isset($r['keyval'][$v[0]]) ){
-              $r['keyval'][$v[0]] = $v[2];
-            }
-            $r['final'][] = [$v[0], $v[1], $v[2], $v[3]];
-          }
-          else{
-            $this->log("Not enough argument for a where", $v);
+            $cfg['final'][] = [$v[0], $v[1], $v[2]];
+            $cfg['unique'][] = [$v[0], $v[1]];
           }
         }
-        else{
-          $this->log("Incorrect where", $v, $r);
-        }
-        $r['unique'][] = [$r['final'][$i][0], $r['final'][$i][1]];
-        $i++;
+      }
+      if ( isset($v['field'], $v['operator']) ){
+
       }
     }
-    /** @todo Pass this into the history class -> possible? */
-    // Automatically select non deleted if history is enabled
-    if ( !empty($table) && !$this->triggers_disabled ){
-      $res = $this->_trigger([
-        'moment' => 'before',
-        'table' => $table,
-        'where' => $r,
-        'kind' => 'where',
-        'values' => $values
-      ]);
-      if ( isset($res['where']) ){
-        $r = $res['where'];
+    return $conditions;
+  }
+
+  public function normalize_where(array $w, $table = [], $values = []){
+    if ( $this->check() ){
+      // Checking this array is not already correctly configured to be where
+      if (
+        isset($w['bbn_where_cfg'], $w['fields'], $w['values'], $w['final'], $w['keyval'], $w['unique']) &&
+        ($w['bbn_where_cfg'] === 1)
+      ){
+        return $w;
       }
-    }
-    /*
-     * !empty($hcols)
-    ){
-      foreach ( $hcols as $hc ){
-        if ( !\in_array($hc, $r['fields']) ){
-          array_push($r['fields'], $hc);
-          array_push($r['values'], 1);
-          array_push($r['final'], [$hc, '=', 1]);
-          /** @todo: Check if it is right man!
-          array_push($r['unique'], [$hc, '=']);
-          $r['keyval'][$hc] = 1;
+
+      /** @todo Pass this into the history class -> possible? */
+      // Automatically select non deleted if history is enabled
+      if ( !empty($table) && !$this->triggers_disabled ){
+        $res = $this->_trigger([
+          'moment' => 'before',
+          'table' => $table,
+          'where' => $r,
+          'kind' => 'where',
+          'values' => $values
+        ]);
+        if ( isset($res['where']) ){
+          $r = $res['where'];
         }
       }
+      /*
+       * !empty($hcols)
+      ){
+        foreach ( $hcols as $hc ){
+          if ( !\in_array($hc, $r['fields']) ){
+            array_push($r['fields'], $hc);
+            array_push($r['values'], 1);
+            array_push($r['final'], [$hc, '=', 1]);
+            /** @todo: Check if it is right man!
+            array_push($r['unique'], [$hc, '=']);
+            $r['keyval'][$hc] = 1;
+          }
+        }
+      }
+      */
+      return $r;
     }
-    */
-    return $r;
   }
 
   /**
@@ -433,16 +564,15 @@ trait triggers {
       ];
       switch ( $cfg['kind'] ){
         case 'insert':
-          array_push($query_args, array_values($cfg['values']));
+          $query_args[] = array_values($cfg['values']);
           break;
         case 'update':
-          array_push($query_args, empty($cfg['where']) ?
+          $query_args[] =  empty($cfg['where']) ?
             array_values($cfg['values']) :
-            array_merge(array_values($cfg['values']), $cfg['where']['values'])
-          );
+            array_merge(array_values($cfg['values']), $cfg['where']['values']);
           break;
         case 'delete':
-          array_push($query_args, empty($cfg['where']) ? [] : $cfg['where']['values']);
+          $query_args[] = empty($cfg['where']) ? [] : $cfg['where']['values'];
           break;
         case 'select':
           break;
@@ -463,17 +593,16 @@ trait triggers {
         ];
         switch ( $cfg['kind'] ){
           case 'insert':
-            array_push($query_args, array_values($cfg['values']));
+            $query_args[] = array_values($cfg['values']);
             break;
           case 'update':
-            array_push($query_args, empty($cfg['where']) ?
+            $query_args[] = empty($cfg['where']) ?
               array_values($cfg['values']) :
-              array_merge(array_values($cfg['values']), $cfg['where']['values'])
-            );
+              array_merge(array_values($cfg['values']), $cfg['where']['values']);
             //var_dump($cfg, $query_args);
             break;
           case 'delete':
-            array_push($query_args, empty($cfg['where']) ? [] : $cfg['where']['values']);
+            $query_args[] = empty($cfg['where']) ? [] : $cfg['where']['values'];
             break;
           case 'select':
             break;
@@ -706,7 +835,7 @@ trait triggers {
     $where = $this->where_cfg($where, $table, $values);
     $vals = [];
     foreach ( $values as $k => $v ){
-      array_push($vals, $this->cfn($k, $table));
+      $vals[] = $this->cfn($k, $table);
     }
     if ( $sql = $this->_statement('update', $table, $vals, $where, $ignore) ){
       return $this->_exec_triggers([
@@ -819,5 +948,6 @@ trait triggers {
   public function truncate($table){
     return $this->delete($table, []);
   }
+
 
 }

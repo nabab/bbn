@@ -239,22 +239,20 @@ class chat
 
   public function get_chat_by_users(array $users):? string
   {
-    if ( $this->check() ){
+    if ( $this->check() && count($users) ){
       $join = '';
-      $args = [hex2bin($this->user->get_id())];
+      $where = [];
       foreach ( $users as $i => $u ){
-        $join .= ' JOIN bbn_chats_users AS u'.($i+2).' ON u'.($i+2).'.id_chat = bbn_chats.id ';
+        $join .= ' JOIN bbn_chats_users AS u'.($i+1).' ON u'.($i+1).'.id_chat = bbn_chats.id ';
+        array_push($where, 'u'.($i+1).'.id_user = ?');
         $args[] = hex2bin($u);
       }
+      $where_st = implode(' AND ', $where);
       $sql = <<<MYSQL
 SELECT DISTINCT bbn_chats.id
 FROM bbn_chats
-  JOIN bbn_chats_users AS u1
-    ON u1.id_chat = bbn_chats.id
-  JOIN bbn_chats_users AS u2
-    ON u2.id_chat = bbn_chats.id
-WHERE u1.id_user = ?
-AND u2.id_user = ?
+  $join
+WHERE $where_st
 AND bbn_chats.blocked = 0
 LIMIT 1
 MYSQL;

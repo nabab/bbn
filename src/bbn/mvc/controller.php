@@ -185,7 +185,8 @@ class controller implements api{
 			'local_route' => $this->say_local_route(),
       'path' => $this->say_path(),
       'root' => $this->say_root(),
-			'route' => $this->say_route()
+			'route' => $this->say_route(),
+      'checkers' => $this->checkers
 		];
 	}
 

@@ -70,7 +70,7 @@ class grid extends bbn\models\cls\cache
       }
       // Otherwise it is a table
       else{
-        if ( $this->query = $this->db->get_select($cfg) ){
+        if ( $this->query = $this->db->get_query($cfg) ){
           $this->table = $cfg;
         }
       }
@@ -93,7 +93,7 @@ class grid extends bbn\models\cls\cache
           $this->fields = $cfg['fields'];
         }
         if ( !$this->query ){
-          $this->query = $this->db->get_select($this->table, !empty($cfg['columns']) ? $cfg['columns'] : []);
+          $this->query = $this->db->get_query($this->table, !empty($cfg['columns']) ? $cfg['columns'] : []);
           if ( $i = strpos($this->query, 'WHERE 1') ){
             $this->query = substr($this->query, 0, $i);
           }
@@ -186,7 +186,7 @@ class grid extends bbn\models\cls\cache
     $this->data = [];
   }
 
-  public function get_select(){
+  public function get_query(){
     if ( $this->check() ){
       $select = $this->query;
       if ( $where = $this->filter() ){
@@ -211,7 +211,7 @@ class grid extends bbn\models\cls\cache
     else if ( $this->table ){
       $select = 'SELECT COUNT(*) FROM '.$this->db->tsn($this->table, true);
     }
-    if ( isset($select) ){
+    if ( !empty($select) ){
       if ( $where = $this->filter() ){
         $select .= ' WHERE '.$where;
       }
@@ -225,7 +225,7 @@ class grid extends bbn\models\cls\cache
   }
 
   public function get_data(){
-    if ( $sql = $this->get_select() ){
+    if ( $sql = $this->get_query() ){
       $this->chrono->start();
       $q = $this->db->query($sql);
       $rows = $q->get_rows();
@@ -292,9 +292,14 @@ class grid extends bbn\models\cls\cache
       }
       $r['total'] = $total;
       $r['data'] = $this->get_data();
-      $r['time']['query'] = $this->query_time;
-      $r['time']['count'] = $this->count_time;
+      $r['time'] = [
+        'query' => $this->query_time,
+        'count' => $this->count_time
+      ];
+
     }
+    $r['query'] = $this->get_query();
+    $r['count'] = $this->get_count();
     if ( !$this->db->check() ){
       $r['success'] = false;
       $r['error'] = $this->db->last_error;
@@ -305,10 +310,6 @@ class grid extends bbn\models\cls\cache
   public function check()
   {
     return null !== $this->query;
-  }
-
-  public function get_query(){
-    return $this->query;
   }
 
   public function get_start()
@@ -349,6 +350,7 @@ class grid extends bbn\models\cls\cache
   }
 
   public function filter(array $filters = null, $array = false){
+    /** @var array|string $res */
     $res = $array ? [] : '';
     if ( null === $filters ){
       $num1 = empty($this->prefilters) ? 0 : \count($this->prefilters['conditions']);
@@ -383,10 +385,13 @@ class grid extends bbn\models\cls\cache
             $res .= $pre.$tmp;
           }
         }
-        else if ( $field = $this->get_field($f, $array) ){
+        else if ( isset($f['operator']) && ($field = $this->get_field($f, $array)) ){
           $pre = empty($res) ? " ( " : " $logic ";
           if ( !$array ){
             $res .= $pre.$field." ";
+          }
+          if ( !array_key_exists('value', $f) ){
+            $f['value'] = false;
           }
           $is_number = bbn\str::is_number($f['value']);
           $is_uid = false;
@@ -567,7 +572,6 @@ class grid extends bbn\models\cls\cache
                 $res .= "LIKE '%".$this->db->escape_value($f['value'])."%'";
               }
               break;
-
           }
         }
       }

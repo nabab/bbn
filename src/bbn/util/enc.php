@@ -19,7 +19,11 @@ class enc
 
 
 
-  protected static $method = "AES-256-CBC";
+  protected static $method = "AES-256-CFB";
+
+  protected static $salt = 'dsjfjsdvcb34YhXZLW';
+
+  protected static $prefix = 'bbn-';
 
   private static function get_key($key = ''){
     if ( empty($key) ){
@@ -79,5 +83,52 @@ class enc
 		return openssl_decrypt($encstring, $method, $key, 0, openssl_random_pseudo_bytes());
 	}
 
+  /**
+   * Encrypt string using openSSL module
+   * @param string $textToEncrypt
+   * @param string $encryptionMethod One of built-in 50 encryption algorithms
+   * @param string $secretHash Any random secure SALT string for your website
+   * @param bool $raw If TRUE return base64 encoded string
+   * @param string $password User's optional password
+   * @return null|string
+   */
+  public static function encryptOpenssl($textToEncrypt, string $encryptionMethod = null, string $secretHash = null, bool $raw = false, string $password = '') :? string
+  {
+    if ( !$encryptionMethod ){
+      $encryptionMethod = self::$method;
+    }
+    if ( !$secretHash ){
+      $secretHash = self::$salt;
+    }
+    if ( $length = openssl_cipher_iv_length($encryptionMethod) ){
+      $iv = substr(md5(self::$prefix.$password), 0, $length);
+      return openssl_encrypt($textToEncrypt, $encryptionMethod, $secretHash, $raw, $iv);
+    }
+    return null;
+  }
+
+  /**
+   * Decrypt string using openSSL module
+   * @param string $textToDecrypt
+   * @param string $encryptionMethod One of built-in 50 encryption algorithms
+   * @param string $secretHash Any random secure SALT string for your website
+   * @param bool $raw If TRUE return base64 encoded string
+   * @param string $password User's optional password
+   * @return null|string
+   */
+  public static function decryptOpenssl($textToDecrypt, string $encryptionMethod = null, string $secretHash = null, bool $raw = false, string $password = '') :? string
+  {
+    if ( !$encryptionMethod ){
+      $encryptionMethod = self::$method;
+    }
+    if ( !$secretHash ){
+      $secretHash = self::$salt;
+    }
+    if ( $length = openssl_cipher_iv_length($encryptionMethod) ){
+      $iv = substr(md5(self::$prefix.$password), 0, $length);
+      return openssl_decrypt($textToDecrypt, $encryptionMethod, $secretHash, $raw, $iv);
+    }
+    return null;
+  }
+
 }
-?>

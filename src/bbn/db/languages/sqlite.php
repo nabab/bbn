@@ -33,6 +33,11 @@ class sqlite implements bbn\db\engines
     $this->db = $db;
   }
 
+  public function confirm_connection(){
+    // SQLite has not keys enabled by default
+    $this->enable_keys();
+  }
+
 
   /**
 	 * @return void 
@@ -440,10 +445,14 @@ class sqlite implements bbn\db\engines
 		return false;
 	}
 
+	public function get_select($table, $fields){
+
+  }
+
 	/**
 	 * @return string
 	 */
-  public function get_select($table, array $fields = [], array $where = [], $order = [], $limit = false, $start = 0, $php = false){
+  public function get_query($table, array $fields = [], array $where = [], $order = [], $limit = false, $start = 0, $php = false){
     // Tables are an array
     if ( !\is_array($table) ){
       $table = [$table];

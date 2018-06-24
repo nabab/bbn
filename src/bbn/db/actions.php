@@ -77,4 +77,3 @@ interface actions
 	 */
 	public function get_objects();
 }
-?>

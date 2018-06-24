@@ -1125,17 +1125,26 @@ class str
         }
         $st .= str_repeat('    ', $lev);
         if ( $is_assoc ){
-          $st .= ( \is_string($k) ? '\''.self::escape_squote($k).'\'' : $k ). ' => ';
+          $st .= ( \is_string($k) ? '"'.self::escape_dquote($k).'"' : $k ). ': ';
         }
         if ( \is_array($v) ){
           $st .= self::export($v, $remove_empty, $lev+1);
         }
         else if ( \is_object($v) ){
           $cls = get_class($v);
-          if ( $cls === '\\stdClass' ){
+          if ( $cls === 'stdClass' ){
             $st .= self::export($v, $remove_empty, $lev+1);
           }
           else{
+            /*
+            $rc = new \ReflectionClass($cls);
+            if ( $rc->hasMethod('__toString') ){
+              $st .= $v;
+            }
+            else{
+              $st .= 'Object '.$cls;
+            }
+            */
             $st .= 'Object '.$cls;
           }
         }
@@ -1151,8 +1160,11 @@ class str
         else if ( \is_int($v) || \is_float($v) ){
           $st .= $v;
         }
+        else if ( !ctype_print($v) && (strlen($v) === 16) ){
+          $st .= '0x'.bin2hex($v);
+        }
         else if ( !$remove_empty || !empty($v) ){
-          $st .= '\''.self::escape_squote($v).'\'';
+          $st .= '"'.self::escape_dquote($v).'"';
         }
         $st .= ','.PHP_EOL;
       }

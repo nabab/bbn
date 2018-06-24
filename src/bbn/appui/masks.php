@@ -52,7 +52,9 @@ class masks extends bbn\models\cls\db {
   }
 
   public function get_all($id_type = null, $simple = true){
-    
+    if ( !bbn\str::is_uid($id_type) ){
+      $id_type = self::get_option_id($id_type);
+    }
     $all = $id_type ? $this->db->get_column_values('bbn_notes_masks', 'id_note', [
       'id_type' => $id_type
     ]) : $this->db->get_column_values('bbn_notes_masks', 'id_note');
@@ -64,6 +66,9 @@ class masks extends bbn\models\cls\db {
   }
 
   public function get_text_value($id_type){
+    if ( !bbn\str::is_uid($id_type) ){
+      $id_type = self::get_option_id($id_type);
+    }
     $all = $this->get_all($id_type);
     $admin = new bbn\user\manager(\bbn\user::get_instance());
     if ( \is_array($all) ){
@@ -84,6 +89,9 @@ class masks extends bbn\models\cls\db {
   }
 
   public function get_default($id_type){
+    if ( !bbn\str::is_uid($id_type) ){
+      $id_type = self::get_option_id($id_type);
+    }
     if ( $id_note = $this->db->select_one('bbn_notes_masks', 'id_note', [
       'id_type' => $id_type,
       'def' => 1
@@ -96,9 +104,9 @@ class masks extends bbn\models\cls\db {
   public function set_default($id_note){
     $current = $this->get($id_note);
     if ( $current ){
-      while ( $old = $this->get_default($current['id_type']) ){
+      if ( $old = $this->get_default($current['id_type']) ){
         if ( $old['id_note'] === $id_note ){
-          return null;
+          return 1;
         }
         $this->db->update('bbn_notes_masks', [
           'def' => 0
@@ -116,6 +124,9 @@ class masks extends bbn\models\cls\db {
 
   public function insert($id_type, $title, $content): ?string
   {
+    if ( !bbn\str::is_uid($id_type) ){
+      $id_type = self::get_option_id($id_type);
+    }
     if (
       $this->o->exists($id_type) &&
       ($id_note = $this->notes->insert($title, $content, $this->o->from_code('masks', 'types', 'notes', 'appui')))
@@ -166,7 +177,7 @@ class masks extends bbn\models\cls\db {
 
 
 
-
+  /*
 
 
 
@@ -200,5 +211,6 @@ class masks extends bbn\models\cls\db {
     $id = $this->db->select_one('bbn_notes_masks', 'id', ['categorie' => $cat, 'defaut' => 1]);
     return $this->get_st($id);
   }
+  */
 
 }

@@ -36,6 +36,9 @@ class mysql implements bbn\db\engines
     $this->db = $db;
   }
 
+  public function confirm_connection(){
+  }
+
 
   /**
 	 * @return void 
@@ -470,29 +473,25 @@ class mysql implements bbn\db\engines
 		return false;
 	}
 
-	/**
-	 * @return string
-	 */
-  public function get_select($table, array $fields = [], array $where = [], $order = [], $limit = false, $start = 0, $php = false){
+	public function get_select($table, array $fields = []){
+    $cfg = \is_array($table) && isset($table['tables']) ?
+      $table :
+      \call_user_func_array([$this->db, 'treat_select_arguments'], func_get_args());
     // Tables are an array
     if ( !\is_array($table) ){
       $table = [$table];
     }
     /** @var array $tables_fields List of all the fields' names indexed by table */
     $tables_fields = [];
-    foreach ( $table as $i => $tab ){
+    foreach ( $cfg['tables'] as $i => $tab ){
       if ( $fn = $this->table_full_name($tab, 1) ){
-        $table[$i] = $fn;
-        $tables_fields[$table[$i]] = array_keys($this->db->modelize($table[$i])['fields']);
+        $cfg['tables'][$i] = $fn;
+        $tables_fields[$fn] = array_keys($this->db->modelize($fn)['fields']);
       }
     }
     if ( !empty($tables_fields) ){
       /** @var string $r The SELECT resulting string */
       $r = '';
-      if ( $php ){
-        $r .= '$db->query("';
-      }
-      $aliases = [];
       $r .= "SELECT \n";
       // Columns are specified
       if ( \count($fields) > 0 ){
@@ -502,8 +501,8 @@ class mysql implements bbn\db\engines
             // So we look into the tables to check if there is the field
             $tab = [];
             foreach ( $tables_fields as $t => $f ){
-              if ( \in_array($c, $f) ){
-                array_push($tab, $t);
+              if ( \in_array($c, $f, true) ){
+                $tab[] = $t;
               }
             }
             // If the same column is passed twice in its short form
@@ -518,11 +517,10 @@ class mysql implements bbn\db\engines
             }
           }
           if ( !is_numeric($k) && bbn\str::check_name($k) && ($k !== $c) ){
-            array_push($aliases, $k);
             $r .= "{$this->escape($c)} AS {$this->escape($k)},".PHP_EOL;
           }
           else {
-            $r .= $this->escape($c).",".PHP_EOL;
+            $r .= $this->escape($c).','.PHP_EOL;
           }
         }
       }
@@ -534,14 +532,34 @@ class mysql implements bbn\db\engines
           }
         }
       }
-      $r = substr($r,0,strrpos($r,',')).PHP_EOL."FROM ".implode(', ', $table).PHP_EOL.
-        $this->db->get_where($where, $table, $aliases).PHP_EOL.
-        $this->get_order($order, $table, $aliases);
+      return substr($r,0,strrpos($r,',')).PHP_EOL.'FROM '.implode(', ', $table);
+    }
+    return false;
+  }
+
+	/**
+	 * @return string
+	 */
+  public function get_query($table, array $fields = [], $where = [], $order = [], $limit = false, $start = 0, $php = false){
+    $cfg = \is_array($table) && isset($table['tables']) ?
+      $table :
+      \call_user_func_array([$this->db, 'treat_select_arguments'], func_get_args());
+    // Tables are an array
+    if ( !\is_array($table) ){
+      $table = [$table];
+    }
+    if ( $sel = $this->db->get_select($table, $fields) ){
+      /** @var string $r The SELECT resulting string */
+      $aliases = array_filter(array_keys($fields), 'is_string');
+
+      $r = $sel.PHP_EOL.
+        $this->db->get_where($cfg['where'], $cfg['tables'], $aliases).PHP_EOL.
+        $this->get_order($cfg['order'], $cfg['tables'], $aliases);
       if ( $limit ){
         $r .= PHP_EOL . $this->get_limit([$limit, $start]);
       }
-      if ( $php ){
-        $r .= '");';
+      if ( $cfg['php'] ){
+        $r = '$db->query("'.bbn\str::escape_dquotes($r).'");';
       }
       return $r;
     }

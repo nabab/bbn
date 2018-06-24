@@ -148,7 +148,8 @@ class x
             //'context' => $context
           ]);
         }
-        file_put_contents($file, json_encode($r));
+        self::sort_by($r, 'last_date', 'DESC');
+        file_put_contents($file, json_encode($r, JSON_PRETTY_PRINT));
       }
       if ( $errno > 8 ){
         die($errstr);
@@ -525,7 +526,7 @@ class x
         $r = 'Function';
       }
       else if ( \is_object($a) ){
-        $n = get_class($a);
+        $n = \get_class($a);
         if ( $n === '\\stdClass' ){
           $r = str::export($a);
         }
@@ -535,6 +536,9 @@ class x
       }
       else if ( \is_array($a) ){
         $r = str::export($a);
+      }
+      else if ( !ctype_print($a) && (strlen($a) === 16) ){
+        $r = '0x'.bin2hex($a);
       }
       $st .= $r.PHP_EOL;
     }

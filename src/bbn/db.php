@@ -314,6 +314,85 @@ class db extends \PDO implements db\actions, db\api, db\engines
     return isset($sql, $hash) ? ['sql' => $sql, 'hash' => $hash] : false;
   }
 
+  public function get_fields_list($tables){
+    $res = [];
+    if ( !\is_array($tables) ){
+      $tables = [$tables];
+    }
+    foreach ( $tables as $t ){
+      if ( !($model = $this->modelize($t)) ){
+        $this->error("Impossible to find the table $t");
+        die("Impossible to find the table $t");
+      }
+      foreach ( $model['fields'] as $f => $o ){
+        $res[] = $this->cfn($f, $t);
+      }
+    }
+    return $res;
+  }
+
+  public function treat_select_arguments(){
+    $args = func_get_args();
+    $res = [
+      'fields' => [],
+      'where' => [],
+      'order' => [],
+      'limit' => 0,
+      'start' => 0,
+      'join' => [],
+      'group' => [],
+      'having' => [],
+      'php' => false
+    ];
+    if ( \is_array($args[0]) && (isset($args[0]['table']) || isset($args[0]['tables'])) ){
+      if ( isset($args[0]['table']) && !isset($args[0]['tables']) ){
+        $args[0]['tables'] = $args[0]['table'];
+        unset($args[0]['table']);
+      }
+      $res = array_merge($res, $args[0]);
+    }
+    else{
+      $res['tables'] = $args[0];
+      if ( isset($args[1]) ){
+        $res['fields'] = $args[1];
+      }
+      if ( isset($args[2]) ){
+        $res['where'] = $args[2];
+      }
+      if ( isset($args[3]) ){
+        $res['order'] = \is_string($args[3]) ? [$args[3] => 'ASC'] : $args[3];
+      }
+      if ( isset($args[4]) ){
+        $res['limit'] = $args[4];
+      }
+      if ( isset($args[5]) && \is_numeric($args[4]) ){
+        $res['start'] = $args[5];
+      }
+    }
+    if ( !\is_array($res['tables']) ){
+      $res['tables'] = \is_string($res['tables']) ? [$res['tables']] : [];
+    }
+    if ( empty($res['tables']) ){
+      return false;
+    }
+    if ( !\is_array($res['fields']) ){
+      $res['fields'] = \is_string($res['fields']) ? [$res['fields']] : [];
+    }
+    if ( !\is_array($res['where']) ){
+      $res['where'] = [];
+    }
+    if ( !\is_array($res['order']) ){
+      $res['order'] = \is_string($res['order']) ? [$res['order'] => 'ASC'] : [];
+    }
+    if ( !\is_numeric($res['limit']) ){
+      unset($res['limit']);
+    }
+    if ( !\is_numeric($res['start']) ){
+      unset($res['start']);
+    }
+    return $res;
+  }
+
   /**
    * @todo Thomas fais ton taf!!
    *
@@ -332,31 +411,29 @@ class db extends \PDO implements db\actions, db\api, db\engines
     $b = debug_backtrace();
     foreach ( $b as $c ){
       if ( isset($c['file']) ){
-        array_push($msg,'File '.$c['file'].' - Line '.$c['line']);
-        array_push($msg,
-            ( isset($c['class']) ?  '  Class '.$c['class'].' - ' : '' ).
-            ( isset($c['function']) ?  '  Function '.$c['function'] : '' )/*.
-					( isset($c['args']) ? 'Arguments: '.substr(print_r($c['args'],1),0,100) : '' )*/
-        );
+        $msg[] = 'File '.$c['file'].' - Line '.$c['line'];
+        $msg[] =
+          ( isset($c['class']) ?  '  Class '.$c['class'].' - ' : '' ).
+          ( isset($c['function']) ?  '  Function '.$c['function'] : '' );
       }
     }
-    array_push($msg,self::$line);
+    $msg[] = self::$line;
     if ( \is_string($e) ){
-      array_push($msg, $e);
+      $msg[] = $e;
     }
     else if ( method_exists($e, "getMessage") ){
-      array_push($msg, $e->getMessage());
+      $msg[] = $e->getMessage();
     }
     $this->last_error = end($msg);
-    array_push($msg, self::$line);
-    array_push($msg, $this->last());
-    array_push($msg, self::$line);
+    $msg[] =  self::$line;
+    $msg[] = $this->last();
+    $msg[] = self::$line;
     if ( $this->last_params['values'] ){
-      array_push($msg, self::$line);
-      array_push($msg, 'Parameters');
-      array_push($msg, self::$line);
-      array_push($msg, x::get_dump($this->last_params['values']));
-      array_push($msg, self::$line);
+      $msg[] = self::$line;
+      $msg[] = 'Parameters';
+      $msg[] = self::$line;
+      $msg[] = x::get_dump($this->last_params['values']);
+      $msg[] = self::$line;
     }
     $this->log(implode(PHP_EOL, $msg));
     if ( $this->on_error === self::E_DIE ){
@@ -427,15 +504,21 @@ class db extends \PDO implements db\actions, db\api, db\engines
           if ( !empty($cfg['cache_length']) ){
             $this->cache_renewal = (int)$cfg['cache_length'];
           }
+          $this->confirm_connection();
           $this->start_fancy_stuff();
-          // SQLite has not keys enabled by default
-          $this->enable_keys();
         }
         catch ( \PDOException $e ){
-          x::log("Impossible to create the connection for ".$cfg['engine']."/".$cfg['db'], 'db');
-          die(\defined('bbn_IS_DEV') && BBN_IS_DEV ? var_dump($e) : 'Impossible to create the database connection');
+          x::log(["Impossible to create the connection for ".$cfg['engine']."/".$cfg['db'], $e], 'db');
+          die(\defined('bbn_IS_DEV') && BBN_IS_DEV ? var_dump($e, true) : 'Impossible to create the database connection');
         }
       }
+    }
+  }
+
+  public function confirm_connection()
+  {
+    if ( $this->language ){
+      return $this->language->confirm_connection();
     }
   }
 
@@ -1292,8 +1375,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
             $this->set_last_insert_id();
           }
           if ( $q['prepared'] && ( isset($q['sequences']['INSERT']) || isset($q['sequences']['UPDATE']) || isset($q['sequences']['DELETE']) || isset($q['sequences']['DROP']) ) ){
-            $n = $q['prepared']->rowCount();
-            return $n;
+            return $q['prepared']->rowCount();
           }
           return $r;
         }
@@ -1804,8 +1886,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return array|false
    */
   public function select_all_by_keys($table, $fields = [], $where = [], $order = false, $start = 0){
-    if ( $sql = $this->get_select($table, $fields, $where, $order, $start) ){
-      $where = $this->where_cfg($where, $table);
+    $where = $this->where_cfg($where, $table);
+    if ( $sql = $this->get_query($table, $fields, $where['final'], $order, $start) ){
       if ( \count($where['values']) > 0 ){
         return $this->get_key_val($sql, $where['values']);
       }
@@ -1988,7 +2070,19 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public function select($table, $fields = [], $where = [], $order = false, $start = 0)
   {
-    if ( $r = $this->_sel($table, $fields, $where, $order, 1, $start) ){
+    $args = \func_get_args();
+    if ( $start ){
+      array_splice($args, 4, 0, 1);
+    }
+    else if (
+      \is_array($args[0]) &&
+      isset($args[0]['table']) &&
+      isset($args[0]['limit']) &&
+      ($args[0]['limit'] !== 1)
+    ){
+      $args[0]['limit'] = 1;
+    }
+    if ( $r = \call_user_func_array([$this, '_sel'], $args) ){
       return $r->get_object();
     }
     return false;
@@ -2010,7 +2104,19 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return string | int
    */
   public function select_one($table, $field, $where = [], $order = false, $start = 0){
-    if ( $r = $this->_sel($table, [$field], $where, $order, 1, $start) ){
+    $args = \func_get_args();
+    if ( $start ){
+      array_splice($args, 4, 0, 1);
+    }
+    else if (
+      \is_array($args[0]) &&
+      isset($args[0]['table']) &&
+      isset($args[0]['limit']) &&
+      ($args[0]['limit'] !== 1)
+    ){
+      $args[0]['limit'] = 1;
+    }
+    if ( $r = \call_user_func_array([$this, '_sel'], $args) ){
       if ( $res = $r->get_row() ){
         return $res[$field];
       }
@@ -2040,7 +2146,19 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return array
    */
   public function rselect($table, $fields = [], $where = [], $order = false, $start = 0){
-    if ( $r = $this->_sel($table, $fields, $where, $order, 1, $start) ){
+    $args = \func_get_args();
+    if ( $start ){
+      array_splice($args, 4, 0, 1);
+    }
+    else if (
+      \is_array($args[0]) &&
+      isset($args[0]['table']) &&
+      isset($args[0]['limit']) &&
+      ($args[0]['limit'] !== 1)
+    ){
+      $args[0]['limit'] = 1;
+    }
+    if ( $r = \call_user_func_array([$this, '_sel'], $args) ){
       return $r->get_row();
     }
     return false;
@@ -2068,7 +2186,19 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
 
   public function iselect($table, $fields = [], $where = [], $order = false, $start = 0){
-    if ( $r = $this->_sel($table, $fields, $where, $order, 1, $start) ){
+    $args = \func_get_args();
+    if ( $start ){
+      array_splice($args, 4, 0, 1);
+    }
+    else if (
+      \is_array($args[0]) &&
+      isset($args[0]['table']) &&
+      isset($args[0]['limit']) &&
+      ($args[0]['limit'] !== 1)
+    ){
+      $args[0]['limit'] = 1;
+    }
+    if ( $r = \call_user_func_array([$this, '_sel'], $args) ){
       return $r->get_irow();
     }
     return false;
@@ -2104,7 +2234,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public function select_all($table, $fields = [], $where = [], $order = false, $limit = 0, $start = 0)
   {
-    if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
+    if ( $r = \call_user_func_array([$this, '_sel'], \func_get_args()) ){
       return $r->get_objects();
     }
     return [];
@@ -2140,7 +2270,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public function rselect_all($table, $fields = [], $where = [], $order = false, $limit = 0, $start = 0)
   {
-    if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
+    if ( $r = \call_user_func_array([$this, '_sel'], \func_get_args()) ){
       return $r->get_rows();
     }
     return [];
@@ -2175,10 +2305,14 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return array
    */
   public function iselect_all($table, $fields = [], $where = [], $order = false, $limit = 0, $start = 0){
-    if ( $r = $this->_sel($table, $fields, $where, $order, $limit, $start) ){
+    if ( $r = \call_user_func_array([$this, '_sel'], \func_get_args()) ){
       return $r->get_irows();
     }
     return [];
+  }
+
+  public function count_queries(){
+    return count($this->queries);
   }
 
   /**
@@ -2499,7 +2633,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return string
    */
   public function get_where(array $where, $table='', $aliases = []){
-    if ( !isset($where['final'], $where['keyval'], $where['values'], $where['fields']) ){
+    if ( !isset($where['bbn_where_cfg'], $where['final'], $where['keyval'], $where['values'], $where['fields']) ){
       $where = $this->where_cfg($where, $table, $aliases);
     }
     $st = '';
@@ -2618,7 +2752,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * Return SQL code for row(s) SELECT.
    *
    * ```php
-   * \bbn\x::dump($db->get_select('table_users',['name','surname'],[['id','>', 1]], ['id'=>'DESC']));
+   * \bbn\x::dump($db->get_query('table_users',['name','surname'],[['id','>', 1]], ['id'=>'DESC']));
    * /*
    * (string)
    *   SELECT
@@ -2638,8 +2772,33 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @param bool $php default: false
    * @return string
    */
-  public function get_select($table, array $fields = [], array $where = [], $order = [], $limit = false, $start = 0, $php = false){
-    return $this->language->get_select($table, $fields, $where, $order, $limit, $start, $php);
+  public function get_query($table){
+    return \call_user_func_array([$this->language, 'get_query'], \func_get_args());
+  }
+
+  /**
+   * Return SQL code for row(s) SELECT.
+   *
+   * ```php
+   * \bbn\x::dump($db->get_select('table_users',['name','surname']));
+   * /*
+   * (string)
+   *   SELECT
+   *    `table_users`.`name`,
+   *    `table_users`.`surname`
+   * ```
+   *
+   * @param string $table The table's name
+   * @param array $fields The fields' name
+   * @param array $where The "where" condition
+   * @param string | array $order The "order" condition
+   * @param int|boolean $limit The "limit" condition, default: false
+   * @param int $start The "start" condition, default: 0
+   * @param bool $php default: false
+   * @return string
+   */
+  public function get_select($table, array $fields = []){
+    return \call_user_func_array([$this->language, 'get_select'], \func_get_args());
   }
 
   /**

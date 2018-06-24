@@ -203,7 +203,8 @@ class menus extends bbn\models\cls\basic{
     $root = $this->get_option_root();
     foreach ( $parents as $i => $val ){
       if ( $val === $root ){
-        return $parents[$i - 2];
+        //return $parents[$i - 2];
+        return $parents[$i - 1];
       }
     }
     return null;

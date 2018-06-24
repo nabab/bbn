@@ -70,9 +70,14 @@ class dbsync
       die("Table name not allowed");
     }
   }
-	/**
-	 * @return void
-	 */
+
+  /**
+   * @param bbn\db $db
+   * @param string $dbs
+   * @param array $tables
+   * @param string $dbs_table
+   * @return void
+   */
 	public static function init(bbn\db $db, $dbs='', $tables=[], $dbs_table=''){
     self::$db = $db;
     self::def($dbs, $dbs_table);
@@ -96,7 +101,7 @@ class dbsync
     if ( \is_array(self::$dbs) ){
       self::$dbs = new bbn\db(self::$dbs);
     }
-    if ( bbn\appui\history::$is_used ){
+    if ( class_exists('\\bbn\\appui\\history') && bbn\appui\history::$is_used ){
       self::$has_history = 1;
     }
     if ( (self::$dbs->engine === 'sqlite') && !\in_array(self::$dbs_table, self::$dbs->get_tables()) ){
@@ -315,11 +320,11 @@ class dbsync
       }
       // Proceeding to the actions: delete is before
       if ( $d['action'] === 'delete' ){
-        if ( self::$db->delete($d['tab'], json_decode($d['rows'], 1)) ){
+        if ( self::$db->delete($d['tab'], $d['rows']) ){
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
           $to_log['deleted_real']++;
         }
-        else if ( !self::$db->select($d['tab'], [], json_decode($d['rows'], 1)) ){
+        else if ( !self::$db->select($d['tab'], [], $d['rows']) ){
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
         }
         else{
@@ -349,20 +354,21 @@ class dbsync
         ]);
       if ( \count($each) > 0 ){
         $to_log['num_problems']++;
-        array_push($to_log['problems'], "Conflict!", $d);
+        $to_log['problems'][] = "Conflict!";
+        $to_log['problems'][] = $d;
         foreach ( $each as $e ){
           // If it's deleted locally and updated on the twin we restore
           if ( $e['action'] === 'delete' ){
             if ( $d['action'] === 'update' ){
-              if ( !(self::$db->insert_update(
+              if ( !self::$db->insert_update(
                       $d['tab'],
                       bbn\x::merge_arrays(
                         $e['vals'],
                         $d['vals']
-                      )
-              )) ){
+                      ))
+              ){
                 $to_log['num_problems']++;
-                array_push($to_log['problems'], "insert_update number 1 had a problem");
+                $to_log['problems'][] = "insert_update number 1 had a problem";
               }
             }
           }
@@ -371,7 +377,7 @@ class dbsync
             if ( $d['action'] === 'delete' ){
               if ( !self::$db->insert_update($d['tab'], bbn\x::merge_arrays($d['vals'], $e['vals'])) ){
                 $to_log['num_problems']++;
-                array_push($to_log['problems'], "insert_update had a problem");
+                $to_log['problems'][] = "insert_update had a problem";
               }
             }
           // If it's updated locally and in the twin we merge the values for the update

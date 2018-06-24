@@ -11,7 +11,8 @@ namespace bbn\api;
 use bbn;
 
 class virtualmin {
-  use bbn\models\tts\cache;
+
+
 
   const cache_name = 'bbn/api/virtualmin';
 
@@ -43,7 +44,6 @@ class virtualmin {
    */
   public function __construct(array $cfg){
     if ( isset($cfg['user'], $cfg['pass']) ){
-      self::cache_init();
       $this->user = $cfg['user'];
       $this->pass = $cfg['pass'];
       $this->mode = $cfg['mode'] === 'cloudmin' ? 'cloudmin' : 'virtualmin';
@@ -69,6 +69,7 @@ class virtualmin {
    */
   public function __call($name, $arguments){
     if ( $this->checked ){
+
       $cmd_name = str_replace('_', '-', $name);
       if ( isset($this->commands[$cmd_name]) ){
         //Setting the last action performed
@@ -108,32 +109,8 @@ class virtualmin {
         $url_part .= "'";
         //Concatenating the header url and $url_part to create the full url to be executed
         $url_part = $this->get_header_url() . $url_part;
-
         //Calling shell_exec and returning the result array
-    //    return $this->call_shell_exec($url_part);
-
-        if ( (strpos($cmd_name, 'list-') !== false) ||
-          (strpos($cmd_name, 'get-') !== false) ||
-          (strpos($cmd_name, 'info') !== false)
-        ){
-          $uid = $this->hostname;
-//  \bbn\x::log(["ss", $arguments], 'cache_delete');
-          if ( !empty($arguments) ){
-            $uid .= md5(json_encode($arguments));
-          }
-          if ( $this->cache_has($uid, $name) ){
-            $result_call = $this->cache_get($uid, $name);
-          }
-          else {
-            $result_call = $this->call_shell_exec($url_part);
-            $this->cache_set($uid, $name, $result_call);
-          }
-        }
-        else{
-          $result_call = $this->call_shell_exec($url_part);
-        }
-        //Calling shell_exec and returning the result array
-        return $result_call;
+        return $this->call_shell_exec($url_part);
       }
       // We force even if we don't have the command in the list
       else if ( !empty($arguments[1]) ){
@@ -157,7 +134,6 @@ class virtualmin {
         //Concatenating the header url and $url_part to create the full url to be executed
         $url_part = $this->get_header_url() . $url_part;
         \bbn\x::log($url_part, 'webmin');
-
         //Calling shell_exec and returning the result array
         return $this->call_shell_exec($url_part);
       }
@@ -167,27 +143,6 @@ class virtualmin {
     }
     return false;
   }
-
-
-  /**
-   * This function allows the cancellation of the cache of the used commands
-   *
-   * @param $uid file cache
-   * @param $method name
-   * @return bool
-   */
-  public function delete_cache($command_name = '', $arguments= false){
-    $uid = $this->hostname;
-    if ( !empty($arguments) ){
-      $uid .= md5(json_encode($arguments));
-    }
-    if ( !empty($this->cache_delete($uid, $command_name)) ){
-      \bbn\x::log([$uid, $command_name], 'cache_delete');
-      return true;
-    }
-    return false;
-  }
-
 
   /**
    * @return array
@@ -352,23 +307,9 @@ class virtualmin {
     $url_part .="'";
     //Concatenating the header url and $url_part to create the full url to be executed
     $url_part = $this->get_header_url() . $url_part;
-
-    //test
-    $uid = $this->hostname;
-    if ( !empty($param) ){
-      $uid .= md5(json_encode($param));
-    }
-
-    if ( $this->cache_has($uid, 'list_commands') ){
-      $result_call = $this->cache_get($uid, 'list_commands');
-    }
-    else {
-      $result_call = $this->call_shell_exec($url_part);
-      $this->cache_set($uid, 'list_commands', $result_call);
-    }
-    return $result_call;
+    //Calling shell_exec and returning the result array
+    return $this->call_shell_exec($url_part);
   }
-
 
   /**
    * @param $command

@@ -19,6 +19,11 @@ namespace bbn\db;
  */
 interface engines
 {
+  /**
+   * Returns a binary UUID
+   * @return binary
+   */
+  public function confirm_connection();
  /**
 	* Fetches the database and returns an array of several arrays of rows text-indexed
 	* 
@@ -146,9 +151,9 @@ interface engines
 	 * Fetches the database and returns an array of objects 
 	 * 
 	 * @return false|array
-	 */
-	public function get_select($table, array $fields = [], array $where = [], $order, $limit, $start, $php = false);
-	
+	public function get_query($table);
+   */
+
 	/**
 	 * Fetches the database and returns an array of objects 
 	 * 
@@ -250,4 +255,5 @@ interface engines
    * @return binary
    */
   public function get_uid();
+
 }

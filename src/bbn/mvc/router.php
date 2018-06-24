@@ -215,7 +215,7 @@ class router {
 
           $checker = ( $tmp === '.' ? '' : $tmp.'/' ).$checker_file;
           if ( $this->alt_root ){
-            if ( strpos($tmp, $this->alt_root) === 0 ){
+            if ( strpos($path, $this->alt_root) === 0 ){
               $alt_ctrl = $this->get_alt_root($mode).
                 ( \strlen($tmp) === \strlen($this->alt_root) ?
                   '' : substr($tmp, \strlen($this->alt_root)+1).'/'
@@ -243,6 +243,7 @@ class router {
       }
     }
     //$this->log(self::$known[$mode][$path]);
+    //\bbn\x::hdump(self::$known[$mode][$path]);
     return self::$known[$mode][$path];
   }
 
@@ -272,16 +273,14 @@ class router {
         return $this->get_known($tmp, $mode);
       }
 
+      // if $tmp is a plugin root index setting $this->alt_root and rerouting to reprocess the path
+      if ( isset($this->routes['root'][$tmp]) && ($this->alt_root !== $tmp) ){
+        $this->set_alt_root($tmp);
+        return $this->route($path, $mode, $this->get_alt_root($mode));
+      }
+
       // navigation (we are in dom and dom is default or we are not in dom, i.e. public)
       if ( (($mode === 'dom') && (BBN_DEFAULT_MODE === 'dom')) || ($mode !== 'dom') ){
-        // if $tmp is a plugin root index setting $this->alt_root and rerouting to reprocess the path
-        if ( isset($this->routes['root'][$tmp]) ){
-          $tmp2 = $this->alt_root ?: '';
-          $this->set_alt_root($tmp);
-          if ( !$tmp2 || ($tmp2 !== $this->alt_root) ){
-            return $this->route($path, $mode);
-          }
-        }
         // Checking first if the specific route exists (through $routes['alias'])
         if ( $this->has_route($tmp) ){
           $real_path = $this->get_route($tmp);
@@ -321,7 +320,7 @@ class router {
       // Full DOM requested
       if ( !$file && ($mode === 'dom') ){
         // Root index file (if $tmp is at the root level)
-        if ( $tmp === '.' ){
+        if ( ($tmp === '.') && !$this->alt_root ){
           // If file exists
           if ( file_exists($root.'index.php') ){
             $real_path = 'index';
@@ -340,26 +339,21 @@ class router {
           $file = $root.$tmp.'/index.php';
         }
         // An alternative root exists, we look into it
-        else if ( $this->alt_root &&
-          file_exists($this->get_alt_root($mode).$tmp.'/index.php')
-        ){
-          $plugin = $this->alt_root;
-          $real_path = $tmp. '/index';
-          $file = $this->get_alt_root($mode).$tmp.'/index.php';
-          $root = $this->get_alt_root($mode);
-        }
-        // if $tmp is a plugin root index setting $this->alt_root and rerouting to reprocess the path
-        else if ( isset($this->routes['root'][$tmp]) ){
-          $this->set_alt_root($tmp);
-          if ( file_exists($this->get_alt_root($mode).'/index.php') ){
-            $plugin = $this->alt_root;
-            $real_path = $tmp.'/index';
-            $file = $this->get_alt_root($mode).'/index.php';
-            $root = $this->get_alt_root($mode);
+        else if ( $this->alt_root && (strpos($tmp, $this->alt_root) === 0) ){
+          if ( $tmp === $this->alt_root ){
+            $name = '';
           }
           else{
-            return $this->route(substr($path, \strlen($tmp)+1), $mode);
+            $name = substr($tmp, \strlen($this->alt_root)+1);
           }
+          // Corresponding file
+          if ( file_exists($this->get_alt_root($mode).$name.'/index.php') ){
+            $plugin = $this->alt_root;
+            $real_path = $tmp;
+            $file = $this->get_alt_root($mode).$name.'/index.php';
+            $root = $this->get_alt_root($mode);
+          }
+          // home.php in corresponding dir
         }
       }
       if ( $file ){
@@ -411,33 +405,35 @@ class router {
   }
 
   private function find_mv(string $path, string $mode){
-    /** @var string $root Where the files will be searched for by default */
-    $root = $this->get_root($mode);
-    /** @var boolean|string $file Once found, full path and filename */
-    $file = false;
-    $plugin = false;
-    if ( $alt_path = $this->find_in_roots($path) ){
-      $alt_root = $this->get_alt_root($mode, $alt_path);
-    }
-    else if ( $alt_root = $this->get_alt_root($mode) ){
-      $alt_path = $this->alt_root;
-    }
-    foreach ( self::$filetypes[$mode] as $t ){
-      if ( is_file($root.$path.'.'.$t) ){
-        $file = $root . $path . '.' . $t;
+    if ( self::is_mode($mode) ){
+      /** @var string $root Where the files will be searched for by default */
+      $root = $this->get_root($mode);
+      /** @var boolean|string $file Once found, full path and filename */
+      $file = false;
+      $plugin = false;
+      if ( $alt_path = $this->find_in_roots($path) ){
+        $alt_root = $this->get_alt_root($mode, $alt_path);
       }
-      else if ( $alt_path && is_file($alt_root.substr($path, \strlen($alt_path)+1).'.'.$t) ){
-        $file = $alt_root . substr($path, \strlen($alt_path)+1) . '.' . $t;
-        $plugin = $alt_path;
+      else if ( $alt_root = $this->get_alt_root($mode) ){
+        $alt_path = $this->alt_root;
       }
-      if ( $file ){
-        return $this->set_known([
-          'file' => $file,
-          'path' => $path,
-          'ext' => $t,
-          'mode' => $mode,
-          'plugin' => $plugin
-        ]);
+      foreach ( self::$filetypes[$mode] as $t ){
+        if ( is_file($root.$path.'.'.$t) ){
+          $file = $root . $path . '.' . $t;
+        }
+        else if ( $alt_path && is_file($alt_root.substr($path, \strlen($alt_path)+1).'.'.$t) ){
+          $file = $alt_root . substr($path, \strlen($alt_path)+1) . '.' . $t;
+          $plugin = $alt_path;
+        }
+        if ( $file ){
+          return $this->set_known([
+            'file' => $file,
+            'path' => $path,
+            'ext' => $t,
+            'mode' => $mode,
+            'plugin' => $plugin
+          ]);
+        }
       }
     }
     return false;
@@ -510,9 +506,7 @@ class router {
       else if ( $root ){
         return $this->find_alt_mv($path, $mode, $root);
       }
-      else{
-        return $this->find_mv($path, $mode);
-      }
+      return  $this->find_mv($path, $mode);
     }
     return false;
   }

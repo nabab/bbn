@@ -459,7 +459,7 @@ class json implements db\api
 	/**
 	 * @return string
 	 */
-	public function get_select($table, array $fields = [], array $where = [], $order = [], $limit = false, $start = 0, $php = false)
+	public function get_query($table, array $fields = [], array $where = [], $order = [], $limit = false, $start = 0, $php = false)
 	{
 		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && \count($m['fields']) > 0 )
 		{
