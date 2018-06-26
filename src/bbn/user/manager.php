@@ -251,6 +251,20 @@ You can click the following link to access directly your account:<br>
     );
   }
 
+  public function full_list(){
+    $r = [];
+    $u = $this->class_cfg['arch']['users'];
+    foreach ( $this->db->rselect_all('bbn_users') as $a ){
+      $r[] = [
+        'value' => $a[$u['id']],
+        'text' => $this->get_name($a, false),
+        'id_group' => $a[$u['id_group']],
+        'active' => $a[$u['active']] ? true : false
+      ];
+    }
+    return $r;
+  }
+
   public function get_name($user, $full = true){
     if ( !\is_array($user) ){
       $user = $this->get_user($user);

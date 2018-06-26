@@ -267,7 +267,7 @@ class router {
     /** @var string $real_path The application path */
     $real_path = null;
     // We go through the path, removing a bit each time until we find the corresponding file
-    while (\strlen($tmp) > 0){
+    while ( \strlen($tmp) > 0){
       // We might already know it!
       if ($this->is_known($tmp, $mode)){
         return $this->get_known($tmp, $mode);
@@ -390,7 +390,7 @@ class router {
       ]);
     }
     // Aaaargh!
-    die(bbn\x::dump("No default file defined for mode $mode $tmp"));
+    die(bbn\x::dump("No default file defined for mode $mode $tmp (and no 404 file either)"));
   }
 
   private function find_in_roots($path){

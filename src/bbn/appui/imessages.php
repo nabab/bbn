@@ -111,9 +111,9 @@ class imessages extends \bbn\models\cls\db
    * imessages constructor.
    * @param \bbn\db $db
    */
-  public function __construct(\bbn\db $db){
+  public function __construct(\bbn\db $db, $cfg = []){
     parent::__construct($db);
-    self::_init_class_cfg(self::$_defaults);
+    $this->_init_class_cfg($cfg);
     $this->notes = new \bbn\appui\notes($this->db);
     $this->options = \bbn\appui\options::get_instance();
   }
@@ -163,6 +163,7 @@ class imessages extends \bbn\models\cls\db
    */
   public function get(string $id_option, string $id_user, $simple = true){
     $cfg =& $this->class_cfg;
+    \bbn\x::log($this->class_cfg, 'mirko');
     // Current datetime
     $now = date('Y-m-d H:i:s');
     // Get the user's group

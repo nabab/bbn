@@ -257,9 +257,9 @@ class mvc implements mvc\api{
   private function init_locale(){
     if ( defined('BBN_LOCALE') && is_dir(BBN_APP_PATH.'locale') ){
       putenv('LANG='.BBN_LOCALE);
-      setlocale(LC_ALL, '');
+      //setlocale(LC_ALL, '');
       setlocale(LC_MESSAGES,BBN_LOCALE);
-      setlocale(LC_CTYPE, BBN_LOCALE);
+      //setlocale(LC_CTYPE, BBN_LOCALE);
       //$domains = glob($root.'/'.$locale.'/LC_MESSAGES/messages-*.mo');
       //$current = basename($domains[0],'.mo');
       //$timestamp = preg_replace('{messages-}i','',$current);
