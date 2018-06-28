@@ -157,7 +157,14 @@ class mvc implements mvc\api{
 
   public static function include_php_view($bbn_inc_file, $bbn_inc_content, array $bbn_inc_data = [])
   {
-    $fn = function() use($bbn_inc_file, $bbn_inc_content, $bbn_inc_data){
+    $randoms = [];
+    $_random = function($i) use (&$randoms){
+      if ( !isset($randoms[$i]) ){
+        $randoms[$i] = md5(\bbn\str::genpwd());
+      }
+      return $randoms[$i];
+    };
+    $fn = function() use($bbn_inc_file, $bbn_inc_content, $bbn_inc_data, $_random){
       if ( $bbn_inc_content ){
         ob_start();
         if ( \count($bbn_inc_data) ){
