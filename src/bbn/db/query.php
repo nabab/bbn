@@ -18,79 +18,70 @@ use bbn;
  */
 class query extends \PDOStatement implements actions
 {
-  private static $return_sequences = ["SELECT", "SHOW", "PRAGMA", "UNION"];
 	/**
 	 * @var mixed
 	 */
 	private $db;
 
-	/**
-	 * @var mixed
-	 */
-	private $res;
+  /**
+   * @var mixed
+   */
+  private $res;
 
-	/**
-	 * @var mixed
-	 */
-	private $num;
+  /**
+   * @var array
+   */
+  protected $values;
 
-	/**
-	 * @var mixed
-	 */
-	private $sequences;
+  /**
+   * @var bool
+   */
+  protected $write;
 
-	/**
-	 * @var mixed
-	 */
-	private $values;
+  /**
+   * @var bool
+   */
+  protected $structure;
 
+  /**
+   * @var bool
+   */
+  protected $union;
 
-	/**
-	 * @param PDO $db
-	 * @param array $seq
-	 * @param array $values
-	 * @return void 
+  /**
+	 * @param bbn\db $db
 	 */
-	protected function __construct($db)
+	protected function __construct(bbn\db $db)
 	{
 		if ( !empty($this->queryString) )
 		{
 			$this->db = $db;
-			$this->sequences = $this->db->last_params['sequences'];
-			$this->values = isset($this->db->last_params['values']) ? $this->db->last_params['values'] : [];
+			$this->values = $this->db->last_params['values'] ?? [];
+      $this->write = $this->db->last_params['write'] ?? false;
+      $this->structure = $this->db->last_params['structure'] ?? [];
 		}
 	}
   
-  private function does_return(){
-    foreach ( self::$return_sequences as $rs ){
-      if ( isset($this->sequences[$rs]) ){
-        return true;
-      }
-    }
-    return false;
-  }
-	
 	/**
-	 * @return $this 
+   * @param array $values
+	 * @return self
 	 */
-	public function init($values=array())
+	public function init(array $values = []): self
 	{
 		$this->values = $values;
 		$this->res = null;
-		$this->num = null;
 		return $this;
 	}
 
 	/**
 	 * @param array|null $args
-	 * @return void 
+	 * @return bool
 	 */
-	public function execute($args=null)
+	public function execute($args = null): ?bool
 	{
-		if ( $this->res === null || $args !== null )
-		{
+		if ( ($this->res === null) || ($args !== null) ){
 			$this->res = 1;
-			if ( \is_array( $args ) ){
+			if ( \is_array($args) ){
 				try{
 					return parent::execute($args);
 				}
@@ -98,22 +89,19 @@ class query extends \PDOStatement implements actions
 					$this->db->error($e);
 				}
 			}
-			else if ( !\is_null($args) )
-			{
+			else if ( $args !== null ){
 				$args = \func_get_args();
 				try{
-					return eval( 'return parent::execute( $args );' );
+					return parent::execute(...$args);
 				}
 				catch ( \PDOException $e ){
 					$this->db->error($e);
 				}
 			}
-			else
-			{
-				if ( isset($this->values) && \is_array($this->values) ){
-          foreach ( $this->values as $i => $v )
-          {
-            if ( \bbn\str::is_buid($v) ){
+			else{
+				if ( $this->values && \is_array($this->values) && count($this->values) ){
+          foreach ( $this->values as $i => $v ){
+            if ( bbn\str::is_buid($v) ){
               $this->bindValue($i+1, $v);
             }
             else{
@@ -141,110 +129,40 @@ class query extends \PDOStatement implements actions
 				}
 			}
 		}
-		return false;
+		return null;
 	}
 
 	/**
-	 * @return void 
+	 * @return int
 	 */
-	public function count()
-	{
-		if ( $this->num === null )
-		{
-			$this->num = 0;
-			if ( isset($this->sequences['SELECT']) || isset($this->sequences['UNION']) )
-			{
-				$s = $this->sequences;
-				$queries = [];
-				if ( isset($s['UNION']) ){
-					foreach ( $s['UNION'] as $k => $un ){
-						if ( isset($un['SELECT']) ){
-							array_push($queries, $un);
-						}
-					}
-				}
-				else{
-					array_push($queries, $s);
-				}
-				$start_value = 0;
-				foreach ( $queries as $qr ){
-					$qr['SELECT'] = [
-						[
-							'expr_type' => 'aggregate_function',
-							'alias' => '',
-							'base_expr' => 'COUNT',
-							'sub_tree' => [
-								[
-									'expr_type' => 'colref',
-									'base_expr' => '*'
-								]
-							]
-						]
-					];
-					if ( isset($qr['ORDER']) ){
-						unset($qr['ORDER']);
-					}
-					if ( isset($qr['LIMIT']) ){
-						unset($qr['LIMIT']);
-					}
-					$num_values = 0;
-					foreach ( $qr as $qr2 ){
-						foreach ( $qr2 as $qr3 ){
-							if ( isset($qr3['base_expr']) && $qr3['base_expr'] === '?' ){
-								$num_values++;
-							}
-						}
-					}
-					$sql = $this->db->create_query($qr);
-          $this->db->add_statement($sql);
-					try
-					{
-						$q = $this->db->prepare($sql);
-						if ( !empty($this->values) && \is_array($this->values) && \count($this->values) > 0 ){
-							$v = $this->values;
-							$q->values = array_splice($v, $start_value, $num_values);
-							$start_value += $num_values;
-						}
-						if ( $q->execute() ){
-							$this->num += (int)$q->fetchColumn();
-						}
-						/* In case there is some group by that split the results, we request the full set of results
-							$n = \count($q->fetchAll());
-							if ( $n > $this->num && $this->num > 0 ){
-							$this->num = $n + 1;
-							}
-						 */
-					}
-					catch ( \PDOException $e )
-					{ $this->db->error($e); }
-				}
-			}
-		}
-		return $this->num;
-	}
-
-	/**
-	 * @return void 
-	 */
-	public function columnCount()
+	public function columnCount(): int
 	{
 		$this->execute();
 		return parent::columnCount();
 	}
 
-	/**
-	 * @return void 
-	 */
-	public function fetch($fetch_style=\PDO::FETCH_BOTH, $cursor_orientation=\PDO::FETCH_ORI_NEXT, $cursor_offset=0)
+  /**
+   * @param int $how
+   * @param int $orientation
+   * @param int $offset
+   * @return mixed
+   */
+	public function fetch($how = null, $orientation = null, $offset = null)
 	{
+	  if ( $how === null ){
+	    $how = \PDO::FETCH_BOTH;
+    }
 		$this->execute();
-		return bbn\str::correct_types(parent::fetch( $fetch_style, $cursor_orientation, $cursor_offset ));
+		return bbn\str::correct_types(parent::fetch($how, $orientation, $offset));
 	}
 
-	/**
-	 * @return void 
-	 */
-	public function fetchAll($fetch_style=\PDO::FETCH_BOTH, $fetch_argument=false, $ctor_args=false)
+  /**
+   * @param int $fetch_style
+   * @param bool $fetch_argument
+   * @param bool $ctor_args
+   * @return bool|array
+   */
+	public function fetchAll($fetch_style = \PDO::FETCH_BOTH, $fetch_argument = false, $ctor_args = false)
 	{
 		$this->execute();
 		if ( $ctor_args ){
@@ -259,46 +177,50 @@ class query extends \PDOStatement implements actions
     return bbn\str::correct_types($res);
 	}
 
-	/**
-	 * @return void 
-	 */
-	public function fetchColumn($column_number=0)
+  /**
+   * @param int $column_number
+   * @return mixed
+   */
+	public function fetchColumn($column_number = 0)
 	{
 		$this->execute();
 		return bbn\str::correct_types(parent::fetchColumn($column_number));
 	}
 
-	/**
-	 * @return void 
-	 */
-	public function fetchObject($class_name="stdClass", $ctor_args=array())
+  /**
+   * @param string $class_name
+   * @param array $ctor_args
+   * @return mixed
+   */
+	public function fetchObject($class_name = 'stdClass', $ctor_args = [])
 	{
 		$this->execute();
 		return bbn\str::correct_types(parent::fetchObject($class_name,$ctor_args));
 	}
 
 	/**
-	 * @return void 
+	 * @return int
 	 */
-	public function rowCount()
+	public function rowCount(): int
 	{
 		$this->execute();
 		return parent::rowCount();
 	}
 
-	/**
-	 * @return void 
-	 */
-	public function getColumnMeta($column=0)
+  /**
+   * @param int $column
+   * @return array
+   */
+	public function getColumnMeta($column=0): array
 	{
 		$this->execute();
 		return parent::getColumnMeta($column);
 	}
 
 	/**
-	 * @return void 
+	 * @return bool
 	 */
-	public function nextRowset()
+	public function nextRowset(): bool
 	{
 		$this->execute();
 		return parent::nextRowset();
@@ -307,92 +229,97 @@ class query extends \PDOStatement implements actions
 	/**
 	 * @return array|boolean
 	 */
-	public function get_row()
+	public function get_row(): ?array
 	{
-		if ( $this->does_return() ){
-			return $this->fetch(\PDO::FETCH_ASSOC);
+    if ( !$this->write ){
+			return $this->fetch(\PDO::FETCH_ASSOC) ?: null;
     }
-		return false;
+		return null;
 	}
 
 	/**
-	 * @return void 
+	 * @return null|array
 	 */
-	public function get_rows()
+	public function get_rows(): ?array
 	{
-		if ( $this->does_return() ){
-			return $this->fetchAll(\PDO::FETCH_ASSOC);
+    if ( !$this->write ){
+			$r = $this->fetchAll(\PDO::FETCH_ASSOC);
+			return $r === false ? null : $r;
     }
-		return false;
+		return null;
 	}
 
-	/**
-	 * @return array 
+  /**
+   * @return null|array
+   */
+  public function get_irow(): ?array
+  {
+    if ( !$this->write ){
+      return $this->fetch(\PDO::FETCH_NUM) ?: null;
+    }
+    return null;
+  }
+
+  /**
+   * @return null|array
+   */
+  public function get_irows(): ?array
+  {
+    if ( !$this->write ){
+      return $this->fetchAll(\PDO::FETCH_NUM);
+    }
+    return null;
+  }
+
+  /**
+	 * @return null|array
 	 */
-	public function get_by_columns()
+	public function get_by_columns(): ?array
 	{
-    $r = [];
-		if ( $this->does_return() ){
+    if ( !$this->write ){
+      $r = [];
 			$ds = $this->fetchAll(\PDO::FETCH_ASSOC);
 			foreach ( $ds as $d ){
 				foreach ( $d as $k => $v ){
 					if ( !isset($r[$k]) ){
 						$r[$k] = [];
           }
-					array_push($r[$k],$v);
+					$r[$k][] = $v;
 				}
 			}
+      return $r;
     }
-    return $r;
+    return null;
 	}
 
 	/**
-	 * @return void 
+	 * @return null|\stdClass
 	 */
-	public function get_objects()
+	public function get_obj(): ?\stdClass
 	{
-		if ( $this->does_return() )
-			return $this->fetchAll(\PDO::FETCH_OBJ);
-		return false;
+		return $this->get_object(...\func_get_args());
 	}
 
 	/**
-	 * @return void 
+	 * @return null|\stdClass
 	 */
-	public function get_obj()
+	public function get_object(): ?\stdClass
 	{
-		return $this->get_object(\func_get_args());
+    if ( !$this->write ){
+      return $this->fetch(\PDO::FETCH_OBJ) ?: null;
+    }
+		return null;
 	}
 
-	/**
-	 * @return void 
-	 */
-	public function get_object()
-	{
-		if ( $this->does_return() )
-			return $this->fetch(\PDO::FETCH_OBJ);
-		return false;
-	}
-
-	/**
-	 * @return void 
-	 */
-	public function get_irow()
-	{
-		if ( isset($this->sequences['SELECT']) || isset($this->sequences['SHOW']) )
-			return $this->fetch(\PDO::FETCH_NUM);
-		return false;
-	}
-
-	/**
-	 * @return void 
-	 */
-	public function get_irows()
-	{
-		if ( isset($this->sequences['SELECT']) || isset($this->sequences['SHOW']) )
-			return $this->fetchAll(\PDO::FETCH_NUM);
-		return false;
-	}
+  /**
+   * @return null|array
+   */
+  public function get_objects(): ?array
+  {
+    if ( !$this->write ){
+      return $this->fetchAll(\PDO::FETCH_OBJ);
+    }
+    return null;
+  }
 
 }
-?>

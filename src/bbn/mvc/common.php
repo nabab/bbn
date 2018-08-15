@@ -43,7 +43,7 @@ trait common {
     }
   }
 
-  public function plugin_data_path($plugin = null):? string
+  public function plugin_data_path($plugin = null): ?string
   {
     if ( ($this->plugin || $plugin) && \defined ('BBN_DATA_PATH') ){
       return BBN_DATA_PATH.'plugins/'.$this->plugin_name($plugin ?: $this->plugin).'/';

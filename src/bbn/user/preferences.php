@@ -91,7 +91,7 @@ class preferences extends bbn\models\cls\db
       return null;
     }
     if ( $id_option && !bbn\str::is_uid($id_option) ){
-      $id_option = \call_user_func_array([$this->opt, 'from_path'], \func_get_args());
+      $id_option = $this->opt->from_path(...\func_get_args());
     }
     if ( $id_option && bbn\str::is_uid($id_option) ){
       return $id_option;
@@ -161,7 +161,7 @@ AND ($cond)
 ORDER BY IFNULL($num, $text)
 MYSQL;
       array_unshift($args, $sql);
-      return \call_user_func_array([$this->db, 'get_col_array'], $args);
+      return $this->db->get_col_array(...$args);
     }
     return null;
   }
@@ -206,7 +206,7 @@ AND ($cond)
 ORDER BY $text
 MYSQL;
       array_unshift($args, $sql);
-      return \call_user_func_array([$this->db, 'get_rows'], $args);
+      return $this->db->get_rows(...$args);
     }
     return null;
   }

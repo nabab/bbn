@@ -69,7 +69,7 @@ class x
    * \bbn\x::log('My text', 'FileName');
    * ```
    *
-   * @param string $st Text to save.
+   * @param mixed $st Item to log.
    * @param string $file Filename, default: "misc".
    * @return void
    */
@@ -110,14 +110,14 @@ class x
    * @param string $errstr The file's name, default: "misc".
    * @param $errfile
    * @param $errline
-   * @param array $context
    * @return bool
    */
 
-  public static function log_error($errno, $errstr, $errfile, $errline, $context = []){
+  public static function log_error($errno, $errstr, $errfile, $errline){
     if ( \defined('BBN_DATA_PATH') ){
       if ( is_dir(BBN_DATA_PATH.'logs') ){
         $file = BBN_DATA_PATH.'logs/_php_error.json';
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20);
         $r = false;
         if ( is_file($file) ){
           $r = json_decode(file_get_contents($file), 1);
@@ -135,9 +135,10 @@ class x
         if ( $idx !== false ){
           $r[$idx]['count']++;
           $r[$idx]['last_date'] = $t;
+          $r[$idx]['backtrace'] = $backtrace;
         }
         else{
-          array_push($r, [
+          $r[] = [
             'first_date' => $t,
             'last_date' => $t,
             'count' => 1,
@@ -145,8 +146,9 @@ class x
             'error' => $errstr,
             'file' => $errfile,
             'line' => $errline,
+            'backtrace' => $backtrace
             //'context' => $context
-          ]);
+          ];
         }
         self::sort_by($r, 'last_date', 'DESC');
         file_put_contents($file, json_encode($r, JSON_PRETTY_PRINT));
@@ -522,7 +524,7 @@ class x
       else if ( !$a ){
         $r = '0';
       }
-      else if ( \is_callable($a) ){
+      else if ( !\is_string($a) && \is_callable($a) ){
         $r = 'Function';
       }
       else if ( \is_object($a) ){
@@ -552,7 +554,7 @@ class x
    * @return string
    */
   public static function get_hdump(){
-    return '<p>'.nl2br(str_replace("  ", "&nbsp;&nbsp;", htmlentities(\call_user_func_array('self::get_dump', \func_get_args()))), false).'</p>';
+    return '<p>'.nl2br(str_replace("  ", "&nbsp;&nbsp;", htmlentities(self::get_dump(...\func_get_args()))), false).'</p>';
   }
 
   /**
@@ -563,7 +565,7 @@ class x
    *
    */
   public static function dump(){
-    echo \call_user_func_array('self::get_dump', \func_get_args());
+    echo self::get_dump(...\func_get_args());
 
   }
 
@@ -574,7 +576,7 @@ class x
    * @return void
    */
   public static function hdump(){
-    echo \call_user_func_array('self::get_hdump', \func_get_args());
+    echo self::get_hdump(...\func_get_args());
   }
 
   /**
@@ -1476,7 +1478,7 @@ class x
     return $json ? json_encode($res) : $res;
   }
 
-  public static function json_base64_decode($st):? array
+  public static function json_base64_decode($st): ?array
   {
     $res = \is_string($st) ? json_decode($st, true) : $st;
     if ( \is_array($res) ){
@@ -1494,6 +1496,23 @@ class x
       return $res;
     }
     return null;
+  }
+
+  public static function index_by_first_val(array $ar): array
+  {
+    if ( empty($ar) || !isset($ar[0]) || !\count($ar[0]) ){
+      return $ar;
+    }
+    $cols = array_keys($ar[0]);
+    $idx = array_shift($cols);
+    $num_cols = \count($cols);
+    $res = [];
+    foreach ( $ar as $d ){
+      $index = $d[$idx];
+      unset($d[$idx]);
+      $res[$index] = $num_cols > 1 ? $d : $d[$cols[0]];
+    }
+    return $res;
   }
 
 }

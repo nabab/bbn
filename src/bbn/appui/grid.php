@@ -23,6 +23,7 @@ class grid extends bbn\models\cls\cache
 {
 	private
     /* @var db The DB connection */
+    $cfg,
     $start,
     $limit,
     $order,
@@ -31,6 +32,8 @@ class grid extends bbn\models\cls\cache
     $query,
     $table,
     $group_by,
+    $join,
+    $having,
     $count,
     $num = 0,
     $prefilters = [],
@@ -51,89 +54,64 @@ class grid extends bbn\models\cls\cache
    */
   public function __construct(bbn\db $db, array $post, $cfg){
     parent::__construct($db);
-    // Mandatory configuration coming from the table component
-    $this->start = isset($post['start']) &&
-            bbn\str::is_number($post['start']) ?
-                    $post['start'] : 0;
-
-    $this->limit = ( isset($post['limit']) &&
-            bbn\str::is_number($post['limit']) ) ?
-                    $post['limit'] : 20;
-
-    $this->filters = $post['filters'] ?? [];
-    $this->order = $post['order'] ?? ($cfg['order'] ?? []);
-    // Simple configuration using a string
+    // Simple configuration using just a string with the table
     if ( \is_string($cfg) ){
-      // If there is a space it is a query
-      if ( strrpos($cfg, ' ') ){
-        $this->query = $cfg;
-      }
-      // Otherwise it is a table
-      else{
-        if ( $this->query = $this->db->get_query($cfg) ){
-          $this->table = $cfg;
-        }
-      }
+      $cfg = ['tables' => [$cfg]];
     }
-    // Full configuration
-    else if ( \is_array($cfg) ){
+    if ( \is_array($cfg) && $this->db->check() ){
+      $db_cfg = [
+        'tables' => $cfg['tables'] ?? ($cfg['table'] ?? null),
+        'fields' => $cfg['fields'] ?? [],
+        'order' => $post['order'] ?? ($cfg['order'] ?? []),
+        'join' => $cfg['join'] ?? [],
+        'group_by' => $cfg['group_by'] ?? [],
+        'having' => $cfg['having'] ?? [],
+        'limit' => $post['limit'] ?? ($cfg['limit'] ?? 20),
+        'start' => $post['start'] ?? 0,
+        'where' => !empty($post['filters']) && !empty($post['filters']['conditions']) ?? []
+      ];
+      if ( !empty($cfg['filters']) ){
+        $this->prefilters = isset($cfg['filters']['conditions']) ? $cfg['filters'] : [
+          'logic' => 'AND',
+          'conditions' => $cfg['filters']
+        ];
+        $db_cfg['where'] = empty($db_cfg['where']) ? $this->prefilters : [
+          'logic' => 'AND',
+          'conditions' => [
+            $db_cfg['where'],
+            $this->prefilters
+          ]
+        ];
+      }
+
+      $this->cfg = $this->db->process_cfg($db_cfg);
+      // Mandatory configuration coming from the table component
+      $this->start = $this->cfg['start'];
+      $this->limit = $this->cfg['limit'];
+      $this->filters = $this->cfg['filters'];
+      $this->order = $this->cfg['order'];
+      $this->group_by = $this->cfg['group_by'];
+      $this->join = $this->cfg['join'];
+      $this->having = $this->cfg['having'];
       if ( !empty($cfg['query']) ){
         $this->query = $cfg['query'];
       }
-      if ( !empty($cfg['table']) ){
-        $this->table = $cfg['table'];
+      else if ( !empty($this->cfg['sql']) ){
+        $this->query = $this->get_full_select($this->cfg);
+      }
+      if ( !empty($this->query) ){
         if ( empty($cfg['fields']) ){
-          $cols = array_keys($this->db->get_columns($this->table));
-          $table = $this->table;
-          $this->fields = array_combine($cols, array_map(function($a) use ($table){
-            return $table.'.'.$a;
-          }, $cols));
+          $this->fields = $this->db->get_fields_list($this->cfg['tables']);
         }
         else{
           $this->fields = $cfg['fields'];
         }
-        if ( !$this->query ){
-          $this->query = $this->db->get_query($this->table, !empty($cfg['columns']) ? $cfg['columns'] : []);
-          if ( $i = strpos($this->query, 'WHERE 1') ){
-            $this->query = substr($this->query, 0, $i);
-          }
-        }
-      }
-      if ( $this->query ){
-        if ( isset($cfg['observer'], $cfg['observer']['request']) ){
+        if ( array_key_exists('observer', $cfg) && isset($cfg['observer']['request']) ){
           $this->observer = $cfg['observer'];
         }
         // Additional fields (not in the result but accepted for filtering and ordering
         if ( isset($cfg['extra_fields']) ){
           $this->extra_fields = $cfg['extra_fields'];
-        }
-        // Additional filters
-        if ( !empty($cfg['filters']) ){
-          $this->prefilters = isset($cfg['filters']['logic']) ? $cfg['filters'] : [
-            'logic' => 'AND',
-            'conditions' => $cfg['filters']
-          ];
-          if ( \bbn\x::is_assoc($this->prefilters['conditions']) ){
-            $this->prefilters['conditions'] = [];
-            foreach ( $cfg['filters'] as $col => $val ){
-              if ( $val === null ){
-                $this->prefilters['conditions'][] = [
-                  'field' => $col,
-                  'operator' => 'isnull'
-                ];
-              }
-              else{
-                $this->prefilters['conditions'][] = [
-                  'field' => $col,
-                  'operator' => 'eq',
-                  'value' => $val
-                ];
-              }
-            }
-          }
-        }
-        if ( !empty($cfg['group_by']) ){
-          $this->group_by = $cfg['group_by'];
         }
         if ( !empty($cfg['count']) ){
           $this->count = $cfg['count'];
@@ -144,13 +122,16 @@ class grid extends bbn\models\cls\cache
       }
     }
     $this->cache_uid = md5(serialize([
-      'filters' => $this->filters,
-      'prefilters' => $this->prefilters,
-      'query' => $this->query,
-      'table' => $this->table,
-      'group_by' => $this->group_by,
-      'order' => $this->order,
-      'count' => $this->count
+      'tables' => $this->cfg['tables'],
+      'fields' => $this->cfg['fields'],
+      'order' => $this->cfg['order'],
+      'values' => $this->cfg['values'],
+      'join' => $this->cfg['join'],
+      'group_by' => $this->cfg['group_by'],
+      'having' => $this->cfg['having'],
+      'limit' => $this->cfg['limit'],
+      'start' => $this->cfg['start'],
+      'filters' => $this->cfg['filters']
     ]));
     $this->chrono = new bbn\util\timer();
   }
@@ -186,49 +167,30 @@ class grid extends bbn\models\cls\cache
     $this->data = [];
   }
 
-  public function get_query(){
-    if ( $this->check() ){
-      $select = $this->query;
-      if ( $where = $this->filter() ){
-        $select .= ' WHERE '.$where;
-      }
-      if ( $this->group_by ){
-        $select .= ' GROUP BY '.$this->group_by;
-      }
-      if ( $order = $this->order_string() ){
-        $select .= ' ORDER BY '.$order;
-      }
-      $select .= ' LIMIT '.$this->start.', '.$this->limit;
-      return $select;
+  public function get_full_select(): ?string
+  {
+    if ( $this->db->check() ){
+      return
+        $this->db->get_select($this->cfg).
+        $this->db->get_join($this->cfg).
+        $this->db->get_where($this->cfg).
+        $this->db->get_group_by($this->cfg).
+        $this->db->get_order($this->cfg).
+        $this->db->get_limit($this->cfg);
     }
-    return false;
-  }
-
-  public function get_count(){
-    if ( $this->count ){
-      $select = $this->count;
-    }
-    else if ( $this->table ){
-      $select = 'SELECT COUNT(*) FROM '.$this->db->tsn($this->table, true);
-    }
-    if ( !empty($select) ){
-      if ( $where = $this->filter() ){
-        $select .= ' WHERE '.$where;
-      }
-      /** @todo Group by is only applied to a non given count query, is it ok?? */
-      if ( !$this->count && $this->group_by ){
-        $select .= ' GROUP BY '.$this->group_by;
-      }
-      return $select;
-    }
-    return false;
+    return null;
   }
 
   public function get_data(){
-    if ( $sql = $this->get_query() ){
+    if ( $sql = $this->get_full_select() ){
       $this->chrono->start();
-      $q = $this->db->query($sql);
-      $rows = $q->get_rows();
+      if ( $this->query === $this->cfg['sql'] ){
+        $rows = $this->db->rselect_all($this->cfg);
+      }
+      else{
+        $q = $this->db->query($this->query);
+        $rows = $q->get_rows();
+      }
       $this->query_time = $this->chrono->measure();
       $this->chrono->stop();
       return $rows;
@@ -245,20 +207,22 @@ class grid extends bbn\models\cls\cache
       return $this->num;
     }
     $this->chrono->start();
-    if ( $count = $this->get_count() ){
-      $this->num = $this->db->get_one($count);
-      $this->count_time = $this->chrono->measure();
-      $this->chrono->stop();
-      $this->set_cache([
-        'num' => $this->num,
-        'time' => $this->count_time
-      ]);
-      return $this->num;
+    if ( $this->count ){
+      $this->num = $this->db->get_one($this->count);
     }
-    return 0;
+    else if ( $this->cfg['sql'] ){
+      $this->num = $this->db->count($this->cfg);
+    }
+    $this->count_time = $this->chrono->measure();
+    $this->chrono->stop();
+    $this->set_cache([
+      'num' => $this->num,
+      'time' => $this->count_time
+    ]);
+    return $this->num ?: 0;
   }
 
-  public function get_observer():? array
+  public function get_observer(): ?array
   {
     if ( $this->observer ){
       $obs = new bbn\appui\observer($this->db);
@@ -298,8 +262,7 @@ class grid extends bbn\models\cls\cache
       ];
 
     }
-    $r['query'] = $this->get_query();
-    $r['count'] = $this->get_count();
+    $r['query'] = $this->get_full_select();
     if ( !$this->db->check() ){
       $r['success'] = false;
       $r['error'] = $this->db->last_error;
@@ -309,7 +272,7 @@ class grid extends bbn\models\cls\cache
 
   public function check()
   {
-    return null !== $this->query;
+    return $this->db->check() && (null !== $this->query);
   }
 
   public function get_start()
@@ -320,14 +283,6 @@ class grid extends bbn\models\cls\cache
   public function get_limit()
   {
     return $this->limit;
-  }
-
-  public function where()
-  {
-    if ( isset($this->cfg['filter']) && $this->check() ){
-      return $this->filter($this->cfg['filter']);
-    }
-    return '';
   }
 
   public function get_field($f, $array = false){
@@ -347,254 +302,6 @@ class grid extends bbn\models\cls\cache
       return $this->extra_fields[$f];
     }
     return false;
-  }
-
-  public function filter(array $filters = null, $array = false){
-    /** @var array|string $res */
-    $res = $array ? [] : '';
-    if ( null === $filters ){
-      $num1 = empty($this->prefilters) ? 0 : \count($this->prefilters['conditions']);
-      $num2 = empty($this->filters) ? 0 : \count($this->filters['conditions']);
-      if ( $num1 ){
-        $prefilters = $this->prefilters;
-        array_walk($prefilters['conditions'], function(&$a){
-          $a['prefilter'] = true;
-        });
-      }
-      if ( ($num1 || $num2) && $this->check() ){
-        if ( $num1 && $num2 ){
-          $filters = [
-            'logic' => 'AND',
-            'conditions' => [$prefilters, $this->filters]
-          ];
-        }
-        else{
-          $filters = $num1 ? $prefilters : $this->filters;
-        }
-      }
-    }
-    if ( !empty($filters['conditions']) && $this->check() ){
-      $logic = isset($filters['logic']) && ($filters['logic'] === 'OR') ? 'OR' : 'AND';
-      foreach ( $filters['conditions'] as $f ){
-        if ( isset($f['logic']) && !empty($f['conditions']) ){
-          $pre = empty($res) ? " ( " : " $logic ";
-          if ( $array ){
-            $res = bbn\x::merge_arrays($res, $this->filter($f, true));
-          }
-          else if ( $tmp = $this->filter($f) ){
-            $res .= $pre.$tmp;
-          }
-        }
-        else if ( isset($f['operator']) && ($field = $this->get_field($f, $array)) ){
-          $pre = empty($res) ? " ( " : " $logic ";
-          if ( !$array ){
-            $res .= $pre.$field." ";
-          }
-          if ( !array_key_exists('value', $f) ){
-            $f['value'] = false;
-          }
-          $is_number = bbn\str::is_number($f['value']);
-          $is_uid = false;
-          if ( !$is_number && bbn\str::is_uid($f['value']) ){
-            $is_uid = true;
-          }
-          switch ( $f['operator'] ){
-            case 'eq':
-              if ( $array ){
-                $res[] = [$field, $is_number || $is_uid ? '=' : 'LIKE', $f['value']];
-              }
-              else{
-                if ( isset($f['exp']) ){
-                  $res .= '= '.$f['exp'];
-                }
-                else if ( $is_number ){
-                  $res .= '= '.$f['value'];
-                }
-                else if ( $is_uid ){
-                  $res .= "= UNHEX('".$f['value']."')";
-                }
-                else{
-                  $res .= "LIKE '".$this->db->escape_value($f['value'])."'";
-                }
-              }
-              break;
-
-            case 'neq':
-              if ( $array ){
-                $res[] = [$field, $is_number || $is_uid ? '!=' : 'NOT LIKE', $f['value']];
-              }
-              else{
-                if ( isset($f['exp']) ){
-                  $res .= '!= '.$f['exp'];
-                }
-                else if ( $is_number ){
-                  $res .= '!= '.$f['value'];
-                }
-                else if ( $is_uid ){
-                  $res .= "!= UNHEX('".$f['value']."')";
-                }
-                else{
-                  $res .= "NOT LIKE '".$this->db->escape_value($f['value'])."'";
-                }
-              }
-              break;
-
-            case 'startswith':
-              if ( $array ){
-                $res[] = [$field, 'LIKE', $f['value'].'%'];
-              }
-              else{
-                $res .= "LIKE '".$this->db->escape_value($f['value'])."%'";
-              }
-              break;
-
-            case 'endswith':
-              if ( $array ){
-                $res[] = [$field, 'LIKE', '%'.$f['value']];
-              }
-              else{
-                $res .= "LIKE '%".$this->db->escape_value($f['value'])."'";
-              }
-              break;
-
-            case 'gte':
-              if ( $array ){
-                $res[] = [$field, '>=', $f['value']];
-              }
-              else if ( isset($f['exp']) ){
-                $res .= '>= '.$f['exp'];
-              }
-              else if ( $is_number ){
-                $res .= '>= '.$f['value'];
-              }
-              else{
-                $res .= ">= '".$this->db->escape_value($f['value'])."'";
-              }
-              break;
-
-            case 'gt':
-              if ( $array ){
-                $res[] = [$field, '>', $f['value']];
-              }
-              else if ( isset($f['exp']) ){
-                $res .= '> '.$f['exp'];
-              }
-              else if ( $is_number ){
-                $res .= '> '.$f['value'];
-              }
-              else{
-                $res .= "> '".$this->db->escape_value($f['value'])."'";
-              }
-              break;
-
-            case 'lte':
-              if ( $array ){
-                $res[] = [$field, '<=', $f['value']];
-              }
-              else if ( isset($f['exp']) ){
-                $res .= '<= '.$f['exp'];
-              }
-              else if ( $is_number ){
-                $res .= '<= '.$f['value'];
-              }
-              else{
-                $res .= "<= '".$this->db->escape_value($f['value'])."'";
-              }
-              break;
-
-            case 'lt':
-              if ( $array ){
-                $res[] = [$field, '<', $f['value']];
-              }
-              else if ( isset($f['exp']) ){
-                $res .= '< '.$f['exp'];
-              }
-              else if ( $is_number ){
-                $res .= '< '.$f['value'];
-              }
-              else{
-                $res .= "< '".$this->db->escape_value($f['value'])."'";
-              }
-              break;
-
-              /** @todo Check if it is working with an array */
-            case 'isnull':
-              if ( $array ){
-                $res[] = [$field, 'IS NULL', null];
-              }
-              else{
-                $res .= "IS NULL";
-              }
-              break;
-
-            case 'isnotnull':
-              if ( $array ){
-                $res[] = [$field, 'IS NOT NULL', null];
-              }
-              else{
-                $res .= "IS NOT NULL";
-              }
-              break;
-
-            case 'isempty':
-              if ( $array ){
-                $res[] = [$field, 'LIKE', ''];
-              }
-              else{
-                $res .= "LIKE ''";
-              }
-              break;
-
-            case 'isnotempty':
-              if ( $array ){
-                $res[] = [$field, 'NOT LIKE', ''];
-              }
-              else{
-                $res .= "NOT LIKE ''";
-              }
-              break;
-
-            case 'doesnotcontain':
-              if ( $array ){
-                $res[] = [$field, 'NOT LIKE', '%'.$f['value'].'%'];
-              }
-              else{
-                $res .= "NOT LIKE '%".$this->db->escape_value($f['value'])."%'";
-              }
-              break;
-
-            case 'contains':
-            default:
-              if ( $array ){
-                $res[] = [$field, 'LIKE', '%'.$f['value'].'%'];
-              }
-              else{
-                $res .= "LIKE '%".$this->db->escape_value($f['value'])."%'";
-              }
-              break;
-          }
-        }
-      }
-      if ( !$array && !empty($res) ){
-        $res .= " ) ";
-      }
-    }
-    return $res;
-  }
-
-  public function order_string(){
-    $st = '';
-    if ( !empty($this->order) ){
-      foreach ( $this->order as $f ){
-        if ( $field = $this->get_field($f) ){
-          if ( !empty($st) ){
-            $st .= ", ";
-          }
-          $st .= $field." ".( strtolower($f['dir']) === 'desc' ? 'DESC' : 'ASC' );
-        }
-      }
-    }
-    return $st;
   }
 
 }

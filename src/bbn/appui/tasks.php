@@ -146,6 +146,7 @@ class tasks extends bbn\models\cls\db{
     if ( $opt && $user && isset($log['action'], $log['id_user']) ){
       $type = explode('_', $opt->code($log['action']));
       $action = $user->get_name($this->mgr->get_user($log['id_user'])).' '.$opt->text($log['action']);
+
       $log['value'] = empty($log['value']) ? [] : json_decode($log['value']);
       if ( !empty($log['value']) ){
         $values = [];
@@ -176,6 +177,12 @@ class tasks extends bbn\models\cls\db{
           case 'priority':
             $values = $log['value'];
             break;
+          case 'price':
+          case 'approved':
+            foreach ( $log['value'] as $i => $v ){
+              $values[] = number_format((float)$v, 2, ',', '.');
+            }
+            break;
           default:
             foreach ( $log['value'] as $v ){
               array_push($values, $opt->text($v));
@@ -186,7 +193,7 @@ class tasks extends bbn\models\cls\db{
             $values[$i] = '<strong>'.$v.'</strong>';
           }
           array_unshift($values, $action);
-          return \call_user_func_array("sprintf", $values);
+          return \sprintf(...$values);
         }
       }
       return $action;
@@ -218,6 +225,38 @@ class tasks extends bbn\models\cls\db{
       ]);
     }
     return $res;
+  }
+
+  public function get_approved_log($id){
+    if (
+      $this->exists($id) &&
+      ($action = $this->id_action('price_approved'))
+    )
+    return $this->db->select('bbn_tasks_logs', [], [
+      'id_task' => $id,
+      'action' => $action
+    ], ['chrono' => 'DESC']);
+  }
+
+  public function get_price_log($id){
+    if (
+      $this->exists($id) &&
+      ($action_ins = $this->id_action('price_insert')) &&
+      ($action_upd = $this->id_action('price_update'))
+    )
+    return $this->db->get_obj("
+      SELECT *
+      FROM bbn_tasks_logs
+      WHERE id_task = ?
+        AND (
+            action = ?
+            OR action = ?
+          )
+      ORDER BY chrono DESC",
+      hex2bin($id),
+      hex2bin($action_ins),
+      hex2bin($action_upd)
+    );
   }
 
   public function get_list($parent = null, $status = 'opened|ongoing|holding', $id_user = false, $order = 'priority', $dir = 'ASC', $limit = 1000, $start = 0){
@@ -275,9 +314,9 @@ class tasks extends bbn\models\cls\db{
       {$this->references_join}
     WHERE bbn_tasks_roles.id_user = ?".
       (empty($where) ? '' : " AND ($where)")."
-    AND bbn_tasks.active = 1 
+    AND bbn_tasks.active = 1
     AND bbn_tasks.id_alias IS NULL
-    AND bbn_tasks.id_parent ".( \is_null($parent) ? "IS NULL" : "= $parent" )." 
+    AND bbn_tasks.id_parent ".( \is_null($parent) ? "IS NULL" : "= $parent" )."
     GROUP BY bbn_tasks_roles.id_task
     LIMIT $start, $limit";
 
@@ -334,7 +373,7 @@ class tasks extends bbn\models\cls\db{
       {$this->references_join}
     WHERE (bbn_tasks.title LIKE ?
     OR bbn_notes_versions.content LIKE ?)
-    AND bbn_tasks.active = 1 
+    AND bbn_tasks.active = 1
     GROUP BY bbn_tasks.id
     LIMIT $start, $limit";
 
@@ -418,6 +457,11 @@ class tasks extends bbn\models\cls\db{
         }
       }
       return $info;
+    }
+  }
+  public function get_state($id){
+    if ( $this->exists($id) ){
+      return $this->db->select_one('bbn_tasks', 'state', ['id' => $id]);
     }
   }
 
@@ -878,16 +922,33 @@ class tasks extends bbn\models\cls\db{
           $ok = 1;
         }
       }
+      else if ( $prop === 'price' ){
+        $prev = $this->db->select_one('bbn_tasks', 'price', ['id' => $id_task]);
+        if ( !$prev && $value ){
+          $this->add_log($id_task, 'price_insert', [$value]);
+          $ok = 1;
+        }
+        else if ( $prev && !$value ){
+          $this->add_log($id_task, 'price_delete', [$prev]);
+          $ok = 1;
+        }
+        if ( $prev && $value && ($prev !== $value) ){
+          $this->add_log($id_task, 'price_update', [$prev, $value]);
+          $ok = 1;
+        }
+      }
       else if ( $prop === 'state' ){
         $states = $this->states();
         switch ( $value ){
           case $states['closed']:
             $ok = 1;
             $this->add_log($id_task, 'task_close');
+            $this->stop_all_tracks($id_task);
             break;
           case $states['holding']:
             $ok = 1;
             $this->add_log($id_task, 'task_hold');
+            $this->stop_all_tracks($id_task);
             break;
           case $states['ongoing']:
             $ok = 1;
@@ -896,6 +957,11 @@ class tasks extends bbn\models\cls\db{
           case $states['opened']:
             $ok = 1;
             $this->add_log($id_task, 'task_reopen');
+            break;
+          case $states['unapproved']:
+            $this->add_log($id_task, 'task_unapproved');
+            $this->stop_all_tracks($id_task);
+            $ok = 1;
             break;
         }
       }
@@ -916,6 +982,16 @@ class tasks extends bbn\models\cls\db{
       $text = "<p>{$this->user} a supprimé le bug<br><strong>$info[title]</strong></p>";
       $this->email($id, $subject, $text);
       return $id;
+    }
+  }
+
+  public function approve($id){
+    if (
+      $this->exists($id) &&
+      ($info = $this->db->select('bbn_tasks', ['state', 'price'], ['id' => $id])) &&
+      ($unapproved = $this->id_state('unapproved'))
+    ){
+      return ($info->state === $unapproved) && $this->add_log($id, 'price_approved', [$info->price]);
     }
   }
 
@@ -941,6 +1017,134 @@ class tasks extends bbn\models\cls\db{
 
   public function ping($id){
     return $this->add_log($id, 'task_ping');
+  }
+
+  public function start_track($id_task, $id_user = false){
+    if (
+      !$this->get_active_track($id_user) &&
+      ($ongoing = $this->id_state('ongoing')) &&
+      ($ongoing === $this->get_state($id_task)) &&
+      ($role = $this->has_role($id_task, $id_user ?: $this->id_user)) &&
+      (($role === 'managers') || ($role === 'workers'))
+    ){
+      return $this->db->insert('bbn_tasks_sessions', [
+        'id_task' => $id_task,
+        'id_user' => $id_user ?: $this->id_user,
+        'start' => date('Y-m-d H:i:s')
+      ]);
+    }
+    return false;
+  }
+
+  public function stop_track($id_task, $message = false, $id_user = false){
+    $ok = false;
+    $now = time();
+    if (
+      ($active_track = $this->get_active_track($id_user)) &&
+      ($active_track['id_task'] === $id_task)
+    ){
+      $ok = true;
+      if (
+        !empty($message) &&
+        !($id_note = $this->comment($id_task, [
+          'title' => _('Report tracker').' '.date('d M Y H:i', strtotime($active_track['start'])).' - '.date('d M Y H:i', $now),
+          'text' => $message
+        ]))
+      ){
+        $ok = false;
+      }
+      if ( $ok ){
+        $ok = $this->db->update('bbn_tasks_sessions', [
+          'length' => $now - strtotime($active_track['start']),
+          'id_note' => $id_note ?: NULL
+        ], [
+          'id' => $active_track['id']
+        ]);
+      }
+    }
+    return (bool)$ok;
+  }
+
+  public function stop_all_tracks($id){
+    $this->db->query("
+      UPDATE bbn_tasks_sessions
+      SET `length` = TO_SECONDS(NOW())-TO_SECONDS(start)
+      WHERE id_task = ?
+        AND `length` IS NULL",
+      hex2bin($id)
+    );
+    return $this->db->get_one("
+      SELECT COUNT(*)
+      FROM bbn_tasks_sessions
+      WHERE id_task = ?
+        AND `length` IS NULL",
+      hex2bin($id)
+    ) === 0;
+  }
+
+  public function get_active_track($id_user = false){
+    return $this->db->get_row("
+      SELECT *
+      FROM bbn_tasks_sessions
+      WHERE id_user = ?
+        AND length IS NULL",
+      $id_user ? hex2bin($id_user) : hex2bin($this->id_user)
+    );
+  }
+
+  public function get_track($id_task){
+    return $this->db->get_row("
+      SELECT *
+      FROM bbn_tasks_sessions
+      WHERE id_user = ?
+        AND id_task = ?
+        AND length IS NULL",
+      hex2bin($this->id_user),
+      hex2bin($id_task)
+    );
+  }
+
+  public function get_tracks($id_task){
+    return $this->db->get_rows("
+      SELECT id_user, SUM(length) AS total_time
+      FROM bbn_tasks_sessions
+      WHERE id_task = ?
+      GROUP BY id_user",
+      hex2bin($id_task)
+    );
+  }
+
+  public function get_tasks_tracks($id_user){
+    if (
+      ($manager = $this->id_role('managers')) &&
+      ($worker = $this->id_role('workers')) &&
+      ($ongoing = $this->id_state('ongoing'))
+    ){
+      return $this->db->get_rows("
+        SELECT bbn_tasks.*
+        FROM bbn_tasks
+        	JOIN bbn_tasks_roles
+        		ON bbn_tasks_roles.id_task = bbn_tasks.id
+        		AND bbn_tasks_roles.id_user = ?
+        		AND (
+              bbn_tasks_roles.role = ?
+        			OR bbn_tasks_roles.role = ?
+        		)
+        WHERE bbn_tasks.active = 1
+          AND bbn_tasks.state = ?",
+        hex2bin($id_user),
+        hex2bin($manager),
+        hex2bin($worker),
+        hex2bin($ongoing)
+      );
+    }
+  }
+
+  public function get_invoice($id_task){
+    if ( $id_invoice = $this->db->select_one('bbn_tasks_invoices', 'id_invoice', ['id_task' => $id_task]) ){
+      return $this->db->rselect('bbn_invoices', [], ['id' => $id_invoice]);
+    }
+    return false;
   }
 
 }

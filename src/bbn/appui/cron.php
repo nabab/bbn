@@ -303,7 +303,7 @@ class cron extends bbn\models\cls\basic{
    * Returns the $data property.
    * @return array|null
    */
-  public function get_data():? array
+  public function get_data(): ?array
   {
     return $this->data;
   }
@@ -312,16 +312,16 @@ class cron extends bbn\models\cls\basic{
    * Returns the $data property.
    * @return array|null
    */
-  public function get_path():? string
+  public function get_path(): ?string
   {
     return $this->path;
   }
 
-  public function get_status_path($type):? string {
+  public function get_status_path($type): ?string {
     return $this->path && $type ? $this->path.'status/.'.$type : null;
   }
 
-  public function get_pid_path(array $cfg):? string
+  public function get_pid_path(array $cfg): ?string
   {
     if ( $this->path && isset($cfg['type']) ){
       return $this->path.'pid/.'.(isset($cfg['file'], $cfg['id']) ? $cfg['id'] : $cfg['type']);
@@ -329,7 +329,7 @@ class cron extends bbn\models\cls\basic{
     return null;
   }
 
-  public function get_log_path(array $cfg):? string
+  public function get_log_path(array $cfg): ?string
   {
     if ( isset($cfg['type']) && $this->path ){
       $dir = isset($cfg['id']) ? bbn\file\dir::create_path($this->path.'log/tasks/'.$cfg['id']) : $this->path.'log/'.$cfg['type'];
@@ -338,7 +338,7 @@ class cron extends bbn\models\cls\basic{
     return null;
   }
 
-  public function get_error_log_path(array $cfg):? string
+  public function get_error_log_path(array $cfg): ?string
   {
     if ( isset($cfg['type']) && $this->path ){
       $dir = isset($cfg['id']) ? bbn\file\dir::create_path($this->path.'error/tasks/'.$cfg['id']) : $this->path.'error/'.$cfg['type'];
@@ -494,7 +494,7 @@ class cron extends bbn\models\cls\basic{
    * @param $id
    * @return null|array
    */
-  public function get_cron($id):? array
+  public function get_cron($id): ?array
   {
     if ( $this->check() && ($data = $this->db->rselect($this->table, [], ['id' => $id])) ){
       $data['cfg'] = json_decode($data['cfg'], 1);
@@ -567,7 +567,7 @@ class cron extends bbn\models\cls\basic{
    * @param int $from_time
    * @return null|string
    */
-  public function get_next_date(string $frequency, int $from_time = 0):? string
+  public function get_next_date(string $frequency, int $from_time = 0): ?string
   {
     if ( \is_string($frequency) && (\strlen($frequency) >= 2) ){
       if ( !$from_time ){
@@ -617,7 +617,7 @@ class cron extends bbn\models\cls\basic{
    * @param null $id_cron
    * @return null|array
    */
-  public function get_next($id_cron = null):? array
+  public function get_next($id_cron = null): ?array
   {
     if ( $this->check() && ($data = $this->db->get_row("
         SELECT *
@@ -633,7 +633,7 @@ class cron extends bbn\models\cls\basic{
     }
   }
 
-  public function get_next_rows(int $limit = 10, int $sec = 1):? array
+  public function get_next_rows(int $limit = 10, int $sec = 1): ?array
   {
     if ( $limit === 0 ){
       $limit = 1000;

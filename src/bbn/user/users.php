@@ -21,7 +21,7 @@ class users extends bbn\models\cls\db
    * @param $token
    * @return string
    */
-  public function get_user_from_token($token_id):? string
+  public function get_user_from_token($token_id): ?string
   {
     if ( bbn\str::is_uid($token_id) ){
       return $this->db->get_one(<<<MYSQL
@@ -42,7 +42,7 @@ MYSQL
    * @param $id_user
    * @return array
    */
-  public function get_user_tokens($id_user):? array
+  public function get_user_tokens($id_user): ?array
   {
     if ( bbn\str::is_uid($id_user) ){
       $sql = <<<MYSQL

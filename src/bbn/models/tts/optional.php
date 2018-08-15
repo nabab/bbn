@@ -39,6 +39,9 @@ trait optional
       $tmp = explode('\\', __CLASS__);
       $cls = end($tmp);
       if ( !(self::$option_root_id = $opt->from_code($cls, BBN_APPUI)) ){
+        if ( defined('BBN_IS_DEV') && BBN_IS_DEV ){
+          die(bbn\x::hdump("Impossible to find the option $cls for ".__CLASS__));
+        }
         die("Impossible to find the option $cls for ".__CLASS__);
       }
       self::$optional_is_init = true;

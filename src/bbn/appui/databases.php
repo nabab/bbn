@@ -15,7 +15,7 @@ class databases extends bbn\models\cls\cache
 
   private
     $o,
-    $db2;
+    $db_alt;
 
   public function __construct(bbn\db $db){
     parent::__construct($db);
@@ -49,13 +49,13 @@ class databases extends bbn\models\cls\cache
       !bbn\str::is_uid($db) &&
       !empty($db_user)
     ){
-      $this->db2 = new bbn\db([
+      $this->db_alt = new bbn\db([
         'host' => $host,
         'db' => $db,
         'user' => $db_user['code'],
         'pass' => $db_user['pass']
       ]);
-      return $this->db2;
+      return $this->db_alt;
     }
   }
 

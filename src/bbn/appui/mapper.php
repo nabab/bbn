@@ -486,7 +486,7 @@ class mapper extends bbn\models\cls\db{
                 $r['widget']['dataSource'] = $r['values'];
               }
               else{
-                $r['sql_one'] = $this->db->get_query($ref['table'], $cols);
+                $r['sql_one'] = $this->db->get_full_select($ref['table'], $cols);
               }
             }
 
@@ -656,7 +656,7 @@ class mapper extends bbn\models\cls\db{
               break;
             }
           }
-          $cfg['data']['sql'] = $this->db->get_query($ref['table'], $cols);
+          $cfg['data']['sql'] = $this->db->get_full_select($ref['table'], $cols);
 					$cfg['data']['db'] = $this->db;
 					$cfg['field'] = 'dropdown';
 				}
@@ -821,7 +821,7 @@ class mapper extends bbn\models\cls\db{
 							'type' => $f['type'],
 							'null' => $f['null'],
               'key' => $f['key'],
-              'default' => $f['default_value'],
+              'default' => $f['default'],
 							'config' => json_encode($config)
 						]);
 					}

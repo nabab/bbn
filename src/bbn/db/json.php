@@ -260,7 +260,7 @@ class json implements db\api
             'position' => $p++,
             'null' => $row['Null'] === 'NO' ? 0 : 1,
             'key' => \in_array($row['Key'], ['PRI', 'UNI', 'MUL']) ? $row['Key'] : null,
-            'default_value' => \is_null($row['Default']) && $row['Null'] !== 'NO' ? 'NULL' : $row['Default'],
+            'default' => \is_null($row['Default']) && $row['Null'] !== 'NO' ? 'NULL' : $row['Default'],
             'extra' => $row['Extra'],
             'signed' => 0,
             'maxlength' => 0
@@ -459,7 +459,7 @@ class json implements db\api
 	/**
 	 * @return string
 	 */
-	public function get_query($table, array $fields = [], array $where = [], $order = [], $limit = false, $start = 0, $php = false)
+	public function get_full_select($table, array $fields = [], array $where = [], $order = [], $limit = false, $start = 0, $php = false)
 	{
 		if ( ( $table = $this->table_full_name($table, 1) )  && ( $m = $this->db->modelize($table) ) && \count($m['fields']) > 0 )
 		{

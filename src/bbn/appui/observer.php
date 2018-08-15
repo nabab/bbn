@@ -84,7 +84,7 @@ class observer extends bbn\models\cls\db
    * @param string $params
    * @return null|string
    */
-  private function _get_id(string $request, string $params):? string
+  private function _get_id(string $request, string $params): ?string
   {
     if ( $this->check() ){
       if ( $params ){
@@ -110,7 +110,7 @@ class observer extends bbn\models\cls\db
    * @param string $params
    * @return null|string
    */
-  private function _get_token_id(string $request, string $params):? string
+  private function _get_token_id(string $request, string $params): ?string
   {
     if ( \defined('BBN_USER_TOKEN_ID') && $this->check() ){
       $sql = '
@@ -210,62 +210,64 @@ MYSQL
    * @param array $cfg
    * @return null|string
    */
-  public function add(array $cfg):? string
+  public function add(array $cfg): ?string
   {
-    if ( \defined('BBN_USER_TOKEN_ID') && (null !== $cfg['request']) ){
-      $id_alias = false;
-      // We perform the check after the query has been executed.
-      if ( $this->check() ){
-        $params = self::sanitize_params($cfg['params'] ?? []);
-        $request = trim($cfg['request']);
-        $t = new bbn\util\timer();
-        $t->start();
-        $res = $this->_exec($request, $params);
-        $duration = (int)ceil($t->stop() * 1000);
-        $id_alias = $this->_get_id($request, $params);
-        // If it is a public observer it will be the id_alias and the main observer
-        if ( !empty($cfg['public']) && !$id_alias ){
-          if ( $this->db->insert('bbn_observers', [
-            'request' => $request,
-            'params' => $params ?: null,
-            'name' => $cfg['name'] ?? null,
-            'duration' => $duration,
-            'id_token' => null,
-            'public' => 1,
-            'result' => $res
-          ]) ){
-            $id_alias = $this->db->last_id();
-          }
+    if (
+      \defined('BBN_USER_TOKEN_ID') &&
+      (null !== $cfg['request']) &&
+      $this->check()
+    ){
+      $params = self::sanitize_params($cfg['params'] ?? []);
+      $request = trim($cfg['request']);
+      $t = new bbn\util\timer();
+      $t->start();
+      $res = $this->_exec($request, $params);
+      $duration = (int)ceil($t->stop() * 1000);
+      $id_alias = $this->_get_id($request, $params);
+      // If it is a public observer it will be the id_alias and the main observer
+      if (
+        !$id_alias &&
+        !empty($cfg['public']) &&
+        $this->db->insert('bbn_observers', [
+          'request' => $request,
+          'params' => $params ?: null,
+          'name' => $cfg['name'] ?? null,
+          'duration' => $duration,
+          'id_token' => null,
+          'public' => 1,
+          'result' => $res
+        ])
+      ){
+        $id_alias = $this->db->last_id();
+      }
+      // Getting the ID of the observer corresponding to current token
+      if ( $id_obs = $this->_get_token_id($request, $params) ){
+        //
+        $this->check_result($id_obs);
+        return $id_obs;
+      }
+      else if ( $id_alias ){
+        if ( $this->db->insert('bbn_observers', [
+          'id_token' => BBN_USER_TOKEN_ID,
+          'public' => 0,
+          'id_alias' => $id_alias,
+          'next' => null,
+          'result' => $res
+        ]) ){
+          return $this->db->last_id();
         }
-        // Getting the ID of the observer corresponding to current token
-        if ( $id_obs = $this->_get_token_id($request, $params) ){
-          //
-          $this->check_result($id_obs);
-          return $id_obs;
-        }
-        else if ( $id_alias ){
-          if ( $this->db->insert('bbn_observers', [
-            'id_token' => BBN_USER_TOKEN_ID,
-            'public' => 0,
-            'id_alias' => $id_alias,
-            'next' => null,
-            'result' => $res
-          ]) ){
-            return $this->db->last_id();
-          }
-        }
-        else{
-          if ( $this->db->insert('bbn_observers', [
-            'request' => $request,
-            'params' => $params ?: null,
-            'name' => $cfg['name'] ?? null,
-            'duration' => $duration,
-            'id_token' => BBN_USER_TOKEN_ID,
-            'public' => 0,
-            'result' => $res
-          ]) ){
-            return $this->db->last_id();
-          }
+      }
+      else{
+        if ( $this->db->insert('bbn_observers', [
+          'request' => $request,
+          'params' => $params ?: null,
+          'name' => $cfg['name'] ?? null,
+          'duration' => $duration,
+          'id_token' => BBN_USER_TOKEN_ID,
+          'public' => 0,
+          'result' => $res
+        ]) ){
+          return $this->db->last_id();
         }
       }
     }
@@ -278,7 +280,7 @@ MYSQL
    * @param $id
    * @return array|null
    */
-  public function get($id):? array
+  public function get($id): ?array
   {
     if ( $this->check() ){
       $d = $this->db->rselect('bbn_observers', [], [

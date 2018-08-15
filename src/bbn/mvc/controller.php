@@ -599,8 +599,8 @@ class controller implements api{
     if ( !$has_path ){
       array_unshift($args, $this->path);
     }
-    array_push($args, 'js');
-    if ( $r = \call_user_func_array([$this, 'get_view'], $args) ){
+    $args[] = 'js';
+    if ( $r = $this->get_view(...$args) ){
       $this->add_script($r);
     }
     return $this;
@@ -1009,7 +1009,7 @@ class controller implements api{
 	}
 
 	public function get_object_model(){
-    $m = \call_user_func_array([$this, 'get_model'], \func_get_args());
+    $m = $this->get_model(...func_get_args());
     if ( \is_array($m) ){
       return bbn\x::to_object($m);
     }

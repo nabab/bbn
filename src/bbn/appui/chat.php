@@ -55,9 +55,28 @@ class chat
    * @param int $public
    * @return null|string
    */
-  public function create(array $users, int $public = 0):? string
+  public function create(array $users, int $public = 0): ?string
   {
     if ( $this->check() ){
+      $join = '';
+      $where = '';
+      $values = [$this->user->get_id(), $public];
+      foreach ( $users as $i => $u ){
+        $join .= "JOIN bbn_chats_users AS u$i ON u$i.id_chat = bbn_chats.id".PHP_EOL;
+        $where .= "AND u$i.id_user = ?".PHP_EOL;
+        $values[] = $u;
+      }
+      $sql = <<<SQL
+SELECT id
+FROM bbn_chats
+  $join
+WHERE creator = ?
+AND public = ? 
+$where
+SQL;
+      if ( ($id_chat = $this->db->get_one($sql, $values)) && (count($users) === $this->db->count('bbn_chat_users', ['id_chat' => $id_chat])) ){
+        return $id_chat;
+      }
       if ( $this->db->insert('bbn_chats', [
         'creator' => $this->user->get_id(),
         'creation' => date('Y-m-d H:i:s'),
@@ -131,7 +150,7 @@ class chat
    * @param string $id_user
    * @return bool|null
    */
-  public function is_participant(string $id_chat, string $id_user = null):? bool
+  public function is_participant(string $id_chat, string $id_user = null): ?bool
   {
     if ( $this->check() ){
       return (bool)$this->db->count('bbn_chats_users', [
@@ -148,7 +167,7 @@ class chat
    * @param $id_chat
    * @return array|null
    */
-  public function info($id_chat):? array
+  public function info($id_chat): ?array
   {
     if ( $this->check() ){
       return $this->db->rselect('bbn_chats', [], ['id' => $id_chat]) ?: null;
@@ -162,7 +181,7 @@ class chat
    * @param string $id_chat
    * @return array|null
    */
-  public function get_participants(string $id_chat):? array
+  public function get_participants(string $id_chat): ?array
   {
     if ( $this->check() ){
       return $this->db->get_field_values('bbn_chats_users', 'id_user', ['id_chat' => $id_chat]);
@@ -177,7 +196,7 @@ class chat
    * @param string $message
    * @return int|null
    */
-  public function talk(string $id_chat, string $message):? int
+  public function talk(string $id_chat, string $message): ?int
   {
     if ( $this->check() && ($chat = $this->info($id_chat)) && !$chat['blocked'] ){
       $users = $this->get_participants($id_chat);
@@ -203,7 +222,7 @@ class chat
    * @param $id_chat
    * @return bool|null
    */
-  public function is_admin($id_chat):? bool
+  public function is_admin($id_chat): ?bool
   {
     if ( $this->check() && ($chat = $this->info($id_chat)) && !$chat['blocked'] ){
       return (bool)$this->db->count('bbn_chats_users', [
@@ -229,7 +248,7 @@ class chat
     return false;
   }
 
-  public function get_chats():? array
+  public function get_chats(): ?array
   {
     if ( $this->check() ){
       return $this->db->get_field_values('bbn_chats_users', 'id_chat', ['id_user' => $this->user->get_id()]);
@@ -237,7 +256,7 @@ class chat
   }
 
 
-  public function get_chat_by_users(array $users):? string
+  public function get_chat_by_users(array $users): ?string
   {
     if ( $this->check() && count($users) ){
       $join = '';

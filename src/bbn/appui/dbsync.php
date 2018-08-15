@@ -104,8 +104,9 @@ class dbsync
     if ( class_exists('\\bbn\\appui\\history') && bbn\appui\history::$is_used ){
       self::$has_history = 1;
     }
+    /** @todo Replace with DB functions */
     if ( (self::$dbs->engine === 'sqlite') && !\in_array(self::$dbs_table, self::$dbs->get_tables()) ){
-      self::$dbs->query('
+      self::$dbs->exec(<<<MYSQL
         CREATE TABLE "dbsync" (
           "id" INTEGER PRIMARY KEY  NOT NULL ,
           "db" TEXT NOT NULL ,
@@ -120,10 +121,11 @@ class dbsync
         CREATE INDEX "chrono" "dbsync" ("chrono");
         CREATE INDEX "action" "dbsync" ("action");
         CREATE INDEX "state" "dbsync" ("state");
-      ');
+MYSQL
+      );
     }
     else if ( (self::$dbs->engine === 'mysql') && !\in_array(self::$dbs_table, self::$dbs->get_tables()) ){
-      self::$dbs->query("
+      self::$dbs->exec(<<<MYSQL
         CREATE TABLE IF NOT EXISTS `dbsync` (
           `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
           `db` varchar(50) NOT NULL,
@@ -141,7 +143,8 @@ class dbsync
           ADD KEY `chrono` (`chrono`),
           ADD KEY `action` (`action`),
           ADD KEY `state` (`state`);
-      ");
+MYSQL
+      );
     }
   }
 	/**
@@ -176,29 +179,18 @@ class dbsync
     }
     if ( !self::$disabled &&
       self::check() &&
-      ($table = self::$db->tfn($cfg['table'])) &&
-      \in_array($table, self::$tables)
+      (count($cfg['tables']) === 1) &&
+      ($table = self::$db->tfn(current($cfg['tables']))) &&
+      \in_array($table, self::$tables, true)
     ){
-      if ( ($cfg['moment'] === 'before') &&
-        ($cfg['kind'] === 'insert') &&
-        self::$db->has_id_increment($table) &&
-        ($pri = self::$db->get_unique_primary($table)) &&
-        ($pri = self::$db->csn($pri)) &&
-        empty($cfg['values'][$pri])
-      ){
-        $cfg['values'][$pri] = self::$db->new_id($table);
-        $cfg['run'] = false;
-        $cfg['trig'] = false;
-        $cfg['value'] = self::$db->insert($table, $cfg['values'], $cfg['ignore']);
-      }
-      else if ( $cfg['moment'] === 'after' ){
+      if ( $cfg['moment'] === 'after' ){
         // Case where we actually delete or restore through the $hcol column
         self::$dbs->insert(self::$dbs_table, [
           'db' => self::$db->current,
           'tab' => self::$db->tsn($table),
           'action' => $cfg['kind'],
-          'chrono' => microtime(1),
-          'rows' => empty($cfg['where']) ? '[]' : bbn\x::json_base64_encode($cfg['where']['final']),
+          'chrono' => microtime(true),
+          'rows' => empty($cfg['where']) ? '[]' : bbn\x::json_base64_encode($cfg['where']),
           'vals' => empty($cfg['values']) ? '[]' : bbn\x::json_base64_encode($cfg['values'])
         ]);
       }

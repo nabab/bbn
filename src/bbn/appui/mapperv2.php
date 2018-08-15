@@ -440,7 +440,7 @@ class mapperv2 extends bbn\models\cls\cache{
                 $r['widget']['dataSource'] = $r['values'];
               }
               else{
-                $r['sql_one'] = $this->db->get_query($ref['table'], $cols);
+                $r['sql_one'] = $this->db->get_full_select($ref['table'], $cols);
               }
             }
 
@@ -608,7 +608,7 @@ class mapperv2 extends bbn\models\cls\cache{
           // Otherwise we keep the SQL with an autocomplete
           /** @todo The SQL is not needed... */
           else{
-            $cfg['sql'] = $this->db->get_query($ref['table'], $cols);
+            $cfg['sql'] = $this->db->get_full_select($ref['table'], $cols);
             $cfg['field'] = 'autocomplete';
           }
 				}

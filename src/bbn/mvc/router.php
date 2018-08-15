@@ -323,7 +323,7 @@ class router {
         if ( ($tmp === '.') && !$this->alt_root ){
           // If file exists
           if ( file_exists($root.'index.php') ){
-            $real_path = 'index';
+            $real_path = '.';
             $file = $root.'index.php';
           }
           // Otherwise $file will remain undefined
@@ -335,7 +335,7 @@ class router {
         }
         // There is an index file in a subfolder
         else if ( file_exists($root.$tmp.'/index.php') ){
-          $real_path = $tmp.'/index';
+          $real_path = $tmp;
           $file = $root.$tmp.'/index.php';
         }
         // An alternative root exists, we look into it
@@ -375,9 +375,14 @@ class router {
     }
     if ( $file ){
       if ( $plugin && \defined('BBN_LOCALE') && isset($this->routes['root'][$plugin]['name']) ){
-        bindtextdomain($this->routes['root'][$plugin]['name'], $this->routes['root'][$plugin]['path'].'../src/locale');
-        bind_textdomain_codeset($this->routes['root'][$plugin]['name'], 'UTF-8');
-        textdomain($this->routes['root'][$plugin]['name']);
+        $lang_path = $this->routes['root'][$plugin]['path'].'../src/locale';
+        if ( is_dir($lang_path) ){
+          $textdomain = $this->routes['root'][$plugin]['name'].
+            ((string)(@file_get_contents($lang_path.'/index.txt')));
+          bindtextdomain($textdomain, $lang_path);
+          bind_textdomain_codeset($textdomain, 'UTF-8');
+          textdomain($textdomain);
+        }
       }
       return $this->set_known([
         'file' => $file,

@@ -177,7 +177,7 @@ class session
   }
 
   public function work(callable $fn){
-    return \call_user_func_array([$this, 'transform'], \func_get_args());
+    return $this->transform(...\func_get_args());
   }
 
 
@@ -185,14 +185,14 @@ class session
     if ( $this->id ){
       $args = \func_get_args();
       array_shift($args);
-      $var = \call_user_func_array([$this, 'get'], $args);
+      $var = $this->get(...$args);
       if ( !\is_array($var) ){
         $var = [];
       }
       if ( !\in_array($value, $var) ){
         array_push($var, $value);
         array_unshift($args, $var);
-        \call_user_func_array([$this, 'set'], $args);
+        $this->set(...$args);
       }
       return $this;
     }

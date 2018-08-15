@@ -8,7 +8,7 @@ namespace bbn\util;
 
 // @rodneyrehm
 // http://stackoverflow.com/a/7917979/99923
-class pparser
+class phpparser
 {
     // something to keep track of parens nesting
     protected $stack = null;
@@ -23,7 +23,7 @@ class pparser
     protected $buffer_start = null;
 
     public function parse($string)
-    {die(var_dump('daio'));
+    {
         if (!$string){
             // no string, no data
             return [];

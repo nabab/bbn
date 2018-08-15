@@ -236,46 +236,32 @@ class options extends bbn\models\cls\db
    * @param int $start Where to start the query (only if limit is > 1)
    * @return array|false An array of rows, empty if not found, false if there is an error in the where config
    */
-  protected function get_rows(array $where = [], int $limit = 0, int $start = 0): ?array
+  protected function get_rows(array $where, int $limit = 0, int $start = 0): ?array
   {
-    $db =& $this->db;
-    $tab = $this->class_cfg['table'];
     $c =& $this->class_cfg['arch']['options'];
-    if ( empty($where) ){
-      $where = [$c['active'] => 1];
-    }
-    /** @todo Checkout */
     $cols = [];
     foreach ( $c AS $k => $col ){
       // All the columns except cfg and active
       if ( !\in_array($k, $this->non_selected, true) ){
-        $cols[] = $db->cfn($col, $tab);
+        $cols[$k] = $this->db->cfn($col, $this->class_table);
       }
     }
-    $cols['num_children'] = 'COUNT('.$db->escape($db->cfn($this->class_cfg['arch']['options']['id'], $tab.'2', true)).')';
-    $todo = [$c['id'], $c['id_parent'], $c['id_alias']];
-    foreach ( $todo as $to ){
-      if ( !empty($where[$to]) && !\bbn\str::is_buid($where[$to]) ){
-        $where[$to] = $where[$to];
-      }
-      else if ( !empty($where[$this->db->cfn($to, $tab)]) && !\bbn\str::is_buid($where[$this->db->cfn($to, $tab)]) ){
-        $where[$this->db->cfn($to, $tab)] = $where[$this->db->cfn($to, $tab)];
-      }
-    }
-    return $this->db->rselect_all([
-      'tables' => [$tab],
+    $cols['num_children'] = "COUNT(".$this->db->cfn($this->class_cfg['arch']['options']['id'], $this->class_table, true)
+      .')';
+    $cfg = [
+      'tables' => ['bbn_options'],
       'fields' => $cols,
       'join' => [
         [
           'type' => 'left',
-          'table' => $tab,
-          'alias' => $tab.'2',
+          'table' => 'bbn_options',
+          'alias' => 'children',
           'on' => [
             'conditions' => [
               [
-                'field' => $db->cfn($c['id_parent'], $tab.'2'),
+                'field' => 'children.id_parent',
                 'operator' => 'eq',
-                'exp' => $db->cfn($c['id'], $tab, true)
+                'exp' => 'bbn_options.id'
               ]
             ],
             'logic' => 'AND'
@@ -283,13 +269,11 @@ class options extends bbn\models\cls\db
         ]
       ],
       'where' => $where,
-      'group_by' => [$this->db->cfn($c['id'], $tab)],
-      'order' => [
-        $this->db->cfn($c['id'], $tab)
-      ],
+      'group_by' => ['bbn_options.id'],
       'limit' => $limit,
       'start' => $start
-    ]);
+    ];
+    return $this->db->rselect_all($cfg);
   }
 
   /**
@@ -319,14 +303,20 @@ class options extends bbn\models\cls\db
    */
   public function __construct(bbn\db $db, array $cfg=[]){
     parent::__construct($db);
-    $this->init();
     $this->_init_class_cfg($cfg);
+    $this->init();
     self::retriever_init($this);
     $this->cache_init();
   }
 
   public function init(){
-    $this->root = $this->db->get_one('SELECT id FROM bbn_options WHERE id_parent IS NULL');
+    $this->root = $this->db->select_one(
+      $this->class_cfg['table'],
+      $this->class_cfg['arch']['options']['id'],
+      [
+        $this->class_cfg['arch']['options']['id_parent'] => null,
+        $this->class_cfg['arch']['options']['text'] => 'root'
+      ]);
     $this->default = $this->root;
   }
 
@@ -1829,44 +1819,26 @@ class options extends bbn\models\cls\db
     $id = null;
     if ( $this->_prepare($it) ){
       $c =& $this->class_cfg['arch']['options'];
-      if ( !\is_null($it[$c['code']]) ){
-        // Reviving deleted entry
-        if ( $id = $this->db->select_one($this->class_cfg['table'], $c['id'], [
+      if (
+        !\is_null($it[$c['code']]) &&
+        ($id = $this->db->select_one($this->class_cfg['table'], $c['id'],
+          [
           $c['id_parent'] => $it[$c['id_parent']],
-          $c['code'] => $it[$c['code']],
-          $c['active'] => 0
-        ])
-        ){
-          $res = $this->db->update($this->class_cfg['table'], [
-            $c['text'] => $it[$c['text']],
-            $c['id_alias'] => $it[$c['id_alias']],
-            $c['value'] => $it[$c['value']],
-            $c['num'] => $it[$c['num']],
-            $c['cfg'] => \is_array($it[$c['cfg']]) ? json_encode($it[$c['cfg']]) : $it[$c['cfg']],
-            $c['active'] => 1
-          ], [
-            $c['id'] => $id,
-            $c['active'] => 0
-          ]);
+          $c['code'] => $it[$c['code']]
+        ]))
+      ){
+        if ( !$force ){
+          return false;
         }
-        else{
-          if ( $force &&
-            ($id = $this->db->select_one($this->class_cfg['table'], $c['id'], [
-              $c['id_parent'] => $it[$c['id_parent']],
-              $c['code'] => $it[$c['code']]
-            ]))
-          ){
-            $res = $this->db->update($this->class_cfg['table'], [
-              $c['text'] => $it[$c['text']],
-              $c['id_alias'] => $it[$c['id_alias']],
-              $c['value'] => $it[$c['value']],
-              $c['num'] => $it[$c['num']],
-              $c['cfg'] => \is_array($it[$c['cfg']]) ? json_encode($it[$c['cfg']]) : $it[$c['cfg']]
-            ], [
-              $c['id'] => $id
-            ]);
-          }
-        }
+        $res = $this->db->update($this->class_cfg['table'], [
+          $c['text'] => $it[$c['text']],
+          $c['id_alias'] => $it[$c['id_alias']],
+          $c['value'] => $it[$c['value']],
+          $c['num'] => $it[$c['num']],
+          $c['cfg'] => \is_array($it[$c['cfg']]) ? json_encode($it[$c['cfg']]) : $it[$c['cfg']]
+        ], [
+          $c['id'] => $id
+        ]);
       }
       if (
         !$id &&
@@ -1877,8 +1849,7 @@ class options extends bbn\models\cls\db
           $c['id_alias'] => $it[$c['id_alias']],
           $c['value'] => $it[$c['value']],
           $c['num'] => $it[$c['num']],
-          $c['cfg'] => \is_array($it[$c['cfg']]) ? json_encode($it[$c['cfg']]) : $it[$c['cfg']],
-          $c['active'] => 1
+          $c['cfg'] => \is_array($it[$c['cfg']]) ? json_encode($it[$c['cfg']]) : $it[$c['cfg']]
         ]))
       ){
         $id = $this->db->last_id();

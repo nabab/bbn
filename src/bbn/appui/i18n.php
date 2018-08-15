@@ -196,11 +196,11 @@ class i18n extends bbn\models\cls\db{
           'id_parent' => $parent
         ];
         foreach ( $items as $idx => $item ){
-          if ( $id = $this->db->get_val('bbn_i18n', 'id', [
+          if ( $id = $this->db->select_one('bbn_i18n', 'id', [
             'exp'=> $item['text'],
             'lang' => $paths[$p]['language']
           ])){
-            if ( $this->db->get_val('bbn_i18n_exp', 'id_exp', [
+            if ( $this->db->select_one('bbn_i18n_exp', 'id_exp', [
               'id_exp' => $id,
               'lang' => $lang
             ]) ){

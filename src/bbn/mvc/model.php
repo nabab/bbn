@@ -107,35 +107,35 @@ class model extends bbn\models\cls\db{
   }
 
   public function get_content(){
-    return \call_user_func_array([$this->ctrl, 'get_content'], \func_get_args());
+    return $this->ctrl->get_content(...\func_get_args());
   }
 
   public function get_model(){
-    return \call_user_func_array([$this->ctrl, 'get_model'], \func_get_args());
+    return $this->ctrl->get_model(...\func_get_args());
   }
 
   public function get_cached_model(){
-    return \call_user_func_array([$this->ctrl, 'get_cached_model'], \func_get_args());
+    return $this->ctrl->get_cached_model(...\func_get_args());
   }
 
   public function get_plugin_model($path, $data = []){
-    return \call_user_func_array([$this->ctrl, 'get_plugin_model'], \func_get_args());
+    return $this->ctrl->get_plugin_model(...\func_get_args());
   }
 
   public function has_plugin(){
-    return \call_user_func_array([$this->ctrl, 'has_plugin'], \func_get_args());
+    return $this->ctrl->has_plugin(...\func_get_args());
   }
 
   public function is_plugin(){
-    return \call_user_func_array([$this->ctrl, 'is_plugin'], \func_get_args());
+    return $this->ctrl->is_plugin(...\func_get_args());
   }
 
   public function plugin_path(){
-    return \call_user_func_array([$this->ctrl, 'plugin_path'], \func_get_args());
+    return $this->ctrl->plugin_path(...\func_get_args());
   }
 
   public function plugin_url(){
-    return \call_user_func_array([$this->ctrl, 'plugin_url'], \func_get_args());
+    return $this->ctrl->plugin_url(...\func_get_args());
   }
   /**
 	 * Checks if data exists or if a specific index exists in the data

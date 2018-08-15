@@ -59,7 +59,8 @@ class str
    * @param mixed $case The case to convert to ("lower" or "upper"), default being title case.
    * @return string
    */
-  public static function change_case($st, $case = 'x'){
+  public static function change_case(string $st, $case = 'x'): string
+  {
     $st = self::cast($st);
     $case = substr(strtolower((string)$case), 0, 1);
     switch ( $case ){
@@ -91,7 +92,7 @@ class str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escape_all_quotes($st)
+  public static function escape_all_quotes(string $st): string
   {
     return self::escape_dquotes(self::escape_squotes($st));
   }
@@ -108,7 +109,7 @@ class str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escape_dquotes($st)
+  public static function escape_dquotes(string $st): string
   {
     return addcslashes(self::cast($st), "\"\\\r\n\t");
   }
@@ -124,7 +125,7 @@ class str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escape_dquote($st)
+  public static function escape_dquote(string $st): string
   {
     return self::escape_dquotes($st);
   }
@@ -140,7 +141,7 @@ class str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escape_quote($st)
+  public static function escape_quote(string $st): string
   {
     return self::escape_dquotes($st);
   }
@@ -156,7 +157,7 @@ class str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escape_quotes($st)
+  public static function escape_quotes(string $st): string
   {
     return self::escape_dquotes($st);
   }
@@ -172,7 +173,7 @@ class str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escape_squotes($st)
+  public static function escape_squotes(string $st): string
   {
     return addcslashes(self::cast($st), "'\\\r\n\t");
   }
@@ -188,7 +189,7 @@ class str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escape($st)
+  public static function escape(string $st): string
   {
     return self::escape_squotes($st);
   }
@@ -204,7 +205,7 @@ class str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escape_apo($st)
+  public static function escape_apo(string $st): string
   {
     return self::escape_squotes($st);
   }
@@ -220,7 +221,7 @@ class str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escape_squote($st)
+  public static function escape_squote(string $st): string
   {
     return self::escape_squotes($st);
   }
@@ -256,7 +257,8 @@ class str
    * @param string $mode A selection of configuration: "all" (default), "2n1", "html", "code".
    * @return string
    */
-  public static function clean($st, $mode='all'){
+  public static function clean(string $st, $mode='all'): string
+  {
     if ( \is_array($st) ){
       reset($st);
       $i = \count($st);
@@ -320,7 +322,8 @@ class str
    * @param int $max The maximum string lenght.
    * @return string
    */
-  public static function cut($st, $max = 15){
+  public static function cut(string $st, int $max = 15): string
+  {
     $st = self::cast($st);
     $st = mb_ereg_replace('&nbsp;',' ',$st);
     $st = mb_ereg_replace('\n',' ',$st);
@@ -342,7 +345,8 @@ class str
     return $st;
   }
 
-  public static function sanitize($st){
+  public static function sanitize(string $st): string
+  {
     $file = mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $st);
 // Remove any runs of periods (thanks falstro!)
     $file = mb_ereg_replace("([\.]{2,})", '', $file);
@@ -363,7 +367,7 @@ class str
    * @param bool $is_path Tells if the slashes (/) are authorized in the string
    * @return string
    */
-  public static function encode_filename(string $st, $maxlength = 50, $extension = null, $is_path = false)
+  public static function encode_filename(string $st, $maxlength = 50, $extension = null, $is_path = false): string
   {
 
     $st = self::remove_accents(self::cast($st));
@@ -423,7 +427,7 @@ class str
    * @param int $maxlength The maximum length, default: "50".
    * @return string
    */
-  public static function encode_dbname($st, $maxlength = 50)
+  public static function encode_dbname(string $st, $maxlength = 50): string
   {
     $st = self::remove_accents(self::cast($st));
     $res = '';
@@ -462,25 +466,19 @@ class str
    * @param bool $ar If "true" returns also the file path, default: "false".
    * @return string|array
    */
-  public static function file_ext($file, $ar=false)
+  public static function file_ext(string $file, bool $ar = false)
   {
     $file = self::cast($file);
-    if ( mb_strrpos($file, '/') !== false )
-      $file = substr($file, mb_strrpos($file, '/')+1);
-    if ( mb_strpos($file, '.') !== false )
-    {
+    if ( mb_strrpos($file, '/') !== false ){
+      $file = substr($file, mb_strrpos($file, '/') + 1);
+    }
+    if ( mb_strpos($file, '.') !== false ){
       $p = mb_strrpos($file, '.');
       $f = mb_substr($file, 0, $p);
       $ext = mb_convert_case(mb_substr($file, $p+1), MB_CASE_LOWER);
-      if ( $ar )
-        return [$f, $ext];
-      else
-        return $ext;
+      return $ar ? [$f, $ext] : $ext;
     }
-    else if ( $ar )
-      return [$file, ''];
-    else
-      return '';
+    return $ar ? [$file, ''] : '';
   }
 
   /**
@@ -497,33 +495,23 @@ class str
    * @param int $int_min Minimum characters of password, default: "6".
    * @return string
    */
-  public static function genpwd($int_max=12, $int_min=6)
+  public static function genpwd(int $int_max = 12, int $int_min = 6): string
   {
     mt_srand();
-    if ($int_min > 0)
-      $longueur = mt_rand($int_min,$int_max);
-    else
-      $longueur = $int_max;
+    $len = ($int_min > 0) && ($int_min < $int_max) ? random_int($int_min, $int_max) : $int_max;
     $mdp = '';
-    for($i=0; $i<$longueur; $i++)
-    {
-      // First caracter a letter
-      if ( $i === 0 ){
-        $quoi= mt_rand(2,3);
-      }
-      else{
-        $quoi= mt_rand(1,3);
-      }
-      switch($quoi)
-      {
+    for( $i = 0; $i < $len; $i++ ){
+      // First character is a letter
+      $type = $i === 0 ? random_int(2, 3) : random_int(1, 3);
+      switch ( $type ){
         case 1:
-          $mdp .= mt_rand(0,9);
+          $mdp .= random_int(0,9);
           break;
         case 2:
-          $mdp .= \chr(mt_rand(65,90));
+          $mdp .= \chr(random_int(65,90));
           break;
         case 3:
-          $mdp .= \chr(mt_rand(97,122));
+          $mdp .= \chr(random_int(97,122));
           break;
       }
     }
@@ -541,7 +529,8 @@ class str
    * @param string $st The string.
    * @return bool
    */
-  public static function is_json($st){
+  public static function is_json($st)
+  {
     if ( \is_string($st) && !empty($st) &&
       ( (substr($st, 0, 1) === '{') || (substr($st, 0, 1) === '[') )){
       json_decode($st);
@@ -568,7 +557,7 @@ class str
    * @param mixed $st The item to be tested.
    * @return bool
    */
-  public static function is_number()
+  public static function is_number(): bool
   {
     $args = \func_get_args();
     foreach ( $args as $a ){
@@ -600,7 +589,7 @@ class str
    * @param mixed $st The item to be tested.
    * @return bool
    */
-  public static function is_integer()
+  public static function is_integer(): bool
   {
     $args = \func_get_args();
     foreach ( $args as $a ){
@@ -631,7 +620,7 @@ class str
    * @param mixed $st The item to be tested.
    * @return bool
    */
-  public static function is_clean_path()
+  public static function is_clean_path(): bool
   {
     $args = \func_get_args();
     foreach ( $args as $a ){
@@ -663,7 +652,7 @@ class str
    * @param mixed $st The item to be tested.
    * @return bool
    */
-  public static function is_decimal()
+  public static function is_decimal(): bool
   {
     $args = \func_get_args();
     foreach ( $args as $a ){
@@ -698,14 +687,14 @@ class str
    */
   public static function correct_types($st){
     if ( \is_string($st) ){
-      if ( \bbn\str::is_buid($st) ){
+      if ( self::is_buid($st) ){
         $st = bin2hex($st);
       }
       else{
         $st = trim($st);
         // Not starting with a zero or ending with a zero decimal
         if ( !preg_match('/^0[^.]+|\.[0-9]*0$/', $st) ){
-          if ( self::is_integer($st) && ((substr($st, 0, 1) !== '0') || ($st === '0')) ){
+          if ( self::is_integer($st) && ((substr((string)$st, 0, 1) !== '0') || ($st === '0')) ){
             $tmp = (int)$st;
             if ( ($tmp < PHP_INT_MAX) && ($tmp > -PHP_INT_MAX) ){
               return $tmp;
@@ -732,11 +721,13 @@ class str
     return $st;
   }
 
-  public static function is_uid($st){
+  public static function is_uid($st): bool
+  {
     return \is_string($st) && (\strlen($st) === 32) && ctype_xdigit($st);// && !mb_detect_encoding($st);
   }
 
-  public static function is_buid($st){
+  public static function is_buid($st): bool
+  {
     if ( \is_string($st) && (\strlen($st) === 16) && !ctype_print($st) && !ctype_space($st) ){
       $enc = mb_detect_encoding($st, ['8bit', 'UTF-8']);
       if ( !$enc || ($enc === '8bit') ){
@@ -763,7 +754,7 @@ class str
    * @param string $email E-mail address.
    * @return bool
    */
-  public static function is_email($email)
+  public static function is_email($email): bool
   {
     if ( function_exists('filter_var') ){
       return filter_var($email,FILTER_VALIDATE_EMAIL) ? true : false;
@@ -838,7 +829,7 @@ class str
    * @param string $url The url.
    * @return array
    */
-  public static function parse_url($url)
+  public static function parse_url($url): array
   {
     $url = self::cast($url);
     $r = x::merge_arrays(parse_url($url), ['url' => $url,'query' => '','params' => []]);
@@ -868,7 +859,7 @@ class str
    * @param boolean $allow_parent If true ../ is allowed in the path (and will come normalized).
    * @return string
    */
-  public static function parse_path(string $path, $allow_parent = false)
+  public static function parse_path(string $path, $allow_parent = false): string
   {
     $path = str_replace('\\', '/', \strval($path));
     $path = str_replace('/./', '/', \strval($path));
@@ -910,7 +901,7 @@ class str
    * @param string $st The string.
    * @return string
    */
-  public static function remove_accents($st)
+  public static function remove_accents($st): string
   {
     $st = trim(mb_ereg_replace('&(.)(tilde|circ|grave|acute|uml|ring|oelig);', '\\1', self::cast($st)));
     $search = explode(",","ç,æ,œ,á,é,í,ó,ú,à,è,ì,ò,ù,ä,ë,ï,ö,ü,ÿ,â,ê,î,ô,û,å,e,i,ø,u,ą,ń,ł,ź,ę,À,Á,Â,Ã,Ä,Ç,È,É,Ê,Ë,Ì,Í,Î,Ï,Ñ,Ò,Ó,Ô,Õ,Ö,Ù,Ú,Û,Ü,Ý,Ł,Ś");
@@ -932,7 +923,8 @@ class str
    *
    * @return bool
    */
-  public static function check_name(){
+  public static function check_name(): bool
+  {
 
     $args = \func_get_args();
     // Each argument must be a string starting with a letter, and having only one character made of letters, numbers and underscores
@@ -958,7 +950,8 @@ class str
    *
    * @return bool
    */
-  public static function check_filename(){
+  public static function check_filename(): bool
+  {
 
     $args = \func_get_args();
     // Each argument must be a string starting with a letter, and having than one character made of letters, numbers and underscores
@@ -986,13 +979,14 @@ class str
    *
    * @return bool
    */
-  public static function has_slash(){
+  public static function has_slash(): bool
+  {
 
     $args = \func_get_args();
     // Each argument must be a string starting with a letter, and having than one character made of letters, numbers and underscores
     foreach ( $args as $a ){
       if ( (strpos($a, '/') !== false) || (strpos($a, '\\') !== false) ){
-        return 1;
+        return true;
       }
     }
 
@@ -1010,7 +1004,8 @@ class str
    * @param string $st The string.
    * @return string
    */
-  public static function get_numbers($st){
+  public static function get_numbers($st): string
+  {
     return preg_replace("/[^0-9]/", '', self::cast($st));
   }
 
@@ -1098,8 +1093,10 @@ class str
    * @param int $lev Default: "1".
    * @return string
    */
-  public static function export($o, $remove_empty=false, $lev=1){
+  public static function export($o, $remove_empty=false, $lev=1): string
+  {
     $st = '';
+    $space = '    ';
     if ( \is_object($o) && ($cls = \get_class($o)) && (strpos($cls, 'stdClass') === false) ){
       $st .= "Object ".$cls.PHP_EOL;
       /*
@@ -1115,23 +1112,24 @@ class str
       */
     }
     else if ( \is_object($o) || \is_array($o) ){
-      $is_assoc = (\is_object($o) || x::is_assoc($o));
-      //$st .= $is_assoc ? '{' : '[';
-      $st .= \is_object($o) ? '{' : '[';
+      $is_object = \is_object($o);
+      $is_array = !$is_object && \is_array($o);
+      $is_assoc = $is_object || ($is_array && x::is_assoc($o));
+      $st .= $is_assoc ? '{' : '[';
       $st .= PHP_EOL;
       foreach ( $o as $k => $v ){
         if ( $remove_empty && ( ( \is_string($v) && empty($v) ) || ( \is_array($v) && \count($v) === 0 ) ) ){
           continue;
         }
-        $st .= str_repeat('    ', $lev);
+        $st .= str_repeat($space, $lev);
         if ( $is_assoc ){
           $st .= ( \is_string($k) ? '"'.self::escape_dquote($k).'"' : $k ). ': ';
         }
         if ( \is_array($v) ){
           $st .= self::export($v, $remove_empty, $lev+1);
         }
-        else if ( \is_object($v) ){
-          $cls = get_class($v);
+        else if ( $is_object ){
+          $cls = \get_class($v);
           if ( $cls === 'stdClass' ){
             $st .= self::export($v, $remove_empty, $lev+1);
           }
@@ -1151,7 +1149,7 @@ class str
         else if ( $v === 0 ){
           $st .= '0';
         }
-        else if ( \is_null($v) ){
+        else if ( null === $v ){
           $st .= 'null';
         }
         else if ( \is_bool($v) ){
@@ -1160,7 +1158,7 @@ class str
         else if ( \is_int($v) || \is_float($v) ){
           $st .= $v;
         }
-        else if ( !ctype_print($v) && (strlen($v) === 16) ){
+        else if ( !ctype_print($v) && (\strlen($v) === 16) ){
           $st .= '0x'.bin2hex($v);
         }
         else if ( !$remove_empty || !empty($v) ){
@@ -1168,7 +1166,7 @@ class str
         }
         $st .= ','.PHP_EOL;
       }
-      $st .= str_repeat('    ', $lev-1);
+      $st .= str_repeat($space, $lev-1);
       //$st .= $is_assoc ? '}' : ']';
       $st .= \is_object($o) ? '}' : ']';
       return $st;
@@ -1191,7 +1189,8 @@ class str
    * @param string $subject
    * @return string
    */
-  public static function replace_once($search, $replace, $subject){
+  public static function replace_once($search, $replace, $subject): string
+  {
     $pos = strpos($subject, $search);
     if ($pos !== false){
       return substr_replace($subject, $replace, $pos, \strlen($search));
@@ -1231,7 +1230,8 @@ class str
    * @param string $st
    * @return bool
    */
-  public static function is_domain($st){
+  public static function is_domain($st): bool
+  {
     return (preg_match("/^([a-z\d](-*[a-z\d])*)(\.([a-z\d](-*[a-z\d])*))*$/i", $st) //valid chars check
       && preg_match("/^.{1,253}$/", $st) //overall length check
       && preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $st)   ); //length of each label
@@ -1252,7 +1252,8 @@ class str
    * @param string $st
    * @return bool
    */
-  public static function is_date_sql($st){
+  public static function is_date_sql($st): bool
+  {
     return date::validateSQL($st);
   }
 
@@ -1267,12 +1268,14 @@ class str
    * @param string $st
    * @return string
    */
-  public static function remove_comments($st){
+  public static function remove_comments(string $st): string
+  {
     $pattern = '/(?:(?:\/\*(?:[^*]|(?:\*+[^*\/]))*\*+\/)|(?:(?<!\:|\\\|\')\/\/.*))/';
     return preg_replace($pattern, '', $st);
   }
 
-  public static function say_size($bytes, $unit = 'B', $stop = false){
+  public static function say_size($bytes, $unit = 'B', $stop = false): string
+  {
 // pretty printer for byte values
 //
     $i = 0;

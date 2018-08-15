@@ -38,7 +38,7 @@ class imessages extends \bbn\models\cls\db
           'id_group' => 'id_group',
           'start' => 'start',
           'end' => 'end',
-          'active' => 'actif'
+          'active' => 'bbn_h'
         ],
         'users' => [
           'id_imessage' => 'id_imessage',
@@ -163,7 +163,6 @@ class imessages extends \bbn\models\cls\db
    */
   public function get(string $id_option, string $id_user, $simple = true){
     $cfg =& $this->class_cfg;
-    \bbn\x::log($this->class_cfg, 'mirko');
     // Current datetime
     $now = date('Y-m-d H:i:s');
     // Get the user's group

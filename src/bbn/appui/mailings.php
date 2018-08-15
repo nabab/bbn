@@ -47,7 +47,7 @@ class mailings
     return !!$this->db->select_one('bbn_emailings', 'id', ['id' => $id, 'statut' => 'suspendu']);
   }
 
-  public function get_recipients($id_recipients):? array
+  public function get_recipients($id_recipients): ?array
   {
     if ( $this->check() && ($opt = options::get_instance()) && ($cfg = $opt->option($id_recipients)) ){
       if ( isset($cfg['model'], $cfg['grid']) && ($m = $this->mvc->get_model($cfg['model'], $cfg['grid'])) ){
@@ -58,7 +58,7 @@ class mailings
     return [];
   }
 
-  public function get_next_mailing():? array
+  public function get_next_mailing(): ?array
   {
     if ( $this->check() ){
       $notes = $this->_note();
@@ -76,7 +76,7 @@ class mailings
     return null;
   }
 
-  public function change_state($id_mailing, $new_state):? bool
+  public function change_state($id_mailing, $new_state): ?bool
   {
     if ( $this->check() ){
       return (bool)$this->db->update("bbn_emailings", ['statut' => $new_state], ['id' => $id_mailing]);

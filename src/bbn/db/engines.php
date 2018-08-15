@@ -3,6 +3,7 @@
  * @package db
  */
 namespace bbn\db;
+use bbn;
 /**
  * DB Interface
  *
@@ -20,17 +21,23 @@ namespace bbn\db;
 interface engines
 {
   /**
-   * Returns a binary UUID
-   * @return binary
+   * Constructor
+   * @param bbn\db $db
    */
-  public function confirm_connection();
+  //public function __construct(bbn\db $db = null);
+
+  /**
+   * @param array $cfg The user's options
+   * @return array|null The final configuration
+   */
+  public function get_connection(array $cfg = []): ?array;
  /**
 	* Fetches the database and returns an array of several arrays of rows text-indexed
 	* 
-	* @params string
-	* @return $this
+	* @param string $db
+	* @return mixed
 	*/
-	public function change($db);
+	public function change(string $db);
 	
 	/**
 	 * Returns a database item expression escaped like database, table, column, key names
@@ -38,8 +45,8 @@ interface engines
 	 * @param string $item The item's name (escaped or not)
 	 * @return string | false
 	 */
-	public function escape($item);
-  
+	public function escape(string $item): string;
+
 	/**
 	 * Returns a table's full name i.e. database.table
 	 * 
@@ -47,7 +54,7 @@ interface engines
 	 * @param bool $escaped If set to true the returned string will be escaped
 	 * @return string | false
 	 */
-	public function table_full_name($table, $escaped=false);
+	public function table_full_name(string $table, bool $escaped = false): ?string;
 	
 	/**
 	 * Returns a table's simple name i.e. table
@@ -56,17 +63,17 @@ interface engines
 	 * @param bool $escaped If set to true the returned string will be escaped
 	 * @return string | false
 	 */
-  public function table_simple_name($table, $escaped=false);
+  public function table_simple_name(string $table, bool $escaped = false): ?string;
   
 	/**
 	 * Returns a column's full name i.e. table.column
 	 * 
 	 * @param string $col The column's name (escaped or not)
-	 * @param string $table The table's name (escaped or not)
+	 * @param null|string $table The table's name (escaped or not)
 	 * @param bool $escaped If set to true the returned string will be escaped
 	 * @return string | false
 	 */
-  public function col_full_name($col, $table='', $escaped=false);
+  public function col_full_name(string $col, $table = null, $escaped = false);
 
 	/**
 	 * Returns a column's simple name i.e. column
@@ -75,7 +82,19 @@ interface engines
 	 * @param bool $escaped If set to true the returned string will be escaped
 	 * @return string | false
 	 */
-  public function col_simple_name($col, $escaped=false);
+  public function col_simple_name(string $col, bool $escaped = false);
+
+  /**
+   * @param string $table
+   * @return bool
+   */
+  public function is_table_full_name(string $table): bool;
+
+  /**
+   * @param string $col
+   * @return bool
+   */
+  public function is_col_full_name(string $col): bool;
 
 	/**
 	 * Fetches the database and returns an array of a single row num-indexed
@@ -96,123 +115,165 @@ interface engines
 	 *
 	 * @return false|array
 	 */
-	public function get_databases();
+	public function get_databases(): ?array;
 
 	/**
 	 * Fetches the database and returns an object of a single row, alias of get_object
 	 *
-	 * @return false|object
+   * @return null|array
 	 */
-	public function get_tables();
+	public function get_tables(): ?array;
 
 	/**
 	 * Fetches the database and returns an object of a single row
 	 *
-	 * @return false|object
+   * @param string $table
+	 * @return null|array
 	 */
-	public function get_columns($table);
+	public function get_columns(string $table): ?array;
 
 	/**
 	 * Fetches the database and returns an array of objects 
 	 *
-	 * @return false|array
+   * @param string $table
+   * @return null|array
 	 */
-	public function get_keys($table);
-	
- /**
-	* Get a string starting with ORDER BY with corresponding parameters to $order
-	*
-	* @return false|array
-	*/
-	public function get_order($order, $table='');
-	
- /**
-	* Get a string starting with LIMIT with corresponding parameters to $where
-	*
-	* @return false|array
-	*/
-	public function get_limit($limit, $start = 0);
+	public function get_keys(string $table): ?array;
+
+  /**
+   * Returns a string with the conditions for the ON, WHERE, or HAVING part of the query if there is, empty otherwise
+   *
+   * @param array $conditions
+   * @param array $cfg
+   * @return string
+   */
+  public function get_conditions(array $conditions, array $cfg = []): string;
+
+  /**
+   * Generates a string starting with SELECT ... FROM with corresponding parameters
+   *
+   * @param array $cfg The configuration array
+   * @return string
+   */
+  public function get_select(array $cfg): string;
+
+  /**
+   * Fetches the database and returns an array of objects
+   *
+   * @param array $cfg The configuration array
+   * @return false|array
+   */
+  public function get_insert(array $cfg): string;
+
+  /**
+   * Fetches the database and returns an array of objects
+   *
+   * @param array $cfg The configuration array
+   * @return false|array
+   */
+  public function get_update(array $cfg): string;
+
+  /**
+   * Returns the SQL code for a DELETE statement.
+   *
+   * @param array $cfg The configuration array
+   * @return string
+   */
+  public function get_delete(array $cfg): string;
+
+  /**
+   * Returns a string with the JOIN part of the query if there is, empty otherwise
+   *
+   * @param array $cfg
+   * @return string
+   */
+  public function get_join(array $cfg): string;
+
+  /**
+   * Returns a string with the JOIN part of the query if there is, empty otherwise
+   *
+   * @param array $cfg
+   * @return string
+   */
+  public function get_where(array $cfg): string;
+
+  /**
+   * Returns a string with the GROUP BY part of the query if there is, empty otherwise
+   *
+   * @param array $cfg
+   * @return string
+   */
+  public function get_group_by(array $cfg): string;
+
+  /**
+   * Returns a string with the HAVING part of the query if there is, empty otherwise
+   *
+   * @param array $cfg
+   * @return string
+   */
+  public function get_having(array $cfg): string;
+
+  /**
+   * Get a string starting with ORDER BY with corresponding parameters to $order
+   *
+   * @param array $cfg
+   * @return string
+   */
+  public function get_order(array $cfg): string;
+
+  /**
+   * Get a string starting with LIMIT with corresponding parameters to $where
+ 	 *
+   * @param array $cfg
+   * @return string
+   */
+	public function get_limit(array $cfg): string;
 	
  /**
 	* Fetches the database and returns an array of objects 
 	*
-	* @return false|array
+  * @param string $table The table for which to create the statement
+	* @return string
 	*/
-	public function get_create($table);
-	
-	/**
-	 * Fetches the database and returns an array of objects 
-	 * 
-	 * @return false|array
-	 */
-	public function get_delete($table, array $where, $ignore = false, $php = false);
-	
-	/**
-	 * Fetches the database and returns an array of objects 
-	 * 
-	 * @return false|array
-	public function get_query($table);
-   */
+	public function get_create(string $table): string;
 
 	/**
-	 * Fetches the database and returns an array of objects 
-	 * 
-	 * @return false|array
+   * Creates an index
+   *
+   * @param string $table
+   * @param string|array $column
+   * @param bool $unique
+   * @param null $length
+   * @return bool
 	 */
-	public function get_insert($table, array $fields = [], $ignore = false, $php = false);
+	public function create_index(string $table, $column, bool $unique = false, $length = null): bool;
 	
 	/**
-	* Fetches the database and returns an array of objects 
-	* 
-	* @return false|array
-	*/
-	public function get_update($table, array $fields = [], array $where = [], $php = false);
-	
-	/**
-	* Return an array of each values of the field $field in the table $table
-	* 
-	* @return false|array
-	*/
-	public function get_column_values($table, $field, array $where = [], array $order = [], $limit = false, $start = 0, $php = false);
-	
-	/**
-	* Return an array of double values arrays: each value of the field $field in the table $table and the number of instances
-	* 
-	* @return false|array
-	*/
-	public function get_values_count($table, $field, array $where = [], $limit, $start, $php = false);
-	
-	/**
-	 * Fetches the database and returns an array of objects 
-	 * 
-	 * @return false|array
+	 * Deletes an index
+	 *
+   * @param string $table
+   * @param string $key
+   * @return bool
 	 */
-	public function create_db_index($table, $column, $unique = false, $length = null);
-	
-	/**
-	 * Fetches the database and returns an array of objects 
-	 * 
-	 * @return false|array
-	 */
-	public function delete_db_index($table, $column);
+	public function delete_index(string $table, string $key): bool;
 
   /**
    * Creates a database user
    *
-   * @param $user
-   * @param $pass
-   * @param $db
-   * @return array|false
+   * @param string $user
+   * @param string $pass
+   * @param string $db
+   * @return bool
    */
-	public function create_db_user($user, $pass, $db);
+	public function create_user(string $user, string $pass, string $db = null): bool;
 
   /**
    * Deletes a database user
    *
-   * @param $user
-   * @return array|false
+   * @param string $user
+   * @return bool
    */
-	public function delete_db_user($user);
+	public function delete_user(string $user): bool;
 
   /**
    * Returns an array of queries to recreate the user(s)
@@ -221,39 +282,40 @@ interface engines
    * @param string $host
    * @return array
    */
-  public function get_users($user='', $host='');
+  public function get_users(string $user = '', string $host = ''): ?array;
 
   /**
    * Gets the size of a database
    *
    * @param string $database
    * @param string $type
-   * @return array
+   * @return int Size in bytes
    */
-  public function db_size(string $database = '', string $type = '');
+  public function db_size(string $database = '', string $type = ''): int;
 
   /**
    * Gets the size of a table
    *
    * @param string $table
    * @param string $type
-   * @return array
+   * @return int Size in bytes
    */
-  public function table_size(string $table, string $type = '');
+  public function table_size(string $table, string $type = ''): int;
 
   /**
    * Gets the status of a table
    *
    * @param string $table
    * @param string $database
-   * @return array
+   * @return mixed
    */
   public function status(string $table = '', string $database = '');
 
   /**
-   * Returns a binary UUID
-   * @return binary
+   * Returns a UUID
+   *
+   * @return string
    */
-  public function get_uid();
+  public function get_uid(): string;
 
 }

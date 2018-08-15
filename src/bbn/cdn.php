@@ -2,18 +2,13 @@
 
 namespace bbn;
 
-/**
- * Manages the whole CDN process from analyzing the request to releasing the output
- * @package cdn
- */
+
 class cdn extends models\cls\basic
 {
 
   use cdn\common;
 
-  /**
-   *
-   */
+
   protected const head_comment = '/* This file has been created by the cdn class from BBN PHP library
  * Please visit http://www.bbn.solutions
  * To update this script, go to:
@@ -23,87 +18,97 @@ class cdn extends models\cls\basic
  */
 
 ';
+
   /**
-   * We show this phrase in the header of a non compressed (test) file
+   * @var string
    */
   protected const test_st    = 'You can remove the test parameter to the URL to get a minified version';
 
   /**
-   * We show this phrase in the header of a compressed (non test) file
+   * @var string
    */
   protected const no_test_st = 'You can add &test=1 to get an uncompressed version';
 
   /**
-   * @var null|string
+   * @var string
    */
   protected $mode;
+
   /**
    * @var array
    */
   protected $extensions = ['js', 'css'];
+
   /**
    * @var array
    */
   protected $files = [];
+
   /**
-   * @var
+   * @var $dir
    */
   protected $dir;
+
   /**
    * @var null|string
    */
   protected $cache_path = 'cache/';
+
   /**
    * @var int
    */
   protected $cache_length = 3600;
+
   /**
-   * @var
+   * @var $file_mtime
    */
   protected $file_mtime;
+
   /**
    * @var string
    */
   protected $request;
+
   /**
-   * @var
+   * @var $o
    */
   protected $o;
+
   /**
    * @var string
    */
   protected $url = '';
+
   /**
-   * @var
+   * @var $hash
    */
   protected $hash;
+
   /**
-   * @var
+   * @var $language
    */
   protected $language;
+
   /**
    * @var array
    */
   protected $cfg;
+
   /**
-   * @var
+   * @var $list
    */
   protected $list;
+
   /**
-   * @var compiler
+   * @var cdn\compiler
    */
   protected $cp;
+
   /**
    * @var string
    */
   protected $ext = '';
 
-  /**
-   * @var
-   */
-  /**
-   * @var
-   */
   public
     $alert,
     $code;
@@ -348,7 +353,7 @@ JS;
       if ( $codes ){
         $str = '';
         foreach ( $codes as $cd ){
-          $str .= "{name: '$cd[name]', script: function(){bbn.fn.info('Loading component $cd[name]... :)');$cd[js]}";
+          $str .= "{name: '$cd[name]', script: function(){try{ $cd[js] } catch(e){bbn.fn.log(e); throw new Error('Impossible to load component $cd[name]');}}";
           if ( !empty($cd['css']) ){
             $str .= ', css: '.json_encode($cd['css']);
           }

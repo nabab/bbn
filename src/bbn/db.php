@@ -13,174 +13,189 @@ namespace bbn;
  * @since Apr 4, 2011, 23:23:55 +0000
  * @category  Database
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @version 0.2r89
+ * @version 3.1
  */
 
 class db extends \PDO implements db\actions, db\api, db\engines
 {
-  use
-      db\triggers,
-      models\tts\retriever;
+  use models\tts\cache;
+  use models\tts\retriever;
 
-  const
-      E_CONTINUE = 'continue',
-    /**
-     * @todo find a way to document constants
-     */
-
-      E_DIE = 'die',
-      E_STOP_ALL = 'stop_all',
-      E_STOP = 'stop';
-
-  private
-    /**
-     * A PHPSQLParser object
-     * @var \PHPSQLParser
-     */
-      $parser,
-    /**
-     * A PHPSQLCreator object
-     * @var PHPSQLCreator
-     */
-      $creator,
-    /**
-     * A PHPFastCache object
-     */
-      $cacher,
-    /**
-     * The SQL engines supported by this class (needs the according language class)
-     * @var array
-     */
-      $accepted_languages = ['mysql', 'sqlite'],
-    /**
-     * Connection configuration
-     * @var array $cfg
-     */
-      $cfg = false,
-    /**
-     * @todo is bool or string??
-     * Unique string identifier for current connection
-     * @var bool
-     */
-      $hash,
-    /**
-     * @var mixed $cache
-     */
-      $cache = [],
-    /**
-     * If set to false, query will return a regular PDOStatement
-     * Use stop_fancy_stuff() to set it to false
-     * And use start_fancy_stuff to set it back to true
-     * @var bool $fancy
-     */
-      $fancy = 1,
-    /**
-     * @var array $debug_queries
-     */
-      $debug_queries = [],
-    /**
-     * Error state of the current connection
-     * @var bool $has_error
-     */
-      $has_error = false;
-
-  protected
-    /**
-     * @var db\languages\mysql Can be other driver
-     */
-      $language = false,
-    /**
-     * @var integer $cache_renewal
-     */
-      $cache_renewal = 3600,
-    /**
-     * @var mixed $max_queries
-     */
-      $max_queries = 50,
-    /**
-     * @var mixed $last_insert_id
-     */
-      $last_insert_id,
-    /**
-     * @var mixed $last_insert_id
-     */
-      $id_just_inserted,
-    /**
-     * @var mixed $hash_contour
-     */
-      $hash_contour = '__BBN__',
-    /**
-     * @var mixed $last_prepared
-     */
-      $last_prepared,
-    /**
-     * @var array $queries
-     */
-      $queries = [],
-    /**
-     * @var string $on_error
-     * Possible values:
-     * *    stop: the script will go on but no further database query will be executed
-     * *    die: the script will die with the error
-     * *    continue: the script and further queries will be executed
-     */
-      $on_error = self::E_STOP_ALL;
-
-  public
-    /**
-     * The quote character for table and column names
-     * @var string $qte
-     */
-      $qte,
-    /**
-     * @var string $last_error
-     */
-      $last_error = false,
-    /**
-     * @var string \$last_query
-     */
-      $last_query,
-    /**
-     * @var boolean $debug
-     */
-      $debug = false,
-    /**
-     * The ODBC engine of this connection
-     * @var string $engine
-     */
-      $engine,
-    /**
-     * The host of this connection
-     * @var string $host
-     */
-      $host,
-    /**
-     * The currently selected database
-     * @var mixed $current
-     */
-      $current,
-    /**
-     * The information that will be accessed by db\query as the current statement's options
-     * @var array $last_params 
-     */
-      $last_params = ['sequences' => false, 'values' => false];
-
-  private static
-    /**
-     * Error state of the current connection
-     * @var bool $has_error_all
-     */
-      $has_error_all = false;
   /**
-   * @var int
+   * The error configuration for continuing after an error occurred
    */
+  protected const E_CONTINUE = 'continue';
+  /**
+   * The error configuration for dying after an error occurred
+   */
+  protected const E_DIE = 'die';
+  /**
+   * The error configuration for stopping all requests on all connections after an error occurred
+   */
+  protected const E_STOP_ALL = 'stop_all';
+  /**
+   * The error configuration for stopping requests on the current connection after an error occurred
+   */
+  protected const E_STOP = 'stop';
 
-  protected static
-    /**
-     * @var string $line
-     */
-      $line = '---------------------------------------------------------------------------------';
+  /**
+   * A PHPSQLParser object
+   * @var \PHPSQLParser\PHPSQLParser
+   */
+  private $parser;
+  /**
+   * @var mixed $cache
+   */
+  private $cache = [];
+  /**
+   * If set to false, query will return a regular PDOStatement
+   * Use stop_fancy_stuff() to set it to false
+   * And use start_fancy_stuff to set it back to true
+   * @var bool $fancy
+   */
+  private $fancy = 1;
+  /**
+   * @var array $debug_queries
+   */
+  private $debug_queries = [];
+  /**
+   * Error state of the current connection
+   * @var bool $has_error
+   */
+  private $has_error = false;
+  /**
+   * An array of functions for launching triggers on actions
+   * @var mixed
+   */
+  private $triggers = [
+    'SELECT' => [
+      'before' => [],
+      'after' => []
+    ],
+    'INSERT' => [
+      'before' => [],
+      'after' => []
+    ],
+    'UPDATE' => [
+      'before' => [],
+      'after' => []
+    ],
+    'DELETE' => [
+      'before' => [],
+      'after' => []
+    ]
+  ];
+  /**
+   * @var bool
+   */
+  private $triggers_disabled = false;
 
+  /**
+   * @todo is bool or string??
+   * Unique string identifier for current connection
+   * @var string
+   */
+  protected $hash;
+  /**
+   * @var db\languages\mysql Can be other driver
+   */
+  protected $language = false;
+  /**
+   * @var integer $cache_renewal
+   */
+  protected  $cache_renewal = 3600;
+  /**
+   * @var mixed $max_queries
+   */
+  protected $max_queries = 50;
+  /**
+   * @var mixed $last_insert_id
+   */
+  protected $last_insert_id;
+  /**
+   * @var mixed $last_insert_id
+   */
+  protected $id_just_inserted;
+  /**
+   * @var mixed $hash_contour
+   */
+  protected $hash_contour = '__BBN__';
+  /**
+   * @var mixed $last_prepared
+   */
+  protected $last_prepared;
+  /**
+   * @var array $queries
+   */
+  protected $queries = [];
+  /**
+   * @var array $cfgs The configs recorded for helpers functions
+   */
+  protected $cfgs = [];
+  /**
+   * @var string $qte The quote character for table and column names.
+   */
+  protected $qte;
+  /**
+   * @var string $on_error
+   * Possible values:
+   * *    stop: the script will go on but no further database query will be executed
+   * *    die: the script will die with the error
+   * *    continue: the script and further queries will be executed
+   */
+  protected $on_error = self::E_STOP_ALL;
+  /** @var array The 'kinds' of writing statement */
+  protected static $write_kinds = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'CREATE'];
+  /** @var array The 'kinds' of structure alteration statement */
+  protected static $structure_kinds = ['DROP', 'ALTER', 'CREATE'];
+
+  /**
+   * @var string $last_error
+   */
+  public $last_error = false;
+  /**
+   * @var string \$last_query
+   */
+  public $last_query;
+  /**
+   * @var boolean $debug
+   */
+  public $debug = false;
+  /**
+   * The ODBC engine of this connection
+   * @var string $engine
+   */
+  public $engine;
+  /**
+   * The host of this connection
+   * @var string $host
+   */
+  public $host;
+  /**
+   * The currently selected database
+   * @var mixed $current
+   */
+  public $current;
+  /**
+   * The information that will be accessed by db\query as the current statement's options
+   * @var array $last_params
+   */
+  public $last_params = ['sequences' => false, 'values' => false];
+
+  /**
+   * Error state of the current connection
+   * @var bool $has_error_all
+   */
+  private static $has_error_all = false;
+
+  /**
+   * @var string $line
+   */
+  protected static $line = '---------------------------------------------------------------------------------';
+
+  /**
+   *
+   */
   private static function has_error()
   {
     self::$has_error_all = true;
@@ -192,18 +207,18 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @param $mode string 'columns','tables' or'databases'
    * @return bool|string
    */
-  private function _cache_name($item, $mode){
+  private function _db_cache_name($item, $mode){
     $r = false;
     $h = str::sanitize($this->host);
     switch ( $mode ){
       case 'columns':
-        $r = 'bbn/db/'.$this->engine.'/'.$h.'/'.str_replace('.', '/', $this->tfn($item));
+        $r = $this->engine.'/'.$h.'/'.str_replace('.', '/', $this->tfn($item));
         break;
       case 'tables':
-        $r = 'bbn/db/'.$this->engine.'/'.$h.'/'.($item ?: $this->db->current);
+        $r = $this->engine.'/'.$h.'/'.($item ?: $this->current);
         break;
       case 'databases':
-        $r = 'bbn/db/'.$this->engine.'/'.$h.'/_bbn-database';
+        $r = $this->engine.'/'.$h.'/_bbn-database';
         break;
     }
     return $r;
@@ -215,15 +230,16 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @param $item
    * @param string $mode
    * @param bool $force
-   * @return bool|mixed
+   * @return array|null
    */
-  private function _get_cache($item, $mode = 'columns', $force = false){
-    $cache_name = $this->_cache_name($item, $mode);
+  private function _get_cache($item, $mode = 'columns', $force = false): ?array
+  {
+    $cache_name = $this->_db_cache_name($item, $mode);
     if ( $force && isset($this->cache[$cache_name]) ){
-      unset($this->cache[$item]);
+      unset($this->cache[$cache_name]);
     }
     if ( !isset($this->cache[$cache_name]) ){
-      $tmp = $this->cacher->get($cache_name);
+      $tmp = $this->cache_get($cache_name);
       if ( !$tmp || $force ){
         switch ( $mode ){
           case 'columns':
@@ -231,9 +247,9 @@ class db extends \PDO implements db\actions, db\api, db\engines
             $cols = $this->language->get_columns($item);
             if ( \is_array($keys) && \is_array($cols) ){
               $tmp = [
-                  'keys' => $keys['keys'],
-                  'cols' => $keys['cols'],
-                  'fields' => $cols
+                'keys' => $keys['keys'],
+                'cols' => $keys['cols'],
+                'fields' => $cols
               ];
             }
             break;
@@ -245,138 +261,489 @@ class db extends \PDO implements db\actions, db\api, db\engines
             break;
         }
         if ( !\is_array($tmp) ){
-          die("Error in table $item or mode $mode");
+          die("Error while creating the cache for the table $item in mode $mode");
         }
         if ( $tmp ){
-          $this->cacher->set($cache_name, $tmp, $this->cache_renewal);
+          $this->cache_set($cache_name, '', $tmp, $this->cache_renewal);
         }
       }
       if ( $tmp ){
         $this->cache[$cache_name] = $tmp;
       }
     }
-    return isset($this->cache[$cache_name]) ? $this->cache[$cache_name] : false;
+    return $this->cache[$cache_name] ?? null;
   }
 
   /**
-   *
-   * @param string $type insert, insert_update, update, delete
-   * @param string $table the table name
-   * @param array | boolean or Where string for delete case
-   * @param array | boolean $arg4 Where string or ignore
-   * @return string A SQL statement or false
+   * @param array $where
+   * @param array $values
+   * @return array
    */
-  private function _statement($type, $table, array $keypairs=[], $arg4=[], $arg5=false){
-    switch ( $type ){
-      case 'insert':
-        $hash = $this->make_hash('insert', $table, serialize($keypairs), $arg4);
-        if ( isset($this->queries[$hash]) ){
-          $sql = $this->queries[$this->queries[$hash]]['statement'];
+  private function _remove_conditions_value(array $where, array &$values = []): array
+  {
+    if ( isset($where['conditions']) ){
+      foreach ( $where['conditions'] as &$f ){
+        ksort($f);
+        if ( isset($f['logic'], $f['conditions']) && \is_array($f['conditions']) ){
+          $tmp = $this->_remove_conditions_value($f, $values);
+          $f = $tmp['hashed'];
         }
-        else{
-          $sql = $this->language->get_insert($table, $keypairs, $arg4);
+        else if ( array_key_exists('value', $f) ){
+          $values[] = $f['value'];
+          unset($f['value']);
         }
-        break;
-      case 'insert_update':
-        $hash = $this->make_hash('insert_update', $table, serialize($keypairs));
-        if ( isset($this->queries[$hash]) ){
-          $sql = $this->queries[$this->queries[$hash]]['statement'];
+      }
+    }
+    return [
+      'hashed' => $where,
+      'values' => $values
+    ];
+  }
+
+  /**
+   * @param array $where
+   * @param bool $full
+   * @return array|bool
+   */
+  private function _treat_conditions(array $where, $full = true){
+    if ( !isset($where['conditions']) && !isset($where['logic']) ){
+      $where['conditions'] = $where;
+      $where['logic'] = 'AND';
+    }
+    if ( isset($where['conditions'], $where['logic']) ){
+      $res = [
+        'conditions' => [],
+        'logic' => $where['logic']
+      ];
+      foreach ( $where['conditions'] as $key => $f ){
+        if (
+          \is_array($f) &&
+          array_key_exists('logic', $f) &&
+          array_key_exists('conditions', $f) &&
+          \is_array($f['conditions'])
+        ){
+          $res['conditions'][] = $this->_treat_conditions($f, false);
         }
-        else if ( $sql = $this->language->get_insert($table, $keypairs) ){
-          $sql .= " ON DUPLICATE KEY UPDATE ";
-          foreach ( $keypairs as $c ){
-            $sql .= $this->escape($c)." = ?, ";
+        else {
+          if ( \is_string($key) ){
+            // 'id_user' => [1, 2] Will do OR
+            if ( !\is_array($f) ) {
+              if ( null === $f ){
+                $f = [
+                  'field' => $key,
+                  'operator' => 'isnull'
+                ];
+              }
+              else{
+                $f = [
+                  'field' => $key,
+                  'operator' => 'eq',
+                  'value' => $f
+                ];
+              }
+            }
+            else if ( isset($f[0]) ){
+              $tmp = [
+                'conditions' => [],
+                'logic' => 'OR'
+              ];
+              foreach ( $f as $v ){
+                if ( null === $v ){
+                  $tmp['conditions'][] = [
+                    'field' => $key,
+                    'operator' => 'isnull'
+                  ];
+                }
+                else{
+                  $tmp['conditions'][] = [
+                    'field' => $key,
+                    'operator' => 'eq',
+                    'value' => $v
+                  ];
+                }
+              }
+              $res['conditions'][] = $tmp;
+            }
           }
-          $sql = substr($sql,0,strrpos($sql,','));
+          else if ( \is_array($f) && !x::is_assoc($f) && count($f) >= 2 ){
+            $tmp = [
+              'field' => $f[0],
+              'operator' => $f[1]
+            ];
+            if ( isset($f[3]) ){
+              $tmp['exp'] = $f[3];
+            }
+            else if ( array_key_exists(2, $f) ){
+              if ( $f[2] === null ){
+                $tmp['operator'] = $f[2] === '!=' ? 'isnotnull' : 'isnull';
+              }
+              else{
+                $tmp['value'] = $f[2];
+              }
+            }
+            $f = $tmp;
+          }
+          if ( isset($f['operator'], $f['field']) ){
+            $res['conditions'][] = $f;
+          }
         }
-        break;
-      case 'update':
-        $hash = $this->make_hash('update', $table, serialize($keypairs), serialize($arg4['unique']));
-        if ( isset($this->queries[$hash]) ){
-          $sql = $this->queries[$this->queries[$hash]]['statement'];
-        }
-        else{
-          $sql = $this->language->get_update($table, $keypairs, $arg4);
-        }
-        break;
-      case 'delete':
-        $hash = $this->make_hash('delete', $table, serialize($keypairs['unique']), $arg4);
-
-        if ( isset($this->queries[$hash]) ){
-          $sql = $this->queries[$this->queries[$hash]]['statement'];
-        }
-        else{
-          $sql = $this->language->get_delete($table, $keypairs['final']);
-         // die(var_dump($sql, $hash) );
-        }
-        break;
+      }
+      if ( $full ){
+        $tmp = $this->_remove_conditions_value($res);
+        $res = [
+          'hashed' => $tmp['hashed'],
+          'values' => $tmp['values'],
+          'where' => $res
+        ];
+      }
+      return $res;
     }
-    return isset($sql, $hash) ? ['sql' => $sql, 'hash' => $hash] : false;
+    return false;
   }
 
-  public function get_fields_list($tables){
-    $res = [];
-    if ( !\is_array($tables) ){
-      $tables = [$tables];
-    }
-    foreach ( $tables as $t ){
-      if ( !($model = $this->modelize($t)) ){
-        $this->error("Impossible to find the table $t");
-        die("Impossible to find the table $t");
+  /**
+   * Adds the specs of a query to the $queries object.
+   *
+   * @param string $hash The hash of the statement.
+   * @param string $statement The SQL full statement.
+   * @param string $kind The type of statement.
+   * @param int $placeholders The number of placeholders.
+   * @param array $options The driver options.
+   */
+  private function _add_query($hash, $statement, $kind, $placeholders, $options)
+  {
+    $this->queries[$hash] = [
+      'sql' => $statement,
+      'kind' => $kind,
+      'write' => \in_array($kind, self::$write_kinds, true),
+      'structure' => \in_array($kind, self::$structure_kinds, true),
+      'placeholders' => $placeholders,
+      'options' => $options,
+      'num' => 0,
+      'exe_time' => 0,
+      'first' => microtime(true),
+      'last' => 0,
+      'prepared' => false
+    ];
+    // Removing queries from global object when there are more than max_queries
+    while ( \count($this->queries) > $this->max_queries ){
+      $max = 0;
+      $index = null;
+      foreach ( $this->queries as $k => $v ){
+        if ( \is_array($v) && ($v['last'] > $max) ){
+          $max = $v['last'];
+          $index = $k;
+        }
       }
-      foreach ( $model['fields'] as $f => $o ){
-        $res[] = $this->cfn($f, $t);
+      if ( null !== $index ){
+        unset($this->queries[$index]);
       }
     }
-    return $res;
   }
 
-  public function treat_select_arguments(){
-    $args = func_get_args();
+  /**
+   * Makes a string that will be the id of the request.
+   *
+   * @return string
+   *
+   */
+  private function _make_hash(): string
+  {
+    $args = \func_get_args();
+    if ( (\count($args) === 1) && \is_array($args[0]) ){
+      $args = $args[0];
+    }
+    $st = '';
+    foreach ( $args as $a ){
+      $st .= \is_array($a) ? serialize($a) : '--'.$a.'--';
+    }
+    return $this->hash_contour.md5($st).$this->hash_contour;
+  }
+
+  /**
+   * Launches a function before or after
+   *
+   * @param array $cfg
+   * @return array
+   */
+  private function _trigger(array $cfg): array
+  {
+    if ( $this->triggers_disabled ){
+      $cfg['run'] = 1;
+      $cfg['trig'] = 1;
+      return $cfg;
+    }
+    if ( !isset($cfg['trig']) ){
+      $cfg['trig'] = 1;
+    }
+    if ( !isset($cfg['run']) ){
+      $cfg['run'] = 1;
+    }
+    if ( !empty($cfg['tables']) && !empty($this->triggers[$cfg['kind']][$cfg['moment']]) ){
+
+      $table = $this->tfn(\is_array($cfg['tables']) ? current($cfg['tables']) : $cfg['tables']);
+      // Specific to a table
+      if ( isset($this->triggers[$cfg['kind']][$cfg['moment']][$table]) ){
+        foreach ( $this->triggers[$cfg['kind']][$cfg['moment']][$table] as $i => $f ){
+          if ( $f ){
+            if ( \is_string($f) ){
+              $cfg[$f] = $f($cfg);
+              if ( !$cfg[$f] ){
+                $cfg['run'] = false;
+                $cfg['trig'] = false;
+              }
+              else if ( \is_array($cfg[$f]) ){
+                foreach ( $cfg[$f] as $k => $v ){
+                  if ( $k === 'trig' ){
+                    if ($cfg['trig']){
+                      $cfg['trig'] = $v;
+                    }
+                  }
+                  else if ( $k === 'run' ){
+                    if ( $cfg['run'] && (!$v || ($v > $cfg['run'])) ){
+                      $cfg['run'] = $v;
+                    }
+                  }
+                  else{
+                    $cfg[$k] = $v;
+                    unset($cfg[$f][$k]);
+                  }
+                }
+              }
+            }
+            else if ( \is_callable($f) && !$f($cfg) ){
+              $cfg['run'] = false;
+              $cfg['trig'] = false;
+            }
+          }
+        }
+        //echo bbn\x::make_tree($trig);
+        //echo bbn\x::make_tree($cfg);
+      }
+    }
+    return $cfg;
+  }
+
+  /**
+   * @param array $args
+   * @param string $kind
+   * @return array
+   */
+  private function _add_kind(array $args, string $kind = 'SELECT'): ?array
+  {
+    $kind = strtoupper($kind);
+    if ( !isset($args[0]) ){
+      return null;
+    }
+    if ( !\is_array($args[0]) ) {
+      array_unshift($args, $kind);
+    }
+    else {
+      $args[0]['kind'] = $kind;
+    }
+    return $args;
+  }
+
+  /**
+   * @param array $cfg
+   */
+  private function _add_primary(array &$cfg): void
+  {
+    // Inserting a row without primary when primary is needed and no auto-increment
+    if (
+      !empty($cfg['primary']) &&
+      empty($cfg['auto_increment']) &&
+      (($idx = array_search($cfg['primary'], $cfg['fields'], true)) > -1) &&
+      (count($cfg['values']) === (count($cfg['fields']) - 1))
+    ){
+      $val = false;
+      switch ( $cfg['primary_type'] ){
+        case 'int':
+          $val = random_int(
+            ceil(10 ** ($cfg['primary_length'] > 3 ? $cfg['primary_length'] - 3 : 1) / 2),
+            ceil(10 ** ($cfg['primary_length'] > 3 ? $cfg['primary_length'] : 1) / 2)
+          );
+          break;
+        case 'binary':
+          if ( $cfg['primary_length'] === 16 ){
+            $val = $this->get_uid();
+          }
+          break;
+      }
+      if ( $val ){
+        array_splice($cfg['values'], $idx, 0, $val);
+        $this->set_last_insert_id($val);
+      }
+    }
+  }
+
+  /**
+   * @returns null|db\query|int A selection query or the number of affected rows by a writing query
+   */
+  private function _exec()
+  {
+    if (
+      $this->check() &&
+      ($cfg = $this->process_cfg(\func_get_args())) &&
+      !empty($cfg['sql'])
+    ){
+      $cfg['moment'] = 'before';
+      $cfg['trig'] = null;
+      if ( $cfg['kind'] === 'INSERT' ){
+        // Add generated primary when inserting a row without primary when primary is needed and no auto-increment
+        $this->_add_primary($cfg);
+      }
+      // Launching the trigger BEFORE execution
+      if ( $cfg = $this->_trigger($cfg) ){
+        if ( !empty($cfg['run']) ){
+          // Executing the query
+          /** @var \bbn\db\query $r */
+          $cfg['run'] = $this->query($cfg['sql'], $cfg['hash'], $cfg['values'] ?? []);
+        }
+        if ( !empty($cfg['force']) ){
+          $cfg['trig'] = 1;
+        }
+        else if ( !$cfg['run'] ){
+          $cfg['trig'] = false;
+        }
+        if ( $cfg['trig'] ){
+          $cfg['moment'] = 'after';
+          $cfg = $this->_trigger($cfg);
+        }
+        if ( !\in_array($cfg['kind'], self::$write_kinds, true) ){
+          return $cfg['run'] ?? null;
+        }
+        if ( isset($cfg['value']) ){
+          return $cfg['value'];
+        }
+        if ( isset($cfg['run']) ){
+          return $cfg['run'];
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Normalizes arguments by making it a uniform array.
+   * <ul><h3>The array will have the following indexes:</h3>
+   * <li>fields</li>
+   * <li>where</li>
+   * <li>filters</li>
+   * <li>order</li>
+   * <li>limit</li>
+   * <li>start</li>
+   * <li>join</li>
+   * <li>group_by</li>
+   * <li>having</li>
+   * <li>values</li>
+   * <li>hashed_join</li>
+   * <li>hashed_where</li>
+   * <li>hashed_having</li>
+   * <li>php</li>
+   * <li>done</li>
+   * </ul>
+   * @param $cfg
+   * @return array
+   */
+  private function _treat_arguments($cfg): array
+  {
+    while ( isset($cfg[0]) && \is_array($cfg[0]) ){
+      $cfg = $cfg[0];
+    }
+    if (
+      \is_array($cfg) &&
+      array_key_exists('tables', $cfg) &&
+      array_key_exists('treated', $cfg) &&
+      ($cfg['treated'] === true)
+    ){
+      return $cfg;
+    }
     $res = [
+      'kind' => 'SELECT',
       'fields' => [],
       'where' => [],
+      'filters' => [],
       'order' => [],
       'limit' => 0,
       'start' => 0,
       'join' => [],
-      'group' => [],
+      'group_by' => [],
       'having' => [],
-      'php' => false
+      'values' => [],
+      'hashed_join' => [],
+      'hashed_where' => [],
+      'hashed_having' => [],
+      'treated' => true
     ];
-    if ( \is_array($args[0]) && (isset($args[0]['table']) || isset($args[0]['tables'])) ){
-      if ( isset($args[0]['table']) && !isset($args[0]['tables']) ){
-        $args[0]['tables'] = $args[0]['table'];
-        unset($args[0]['table']);
+    if ( \is_array($cfg) && (isset($cfg['table']) || isset($cfg['tables'])) ){
+      if ( isset($cfg['table']) && !isset($cfg['tables']) ){
+        $cfg['tables'] = $cfg['table'];
+        unset($cfg['table']);
       }
-      $res = array_merge($res, $args[0]);
+      $res = array_merge($res, $cfg);
     }
-    else{
-      $res['tables'] = $args[0];
-      if ( isset($args[1]) ){
-        $res['fields'] = $args[1];
+    else if ( count($cfg) > 1 ){
+      $res['kind'] = strtoupper($cfg[0]);
+      $res['tables'] = $cfg[1];
+      if ( isset($cfg[2]) ){
+        $res['fields'] = $cfg[2];
       }
-      if ( isset($args[2]) ){
-        $res['where'] = $args[2];
+      if ( isset($cfg[3]) ){
+        $res['where'] = $cfg[3];
       }
-      if ( isset($args[3]) ){
-        $res['order'] = \is_string($args[3]) ? [$args[3] => 'ASC'] : $args[3];
+      if ( isset($cfg[4]) ){
+        $res['order'] = \is_string($cfg[4]) ? [$cfg[4] => 'ASC'] : $cfg[4];
       }
-      if ( isset($args[4]) ){
-        $res['limit'] = $args[4];
+      if ( isset($cfg[5]) && str::is_integer($cfg[5]) ) {
+        $res['limit'] = $cfg[5];
       }
-      if ( isset($args[5]) && \is_numeric($args[4]) ){
-        $res['start'] = $args[5];
+      if ( isset($cfg[6]) && !empty($res['limit']) ){
+        $res['start'] = $cfg[6];
       }
     }
+    $res['kind'] = strtoupper($res['kind']);
+    $res['write'] = \in_array($res['kind'], self::$write_kinds, true);
+    $res['ignore'] = $res['write'] && !empty($res['ignore']);
+    $res['count'] = !$res['write'] && !empty($res['count']);
     if ( !\is_array($res['tables']) ){
       $res['tables'] = \is_string($res['tables']) ? [$res['tables']] : [];
     }
-    if ( empty($res['tables']) ){
-      return false;
+    if ( !empty($res['tables']) ){
+      foreach ( $res['tables'] as &$t ){
+        $t = $this->tfn($t);
+      }
+      unset($t);
     }
-    if ( !\is_array($res['fields']) ){
-      $res['fields'] = \is_string($res['fields']) ? [$res['fields']] : [];
+    if ( !empty($res['fields']) ){
+      if ( \is_string($res['fields']) ){
+        $res['fields'] = [$res['fields']];
+      }
+    }
+    else if ( !empty($res['columns']) ){
+      $res['fields'] = (array)$res['columns'];
+    }
+    else if (
+      !empty($res['values']) &&
+      (($res['kind'] === 'INSERT') || ($res['kind'] === 'UPDATE'))
+    ){
+      $res['fields'] = array_keys($res['values']);
+      $res['values'] = array_values($res['values']);
+    }
+    if (
+      empty($res['values']) &&
+      !empty($res['fields']) &&
+      (($res['kind'] === 'INSERT') || ($res['kind'] === 'UPDATE')) &&
+      \is_string(array_keys($res['fields'])[0])
+    ){
+      $res['values'] = array_values($res['fields']);
+      $res['fields'] = array_keys($res['fields']);
+    }
+    if ( !\is_array($res['join']) ){
+      $res['join'] = [];
+    }
+    if ( !\is_array($res['group_by']) ){
+      $res['group_by'] = [];
     }
     if ( !\is_array($res['where']) ){
       $res['where'] = [];
@@ -384,29 +751,393 @@ class db extends \PDO implements db\actions, db\api, db\engines
     if ( !\is_array($res['order']) ){
       $res['order'] = \is_string($res['order']) ? [$res['order'] => 'ASC'] : [];
     }
-    if ( !\is_numeric($res['limit']) ){
+    if ( !str::is_integer($res['limit']) ){
       unset($res['limit']);
     }
-    if ( !\is_numeric($res['start']) ){
+    if ( !str::is_integer($res['start']) ){
       unset($res['start']);
     }
+    $tmp = $this->_treat_conditions($res['where']);
+    $res['filters'] = $tmp['where'];
+    $res['hashed_where'] = $tmp['hashed'];
+    if ( \is_array($tmp) && isset($tmp['values']) ){
+      foreach ( $tmp['values'] as $v ){
+        $res['values'][] = $v;
+      }
+    }
+    if ( !empty($res['having']) ){
+      $tmp = $this->_treat_conditions($res['having']);
+      $res['having'] = $tmp['where'];
+      $res['hashed_having'] = $tmp['hashed'];
+      foreach ( $tmp['values'] as $v ){
+        $res['values'][] = $v;
+      }
+    }
+    $hash = $this->_make_hash(
+      $res['kind'],
+      $res['ignore'],
+      $res['count'],
+      $res['tables'],
+      $res['fields'],
+      $res['hashed_join'],
+      $res['hashed_where'],
+      $res['hashed_having'],
+      $res['group_by'],
+      $res['order'],
+      $res['limit'],
+      $res['start']
+    );
+    $res['hash'] = $hash;
     return $res;
   }
 
   /**
-   * @todo Thomas fais ton taf!!
+   * @param array $args
+   * @return array
+   */
+  private function _set_limit_1(array $args): array
+  {
+    if (
+      \is_array($args[0]) &&
+      (isset($args[0]['tables']) || isset($args[0]['table']))
+    ){
+      $args[0]['limit'] = 1;
+    }
+    else {
+      if ( isset($args[4]) ){
+        $start = $args[4];
+      }
+      while ( count($args) < 6 ){
+        switch ( count($args) ){
+          case 1:
+          case 2:
+          case 3:
+            $args[] = [];
+            break;
+          case 4:
+            $args[] = 1;
+            break;
+          case 5:
+            $args[] = $start ?? 0;
+        }
+      }
+    }
+    return $args;
+  }
+
+  /**
+   * Constructor
+   *
+   * ```php
+   * $dbtest = new bbn\db(['db_user' => 'test','db_engine' => 'mysql','db_host' => 'host','db_pass' => 't6pZDwRdfp4IM']);
+   *  // (void)
+   * ```
+   * @param null|array $cfg Mandatory db_user db_engine db_host db_pass
+   */
+  public function __construct(array $cfg = [])
+  {
+    if ( \defined('BBN_DB_ENGINE') && !isset($cfg['engine']) ){
+      $cfg['engine'] = BBN_DB_ENGINE;
+    }
+    if ( isset($cfg['engine']) ){
+      $cls = '\\bbn\\db\\languages\\'.$cfg['engine'];
+      if ( !class_exists($cls) ){
+        die("Sorry the engine class $cfg[engine] does not exist");
+      }
+      self::retriever_init($this);
+      $this->cache_init();
+      $this->language = new $cls($this);
+      if ( isset($cfg['on_error']) ){
+        $this->on_error = $cfg['on_error'];
+      }
+      if ( ($cfg = $this->get_connection($cfg)) && !empty($cfg['db']) ){
+        $this->qte = $this->language->qte;
+        try{
+          parent::__construct(...$cfg['args']);
+          $this->current = $cfg['db'];
+          $this->engine = $cfg['engine'];
+          $this->host = $cfg['host'] ?? '127.0.0.1';
+          $this->hash = $this->_make_hash($cfg['args']);
+          $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+          if ( !empty($cfg['cache_length']) ){
+            $this->cache_renewal = (int)$cfg['cache_length'];
+          }
+          $this->start_fancy_stuff();
+        }
+        catch ( \PDOException $e ){
+          $this->log(["Impossible to create the connection for $cfg[engine]/$cfg[db]", $e]);
+          die(\defined('BBN_IS_DEV') && BBN_IS_DEV ? x::get_dump($e) : 'Impossible to create the database connection');
+        }
+      }
+    }
+    if ( !$this->engine ){
+      $this->log("Impossible to create the connection for $cfg[engine]/$cfg[db]");
+      die('Impossible to create the database connection');
+    }
+  }
+
+  /*****************************************************************************************************************
+  *                                                                                                                *
+  *                                                                                                                *
+  *                                                    INTERNAL METHODS                                            *
+  *                                                                                                                *
+  *                                                                                                                *
+  *****************************************************************************************************************/
+
+  /**
+   * Gets the last hash created.
+   * @todo chiedere e thomas se deve diventare private e se va bene la descrizione
+   *
+   * ```php
+   * \bbn\x::dump($db->get_hash());
+   * // (string) 3819056v431b210daf45f9b5dc2
+   * ```
+   *
+   * @return string
+   */
+  public function get_hash()
+  {
+    return $this->hash;
+  }
+
+  /**
+   * Retrieves a query array based on its hash.
+   * @param string $hash
+   * @return array|null
+   */
+  public function retrieve_query(string $hash): ?array
+  {
+    if ( isset($this->queries[$hash]) ){
+      if ( \is_string($this->queries[$hash]) ){
+        $hash = $this->queries[$hash];
+      }
+      return $this->queries[$hash];
+    }
+    return null;
+  }
+
+  /**
+   * Retrieves a configuration array based on its hash.
+   * @param string $hash
+   * @return array|null
+   */
+  public function retrieve_cfg(string $hash): ?array
+  {
+    return $this->cfgs[$hash] ?? null;
+  }
+
+  /**
+   * Retrieve an array of specific filters among the existing ones.
+   *
+   * @param array $cfg
+   * @param $field
+   * @param null $operator
+   * @return array|null
+   */
+  public function filter_filters(array $cfg, $field, $operator = null): ?array
+  {
+    if ( isset($cfg['filters']) ){
+      $f = function($cond, &$res = []) use (&$f, $field, $operator){
+        foreach ( $cond as $c ){
+          if ( isset($c['conditions']) ){
+            $f($c['conditions'], $res);
+          }
+          else if ( ($c['field'] === $field) && (!$operator || ($operator === $c['operator'])) ){
+            $res[] = $c;
+          }
+        }
+        return $res;
+      };
+      return isset($cfg['filters']['conditions']) ? $f($cfg['filters']['conditions']) : [];
+    }
+    return null;
+  }
+
+  /**
+   * @param array $cfg
+   * @param bool $as_new
+   * @return array
+   */
+  public function reprocess_cfg(array $cfg, $as_new = false): array
+  {
+    if ( isset($cfg['bbn_db_processed'], $cfg['kind']) ){
+      unset($cfg['bbn_db_processed']);
+      if ( $as_new ){
+        unset($cfg['hash']);
+        $cfg['treated'] = false;
+      }
+      if ( !$cfg['write'] ){
+        $cfg['values'] = [];
+      }
+      return $this->process_cfg($cfg);
+    }
+    return $cfg;
+  }
+
+  /**
+   *
+   * @param array $args
+   * @return array|null
+   */
+  public function process_cfg(array $args): ?array
+  {
+    // Avoid confusion when
+    while ( \is_array($args) && isset($args[0]) && \is_array($args[0]) ){
+      $args = $args[0];
+    }
+    if ( \is_array($args) && isset($args['bbn_db_processed']) ){
+      return $args;
+    }
+    if ( empty($args['bbn_db_treated']) ){
+      $args = $this->_treat_arguments($args);
+    }
+    if ( isset($args['hash']) ){
+      if ( isset($this->cfgs[$args['hash']]) ){
+        return array_merge($this->cfgs[$args['hash']], ['values' => $args['values'] ?? []]);
+      }
+      /** @var array $tables_full  Each of the tables' full name. */
+      $tables_full = [];
+      $res = array_merge($args, [
+        'tables' => [],
+        'bbn_db_processed' => true,
+        'available_fields' => [],
+        'generate_id' => false
+      ]);
+      $models = [];
+
+      foreach ( $args['tables'] as $key => $tab ){
+        $tfn = $this->tfn($tab);
+
+        // 2 tables in the same statement can't have the same idx
+        $idx = \is_string($key) ? $key : $tfn;
+        // Error if they do
+        if ( isset($tables_full[$idx]) ){
+          $this->error('You cannot use twice the same table with the same alias'.PHP_EOL.x::get_dump($args['tables']));
+          return null;
+        }
+        $tables_full[$idx] = $tfn;
+        $res['tables'][$idx] = $tfn;
+        if ( !isset($models[$tfn]) && ($model = $this->modelize($tfn)) ){
+          $models[$tfn] = $model;
+        }
+      }
+      if (
+        (\count($res['tables']) === 1) &&
+        ($tfn = array_values($res['tables'])[0]) &&
+        isset($models[$tfn]['keys']['PRIMARY']) &&
+        (\count($models[$tfn]['keys']['PRIMARY']['columns']) === 1) &&
+        ($res['primary'] = $models[$tfn]['keys']['PRIMARY']['columns'][0])
+      ){
+        $p = $models[$tfn]['fields'][$res['primary']];
+        $res['auto_increment'] = isset($p['extra']) && ($p['extra'] === 'auto_increment');
+        $res['primary_length'] = $p['maxlength'];
+        $res['primary_type'] = $p['type'];
+        if (
+          ($res['kind'] === 'INSERT') &&
+          !$res['auto_increment'] &&
+          !\in_array($this->csn($res['primary']), $res['fields'], true)
+        ){
+          $res['generate_id'] = true;
+          $res['fields'][] = $res['primary'];
+        }
+      }
+      foreach ( $args['join'] as $key => $join ){
+        if ( !empty($join['table']) && !empty($join['on']) ){
+          $tfn = $this->tfn($join['table']);
+          if ( !isset($models[$tfn]) && ($model = $this->modelize($tfn)) ){
+            $models[$tfn] = $model;
+          }
+          //x::hdump($tfn, $model);
+          $idx = $join['alias'] ?? $tfn;
+          $tables_full[$idx] = $tfn;
+        }
+        else{
+          $this->error('Error! The join array must have on and table defined'.PHP_EOL.x::get_dump($join));
+        }
+      }
+      foreach ( $tables_full as $idx => $tfn ){
+        foreach ( $models[$tfn]['fields'] as $col => $cfg ){
+          $res['available_fields'][$this->cfn($col, $idx)] = $idx;
+          $csn = $this->csn($col);
+          if ( isset($res['available_fields'][$csn]) ){
+            $res['available_fields'][$csn] = false;
+          }
+          else{
+            $res['available_fields'][$csn] = $idx;
+          }
+        }
+      }
+      foreach ( $res['fields'] as $idx => &$col ){
+        if ( strpos($col, '(') ){
+          $res['available_fields'][$col] = '';
+        }
+        if ( \is_string($idx) ){
+          if ( !isset($res['available_fields'][$col]) ){
+            $this->error("Impossible to find the column $col.");
+            return null;
+          }
+          $res['available_fields'][$idx] = $res['available_fields'][$col];
+        }
+      }
+      unset($col);
+      $res['models'] = $models;
+      $res['tables_full'] = $tables_full;
+      switch ( $res['kind'] ){
+        case 'SELECT':
+          if ( $res['select_st'] = $this->language->get_select($res) ){
+            $res['sql'] = $res['select_st'];
+          }
+          break;
+
+        case 'INSERT':
+          if ( $res['insert_st'] = $this->language->get_insert($res) ){
+            $res['sql'] = $res['insert_st'];
+          }
+          //var_dump($res);
+          break;
+        case 'UPDATE':
+          if ( $res['update_st'] = $this->get_update($res) ){
+            $res['sql'] = $res['update_st'];
+          }
+          break;
+        case 'DELETE':
+          if ( $res['delete_st'] = $this->get_delete($res) ){
+            $res['sql'] = $res['delete_st'];
+          }
+          break;
+      }
+
+      $res['join_st'] = $this->language->get_join($res);
+      $res['where_st'] = $this->language->get_where($res);
+      $res['group_st'] = $this->language->get_group_by($res);
+      $res['order_st'] = $this->language->get_order($res);
+      $res['limit_st'] = $this->language->get_limit($res);
+
+      if ( !empty($res['sql']) ){
+        $res['sql'] .= $res['join_st'].$res['where_st'].$res['group_st'].$res['order_st'].$res['limit_st'];
+        $res['statement_hash'] = $this->_make_hash($res['sql']);
+        $this->cfgs[$res['hash']] = $res;
+      }
+      return $res;
+    }
+    $this->error('Impossible to process the config (no hash)'.PHP_EOL.print_r($args, true));
+    return null;
+  }
+
+  /**
+   * Set an error and acts appropriately based oon the error mode
    *
    * @param $e
    * @return void
    */
-  public function error($e)
+  public function error($e): void
   {
     $this->has_error = true;
     self::has_error();
     $msg = [
-        self::$line,
-        'Error in the page!',
-        self::$line
+      self::$line,
+      'Error in the page!',
+      self::$line
     ];
     $b = debug_backtrace();
     foreach ( $b as $c ){
@@ -421,7 +1152,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
     if ( \is_string($e) ){
       $msg[] = $e;
     }
-    else if ( method_exists($e, "getMessage") ){
+    else if ( method_exists($e, 'getMessage') ){
       $msg[] = $e->getMessage();
     }
     $this->last_error = end($msg);
@@ -450,76 +1181,302 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * ```
    * @return bool
    */
-  public function check()
+  public function check(): bool
   {
-    if ( isset($this->current) ){
+    if ( $this->current !== null ){
+      // if $on_error is set to E_CONTINUE returns true
       if ( $this->on_error === self::E_CONTINUE ){
-        return 1;
+        return true;
       }
+      // If any connection has an error with mode E_STOP_ALL
       if ( self::$has_error_all && ($this->on_error !== self::E_STOP_ALL) ){
         return false;
       }
+      // If this connection has an error with mode E_STOP
       if ( $this->has_error && ($this->on_error !== self::E_STOP) ){
         return false;
       }
-      return 1;
+      return true;
     }
     return false;
   }
+
   /**
-   * rructor
-   * @todo Thomas fais ton taf!!
+   * Writes in data/logs/db.log.
    *
    * ```php
-   * $dbtest = new bbn\db(['db_user' => 'test','db_engine' => 'mysql','db_host' => 'host','db_pass' => 't6pZDwRdfp4IM']);
-   *  // (void)
+   * $db->$db->log('test');
    * ```
-   * @param array $cfg Mandatory db_user db_engine db_host db_pass
+   * @param mixed $st
+   * @return db
    */
-  public function __construct($cfg=[])
+  public function log($st): self
   {
-    if ( !isset($cfg['engine']) && \defined('BBN_DB_ENGINE') ){
-      $cfg['engine'] = BBN_DB_ENGINE;
+    $args = \func_get_args();
+    foreach ( $args as $a ){
+      x::log($a, 'db');
     }
-    if ( isset($cfg['engine']) ){
-      $cls = '\bbn\\db\\languages\\'.$cfg['engine'];
-      if ( !class_exists($cls) ){
-        die("Sorry the engine class $cfg[engine] does not exist");
-      }
-      self::retriever_init($this);
-      $this->language = new $cls($this);
-      if ( isset($cfg['on_error']) ){
-        $this->on_error = $cfg['on_error'];
-      }
-      $this->cacher = cache::get_engine();
-      if ( $cfg = $this->language->get_connection($cfg) ){
-        $this->qte = $this->language->qte;
-        try{
-          \call_user_func_array('parent::__construct', $cfg['args']);
-          $this->current = $cfg['db'];
-          $this->engine = $cfg['engine'];
-          $this->host = isset($cfg['host']) ? $cfg['host'] : '127.0.0.1';
-          $this->hash = $this->make_hash($cfg['args']);
-          $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-          if ( !empty($cfg['cache_length']) ){
-            $this->cache_renewal = (int)$cfg['cache_length'];
-          }
-          $this->confirm_connection();
-          $this->start_fancy_stuff();
-        }
-        catch ( \PDOException $e ){
-          x::log(["Impossible to create the connection for ".$cfg['engine']."/".$cfg['db'], $e], 'db');
-          die(\defined('bbn_IS_DEV') && BBN_IS_DEV ? var_dump($e, true) : 'Impossible to create the database connection');
-        }
-      }
-    }
+    return $this;
   }
 
-  public function confirm_connection()
+  /**
+   * Sets the error mode.
+   *
+   * ```php
+   * $db->set_error_mode('continue'|'die'|'stop_all|'stop');
+   * // (void)
+   * ```
+   *
+   * @param string $mode The error mode: "continue", "die", "stop", "stop_all".
+   * @return db
+   */
+  public function set_error_mode($mode): self
   {
-    if ( $this->language ){
-      return $this->language->confirm_connection();
+    $this->on_error = $mode;
+    return $this;
+  }
+
+  /**
+   * Gets the error mode.
+   *
+   * ```php
+   * bbn\x::dump($db->get_error_mode());
+   * // (string) stop_all
+   * ```
+   * @return string
+   */
+  public function get_error_mode(): string 
+  {
+    return $this->on_error;
+  }
+
+  /**
+   * Deletes a specific item from the cache.
+   *
+   * ```php
+   * bbn\x::dump($db->clear_cache('db_example','tables'));
+   * // (db)
+   * ```
+   *
+   * @param string $item 'db_name' or 'table_name'
+   * @param string $mode 'columns','tables' or'databases'
+   * @return self
+   */
+  public function clear_cache($item, $mode): self
+  {
+    $cache_name = $this->_cache_name($item, $mode);
+    if ( $this->cache_has($cache_name) ){
+      $this->cache_delete($cache_name);
     }
+    return $this;
+  }
+
+  /**
+   * Clears the cache.
+   *
+   * ```php
+   * bbn\x::dump($db->clear_all_cache());
+   * // (db)
+   * ```
+   *
+   * @return self
+   */
+  public function clear_all_cache(): self
+  {
+    $this->cache_delete_all();
+    return $this;
+  }
+
+  /**
+   * Stops fancy stuff.
+   *
+   * ```php
+   *  $db->stop_fancy_stuff();
+   * // (void)
+   * ```
+   *
+   * @return db
+   */
+  public function stop_fancy_stuff(): self
+  {
+    $this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [\PDOStatement::class]);
+    $this->fancy = false;
+    return $this;
+  }
+
+  /**
+   * Starts fancy stuff.
+   *
+   * ```php
+   * $db->start_fancy_stuff();
+   * // (void)
+   * ```
+   * @return db
+   */
+  public function start_fancy_stuff(): self
+  {
+    $this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [db\query::class, [$this]]);
+    $this->fancy = 1;
+    return $this;
+  }
+
+  /**
+   * Clear.
+   *
+   * ```php
+   * $db->clear()
+   * // (void)
+   * ```
+   *
+   * @return db
+   */
+  public function clear(): self
+  {
+    $this->queries = [];
+    return $this;
+  }
+
+  /**
+   * Return an object with all the properties of the statement and where it is carried out.
+   *
+   * ```php
+   * \bbn\x::dump($db->add_statement('SELECT name FROM table_users'));
+   * // (db)
+   * ```
+   *
+   * @param string $statement
+   * @return db
+   */
+  public function add_statement($statement): self
+  {
+    $this->last_query = $statement;
+    if ( $this->debug ){
+      //$this->log($statement);
+      $this->debug_queries[] = $statement;
+    }
+    return $this;
+  }
+
+  /*****************************************************************************************************************
+  *                                                                                                                *
+  *                                                                                                                *
+  *                                                      TRIGGERS                                                  *
+  *                                                                                                                *
+  *                                                                                                                *
+  *****************************************************************************************************************/
+
+  /**
+   * Enable the triggers' functions
+   *
+   * @return db
+   */
+  public function enable_trigger(): self
+  {
+    $this->triggers_disabled = false;
+    return $this;
+  }
+
+  /**
+   * Disable the triggers' functions
+   *
+   * @return db
+   */
+  public function disable_trigger(): self
+  {
+    $this->triggers_disabled = true;
+    return $this;
+  }
+
+  /**
+   * Apply a function each time the methods $kind are used
+   *
+   * @param callable $function
+   * @param array|string $kind select|insert|update|delete
+   * @param array|string $moment before|after
+   * @param null|string|array $tables database's table(s) name(s)
+   * @return db
+   */
+  public function set_trigger(callable $function, $kind = null, $moment = null, $tables = '*' ): self
+  {
+    $kinds = ['SELECT', 'INSERT', 'UPDATE', 'DELETE'];
+    $moments = ['before', 'after'];
+    if ( empty($kind) ){
+      $kind = $kinds;
+    }
+    else if ( !\is_array($kind) ){
+      $kind = (array)strtoupper($kind);
+    }
+    else{
+      $kind = array_map('strtoupper', $kind);
+    }
+    if ( empty($moment) ){
+      $moment = $moments;
+    }
+    else {
+      $moment = !\is_array($moment) ? (array)strtolower($moment) : array_map('strtolower', $moment);
+    }
+    foreach ( $kind as $k ){
+      if ( \in_array($k, $kinds, true) ){
+        foreach ( $moment as $m ){
+          if ( array_key_exists($m, $this->triggers[$k]) && \in_array($m, $moments, true) ){
+            if ( $tables === '*' ){
+              $tables = $this->get_tables();
+            }
+            else if ( str::check_name($tables) ){
+              $tables = [$tables];
+            }
+            if ( \is_array($tables) ){
+              foreach ( $tables as $table ){
+                $t = $this->tfn($table);
+                if ( !isset($this->triggers[$k][$m][$t]) ){
+                  $this->triggers[$k][$m][$t] = [];
+                }
+                $this->triggers[$k][$m][$t][] = $function;
+              }
+            }
+          }
+        }
+      }
+    }
+    return $this;
+  }
+
+  /**
+   * @return array
+   */
+  public function get_triggers(): array
+  {
+    return $this->triggers;
+  }
+
+  /*****************************************************************************************************************
+  *                                                                                                                *
+  *                                                                                                                *
+  *                                                   STRUCTURE HELPERS                                            *
+  *                                                                                                                *
+  *                                                                                                                *
+  *****************************************************************************************************************/
+
+  /**
+   * @param $tables
+   * @return array
+   */
+  public function get_fields_list($tables): array
+  {
+    $res = [];
+    if ( !\is_array($tables) ){
+      $tables = [$tables];
+    }
+    foreach ( $tables as $t ){
+      if ( !($model = $this->modelize($t)) ){
+        $this->error('Impossible to find the table '.$t);
+        die('Impossible to find the table '.$t);
+      }
+      foreach ( $model['fields'] as $f => $o ){
+        $res[] = $this->cfn($f, $t);
+      }
+    }
+    return $res;
   }
 
   /**
@@ -535,7 +1492,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @param string $db The database name if different from the current one
    * @return array with tables and fields related to the searched foreign key
    */
-  public function get_foreign_keys(string $col, string $table, string $db = null){
+  public function get_foreign_keys(string $col, string $table, string $db = null): array
+  {
     if ( !$db ){
       $db = $this->current;
     }
@@ -544,15 +1502,15 @@ class db extends \PDO implements db\actions, db\api, db\engines
     foreach ( $model as $tn => $m ){
       foreach ( $m['keys'] as $k => $t ){
         if ( ($t['ref_table'] === $table) &&
-            ($t['ref_column'] === $col) &&
-            ($t['ref_db'] === $db) &&
-            (\count($t['columns']) === 1)
+          ($t['ref_column'] === $col) &&
+          ($t['ref_db'] === $db) &&
+          (\count($t['columns']) === 1)
         ){
           if ( !isset($res[$tn]) ){
             $res[$tn] = [$t['columns'][0]];
           }
           else{
-            array_push($res[$tn], $t['columns'][0]);
+            $res[$tn][] = $t['columns'][0];
           }
         }
       }
@@ -561,150 +1519,266 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Return the log in data/logs/db.log.
+   * Return true if in the table there are fields with auto-increment.
+   * Working only on mysql.
    *
    * ```php
-   * $db->$db->log('test');
-   * ```
-   * @param string $st
-   */
-
-  public function log($st){
-    $args = \func_get_args();
-    foreach ( $args as $a ){
-      x::log($a, 'db');
-    }
-  }
-
-  /**
-   * Sets the error mode.
-   * @todo return data
-   *
-   * ```php
-   * $db->set_error_mode('continue'|'die'|'stop_all|'stop');
-   * // (void)
+   * \bbn\x::dump($db->has_id_increment('table_users'));
+   * // (bool) 1
    * ```
    *
-   * @param string $mode The error mode: "continue", "die", "stop", "stop_all".
+   * @param string $table The table's name
+   * @return bool
    */
-  public function set_error_mode($mode){
-    $this->on_error = $mode;
-  }
-
-  /**
-   * Gets the error mode.
-   *
-   * ```php
-   * bbn\x::dump($db->get_error_mode());
-   * // (string) stop_all
-   * ```
-   * @return string
-   */
-  public function get_error_mode(){
-    return $this->on_error;
-  }
-
-  /**
-   * Deletes a specific item from the cache.
-   *
-   * ```php
-   * bbn\x::dump($db->clear_cache('db_example','tables'));
-   * // (db)
-   * ```
-   *
-   * @param string $item 'db_name' or 'table_name'
-   * @param string $mode 'columns','tables' or'databases'
-   * @return db
-   */
-  public function clear_cache($item, $mode){
-    $cache_name = $this->_cache_name($item, $mode);
-    if ( $this->cacher->has($cache_name) ){
-      $this->cacher->delete($cache_name);
-    }
-    return $this;
-  }
-
-  /**
-   * Clears the cache.
-   *
-   * @todo clear_all_cache() with $this->language->get_databases etc...
-   *
-   * ```php
-   * bbn\x::dump($db->clear_all_cache());
-   * // (db)
-   * ```
-   *
-   * @return db
-   */
-  public function clear_all_cache(){
-    $this->cacher->delete_all('bbn/db/'.$this->engine);
-    return $this;
-  }
-
-  /**
-   * Stops fancy stuff.
-   *
-   * @todo return data --errore 500
-   *
-   * ```php
-   *  $db->stop_fancy_stuff();
-   * // (void)
-   * ```
-   *
-   * @return void
-   */
-  public function stop_fancy_stuff(){
-    $this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, ['\PDOStatement']);
-    $this->fancy = false;
-  }
-
-  /**
-   * Starts fancy stuff.
-   *
-   * @todo return data -errore 500
-   *
-   * ```php
-   * $db->start_fancy_stuff();
-   * // (void)
-   * ```
-   * @return void
-   */
-  public function start_fancy_stuff(){
-    $this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, ['\bbn\\db\\query',[$this]]);
-    $this->fancy = 1;
-  }
-
-  /**
-   * Clear.
-   *
-   * @todo return data
-   *
-   * ```php
-   * $db->clear()
-   * // (void)
-   * ```
-   *
-   * @return void
-   */
-  public function clear()
+  public function has_id_increment($table): bool
   {
-    $this->queries = [];
+    return ($model = $this->modelize($table)) &&
+      isset($model['keys']['PRIMARY']) &&
+      (\count($model['keys']['PRIMARY']['columns']) === 1) &&
+      ($model['fields'][$model['keys']['PRIMARY']['columns'][0]]['extra'] === 'auto_increment');
   }
 
   /**
-   * Escapes names with the appropriate quotes (db, tables, columns, keys...)
+   * Return the table's structure as an indexed array.
    *
    * ```php
-   * bbn\x::dump($db->escape("table_users"));
-   * // (string) `table_users`
+   * \bbn\x::dump($db->modelize("table_users"));
+   * // (array) [keys] => Array ( [PRIMARY] => Array ( [columns] => Array ( [0] => userid [1] => userdataid ) [ref_db] => [ref_table] => [ref_column] => [unique] => 1 )     [table_users_userId_userdataId_info] => Array ( [columns] => Array ( [0] => userid [1] => userdataid [2] => info ) [ref_db] => [ref_table] => [ref_column] =>     [unique] => 0 ) ) [cols] => Array ( [userid] => Array ( [0] => PRIMARY [1] => table_users_userId_userdataId_info ) [userdataid] => Array ( [0] => PRIMARY [1] => table_users_userId_userdataId_info ) [info] => Array ( [0] => table_users_userId_userdataId_info ) ) [fields] => Array ( [userid] => Array ( [position] => 1 [null] => 0 [key] => PRI [default] => [extra] => [signed] => 1 [maxlength] => 11 [type] => int ) [userdataid] => Array ( [position] => 2 [null] => 0 [key] => PRI [default] => [extra] => [signed] => 1 [maxlength] => 11 [type] => int ) [info] => Array ( [position] => 3 [null] => 1 [key] => [default] => NULL [extra] => [signed] => 0 [maxlength] => 200 [type] => varchar ) )
    * ```
    *
-   * @param string $item The name to escape.
-   * @return string
+   * @param null|array|string $table The table's name
+   * @param bool $force If set to true will force the modelization to reperform even if the cache exists
+   * @return null|array
    */
-  public function escape($item){
-    return $this->language->escape($item);
+  public function modelize($table = null, bool $force = false): ?array
+  {
+    $r = [];
+    $tables = false;
+    if ( empty($table) || $table === '*' ){
+      $tables = $this->get_tables($this->current);
+    }
+    else if ( \is_string($table) ){
+      $tables = [$table];
+    }
+    else if ( \is_array($table) ){
+      $tables = $table;
+    }
+    if ( \is_array($tables) ){
+      foreach ( $tables as $t ){
+        $full = $this->tfn($t);
+        $r[$full] = $this->_get_cache($full, 'columns', $force);
+      }
+      if ( \count($r) === 1 ){
+        return end($r);
+      }
+      return $r;
+    }
+    return null;
   }
+
+  /**
+   * @param string $table
+   * @param bool $force
+   * @return null|array
+   */
+  public function fmodelize($table = '', $force = false): ?array
+  {
+    if ( $res = $this->modelize(...\func_get_args()) ){
+      foreach ( $res['fields'] as $n => $f ){
+        $res['fields'][$n]['name'] = $n;
+        $res['fields'][$n]['keys'] = [];
+        if ( isset($res['cols'][$n]) ){
+          foreach ( $res['cols'][$n] as $key ){
+            $res['fields'][$n]['keys'][$key] = $res['keys'][$key];
+          }
+        }
+      }
+      return $res['fields'];
+    }
+    return null;
+  }
+
+  /**
+   * find_references
+   *
+   * @param $column
+   * @param string $db
+   * @return array|bool
+   *
+   */
+  public function find_references($column, $db = ''): array
+  {
+    $changed = false;
+    if ( $db && ($db !== $this->current) ){
+      $changed = $this->current;
+      $this->change($db);
+    }
+    $column = $this->cfn($column);
+    $bits = explode('.', $column);
+    if ( \count($bits) === 2 ){
+      array_unshift($bits, $this->current);
+    }
+    if ( \count($bits) !== 3 ){
+
+      return false;
+    }
+    $refs = [];
+    $schema = $this->modelize();
+    $test = function($key) use($bits){
+      return ($key['ref_db'] === $bits[0]) && ($key['ref_table'] === $bits[1]) && ($key['ref_column'] === $bits[2]);
+    };
+    foreach ( $schema as $table => $cfg ){
+      foreach ( $cfg['keys'] as $k ){
+        if ( $test($k) ){
+          $refs[] = $table.'.'.$k['columns'][0];
+        }
+      }
+    }
+    if ( $changed ){
+      $this->change($changed);
+    }
+    return $refs;
+  }
+
+  /**
+   * find_relations
+   *
+   * @param $column
+   * @param string $db
+   * @return array|bool
+   */
+  public function find_relations($column, $db = ''): array
+  {
+    $changed = false;
+    if ( $db && ($db !== $this->current) ){
+      $changed = $this->current;
+      $this->change($db);
+    }
+    $column = $this->cfn($column);
+    $bits = explode('.', $column);
+    if ( \count($bits) === 2 ){
+      array_unshift($bits, $this->current);
+    }
+    if ( \count($bits) !== 3 ){
+
+      return false;
+    }
+    $table = $bits[1];
+    $refs = [];
+    $schema = $this->modelize();
+    $test = function($key) use($bits){
+      return ($key['ref_db'] === $bits[0]) && ($key['ref_table'] === $bits[1]) && ($key['ref_column'] === $bits[2]);
+    };
+    foreach ( $schema as $tf => $cfg ){
+      $t = $this->tsn($tf);
+      if ( $t !== $table ){
+        foreach ( $cfg['keys'] as $k ){
+          if ( $test($k) ){
+            foreach ( $cfg['keys'] as $k2 ){
+              // Is not the same table
+              if ( !$test($k2) &&
+                // Has a reference
+                !empty($k2['ref_column']) &&
+                // and refers to a single column
+                (\count($k['columns']) === 1) &&
+                // A unique reference
+                (\count($k2['columns']) === 1) &&
+                // To a table with a primary
+                isset($schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']]) &&
+                // which is a sole column
+                (\count($schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']]) === 1) &&
+                // We retrieve the key name
+                ($key_name = $schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']][0]) &&
+                // which is unique
+                !empty($schema[$this->tfn($k2['ref_table'])]['keys'][$key_name]['unique'])
+              ){
+                if ( !isset($refs[$t]) ){
+                  $refs[$t] = ['column' => $k['columns'][0], 'refs' => []];
+                }
+                $refs[$t]['refs'][$k2['columns'][0]] = $k2['ref_table'].'.'.$k2['ref_column'];
+              }
+            }
+          }
+        }
+      }
+    }
+    if ( $changed ){
+      $this->change($changed);
+    }
+    return $refs;
+  }
+
+  /**
+   * Return primary keys of a table as a numeric array.
+   *
+   * ```php
+   * \bbn\x::dump($db-> get_primary('table_users'));
+   * // (array) ["id"]
+   * ```
+   *
+   * @param string $table The table's name
+   * @return array
+   */
+  public function get_primary($table): array
+  {
+    if ( ($keys = $this->get_keys($table)) && isset($keys['keys']['PRIMARY']) ){
+      return $keys['keys']['PRIMARY']['columns'];
+    }
+    return [];
+  }
+
+  /**
+   * Return the unique primary key of the given table.
+   *
+   * ```php
+   * \bbn\x::dump($db->get_unique_primary('table_users'));
+   * // (string) id
+   * ```
+   *
+   * @param string $table The table's name
+   * @return null|string
+   */
+  public function get_unique_primary($table): ?string
+  {
+    if ( ($keys = $this->get_keys($table)) &&
+      isset($keys['keys']['PRIMARY']) &&
+      (\count($keys['keys']['PRIMARY']['columns']) === 1) ){
+      return $keys['keys']['PRIMARY']['columns'][0];
+    }
+    return null;
+  }
+
+  /**
+   * Return the unique keys of a table as a numeric array.
+   *
+   * ```php
+   * \bbn\x::dump($db->get_unique_keys('table_users'));
+   * // (array) ["userid", "userdataid"]
+   * ```
+   *
+   * @param string $table The table's name
+   * @return array
+   */
+  public function get_unique_keys($table): array
+  {
+    $fields = [[]];
+    if ( $ks = $this->get_keys($table) ){
+      foreach ( $ks['keys'] as $k ){
+        if ( $k['unique'] ){
+          $fields[] = $k['columns'];
+        }
+      }
+    }
+    return array_merge(...$fields);
+  }
+
+  /*****************************************************************************************************************
+  *                                                                                                                *
+  *                                                                                                                *
+  *                                                      UTILITIES                                                 *
+  *                                                                                                                *
+  *                                                                                                                *
+  *****************************************************************************************************************/
 
   /**
    * Return a string with quotes and percent escaped.
@@ -716,16 +1790,14 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *
    * @param string $value The string to escape.
    * @param string $esc
-   * @return mixed
+   * @return string
    *
    */
-  public function escape_value($value, $esc = "'"){
-    if ( \is_string($value) ){
-      return str_replace('%', '\\%', $esc === '"' ?
-          str::escape_dquotes($value) :
-          str::escape_squotes($value));
-    }
-    return $value;
+  public function escape_value(string $value, $esc = "'"): string 
+  {
+    return str_replace('%', '\\%', $esc === '"' ?
+      str::escape_dquotes($value) :
+      str::escape_squotes($value));
   }
 
   /**
@@ -736,10 +1808,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * bbn\x::dump($db->set_last_insert_id());
    * // (db)
    * ```
-   * @param int $id The last inserted id
-   * @return db
+   * @param mixed $id The last inserted id
+   * @return self
    */
-  public function set_last_insert_id($id=''){
+  public function set_last_insert_id($id=''): self
+  {
     if ( $id === '' ){
       if ( $this->id_just_inserted ){
         $id = $this->id_just_inserted;
@@ -760,273 +1833,30 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * Return table's full name.
-   *
-   * ```php
-   * bbn\x::dump($db->table_full_name("table_users"));
-   * // (String) db_example.table_users
-   * bbn\x::dump($db->table_full_name("table_users", true));
-   * // (String) `db_example`.`table_users`
-   * ```
-   *
-   * @param string $table The table's name (escaped or not).
-   * @param bool $escaped If set to true the returned string will be escaped.
-   * @return string | false
-   */
-  public function table_full_name($table, $escaped=false){
-    return $this->language->table_full_name($table, $escaped);
-  }
-
-  /**
-   * Return table's full name.
-   * (similar to {@link table_full_name()})
-   *
-   * ```php
-   * \bbn\x::dump($db->tfn("table_users"));
-   * // (String) db_example.table_users
-   * \bbn\x::dump($db->tfn("table_users", true));
-   * // (String) `db_example`.`table_users`
-   * ```
-   *
-   * @param string $table The table's name
-   * @param bool $escaped If set to true the returned string will be escaped
-   * @return string | false
-   */
-
-
-  public function tfn($table, $escaped=false){
-    return $this->table_full_name($table, $escaped);
-  }
-
-  /**
-   * Return table's simple name.
-   *
-   * ```php
-   * \bbn\x::dump($db->table_simple_name("example_db.table_users"));
-   * // (string) table_users
-   * \bbn\x::dump($db->table_simple_name("example.table_users", true));
-   * // (string) `table_users`
-   * ```
-   *
-   * @param string $table The table's name (escaped or not)
-   * @param bool $escaped If set to true the returned string will be escaped
-   * @return string | false
-   */
-  public function table_simple_name($table, $escaped=false){
-    return $this->language->table_simple_name($table, $escaped);
-  }
-
-  /**
-   * Return table's simple name.
-   * (similar to {@link table_simple_name()})
-   *
-   * ```php
-   * \bbn\x::dump($db->tsn("work_db.table_users"));
-   * // (string) table_users
-   * \bbn\x::dump($db->tsn("work_db.table_users", true));
-   * // (string) `table_users`
-   * ```
-   *
-   * @param $table The table's name
-   * @param bool $escaped If set to true the returned string will be escaped.
-   * @return false | string
-   */
-  public function tsn($table, $escaped=false){
-    return $this->table_simple_name($table, $escaped);
-  }
-
-  /**
-   * Return column's full name.
-   *
-   * ```php
-   * \bbn\x::dump($db->col_full_name("name", "table_users"));
-   * // (string)  table_users.name
-   * \bbn\x::dump($db->col_full_name("name", "table_users", true));
-   * // (string) \`table_users\`.\`name\`
-   * ```
-   *
-   * @param string $col The column's name (escaped or not)
-   * @param string $table The table's name (escaped or not)
-   * @param bool $escaped If set to true the returned string will be escaped
-   * @return string | false
-   */
-  public function col_full_name($col, $table='', $escaped=false){
-    return $this->language->col_full_name($col, $table, $escaped);
-  }
-
-  /**
-   * Return column's full name.
-   * (similar to {@link col_full_name()})
-   *
-   * ```php
-   * \bbn\x::dump($db->cfn("name", "table_users"));
-   * // (string)  table_users.name
-   * \bbn\x::dump($db->cfn("name", "table_users", true));
-   * // (string) \`table_users\`.\`name\`
-   * ```
-   *
-   * @param string $col The column's name (escaped or not).
-   * @param string $table The table's name (escaped or not).
-   * @param bool $escaped If set to true the returned string will be escaped.
-   * @return string | false
-   */
-  public function cfn($col, $table='', $escaped = false){
-    return $this->col_full_name($col, $table, $escaped);
-  }
-
-  /**
-   * Return the column's simple name.
-   *
-   * ```php
-   * \bbn\x::dump($db->col_simple_name("table_users.name"));
-   * // (string) name
-   * \bbn\x::dump($db->col_simple_name("table_users.name", true));
-   * // (string) `name`
-   * ```
-   *
-   * @param string $col The column's complete name (escaped or not).
-   * @param bool $escaped If set to true the returned string will be escaped.
-   * @return string | false
-   */
-  public function col_simple_name($col, $escaped = false){
-    return $this->language->col_simple_name($col, $escaped);
-  }
-
-  /**
-   * Return the column's simple name.
-   * (similar to {@link col_simple_name()})
-   *
-   * ```php
-   * \bbn\x::dump($db->csn("table_users.name"));
-   * // (string) name
-   * \bbn\x::dump($db->csn("table_users.name", true));
-   * // (string) `name`
-   * ```
-   *
-   * @param string $col The column's complete name (escaped or not)
-   * @param bool $escaped If set to true the returned string will be escaped.
-   * @return string | false
-   */
-  public function csn($col, $escaped = false){
-    return $this->col_simple_name($col, $escaped);
-  }
-
-  /**
-   * Makes a string that will be the id of the request.
-   *
-   * @return string
-   *
-   */
-  private function make_hash()
-  {
-    $args = \func_get_args();
-    if ( (\count($args) === 1) && \is_array($args[0]) ){
-      $args = $args[0];
-    }
-    $st = '';
-    foreach ( $args as $a ){
-      $st .= serialize($a);
-    }
-    return $this->hash_contour.md5($st).$this->hash_contour;
-  }
-
-  /**
-   * Gets the last hash created.
-   * @todo chiedere e thomas se deve diventare private e se va bene la descrizione
-   *
-   * ```php
-   * \bbn\x::dump($db->get_hash());
-   * // (string) 3819056v431b210daf45f9b5dc2
-   * ```
-   *
-   * @return string
-   */
-  public function get_hash()
-  {
-    return $this->hash;
-  }
-
-
-  /**
-   * Return an object with all the properties of the statement and where it is carried out.
-   *
-   * ```php
-   * \bbn\x::dump($db->add_statement('SELECT name FROM table_users'));
-   * // (db)
-   * ```
-   *
-   * @param string $statement
-   * @return db
-   */
-  public function add_statement($statement){
-    $this->last_query = $statement;
-    if ( $this->debug ){
-      array_push($this->debug_queries, $statement);
-    }
-    return $this;
-  }
-
-  /**
-   * Return true if in the table there are fields with auto-increment.
-   * Working only on mysql.
-   *
-   * ```php
-   * \bbn\x::dump($db->has_id_increment('table_users'));
-   * // (bool) 1
-   * ```
-   *
-   * @todo: working only on mysql
-   * @param string $table The table's name
-   * @return boolean
-   */
-  public function has_id_increment($table){
-    if ( $model = $this->modelize($table) ){
-      if ( isset($model['keys']['PRIMARY']) &&
-          (\count($model['keys']['PRIMARY']['columns']) === 1) &&
-          ($model['fields'][$model['keys']['PRIMARY']['columns'][0]]['extra'] === 'auto_increment') ){
-        return 1;
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Return a SQL query based on a configuration (??)
-   *
-   * @todo chiedere a thomas, non siamo riusciti a provarla
-   * @todo Check the configuration format
-   *
-   * @param array $cfg Description
-   * @return string
-   */
-  public function create_query($cfg){
-    if ( !isset($this->creator) ){
-      $this->creator = new \PHPSQLParser\PHPSQLCreator();
-    }
-    return $this->creator->create($cfg);
-  }
-
-  /**
    * Parses a SQL query and return an array.
    *
-   * @todo chiedere a thomas
-   *
-   * @param string $cfg
-   * @return array
+   * @param string $statement
+   * @return null|array
    */
-  public function parse_query($cfg)
+  public function parse_query(string $statement): ?array
   {
-    if ( !isset($this->parser) ){
+    if ( $this->parser === null ){
       $this->parser = new \PHPSQLParser\PHPSQLParser();
     }
-    $r = $this->parser->parse($cfg);
-    if ( !count($r) ){
-      return false;
+    try {
+      $r = $this->parser->parse($statement);
+      if ( !count($r) ){
+        return null;
+      }
+      if ( isset($r['BRACKET']) && (\count($r) === 1) ){
+        return null;
+      }
+      return $r;
     }
-    if ( isset($r['BRACKET']) && (\count($r) === 1) ){
-      return false;
+    catch ( \Exception $e ){
+      $this->log('Impossible to parse the query '.$statement);
     }
-    return $r;
+    return null;
   }
 
   /**
@@ -1039,7 +1869,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *
    * @return string
    */
-  public function last()
+  public function last(): ?string
   {
     return $this->last_query;
   }
@@ -1052,7 +1882,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * // (int) 26
    * ```
    *
-   * @return int
+   * @return mixed
    */
   public function last_id()
   {
@@ -1062,378 +1892,30 @@ class db extends \PDO implements db\actions, db\api, db\engines
     return false;
   }
 
-  public function get_uid()
-  {
-    //return hex2bin(str_replace('-', '', \bbn\x::make_uid()));
-    return $this->language->get_uid();
-  }
-
-  public function add_uid($uid_table = 'bbn_history_uids', $uid_col = 'uid'){
-    $uid = $this->get_uid();
-    $this->set_last_insert_id($uid);
-    return $uid;
-  }
-
   /**
-   * Adds the specs of a query to the $queries object.
+   * Deletes all the queries recorded and returns their (ex) number.
    *
-   * @param string $hash
-   * @param string $statement
-   * @param array $sequences
-   * @param array $placeholders
-   * @param array $options
+   * @return int
    */
-  private function add_query($hash, $statement, $sequences, $placeholders, $options)
+  public function flush(): int
   {
-    $this->queries[$hash] = [
-      'statement' => $statement,
-      'sequences' => $sequences,
-      'placeholders' => $placeholders,
-      'options' => $options,
-      'num' => 0,
-      'exe_time' => 0,
-      'prepared' => false
-    ];
-    while ( \count($this->queries) > $this->max_queries ){
-      array_shift($this->queries);
-    }
-  }
-
-  /**
-   * Changes the database used to the given one.
-   *
-   * ```php
-   * $db = new db();
-   * x::dump($db->change('db_example'));
-   * // (db)
-   * ```
-   *
-   * @param string $db The database's name
-   * @return db
-   */
-  public function change($db)
-  {
-    if ( $this->language->change($db) ){
-      $this->current = $db;
-    }
-    return $this;
-  }
-
-  /**
-   * Disables foreign keys constraints.
-   *
-   * ```php
-   * \bbn\x::dump($db->disable_keys());
-   * // (db)
-   * ```
-   *
-   * @return db
-   */
-  public function disable_keys()
-  {
-    $this->language->disable_keys();
-    return $this;
-  }
-
-  /**
-   * Enables foreign keys constraints.
-   *
-   * ```php
-   * \bbn\x::dump($db->enable_keys());
-   * // (db)
-   * ```
-   *
-   * @return db
-   */
-  public function enable_keys(): self
-  {
-    $this->language->enable_keys();
-    return $this;
-  }
-
-  public function flush(){
     $num = \count($this->queries);
     $this->queries = [];
     return $num;
   }
 
   /**
-   * Return an array with the count of values corresponding to the where conditions.
-   *
-   * ```php
-   * \bbn\x::dump($db->stat('table_user', 'name', ['name' => '%n']));
-   * /* (array)
-   * [
-   *  [
-   *      "num" => 1,
-   *      "name" => "alan",
-   *  ], [
-   *      "num" => 1,
-   *      "name" => "karen",
-   *  ],
-   * ]
-   * ```
-   *
-   * @param string $table The table's name.
-   * @param string $column The field's name.
-   * @param array $where The "where" condition.
-   * @param array $order The "order" condition.
-   * @param int $limit The "limit" condition.
-   * @param int $start The "start" condition.
-   * @return array
-   */
-  public function stat($table, $column, $where = [], $order = [], $limit = 0, $start = 0){
-    if ( $this->check() ){
-      $where = $this->where_cfg($where, $table);
-      $sql = 'SELECT COUNT(*) AS '.$this->qte.'num'.$this->qte.', '.
-          $this->csn($column, 1).PHP_EOL.
-          'FROM '.$this->tfn($table, 1).PHP_EOL.
-          $this->get_where($where, $table).PHP_EOL.
-          'GROUP BY '.$this->csn($column, 1).PHP_EOL.
-          ( empty($order) ?
-              'ORDER BY '.$this->qte.'num'.$this->qte.' DESC'
-              : $this->get_order($order)
-          ).PHP_EOL.
-          $this->get_order($limit, $start);
-      return $this->get_rows($sql, $where['final']);
-    }
-  }
-
-  /**
    * Executes the original PDO query function
-   * @todo far vedere a thomams perche non ho capito a che serve, prima c'era scritto return \PDO::query, però ritorna false
    *
    * ```php
    * \bbn\x::dump($db->raw_query());
    * // (bool)
    * ```
-   * @return boolean
+   * @return bool|\PDOStatement
    */
-  public function raw_query(){
-    if ( $this->check() ){
-      $args = \func_get_args();
-      return \call_user_func_array('parent::query', $args);
-    }
-  }
-
-  /**
-   * Executes a writing statement and return the number of affected rows or return a query object for the reading * statement
-   * @todo far vedere a thomams perche non funziona in lettura
-   *
-   * ```php
-   * \bbn\x::dump($db->query("DELETE * FROM table_users WHERE id > 0"));
-   * // (int) 3
-   * \bbn\x::dump($db->query("SELECT * FROM table_users WHERE name = 'John"));
-   * // (db)
-   * ```
-   *
-   * @param string
-   * @return int | db\query
-   */
-  public function query(){
-    if ( $this->check() ){
-      $args = \func_get_args();
-      if ( !$this->fancy ){
-        return \call_user_func_array('parent::query', $args);
-      }
-      if ( \count($args) === 1 && \is_array($args[0]) ){
-        $args = $args[0];
-      }
-
-      if ( !empty($args[0]) && \is_string($args[0]) ){
-
-        // The first argument is the statement
-        $statement = trim(array_shift($args));
-        $hash = $this->make_hash($statement);
-
-        // Sending a hash as second argument from statement generating functions will bind it to the statement
-        if ( isset($args[0]) && \is_string($args[0]) &&
-            ( \strlen($args[0]) === ( 32 + 2*\strlen($this->hash_contour) ) ) &&
-            ( strpos($args[0], $this->hash_contour) === 0 ) &&
-            ( substr($args[0],-\strlen($this->hash_contour)) === $this->hash_contour ) ){
-          $hash_sent = array_shift($args);
-        }
-
-        // Case where drivers are arguments
-        if ( isset($args[0]) && \is_array($args[0]) && !array_key_exists(0,$args[0]) ){
-          $driver_options = array_shift($args);
-        }
-
-        // Case where values are argument
-        else if ( isset($args[0]) &&
-            \is_array($args[0]) &&
-            (\count($args) === 1) ){
-          $args = $args[0];
-        }
-        if ( !isset($driver_options) ){
-          $driver_options = [];
-        }
-        $this->last_params['values'] = [];
-        $num_values = 0;
-        foreach ( $args as $i => $arg ){
-          if ( !\is_array($arg) ){
-            $this->last_params['values'][] = $arg;
-            $num_values++;
-          }
-          else if ( isset($arg[2]) ){
-            $this->last_params['values'][] = $arg[2];
-            $num_values++;
-          }
-        }
-        if ( !isset($this->queries[$hash]) ){
-          if ( $sequences = $this->parse_query($statement) ){
-            /* Or looking for question marks */
-            preg_match_all('/(\?)/', $statement, $exp);
-            $this->add_query(
-                $hash,
-                $statement,
-                $sequences,
-                isset($exp[1]) && \is_array($exp[1]) ? \count($exp[1]) : 0,
-                $driver_options);
-            if ( isset($hash_sent) ){
-              $this->queries[$hash_sent] = $hash;
-            }
-          }
-          else if ( ($this->engine === 'sqlite') && (strpos($statement, 'PRAGMA') === 0) ){
-            $sequences = ['PRAGMA' => $statement];
-            $this->add_query(
-                $hash,
-                $statement,
-                $sequences,
-                0,
-                $driver_options);
-            if ( isset($hash_sent) ){
-              $this->queries[$hash_sent] = $hash;
-            }
-          }
-          else{
-            die(\defined('bbn_IS_DEV') && BBN_IS_DEV ? "Impossible to parse the query $statement" : 'Impossible to parse the query');
-          }
-        }
-        else if ( \is_string($this->queries[$hash]) ){
-          $hash = $this->queries[$hash];
-        }
-        /* If the number of values is inferior to the number of placeholders we fill the values with the last given value */
-        if ( $num_values < $this->queries[$hash]['placeholders'] ){
-          $this->last_params['values'] = array_merge($this->last_params['values'], array_fill($num_values, $this->queries[$hash]['placeholders'] - $num_values, end($this->last_params['values'])));
-          $num_values = \count($this->last_params['values']);
-        }
-        /* The number of values must match the number of placeholders to bind */
-        if ( $num_values !== $this->queries[$hash]['placeholders'] ){
-          $this->error('Incorrect arguments count (your values: '.$num_values.', in the statement: '.$this->queries[$hash]['placeholders']."\n\n".$statement."\n\n".'start of values'.print_r($this->last_params['values'], 1).'Arguments:'.print_r(\func_get_args(),1));
-          exit;
-        }
-        $q =& $this->queries[$hash];
-        $this->last_params['sequences'] = $q['sequences'];
-        $this->queries[$hash]['num']++;
-        if ( $q['exe_time'] === 0 ){
-          $t = microtime(1);
-        }
-        $this->add_statement($q['statement']);
-        if ( isset($q['sequences']['DROP']) || isset($q['sequences']['CREATE']) || isset($q['sequences']['ALTER']) ){
-          // A voir
-          //$this->clear_cache();
-        }
-        try{
-          if ( $q['prepared'] && $this->is_write_sequence($q['sequences']) ){
-            $r = $q['prepared']->init($this->last_params['values'])->execute();
-          }
-          else{
-            if ( $this->is_write_sequence($q['sequences']) ){
-              if ( $num_values === 0 ){
-                $r = $this->exec($q['statement']);
-              }
-              else{
-                $q['prepared'] = $this->prepare($q['statement'], $q['options']);
-                $r = $q['prepared']->execute();
-              }
-              if ( isset($t) && $q['exe_time'] === 0 ){
-                $q['exe_time'] = microtime(1) - $t;
-              }
-            }
-            else{
-              if ( !$q['prepared'] ){
-                $q['prepared'] = $this->prepare($q['statement'], $driver_options);
-                if ( isset($t) && $q['exe_time'] === 0 ){
-                  $q['exe_time'] = microtime(1) - $t;
-                }
-              }
-              else{
-                $q['prepared']->init($this->last_params['values']);
-              }
-            }
-          }
-        }
-        catch (\PDOException $e ){
-          $this->error($e);
-        }
-        if ( $this->check() ){
-          if ( !isset($r) ){
-            return $q['prepared'];
-          }
-          if ( isset($q['sequences']['INSERT']) ){
-            $this->set_last_insert_id();
-          }
-          if ( $q['prepared'] && ( isset($q['sequences']['INSERT']) || isset($q['sequences']['UPDATE']) || isset($q['sequences']['DELETE']) || isset($q['sequences']['DROP']) ) ){
-            return $q['prepared']->rowCount();
-          }
-          return $r;
-        }
-      }
-    }
-    return false;
-  }
-
-  public function is_write_sequence($sequences){
-    return isset($sequences['INSERT']) || isset($sequences['UPDATE']) || isset($sequences['DELETE']) || isset($sequences['DROP']) || isset($sequences['ALTER']) || isset($sequences['CREATE']);
-  }
-
-  /**
-   * Return a single value from a request based on arguments.
-   *
-   * ```php
-   * \bbn\x::dump($db->get_val("table_users", "surname", "name", "Julien"));
-   * // (string) Smith
-   * ```
-   *
-   * @param string $table The table's name.
-   * @param string $field_to_get The field to get.
-   * @param string|array $field_to_check Name of the field in which search the value.
-   * @param string $value The value to check.
-   * @return string | false
-   */
-  public function get_val($table, $field_to_get, $field_to_check='', $value=''){
-    if ( \is_array($field_to_check) ){
-      $where = $field_to_check;
-    }
-    else if ( !empty($field_to_check) && !empty($value) ){
-      $where = [$field_to_check => $value];
-    }
-    else{
-      $where = [];
-    }
-    if ( $s = $this->select($table, [$field_to_get], $where)){
-      return $s->$field_to_get;
-    }
-    return false;
-  }
-
-  /**
-   * Return a single value from a request based on arguments.
-   *
-   * ```php
-   * \bbn\x::dump($db->val_by_id("table_users", "surname", "138"));
-   * // (string) Smith
-   * ```
-   *
-   * @param string $table The table's name.
-   * @param string $field The field's name.
-   * @param string $id The "id" value.
-   * @param string $col The column's name in which search for the value, default: 'id'.
-   * @return string | false
-   */
-  public function val_by_id($table, $field, $id, $col='id'){
-    return $this->select_one($table, $field, [$col => $id]);
+  public function raw_query()
+  {
+    return parent::query(...\func_get_args());
   }
 
   /**
@@ -1444,28 +1926,29 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * // (int) 69991701
    * ```
    *
-   * @param string $table The table's name.
+   * @todo Either get rid of th efunction or include the UID types
+   * @param null|string $table The table's name.
    * @param int $min
-   * @return int
+   * @return mixed
    */
-  public function new_id($table, $min = 1){
+  public function new_id($table, int $min = 1){
     $tab = $this->modelize($table);
     if ( \count($tab['keys']['PRIMARY']['columns']) !== 1 ){
       die("Error! Unique numeric primary key doesn't exist");
     }
-    else if (
-        ($id_field = $tab['keys']['PRIMARY']['columns'][0]) &&
-        ($maxlength = $tab['fields'][$id_field]['maxlength'] )&&
-        ($maxlength > 1)
+    if (
+      ($id_field = $tab['keys']['PRIMARY']['columns'][0]) &&
+      ($maxlength = $tab['fields'][$id_field]['maxlength'] )&&
+      ($maxlength > 1)
     ){
       $max = (10 ** $maxlength) - 1;
       if ( $max >= mt_getrandmax() ){
         $max = mt_getrandmax();
       }
-      if ( ($max > 1) && ($table = $this->tfn($table, 1)) ){
+      if ( ($max > $min) && ($table = $this->tfn($table, true)) ){
         $i = 0;
         do {
-          $id = random_int(1, $max);
+          $id = random_int($min, $max);
           /** @todo */
           /*
           if ( strpos($tab['fields'][$id_field]['type'], 'char') !== false ){
@@ -1477,13 +1960,35 @@ class db extends \PDO implements db\actions, db\api, db\engines
         while ( ($i < 100) && $this->select($table, [$id_field], [$id_field => $id]) );
         return $id;
       }
-      return false;
     }
+    return null;
   }
 
+  /**
+   * Returns a random value fitting the requested column's type
+   *
+   * @todo This great function has to be done properly
+   * @param $col
+   * @param $table
+   * @return mixed
+   */
   public function random_value($col, $table){
-    $tab = $this->modelize($table);
-    if ( isset($tab['fields'][$col]) ){
+    $val = null;
+    if ( ($tab = $this->modelize($table)) && isset($tab['fields'][$col]) ){
+      foreach ( $tab['keys'] as $key => $cfg ){
+        if (
+          $cfg['unique'] &&
+          !empty($cfg['ref_column']) &&
+          (\count($cfg['columns']) === 1) &&
+          ($col === $cfg['columns'][0])
+        ){
+          return ($num = $this->count($cfg['ref_column'])) ? $this->select_one([
+            'tables' [$cfg['ref_table']],
+            'fields' => [$cfg['ref_column']],
+            'start' => random_int(0, $num - 1)
+          ]) : null;
+        }
+      }
       switch ( $tab['fields'][$col]['type'] ){
         case 'int':
           if ( ($tab['fields'][$col]['maxlength'] === 1) && !$tab['fields'][$col]['signed'] ){
@@ -1495,7 +2000,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
               $max = mt_getrandmax();
             }
             if ( $tab['fields'][$col]['signed'] ){
-              $max = $max / 2;
+              $max /= 2;
             }
             $min = $tab['fields'][$col]['signed'] ? -$max : 0;
             $val = random_int($min, $max);
@@ -1528,47 +2033,835 @@ class db extends \PDO implements db\actions, db\api, db\engines
         case 'enum':
           break;
       }
-      if ( isset($val) ){
-        foreach ( $tab['keys'] as $key => $cfg ){
-          if (
-            $cfg['unique'] &&
-            \in_array($col, $cfg['columns'], true) &&
-            \is_null($cfg['ref_column']) &&
-            (\count($cfg['columns']) === 1) &&
-            $this->select_one($table, $col, [$col => $val])
-          ){
-            return $this->random_value($col, $table);
-          }
-        }
-      }
-      return $val;
     }
+    return $val;
   }
 
   /**
-   * Return the integer which will be the next incremented ID in the given table.
-   *
-   * ```php
-   * \bbn\x::dump($db->next_id("table_users"));
-   * // (int) 19
-   * ```
-   *
-   * @param string $table The table's name.
    * @return int
    */
-  public function next_id($table){
-    $tab = $this->modelize($table);
-    if ( \count($tab['keys']['PRIMARY']['columns']) !== 1 ){
-      die("Error! Unique numeric primary key doesn't exist");
-    }
-    if ( $id_field = $tab['keys']['PRIMARY']['columns'][0] ){
-      if ( $cur = (int)$this->get_one("SELECT MAX(".$this->escape($id_field).") FROM ".$this->escape($table)) ){
-        return $cur + 1;
-      }
-      return 1;
+  public function count_queries(): int
+  {
+    return \count($this->queries);
+  }
+
+  /*****************************************************************************************************************
+  *                                                                                                                *
+  *                                                                                                                *
+  *                                                    Query helpers                                               *
+  *                                                                                                                *
+  *                                                                                                                *
+  *****************************************************************************************************************/
+
+  /**
+   * Executes the given query with given vars, and extracts the first cell's result.
+   *
+   * ```php
+   * \bbn\x::dump($db->get_one("SELECT name FROM table_users WHERE id>?", 138));
+   * // (string) John
+   * ```
+   *
+   * @param string query
+   * @param mixed values
+   * @return mixed
+   */
+  public function get_one(){
+    /** @var db\query $r */
+    if ( $r = $this->query(...\func_get_args()) ){
+      return $r->fetchColumn(0);
     }
     return false;
   }
+
+  /**
+   * Execute the given query with given vars, and extract the first cell's result.
+   * (similar to {@link get_one()})
+   *
+   * ```php
+   * \bbn\x::dump($db->get_var("SELECT telephone FROM table_users WHERE id>?", 1));
+   * // (int) 123554154
+   * ```
+   *
+   * @param string query
+   * @param mixed values
+   * @return mixed
+   */
+  public function get_var(){
+    return $this->get_one(...\func_get_args());
+  }
+
+  /**
+   * Return an array indexed on the first field of the request.
+   * The value will be an array if the request has more than two fields.
+   *
+   * ```php
+   * \bbn\x::dump($db->get_key_val("SELECT name,id_group FROM table_users"));
+   * /*
+   * (array)[
+   *      "John" => 1,
+   *      "Michael" => 1,
+   *      "Barbara" => 1
+   *        ]
+   *
+   * \bbn\x::dump($db->get_key_val("SELECT name, surname, id FROM table_users WHERE id > 2 "));
+   * /*
+   * (array)[
+   *         "John" => [
+   *          "surname" => "Brown",
+   *          "id" => 3
+   *         ],
+   *         "Michael" => [
+   *          "surname" => "Smith",
+   *          "id" => 4
+   *         ]
+   *        ]
+   * ```
+   *
+   * @param string query
+   * @param mixed values
+   * @return null|array
+   */
+  public function get_key_val(): ?array
+  {
+    if ( $r = $this->query(...\func_get_args()) ){
+      if ( $rows = $r->get_rows() ){
+        return x::index_by_first_val($rows);
+      }
+      return [];
+    }
+    return null;
+  }
+
+  /**
+   * Return an array with the values of single field resulting from the query.
+   *
+   * ```php
+   * \bbn\x::dump($db->get_col_array("SELECT id FROM table_users"));
+   * /*
+   * (array)[1, 2, 3, 4]
+   * ```
+   *
+   * @param string query
+   * @param mixed values
+   * @return array
+   */
+  public function get_col_array(): array
+  {
+    if ( $r = $this->get_by_columns(...\func_get_args()) ){
+      return array_values(current($r));
+    }
+    return [];
+  }
+
+  /*****************************************************************************************************************
+  *                                                                                                                *
+  *                                                                                                                *
+  *                                           Read helpers with triggers                                           *
+  *                                                                                                                *
+  *                                                                                                                *
+  *****************************************************************************************************************/
+
+  /**
+   * Returns the first row resulting from the query as an object.
+   *
+   * ```php
+   * \bbn\x::dump($db->select('table_users', ['name', 'surname'], [['id','>','2']]));
+   * /*
+   * (object){
+   *   "name": "John",
+   *   "surname": "Smith",
+   * }
+   * ```
+   *
+   * @param string|array $table The table's name or a configuration array
+   * @param string|array $fields The fields' name
+   * @param array $where  The "where" condition
+   * @param array | boolean $order The "order" condition, default: false
+   * @param int $start The "start" condition, default: 0
+   * @return null|\stdClass
+   */
+  public function select($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?\stdClass
+  {
+    $args = $this->_add_kind($this->_set_limit_1(\func_get_args()));
+    if ( $r = $this->_exec(...$args) ){
+      return $r->get_object();
+    }
+    return null;
+  }
+
+  /**
+   * Return table's rows resulting from the query as an array of objects.
+   *
+   * ```php
+   * \bbn\x::dump($db->select_all("tab_users", ["id", "name", "surname"],[["id", ">", 1]], ["id" => "ASC"], 2));
+   * /*
+   * (array)[
+   *        Object stdClass: df {
+   *          "id" => 2,
+   *          "name" => "John",
+   *          "surname" => "Smith",
+   *          },
+   *        Object stdClass: df {
+   *          "id" => 3,
+   *          "name" => "Thomas",
+   *          "surname" => "Jones",
+   *         }
+   *        ]
+   * ```
+   *
+   * @param string|array $table The table's name or a configuration array
+   * @param string|array $fields The fields' name
+   * @param array $where  The "where" condition
+   * @param array | boolean $order The "order" condition, default: false
+   * @param int $limit The "limit" condition, default: 0
+   * @param int $start The "start" condition, default: 0
+   * @return null|array
+   */
+  public function select_all($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
+  {
+    if ( $r = $this->_exec(...$this->_add_kind(\func_get_args())) ){
+      return $r->get_objects();
+    }
+    return null;
+  }
+
+  /**
+   * Return the first row resulting from the query as a numeric array.
+   *
+   * ```php
+   * \bbn\x::dump($db->iselect("tab_users", ["id", "name", "surname"], [["id", ">", 1]], ["id" => "ASC"], 2));
+   * /*
+   * (array)[
+   *          4,
+   *         "Jack",
+   *          "Stewart"
+   *        ]
+   * ```
+   *
+   * @param string|array $table The table's name or a configuration array
+   * @param string|array $fields The fields' name
+   * @param array $where  The "where" condition
+   * @param array | boolean $order The "order" condition, default: false
+   * @param int $start The "start" condition, default: 0
+   * @return array
+   */
+  public function iselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array
+  {
+    if ( $r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\func_get_args()))) ){
+      return $r->get_irow();
+    }
+    return null;
+  }
+
+  /**
+   * Return the searched rows as an array of numeric arrays.
+   *
+   * ```php
+   * \bbn\x::dump($db->iselect_all("tab_users", ["id", "name", "surname"], [["id", ">", 1]],["id" => "ASC"],2));
+   * /*
+   * (array)[
+   *          [
+   *            2,
+   *            "John",
+   *            "Smith",
+   *          ],
+   *          [
+   *            3,
+   *            "Thomas",
+   *            "Jones",
+   *          ]
+   *        ]
+   * ```
+   *
+   * @param string|array $table The table's name or a configuration array
+   * @param string|array $fields The fields's name
+   * @param array $where  The "where" condition
+   * @param array | boolean The "order" condition, default: false
+   * @param int $limit The "limit" condition, default: 0
+   * @param int $start The "start" condition, default: 0
+   * @return array
+   */
+  public function iselect_all($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
+  {
+    if ( $r = $this->_exec(...$this->_add_kind(\func_get_args())) ){
+      return $r->get_irows();
+    }
+    return null;
+  }
+
+  /**
+   * Return the first row resulting from the query as an indexed array.
+   *
+   * ```php
+   * \bbn\x::dump($db->rselect("tab_users", ["id", "name", "surname"], ["id", ">", 1], ["id" => "ASC"], 2));
+   * /*
+   * (array) [
+   *          "id" => 4,
+   *          "name" => "John",
+   *          "surname" => "Smith"
+   *         ]
+   * ```
+   *
+   * @param string|array $table The table's name or a configuration array
+   * @param string|array $fields The fields' name
+   * @param array $where  The "where" condition
+   * @param array|boolean $order The "order" condition, default: false
+   * @param int $start The "start" condition, default: 0
+   * @return null|array
+   */
+  public function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array
+  {
+    if ( $r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\func_get_args()))) ){
+      return $r->get_row();
+    }
+    return null;
+  }
+
+  /**
+   * Return table's rows as an array of indexed arrays.
+   *
+   * ```php
+   * \bbn\x::dump($db->rselect_all("tab_users", ["id", "name", "surname"], [["id", ">", 1]], ["id" => "ASC"], 2));
+   * /*
+   * (array) [
+   *          [
+   *          "id" => 2,
+   *          "name" => "John",
+   *          "surname" => "Smith",
+   *          ],
+   *          [
+   *          "id" => 3,
+   *          "name" => "Thomas",
+   *          "surname" => "Jones",
+   *          ]
+   *        ]
+   * ```
+   *
+   * @param string|array $table The table's name or a configuration array
+   * @param string|array $fields The fields' name
+   * @param array $where  The "where" condition
+   * @param array | boolean $order condition, default: false
+   * @param int $limit The "limit" condition, default: 0
+   * @param int $start The "start" condition, default: 0
+   * @return null|array
+   */
+  public function rselect_all($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array
+  {
+    if ( $r = $this->_exec(...$this->_add_kind(\func_get_args())) ){
+      if ( \is_object($r) ){
+        return $r->get_rows();
+      }
+      $this->log('ERROR IN RSELECT_ALL', $r);
+    }
+    return [];
+  }
+
+  /**
+   * Return a single value
+   *
+   * ```php
+   * \bbn\x::dump($db->select_one("tab_users", "name", [["id", ">", 1]], ["id" => "DESC"], 2));
+   *  (string) 'Michael'
+   * ```
+   *
+   * @param string|array $table The table's name or a configuration array
+   * @param string $field The field's name
+   * @param array $where  The "where" condition
+   * @param array | boolean $order The "order" condition, default: false
+   * @param int $start The "start" condition, default: 0
+   * @return mixed
+   */
+  public function select_one($table, $field = null, array $where = [], array $order = [], int $start = 0)
+  {
+    if ( $r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\func_get_args()))) ){
+      if ( \is_object($r) ){
+        return ($a = $r->get_object()) ? current(get_object_vars($a)) : false;
+      }
+      $this->log('ERROR IN RSELECT_ONE', $r);
+    }
+    return false;
+  }
+
+  /**
+   * Return the number of records in the table corresponding to the $where condition (non mandatory).
+   *
+   * ```php
+   * \bbn\x::dump($db->count('table_users', ['name' => 'John']));
+   * // (int) 2
+   * ```
+   *
+   * @param string|array $table The table's name or a configuration array
+   * @param array $where The "where" condition
+   * @return int
+   */
+  public function count($table, array $where = []): ?int
+  {
+    $args = \is_array($table) && isset($table['tables']) ? $table : [
+      'tables' => [$table],
+      'where' => $where
+    ];
+    $args['count'] = true;
+    if ( !empty($args['bbn_db_processed']) ){
+      unset($args['bbn_db_processed']);
+    }
+    if ( $r = $this->_exec($args) ){
+      if ( \is_object($r) ){
+        return ($a = $r->get_irow()) ? $a[0] : null;
+      }
+      $this->log('ERROR IN COUNT', $r);
+    }
+    return null;
+  }
+
+  /**
+   * Return an array indexed on the first field of the request.
+   * The value will be an array if the request has more than two fields.
+   * Return the same value as "get_key_val".
+   *
+   * ```php
+   * \bbn\x::dump($db->select_all_by_keys("table_users", ["name","id","surname"], [["id", ">", "1"]], ["id" => "ASC"]);
+   * /*
+   * (array)[
+   *        "John" => [
+   *          "surname" => "Brown",
+   *          "id" => 3
+   *          ],
+   *        "Michael" => [
+   *          "surname" => "Smith",
+   *          "id" => 4
+   *        ]
+   *      ]
+   * ```
+   *
+   * @param string|array $table The table's name or a configuration array
+   * @param array $fields The fields's name
+   * @param array $where The "where" condition
+   * @param array|boolean $order The "order" condition
+   * @param int $limit The $limit condition, default: 0
+   * @param int $start The $limit condition, default: 0
+   * @return array|false
+   */
+  public function select_all_by_keys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
+  {
+    if ( $rows = $this->rselect_all($table, $fields, $where, $order, $limit, $start) ){
+      return x::index_by_first_val($rows);
+    }
+    return $this->check() ? [] : null;
+  }
+
+  /**
+   * Return an array with the count of values corresponding to the where conditions.
+   *
+   * ```php
+   * \bbn\x::dump($db->stat('table_user', 'name', ['name' => '%n']));
+   * /* (array)
+   * [
+   *  [
+   *      "num" => 1,
+   *      "name" => "alan",
+   *  ], [
+   *      "num" => 1,
+   *      "name" => "karen",
+   *  ],
+   * ]
+   * ```
+   *
+   * @param string|array $table The table's name or a configuration array.
+   * @param string $column The field's name.
+   * @param array $where The "where" condition.
+   * @param array $order The "order" condition.
+   * @return array
+   */
+  public function stat(string $table, string $column, array $where = [], array $order = []): ?array{
+    if ( $this->check() ){
+      return $this->rselect_all([
+        'tables' => [$table],
+        'fields' => [
+          $column,
+          'num' => 'COUNT(*)'
+        ],
+        'where' => $where,
+        'order' => $order,
+        'group_by' => [$column]
+      ]);
+    }
+    return null;
+  }
+
+  /**
+   * Return the unique values of a column of a table as a numeric indexed array.
+   *
+   * ```php
+   * \bbn\x::dump($db->get_field_values("table_users", "surname", [['id', '>', '2']], 1, 1));
+   * // (array) ["Smiths", "White"]
+   * ```
+   *
+   * @param string|array $table The table's name or a configuration array
+   * @param string $field The field's name
+   * @param array $where The "where" condition
+   * @param array $order The "order" condition
+   * @return array | false
+   */
+  public function get_field_values($table, $field = null,  array $where = [], array $order = []){
+    return $this->get_column_values($table, $field, $where, $order);
+  }
+
+  /**
+   * Return a count of identical values in a field as array, reporting a structure type 'num' - 'val'.
+   *
+   * ```php
+   * \bbn\x::dump($db->count_field_values('table_users','surname',[['name','=','John']]));
+   * // (array) ["num" => 2, "val" => "John"]
+   * ```
+   *
+   * @param string|array $table The table's name or a configuration array
+   * @param null|string $field The field's name
+   * @param array $where The "where" condition
+   * @param array $order The "order" condition
+   * @return array | false
+   */
+  public function count_field_values($table, string $field = null,  array $where = [], array $order = []){
+    if ( \is_array($table) && \is_array($table['fields']) && count($table['fields']) ){
+      $args = $table;
+      $field = array_values($table['fields'])[0];
+    }
+    else{
+      $args = [
+        'tables' => [$table],
+        'where' => $where,
+        'order' => $order
+      ];
+    }
+    $args = array_merge($args, [
+      'kind' => 'SELECT',
+      'fields' => [
+        'val' => $field,
+        'num' => 'COUNT(*)'
+      ],
+      'group_by' => [$field]
+    ]);
+    return $this->rselect_all($args);
+  }
+
+  /**
+   * Return a numeric indexed array with the values of the unique column ($field) from the selected $table
+   *
+   * ```php
+   * \bbn\x::dump($db->get_column_values('table_users','surname',['id','>',1]));
+   * /*
+   * array [
+   *    "Smith",
+   *    "Jones",
+   *    "Williams",
+   *    "Taylor"
+   * ]
+   * ```
+   *
+   * @param string|array $table The table's name or a configuration array
+   * @param string $field The field's name
+   * @param array $where The "where" condition
+   * @param array $order The "order" condition
+   * @return array
+   */
+  public function get_column_values($table, string $field = null,  array $where = [], array $order = []): ?array
+  {
+    if ( \is_array($table) && isset($table['fields']) && \is_array($table['fields']) && !empty($table['fields'][0]) ){
+      array_splice($table['fields'], 0, 1, 'DISTINCT '.(string)$table['fields'][0]);
+    }
+    else if ( \is_string($table) && \is_string($field) && (stripos($field, 'DISTINCT') !== 0) ){
+      $field = 'DISTINCT '.$field;
+    }
+    if ( $rows = $this->iselect_all($table, $field, $where, $order) ){
+      $r = [];
+      foreach ( $rows as $row ){
+        $r[] = $row[0];
+      }
+      return $r;
+    }
+    return $this->check() ? [] : null;
+  }
+
+  /**
+   * Return a string with the sql query to count equal values in a field of the table.
+   *
+   * ```php
+   * \bbn\x::dump($db->get_values_count('table_users','name',['surname','=','smith']));
+   * /*
+   * (string)
+   *   SELECT COUNT(*) AS num, `name` AS val FROM `db_example`.`table_users`
+   *     GROUP BY `name`
+   *     ORDER BY `name`
+   * ```
+   *
+   * @param string|array $table The table's name or a configuration array
+   * @param string $field The field's name
+   * @param array $where The "where" condition
+   * @param array $order The "order" condition
+   * @return array
+   */
+  public function get_values_count($table, string $field = null, array $where = [], $order): array
+  {
+    return $this->count_field_values($table, $field, $where, $order);
+  }
+
+  /*****************************************************************************************************************
+  *                                                                                                                *
+  *                                                                                                                *
+  *                                          Write helpers with triggers                                           *
+  *                                                                                                                *
+  *                                                                                                                *
+  *****************************************************************************************************************/
+
+  /**
+   * Inserts row(s) in a table.
+   *
+   * <code>
+   * $this->db->insert("table_users", [
+   *    ["name" => "Ted"],
+   *    ["surname" => "McLow"]
+   *  ]);
+   * </code>
+   *
+   * <code>
+   * $this->db->insert("table_users", [
+   *    ["name" => "July"],
+   *    ["surname" => "O'neill"]
+   *  ], [
+   *    ["name" => "Peter"],
+   *    ["surname" => "Griffin"]
+   *  ], [
+   *    ["name" => "Marge"],
+   *    ["surname" => "Simpson"]
+   *  ]);
+   * </code>
+   *
+   * @param string|array $table The table name or the configuration array.
+   * @param array $values The values to insert.
+   * @param bool $ignore If true, controls if the row is already existing and ignores it.
+   *
+   * @return int Number affected rows.
+   */
+  public function insert($table, array $values = null, $ignore = false): ?int
+  {
+    if ( \is_array($table) && isset($table['values']) ){
+      $values = $table['values'];
+    }
+    // Array of arrays
+    if (
+      \is_array($values) &&
+      count($values) &&
+      !x::is_assoc($values) &&
+      \is_array($values[0])
+    ){
+      $res = 0;
+      foreach ( $values as $v ){
+        $res += $this->insert($table, $v, $ignore);
+      }
+      return $res;
+    }
+    $cfg = \is_array($table) ? $table : [
+      'tables' => [$table],
+      'values' => $values,
+      'ignore' => $ignore
+    ];
+    $cfg['kind'] = 'INSERT';
+    return $this->_exec($cfg);
+  }
+
+  /**
+   * If not exist inserts row(s) in a table, else update.
+   *
+   * <code>
+   * $this->db->insert_update(
+   *  "table_users",
+   *  [
+   *    'id' => '12',
+   *    'name' => 'Frank'
+   *  ]
+   * );
+   * </code>
+   *
+   * @param string|array $table The table name or the configuration array.
+   * @param array $values The values to insert.
+   *
+   * @return int The number of rows inserted or updated.
+   */
+  public function insert_update($table, array $values = null): ?int {
+    // Twice the arguments
+    if ( \is_array($table) && isset($table['values']) ){
+      $values = $table['values'];
+    }
+    if ( !x::is_assoc($values) ){
+      $res = 0;
+      foreach ( $values as $v ){
+        $res += $this->insert_update($table, $v);
+      }
+      return $res;
+    }
+    $keys = $this->get_keys($table);
+    $unique = [];
+    foreach ( $keys['keys'] as $k ){
+      // Checking each unique key
+      if ( $k['unique'] ){
+        $i = 0;
+        foreach ( $k['columns'] as $c ){
+          if ( isset($values[$c]) ){
+            $unique[$c] = $values[$c];
+            $i++;
+          }
+        }
+        // Only if the number of known field values matches the number of columns qhich are parts of the unique key
+        if ( ($i === \count($k['columns'])) && $this->count($table, $unique) ){
+          // Removing unique matching fields from the values (as it is the where)
+          foreach ( $unique as $f => $v ){
+            unset($values[$f]);
+          }
+          // For updating
+          return $this->update($table, $values, $unique);
+        }
+      }
+    }
+    // No need to update, inserting
+    return $this->insert($table, $values);
+  }
+
+  /**
+   * Updates row(s) in a table.
+   *
+   * <code>
+   * $this->db->update(
+   *  "table_users",
+   *  [
+   *    ['name' => 'Frank'],
+   *    ['surname' => 'Red']
+   *  ],
+   *  ['id' => '127']
+   * );
+   * </code>
+   *
+   * @param string|array $table The table name or the configuration array.
+   * @param array $values The new value(s).
+   * @param array $where The "where" condition.
+   * @param boolean $ignore If IGNORE should be added to the statement
+   *
+   * @return int The number of rows updated.
+   */
+  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int
+  {
+    $cfg = \is_array($table) ? $table : [
+      'tables' => [$table],
+      'where' => $where,
+      'values' => $values,
+      'ignore' => $ignore
+    ];
+    $cfg['kind'] = 'UPDATE';
+    return $this->_exec($cfg);
+  }
+
+  /**
+   * If exist delete row(s) in a table, else ignore.
+   *
+   * <code>
+   * $this->db->delete_ignore(
+   *  "table_users",
+   *  ['id' => '20']
+   * );
+   * </code>
+   *
+   * @param string|array $table The table name or the configuration array.
+   * @param array $values
+   * @param array $where The "where" condition.
+   *
+   * @return int The number of rows deleted.
+   */
+  public function update_ignore($table, array $values = null, array $where = null): ?int
+  {
+    return $this->update($table, $values, $where, true);
+  }
+
+  /**
+   * Deletes row(s) in a table.
+   *
+   * <code>
+   * $this->db->delete("table_users", ['id' => '32']);
+   * </code>
+   *
+   * @param string|array $table The table name or the configuration array.
+   * @param array $where The "where" condition.
+   * @param bool $ignore default: false.
+   *
+   * @return int The number of rows deleted.
+   */
+  public function delete($table, array $where = null, bool $ignore = false): ?int
+  {
+    $cfg = \is_array($table) ? $table : [
+      'tables' => [$table],
+      'where' => $where,
+      'ignore' => $ignore
+    ];
+    $cfg['kind'] = 'DELETE';
+    return $this->_exec($cfg);
+  }
+
+  /**
+   * If exist delete row(s) in a table, else ignore.
+   *
+   * <code>
+   * $this->db->delete_ignore(
+   *  "table_users",
+   *  ['id' => '20']
+   * );
+   * </code>
+   *
+   * @param string|array $table The table name or the configuration array.
+   * @param array $where The "where" condition.
+   *
+   * @return int The number of rows deleted.
+   */
+  public function delete_ignore($table, array $where = null): ?int
+  {
+    return $this->delete(\is_array($table) ? array_merge($table, ['ignore' => true]) : $table, $where, true);
+  }
+
+  /**
+   * If not exist inserts row(s) in a table, else ignore.
+   *
+   * <code>
+   * $this->db->insert_ignore(
+   *  "table_users",
+   *  [
+   *    ['id' => '19', 'name' => 'Frank'],
+   *    ['id' => '20', 'name' => 'Ted'],
+   *  ]
+   * );
+   * </code>
+   *
+   * @param string|array $table The table name or the configuration array.
+   * @param array $values The row(s) values.
+   *
+   * @return int The number of rows inserted.
+   */
+  public function insert_ignore($table, array $values = null): ?int
+  {
+    return $this->insert(\is_array($table) ? array_merge($table, ['ignore' => true]) : $table, $values, true);
+  }
+
+  /**
+   * @param $table
+   * @return int|null
+   */
+  public function truncate($table): ?int
+  {
+    return $this->delete($table, []);
+  }
+
+  /*****************************************************************************************************************
+  *                                                                                                                *
+  *                                                                                                                *
+  *                                               NATIVE FUNCTIONS                                                 *
+  *                                                                                                                *
+  *                                                                                                                *
+  *****************************************************************************************************************/
 
   /**
    * Return an indexed array with the first result of the query or false if there are no results.
@@ -1586,7 +2879,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return array | false
    */
   public function fetch($query){
-    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
+    if ( $r = $this->query(...\func_get_args()) ){
       return $r->fetch();
     }
     return false;
@@ -1622,7 +2915,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return array | false
    */
   public function fetchAll($query){
-    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
+    if ( $r = $this->query(...\func_get_args()) ){
       return $r->fetchAll();
     }
     return false;
@@ -1633,12 +2926,13 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @todo confusion between result's index and this->query arguments(IMPORTANT). Missing the example because the function doesn't work
    *
    * @param $query
-   * @return string | false
+   * @param int $num
+   * @return mixed
    */
-  public function fetchColumn($query, $num=0)
+  public function fetchColumn($query, int $num = 0)
   {
-    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
-      return $r->fetchColumn(\is_int($num) ? $num : 0);
+    if ( $r = $this->query(...\func_get_args()) ){
+      return $r->fetchColumn($num);
     }
     return false;
   }
@@ -1656,717 +2950,503 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * ```
    *
    * @param string $query
-   * @return stdClass
-   *
+   * @return bool|\stdClass
    */
-  public function fetchObject($query){
-    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
+  public function fetchObject($query)
+  {
+    if ( $r = $this->query(...\func_get_args()) ){
       return $r->fetchObject();
     }
     return false;
   }
 
   /**
-   * Executes the given query with given vars, and extracts the first cell's result.
+   * Executes a writing statement and return the number of affected rows or return a query object for the reading * statement
+   * @todo far vedere a thomams perche non funziona in lettura
    *
    * ```php
-   * \bbn\x::dump($db->get_one("SELECT name FROM table_users WHERE id>?", 138));
-   * // (string) John
+   * \bbn\x::dump($db->query("DELETE FROM table_users WHERE name LIKE '%lucy%'"));
+   * // (int) 3
+   * \bbn\x::dump($db->query("SELECT * FROM table_users WHERE name = 'John"));
+   * // (bbn\db\query) Object
    * ```
    *
-   * @param string query
-   * @param int
-   * @return string | int | false
+   * @param array|string $statement
+   * @return int|db\query
    */
-  public function get_one(){
-    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
-      return $r->fetchColumn(0);
-    }
-    return false;
-  }
-
-  /**
-   * Execute the given query with given vars, and extract the first cell's result.
-   * (similar to {@link get_one()})
-   *
-   * ```php
-   * \bbn\x::dump($db->get_var("SELECT telephone FROM table_users WHERE id>?", 1));
-   * // (int) 123554154
-   * ```
-   *
-   * @param string query
-   * @param int
-   * @return string | int | false
-   */
-  public function get_var(){
-    return \call_user_func_array([$this, "get_one"], \func_get_args());
-  }
-
-
-  /**
-   * Return the first row resulting from the query as an array indexed with the fields' name.
-   *
-   * ```php
-   * \bbn\x::dump($db->get_row("SELECT id, name FROM table_users WHERE id > ? ", 2));;
-   *
-   * /* (array)[
-   *        "id" => 3,
-   *        "name" => "thomas",
-   *        ]
-   * ```
-   *
-   * @param string query.
-   * @param int The var ? value.
-   * @return array | false
-   *
-   */
-  public function get_row(){
-    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
-      return $r->get_row();
-    }
-    return false;
-  }
-
-  /**
-   * Return an array that includes indexed arrays for every row resultant from the query.
-   *
-   * ```php
-   * \bbn\x::dump($db->get_rows("SELECT id, name FROM table_users WHERE id > ? LIMIT ?", 2));
-   * /* (array)[
-   *            [
-   *            "id" => 3,
-   *            "name" => "john",
-   *            ],
-   *            [
-   *            "id" => 4,
-   *            "name" => "barbara",
-   *            ],
-   *          ]
-   * ```
-   *
-   * @param string
-   * @param int The var ? value
-   * @return array | false
-   */
-  public function get_rows(){
-    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
-      return $r->get_rows();
-    }
-    return [];
-  }
-
-  /**
-   * Return a row as a numeric indexed array.
-   *
-   * ```php
-   * \bbn\x::dump($db->get_irow("SELECT id, name, surname FROM table_users WHERE id > ?", 2));
-   * /* (array) [
-   *              3,
-   *              "john",
-   *              "brown",
-   *             ]
-   * ```
-   *
-   * @param string query
-   * @param int The var ? value
-   * @return array | false
-   */
-  public function get_irow(){
-    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
-      return $r->get_irow();
-    }
-    return false;
-  }
-
-  /**
-   * Return an array of numeric indexed rows.
-   *
-   * ```php
-   * \bbn\x::dump($db->get_irows("SELECT id, name FROM table_users WHERE id > ? LIMIT ?", 2, 2));
-   * /*
-   * (array)[
-   *         [
-   *          3,
-   *         "john"
-   *         ],
-   *         [
-   *         4,
-   *         "barbara"
-   *        ]
-   *       ]
-   * ```
-   *
-   * @param string query
-   * @param int The var ? value
-   * @return array
-   */
-  public function get_irows()
+  public function query($statement)
   {
-    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
-      return $r->get_irows();
-    }
-    return [];
-  }
+    if ( $this->check() ){
+      $args = \func_get_args();
+      // If fancy is false we just use the regular PDO query function
+      if ( !$this->fancy ){
+        return parent::query(...$args);
+      }
+      // The function can be called directly with func_get_args()
+      while ( (\count($args) === 1) && \is_array($args[0]) ){
+        $args = $args[0];
+      }
 
-  /**
-   * Return an array indexed on the first field of the request.
-   * The value will be an array if the request has more than two fields.
-   *
-   * ```php
-   * \bbn\x::dump($db->get_key_val("SELECT name,id_group FROM table_users"));
-   * /*
-   * (array)[
-   *      "John" => 1,
-   *      "Michael" => 1,
-   *      "Barbara" => 1
-   *        ]
-   *
-   * \bbn\x::dump($db->get_key_val("SELECT name, surname, id FROM table_users WHERE id > 2 "));
-   * /*
-   * (array)[
-   *         "John" => [
-   *          "surname" => "Brown",
-   *          "id" => 3
-   *         ],
-   *         "Michael" => [
-   *          "surname" => "Smith",
-   *          "id" => 4
-   *         ]
-   *        ]
-   * ```
-   *
-   * @param string query
-   * @return array | false
-   */
-  public function get_key_val(){
-    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
-      $rows = $r->get_rows();
-      // At least 2 columns
-      if ( (\count($rows) > 0) && (\count($rows[0]) > 1) ){
-        $cols = array_keys($rows[0]);
-        $idx = array_shift($cols);
-        $num_cols = \count($cols);
-        $res = [];
-        foreach ( $rows as $d ){
-          $index = $d[$idx];
-          unset($d[$idx]);
-          $res[$index] = $num_cols > 1 ? $d : $d[$cols[0]];
+      if ( !empty($args[0]) && \is_string($args[0]) ){
+
+        // The first argument is the statement
+        $statement = trim(array_shift($args));
+        $hash = $this->_make_hash($statement);
+
+        // Sending a hash as second argument from helper functions will bind it to the saved statement
+        if (
+          count($args) &&
+          \is_string($args[0]) &&
+          (strpos($args[0], $this->hash_contour) === 0) &&
+          (\strlen($args[0]) === (32 + 2*\strlen($this->hash_contour))) &&
+          (substr($args[0],-\strlen($this->hash_contour)) === $this->hash_contour)
+        ){
+          $hash_sent = array_shift($args);
         }
-        return $res;
+
+        $driver_options = [];
+        if (
+          count($args) &&
+          \is_array($args[0])
+        ){
+          // Case where drivers are arguments
+          if ( !array_key_exists(0, $args[0]) ){
+            $driver_options = array_shift($args);
+          }
+          // Case where values are in a single argument
+          else if ( \count($args) === 1 ){
+            $args = $args[0];
+          }
+        }
+
+        /** @var array $params Will become the property last_params each time a query is executed */
+        $params = [
+          'statement' => $statement,
+          'values' => [],
+          'last' => microtime(true)
+        ];
+        $num_values = 0;
+        foreach ( $args as $i => $arg ){
+          if ( !\is_array($arg) ){
+            $params['values'][] = $arg;
+            $num_values++;
+          }
+          else if ( isset($arg[2]) ){
+            $params['values'][] = $arg[2];
+            $num_values++;
+          }
+        }
+
+        if ( !isset($this->queries[$hash]) ){
+          /** @var int $placeholders The number of placeholders in the statement */
+          $placeholders = 0;
+          if ( $sequences = $this->parse_query($statement) ){
+            /* Or looking for question marks */
+            $sequences = array_keys($sequences);
+            preg_match_all('/(\?)/', $statement, $exp);
+            $placeholders = isset($exp[1]) && \is_array($exp[1]) ? \count($exp[1]) : 0;
+            while ( $sequences[0] === 'OPTIONS' ){
+              array_shift($sequences);
+            }
+            $params['kind'] = $sequences[0];
+            $params['union'] = isset($sequences['UNION']);
+            $params['write'] = \in_array($params['kind'], self::$write_kinds, true);
+            $params['structure'] = \in_array($params['kind'], self::$structure_kinds, true);
+          }
+          else if ( ($this->engine === 'sqlite') && (strpos($statement, 'PRAGMA') === 0) ){
+            $params['kind'] = 'PRAGMA';
+          }
+          else{
+            die(\defined('BBN_IS_DEV') && BBN_IS_DEV ? "Impossible to parse the query $statement" : 'Impossible to parse the query');
+          }
+          // This will add to the queries array
+          $this->_add_query(
+            $hash,
+            $statement,
+            $params['kind'],
+            $placeholders,
+            $driver_options);
+          if ( !empty($hash_sent) ){
+            $this->queries[$hash_sent] = $hash;
+          }
+        }
+        // The hash of the hash for retrieving a query based on the helper's config's hash
+        else if ( \is_string($this->queries[$hash]) ){
+          $hash = $this->queries[$hash];
+        }
+
+        $q =& $this->queries[$hash];
+        /* If the number of values is inferior to the number of placeholders we fill the values with the last given value */
+        if ( !empty($params['values']) && ($num_values < $q['placeholders']) ){
+          $params['values'] = array_merge(
+            $params['values'],
+            array_fill($num_values, $q['placeholders'] - $num_values, end($params['values']))
+          );
+          $num_values = \count($params['values']);
+        }
+        /* The number of values must match the number of placeholders to bind */
+        if ( $num_values !== $q['placeholders'] ){
+          $this->error('Incorrect arguments count (your values: '.$num_values.', in the statement: '.$q['placeholders']."\n\n".$statement."\n\n".'start of values'.print_r($params['values'], 1).'Arguments:'.print_r(\func_get_args(),true));
+          exit;
+        }
+        $q['num']++;
+        $q['last'] = microtime(true);
+        if ( $q['exe_time'] === 0 ){
+          $t = $q['last'];
+        }
+        // That will always contains the parameters of the last query done
+        $this->last_params = $params;
+        // Adds to $debug_queries if in debug mode and defines $last_query
+        $this->add_statement($q['sql']);
+        // If the statement is a structure modifier we need to clear the cache
+        if ( $q['structure'] ){
+          foreach ( $this->queries as $k => $v ){
+            if ( $k !== $hash ){
+              unset($this->queries[$q]);
+            }
+          }
+          /** @todo Clear the cache */
+        }
+        try{
+          // This is a writing statement, it will execute the statement and return the number of affected rows
+          if ( $q['write'] ){
+            // A prepared query already exists for the writing
+            /** @var db\query */
+            if ( $q['prepared'] ){
+              $r = $q['prepared']->init($this->last_params['values'])->execute();
+            }
+            // If there are no values we can assume the statement doesn't need to be prepared and is just executed
+            else if ( $num_values === 0 ){
+              // Native PDO function which returns the number of affected rows
+              $r = $this->exec($q['sql']);
+            }
+            // Preparing the query
+            else{
+              // Native PDO function which will use db\query as base class
+              /** @var db\query */
+              $q['prepared'] = $this->prepare($q['sql'], $q['options']);
+              $r = $q['prepared']->execute();
+            }
+          }
+          // This is a reading statement, it will prepare the statement and return a query object
+          else{
+            if ( !$q['prepared'] ){
+              // Native PDO function which will use db\query as base class
+              $q['prepared'] = $this->prepare($q['sql'], $driver_options);
+            }
+            else{
+              // Returns the same db\query object
+              $q['prepared']->init($this->last_params['values']);
+            }
+          }
+          if ( !empty($t) && $q['exe_time'] === 0 ){
+            $q['exe_time'] = microtime(true) - $t;
+          }
+        }
+        catch (\PDOException $e ){
+          $this->error($e);
+        }
+        if ( $this->check() ){
+          // So if read statement returns the query object
+          if ( !$q['write'] ){
+            return $q['prepared'];
+          }
+          // If it is a write statement returns the number of affected rows
+          if ( $q['prepared'] && $q['write'] ){
+            $r = $q['prepared']->rowCount();
+          }
+          // If it is an insert statement we (try to) set the last inserted ID
+          if ( ($q['kind'] === 'INSERT') && $r ){
+            $this->set_last_insert_id();
+          }
+          return $r ?? false;
+        }
       }
     }
-    return [];
+    return false;
   }
 
+  /*****************************************************************************************************************
+  *                                                                                                                *
+  *                                                                                                                *
+  *                                                     SHORTCUTS                                                  *
+  *                                                                                                                *
+  *                                                                                                                *
+  *****************************************************************************************************************/
+
+
   /**
-   * Return an array indexed on the first field of the request.
-   * The value will be an array if the request has more than two fields.
-   * Return the same value as "get_key_val".
+   * Return table's simple name.
+   * (similar to {@link table_simple_name()})
    *
    * ```php
-   * \bbn\x::dump($db->select_all_by_keys("table_users", ["name","id","surname"], [["id", ">", "1"]], ["id" => "ASC"]);
-   * /*
-   * (array)[
-   *        "John" => [
-   *          "surname" => "Brown",
-   *          "id" => 3
-   *          ],
-   *        "Michael" => [
-   *          "surname" => "Smith",
-   *          "id" => 4
-   *        ]
-   *      ]
+   * \bbn\x::dump($db->tsn("work_db.table_users"));
+   * // (string) table_users
+   * \bbn\x::dump($db->tsn("work_db.table_users", true));
+   * // (string) `table_users`
    * ```
    *
    * @param string $table The table's name
-   * @param string|array $fields The fields's name
-   * @param array $where The "where" condition
-   * @param array|boolean $order The "order" condition
-   * @param int $start The $limit condition, default: 0
-   * @return array|false
+   * @param bool $escaped If set to true the returned string will be escaped.
+   * @return null|string
    */
-  public function select_all_by_keys($table, $fields = [], $where = [], $order = false, $start = 0){
-    $where = $this->where_cfg($where, $table);
-    if ( $sql = $this->get_query($table, $fields, $where['final'], $order, $start) ){
-      if ( \count($where['values']) > 0 ){
-        return $this->get_key_val($sql, $where['values']);
-      }
-      else {
-        return $this->get_key_val($sql);
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Return an array indexed on the searched field's in which there are all the values of the column.
-   *
-   * ```php
-   * \bbn\x::dump($db->get_by_columns("SELECT name, surname FROM table_users WHERE id > 2"));
-   * /*
-   * (array) [
-   *      "name" => [
-   *       "John",
-   *       "Michael"
-   *      ],
-   *      "surname" => [
-   *        "Brown",
-   *        "Smith"
-   *      ]
-   *     ]
-   * ```
-   *
-   * @param string query
-   * @return array
-   */
-  public function get_by_columns(){
-    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
-      return $r->get_by_columns();
-    }
-    return false;
-  }
-
-  /**
-   * Return an array with the values of single field resulting from the query.
-   *
-   * ```php
-   * \bbn\x::dump($db->get_col_array("SELECT id FROM table_users"));
-   * /*
-   * (array)[1, 2, 3, 4]
-   * ```
-   *
-   * @param string
-   * @return array | false
-   */
-  public function get_col_array(){
-    if ( $r = \call_user_func_array([$this, 'get_by_columns'], \func_get_args()) ){
-      return array_values(current($r));
-    }
-    return [];
-  }
-
-  /**
-   * Return the first row resulting from the query as an object (similar to {@link get_object()}).
-   *
-   * ```php
-   * \bbn\x::dump($db->get_obj("SELECT surname FROM table_users"));
-   * /*
-   * (obj){
-   *       "name" => "Smith"
-   *       }
-   * ```
-   *
-   * @param string
-   * @return object
-   */
-  public function get_obj(){
-    return $this->get_object(\func_get_args());
-  }
-
-  /**
-   * Return the first row resulting from the query as an object.
-   * Synonym of get_obj.
-   *
-   * ```php
-   * \bbn\x::dump($db->get_object("SELECT name FROM table_users"));
-   * /*
-   * (obj){
-   *       "name" => "John"
-   *       }
-   * ```
-   *
-   * @param string
-   * @return object | false
-   */
-  public function get_object(){
-    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
-      return $r->get_object();
-    }
-    return false;
-  }
-
-  /**
-   * Return an array of stdClass objects.
-   *
-   * ```php
-   * \bbn\x::dump($db->get_objects("SELECT name FROM table_users"));
-   *
-   * /*
-   * (array) [
-   *          Object stdClass: df {
-   *            "name" => "John",
-   *          },
-   *          Object stdClass: df {
-   *            "name" => "Michael",
-   *          },
-   *          Object stdClass: df {
-   *            "name" => "Thomas",
-   *          },
-   *          Object stdClass: df {
-   *            "name" => "William",
-   *          },
-   *          Object stdClass: df {
-   *            "name" => "Jake",
-   *          },
-   *         ]
-   * ```
-   *
-   * @param string The query
-   * @return array
-   */
-  public function get_objects()
+  public function tfn(string $table, bool $escaped = false): ?string
   {
-    if ( $r = \call_user_func_array([$this, 'query'], \func_get_args()) ){
-      return $r->get_objects();
-    }
-    return [];
+    return $this->table_full_name($table, $escaped);
   }
 
   /**
-   * Return the number of records in the table corresponding to the $where condition (non mandatory).
+   * Return table's simple name.
+   * (similar to {@link table_simple_name()})
    *
    * ```php
-   * \bbn\x::dump($db->count('table_users', ['name' => 'John']));
-   * // (int) 2
+   * \bbn\x::dump($db->tsn("work_db.table_users"));
+   * // (string) table_users
+   * \bbn\x::dump($db->tsn("work_db.table_users", true));
+   * // (string) `table_users`
    * ```
    *
    * @param string $table The table's name
-   * @param array $where The "where" condition
-   * @return int
+   * @param bool $escaped If set to true the returned string will be escaped.
+   * @return null|string
    */
-  public function count($table, array $where = []){
-    $where_arr = $this->where_cfg($where, $table);
-    $where = $this->get_where($where_arr, $table);
-    if ($table = $this->tfn($table, 1) ){
-      $sql = "SELECT COUNT(*) FROM ".$table.$where;
-      if ( \count($where_arr['values']) > 0 ){
-        return \call_user_func_array([$this, "get_one"], array_merge([$sql], $where_arr['values']));
-      }
-      else{
-        return $this->get_one($sql);
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Return the first row resulting from the query as an object.
-   *
-   * ```php
-   * \bbn\x::dump($db->select('table_users', ['name', 'surname'], [['id','>','2']]));
-   * /*
-   * (object){
-   *   "name": "John",
-   *   "surname": "Smith",
-   * }
-   * ```
-   *
-   * @param string $table The table's name
-   * @param string|array $fields The fields' name
-   * @param array $where  The "where" condition
-   * @param array | boolean $order The "order" condition, default: false
-   * @param int $start The "start" condition, default: 0
-   * @return object|boolean
-   */
-  public function select($table, $fields = [], $where = [], $order = false, $start = 0)
+  public function tsn(string $table, bool $escaped = false): ?string
   {
-    $args = \func_get_args();
-    if ( $start ){
-      array_splice($args, 4, 0, 1);
-    }
-    else if (
-      \is_array($args[0]) &&
-      isset($args[0]['table']) &&
-      isset($args[0]['limit']) &&
-      ($args[0]['limit'] !== 1)
-    ){
-      $args[0]['limit'] = 1;
-    }
-    if ( $r = \call_user_func_array([$this, '_sel'], $args) ){
-      return $r->get_object();
-    }
-    return false;
+    return $this->table_simple_name($table, $escaped);
   }
 
   /**
-   * Return a single value
+   * Return column's full name.
+   * (similar to {@link col_full_name()})
    *
    * ```php
-   * \bbn\x::dump($db->select_one("tab_users", "name", [["id", ">", 1]], ["id" => "DESC"], 2));
-   *  (string) 'Michael'
+   * \bbn\x::dump($db->cfn("name", "table_users"));
+   * // (string)  table_users.name
+   * \bbn\x::dump($db->cfn("name", "table_users", true));
+   * // (string) \`table_users\`.\`name\`
    * ```
    *
-   * @param string $table The table's name
-   * @param string $field The field's name
-   * @param array $where  The "where" condition
-   * @param array | boolean $order The "order" condition, default: false
-   * @param int $start The "start" condition, default: 0
-   * @return string | int
+   * @param string $col The column's name (escaped or not).
+   * @param string $table The table's name (escaped or not).
+   * @param bool $escaped If set to true the returned string will be escaped.
+   * @return null|string
    */
-  public function select_one($table, $field, $where = [], $order = false, $start = 0){
-    $args = \func_get_args();
-    if ( $start ){
-      array_splice($args, 4, 0, 1);
-    }
-    else if (
-      \is_array($args[0]) &&
-      isset($args[0]['table']) &&
-      isset($args[0]['limit']) &&
-      ($args[0]['limit'] !== 1)
-    ){
-      $args[0]['limit'] = 1;
-    }
-    if ( $r = \call_user_func_array([$this, '_sel'], $args) ){
-      if ( $res = $r->get_row() ){
-        return $res[$field];
-      }
-
-    }
-    return false;
-  }
-
-  /**
-   * Return the first row resulting from the query as an indexed array.
-   *
-   * ```php
-   * \bbn\x::dump($db->rselect("tab_users", ["id", "name", "surname"], ["id", ">", 1], ["id" => "ASC"], 2));
-   * /*
-   * (array) [
-   *          "id" => 4,
-   *          "name" => "John",
-   *          "surname" => "Smith"
-   *         ]
-   * ```
-   *
-   * @param string $table The table's name
-   * @param string | array $fields The fields' name
-   * @param array $where  The "where" condition
-   * @param array | boolean $order The "order" condition, default: false
-   * @param int $start The "start" condition, default: 0
-   * @return array
-   */
-  public function rselect($table, $fields = [], $where = [], $order = false, $start = 0){
-    $args = \func_get_args();
-    if ( $start ){
-      array_splice($args, 4, 0, 1);
-    }
-    else if (
-      \is_array($args[0]) &&
-      isset($args[0]['table']) &&
-      isset($args[0]['limit']) &&
-      ($args[0]['limit'] !== 1)
-    ){
-      $args[0]['limit'] = 1;
-    }
-    if ( $r = \call_user_func_array([$this, '_sel'], $args) ){
-      return $r->get_row();
-    }
-    return false;
-  }
-
-  /**
-   * Return the first row resulting from the query as a numeric array.
-   *
-   * ```php
-   * \bbn\x::dump($db->iselect("tab_users", ["id", "name", "surname"], [["id", ">", 1]], ["id" => "ASC"], 2));
-   * /*
-   * (array)[
-   *          4,
-   *         "Jack",
-   *          "Stewart"
-   *        ]
-   * ```
-   *
-   * @param string $table The table's name
-   * @param string|array $fields The fields' name
-   * @param array $where  The "where" condition
-   * @param array | boolean $order The "order" condition, default: false
-   * @param int $start The "start" condition, default: 0
-   * @return array
-   */
-
-  public function iselect($table, $fields = [], $where = [], $order = false, $start = 0){
-    $args = \func_get_args();
-    if ( $start ){
-      array_splice($args, 4, 0, 1);
-    }
-    else if (
-      \is_array($args[0]) &&
-      isset($args[0]['table']) &&
-      isset($args[0]['limit']) &&
-      ($args[0]['limit'] !== 1)
-    ){
-      $args[0]['limit'] = 1;
-    }
-    if ( $r = \call_user_func_array([$this, '_sel'], $args) ){
-      return $r->get_irow();
-    }
-    return false;
-  }
-
-  /**
-   * Return table's rows resulting from the query as an array of objects.
-   *
-   * ```php
-   * \bbn\x::dump($db->select_all("tab_users", ["id", "name", "surname"],[["id", ">", 1]], ["id" => "ASC"], 2));
-   * /*
-   * (array)[
-   *        Object stdClass: df {
-   *          "id" => 2,
-   *          "name" => "John",
-   *          "surname" => "Smith",
-   *          },
-   *        Object stdClass: df {
-   *          "id" => 3,
-   *          "name" => "Thomas",
-   *          "surname" => "Jones",
-   *         }
-   *        ]
-   * ```
-   *
-   * @param string $table The table's name
-   * @param string|array $fields The fields' name
-   * @param array $where  The "where" condition
-   * @param array | boolean $order The "order" condition, default: false
-   * @param int $limit The "limit" condition, default: 0
-   * @param int $start The "start" condition, default: 0
-   * @return array
-   */
-  public function select_all($table, $fields = [], $where = [], $order = false, $limit = 0, $start = 0)
+  public function cfn(string $col, $table = null, bool $escaped = false): ?string
   {
-    if ( $r = \call_user_func_array([$this, '_sel'], \func_get_args()) ){
-      return $r->get_objects();
-    }
-    return [];
+    return $this->col_full_name($col, $table, $escaped);
   }
 
   /**
-   * Return table's rows as an array of indexed arrays.
+   * Return the column's simple name.
+   * (similar to {@link col_simple_name()})
    *
    * ```php
-   * \bbn\x::dump($db->rselect_all("tab_users", ["id", "name", "surname"], [["id", ">", 1]], ["id" => "ASC"], 2));
-   * /*
-   * (array) [
-   *          [
-   *          "id" => 2,
-   *          "name" => "John",
-   *          "surname" => "Smith",
-   *          ],
-   *          [
-   *          "id" => 3,
-   *          "name" => "Thomas",
-   *          "surname" => "Jones",
-   *          ]
-   *        ]
+   * \bbn\x::dump($db->csn("table_users.name"));
+   * // (string) name
+   * \bbn\x::dump($db->csn("table_users.name", true));
+   * // (string) `name`
    * ```
    *
-   * @param string $table The table's name
-   * @param string|array $fields The fields' name
-   * @param array $where  The "where" condition
-   * @param array | boolean $order condition, default: false
-   * @param int $limit The "limit" condition, default: 0
-   * @param int $start The "start" condition, default: 0
-   * @return array
+   * @param string $col The column's complete name (escaped or not)
+   * @param bool $escaped If set to true the returned string will be escaped.
+   * @return null|string
    */
-  public function rselect_all($table, $fields = [], $where = [], $order = false, $limit = 0, $start = 0)
+  public function csn(string $col, bool $escaped = false): ?string
   {
-    if ( $r = \call_user_func_array([$this, '_sel'], \func_get_args()) ){
-      return $r->get_rows();
-    }
-    return [];
+    return $this->col_simple_name($col, $escaped);
   }
+
+  /*****************************************************************************************************************
+  *                                                                                                                *
+  *                                                                                                                *
+  *                                               ENGINES INTERFACE                                                *
+  *                                                                                                                *
+  *                                                                                                                *
+  *****************************************************************************************************************/
 
   /**
-   * Return the searched rows as an array of numeric arrays.
-   *
-   * ```php
-   * \bbn\x::dump($db->iselect_all("tab_users", ["id", "name", "surname"], [["id", ">", 1]],["id" => "ASC"],2));
-   * /*
-   * (array)[
-   *          [
-   *            2,
-   *            "John",
-   *            "Smith",
-   *          ],
-   *          [
-   *            3,
-   *            "Thomas",
-   *            "Jones",
-   *          ]
-   *        ]
-   * ```
-   *
-   * @param string $table The table's name
-   * @param string|array $fields The fields's name
-   * @param array $where  The "where" condition
-   * @param array | boolean The "order" condition, default: false
-   * @param int $limit The "limit" condition, default: 0
-   * @param int $start The "start" condition, default: 0
-   * @return array
+   * @param array $cfg The user's options
+   * @return array|null The final configuration
    */
-  public function iselect_all($table, $fields = [], $where = [], $order = false, $limit = 0, $start = 0){
-    if ( $r = \call_user_func_array([$this, '_sel'], \func_get_args()) ){
-      return $r->get_irows();
-    }
-    return [];
-  }
-
-  public function count_queries(){
-    return count($this->queries);
-  }
-
-  /**
-   * Return the table's structure as an indexed array.
-   *
-   * ```php
-   * \bbn\x::dump($db->modelize("table_users"));
-   * /*
-   * (array) [keys] => Array ( [PRIMARY] => Array ( [columns] => Array ( [0] => userid [1] => userdataid ) [ref_db] => [ref_table] => [ref_column] => [unique] => 1 )     [table_users_userId_userdataId_info] => Array ( [columns] => Array ( [0] => userid [1] => userdataid [2] => info ) [ref_db] => [ref_table] => [ref_column] =>     [unique] => 0 ) ) [cols] => Array ( [userid] => Array ( [0] => PRIMARY [1] => table_users_userId_userdataId_info ) [userdataid] => Array ( [0] => PRIMARY [1] => table_users_userId_userdataId_info ) [info] => Array ( [0] => table_users_userId_userdataId_info ) ) [fields] => Array ( [userid] => Array ( [position] => 1 [null] => 0 [key] => PRI [default] => [extra] => [signed] => 1 [maxlength] => 11 [type] => int ) [userdataid] => Array ( [position] => 2 [null] => 0 [key] => PRI [default] => [extra] => [signed] => 1 [maxlength] => 11 [type] => int ) [info] => Array ( [position] => 3 [null] => 1 [key] => [default] => NULL [extra] => [signed] => 0 [maxlength] => 200 [type] => varchar ) )
-   * ```
-   *
-   * @param string $table The table's name
-   * @return null|array
-   */
-  public function modelize($table = '', $force = false): ?array
+  public function get_connection(array $cfg = []): ?array
   {
-    $r = [];
-    $tables = false;
-    if ( empty($table) || $table === '*' ){
-      $tables = $this->get_tables($this->current);
-    }
-    else if ( \is_string($table) ){
-      $tables = [$table];
-    }
-    else if ( \is_array($table) ){
-      $tables = $table;
-    }
-    if ( \is_array($tables) ){
-      foreach ( $tables as $t ){
-        $full = $this->tfn($t);
-        $r[$full] = $this->_get_cache($full, 'columns', $force);
-      }
-      if ( \count($r) === 1 ){
-        return end($r);
-      }
-      return $r;
+    if ( $this->language ){
+      return $this->language->get_connection($cfg);
     }
     return null;
   }
 
-  public function fmodelize($table = '', $force = false){
-    if ( $res = \call_user_func_array([$this, 'modelize'], \func_get_args()) ){
-      foreach ( $res['fields'] as $n => $f ){
-        $res['fields'][$n]['name'] = $n;
-        $res['fields'][$n]['keys'] = [];
-        if ( isset($res['cols'][$n]) ){
-          foreach ( $res['cols'][$n] as $key ){
-            $res['fields'][$n]['keys'][$key] = $res['keys'][$key];
-          }
-        }
-      }
-      return $res['fields'];
+  /**
+   * Changes the database used to the given one.
+   *
+   * ```php
+   * $db = new db();
+   * x::dump($db->change('db_example'));
+   * // (db)
+   * ```
+   *
+   * @param string $db The database's name
+   * @return self
+   */
+  public function change(string $db): self
+  {
+    if ( $this->language->change($db) ){
+      $this->current = $db;
     }
-    return false;
+    return $this;
+  }
+
+  /**
+   * Escapes names with the appropriate quotes (db, tables, columns, keys...)
+   *
+   * ```php
+   * bbn\x::dump($db->escape("table_users"));
+   * // (string) `table_users`
+   * ```
+   *
+   * @param string $item The name to escape.
+   * @return string
+   */
+  public function escape(string $item): string
+  {
+    return $this->language->escape($item);
+  }
+
+  /**
+   * Return table's full name.
+   *
+   * ```php
+   * bbn\x::dump($db->table_full_name("table_users"));
+   * // (String) db_example.table_users
+   * bbn\x::dump($db->table_full_name("table_users", true));
+   * // (String) `db_example`.`table_users`
+   * ```
+   *
+   * @param string $table The table's name (escaped or not).
+   * @param bool $escaped If set to true the returned string will be escaped.
+   * @return string | false
+   */
+  public function table_full_name(string $table, bool $escaped = false): ?string
+  {
+    return $this->language->table_full_name($table, $escaped);
+  }
+
+  /**
+   * Returns true if the string corresponds to the tipology of a table full name.
+   * (similar to {@link table_full_name()})
+   *
+   * ```php
+   * \bbn\x::dump($db->tfn("table_users"));
+   * // (String) db_example.table_users
+   * \bbn\x::dump($db->tfn("table_users", true));
+   * // (String) `db_example`.`table_users`
+   * ```
+   *
+   * @param string $table The table's name
+   * @return bool
+   */
+  public function is_table_full_name(string $table): bool
+  {
+    return $this->language->is_table_full_name($table);
+  }
+
+  /**
+   * @param string $col
+   * @return bool
+   */
+  public function is_col_full_name(string $col): bool
+  {
+    return $this->language->is_col_full_name($col);
+  }
+
+  /**
+   * Return table's simple name.
+   *
+   * ```php
+   * \bbn\x::dump($db->table_simple_name("example_db.table_users"));
+   * // (string) table_users
+   * \bbn\x::dump($db->table_simple_name("example.table_users", true));
+   * // (string) `table_users`
+   * ```
+   *
+   * @param string $table The table's name (escaped or not)
+   * @param bool $escaped If set to true the returned string will be escaped
+   * @return string | false
+   */
+  public function table_simple_name(string $table, bool $escaped = false): ?string
+  {
+    return $this->language->table_simple_name($table, $escaped);
+  }
+
+  /**
+   * Return column's full name.
+   *
+   * ```php
+   * \bbn\x::dump($db->col_full_name("name", "table_users"));
+   * // (string)  table_users.name
+   * \bbn\x::dump($db->col_full_name("name", "table_users", true));
+   * // (string) \`table_users\`.\`name\`
+   * ```
+   *
+   * @param string $col The column's name (escaped or not)
+   * @param string $table The table's name (escaped or not)
+   * @param bool $escaped If set to true the returned string will be escaped
+   * @return string | false
+   */
+  public function col_full_name(string $col, $table = '', $escaped = false): ?string
+  {
+    return $this->language->col_full_name($col, $table, $escaped);
+  }
+
+  /**
+   * Return the column's simple name.
+   *
+   * ```php
+   * \bbn\x::dump($db->col_simple_name("table_users.name"));
+   * // (string) name
+   * \bbn\x::dump($db->col_simple_name("table_users.name", true));
+   * // (string) `name`
+   * ```
+   *
+   * @param string $col The column's complete name (escaped or not).
+   * @param bool $escaped If set to true the returned string will be escaped.
+   * @return string | false
+   */
+  public function col_simple_name(string $col, bool $escaped = false): ?string
+  {
+    return $this->language->col_simple_name($col, $escaped);
+  }
+
+  /**
+   * Disables foreign keys constraints.
+   *
+   * ```php
+   * \bbn\x::dump($db->disable_keys());
+   * // (db)
+   * ```
+   *
+   * @return db
+   */
+  public function disable_keys(): self
+  {
+    $this->language->disable_keys();
+    return $this;
+  }
+
+  /**
+   * Enables foreign keys constraints.
+   *
+   * ```php
+   * \bbn\x::dump($db->enable_keys());
+   * // (db)
+   * ```
+   *
+   * @return db
+   */
+  public function enable_keys(): self
+  {
+    $this->language->enable_keys();
+    return $this;
   }
 
   /**
@@ -2384,9 +3464,10 @@ class db extends \PDO implements db\actions, db\api, db\engines
    *      ]
    * ```
    *
-   * @return array | false
+   * @return null|array
    */
-  public function get_databases(){
+  public function get_databases(): ?array
+  {
     return $this->_get_cache('', 'databases');
   }
 
@@ -2415,9 +3496,10 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * ```
    *
    * @param string $database Database name
-   * @return array | false
+   * @return null|array
    */
-  public function get_tables($database=''){
+  public function get_tables(string $database=''): ?array
+  {
     if ( empty($database) ){
       $database = $this->current;
     }
@@ -2474,13 +3556,14 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * ```
    *
    * @param string $table The table's name
-   * @return array | false
+   * @return null|array
    */
-  public function get_columns($table){
+  public function get_columns(string $table): ?array
+  {
     if ( $tmp = $this->_get_cache($table) ){
       return $tmp['fields'];
     }
-    return false;
+    return null;
   }
 
   /**
@@ -2522,102 +3605,123 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * ```
    *
    * @param string $table The table's name
-   * @return array | false
+   * @return null|array
    */
-  public function get_keys($table)
+  public function get_keys(string $table): ?array
   {
     if ( $tmp = $this->_get_cache($table) ){
       return [
-          "keys" => $tmp['keys'],
-          "cols" => $tmp['cols']
+        'keys' => $tmp['keys'],
+        'cols' => $tmp['cols']
       ];
     }
-    return false;
+    return null;
   }
 
   /**
-   * get_change
-   * @todo Bugfix non funziona
-   */
-  public function get_change($db){
-    return $this->language->get_change($db);
-  }
-
-  /**
-   * Return primary keys of a table as a numeric array.
-   *
-   * ```php
-   * \bbn\x::dump($db-> get_primary('table_users'));
-   * // (array) ["id"]
-   * ```
-   *
-   * @param string $table The table's name
-   * @return array
-   */
-  public function get_primary($table){
-    if ( ($keys = $this->get_keys($table)) && isset($keys['keys']['PRIMARY']) ){
-      return $keys['keys']['PRIMARY']['columns'];
-    }
-    return [];
-  }
-
-  /**
-   * Return the unique primary key of the given table.
-   *
-   * ```php
-   * \bbn\x::dump($db->get_unique_primary('table_users'));
-   * // (string) id
-   * ```
-   *
-   * @param string $table The table's name
+   * @param array $conditions
+   * @param array $cfg
    * @return string
    */
-  public function get_unique_primary($table){
-    if ( ($keys = $this->get_keys($table)) &&
-        isset($keys['keys']['PRIMARY']) &&
-        (\count($keys['keys']['PRIMARY']['columns']) === 1) ){
-      return $keys['keys']['PRIMARY']['columns'][0];
-    }
-    return false;
-  }
-
-  /**
-   * Return the unique keys of a table as a numeric array.
-   *
-   * ```php
-   * \bbn\x::dump($db->get_unique_keys('table_users'));
-   * // (array) ["userid", "userdataid"]
-   * ```
-   *
-   * @param string $table The table's name
-   * @return array
-   */
-  public function get_unique_keys($table)
+  public function get_conditions(array $conditions, array $cfg = []): string
   {
-    $fields = [];
-    if ( $ks = $this->get_keys($table) ){
-      foreach ( $ks['keys'] as $k ){
-        if ( $k['unique'] === 1 ){
-          $fields = array_merge($fields, $k['columns']);
-        }
-      }
-    }
-    return $fields;
+    return $this->language->get_conditions($conditions, $cfg);
   }
 
   /**
-   * where_json
+   * Return SQL code for row(s) SELECT.
    *
-   * @param $prop
-   * @param $value
+   * ```php
+   * \bbn\x::dump($db->get_select('table_users',['name','surname']));
+   * /*
+   * (string)
+   *   SELECT
+   *    `table_users`.`name`,
+   *    `table_users`.`surname`
+   * ```
+   *
+   * @param array $cfg The configuration array
    * @return string
-   * @todo chiedere a th
-   *
    */
-  public function where_json($prop, $value){
-    $r = [$prop => $value];
-    $json = json_encode($r);
-    return '%'.substr($json, 1, -1).'%';
+  public function get_select(array $cfg): string
+  {
+    return $this->language->get_select(...$this->_add_kind(\func_get_args()));
+  }
+
+  /**
+   * Returns the SQL code for an INSERT statement.
+   *
+   * ```php
+   * \bbn\x::dump($db->get_insert([
+   *   'tables' => ['table_users'],
+   *   'fields' => ['name','surname']
+   * ]));
+   * /*
+   * (string)
+   *  INSERT INTO `db_example`.`table_users` (
+   *              `name`, `surname`)
+   *              VALUES (?, ?)
+   * ```
+   *
+   * @param array $cfg The configuration array
+   * @return string
+   */
+  public function get_insert(array $cfg): string
+  {
+    $cfg['kind'] = 'INSERT';
+    return $this->language->get_insert($this->process_cfg($cfg));
+  }
+
+  /**
+   * Returns the SQL code for an UPDATE statement.
+   *
+   * ```php
+   * \bbn\x::dump($db->get_update([
+   *   'tables' => ['table_users'],
+   *   'fields' => ['name','surname']
+   * ]));
+   * /*
+   * (string)
+   *    UPDATE `db_example`.`table_users`
+   *    SET `table_users`.`name` = ?,
+   *        `table_users`.`surname` = ?
+   * ```
+   *
+   * @param array $cfg The configuration array
+   * @return string
+   */
+  public function get_update(array $cfg): string
+  {
+    $cfg['kind'] = 'UPDATE';
+    return $this->language->get_update($this->process_cfg($cfg));
+  }
+
+  /**
+   * Returns the SQL code for a DELETE statement.
+   *
+   * ```php
+   * \bbn\x::dump($db->get_delete('table_users',['id'=>1]));
+   * // (string) DELETE FROM `db_example`.`table_users` * WHERE 1 AND `table_users`.`id` = ?
+   * ```
+   *
+   * @param array $cfg The configuration array
+   * @return string
+   */
+  public function get_delete(array $cfg): string
+  {
+    $cfg['kind'] = 'DELETE';
+    return $this->language->get_delete($this->process_cfg($cfg));
+  }
+
+  /**
+   * Returns a string with the JOIN part of the query if there is, empty otherwise
+   *
+   * @param array $cfg
+   * @return string
+   */
+  public function get_join(array $cfg): string
+  {
+    return $this->language->get_join($cfg);
   }
 
   /**
@@ -2628,51 +3732,34 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * // (string) WHERE 1 AND `table_users`.`id` = ?
    * ```
    *
-   * @param array $where The "where" condition
-   * @param string $table The table's name
+   * @param array $cfg
    * @return string
    */
-  public function get_where(array $where, $table='', $aliases = []){
-    if ( !isset($where['bbn_where_cfg'], $where['final'], $where['keyval'], $where['values'], $where['fields']) ){
-      $where = $this->where_cfg($where, $table, $aliases);
-    }
-    $st = '';
-    if ( \count($where['final']) > 0 ){
-      if ( !\is_array($table) ){
-        $table = [$table];
-      }
-      if ( !empty($table) ){
-        foreach ( $table as $tab ){
-          $m = $this->modelize($table);
-          if ( !$m || \count($m['fields']) === 0 ){
-            /*
-            * @todo  check the fields against the table's model and the aliases
-            */
-            return $st;
-          }
-        }
-      }
-      $cls = '\bbn\\db\\languages\\'.$this->engine;
-      $operators = $cls::$operators;
-      foreach ( $where['final'] as $w ){
-        // 2 parameters, we use equal
-        if ( \count($w) >= 3 && \in_array(strtolower($w[1]), $operators) ){
-          // 4 parameters, it's a SQL function, no escaping no binding
-          if ( isset($w[3]) ){
-            $st .= 'AND '.$this->escape($w[0]).' '.$w[1].' '.$w[2].' ';
-          }
-          // 3 parameters, the operator is second item
-          else{
-            $st .= 'AND '.$this->escape($w[0]).' '.$w[1].' ? ';
-          }
-        }
-        $st .= PHP_EOL;
-      }
-      if ( !empty($st) ){
-        $st = ' WHERE 1 '.PHP_EOL.$st;
-      }
-    }
-    return $st;
+  public function get_where(array $cfg): string
+  {
+    return $this->language->get_where($cfg);
+  }
+
+  /**
+   * Returns a string with the GROUP BY part of the query if there is, empty otherwise
+   *
+   * @param array $cfg
+   * @return string
+   */
+  public function get_group_by(array $cfg): string
+  {
+    return $this->language->get_group_by($cfg);
+  }
+
+  /**
+   * Returns a string with the HAVING part of the query if there is, empty otherwise
+   *
+   * @param array $cfg
+   * @return string
+   */
+  public function get_having(array $cfg): string
+  {
+    return $this->language->get_having($cfg);
   }
 
   /**
@@ -2683,12 +3770,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * // (string) ORDER BY `name` DESC
    * ```
    *
-   * @param array $order The "order" condition
-   * @param string $table The table's name
+   * @param array $cfg
    * @return string
    */
-  public function get_order($order, $table=''){
-    return $this->language->get_order($order, $table='');
+  public function get_order(array $cfg): string
+  {
+    return $this->language->get_order($cfg);
   }
 
   /**
@@ -2699,12 +3786,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * // (string) LIMIT 1, 3
    * ```
    *
-   * @param int $limit The "limit" condition
-   * @param int $start The "start" condition, default: 0
+   * @param array $cfg
    * @return string
    */
-  public function get_limit($limit, $start = 0){
-    return $this->language->get_limit($limit, $start);
+  public function get_limit(array $cfg): string
+  {
+    return $this->language->get_limit($cfg);
   }
 
   /**
@@ -2726,346 +3813,13 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @param string $table The table's name
    * @return string | false
    */
-  public function get_create($table){
+  public function get_create(string $table): string
+  {
     return $this->language->get_create($table);
   }
 
   /**
-   * Return SQL code for row(s) DELETE.
-   *
-   * ```php
-   * \bbn\x::dump($db->get_delete('table_users',['id'=>1]));
-   * // (string) DELETE FROM `db_example`.`table_users` * WHERE 1 AND `table_users`.`id` = ?
-   * ```
-   *
-   * @param string $table The table's name
-   * @param array $where The "where" condition
-   * @param bool $ignore If true inserts the "ignore" condition , default: false
-   * @param bool $php default: false
-   * @return string | false
-   */
-  public function get_delete($table, array $where, $ignore = false, $php = false){
-    return $this->language->get_delete($table, $where, $ignore, $php);
-  }
-
-  /**
-   * Return SQL code for row(s) SELECT.
-   *
-   * ```php
-   * \bbn\x::dump($db->get_query('table_users',['name','surname'],[['id','>', 1]], ['id'=>'DESC']));
-   * /*
-   * (string)
-   *   SELECT
-   *    `table_users`.`name`,
-   *    `table_users`.`surname`
-   *   FROM `db_example`.`table_users`
-   *   WHERE 1
-   *   AND `table_users`.`id` > ?
-   * ```
-   *
-   * @param string $table The table's name
-   * @param array $fields The fields' name
-   * @param array $where The "where" condition
-   * @param string | array $order The "order" condition
-   * @param int|boolean $limit The "limit" condition, default: false
-   * @param int $start The "start" condition, default: 0
-   * @param bool $php default: false
-   * @return string
-   */
-  public function get_query($table){
-    return \call_user_func_array([$this->language, 'get_query'], \func_get_args());
-  }
-
-  /**
-   * Return SQL code for row(s) SELECT.
-   *
-   * ```php
-   * \bbn\x::dump($db->get_select('table_users',['name','surname']));
-   * /*
-   * (string)
-   *   SELECT
-   *    `table_users`.`name`,
-   *    `table_users`.`surname`
-   * ```
-   *
-   * @param string $table The table's name
-   * @param array $fields The fields' name
-   * @param array $where The "where" condition
-   * @param string | array $order The "order" condition
-   * @param int|boolean $limit The "limit" condition, default: false
-   * @param int $start The "start" condition, default: 0
-   * @param bool $php default: false
-   * @return string
-   */
-  public function get_select($table, array $fields = []){
-    return \call_user_func_array([$this->language, 'get_select'], \func_get_args());
-  }
-
-  /**
-   * Return SQL code for row(s) INSERT.
-   *
-   * ```php
-   * \bbn\x::dump($db->get_insert('table_users',['name','surname']));
-   * /*
-   * (string)
-   *  INSERT INTO `db_example`.`table_users` (
-   *              `name`, `surname`)
-   *              VALUES (?, ?)
-   * ```
-   *
-   * @param string $table The table's name
-   * @param array $fields The fields' name
-   * @param bool $ignore If true inserts the "ignore" condition, default: false
-   * @param bool $php default: false
-   * @return string
-   */
-  public function get_insert($table, array $fields = [], $ignore = false, $php = false){
-    return $this->language->get_insert($table, $fields, $ignore, $php);
-  }
-
-  /**
-   * Return SQL code for row(s) UPDATE.
-   *
-   * ```php
-   * \bbn\x::dump($db->get_update('table_users',['name','surname']));
-   * /*
-   * (string)
-   *    UPDATE `db_example`.`table_users`
-   *    SET `table_users`.`name` = ?,
-   *        `table_users`.`surname` = ?
-   * ```
-   *
-   * @param string $table The table's name
-   * @param array $fields The fields' name
-   * @param array $where The "where" condition
-   * @param bool $php default: false
-   * @return string
-   */
-  public function get_update($table, array $fields = [], array $where = [], $ignore = false, $php = false){
-    return $this->language->get_update($table, $fields, $where, $ignore, $php);
-  }
-
-  /**
-   * Return a numeric indexed array with the values of the unique column ($field) from the selected $table
-   *
-   * ```php
-   * \bbn\x::dump($db->get_column_values('table_users','surname',['id','>',1]));
-   * /*
-   * array [
-   *    "Smith",
-   *    "Jones",
-   *    "Williams",
-   *    "Taylor"
-   * ]
-   * ```
-   *
-   * @param string $table The table's name
-   * @param string $field The field's name
-   * @param array $where The "where" condition
-   * @param int | boolean $limit The "limit" condition, default: false
-   * @param int $start The "start" condition, default: 0
-   * @param bool $php default: false
-   * @return array
-   */
-  public function get_column_values($table, $field,  array $where = [], array $order = [], $limit = false, $start = 0, $php = false){
-    $r = [];
-    $where = $this->where_cfg($where, $table);
-    if ( $rows = $this->get_irows(
-        $this->language->get_column_values($table, $field, $where, $order, $limit, $start, false),
-        $where['values'])
-    ){
-      foreach ( $rows as $row ){
-        array_push($r, $row[0]);
-      }
-    }
-    return $r;
-  }
-
-  /**
-   * Return a string with the sql query to count equal values in a field of the table.
-   *
-   * ```php
-   * \bbn\x::dump($db->get_values_count('table_users','name',['surname','=','smith']));
-   * /*
-   * (string)
-   *   SELECT COUNT(*) AS num, `name` AS val FROM `db_example`.`table_users`
-   *     GROUP BY `name`
-   *     ORDER BY `name`
-   * ```
-   *
-   * @param string $table The table's name
-   * @param string $field The field's name
-   * @param array $where The "where" condition
-   * @param int|boolean $limit The "limit" condition, dafault: false
-   * @param int $start The "start" condition, default: 0
-   * @param bool $php default: false
-   * @return string
-   */
-  public function get_values_count($table, $field,  array $where = [], $limit = false, $start = 0, $php = false){
-    return $this->language->get_values_count($table, $field, $where, $limit, $start, $php);
-  }
-
-  /**
-   * Return the unique values of a column of a table as a numeric indexed array.
-   *
-   * ```php
-   * \bbn\x::dump($db->get_field_values("table_users", "surname", [['id', '>', '2']], 1, 1));
-   * // (array) ["Smiths", "White"]
-   * ```
-   *
-   * @param string $table The table's name
-   * @param string $field The field's name
-   * @param array $where The "where" condition
-   * @param int|boolean $limit The "limit" condition, default: false
-   * @param int $start The "start" condition, default: 0
-   * @return array | false
-   */
-  public function get_field_values($table, $field,  array $where = [], $limit = false, $start = 0){
-    if ( $statement = $this->language->get_column_values($table, $field, $where, [], $limit, $start) ){
-      $w = $this->where_cfg($where, $table);
-      $args = \count($w['values']) ? array_merge([$statement], $w['values']) : [$statement];
-      $r = \call_user_func_array([$this, 'get_by_columns'], $args);
-      if ( \is_array($r) ){
-        return $r[$field] ?? [];
-      }
-    }
-  }
-
-  /**
-   * Return a count of identical values in a field as array, reporting a structure type 'num' - 'val'.
-   *
-   * ```php
-   * \bbn\x::dump($db->count_field_values('table_users','surname',[['name','=','John']]));
-   * // (array) ["num" => 2, "val" => "John"]
-   * ```
-   *
-   * @param string $table The table's name
-   * @param string $field The field's name
-   * @param array $where The "where" condition
-   * @param int|boolean $limit The "limit" condition, default: false
-   * @param int $start The "start" condition, default: 0
-   * @return array | false
-   */
-  public function count_field_values($table, $field,  array $where = [], $limit = false, $start = 0){
-    if ( $r = $this->language->get_values_count($table, $field, $where, $limit, $start) ){
-      $where = $this->where_cfg($where, $table);
-      return $this->get_rows($r, $where['values']);
-    }
-  }
-
-  /**
-   * find_references
-   *
-   * @todo da errore
-   *
-   * @param $column
-   * @param string $db
-   * @return array|bool
-   *
-   */
-  public function find_references($column, $db = ''){
-    $changed = false;
-    if ( $db && ($db !== $this->current) ){
-      $changed = $this->current;
-      $this->change($db);
-    }
-    $column = $this->cfn($column);
-    $bits = explode(".", $column);
-    if ( \count($bits) === 2 ){
-      array_unshift($bits, $this->current);
-    }
-    if ( \count($bits) !== 3 ){
-
-      return false;
-    }
-    $refs = [];
-    $schema = $this->modelize();
-    $test = function($key) use($bits){
-      return ($key['ref_db'] === $bits[0]) && ($key['ref_table'] === $bits[1]) && ($key['ref_column'] === $bits[2]);
-    };
-    foreach ( $schema as $table => $cfg ){
-      foreach ( $cfg['keys'] as $k ){
-        if ( $test($k) ){
-          array_push($refs, $table.'.'.$k['columns'][0]);
-        }
-      }
-    }
-    if ( $changed ){
-      $this->change($changed);
-    }
-    return $refs;
-  }
-
-  /**
-   * find_relations
-   * @todo da errore
-   *
-   * @param $column
-   * @param string $db
-   * @return array|bool
-   */
-  public function find_relations($column, $db = ''){
-    $changed = false;
-    if ( $db && ($db !== $this->current) ){
-      $changed = $this->current;
-      $this->change($db);
-    }
-    $column = $this->cfn($column);
-    $bits = explode(".", $column);
-    if ( \count($bits) === 2 ){
-      array_unshift($bits, $this->current);
-    }
-    if ( \count($bits) !== 3 ){
-
-      return false;
-    }
-    $table = $bits[1];
-    $refs = [];
-    $schema = $this->modelize();
-    $test = function($key) use($bits){
-      return ($key['ref_db'] === $bits[0]) && ($key['ref_table'] === $bits[1]) && ($key['ref_column'] === $bits[2]);
-    };
-    foreach ( $schema as $tf => $cfg ){
-      $t = $this->tsn($tf);
-      if ( $t !== $table ){
-        foreach ( $cfg['keys'] as $k ){
-          if ( $test($k) ){
-            foreach ( $cfg['keys'] as $k2 ){
-              // Is not the same table
-              if ( !$test($k2) &&
-                  // Has a reference
-                  !empty($k2['ref_column']) &&
-                  // A unique reference
-                  (\count($k2['columns']) === 1) &&
-                  // To a table with a primary
-                  isset($schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']]) &&
-                  // which is a sole column
-                  (\count($schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']]) === 1) &&
-                  // We retrieve the key name
-                  ($key_name = $schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']][0]) &&
-                  // which is unique
-                  !empty($schema[$this->tfn($k2['ref_table'])]['keys'][$key_name]['unique']) &&
-                  // and refers to a single column
-                  (\count($k['columns']) === 1)
-              ){
-                if ( !isset($refs[$t]) ){
-                  $refs[$t] = ['column' => $k['columns'][0], 'refs' => []];
-                }
-                $refs[$t]['refs'][$k2['columns'][0]] = $k2['ref_table'].'.'.$k2['ref_column'];
-              }
-            }
-          }
-        }
-      }
-    }
-    if ( $changed ){
-      $this->change($changed);
-    }
-    return $refs;
-  }
-
-  /**
-   * Creates an index on a column of the table
+   * Creates an index on one or more column(s) of the table
    *
    * @todo return data
    *
@@ -3074,13 +3828,15 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * // (void)
    * ```
    *
-   * @param string $table The table's name
-   * @param string $column The column's name
-   * @param boolean $unique Default false
-   * @return void
+   * @param string $table
+   * @param string|array $column
+   * @param bool $unique
+   * @param null $length
+   * @return bool
    */
-  public function create_db_index($table, $column, $unique = false, $length = null){
-    return $this->language->create_db_index($table, $column, $unique);
+  public function create_index(string $table, $column, bool $unique = false, $length = null): bool
+  {
+    return $this->language->create_index($table, $column, $unique);
   }
 
   /**
@@ -3094,11 +3850,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * ```
    *
    * @param string $table The table's name.
-   * @param string $column The column's name.
-   * @return void
+   * @param string $key The key's name.
+   * @return bool
    */
-  public function delete_db_index($table, $column){
-    return $this->language->delete_db_index($table, $column);
+  public function delete_index(string $table, string $key): bool
+  {
+    return $this->language->delete_index($table, $key);
   }
 
   /**
@@ -3110,13 +3867,14 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * // (void)
    * ```
    *
-   * @param string $user. The username
-   * @param string $pass. The password
-   * @param string $db. The database's name
-   * @return void
+   * @param string $user
+   * @param string $pass
+   * @param string $db
+   * @return bool
    */
-  public function create_db_user($user, $pass, $db){
-    return $this->language->create_db_user($user, $pass, $db);
+  public function create_user(string $user, string $pass, string $db = null): bool
+  {
+    return $this->language->create_user($user, $pass, $db);
   }
 
   /**
@@ -3129,11 +3887,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * // (void)
    * ```
    *
-   * @param string $user. The username to delete
-   * @return void
+   * @param string $user
+   * @return bool
    */
-  public function delete_db_user($user){
-    return $this->language->delete_db_user($user);
+  public function delete_user(string $user): bool
+  {
+    return $this->language->delete_user($user);
   }
 
   /**
@@ -3149,21 +3908,269 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * ```
    *
    * @param string $user. The user's name, without params will return all privileges of all db_users
+   * @param string $host. The host
    * @return array
    */
-  public function get_users($user='', $host=''){
+  public function get_users(string $user = '', string $host = ''): ?array
+  {
     return $this->language->get_users($user, $host);
   }
 
-  public function db_size(string $database = '', string $type = ''){
+  /**
+   * @param string $database
+   * @param string $type
+   * @return int
+   */
+  public function db_size(string $database = '', string $type = ''): int
+  {
     return $this->language->db_size($database, $type);
   }
 
-  public function table_size(string $table, string $type = ''){
+  /**
+   * @param string $table
+   * @param string $type
+   * @return int
+   */
+  public function table_size(string $table, string $type = ''): int
+  {
     return $this->language->table_size($table, $type);
   }
 
-  public function status(string $table = '', string $database = ''){
+  /**
+   * @param string $table
+   * @param string $database
+   * @return array|false|mixed
+   */
+  public function status(string $table = '', string $database = '')
+  {
     return $this->language->status($table, $database);
+  }
+
+  /**
+   * @return string
+   */
+  public function get_uid(): string
+  {
+    //return hex2bin(str_replace('-', '', \bbn\x::make_uid()));
+    return $this->language->get_uid();
+  }
+
+  /*****************************************************************************************************************
+  *                                                                                                                *
+  *                                                                                                                *
+  *                                               ACTIONS INTERFACE                                                *
+  *                                                                                                                *
+  *                                                                                                                *
+  *****************************************************************************************************************/
+
+  /**
+   * Return the first row resulting from the query as an array indexed with the fields' name.
+   *
+   * ```php
+   * \bbn\x::dump($db->get_row("SELECT id, name FROM table_users WHERE id > ? ", 2));;
+   *
+   * /* (array)[
+   *        "id" => 3,
+   *        "name" => "thomas",
+   *        ]
+   * ```
+   *
+   * @param string query.
+   * @param int The var ? value.
+   * @return array | false
+   *
+   */
+  public function get_row(): ?array
+  {
+    if ( $r = $this->query(...\func_get_args()) ){
+      return $r->get_row();
+    }
+    return null;
+  }
+
+  /**
+   * Return an array that includes indexed arrays for every row resultant from the query.
+   *
+   * ```php
+   * \bbn\x::dump($db->get_rows("SELECT id, name FROM table_users WHERE id > ? LIMIT ?", 2));
+   * /* (array)[
+   *            [
+   *            "id" => 3,
+   *            "name" => "john",
+   *            ],
+   *            [
+   *            "id" => 4,
+   *            "name" => "barbara",
+   *            ],
+   *          ]
+   * ```
+   *
+   * @param string
+   * @param int The var ? value
+   * @return array | false
+   */
+  public function get_rows(): ?array
+  {
+    if ( $r = $this->query(...\func_get_args()) ){
+      return $r->get_rows();
+    }
+    return null;
+  }
+
+  /**
+   * Return a row as a numeric indexed array.
+   *
+   * ```php
+   * \bbn\x::dump($db->get_irow("SELECT id, name, surname FROM table_users WHERE id > ?", 2));
+   * /* (array) [
+   *              3,
+   *              "john",
+   *              "brown",
+   *             ]
+   * ```
+   *
+   * @param string query
+   * @param int The var ? value
+   * @return array | false
+   */
+  public function get_irow(): ?array
+  {
+    if ( $r = $this->query(...\func_get_args()) ){
+      return $r->get_irow();
+    }
+    return null;
+  }
+
+  /**
+   * Return an array of numeric indexed rows.
+   *
+   * ```php
+   * \bbn\x::dump($db->get_irows("SELECT id, name FROM table_users WHERE id > ? LIMIT ?", 2, 2));
+   * /*
+   * (array)[
+   *         [
+   *          3,
+   *         "john"
+   *         ],
+   *         [
+   *         4,
+   *         "barbara"
+   *        ]
+   *       ]
+   * ```
+   *
+   * @return null|array
+   */
+  public function get_irows(): ?array
+  {
+    if ( $r = $this->query(...\func_get_args()) ){
+      return $r->get_irows();
+    }
+    return null;
+  }
+
+  /**
+   * Return an array indexed on the searched field's in which there are all the values of the column.
+   *
+   * ```php
+   * \bbn\x::dump($db->get_by_columns("SELECT name, surname FROM table_users WHERE id > 2"));
+   * /*
+   * (array) [
+   *      "name" => [
+   *       "John",
+   *       "Michael"
+   *      ],
+   *      "surname" => [
+   *        "Brown",
+   *        "Smith"
+   *      ]
+   *     ]
+   * ```
+   *
+   * @param string query
+   * @return null|array
+   */
+  public function get_by_columns(): ?array
+  {
+    if ( $r = $this->query(...\func_get_args()) ){
+      return $r->get_by_columns();
+    }
+    return null;
+  }
+
+  /**
+   * Return the first row resulting from the query as an object (similar to {@link get_object()}).
+   *
+   * ```php
+   * \bbn\x::dump($db->get_obj("SELECT surname FROM table_users"));
+   * /*
+   * (obj){
+   *       "name" => "Smith"
+   *       }
+   * ```
+   *
+   * @return null|\stdClass
+   */
+  public function get_obj(): ?\stdClass
+  {
+    return $this->get_object(\func_get_args());
+  }
+
+  /**
+   * Return the first row resulting from the query as an object.
+   * Synonym of get_obj.
+   *
+   * ```php
+   * \bbn\x::dump($db->get_object("SELECT name FROM table_users"));
+   * /*
+   * (obj){
+   *       "name" => "John"
+   *       }
+   * ```
+   *
+   * @return null|\stdClass
+   */
+  public function get_object(): ?\stdClass
+  {
+    if ( $r = $this->query(...\func_get_args()) ){
+      return $r->get_object();
+    }
+    return null;
+  }
+
+  /**
+   * Return an array of stdClass objects.
+   *
+   * ```php
+   * \bbn\x::dump($db->get_objects("SELECT name FROM table_users"));
+   *
+   * /*
+   * (array) [
+   *          Object stdClass: df {
+   *            "name" => "John",
+   *          },
+   *          Object stdClass: df {
+   *            "name" => "Michael",
+   *          },
+   *          Object stdClass: df {
+   *            "name" => "Thomas",
+   *          },
+   *          Object stdClass: df {
+   *            "name" => "William",
+   *          },
+   *          Object stdClass: df {
+   *            "name" => "Jake",
+   *          },
+   *         ]
+   * ```
+   *
+   * @return null|array
+   */
+  public function get_objects(): ?array
+  {
+    if ( $r = $this->query(...\func_get_args()) ){
+      return $r->get_objects();
+    }
+    return [];
   }
 }

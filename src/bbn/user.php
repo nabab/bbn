@@ -726,7 +726,7 @@ class user extends models\cls\basic
    * Returns the list of tables used by the current class.
    * @return array
    */
-  public function get_tables():? array
+  public function get_tables(): ?array
   {
     if ( !empty($this->class_cfg) ){
       return $this->class_cfg['tables'];
@@ -739,7 +739,7 @@ class user extends models\cls\basic
    * @param string $table
    * @return array|null
    */
-  public function get_fields(string $table = ''):? array
+  public function get_fields(string $table = ''): ?array
   {
     if ( !empty($this->class_cfg) ){
       if ( $table ){
@@ -1213,7 +1213,7 @@ class user extends models\cls\basic
     return false;
   }
 
-  public function get_token_id(string $token):? string
+  public function get_token_id(string $token): ?string
   {
     if ( $id_session = $this->get_id_session() ){
       if ( $id = $this->db->select_one('bbn_users_tokens', 'id', [

@@ -212,7 +212,7 @@ class notes extends bbn\models\cls\db
       if ( \bbn\str::is_uid($id_user) ){
         $where[$cf['arch']['notes']['creator']] = $id_user;
       }
-      $notes = $db->rselect_all($cf['table'], [], $where, false, $limit, $start);
+      $notes = $db->rselect_all($cf['table'], [], $where, [], $limit, $start);
       foreach ( $notes as $note ){
         if ( $version = $db->rselect($cf['tables']['versions'], [], [
           $cf['arch']['versions']['id_note'] => $note[$cf['arch']['notes']['id']],

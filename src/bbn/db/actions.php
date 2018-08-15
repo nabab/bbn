@@ -26,54 +26,54 @@ interface actions
 	 * @params 
 	 * @return false|array
 	 */
-	public function get_row();
+	public function get_row(): ?array;
 
 	/**
 	 * Fetches the database and returns an array of several arrays of rows text-indexed
 	 *
 	 * @return false|array
 	 */
-	public function get_rows();
+	public function get_rows(): ?array;
 
 	/**
 	 * Fetches the database and returns an array of a single row num-indexed
 	 *
 	 * @return false|array
 	 */
-	public function get_irow();
+	public function get_irow(): ?array;
 
 	/**
 	 * Fetches the database and returns an array of several arrays of rows num-indexed
 	 *
 	 * @return false|array
 	 */
-	public function get_irows();
+	public function get_irows(): ?array;
 
 	/**
 	 * Fetches the database and returns an array of arrays, one per column, each having each column's values
 	 *
 	 * @return false|array
 	 */
-	public function get_by_columns();
+	public function get_by_columns(): ?array;
 
 	/**
 	 * Fetches the database and returns an object of a single row, alias of get_object
 	 *
-	 * @return false|object
+	 * @return null|\stdClass
 	 */
-	public function get_obj();
+	public function get_obj(): ?\stdClass;
 
 	/**
 	 * Fetches the database and returns an object of a single row
 	 *
-	 * @return false|object
+   * @return null|\stdClass
 	 */
-	public function get_object();
+	public function get_object(): ?\stdClass;
 
 	/**
 	 * Fetches the database and returns an array of objects 
 	 *
-	 * @return false|array
+	 * @return null|array
 	 */
-	public function get_objects();
+	public function get_objects(): ?array;
 }

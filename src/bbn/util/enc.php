@@ -92,7 +92,7 @@ class enc
    * @param string $password User's optional password
    * @return null|string
    */
-  public static function encryptOpenssl($textToEncrypt, string $encryptionMethod = null, string $secretHash = null, bool $raw = false, string $password = '') :? string
+  public static function encryptOpenssl($textToEncrypt, string $encryptionMethod = null, string $secretHash = null, bool $raw = false, string $password = ''): ? string
   {
     if ( !$encryptionMethod ){
       $encryptionMethod = self::$method;
@@ -116,7 +116,7 @@ class enc
    * @param string $password User's optional password
    * @return null|string
    */
-  public static function decryptOpenssl($textToDecrypt, string $encryptionMethod = null, string $secretHash = null, bool $raw = false, string $password = '') :? string
+  public static function decryptOpenssl($textToDecrypt, string $encryptionMethod = null, string $secretHash = null, bool $raw = false, string $password = ''): ? string
   {
     if ( !$encryptionMethod ){
       $encryptionMethod = self::$method;
