@@ -355,8 +355,8 @@ class mvc implements mvc\api{
     return $this;
   }*/
 
-  public function get_route($path, $mode){
-    return $this->router->route($path, $mode);
+  public function get_route($path, $mode, $root = null){
+    return $this->router->route($path, $mode, $root);
   }
 
   public function get_file(){
@@ -414,6 +414,30 @@ class mvc implements mvc\api{
 	}
 
   /**
+   * @param string $path
+   * @param string $mode
+   * @return bool
+   */
+  public function has_view(string $path = '', string $mode = 'html'): bool
+  {
+    return array_key_exists($mode, self::$loaded_views[$mode]) && isset(self::$loaded_views[$mode][$path]);
+  }
+
+  /**
+   * @param string $path
+   * @param string $mode
+   * @param mvc\view $view
+   * @return void
+   */
+  public function add_to_views(string $path, string $mode, mvc\view $view): void
+  {
+    if ( !array_key_exists($mode, self::$loaded_views[$mode]) ){
+      self::$loaded_views[$mode] = [];
+    }
+    self::$loaded_views[$mode][$path] = $view;
+  }
+
+  /**
    * This will get a view.
    *
    * @param string $path
@@ -425,22 +449,53 @@ class mvc implements mvc\api{
     if ( !router::is_mode($mode) ){
       die("Incorrect mode $path $mode");
     }
-    if ( ($this->get_mode() === 'dom') && (BBN_DEFAULT_MODE !== 'dom') ){
+    if ( ($this->get_mode() === 'dom') && (!defined('BBN_DEFAULT_MODE') || (BBN_DEFAULT_MODE !== 'dom')) ){
       $path .= ($path === '' ? '' : '/').'index';
     }
     $view = null;
-    if ( isset(self::$loaded_views[$mode][$path]) ){
+    if ( $this->has_view($path, $mode) ){
       $view = self::$loaded_views[$mode][$path];
     }
     else if ( $info = $this->router->route($path, $mode) ){
       $view = new mvc\view($info);
-      self::$loaded_views[$mode][$path] = $view;
+      $this->add_to_views($path, $mode, $view);
     }
     if ( \is_object($view) && $view->check() ){
       return \is_array($data) ? $view->get($data) : $view->get();
     }
     return '';
   }
+
+  /**
+   * This will get a view from a different root.
+   *
+   * @param string $full_path
+   * @param string $mode
+   * @param array $data
+   * @return string|false
+   */
+  public function get_external_view(string $full_path, string $mode = 'html', array $data=null){
+    if ( !router::is_mode($mode) ){
+      die("Incorrect mode $full_path $mode");
+    }
+    if ( ($this->get_mode() === 'dom') && (!defined('BBN_DEFAULT_MODE') || (BBN_DEFAULT_MODE !== 'dom')) ){
+      $full_path .= ($full_path === '' ? '' : '/').'index';
+    }
+    $view = null;
+    if ( $this->has_view($full_path, $mode) ){
+      $view = self::$loaded_views[$mode][$full_path];
+    }
+    else if ( $info = $this->router->route(basename($full_path), 'free-'.$mode, \dirname($full_path)) ){
+      $view = new mvc\view($info);
+      $this->add_to_views($full_path, $mode, $view);
+    }
+    if ( \is_object($view) && $view->check() ){
+      return \is_array($data) ? $view->get($data) : $view->get();
+    }
+    return '';
+  }
+
+
 
   /**
    * This will get a view.

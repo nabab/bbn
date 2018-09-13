@@ -79,6 +79,7 @@ class tasks extends bbn\models\cls\db{
 
   public function __construct(bbn\db $db){
     parent::__construct($db);
+    self::optional_init($this);
     if ( $user = bbn\user::get_instance() ){
       $this->user = $user->get_name();
       $this->id_user = $user->get_id();
@@ -94,7 +95,6 @@ class tasks extends bbn\models\cls\db{
       }
     }
     $this->columns = array_keys($this->db->get_columns('bbn_tasks'));
-    self::optional_init($this);
   }
 
   public function get_title($id_task){
@@ -231,11 +231,13 @@ class tasks extends bbn\models\cls\db{
     if (
       $this->exists($id) &&
       ($action = $this->id_action('price_approved'))
-    )
-    return $this->db->select('bbn_tasks_logs', [], [
-      'id_task' => $id,
-      'action' => $action
-    ], ['chrono' => 'DESC']);
+    ){
+      return $this->db->rselect('bbn_tasks_logs', [], [
+        'id_task' => $id,
+        'action' => $action
+      ], ['chrono' => 'DESC']) ?: new \stdClass();
+    }
+    return new \stdClass();
   }
 
   public function get_price_log($id){
@@ -243,20 +245,34 @@ class tasks extends bbn\models\cls\db{
       $this->exists($id) &&
       ($action_ins = $this->id_action('price_insert')) &&
       ($action_upd = $this->id_action('price_update'))
-    )
-    return $this->db->get_obj("
-      SELECT *
-      FROM bbn_tasks_logs
-      WHERE id_task = ?
-        AND (
-            action = ?
-            OR action = ?
-          )
-      ORDER BY chrono DESC",
-      hex2bin($id),
-      hex2bin($action_ins),
-      hex2bin($action_upd)
-    );
+    ){
+      return $this->db->rselect([
+        'table' => 'bbn_tasks_logs',
+        'where' => [
+          'logic' => 'AND',
+          'conditions' => [[
+            'field' => 'id_task',
+            'operation' => '=',
+            'value' => $id
+          ], [
+            'logic' => 'OR',
+            'conditions' => [[
+              'field' => 'action',
+              'operatort' => '=',
+              'value' => $action_ins
+            ], [
+              'field' => 'action',
+              'operatort' => '=',
+              'value' => $action_upd
+            ]]
+          ]]
+        ],
+        'order' => [[
+          'field' => 'chrono',
+          'dir' => 'DESC'
+        ]]
+      ]) ?: new \stdClass();
+    }
   }
 
   public function get_list($parent = null, $status = 'opened|ongoing|holding', $id_user = false, $order = 'priority', $dir = 'ASC', $limit = 1000, $start = 0){
@@ -702,7 +718,7 @@ class tasks extends bbn\models\cls\db{
         'bbn_tasks_roles',
         [],
         ['id_task' => $id],
-        'role');
+        ['role' => 'ASC']);
       $n = false;
       foreach ( $all as $a ){
         $code = bbn\x::get_field($roles, ['id' => $a['role']], 'code');
@@ -1131,7 +1147,8 @@ class tasks extends bbn\models\cls\db{
         			OR bbn_tasks_roles.role = ?
         		)
         WHERE bbn_tasks.active = 1
-          AND bbn_tasks.state = ?",
+          AND bbn_tasks.state = ?
+        GROUP BY bbn_tasks.id",
         hex2bin($id_user),
         hex2bin($manager),
         hex2bin($worker),

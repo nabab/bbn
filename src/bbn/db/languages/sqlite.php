@@ -458,6 +458,9 @@ class sqlite implements bbn\db\engines
                   $is_uid = true;
                 }
               }
+              else if ( \in_array($model['type'], self::$numeric_types, true) ){
+                $is_number = true;
+              }
             }
           }
           else{

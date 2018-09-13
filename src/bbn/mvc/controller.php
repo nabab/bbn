@@ -722,6 +722,10 @@ class controller implements api{
     return $v;
 	}
 
+  public function get_external_view(string $full_path, string $mode = 'html', array $data=null){
+    return $this->mvc->get_external_view($full_path, $mode, $data);
+  }
+
   public function get_plugin_view(string $path, string $type = 'html', array $data = []){
     return $this->mvc->get_plugin_view($path, $type, $data, $this->say_plugin());
   }
@@ -834,8 +838,8 @@ class controller implements api{
     return $this->mvc->get_routes();
   }
 
-  public function get_route($path, $mode){
-    return $this->mvc->get_route($path, $mode);
+  public function get_route($path, $mode, $root = null){
+    return $this->mvc->get_route($path, $mode, $root);
   }
 
   public function get_prepath(){

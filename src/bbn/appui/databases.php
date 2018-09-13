@@ -146,21 +146,21 @@ class databases extends bbn\models\cls\cache
    * @return false|int
    */
   public function db_id(string $db = '', string $host = ''){
-    if ( !\bbn\str::is_uid($host) ){
+    if ( !bbn\str::is_uid($host) ){
       $host = $this->host_id($host ?: $this->db->host);
     }
     //var_dump("P{ARENT", $host, $this->o->from_code('dbs', $host));
-    if ( \bbn\str::is_uid($host) && ($id_parent = $this->o->from_code('dbs', $host)) ){
+    if ( bbn\str::is_uid($host) && ($id_parent = $this->o->from_code('dbs', $host)) ){
       return $this->o->from_code($db ?: $this->db->current, $id_parent);
     }
     return false;
   }
 
   public function count_dbs(string $host){
-    if ( !\bbn\str::is_uid($host) ){
+    if ( !bbn\str::is_uid($host) ){
       $host = $this->host_id($host);
     }
-    if ( \bbn\str::is_uid($host) && ($id_parent = $this->o->from_code('dbs', $host)) ){
+    if ( bbn\str::is_uid($host) && ($id_parent = $this->o->from_code('dbs', $host)) ){
       return $this->o->count($id_parent);
     }
   }
@@ -170,10 +170,10 @@ class databases extends bbn\models\cls\cache
    * @return array|false
    */
   public function dbs(string $host = ''){
-    if ( !\bbn\str::is_uid($host) ){
+    if ( !bbn\str::is_uid($host) ){
       $host = $this->host_id($host ?: $this->db->host);
     }
-    if ( \bbn\str::is_uid($host) && ($id_parent = $this->o->from_code('dbs', $host)) ){
+    if ( bbn\str::is_uid($host) && ($id_parent = $this->o->from_code('dbs', $host)) ){
       return array_map(function($a){
         return [
           'id' => $a['id'],
@@ -190,10 +190,10 @@ class databases extends bbn\models\cls\cache
    * @return array|false
    */
   public function full_dbs(string $host = ''){
-    if ( !\bbn\str::is_uid($host) ){
+    if ( !bbn\str::is_uid($host) ){
       $host = $this->host_id($host ?: $this->db->host);
     }
-    if ( \bbn\str::is_uid($host) && ($id_parent = $this->o->from_code('dbs', $host)) ){
+    if ( bbn\str::is_uid($host) && ($id_parent = $this->o->from_code('dbs', $host)) ){
       $o =& $this->o;
       return array_map(function($a) use ($o){
         $r = [
@@ -226,19 +226,19 @@ class databases extends bbn\models\cls\cache
    * @return false|int
    */
   public function table_id(string $table, string $db = '', string $host = ''){
-    if ( !\bbn\str::is_uid($db) ){
+    if ( !bbn\str::is_uid($db) ){
       $db = $this->db_id($db, $host);
     }
-    if ( \bbn\str::is_uid($db) && ($id_parent = $this->o->from_code('tables', $db)) ){
+    if ( bbn\str::is_uid($db) && ($id_parent = $this->o->from_code('tables', $db)) ){
       return $this->o->from_code($table, $id_parent);
     }
   }
 
   public function count_tables(string $db, string $host = ''){
-    if ( !\bbn\str::is_uid($db) ){
+    if ( !bbn\str::is_uid($db) ){
       $db = $this->db_id($db, $host);
     }
-    if ( \bbn\str::is_uid($db) && ($id_parent = $this->o->from_code('tables', $db)) ){
+    if ( bbn\str::is_uid($db) && ($id_parent = $this->o->from_code('tables', $db)) ){
       return $this->o->count($id_parent);
     }
   }
@@ -249,10 +249,10 @@ class databases extends bbn\models\cls\cache
    * @return array|false
    */
   public function tables(string $db = '', string $host = ''){
-    if ( !\bbn\str::is_uid($db) ){
+    if ( !bbn\str::is_uid($db) ){
       $db = $this->db_id($db ?: $this->db->current, $host ?: $this->db->host);
     }
-    if ( \bbn\str::is_uid($db) && ($id_parent = $this->o->from_code('tables', $db)) ){
+    if ( bbn\str::is_uid($db) && ($id_parent = $this->o->from_code('tables', $db)) ){
       return array_map(function($a){
         return [
           'id' => $a['id'],
@@ -270,10 +270,10 @@ class databases extends bbn\models\cls\cache
    * @return array|false
    */
   public function full_tables(string $db = '', $host = ''){
-    if ( !\bbn\str::is_uid($db) ){
+    if ( !bbn\str::is_uid($db) ){
       $db = $this->db_id($db ?: $this->db->current, $host ?: $this->db->host);
     }
-    if ( \bbn\str::is_uid($db) && ($id_parent = $this->o->from_code('tables', $db)) ){
+    if ( bbn\str::is_uid($db) && ($id_parent = $this->o->from_code('tables', $db)) ){
       $o =& $this->o;
       return array_map(function($a) use ($o){
         $r = [
@@ -420,18 +420,18 @@ class databases extends bbn\models\cls\cache
    * @return false|int
    */
   public function column_id(string $column, string $table, string $db = '', string $host = ''){
-    if ( \bbn\str::is_uid($table) ){
+    if ( bbn\str::is_uid($table) ){
       return $this->o->from_code($this->db->csn($column), 'columns', $table);
     }
     return self::get_option_id($this->db->csn($column), 'columns', $this->db->tsn($table), 'tables', $db ?: $this->db->current, 'dbs', $host ?: $this->db->host, 'hosts');
   }
 
   public function count_columns(string $table, string $db = '', string $host = ''){
-    if ( !\bbn\str::is_uid($table) ){
+    if ( !bbn\str::is_uid($table) ){
       $table = $this->table_id($table, $db, $host);
     }
     if (
-      \bbn\str::is_uid($table) &&
+      bbn\str::is_uid($table) &&
       ($id_parent = $this->o->from_code('columns', $table))
     ){
       return $this->o->count($id_parent);
@@ -445,10 +445,10 @@ class databases extends bbn\models\cls\cache
    * @return array|false
    */
   public function columns(string $table, string $db = '', string $host = ''){
-    if ( !\bbn\str::is_uid($table) ){
+    if ( !bbn\str::is_uid($table) ){
       $table = $this->table_id($this->db->tsn($table), $db, $host);
     }
-    if ( \bbn\str::is_uid($table) && ($id_parent = $this->o->from_code('columns', $table)) ){
+    if ( bbn\str::is_uid($table) && ($id_parent = $this->o->from_code('columns', $table)) ){
       return $this->o->options($id_parent);
     }
     return false;
@@ -461,10 +461,10 @@ class databases extends bbn\models\cls\cache
    * @return array|false
    */
   public function full_columns(string $table, string $db = '', string $host = ''){
-    if ( !\bbn\str::is_uid($table) ){
+    if ( !bbn\str::is_uid($table) ){
       $table = $this->table_id($table, $db, $host);
     }
-    if ( \bbn\str::is_uid($table) && ($id_parent = $this->o->from_code('columns', $table)) ){
+    if ( bbn\str::is_uid($table) && ($id_parent = $this->o->from_code('columns', $table)) ){
       return $this->o->full_options($id_parent);
     }
     return false;
@@ -478,17 +478,17 @@ class databases extends bbn\models\cls\cache
    * @return false|int
    */
   public function key_id(string $key, string $table, string $db = '', string $host = ''){
-    if ( \bbn\str::is_uid($key) ){
+    if ( bbn\str::is_uid($key) ){
       return $this->o->from_code($key, $table);
     }
     return self::get_option_id($key, 'keys', $table, 'tables', $db ?: $this->db->current, 'dbs', $host ?: $this->db->host, 'hosts');
   }
 
   public function count_keys(string $table, string $db = '', string $host = ''){
-    if ( !\bbn\str::is_uid($table) ){
+    if ( !bbn\str::is_uid($table) ){
       $table = $this->table_id($table, $db, $host);
     }
-    if ( \bbn\str::is_uid($table) && ($id_parent = $this->o->from_code('keys', $table)) ){
+    if ( bbn\str::is_uid($table) && ($id_parent = $this->o->from_code('keys', $table)) ){
       return $this->o->count($id_parent);
     }
   }
@@ -500,11 +500,11 @@ class databases extends bbn\models\cls\cache
    * @return array|bool|false
    */
   public function keys(string $table, string $db = '', string $host = ''){
-    if ( !\bbn\str::is_uid($table) ){
+    if ( !bbn\str::is_uid($table) ){
       $table = $this->table_id($table, $db, $host);
     }
     if (
-      \bbn\str::is_uid($table) &&
+      bbn\str::is_uid($table) &&
       ($id_parent = $this->o->from_code('keys', $table)) &&
       ($tree = $this->o->full_tree($id_parent)) &&
       $tree['items']
@@ -642,10 +642,10 @@ class databases extends bbn\models\cls\cache
         if ( !empty($host) && !bbn\str::is_uid($host) ){
           $tables = $this->connection($host, $db)->get_tables();
           if ( !empty($tables) ){
-        foreach ( $tables as $t ){
-          $this->import_table($t, $id_db);
-        }
-      }
+            foreach ( $tables as $t ){
+              $this->import_table($t, $id_db);
+            }
+          }
         }
       }
       return $id_db;
@@ -708,9 +708,9 @@ class databases extends bbn\models\cls\cache
         $fields = [];
         foreach ( $m['fields'] as $col => $cfg ){
           if ( $opt_col = $this->o->option($col, $id_columns) ){
-            $num_cols += (int)$this->o->set($opt_col['id'], \bbn\x::merge_arrays($opt_col, $cfg));
+            $num_cols += (int)$this->o->set($opt_col['id'], bbn\x::merge_arrays($opt_col, $cfg));
           }
-          else if ( $id = $this->o->add(\bbn\x::merge_arrays($cfg, [
+          else if ( $id = $this->o->add(bbn\x::merge_arrays($cfg, [
             'id_parent' => $id_columns,
             'text' => $col,
             'code' => $col,
@@ -725,7 +725,7 @@ class databases extends bbn\models\cls\cache
           }
         }
         $columns_to_delete = array_filter($this->o->options($id_columns), function($c) use($m){
-          return !\in_array($c, array_keys($m['fields']));
+          return array_key_exists($c, $m['fields']);
         });
         if ( !empty($columns_to_delete) ){
           foreach ( $columns_to_delete as $id => $c ){
@@ -747,9 +747,9 @@ class databases extends bbn\models\cls\cache
             unset($cfg['ref_db'], $cfg['ref_table'], $cfg['ref_column']);
           }
           if ( $opt_key = $this->o->option($key, $id_keys) ){
-            $num_keys += (int)$this->o->set($opt_key['id'], \bbn\x::merge_arrays($opt_key, $cfg));
+            $num_keys += (int)$this->o->set($opt_key['id'], bbn\x::merge_arrays($opt_key, $cfg));
           }
-          else if ( $id = $this->o->add(\bbn\x::merge_arrays($cfg, [
+          else if ( $id = $this->o->add(bbn\x::merge_arrays($cfg, [
             'id_parent' => $id_keys,
             'text' => $key,
             'code' => $key
@@ -766,7 +766,7 @@ class databases extends bbn\models\cls\cache
             foreach ( $cols as $col ){
               if ( isset($fields[$col]) ){
                 if ( $opt = $this->o->option($col, $opt_key['id']) ){
-                  $this->o->set($opt['id'], \bbn\x::merge_arrays($opt, [
+                  $this->o->set($opt['id'], bbn\x::merge_arrays($opt, [
                     'id_alias' => $fields[$col]
                   ]));
                 }
@@ -786,7 +786,7 @@ class databases extends bbn\models\cls\cache
           }
         }
         $keys_to_delete = array_filter($this->o->options($id_keys), function($c) use($m){
-          return !\in_array($c, array_keys($m['keys']));
+          return array_key_exists($c, $m['keys']);
         });
         if ( !empty($keys_to_delete) ){
           foreach ( $keys_to_delete as $id => $k ){

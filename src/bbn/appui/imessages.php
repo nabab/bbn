@@ -37,8 +37,7 @@ class imessages extends \bbn\models\cls\db
           'id_user' => 'id_user',
           'id_group' => 'id_group',
           'start' => 'start',
-          'end' => 'end',
-          'active' => 'bbn_h'
+          'end' => 'end'
         ],
         'users' => [
           'id_imessage' => 'id_imessage',
@@ -181,7 +180,6 @@ class imessages extends \bbn\models\cls\db
         {$cfg['table']}.{$cfg['arch']['imessages']['end']} IS NULL
         OR {$cfg['table']}.{$cfg['arch']['imessages']['end']} > ?
       )
-      AND {$cfg['table']}.{$cfg['arch']['imessages']['active']} = 1
       AND (
         {$cfg['table']}.{$cfg['arch']['imessages']['id_user']} = ?
         OR {$cfg['table']}.{$cfg['arch']['imessages']['id_group']} = ?
@@ -256,8 +254,7 @@ class imessages extends \bbn\models\cls\db
     $messages = $this->db->get_rows("
       SELECT {$cfg['table']}.*
       FROM {$cfg['table']}
-      WHERE {$cfg['table']}.{$cfg['arch']['imessages']['active']} = 1
-      AND {$cfg['table']}.{$cfg['arch']['imessages']['id_option']} = ?",
+      WHERE {$cfg['table']}.{$cfg['arch']['imessages']['id_option']} = ?",
       hex2bin($id_option)
     );
     // Get and return the imessage's content|title from notes archive
@@ -292,7 +289,6 @@ class imessages extends \bbn\models\cls\db
         {$cfg['table']}.{$cfg['arch']['imessages']['end']} IS NULL
         OR {$cfg['table']}.{$cfg['arch']['imessages']['end']} > ?
       )
-      AND {$cfg['table']}.{$cfg['arch']['imessages']['active']} = 1
       AND (
         (
           {$cfg['table']}.{$cfg['arch']['imessages']['id_user']} = ?

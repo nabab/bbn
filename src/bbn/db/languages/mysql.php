@@ -501,10 +501,13 @@ MYSQL
                   $is_uid = true;
                 }
               }
+              else if ( \in_array($model['type'], self::$numeric_types, true) ){
+                $is_number = true;
+              }
             }
           }
           else{
-            $res .= (empty($res) ? '(' : " $logic ").$this->escape($field).' ';
+            $res .= (empty($res) ? '(' : " $logic ").$field.' ';
           }
           switch ( $f['operator'] ){
             case 'eq':
@@ -513,7 +516,7 @@ MYSQL
                 $res .= '= '.$f['exp'];
               }
               else if ( $is_uid ){
-                $res .= '= UNHEX(?)';
+                $res .= '= ?';
               }
               else if ( $is_number ){
                 $res .= '= ?';
@@ -528,7 +531,7 @@ MYSQL
                 $res .= '!= '.$f['exp'];
               }
               else if ( $is_uid ){
-                $res .= '!= UNHEX(?)';
+                $res .= '!= ?';
               }
               else if ( $is_number ){
                 $res .= '!= ?';
@@ -632,9 +635,6 @@ MYSQL
     $res = '';
     if ( \is_array($cfg['tables']) && !empty($cfg['tables']) ){
       $res = 'SELECT ';
-      if ( !empty($cfg['count']) ){
-        $res .= 'COUNT(';
-      }
       if ( empty($cfg['fields']) ){
         $res .= '*';
       }
@@ -652,7 +652,7 @@ MYSQL
           }
           // Adding the alias in $fields
           if ( strpos($f, '(') ){
-            $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '').$f.(\is_string($alias) ? ' AS '.$alias : '');
+            $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '').$f.(\is_string($alias) ? ' AS '.$this->escape($alias) : '');
           }
           else if ( !empty($cfg['available_fields'][$f]) ){
             $idx = $cfg['available_fields'][$f];
@@ -676,12 +676,12 @@ MYSQL
               $st = $this->col_full_name($csn, $cfg['available_fields'][$f], true);
             }
             if ( \is_string($alias) ){
-              $st .= ' AS '.$alias;
+              $st .= ' AS '.$this->escape($alias);
             }
             $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '').$st;
           }
           else if ( isset($cfg['available_fields'][$f]) && ($cfg['available_fields'][$f] === false) ){
-            $this->db->error("Error! The column '$f' exists on several tables in '".implode(', ', $cfg['tables']));
+            //$this->db->error("Error! The column '$f' exists on several tables in '".implode(', ', $cfg['tables']));
           }
           else{
             $this->db->error("Error! The column '$f' doesn't exist in '".implode(', ', $cfg['tables']).' ('.implode(' - ', array_keys($cfg['available_fields'])).')');
@@ -689,15 +689,12 @@ MYSQL
         }
         $res .= implode(', ', $fields_to_put);
       }
-      if ( !empty($cfg['count']) ){
-        $res .= ')';
-      }
       $res .= PHP_EOL;
       $tables_to_put = [];
       foreach ( $cfg['tables'] as $alias => $tfn ){
         $st = $this->table_full_name($tfn, true);
         if ( $alias !== $tfn ){
-          $st .= ' AS '.$alias;
+          $st .= ' AS '.$this->escape($alias);
         }
         $tables_to_put[] = $st;
       }
@@ -731,7 +728,7 @@ MYSQL
             $is_uid = true;
           }
           $fields_to_put['fields'][] = $this->col_simple_name($f, true);
-          $fields_to_put['values'][] = $is_uid && (!$column['null'] || (null !== $cfg['values'][$i])) ? 'UNHEX(?)' : '?';
+          $fields_to_put['values'][] = '?';
         }
       }
       else{
@@ -769,11 +766,11 @@ MYSQL
             $is_uid = true;
           }
           $fields_to_put['fields'][] = $this->col_simple_name($f, true);
-          $fields_to_put['values'][] = $is_uid ? 'UNHEX(?)' : '?';
+          $fields_to_put['values'][] = '?';
         }
       }
       else{
-        $this->db->error("Error! The column '$f' doesn't exist in '".implode(', ', $cfg['tables']));
+        $this->db->error("Error!! The column '$f' doesn't exist in '".implode(', ', $cfg['tables']));
       }
     }
     if ( count($fields_to_put['fields']) ){
@@ -826,7 +823,7 @@ MYSQL
           $res .=
             (isset($join['type']) && ($join['type'] === 'left') ? 'LEFT ' : '').
             'JOIN '.$this->table_full_name($join['table'],true).
-            (!empty($join['alias']) ? ' AS '.$join['alias'] : '').PHP_EOL.'ON '.$cond;
+            (!empty($join['alias']) ? ' AS '.$this->escape($join['alias']) : '').PHP_EOL.'ON '.$cond;
         }
       }
     }
@@ -861,17 +858,14 @@ MYSQL
     if ( !empty($cfg['group_by']) ){
       foreach ( $cfg['group_by'] as $g ){
         if ( isset($cfg['available_fields'][$g]) ){
-          $group_to_put[] = $this->col_full_name($g, $cfg['available_fields'][$g], true);
+          $group_to_put[] = $this->escape($g);
         }
         else{
-          $this->db->error("Error! The column '$g' doesn't exist for group by");
+          $this->db->error("Error! The column '$g' doesn't exist for group by".print_r($cfg, true));
         }
       }
       if ( count($group_to_put) ){
         $res .= 'GROUP BY '.implode(', ', $group_to_put).PHP_EOL;
-        if ( !empty($cfg['having']) ){
-          $res .= 'HAVING '.$this->get_conditions($cfg['having'], $cfg);
-        }
       }
     }
     return $res;
@@ -886,8 +880,8 @@ MYSQL
   public function get_having(array $cfg): string
   {
     $res = '';
-    if ( !empty($cfg['group_by']) && !empty($cfg['having']) && ($cond = $this->get_conditions($cfg['having'])) ){
-      $res .= PHP_EOL.'HAVING '.$cond;
+    if ( !empty($cfg['group_by']) && !empty($cfg['having']) && ($cond = $this->get_conditions($cfg['having'], $cfg)) ){
+      $res .= 'HAVING '.$cond.PHP_EOL;
     }
     return $res;
   }
@@ -901,7 +895,11 @@ MYSQL
     $res = '';
     if ( !empty($cfg['order']) ){
       foreach ( $cfg['order'] as $col => $dir ){
-        if ( isset($cfg['available_fields'][$col]) ){
+        if ( \is_array($dir) && isset($dir['field'], $cfg['available_fields'][$dir['field']]) ){
+          $res .= $this->escape($dir['field']).' '.
+            (!empty($dir['dir']) && strtolower($dir['dir']) === 'desc' ? 'DESC' : 'ASC' ).','.PHP_EOL;
+        }
+        else if ( isset($cfg['available_fields'][$col]) ){
           $res .= $this->escape($col).' '.
             (strtolower($dir) === 'desc' ? 'DESC' : 'ASC' ).','.PHP_EOL;
         }
@@ -922,8 +920,8 @@ MYSQL
   public function get_limit(array $cfg): string
   {
     $res = '';
-    if ( $cfg['limit'] && bbn\str::is_integer($cfg['limit']) ){
-      $res .= 'LIMIT '.(bbn\str::is_integer($cfg['start']) ? (string)$cfg['start'] : '0').', '.$cfg['limit'];
+    if ( !empty($cfg['limit']) && bbn\str::is_integer($cfg['limit']) ){
+      $res .= 'LIMIT '.(!empty($cfg['start']) && bbn\str::is_integer($cfg['start']) ? (string)$cfg['start'] : '0').', '.$cfg['limit'];
     }
     return $res;
   }

@@ -306,19 +306,22 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return array|bool
    */
   private function _treat_conditions(array $where, $full = true){
-    if ( !isset($where['conditions']) && !isset($where['logic']) ){
+    if ( !isset($where['conditions']) ){
       $where['conditions'] = $where;
       $where['logic'] = 'AND';
     }
-    if ( isset($where['conditions'], $where['logic']) ){
+    if ( isset($where['conditions']) && \is_array($where['conditions']) ){
+      if ( !isset($where['logic']) || (strtoupper($where['logic']) !== 'OR') ){
+        $where['logic'] = 'AND';
+      }
       $res = [
         'conditions' => [],
         'logic' => $where['logic']
       ];
       foreach ( $where['conditions'] as $key => $f ){
+        $is_array = \is_array($f);
         if (
-          \is_array($f) &&
-          array_key_exists('logic', $f) &&
+          $is_array &&
           array_key_exists('conditions', $f) &&
           \is_array($f['conditions'])
         ){
@@ -327,7 +330,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
         else {
           if ( \is_string($key) ){
             // 'id_user' => [1, 2] Will do OR
-            if ( !\is_array($f) ) {
+            if ( !$is_array ) {
               if ( null === $f ){
                 $f = [
                   'field' => $key,
@@ -365,7 +368,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
               $res['conditions'][] = $tmp;
             }
           }
-          else if ( \is_array($f) && !x::is_assoc($f) && count($f) >= 2 ){
+          else if ( $is_array && !x::is_assoc($f) && count($f) >= 2 ){
             $tmp = [
               'field' => $f[0],
               'operator' => $f[1]
@@ -383,7 +386,10 @@ class db extends \PDO implements db\actions, db\api, db\engines
             }
             $f = $tmp;
           }
-          if ( isset($f['operator'], $f['field']) ){
+          if ( isset($f['field']) ){
+            if ( !isset($f['operator']) ){
+              $f['operator'] = 'eq';
+            }
             $res['conditions'][] = $f;
           }
         }
@@ -485,40 +491,18 @@ class db extends \PDO implements db\actions, db\api, db\engines
       // Specific to a table
       if ( isset($this->triggers[$cfg['kind']][$cfg['moment']][$table]) ){
         foreach ( $this->triggers[$cfg['kind']][$cfg['moment']][$table] as $i => $f ){
-          if ( $f ){
-            if ( \is_string($f) ){
-              $cfg[$f] = $f($cfg);
-              if ( !$cfg[$f] ){
-                $cfg['run'] = false;
-                $cfg['trig'] = false;
-              }
-              else if ( \is_array($cfg[$f]) ){
-                foreach ( $cfg[$f] as $k => $v ){
-                  if ( $k === 'trig' ){
-                    if ($cfg['trig']){
-                      $cfg['trig'] = $v;
-                    }
-                  }
-                  else if ( $k === 'run' ){
-                    if ( $cfg['run'] && (!$v || ($v > $cfg['run'])) ){
-                      $cfg['run'] = $v;
-                    }
-                  }
-                  else{
-                    $cfg[$k] = $v;
-                    unset($cfg[$f][$k]);
-                  }
-                }
-              }
-            }
-            else if ( \is_callable($f) && !$f($cfg) ){
+          if ( $f && \is_callable($f) ){
+            if ( !($tmp = $f($cfg)) ){
               $cfg['run'] = false;
               $cfg['trig'] = false;
+            }
+            else{
+              $cfg = $tmp;
             }
           }
         }
         //echo bbn\x::make_tree($trig);
-        //echo bbn\x::make_tree($cfg);
+        //echo x::make_tree($cfg);
       }
     }
     return $cfg;
@@ -545,6 +529,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
+   * Adds a random primary value when it is absent from the set and present in the fields
    * @param array $cfg
    */
   private function _add_primary(array &$cfg): void
@@ -566,13 +551,16 @@ class db extends \PDO implements db\actions, db\api, db\engines
           break;
         case 'binary':
           if ( $cfg['primary_length'] === 16 ){
+            x::log($cfg['tables'], 'add_options');
             $val = $this->get_uid();
+            x::log($val, 'add_options');
           }
           break;
       }
       if ( $val ){
         array_splice($cfg['values'], $idx, 0, $val);
         $this->set_last_insert_id($val);
+        x::log(['v' => $cfg['values'], 'f' => $cfg['fields']], 'add_options');
       }
     }
   }
@@ -587,24 +575,37 @@ class db extends \PDO implements db\actions, db\api, db\engines
       ($cfg = $this->process_cfg(\func_get_args())) &&
       !empty($cfg['sql'])
     ){
+      //die(var_dump('0exec cfg', $cfg, \func_get_args()));
       $cfg['moment'] = 'before';
       $cfg['trig'] = null;
       if ( $cfg['kind'] === 'INSERT' ){
         // Add generated primary when inserting a row without primary when primary is needed and no auto-increment
         $this->_add_primary($cfg);
       }
+      if ( count($cfg['values']) !== count($cfg['values_types']) ){
+        die(x::hdump($cfg['values'], $cfg['values_types'], $cfg['sql'], $cfg, debug_backtrace(false, 5)));
+      }
       // Launching the trigger BEFORE execution
       if ( $cfg = $this->_trigger($cfg) ){
         if ( !empty($cfg['run']) ){
+          $this->log(["TRIGGER OK", $cfg['run'], $cfg['fields']]);
           // Executing the query
-          /** @var \bbn\db\query $r */
-          $cfg['run'] = $this->query($cfg['sql'], $cfg['hash'], $cfg['values'] ?? []);
+          /** @todo Put hash back! */
+          //$cfg['run'] = $this->query($cfg['sql'], $cfg['hash'], $cfg['values'] ?? []);
+          /** @var \bbn\db\query */
+          $cfg['run'] = $this->query($cfg['sql'], array_map(function($i)use($cfg){
+            return
+              ($cfg['values_types'][$i] === 'binary16') &&
+              str::is_uid($cfg['values'][$i]) ?
+                hex2bin($cfg['values'][$i]) :
+                $cfg['values'][$i];
+          }, array_keys($cfg['values'])));
         }
         if ( !empty($cfg['force']) ){
           $cfg['trig'] = 1;
         }
-        else if ( !$cfg['run'] ){
-          $cfg['trig'] = false;
+        else if ( null === $cfg['trig'] ){
+          $cfg['trig'] = (bool)$cfg['run'];
         }
         if ( $cfg['trig'] ){
           $cfg['moment'] = 'after';
@@ -654,8 +655,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
     if (
       \is_array($cfg) &&
       array_key_exists('tables', $cfg) &&
-      array_key_exists('treated', $cfg) &&
-      ($cfg['treated'] === true)
+      !empty($cfg['bbn_db_treated']) &&
+      ($cfg['bbn_db_treated'] === true)
     ){
       return $cfg;
     }
@@ -663,20 +664,13 @@ class db extends \PDO implements db\actions, db\api, db\engines
       'kind' => 'SELECT',
       'fields' => [],
       'where' => [],
-      'filters' => [],
       'order' => [],
       'limit' => 0,
       'start' => 0,
-      'join' => [],
       'group_by' => [],
       'having' => [],
-      'values' => [],
-      'hashed_join' => [],
-      'hashed_where' => [],
-      'hashed_having' => [],
-      'treated' => true
     ];
-    if ( \is_array($cfg) && (isset($cfg['table']) || isset($cfg['tables'])) ){
+    if ( x::is_assoc($cfg) ){
       if ( isset($cfg['table']) && !isset($cfg['tables']) ){
         $cfg['tables'] = $cfg['table'];
         unset($cfg['table']);
@@ -702,6 +696,15 @@ class db extends \PDO implements db\actions, db\api, db\engines
         $res['start'] = $cfg[6];
       }
     }
+    $res = array_merge($res, [
+      'values' => [],
+      'filters' => [],
+      'join' => [],
+      'hashed_join' => [],
+      'hashed_where' => [],
+      'hashed_having' => [],
+      'bbn_db_treated' => true
+    ]);
     $res['kind'] = strtoupper($res['kind']);
     $res['write'] = \in_array($res['kind'], self::$write_kinds, true);
     $res['ignore'] = $res['write'] && !empty($res['ignore']);
@@ -715,6 +718,9 @@ class db extends \PDO implements db\actions, db\api, db\engines
       }
       unset($t);
     }
+    else{
+      return [];
+    }
     if ( !empty($res['fields']) ){
       if ( \is_string($res['fields']) ){
         $res['fields'] = [$res['fields']];
@@ -723,15 +729,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
     else if ( !empty($res['columns']) ){
       $res['fields'] = (array)$res['columns'];
     }
-    else if (
-      !empty($res['values']) &&
-      (($res['kind'] === 'INSERT') || ($res['kind'] === 'UPDATE'))
-    ){
-      $res['fields'] = array_keys($res['values']);
-      $res['values'] = array_values($res['values']);
-    }
     if (
-      empty($res['values']) &&
       !empty($res['fields']) &&
       (($res['kind'] === 'INSERT') || ($res['kind'] === 'UPDATE')) &&
       \is_string(array_keys($res['fields'])[0])
@@ -739,11 +737,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
       $res['values'] = array_values($res['fields']);
       $res['fields'] = array_keys($res['fields']);
     }
-    if ( !\is_array($res['join']) ){
-      $res['join'] = [];
-    }
     if ( !\is_array($res['group_by']) ){
-      $res['group_by'] = [];
+      $res['group_by'] = empty($res['group_by']) ? [] : [$res['group_by']];
     }
     if ( !\is_array($res['where']) ){
       $res['where'] = [];
@@ -757,37 +752,65 @@ class db extends \PDO implements db\actions, db\api, db\engines
     if ( !str::is_integer($res['start']) ){
       unset($res['start']);
     }
-    $tmp = $this->_treat_conditions($res['where']);
-    $res['filters'] = $tmp['where'];
-    $res['hashed_where'] = $tmp['hashed'];
-    if ( \is_array($tmp) && isset($tmp['values']) ){
-      foreach ( $tmp['values'] as $v ){
-        $res['values'][] = $v;
+    if ( !empty($cfg['join']) ){
+      foreach ( $cfg['join'] as $k => $join ){
+        if ( \is_array($join) ){
+          if ( \is_string($k) ){
+            if ( empty($join['table']) ){
+              $join['table'] = $k;
+            }
+            else if ( empty($join['alias']) ){
+              $join['alias'] = $k;
+            }
+          }
+          if ( isset($join['table'], $join['on']) && ($tmp = $this->_treat_conditions($join['on'])) ){
+            $res['join'][] = array_merge($join, ['on' => $tmp['where']]);
+            $res['hashed_join'][] = $tmp['hashed'];
+            if ( !empty($tmp['values']) ){
+              foreach ( $tmp['values'] as $v ){
+                $res['values'][] = $v;
+              }
+            }
+          }
+        }
       }
     }
-    if ( !empty($res['having']) ){
-      $tmp = $this->_treat_conditions($res['having']);
+    if ( $tmp = $this->_treat_conditions($res['where']) ){
+      $res['filters'] = $tmp['where'];
+      $res['hashed_where'] = $tmp['hashed'];
+      if ( \is_array($tmp) && isset($tmp['values']) ){
+        foreach ( $tmp['values'] as $v ){
+          $res['values'][] = $v;
+        }
+      }
+    }
+    if ( !empty($res['having']) && ($tmp = $this->_treat_conditions($res['having'])) ){
       $res['having'] = $tmp['where'];
       $res['hashed_having'] = $tmp['hashed'];
       foreach ( $tmp['values'] as $v ){
         $res['values'][] = $v;
       }
     }
-    $hash = $this->_make_hash(
-      $res['kind'],
-      $res['ignore'],
-      $res['count'],
-      $res['tables'],
-      $res['fields'],
-      $res['hashed_join'],
-      $res['hashed_where'],
-      $res['hashed_having'],
-      $res['group_by'],
-      $res['order'],
-      $res['limit'],
-      $res['start']
-    );
-    $res['hash'] = $hash;
+    if ( empty($cfg['hash']) ){
+      $hash = $this->_make_hash(
+        $res['kind'],
+        $res['ignore'],
+        $res['count'],
+        $res['tables'],
+        $res['fields'],
+        $res['hashed_join'],
+        $res['hashed_where'],
+        $res['hashed_having'],
+        $res['group_by'],
+        $res['order'],
+        $res['limit'] ?? 0,
+        $res['start'] ?? 0
+      );
+      $res['hash'] = $hash;
+    }
+    else{
+      $res['hash'] = $cfg['hash'];
+    }
     return $res;
   }
 
@@ -877,12 +900,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /*****************************************************************************************************************
-  *                                                                                                                *
-  *                                                                                                                *
-  *                                                    INTERNAL METHODS                                            *
-  *                                                                                                                *
-  *                                                                                                                *
-  *****************************************************************************************************************/
+   *                                                                                                                *
+   *                                                                                                                *
+   *                                                    INTERNAL METHODS                                            *
+   *                                                                                                                *
+   *                                                                                                                *
+   *****************************************************************************************************************/
 
   /**
    * Gets the last hash created.
@@ -954,24 +977,47 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * @param array $cfg
-   * @param bool $as_new
+   * @param array $where
+   * @param array $values
    * @return array
    */
-  public function reprocess_cfg(array $cfg, $as_new = false): array
+  public function get_values_types(array $where, array $cfg, &$types = []): array
   {
-    if ( isset($cfg['bbn_db_processed'], $cfg['kind']) ){
-      unset($cfg['bbn_db_processed']);
-      if ( $as_new ){
-        unset($cfg['hash']);
-        $cfg['treated'] = false;
+    if ( isset($where['conditions']) ){
+      foreach ( $where['conditions'] as &$f ){
+        if ( isset($f['logic'], $f['conditions']) && \is_array($f['conditions']) ){
+          $this->get_values_types($f, $cfg, $types);
+        }
+        else if ( array_key_exists('value', $f) ){
+          $type = null;
+          if (
+            isset($cfg['models'], $cfg['available_fields'][$f['field']]) &&
+            ($model = $cfg['models'][$cfg['available_fields'][$f['field']]]['fields']) &&
+            ($fname = $this->csn($f['field'])) &&
+            !empty($model[$fname]['type'])
+          ){
+            $type = $model[$fname]['type'];
+            if ( !empty($model[$fname]['maxlength']) ){
+              $type .= (string)$model[$fname]['maxlength'];
+            }
+          }
+          $types[] = $type;
+        }
       }
-      if ( !$cfg['write'] ){
-        $cfg['values'] = [];
-      }
-      return $this->process_cfg($cfg);
     }
-    return $cfg;
+    return $types;
+  }
+
+  /**
+   * @param array $cfg
+   * @return array|null
+   */
+  public function reprocess_cfg(array $cfg): ?array
+  {
+    unset($cfg['bbn_db_processed']);
+    unset($cfg['bbn_db_treated']);
+    unset($this->cfgs[$cfg['hash']]);
+    return $this->process_cfg($cfg, true);
   }
 
   /**
@@ -979,26 +1025,29 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @param array $args
    * @return array|null
    */
-  public function process_cfg(array $args): ?array
+  public function process_cfg(array $args, $force = false): ?array
   {
     // Avoid confusion when
     while ( \is_array($args) && isset($args[0]) && \is_array($args[0]) ){
       $args = $args[0];
     }
-    if ( \is_array($args) && isset($args['bbn_db_processed']) ){
+    if ( \is_array($args) && !empty($args['bbn_db_processed']) ){
       return $args;
     }
+    //var_dump("UPD0", $args);
     if ( empty($args['bbn_db_treated']) ){
       $args = $this->_treat_arguments($args);
     }
+    //var_dump("UPD0", $args);
     if ( isset($args['hash']) ){
       if ( isset($this->cfgs[$args['hash']]) ){
-        return array_merge($this->cfgs[$args['hash']], ['values' => $args['values'] ?? []]);
+        return array_merge($this->cfgs[$args['hash']], ['values' => $args['values'] ?: []]);
       }
       /** @var array $tables_full  Each of the tables' full name. */
       $tables_full = [];
       $res = array_merge($args, [
         'tables' => [],
+        'values_types' => [],
         'bbn_db_processed' => true,
         'available_fields' => [],
         'generate_id' => false
@@ -1068,11 +1117,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
         }
       }
       foreach ( $res['fields'] as $idx => &$col ){
-        if ( strpos($col, '(') ){
-          $res['available_fields'][$col] = '';
+        if ( strpos($col, '(') || strpos($col, '->"$.') ){
+          $res['available_fields'][$col] = false;
         }
         if ( \is_string($idx) ){
           if ( !isset($res['available_fields'][$col]) ){
+            //$this->log($res);
             $this->error("Impossible to find the column $col.");
             return null;
           }
@@ -1088,7 +1138,6 @@ class db extends \PDO implements db\actions, db\api, db\engines
             $res['sql'] = $res['select_st'];
           }
           break;
-
         case 'INSERT':
           if ( $res['insert_st'] = $this->language->get_insert($res) ){
             $res['sql'] = $res['insert_st'];
@@ -1110,12 +1159,42 @@ class db extends \PDO implements db\actions, db\api, db\engines
       $res['join_st'] = $this->language->get_join($res);
       $res['where_st'] = $this->language->get_where($res);
       $res['group_st'] = $this->language->get_group_by($res);
-      $res['order_st'] = $this->language->get_order($res);
-      $res['limit_st'] = $this->language->get_limit($res);
+      $res['having_st'] = $this->language->get_having($res);
+      $res['order_st'] = $res['count'] ? '' : $this->language->get_order($res);
+      $res['limit_st'] = $res['count'] ? '' : $this->language->get_limit($res);
 
       if ( !empty($res['sql']) ){
-        $res['sql'] .= $res['join_st'].$res['where_st'].$res['group_st'].$res['order_st'].$res['limit_st'];
+        $res['sql'] .= $res['join_st'].$res['where_st'].$res['group_st'].$res['having_st'];
+        if ( !empty($res['count']) ){
+          $res['sql'] = 'SELECT COUNT(*) FROM ('.$res['sql'].') AS my_count_table';
+        }
+        else {
+          $res['sql'] .= $res['order_st'].$res['limit_st'];
+        }
         $res['statement_hash'] = $this->_make_hash($res['sql']);
+
+        foreach ( $res['join'] as $r ){
+          $this->get_values_types($r['on'], $res, $res['values_types']);
+        }
+        if ( ($res['kind'] === 'INSERT') || ($res['kind'] === 'UPDATE') ){
+          foreach ( $res['fields'] as $name ){
+            $type = null;
+            if (
+              isset($res['models'], $res['available_fields'][$name]) &&
+              ($model = $res['models'][$res['available_fields'][$name]]['fields']) &&
+              ($fname = $this->csn($name)) &&
+              !empty($model[$fname]['type'])
+            ){
+              $type = $model[$fname]['type'];
+              if ( !empty($model[$fname]['maxlength']) ){
+                $type .= (string)$model[$fname]['maxlength'];
+              }
+            }
+            $res['values_types'][] = $type;
+          }
+        }
+        $this->get_values_types($res['filters'], $res, $res['values_types']);
+        $this->get_values_types($res['having'], $res, $res['values_types']);
         $this->cfgs[$res['hash']] = $res;
       }
       return $res;
@@ -1245,7 +1324,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * ```
    * @return string
    */
-  public function get_error_mode(): string 
+  public function get_error_mode(): string
   {
     return $this->on_error;
   }
@@ -1350,20 +1429,20 @@ class db extends \PDO implements db\actions, db\api, db\engines
   public function add_statement($statement): self
   {
     $this->last_query = $statement;
+    $this->log($statement);
     if ( $this->debug ){
-      //$this->log($statement);
       $this->debug_queries[] = $statement;
     }
     return $this;
   }
 
   /*****************************************************************************************************************
-  *                                                                                                                *
-  *                                                                                                                *
-  *                                                      TRIGGERS                                                  *
-  *                                                                                                                *
-  *                                                                                                                *
-  *****************************************************************************************************************/
+   *                                                                                                                *
+   *                                                                                                                *
+   *                                                      TRIGGERS                                                  *
+   *                                                                                                                *
+   *                                                                                                                *
+   *****************************************************************************************************************/
 
   /**
    * Enable the triggers' functions
@@ -1450,12 +1529,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /*****************************************************************************************************************
-  *                                                                                                                *
-  *                                                                                                                *
-  *                                                   STRUCTURE HELPERS                                            *
-  *                                                                                                                *
-  *                                                                                                                *
-  *****************************************************************************************************************/
+   *                                                                                                                *
+   *                                                                                                                *
+   *                                                   STRUCTURE HELPERS                                            *
+   *                                                                                                                *
+   *                                                                                                                *
+   *****************************************************************************************************************/
 
   /**
    * @param $tables
@@ -1773,12 +1852,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /*****************************************************************************************************************
-  *                                                                                                                *
-  *                                                                                                                *
-  *                                                      UTILITIES                                                 *
-  *                                                                                                                *
-  *                                                                                                                *
-  *****************************************************************************************************************/
+   *                                                                                                                *
+   *                                                                                                                *
+   *                                                      UTILITIES                                                 *
+   *                                                                                                                *
+   *                                                                                                                *
+   *****************************************************************************************************************/
 
   /**
    * Return a string with quotes and percent escaped.
@@ -1793,7 +1872,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return string
    *
    */
-  public function escape_value(string $value, $esc = "'"): string 
+  public function escape_value(string $value, $esc = "'"): string
   {
     return str_replace('%', '\\%', $esc === '"' ?
       str::escape_dquotes($value) :
@@ -2046,12 +2125,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /*****************************************************************************************************************
-  *                                                                                                                *
-  *                                                                                                                *
-  *                                                    Query helpers                                               *
-  *                                                                                                                *
-  *                                                                                                                *
-  *****************************************************************************************************************/
+   *                                                                                                                *
+   *                                                                                                                *
+   *                                                    Query helpers                                               *
+   *                                                                                                                *
+   *                                                                                                                *
+   *****************************************************************************************************************/
 
   /**
    * Executes the given query with given vars, and extracts the first cell's result.
@@ -2154,12 +2233,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /*****************************************************************************************************************
-  *                                                                                                                *
-  *                                                                                                                *
-  *                                           Read helpers with triggers                                           *
-  *                                                                                                                *
-  *                                                                                                                *
-  *****************************************************************************************************************/
+   *                                                                                                                *
+   *                                                                                                                *
+   *                                           Read helpers with triggers                                           *
+   *                                                                                                                *
+   *                                                                                                                *
+   *****************************************************************************************************************/
 
   /**
    * Returns the first row resulting from the query as an object.
@@ -2375,7 +2454,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   {
     if ( $r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\func_get_args()))) ){
       if ( \is_object($r) ){
-        return ($a = $r->get_object()) ? current(get_object_vars($a)) : false;
+        return ($a = $r->get_irow()) ? $a[0] : false;
       }
       $this->log('ERROR IN RSELECT_ONE', $r);
     }
@@ -2404,11 +2483,13 @@ class db extends \PDO implements db\actions, db\api, db\engines
     if ( !empty($args['bbn_db_processed']) ){
       unset($args['bbn_db_processed']);
     }
-    if ( $r = $this->_exec($args) ){
-      if ( \is_object($r) ){
-        return ($a = $r->get_irow()) ? $a[0] : null;
+    if ( \is_object($r = $this->_exec($args)) ){
+      $a = $r->get_irow();
+      if ( !is_int($a[0]) ){
+        //die(var_dump($a, $args));
       }
-      $this->log('ERROR IN COUNT', $r);
+      return $a ? (int)$a[0] : null;
+      //$this->log('ERROR IN COUNT', $r);
     }
     return null;
   }
@@ -2605,12 +2686,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /*****************************************************************************************************************
-  *                                                                                                                *
-  *                                                                                                                *
-  *                                          Write helpers with triggers                                           *
-  *                                                                                                                *
-  *                                                                                                                *
-  *****************************************************************************************************************/
+   *                                                                                                                *
+   *                                                                                                                *
+   *                                          Write helpers with triggers                                           *
+   *                                                                                                                *
+   *                                                                                                                *
+   *****************************************************************************************************************/
 
   /**
    * Inserts row(s) in a table.
@@ -2654,14 +2735,16 @@ class db extends \PDO implements db\actions, db\api, db\engines
       \is_array($values[0])
     ){
       $res = 0;
+
       foreach ( $values as $v ){
         $res += $this->insert($table, $v, $ignore);
       }
       return $res;
     }
+
     $cfg = \is_array($table) ? $table : [
       'tables' => [$table],
-      'values' => $values,
+      'fields' => $values,
       'ignore' => $ignore
     ];
     $cfg['kind'] = 'INSERT';
@@ -2751,7 +2834,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
     $cfg = \is_array($table) ? $table : [
       'tables' => [$table],
       'where' => $where,
-      'values' => $values,
+      'fields' => $values,
       'ignore' => $ignore
     ];
     $cfg['kind'] = 'UPDATE';
@@ -2856,12 +2939,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /*****************************************************************************************************************
-  *                                                                                                                *
-  *                                                                                                                *
-  *                                               NATIVE FUNCTIONS                                                 *
-  *                                                                                                                *
-  *                                                                                                                *
-  *****************************************************************************************************************/
+   *                                                                                                                *
+   *                                                                                                                *
+   *                                               NATIVE FUNCTIONS                                                 *
+   *                                                                                                                *
+   *                                                                                                                *
+   *****************************************************************************************************************/
 
   /**
    * Return an indexed array with the first result of the query or false if there are no results.
@@ -3097,7 +3180,9 @@ class db extends \PDO implements db\actions, db\api, db\engines
         // That will always contains the parameters of the last query done
         $this->last_params = $params;
         // Adds to $debug_queries if in debug mode and defines $last_query
-        $this->add_statement($q['sql']);
+        if ( \bbn\appui\history::is_enabled() ){
+          $this->add_statement($q['sql']);
+        }
         // If the statement is a structure modifier we need to clear the cache
         if ( $q['structure'] ){
           foreach ( $this->queries as $k => $v ){
@@ -3167,12 +3252,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /*****************************************************************************************************************
-  *                                                                                                                *
-  *                                                                                                                *
-  *                                                     SHORTCUTS                                                  *
-  *                                                                                                                *
-  *                                                                                                                *
-  *****************************************************************************************************************/
+   *                                                                                                                *
+   *                                                                                                                *
+   *                                                     SHORTCUTS                                                  *
+   *                                                                                                                *
+   *                                                                                                                *
+   *****************************************************************************************************************/
 
 
   /**
@@ -3257,12 +3342,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /*****************************************************************************************************************
-  *                                                                                                                *
-  *                                                                                                                *
-  *                                               ENGINES INTERFACE                                                *
-  *                                                                                                                *
-  *                                                                                                                *
-  *****************************************************************************************************************/
+   *                                                                                                                *
+   *                                                                                                                *
+   *                                               ENGINES INTERFACE                                                *
+   *                                                                                                                *
+   *                                                                                                                *
+   *****************************************************************************************************************/
 
   /**
    * @param array $cfg The user's options
@@ -3956,12 +4041,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /*****************************************************************************************************************
-  *                                                                                                                *
-  *                                                                                                                *
-  *                                               ACTIONS INTERFACE                                                *
-  *                                                                                                                *
-  *                                                                                                                *
-  *****************************************************************************************************************/
+   *                                                                                                                *
+   *                                                                                                                *
+   *                                               ACTIONS INTERFACE                                                *
+   *                                                                                                                *
+   *                                                                                                                *
+   *****************************************************************************************************************/
 
   /**
    * Return the first row resulting from the query as an array indexed with the fields' name.

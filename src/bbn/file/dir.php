@@ -29,7 +29,8 @@ class dir extends bbn\models\cls\basic
 		* @param string $dir The directory path.
 		* @return string
 		*/
-  public static function clean($dir){
+  public static function clean(string $dir): string
+  {
     $new = trim(str_replace('\\', '/', $dir));
     if ( substr($new, -1) === '/' ){
       $new = substr($new, 0, -1);
@@ -51,7 +52,7 @@ class dir extends bbn\models\cls\basic
 		* @param string $dir The directory's path.
 		* @return bool
 		*/
-	public static function has_file($dir)
+	public static function has_file(string $dir): bool
 	{
     $dir = self::clean($dir);
     $as = \func_get_args();
@@ -61,7 +62,7 @@ class dir extends bbn\models\cls\basic
         return false;
       }
     }
-		return 1;
+		return true;
 	}
 
 	/**
@@ -77,7 +78,7 @@ class dir extends bbn\models\cls\basic
 		* @param string $dir The directory path.
 		* @return string
 		*/
-  public static function cur($dir)
+  public static function cur(string $dir): string
   {
     return strpos($dir, './') === 0 ? substr($dir, 2) : $dir;
   }
@@ -99,12 +100,15 @@ class dir extends bbn\models\cls\basic
 	public static function get_dirs($dir, $hidden = false){
     $dir = self::clean($dir);
     clearstatcache();
-		if ( is_dir($dir) && ((substr(basename($dir), 0, 1) !== '.') || $hidden) ){
+    if ( $dir === './' ){
+      $dir = '.';
+    }
+    if ( is_dir($dir) && (($dir === '.') || ((strpos(basename($dir), '.') !== 0) || $hidden)) ){
 			$dirs = [];
-			$fs = scandir($dir);
+			$fs = scandir($dir, SCANDIR_SORT_ASCENDING );
 			foreach ( $fs as $f ){
 				if ( $f !== '.' && $f !== '..' && is_dir($dir.'/'.$f) ){
-					array_push($dirs, self::cur($dir.'/').$f);
+					$dirs[] = self::cur($dir.'/').$f;
         }
 			}
       if ( !empty($dirs) ){
@@ -139,9 +143,12 @@ class dir extends bbn\models\cls\basic
 	{
     $dir = self::clean($dir);
     clearstatcache();
-    if ( is_dir($dir) && ((substr(basename($dir), 0, 1) !== '.') || $hidden) ){
+    if ( $dir === './' ){
+      $dir = '.';
+    }
+    if ( is_dir($dir) && (($dir === '.') || ((strpos(basename($dir), '.') !== 0) || $hidden)) ){
 			$files = [];
-			$fs = scandir($dir);
+			$fs = scandir($dir, SCANDIR_SORT_ASCENDING );
       //$encodings = ['UTF-8', 'WINDOWS-1252', 'ISO-8859-1', 'ISO-8859-15'];
 			foreach ( $fs as $f ){
 				if ( $f !== '.' && $f !== '..' ){
@@ -151,12 +158,12 @@ class dir extends bbn\models\cls\basic
             $f = html_entity_decode(htmlentities($f, ENT_QUOTES, $enc), ENT_QUOTES , 'UTF-8');
           }
           */
-          if ( (substr(basename($f), 0, 1) !== '.') || $hidden ){
+          if ( $hidden || (strpos(basename($f), '.') !== 0) ){
             if ( $including_dirs ){
-              array_push($files, self::cur($dir.'/').$f);
+              $files[] = self::cur($dir.'/').$f;
             }
             else if ( is_file($dir.'/'.$f) ){
-              array_push($files, self::cur($dir.'/').$f);
+              $files[] = self::cur($dir.'/').$f;
             }
           }
 				}
@@ -185,7 +192,7 @@ class dir extends bbn\models\cls\basic
 		* @param bool $full If set to '0' will delete only the content of the directory. Default: "1".
 		* @return bool
  	*/
-	public static function delete($dir, $full = 1)
+	public static function delete(string $dir, bool $full = true): bool
 	{
     $dir = self::clean($dir);
 		if ( is_dir($dir) ){
@@ -198,7 +205,7 @@ class dir extends bbn\models\cls\basic
       }
 			return true;
 		}
-    else if ( is_file($dir) ){
+    if ( is_file($dir) ){
       return unlink($dir);
     }
 		return false;
@@ -226,7 +233,8 @@ class dir extends bbn\models\cls\basic
 		* @param bool $hidden If set to true will include the hidden files/directories in the result
 		* @return array
 		*/
-	 public static function scan($dir, $type = null, $hidden = false){
+	 public static function scan(string $dir, string $type = null, bool $hidden = false): array
+   {
 	   $all = [];
 	   $dir = self::clean($dir);
 	   $dirs = self::get_dirs($dir);
@@ -239,7 +247,7 @@ class dir extends bbn\models\cls\basic
 	     }
 	     else if ( $type ){
 	       $all = array_filter(self::get_files($dir, false, $hidden), function($a)use($type){
-	         $ext = \bbn\str::file_ext($a);
+	         $ext = bbn\str::file_ext($a);
 	         return strtolower($ext) === strtolower($type);
 	       });
 	     }
@@ -323,16 +331,16 @@ class dir extends bbn\models\cls\basic
 		* @param bool $hidden If set to true will also return the hidden files/folders contained in the given directory. Default=false
 		* @return array
 		*/
-	 public static function mscan($dir, $type = null, $hidden = false){
+	 public static function mscan(string $dir, string $type = null, $hidden = false): array
+   {
+     $res = [];
 	   if ( $all = self::scan($dir, $type, $hidden) ){
-	     $res = [];
 	     foreach ($all as $a ){
 	       $t = filemtime($a);
-	       array_push($res, ['name' => $a, 'mtime' => $t, 'date' => date('Y-m-d H:i:s', $t)]);
+	       $res[] = ['name' => $a, 'mtime' => $t, 'date' => date('Y-m-d H:i:s', $t)];
 	     }
-	     return $res;
 	   }
-    return [];
+     return $res;
    }
 	/**
 		* Return an array with the tree of the folder's content.
@@ -408,11 +416,11 @@ class dir extends bbn\models\cls\basic
 		*
 		* @param string $dir The directory's path.
 		* @param bool $only_dir If set to true will just return the folder(s), if false will include in the resulr also the file(s). Default = false.
-		* @param string $filter da vedere
+		* @param callable $filter Filter function
 		* @param bool $hidden If set to true will also return the hidden file(s)/folder(s)
 		* @return array
 		*/
-  public static function get_tree($dir, $only_dir = false, $filter = false, $hidden = false)
+  public static function get_tree(string $dir, bool $only_dir = false, callable $filter = null, bool $hidden = false): array
   {
     $r = [];
     $dir = self::clean($dir);
@@ -426,13 +434,13 @@ class dir extends bbn\models\cls\basic
           'items' => self::get_tree($d, $only_dir, $filter, $hidden)
         ];
         $x['num_children'] = \count($x['items']);
-        if ( is_callable($filter) ){
+        if ( $filter ){
           if ( $filter($x) ){
-            array_push($r, $x);
+            $r[] = $x;
           }
         }
         else{
-          array_push($r, $x);
+          $r[] = $x;
         }
       }
       if ( !$only_dir ){
@@ -443,13 +451,13 @@ class dir extends bbn\models\cls\basic
             'type' => 'file',
             'ext' => bbn\str::file_ext($f)
           ];
-          if ( is_callable($filter) ){
+          if ( $filter ){
             if ( $filter($x) ){
-              array_push($r, $x);
+              $r[] = $x;
             }
           }
           else{
-            array_push($r, $x);
+            $r[] = $x;
           }
         }
       }
@@ -469,25 +477,22 @@ class dir extends bbn\models\cls\basic
 		* @param bool $chmod If set to true the user won't have the permissions to view the content of the folder created
 		* @return string|false
 		*/
-	public static function create_path($dir, $chmod=false){
+	public static function create_path(string $dir, $chmod=false){
     if ( !$dir || !\is_string($dir) ){
       return false;
     }
     clearstatcache();
     if ( !is_dir($dir) ){
       $bits = explode('/', $dir);
-      $num = \count($bits);
       $path = empty($bits[0]) ? '/' : '';
       foreach ( $bits as $i => $b ){
         if ( !empty($b) ){
           $path .= $b;
-          if ( !is_dir($path) ){
-            if ( !mkdir($path) && !is_dir($path) ){
-              return false;
-            }
-            if ( $chmod ){
-              @chmod($path, $chmod);
-            }
+          if ( !mkdir($path) && !is_dir($path) ){
+            return false;
+          }
+          if ( $chmod ){
+            @chmod($path, $chmod);
           }
           $path .= '/';
         }
@@ -514,11 +519,11 @@ class dir extends bbn\models\cls\basic
 		* @param string $dest The full name of the destination (including basename)
 		* @param string | true $st If in the destination folder alredy exists a file with the same name of the file to move it will rename the file adding '_v' (default). If 'string' will change the file name with the given string. If $st=true it will overwrite the file/folder.
 		* @param int $length The number of characters to use for the revision number; will be zerofilled
-		* @return string the (new or not) name of file/folder moved  or false
+		* @return bool Success
 		*/
-	public static function move($orig, $dest, $st = '_v', $length = 0)
+	public static function move($orig, $dest, $st = '_v', $length = 0): bool
 	{
-    if ( file_exists($orig) && self::create_path(dirname($dest)) ){
+    if ( file_exists($orig) && self::create_path(\dirname($dest)) ){
       if ( file_exists($dest) ){
         if ( $st === true ){
           self::delete($dest);
@@ -526,7 +531,7 @@ class dir extends bbn\models\cls\basic
         else{
           $i = 1;
           while ( $i ){
-            $dir = dirname($dest).'/';
+            $dir = \dirname($dest).'/';
             $file_name = bbn\str::file_ext($dest, 1);
             $file = $file_name[0].$st;
             if ( $length > 0 ){
@@ -549,7 +554,7 @@ class dir extends bbn\models\cls\basic
         }
       }
       if ( rename($orig, $dest) ){
-        return basename($dest);
+        return true;
       }
     }
     return false;
@@ -566,20 +571,21 @@ class dir extends bbn\models\cls\basic
 		* @param string $dst The new destination of files
 		* @return bool
 		*/
-  public static function copy($src, $dst){
+  public static function copy($src, $dst): bool
+  {
     if ( is_file($src) ){
       return copy($src, $dst);
     }
-    else if ( is_dir($src) && bbn\file\dir::create_path($dst) ){
-      $files = bbn\file\dir::get_files($src);
-      $dirs = bbn\file\dir::get_dirs($src);
+    if ( is_dir($src) && self::create_path($dst) ){
+      $files = self::get_files($src);
+      $dirs = self::get_dirs($src);
       foreach ( $files as $f ){
         copy($f, $dst.'/'.basename($f));
       }
       foreach ( $dirs as $f ){
         self::copy($f, $dst.'/'.basename($f));
       }
-      return 1;
+      return true;
     }
     else{
       return false;

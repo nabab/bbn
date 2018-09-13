@@ -72,7 +72,10 @@ trait optional
     $opt = bbn\appui\options::get_instance();
     $args = \func_get_args();
     $args[] = self::$option_root_id;
-    return array_flip($opt->get_codes($args));
+    $codes = array_filter($opt->get_codes($args), function($a){
+      return $a !== null;
+    });
+    return $codes ? array_flip($codes) : [];
   }
 
   public static function get_options_tree($code = null){
@@ -99,7 +102,7 @@ trait optional
     $opt = bbn\appui\options::get_instance();
     $args = \func_get_args();
     $args[] = self::$option_root_id;
-    if ( $id = $opt->from_code($args) ){
+    if ( $id = $opt->from_code(...$args) ){
       return $opt->text_value_options($id);
     }
     return [];

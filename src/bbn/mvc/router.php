@@ -95,8 +95,16 @@ class router {
      */
     $routes = [];
 
-  public static function is_mode($mode){
-    return \in_array($mode, self::$types);
+  /**
+   * @param $mode
+   * @return bool
+   */
+  public static function is_mode($mode): bool
+  {
+    if ( strpos($mode, 'free-') === 0 ){
+      $mode = substr($mode, \strlen('free-'));
+    }
+    return \in_array($mode, self::$types, true);
   }
 
   /**
@@ -409,19 +417,24 @@ class router {
     return false;
   }
 
-  private function find_mv(string $path, string $mode){
+  private function find_mv(string $path, string $mode, string $root = null){
     if ( self::is_mode($mode) ){
-      /** @var string $root Where the files will be searched for by default */
-      $root = $this->get_root($mode);
       /** @var boolean|string $file Once found, full path and filename */
       $file = false;
       $plugin = false;
-      if ( $alt_path = $this->find_in_roots($path) ){
-        $alt_root = $this->get_alt_root($mode, $alt_path);
+      if ( !$root ){
+        $root = $this->get_root($mode);
+        if ( $alt_path = $this->find_in_roots($path) ){
+          $alt_root = $this->get_alt_root($mode, $alt_path);
+        }
+        else if ( $alt_root = $this->get_alt_root($mode) ){
+          $alt_path = $this->alt_root;
+        }
       }
-      else if ( $alt_root = $this->get_alt_root($mode) ){
-        $alt_path = $this->alt_root;
+      else if ( substr($root, -1) !== '/' ){
+        $root .= '/';
       }
+      /** @var string $root Where the files will be searched for by default */
       foreach ( self::$filetypes[$mode] as $t ){
         if ( is_file($root.$path.'.'.$t) ){
           $file = $root . $path . '.' . $t;
@@ -496,7 +509,6 @@ class router {
   public function route($path, $mode, $root = null){
 
     if ( self::is_mode($mode) ){
-
       // If there is a prepath defined we prepend it to the path
       if ( $this->prepath && (strpos($path, '/') !== 0) && (strpos($path, $this->prepath) !== 0) ){
         $path = $this->prepath.$path;
@@ -509,6 +521,9 @@ class router {
         return $this->find_controller($path, $mode);
       }
       else if ( $root ){
+        if ( strpos($mode, 'free-') === 0 ){
+          return  $this->find_mv($path, substr($mode, \strlen('free-')), $root);
+        }
         return $this->find_alt_mv($path, $mode, $root);
       }
       return  $this->find_mv($path, $mode);

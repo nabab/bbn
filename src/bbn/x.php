@@ -1022,7 +1022,7 @@ class x
    * // array [1,2,3,5,6]
    * ```
    *
-   * @param $ar The reference to the array t7o sort
+   * @param $ar array The reference to the array t7o sort
    * @return void
    */
 

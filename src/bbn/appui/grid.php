@@ -21,47 +21,74 @@ use bbn;
 
 class grid extends bbn\models\cls\cache
 {
-	private
-    /* @var db The DB connection */
-    $cfg,
-    $start,
-    $limit,
-    $order,
-    $filters = [],
-    $observer = false,
-    $query,
-    $table,
-    $group_by,
-    $join,
-    $having,
-    $count,
-    $num = 0,
-    $prefilters = [],
-    $fields = [],
-    $extra_fields = [],
-    $cache_uid,
-    $query_time = 0,
-    $count_time = 0,
-    $chrono,
-    $data = [];
-
+  /**
+   * @var array The definitive DB config array
+   */
+  protected $cfg;
+  /**
+   * @var array The original DB config array
+   */
+  protected $original_cfg;
+  /**
+   * @var array The DB config for the count - if the count param is not supplied
+   */
+  protected $count_cfg;
 
   /**
-   * grid constructor.
-   * @param bbn\db $db
-   * @param array $post Mandatory configuration from the table component
-   * @param $cfg
+   * @var bool|mixed Is an observer called
+   */
+  protected $observer = false;
+
+  /**
+   * @var string The SQL query when given as parameter
+   */
+  protected $query;
+
+  /**
+   * @var string The SQL query for counting when given as parameter
+   */
+  protected $count;
+
+  /**
+   * @var int The total number of rows (without limit)
+   */
+  private $num = 0;
+
+  /**
+   * @var string The cache UID string
+   */
+  private $cache_uid;
+
+  /**
+   * @var float The last time that the data query took
+   */
+  private $query_time = 0;
+
+  /**
+   * @var string The timer object
+   */
+  private $chrono;
+  /**
+   * Grid constructor.
+   *
+   * @param bbn\db $db The database connection
+   * @param array $post Mandatory configuration sent by the table component (client side)
+   * @param string|array $cfg Original table configuration (server side)
    */
   public function __construct(bbn\db $db, array $post, $cfg){
+    // We inherit db and cacher properties
     parent::__construct($db);
     // Simple configuration using just a string with the table
     if ( \is_string($cfg) ){
-      $cfg = ['tables' => [$cfg]];
+      $cfg = [
+        'tables' => [$cfg]
+      ];
     }
     if ( \is_array($cfg) && $this->db->check() ){
+      // Preparing a classic config array for DB
       $db_cfg = [
         'tables' => $cfg['tables'] ?? ($cfg['table'] ?? null),
-        'fields' => $cfg['fields'] ?? [],
+        'fields' => $cfg['fields'] ? (array)$cfg['fields'] : [],
         'order' => $post['order'] ?? ($cfg['order'] ?? []),
         'join' => $cfg['join'] ?? [],
         'group_by' => $cfg['group_by'] ?? [],
@@ -70,51 +97,51 @@ class grid extends bbn\models\cls\cache
         'start' => $post['start'] ?? 0,
         'where' => !empty($post['filters']) && !empty($post['filters']['conditions']) ?? []
       ];
+      // Adding all the fields if fields is empty
+      if ( empty($db_cfg['fields']) ){
+        foreach ( array_unique(array_values($db_cfg['tables'])) as $t ){
+          foreach ( $this->db->get_fields_list($t) as $f ){
+            if ( !\in_array($f, $cfg['fields'], true) ){
+              $db_cfg['fields'][] = $f;
+            }
+          }
+        }
+      }
+      // For the server config both properties where and filters are accepted (backward compatibility)
+      if ( empty($cfg['filters']) && !empty($cfg['where']) ){
+        $cfg['filters'] = $cfg['where'];
+      }
+      // The (pre)filters set server-side are mandatory and are added to the client-side filters if any
       if ( !empty($cfg['filters']) ){
-        $this->prefilters = isset($cfg['filters']['conditions']) ? $cfg['filters'] : [
+        $prefilters = isset($cfg['filters']['conditions']) ? $cfg['filters'] : [
           'logic' => 'AND',
           'conditions' => $cfg['filters']
         ];
-        $db_cfg['where'] = empty($db_cfg['where']) ? $this->prefilters : [
+        // They either become the where or are added as a new root condition
+        $db_cfg['where'] = empty($db_cfg['where']) ? $prefilters : [
           'logic' => 'AND',
           'conditions' => [
             $db_cfg['where'],
-            $this->prefilters
+            $prefilters
           ]
         ];
       }
-
       $this->cfg = $this->db->process_cfg($db_cfg);
-      // Mandatory configuration coming from the table component
-      $this->start = $this->cfg['start'];
-      $this->limit = $this->cfg['limit'];
-      $this->filters = $this->cfg['filters'];
-      $this->order = $this->cfg['order'];
-      $this->group_by = $this->cfg['group_by'];
-      $this->join = $this->cfg['join'];
-      $this->having = $this->cfg['having'];
+      $this->original_cfg = $db_cfg;
       if ( !empty($cfg['query']) ){
         $this->query = $cfg['query'];
       }
-      else if ( !empty($this->cfg['sql']) ){
-        $this->query = $this->get_full_select($this->cfg);
-      }
-      if ( !empty($this->query) ){
-        if ( empty($cfg['fields']) ){
-          $this->fields = $this->db->get_fields_list($this->cfg['tables']);
-        }
-        else{
-          $this->fields = $cfg['fields'];
-        }
+      // A query must exist, custom or generated
+      if ( $this->check() ){
         if ( array_key_exists('observer', $cfg) && isset($cfg['observer']['request']) ){
           $this->observer = $cfg['observer'];
         }
-        // Additional fields (not in the result but accepted for filtering and ordering
-        if ( isset($cfg['extra_fields']) ){
-          $this->extra_fields = $cfg['extra_fields'];
-        }
         if ( !empty($cfg['count']) ){
           $this->count = $cfg['count'];
+        }
+        else{
+          $db_cfg['count'] = true;
+          $this->count_cfg = $db_cfg;
         }
         if ( !empty($cfg['num']) ){
           $this->num = $cfg['num'];
@@ -163,41 +190,43 @@ class grid extends bbn\models\cls\cache
     return $this;
   }
 
-  public function flush(){
-    $this->data = [];
-  }
-
-  public function get_full_select(): ?string
+  public function get_query(): ?string
   {
     if ( $this->db->check() ){
-      return
-        $this->db->get_select($this->cfg).
-        $this->db->get_join($this->cfg).
-        $this->db->get_where($this->cfg).
-        $this->db->get_group_by($this->cfg).
-        $this->db->get_order($this->cfg).
-        $this->db->get_limit($this->cfg);
+      if ( $this->query ){
+        return $this->query.PHP_EOL.
+          $this->db->get_where($this->cfg).
+          $this->db->get_group_by($this->cfg).
+          $this->db->get_order($this->cfg).
+          $this->db->get_limit($this->cfg);
+      }
+      return $this->cfg['sql'];
     }
     return null;
   }
 
-  public function get_data(){
-    if ( $sql = $this->get_full_select() ){
+  public function get_data(): ?array
+  {
+    if ( $this->check() ){
       $this->chrono->start();
-      if ( $this->query === $this->cfg['sql'] ){
-        $rows = $this->db->rselect_all($this->cfg);
-      }
-      else{
-        $q = $this->db->query($this->query);
+      if ( $this->query ){
+        $this->sql = $this->get_query();
+        $q = $this->db->query($this->sql, $this->cfg['values'] ?: []);
         $rows = $q->get_rows();
+      }
+      else {
+        $rows = $this->db->rselect_all($this->cfg);
+        $this->sql = $this->cfg['sql'];
       }
       $this->query_time = $this->chrono->measure();
       $this->chrono->stop();
       return $rows;
     }
+    return null;
   }
 
-  public function get_total($force = false){
+  public function get_total($force = false) : ?int
+  {
     if ( $this->num && !$force ){
       return $this->num;
     }
@@ -206,20 +235,32 @@ class grid extends bbn\models\cls\cache
       $this->num = $cache['num'];
       return $this->num;
     }
-    $this->chrono->start();
     if ( $this->count ){
-      $this->num = $this->db->get_one($this->count);
+      $this->chrono->start();
+      $this->num = $this->db->get_one(
+        $this->count,
+        $this->cfg['values'] ?: []
+      );
+      $this->count_time = $this->chrono->measure();
+      $this->chrono->stop();
+      $this->set_cache([
+        'num' => $this->num,
+        'time' => $this->count_time
+      ]);
+      return $this->num ?: 0;
     }
-    else if ( $this->cfg['sql'] ){
-      $this->num = $this->db->count($this->cfg);
+    else if ( $this->count_cfg ){
+      $this->chrono->start();
+      $this->num = $this->db->select_one($this->count_cfg);
+      $this->count_time = $this->chrono->measure();
+      $this->chrono->stop();
+      $this->set_cache([
+        'num' => $this->num,
+        'time' => $this->count_time
+      ]);
+      return $this->num ?: 0;
     }
-    $this->count_time = $this->chrono->measure();
-    $this->chrono->stop();
-    $this->set_cache([
-      'num' => $this->num,
-      'time' => $this->count_time
-    ]);
-    return $this->num ?: 0;
+    return null;
   }
 
   public function get_observer(): ?array
@@ -236,7 +277,8 @@ class grid extends bbn\models\cls\cache
     }
   }
 
-  public function get_datatable(){
+  public function get_datatable(): array
+  {
     $r = [
       'data' => [],
       'total' => 0,
@@ -244,25 +286,26 @@ class grid extends bbn\models\cls\cache
       'error' => false,
       'time' => []
     ];
-    if ( $this->db->check() && ($total = $this->get_total()) ){
-      if ( $this->start ){
-        $r['start'] = $this->start;
+    if ( $this->check() ){
+      if ( $total = $this->get_total() ){
+        if ( $this->cfg['start'] ){
+          $r['start'] = $this->cfg['start'];
+        }
+        if ( $this->cfg['limit'] ){
+          $r['limit'] = $this->cfg['limit'];
+        }
+        if ( $this->observer ){
+          $r['observer'] = $this->get_observer();
+        }
+        $r['total'] = $total;
+        $r['data'] = $this->get_data();
+        $r['time'] = [
+          'query' => $this->query_time,
+          'count' => $this->count_time
+        ];
       }
-      if ( $this->limit ){
-        $r['limit'] = $this->limit;
-      }
-      if ( $this->observer ){
-        $r['observer'] = $this->get_observer();
-      }
-      $r['total'] = $total;
-      $r['data'] = $this->get_data();
-      $r['time'] = [
-        'query' => $this->query_time,
-        'count' => $this->count_time
-      ];
-
+      $r['query'] = $this->db->last();
     }
-    $r['query'] = $this->get_full_select();
     if ( !$this->db->check() ){
       $r['success'] = false;
       $r['error'] = $this->db->last_error;
@@ -270,38 +313,24 @@ class grid extends bbn\models\cls\cache
     return $r;
   }
 
-  public function check()
+  public function check(): bool
   {
-    return $this->db->check() && (null !== $this->query);
+    return $this->db->check() && ($this->query || $this->cfg['sql']);
   }
 
-  public function get_start()
+  public function get_start(): int
   {
-    return $this->start;
+    return $this->cfg['start'];
   }
 
-  public function get_limit()
+  public function get_limit(): int
   {
-    return $this->limit;
+    return $this->cfg['limit'];
   }
 
-  public function get_field($f, $array = false){
-    if ( \is_array($f) && isset($f['field']) ){
-      if ( !empty($f['prefilter']) ){
-        return $f['field'];
-      }
-      $f = $f['field'];
-    }
-    if ( empty($this->fields) || $array ){
-      return strpos($f, '.') ? $this->db->col_full_name($f, null, $array ? false : true) : $this->db->col_simple_name($f, $array ? false : true);
-    }
-    else if ( isset($this->fields[$f]) ){
-      return $this->fields[$f];
-    }
-    if ( isset($this->extra_fields[$f]) ){
-      return $this->extra_fields[$f];
-    }
-    return false;
+  public function get_cfg(): array
+  {
+    return $this->cfg;
   }
 
 }

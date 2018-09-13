@@ -57,9 +57,9 @@ trait dbconfig
    * @return bool
    */
   public function exists($id){
-    return $this->db->count($this->class_table, [
+    return (bool)$this->db->count($this->class_table, [
       $this->class_cfg['arch'][$this->class_table_index]['id'] => $id
-    ]) ? true : false;
+    ]);
   }
 
   /**
