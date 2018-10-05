@@ -185,13 +185,19 @@ MYSQL
     ){
       if ( $cfg['moment'] === 'after' ){
         // Case where we actually delete or restore through the $hcol column
+        $values = [];
+        if ( !empty($cfg['fields']) && !empty($cfg['values']) ){
+          foreach ( $cfg['fields'] as $i => $f ){
+            $values[$f] = $cfg['values'][$i];
+          }
+        }
         self::$dbs->insert(self::$dbs_table, [
           'db' => self::$db->current,
           'tab' => self::$db->tsn($table),
           'action' => $cfg['kind'],
           'chrono' => microtime(true),
           'rows' => empty($cfg['where']) ? '[]' : bbn\x::json_base64_encode($cfg['where']),
-          'vals' => empty($cfg['values']) ? '[]' : bbn\x::json_base64_encode($cfg['values'])
+          'vals' => empty($values) ? '[]' : bbn\x::json_base64_encode($values)
         ]);
       }
     }
@@ -245,16 +251,16 @@ MYSQL
       self::$db->current) ) ? $test : time();
     // Deleting the entries prior to this sync we produced and have been seen by the twin process
     $to_log['deleted_sync'] = self::$dbs->delete(self::$dbs_table, [
-      ['db', 'LIKE', self::$db->current],
+      ['db', '=', self::$db->current],
       ['state', '=', 1],
       ['chrono', '<', $start]
     ]);
 
     // Selecting the entries inserted
     $ds = self::$dbs->rselect_all(self::$dbs_table, ['id', 'tab', 'vals', 'chrono'], [
-      ['db', 'NOT LIKE', self::$db->current],
+      ['db', '!=', self::$db->current],
       ['state', '=', 0],
-      ['action', 'LIKE', 'insert']
+      ['action', '=', 'insert']
     ], [
       'chrono' => 'ASC',
       'id' => 'ASC'
@@ -293,10 +299,10 @@ MYSQL
     // Selecting the entries modified and deleted in the twin DB,
     // ordered by table and rows (so the same go together)
     $ds = self::$dbs->rselect_all(self::$dbs_table, ['id', 'tab', 'action', 'rows', 'vals', 'chrono'], [
-      ['db', 'NOT LIKE', self::$db->current],
+      ['db', '!=', self::$db->current],
       ['state', '=', 0],
-      ['rows', 'NOT LIKE', '[]'],
-      ['action', 'NOT LIKE', 'insert']
+      ['rows', '!=', '[]'],
+      ['action', '!=', 'insert']
     ], [
       'tab' => 'ASC',
       'rows' => 'ASC',
@@ -311,7 +317,7 @@ MYSQL
         self::cbf1($d);
       }
       // Proceeding to the actions: delete is before
-      if ( $d['action'] === 'delete' ){
+      if ( strtolower($d['action']) === 'delete' ){
         if ( self::$db->delete($d['tab'], $d['rows']) ){
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
           $to_log['deleted_real']++;
@@ -336,22 +342,21 @@ MYSQL
             ) ? $ds[$i+1]['chrono'] : microtime();
       // Looking for the actions done on this specific record in our database
       // between the twin change and the next (or now if there is no other change)
-      $each = self::$dbs->rselect_all(self::$dbs_table,
-        ['id', 'chrono', 'action', 'vals'], [
-          ['db', 'LIKE', self::$db->current],
-          ['tab', 'LIKE', $d['tab']],
-          ['rows', 'LIKE', $d['rows']],
-          ['chrono', '>=', $d['chrono']],
-          ['chrono', '<', $next_time],
-        ]);
+      $each = self::$dbs->rselect_all(self::$dbs_table, ['id', 'chrono', 'action', 'vals'], [
+        ['db', '=', self::$db->current],
+        ['tab', '=', $d['tab']],
+        ['rows', '=', $d['rows']],
+        ['chrono', '>=', $d['chrono']],
+        ['chrono', '<', $next_time],
+      ]);
       if ( \count($each) > 0 ){
         $to_log['num_problems']++;
         $to_log['problems'][] = "Conflict!";
         $to_log['problems'][] = $d;
         foreach ( $each as $e ){
           // If it's deleted locally and updated on the twin we restore
-          if ( $e['action'] === 'delete' ){
-            if ( $d['action'] === 'update' ){
+          if ( strtolower($e['action']) === 'delete' ){
+            if ( strtolower($d['action']) === 'update' ){
               if ( !self::$db->insert_update(
                       $d['tab'],
                       bbn\x::merge_arrays(
@@ -365,22 +370,22 @@ MYSQL
             }
           }
           // If it's updated locally and deleted in the twin we restore
-          else if ( $e['action'] === 'update' ){
-            if ( $d['action'] === 'delete' ){
+          else if ( strtolower($e['action']) === 'update' ){
+            if ( strtolower($d['action']) === 'delete' ){
               if ( !self::$db->insert_update($d['tab'], bbn\x::merge_arrays($d['vals'], $e['vals'])) ){
                 $to_log['num_problems']++;
                 $to_log['problems'][] = "insert_update had a problem";
               }
             }
           // If it's updated locally and in the twin we merge the values for the update
-            else if ( $d['action'] === 'update' ){
+            else if ( strtolower($d['action']) === 'update' ){
               $d['vals'] = bbn\x::merge_arrays($d['vals'], $e['vals']);
             }
           }
         }
       }
       // Proceeding to the actions update is after in case we needed to restore
-      if ( $d['action'] === 'update' ){
+      if ( strtolower($d['action']) === 'update' ){
         if ( self::$db->update($d['tab'], $d['vals'], $d['rows']) ){
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
           $to_log['updated_real']++;

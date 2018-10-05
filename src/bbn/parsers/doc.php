@@ -197,7 +197,7 @@ class doc {
 	 * Parses a tag
 	 *
 	 * @param string $text The tag text to parse
-	 * @return array
+	 * @return array|false
 	 */
 	private function parse_tag(string $text){
 		$res = [];

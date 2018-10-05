@@ -56,7 +56,7 @@ class str
    * ```
    *
    * @param mixed $st The item to convert.
-   * @param mixed $case The case to convert to ("lower" or "upper"), default being title case.
+   * @param mixed $case The case to convert to ("lower" or "upper"), default being the title case.
    * @return string
    */
   public static function change_case(string $st, $case = 'x'): string
@@ -82,7 +82,7 @@ class str
 
 
   /**
-   * Escape all quotes (single and double) from a given string.
+   * Escapes all quotes (single and double) from a given string.
    *
    * ```php
    * \bbn\x::dump(\bbn\str::escape_dquotes('the "Gay Pride" is is Putin\'s favorite'));
@@ -99,7 +99,7 @@ class str
 
 
   /**
-   * Escape string in double quotes.
+   * Escapes the string in double quotes.
    *
    * ```php
    * \bbn\x::dump(\bbn\str::escape_dquotes('this is the house "Mary"'));
@@ -163,7 +163,7 @@ class str
   }
 
   /**
-   * Escape string in quotes.
+   * Escapes the string in quotes.
    *
    * ```php
    * \bbn\x::dump(\bbn\str::escape_squotes("Today's \"newspaper\""));
@@ -227,7 +227,7 @@ class str
   }
 
   /**
-   * Returns a string expunged of several types of character depending of configuration.
+   * Returns an expunged string of several types of character(s) depending on the configuration.
    *
    * ```php
    * $test="this      is
@@ -311,7 +311,7 @@ class str
   }
 
   /**
-   * Cut a string (HTML and PHP tags stripped) to maximum lenght inserted.
+   * Cuts a string (HTML and PHP tags stripped) to maximum length inserted.
    *
    * ```php
    * \bbn\x::dump(\bbn\str::cut("<!-- HTML Document --> Example text", 7));
@@ -319,7 +319,7 @@ class str
    * ```
    *
    * @param string $st The string to be cut.
-   * @param int $max The maximum string lenght.
+   * @param int $max The maximum string length.
    * @return string
    */
   public static function cut(string $st, int $max = 15): string
@@ -331,7 +331,7 @@ class str
     $st = html_entity_decode($st, ENT_QUOTES, 'UTF-8');
     $st = self::clean($st);
     if ( mb_strlen($st) >= $max ){
-      // Chars forbidden to finish the string with
+      // Chars forbidden to finish with a string
       $chars = [' ', '.'];
       // Final chars
       $ends = [];
@@ -345,16 +345,19 @@ class str
     return $st;
   }
 
+  /**
+  * @todo comment this
+  */
   public static function sanitize(string $st): string
   {
     $file = mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $st);
-// Remove any runs of periods (thanks falstro!)
+	// Removes any run of periods (thanks falstro!)
     $file = mb_ereg_replace("([\.]{2,})", '', $file);
     return $file;
   }
 
   /**
-   * Returns a cross-platform filename for file.
+   * Returns a cross-platform filename for the file.
    *
    * ```php
    * \bbn\x::dump(\bbn\str::encode_filename('test file/,1', 15, 'txt'));
@@ -363,7 +366,7 @@ class str
    *
    * @param string $st The name as string.
    * @param int $maxlength The maximum filename length (without extension), default: "50".
-   * @param string $extension The extension of file.
+   * @param string $extension The extension of the file.
    * @param bool $is_path Tells if the slashes (/) are authorized in the string
    * @return string
    */
@@ -463,7 +466,7 @@ class str
    * ```
    *
    * @param string $file The file path.
-   * @param bool $ar If "true" returns also the file path, default: "false".
+   * @param bool $ar If "true" also returns the file path, default: "false".
    * @return string|array
    */
   public static function file_ext(string $file, bool $ar = false)
@@ -491,8 +494,8 @@ class str
    * // (string) "dDEtxY"
    * ```
    *
-   * @param int $int_max Maximum characters of password, default: "12".
-   * @param int $int_min Minimum characters of password, default: "6".
+   * @param int $int_max Maximum password characters, default: "12".
+   * @param int $int_min Minimum password characters, default: "6".
    * @return string
    */
   public static function genpwd(int $int_max = 12, int $int_min = 6): string
@@ -606,7 +609,7 @@ class str
   }
 
   /**
-   * check that the path is contained in the parameter ".. \\" or "../" and if there will return false if true.
+   * Checks if ".. \\" or "../" is contained in the parameter and it will return false if true.
    *
    * ```php
    * \bbn\x::dump(\bbn\str::is_clean_path("/home/user/Images"));
@@ -638,7 +641,7 @@ class str
 
   /**
    * Checks if the item is a decimal.
-   * Can take as many arguments and will return false if one of them is not a decimal or the string of a decimal (float).
+   * Can take many arguments and it will return false if one of them is not a decimal or the string of a decimal (float).
    *
    * ```php
    * \bbn\x::dump(\bbn\str::is_decimal(13.2));
@@ -669,7 +672,7 @@ class str
   }
 
   /**
-   * Converts string variable into int or float if it looks like it and returns the argument anyway.
+   * If it looks like an int or float type, the string variable is converted into the correct type.
    *
    * ```php
    * \bbn\x::dump(\bbn\str::correct_types(1230));
@@ -700,7 +703,7 @@ class str
               return $tmp;
             }
           }
-          // If it's a decimal, not or starting ending with a zero
+          // If it is a decimal, not starting or ending with a zero
           else if ( self::is_decimal($st) ){
             return (float)$st;
           }
@@ -721,11 +724,23 @@ class str
     return $st;
   }
 
+  /**
+  * Checks if the string is a valid UID string.
+  *
+  * @param string $st 
+  * @return boolean
+  */
   public static function is_uid($st): bool
   {
     return \is_string($st) && (\strlen($st) === 32) && ctype_xdigit($st);// && !mb_detect_encoding($st);
   }
 
+  /**
+  * Checks if the string is a valid binary UID string.
+  *
+  * @param string $st
+  * @return boolean
+  */
   public static function is_buid($st): bool
   {
     if ( \is_string($st) && (\strlen($st) === 16) && !ctype_print($st) && !ctype_space($st) ){
@@ -738,7 +753,7 @@ class str
   }
 
   /**
-   * Checks if the string is a correct type of e-mail address.
+   * Checks if the string is the correct type of e-mail address.
    *
    * ```php
    * \bbn\x::dump(\bbn\str::is_email('test@email.com'));
@@ -848,7 +863,7 @@ class str
   }
 
   /**
-   * Replace backslash with slash in a path string. Forbids the use of ../
+   * Replaces backslash with slash in a path string. Forbids the use of ../
    *
    * ```php
    * \bbn\x::dump(\bbn\str::parse_path('\home\user\Desktop'));
@@ -856,7 +871,7 @@ class str
    * ```
    *
    * @param string $path The path.
-   * @param boolean $allow_parent If true ../ is allowed in the path (and will come normalized).
+   * @param boolean $allow_parent If true ../ is allowed in the path (and will become normalized).
    * @return string
    */
   public static function parse_path(string $path, $allow_parent = false): string
@@ -891,7 +906,7 @@ class str
   }
 
   /**
-   * Replaces accented characters with their character without accent.
+   * Replaces accented characters with their character without the accent.
    *
    * ```php
    * \bbn\x::dump(\bbn\str::remove_accents("TÃ¨st FÃ¬lÃ¨ Ã²Ã¨Ã Ã¹è"));
@@ -912,7 +927,7 @@ class str
   }
 
   /**
-   * Checks if a string comply with SQL naming convention.
+   * Checks if a string complies with SQL naming convention.
    *
    * ```php
    * \bbn\x::dump(\bbn\str::check_name("Paul"));
@@ -939,7 +954,7 @@ class str
     return true;
   }
   /**
-   * Checks if a string doesn't contain a filesystem path
+   * Checks if a string doesn't contain a filesystem path.
    *
    * ```php
    * \bbn\x::dump(\bbn\str::check_filename("Paul"));
@@ -965,7 +980,7 @@ class str
 
 
   /**
-   * Checks if a string comply with SQL naming convention.
+   * Checks if a string complies with SQL naming convention.
    * Returns "true" if slash or backslash are present.
    *
    * ```php
@@ -1010,7 +1025,7 @@ class str
   }
 
   /**
-   * returns the argumented value, replacing not standard objects (not stdClass) by their class name.
+   * Returns the argumented value, replacing not standard objects (not stdClass) by their class name.
    *
    * ```php
    * $myObj = new stdClass();
@@ -1070,7 +1085,7 @@ class str
   }
 
   /**
-   * Returns a variable in a fashion that is directly usable by PHP.
+   * Returns a variable in a mode that is directly usable by PHP.
    *
    * ```php
    * $myObj = new stdClass();
@@ -1175,7 +1190,7 @@ class str
   }
 
   /**
-   * Look for and superseding part of a string. If the party is seeking is not found, the function returns the string without change
+   * Replaces part of a string. If the part is not found, the method returns the string without change.
    *
    * ```php
    * \bbn\x::hdump(\bbn\str::replace_once("cold","hot", "Today there is cold"));
@@ -1184,9 +1199,9 @@ class str
    * // (string)  "Today there is cold"
    * ```
    *
-   * @param string $search
-   * @param string $replace
-   * @param string $subject
+   * @param string $search The string to search
+   * @param string $replace The string to replace
+   * @param string $subject The string into search
    * @return string
    */
   public static function replace_once($search, $replace, $subject): string
@@ -1199,7 +1214,7 @@ class str
   }
 
   /**
-   * This function returns url if it is written correctly in parameter passed or false if it is not
+   * Checks if the argument is a valid URL string.
    *
    * ```php
    * \bbn\x::dump(\bbn\str::is_url("http://bbn.so"));
@@ -1209,7 +1224,7 @@ class str
    * // (bool) false
    * ```
    *
-   * @param string $st containing a url
+   * @param string $st The string to perform
    * @return string|false
    */
   public static function is_url($st){
@@ -1217,7 +1232,7 @@ class str
   }
 
   /**
-   * This function returns true or false if the string that we pass is written correctly to be a domain
+   * Checks if the argument is a valid domain name.
    *
    * ```php
    * \bbn\x::dump(\bbn\str::is_domain("http://bbn.so"));
@@ -1227,7 +1242,7 @@ class str
    * // (bool) true
    * ```
    *
-   * @param string $st
+   * @param string $st The string to perform
    * @return bool
    */
   public static function is_domain($st): bool
@@ -1238,7 +1253,7 @@ class str
   }
 
   /**
-   * Validates if a string is SQL formatted date
+   * Checks if the argument is in a valid SQL date format.
    *
    * ```php
    * \bbn\x::dump(\bbn\str::is_date_sql("1999-12-05 11:10:22"));
@@ -1258,7 +1273,7 @@ class str
   }
 
   /**
-   * Remove the comment content
+   * Removes the comments.
    *
    * ```php
    *  var_dump(\bbn\str::remove_comments("<!--this is a comment-->"));
@@ -1274,6 +1289,14 @@ class str
     return preg_replace($pattern, '', $st);
   }
 
+  /**
+  * Converts the bytes to another unit form.
+  *
+  * @param int $bytes The bytes
+  * @param string The unit you want to convert ('B', 'K', 'M', 'G', 'T')
+  * @parma boolean $stop
+  * @return string
+  */
   public static function say_size($bytes, $unit = 'B', $stop = false): string
   {
 // pretty printer for byte values
@@ -1288,5 +1311,58 @@ class str
       }
     }
     return sprintf("%5.2f %s".$unit, $bytes, $units[$i]);
+  }
+
+  /**
+   * @param $size
+   * @param string $unit_orig
+   * @param string $unit_dest
+   * @return string
+   */
+  function convert_size($size, $unit_orig = 'B', $unit_dest = 'MB')
+  {
+    if ( strlen($unit_orig) <= 1 ){
+      $unit_orig .= 'B';
+    }
+    if ( strlen($unit_dest) <= 1 ){
+      $unit_dest .= 'B';
+    }
+    $base = log($size) / log(1024);
+    $suffix = array("", "KB", "MB", "GB", "TB");
+    $f_base = floor($base);
+    return round(pow(1024, $base - floor($base)), 1) . $suffix[$f_base];
+  }
+
+  /**
+   * Checks whether a JSON string is valid or not. If $return_error is set to true, the error will be returned.
+   *
+   * @param string $json
+   * @param bool $return_error
+   * @return bool|string
+   */
+  function check_json(string $json, bool $return_error = false)
+  {
+    json_decode($json);
+    $error = json_last_error();
+    if ( $error === JSON_ERROR_NONE ){
+      return true;
+    }
+    if ( !$return_error ){
+      return false;
+    }
+    switch ( $error ) {
+      case JSON_ERROR_DEPTH:
+        return 'Maximum stack depth exceeded';
+      case JSON_ERROR_STATE_MISMATCH:
+        return _('Underflow or the modes mismatch');
+      case JSON_ERROR_CTRL_CHAR:
+        return _('Unexpected control character found');
+      case JSON_ERROR_SYNTAX:
+        return _('Syntax error, malformed JSON');
+      case JSON_ERROR_UTF8:
+        return _('Malformed UTF-8 characters, possibly incorrectly encoded');
+      default:
+        return _('Unknown error');
+    }
   }
 }

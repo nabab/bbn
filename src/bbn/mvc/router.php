@@ -439,7 +439,7 @@ class router {
         if ( is_file($root.$path.'.'.$t) ){
           $file = $root . $path . '.' . $t;
         }
-        else if ( $alt_path && is_file($alt_root.substr($path, \strlen($alt_path)+1).'.'.$t) ){
+        else if ( !empty($alt_path) && is_file($alt_root.substr($path, \strlen($alt_path)+1).'.'.$t) ){
           $file = $alt_root . substr($path, \strlen($alt_path)+1) . '.' . $t;
           $plugin = $alt_path;
         }

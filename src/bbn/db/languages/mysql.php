@@ -85,7 +85,7 @@ class mysql implements bbn\db\engines
     }
     return null;
 	}
-	
+
 	/**
    * @param string $db The database name or file
 	 * @return bool
@@ -98,10 +98,10 @@ class mysql implements bbn\db\engines
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Returns a database item expression escaped like database, table, column, key names
-	 * 
+	 *
 	 * @param string $item The item's name (escaped or not)
 	 * @return string
 	 */
@@ -117,10 +117,10 @@ class mysql implements bbn\db\engines
     }
     return implode('.', $r);
 	}
-	
+
 	/**
 	 * Returns a table's full name i.e. database.table
-	 * 
+	 *
 	 * @param string $table The table's name (escaped or not)
 	 * @param bool $escaped If set to true the returned string will be escaped
 	 * @return null|string
@@ -411,7 +411,7 @@ FROM `information_schema`.`KEY_COLUMN_USAGE`
 WHERE `TABLE_SCHEMA` LIKE ?
 AND `TABLE_NAME` LIKE ?
 AND `COLUMN_NAME` LIKE ?
-AND ( 
+AND (
   `CONSTRAINT_NAME` LIKE ? OR
   ( `REFERENCED_TABLE_NAME` IS NOT NULL OR ORDINAL_POSITION = ? )
 )
@@ -509,7 +509,13 @@ MYSQL
           else{
             $res .= (empty($res) ? '(' : " $logic ").$field.' ';
           }
-          switch ( $f['operator'] ){
+          switch ( strtolower($f['operator']) ){
+            case 'like':
+              $res .= 'LIKE ?';
+              break;
+            case 'not like':
+              $res .= 'NOT LIKE ?';
+              break;
             case 'eq':
             case '=':
               if ( isset($f['exp']) ){
@@ -996,7 +1002,7 @@ MYSQL
 		}
 		return false;
 	}
-	
+
 	/**
    * Creates a database user
    *
@@ -1036,7 +1042,7 @@ MYSQL
 	{
 		if ( bbn\str::check_name($user) ){
 			$this->db->raw_query("
-			REVOKE ALL PRIVILEGES ON *.* 
+			REVOKE ALL PRIVILEGES ON *.*
 			FROM $user");
 			return (bool)$this->db->query("DROP USER $user");
 		}

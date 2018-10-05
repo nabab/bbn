@@ -2735,7 +2735,7 @@ class options extends bbn\models\cls\db
       $opts = $this->full_options($id);
       foreach ( $opts as $opt ){
         $o = [
-          'icon' => $opt['icon'] ?? 'fa fa-cog',
+          'icon' => $opt['icon'] ?? 'fas fa-asteriskog',
           'text' => $opt['text'],
           'id' => $opt['id']
         ];

@@ -39,6 +39,10 @@ class tasks extends bbn\models\cls\db{
     */
   }
 
+  private static function options(){
+    return \bbn\appui\options::get_instance();
+  }
+
   public static function cat_correspondances(){
     if ( $opt = bbn\appui\options::get_instance() ){
       $cats = self::get_options_tree('cats');
@@ -767,13 +771,26 @@ class tasks extends bbn\models\cls\db{
     return $this->db->get_column_values('bbn_tasks_roles', 'id_user', ['id_task' => $id_task]);
   }
 
+  public function get_deciders($id_task){
+    if (
+      $this->exists($id_task) &&
+      ($role = $this->id_role('deciders'))
+    ){
+      return $this->db->get_column_values('bbn_tasks_roles', 'id_user', [
+        'id_task' => $id_task,
+        'role' => $role
+      ]);
+    }
+    return false;
+  }
+
   public function comment($id_task, array $cfg){
     if ( $this->exists($id_task) && !empty($cfg) ){
       $note = new \bbn\appui\notes($this->db);
       $r = $note->insert(
         (empty($cfg['title']) ? '' : $cfg['title']),
         (empty($cfg['text']) ? '' : $cfg['text']),
-        self::get_option_id('tasks', 'types', 'notes', 'appui')
+        self::options()->from_code('tasks', 'types', 'notes', 'appui')
       );
       if ( $r ){
         $this->db->insert('bbn_tasks_notes', [
@@ -1005,10 +1022,13 @@ class tasks extends bbn\models\cls\db{
     if (
       $this->exists($id) &&
       ($info = $this->db->select('bbn_tasks', ['state', 'price'], ['id' => $id])) &&
-      ($unapproved = $this->id_state('unapproved'))
+      ($unapproved = $this->id_state('unapproved')) &&
+      ($deciders = $this->get_deciders($id)) &&
+      in_array($this->id_user, $deciders)
     ){
       return ($info->state === $unapproved) && $this->add_log($id, 'price_approved', [$info->price]);
     }
+    return false;
   }
 
   public function up($id){
@@ -1052,6 +1072,14 @@ class tasks extends bbn\models\cls\db{
     return false;
   }
 
+  /**
+   * Stops a track.
+   *
+   * @param  string  $id_task The task's ID
+   * @param  boolean|string $message The message to attach to track (optional)
+   * @param  boolean|string $id_user The track's user. If you give 'false', it will use the current user
+   * @return boolean
+   */
   public function stop_track($id_task, $message = false, $id_user = false){
     $ok = false;
     $now = time();

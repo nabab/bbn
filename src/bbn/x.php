@@ -2,17 +2,11 @@
 namespace bbn;
 
 /**
- * Model View Controller Class
- *
- *
- * This class will route a request to the according model and/or view through its controller.
- * A model and a view can be automatically associated if located in the same directory branch with the same name than the controller in their respective locations
- * A view can be directly imported in the controller through this very class
+ * A container of tools
  *
  * @author Thomas Nabet <thomas.nabet@gmail.com>
  * @copyright BBN Solutions
  * @since Apr 4, 2011, 23:23:55 +0000
- * @category  MVC
  * @license   http://opensource.org/licenses/MIT MIT
  * @version 0.2r89
  * @todo Merge the output objects and combine JS strings.
@@ -25,6 +19,9 @@ class x
 
   private static $counters = [];
 
+  /**
+  *
+  */
   private static function _init_count(string $name){
     if ( !$name ){
       $name = 'num';
@@ -63,7 +60,7 @@ class x
   }
 
   /**
-   * Saves logs into a file.
+   * Saves logs to a file.
    *
    * ```php
    * \bbn\x::log('My text', 'FileName');
@@ -104,7 +101,7 @@ class x
   }
 
   /**
-   * Puts the PHP errors into a JSON file
+   * Puts the PHP errors into a JSON file.
    *
    * @param string $errno The text to save.
    * @param string $errstr The file's name, default: "misc".
@@ -112,7 +109,6 @@ class x
    * @param $errline
    * @return bool
    */
-
   public static function log_error($errno, $errstr, $errfile, $errline){
     if ( \defined('BBN_DATA_PATH') ){
       if ( is_dir(BBN_DATA_PATH.'logs') ){
@@ -161,7 +157,7 @@ class x
   }
 
   /**
-   * Returns an object merging two objects.
+   * Returns to a merged object from two objects.
    *
    * ```php
    * class A {
@@ -200,7 +196,7 @@ class x
     return self::to_object($res);
   }
   /**
-   * Returns an array merging several arrays.
+   * Returns to a merged array from two or more arrays.
    *
    * ```php
    * \bbn\x::merge_arrays([1, 'Test'], [2, 'Example']);
@@ -251,7 +247,7 @@ class x
    * // object {[1, 'Test'], [2, 'Example']}
    * ```
    *
-   * @param array $ar The array to convert.
+   * @param array $ar The array or JSON to convert.
    * @return false | object
    */
   public static function to_object($ar){
@@ -275,7 +271,7 @@ class x
    * ]
    * ```
    *
-   * @param object $obj The object to convert.
+   * @param object $obj The object or JSON to convert.
    * @return false | array
    */
   public static function to_array($obj){
@@ -327,7 +323,7 @@ class x
   }
 
   /**
-   * Indents a flat JSON string to make it more human-readable.
+   * Indents a flat JSON string to make it human-readable.
    *
    * ```php
    * echo \bbn\x::indent_json('{"firstName": "John", "lastName": "Smith", "age": 25}');
@@ -395,7 +391,7 @@ class x
   }
 
   /**
-   * Returns an object or an array cleaned up from all empty values.
+   * Returns an object or an array cleaned of all empty values.
    * @todo Add a preserve_keys option?
    *
    * ```php
@@ -408,7 +404,7 @@ class x
    *
    * @param array|object $arr An object or array to clean.
    * @param bool $remove_space If "true" the spaces are removed, default: "false".
-   * @return array The clean result.
+   * @return array The cleaned result.
    */
   public static function remove_empty($arr, $remove_space = false){
     foreach ( $arr as $k => $v ){
@@ -580,7 +576,7 @@ class x
   }
 
   /**
-   * Return HTML code for creating the &lt;option&gt; tag(s) based on an array.
+   * Returns the HTML code for creating the &lt;option&gt; tag(s) based on an array.
    * If the array is indexed, the index will be used as value
    *
    * ```php
@@ -633,15 +629,15 @@ class x
   }
 
   /**
-   * Converts a numeric array to an associative one, using the values alternatively as key or value.
+   * Converts a numeric array into an associative one, alternating key and value.
    *
    * ```php
    * \bbn\x::to_keypair(['Test', 'TestFile', 'Example', 'ExampleFile']);
    * // string ['Test' => 'TestFile', 'Example' => 'ExampleFile']
    * ```
    *
-   * @param array $arr must contain an even number of values
-   * @param bool $protected if false no index protection will be performed
+   * @param array $arr The array. It must contain an even number of values
+   * @param bool $protected If false no index protection will be performed
    * @return array|false
    */
   public static function to_keypair($arr, $protected = 1){
@@ -676,7 +672,7 @@ class x
    * ```
    *
    * @param array $ar A multidimensional array
-   * @param string $key The property where to check the value from
+   * @param string $key Where to check the property value from
    * @return mixed
    */
   public static function max_with_key($ar, $key){
@@ -696,7 +692,7 @@ class x
   }
 
   /**
-   * Returns the minimum value of an index of a multidimensional array.
+   * Returns the minimum value of an index from a multidimensional array.
    *
    * ```php
    * \bbn\x::min_with_key([
@@ -725,7 +721,7 @@ class x
   }
 
   /**
-   * Gets the backtrace and dumps it or logs it into a file
+   * Gets the backtrace and dumps or logs it into a file.
    *
    * ```php
    * \bbn\x::dump(\bbn\x::debug());
@@ -749,7 +745,7 @@ class x
   }
 
   /**
-   * Apply the given function at all level of a multidimensional array (if defined param $item).
+   * Applies the given function at all levels of a multidimensional array (if defined param $item).
    *
    * ```php
    * $ar = [
@@ -817,7 +813,7 @@ class x
    * ```
    * @param callable $fn The function to be applied to the items of the array
    * @param array $ar
-   * @param string|null $items If null the function will be applied just to the item of parent array
+   * @param string|null $items If null the function will be applied just to the item of the parent array
    * @return array
    */
   public static function map(callable $fn, array $ar, string $items = null){
@@ -839,7 +835,7 @@ class x
   }
 
   /**
-   * Returns the array's first index which satisfies the where condition.
+   * Returns the array's first index, which satisfies the 'where' condition.
    *
    * ```php
    * \bbn\x::hdump(\bbn\x::find([[
@@ -880,7 +876,7 @@ class x
    * // int 1
    * ```
    *
-   * @param array $ar
+   * @param array $ar The search within the array
    * @param array $where The where condition
    * @return bool|int
    */
@@ -904,7 +900,7 @@ class x
   }
 
   /**
-   * Returns the first row of an array satisfying the where parameters ({@link find()).
+   * Returns the first row of an array to satisfy the where parameters ({@link find()).
    *
    * ```php
    * \bbn\x::dump(\bbn\x::get_row([[
@@ -927,7 +923,7 @@ class x
    * // array [ "id" => 2, "name" => "Albert", "fname" => "Taylor", ]
    * ```
    *
-   * @param array $r
+   * @param array $r The array
    * @param array $where The where condition
    * @return bool|mixed
    *
@@ -963,7 +959,7 @@ class x
    * // int 2
    * ```
    *
-   * @param array $r
+   * @param array $r The array
    * @param array $where The where condition
    * @param string $field The field where to look for
    * @return bool|mixed
@@ -976,7 +972,7 @@ class x
   }
 
   /**
-   * Returns a reference to a subarray targeted by an array $keys
+   * Returns a reference to a subarray targeted by an array $keys.
    *
    * ```php
    * $ar = [
@@ -996,8 +992,8 @@ class x
    * \bbn\x::hdump(\bbn\x::pick($ar,['session', 'user', 'profile', 'admin']));
    * // ["email"  =>  "test@test.com",]
    * ```
-   * @param array $ar
-   * @param array $keys
+   * @param array $ar The array
+   * @param array $keys The array's keys
    * @return array|mixed
    */
   public static function pick(array $ar, array $keys){
@@ -1013,7 +1009,7 @@ class x
   }
 
   /**
-   * Sort the item of an array.
+   * Sorts the items of an array.
    *
    * ```php
    * $var = [3, 2, 5, 6, 1];
@@ -1022,7 +1018,7 @@ class x
    * // array [1,2,3,5,6]
    * ```
    *
-   * @param $ar array The reference to the array t7o sort
+   * @param $ar array The reference of the array to sort
    * @return void
    */
 
@@ -1044,7 +1040,7 @@ class x
   }
 
   /**
-   * Sort the item of an indexed array basing on a given $key.
+   * Sorts the items of an indexed array based on a given $key.
    *
    * ```php
    *  $v = [['age'=>10, 'name'=>'thomas'], ['age'=>22, 'name'=>'John'], ['age'=>37, 'name'=>'Michael']];
@@ -1064,6 +1060,7 @@ class x
    * @return void
    */
   public static function sort_by(&$ar, $key, $dir = ''){
+
     $args = \func_get_args();
     array_shift($args);
     if ( \is_string($key) ){
@@ -1104,7 +1101,7 @@ class x
 
 
   /**
-   * Checks if the operating system from which PHP is executed is Windows or not
+   * Checks if the operating system, from which PHP is executed, is Windows or not.
    * ```php
    * \bbn\x::dump(\bbn\x::is_windows());
    * // boolean false
@@ -1118,7 +1115,7 @@ class x
   }
 
   /**
-   * Makes a Curl call towards a URL and returns the result as a string
+   * Makes a Curl call towards a URL and returns the result as a string.
    *
    * ```php
    *  $url = 'https://www.omdbapi.com/';
@@ -1171,7 +1168,7 @@ class x
   }
 
   /**
-   * Returns the given array or object as a tree structure ready for a JS tree
+   * Returns the given array or object as a tree structure ready for a JS tree.
    *
    * ```php
    * \bbn\x::hdump(\bbn\x::get_tree([['id' => 1,'name' => 'Andrew','fname' => 'Williams','children' =>[['name' => 'Emma','age' => 6],['name' => 'Giorgio','age' => 9]]], ['id' => 2,'name' => 'Albert','fname' => 'Taylor','children' =>[['name' => 'Esther','age' => 6],['name' => 'Paul','age' => 9]]], ['id' => 3,'name' => 'Mike','fname' => 'Smith','children' =>[['name' => 'Sara','age' => 6],['name' => 'Fred','age' => 9]]]]));
@@ -1210,7 +1207,7 @@ class x
   }
 
   /**
-   * Returns a view of an array or object as a JS tree
+   * Returns a view of an array or object as a JS tree.
    *
    * ```php
    * \bbn\x::dump(\bbn\x::make_tree([['id' => 1,'name' => 'Andrew','fname' => 'Williams','children' =>[['name' => 'Emma','age' => 6],['name' => 'Giorgio','age' => 9]]], ['id' => 2,'name' => 'Albert','fname' => 'Taylor','children' =>[['name' => 'Esther','age' => 6],['name' => 'Paul','age' => 9]]], ['id' => 3,'name' => 'Mike','fname' => 'Smith','children' =>[['name' => 'Sara','age' => 6],['name' => 'Fred','age' => 9]]]]));
@@ -1258,7 +1255,7 @@ class x
   }
 
   /**
-   * Formats a CSV line(s) and returns an array.
+   * Formats a CSV line(s) and returns it as an array.
    * Adapted from http://us3.php.net/manual/en/function.fputcsv.php#87120
    *
    * ```php
@@ -1333,6 +1330,8 @@ class x
   }
 
   /**
+   * Checks if two files are the same.
+   *
    * @param string $file1
    * @param string $file2
    * @param bool $strict
@@ -1351,6 +1350,9 @@ class x
     }
   }
 
+  /**
+  * @todo Comment this
+  */
   public static function check_properties($obj){
     $props = \func_get_args();
     array_shift($props);
@@ -1367,10 +1369,24 @@ class x
     }
   }
 
+  /**
+  * Counts the properties of an object.
+  *
+  * @parma $obj
+  * @return int
+  */
   public static function count_properties($obj){
     return \count(get_object_vars($obj));
   }
 
+  /**
+  * Creates an Excel file from a given array.
+  *
+  * @param array $array The array to export
+  * @param string $file The file path
+  * @param bool $with_titles Set it to false if you don't want the columns titles. Default true
+  * @return bool
+  */
   public static function to_excel(array $data, string $file, bool $with_titles = true): bool
   {
     $checked = false;
@@ -1392,18 +1408,26 @@ class x
       $todo[] = array_values($d);
     }
     if ( count($todo) ){
-      $objPHPExcel = new \PHPExcel();
+      $objPHPExcel = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
       $objPHPExcel->getActiveSheet()->fromArray($todo, NULL, 'A1');
-      $objPHPExcel->getDefaultStyle()
-                  ->getNumberFormat()
-                  ->setFormatCode(\PHPExcel_Style_NumberFormat::FORMAT_TEXT);
-      $ow = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+      $objPHPExcel
+        ->getDefaultStyle()
+        ->getNumberFormat()
+        ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
+      $ow = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($objPHPExcel);
       $ow->save($file);
       return \is_file($file);
     }
     return false;
   }
 
+  /**
+  * Makes a UID.
+  * 
+  * @param bool $binary Set it to true if you want a binary UID
+  * @param bool $hypens Set it to true if you want hypens to seperate the UID
+  * @return string|bynary
+  */
   public static function make_uid($binary = false, $hyphens = false){
     $tmp = sprintf($hyphens ? '%04x%04x-%04x-%04x-%04x-%04x%04x%04x' : '%04x%04x%04x%04x%04x%04x%04x%04x',
 
@@ -1428,6 +1452,11 @@ class x
     return $binary ? hex2bin($tmp) : $tmp;
   }
 
+  /**
+  * Converts a hex UID to a binary UID. You can also give an array or an object to convert the array's items or the object's properties.
+  * @param string|array|object $st
+  * @return string
+  */
   public static function convert_uids($st){
     if ( \is_array($st) || \is_object($st) ){
       foreach ( $st as &$s ){
@@ -1440,6 +1469,15 @@ class x
     return $st;
   }
 
+  /**
+  * Compares two float numbers with the given operator.
+  *
+  * @param float $v1
+  * @param float $v2
+  * @param string $operator
+  * @param int $precision
+  * @return boolean
+  */
   public static function compare_floats($v1, $v2, string $operator = '===', int $precision = 4): bool
   {
     $v1 = round((float)$v1 * pow(10, $precision));
@@ -1461,6 +1499,13 @@ class x
     return false;
   }
 
+  /**
+  * Encodes an array's values to the base64 encoding scheme. You can also convert the resulting array into a JSON string (default).
+  *
+  * @param array $arr
+  * @param boolean $json
+  * @return string|array
+  */
   public static function json_base64_encode(array $arr, $json = true)
   {
     $res = [];
@@ -1478,6 +1523,12 @@ class x
     return $json ? json_encode($res) : $res;
   }
 
+  /**
+  * Decodes the base64 array's values. You can also give a JSON string of an array.
+  * 
+  * @param string|array $st
+  * @result array 
+  */
   public static function json_base64_decode($st): ?array
   {
     $res = \is_string($st) ? json_decode($st, true) : $st;
@@ -1498,6 +1549,11 @@ class x
     return null;
   }
 
+  /**
+  * Creates an associative array based on the first array's value.
+  *
+  * @param array $ar
+  * @return array*/
   public static function index_by_first_val(array $ar): array
   {
     if ( empty($ar) || !isset($ar[0]) || !\count($ar[0]) ){

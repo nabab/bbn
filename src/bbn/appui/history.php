@@ -212,7 +212,6 @@ class history
 	 */
   public static function disable(): void
   {
-    \bbn\x::log("DISABLEEEEE", 'db');
     self::$enabled = false;
   }
 
@@ -221,7 +220,6 @@ class history
 	 */
   public static function enable(): void
   {
-    \bbn\x::log("ENABLEEEEE", 'db');
     self::$enabled = true;
   }
 
@@ -257,7 +255,6 @@ class history
 	  return
       isset(self::$user, self::$table, self::$db) &&
       self::is_init() &&
-      self::is_enabled() &&
       self::_get_db();
   }
 
@@ -930,7 +927,7 @@ MYSQL;
    */
   public static function trigger(array $cfg): array
   {
-    if ( !self::check() || !($db = self::_get_db()) ){
+    if ( !self::is_enabled() || !($db = self::_get_db()) ){
       return $cfg;
     }
     $tables = $cfg['tables'] ?? (array)$cfg['table'];
@@ -1006,9 +1003,6 @@ MYSQL;
         }
         if ( $change ){
           $cfg = $db->reprocess_cfg($cfg);
-          if ( \in_array('apst_app_new.apst_liens', $cfg['tables'], true) && (count($cfg['fields']) > 1) ){
-            //die(bbn\x::dump($cfg));
-          }
         }
       }
     }
@@ -1034,8 +1028,8 @@ MYSQL;
           $primary_where = $cfg['filters']['conditions'][0]['value'];
         }
         $idx = array_search($s['primary'], $cfg['fields'], true);
-        if ( ($idx > -1) && isset($cfg['values'][$idx]) ){
-          $primary_defined = true;
+        if ( ($idx !== false) && isset($cfg['values'][$idx]) ){
+          $primary_defined = $cfg['generate_id'] ? false : true;
           $primary_value = $cfg['values'][$idx];
         }
 
@@ -1044,11 +1038,7 @@ MYSQL;
           case 'INSERT':
             // If the primary is specified and already exists in a row in deleted state
             // (if it exists in active state, DB will return its standard error but it's not this class' problem)
-            if ( $primary_defined ){
-              // We check if a row exists and get its content
-              $all = self::$db->rselect($table, [], [$s['primary'] => $primary_value]);
-            }
-            if ( empty($all) ){
+            if ( !$primary_defined ){
               // Checks if there is a unique value (non based on UID)
               $modelize = $db->modelize($table);
               $keys = $modelize['keys'];
@@ -1074,20 +1064,36 @@ MYSQL;
                   if ( $exit ){
                     continue;
                   }
-                  if ( $all = self::$db->rselect([
+                  self::disable();
+                  if ( $tmp = $db->select_one([
                     'tables' => [$table],
+                    'fields' => [$s['primary']],
+                    'join' => [[
+                      'table' => self::$table_uids,
+                      'on' => [[
+                        'field' => $db->cfn('bbn_uid', self::$table_uids),
+                        'operator' => 'eq',
+                        'exp' => $db->cfn($s['primary'], $table, true)
+                      ]]
+                    ]],
                     'where' => [
                       'conditions' => $fields,
                       'logic' => 'AND'
                     ]
                   ]) ){
+                    $primary_value = $tmp;
+                    $primary_defined = true;
                     break;
                   }
+                  self::enable();
                 }
               }
             }
-            // A record already exists
-            if ( !empty($all) ){
+            if (
+              $primary_defined &&
+              ($db->select_one('bbn_history_uids', 'bbn_active', ['bbn_uid' => $primary_value]) === 0) &&
+              ($all = self::$db->rselect($table, [], [$s['primary'] => $primary_value]))
+            ){
               // We won't execute the after trigger
               $cfg['trig'] = false;
               // Real query's execution will be prevented
@@ -1097,29 +1103,28 @@ MYSQL;
               $update = [];
               // We update each element which needs to (the new ones different from the old, and the old ones different from the default)
               foreach ( $all as $k => $v ){
-                $cfn = self::$db->cfn($k, $table);
                 if ( $k !== $s['primary'] ){
-                  if ( isset($cfg['values'][$k]) &&
-                    ($cfg['values'][$k] !== $v)
-                  ){
-                    $update[$k] = $cfg['values'][$k];
+                  $idx = array_search($k, $cfg['fields'], true);
+                  if ( $idx !== false ){
+                    if ( $v !== $cfg['values'][$idx] ){
+                      $update[$k] = $cfg['values'][$idx];
+                    }
                   }
-                  else if ( !isset($cfg['values'][$k]) && ($v !== $s['fields'][$k]['default']) ){
+                  else if ( $v !== $s['fields'][$k]['default'] ){
                     $update[$k] = $s['fields'][$k]['default'];
                   }
                 }
               }
-              //die(var_dump($update, $cfg));
-              if ( \count($update) > 0 ){
-                self::$db->update($table, $update, [
-                  $s['primary'] => !empty($all) ? $all[$s['primary']] : $cfg['values'][$s['primary']]
-                ]);
-                //die("jjjj");
-              }
+              self::disable();
               if ( $cfg['value'] = self::$db->update(self::$table_uids, ['bbn_active' => 1], [
                 'bbn_uid' => $primary_value
               ]) ){
-                self::$db->set_last_insert_id(!empty($all) ? $all[$s['primary']] : $cfg['values'][$s['primary']]);
+                if ( \count($update) > 0 ){
+                  self::enable();
+                  self::$db->update($table, $update, [
+                    $s['primary'] => $primary_value
+                  ]);
+                }
                 $cfg['history'][] = [
                   'operation' => 'RESTORE',
                   'column' => $s['fields'][$s['primary']]['id_option'],
@@ -1127,8 +1132,10 @@ MYSQL;
                   'chrono' => microtime(true)
                 ];
               }
+              self::enable();
             }
             else {
+              self::disable();
               if ( self::$db->insert(self::$table_uids, [
                 'bbn_uid' => $primary_value,
                 'bbn_table' => $s['id']
@@ -1141,6 +1148,7 @@ MYSQL;
                 ];
               }
               self::$db->set_last_insert_id($primary_value);
+              self::enable();
             }
             break;
           case 'UPDATE':
@@ -1167,6 +1175,7 @@ MYSQL;
                 }
               }
             }*/
+            self::disable();
             if (
               $primary_where &&
               ($row = self::$db->rselect($table, $cfg['fields'], [$s['primary'] => $primary_where]))
@@ -1188,9 +1197,6 @@ MYSQL;
                 }
               }
             }
-
-            // ****************************************
-
             // Case where the primary is not defined, we'll update each primary instead
             else if ( $ids = self::$db->get_column_values($table, $s['primary'], $cfg['filters']) ){
               // We won't execute the after trigger
@@ -1210,6 +1216,7 @@ MYSQL;
               // ****************************************
 
             }
+            self::enable();
             break;
 
           // Nothing is really deleted, the hcol is just set to 0
@@ -1220,6 +1227,7 @@ MYSQL;
             $cfg['run'] = false;
             $cfg['value'] = 0;
             // Case where the primary is not defined, we'll delete based on each primary instead
+            self::disable();
             if ( !$primary_where ){
               $ids = self::$db->get_column_values($table, $s['primary'], $cfg['filters']);
               foreach ( $ids as $id ){
@@ -1244,6 +1252,7 @@ MYSQL;
                 ];
               }
             }
+            self::enable();
             break;
         }
       }
@@ -1251,10 +1260,12 @@ MYSQL;
         ($cfg['moment'] === 'after') &&
         isset($cfg['history'])
       ){
+        self::disable();
         foreach ($cfg['history'] as $h){
           self::_insert($h);
         }
         unset($cfg['history']);
+        self::enable();
       }
     }
     return $cfg;

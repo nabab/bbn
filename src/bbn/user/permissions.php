@@ -56,7 +56,7 @@ class permissions extends bbn\models\cls\basic
 		if ( !($this->opt = bbn\appui\options::get_instance()) ){
       die('Impossible to construct permissions: you need to instantiate options before');
     }
-    if ( !($this->pref = bbn\user::get_instance()) ){
+    if ( !($this->user = bbn\user::get_instance()) ){
       die('Impossible to construct permissions: you need to instantiate user before');
     }
     if ( !($this->pref = bbn\user\preferences::get_instance()) ){

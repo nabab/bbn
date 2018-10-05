@@ -95,7 +95,7 @@ class grid extends bbn\models\cls\cache
         'having' => $cfg['having'] ?? [],
         'limit' => $post['limit'] ?? ($cfg['limit'] ?? 20),
         'start' => $post['start'] ?? 0,
-        'where' => !empty($post['filters']) && !empty($post['filters']['conditions']) ?? []
+        'where' => !empty($post['filters']) && !empty($post['filters']['conditions']) ? $post['filters'] : []
       ];
       // Adding all the fields if fields is empty
       if ( empty($db_cfg['fields']) ){

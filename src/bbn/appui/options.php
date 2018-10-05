@@ -96,6 +96,7 @@ class options extends bbn\models\cls\db
   {
     // The table's columns
     $c =& $this->class_cfg['arch']['options'];
+
     // If id_parent is undefined it uses the default
     if ( !isset($it[$c['id_parent']]) ){
       $it[$c['id_parent']] = $this->default;
@@ -173,6 +174,7 @@ class options extends bbn\models\cls\db
       else if ( empty($it[$c['num']]) ){
         $it[$c['num']] = $parent['num_children'] + 1;
       }
+
       if ( !isset($it[$c['id_alias']]) || !bbn\str::is_uid($it[$c['id_alias']]) ){
         $it[$c['id_alias']] = null;
       }
@@ -444,37 +446,46 @@ class options extends bbn\models\cls\db
     // Using the code(s) as argument(s) from now
     $id_parent = array_pop($args);
     $true_code = array_pop($args);
-    $local_cache_name2 = $true_code.'-'.$id_parent;
-    /** @var int|false $tmp */
-    if ( null !== ($tmp = $this->_get_local_cache($local_cache_name)) ){
-      if ( !count($args) ){
+    $cache_name = 'get_code_'.$true_code;
+    $local_cache_name = $id_parent.'-'.$cache_name;
+    if ( !empty($args) ){
+      $cache_name2 = $cache_name.'-'.implode('-', $args);
+      $local_cache_name2 = $id_parent.'-'.$cache_name2;
+      if ( $tmp = $this->_get_local_cache($local_cache_name2) ){
         return $tmp;
       }
-      $args[] = $tmp;
-      return $this->from_code($args);
+      if ( $tmp = $this->cache_get($id_parent, $cache_name2) ){
+        $this->_set_local_cache($local_cache_name2, $tmp);
+        return $tmp;
+      }
     }
-    if ( null !== ($tmp = $this->_get_local_cache($local_cache_name2)) ){
+    if (
+      ($tmp = $this->_get_local_cache($local_cache_name)) ||
+      ($tmp = $this->cache_get($id_parent, $cache_name))
+    ){
       if ( !count($args) ){
         return $tmp;
       }
-      $args[] = $tmp;
-      return $this->from_code($args);
     }
     $c =& $this->class_cfg;
     /** @var int|false $tmp */
-    if ( $tmp = $this->db->select_one($c['table'], $c['arch']['options']['id'], [
+    if ( !$tmp && ($tmp = $this->db->select_one($c['table'], $c['arch']['options']['id'], [
         $c['arch']['options']['id_parent'] => $id_parent,
         $c['arch']['options']['code'] => $true_code
-      ]) ){
-      $this->_set_local_cache($local_cache_name2, $tmp);
-      if ( $local_cache_name !== $local_cache_name2 ){
-        $this->_set_local_cache($local_cache_name, $tmp);
-      }
+      ])) ){
+      $this->_set_local_cache($local_cache_name, $tmp);
+      $this->cache_set($id_parent, $cache_name, $tmp);
+    }
+    if ( $tmp ){
       if ( \count($args) ){
         $args[] = $tmp;
-        return $this->from_code($args);
+        if ( $tmp = $this->from_code($args) ){
+          $this->_set_local_cache($local_cache_name2, $tmp);
+          $this->cache_set($id_parent, $cache_name2, $tmp);
+        }
       }
       return $tmp;
+
     }
 
     return null;
@@ -810,7 +821,7 @@ class options extends bbn\models\cls\db
     $res = [];
 
     if ( $cfg = $this->get_cfg($id) ){
-      if ( !empty($cfg['show_code']) ){
+      if ( !empty($cfg['show_code']) || !empty($cfg['schema']) ){
         $opts = $this->full_options($id);
       }
       else{
@@ -824,6 +835,16 @@ class options extends bbn\models\cls\db
         ];
         if ( !empty($cfg['show_code']) ){
           $res[$i]['code'] = $o['code'];
+        }
+        if ( !empty($cfg['schema']) ){
+          if ( \is_string($cfg['schema']) ){
+            $cfg['schema'] = json_decode($cfg['schema'], 1);
+          }
+          foreach ( $cfg['schema'] as $s ){
+            if ( !empty($s['field']) && ($s['field'] !== $text) && ($s['field'] !== $value) && (empty($cfg['show_code']) || ($s['field'] !== 'code')) ){
+              $res[$i][$s['field']] = $o[$s['field']] ?? null;
+            }
+          }
         }
         $i++;
       }
@@ -1295,6 +1316,9 @@ class options extends bbn\models\cls\db
   public function get_cfg($code = null): ?array
   {
     if ( bbn\str::is_uid($id = $this->from_code(\func_get_args())) ){
+      if ( $tmp = $this->cache_get($id, __METHOD__) ){
+        return $tmp;
+      }
       $c =& $this->class_cfg;
       $cfg = $this->db->select_one($c['table'], $c['arch']['options']['cfg'], [$c['arch']['options']['id'] => $id]);
       $cfg = bbn\str::is_json($cfg) ? json_decode($cfg, 1) : [];
@@ -1338,6 +1362,7 @@ class options extends bbn\models\cls\db
       foreach ( $mandatories as $m ){
         $cfg[$m] = empty($cfg[$m]) ? null : $cfg[$m];
       }
+      $this->cache_set($id, __METHOD__, $cfg);
       return $cfg;
     }
     return null;
@@ -1936,7 +1961,7 @@ class options extends bbn\models\cls\db
       ($id !== $this->default) &&
       ($id !== $this->root) &&
       bbn\str::is_uid(($id_parent = $this->get_id_parent($id)))
-    ){
+    ){    
       $num = 0;
       if ( $items = $this->items($id) ){
         foreach ( $items as $it ){
@@ -2504,9 +2529,11 @@ class options extends bbn\models\cls\db
     $option['id_parent'] = $id_parent ?: $this->default;
     $num = 0;
     $items = empty($option['items']) ? false : $option['items'];
+
     unset($option['id']);
     unset($option['items']);
     $num += (int)$this->add($option, $force);
+
     $id = $this->db->last_id();
     if ( $items ){
       foreach ( $items as $it ){
@@ -2744,7 +2771,7 @@ class options extends bbn\models\cls\db
       $opts = $this->full_options($id);
       foreach ( $opts as $opt ){
         $o = [
-          'icon' => $opt['icon'] ?? 'fa fa-cog',
+          'icon' => $opt['icon'] ?? 'fas fa-cog',
           'text' => $opt['text'],
           'id' => $opt['id']
         ];

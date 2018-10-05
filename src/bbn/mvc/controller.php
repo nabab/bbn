@@ -783,8 +783,8 @@ class controller implements api{
   {
 		$this->obj->css = $this
       ->add_data($cached ?
-        $this->get_cached_model(bbn\x::merge_arrays($this->post, $this->data), $cached) :
-        $this->get_model(bbn\x::merge_arrays($this->post, $this->data))
+        $this->get_cached_model($this->path, bbn\x::merge_arrays($this->post, $this->data), $cached) :
+        $this->get_model($this->path, bbn\x::merge_arrays($this->post, $this->data))
       )
       ->get_less($this->path, false);
 		if ( $new_title = $this->retrieve_var($title) ){
@@ -913,6 +913,8 @@ class controller implements api{
   public function get_cached_model(){
     $args = \func_get_args();
     $die = 1;
+    $ttl = 0;
+    $data = [];
     foreach ( $args as $a ){
       if ( \is_string($a) && \strlen($a) ){
         $path = $a;

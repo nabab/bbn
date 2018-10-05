@@ -10,7 +10,7 @@
 namespace bbn\api;
 use bbn;
 
-class cloudmin {
+class cloudmin2 {
 
   const cache_name = 'bbn/api/cloudmin';
 

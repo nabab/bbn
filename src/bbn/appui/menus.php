@@ -202,25 +202,30 @@ class menus extends bbn\models\cls\basic{
 
   public function get_id_menu($id): ?string
   {
-    $parents = $this->options->parents($id);
-    $root = $this->get_option_root();
-    foreach ( $parents as $i => $val ){
-      if ( $val === $root ){
-        //return $parents[$i - 2];
-        return $parents[$i - 1];
+    if (
+      ($parents = $this->options->parents($id)) &&
+      ($root = $this->get_option_root())
+    ){
+      foreach ( $parents as $i => $val ){
+        if ( $val === $root ){
+          return $parents[($i === 0 ? $i : $i-1)];
+        }
       }
     }
     return null;
   }
 
+
   /**
-   * Delete  chache for menu
+   * Removes menu and deletes parent cache
    * @param $id
    * @return int|boolean
    */
   public function remove(string $id){
-    if( $id_menu = $this->get_id_menu($id) ){
-      $this->options->remove($id);
+    if (
+      ($id_menu = $this->get_id_menu($id)) &&
+      $this->options->remove($id)
+    ){
       $this->delete_cache($id_menu);
       return true;
     }
@@ -236,8 +241,10 @@ class menus extends bbn\models\cls\basic{
    */
   public function add(string $id_parent, array $cfg): ?string
   {
+
     if( $id_menu = $this->get_id_menu($id_parent) ){
       $cfg['id_parent'] = $id_parent;
+
       if ( $res = $this->options->add($cfg) ){
         $this->delete_cache($id_menu);
       }
@@ -255,7 +262,7 @@ class menus extends bbn\models\cls\basic{
   public function set(string $id, array $cfg){
     if ( $id_menu = $this->get_id_menu($id) ){
 
-      if ( $res = $this->options->set($id, $cfg) ){        
+      if ( $res = $this->options->set($id, $cfg) ){
         $this->delete_cache($id_menu);
       }
       return $res;
@@ -290,7 +297,6 @@ class menus extends bbn\models\cls\basic{
   }
 
   public function delete_cache($id_menu){
-    //die(\bbn\x::dump($this->options->text($id_menu)));
     $this->options->delete_cache($id_menu, true);
     return $this->cache_delete($id_menu);
   }

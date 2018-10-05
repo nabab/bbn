@@ -301,113 +301,6 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * @param array $where
-   * @param bool $full
-   * @return array|bool
-   */
-  private function _treat_conditions(array $where, $full = true){
-    if ( !isset($where['conditions']) ){
-      $where['conditions'] = $where;
-      $where['logic'] = 'AND';
-    }
-    if ( isset($where['conditions']) && \is_array($where['conditions']) ){
-      if ( !isset($where['logic']) || (strtoupper($where['logic']) !== 'OR') ){
-        $where['logic'] = 'AND';
-      }
-      $res = [
-        'conditions' => [],
-        'logic' => $where['logic']
-      ];
-      foreach ( $where['conditions'] as $key => $f ){
-        $is_array = \is_array($f);
-        if (
-          $is_array &&
-          array_key_exists('conditions', $f) &&
-          \is_array($f['conditions'])
-        ){
-          $res['conditions'][] = $this->_treat_conditions($f, false);
-        }
-        else {
-          if ( \is_string($key) ){
-            // 'id_user' => [1, 2] Will do OR
-            if ( !$is_array ) {
-              if ( null === $f ){
-                $f = [
-                  'field' => $key,
-                  'operator' => 'isnull'
-                ];
-              }
-              else{
-                $f = [
-                  'field' => $key,
-                  'operator' => 'eq',
-                  'value' => $f
-                ];
-              }
-            }
-            else if ( isset($f[0]) ){
-              $tmp = [
-                'conditions' => [],
-                'logic' => 'OR'
-              ];
-              foreach ( $f as $v ){
-                if ( null === $v ){
-                  $tmp['conditions'][] = [
-                    'field' => $key,
-                    'operator' => 'isnull'
-                  ];
-                }
-                else{
-                  $tmp['conditions'][] = [
-                    'field' => $key,
-                    'operator' => 'eq',
-                    'value' => $v
-                  ];
-                }
-              }
-              $res['conditions'][] = $tmp;
-            }
-          }
-          else if ( $is_array && !x::is_assoc($f) && count($f) >= 2 ){
-            $tmp = [
-              'field' => $f[0],
-              'operator' => $f[1]
-            ];
-            if ( isset($f[3]) ){
-              $tmp['exp'] = $f[3];
-            }
-            else if ( array_key_exists(2, $f) ){
-              if ( $f[2] === null ){
-                $tmp['operator'] = $f[2] === '!=' ? 'isnotnull' : 'isnull';
-              }
-              else{
-                $tmp['value'] = $f[2];
-              }
-            }
-            $f = $tmp;
-          }
-          if ( isset($f['field']) ){
-            if ( !isset($f['operator']) ){
-              $f['operator'] = 'eq';
-            }
-            $res['conditions'][] = $f;
-          }
-        }
-      }
-      if ( $full ){
-        $tmp = $this->_remove_conditions_value($res);
-        $res = [
-          'hashed' => $tmp['hashed'],
-          'values' => $tmp['values'],
-          'where' => $res
-        ];
-      }
-      return $res;
-    }
-    return false;
-  }
-
-  /**
    * Adds the specs of a query to the $queries object.
    *
    * @param string $hash The hash of the statement.
@@ -588,7 +481,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       // Launching the trigger BEFORE execution
       if ( $cfg = $this->_trigger($cfg) ){
         if ( !empty($cfg['run']) ){
-          $this->log(["TRIGGER OK", $cfg['run'], $cfg['fields']]);
+          //$this->log(["TRIGGER OK", $cfg['run'], $cfg['fields']]);
           // Executing the query
           /** @todo Put hash back! */
           //$cfg['run'] = $this->query($cfg['sql'], $cfg['hash'], $cfg['values'] ?? []);
@@ -763,7 +656,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
               $join['alias'] = $k;
             }
           }
-          if ( isset($join['table'], $join['on']) && ($tmp = $this->_treat_conditions($join['on'])) ){
+          if ( isset($join['table'], $join['on']) && ($tmp = $this->treat_conditions($join['on'])) ){
             $res['join'][] = array_merge($join, ['on' => $tmp['where']]);
             $res['hashed_join'][] = $tmp['hashed'];
             if ( !empty($tmp['values']) ){
@@ -775,7 +668,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
         }
       }
     }
-    if ( $tmp = $this->_treat_conditions($res['where']) ){
+    if ( $tmp = $this->treat_conditions($res['where']) ){
       $res['filters'] = $tmp['where'];
       $res['hashed_where'] = $tmp['hashed'];
       if ( \is_array($tmp) && isset($tmp['values']) ){
@@ -784,7 +677,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
         }
       }
     }
-    if ( !empty($res['having']) && ($tmp = $this->_treat_conditions($res['having'])) ){
+    if ( !empty($res['having']) && ($tmp = $this->treat_conditions($res['having'])) ){
       $res['having'] = $tmp['where'];
       $res['hashed_having'] = $tmp['hashed'];
       foreach ( $tmp['values'] as $v ){
@@ -876,7 +769,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       if ( ($cfg = $this->get_connection($cfg)) && !empty($cfg['db']) ){
         $this->qte = $this->language->qte;
         try{
-          parent::__construct(...$cfg['args']);
+          parent::__construct(...($cfg['args'] ?: []));
           $this->current = $cfg['db'];
           $this->engine = $cfg['engine'];
           $this->host = $cfg['host'] ?? '127.0.0.1';
@@ -950,6 +843,113 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
+   * @param array $where
+   * @param bool $full
+   * @return array|bool
+   */
+  public function treat_conditions(array $where, $full = true){
+    if ( !isset($where['conditions']) ){
+      $where['conditions'] = $where;
+      $where['logic'] = 'AND';
+    }
+    if ( isset($where['conditions']) && \is_array($where['conditions']) ){
+      if ( !isset($where['logic']) || (strtoupper($where['logic']) !== 'OR') ){
+        $where['logic'] = 'AND';
+      }
+      $res = [
+        'conditions' => [],
+        'logic' => $where['logic']
+      ];
+      foreach ( $where['conditions'] as $key => $f ){
+        $is_array = \is_array($f);
+        if (
+          $is_array &&
+          array_key_exists('conditions', $f) &&
+          \is_array($f['conditions'])
+        ){
+          $res['conditions'][] = $this->treat_conditions($f, false);
+        }
+        else {
+          if ( \is_string($key) ){
+            // 'id_user' => [1, 2] Will do OR
+            if ( !$is_array ) {
+              if ( null === $f ){
+                $f = [
+                  'field' => $key,
+                  'operator' => 'isnull'
+                ];
+              }
+              else{
+                $f = [
+                  'field' => $key,
+                  'operator' => 'eq',
+                  'value' => $f
+                ];
+              }
+            }
+            else if ( isset($f[0]) ){
+              $tmp = [
+                'conditions' => [],
+                'logic' => 'OR'
+              ];
+              foreach ( $f as $v ){
+                if ( null === $v ){
+                  $tmp['conditions'][] = [
+                    'field' => $key,
+                    'operator' => 'isnull'
+                  ];
+                }
+                else{
+                  $tmp['conditions'][] = [
+                    'field' => $key,
+                    'operator' => 'eq',
+                    'value' => $v
+                  ];
+                }
+              }
+              $res['conditions'][] = $tmp;
+            }
+          }
+          else if ( $is_array && !x::is_assoc($f) && count($f) >= 2 ){
+            $tmp = [
+              'field' => $f[0],
+              'operator' => $f[1]
+            ];
+            if ( isset($f[3]) ){
+              $tmp['exp'] = $f[3];
+            }
+            else if ( array_key_exists(2, $f) ){
+              if ( $f[2] === null ){
+                $tmp['operator'] = $f[2] === '!=' ? 'isnotnull' : 'isnull';
+              }
+              else{
+                $tmp['value'] = $f[2];
+              }
+            }
+            $f = $tmp;
+          }
+          if ( isset($f['field']) ){
+            if ( !isset($f['operator']) ){
+              $f['operator'] = 'eq';
+            }
+            $res['conditions'][] = $f;
+          }
+        }
+      }
+      if ( $full ){
+        $tmp = $this->_remove_conditions_value($res);
+        $res = [
+          'hashed' => $tmp['hashed'],
+          'values' => $tmp['values'],
+          'where' => $res
+        ];
+      }
+      return $res;
+    }
+    return false;
+  }
+
+  /**
    * Retrieve an array of specific filters among the existing ones.
    *
    * @param array $cfg
@@ -992,7 +992,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
           $type = null;
           if (
             isset($cfg['models'], $cfg['available_fields'][$f['field']]) &&
-            ($model = $cfg['models'][$cfg['available_fields'][$f['field']]]['fields']) &&
+            //($model = $cfg['models'][$cfg['available_fields'][$f['field']]]['fields']) &&
+            ($model = $cfg['models'][$cfg['tables_full'][$cfg['available_fields'][$f['field']]]]['fields']) &&
             ($fname = $this->csn($f['field'])) &&
             !empty($model[$fname]['type'])
           ){
@@ -1006,6 +1007,25 @@ class db extends \PDO implements db\actions, db\api, db\engines
       }
     }
     return $types;
+  }
+
+  public function arrange_conditions(array &$conditions, array $cfg): void
+  {
+    if ( !empty($cfg['available_fields']) && isset($conditions['conditions']) ){
+      foreach ( $conditions['conditions'] as &$c ){
+        if ( array_key_exists('conditions', $c) && \is_array($c['conditions']) ){
+          $this->arrange_conditions($c, $cfg);
+        }
+        else if ( isset($c['field']) && !$cfg['available_fields'][$c['field']] && !$this->is_col_full_name($c['field']) ){
+          foreach ( $cfg['tables'] as $t => $o ){
+            if ( isset($cfg['available_fields'][$this->col_full_name($c['field'], $t)]) ){
+              $c['field'] = $this->col_full_name($c['field'], $t);
+              break;
+            }
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -1128,6 +1148,10 @@ class db extends \PDO implements db\actions, db\api, db\engines
           }
           $res['available_fields'][$idx] = $res['available_fields'][$col];
         }
+      }
+      // From here the available fields are defined
+      if ( !empty($res['filters']) ){
+        $this->arrange_conditions($res['filters'], $res);
       }
       unset($col);
       $res['models'] = $models;
@@ -1429,7 +1453,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   public function add_statement($statement): self
   {
     $this->last_query = $statement;
-    $this->log($statement);
+    //$this->log($statement);
     if ( $this->debug ){
       $this->debug_queries[] = $statement;
     }
