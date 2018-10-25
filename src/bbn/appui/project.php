@@ -267,9 +267,9 @@ class project extends bbn\models\cls\db {
         if ( !empty($cats[$a['id_alias']]['tabs']) ){
           $r[$k]['tabs'] = $cats[$a['id_alias']]['tabs'];
         }
-        else{
+        else if( !empty($cats[$a['id_alias']]['extensions']) ){
           $r[$k]['extensions'] = $cats[$a['id_alias']]['extensions'];
-        }
+        }        
         unset($r[$k]['alias']);
       }
     }

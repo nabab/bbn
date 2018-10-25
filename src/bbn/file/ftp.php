@@ -4,6 +4,8 @@
  */
 namespace bbn\file;
 use bbn;
+use boo\test;
+
 /**
  * File Transfer Protocol Class
  *
@@ -17,6 +19,7 @@ use bbn;
  */
 class ftp extends bbn\models\cls\basic
 {
+  public const TIMEOUT = 20;
 
 	/**
 	 * @var string
@@ -58,61 +61,69 @@ class ftp extends bbn\models\cls\basic
 		{
 			$this->dir = $cfg['dir'] ?? '';
 			if ( isset($cfg['host']) ){
-				$this->host = $cfg['host'];
+				$host = $cfg['host'];
 			}
 			else if ( \defined('BBN_FTP_HOST') ){
-				$this->host = BBN_FTP_HOST;
+				$host = BBN_FTP_HOST;
 			}
 			if ( isset($cfg['login']) ){
-				$this->login = $cfg['login'];
+				$login = $cfg['login'];
 			}
 			else if ( \defined('BBN_FTP_LOGIN') ){
-				$this->login = BBN_FTP_LOGIN;
+				$login = BBN_FTP_LOGIN;
 			}
 			if ( isset($cfg['pass']) ){
 				// $this->pass = bbn\util\enc::decrypt($cfg['pass']);
-        $this->pass = $cfg['pass'];
+        $pass = $cfg['pass'];
 			}
 			else if ( \defined('BBN_FTP_PASS') ){
-				$this->pass = bbn\util\enc::decrypt(BBN_FTP_PASS);
+				$pass = bbn\util\enc::decrypt(BBN_FTP_PASS);
 			}
 			if (
-			  isset($this->dir, $this->host, $this->login, $this->pass) &&
-				($this->dir = $this->checkPath($this->dir)) &&
-				($this->cn = ftp_connect($this->host))
+			  isset($this->dir, $host, $login, $pass) &&
+				($this->dir = $this->checkPath($this->dir))
       ){
-        if ( ftp_login($this->cn, $this->login,$this->pass) )
-        {
-          if ( @ftp_chdir($this->cn, $this->dir) )
+			  if ( empty($cfg['ssl']) ){
+          $this->cn = ftp_connect($host, $cfg['port'] ?? 21, $cfg['timeout'] ?? self::TIMEOUT);
+        }
+        else{
+          $this->cn = ftp_ssl_connect($host, $cfg['port'] ?? 21, $cfg['timeout'] ?? self::TIMEOUT);
+        }
+        if ( $this->cn ){
+          if ( ftp_login($this->cn, $login, $pass) )
           {
-            ftp_pasv($this->cn,TRUE);
-            return;
+            if ( @ftp_chdir($this->cn, $this->dir) )
+            {
+              ftp_pasv($this->cn,TRUE);
+              return;
+            }
+            else {
+              $this->error = \defined('BBN_IMPOSSIBLE_TO_FIND_THE_SPECIFIED_FOLDER') ?
+                BBN_IMPOSSIBLE_TO_FIND_THE_SPECIFIED_FOLDER : 'Impossible to find the specified folder';
+            }
           }
-          else{
-            $this->error = \defined('BBN_IMPOSSIBLE_TO_FIND_THE_SPECIFIED_FOLDER') ?
-              BBN_IMPOSSIBLE_TO_FIND_THE_SPECIFIED_FOLDER : 'Impossible to find the specified folder';
+          else {
+            $this->cn = false;
+            $this->error = \defined('BBN_IMPOSSIBLE_TO_CONNECT_TO_THE_FTP_HOST') ?
+              BBN_IMPOSSIBLE_TO_CONNECT_TO_THE_FTP_HOST : 'Impossible to connect to the FTP host';
           }
         }
-        else
-        {
-          $this->cn = false;
-          $this->error = \defined('BBN_IMPOSSIBLE_TO_CONNECT_TO_THE_FTP_HOST') ?
-            BBN_IMPOSSIBLE_TO_CONNECT_TO_THE_FTP_HOST : 'Impossible to connect to the FTP host';
+        else {
+          $this->error = \defined('BBN_IMPOSSIBLE_TO_FIND_THE_FTP_HOST') ?
+            BBN_IMPOSSIBLE_TO_FIND_THE_FTP_HOST : 'Unable to find the FTP host';
         }
-      }
-      else{
-        $this->error = \defined('BBN_IMPOSSIBLE_TO_FIND_THE_FTP_HOST') ?
-          BBN_IMPOSSIBLE_TO_FIND_THE_FTP_HOST : 'Unable to find the FTP host';
       }
 		}
 	}
 
-	/**
-	 * @return void 
-	 */
-	public function listFiles($path='.')
+  /**
+   * @param string $path
+   * @param bool $fast
+   * @return array|null
+   */
+	public function listFiles($path='.', bool $fast = false):? array
 	{
-		$res = [];
+    $res = [];
 		if ( $this->cn &&
             @ftp_chdir($this->cn, $path) &&
             ($files = ftp_nlist($this->cn, $path)) ){
@@ -133,9 +144,8 @@ class ftp extends bbn\models\cls\basic
         }
         $res[] = $ele;
       }
-      return $res;
     }
-		return false;
+    return $res;
 	}
 
 	/**
@@ -151,21 +161,23 @@ class ftp extends bbn\models\cls\basic
    * 
 	 * @return array
 	 */
-	public function scan($dir, $type = null, &$res = []){
+	public function scan(string $dir, string $type = null, &$res = [], int $timeout = 0): array
+  {
+    $res = [];
     if ( $dirs = $this->listFiles($dir) ){
       foreach ( $dirs as $d ){
         if ( $type &&
                 (strpos($type, 'file') === 0) &&
                 !isset($d['num']) ){
-          array_push($res, $d['name']);
+          $res[] = $d['name'];
         }
         else if ( $type &&
                 ((strpos($type, 'dir') === 0) || (strpos($type, 'fold') === 0)) &&
                 isset($d['num']) ){
-          array_push($res, $d['name']);
+          $res[] = $d['name'];
         }
         else{
-          array_push($res, $d['name']);
+          $res[] = $d['name'];
         }
         if ( isset($d['num']) ){
           $this->scan($d['name'], $type, $res);

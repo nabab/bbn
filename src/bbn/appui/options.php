@@ -819,7 +819,6 @@ class options extends bbn\models\cls\db
   public function text_value_options($id = null, string $text = 'text', string $value = 'value'): ?array
   {
     $res = [];
-
     if ( $cfg = $this->get_cfg($id) ){
       if ( !empty($cfg['show_code']) || !empty($cfg['schema']) ){
         $opts = $this->full_options($id);
@@ -1855,6 +1854,7 @@ class options extends bbn\models\cls\db
     $items = !empty($it['items']) && \is_array($it['items']) ? $it['items'] : false;
     $id = null;
     if ( $this->_prepare($it) ){
+      var_dump($it);
       $c =& $this->class_cfg['arch']['options'];
       if (
         $force &&
@@ -1925,7 +1925,7 @@ class options extends bbn\models\cls\db
   public function set($id, array $cfg){
     if ( $this->_prepare($cfg) ){
       $c =& $this->class_cfg['arch']['options'];
-      // id_parent cannot be edited this way
+      // id_parent cannot be edited this way    
       if ( $res = $this->db->update($this->class_cfg['table'], [
         $c['text'] => $cfg[$c['text']],
         $c['code'] => !empty($cfg[$c['code']]) ? $cfg[$c['code']] : null,
@@ -1952,16 +1952,16 @@ class options extends bbn\models\cls\db
    * // (bool) false The option doesn't exist anymore
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param string $code Any option(s) accepted by {@link from_code()}
    * @return bool|int The number of affected rows or false if option not found
    */
-  public function remove($code = null){
+  public function remove($code){
     if (
-      bbn\str::is_uid($id = $this->from_code(\func_get_args())) &&
+      bbn\str::is_uid($id = $this->from_code(...\func_get_args())) &&
       ($id !== $this->default) &&
       ($id !== $this->root) &&
       bbn\str::is_uid(($id_parent = $this->get_id_parent($id)))
-    ){    
+    ){
       $num = 0;
       if ( $items = $this->items($id) ){
         foreach ( $items as $it ){
@@ -1993,7 +1993,7 @@ class options extends bbn\models\cls\db
    * @param mixed $code Any option(s) accepted by {@link from_code()}
    * @return bool|int The number of affected rows or false if option not found
    */
-  public function remove_full($code = null){
+  public function remove_full($code){
     if (
       bbn\str::is_uid($id = $this->from_code(\func_get_args())) &&
       ($id !== $this->default) &&

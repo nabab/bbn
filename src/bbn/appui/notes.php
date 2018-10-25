@@ -207,37 +207,89 @@ class notes extends bbn\models\cls\db
       $type = $type = self::get_option_id(is_null($type) ? 'personal' : $type, 'types');
     }
     if ( \bbn\str::is_uid($type) && is_int($limit) && is_int($start) ){
-      $where = [
-        $cf['arch']['notes']['id_type'] => $type,
-        $cf['arch']['notes']['active'] => 1
-      ];
+      $where = [[
+        'field' => $db->cfn($cf['arch']['notes']['id_type'], $cf['table']),
+        'value' => $type
+      ], [
+        'field' => $db->cfn($cf['arch']['notes']['active'], $cf['table']),
+        'value' => 1
+      ], [
+        'field' => 'versions2.'.$cf['arch']['versions']['version'],
+        'operator' => 'isnull'
+      ]];
       if ( \bbn\str::is_uid($id_user) ){
-        $where[$cf['arch']['notes']['creator']] = $id_user;
+        $where[] = [
+          'field' => $db->cfn($cf['arch']['notes']['creator'], $cf['table']),
+          'value' => $id_user
+        ];
       }
-      $notes = $db->rselect_all($cf['table'], [$cf['arch']['notes']['id']], $where, [], $limit, $start);
+      $notes = $db->rselect_all([
+        'table' => $cf['table'],
+        'fields' => [
+          'versions1.'.$cf['arch']['versions']['id_note'],
+          'versions1.'.$cf['arch']['versions']['version'],
+          'versions1.'.$cf['arch']['versions']['title'],
+          'versions1.'.$cf['arch']['versions']['content'],
+          'versions1.'.$cf['arch']['versions']['id_user'],
+          'versions1.'.$cf['arch']['versions']['creation']
+        ],
+        'join' => [[
+          'table' => $cf['tables']['versions'],
+          'type' => 'left',
+          'alias' => 'versions1',
+          'on' => [
+            'conditions' => [[
+              'field' => $db->cfn($cf['arch']['notes']['id'], $cf['table']),
+              'exp' => 'versions1.'.$cf['arch']['versions']['id_note']
+            ]]
+          ]
+        ], [
+          'table' => $cf['tables']['versions'],
+          'type' => 'left',
+          'alias' => 'versions2',
+          'on' => [
+            'conditions' => [[
+              'field' => $db->cfn($cf['arch']['notes']['id'], $cf['table']),
+              'exp' => 'versions2.'.$cf['arch']['versions']['id_note']
+            ], [
+              'field' => 'versions1.'.$cf['arch']['versions']['version'],
+              'operator' => '<',
+              'exp' => 'versions2.'.$cf['arch']['versions']['version']
+            ]]
+          ]
+        ]],
+        'where' => [
+          'conditions' => $where
+        ],
+        'group_by' => $db->cfn($cf['arch']['notes']['id'], $cf['table']),
+        'order' => [[
+          'field' => 'versions1.'.$cf['arch']['versions']['version'],
+          'dir' => 'DESC'
+        ], [
+          'field' => 'versions1.'.$cf['arch']['versions']['creation'],
+          'dir' => 'DESC'
+        ]],
+        'limit' => $limit,
+        'start' => $start
+      ]);
       foreach ( $notes as $note ){
-        if ( $version = $db->rselect($cf['tables']['versions'], [], [
-          $cf['arch']['versions']['id_note'] => $note[$cf['arch']['notes']['id']],
-          $cf['arch']['versions']['version'] => $this->latest($note[$cf['arch']['notes']['id']])
+        if ( $medias = $db->get_column_values($cf['tables']['nmedias'], $cf['arch']['nmedias']['id_media'], [
+          $cf['arch']['nmedias']['id_note'] => $note[$cf['arch']['versions']['id_note']],
+          $cf['arch']['nmedias']['version'] => $note[$cf['arch']['versions']['version']],
         ]) ){
-          if ( $medias = $db->get_column_values($cf['tables']['nmedias'], $cf['arch']['nmedias']['id_media'], [
-            $cf['arch']['nmedias']['id_note'] => $note[$cf['arch']['notes']['id']],
-            $cf['arch']['nmedias']['version'] => $version[$cf['arch']['versions']['version']],
-          ]) ){
-            $version['medias'] = [];
-            foreach ( $medias as $m ){
-              if ( $med = $db->rselect($cf['tables']['medias'], [], [$cf['arch']['medias']['id'] => $m]) ){
-                if ( \bbn\str::is_json($med[$cf['arch']['medias']['content']]) ){
-                  $med[$cf['arch']['medias']['content']] = json_decode($med[$cf['arch']['medias']['content']]);
-                }
-                $version['medias'][] = $med;
+          $note['medias'] = [];
+          foreach ( $medias as $m ){
+            if ( $med = $db->rselect($cf['tables']['medias'], [], [$cf['arch']['medias']['id'] => $m]) ){
+              if ( \bbn\str::is_json($med[$cf['arch']['medias']['content']]) ){
+                $med[$cf['arch']['medias']['content']] = json_decode($med[$cf['arch']['medias']['content']]);
               }
+              $version['medias'][] = $med;
             }
           }
-          $res[] = $version;
         }
+        $res[] = $note;
       }
-      \bbn\x::sort_by($res,'creation', 'DESC');
+      \bbn\x::sort_by($res, $cf['arch']['versions']['creation'], 'DESC');
       return $res;
     }
     return false;

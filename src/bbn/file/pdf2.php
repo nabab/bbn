@@ -101,7 +101,6 @@ EOF
     if ( \is_string($cfg) ){
       $this->add_page($cfg);
     }
-    return $this;
 	}
   
   
@@ -139,12 +138,12 @@ EOF
       }
       $this->pdf->AddPageByArray([
         'orientation' => $this->cfg['orientation'],
-        'margin-left' => $this->cfg['margin-left'],
-        'margin-right' => $this->cfg['margin-right'],
-        'margin-top' => $this->cfg['margin-top'],
-        'margin-bottom' => $this->cfg['margin-bottom'],
-        'margin-header' => $this->cfg['margin-header'],
-        'margin-footer' => $this->cfg['margin-footer'],
+        'margin-left' => $this->cfg['margin_left'],
+        'margin-right' => $this->cfg['margin_right'],
+        'margin-top' => $this->cfg['margin_top'],
+        'margin-bottom' => $this->cfg['margin_bottom'],
+        'margin-header' => $this->cfg['margin_header'],
+        'margin-footer' => $this->cfg['margin_footer'],
 				'odd-header-name' => 'head',
 				'odd-footer-name' => 'foot',
         'odd-header-value' => 1,

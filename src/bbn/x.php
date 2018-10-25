@@ -535,7 +535,10 @@ class x
       else if ( \is_array($a) ){
         $r = str::export($a);
       }
-      else if ( !ctype_print($a) && (strlen($a) === 16) ){
+      else if ( \is_resource($a) ){
+        $r = 'Resource '.get_resource_type($a);
+      }
+      else if ( str::is_buid($a) ){
         $r = '0x'.bin2hex($a);
       }
       $st .= $r.PHP_EOL;

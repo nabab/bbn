@@ -239,8 +239,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       unset($this->cache[$cache_name]);
     }
     if ( !isset($this->cache[$cache_name]) ){
-      $tmp = $this->cache_get($cache_name);
-      if ( !$tmp || $force ){
+      if ( $force || !($tmp = $this->cache_get($cache_name)) ){
         switch ( $mode ){
           case 'columns':
             $keys = $this->language->get_keys($item);
@@ -475,8 +474,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
         // Add generated primary when inserting a row without primary when primary is needed and no auto-increment
         $this->_add_primary($cfg);
       }
-      if ( count($cfg['values']) !== count($cfg['values_types']) ){
-        die(x::hdump($cfg['values'], $cfg['values_types'], $cfg['sql'], $cfg, debug_backtrace(false, 5)));
+      if ( count($cfg['values']) !== count($cfg['values_desc']) ){
+        die('Database error in values count');
       }
       // Launching the trigger BEFORE execution
       if ( $cfg = $this->_trigger($cfg) ){
@@ -487,11 +486,42 @@ class db extends \PDO implements db\actions, db\api, db\engines
           //$cfg['run'] = $this->query($cfg['sql'], $cfg['hash'], $cfg['values'] ?? []);
           /** @var \bbn\db\query */
           $cfg['run'] = $this->query($cfg['sql'], array_map(function($i)use($cfg){
-            return
-              ($cfg['values_types'][$i] === 'binary16') &&
-              str::is_uid($cfg['values'][$i]) ?
-                hex2bin($cfg['values'][$i]) :
-                $cfg['values'][$i];
+            // Transforming the values if needed
+            if (
+              ($cfg['values_desc'][$i]['type'] === 'binary') &&
+              ($cfg['values_desc'][$i]['maxlength'] === 16) &&
+              str::is_uid($cfg['values'][$i])
+            ){
+              return hex2bin($cfg['values'][$i]);
+            }
+            if (
+              \is_string($cfg['values'][$i]) && (
+                (
+                  ($cfg['values_desc'][$i]['type'] === 'date') &&
+                  (\strlen($cfg['values'][$i]) < 10)
+                ) || (
+                  ($cfg['values_desc'][$i]['type'] === 'time') &&
+                  (\strlen($cfg['values'][$i]) < 8)
+                ) || (
+                  ($cfg['values_desc'][$i]['type'] === 'datetime') &&
+                  (\strlen($cfg['values'][$i]) < 19)
+                )
+              )
+            ){
+              return $cfg['values'][$i].'%';
+            }
+            if ( !empty($cfg['values_desc'][$i]['operator']) ){
+              switch ( $cfg['values_desc'][$i]['operator'] ){
+                case 'contains':
+                case 'doesnotcontain':
+                  return '%'.$cfg['values'][$i].'%';
+                case 'startswith':
+                  return $cfg['values'][$i].'%';
+                case 'endswith':
+                  return '%'.$cfg['values'][$i];
+              }
+            }
+            return $cfg['values'][$i];
           }, array_keys($cfg['values'])));
         }
         if ( !empty($cfg['force']) ){
@@ -657,6 +687,9 @@ class db extends \PDO implements db\actions, db\api, db\engines
             }
           }
           if ( isset($join['table'], $join['on']) && ($tmp = $this->treat_conditions($join['on'])) ){
+            if ( !isset($join['type']) ){
+              $join['type'] = 'right';
+            }
             $res['join'][] = array_merge($join, ['on' => $tmp['where']]);
             $res['hashed_join'][] = $tmp['hashed'];
             if ( !empty($tmp['values']) ){
@@ -978,35 +1011,59 @@ class db extends \PDO implements db\actions, db\api, db\engines
 
   /**
    * @param array $where
-   * @param array $values
+   * @param array $cfg
    * @return array
    */
-  public function get_values_types(array $where, array $cfg, &$types = []): array
+  public function get_values_desc(array $where, array $cfg, &$others = []): array
   {
     if ( isset($where['conditions']) ){
       foreach ( $where['conditions'] as &$f ){
         if ( isset($f['logic'], $f['conditions']) && \is_array($f['conditions']) ){
-          $this->get_values_types($f, $cfg, $types);
+          $this->get_values_desc($f, $cfg, $others);
         }
         else if ( array_key_exists('value', $f) ){
-          $type = null;
+          $desc = null;
           if (
             isset($cfg['models'], $cfg['available_fields'][$f['field']]) &&
             //($model = $cfg['models'][$cfg['available_fields'][$f['field']]]['fields']) &&
-            ($model = $cfg['models'][$cfg['tables_full'][$cfg['available_fields'][$f['field']]]]['fields']) &&
-            ($fname = $this->csn($f['field'])) &&
-            !empty($model[$fname]['type'])
+            ($model = $cfg['models'][$cfg['tables_full'][$cfg['available_fields'][$f['field']]]]) &&
+            ($fname = $this->csn($f['field']))
           ){
-            $type = $model[$fname]['type'];
-            if ( !empty($model[$fname]['maxlength']) ){
-              $type .= (string)$model[$fname]['maxlength'];
+            if ( !empty($model['fields'][$fname]['type']) ){
+              $desc = [
+                'type' => $model['fields'][$fname]['type'],
+                'maxlength' => $model['fields'][$fname]['maxlength'] ?? null,
+                'operator' => $f['operator'] ?? null
+              ];
+            }
+            // Fixing filters using alias
+            else if (
+              isset($cfg['fields'][$f['field']]) &&
+              ($fname = $this->csn($cfg['fields'][$f['field']])) &&
+              !empty($model['fields'][$fname]['type'])
+            ){
+              $desc = [
+                'type' => $model[$fname]['type'],
+                'maxlength' => $model[$fname]['maxlength'] ?? null,
+                'operator' => $f['operator'] ?? null
+              ];
+            }
+            if ( $desc ){
+              $desc['primary'] = false;
+              if (
+                isset($model['keys']['PRIMARY']) &&
+                (count($model['keys']['PRIMARY']['columns']) === 1) &&
+                ($model['keys']['PRIMARY']['columns'][0] === $fname)
+              ){
+                $desc['primary'] = true;
+              }
             }
           }
-          $types[] = $type;
+          $others[] = $desc;
         }
       }
     }
-    return $types;
+    return $others;
   }
 
   public function arrange_conditions(array &$conditions, array $cfg): void
@@ -1016,7 +1073,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
         if ( array_key_exists('conditions', $c) && \is_array($c['conditions']) ){
           $this->arrange_conditions($c, $cfg);
         }
-        else if ( isset($c['field']) && !$cfg['available_fields'][$c['field']] && !$this->is_col_full_name($c['field']) ){
+        else if ( isset($c['field']) && empty($cfg['available_fields'][$c['field']]) && !$this->is_col_full_name($c['field']) ){
           foreach ( $cfg['tables'] as $t => $o ){
             if ( isset($cfg['available_fields'][$this->col_full_name($c['field'], $t)]) ){
               $c['field'] = $this->col_full_name($c['field'], $t);
@@ -1037,7 +1094,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
     unset($cfg['bbn_db_processed']);
     unset($cfg['bbn_db_treated']);
     unset($this->cfgs[$cfg['hash']]);
-    return $this->process_cfg($cfg, true);
+    $tmp = $this->process_cfg($cfg, true);
+    if ( !empty($cfg['values']) && (count($cfg['values']) === count($tmp['values'])) ){
+      $tmp = array_merge($tmp, ['values' => $cfg['values']]);
+    }
+    return $tmp;
   }
 
   /**
@@ -1061,13 +1122,13 @@ class db extends \PDO implements db\actions, db\api, db\engines
     //var_dump("UPD0", $args);
     if ( isset($args['hash']) ){
       if ( isset($this->cfgs[$args['hash']]) ){
-        return array_merge($this->cfgs[$args['hash']], ['values' => $args['values'] ?: []]);
+        return array_merge($this->cfgs[$args['hash']], ['values' => $args['values'] ?: [], 'where' => $args['where'] ?: []]);
       }
       /** @var array $tables_full  Each of the tables' full name. */
       $tables_full = [];
       $res = array_merge($args, [
         'tables' => [],
-        'values_types' => [],
+        'values_desc' => [],
         'bbn_db_processed' => true,
         'available_fields' => [],
         'generate_id' => false
@@ -1116,7 +1177,6 @@ class db extends \PDO implements db\actions, db\api, db\engines
           if ( !isset($models[$tfn]) && ($model = $this->modelize($tfn)) ){
             $models[$tfn] = $model;
           }
-          //x::hdump($tfn, $model);
           $idx = $join['alias'] ?? $tfn;
           $tables_full[$idx] = $tfn;
         }
@@ -1137,7 +1197,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
         }
       }
       foreach ( $res['fields'] as $idx => &$col ){
-        if ( strpos($col, '(') || strpos($col, '->"$.') ){
+        if ( strpos($col, '(') || strpos($col, '->"$.')  || strpos($col, "->'$.") ){
           $res['available_fields'][$col] = false;
         }
         if ( \is_string($idx) ){
@@ -1158,17 +1218,26 @@ class db extends \PDO implements db\actions, db\api, db\engines
       $res['tables_full'] = $tables_full;
       switch ( $res['kind'] ){
         case 'SELECT':
+          if ( empty($res['fields']) ){
+            foreach ( array_keys($res['available_fields']) as $f ){
+              if ( $this->is_col_full_name($f) ){
+                $res['fields'][] = $f;
+              }
+            }
+          }
           if ( $res['select_st'] = $this->language->get_select($res) ){
             $res['sql'] = $res['select_st'];
           }
           break;
         case 'INSERT':
+          $res = $this->remove_virtual($res);
           if ( $res['insert_st'] = $this->language->get_insert($res) ){
             $res['sql'] = $res['insert_st'];
           }
           //var_dump($res);
           break;
         case 'UPDATE':
+          $res = $this->remove_virtual($res);
           if ( $res['update_st'] = $this->get_update($res) ){
             $res['sql'] = $res['update_st'];
           }
@@ -1198,33 +1267,52 @@ class db extends \PDO implements db\actions, db\api, db\engines
         $res['statement_hash'] = $this->_make_hash($res['sql']);
 
         foreach ( $res['join'] as $r ){
-          $this->get_values_types($r['on'], $res, $res['values_types']);
+          $this->get_values_desc($r['on'], $res, $res['values_desc']);
         }
         if ( ($res['kind'] === 'INSERT') || ($res['kind'] === 'UPDATE') ){
           foreach ( $res['fields'] as $name ){
-            $type = null;
+            $desc = [];
             if (
               isset($res['models'], $res['available_fields'][$name]) &&
               ($model = $res['models'][$res['available_fields'][$name]]['fields']) &&
               ($fname = $this->csn($name)) &&
               !empty($model[$fname]['type'])
             ){
-              $type = $model[$fname]['type'];
-              if ( !empty($model[$fname]['maxlength']) ){
-                $type .= (string)$model[$fname]['maxlength'];
-              }
+              $desc['type'] = $model[$fname]['type'];
+              $desc['maxlength'] = $model[$fname]['maxlength'] ?? null;
             }
-            $res['values_types'][] = $type;
+            $res['values_desc'][] = $desc;
           }
         }
-        $this->get_values_types($res['filters'], $res, $res['values_types']);
-        $this->get_values_types($res['having'], $res, $res['values_types']);
+        $this->get_values_desc($res['filters'], $res, $res['values_desc']);
+        $this->get_values_desc($res['having'], $res, $res['values_desc']);
         $this->cfgs[$res['hash']] = $res;
       }
       return $res;
     }
     $this->error('Impossible to process the config (no hash)'.PHP_EOL.print_r($args, true));
     return null;
+  }
+
+  public function remove_virtual(array $res): array
+  {
+    if ( isset($res['fields']) ){
+      $to_remove = [];
+      foreach ( $res['fields'] as $i => $f ){
+        if (
+          !empty($res['available_fields'][$f]) &&
+          isset($res['models'][$res['available_fields'][$f]]['fields'][$this->csn($f)]) &&
+          $res['models'][$res['available_fields'][$f]]['fields'][$this->csn($f)]['virtual']
+        ){
+          array_unshift($to_remove, $i);
+        }
+      }
+      foreach ($to_remove as $i) {
+        array_splice($res['fields'], $i, 1);
+        array_splice($res['values'], $i, 1);
+      }
+    }
+    return $res;
   }
 
   /**
@@ -2509,11 +2597,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
     }
     if ( \is_object($r = $this->_exec($args)) ){
       $a = $r->get_irow();
-      if ( !is_int($a[0]) ){
-        //die(var_dump($a, $args));
-      }
       return $a ? (int)$a[0] : null;
-      //$this->log('ERROR IN COUNT', $r);
     }
     return null;
   }
@@ -2861,7 +2945,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       'fields' => $values,
       'ignore' => $ignore
     ];
-    $cfg['kind'] = 'UPDATE';
+    $cfg['kind'] = 'UPDATE';  
     return $this->_exec($cfg);
   }
 
@@ -3204,14 +3288,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
         // That will always contains the parameters of the last query done
         $this->last_params = $params;
         // Adds to $debug_queries if in debug mode and defines $last_query
-        if ( \bbn\appui\history::is_enabled() ){
-          $this->add_statement($q['sql']);
-        }
+        $this->add_statement($q['sql']);
         // If the statement is a structure modifier we need to clear the cache
         if ( $q['structure'] ){
           foreach ( $this->queries as $k => $v ){
             if ( $k !== $hash ){
-              unset($this->queries[$q]);
+              unset($this->queries[$k]);
             }
           }
           /** @todo Clear the cache */
@@ -4281,5 +4363,9 @@ class db extends \PDO implements db\actions, db\api, db\engines
       return $r->get_objects();
     }
     return [];
+  }
+
+  public function create_table(){
+    return $this->language->create_table(...\func_get_args());
   }
 }

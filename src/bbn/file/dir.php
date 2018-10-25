@@ -488,11 +488,13 @@ class dir extends bbn\models\cls\basic
       foreach ( $bits as $i => $b ){
         if ( !empty($b) ){
           $path .= $b;
-          if ( !@mkdir($path) && !is_dir($path) ){
-            return false;
-          }
-          if ( $chmod ){
-            @chmod($path, $chmod);
+          if ( !is_dir($path) ){
+            if ( !mkdir($path) || !is_dir($path) ){
+              return false;
+            }
+            if ( $chmod ){
+              @chmod($path, $chmod);
+            }
           }
           $path .= '/';
         }

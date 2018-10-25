@@ -86,6 +86,8 @@ class history
       // Recording the last ID
       $id = $db->last_id();
       $last = self::$db->last();
+      $last_params = self::$db->last_params;
+      self::disable();
       if ( !array_key_exists('old', $cfg) ){
         $cfg['ref'] = null;
         $cfg['val'] = null;
@@ -115,6 +117,8 @@ class history
         $db->set_last_insert_id($id);
       }
       self::$db->last_query = $last;
+      self::$db->last_params = $last_params;
+      self::enable();
       return $res;
     }
     return 0;
@@ -429,7 +433,7 @@ MYSQL;
       $tab = $db->escape(self::$table);
       $tab_uids = $db->escape(self::$table_uids);
       $uid = $db->cfn('bbn_uid', self::$table_uids, true);
-      $deletion = $db->cfn('deletion', self::$table_uids, true);
+      $active = $db->cfn(self::$column, self::$table_uids, true);
       $id_tab = $db->cfn('bbn_table', self::$table_uids, true);
       $line = $db->escape('uid', self::$table);
       $chrono = $db->escape('tst');
@@ -439,7 +443,7 @@ FROM $tab_uids
   JOIN $tab
     ON $uid = $line
 WHERE $id_tab = ? 
-AND $deletion IS NULL
+AND $active = 1
 ORDER BY $chrono
 LIMIT $start, $limit
 MYSQL;
@@ -598,7 +602,6 @@ MYSQL;
    */
   public static function get_row_back(string $table, string $id, $when, array $columns = []): ?array
   {
-
     if ( !($when = self::valid_date($when)) ){
       self::_report_error("The date $when is incorrect", __CLASS__, __LINE__);
     }
@@ -608,7 +611,6 @@ MYSQL;
       ($model = $dbc->modelize($table)) &&
       ($cfg = self::get_table_cfg($table))
     ){
-
       // Time is after last modification: the current is given
       self::disable();
       if ( $when >= time() ){
@@ -627,7 +629,7 @@ MYSQL;
         }
         $r = [];
         //die(var_dump($columns, $model['fields']));
-        foreach ( $columns as $col ){
+        foreach ( $columns as $col ){        
           if ( isset($model['fields'][$col]['id_option']) ){
             $r[$col] = $db->rselect(self::$table, ['val', 'ref'], [
               'uid' => $id,
@@ -635,7 +637,7 @@ MYSQL;
               'opr' => 'UPDATE',
               ['tst', '>', $when]
             ]);
-            $r[$col] = $r[$col]['ref'] ?: ($r[$col]['val'] ?: false);
+            $r[$col] = $r[$col]['ref'] ?: ($r[$col]['val'] ?: null);
           }
           if ( $r[$col] === null ){
             $r[$col] = $db->select_one($table, $col, [
@@ -730,7 +732,7 @@ WHERE $line = ?
 AND ($where)
 ORDER BY $chrono DESC
 MYSQL;
-        return $db->get_one($sql, $id);
+        return $db->get_one($sql, hex2bin($id));
       }
     }
     return null;
@@ -742,8 +744,11 @@ MYSQL;
    * @param string $col
    * @return array
    */
-  public static function get_history(string $table, string $id, $col = ''){
-    if ( self::check($table) ){
+  public static function get_history(string $table, string $id, string $col = ''){
+    if ( 
+      self::check($table) && 
+      ($modelize = self::get_table_cfg($table))
+    ){
       $pat = [
         'ins' => 'INSERT',
         'upd' => 'UPDATE',
@@ -751,25 +756,42 @@ MYSQL;
         'del' => 'DELETE'
       ];
       $r = [];
-      $table = self::$db->table_full_name($table);
+      $fields = [
+          'date' => 'tst',
+          'user' => 'usr',
+          'col'
+        ];
+      $where = [
+        'uid' => $id
+      ];
+      if ( !empty($col) ){
+        if ( !\bbn\str::is_uid($col) ){
+          $fields[] = $modelize['fields'][$col]['type'] === 'binary' ? 'ref' : 'val';
+          $col = self::$databases_obj->column_id($col, $table);
+        }
+        else {
+          $idx = \bbn\x::find($modelize['fields'], ['id_option' => strtolower($col)]);
+          $fields[] = $modelize['fields'][$idx]['type'] === 'binary' ? 'ref' : 'val';
+        }
+        $where['col'] = $col;
+      }
+      else {
+        $fields[] = 'val';
+        $fields[] = 'ref';
+      }
       foreach ( $pat as $k => $p ){
-        if ( $q = self::$db->rselect_all(
-          self::$table,
-          [
-            'date' => 'tst',
-            'user' => 'usr',
-            'val',
-            'col',
-            //'id'
-          ],[
-            ['uid', '=', $id],
-            //['col', 'LIKE', $table.'.'.( $col ? $col : '%' )],
-            ['col', '=', $col],
-            ['opr', 'LIKE', $p]
-          ],[
-            'tst' => 'desc'
-          ]
-        ) ){
+        $where['opr'] = $p;
+        if ( $q = self::$db->rselect_all([
+          'table' => self::$table,
+          'fields' => $fields,
+          'where' => [
+            'conditions' => $where
+          ],
+          'order' => [[
+            'field' => 'tst',
+            'dir' => 'desc'
+          ]]
+        ]) ){
           $r[$k] = $q;
         }
       }
@@ -799,17 +821,25 @@ WHERE $line = ?
 AND ($where)
 ORDER BY $chrono ASC
 MYSQL;
-      $r = $db->get_rows($sql, $id);
+      $r = $db->get_rows($sql, hex2bin($id));
     }
     return $r;
 	}
 
-  public static function get_column_history($table, $id, $column)
+  public static function get_column_history(string $table, string $id, string $column)
   {
-    if ( self::check($table)&& ($primary = self::$db->get_primary($table)) ){
+    if ( 
+      self::check($table) && 
+      ($primary = self::$db->get_primary($table)) &&
+      ($modelize = self::get_table_cfg($table))
+    ){
+      if ( \bbn\str::is_uid($column) ){
+        $column = \bbn\x::find($modelize['fields'], ['id_option' => strtolower($column)]);
+      }
       $current = self::$db->select_one($table, $column, [
         $primary[0] => $id
       ]);
+      $val = $modelize['fields'][$column] === 'binary' ? 'ref' : 'val';
       $hist = self::get_history($table, $id, $column);
       $r = [];
       if ( $crea = self::get_creation($table, $id) ){
@@ -819,28 +849,28 @@ MYSQL;
             if ( $i === 0 ){
               $r[] = [
                 'date' => $crea['date'],
-                'val' => $h['old'],
+                $val => $h[$val],
                 'user' => $crea['user']
               ];
             }
             else{
               $r[] = [
                 'date' => $hist['upd'][$i-1]['date'],
-                'val' => $h['old'],
+                $val => $h[$val],
                 'user' => $hist['upd'][$i-1]['user']
               ];
             }
           }
           $r[] = [
             'date' => $hist['upd'][$i]['date'],
-            'val' => $current,
+            $val => $current,
             'user' => $hist['upd'][$i]['user']
           ];
         }
         else if (!empty($hist['ins']) ){
           $r[0] = [
             'date' => $hist['ins'][0]['date'],
-            'val' => $current,
+            $val => $current,
             'user' => $hist['ins'][0]['user']
           ];
         }
@@ -932,7 +962,6 @@ MYSQL;
     }
     $tables = $cfg['tables'] ?? (array)$cfg['table'];
     // Will return false if disabled, the table doesn't exist, or doesn't have history
-    //die(var_dump(self::get_table_cfg($tables[0]), $tables[0], $cfg));
     if (
       ($cfg['kind'] === 'SELECT') &&
       ($cfg['moment'] === 'before') &&
@@ -942,7 +971,7 @@ MYSQL;
       $change = 0;
       if ( !isset($cfg['history']) ){
         $cfg['history'] = [];
-        foreach ( $cfg['join'] as $t ){
+        foreach ( $cfg['join'] as $i => $t ){
           $model = $db->modelize($t['table']);
           if (
             isset($model['keys']['PRIMARY']) &&
@@ -950,7 +979,7 @@ MYSQL;
           ){
             $change++;
             $cfg['join'][] = [
-              'table' => self::$table_uids,
+              'table' => $db->tsn(self::$table_uids),
               'alias' => $db->tsn(self::$table_uids).$change,
               'type' => $t['type'] ?? 'right',
               'on' => [
@@ -963,15 +992,42 @@ MYSQL;
                       !empty($t['alias']) ? $t['alias'] : $t['table'],
                       true
                     )
-                  ], [
-                    'field' => $db->cfn(self::$table_uids.$change.'.bbn_active'),
-                    'operator' => '=',
-                    'exp' => '1'
                   ]
                 ],
                 'logic' => 'AND'
               ]
             ];
+            if ( $t['type'] === 'left' ){
+              $field = 'IFNULL('.$db->cfn(self::$table_uids.$change.'.bbn_active', true).', 1)';
+              if ( $cfg['filters']['logic'] === 'OR' ){
+                $cfg['filters'] = [
+                  'conditions' => [
+                    $cfg['filters'],
+                    [
+                      'field' => $field,
+                      'operator' => '=',
+                      'exp' => '1'
+                    ]
+                  ],
+                  'logic' => 'AND'
+                ];
+              }
+              else{
+                $cfg['filters']['conditions'][] = [
+                  'field' => $field,
+                  'operator' => '=',
+                  'exp' => '1'
+                ];
+              }
+            }
+            else{
+              $cfg['join'][count($cfg['join']) - 1]['on']['conditions'][] = [
+                'field' => $db->cfn(self::$table_uids.$change.'.bbn_active'),
+                'operator' => '=',
+                'exp' => '1'
+              ];
+            }
+
           }
         }
         foreach ( $cfg['tables'] as $alias => $table ){
@@ -1018,14 +1074,9 @@ MYSQL;
         $primary_where = false;
         $primary_defined = false;
         $primary_value = false;
-        if (
-          ($cfg['filters']['logic'] === 'AND') &&
-          !empty($cfg['filters']['conditions']) &&
-          isset($cfg['filters']['conditions'][0]['field']) &&
-          !empty($cfg['filters']['conditions'][0]['value']) &&
-          ($cfg['filters']['conditions'][0]['field'] === $s['primary'])
-        ){
-          $primary_where = $cfg['filters']['conditions'][0]['value'];
+        $idx = \bbn\x::find($cfg['values_desc'], ['primary' => true]);
+        if ( $idx !== false ){
+          $primary_where = $cfg['values'][$idx];
         }
         $idx = array_search($s['primary'], $cfg['fields'], true);
         if ( ($idx !== false) && isset($cfg['values'][$idx]) ){
@@ -1175,7 +1226,6 @@ MYSQL;
                 }
               }
             }*/
-            self::disable();
             if (
               $primary_where &&
               ($row = self::$db->rselect($table, $cfg['fields'], [$s['primary'] => $primary_where]))
@@ -1216,7 +1266,6 @@ MYSQL;
               // ****************************************
 
             }
-            self::enable();
             break;
 
           // Nothing is really deleted, the hcol is just set to 0
@@ -1227,7 +1276,6 @@ MYSQL;
             $cfg['run'] = false;
             $cfg['value'] = 0;
             // Case where the primary is not defined, we'll delete based on each primary instead
-            self::disable();
             if ( !$primary_where ){
               $ids = self::$db->get_column_values($table, $s['primary'], $cfg['filters']);
               foreach ( $ids as $id ){
@@ -1235,11 +1283,14 @@ MYSQL;
               }
             }
             else {
+              self::disable();
               $cfg['value'] = self::$db->update(self::$table_uids, [
                 'bbn_active' => 0
               ], [
                 'bbn_uid' => $primary_where
               ]);
+              //var_dump("HIST", $primary_where);
+              self::enable();
               if ( $cfg['value'] ){
                 $cfg['trig'] = 1;
                 // And we insert into the history table
@@ -1252,7 +1303,6 @@ MYSQL;
                 ];
               }
             }
-            self::enable();
             break;
         }
       }
@@ -1260,12 +1310,10 @@ MYSQL;
         ($cfg['moment'] === 'after') &&
         isset($cfg['history'])
       ){
-        self::disable();
         foreach ($cfg['history'] as $h){
           self::_insert($h);
         }
         unset($cfg['history']);
-        self::enable();
       }
     }
     return $cfg;

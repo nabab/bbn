@@ -90,7 +90,7 @@ SQL;
           'admin' => 1
         ]);
         foreach ( $users as $user ){
-          $this->db->insert('bbn_chats_users', [
+          $this->db->insert_ignore('bbn_chats_users', [
             'id_chat' => $id_chat,
             'id_user' => $user,
             'entrance' => microtime(true),

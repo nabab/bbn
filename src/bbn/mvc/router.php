@@ -382,15 +382,18 @@ class router {
       $file = $root.'404.php';
     }
     if ( $file ){
-      if ( $plugin && \defined('BBN_LOCALE') && isset($this->routes['root'][$plugin]['name']) ){
+      if (
+        $plugin &&
+        \defined('BBN_LOCALE') &&
+        isset($this->routes['root'][$plugin]['name']) &&
+        is_dir($this->routes['root'][$plugin]['path'].'../src/locale')
+      ){
         $lang_path = $this->routes['root'][$plugin]['path'].'../src/locale';
-        if ( is_dir($lang_path) ){
-          $textdomain = $this->routes['root'][$plugin]['name'].
-            ((string)(@file_get_contents($lang_path.'/index.txt')));
-          bindtextdomain($textdomain, $lang_path);
-          bind_textdomain_codeset($textdomain, 'UTF-8');
-          textdomain($textdomain);
-        }
+        $textdomain = $this->routes['root'][$plugin]['name'].
+          (is_file($lang_path.'/index.txt') ? (string)file_get_contents($lang_path.'/index.txt') : '');
+        bindtextdomain($textdomain, $lang_path);
+        bind_textdomain_codeset($textdomain, 'UTF-8');
+        textdomain($textdomain);
       }
       return $this->set_known([
         'file' => $file,
@@ -399,7 +402,7 @@ class router {
         'request' => $path,
         'mode' => $mode,
         'plugin' => $plugin,
-        'args' => $args
+        'args' => $args,
       ]);
     }
     // Aaaargh!
@@ -422,6 +425,7 @@ class router {
       /** @var boolean|string $file Once found, full path and filename */
       $file = false;
       $plugin = false;
+      $i18n = false;
       if ( !$root ){
         $root = $this->get_root($mode);
         if ( $alt_path = $this->find_in_roots($path) ){
@@ -438,18 +442,35 @@ class router {
       foreach ( self::$filetypes[$mode] as $t ){
         if ( is_file($root.$path.'.'.$t) ){
           $file = $root . $path . '.' . $t;
+          /** @todo change the system to route components, this is way tooo heavy */
+          if ( (strpos($root, BBN_LIB_PATH) === 0) && ($plugins = $this->get_plugins()) ){
+            foreach ( $plugins as $p ){
+              if ( strpos($root, $p['path']) === 0 ){
+                $plugin = $p['url'];
+                break;
+              }
+            }
+          }
         }
         else if ( !empty($alt_path) && is_file($alt_root.substr($path, \strlen($alt_path)+1).'.'.$t) ){
           $file = $alt_root . substr($path, \strlen($alt_path)+1) . '.' . $t;
           $plugin = $alt_path;
         }
         if ( $file ){
+          if ( ($t === 'js') && \defined('BBN_LANG') ){
+            $fpath = $plugin ? $this->plugin_path($this->plugin_name($plugin)) : BBN_APP_PATH;
+            if ( file_exists($fpath.'locale/'.BBN_LANG.'/'.BBN_LANG.'.json')
+            ){
+              $i18n = $fpath.'locale/'.BBN_LANG.'/'.BBN_LANG.'.json';
+            }
+          }
           return $this->set_known([
             'file' => $file,
             'path' => $path,
             'ext' => $t,
             'mode' => $mode,
-            'plugin' => $plugin
+            'plugin' => $plugin,
+            'i18n' => $i18n
           ]);
         }
       }
@@ -526,7 +547,7 @@ class router {
         }
         return $this->find_alt_mv($path, $mode, $root);
       }
-      return  $this->find_mv($path, $mode);
+      return $this->find_mv($path, $mode);
     }
     return false;
   }

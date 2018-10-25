@@ -25,12 +25,17 @@ class view{
   use common;
 
 
-	private
+  private
     /**
      * The full path to the view file
      * @var null|string
      */
     $file,
+    /**
+     * The local path for the view file
+     * @var null|string
+     */
+    $path,
     /**
      * The file's extension
      * @var null|string
@@ -42,9 +47,14 @@ class view{
      */
     $checkers,
     /**
-		 * The content the view file.
-		 * @var null|string
-		 */
+     * A JSON file for adding language to javascript.
+     * @var null|string
+     */
+    $lang_file,
+    /**
+     * The content the view file.
+     * @var null|string
+     */
 		$content;
 
 	/**
@@ -57,9 +67,12 @@ class view{
 	public function __construct(array $info)
 	{
     if ( router::is_mode($info['mode']) ){
+      $this->path = $info['path'];
       $this->ext = $info['ext'];
       $this->file = $info['file'];
       $this->checkers = $info['checkers'] ?? [];
+      $this->lang_file = $info['i18n'] ?? null;
+      $this->plugin = $info['plugin'] ?? null;
     }
 	}
 
@@ -90,6 +103,21 @@ class view{
       }
       switch ( $this->ext ){
         case 'js':
+          // Language variables inclusions in the javascript files
+          if ( !empty($this->lang_file) ){
+            $tmp = json_decode(file_get_contents($this->lang_file), true);
+            //die(var_dump(count($tmp), 'components/'.$this->path.'/'.$this->path, $tmp));
+            if ( $translations = $tmp['mvc/'.$this->path] ?? ($tmp['components/'.$this->path] ?? null) ){
+              $json = json_encode($translations);
+              $tmp = <<<JAVASCRIPT
+(() => {
+  $.extend(bbn.lng, $json)
+})();
+JAVASCRIPT;
+              $this->content = $tmp.$this->content;
+            }
+            unset($tmp, $translations);
+          }
 					return $this->content;
         case 'coffee':
 					return $this->content;

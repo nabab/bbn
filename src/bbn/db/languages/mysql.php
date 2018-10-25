@@ -25,7 +25,10 @@ class mysql implements bbn\db\engines
 	public static $operators = ['!=','=','<>','<','<=','>','>=','like','clike','slike','not','is','is not', 'in','between', 'not like'];
 
   /** @var array Numeric column types */
-	public static $numeric_types = ['integer', 'int', 'smallint', 'tinyint', 'mediumint', 'bigint', 'decimal', 'numeric', 'float', 'double'];
+  public static $numeric_types = ['integer', 'int', 'smallint', 'tinyint', 'mediumint', 'bigint', 'decimal', 'numeric', 'float', 'double'];
+
+  /** @var array Numeric column types */
+  public static $date_types = ['date', 'time', 'datetime'];
 
   /** @var string The quote character */
   public $qte = '`';
@@ -77,7 +80,6 @@ class mysql implements bbn\db\engines
         $cfg['user'],
         $cfg['pass'],
         [
-          \PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
           \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'
         ]
       ];
@@ -331,7 +333,8 @@ class mysql implements bbn\db\engines
           'default' => ($row['Default'] === null) && ($row['Null'] !== 'NO') ? 'NULL' : $row['Default'],
           'extra' => $row['Extra'],
           'signed' => 0,
-          'maxlength' => 0
+          'maxlength' => 0,
+          'virtual' => $row['Extra'] === 'VIRTUAL GENERATED'
         ];
         if ( (strpos($row['Type'], 'enum') === 0) || (strpos($row['Type'], 'set') === 0) ){
           $r[$f]['type'] = 'enum';
@@ -354,13 +357,13 @@ class mysql implements bbn\db\engines
             isset($real_type[1][0]) &&
             \in_array($real_type[1][0], self::$numeric_types, true)
           ){
-      if ( strpos($row['Type'], 'unsigned') ){
-        $row['Type'] = trim(str_replace('unsigned','',$row['Type']));
-      }
-      else{
-        $r[$f]['signed'] = 1;
-      }
-    }
+            if ( strpos($row['Type'], 'unsigned') ){
+              $row['Type'] = trim(str_replace('unsigned','',$row['Type']));
+            }
+            else{
+              $r[$f]['signed'] = 1;
+            }
+          }
           if ( strpos($row['Type'],'text') !== false ){
             $r[$f]['type'] = 'text';
           }
@@ -476,6 +479,7 @@ MYSQL
           $is_number = false;
           $is_null = true;
           $is_uid = false;
+          $is_date = false;
           $model = null;
           if ( isset($cfg['available_fields'][$field]) ){
             $table = $cfg['available_fields'][$field];
@@ -485,8 +489,8 @@ MYSQL
               $res .= (empty($res) ?
                   '(' :
                   " $logic ").(
-                isset($cfg['available_fields'][$field]) ?
-                  $this->col_full_name($field, $cfg['available_fields'][$field], true).' ' :
+                !empty($cfg['available_fields'][$field]) ?
+                  $this->col_full_name($cfg['fields'][$field] ?? $field, $cfg['available_fields'][$field], true).' ' :
                   $this->col_simple_name($column, true)
                 );
             }
@@ -504,6 +508,9 @@ MYSQL
               else if ( \in_array($model['type'], self::$numeric_types, true) ){
                 $is_number = true;
               }
+              else if ( \in_array($model['type'], self::$date_types, true) ){
+                $is_date = true;
+              }
             }
           }
           else{
@@ -518,13 +525,11 @@ MYSQL
               break;
             case 'eq':
             case '=':
+            case 'is':
               if ( isset($f['exp']) ){
                 $res .= '= '.$f['exp'];
               }
-              else if ( $is_uid ){
-                $res .= '= ?';
-              }
-              else if ( $is_number ){
+              else if ( $is_uid || $is_number ){
                 $res .= '= ?';
               }
               else{
@@ -533,13 +538,11 @@ MYSQL
               break;
             case 'neq':
             case '!=':
+            case 'isnot':
               if ( isset($f['exp']) ){
                 $res .= '!= '.$f['exp'];
               }
-              else if ( $is_uid ){
-                $res .= '!= ?';
-              }
-              else if ( $is_number ){
+              else if ( $is_uid || $is_number ){
                 $res .= '!= ?';
               }
               else{
@@ -547,12 +550,14 @@ MYSQL
               }
               break;
 
-            case 'startswith':
-              $res .= 'LIKE ?';
+            case 'doesnotcontains':
+              $res .= 'NOT LIKE '.($f['exp'] ?? '?');
               break;
 
             case 'endswith':
-              $res .= 'LIKE ?';
+            case 'startswith':
+            case 'contains':
+              $res .= 'LIKE '.($f['exp'] ?? '?');
               break;
 
             case 'gte':
@@ -641,10 +646,7 @@ MYSQL
     $res = '';
     if ( \is_array($cfg['tables']) && !empty($cfg['tables']) ){
       $res = 'SELECT ';
-      if ( empty($cfg['fields']) ){
-        $res .= '*';
-      }
-      else{
+      if ( !empty($cfg['fields']) ){
         $fields_to_put = [];
         // Checking the selected fields
         foreach ( $cfg['fields'] as $alias => $f ){
@@ -660,7 +662,7 @@ MYSQL
           if ( strpos($f, '(') ){
             $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '').$f.(\is_string($alias) ? ' AS '.$this->escape($alias) : '');
           }
-          else if ( !empty($cfg['available_fields'][$f]) ){
+          else if ( isset($cfg['available_fields'][$f]) ){
             $idx = $cfg['available_fields'][$f];
             $csn = $this->col_simple_name($f);
             $is_uid = false;
@@ -677,6 +679,10 @@ MYSQL
             //$res['fields'][$alias] = $this->cfn($f, $fields[$f]);
             if ( $is_uid ){
               $st = 'LOWER(HEX('.$this->col_full_name($csn, $cfg['available_fields'][$f], true).'))';
+            }
+            // For JSON fields
+            else if ( $cfg['available_fields'][$f] === false ){
+              $st = $f;
             }
             else{
               $st = $this->col_full_name($csn, $cfg['available_fields'][$f], true);
@@ -1142,5 +1148,45 @@ MYSQL
       $uid = $this->db->get_one("SELECT replace(uuid(),'-','')");
     }
     return $uid;
+  }
+
+  public function create_table($table_name, array $columns, array $keys = null, string $charset = 'utf8', $engine = 'InnoDB')
+  {
+    $lines = [];
+    $sql = '';
+    foreach ( $columns as $n => $c ){
+      $name = $c['name'] ?? $n;
+      if ( isset($c['type']) && bbn\str::check_name($name) ){
+        $st = $this->col_simple_name($name, true).' '.$c['type'];
+        if ( !empty($c['maxlength']) ){
+          $st .= '('.$c['maxlength'].')';
+        }
+        else if ( !empty($c['values']) && \is_array($c['values']) ){
+          $st .= '(';
+          foreach ( $c['values'] as $i => $v ){
+            $st .= "'".bbn\str::escape_squotes($v)."'";
+            if ( $i < count($c['values']) - 1 ){
+              $st .= ',';
+            }
+          }
+          $st .= ')';
+        }
+        if ( (strpos($c['type'], 'int') !== false) && empty($c['signed']) ){
+          $st .= ' UNSIGNED';
+        }
+        if ( empty($c['null']) ){
+          $st .= ' NOT NULL';
+        }
+        if ( isset($c['default']) ){
+          $st .= ' DEFAULT '.($c['default'] === 'NULL' ? 'NULL' : "'".bbn\str::escape_squotes($c['default'])."'");
+        }
+        $lines[] = $st;
+      }
+    }
+    if ( count($lines) ){
+      $sql = 'CREATE TABLE '.$this->table_simple_name($table_name, true).' ('.PHP_EOL.implode(','.PHP_EOL, $lines).
+        PHP_EOL.') ENGINE='.$engine.' DEFAULT CHARSET='.$charset.';';
+    }
+    return $sql;
   }
 }

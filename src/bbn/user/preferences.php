@@ -790,8 +790,11 @@ MYSQL;
   public function get_shared(string $id): ?array
   {
     if ( bbn\str::is_uid($id) ){
-      return $this->db->rselect_all($this->class_table, [$this->fields['id'], $this->fields['id_user'],
-        $this->fields['id_group']], [
+      return $this->db->rselect_all($this->class_table, [
+        $this->fields['id'],
+        $this->fields['id_user'],
+        $this->fields['id_group']
+      ], [
         $this->fields['id_alias'] => $id
       ]);
     }
@@ -826,6 +829,7 @@ MYSQL;
   public function share_with_group(string $id, string $id_group, bool $cancel = false): ?int
   {
     if ( $cfg = $this->get($id) ){
+
       $id_share = $this->db->select_one($this->class_table, $this->fields['id'], [
         'id_alias' => $id,
         'id_group' => $id_group

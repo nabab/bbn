@@ -113,9 +113,9 @@ class i18n extends bbn\models\cls\cache
         case 'js':
           $res = $this->analyze_js($file);
           break;
-        case 'json':
+        /*case 'json':
           $res = $this->analyze_json($file);
-          break;
+          break;*/
       }
     }
     return $res;
@@ -124,11 +124,11 @@ class i18n extends bbn\models\cls\cache
   public function analyze_folder(string $folder = '.', bool $deep = false): array
   {
     $res = [];
-
-    if (  \is_dir($folder) ){
+		if (  \is_dir($folder) ){
 
       $files = $deep ? bbn\file\dir::scan($folder, 'file') : bbn\file\dir::get_files($folder);
-      foreach ( $files as $f ){
+		  foreach ( $files as $f ){
+
         $words = $this->analyze_file($f);
         foreach ( $words as $word ){
           if ( !isset($res[$word]) ){
@@ -351,17 +351,26 @@ class i18n extends bbn\models\cls\cache
         $domain = $o['text'];
 
         /** @var $to_explore the path to explore */
-        $to_explore = constant($parent['code']).$o['code'];
+        $to_explore = constant($parent['code']);
         /** @var $locale_dir the path to locale dir */
-        $locale_dir = dirname($to_explore).'/locale';
+          if( $parent['code'] !== 'BBN_LIB_PATH'){
+						$locale_dir = $to_explore.'locale';
+					}
+					else{
+						$locale_dir = mb_substr(constant($parent['code']).$o['code'], 0,-4).'locale';
+
+					}
+
         $domain .= is_file($locale_dir.'/index.txt') ? file_get_contents($locale_dir.'/index.txt') : '';
 
         /** @var $dirs scans dirs existing in locale folder for this path */
         if ( is_dir($locale_dir) ){
           /** @var array $languages dirs in locale folder*/
-          $dirs = \bbn\file\dir::get_dirs($locale_dir);
-          foreach ($dirs as $l ){
-            $languages[] = basename($l);
+          $dirs = \bbn\file\dir::get_dirs($locale_dir) ?: [];
+          if(!empty($dirs)){
+            foreach ($dirs as $l ){
+              $languages[] = basename($l);
+            }
           }
         }
         $new = 0;
@@ -390,7 +399,7 @@ class i18n extends bbn\models\cls\cache
                   'num' => count($translations),
                   'num_translations' => $num_translations,
                   'lang' => $lng,
-                  'num_translations_db' => $this->count_translations_db($id_option)[$lng] ?: 0
+                  'num_translations_db' => $this->count_translations_db($id_option) ? $this->count_translations_db($id_option)[$lng] : 0
                 ];
               }
 
@@ -429,16 +438,17 @@ class i18n extends bbn\models\cls\cache
     if (!empty($id_option) && ($o = options::get_instance()->option($id_option)) &&
     ($parent = options::get_instance()->parent($id_option)) &&
     defined($parent['code']) ){
+      $tmp = [];
       /** @var  $to_explore the path to explore */
       $to_explore = constant($parent['code']).$o['code'];
       /** @var  $locale_dir locale dir in the path*/
       $locale_dir = dirname($to_explore).'/locale';
-
+      $dirs = \bbn\file\dir::get_dirs($locale_dir) ?: [];
       $languages = array_map(function($a){
         return basename($a);
-      }, \bbn\file\dir::get_dirs($locale_dir)) ?: [];
+      }, $dirs) ?: [];
       if ( !empty($languages) ){
-        $tmp = [];
+
         foreach ( $languages as $lng ){
           /* the path of po and mo files */
           $idx = is_file($locale_dir.'/index.txt') ? file_get_contents($locale_dir.'/index.txt') : '';
@@ -490,19 +500,73 @@ class i18n extends bbn\models\cls\cache
     return $count;
   }
 
-  public function get_translations_strings($id_option,$source_language, $languages){
+  public function get_translations_strings($id_option, $source_language, $languages){
 
-    if ( !empty($id_option) && !empty($source_language) && ($o = options::get_instance()->option($id_option)) &&
-    ($parent = options::get_instance()->parent($id_option)) &&
-    defined($parent['code'])){
-      /** @var  $to_explore the path to explore*/
-      $to_explore = constant($parent['code']).$o['code'];
+    if (
+      !empty($id_option) &&
+      !empty($source_language) &&
+      ($o = options::get_instance()->option($id_option)) &&
+      ($parent = options::get_instance()->option($o['id_parent'])) &&
+      \defined($parent['code'])
+    ){
+
+      /** @var string $to_explore The path to explore path of mvc */
+      $to_explore = \constant($parent['code']).($o['code'] === '/' ? '' : $o['code']);
+
+      $current_path = \constant($parent['code']);
+
+      //DOVREI ELIMINARE CARTELLE . .. E DATA MA FACENDO COME SOTTO PERDO I FILE SPARSI IN CURRENT
+      if ( constant($parent['code']) === BBN_APP_PATH ){
+        $current_dirs = bbn\file\dir::get_dirs( constant($parent['code']).($o['code'] === '/' ? '' : $o['code']));
+			}
+
+      //all dirs contained in current if not in vendor
+      if ( constant($parent['code']) === BBN_LIB_PATH ){
+        //case of plugins
+        $src =  mb_substr($current_path.$o['code'], 0,-4);
+        $current_dirs = bbn\file\dir::get_dirs($src);
+
+      }
+      else if ( constant($parent['code']) === BBN_CDN_PATH ){
+        //case javascript and styles project apst
+        $current_dirs[] =  constant($parent['code']).$o['code'];
+      }
+
+      $to_explore_dirs = [];
+
+      //creates the array $to_explore_dirs containing mvc, plugins e components
+      if ( !empty($current_dirs) ){
+				foreach ($current_dirs as $key => $value) {
+          //if ( strpos($value, '.') !== 0 ){
+          if( constant($parent['code']) === BBN_APP_PATH ){
+            if (( strpos($value, 'locale') !== 0 ) && ( strpos($value, 'data') !== 0 ) && ( strpos($value, '.') !== 0 )){
+						//with the full path in $current_dirs all strpos are not more valid!!! I cannot exclude ., locale  e data dirs
+              $to_explore_dirs = $current_dirs;
+            }
+          }
+
+          if( constant($parent['code']) === BBN_CDN_PATH ){
+            $to_explore_dirs[] = $current_dirs;
+          }
+          else if ( $parent['code'] === 'BBN_LIB_PATH'  ){
+            //case of plugins appui
+            $to_explore_dirs[] = $current_dirs[$key];
+
+          }
+
+          //}
+        }
+      }
+
+
+
 
       /** @var  $locale_dir  the root of locale dir for this id_option*/
       $locale_dir = dirname($to_explore).'/locale';
-      /** @var $dirs scans dirs contained in locale folder of this path*/
-      $dirs = scandir($locale_dir, 1);
 
+      /** @var $dirs scans dirs contained in locale folder of this path*/
+      //$dirs = scandir($locale_dir, 1) ?: [];
+      $res = [];
       //case of generate called from table
       if ( empty($languages) ){
         /** @var (array) $languages based on locale dirs found in the path*/
@@ -511,8 +575,25 @@ class i18n extends bbn\models\cls\cache
         }, \bbn\file\dir::get_dirs($locale_dir)) ?: [];
       }
 
-      /** @var $res array of the files found in the directory $to_explore */
-      $res = $this->analyze_folder($to_explore, true);
+      if ( !empty($to_explore_dirs) && ($parent['code'] !== 'BBN_CDN_PATH' )){
+
+        foreach ( $to_explore_dirs as $c ){
+					$res[] = $this->analyze_folder($c, true);
+
+				}
+      }
+      else if( ( $parent['code'] === 'BBN_CDN_PATH' ) && (!empty($current_dirs)) ){
+        foreach($current_dirs as $c ){
+          $res[] = $this->analyze_folder($c, true);
+        }
+      }
+
+
+      //all strings found in the differend dirs $to_explore_dirs
+      //merge all index of $res
+      $res = array_merge(...$res);
+
+
       $news = [];
       $done = 0;
 
@@ -526,13 +607,13 @@ class i18n extends bbn\models\cls\cache
           'exp' => $r,
           'lang' => $source_language
         ])) ){
+
           //\bbn\x::log( [$r,$source_language, $this->db->check()] , 'find_strings');
           /* if the string $r is not in 'bbn_i18n' inserts the string */
-          $this->db->insert('bbn_i18n', [
+          $this->db->insert_ignore('bbn_i18n', [
             'exp' => $r,
             'lang' => $source_language,
           ]);
-
           $id = $this->db->last_id();
 
         }
@@ -551,7 +632,7 @@ class i18n extends bbn\models\cls\cache
           /* if the string $r is not in 'bbn_i18n_exp' inserts the string
             $done will be the number of strings found in the folder $to_explore that haven't been found in the table
            'bbn_i18n_exp' of db, so $done is the number of new strings inserted in in 'bbn_i18n_exp'*/
-          $done += (int)$this->db->insert('bbn_i18n_exp', [
+          $done += (int)$this->db->insert_ignore('bbn_i18n_exp', [
             'id_exp' => $id,
             'lang' => $source_language,
             'expression' => $r
@@ -572,6 +653,7 @@ class i18n extends bbn\models\cls\cache
           );
         }
       }
+
       return [
         'news' => $news,
         'id_option' => $id_option,
@@ -597,10 +679,16 @@ class i18n extends bbn\models\cls\cache
       $path_source_lang = options::get_instance()->get_prop($id_option, 'language');
 
       /** @var  $to_explore the path to explore */
-      $to_explore = constant($parent['code']).$o['code'];
+      $to_explore = constant($parent['code']);;
 
       /** @var  $locale_dir locale dir in the path*/
-      $locale_dir = dirname($to_explore).'/locale';
+		if( $parent['code'] !== 'BBN_LIB_PATH'){
+			$locale_dir = $to_explore.'locale';
+		}
+		else{
+			$locale_dir = mb_substr(constant($parent['code']).$o['code'], 0,-4).'locale';
+
+		}
 
       $languages = array_map(function($a){
         return basename($a);
@@ -668,6 +756,7 @@ class i18n extends bbn\models\cls\cache
           }
         }
       }
+//\bbn\x::log( [$po_file, array_values($po_file)] , 'find_strings');
       return [
         'path_source_lang' => $path_source_lang,
         'path' => $o['text'],

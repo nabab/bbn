@@ -76,6 +76,7 @@ class grid extends bbn\models\cls\cache
    * @param string|array $cfg Original table configuration (server side)
    */
   public function __construct(bbn\db $db, array $post, $cfg){
+    
     // We inherit db and cacher properties
     parent::__construct($db);
     // Simple configuration using just a string with the table
@@ -87,8 +88,8 @@ class grid extends bbn\models\cls\cache
     if ( \is_array($cfg) && $this->db->check() ){
       // Preparing a classic config array for DB
       $db_cfg = [
-        'tables' => $cfg['tables'] ?? ($cfg['table'] ?? null),
-        'fields' => $cfg['fields'] ? (array)$cfg['fields'] : [],
+        'tables' => $cfg['tables'] ?? ($cfg['table'] ? (\is_string($cfg['table']) ? [$cfg['table']] : $cfg['table']) : null),
+        'fields' => !empty($cfg['fields']) ? (array)$cfg['fields'] : [],
         'order' => $post['order'] ?? ($cfg['order'] ?? []),
         'join' => $cfg['join'] ?? [],
         'group_by' => $cfg['group_by'] ?? [],
@@ -97,11 +98,15 @@ class grid extends bbn\models\cls\cache
         'start' => $post['start'] ?? 0,
         'where' => !empty($post['filters']) && !empty($post['filters']['conditions']) ? $post['filters'] : []
       ];
+
       // Adding all the fields if fields is empty
-      if ( empty($db_cfg['fields']) ){
+      if ( empty($db_cfg['tables']) ){
+        $this->log(['NO TABLES!', $db_cfg]);
+      }
+      else if ( empty($db_cfg['fields']) ){
         foreach ( array_unique(array_values($db_cfg['tables'])) as $t ){
           foreach ( $this->db->get_fields_list($t) as $f ){
-            if ( !\in_array($f, $cfg['fields'], true) ){
+            if ( !\in_array($f, $db_cfg['fields'], true) ){
               $db_cfg['fields'][] = $f;
             }
           }
@@ -110,6 +115,7 @@ class grid extends bbn\models\cls\cache
       // For the server config both properties where and filters are accepted (backward compatibility)
       if ( empty($cfg['filters']) && !empty($cfg['where']) ){
         $cfg['filters'] = $cfg['where'];
+       
       }
       // The (pre)filters set server-side are mandatory and are added to the client-side filters if any
       if ( !empty($cfg['filters']) ){
@@ -161,6 +167,10 @@ class grid extends bbn\models\cls\cache
       'filters' => $this->cfg['filters']
     ]));
     $this->chrono = new bbn\util\timer();
+  }
+
+  protected function fix_filters($where){
+
   }
 
   protected function get_cache(){
@@ -226,7 +236,7 @@ class grid extends bbn\models\cls\cache
   }
 
   public function get_total($force = false) : ?int
-  {
+  {    
     if ( $this->num && !$force ){
       return $this->num;
     }
@@ -304,6 +314,9 @@ class grid extends bbn\models\cls\cache
           'count' => $this->count_time
         ];
       }
+      //unset($this->count_cfg['where']['conditions'][0]['time']);
+      //$this->count_cfg['where']['conditions'][0]['value'] = hex2bin($this->count_cfg['where']['conditions'][0]['value']);
+      //die(bbn\x::dump($this->db->select_one($this->count_cfg), $this->db->last(), $this->count_cfg, $this->num, $this->db->last_params));
       $r['query'] = $this->db->last();
     }
     if ( !$this->db->check() ){

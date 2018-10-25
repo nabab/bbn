@@ -14,7 +14,8 @@ trait common
   static public $types = [
     'js' => ['js', 'coffee'],
     'css' => ['css', 'less', 'sass', 'scss'],
-    'html' => ['html', 'php']
+    'html' => ['html', 'php'],
+    'lang' => ['lang']
   ];
 
 }

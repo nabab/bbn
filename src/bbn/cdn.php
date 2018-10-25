@@ -294,6 +294,17 @@ JS;
                 }, $cssc['css']);
               }
             }
+            if (
+              !empty($c['lang']) &&
+              !empty($cp['lang']) &&
+              \in_array(\dirname($js)."/$name.$c[lang].lang", $cp['lang'], true)
+            ){
+              $lang = file_get_contents(BBN_PUBLIC.\dirname($js)."/$name.$c[lang].lang");
+              if ( $lang ){
+                //$lang = json_decode($lang, true);
+                $codes[$i]['js'] = "if ( window.bbn ){ bbn.fn.autoExtend('lng', $lang); }".PHP_EOL.$codes[$i]['js'];
+              }
+            }
 
             // Dependencies links
             $dep_path = BBN_PUBLIC.$jsc['js'][0]['dir'].'/';

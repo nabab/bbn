@@ -213,7 +213,8 @@ class config extends bbn\models\cls\basic
     $res = [
       'js' => [],
       'css' => [],
-      'html' => []
+      'html' => [],
+      'lang' => []
     ];
     $files = bbn\file\dir::get_files(BBN_PUBLIC.$dir);
     foreach ( $files as $f ){
@@ -222,7 +223,7 @@ class config extends bbn\models\cls\basic
         $file = basename($f);
         if ( $file !== '_def.less' ){
           foreach ( self::$types as $type => $extensions ){
-            if ( in_array($ext, $extensions, true) ){
+            if ( \in_array($ext, $extensions, true) ){
               $res[$type][] = $this->sanitize($dir.$file);
             }
           }
@@ -239,8 +240,8 @@ class config extends bbn\models\cls\basic
     $files = bbn\file\dir::get_files(BBN_PUBLIC.$this->cfg['url']);
     foreach ( $files as $f ){
       $ext = bbn\str::file_ext($f);
-      foreach ( library::$types as $type => $extensions ){
-        if ( in_array($ext, $extensions) ){
+      foreach ( self::$types as $type => $extensions ){
+        if ( \in_array($ext, $extensions, true) ){
           $res[$type][] = $f;
           if ( $ext === 'js' ){
             header('Content-type: text/javascript');
