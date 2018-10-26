@@ -388,7 +388,7 @@ class router {
         isset($this->routes['root'][$plugin]['name']) &&
         is_dir($this->routes['root'][$plugin]['path'].'../src/locale')
       ){
-        $lang_path = $this->routes['root'][$plugin]['path'].'../src/locale';
+        $lang_path = \dirname($this->routes['root'][$plugin]['path']).'/src/locale';
         $textdomain = $this->routes['root'][$plugin]['name'].
           (is_file($lang_path.'/index.txt') ? (string)file_get_contents($lang_path.'/index.txt') : '');
         bindtextdomain($textdomain, $lang_path);
