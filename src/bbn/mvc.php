@@ -137,6 +137,10 @@ class mvc implements mvc\api{
     return false;
   }
 
+  public function get_cookie(){
+    return empty($_COOKIE[BBN_APP_NAME]) ? false : json_decode($_COOKIE[BBN_APP_NAME], true)['value'];
+  }
+
   public function set_root($root){
     /** @todo a proper verification of the path */
     if ( strpos($root, -1) !== '/' ){
@@ -673,6 +677,10 @@ class mvc implements mvc\api{
       }
       $output = new mvc\output($obj, $this->get_mode());
       $output->run();
+    }
+    else{
+      header('HTTP/1.0 404 Not Found');
+      exit();
     }
   }
 

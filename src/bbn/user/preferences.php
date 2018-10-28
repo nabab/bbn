@@ -172,41 +172,39 @@ MYSQL;
    * @param string $id_link
    * @return array|null
    */
-  private function _get_links(string $id_lnk, string $id_user = null, string $id_group = null): ?array
+  private function _get_links(string $id_link, string $id_user = null, string $id_group = null): ?array
   {
-    if ( $id_lnk = $this->_get_id_option($id_lnk) ){
-      $col_id = $this->db->csn($this->fields['id'], true);
-      $table = $this->db->tsn($this->class_cfg['table'], true);
-      $id_opt = $this->db->csn($this->fields['id_option'], true);
-      $id_link = $this->db->csn($this->fields['id_link'], true);
-      $text = $this->db->csn($this->fields['text'], true);
-      $user = $this->db->csn($this->fields['id_user'], true);
-      $group = $this->db->csn($this->fields['id_group'], true);
-      $public = $this->db->csn($this->fields['public'], true);
-      $cond = [];
-      $args = [$id_lnk];
+    if ( $id_link = $this->_get_id_option($id_link) ){
+      $where = [
+        'logic' => 'AND',
+        'conditions' => [
+          [
+            'field' => $this->fields['id_link'],
+            'operator' => '=',
+            'value' => $id_link
+          ]
+        ]
+      ];
       if ( null !== $id_user ){
-        $cond[] = "$user = UNHEX(?)";
-        $args[] = $id_user;
+        $cond[$this->fields['id_user']] = $id_user;
       }
       if ( null !== $id_group ){
-        $cond[] = "$group = UNHEX(?)";
-        $args[] = $id_group;
+        $cond[$this->fields['id_group']] = $id_group;
       }
       // Not specific
-      if ( (null !== $id_user) && (null !== $id_group) ){
-        $cond[] = "$public = 1";
+      if ( (null === $id_user) && (null === $id_group) ){
+        $cond[$this->fields['public']] = 1;
       }
-      $cond = implode(' OR ', $cond);
-      $sql = <<< MYSQL
-SELECT $col_id, $id_opt
-FROM $table
-WHERE $id_link = UNHEX(?)
-AND ($cond)
-ORDER BY $text
-MYSQL;
-      array_unshift($args, $sql);
-      return $this->db->get_rows(...$args);
+      $where['conditions'][] = [
+        'logic' => 'OR',
+        'conditions' => $cond
+      ];
+      return $this->db->rselect_all([
+        'tables' => [$this->class_cfg['table']],
+        'fields' => [$this->fields['id'], $this->fields['id_option']],
+        'where' => $where,
+        'order' => [$this->fields['text']]
+      ]);
     }
     return null;
   }

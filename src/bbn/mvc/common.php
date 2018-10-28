@@ -75,4 +75,8 @@ trait common {
     return $this->mvc->plugin_name($path ?: $this->plugin);
   }
 
+  public function get_cookie(){
+    return $this->mvc->get_cookie();
+  }
+
 }

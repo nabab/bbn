@@ -376,11 +376,13 @@ class router {
         $tmp = '';
       }
     }
+    /*
     // Not found, sending the default controllers
     if ( !$file && is_file($root.'404.php') ){
       $real_path = '404';
       $file = $root.'404.php';
     }
+    */
     if ( $file ){
       if (
         $plugin &&
@@ -406,7 +408,7 @@ class router {
       ]);
     }
     // Aaaargh!
-    die(bbn\x::dump("No default file defined for mode $mode $tmp (and no 404 file either)"));
+    //die(bbn\x::dump("No default file defined for mode $mode $tmp (and no 404 file either)"));
   }
 
   private function find_in_roots($path){
