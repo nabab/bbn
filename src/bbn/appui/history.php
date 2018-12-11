@@ -557,7 +557,7 @@ WHERE $line = ?
 AND ($where)
 AND $operation LIKE 'UPDATE'
 AND $chrono < ?
-ORDER BY $chrono ASC
+ORDER BY $chrono DESC
 LIMIT 1
 MYSQL;
       return $db->get_row($sql, hex2bin($id), $date);
@@ -966,68 +966,86 @@ MYSQL;
       ($cfg['kind'] === 'SELECT') &&
       ($cfg['moment'] === 'before') &&
       !empty($cfg['tables']) &&
-      (bbn\x::find($cfg['join'], ['table' => self::$table_uids]) === false)
+      !in_array($db->tfn(self::$table), $cfg['tables_full'], true) &&
+      !in_array($db->tfn(self::$table_uids), $cfg['tables_full'], true)
     ){
       $change = 0;
       if ( !isset($cfg['history']) ){
         $cfg['history'] = [];
+        $new_join = [];
         foreach ( $cfg['join'] as $i => $t ){
+          $post_join = false;
           $model = $db->modelize($t['table']);
           if (
             isset($model['keys']['PRIMARY']) &&
             ($model['keys']['PRIMARY']['ref_table'] === $db->csn(self::$table_uids))
           ){
             $change++;
-            $cfg['join'][] = [
-              'table' => $db->tsn(self::$table_uids),
-              'alias' => $db->tsn(self::$table_uids).$change,
-              'type' => $t['type'] ?? 'right',
-              'on' => [
-                'conditions' => [
-                  [
-                    'field' => $db->cfn(self::$table_uids.$change.'.bbn_uid'),
-                    'operator' => 'eq',
-                    'exp' => $db->cfn(
-                      $model['keys']['PRIMARY']['columns'][0],
-                      !empty($t['alias']) ? $t['alias'] : $t['table'],
-                      true
-                    )
-                  ]
-                ],
-                'logic' => 'AND'
-              ]
-            ];
-            if ( $t['type'] === 'left' ){
-              $field = 'IFNULL('.$db->cfn(self::$table_uids.$change.'.bbn_active', true).', 1)';
-              if ( $cfg['filters']['logic'] === 'OR' ){
-                $cfg['filters'] = [
+            if ( $t['type'] !== 'left' ){
+              $post_join = [
+                'table' => $db->tsn(self::$table_uids),
+                'alias' => $db->tsn(self::$table_uids).$change,
+                'type' => $t['type'] ?? 'right',
+                'on' => [
                   'conditions' => [
-                    $cfg['filters'],
                     [
-                      'field' => $field,
+                      'field' => $db->cfn('bbn_uid', self::$table_uids.$change),
+                      'operator' => 'eq',
+                      'exp' => $db->cfn(
+                        $model['keys']['PRIMARY']['columns'][0],
+                        !empty($t['alias']) ? $t['alias'] : $t['table'],
+                        true
+                      )
+                    ], [
+                      'field' => $db->cfn('bbn_active', self::$table_uids.$change),
                       'operator' => '=',
                       'exp' => '1'
                     ]
                   ],
                   'logic' => 'AND'
-                ];
-              }
-              else{
-                $cfg['filters']['conditions'][] = [
-                  'field' => $field,
-                  'operator' => '=',
-                  'exp' => '1'
-                ];
-              }
-            }
-            else{
-              $cfg['join'][count($cfg['join']) - 1]['on']['conditions'][] = [
-                'field' => $db->cfn(self::$table_uids.$change.'.bbn_active'),
-                'operator' => '=',
-                'exp' => '1'
+                ]
               ];
             }
-
+            else{
+              $join_alias = $t;
+              $alias = strtolower(bbn\str::genpwd());
+              $join_alias['alias'] = $alias;
+              $join_alias['on']['conditions'] = $db->replace_table_in_conditions($join_alias['on']['conditions'], !empty($t['alias']) ? $t['alias'] : $t['table'], $alias);
+              $new_join[] = $join_alias;
+              $t['on'] = [
+                'conditions' => [
+                  [
+                    'field' => $db->cfn('bbn_uid', self::$table_uids.$change),
+                    'operator' => 'eq',
+                    'exp' => $db->cfn($model['keys']['PRIMARY']['columns'][0], !empty($t['alias']) ? $t['alias'] : $t['table'], true)
+                  ], [
+                    'field' => $db->cfn('bbn_active', self::$table_uids.$change),
+                    'operator' => '=',
+                    'exp' => '1'
+                  ]
+                ],
+                'logic' => 'AND'
+              ];
+              $new_join[] = [
+                'table' => $db->tsn(self::$table_uids),
+                'alias' => $db->tsn(self::$table_uids).$change,
+                'type' => 'left',
+                'on' => [
+                  'conditions' => [
+                    [
+                      'field' => $db->cfn('bbn_uid', self::$table_uids.$change),
+                      'operator' => 'eq',
+                      'exp' => $db->cfn($model['keys']['PRIMARY']['columns'][0], $alias, true)
+                    ]
+                  ],
+                  'logic' => 'AND'
+                ]
+              ];
+            }
+          }
+          $new_join[] = $t;
+          if ( $post_join ){
+            $new_join[] = $post_join;
           }
         }
         foreach ( $cfg['tables'] as $alias => $table ){
@@ -1037,7 +1055,7 @@ MYSQL;
             ($db->tfn($model['keys']['PRIMARY']['ref_db'].'.'.$model['keys']['PRIMARY']['ref_table']) === self::$table_uids)
           ){
             $change++;
-            $cfg['join'][] = [
+            $new_join[] = [
               'table' => self::$table_uids,
               'alias' => $db->tsn(self::$table_uids).$change,
               'on' => [
@@ -1058,6 +1076,8 @@ MYSQL;
           }
         }
         if ( $change ){
+          $cfg['join'] = $new_join;
+          $cfg['where'] = $cfg['filters'];
           $cfg = $db->reprocess_cfg($cfg);
         }
       }
@@ -1134,16 +1154,40 @@ MYSQL;
                   ]) ){
                     $primary_value = $tmp;
                     $primary_defined = true;
+                    self::enable();
                     break;
                   }
                   self::enable();
                 }
               }
             }
+            //\bbn\x::log([$primary_defined, $primary_value], 'mirko2');
             if (
               $primary_defined &&
-              ($db->select_one('bbn_history_uids', 'bbn_active', ['bbn_uid' => $primary_value]) === 0) &&
-              ($all = self::$db->rselect($table, [], [$s['primary'] => $primary_value]))
+              ($db->select_one(self::$table_uids, self::$column, ['bbn_uid' => $primary_value]) === 0) &&
+              //($all = self::$db->rselect($table, [], [$s['primary'] => $primary_value]))
+              ($all = self::$db->rselect([
+                'table' => $table,
+                'fields' => $cfg['fields'],
+                'join' => [[
+                  'table' => self::$table_uids,
+                  'on' => [
+                    'conditions' => [[
+                      'field' => $s['primary'],
+                      'exp' => 'bbn_uid'
+                    ], [
+                      'field' => self::$column,
+                      'value' => 0
+                    ]]
+                  ]
+                ]],
+                'where' => [
+                  'conditions' => [[
+                    'field' => $s['primary'],
+                    'value' => $primary_value
+                  ]]
+                ]
+              ]))
             ){
               // We won't execute the after trigger
               $cfg['trig'] = false;
@@ -1168,7 +1212,7 @@ MYSQL;
               }
               self::disable();
               if ( $cfg['value'] = self::$db->update(self::$table_uids, ['bbn_active' => 1], [
-                'bbn_uid' => $primary_value
+                ['bbn_uid', '=', $primary_value]
               ]) ){
                 if ( \count($update) > 0 ){
                   self::enable();
@@ -1187,7 +1231,10 @@ MYSQL;
             }
             else {
               self::disable();
-              if ( self::$db->insert(self::$table_uids, [
+              if ( $primary_defined && !self::$db->count($table, [$s['primary'] => $primary_value]) ){
+                $primary_defined = false;
+              }
+              if ( !$primary_defined && self::$db->insert(self::$table_uids, [
                 'bbn_uid' => $primary_value,
                 'bbn_table' => $s['id']
               ]) ){
@@ -1197,8 +1244,8 @@ MYSQL;
                   'line' => $primary_value,
                   'chrono' => microtime(true)
                 ];
+                self::$db->set_last_insert_id($primary_value);
               }
-              self::$db->set_last_insert_id($primary_value);
               self::enable();
             }
             break;
@@ -1299,7 +1346,7 @@ MYSQL;
                   'column' => $s['fields'][$s['primary']]['id_option'],
                   'line' => $primary_where,
                   'old' => NULL,
-                  'tst' => microtime(true)
+                  'chrono' => microtime(true)
                 ];
               }
             }

@@ -259,24 +259,29 @@ SQL;
   public function get_chat_by_users(array $users): ?string
   {
     if ( $this->check() && count($users) ){
-      $join = '';
-      $where = [];
+      $cfg = [
+        'tables' => ['bbn_chats'],
+        'fields' => ['bbn_chats.id'],
+        'join' => [],
+        'where' => ['blocked' => 1]
+      ];
       foreach ( $users as $i => $u ){
-        $join .= ' JOIN bbn_chats_users AS u'.($i+1).' ON u'.($i+1).'.id_chat = bbn_chats.id ';
-        array_push($where, 'u'.($i+1).'.id_user = ?');
-        $args[] = hex2bin($u);
+        $cfg['join'][] = [
+          'table' => 'bbn_chats_users',
+          'alias' => 'u'.($i+1),
+          'on' => [
+            'conditions' => [
+              [
+                'field' => 'bbn_chats.id',
+                'exp' => 'u'.($i+1).'.id_chat'
+              ]
+            ]
+          ]
+        ];
+        $cfg['where']['u'.($i+1).'.id_user'] = $u;
       }
-      $where_st = implode(' AND ', $where);
-      $sql = <<<MYSQL
-SELECT DISTINCT bbn_chats.id
-FROM bbn_chats
-  $join
-WHERE $where_st
-AND bbn_chats.blocked = 0
-LIMIT 1
-MYSQL;
       $id_chat = false;
-      $ids = $this->db->get_col_array($sql, $args);
+      $ids = $this->db->get_column_values($cfg);
       if ( count($ids) ){
         foreach ( $ids as $id ){
           if ( count($this->get_participants($id)) === (count($users) + 1) ){
@@ -311,6 +316,7 @@ MYSQL;
         foreach ( $files as $file ){
           $time = (float)basename($file, '.msg');
           if ( (!$last || \bbn\x::compare_floats($time, $last, '>')) && ($st = file_get_contents($file)) ){
+            $enc = bbn\util\enc::crypt('test');
             $res['messages'][] = json_decode(bbn\util\enc::decrypt($st), true);
           }
         }

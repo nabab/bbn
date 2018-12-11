@@ -201,6 +201,15 @@ class db extends \PDO implements db\actions, db\api, db\engines
     self::$has_error_all = true;
   }
 
+  public static function get_log_line(string $text = ''){
+    if ( $text ){
+      $text = ' '.$text.' ';
+    }
+    $tot = \strlen(self::$line) - \strlen($text);
+    $char = \substr(self::$line, 0, 1);
+    return \str_repeat($char, floor($tot/2)).$text.\str_repeat($char, ceil($tot/2));
+  }
+
   /**
    *
    * @param $item string 'db_name' or 'table'
@@ -849,6 +858,19 @@ class db extends \PDO implements db\actions, db\api, db\engines
     return $this->hash;
   }
 
+  public function replace_table_in_conditions(array $conditions, $old_name, $new_name)
+  {
+    return \bbn\x::map(function($a)use($old_name, $new_name){
+      if ( !empty($a['field']) ){
+        $a['field'] = preg_replace("/(\\W|^)$old_name([\\`\\']*\\s*)\\./", '$1'.$new_name.'$2.', $a['field']);
+      }
+      if ( !empty($a['exp']) ){
+        $a['exp'] = preg_replace("/(\\W|^)$old_name([\\`\\']*\\s*)\\./", '$1'.$new_name.'$2.', $a['exp']);
+      }
+      return $a;
+    }, $conditions, 'conditions');
+  }
+
   /**
    * Retrieves a query array based on its hash.
    * @param string $hash
@@ -1188,10 +1210,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
         foreach ( $models[$tfn]['fields'] as $col => $cfg ){
           $res['available_fields'][$this->cfn($col, $idx)] = $idx;
           $csn = $this->csn($col);
-          if ( isset($res['available_fields'][$csn]) ){
+          if ( !isset($res['available_fields'][$csn]) ){
+            /*
             $res['available_fields'][$csn] = false;
           }
           else{
+            */
             $res['available_fields'][$csn] = $idx;
           }
         }
@@ -1203,7 +1227,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
         if ( \is_string($idx) ){
           if ( !isset($res['available_fields'][$col]) ){
             //$this->log($res);
-            $this->error("Impossible to find the column $col.");
+            $this->error("Impossible to find the column $col");
             return null;
           }
           $res['available_fields'][$idx] = $res['available_fields'][$col];
@@ -1225,6 +1249,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
               }
             }
           }
+          //\bbn\x::log($res, 'sql');
           if ( $res['select_st'] = $this->language->get_select($res) ){
             $res['sql'] = $res['select_st'];
           }
@@ -1327,39 +1352,45 @@ class db extends \PDO implements db\actions, db\api, db\engines
     self::has_error();
     $msg = [
       self::$line,
-      'Error in the page!',
+      self::get_log_line('ERROR DB!'),
       self::$line
     ];
-    $b = debug_backtrace();
-    foreach ( $b as $c ){
-      if ( isset($c['file']) ){
-        $msg[] = 'File '.$c['file'].' - Line '.$c['line'];
-        $msg[] =
-          ( isset($c['class']) ?  '  Class '.$c['class'].' - ' : '' ).
-          ( isset($c['function']) ?  '  Function '.$c['function'] : '' );
-      }
-    }
-    $msg[] = self::$line;
     if ( \is_string($e) ){
+      $msg[] = self::get_log_line('USER MESSAGE');
       $msg[] = $e;
     }
     else if ( method_exists($e, 'getMessage') ){
+      $msg[] = self::get_log_line('DB MESSAGE');
       $msg[] = $e->getMessage();
     }
     $this->last_error = end($msg);
-    $msg[] =  self::$line;
+    $msg[] = self::get_log_line('QUERY');
     $msg[] = $this->last();
-    $msg[] = self::$line;
     if ( $this->last_params['values'] ){
-      $msg[] = self::$line;
-      $msg[] = 'Parameters';
-      $msg[] = self::$line;
-      $msg[] = x::get_dump($this->last_params['values']);
-      $msg[] = self::$line;
+      $msg[] =  self::get_log_line('VALUES');
+      foreach ( $this->last_params['values'] as $v ){
+        if ( $v === null ){
+          $msg[] = 'NULL';
+        }
+        else if ( \is_bool($v) ){
+          $msg[] = $v ? 'TRUE' : 'FALSE';
+        }
+        else if ( \is_string($v) ){
+          $msg[] = str::is_buid($v) ? bin2hex($v) : str::cut($v, 30);
+        }
+        else{
+          $msg[] = $v;
+        }
+      }
     }
+    $msg[] =  self::get_log_line('BACKTRACE');
+    $dbt = array_reverse(debug_backtrace());
+    array_walk($dbt, function($a, $i) use(&$msg){
+      $msg[] = str_repeat(' ', $i).($i ? '->' : '')."{$a['function']}  (".basename(dirname($a['file'])).'/'.basename($a['file']).":{$a['line']})";
+    });
     $this->log(implode(PHP_EOL, $msg));
     if ( $this->on_error === self::E_DIE ){
-      die(\defined('BBN_IS_PROD') && BBN_IS_PROD ? 'Database error' : implode(PHP_EOL, $msg));
+      die(\defined('BBN_IS_DEV') && BBN_IS_DEV ? implode(PHP_EOL, $msg) : 'Database error');
     }
   }
 
@@ -1543,7 +1574,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
     $this->last_query = $statement;
     //$this->log($statement);
     if ( $this->debug ){
-      $this->debug_queries[] = $statement;
+      //$this->debug_queries[] = $statement;
     }
     return $this;
   }
@@ -1576,6 +1607,16 @@ class db extends \PDO implements db\actions, db\api, db\engines
   {
     $this->triggers_disabled = true;
     return $this;
+  }
+
+  public function is_trigger_enabled(): bool
+  {
+    return !$this->triggers_disabled;
+  }
+
+  public function is_trigger_disabled(): bool
+  {
+    return $this->triggers_disabled;
   }
 
   /**
@@ -1838,7 +1879,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @param string $db
    * @return array|bool
    */
-  public function find_relations($column, $db = ''): array
+  public function find_relations($column, $db = ''): ?array
   {
     $changed = false;
     if ( $db && ($db !== $this->current) ){
@@ -1848,11 +1889,10 @@ class db extends \PDO implements db\actions, db\api, db\engines
     $column = $this->cfn($column);
     $bits = explode('.', $column);
     if ( \count($bits) === 2 ){
-      array_unshift($bits, $this->current);
+      array_unshift($bits, $db ?: $this->current);
     }
     if ( \count($bits) !== 3 ){
-
-      return false;
+      return null;
     }
     $table = $bits[1];
     $refs = [];
@@ -3283,7 +3323,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
         $q['num']++;
         $q['last'] = microtime(true);
         if ( $q['exe_time'] === 0 ){
-          $t = $q['last'];
+          $time = $q['last'];
         }
         // That will always contains the parameters of the last query done
         $this->last_params = $params;
@@ -3330,8 +3370,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
               $q['prepared']->init($this->last_params['values']);
             }
           }
-          if ( !empty($t) && $q['exe_time'] === 0 ){
-            $q['exe_time'] = microtime(true) - $t;
+          if ( !empty($time) && ($q['exe_time'] === 0) ){
+            $q['exe_time'] = microtime(true) - $time;
           }
         }
         catch (\PDOException $e ){
@@ -3812,11 +3852,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
   /**
    * @param array $conditions
    * @param array $cfg
+   * @param bool $is_having
    * @return string
    */
-  public function get_conditions(array $conditions, array $cfg = []): string
+  public function get_conditions(array $conditions, array $cfg = [], bool $is_having = false): string
   {
-    return $this->language->get_conditions($conditions, $cfg);
+    return $this->language->get_conditions($conditions, $cfg, $is_having);
   }
 
   /**

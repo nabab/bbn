@@ -152,7 +152,7 @@ class compiler extends bbn\models\cls\basic
     $code = '';
     $num_files = \count($files);
     if (  $num_files ){
-      $url = BBN_URL.'?files=%s&v='.($this->o['v'] ?? time());
+      $url = BBN_URL.'?files=%s&v='.($this->o['v'] ?? (\defined('BBN_IS_PROD') && BBN_IS_PROD ? '' : time()));
       $files_json = json_encode($files);
             $code .= <<<JS
   .then(function(){
@@ -220,12 +220,13 @@ JS;
 
             $params = [];
             // The v parameter is passed between requests (to refresh)
-            $params['v'] = $this->o['v'] ?? time();
+            if ( $this->o['v'] || (\defined('BBN_IS_DEV') && BBN_IS_DEV) ){
+              $params['v'] = $this->o['v'] ?? time();
+            }
             // The test parameter also (for minification)
             if ( $test ){
-              $params['test'] = null;
+              $params['test'] = 1;
             }
-
             $url .= http_build_query($params);
             $jsdir = $dir === '.' ? '' : $dir.'/';
             $code .= <<<JS

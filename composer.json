@@ -13,6 +13,9 @@
     }
   ],
   "require": {
+    "php": ">=7.1",
+    "ext-mbstring": "*",
+    "ext-json": "*",
     "zordius/lightncandy": "dev-master",
     "greenlion/php-sql-parser": "dev-trunk",
     "mpdf/mpdf": "dev-master",

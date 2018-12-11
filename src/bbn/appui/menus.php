@@ -261,7 +261,6 @@ class menus extends bbn\models\cls\basic{
    */
   public function set(string $id, array $cfg){
     if ( $id_menu = $this->get_id_menu($id) ){
-
       if ( $res = $this->options->set($id, $cfg) ){
         $this->delete_cache($id_menu);
       }

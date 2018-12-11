@@ -199,6 +199,52 @@ class notes extends bbn\models\cls\db
     return $res;
   }
 
+  public function get_full($id, $version = false){
+    $cf =& $this->class_cfg;
+    if ( !\is_int($version) ){
+      $version = $this->latest($id);
+    }
+    if ( $res = $this->db->rselect([
+      'table' => $cf['table'],
+      'fields' => [
+        $cf['arch']['notes']['id'],
+        $cf['arch']['notes']['id_parent'],
+        $cf['arch']['notes']['id_alias'],
+        $cf['arch']['notes']['id_type'],
+        $cf['arch']['notes']['private'],
+        $cf['arch']['notes']['locked'],
+        $cf['arch']['notes']['pinned'],
+        $cf['arch']['versions']['version'],
+        $cf['arch']['versions']['title'],
+        $cf['arch']['versions']['content'],
+        $cf['arch']['versions']['id_user'],
+        $cf['arch']['versions']['creation']
+      ],
+      'join' => [[
+        'table' => $cf['tables']['versions'],
+        'on' => [
+          'conditions' => [[
+            'field' => $cf['arch']['versions']['id_note'],
+            'exp' => $cf['arch']['notes']['id'],
+          ], [
+            'field' => $cf['arch']['versions']['version'],
+            'value' => $version
+          ]]
+        ]
+      ]],
+      'where' => [
+        'conditions' => [[
+          'field' => $cf['arch']['notes']['id'],
+          'value' => $id
+        ]]
+      ]
+    ]) ){
+      $res['medias'] = $this->get_medias($id, $version);
+      return $res;
+    }
+    return false;
+  }
+
   public function get_by_type($type = NULL, $id_user = false, $limit = 0, $start = 0){
     $db =& $this->db;
     $cf =& $this->class_cfg;

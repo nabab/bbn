@@ -46,6 +46,7 @@ class masks extends bbn\models\cls\db {
       $data['default'] = $mask['def'];
       $data['id_type'] = $mask['id_type'];
       $data['type'] = $this->o->text($mask['id_type']);
+      $data['name'] = $mask['name'];
       return $data;
     }
     return null;
@@ -55,9 +56,9 @@ class masks extends bbn\models\cls\db {
     if ( !bbn\str::is_uid($id_type) ){
       $id_type = self::get_option_id($id_type);
     }
-    $all = $id_type ? $this->db->get_column_values('bbn_notes_masks', 'id_note', [
+    $all = $this->db->get_column_values('bbn_notes_masks', 'id_note', $id_type ? [
       'id_type' => $id_type
-    ]) : $this->db->get_column_values('bbn_notes_masks', 'id_note');
+    ] : []);
     $r = [];
     foreach ( $all as $a ){
       $r[] = $this->get($a, $simple);
@@ -65,7 +66,7 @@ class masks extends bbn\models\cls\db {
     return $r;
   }
 
-  public function get_text_value($id_type){
+  public function get_text_value($id_type, $fulltext = false){
     if ( !bbn\str::is_uid($id_type) ){
       $id_type = self::get_option_id($id_type);
     }
@@ -74,14 +75,18 @@ class masks extends bbn\models\cls\db {
     if ( \is_array($all) ){
       $res = [];
       foreach ( $all as $a ){
-        $res[] = [
-          'text' => $a['title'].
+        $tmp = [
+          'text' => $a['name'],
+          'value' => $a['id_note']
+        ];
+        if ( $fulltext ){
+          $tmp['fulltext'] = $a['title'].
             ($a['default'] ? ' ('._('default').')' : '').
             ' - v'.$a['version'].' '.
             \bbn\date::format($a['creation']).' '._('by').' '.
-            $admin->get_name($a['id_user']),
-          'value' => $a['id_note']
-        ];
+            $admin->get_name($a['id_user']);
+        }
+        $res[] = $tmp;
       }
       return $res;
     }
@@ -122,7 +127,7 @@ class masks extends bbn\models\cls\db {
     }
   }
 
-  public function insert($id_type, $title, $content): ?string
+  public function insert($name, $id_type, $title, $content): ?string
   {
     if ( !bbn\str::is_uid($id_type) ){
       $id_type = self::get_option_id($id_type);
@@ -133,7 +138,8 @@ class masks extends bbn\models\cls\db {
     ){
       $data = [
         'id_note' => $id_note,
-        'id_type' => $id_type
+        'id_type' => $id_type,
+        'name' => $name
       ];
       if ( !$this->count($id_type) ){
         $data['def'] = 1;
@@ -146,13 +152,27 @@ class masks extends bbn\models\cls\db {
   }
 
   public function update(array $cfg){
-    if ( !empty($cfg['id_note']) && !empty($cfg['id_user']) && !empty($cfg['id_type']) && !empty($cfg['title']) &&
-      !empty
-      ($cfg['content']) ){
-      $id_note = $cfg['id'];
-      unset($cfg['id']);
-      $this->db->update('bbn_notes_masks', $cfg, ['id_note' => $id_note]);
+    if ( 
+      !empty($cfg['id_note']) && 
+      !empty($cfg['title']) &&
+      !empty($cfg['content']) &&
+      !empty($cfg['name'])
+    ){
+      $data = [
+        'name' => $cfg['name'],
+        'def' => !empty($cfg['def']) || !empty($cfg['default']) ? 1 : 0
+      ];
+      if ( !empty($cfg['id_type']) ){
+        $data['id_type'] = $cfg['id_type'];
+      }
+      if ( 
+        $this->db->update('bbn_notes_masks', $data, ['id_note' => $cfg['id_note']]) ||
+        $this->notes->update($cfg['id_note'], $cfg['title'], $cfg['content'])
+      ){
+        return true;
+      }
     }
+    return false;
   }
 
   public function delete($id_note){

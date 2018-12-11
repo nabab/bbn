@@ -406,7 +406,7 @@ class i18n extends bbn\models\cls\cache
             }
             /* if the file po for the $lng doesn't exist $result is an empty object */
             else{
-              if( !emptY($this->count_translations_db($id_option)[$lng]) ){
+              if( !empty($this->count_translations_db($id_option)[$lng]) ){
                 $count_translations = $this->count_translations_db($id_option)[$lng];
               }
               else{
@@ -515,7 +515,7 @@ class i18n extends bbn\models\cls\cache
 
       $current_path = \constant($parent['code']);
 
-      //DOVREI ELIMINARE CARTELLE . .. E DATA MA FACENDO COME SOTTO PERDO I FILE SPARSI IN CURRENT
+      
       if ( constant($parent['code']) === BBN_APP_PATH ){
         $current_dirs = bbn\file\dir::get_dirs( constant($parent['code']).($o['code'] === '/' ? '' : $o['code']));
 			}
@@ -589,10 +589,11 @@ class i18n extends bbn\models\cls\cache
       }
 
 
-      //all strings found in the differend dirs $to_explore_dirs
+      //all strings found in the different dirs $to_explore_dirs
       //merge all index of $res
-      $res = array_merge(...$res);
-
+      if(!empty($res)){
+         $res = array_merge(...$res);
+      }
 
       $news = [];
       $done = 0;
@@ -679,21 +680,20 @@ class i18n extends bbn\models\cls\cache
       $path_source_lang = options::get_instance()->get_prop($id_option, 'language');
 
       /** @var  $to_explore the path to explore */
-      $to_explore = constant($parent['code']);;
+      $to_explore = constant($parent['code']);
 
       /** @var  $locale_dir locale dir in the path*/
-		if( $parent['code'] !== 'BBN_LIB_PATH'){
-			$locale_dir = $to_explore.'locale';
-		}
-		else{
-			$locale_dir = mb_substr(constant($parent['code']).$o['code'], 0,-4).'locale';
+      if( $parent['code'] !== 'BBN_LIB_PATH'){
+        $locale_dir = $to_explore.'locale';
+      }
+      else{
+        $locale_dir = mb_substr(constant($parent['code']).$o['code'], 0,-4).'locale';
 
-		}
+      }
 
       $languages = array_map(function($a){
         return basename($a);
       }, \bbn\file\dir::get_dirs($locale_dir)) ?: [];
-      $new = 0;
       $i = 0;
       $res = [];
       $project = new bbn\appui\project($this->db, $id_project);
@@ -761,7 +761,6 @@ class i18n extends bbn\models\cls\cache
         'path_source_lang' => $path_source_lang,
         'path' => $o['text'],
         'success' => $success,
-        'new' => $new,
         'languages' => $languages,
         'total' => count(array_values($po_file)),
         'strings' => array_values($po_file),

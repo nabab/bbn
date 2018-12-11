@@ -84,26 +84,26 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
       die("A host name and a \"From\" eMail address must be provided");
     }
     $this->mailer = new PHPMailer();
-    $this->mailer->isSMTP();
-    if ( !empty($cfg['ssl']) ){
-      if ( \is_array($cfg['ssl']) ){
-        $this->mailer->SMTPOptions = ['ssl' => $cfg['ssl']];
+    $this->mailer->CharSet = isset($cfg['charset']) ? $cfg['charset'] : "UTF-8";
+    if ( isset($cfg['user'], $cfg['pass']) ){
+      // SMTP connection will not close after each email sent, reduces SMTP overhead
+      $this->mailer->isSMTP();
+      if ( !empty($cfg['ssl']) ){
+        if ( \is_array($cfg['ssl']) ){
+          $this->mailer->SMTPOptions = ['ssl' => $cfg['ssl']];
+        }
+        else{
+          $this->mailer->SMTPSecure = 'ssl';
+        }
       }
       else{
-        $this->mailer->SMTPSecure = 'ssl';
+        $this->mailer->SMTPSecure = 'tls';
       }
-    }
-    else{
-      $this->mailer->SMTPSecure = 'tls';
-    }
-    $this->mailer->CharSet = isset($cfg['charset']) ? $cfg['charset'] : "UTF-8";
-    // SMTP connection will not close after each email sent, reduces SMTP overhead
-    $this->mailer->SMTPKeepAlive = true;
-    $this->mailer->SMTPDebug = empty($cfg['debug']) ? false : 3;
-    $this->mailer->Debugoutput = 'error_log';
-    $this->mailer->Host = $cfg['host'];
-    $this->mailer->Port = isset($cfg['port']) ? $cfg['port'] : 587;
-    if ( isset($cfg['user'], $cfg['pass']) ){
+      $this->mailer->Host = $cfg['host'];
+      $this->mailer->Port = isset($cfg['port']) ? $cfg['port'] : 587;
+      $this->mailer->SMTPKeepAlive = true;
+      $this->mailer->SMTPDebug = empty($cfg['debug']) ? false : 3;
+      $this->mailer->Debugoutput = 'error_log';
       $this->mailer->SMTPAuth = true;
       $this->mailer->Username = $cfg['user'];
       $this->mailer->Password = $cfg['pass'];

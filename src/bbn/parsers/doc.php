@@ -75,7 +75,7 @@ class doc {
         'exports' => [],
         'extends' => 'augments',
         'external' => [],
-        'file' => [],
+        'file' => ['text'],
         'fileoverview' => 'file',
         'fires' => ['name'],
         'func' => 'function',
@@ -300,7 +300,7 @@ class doc {
         }
         $t = $tag['tag'];
         unset($tag['tag']);
-        $res[$t][] = $tag['text'] ?: $tag;
+        $res[$t][] = $tag['text'] ?? $tag;
       }
     }
     return array_map(function($r){
@@ -428,7 +428,8 @@ class doc {
       ($this->mode === 'js') ||
       ($this->mode === 'vue')
     ){
-      preg_match('/\w+/', $text, $name, PREG_OFFSET_CAPTURE);
+      //preg_match('/\w+/', $text, $name, PREG_OFFSET_CAPTURE);
+      preg_match('/[[:graph:]]+/', $text, $name, PREG_OFFSET_CAPTURE);
     }
     else if ( $this->mode === 'php' ){
       preg_match('/\$[a-z]+/', $text, $name, PREG_OFFSET_CAPTURE);
@@ -443,7 +444,7 @@ class doc {
    * @param string $memberof The parent tag name
    * @return array|false
    */
-  private function get(string $tag, string $memberof = ''){
+  private function get(string $tag, string $memberof = '', bool $grouped = true){
     if ( empty($this->parsed) ){
       $this->parse();
     }
@@ -465,11 +466,20 @@ class doc {
             )
           )
         ){
-          $tmp = array_merge($p['tags'][$i], [
-            'description' => $p['description']
-          ]);
-          unset($p['tags'][$i], $tmp['tag']);
-          $res[] = array_merge($tmp, $this->group_tags($p['tags']));
+          if ( $grouped ){
+            $tmp = $p['tags'][$i];
+            if ( $p['tags'][$i]['tag'] !== 'file' ){
+              $tmp['description'] = $p['description'];
+            }
+            unset($p['tags'][$i], $tmp['tag']);
+            $res[] = array_merge($tmp, $this->group_tags($p['tags']));
+          }
+          else {
+            $res = array_map(function($t){
+              unset($t['tag']);
+              return $t;
+            }, $p['tags']);
+          }
         }
       }
       return $res;
@@ -504,7 +514,7 @@ class doc {
    * @return array|false
    */
   private function get_mixins(string $memberof = ''){
-    return $this->get('mixin', $memberof);
+    return $this->get('mixin', $memberof, false);
   }
 
   /**
@@ -573,6 +583,16 @@ class doc {
    */
   private function get_todo(string $memberof = ''){
     return $this->get('todo', $memberof);
+  }
+
+  /**
+   * Gets the 'file' tag
+   *
+   * @param string $memberof The parent tag name
+   * @return array|false
+   */
+  private function get_file(string $memberof = ''){
+    return $this->get('file', $memberof);
   }
 
   /**
@@ -672,9 +692,10 @@ class doc {
    */
   public function get_js(){
     return [
+      'description' => $this->get_file(),
       'methods' => $this->get_methods(),
       'events' => $this->get_events(),
-      'todo' => $this->get_todo()
+      //'todo' => $this->get_todo()
     ];
   }
 
@@ -686,6 +707,7 @@ class doc {
    */
   public function get_vue(string $memberof = ''){
     return [
+      'description' => $this->get_file($memberof),
       'methods' => $this->get_methods($memberof),
       'events' => $this->get_events($memberof),
       'mixins' => $this->get_mixins($memberof),
@@ -694,7 +716,7 @@ class doc {
       'computed' => $this->get_computed($memberof),
       'watch' => $this->get_watch($memberof),
       'components' => $this->get_components($memberof),
-      'todo' => $this->get_todo($memberof)
+      //'todo' => $this->get_todo($memberof)
     ];
   }
 }

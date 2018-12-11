@@ -103,7 +103,7 @@ class options extends bbn\models\cls\db
     }
     // Text is required and parent exists
     if ( isset($it[$c['id_parent']]) &&
-      !empty($it[$c['text']]) &&
+      (!empty($it[$c['text']]) || !empty($it[$c['id_alias']])) &&
       ($parent = $this->option($it[$c['id_parent']]))
     ){
       // ID shouldn't be updated or created
@@ -114,6 +114,11 @@ class options extends bbn\models\cls\db
       // If code is empty it MUST be null
       if ( empty($it[$c['code']]) ){
         $it[$c['code']] = null;
+      }
+
+      // If code is empty it MUST be null
+      if ( empty($it[$c['text']]) ){
+        $it[$c['text']] = '';
       }
 
       // Unsetting computed values
@@ -345,6 +350,7 @@ class options extends bbn\models\cls\db
       $this->cache_delete($id);
       if ( !$subs ){
         $this->cache_delete($this->get_id_parent($id));
+        $this->cache_delete($id);
       }
     }
     else{
@@ -409,26 +415,29 @@ class options extends bbn\models\cls\db
     while ( isset($args[0]) && \is_array($args[0]) ){
       $args = $args[0];
     }
-    if ( !count($args) ){
-      return null;
-    }
     // If we get an option array as param
     if ( isset($args['id']) ){
       return $args['id'];
     }
-    // False is accepted as id_parent for root
-    if ( end($args) === false ){
-      array_pop($args);
-      $args[] = $this->default;
-    }
     $num = \count($args);
     if ( !$num ){
+      return null;
+    }
+    // False is accepted as id_parent for root
+    if ( ($num === 1) && ($args[0] === false) ){
       return $this->default;
     }
     if ( bbn\str::is_uid($args[0]) ){
-      return $args[0];
+      if ( $num === 1 ){
+        return $args[0];
+      }
+      // If there are extra arguments with the ID we check that they correspond to its parent
+      if ( $this->get_id_parent($args[0]) === $this->from_code(...\array_slice($args, 1)) ){
+        return $args[0];
+      }
     }
-    if ( !\is_string($args[0]) ){
+    // We can use whatever alphanumeric value for code
+    if ( !\is_string($args[0]) && !is_numeric($args[0]) ){
       return null;
     }
     // They must all have the same form at start with an id_parent as last argument
@@ -446,7 +455,7 @@ class options extends bbn\models\cls\db
     // Using the code(s) as argument(s) from now
     $id_parent = array_pop($args);
     $true_code = array_pop($args);
-    $cache_name = 'get_code_'.$true_code;
+    $cache_name = 'get_code_'.base64_encode($true_code);
     $local_cache_name = $id_parent.'-'.$cache_name;
     if ( !empty($args) ){
       $cache_name2 = $cache_name.'-'.implode('-', $args);
@@ -488,6 +497,19 @@ class options extends bbn\models\cls\db
 
     }
 
+    return null;
+  }
+
+  public function set_value(array $value, $id): ?int
+  {
+    if ( $this->exists($id) ){
+      $c =& $this->class_cfg;
+      $this->cache_delete($id);
+      return $this->db->update($c['table'],
+        [$c['arch']['options']['value'] => json_encode($value)],
+        [$c['arch']['options']['id'] => $id]
+      );
+    }
     return null;
   }
 
@@ -682,6 +704,19 @@ class options extends bbn\models\cls\db
     return null;
   }
 
+  public function get_value($code = null): ?array
+  {
+    if (
+      bbn\str::is_uid($id = $this->from_code(\func_get_args())) &&
+      ($opt = $this->native_option($id)) &&
+      !empty($opt[$this->class_cfg['arch']['options']['value']]) &&
+      bbn\str::is_json($opt[$this->class_cfg['arch']['options']['value']])
+    ){
+      return json_decode($opt[$this->class_cfg['arch']['options']['value']], true);
+    }
+    return null;
+  }
+
   /**
    * Returns an option's full content as an array
    *
@@ -712,11 +747,10 @@ class options extends bbn\models\cls\db
     ){
       $this->_set_value($opt);
       $c =& $this->class_cfg['arch']['options'];
-      if ( bbn\str::is_uid($opt[$c['id_alias']]) && $this->exists($opt[$c['id_alias']]) ){
+      if ( bbn\str::is_uid($opt[$c['id_alias']]) && ($opt['alias'] = $this->native_option($opt[$c['id_alias']])) ){
         if ( $opt[$c['id_alias']] === $id ){
           die(var_dump("Impossible to have the same ID as ALIAS, check out ID", $id));
         }
-        $opt['alias'] = $this->native_option($opt[$c['id_alias']]);
         $this->_set_value($opt['alias']);
       }
       return $opt;
@@ -1327,23 +1361,40 @@ class options extends bbn\models\cls\db
       foreach ( $parents as $i => $p ){
         $parent_cfg = $this->db->select_one($c['table'], $c['arch']['options']['cfg'], [$c['arch']['options']['id'] => $p]);
         $parent_cfg = bbn\str::is_json($parent_cfg) ? json_decode($parent_cfg, 1) : [];
-        if ( !empty($parent_cfg['inheritance']) ){
+        if ( !empty($parent_cfg['scfg']) && ($i === $last) ){
+          $cfg = array_merge((array)$cfg, $parent_cfg['scfg']);
+          $cfg['inherit_from'] = $p;
+          $cfg['frozen'] = 1;
+          break;
+        }
+        if ( !empty($parent_cfg['inheritance']) || !empty($parent_cfg['scfg']['inheritance']) ){
           if (
             (
               ($i === $last) &&
-              ($parent_cfg['inheritance'] === 'children')
+              (
+                ($parent_cfg['inheritance'] === 'children') ||
+                (!empty($parent_cfg['scfg']) && ($parent_cfg['scfg']['inheritance'] === 'children'))
+              )
             ) ||
-            ($parent_cfg['inheritance'] === 'cascade')
+            (
+              ($parent_cfg['inheritance'] === 'cascade') ||
+              (!empty($parent_cfg['scfg']) && ($parent_cfg['scfg']['inheritance'] === 'cascade'))
+            )
           ){
             // Keeping in the option cfg properties which don't exist in the parent
-            $cfg = array_merge(\is_array($cfg) ? $cfg : [], $parent_cfg);
+            $cfg = array_merge((array)$cfg, $parent_cfg['scfg'] ?? $parent_cfg);
             $cfg['inherit_from'] = $p;
             $cfg['frozen'] = 1;
-
             break;
           }
-          else if ( ($parent_cfg['inheritance'] === 'default') && !count($cfg) ){
-            $cfg = $parent_cfg;
+          else if ( 
+            !count($cfg) &&
+            (
+              ($parent_cfg['inheritance'] === 'default') ||
+              (!empty($parent_cfg['scfg']) && ($parent_cfg['scfg']['inheritance'] === 'default'))
+            )
+          ){
+            $cfg = $parent_cfg['scfg'] ?? $parent_cfg;
             $cfg['inherit_from'] = $p;
           }
         }
@@ -1472,11 +1523,8 @@ class options extends bbn\models\cls\db
    */
   public function get_id_parent($code = null): ?string
   {
-    if ( bbn\str::is_uid($id = $this->from_code(\func_get_args())) ){
-      return $this->db->select_one(
-        $this->class_cfg['table'],
-        $this->class_cfg['arch']['options']['id_parent'],
-        ['id' => $id]);
+    if ( bbn\str::is_uid($id = $this->from_code(\func_get_args())) && ($o = $this->native_option($id)) ){
+      return $o['id_parent'];
     }
     return null;
   }
@@ -1534,7 +1582,7 @@ class options extends bbn\models\cls\db
         if ( $id === $id_parent ){
           return true;
         }
-        if ( \in_array($id, $done) ){
+        if ( \in_array($id, $done, true) ){
           break;
         }
         $done[] = $id;
@@ -1854,7 +1902,6 @@ class options extends bbn\models\cls\db
     $items = !empty($it['items']) && \is_array($it['items']) ? $it['items'] : false;
     $id = null;
     if ( $this->_prepare($it) ){
-      var_dump($it);
       $c =& $this->class_cfg['arch']['options'];
       if (
         $force &&
@@ -1960,7 +2007,7 @@ class options extends bbn\models\cls\db
       bbn\str::is_uid($id = $this->from_code(...\func_get_args())) &&
       ($id !== $this->default) &&
       ($id !== $this->root) &&
-      bbn\str::is_uid(($id_parent = $this->get_id_parent($id)))
+      bbn\str::is_uid($id_parent = $this->get_id_parent($id))
     ){
       $num = 0;
       if ( $items = $this->items($id) ){

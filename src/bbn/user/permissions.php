@@ -83,7 +83,9 @@ class permissions extends bbn\models\cls\basic
         $is_not_last = $i < (\count($parts) - 1);
         if ( !empty($p) ){
           $prev_parent = $parent;
+          // Adds a slash for each bit of the path except the last one
           $parent = $this->opt->from_code($p.($is_not_last ? '/' : ''), $prev_parent);
+          // If not found looking for a subpermission
           if ( !$parent && $is_not_last ){
             $parent = $this->opt->from_code($p, $prev_parent);
           }
@@ -225,7 +227,7 @@ class permissions extends bbn\models\cls\basic
    */
   public function is(string $path, string $type = 'page'): ?string
   {
-    return $this->from_path($path, $type) ?: null;
+    return $this->from_path($path, $type);
   }
 
   /**

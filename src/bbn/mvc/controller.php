@@ -621,6 +621,18 @@ class controller implements api{
     return $this;
   }
 
+  public function set_obj(array $arr){
+    foreach ( $arr as $k => $a ){
+      $this->obj->{$k} = $a;
+    }
+    return $this;
+  }
+
+  public function set_url($url){
+    $this->obj->url = $url;
+    return $this;
+  }
+
   public function set_title($title){
     $this->obj->title = $title;
     return $this;
@@ -764,7 +776,7 @@ class controller implements api{
 	}
 
   public function action(){
-    $this->obj = $this->add_data(['res' => ['success' => false]])->add_data($this->post)->get_object_model('', $this->data);
+    $this->obj = $this->add_data(['res' => ['success' => false]])->add_data($this->post)->get_object_model();
   }
 
   public function cached_action($ttl = 60){
@@ -777,9 +789,9 @@ class controller implements api{
 
   /**
    * @param string $title
-   * @param null|array $data
+   * @param self
    */
-  public function combo($title = null, $data = null, $cached = null)
+  public function combo($title = null, $data = null, $cached = null): self
   {
 		$this->obj->css = $this
       ->add_data($cached ?
@@ -806,6 +818,7 @@ class controller implements api{
       $this->add_js($this->path, $data, false);
     }
 		echo $this->get_view($this->path, false);
+    return $this;
 	}
 
   /**
@@ -836,6 +849,10 @@ class controller implements api{
 
   public function get_routes(){
     return $this->mvc->get_routes();
+  }
+
+  public function get_aliases(){
+    return $this->mvc->get_routes('alias');
   }
 
   public function get_route($path, $mode, $root = null){
@@ -1141,25 +1158,44 @@ class controller implements api{
 		return $this;
 	}
 
-	/**
-	 * Merges the existing data if there is with this one. Chainable.
-	 *
-	 * @return void
-	 */
-	public function add($path, $data=[], $internal = false)
-	{
-		if ( substr($path, 0, 2) === './' ){
-			$path = $this->say_dir().substr($path, 1);
-		}
+  /**
+   * Merges the existing data if there is with this one. Chainable.
+   *
+   * @return void
+   */
+  public function add($path, $data=[], $internal = false)
+  {
+    if ( substr($path, 0, 2) === './' ){
+      $path = $this->say_dir().substr($path, 1);
+    }
     if ( $route = $this->mvc->get_route($path, $internal ? 'private' : 'public') ){
       $o = new controller($this->mvc, $route, $data);
       $o->process();
       return $o;
     }
-		return false;
-	}
+    return false;
+  }
 
-	public function get_result(){
+  /**
+   * Merges the existing data if there is with this one. Chainable.
+   *
+   * @return void
+   */
+  public function add_to_obj(string $path, $data=[], $internal = false)
+  {
+    if ( substr($path, 0, 2) === './' ){
+      $path = $this->say_dir().substr($path, 1);
+    }
+    if ( $route = $this->mvc->get_route($path, $internal ? 'private' : 'public') ){
+      $o = new controller($this->mvc, $route, $data);
+      $o->process();
+      $this->obj = \bbn\x::merge_objects($this->obj, $o->obj);
+      return $this;
+    }
+    return false;
+  }
+
+  public function get_result(){
 		return $this->obj;
 	}
 

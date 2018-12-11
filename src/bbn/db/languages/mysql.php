@@ -14,7 +14,7 @@ use bbn;
  * @since Apr 4, 2011, 23:23:55 +0000
  * @category  Database
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @version 0.2r89
+ * @version 0.4
  */
 class mysql implements bbn\db\engines
 {
@@ -27,9 +27,48 @@ class mysql implements bbn\db\engines
   /** @var array Numeric column types */
   public static $numeric_types = ['integer', 'int', 'smallint', 'tinyint', 'mediumint', 'bigint', 'decimal', 'numeric', 'float', 'double'];
 
-  /** @var array Numeric column types */
+  /** @var array Time and date column types */
   public static $date_types = ['date', 'time', 'datetime'];
 
+  public static $types = [
+    'tinyint',
+    'smallint',
+    'mediumint',
+    'int',
+    'bigint',
+    'decimal',
+    'float',
+    'double',
+    'bit',
+    'char',
+    'varchar',
+    'binary',
+    'varbinary',
+    'tinyblob',
+    'blob',
+    'mediumblob',
+    'longblob',
+    'tinytext',
+    'text',
+    'mediumtext',
+    'longtext',
+    'enum',
+    'set',
+    'date',
+    'time',
+    'datetime',
+    'timestamp',
+    'year',
+    'geometry',
+    'point',
+    'linestring',
+    'polygon',
+    'geometrycollection',
+    'multilinestring',
+    'multipoint',
+    'multipolygon',
+    'json'
+  ];
   /** @var string The quote character */
   public $qte = '`';
 
@@ -115,7 +154,7 @@ class mysql implements bbn\db\engines
       if ( !bbn\str::check_name($m) ){
         return false;
       }
-      $r[] = '`'.$m.'`';
+      $r[] = $this->qte.$m.$this->qte;
     }
     return implode('.', $r);
 	}
@@ -129,7 +168,7 @@ class mysql implements bbn\db\engines
 	 */
 	public function table_full_name(string $table, bool $escaped = false): ?string
 	{
-    $bits = explode('.', str_replace('`', '', $table));
+    $bits = explode('.', str_replace($this->qte, '', $table));
     if ( \count($bits) === 3 ){
       $db = trim($bits[0]);
       $table = trim($bits[1]);
@@ -143,7 +182,7 @@ class mysql implements bbn\db\engines
       $table = trim($bits[0]);
     }
     if ( bbn\str::check_name($db, $table) ){
-      return $escaped ? '`'.$db.'`.`'.$table.'`' : $db.'.'.$table;
+      return $escaped ? $this->qte.$db.$this->qte.'.'.$this->qte.$table.$this->qte : $db.'.'.$table;
     }
 		return null;
 	}
@@ -157,8 +196,8 @@ class mysql implements bbn\db\engines
 	 */
   public function table_simple_name(string $table, bool $escaped = false): ?string
   {
-    if ( \is_string($table) && ($table = trim($table)) ){
-      $bits = explode('.', str_replace('`', '', $table));
+    if ( $table = trim($table) ){
+      $bits = explode('.', str_replace($this->qte, '', $table));
       switch ( \count($bits) ){
         case 1:
           $table = $bits[0];
@@ -171,7 +210,7 @@ class mysql implements bbn\db\engines
           break;
       }
       if ( bbn\str::check_name($table) ){
-        return $escaped ? '`'.$table.'`' : $table;
+        return $escaped ? $this->qte.$table.$this->qte : $table;
       }
     }
 		return null;
@@ -187,20 +226,19 @@ class mysql implements bbn\db\engines
 	 */
   public function col_full_name(string $col, $table = null, $escaped = false): ?string
   {
-    if ( \is_string($col) && ($col = trim($col)) ){
-      $bits = explode('.', str_replace('`', '', $col));
+    if ( $col = trim($col) ){
+      $bits = explode('.', str_replace($this->qte, '', $col));
       $ok = null;
-      if ( \count($bits) > 1 ){
-        $col = array_pop($bits);
+      $col = array_pop($bits);
+      if ( $table && ($table = $this->table_simple_name($table)) ){
+        $ok = 1;
+      }
+      else if ( \count($bits) ){
         $table = array_pop($bits);
         $ok = 1;
       }
-      else if ( $table = $this->table_simple_name($table) ){
-        $col = end($bits);
-        $ok = 1;
-      }
-      if ( ($ok !== null) && bbn\str::check_name($table, $col) ){
-        return $escaped ? '`'.$table.'`.`'.$col.'`' : $table.'.'.$col;
+      if ( (null !== $ok) && bbn\str::check_name($table, $col) ){
+        return $escaped ? $this->qte.$table.$this->qte.'.'.$this->qte.$col.$this->qte : $table.'.'.$col;
       }
     }
 		return null;
@@ -211,15 +249,15 @@ class mysql implements bbn\db\engines
 	 *
 	 * @param string $col The column's name (escaped or not)
 	 * @param bool $escaped If set to true the returned string will be escaped
-	 * @return string | false
+	 * @return null|string
 	 */
-  public function col_simple_name($col, $escaped = false)
+  public function col_simple_name(string $col, bool $escaped=false): ?string
   {
-    if ( \is_string($col) && ($col = trim($col)) ){
-      $bits = explode('.', str_replace('`', '', $col));
+    if ( $col = trim($col) ){
+      $bits = explode('.', str_replace($this->qte, '', $col));
       $col = end($bits);
       if ( bbn\str::check_name($col) ){
-        return $escaped ? '`'.$col.'`' : $col;
+        return $escaped ? $this->qte.$col.$this->qte : $col;
       }
     }
     return null;
@@ -240,7 +278,7 @@ class mysql implements bbn\db\engines
    */
   public function is_col_full_name(string $col): bool
   {
-    return strpos($col, '.') ? true : false;
+    return (bool)strpos($col, '.');
   }
 
   /**
@@ -458,16 +496,17 @@ MYSQL
    *
    * @param array $conditions
    * @param array $cfg
+   * @param bool $is_having
    * @return string
    */
-  public function get_conditions(array $conditions, array $cfg = []): string
+  public function get_conditions(array $conditions, array $cfg = [], bool $is_having = false): string
   {
     $res = '';
     if ( isset($conditions['conditions'], $conditions['logic']) ){
       $logic = isset($conditions['logic']) && ($conditions['logic'] === 'OR') ? 'OR' : 'AND';
       foreach ( $conditions['conditions'] as $key => $f ){
         if ( \is_array($f) && isset($f['logic']) && !empty($f['conditions']) ){
-          if ( $tmp = $this->get_conditions($f, $cfg) ){
+          if ( $tmp = $this->get_conditions($f, $cfg, $is_having) ){
             $res .= (empty($res) ? '(' : PHP_EOL."$logic ").$tmp;
           }
         }
@@ -495,7 +534,11 @@ MYSQL
                 );
             }
             else{
-              $res .= (empty($res) ? '(' : PHP_EOL."$logic ").$this->escape($field).' ';
+              // Remove the alias from where and join but not in having
+              if ( !$is_having && ($table === false) && isset($cfg['fields'][$field]) ){
+                $field = $cfg['fields'][$field];
+              }
+              $res .= (empty($res) ? '(' : PHP_EOL."$logic ").$field.' ';
             }
             if ( !empty($model) ){
               $is_null = (bool)$model['null'];
@@ -602,11 +645,11 @@ MYSQL
 
             /** @todo Check if it is working with an array */
             case 'isnull':
-              $res .= $is_null ? 'IS NULL' : " = ''";
+              $res .= 'IS NULL';
               break;
 
             case 'isnotnull':
-              $res .= $is_null ? 'IS NOT NULL' : " != ''";
+              $res .= 'IS NOT NULL';
               break;
 
             case 'isempty':
@@ -662,7 +705,7 @@ MYSQL
           if ( strpos($f, '(') ){
             $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '').$f.(\is_string($alias) ? ' AS '.$this->escape($alias) : '');
           }
-          else if ( isset($cfg['available_fields'][$f]) ){
+          else if ( array_key_exists($f, $cfg['available_fields']) ){
             $idx = $cfg['available_fields'][$f];
             $csn = $this->col_simple_name($f);
             $is_uid = false;
@@ -693,7 +736,7 @@ MYSQL
             $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '').$st;
           }
           else if ( isset($cfg['available_fields'][$f]) && ($cfg['available_fields'][$f] === false) ){
-            //$this->db->error("Error! The column '$f' exists on several tables in '".implode(', ', $cfg['tables']));
+            $this->db->error("Error! The column '$f' exists on several tables in '".implode(', ', $cfg['tables']));
           }
           else{
             $this->db->error("Error! The column '$f' doesn't exist in '".implode(', ', $cfg['tables']).' ('.implode(' - ', array_keys($cfg['available_fields'])).')');
@@ -871,9 +914,10 @@ MYSQL
       foreach ( $cfg['group_by'] as $g ){
         if ( isset($cfg['available_fields'][$g]) ){
           $group_to_put[] = $this->escape($g);
+          //$group_to_put[] = $this->col_full_name($g, $cfg['available_fields'][$g], true);
         }
         else{
-          $this->db->error("Error! The column '$g' doesn't exist for group by".print_r($cfg, true));
+          $this->db->error("Error! The column '$g' doesn't exist for group by ".print_r($cfg, true));
         }
       }
       if ( count($group_to_put) ){
@@ -892,7 +936,7 @@ MYSQL
   public function get_having(array $cfg): string
   {
     $res = '';
-    if ( !empty($cfg['group_by']) && !empty($cfg['having']) && ($cond = $this->get_conditions($cfg['having'], $cfg)) ){
+    if ( !empty($cfg['group_by']) && !empty($cfg['having']) && ($cond = $this->get_conditions($cfg['having'], $cfg, true)) ){
       $res .= 'HAVING '.$cond.PHP_EOL;
     }
     return $res;
@@ -907,13 +951,22 @@ MYSQL
     $res = '';
     if ( !empty($cfg['order']) ){
       foreach ( $cfg['order'] as $col => $dir ){
-        if ( \is_array($dir) && isset($dir['field'], $cfg['available_fields'][$dir['field']]) ){
-          $res .= $this->escape($dir['field']).' '.
-            (!empty($dir['dir']) && strtolower($dir['dir']) === 'desc' ? 'DESC' : 'ASC' ).','.PHP_EOL;
+        if ( \is_array($dir) && isset($dir['field']) ){
+          $col = $dir['field'];
+          $dir = $dir['dir'] ?? 'ASC';
         }
-        else if ( isset($cfg['available_fields'][$col]) ){
-          $res .= $this->escape($col).' '.
-            (strtolower($dir) === 'desc' ? 'DESC' : 'ASC' ).','.PHP_EOL;
+        if ( isset($cfg['available_fields'][$col]) ){
+          // If it's an alias we use the simple name
+          if ( isset($cfg['fields'][$col]) ){
+            $f = $this->col_simple_name($col, true);
+          }
+          else if ( $cfg['available_fields'][$col] === false ){
+            $f = $col;
+          }
+          else {
+            $f = $this->col_full_name($col, $cfg['available_fields'][$col], true);
+          }
+          $res .= $f.' '.(strtolower($dir) === 'desc' ? 'DESC' : 'ASC' ).','.PHP_EOL;
         }
       }
       if ( !empty($res) ){

@@ -672,75 +672,22 @@ class str
   }
 
   /**
-   * If it looks like an int or float type, the string variable is converted into the correct type.
+   * Checks if the string is a valid UID string.
    *
-   * ```php
-   * \bbn\x::dump(\bbn\str::correct_types(1230));
-   * // (int) 1230
-   * \bbn\x::dump(\bbn\str::correct_types(12.30));
-   * // (float) 12.3
-   * \bbn\x::dump(\bbn\str::correct_types("12.3"));
-   * // (float) 12.3
-   * \bbn\x::dump(\bbn\str::correct_types([1230]));
-   * // (int) [1230]
-   * ```
-   *
-   * @param mixed $st
-   * @return mixed
+   * @param string $st
+   * @return boolean
    */
-  public static function correct_types($st){
-    if ( \is_string($st) ){
-      if ( self::is_buid($st) ){
-        $st = bin2hex($st);
-      }
-      else{
-        $st = trim($st);
-        // Not starting with a zero or ending with a zero decimal
-        if ( !preg_match('/^0[^.]+|\.[0-9]*0$/', $st) ){
-          if ( self::is_integer($st) && ((substr((string)$st, 0, 1) !== '0') || ($st === '0')) ){
-            $tmp = (int)$st;
-            if ( ($tmp < PHP_INT_MAX) && ($tmp > -PHP_INT_MAX) ){
-              return $tmp;
-            }
-          }
-          // If it is a decimal, not starting or ending with a zero
-          else if ( self::is_decimal($st) ){
-            return (float)$st;
-          }
-        }
-      }
-    }
-    else if ( \is_array($st) ){
-      foreach ( $st as $k => $v ){
-        $st[$k] = self::correct_types($v);
-      }
-    }
-    else if ( \is_object($st) ){
-      $vs = get_object_vars($st);
-      foreach ( $vs as $k => $v ){
-        $st->$k = self::correct_types($v);
-      }
-    }
-    return $st;
-  }
-
-  /**
-  * Checks if the string is a valid UID string.
-  *
-  * @param string $st 
-  * @return boolean
-  */
   public static function is_uid($st): bool
   {
     return \is_string($st) && (\strlen($st) === 32) && ctype_xdigit($st);// && !mb_detect_encoding($st);
   }
 
   /**
-  * Checks if the string is a valid binary UID string.
-  *
-  * @param string $st
-  * @return boolean
-  */
+   * Checks if the string is a valid binary UID string.
+   *
+   * @param string $st
+   * @return boolean
+   */
   public static function is_buid($st): bool
   {
     if ( \is_string($st) && (\strlen($st) === 16) && !ctype_print($st) && !ctype_space($st) ){
@@ -817,6 +764,124 @@ class str
       }
       return $isValid;
     }
+  }
+
+  /**
+   * Checks if the argument is a valid URL string.
+   *
+   * ```php
+   * \bbn\x::dump(\bbn\str::is_url("http://bbn.so"));
+   * // (string) "https://bbn.so"
+   *
+   * \bbn\x::dump(\bbn\str::is_url("bbn.so"));
+   * // (bool) false
+   * ```
+   *
+   * @param string $st The string to perform
+   * @return string|false
+   */
+  public static function is_url($st){
+    return filter_var($st, FILTER_VALIDATE_URL);
+  }
+
+  /**
+   * Checks if the argument is a valid domain name.
+   *
+   * ```php
+   * \bbn\x::dump(\bbn\str::is_domain("http://bbn.so"));
+   * // (string) false
+   *
+   * \bbn\x::dump(\bbn\str::is_domain("bbn.so"));
+   * // (bool) true
+   * ```
+   *
+   * @param string $st The string to perform
+   * @return bool
+   */
+  public static function is_domain($st): bool
+  {
+    return (preg_match("/^([a-z\d](-*[a-z\d])*)(\.([a-z\d](-*[a-z\d])*))*$/i", $st) //valid chars check
+      && preg_match("/^.{1,253}$/", $st) //overall length check
+      && preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $st)   ); //length of each label
+  }
+
+  public static function is_ip($st): bool
+  {
+    $valid = filter_var($st, FILTER_VALIDATE_IP);
+    return $valid;
+  }
+
+  /**
+   * Checks if the argument is in a valid SQL date format.
+   *
+   * ```php
+   * \bbn\x::dump(\bbn\str::is_date_sql("1999-12-05 11:10:22"));
+   * // (bool) true
+   * \bbn\x::dump(\bbn\str::is_date_sql("1999-12-05"));
+   * // (bool) true
+   * \bbn\x::dump(\bbn\str::is_date_sql("19-12-1999"));
+   * // (bool) false
+   * ```
+   *
+   * @param string $st
+   * @return bool
+   */
+  public static function is_date_sql($st): bool
+  {
+    return date::validateSQL($st);
+  }
+
+  /**
+   * If it looks like an int or float type, the string variable is converted into the correct type.
+   *
+   * ```php
+   * \bbn\x::dump(\bbn\str::correct_types(1230));
+   * // (int) 1230
+   * \bbn\x::dump(\bbn\str::correct_types(12.30));
+   * // (float) 12.3
+   * \bbn\x::dump(\bbn\str::correct_types("12.3"));
+   * // (float) 12.3
+   * \bbn\x::dump(\bbn\str::correct_types([1230]));
+   * // (int) [1230]
+   * ```
+   *
+   * @param mixed $st
+   * @return mixed
+   */
+  public static function correct_types($st){
+    if ( \is_string($st) ){
+      if ( self::is_buid($st) ){
+        $st = bin2hex($st);
+      }
+      else{
+        $st = trim($st);
+        // Not starting with a zero or ending with a zero decimal
+        if ( !preg_match('/^0[^.]+|\.[0-9]*0$/', $st) ){
+          if ( self::is_integer($st) && ((substr((string)$st, 0, 1) !== '0') || ($st === '0')) ){
+            $tmp = (int)$st;
+            if ( ($tmp < PHP_INT_MAX) && ($tmp > -PHP_INT_MAX) ){
+              return $tmp;
+            }
+          }
+          // If it is a decimal, not starting or ending with a zero
+          else if ( self::is_decimal($st) ){
+            return (float)$st;
+          }
+        }
+      }
+    }
+    else if ( \is_array($st) ){
+      foreach ( $st as $k => $v ){
+        $st[$k] = self::correct_types($v);
+      }
+    }
+    else if ( \is_object($st) ){
+      $vs = get_object_vars($st);
+      foreach ( $vs as $k => $v ){
+        $st->$k = self::correct_types($v);
+      }
+    }
+    return $st;
   }
 
   /**
@@ -1182,8 +1247,8 @@ class str
         $st .= ','.PHP_EOL;
       }
       $st .= str_repeat($space, $lev-1);
-      //$st .= $is_assoc ? '}' : ']';
-      $st .= \is_object($o) ? '}' : ']';
+      $st .= $is_assoc ? '}' : ']';
+      //$st .= \is_object($o) ? '}' : ']';
       return $st;
     }
     return $o;
@@ -1211,65 +1276,6 @@ class str
       return substr_replace($subject, $replace, $pos, \strlen($search));
     }
     return $subject;
-  }
-
-  /**
-   * Checks if the argument is a valid URL string.
-   *
-   * ```php
-   * \bbn\x::dump(\bbn\str::is_url("http://bbn.so"));
-   * // (string) "https://bbn.so"
-   *
-   * \bbn\x::dump(\bbn\str::is_url("bbn.so"));
-   * // (bool) false
-   * ```
-   *
-   * @param string $st The string to perform
-   * @return string|false
-   */
-  public static function is_url($st){
-    return filter_var($st, FILTER_VALIDATE_URL);
-  }
-
-  /**
-   * Checks if the argument is a valid domain name.
-   *
-   * ```php
-   * \bbn\x::dump(\bbn\str::is_domain("http://bbn.so"));
-   * // (string) false
-   *
-   * \bbn\x::dump(\bbn\str::is_domain("bbn.so"));
-   * // (bool) true
-   * ```
-   *
-   * @param string $st The string to perform
-   * @return bool
-   */
-  public static function is_domain($st): bool
-  {
-    return (preg_match("/^([a-z\d](-*[a-z\d])*)(\.([a-z\d](-*[a-z\d])*))*$/i", $st) //valid chars check
-      && preg_match("/^.{1,253}$/", $st) //overall length check
-      && preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $st)   ); //length of each label
-  }
-
-  /**
-   * Checks if the argument is in a valid SQL date format.
-   *
-   * ```php
-   * \bbn\x::dump(\bbn\str::is_date_sql("1999-12-05 11:10:22"));
-   * // (bool) true
-   * \bbn\x::dump(\bbn\str::is_date_sql("1999-12-05"));
-   * // (bool) true
-   * \bbn\x::dump(\bbn\str::is_date_sql("19-12-1999"));
-   * // (bool) false
-   * ```
-   *
-   * @param string $st
-   * @return bool
-   */
-  public static function is_date_sql($st): bool
-  {
-    return date::validateSQL($st);
   }
 
   /**

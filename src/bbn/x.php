@@ -122,11 +122,15 @@ class x
           $r = [];
         }
         $t = date('Y-m-d H:i:s');
+        if ( class_exists('\\bbn\\mvc') ){
+          $mvc = mvc::get_instance();
+        }
         $idx = self::find($r, [
           'type' => $errno,
           'error' => $errstr,
           'file' => $errfile,
-          'line' => $errline
+          'line' => $errline,
+          'request' => ''
         ]);
         if ( $idx !== false ){
           $r[$idx]['count']++;
@@ -142,7 +146,8 @@ class x
             'error' => $errstr,
             'file' => $errfile,
             'line' => $errline,
-            'backtrace' => $backtrace
+            'backtrace' => $backtrace,
+            'request' => ''
             //'context' => $context
           ];
         }
@@ -682,7 +687,7 @@ class x
     if (!\is_array($ar) || \count($ar) == 0) return false;
     $max = current($ar)[$key];
     foreach ( $ar as $a ){
-      if ( is_float($a['$key']) || is_float($max) ){
+      if ( is_float($a[$key]) || is_float($max) ){
         if ( self::compare_floats($a[$key], $max, '>') ){
           $max = $a[$key];
         }
@@ -825,13 +830,13 @@ class x
       $is_false = $a === false;
       $r = $fn($a);
       if ( $is_false ){
-        array_push($res, $r);
+        $res[] = $r;
       }
       else if ( $r !== false ){
         if ( \is_array($r) && $items && isset($r[$items]) && \is_array($r[$items]) ){
           $r[$items] = self::map($fn, $r[$items], $items);
         }
-        array_push($res, $r);
+        $res[] = $r;
       }
     }
     return $res;

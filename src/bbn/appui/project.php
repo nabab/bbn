@@ -269,7 +269,7 @@ class project extends bbn\models\cls\db {
         }
         else if( !empty($cats[$a['id_alias']]['extensions']) ){
           $r[$k]['extensions'] = $cats[$a['id_alias']]['extensions'];
-        }        
+        }
         unset($r[$k]['alias']);
       }
     }
@@ -295,7 +295,7 @@ class project extends bbn\models\cls\db {
       ){
         $repository = $i;
       }
-    }
+    }    
     if ( !empty($repository) ){
       return empty($obj) ? $repository : $repositories[$repository];
     }

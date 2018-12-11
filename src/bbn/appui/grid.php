@@ -60,7 +60,12 @@ class grid extends bbn\models\cls\cache
   private $cache_uid;
 
   /**
-   * @var float The last time that the data query took
+   * @var float The last time that the count query took place
+   */
+  private $count_time = 0;
+
+  /**
+   * @var float The last time that the data query took place
    */
   private $query_time = 0;
 
@@ -76,7 +81,7 @@ class grid extends bbn\models\cls\cache
    * @param string|array $cfg Original table configuration (server side)
    */
   public function __construct(bbn\db $db, array $post, $cfg){
-    
+
     // We inherit db and cacher properties
     parent::__construct($db);
     // Simple configuration using just a string with the table
@@ -98,7 +103,6 @@ class grid extends bbn\models\cls\cache
         'start' => $post['start'] ?? 0,
         'where' => !empty($post['filters']) && !empty($post['filters']['conditions']) ? $post['filters'] : []
       ];
-
       // Adding all the fields if fields is empty
       if ( empty($db_cfg['tables']) ){
         $this->log(['NO TABLES!', $db_cfg]);
@@ -115,7 +119,7 @@ class grid extends bbn\models\cls\cache
       // For the server config both properties where and filters are accepted (backward compatibility)
       if ( empty($cfg['filters']) && !empty($cfg['where']) ){
         $cfg['filters'] = $cfg['where'];
-       
+
       }
       // The (pre)filters set server-side are mandatory and are added to the client-side filters if any
       if ( !empty($cfg['filters']) ){
@@ -221,7 +225,12 @@ class grid extends bbn\models\cls\cache
       $this->chrono->start();
       if ( $this->query ){
         $this->sql = $this->get_query();
-        $q = $this->db->query($this->sql, $this->cfg['values'] ?: []);
+        $q = $this->db->query($this->sql, !empty($this->cfg['values']) ? array_map(function($v){
+          if ( \bbn\str::is_uid($v) ){
+            return hex2bin($v);
+          }
+          return $v;
+        }, $this->cfg['values']) : []);
         $rows = $q->get_rows();
       }
       else {
@@ -236,7 +245,7 @@ class grid extends bbn\models\cls\cache
   }
 
   public function get_total($force = false) : ?int
-  {    
+  {
     if ( $this->num && !$force ){
       return $this->num;
     }
@@ -248,8 +257,15 @@ class grid extends bbn\models\cls\cache
     if ( $this->count ){
       $this->chrono->start();
       $this->num = $this->db->get_one(
-        $this->count,
-        $this->cfg['values'] ?: []
+        $this->count.PHP_EOL.
+          $this->db->get_where($this->cfg).
+          $this->db->get_group_by($this->cfg),
+        !empty($this->cfg['values']) ? array_map(function($v){
+          if ( \bbn\str::is_uid($v) ){
+            return hex2bin($v);
+          }
+          return $v;
+        }, $this->cfg['values']) : []
       );
       $this->count_time = $this->chrono->measure();
       $this->chrono->stop();
@@ -287,7 +303,7 @@ class grid extends bbn\models\cls\cache
     }
   }
 
-  public function get_datatable(): array
+  public function get_datatable($force = false): array
   {
     $r = [
       'data' => [],
@@ -297,7 +313,7 @@ class grid extends bbn\models\cls\cache
       'time' => []
     ];
     if ( $this->check() ){
-      if ( $total = $this->get_total() ){
+      if ( $total = $this->get_total($force) ){
         if ( $this->cfg['start'] ){
           $r['start'] = $this->cfg['start'];
         }

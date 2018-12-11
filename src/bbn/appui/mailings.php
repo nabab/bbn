@@ -88,8 +88,9 @@ class mailings
     $med = [];
     if ( $files = $this->_note()->get_medias($id, $version) ){
       foreach ( $files as $f ){
-        if ( is_file(BBN_DATA_PATH.$f['file']) ){
-          array_push($med, BBN_DATA_PATH.$f['file']);
+        $t = $f['title'] ?: $f['name'];
+        if ( is_file(BBN_DATA_PATH.$f['file']) && !\array_key_exists($t) ){
+          $med[$t] = BBN_DATA_PATH.$f['file'];
         }
       }
     }

@@ -58,6 +58,7 @@ class tasks extends bbn\models\cls\db{
         }
         return $a;
       }, $cats, 1);
+      \bbn\x::sort_by($res, 'text', 'ASC');
       return $res;
     }
     return false;

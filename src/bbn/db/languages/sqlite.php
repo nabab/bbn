@@ -14,8 +14,7 @@ use bbn;
  * @since Apr 4, 2011, 23:23:55 +0000
  * @category  Database
  * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @version 0.3
- * @todo Finishing the get_where method and implement it in all the get functions
+ * @version 0.4
  */
 class sqlite implements bbn\db\engines
 {
@@ -27,6 +26,9 @@ class sqlite implements bbn\db\engines
 
 	/** @var array Numeric column types */
   public static $numeric_types = ['integer', 'numeric', 'real'];
+
+  /** @var array Time and date column types don't exist in SQLite */
+  public static $date_types = [];
 
   /** @var string The quote character */
   public $qte = '"';
@@ -62,7 +64,7 @@ class sqlite implements bbn\db\engines
     if ( !isset($cfg['db']) && \defined('BBN_DATABASE') ){
       $cfg['db'] = BBN_DATABASE;
     }
-    if ( isset($cfg['db']) && \strlen($cfg['db']) > 1 ){
+    if ( !empty($cfg['db']) && \is_string($cfg['db']) ){
       if ( is_file($cfg['db']) ){
         $info = pathinfo($cfg['db']);
         $cfg['host'] = $info['dirname'].DIRECTORY_SEPARATOR;
@@ -107,7 +109,7 @@ class sqlite implements bbn\db\engines
       $db .= '.sqlite';
     }
     $info = pathinfo($db);
-    if ( ( $info['filename'] !== $this->db->current ) && file_exists($this->db->host.$db) && strpos($db, "'") === false ){
+    if ( ( $info['filename'] !== $this->db->current ) && file_exists($this->db->host.$db) && strpos($db, $this->qte) === false ){
       $this->db->raw_query("ATTACH '".$this->db->host.$db."' AS ".$info['filename']);
       return true;
     }
@@ -128,7 +130,7 @@ class sqlite implements bbn\db\engines
       if ( !bbn\str::check_name($m) ){
         return false;
       }
-      $r[] = '"'.$m.'"';
+      $r[] = $this->qte.$m.$this->qte;
     }
     return implode('.', $r);
 	}
@@ -142,7 +144,7 @@ class sqlite implements bbn\db\engines
 	 */
 	public function table_full_name(string $table, bool $escaped = false): ?string
 	{
-    $bits = explode('.', str_replace('"', '', $table));
+    $bits = explode('.', str_replace($this->qte, '', $table));
     if ( \count($bits) === 2 ){
       $db = trim($bits[0]);
       $table = trim($bits[1]);
@@ -153,9 +155,9 @@ class sqlite implements bbn\db\engines
     }
     if ( bbn\str::check_name($db, $table) ){
       if ( $db === 'main' ){
-        return $escaped ? '"'.$table.'"' : $table;
+        return $escaped ? $this->qte.$table.$this->qte : $table;
       }
-      return $escaped ? '"'.$db.'"."'.$table.'"' : $db.'.'.$table;
+      return $escaped ? $this->qte.$db.$this->qte.'.'.$this->qte.$table.$this->qte : $db.'.'.$table;
     }
 		return null;
 	}
@@ -169,11 +171,11 @@ class sqlite implements bbn\db\engines
 	 */
   public function table_simple_name(string $table, bool $escaped = false): ?string
   {
-    if ( \is_string($table) && ($table = trim($table)) ){
-      $bits = explode('.', str_replace('"', '', $table));
+    if ( $table = trim($table) ){
+      $bits = explode('.', str_replace($this->qte, '', $table));
       $table = end($bits);
       if ( bbn\str::check_name($table) ){
-        return $escaped ? '"'.$table.'"' : $table;
+        return $escaped ? $this->qte.$table.$this->qte : $table;
       }
     }
 		return false;
@@ -189,16 +191,14 @@ class sqlite implements bbn\db\engines
 	 */
   public function col_full_name(string $col, $table = null, $escaped = false): ?string
   {
-    if ( \is_string($col) && ($col = trim($col)) ){
-      $bits = explode('.', str_replace('"', '', $col));
+    if ( $col = trim($col) ){
+      $bits = explode('.', str_replace($this->qte, '', $col));
       $ok = null;
-      if ( null !== $table ){
-        $table = $this->table_simple_name($table);
-        $col = end($bits);
+      $col = array_pop($bits);
+      if ( $table && ($table = $this->table_simple_name($table)) ){
         $ok = 1;
       }
-      else if ( \count($bits) > 1 ){
-        $col = array_pop($bits);
+      else if ( \count($bits) ){
         $table = array_pop($bits);
         $ok = 1;
       }
@@ -206,7 +206,7 @@ class sqlite implements bbn\db\engines
         return $escaped ? '"'.$table.'"."'.$col.'"' : $table.'.'.$col;
       }
     }
-		return false;
+		return null;
   }
 
 	/**
@@ -218,21 +218,29 @@ class sqlite implements bbn\db\engines
 	 */
   public function col_simple_name(string $col, bool $escaped=false): ?string
   {
-    if ( \is_string($col) && ($col = trim($col)) ){
-      $bits = explode('.', str_replace('"', '', $col));
+    if ( $col = trim($col) ){
+      $bits = explode('.', str_replace($this->qte, '', $col));
       $col = end($bits);
       if ( bbn\str::check_name($col) ){
-        return $escaped ? '"'.$col.'"' : $col;
+        return $escaped ? $this->qte.$col.$this->qte : $col;
       }
     }
-    return false;
+    return null;
   }
 
+  /**
+   * @param string $table
+   * @return bool
+   */
   public function is_table_full_name(string $table): bool
   {
     return true;
   }
 
+  /**
+   * @param string $col
+   * @return bool
+   */
   public function is_col_full_name(string $col): bool
   {
     return (bool)strpos($col, '.');
@@ -412,16 +420,17 @@ class sqlite implements bbn\db\engines
    *
    * @param array $conditions
    * @param array $cfg
+   * @param bool $is_having
    * @return string
    */
-  public function get_conditions(array $conditions, array $cfg = []): string
+  public function get_conditions(array $conditions, array $cfg = [], bool $is_having = false): string
   {
     $res = '';
     if ( isset($conditions['conditions'], $conditions['logic']) ){
       $logic = isset($conditions['logic']) && ($conditions['logic'] === 'OR') ? 'OR' : 'AND';
       foreach ( $conditions['conditions'] as $key => $f ){
         if ( \is_array($f) && isset($f['logic']) && !empty($f['conditions']) ){
-          if ( $tmp = $this->get_conditions($f, $cfg) ){
+          if ( $tmp = $this->get_conditions($f, $cfg, $is_having) ){
             $res .= (empty($res) ? '(' : PHP_EOL."$logic ").$tmp;
           }
         }
@@ -433,6 +442,7 @@ class sqlite implements bbn\db\engines
           $is_number = false;
           $is_null = true;
           $is_uid = false;
+          $is_date = false;
           $model = null;
           if ( isset($cfg['available_fields'][$field]) ){
             $table = $cfg['available_fields'][$field];
@@ -442,13 +452,13 @@ class sqlite implements bbn\db\engines
               $res .= (empty($res) ?
                   '(' :
                   " $logic ").(
-                isset($cfg['available_fields'][$field]) ?
-                  $this->col_full_name($field, $cfg['available_fields'][$field], true).' ' :
+                !empty($cfg['available_fields'][$field]) ?
+                  $this->col_full_name($cfg['fields'][$field] ?? $field, $cfg['available_fields'][$field], true).' ' :
                   $this->col_simple_name($column, true)
                 );
             }
             else{
-              $res .= (empty($res) ? '(' : PHP_EOL."$logic ").$this->escape($field).' ';
+              $res .= (empty($res) ? '(' : PHP_EOL."$logic ").$field.' ';
             }
             if ( !empty($model) ){
               $is_null = (bool)$model['null'];
@@ -461,21 +471,28 @@ class sqlite implements bbn\db\engines
               else if ( \in_array($model['type'], self::$numeric_types, true) ){
                 $is_number = true;
               }
+              else if ( \in_array($model['type'], self::$date_types, true) ){
+                $is_date = true;
+              }
             }
           }
           else{
-            $res .= (empty($res) ? '(' : " $logic ").$this->escape($field).' ';
+            $res .= (empty($res) ? '(' : " $logic ").$field.' ';
           }
-          switch ( $f['operator'] ){
+          switch ( strtolower($f['operator']) ){
+            case 'like':
+              $res .= 'LIKE ?';
+              break;
+            case 'not like':
+              $res .= 'NOT LIKE ?';
+              break;
             case 'eq':
             case '=':
+            case 'is':
               if ( isset($f['exp']) ){
                 $res .= '= '.$f['exp'];
               }
-              else if ( $is_uid ){
-                $res .= '= X\'?\'';
-              }
-              else if ( $is_number ){
+              else if ( $is_uid || $is_number ){
                 $res .= '= ?';
               }
               else{
@@ -484,13 +501,11 @@ class sqlite implements bbn\db\engines
               break;
             case 'neq':
             case '!=':
+            case 'isnot':
               if ( isset($f['exp']) ){
                 $res .= '!= '.$f['exp'];
               }
-              else if ( $is_uid ){
-                $res .= '!= X\'?\'';
-              }
-              else if ( $is_number ){
+              else if ( $is_uid || $is_number ){
                 $res .= '!= ?';
               }
               else{
@@ -498,12 +513,14 @@ class sqlite implements bbn\db\engines
               }
               break;
 
-            case 'startswith':
-              $res .= 'LIKE ?';
+            case 'doesnotcontains':
+              $res .= 'NOT LIKE '.($f['exp'] ?? '?');
               break;
 
             case 'endswith':
-              $res .= 'LIKE ?';
+            case 'startswith':
+            case 'contains':
+              $res .= 'LIKE '.($f['exp'] ?? '?');
               break;
 
             case 'gte':
@@ -592,13 +609,7 @@ class sqlite implements bbn\db\engines
     $res = '';
     if ( \is_array($cfg['tables']) && !empty($cfg['tables']) ){
       $res = 'SELECT ';
-      if ( !empty($cfg['count']) ){
-        $res .= 'COUNT(';
-      }
-      if ( empty($cfg['fields']) ){
-        $res .= '* ';
-      }
-      else{
+      if ( !empty($cfg['fields']) ){
         $fields_to_put = [];
         // Checking the selected fields
         foreach ( $cfg['fields'] as $alias => $f ){
@@ -612,7 +623,7 @@ class sqlite implements bbn\db\engines
           }
           // Adding the alias in $fields
           if ( strpos($f, '(') ){
-            $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '').$f.(\is_string($alias) ? ' AS '.$alias : '');
+            $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '').$f.(\is_string($alias) ? ' AS '.$this->escape($alias) : '');
           }
           else if ( !empty($cfg['available_fields'][$f]) ){
             $idx = $cfg['available_fields'][$f];
@@ -632,11 +643,15 @@ class sqlite implements bbn\db\engines
             if ( $is_uid ){
               $st = 'LOWER(HEX('.$this->col_full_name($csn, $cfg['available_fields'][$f], true).'))';
             }
+            // For JSON fields
+            else if ( $cfg['available_fields'][$f] === false ){
+              $st = $f;
+            }
             else{
               $st = $this->col_full_name($csn, $cfg['available_fields'][$f], true);
             }
             if ( \is_string($alias) ){
-              $st .= ' AS '.$alias;
+              $st .= ' AS '.$this->escape($alias);
             }
             $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '').$st;
           }
@@ -644,19 +659,17 @@ class sqlite implements bbn\db\engines
             $this->db->error("Error! The column '$f' exists on several tables in '".implode(', ', $cfg['tables']));
           }
           else{
-            $this->db->error("Error! The column '$f' doesn't exist in '".implode(', ', $cfg['tables']));
+            $this->db->error("Error! The column '$f' doesn't exist in '".implode(', ', $cfg['tables']).' ('.implode(' - ', array_keys($cfg['available_fields'])).')');
           }
         }
-        $res .= implode(', ', $fields_to_put).PHP_EOL;
+        $res .= implode(', ', $fields_to_put);
       }
-      if ( !empty($cfg['count']) ){
-        $res .= ') AS num'.PHP_EOL;
-      }
+      $res .= PHP_EOL;
       $tables_to_put = [];
       foreach ( $cfg['tables'] as $alias => $tfn ){
         $st = $this->table_full_name($tfn, true);
         if ( $alias !== $tfn ){
-          $st .= ' AS '.$alias;
+          $st .= ' AS '.$this->escape($alias);
         }
         $tables_to_put[] = $st;
       }
@@ -783,7 +796,7 @@ class sqlite implements bbn\db\engines
           $res .=
             (isset($join['type']) && ($join['type'] === 'left') ? 'LEFT ' : '').
             'JOIN '.$this->table_full_name($join['table'],true).
-            (!empty($join['alias']) ? ' AS '.$join['alias'] : '').PHP_EOL.'ON '.$cond;
+            (!empty($join['alias']) ? ' AS '.$this->escape($join['alias']) : '').PHP_EOL.'ON '.$cond;
         }
       }
     }
@@ -798,7 +811,7 @@ class sqlite implements bbn\db\engines
    */
   public function get_where(array $cfg): string
   {
-    $res = $this->get_conditions($cfg['filters'] ?: [], $cfg);
+    $res = $this->get_conditions($cfg['filters'] ?? [], $cfg);
     if ( !empty($res) ){
       $res = 'WHERE '.$res;
     }
@@ -818,17 +831,15 @@ class sqlite implements bbn\db\engines
     if ( !empty($cfg['group_by']) ){
       foreach ( $cfg['group_by'] as $g ){
         if ( isset($cfg['available_fields'][$g]) ){
-          $group_to_put[] = $this->col_full_name($g, $cfg['available_fields'][$g], true);
+          $group_to_put[] = $this->escape($g);
+          //$group_to_put[] = $this->col_full_name($g, $cfg['available_fields'][$g], true);
         }
         else{
-          $this->db->error("Error! The column '$g' doesn't exist for group by");
+          $this->db->error("Error! The column '$g' doesn't exist for group by ".print_r($cfg, true));
         }
       }
       if ( count($group_to_put) ){
         $res .= 'GROUP BY '.implode(', ', $group_to_put).PHP_EOL;
-        if ( !empty($cfg['having']) ){
-          $res .= 'HAVING '.$this->get_conditions($cfg['having'], $cfg);
-        }
       }
     }
     return $res;
@@ -843,8 +854,8 @@ class sqlite implements bbn\db\engines
   public function get_having(array $cfg): string
   {
     $res = '';
-    if ( !empty($cfg['group_by']) && !empty($cfg['having']) && ($cond = $this->get_conditions($cfg['having'])) ){
-      $res .= PHP_EOL.'HAVING '.$cond;
+    if ( !empty($cfg['group_by']) && !empty($cfg['having']) && ($cond = $this->get_conditions($cfg['having'], $cfg, true)) ){
+      $res .= 'HAVING '.$cond.PHP_EOL;
     }
     return $res;
   }
@@ -858,13 +869,17 @@ class sqlite implements bbn\db\engines
     $res = '';
     if ( !empty($cfg['order']) ){
       foreach ( $cfg['order'] as $col => $dir ){
-        if ( isset($cfg['available_fields'][$col]) ){
+        if ( \is_array($dir) && isset($dir['field'], $cfg['available_fields'][$dir['field']]) ){
+          $res .= $this->escape($dir['field']).' COLLATE NOCASE '.
+            (!empty($dir['dir']) && strtolower($dir['dir']) === 'desc' ? 'DESC' : 'ASC' ).','.PHP_EOL;
+        }
+        else if ( isset($cfg['available_fields'][$col]) ){
           $res .= $this->escape($col).' COLLATE NOCASE '.
             (strtolower($dir) === 'desc' ? 'DESC' : 'ASC' ).','.PHP_EOL;
         }
       }
       if ( !empty($res) ){
-        return 'ORDER BY '.substr($res,0, strrpos($res,','));
+        return 'ORDER BY '.substr($res,0, strrpos($res,',')).PHP_EOL;
       }
     }
     return $res;
@@ -879,31 +894,26 @@ class sqlite implements bbn\db\engines
   public function get_limit(array $cfg): string
   {
     $res = '';
-    if ( $cfg['limit'] && bbn\str::is_integer($cfg['limit']) ){
-      $res .= 'LIMIT '.(bbn\str::is_integer($cfg['start']) ? (string)$cfg['start'] : '0').', '.$cfg['limit'];
+    if ( !empty($cfg['limit']) && bbn\str::is_integer($cfg['limit']) ){
+      $res .= 'LIMIT '.(!empty($cfg['start']) && bbn\str::is_integer($cfg['start']) ? (string)$cfg['start'] : '0').', '.$cfg['limit'];
     }
     return $res;
   }
   
 	/**
-	 * @return null|string
+   * @param null|string $table The table for which to create the statement
+   * @return string
 	 */
 	public function get_create(string $table): string
 	{
-    if ( $table = $this->table_full_name($table) ){
-      if ( strpos($table, '.') ){
-        $t = explode('.', $table);
-        $database = $t[0];
-        $table = $t[1];
-      }
-      else{
-        $database = '';
-      }
-      return $this->db->get_one('
+    if ( \bbn\str::check_name($table) ){
+      return $this->db->get_one(<<<SQLITE
         SELECT "sql"
-        FROM '.$database.'"sqlite_master"
-          WHERE type = \'table\'
-          AND name = \''.$table.'\'');
+        FROM "sqlite_master"
+          WHERE type = 'table'
+          AND name = '$table'
+SQLITE
+);
 		}
 		return '';
 	}
