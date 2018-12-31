@@ -85,12 +85,35 @@ class config extends bbn\models\cls\basic
       $res = $this->get_dir();
     }
     else if ( $this->cfg['is_component'] && is_dir(BBN_PUBLIC.$this->cfg['url']) ){
+      //cpStart:
       $res = [];
       $this->cfg['num'] = 0;
-      foreach ( $this->cfg['components'] as $cp ){
-        $res[$cp] = $this->get_dir($this->cfg['url'].$cp);
-        foreach ( $res[$cp] as $type => $files ){
-          $this->cfg['num'] += \count($files);
+      foreach ( $this->cfg['components'] as $i => $cp ){
+        if ( !isset($res[$cp]) ){
+          $res[$cp] = $this->get_dir($this->cfg['url'].$cp);
+          if ( $res[$cp] ){
+            $dir = false;
+            foreach ( $res[$cp] as $type => $files ){
+              if ( !$dir && count($files) ){
+                $dir = BBN_PUBLIC.\dirname($files[0]);
+              }
+              $this->cfg['num'] += \count($files);
+            }
+            /*
+            if ( $dir && is_file($dir.'/bbn.json') ){
+              $json = json_decode(file_get_contents($dir.'/bbn.json'));
+              if ( isset($json->components) ){
+                foreach ( $json->components as $tmp ){
+                  if ( !isset($res[$tmp]) && !\in_array($tmp, $this->cfg['components'], true) ){
+                    $this->cfg['components'][] = $tmp;
+                    goto cpStart;
+                    break;
+                  }
+                }
+              }
+            }
+            */
+          }
         }
       }
     }

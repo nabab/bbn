@@ -353,13 +353,15 @@ class i18n extends bbn\models\cls\cache
         /** @var $to_explore the path to explore */
         $to_explore = constant($parent['code']);
         /** @var $locale_dir the path to locale dir */
-          if( $parent['code'] !== 'BBN_LIB_PATH'){
-						$locale_dir = $to_explore.'locale';
-					}
-					else{
-						$locale_dir = mb_substr(constant($parent['code']).$o['code'], 0,-4).'locale';
-
-					}
+       //exeption for apst_app, don't need the code
+       
+        if( (constant($parent['code']) === BBN_APP_PATH) && (strrpos('mvc/', $o['code'], 0) === 0) ) {
+          $locale_dir = $to_explore.'locale';
+        }
+        else{
+          $locale_dir = $to_explore.$o['code'].'locale';
+        }
+        
 
         $domain .= is_file($locale_dir.'/index.txt') ? file_get_contents($locale_dir.'/index.txt') : '';
 
@@ -536,7 +538,7 @@ class i18n extends bbn\models\cls\cache
 
       //creates the array $to_explore_dirs containing mvc, plugins e components
       if ( !empty($current_dirs) ){
-				foreach ($current_dirs as $key => $value) {
+        foreach ($current_dirs as $key => $value) {
           //if ( strpos($value, '.') !== 0 ){
           if( constant($parent['code']) === BBN_APP_PATH ){
             if (( strpos($value, 'locale') !== 0 ) && ( strpos($value, 'data') !== 0 ) && ( strpos($value, '.') !== 0 )){
@@ -682,14 +684,14 @@ class i18n extends bbn\models\cls\cache
       /** @var  $to_explore the path to explore */
       $to_explore = constant($parent['code']);
 
-      /** @var  $locale_dir locale dir in the path*/
-      if( $parent['code'] !== 'BBN_LIB_PATH'){
+       //exeption for apst_app, don't need the code
+      if( (constant($parent['code']) === BBN_APP_PATH) && (strrpos('mvc/', $o['code'], 0) === 0) ) {
         $locale_dir = $to_explore.'locale';
       }
       else{
-        $locale_dir = mb_substr(constant($parent['code']).$o['code'], 0,-4).'locale';
-
+        $locale_dir = $to_explore.$o['code'].'locale';
       }
+        
 
       $languages = array_map(function($a){
         return basename($a);
@@ -741,22 +743,23 @@ class i18n extends bbn\models\cls\cache
 
                   /** @var (array) takes $paths of files in which the string was found from the file po */
                   $paths = $t->getReference();
-
+                   
                   /** get the url to use it for the link to ide from the table */
                   foreach ( $paths as $p ){
-                    $po_file[$i][$lng]['paths'][] = $project->real_to_url($p);
+                    $po_file[$i][$lng]['paths'][] = $project->real_to_url_i18n($p);
                   }
                   /** the number of times the strings is found in the files of the path  */
                   $po_file[$i][$lng]['occurrence'] = !empty($po_file[$i][$path_source_lang]) ? count($po_file[$i][$path_source_lang]['paths']) : 0;
 
                 };
               }
+              
               $success = true;
             }
           }
         }
       }
-//\bbn\x::log( [$po_file, array_values($po_file)] , 'find_strings');
+      
       return [
         'path_source_lang' => $path_source_lang,
         'path' => $o['text'],

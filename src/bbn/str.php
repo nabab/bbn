@@ -854,6 +854,12 @@ class str
         $st = bin2hex($st);
       }
       else{
+        if ( self::is_json($st) ){
+          if ( strpos($st, '": ') && ($json = json_decode($st)) ){
+            return json_encode($json);
+          }
+          return $st;
+        }
         $st = trim($st);
         // Not starting with a zero or ending with a zero decimal
         if ( !preg_match('/^0[^.]+|\.[0-9]*0$/', $st) ){

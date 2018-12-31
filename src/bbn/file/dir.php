@@ -102,7 +102,7 @@ class dir extends bbn\models\cls\basic
     clearstatcache();
     if ( $dir === './' ){
       $dir = '.';
-    }
+		}
     if ( is_dir($dir) && (($dir === '.') || ((strpos(basename($dir), '.') !== 0) || $hidden)) ){
 			$dirs = [];
 			$fs = scandir($dir, SCANDIR_SORT_ASCENDING );

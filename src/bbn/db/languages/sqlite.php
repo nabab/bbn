@@ -475,6 +475,9 @@ class sqlite implements bbn\db\engines
                 $is_date = true;
               }
             }
+            else if ( $f['value'] && \bbn\str::is_uid($f['value']) ){
+              $is_uid = true;
+            }
           }
           else{
             $res .= (empty($res) ? '(' : " $logic ").$field.' ';

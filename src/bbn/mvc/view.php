@@ -106,12 +106,13 @@ class view{
           // Language variables inclusions in the javascript files
           if ( !empty($this->lang_file) ){
             $tmp = json_decode(file_get_contents($this->lang_file), true);
+            $path = $this->plugin ? substr($this->path, \strlen($this->plugin) + 1) : $this->path;
             //die(var_dump(count($tmp), 'components/'.$this->path.'/'.$this->path, $tmp));
-            if ( $translations = $tmp['mvc/'.$this->path] ?? ($tmp['components/'.$this->path] ?? null) ){
+            if ( $translations = $tmp['mvc/'.$path] ?? ($tmp['components/'.$path] ?? null) ){
               $json = json_encode($translations);
               $tmp = <<<JAVASCRIPT
 (() => {
-  $.extend(bbn.lng, $json)
+  bbn.fn.autoExtend("lng", $json)
 })();
 JAVASCRIPT;
               $this->content = $tmp.$this->content;

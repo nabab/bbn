@@ -316,22 +316,25 @@ JS;
                 $json = json_decode(file_get_contents($dep_path.'bower.json'), true);
               }
             }
-            if (
-              !empty($json) &&
-              !empty($json['dependencies']) &&
-              ($db = db::get_instance())
-            ){
-              $lib = new cdn\library($db, $this->cfg['lang'], true);
-              foreach ( $json['dependencies'] as $l => $version ){
-                $lib->add($l);
+            if ( !empty($json) ){
+              if ( !empty($json['dependencies']) &&
+                ($db = db::get_instance())
+              ){
+                $lib = new cdn\library($db, $this->cfg['lang'], true);
+                foreach ( $json['dependencies'] as $l => $version ){
+                  $lib->add($l);
+                }
+                if ( $cfg = $lib->get_config() ){
+                  if ( !empty($cfg['css']) ){
+                    $includes .= $this->cp->css_links($cfg['css'], $this->cfg['test']);
+                  }
+                  if ( !empty($cfg['js']) ){
+                    $includes .= $this->cp->js_links($cfg['js'], $this->cfg['test']);
+                  }
+                }
               }
-              if ( $cfg = $lib->get_config() ){
-                if ( !empty($cfg['css']) ){
-                  $includes .= $this->cp->css_links($cfg['css'], $this->cfg['test']);
-                }
-                if ( !empty($cfg['js']) ){
-                  $includes .= $this->cp->js_links($cfg['js'], $this->cfg['test']);
-                }
+              if ( !empty($json['components']) ){
+                /** @todo Add dependent components */
               }
             }
 

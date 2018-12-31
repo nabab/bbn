@@ -159,6 +159,10 @@ class mvc implements mvc\api{
     return $this->router->fetch_dir($dir, $mode);
   }
 
+  public function apply_locale($plugin){
+    return $this->router->apply_locale($plugin);
+  }
+
   public static function include_php_view($bbn_inc_file, $bbn_inc_content, array $bbn_inc_data = [])
   {
     $randoms = [];

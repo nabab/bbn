@@ -289,14 +289,15 @@ class project extends bbn\models\cls\db {
   public function repository_from_url(string $url, bool $obj = false){
     $repository = '';
     $repositories = $this->repositories();
+
     foreach ( $repositories as $i => $d ){
       if ( (strpos($url, $i) === 0) &&
         (\strlen($i) > \strlen($repository) )
       ){
         $repository = $i;
       }
-    }    
-    if ( !empty($repository) ){
+    }
+    if ( !empty($repository) ){    
       return empty($obj) ? $repository : $repositories[$repository];
     }
     return false;
@@ -309,14 +310,16 @@ class project extends bbn\models\cls\db {
    * @return bool|string
    */
   public function real_to_url(string $file){
+    
     foreach ( $this->repositories() as $i => $d ){
       if (
         // Repository's root path
         ($root = $this->get_root_path($d)) &&
         (strpos($file, $root) === 0)
       ){
-        $res = $i . '/';
+				$res = $i;
         $bits = explode('/', substr($file, \strlen($root)));
+        
         // MVC
         if ( !empty($d['tabs']) ){
           $tab_path = array_shift($bits);
@@ -337,6 +340,7 @@ class project extends bbn\models\cls\db {
         // Normal file
         else {
           $res .= implode('/', $bits);
+          
         }
         return \bbn\str::parse_path($res);
       }
@@ -344,6 +348,76 @@ class project extends bbn\models\cls\db {
     return false;
   }
 
+    public function real_to_url_i18n(string $file){
+    
+    foreach ( $this->repositories() as $i => $d ){
+     
+      if (
+        // Repository's root path
+        ($root = $this->get_root_path($d)) &&
+        (strpos($file, $root) === 0)
+      ){
+				$res = $i;
+				
+        if ( !empty( ( $parent_code = $this->options->code($d['id_parent']) )) ){
+					
+					$var = str_replace($root, '', $file);
+				  $ext = \bbn\str::file_ext($var);
+          
+					
+					if ( ( $parent_code === 'BBN_APP_PATH' ) ){
+								//eccezione per apst app che punta ancora su mvc
+						if ( strpos($res, 'mvc/') ){
+							$res = str_replace('mvc/', '', $res );
+						}
+						else if ( strpos($res, 'plugins/') ){
+							$res = $parent_code.'/';
+						}
+				    
+						$var = str_replace(constant($parent_code), '', $file);
+					}
+		
+					$bits = explode('/', $var);		
+					$name = str_replace('.'.$ext, '', array_pop($bits));
+
+					if ( (strpos($var, 'mvc') === 0) && ($bits[1] !== 'cli') || ( strpos($var, 'plugins') === 0 ) ){
+
+						$tab_path = $bits[1];
+						if( strpos($var, 'plugins') === 0 ){
+						 
+							$tab_path = $bits[2];
+							unset($bits[2]);
+						}
+						else{
+							$tab_path = $bits[1];
+							unset($bits[1]);
+						}
+						if ( $tab_path === 'html' ){
+							$ext = 'html';
+					  }
+						else if ( $tab_path === 'public' ){
+							$ext = 'php';
+						}
+						else if ( $tab_path === 'model' ){
+							$ext = 'model';
+						}
+						
+					}
+					else if ( (strpos($var, 'components') === 0) && ($ext !== 'js') ){
+						$ext = 'html';
+					}
+				 	
+					$res .= implode($bits, '/').'/'.$name.'/'.$ext;	
+
+			
+				}
+        
+				
+        return \bbn\str::parse_path($res);
+      }
+    }
+    return false;
+  }
 
 
 

@@ -445,7 +445,11 @@ class controller implements api{
 
 	public function has_been_rerouted(){
 	  return $this->is_rerouted;
-}
+  }
+
+  public function apply_locale($plugin){
+	  return $this->mvc->apply_locale($plugin);
+  }
 
 	/**
 	 * This will get a javascript view encapsulated in an anonymous function for embedding in HTML.

@@ -384,18 +384,8 @@ class router {
     }
     */
     if ( $file ){
-      if (
-        $plugin &&
-        \defined('BBN_LOCALE') &&
-        isset($this->routes['root'][$plugin]['name']) &&
-        is_dir($this->routes['root'][$plugin]['path'].'../src/locale')
-      ){
-        $lang_path = \dirname($this->routes['root'][$plugin]['path']).'/src/locale';
-        $textdomain = $this->routes['root'][$plugin]['name'].
-          (is_file($lang_path.'/index.txt') ? (string)file_get_contents($lang_path.'/index.txt') : '');
-        bindtextdomain($textdomain, $lang_path);
-        bind_textdomain_codeset($textdomain, 'UTF-8');
-        textdomain($textdomain);
+      if ( $plugin ){
+        $this->apply_locale($plugin);
       }
       return $this->set_known([
         'file' => $file,
@@ -409,6 +399,22 @@ class router {
     }
     // Aaaargh!
     //die(bbn\x::dump("No default file defined for mode $mode $tmp (and no 404 file either)"));
+  }
+
+  public function apply_locale(string $plugin){
+    if (
+      \defined('BBN_LOCALE') &&
+      isset($this->routes['root'][$plugin]['name']) &&
+      is_dir($this->routes['root'][$plugin]['path'].'../src/locale')
+    ){
+      $lang_path = \dirname($this->routes['root'][$plugin]['path']).'/src/locale';
+      $textdomain = $this->routes['root'][$plugin]['name'].
+        (is_file($lang_path.'/index.txt') ? (string)file_get_contents($lang_path.'/index.txt') : '');
+      bindtextdomain($textdomain, $lang_path);
+      bind_textdomain_codeset($textdomain, 'UTF-8');
+      textdomain($textdomain);
+      \bbn\x::log($textdomain, 'textdomain');
+    }
   }
 
   private function find_in_roots($path){
@@ -545,7 +551,7 @@ class router {
       }
       else if ( $root ){
         if ( strpos($mode, 'free-') === 0 ){
-          return  $this->find_mv($path, substr($mode, \strlen('free-')), $root);
+          return $this->find_mv($path, substr($mode, \strlen('free-')), $root);
         }
         return $this->find_alt_mv($path, $mode, $root);
       }
