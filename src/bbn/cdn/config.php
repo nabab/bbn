@@ -21,8 +21,7 @@ class config extends bbn\models\cls\basic
   /**
    * @var string
    */
-  protected static
-    $default_language = 'en';
+  protected static $default_language = 'en';
 
   /**
    * @var array
@@ -68,7 +67,7 @@ class config extends bbn\models\cls\basic
       unset($this->cfg['params']['d']);
     }
     // File
-    if ( !empty($this->cfg['ext']) && is_file(BBN_PUBLIC.$this->cfg['url']) ){
+    if ( !empty($this->cfg['ext']) && is_file($this->fpath.$this->cfg['url']) ){
       $res = $this->get_file();
     }
     // Preconfigured
@@ -76,15 +75,15 @@ class config extends bbn\models\cls\basic
       $res = $this->get_preconfig();
     }
     // List of files
-    else if ( isset($this->cfg['params']['files']) && is_dir(BBN_PUBLIC.$this->cfg['url']) ){
+    else if ( isset($this->cfg['params']['files']) && is_dir($this->fpath.$this->cfg['url']) ){
       $res = $this->get_files();
     }
     // Directory content
     // Vue component
-    else if ( isset($this->cfg['params']['dir']) && is_dir(BBN_PUBLIC.$this->cfg['url']) ){
+    else if ( isset($this->cfg['params']['dir']) && is_dir($this->fpath.$this->cfg['url']) ){
       $res = $this->get_dir();
     }
-    else if ( $this->cfg['is_component'] && is_dir(BBN_PUBLIC.$this->cfg['url']) ){
+    else if ( $this->cfg['is_component'] && is_dir($this->fpath.$this->cfg['url']) ){
       //cpStart:
       $res = [];
       $this->cfg['num'] = 0;
@@ -95,7 +94,7 @@ class config extends bbn\models\cls\basic
             $dir = false;
             foreach ( $res[$cp] as $type => $files ){
               if ( !$dir && count($files) ){
-                $dir = BBN_PUBLIC.\dirname($files[0]);
+                $dir = $this->fpath.\dirname($files[0]);
               }
               $this->cfg['num'] += \count($files);
             }
@@ -183,7 +182,7 @@ class config extends bbn\models\cls\basic
       }
     }
     if ( !$supported && strpos($this->cfg['url'], 'cache/') !== 0 ){
-      $this->cfg['cache_file'] = BBN_PUBLIC.$this->cfg['url'];
+      $this->cfg['cache_file'] = $this->fpath.$this->cfg['url'];
     }
     return $res;
   }
@@ -192,8 +191,7 @@ class config extends bbn\models\cls\basic
    * @return array
    */
   protected function get_preconfig(){
-    $db = bbn\db::get_instance();
-    $lib = new library($db, $this->cfg['params']['id']);
+    $lib = new library($this->db, $this->cfg['params']['id']);
     return $lib->get_config();
   }
 
@@ -208,7 +206,7 @@ class config extends bbn\models\cls\basic
     ];
     $files = explode(",", $this->cfg['params']['files']);
     foreach ( $files as $f ){
-      if ( is_file(BBN_PUBLIC.$this->cfg['url'].'/'.$f) ){
+      if ( is_file($this->fpath.$this->cfg['url'].'/'.$f) ){
         $ext = bbn\str::file_ext($f);
         if ( basename($f) !== '_def.less' ){
           foreach ( self::$types as $type => $extensions ){
@@ -239,7 +237,7 @@ class config extends bbn\models\cls\basic
       'html' => [],
       'lang' => []
     ];
-    $files = bbn\file\dir::get_files(BBN_PUBLIC.$dir);
+    $files = bbn\file\dir::get_files($this->fpath.$dir);
     foreach ( $files as $f ){
       if ( is_file($f) ){
         $ext = bbn\str::file_ext($f);
@@ -260,7 +258,7 @@ class config extends bbn\models\cls\basic
    *
    */
   protected function get_component(){
-    $files = bbn\file\dir::get_files(BBN_PUBLIC.$this->cfg['url']);
+    $files = bbn\file\dir::get_files($this->fpath.$this->cfg['url']);
     foreach ( $files as $f ){
       $ext = bbn\str::file_ext($f);
       foreach ( self::$types as $type => $extensions ){
@@ -279,8 +277,8 @@ class config extends bbn\models\cls\basic
    * @return array
    */
   protected function get_libs(){
-    if ( $db = bbn\db::get_instance() ){
-      $lib = new library($db, $this->cfg['lang'], $this->cfg['latest']);
+    if ( !empty($this->cfg['params']['lib']) ){
+      $lib = new library($this->db, $this->cfg['lang'], $this->cfg['latest']);
       $libs = explode(',', $this->cfg['params']['lib']);
       foreach ( $libs as $l ){
         $lib->add($l, $this->cfg['has_dep']);
@@ -293,14 +291,24 @@ class config extends bbn\models\cls\basic
   /**
    * config constructor.
    * @param string $request
+   * @param bbn\db $db
    */
-  public function __construct(string $request){
+  public function __construct(string $request, bbn\db $db = null){
     if ( !defined('BBN_PUBLIC') ){
       $this->error('You must define the constant BBN_PUBLIC as the root of your public document');
     }
+    $this->set_prefix();
+    if ( !$db ){
+      $db = bbn\db::get_instance();
+    }
+    if ( !$db ){
+      die(_('Impossible to initialize the CDN without a DB connection'));
+    }
+    $this->db = $db;
+
     $parsed = parse_url($request);
 
-    $this->cfg['url'] = empty($parsed['path']) ? '' : substr($parsed['path'], 1);
+    $this->cfg['url'] = empty($parsed['path']) ? '' : substr($parsed['path'], 1 + strlen($this->prefix));
     if ( !empty($parsed['query']) ){
       parse_str($parsed['query'], $params);
     }
@@ -309,7 +317,7 @@ class config extends bbn\models\cls\basic
     }
     $this->cfg['params'] = $params ?? [];
     $this->cfg['hash'] = md5($this->cfg['url'].serialize($this->cfg['params']));
-    $this->cfg['cache_file'] = BBN_PUBLIC.'cache/'.$this->cfg['hash'].'.cache';
+    $this->cfg['cache_file'] = $this->fpath.'cache/'.$this->cfg['hash'].'.cache';
     $this->cfg['ext'] = bbn\str::file_ext($this->cfg['url']);
     $this->_set_cfg();
     $this->_set_files();

@@ -1390,7 +1390,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
     });
     $this->log(implode(PHP_EOL, $msg));
     if ( $this->on_error === self::E_DIE ){
-      die(\defined('BBN_IS_DEV') && BBN_IS_DEV ? implode(PHP_EOL, $msg) : 'Database error');
+      die(\defined('BBN_IS_DEV') && BBN_IS_DEV ? '<pre>'.PHP_EOL.implode(PHP_EOL, $msg).PHP_EOL.'</pre>' : 'Database error');
     }
   }
 
@@ -2985,7 +2985,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       'fields' => $values,
       'ignore' => $ignore
     ];
-    $cfg['kind'] = 'UPDATE';  
+    $cfg['kind'] = 'UPDATE';
     return $this->_exec($cfg);
   }
 

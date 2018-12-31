@@ -35,6 +35,11 @@ class cdn extends models\cls\basic
   protected $mode;
 
   /**
+   * @var db
+   */
+  protected $db;
+
+  /**
    * @var array
    */
   protected $extensions = ['js', 'css'];
@@ -117,22 +122,30 @@ class cdn extends models\cls\basic
    * cdn constructor.
    * @param string $request The original request
    * @param string|null $cache If given will point the cache file to serve
+   * @param db|null $db The DB to query fior libraries. If not given will be current instance
    */
-  public function __construct(string $request, string $cache = null)
+  public function __construct(string $request, string $cache = null, db $db = null)
   {
     if ( !defined('BBN_PUBLIC') ){
-      $this->error('You must define the constant BBN_PUBLIC as the root of your public document');
-      die('You must define the constant BBN_PUBLIC as the root of your public document');
+      $this->error('You must define the constant $this->fpath as the root of your public document');
+      die('You must define the constant $this->fpath as the root of your public document');
     }
-    if ( $cache && is_dir(BBN_PUBLIC.$cache) ){
+    $this->set_prefix();
+    if ( $cache && is_dir($this->fpath.$cache) ){
       if ( substr($cache, -1) !== '/' ){
         $cache .= '/';
       }
       $this->cache_path = $cache;
     }
+    if ( !$db ){
+      $db = db::get_instance();
+    }
+    if ( $db ){
+      $this->db = $db;
+    }
     $this->request = $request;
     // Creation of a config object
-    $config = new cdn\config($request);
+    $config = new cdn\config($request, $this->db);
     // Checking request validity
     if ( $config->check() ){
       // Getting a configuration array
@@ -185,7 +198,7 @@ class cdn extends models\cls\basic
     };
   }
   $code
-  
+
 })(window);
 
 JS;
@@ -201,7 +214,7 @@ JS;
     $code = '';
     if ( !empty($codes['js']) ){
       $num = count($codes['js']);
-      $root_url = BBN_URL;
+      $root_url = $this->furl;
       foreach ( $codes['js'] as $c ){
         $tmp = $c['code'];
         if ( empty($this->cfg['nocompil']) ){
@@ -299,7 +312,7 @@ JS;
               !empty($cp['lang']) &&
               \in_array(\dirname($js)."/$name.$c[lang].lang", $cp['lang'], true)
             ){
-              $lang = file_get_contents(BBN_PUBLIC.\dirname($js)."/$name.$c[lang].lang");
+              $lang = file_get_contents($this->fpath.\dirname($js)."/$name.$c[lang].lang");
               if ( $lang ){
                 //$lang = json_decode($lang, true);
                 $codes[$i]['js'] = "if ( window.bbn ){ bbn.fn.autoExtend('lng', $lang); }".PHP_EOL.$codes[$i]['js'];
@@ -307,7 +320,7 @@ JS;
             }
 
             // Dependencies links
-            $dep_path = BBN_PUBLIC.$jsc['js'][0]['dir'].'/';
+            $dep_path = $this->fpath.$jsc['js'][0]['dir'].'/';
             if ( is_file($dep_path.'bbn.json') ){
               $json = json_decode(file_get_contents($dep_path.'bbn.json'), true);
             }
@@ -317,10 +330,8 @@ JS;
               }
             }
             if ( !empty($json) ){
-              if ( !empty($json['dependencies']) &&
-                ($db = db::get_instance())
-              ){
-                $lib = new cdn\library($db, $this->cfg['lang'], true);
+              if ( !empty($json['dependencies']) ){
+                $lib = new cdn\library($this->db, $this->cfg['lang'], true);
                 foreach ( $json['dependencies'] as $l => $version ){
                   $lib->add($l);
                 }
@@ -425,7 +436,7 @@ JS;
         if ( $code ){
           $code = sprintf(
               self::head_comment,
-              BBN_URL.$this->request,
+              $this->furl.$this->request,
               $c['test'] ? self::test_st : self::no_test_st
             ).$code;
           file_put_contents($c['cache_file'], $code);
@@ -452,7 +463,7 @@ JS;
     if ( !parent::check() ){
       return false;
     }
-    $file = empty($this->cfg['file']) || $this->cfg['is_component'] ? $this->cfg['cache_file'] : BBN_PUBLIC.$this->cfg['file'];
+    $file = empty($this->cfg['file']) || $this->cfg['is_component'] ? $this->cfg['cache_file'] : $this->fpath.$this->cfg['file'];
     return $file && is_file($file);
   }
 
@@ -480,8 +491,8 @@ JS;
         foreach ( $c['content'] as $name => $cp ){
           foreach ( $cp as $type => $files ){
             foreach ( $files as $f ){
-              if ( is_file(BBN_PUBLIC.$f) ){
-                $last_modified = filemtime(BBN_PUBLIC.$f);
+              if ( is_file($this->fpath.$f) ){
+                $last_modified = filemtime($this->fpath.$f);
                 if ( $last_modified > $this->file_mtime ){
                   return false;
                 }
@@ -495,8 +506,8 @@ JS;
       }
       else{
         foreach ( $this->cfg['content'][$this->mode] as $f ){
-          if ( is_file(BBN_PUBLIC.$f) ){
-            $last_modified = filemtime(BBN_PUBLIC.$f);
+          if ( is_file($this->fpath.$f) ){
+            $last_modified = filemtime($this->fpath.$f);
             if ( $last_modified > $this->file_mtime ){
               return false;
             }
@@ -517,7 +528,7 @@ JS;
    */
   public function output()
   {
-    $file = empty($this->cfg['file']) || $this->cfg['is_component'] ? $this->cfg['cache_file'] : BBN_PUBLIC.$this->cfg['file'];
+    $file = empty($this->cfg['file']) || $this->cfg['is_component'] ? $this->cfg['cache_file'] : $this->fpath.$this->cfg['file'];
     if ( $file && is_file($file) ){
       // get the HTTP_IF_MODIFIED_SINCE header if set
       $client_if_modified = $_SERVER['HTTP_IF_MODIFIED_SINCE'] ?? false;

@@ -18,6 +18,11 @@ class compiler extends bbn\models\cls\basic
     $cfg,
     $final_file;
 
+  public function __construct()
+  {
+    $this->set_prefix();
+  }
+
   public function minify(string $st, string $lang){
     $tmp = false;
     $st = trim($st);
@@ -41,20 +46,20 @@ class compiler extends bbn\models\cls\basic
   public function get_content($file, $test = false){
     $ext = bbn\str::file_ext($file);
     $minified = false;
-    if ( !is_file(BBN_PUBLIC.$file) ){
+    if ( !is_file($this->fpath.$file) ){
       return false;
     }
     foreach ( self::$min_suffixes as $s ){
       if ( strpos($file, $s.'.') ){
         $minified = true;
-        if ( $test && file_exists(BBN_PUBLIC.str_replace($s.'.', '.', $file)) ){
-          $c = file_get_contents(BBN_PUBLIC.str_replace($s.'.', '.', $file));
+        if ( $test && file_exists($this->fpath.str_replace($s.'.', '.', $file)) ){
+          $c = file_get_contents($this->fpath.str_replace($s.'.', '.', $file));
         }
         break;
       }
     }
     if ( !isset($c) ){
-      $c = file_get_contents(BBN_PUBLIC.$file);
+      $c = file_get_contents($this->fpath.$file);
     }
     if ( \is_string($c) ){
       $c = trim($c);
@@ -89,9 +94,9 @@ class compiler extends bbn\models\cls\basic
 
         case 'less':
           $less = new \lessc();
-          $less->setImportDir([\dirname(BBN_PUBLIC.$file)]);
-          if ( is_file(\dirname(BBN_PUBLIC.$file).'/_def.less') ){
-            $c = file_get_contents((\dirname(BBN_PUBLIC.$file).'/_def.less')).$c;
+          $less->setImportDir([\dirname($this->fpath.$file)]);
+          if ( is_file(\dirname($this->fpath.$file).'/_def.less') ){
+            $c = file_get_contents((\dirname($this->fpath.$file).'/_def.less')).$c;
           }
           try {
             $c = $less->compile($c);
@@ -108,9 +113,9 @@ class compiler extends bbn\models\cls\basic
         case 'scss':
           try{
             $scss = new \Leafo\ScssPhp\Compiler();
-            $scss->setImportPaths([\dirname(BBN_PUBLIC.$file)]);
-            if ( is_file(\dirname(BBN_PUBLIC.$file).'/_def.scss') ){
-              $c = file_get_contents((\dirname(BBN_PUBLIC.$file).'/_def.scss')).$c;
+            $scss->setImportPaths([\dirname($this->fpath.$file)]);
+            if ( is_file(\dirname($this->fpath.$file).'/_def.scss') ){
+              $c = file_get_contents((\dirname($this->fpath.$file).'/_def.scss')).$c;
             }
             $c = $scss->compile($c);
             if ( $c && !$test ){
@@ -147,12 +152,12 @@ class compiler extends bbn\models\cls\basic
     }
     return false;
   }
-  
+
   public function js_links(array $files, $test = false){
     $code = '';
     $num_files = \count($files);
     if (  $num_files ){
-      $url = BBN_URL.'?files=%s&v='.($this->o['v'] ?? (\defined('BBN_IS_PROD') && BBN_IS_PROD ? '' : time()));
+      $url = $this->furl.'?files=%s&v='.($this->o['v'] ?? (\defined('BBN_IS_PROD') && BBN_IS_PROD ? '' : time()));
       $files_json = json_encode($files);
             $code .= <<<JS
   .then(function(){
@@ -195,7 +200,7 @@ JS;
     if (  $num_files ){
       $dirs = [];
       for ( $i = 0; $i < $num_files; $i++ ){
-        if ( is_file(BBN_PUBLIC.$files[$i]) ){
+        if ( is_file($this->fpath.$files[$i]) ){
           $css = $this->get_content($files[$i], false);
           if ( $this->has_links($css) ){
             if ( !isset($dirs[\dirname($files[$i])]) ){
@@ -216,7 +221,7 @@ JS;
           if ( \count($dfiles) ){
             $files_json = json_encode($dfiles);
 
-            $url = BBN_URL.'~~~BBN~~~';
+            $url = $this->furl.'~~~BBN~~~';
 
             $params = [];
             // The v parameter is passed between requests (to refresh)
@@ -230,7 +235,7 @@ JS;
             $url .= http_build_query($params);
             $jsdir = $dir === '.' ? '' : $dir.'/';
             $code .= <<<JS
-            
+
   .then(function(){
     return new Promise(function(bbn_resolve, bbn_reject){
       var dir = "$jsdir",
@@ -248,12 +253,7 @@ JS;
       }
       var css = document.createElement("link");
       css.rel = "stylesheet";
-      if ( rFiles.length === 1 ){
-        css.href = url.replace('~~~BBN~~~', dir + rFiles[0] + '?');
-      }
-      else{
-        css.href = url.replace('~~~BBN~~~', dir + '?f=' + rFiles.join(",") + '&');
-      }
+      css.href = url.replace('~~~BBN~~~', dir + '?f=' + rFiles.join(",") + '&');
       css.onload = function(){
         bbn_resolve();
       };
