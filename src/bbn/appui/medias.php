@@ -54,12 +54,13 @@ class medias extends bbn\models\cls\db
     ){
       $ok = false;
       switch ( $type ){
-        case 'file':
-        case 'html':
-        case 'js':
-        case 'php':
-        case 'rich':
-        case 'text':
+        case 'link':
+          if ( empty($title) ){
+            $title = basename($name);
+          }
+          $ok = 1;
+        break;
+        default:
           if ( is_file($name) ){
             $file = basename($name);
             if ( empty($title) ){
@@ -68,18 +69,13 @@ class medias extends bbn\models\cls\db
             $ok = 1;
           }
           break;
-        case 'link':
-          if ( empty($title) ){
-            $title = basename($name);
-          }
-          $ok = 1;
       }
       if ( $ok ){
         $this->db->insert($cf['table'], [
           $cf['arch']['medias']['id_user'] => $this->usr->get_id(),
           $cf['arch']['medias']['type'] => $id_type,
           $cf['arch']['medias']['title'] => $title,
-          $cf['arch']['medias']['name'] => $file,
+          $cf['arch']['medias']['name'] => $file ?? '',
           $cf['arch']['medias']['content'] => $content,
           $cf['arch']['medias']['private'] => $private ? 1 : 0
         ]);
