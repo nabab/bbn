@@ -178,9 +178,9 @@ class image extends bbn\file
 	 * Construct
 	 * @return void
 	 */
-	public function __construct($file)
+	public function __construct($file, system $fs = null)
 	{
-		parent::__construct($file);
+		parent::__construct($file, $fs);
 		if ( !\in_array($this->get_extension(),bbn\file\image::$allowed_extensions) )
 		{
 			$this->name = false;
@@ -189,7 +189,6 @@ class image extends bbn\file
 			$this->size = false;
 			$this->title = false;
 		}
-		return $this;
 	}
 
 	/**

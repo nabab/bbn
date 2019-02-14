@@ -125,20 +125,20 @@ class options extends bbn\models\cls\db
       if ( isset($it[$c['value']]) && bbn\str::is_json($it[$c['value']]) ){
         $this->_set_value($it);
       }
-      if ( isset($it['alias']) ){
+      if ( array_key_exists('alias', $it) ){
         unset($it['alias']);
       }
-      if ( isset($it['num_children']) ){
+      if ( array_key_exists('num_children', $it) ){
         unset($it['num_children']);
       }
-      if ( isset($it['items']) ){
+      if ( array_key_exists('items', $it) ){
         unset($it['items']);
       }
 
       // Taking care of user-defined properties (contained in value)
       $value = [];
       foreach ( $it as $k => $v ){
-        if ( !\in_array($k, $c) ){
+        if ( !\in_array($k, $c, true) ){
           $value[$k] = $v;
           unset($it[$k]);
         }

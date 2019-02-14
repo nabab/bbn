@@ -28,6 +28,11 @@ class file extends models\cls\basic
     $ext;
 
   /**
+   * @var $fs file\system
+   */
+  protected $fs;
+
+  /**
    * @var string
    */
   protected $hash;
@@ -68,8 +73,9 @@ class file extends models\cls\basic
    * @params mixed $file
    * @return $this
    */
-  public function __construct($file)
+  public function __construct($file, file\system $fs = null)
   {
+    $this->fs = $fs ?: new file\system();
     if ( \is_array($file) )
     {
       if ( isset($file['name'],$file['tmp_name']) )
@@ -104,7 +110,6 @@ class file extends models\cls\basic
     else{
       $this->make();
     }
-    return $this;
   }
 
   /**
@@ -126,7 +131,11 @@ class file extends models\cls\basic
     return $this->size;
   }
 
-  public function iterate_lines(){
+  /**
+   * @return \Generator
+   */
+  public function iterate_lines(): \Generator
+  {
     if ( $this->file ){
       $f = fopen($this->file, 'r');
       try {

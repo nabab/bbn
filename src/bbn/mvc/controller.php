@@ -773,7 +773,7 @@ class controller implements api{
   }
 */
 	private function retrieve_var($var){
-		if ( \is_string($var) && (substr($var, 0, 1) === '$') && isset($this->data[substr($var, 1)]) ){
+		if ( \is_string($var) && (strpos($var, '$') === 0) && isset($this->data[substr($var, 1)]) ){
 			return $this->data[substr($var, 1)];
 		}
 		return false;

@@ -466,11 +466,11 @@ class notes extends bbn\models\cls\db
 		){
 			$ret = [];
 			foreach ( $medias as $m ){
-				if (
+        if (
 				  ($med = $this->db->rselect($cf['tables']['medias'], [], [$cf['arch']['medias']['id'] => $m])) &&
           (empty($type) || (\bbn\str::is_uid($type) && ($type === $med['type'])))
         ){
-					if ( \bbn\str::is_json($med[$cf['arch']['medias']['content']]) ){
+          if ( \bbn\str::is_json($med[$cf['arch']['medias']['content']]) ){
 						$med[$cf['arch']['medias']['content']] = json_decode($med[$cf['arch']['medias']['content']]);
 					}
 					$med['file'] = $cf['paths']['medias'].$med[$cf['arch']['medias']['id']].DIRECTORY_SEPARATOR

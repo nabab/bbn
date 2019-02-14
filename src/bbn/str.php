@@ -59,7 +59,7 @@ class str
    * @param mixed $case The case to convert to ("lower" or "upper"), default being the title case.
    * @return string
    */
-  public static function change_case(string $st, $case = 'x'): string
+  public static function change_case($st, $case = 'x'): string
   {
     $st = self::cast($st);
     $case = substr(strtolower((string)$case), 0, 1);
@@ -92,7 +92,7 @@ class str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escape_all_quotes(string $st): string
+  public static function escape_all_quotes($st): string
   {
     return self::escape_dquotes(self::escape_squotes($st));
   }
@@ -109,7 +109,7 @@ class str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escape_dquotes(string $st): string
+  public static function escape_dquotes($st): string
   {
     return addcslashes(self::cast($st), "\"\\\r\n\t");
   }
@@ -125,7 +125,7 @@ class str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escape_dquote(string $st): string
+  public static function escape_dquote($st): string
   {
     return self::escape_dquotes($st);
   }
@@ -141,7 +141,7 @@ class str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escape_quote(string $st): string
+  public static function escape_quote($st): string
   {
     return self::escape_dquotes($st);
   }
@@ -157,7 +157,7 @@ class str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escape_quotes(string $st): string
+  public static function escape_quotes($st): string
   {
     return self::escape_dquotes($st);
   }
@@ -173,7 +173,7 @@ class str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escape_squotes(string $st): string
+  public static function escape_squotes($st): string
   {
     return addcslashes(self::cast($st), "'\\\r\n\t");
   }
@@ -189,7 +189,7 @@ class str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escape(string $st): string
+  public static function escape($st): string
   {
     return self::escape_squotes($st);
   }
@@ -205,7 +205,7 @@ class str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escape_apo(string $st): string
+  public static function escape_apo($st): string
   {
     return self::escape_squotes($st);
   }
@@ -221,7 +221,7 @@ class str
    * @param string $st The string to escape.
    * @return string
    */
-  public static function escape_squote(string $st): string
+  public static function escape_squote($st): string
   {
     return self::escape_squotes($st);
   }
@@ -257,7 +257,7 @@ class str
    * @param string $mode A selection of configuration: "all" (default), "2n1", "html", "code".
    * @return string
    */
-  public static function clean(string $st, $mode='all'): string
+  public static function clean($st, $mode='all'): string
   {
     if ( \is_array($st) ){
       reset($st);
@@ -370,7 +370,7 @@ class str
    * @param bool $is_path Tells if the slashes (/) are authorized in the string
    * @return string
    */
-  public static function encode_filename(string $st, $maxlength = 50, $extension = null, $is_path = false): string
+  public static function encode_filename($st, $maxlength = 50, $extension = null, $is_path = false): string
   {
 
     $st = self::remove_accents(self::cast($st));
@@ -430,7 +430,7 @@ class str
    * @param int $maxlength The maximum length, default: "50".
    * @return string
    */
-  public static function encode_dbname(string $st, $maxlength = 50): string
+  public static function encode_dbname($st, $maxlength = 50): string
   {
     $st = self::remove_accents(self::cast($st));
     $res = '';
@@ -1364,9 +1364,9 @@ class str
     }
     switch ( $error ) {
       case JSON_ERROR_DEPTH:
-        return 'Maximum stack depth exceeded';
+        return _('Maximum stack depth exceeded');
       case JSON_ERROR_STATE_MISMATCH:
-        return _('Underflow or the modes mismatch');
+        return _('State mismatch (invalid or malformed JSON)');
       case JSON_ERROR_CTRL_CHAR:
         return _('Unexpected control character found');
       case JSON_ERROR_SYNTAX:

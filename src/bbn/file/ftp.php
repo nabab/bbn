@@ -66,10 +66,10 @@ class ftp extends bbn\models\cls\basic
 			else if ( \defined('BBN_FTP_HOST') ){
 				$host = BBN_FTP_HOST;
 			}
-			if ( isset($cfg['login']) ){
-				$login = $cfg['login'];
+			if ( isset($cfg['user']) ){
+				$login = $cfg['user'];
 			}
-			else if ( \defined('BBN_FTP_LOGIN') ){
+			else if ( \defined('BBN_FTP_USER') ){
 				$login = BBN_FTP_LOGIN;
 			}
 			if ( isset($cfg['pass']) ){
@@ -125,7 +125,7 @@ class ftp extends bbn\models\cls\basic
 	{
     $res = [];
 		if ( $this->cn &&
-            @ftp_chdir($this->cn, $path) &&
+            ftp_chdir($this->cn, $path) &&
             ($files = ftp_nlist($this->cn, $path)) ){
       foreach ( $files as $file )
       {

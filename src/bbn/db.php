@@ -2985,7 +2985,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       'fields' => $values,
       'ignore' => $ignore
     ];
-    $cfg['kind'] = 'UPDATE';
+    $cfg['kind'] = 'UPDATE';  
     return $this->_exec($cfg);
   }
 

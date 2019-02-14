@@ -157,6 +157,8 @@ class user extends models\cls\basic
     /** @var bool */
     $auth = false,
     /** @var string */
+    $path,
+    /** @var string */
     $sql,
     /** @var int */
     $id,
@@ -536,8 +538,9 @@ class user extends models\cls\basic
    */
   private function _init_dir($create = false){
     if ( \defined('BBN_DATA_PATH') && $this->get_id() ){
+      $this->path = BBN_DATA_PATH.'users/'.$this->get_id().'/';
       if ( !\defined('BBN_USER_PATH') ){
-        define('BBN_USER_PATH', BBN_DATA_PATH.'users/'.$this->get_id().'/');
+        define('BBN_USER_PATH', $this->path);
       }
       if ( $create ){
         file\dir::create_path(BBN_USER_PATH.'tmp');
@@ -720,6 +723,25 @@ class user extends models\cls\basic
   public function get_class_cfg(): array
   {
     return $this->class_cfg;
+  }
+
+  /**
+   * Returns the directory path for the user.
+   *
+   * @return string
+   */
+  public function get_path(): ?string
+  {
+    return $this->path;
+  }
+  /**
+   * Returns the tmp directory path for the user.
+   *
+   * @return string
+   */
+  public function get_tmp_dir(): ?string
+  {
+    return $this->path.'tmp/';
   }
 
   /**

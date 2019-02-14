@@ -20,7 +20,8 @@ class tasks extends bbn\models\cls\db{
     $template = false,
     $id_user,
     $is_dev,
-    $user;
+    $user,
+    $date = false;
 
 
   protected function email($id_task, $subject, $text){
@@ -41,6 +42,26 @@ class tasks extends bbn\models\cls\db{
 
   private static function options(){
     return \bbn\appui\options::get_instance();
+  }
+
+  public function __construct(bbn\db $db){
+    parent::__construct($db);
+    self::optional_init($this);
+    if ( $user = bbn\user::get_instance() ){
+      $this->user = $user->get_name();
+      $this->id_user = $user->get_id();
+      $this->is_dev = $user->is_dev();
+      $this->mgr = new bbn\user\manager($user);
+      $this->_get_references();
+      //die(var_dump(BBN_APP_PATH, $this->references));
+      if ( \defined("BBN_APP_PATH") && is_file(BBN_APP_PATH.'plugins/appui-task/reference.php') ){
+        $f = include(BBN_APP_PATH.'plugins/appui-task/reference.php');
+        if ( is_callable($f) ){
+          $this->template = $f;
+        }
+      }
+    }
+    $this->columns = array_keys($this->db->get_columns('bbn_tasks'));
   }
 
   public static function cat_correspondances(){
@@ -82,29 +103,9 @@ class tasks extends bbn\models\cls\db{
     return isset($this->user);
   }
 
-  public function __construct(bbn\db $db){
-    parent::__construct($db);
-    self::optional_init($this);
-    if ( $user = bbn\user::get_instance() ){
-      $this->user = $user->get_name();
-      $this->id_user = $user->get_id();
-      $this->is_dev = $user->is_dev();
-      $this->mgr = new bbn\user\manager($user);
-      $this->_get_references();
-      //die(var_dump(BBN_APP_PATH, $this->references));
-      if ( \defined("BBN_APP_PATH") && is_file(BBN_APP_PATH.'plugins/appui-task/reference.php') ){
-        $f = include(BBN_APP_PATH.'plugins/appui-task/reference.php');
-        if ( is_callable($f) ){
-          $this->template = $f;
-        }
-      }
-    }
-    $this->columns = array_keys($this->db->get_columns('bbn_tasks'));
-  }
-
-  public function get_title($id_task){
+  public function get_title($id_task, $simple=false){
     if ( $title = $this->db->select_one('bbn_tasks', 'title', ['id' => $id_task]) ){
-      return _("Task")." ".$title;
+      return (!empty($simple) ? (_("Task")." ") : '').$title;
     }
     return '';
   }
@@ -845,7 +846,7 @@ class tasks extends bbn\models\cls\db{
         'id_user' => $this->id_user,
         'action' => \bbn\str::is_uid($action) ? $action : $this->id_action($action),
         'value' => empty($value) ? '' : json_encode($value),
-        'chrono' => microtime(true)
+        'chrono' => empty($this->date) ? microtime(true) : number_format((float)strtotime($this->date), 4, '.', '')
       ];
       $this->notify($data);
       return $this->db->insert('bbn_tasks_logs', $data);
@@ -908,18 +909,27 @@ class tasks extends bbn\models\cls\db{
     return 0;
   }
 
+  public function set_date($date){
+    $this->date = $date;
+    return $this;
+  }
+
+  public function unset_date(){
+    $this->date = false;
+    return $this;
+  }
+
   public function insert(array $cfg){
-    $date = date('Y-m-d H:i:s');
     if ( isset($cfg['title'], $cfg['type']) ){
       if ( $this->db->insert('bbn_tasks', [
         'title' => $cfg['title'],
         'type' => $cfg['type'],
-        'priority' => isset($cfg['priority']) ? $cfg['priority'] : 5,
-        'id_parent' => isset($cfg['id_parent']) ? $cfg['id_parent'] : null,
-        'deadline' => isset($cfg['deadline']) ? $cfg['deadline'] : null,
+        'priority' => $cfg['priority'] ?? 5,
+        'id_parent' => $cfg['id_parent'] ?? null,
+        'deadline' => $cfg['deadline'] ?? null,
         'id_user' => $this->id_user ?: null,
-        'state' => isset($cfg['state']) ? $cfg['state'] : $this->id_state('opened'),
-        'creation_date' => $date
+        'state' => $cfg['state'] ?? $this->id_state('opened'),
+        'creation_date' => $this->date ?: date('Y-m-d H:i:s')
       ]) ){
         $id = $this->db->last_id();
         $this->add_log($id, 'insert');
@@ -1011,10 +1021,14 @@ class tasks extends bbn\models\cls\db{
   }
 
   public function delete($id){
-    if ( ($info = $this->info($id)) && $this->db->delete('bbn_tasks', ['id' => $id]) ){
-      $subject = "Suppression du bug $info[title]";
+    if ( 
+      ($info = $this->info($id)) &&
+      $this->db->update('bbn_tasks', ['active' => 0], ['id' => $id]) 
+    ){
+      $this->add_log($id, 'delete');
+      /* $subject = "Suppression du bug $info[title]";
       $text = "<p>{$this->user} a supprimé le bug<br><strong>$info[title]</strong></p>";
-      $this->email($id, $subject, $text);
+      $this->email($id, $subject, $text); */
       return $id;
     }
   }

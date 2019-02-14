@@ -198,7 +198,7 @@ class cdn extends models\cls\basic
     };
   }
   $code
-
+  
 })(window);
 
 JS;

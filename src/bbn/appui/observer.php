@@ -224,6 +224,7 @@ MYSQL
       $res = $this->_exec($request, $params);
       $duration = (int)ceil($t->stop() * 1000);
       $id_alias = $this->_get_id($request, $params);
+      //die(var_dump($id_alias, $this->db->last()));
       // If it is a public observer it will be the id_alias and the main observer
       if (
         !$id_alias &&

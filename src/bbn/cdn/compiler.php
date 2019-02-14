@@ -152,7 +152,7 @@ class compiler extends bbn\models\cls\basic
     }
     return false;
   }
-
+  
   public function js_links(array $files, $test = false){
     $code = '';
     $num_files = \count($files);
@@ -235,7 +235,7 @@ JS;
             $url .= http_build_query($params);
             $jsdir = $dir === '.' ? '' : $dir.'/';
             $code .= <<<JS
-
+            
   .then(function(){
     return new Promise(function(bbn_resolve, bbn_reject){
       var dir = "$jsdir",
@@ -253,7 +253,7 @@ JS;
       }
       var css = document.createElement("link");
       css.rel = "stylesheet";
-      css.href = url.replace('~~~BBN~~~', dir + '?f=' + rFiles.join(",") + '&');
+        css.href = url.replace('~~~BBN~~~', dir + '?f=' + rFiles.join(",") + '&');
       css.onload = function(){
         bbn_resolve();
       };

@@ -223,7 +223,7 @@ class project extends bbn\models\cls\db {
   public function get_root_path($repository){
     if ( \is_string($repository) ){
       $repository = $this->repository($repository);
-    }
+    }    
     if ( !empty($repository) && !empty($repository['bbn_path']) ){
       $repository_path = !empty($repository['path']) ? '/' . $repository['path'] : '';
       $path = self::decipher_path($repository['bbn_path'] . $repository_path) . '/';
@@ -297,7 +297,7 @@ class project extends bbn\models\cls\db {
         $repository = $i;
       }
     }
-    if ( !empty($repository) ){    
+    if ( !empty($repository) ){
       return empty($obj) ? $repository : $repositories[$repository];
     }
     return false;
@@ -310,7 +310,7 @@ class project extends bbn\models\cls\db {
    * @return bool|string
    */
   public function real_to_url(string $file){
-    
+
     foreach ( $this->repositories() as $i => $d ){
       if (
         // Repository's root path
@@ -319,7 +319,7 @@ class project extends bbn\models\cls\db {
       ){
 				$res = $i;
         $bits = explode('/', substr($file, \strlen($root)));
-        
+
         // MVC
         if ( !empty($d['tabs']) ){
           $tab_path = array_shift($bits);
@@ -340,7 +340,7 @@ class project extends bbn\models\cls\db {
         // Normal file
         else {
           $res .= implode('/', $bits);
-          
+
         }
         return \bbn\str::parse_path($res);
       }
@@ -349,22 +349,22 @@ class project extends bbn\models\cls\db {
   }
 
     public function real_to_url_i18n(string $file){
-    
+
     foreach ( $this->repositories() as $i => $d ){
-     
+
       if (
         // Repository's root path
         ($root = $this->get_root_path($d)) &&
         (strpos($file, $root) === 0)
       ){
 				$res = $i;
-				
+
         if ( !empty( ( $parent_code = $this->options->code($d['id_parent']) )) ){
-					
+
 					$var = str_replace($root, '', $file);
 				  $ext = \bbn\str::file_ext($var);
-          
-					
+
+
 					if ( ( $parent_code === 'BBN_APP_PATH' ) ){
 								//eccezione per apst app che punta ancora su mvc
 						if ( strpos($res, 'mvc/') ){
@@ -373,18 +373,18 @@ class project extends bbn\models\cls\db {
 						else if ( strpos($res, 'plugins/') ){
 							$res = $parent_code.'/';
 						}
-				    
+
 						$var = str_replace(constant($parent_code), '', $file);
 					}
-		
-					$bits = explode('/', $var);		
+
+					$bits = explode('/', $var);
 					$name = str_replace('.'.$ext, '', array_pop($bits));
 
 					if ( (strpos($var, 'mvc') === 0) && ($bits[1] !== 'cli') || ( strpos($var, 'plugins') === 0 ) ){
 
 						$tab_path = $bits[1];
 						if( strpos($var, 'plugins') === 0 ){
-						 
+
 							$tab_path = $bits[2];
 							unset($bits[2]);
 						}
@@ -401,18 +401,18 @@ class project extends bbn\models\cls\db {
 						else if ( $tab_path === 'model' ){
 							$ext = 'model';
 						}
-						
+
 					}
 					else if ( (strpos($var, 'components') === 0) && ($ext !== 'js') ){
 						$ext = 'html';
 					}
-				 	
-					$res .= implode($bits, '/').'/'.$name.'/'.$ext;	
 
-			
+					$res .= implode($bits, '/').'/'.$name.'/'.$ext;
+
+
 				}
-        
-				
+
+
         return \bbn\str::parse_path($res);
       }
     }

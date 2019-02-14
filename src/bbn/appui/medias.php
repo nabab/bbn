@@ -92,6 +92,19 @@ class medias extends bbn\models\cls\db
     return false;
   }
 
+  public function delete(string $id){
+    if ( \bbn\str::is_uid($id) ){
+      $cf =& $this->class_cfg;
+      if ( $this->db->delete($cf['table'], [$cf['arch']['medias']['id'] => $id]) ){
+        if ( is_dir(BBN_DATA_PATH.'media/'.$id) ){
+          return \bbn\file\dir::delete(BBN_DATA_PATH.'media/'.$id);
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
   public function get_media(string $id){
     $cf =& $this->class_cfg;
     if (
@@ -102,6 +115,31 @@ class medias extends bbn\models\cls\db
       is_file(BBN_DATA_PATH.'media/'.$id.'/'.$media[$cf['arch']['medias']['name']])
     ){
       return BBN_DATA_PATH.'media/'.$id.'/'.$media[$cf['arch']['medias']['name']];
+    }
+    return false;
+  }
+
+  public function zip($medias, $dest){
+    if ( is_string($medias) ){
+      $medias = [$medias];
+    }
+    if ( 
+      is_array($medias) &&
+      ($zip = new \ZipArchive()) &&
+      (
+        (
+          is_file($dest) &&
+          ($zip->open($dest, \ZipArchive::OVERWRITE) === true)
+        ) ||
+        ($zip->open($dest, \ZipArchive::CREATE) === true)
+      )
+    ){
+      foreach ( $medias as $media ){
+        if ( $file = $this->get_media($media) ){
+          $zip->addFile($file, basename($file));
+        }
+      }
+      return $zip->close();
     }
     return false;
   }

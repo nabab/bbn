@@ -41,6 +41,11 @@ trait common
     }
     else{
       $this->furl = BBN_URL;
+      $parsed = parse_url(BBN_SHARED_PATH);
+      if ( $parsed['path'] && ($parsed['path'] !== '/') ){
+        $this->prefix = substr($parsed['path'], 1);
+        $this->furl .= $ths->prefix;
+      }
     }
     $this->fpath = BBN_PUBLIC.$this->prefix;
   }
