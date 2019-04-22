@@ -10,9 +10,9 @@
 namespace bbn\api;
 use bbn;
 
-class cloudmin2 {
+class cloudmintest {
 
-  const cache_name = 'bbn/api/cloudmin';
+  const cache_name = 'bbn/api/cloudmintest';
 
   private
     /** @var  Cloudmin username */
@@ -86,7 +86,7 @@ class cloudmin2 {
               return false;
             }
           }
-          // TODO controlllo se questi valori sono boolean e se nono  a true
+          // TODO controlllo se questi valori sono boolean e se no  a true
           if ( isset($v) ){
             if ( is_bool($v['binary']) &&
               ($v['binary'] == true)
@@ -335,6 +335,7 @@ class cloudmin2 {
     $url_part .="'";
     //Concatenating the header url and $url_part to create the full url to be executed
     $url_part = $this->get_header_url() . $url_part;
+      
     //Calling shell_exec and returning the result array
     return $this->call_shell_exec($url_part);
   }

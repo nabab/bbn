@@ -18,6 +18,7 @@ use bbn;
  */
 class sqlite implements bbn\db\engines
 {
+  private $sqlite_keys_enabled = false;
   /** @var bbn\db The connection object */
   private $db;
 
@@ -42,8 +43,6 @@ class sqlite implements bbn\db\engines
       die('The SQLite driver for PDO is not installed...');
     }
     $this->db = $db;
-    // Obliged to do that  if we want to use foreign keys with SQLite
-    $this->enable_keys();
   }
 
   /*****************************************************************************************************************
@@ -97,7 +96,18 @@ class sqlite implements bbn\db\engines
       }
     }
     return null;
-	}
+  }
+  
+  /**
+   * Actions to do once the PDO object has been created
+   *
+   * @return void
+   */
+  public function post_creation(){
+    // Obliged to do that  if we want to use foreign keys with SQLite
+    $this->enable_keys();
+    return;
+  }
 	
 	/**
    * @param string $db The database name or file
@@ -833,7 +843,7 @@ class sqlite implements bbn\db\engines
     $group_to_put = [];
     if ( !empty($cfg['group_by']) ){
       foreach ( $cfg['group_by'] as $g ){
-        if ( isset($cfg['available_fields'][$g]) ){
+        if ( isset($cfg['available_fields'][$this->is_col_full_name($g) ? $this->col_full_name($g) : $this->col_simple_name($g)]) ){
           $group_to_put[] = $this->escape($g);
           //$group_to_put[] = $this->col_full_name($g, $cfg['available_fields'][$g], true);
         }

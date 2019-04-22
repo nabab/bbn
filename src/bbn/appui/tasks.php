@@ -87,8 +87,8 @@ class tasks extends bbn\models\cls\db{
 
   public static function get_tasks_options(){
     if (
-      ($states = self::get_options_ids('states')) &&
-      ($roles = self::get_options_ids('roles')) &&
+      ($states = self::get_appui_options_ids('states')) &&
+      ($roles = self::get_appui_options_ids('roles')) &&
       ($cats = self::cat_correspondances())
     ){
       return [
@@ -115,15 +115,15 @@ class tasks extends bbn\models\cls\db{
   }
 
   public function actions(){
-    return self::get_options_ids('actions');
+    return self::get_appui_options_ids('actions');
   }
 
   public function states(){
-    return self::get_options_ids('states');
+    return self::get_appui_options_ids('states');
   }
 
   public function roles(){
-    return self::get_options_ids('roles');
+    return self::get_appui_options_ids('roles');
   }
 
   public function id_cat($code){
@@ -131,15 +131,15 @@ class tasks extends bbn\models\cls\db{
   }
 
   public function id_action($code){
-    return self::get_option_id($code, 'actions');
+    return self::get_appui_option_id($code, 'actions');
   }
 
   public function id_state($code){
-    return self::get_option_id($code, 'states');
+    return self::get_appui_option_id($code, 'states');
   }
 
   public function id_role($code){
-    return self::get_option_id($code, 'roles');
+    return self::get_appui_option_id($code, 'roles');
   }
 
   public function get_mine($parent = null, $order = 'priority', $dir = 'ASC', $limit = 50, $start = 0){
@@ -718,7 +718,7 @@ class tasks extends bbn\models\cls\db{
     $r = [];
     if (
       ($opt = bbn\appui\options::get_instance()) &&
-      ($roles = self::get_options('roles'))
+      ($roles = self::get_appui_options('roles'))
     ){
       $all = $this->db->rselect_all(
         'bbn_tasks_roles',
@@ -792,7 +792,7 @@ class tasks extends bbn\models\cls\db{
       $r = $note->insert(
         (empty($cfg['title']) ? '' : $cfg['title']),
         (empty($cfg['text']) ? '' : $cfg['text']),
-        self::options()->from_code('tasks', 'types', 'notes', 'appui')
+        \bbn\appui\notes::get_appui_option_id('tasks', 'types')
       );
       if ( $r ){
         $this->db->insert('bbn_tasks_notes', [
@@ -919,15 +919,30 @@ class tasks extends bbn\models\cls\db{
     return $this;
   }
 
+  public function set_user(string $id_user){
+    if ( \bbn\str::is_uid($id_user) ){
+      $this->id_user = $id_user;
+    }
+    return $this; 
+  }
+
+  public function unset_user(){
+    if ( $user = bbn\user::get_instance() ){
+      $this->id_user = $user->get_id();
+    }
+    return $this;
+  }
+
   public function insert(array $cfg){
     if ( isset($cfg['title'], $cfg['type']) ){
       if ( $this->db->insert('bbn_tasks', [
         'title' => $cfg['title'],
         'type' => $cfg['type'],
         'priority' => $cfg['priority'] ?? 5,
-        'id_parent' => $cfg['id_parent'] ?? null,
-        'deadline' => $cfg['deadline'] ?? null,
-        'id_user' => $this->id_user ?: null,
+        'id_parent' => $cfg['id_parent'] ?? NULL,
+        'id_alias' => $cfg['id_alias'] ?? NULL,
+        'deadline' => $cfg['deadline'] ?? NULL,
+        'id_user' => $this->id_user ?: NULL,
         'state' => $cfg['state'] ?? $this->id_state('opened'),
         'creation_date' => $this->date ?: date('Y-m-d H:i:s')
       ]) ){

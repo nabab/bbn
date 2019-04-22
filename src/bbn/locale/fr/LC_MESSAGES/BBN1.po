@@ -1,0 +1,114 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: 1\n"
+"Report-Msgid-Bugs-To: info@bbn.so\n"
+"last-Translator: BBN Solutions <support@bbn.solutions>\n"
+"Language-Team: FR <FR@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2019-02-14 10:47+0100\n"
+"POT-Revision-Date: 2019-02-14 10:47+0100\n"
+"Language: fr\n"
+"X-Domain: BBN1\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/str.php
+msgid "Maximum stack depth exceeded"
+msgstr ""
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/str.php
+msgid "State mismatch (invalid or malformed JSON)"
+msgstr ""
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/str.php
+msgid "Unexpected control character found"
+msgstr ""
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/str.php
+msgid "Syntax error, malformed JSON"
+msgstr ""
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/str.php
+msgid "Malformed UTF-8 characters, possibly incorrectly encoded"
+msgstr ""
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/str.php
+msgid "Unknown error"
+msgstr ""
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/appui/databases.php
+msgid "Users"
+msgstr "Utilisateurs"
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/appui/databases.php
+msgid "Databases"
+msgstr "Bases de données"
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/appui/databases.php
+msgid "Procedures"
+msgstr "Procédures"
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/appui/databases.php
+msgid "Function"
+msgstr "Fonction"
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/appui/databases.php
+msgid "Tables"
+msgstr "Tables"
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/appui/databases.php
+msgid "Columns"
+msgstr "Colonnes"
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/appui/databases.php
+msgid "Keys"
+msgstr "Clés"
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/appui/masks.php
+msgid "default"
+msgstr "Défaut"
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/appui/masks.php
+msgid "by"
+msgstr "par"
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/appui/tasks.php
+msgid "Task"
+msgstr "Tâche"
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/appui/tasks.php
+msgid "Report tracker"
+msgstr ""
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/cdn/config.php
+msgid "Impossible to initialize the CDN without a DB connection"
+msgstr ""
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/file/system.php
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/file/system2.php
+msgid "Impossible to connect to the FTP host"
+msgstr ""
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/file/system.php
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/file/system2.php
+msgid "Could not connect through SSH."
+msgstr ""
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/file/system.php
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/file/system2.php
+msgid "Could not initialize SFTP subsystem."
+msgstr ""
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/file/system.php
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/file/system2.php
+msgid "Could not authenticate with username and password."
+msgstr ""
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/file/system2.php
+msgid "Impossible to connect to the WebDAV host"
+msgstr ""
+
+#: /home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/bbn/src/bbn/parsers/doc.php
+msgid "Error: mode not allowed."
+msgstr ""

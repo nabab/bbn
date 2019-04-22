@@ -1,7 +1,7 @@
 <?php
 namespace bbn;
 
-use LightnCandy\LightnCandy;
+use \LightnCandy\LightnCandy;
 
 class tpl {
 

@@ -676,7 +676,7 @@ class controller implements api{
         $r['data'] = $new_data;
       }
       else if ( \is_string($a) && !isset($r['path']) ){
-        $r['path'] = \strlen($a) ? $a : $this->path;
+        $r['path'] = $a;
       }
       else if ( \is_string($a) && router::is_mode($a) && !isset($r['mode']) ){
         $r['mode'] = $a;
@@ -692,8 +692,14 @@ class controller implements api{
       $r['mode'] = $r['path'];
       unset($r['path']);
     }
-    if ( !isset($r['path']) ){
+    if ( empty($r['path']) ){
       $r['path'] = $this->path;
+      if (
+        ($this->get_mode() === 'dom') &&
+        (!defined('BBN_DEFAULT_MODE') || (BBN_DEFAULT_MODE !== 'dom'))
+      ){
+        $r['path'] .= '/index';
+      }
     }
     else if ( strpos($r['path'], './') === 0 ){
       $r['path'] = $this->say_dir().substr($r['path'], 1);
@@ -799,10 +805,10 @@ class controller implements api{
   {
 		$this->obj->css = $this
       ->add_data($cached ?
-        $this->get_cached_model($this->path, bbn\x::merge_arrays($this->post, $this->data), $cached) :
-        $this->get_model($this->path, bbn\x::merge_arrays($this->post, $this->data))
+        $this->get_cached_model('', bbn\x::merge_arrays($this->post, $this->data), $cached) :
+        $this->get_model('', bbn\x::merge_arrays($this->post, $this->data))
       )
-      ->get_less($this->path, false);
+      ->get_less('', false);
 		if ( $new_title = $this->retrieve_var($title) ){
 			$this->set_title($new_title);
 		}
@@ -816,12 +822,12 @@ class controller implements api{
       $data = $data === true ? $this->data : [];
     }
 		if ( $this->mode === 'dom' ){
-		  $this->data['script'] = $this->get_js($this->path, $data);
+		  $this->data['script'] = $this->get_js('', $data);
     }
     else{
-      $this->add_js($this->path, $data, false);
+      $this->add_js('', $data, false);
     }
-		echo $this->get_view($this->path, false);
+		echo $this->get_view('', false);
     return $this;
 	}
 
@@ -888,7 +894,7 @@ class controller implements api{
     $args = \func_get_args();
     $die = false;
     foreach ( $args as $a ){
-      if ( \is_string($a) && \strlen($a) ){
+      if ( \is_string($a) ){
         $path = $a;
       }
       else if ( \is_array($a) ){
@@ -898,8 +904,11 @@ class controller implements api{
         $die = $a;
       }
     }
-    if ( !isset($path) ){
+    if ( empty($path) ){
       $path = $this->path;
+      if ( ($this->get_mode() === 'dom') && (!defined('BBN_DEFAULT_MODE') || (BBN_DEFAULT_MODE !== 'dom')) ){
+        $path .= '/index';
+      }
     }
 		else if ( strpos($path, './') === 0 ){
 			$path = $this->say_dir().substr($path, 1);

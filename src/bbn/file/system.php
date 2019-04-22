@@ -57,18 +57,38 @@ class system extends bbn\models\cls\basic
   {
     if ( isset($cfg['host'], $cfg['user'], $cfg['pass']) ){
       $args = [$cfg['host'], $cfg['port'] ?? 21, $cfg['timeout'] ?? 3];
-      if (
-      (
-        ($this->stream = @ftp_ssl_connect(...$args)) &&
-        @ftp_login($this->stream, $cfg['user'], $cfg['pass'])
-      ) || (
-      ($this->stream = @ftp_connect(...$args)) &&
-      @ftp_login($this->stream, $cfg['user'], $cfg['pass'])
-      ) ){
-        $this->current = ftp_pwd($this->stream);
-        return true;
+      try {
+        $this->stream = ftp_ssl_connect(...$args);
       }
-      $this->error = _('Impossible to connect to the FTP host');
+      catch ( \Exception $e ){
+        $this->error = _('Impossible to connect to the FTP host');
+        $this->error .= PHP_EOL.$e->getMessage();
+      }
+      if ( $this->stream ){
+        if ( !@ftp_login($this->stream, $cfg['user'], $cfg['pass']) ){
+          try {
+            $this->stream = ftp_connect(...$args);
+          }
+          catch ( \Exception $e ){
+            $this->error = _('Impossible to connect to the FTP host');
+            $this->error .= PHP_EOL.$e->getMessage();
+          }
+          if ( !@ftp_login($this->stream, $cfg['user'], $cfg['pass']) ){
+            $this->error = _('Impossible to login to the FTP host');
+            $this->error .= PHP_EOL.error_get_last()['message'];
+          }
+        }
+        if ( !$this->error ){
+          $this->current = ftp_pwd($this->stream);
+          if (
+            !empty($cfg['passive']) ||
+            (defined('BBN_SERVER_NAME') && !@fsockopen(BBN_SERVER_NAME, $args[1]))
+          ){
+            ftp_pasv($this->stream, true);
+          }
+          return true;
+        }
+      }
     }
     return false;
   }
@@ -80,12 +100,41 @@ class system extends bbn\models\cls\basic
    */
   private function _connect_ssh(array $cfg): bool
   {
-    if ( isset($cfg['host'], $cfg['user'], $cfg['pass']) ){
-      $this->cn = @ssh2_connect($cfg['host'], $cfg['port'] ?? 22);
+    if ( isset($cfg['host']) ){
+      $param = [];
+      if ( isset($cfg['public'], $cfg['private']) ){
+        $param['hostkey'] = 'ssh-rsa';
+      }
+      $this->cn = @ssh2_connect($cfg['host'], $cfg['port'] ?? 22, $param, [
+        'debug' => function($message, $language, $always_display){
+          bbn\x::log([$message, $language, $always_display]);
+        },
+        'disconnect' => function($reason, $message, $language){
+          bbn\x::log([$reason, $message, $language]);
+        }
+      ]);
       if ( !$this->cn ){
         $this->error = _("Could not connect through SSH.");
       }
-      else if ( @ssh2_auth_password($this->cn, $cfg['user'], $cfg['pass']) ){
+      else if ( isset($cfg['user'], $cfg['public'], $cfg['private']) ){
+        /*
+        $fingerprint = ssh2_fingerprint($this->cn, SSH2_FINGERPRINT_MD5 | SSH2_FINGERPRINT_HEX);
+        if ( strcmp($this->ssh_server_fp, $fingerprint) !== 0 ){
+          $this->error = _('Unable to verify server identity!');
+        }
+        */
+        if ( !ssh2_auth_pubkey_file($this->cn, $cfg['user'], $cfg['public'], $cfg['private'], $cfg['pass'] ?? null) ){
+          $this->error = _('Authentication rejected by server');
+        }
+        else if ( $this->stream = @ssh2_sftp($this->cn) ){
+          $this->current = ssh2_sftp_realpath($this->stream, '.');
+          return true;
+        }
+        else{
+          $this->error = _("Could not connect through SFTP.");
+        }
+      }
+      else if ( isset($cfg['user'], $cfg['pass']) && @ssh2_auth_password($this->cn, $cfg['user'], $cfg['pass']) ){
         //die(_("Could not authenticate with username and password."));
         $this->stream = @ssh2_sftp($this->cn);
         if ( $this->stream ){
@@ -132,52 +181,56 @@ class system extends bbn\models\cls\basic
   {
     $files = [];
     if ( ($this->mode === 'ftp') && ($detailed || ($type !== 'both')) ){
-      $fs = ftp_mlsd($this->stream, substr($path, strlen($this->prefix)));
-      foreach ( $fs as $f ){
-        if ( ($f['name'] !== '.') && ($f['name'] !== '..') && ($hidden || (strpos(basename($f['name']), '.') !== 0)) ){
-          $ok = 0;
-          if ( $type === 'both' ){
-            $ok = 1;
-          }
-          else if ( $type === 'dir' ){
-            $ok = $f['type'] === 'dir';
-          }
-          else if ( $type === 'file' ){
-            $ok = $f['type'] === 'file';
-          }
-          else if ( !is_string($type) || is_file($path.'/'.$f['name']) ){
-            $ok = $this->_check_filter($f['name'], $type);
-          }
-          if ( $ok ){
-            if ( $detailed ){
-              if ( !isset($has_type, $has_mod) ){
-                $has_type = stripos($detailed, 't') !== false;
-                $has_mod = stripos($detailed, 'm') !== false;
-              }
-              $tmp = [
-                'path' => $path.'/'.$f['name']
-              ];
-              if ( $has_mod ){
-                $tmp['mtime'] = mktime(
-                  substr($f['modify'], 8, 2),
-                  substr($f['modify'], 10, 2),
-                  substr($f['modify'], 12, 2),
-                  substr($f['modify'], 4, 2),
-                  substr($f['modify'], 6, 2),
-                  substr($f['modify'], 0, 4)
-                );
-              }
-              if ( $has_type ){
-                $tmp['dir'] = $f['type'] === 'dir';
-                $tmp['file'] = $f['type'] !== 'dir';
-              }
-              $files[] = $tmp;
+      if ( $fs = ftp_mlsd($this->stream, substr($path, strlen($this->prefix))) ){
+        foreach ( $fs as $f ){
+          if ( ($f['name'] !== '.') && ($f['name'] !== '..') && ($hidden || (strpos(basename($f['name']), '.') !== 0)) ){
+            $ok = 0;
+            if ( $type === 'both' ){
+              $ok = 1;
             }
-            else{
-              $files[] = $path.'/'.$f['name'];
+            else if ( $type === 'dir' ){
+              $ok = $f['type'] === 'dir';
+            }
+            else if ( $type === 'file' ){
+              $ok = $f['type'] === 'file';
+            }
+            else if ( !is_string($type) || is_file($path.'/'.$f['name']) ){
+              $ok = $this->_check_filter($f['name'], $type);
+            }
+            if ( $ok ){
+              if ( $detailed ){
+                if ( !isset($has_type, $has_mod) ){
+                  $has_type = stripos($detailed, 't') !== false;
+                  $has_mod = stripos($detailed, 'm') !== false;
+                }
+                $tmp = [
+                  'path' => $path.'/'.$f['name']
+                ];
+                if ( $has_mod ){
+                  $tmp['mtime'] = mktime(
+                    substr($f['modify'], 8, 2),
+                    substr($f['modify'], 10, 2),
+                    substr($f['modify'], 12, 2),
+                    substr($f['modify'], 4, 2),
+                    substr($f['modify'], 6, 2),
+                    substr($f['modify'], 0, 4)
+                  );
+                }
+                if ( $has_type ){
+                  $tmp['dir'] = $f['type'] === 'dir';
+                  $tmp['file'] = $f['type'] !== 'dir';
+                }
+                $files[] = $tmp;
+              }
+              else{
+                $files[] = $path.'/'.$f['name'];
+              }
             }
           }
         }
+      }
+      else{
+        bbn\x::log(error_get_last(), 'filesystem');
       }
     }
     else{
@@ -262,7 +315,7 @@ class system extends bbn\models\cls\basic
       if ( !$filter || $this->_check_filter($p, $filter) ){
         $all[] = $it;
       }
-      foreach ( $this->_scand($p, $hidden, $detailed) as $t ){
+      foreach ( $this->_scand($p, $hidden, $hidden, $detailed) as $t ){
         $all[] = $t;
       }
     }
@@ -444,7 +497,7 @@ class system extends bbn\models\cls\basic
       case 'ftp':
         if ( $this->_connect_ftp($cfg) ){
           $this->mode = 'ftp';
-          $this->prefix = 'ftp://'.$cfg['user'].':'.$cfg['pass'].'@'.$cfg['host'];
+          $this->prefix = 'ftp://'.$cfg['user'].':'.$cfg['pass'].'@'.$cfg['host'].'/';
         }
         break;
       case 'local':
@@ -539,7 +592,6 @@ class system extends bbn\models\cls\basic
   public function get_files(string $path = null, $including_dirs = false, $hidden = false, $filter = null, string $detailed = ''): ?array
   {
     if ( $this->check() && $this->is_dir($path) ){
-      
       $is_absolute = strpos($path, '/') === 0;
       $fs =& $this;
       clearstatcache();
@@ -547,7 +599,6 @@ class system extends bbn\models\cls\basic
       return array_map(function($a)use($is_absolute, $fs, $detailed){
         if ( $detailed ){
           $a['path'] = $fs->get_system_path($a['path'], $is_absolute);
-         
           return $a;
         }
         return $fs->get_system_path($a, $is_absolute);

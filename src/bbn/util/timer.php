@@ -53,7 +53,7 @@ class timer
   public function has_started($key)
   {
     if ( isset($this->measures[$key]) ){
-      return isset($this->measures[$key]['start']);
+      return $this->measures[$key]['start'] > 0;
     }
     return false;
   }

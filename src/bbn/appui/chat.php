@@ -339,4 +339,53 @@ SQL;
   {
     return $this->get_messages($id_chat, null, $day);
   }
+
+  /**
+   * 
+   */
+  public function get_active_chats(){
+    if ( $chats = $this->get_chats() ){
+      $t =& $this;
+      $d = new \DateTime();
+      $d->sub(new \DateInterval('PT20M'));
+      if ( $chats = array_filter($chats, function($c) use($d, $t){
+        return ($m = $t->get_messages($c, $d->getTimestamp())) && !empty($m['messages']);
+      }) ){
+        return array_map(function($c) use($d, $t){
+          return [
+            'id' => $c,
+            'messages' => ($m = $t->get_messages($c)) ? $m['messages'] : [],
+            'partecipants' => $t->get_participants($c),
+            'has_old' => $t->has_old_messages($c, $d->getTimestamp()-1)
+          ];
+        }, $chats);
+      }
+    }
+    return [];
+  }
+
+  public function has_old_messages(string $id_chat, $moment): bool
+  {
+    if ( $this->check() ){
+      $cdir = BBN_DATA_PATH.'users/'.$this->user->get_id().'/chat/'.$id_chat.'/';
+      if ( $this->is_participant($id_chat) && is_dir($cdir) ){
+        $dir = $cdir . date('Y-m-d', $moment);
+        $files = \bbn\file\dir::get_files($dir);
+        foreach ( $files as $file ){
+          $time = (float)basename($file, '.msg');
+          if ( \bbn\x::compare_floats($time, $moment, '<') && ($st = file_get_contents($file)) ){
+            return true;
+          }
+        }
+        $dirs = \bbn\file\dir::get_dirs($cdir);
+        foreach ( $dirs as $d ){
+          if ( (basename($d) < date('Y-m-d', $moment)) && !empty(\bbn\file\dir::get_files($d)) ){
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
 }

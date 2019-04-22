@@ -59,51 +59,117 @@ class library
   public function info($library){
     $params = explode('|', $library);
     $lib = array_shift($params);
-    $sql = 'SELECT "libraries"."name", "libraries"."fname", "libraries"."title",
-      "libraries"."latest", "libraries"."website",
-      "libraries"."last_update", "libraries"."last_check",';
-    $args = [];
-    if ( isset($params[0]) && $params[0] !== 'latest' ){
-      $sql .= '
-      IFNULL("v1"."id", "v2"."id") AS "id",
-      IFNULL("v1"."name", "v2"."name") AS "version",
-      IFNULL("v1"."content", "v2"."content") AS "content",
-      IFNULL("v1"."internal", "v2"."internal") AS "internal"
-      FROM "main"."libraries", "main"."versions"
-        LEFT JOIN "main"."versions" AS "v1"
-          ON "v1"."library" = "libraries"."name"
-          AND "v1"."name" LIKE ?
-        LEFT JOIN "main"."versions" AS "v2"
-          ON "v2"."library" = "libraries"."name"
-          AND "v2"."status" LIKE \'stable\' ';
-      array_push($args, $params[0]);
+    $cfg = [
+      'table' => 'libraries',
+      'fields' => [
+        'libraries.name', 'libraries.fname', 'libraries.title',
+        'libraries.latest', 'libraries.website', 'libraries.last_update',
+        'libraries.last_check'
+      ],
+      'where' => [
+        'libraries.name' => $lib
+      ]
+    ];
+    if ( isset($params[0]) && ($params[0] !== 'latest') ){
+      $cfg['fields']['id'] = 'IFNULL(v1.id, v2.id)';
+      $cfg['fields']['version'] = 'IFNULL(v1.name, v2.name)';
+      $cfg['fields']['content'] = 'IFNULL(v1.content, v2.content)';
+      $cfg['fields']['internal'] = 'IFNULL(v1.internal, v2.internal)';
+      $cfg['join'] =
+      [
+        [
+          'table' => 'versions',
+          'alias' => 'v1',
+          'type' => 'left',
+          'on' => [
+            'conditions' => [
+              [
+                'field' => 'v1.library',
+                'operator' => '=',
+                'exp' => 'libraries.name'
+              ], [
+                'field' => 'v1.name',
+                'operator' => 'LIKE',
+                'value' => $lib
+              ]
+            ]
+          ]
+        ], [
+          'table' => 'versions',
+          'alias' => 'v2',
+          'type' => 'left',
+          'on' => [
+            'conditions' => [
+              [
+                'field' => 'v2.library',
+                'operator' => '=',
+                'exp' => 'libraries.name'
+              ], [
+                'field' => 'v2.name',
+                'operator' => '=',
+                'exp' => 'libraries.latest'
+              ]
+            ]
+          ]
+        ]
+      ];
     }
     else{
-      $sql .= '
-      "versions"."id", "versions"."name" AS "version", "versions"."content" , "versions"."internal" 
-      FROM "main"."libraries"
-        LEFT JOIN "main"."versions"
-          ON "versions"."library" = "libraries"."name"
-          AND "versions"."name" LIKE "libraries"."latest" ';
+      $cfg['fields'][] = 'versions.id';
+      $cfg['fields']['version'] = 'versions.name';
+      $cfg['fields'][] = 'versions.content';
+      $cfg['fields'][] = 'versions.internal';
+      $cfg['join'] = [
+        [
+          'table' => 'versions',
+          'type' => 'left',
+          'on' => [
+            'conditions' => [
+              [
+                'field' => 'versions.library',
+                'operator' => '=',
+                'exp' => 'libraries.name'
+              ], [
+                'field' => 'versions.name',
+                'operator' => '=',
+                'exp' => 'libraries.latest'
+              ]
+            ]
+          ]
+        ]
+      ];
     }
-    $sql .= '
-      WHERE "libraries"."name" LIKE ? 
-      GROUP BY "libraries"."name"
-      ORDER BY "versions"."internal" DESC';
-    $args[] =  $lib;
-    if ( $info = $this->db->get_row($sql, $args) ){
+    // We take all the info from the database
+    if ( $info = $this->db->rselect($cfg) ){
+      // Most of the info is in the JSON field, content
       $info['content'] = json_decode($info['content']);
-      if ( !empty($info['content']->theme_files) && !empty($info['content']->files) ){
+      // The files from which the content will be prepended to corresponding files
+      $info['prepend'] = [];
+      // If there are theme files we want to add them to the list of files
+      if ( !empty($info['content']->theme_files) && isset($info['content']->files) ){
+        // Parameters of the library sent through the URL
         if ( !empty($params[1]) ){
           $ths = explode('!', $params[1]);
         }
         else if ( isset($info['content']->default_theme) ){
           $ths = [$info['content']->default_theme];
         }
-        if ( isset($ths) ){
+        if ( !empty($ths) ){
           foreach ( $ths as $th ){
-            foreach ( $info['content']->theme_files as $tf ){
-              array_push($info['content']->files, sprintf(str_replace('%s', '%1$s', $tf), $th));
+            if ( !empty($info['content']->theme_prepend) ){
+              foreach ( array_reverse($info['content']->theme_files) as $tf ){
+                foreach ( $info['content']->files as $f ){
+                  /** @todo Remove!!! */
+                  if ( substr($f, -4) === 'less' ){
+                    $info['prepend'][$f] = sprintf(str_replace('%s', '%1$s', $tf), $th);
+                  }
+                }
+              }
+            }
+            else{
+              foreach ( $info['content']->theme_files as $tf ){
+                $info['content']->files[] = sprintf(str_replace('%s', '%1$s', $tf), $th);
+              }
             }
           }
         }
@@ -132,7 +198,7 @@ class library
     if ( $info = $this->info($library) ){
   
       if ( !isset($this->libs[$info['name']][$info['internal']]) ){
-        
+        $last = $this->db->last();
         if ( $has_dep ){
           // Adding dependencies
           $dependencies = $this->get_dependencies($info['id']);
@@ -150,10 +216,11 @@ class library
 
         $this->libs[$info['name']][$info['internal']] = [
             'version' => $info['version'],
+            'prepend' => [],
             'files' => []
         ];
         $files =& $this->libs[$info['name']][$info['internal']]['files'];
-        
+        $prepend =& $this->libs[$info['name']][$info['internal']]['prepend'];
         $path = 'lib/'.$info['name'].'/'.$info['version'].'/';
         
         
@@ -171,11 +238,14 @@ class library
             if ( isset($this->info['theme']) && strpos($f, '%s') ){
               $f = sprintf($f, $this->info['theme']);
             }
+            if ( isset($info['prepend'][$f]) ){
+              $prepend[$path.$f] = $path.$info['prepend'][$f];
+            }
             $files[] = $path.$f;
           }
         }
         else{
-          die(bbn\x::dump("Error!", $info));
+          die(\bbn\x::dump("Error!", $info, $last));
         }
         
         // Adding language files at the end (default way)
@@ -201,12 +271,16 @@ class library
   
   public function get_config(){
     $res = [
-        "libraries" => []
+      'libraries' => [],
+      'prepend' => []
     ];
     foreach ( $this->libs as $lib_name => $lib ){
       ksort($lib);
       $lib = current($lib);
       $res['libraries'][$lib_name] = (string) $lib['version'];
+      if ( isset($lib['prepend']) ){
+        $res['prepend'] = array_merge($res['prepend'], $lib['prepend']);
+      }
       foreach ( $lib['files'] as $f ){
         $ext = bbn\str::file_ext($f);
         foreach ( self::$types as $type => $extensions  ){

@@ -159,7 +159,7 @@ class cdn extends models\cls\basic
         }
       }
       if ( $this->mode ){
-        $this->cp = new cdn\compiler();
+        $this->cp = new cdn\compiler($this->cfg);
       }
     }
   }
@@ -236,12 +236,12 @@ JS;
       if ( !empty($this->cfg['content']['css']) ){
         $code .= <<<JS
     return (new Promise(function(bbn_resolve, bbn_reject){
-      bbn_resolve('ok')
+      bbn_resolve()
     }))
 
 JS;
 
-        $code .= $this->cp->css_links($this->cfg['content']['css'], $this->cfg['test']);
+        $code .= $this->cp->css_links($this->cfg['content']['css'], $this->cfg['test'], $this->cfg['content']['prepend']);
       }
       if ( $encapsulated ){
         $code = $this->js_mask($code);
@@ -293,7 +293,8 @@ JS;
               $cssc = $this->cp->compile($cp['css'], $c['test']);
               foreach ( $cssc['css'] as $css ){
                 if ( !isset($css['code']) ){
-                  die(var_dump($css));
+                  throw new \Exception("Impossible to get the SCSS code from component ".$cp);
+                  //die(var_dump($css));
                 }
                 if ( $this->cp->has_links($css['code']) ){
                   $includes .= $this->cp->css_links($cp['css'], $c['test']);
@@ -392,8 +393,8 @@ JS;
 (function(){
   return (new Promise(function(bbn_resolve, bbn_reject){
     setTimeout(function(){
-      bbn_resolve('ok');
-    }, 1)
+      bbn_resolve();
+    })
   }))
   $includes
   .then(function(){
@@ -425,12 +426,20 @@ JS;
         if ( $c['is_component'] ){
           $code = $this->get_components();
         }
-        else if ( $this->mode && ($codes = $this->cp->compile($this->mode === 'css' ? $c['content']['css'] : $c['content']['js'], $c['test'])) ){
-          if ( $this->mode === 'css' ){
-            $code = $this->get_css($codes);
+        else{
+          if ( $c['grouped'] ){
+            $codes = $this->cp->group_compile($this->mode === 'css' ? $c['content']['css'] : $c['content']['js'], $c['test']);
           }
-          else if ( $this->mode === 'js' ){
-            $code = $this->get_js($codes, empty($c['nocompil']) ? true : false);
+          else if ( $this->mode ){
+            $codes = $this->cp->compile($this->mode === 'css' ? $c['content']['css'] : $c['content']['js'], $c['test']);
+          }
+          if ( $codes ){
+            if ( $this->mode === 'css' ){
+              $code = $this->get_css($codes);
+            }
+            else if ( $this->mode === 'js' ){
+              $code = $this->get_js($codes, empty($c['nocompil']) ? true : false);
+            }
           }
         }
         if ( $code ){

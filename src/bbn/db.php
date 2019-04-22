@@ -812,6 +812,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
         $this->qte = $this->language->qte;
         try{
           parent::__construct(...($cfg['args'] ?: []));
+          $this->language->post_creation();
           $this->current = $cfg['db'];
           $this->engine = $cfg['engine'];
           $this->host = $cfg['host'] ?? '127.0.0.1';
@@ -1221,12 +1222,19 @@ class db extends \PDO implements db\actions, db\api, db\engines
         }
       }
       foreach ( $res['fields'] as $idx => &$col ){
-        if ( strpos($col, '(') || strpos($col, '->"$.')  || strpos($col, "->'$.") ){
+        if (
+          strpos($col, '(') ||
+          strpos($col, '->"$.')  ||
+          strpos($col, "->'$.") ||
+          strpos($col, '->>"$.')  ||
+          strpos($col, "->>'$.")
+        ){
           $res['available_fields'][$col] = false;
         }
         if ( \is_string($idx) ){
           if ( !isset($res['available_fields'][$col]) ){
             //$this->log($res);
+            $this->error(json_encode($res['available_fields'], JSON_PRETTY_PRINT));
             $this->error("Impossible to find the column $col");
             return null;
           }
@@ -2985,7 +2993,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       'fields' => $values,
       'ignore' => $ignore
     ];
-    $cfg['kind'] = 'UPDATE';  
+    $cfg['kind'] = 'UPDATE';
     return $this->_exec($cfg);
   }
 
@@ -3508,6 +3516,19 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
+   * Actions to do once the PDO object has been created
+   *
+   * @return void
+   */
+  public function post_creation(){
+    // Obliged to do that  if we want to use foreign keys with SQLite
+    if ( $this->language && !$this->engine ){
+      $this->language->post_creation();
+    }
+    return;
+  }
+
+  /**
    * Changes the database used to the given one.
    *
    * ```php
@@ -3876,7 +3897,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @return string
    */
   public function get_select(array $cfg): string
-  {
+  {  
     return $this->language->get_select(...$this->_add_kind(\func_get_args()));
   }
 

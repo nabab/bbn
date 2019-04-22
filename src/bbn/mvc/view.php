@@ -111,9 +111,9 @@ class view{
             if ( $translations = $tmp['mvc/'.$path] ?? ($tmp['components/'.$path] ?? null) ){
               $json = json_encode($translations);
               $tmp = <<<JAVASCRIPT
-(() => {
+(data) => {
   bbn.fn.autoExtend("lng", $json)
-})();
+};
 JAVASCRIPT;
               $this->content = $tmp.$this->content;
             }

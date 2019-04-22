@@ -1184,7 +1184,7 @@ class str
     $st = '';
     $space = '    ';
     if ( \is_object($o) && ($cls = \get_class($o)) && (strpos($cls, 'stdClass') === false) ){
-      $st .= "Object ".$cls.PHP_EOL;
+      $st .= "Object ".$cls;
       /*
       $o = array_filter((array)$o, function($k) use ($cls){
         if ( strpos($k, '*') === 0 ){
@@ -1255,9 +1255,8 @@ class str
       $st .= str_repeat($space, $lev-1);
       $st .= $is_assoc ? '}' : ']';
       //$st .= \is_object($o) ? '}' : ']';
-      return $st;
     }
-    return $o;
+    return $st;
   }
 
   /**

@@ -321,8 +321,16 @@ class options extends bbn\models\cls\db
   }
 
   public function init(){
-    $this->root = $this->db->get_one('SELECT id FROM bbn_options WHERE id_parent IS NULL');
-    $this->default = $this->root;
+    $this->root = $this->db->select_one('bbn_options', 'id', ['id_parent' => null]);
+    if ( \defined('BBN_APP_NAME') ){
+      $this->default = $this->db->select_one('bbn_options', 'id', [
+        'id_parent' => $this->root,
+        'code' => BBN_APP_NAME
+      ]);
+    }
+    if ( !$this->default ){
+      $this->default = $this->root;
+    }
   }
 
   /**
@@ -500,6 +508,15 @@ class options extends bbn\models\cls\db
     return null;
   }
 
+  public function from_root_code(): ?string
+  {
+    $def = $this->default;
+    $this->set_default($this->root);
+    $res = $this->from_code(...func_get_args());
+    $this->set_default($def);
+    return $res;
+  }
+
   public function set_value(array $value, $id): ?int
   {
     if ( $this->exists($id) ){
@@ -557,10 +574,10 @@ class options extends bbn\models\cls\db
    * bbn\x::dump($opt->get_default());
    * // (int) 0
    * // Default root option
-   * bbn\x::dump($opt->from_code('test));
+   * $new = $opt->from_code('test');
    * // false
    * // Option not found
-   * $opt->set_default(5);
+   * $opt->set_default($new);
    * // Default is now 5
    * bbn\x::dump($opt->get_default());
    * // (int) 5
@@ -573,13 +590,13 @@ class options extends bbn\models\cls\db
    * // (int) 0
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param string $uid 
    * @return options
    */
-  public function set_default($code = null): self
+  public function set_default($uid): self
   {
-    if ( bbn\str::is_uid($id = $this->from_code(\func_get_args())) ){
-      $this->root = $id;
+    if ( $this->db->count('bbn_options', ['id' => $uid]) ){
+      $this->default = $uid;
     }
     return $this;
   }
@@ -966,6 +983,19 @@ class options extends bbn\models\cls\db
         }
         return $res;
       }
+    }
+    return null;
+  }
+
+  public function get_aliases($code = null): ?array
+  {
+    if ( bbn\str::is_uid($id = $this->from_code(\func_get_args())) ){
+      $r = [];
+      foreach ( $this->db->rselect_all('bbn_options', [], ['id_alias' => $id]) as $d ){
+        $this->_set_value($d);
+        $r[] = $d;
+      }
+      return $r;
     }
     return null;
   }
@@ -1387,7 +1417,7 @@ class options extends bbn\models\cls\db
             $cfg['frozen'] = 1;
             break;
           }
-          else if ( 
+          else if (
             !count($cfg) &&
             (
               ($parent_cfg['inheritance'] === 'default') ||
@@ -1972,7 +2002,7 @@ class options extends bbn\models\cls\db
   public function set($id, array $cfg){
     if ( $this->_prepare($cfg) ){
       $c =& $this->class_cfg['arch']['options'];
-      // id_parent cannot be edited this way    
+      // id_parent cannot be edited this way
       if ( $res = $this->db->update($this->class_cfg['table'], [
         $c['text'] => $cfg[$c['text']],
         $c['code'] => !empty($cfg[$c['code']]) ? $cfg[$c['code']] : null,
@@ -2818,7 +2848,7 @@ class options extends bbn\models\cls\db
       $opts = $this->full_options($id);
       foreach ( $opts as $opt ){
         $o = [
-          'icon' => $opt['icon'] ?? 'fas fa-cog',
+          'icon' => $opt['icon'] ?? 'nf nf-fa-cog',
           'text' => $opt['text'],
           'id' => $opt['id']
         ];

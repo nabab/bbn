@@ -332,19 +332,14 @@ class user extends models\cls\basic
 
   /**
    * Retrieves all user info from its session and populates the object
-   * @param null|string $token
    * @return $this
    */
-  private function _retrieve_session($token=null){
+  private function _retrieve_session(){
     if ( !$this->id ){
       // The user ID must be in the session
       $id_session = $this->get_id_session();
       $id = $this->get_session('id');
       if ( $id_session && $id ){
-        /** @todo use the tokens */
-        if ( isset($token) ){
-
-        }
         $this->_sess_info($id_session);
         if (
           isset($this->sess_cfg['fingerprint']) &&
@@ -1045,12 +1040,11 @@ class user extends models\cls\basic
 
 	/**
    * Retrieves user's info from session if needed and checks if authenticated
-   * @param null|string $token
 	 * @return bool
 	 */
-	public function check_session($token=null){
+	public function check_session(){
 	  if ( $this->check() ){
-      $this->_retrieve_session($token);
+      $this->_retrieve_session();
       return $this->auth;
     }
 	}
@@ -1216,49 +1210,5 @@ class user extends models\cls\basic
     }
     return false;
   }
-
-  public function create_token(){
-    if ( $this->check_session() ){
-      $token = md5(\bbn\str::genpwd());
-      $mt = microtime(true);
-      if ( $this->db->insert('bbn_users_tokens', [
-        'id_session' => $this->get_id_session(),
-        'content' => $token,
-        'creation' => $mt,
-        'last' => $mt
-      ]) ){
-        $id_token = $this->db->last_id();
-        file\dir::create_path(BBN_USER_PATH.'tmp/tokens/'.$id_token);
-        return $token;
-      }
-    }
-    return false;
-  }
-
-  public function get_token_id(string $token): ?string
-  {
-    if ( $id_session = $this->get_id_session() ){
-      if ( $id = $this->db->select_one('bbn_users_tokens', 'id', [
-        'id_session' => $id_session,
-        'content' => $token
-      ]) ){
-        $this->refresh_token($id);
-        return $id;
-      }
-    }
-    return null;
-  }
-
-  public function refresh_token($id): int
-  {
-    return $this->db->update('bbn_users_tokens', [
-      'last' => microtime(true)
-    ], [
-      'id' => $id,
-      'id_session' => $this->get_id_session()
-    ]);
-
-  }
-
 
 }

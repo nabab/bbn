@@ -183,6 +183,7 @@ class permissions extends bbn\models\cls\basic
    */
   public function get(string $id_option = null, string $type = 'page', bool $force = false): ?array
   {
+    /*
     if ( $all = $this->get_all($id_option, $type) ){
       $r = [];
       foreach ( $all as $a ){
@@ -191,6 +192,13 @@ class permissions extends bbn\models\cls\basic
         }
       }
       return $r;
+    }
+    */
+    if (
+      ($id_option = $this->_get_id_option($id_option, $type)) &&
+      $this->has($id_option, $type, $force)
+    ){
+      return $this->pref->option($id_option);
     }
     return null;
   }

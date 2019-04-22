@@ -31,6 +31,7 @@ class virtualmin {
     /** @var cache */
     $cacher;
 
+
   public
     // The last action to have been performed
     $last_action = false,
@@ -49,8 +50,9 @@ class virtualmin {
       $this->mode = $cfg['mode'] === 'cloudmin' ? 'cloudmin' : 'virtualmin';
       $this->hostname = isset($cfg['host']) ? $cfg['host'] : 'localhost';
       $this->checked = true;
-      if ( class_exists('\\bbn\\cache') ){
+      /*if ( class_exists('\\bbn\\cache') ){
         $this->cacher = bbn\cache::get_engine();
+
         if ( !$this->cacher->has(self::cache_name) ){
           $this->fetch_commands();
         }
@@ -58,7 +60,7 @@ class virtualmin {
       }
       else{
         $this->commands = $this->fetch_commands();
-      }
+      }*/
     }
   }
 
@@ -70,7 +72,8 @@ class virtualmin {
   public function __call($name, $arguments){
     if ( $this->checked ){
       $cmd_name = str_replace('_', '-', $name);
-      if ( isset($this->commands[$cmd_name]) ){
+      if ( isset($this->commands[$cmd_name]) || ($name === 'info')){
+
         //Setting the last action performed
         $this->last_action = $cmd_name;
         //Defining  the $url_part and the command to be executed
@@ -117,7 +120,6 @@ class virtualmin {
           (strpos($cmd_name, 'info') !== false)
         ){
           $uid = $this->hostname;
-//  \bbn\x::log(["ss", $arguments], 'cache_delete');
           if ( !empty($arguments) ){
             $uid .= md5(json_encode($arguments));
           }
@@ -136,20 +138,25 @@ class virtualmin {
         return $result_call;
       }
       // We force even if we don't have the command in the list
-      else if ( !empty($arguments[1]) ){
-        $args = $this->process_parameters($arguments[0]);
+      else {
+        if ( !empty($arguments) ){
+          $args = $this->process_parameters($arguments[0]);          
+        }
         $url_part = $cmd_name;
-        foreach ( $args as $k => $v ){
-          if ( \is_array($v) ){
-            foreach ( $v as $w ){
-              $url_part .= "&$k=$w";
+        //todo
+        if ( !empty($args) ){
+          foreach ( $args as $k => $v ){
+            if ( \is_array($v) ){
+              foreach ( $v as $w ){
+                $url_part .= "&$k=$w";
+              }
             }
-          }
-          else if ( $v === 1 ){
-            $url_part .= "&$k";
-          }
-          else{
-            $url_part .= "&$k=$v";
+            else if ( $v === 1 ){
+              $url_part .= "&$k";
+            }
+            else{
+              $url_part .= "&$k=$v";
+            }
           }
         }
         //Concatenating the closing single quote
@@ -161,9 +168,9 @@ class virtualmin {
         //Calling shell_exec and returning the result array
         return $this->call_shell_exec($url_part);
       }
-      else{
-        die("The command $name doesn't exist...");
-      }
+      // else{
+      //   die("The command $name doesn't exist...");
+      // }
     }
     return false;
   }
@@ -219,7 +226,7 @@ class virtualmin {
         }
       }
       ksort($commands);
-      $this->cacher->set(self::cache_name, $commands);
+    //  $this->cacher->set(self::cache_name, $commands);
       return $commands;
     }
   }

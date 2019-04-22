@@ -453,16 +453,9 @@ class mvc implements mvc\api{
    * @param array $data
    * @return string|false
    */
-  public function get_view(string $path = '', string $mode = 'html', array $data=null){
+  public function get_view(string $path, string $mode = 'html', array $data=null){
     if ( !router::is_mode($mode) ){
       die("Incorrect mode $path $mode");
-    }
-    if (
-      ($this->get_mode() === 'dom') &&
-      (!defined('BBN_DEFAULT_MODE') || (BBN_DEFAULT_MODE !== 'dom')) &&
-      (basename($path) !== 'index')
-    ){
-      $path .= ($path === '' ? '' : '/').'index';
     }
     $view = null;
     if ( $this->has_view($path, $mode) ){
@@ -542,13 +535,6 @@ class mvc implements mvc\api{
    * @return array|false A data model
    */
   public function get_model($path, array $data, mvc\controller $ctrl){
-    if (
-      ($this->get_mode() === 'dom') &&
-      (!defined('BBN_DEFAULT_MODE') || (BBN_DEFAULT_MODE !== 'dom')) &&
-      (basename($path) !== 'index')
-    ){
-      $path .= ($path === '' ? '' : '/').'index';
-    }
     if ( $route = $this->router->route($path, 'model') ){
       $model = new mvc\model($this->db, $route, $ctrl, $this);
       return $model->get($data);

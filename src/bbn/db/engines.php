@@ -31,6 +31,12 @@ interface engines
    * @return array|null The final configuration
    */
   public function get_connection(array $cfg = []): ?array;
+  /**
+   * Actions to do once the PDO object has been created
+   *
+   * @return void
+   */
+  public function post_creation();
  /**
 	* Fetches the database and returns an array of several arrays of rows text-indexed
 	* 

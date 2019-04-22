@@ -127,7 +127,16 @@ class mysql implements bbn\db\engines
     return null;
 	}
 
-	/**
+  /**
+   * Actions to do once the PDO object has been created
+   *
+   * @return void
+   */
+  public function post_creation(){
+    return;
+  }
+
+  /**
    * @param string $db The database name or file
 	 * @return bool
 	 */
@@ -357,51 +366,53 @@ class mysql implements bbn\db\engines
       return null;
     }
     $r = [];
-		if (
-		  ($table = $this->table_full_name($table, 1)) &&
-			($rows = $this->db->get_rows("SHOW COLUMNS FROM $table"))
-    ){
-      $p = 1;
-      foreach ( $rows as $row ){
-        $f = $row['Field'];
-        $r[$f] = [
-          'position' => $p++,
-          'null' => $row['Null'] === 'NO' ? 0 : 1,
-          'key' => \in_array($row['Key'], ['PRI', 'UNI', 'MUL']) ? $row['Key'] : null,
-          'default' => ($row['Default'] === null) && ($row['Null'] !== 'NO') ? 'NULL' : $row['Default'],
-          'extra' => $row['Extra'],
-          'signed' => 0,
-          'maxlength' => 0,
-          'virtual' => $row['Extra'] === 'VIRTUAL GENERATED'
-        ];
-        if ( (strpos($row['Type'], 'enum') === 0) || (strpos($row['Type'], 'set') === 0) ){
-          $r[$f]['type'] = 'enum';
-          if (
-            preg_match_all('/\((.*?)\)/', $row['Type'], $matches) &&
-            !empty($matches[1]) &&
-            \is_string($matches[1][0]) &&
-            ($matches[1][0][0] === "'")
-          ){
-            $r[$f]['values'] = explode("','", substr($matches[1][0], 1, -1));
-            $r[$f]['extra'] = $matches[1][0];
-          }
-          else{
-            $r['values'] = [];
-          }
-        }
-        else{
-          preg_match_all('/(.*?)\(/', $row['Type'], $real_type);
-          if (
-            isset($real_type[1][0]) &&
-            \in_array($real_type[1][0], self::$numeric_types, true)
-          ){
-            if ( strpos($row['Type'], 'unsigned') ){
-              $row['Type'] = trim(str_replace('unsigned','',$row['Type']));
+		if ( $full = $this->table_full_name($table) ){
+			$t = explode('.', $full);
+			[$db, $table] = $t;
+      $sql = <<<MYSQL
+        SELECT *
+        FROM `information_schema`.`COLUMNS`
+        WHERE `TABLE_NAME` LIKE ?
+        AND `TABLE_SCHEMA` LIKE ?
+        ORDER BY `ORDINAL_POSITION` ASC
+MYSQL;
+      if ( $rows = $this->db->get_rows($sql, $table, $db) ){
+        $p = 1;
+        foreach ( $rows as $row ){
+          $f = $row['COLUMN_NAME'];
+          $r[$f] = [
+            'position' => $p++,
+            'type' => $row['DATA_TYPE'],
+            'null' => $row['IS_NULLABLE'] === 'NO' ? 0 : 1,
+            'key' => \in_array($row['COLUMN_KEY'], ['PRI', 'UNI', 'MUL']) ? $row['COLUMN_KEY'] : null,
+            'default' => ($row['COLUMN_DEFAULT'] === null) && ($row['IS_NULLABLE'] !== 'NO') ? 'NULL' : $row['COLUMN_DEFAULT'],
+            'extra' => $row['EXTRA'],
+            'signed' => strpos($row['COLUMN_TYPE'], ' unsigned') === false,
+            'maxlength' => $row['CHARACTER_MAXIMUM_LENGTH'],
+            'virtual' => $row['EXTRA'] === 'VIRTUAL GENERATED',
+            'generation' => $row['GENERATION_EXPRESSION']
+          ];
+          if ( ($r[$f]['type'] === 'enum') || ($r[$f]['type'] === 'set') ){
+            if (
+              preg_match_all('/\((.*?)\)/', $row['COLUMN_TYPE'], $matches) &&
+              !empty($matches[1]) &&
+              \is_string($matches[1][0]) &&
+              ($matches[1][0][0] === "'")
+            ){
+              $r[$f]['values'] = explode("','", substr($matches[1][0], 1, -1));
+              $r[$f]['extra'] = $matches[1][0];
             }
             else{
-              $r[$f]['signed'] = 1;
+              $r[$f]['values'] = [];
             }
           }
+          else if ( preg_match_all('/\((.*?)\)/', $row['COLUMN_TYPE'], $matches) ){
+            $r[$f]['maxlength'] = (int)$matches[1][0];
+          }
+        }
+        /*
+        else{
+          preg_match_all('/(.*?)\(/', $row['Type'], $real_type);
           if ( strpos($row['Type'],'text') !== false ){
             $r[$f]['type'] = 'text';
           }
@@ -420,9 +431,9 @@ class mysql implements bbn\db\engines
           if ( !isset($r[$f]['type']) ){
             $r[$f]['type'] = strpos($row['Type'], '(') ? substr($row['Type'],0,strpos($row['Type'], '(')) : $row['Type'];
           }
-
         }
-			}
+        */
+      }
 		}
 		return $r;
 	}
@@ -439,50 +450,72 @@ class mysql implements bbn\db\engines
     $r = [];
 		if ( $full = $this->table_full_name($table) ){
 			$t = explode('.', $full);
-			[$db, $table] = $t;
+      [$db, $table] = $t;
       $r = [];
-      $b = $this->db->get_rows('SHOW INDEX FROM '.$this->table_full_name($full, 1));
+      $indexes = $this->db->get_rows('SHOW INDEX FROM '.$this->table_full_name($full, 1));
       $keys = [];
       $cols = [];
-      foreach ( $b as $i => $d ){
+      foreach ( $indexes as $i => $index ){
         $a = $this->db->get_row(<<<MYSQL
-SELECT `ORDINAL_POSITION` as `position`,
-`REFERENCED_TABLE_SCHEMA` as `ref_db`, `REFERENCED_TABLE_NAME` as `ref_table`, `REFERENCED_COLUMN_NAME` as `ref_column`
+SELECT `CONSTRAINT_NAME` AS `name`,
+`ORDINAL_POSITION` AS `position`,
+`REFERENCED_TABLE_SCHEMA` AS `ref_db`,
+`REFERENCED_TABLE_NAME` AS `ref_table`,
+`REFERENCED_COLUMN_NAME` AS `ref_column`
 FROM `information_schema`.`KEY_COLUMN_USAGE`
 WHERE `TABLE_SCHEMA` LIKE ?
 AND `TABLE_NAME` LIKE ?
 AND `COLUMN_NAME` LIKE ?
 AND (
   `CONSTRAINT_NAME` LIKE ? OR
-  ( `REFERENCED_TABLE_NAME` IS NOT NULL OR ORDINAL_POSITION = ? )
+  (`REFERENCED_TABLE_NAME` IS NOT NULL OR `ORDINAL_POSITION` = ?)
 )
-ORDER BY `REFERENCED_TABLE_NAME` DESC
+ORDER BY `KEY_COLUMN_USAGE`.`REFERENCED_TABLE_NAME` DESC
 LIMIT 1
 MYSQL
           ,
           $db,
           $table,
-          $d['Column_name'],
-          $d['Key_name'],
-          $d['Seq_in_index']);
-        if ( !isset($keys[$d['Key_name']]) ){
-          $keys[$d['Key_name']] = [
-            'columns' => [$d['Column_name']],
+          $index['Column_name'],
+          $index['Key_name'],
+          $index['Seq_in_index']);
+        if ( $a ){
+          $b = $this->db->get_row(<<<MYSQL
+          SELECT `CONSTRAINT_NAME` AS `name`,
+          `UPDATE_RULE` AS `update`,
+          `DELETE_RULE` AS `delete`
+          FROM `information_schema`.`REFERENTIAL_CONSTRAINTS`
+          WHERE `CONSTRAINT_NAME` LIKE ?
+          AND `CONSTRAINT_SCHEMA` LIKE ?
+          AND `TABLE_NAME` LIKE ?
+          LIMIT 1
+MYSQL
+                    ,
+                    $a['name'],
+                    $db,
+                    $table);
+        }
+        if ( !isset($keys[$index['Key_name']]) ){
+          $keys[$index['Key_name']] = [
+            'columns' => [$index['Column_name']],
             'ref_db' => $a && $a['ref_db'] ? $a['ref_db'] : null,
             'ref_table' => $a && $a['ref_table'] ? $a['ref_table'] : null,
             'ref_column' => $a && $a['ref_column'] ? $a['ref_column'] : null,
-            'unique' => $d['Non_unique'] ? 0 : 1
+            'constraint' => $b && $b['name'] ? $b['name'] : null,
+            'update' => $b && $b['update'] ? $b['update'] : null,
+            'delete' => $b && $b['delete'] ? $b['delete'] : null,
+            'unique' => $index['Non_unique'] ? 0 : 1
           ];
         }
         else{
-          $keys[$d['Key_name']]['columns'][] = $d['Column_name'];
-          $keys[$d['Key_name']]['ref_db'] = $keys[$d['Key_name']]['ref_table'] = $keys[$d['Key_name']]['ref_column'] = null;
+          $keys[$index['Key_name']]['columns'][] = $index['Column_name'];
+          $keys[$index['Key_name']]['ref_db'] = $keys[$index['Key_name']]['ref_table'] = $keys[$index['Key_name']]['ref_column'] = null;
         }
-        if ( !isset($cols[$d['Column_name']]) ){
-          $cols[$d['Column_name']] = [$d['Key_name']];
+        if ( !isset($cols[$index['Column_name']]) ){
+          $cols[$index['Column_name']] = [$index['Key_name']];
         }
         else{
-          $cols[$d['Column_name']][] = $d['Key_name'];
+          $cols[$index['Column_name']][] = $index['Key_name'];
         }
       }
       $r['keys'] = $keys;
@@ -500,7 +533,7 @@ MYSQL
    * @return string
    */
   public function get_conditions(array $conditions, array $cfg = [], bool $is_having = false): string
-  {
+  {   
     $res = '';
     if ( isset($conditions['conditions'], $conditions['logic']) ){
       $logic = isset($conditions['logic']) && ($conditions['logic'] === 'OR') ? 'OR' : 'AND';
@@ -557,6 +590,9 @@ MYSQL
             }
             else if ( $f['value'] && \bbn\str::is_uid($f['value']) ){
               $is_uid = true;
+            }
+            else if ( is_int($f['value']) || is_float($f['value']) ){
+              $is_number = true;
             }
           }
           else{
@@ -998,7 +1034,7 @@ MYSQL
    * @param null|string $table The table for which to create the statement
    * @return string
    */
-  public function get_create(string $table): string
+  public function get_raw_create(string $table): string
   {
     if (
       ($table = $this->table_full_name($table, true)) &&
@@ -1007,6 +1043,73 @@ MYSQL
       return $r->fetch(\PDO::FETCH_ASSOC)['Create Table'];
     }
     return '';
+  }
+
+  public function get_create(string $table, array $model = null): string
+  {
+    if ( !$model ){
+      $model = $this->db->modelize($table);
+    }
+    $st = 'CREATE TABLE '.$this->db->escape(table).' ('.PHP_EOL;
+    $done = false;
+    foreach ( $model['fields'] as $name => $col ){
+      if ( !$done ){
+        $done = true;
+      }
+      else{
+        $st .= ','.PHP_EOL;
+      }
+      $st .= '  '.$this->db->escape($name).' ';
+      $st .= $col['type'];
+      if ( !empty($col['maxlength']) ){
+        $st .= '('.$col['maxlength'].')';
+      }
+      if ( (strpos($col['type'], 'int') !== false) && !$col['signed'] ){
+        $st .= ' UNSIGNED';
+      }
+      if ( empty($col['null']) ){
+        $st .= ' NOT NULL';
+      }
+      if ( $col['virtual'] ){
+        $st .= ' GENERATED ALWAYS AS ('.$col['generation'].') VIRTUAL';
+      }
+      else if ( array_key_exists('default', $col) ){
+        $st .= ' DEFAULT ';
+        if ( ($col['default'] === 'NULL') || bbn\str::is_number($col['default']) ){
+          $st .= (string)$col['default'];
+        }
+        else{
+          $st .= "'".bbn\str::escape_squotes($col['default'])."'";
+        }
+      }
+    }
+    foreach ( $model['keys'] as $name => $key ){
+      $st .= ','.PHP_EOL.'  ';
+      if ( $key['unique'] && (count($key['columns']) === 1) && isset($model['fields'][$key['columns'][0]]) && ($model['fields'][$key['columns'][0]]['key'] === 'PRI') ){
+        $st .= 'PRIMARY KEY';
+      }
+      else if ($key['unique'] ){
+        $st .= 'UNIQUE KEY '.$this->db->escape($name);    
+      }
+      else{
+        $st .= 'KEY '.$this->db->escape($name);
+      }
+      $dbcls =& $this->db;
+      $st .= ' ('.implode(',', array_map(function($a)use(&$dbcls){
+        return $dbcls->escape($a);
+      }, $key['columns'])).')';
+    }
+    foreach ( $model['keys'] as $name => $key ){
+      if ( !empty($key['constraint']) ){
+        $st .= ','.PHP_EOL.'  '.
+          'CONSTRAINT '.$this->db->escape($key['constraint']).' FOREIGN KEY ('.$this->db->escape($name).') '.
+          'REFERENCES '.$this->db->escape($key['ref_table']).' ('.$this->db->escape($key['ref_column']).')'.
+          ($key['delete'] ? ' ON DELETE '.$key['delete'] : '').
+          ($key['update'] ? ' ON UPDATE '.$key['update'] : '');
+      }
+    }
+    $st .= PHP_EOL.') ENGINE=InnoDB DEFAULT CHARSET=utf8';
+    return $st;
   }
 
   /**

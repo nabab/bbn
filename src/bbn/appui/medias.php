@@ -41,10 +41,10 @@ class medias extends bbn\models\cls\db
 
   public function __construct(bbn\db $db){
     parent::__construct($db);
-    self::_init_class_cfg(self::$_defaults);
+    $this->_init_class_cfg();
     $this->opt = bbn\appui\options::get_instance();
     $this->usr = bbn\user::get_instance();
-    $this->opt_id = $this->opt->from_code('media', 'notes', 'appui');
+    $this->opt_id = $this->opt->from_root_code('media', 'notes', 'appui');
   }
 
   public function insert($name, $content = null, $title = '', $type='file', $private = false){
@@ -105,7 +105,7 @@ class medias extends bbn\models\cls\db
     return false;
   }
 
-  public function get_media(string $id){
+  public function get_media(string $id, $details = false){
     $cf =& $this->class_cfg;
     if (
       \bbn\str::is_uid($id) &&
@@ -114,7 +114,8 @@ class medias extends bbn\models\cls\db
       ($link_type !== $media[$cf['arch']['medias']['type']]) &&
       is_file(BBN_DATA_PATH.'media/'.$id.'/'.$media[$cf['arch']['medias']['name']])
     ){
-      return BBN_DATA_PATH.'media/'.$id.'/'.$media[$cf['arch']['medias']['name']];
+      $media['path'] = BBN_DATA_PATH.'media/'.$id.'/'.$media[$cf['arch']['medias']['name']];
+      return empty($details) ? $media['path'] : $media;
     }
     return false;
   }

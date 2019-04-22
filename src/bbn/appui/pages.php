@@ -49,7 +49,7 @@ class pages extends bbn\models\cls\db
     parent::__construct($db);
     self::_init_class_cfg(self::$_defaults);
     $this->opt = bbn\appui\options::get_instance();
-    $this->opt_id = $this->opt->from_code('pages', 'types', 'notes', 'appui');
+    $this->opt_id = $this->opt->from_root_code('pages', 'types', 'notes', 'appui');
     $this->notes = new bbn\appui\notes($this->db);
   }
 

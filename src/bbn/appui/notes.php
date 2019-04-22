@@ -381,7 +381,7 @@ class notes extends bbn\models\cls\db
     }
     if ( $this->exists($id_note) &&
       !empty($name) &&
-      ($id_type = self::get_option_id($type, 'media')) &&
+      ($id_type = self::get_appui_option_id($type, 'media')) &&
       ($usr = bbn\user::get_instance())
     ){
       if ( !isset($version) ){

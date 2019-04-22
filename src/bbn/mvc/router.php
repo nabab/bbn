@@ -327,8 +327,11 @@ class router {
       }
       // Full DOM requested
       if ( !$file && ($mode === 'dom') ){
+        if ( $this->has_route($tmp) ){
+          return $this->find_controller($this->get_route($tmp), $mode);
+        }
         // Root index file (if $tmp is at the root level)
-        if ( ($tmp === '.') && !$this->alt_root ){
+        else if ( ($tmp === '.') && !$this->alt_root ){
           // If file exists
           if ( file_exists($root.'index.php') ){
             $real_path = '.';
@@ -413,7 +416,7 @@ class router {
       bindtextdomain($textdomain, $lang_path);
       bind_textdomain_codeset($textdomain, 'UTF-8');
       textdomain($textdomain);
-      \bbn\x::log($textdomain, 'textdomain');
+      \bbn\x::log($textdomain.'/'.BBN_LOCALE, 'textdomain');
     }
   }
 

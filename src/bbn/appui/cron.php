@@ -64,7 +64,7 @@ class cron extends bbn\models\cls\basic{
 
   protected static $poll_timeout = 600;
 
-  protected static $token_timeout = 120;
+  protected static $user_timeout = 480;
 
   /**
    * @return int
@@ -101,17 +101,17 @@ class cron extends bbn\models\cls\basic{
   /**
    * @return int
    */
-  public static function get_token_timeout(): int
+  public static function get_user_timeout(): int
   {
-    return self::$token_timeout;
+    return self::$user_timeout;
   }
 
   /**
-   * @param int $token_timeout
+   * @param int $user_timeout
    */
-  public static function set_token_timeout(int $token_timeout): void
+  public static function set_user_timeout(int $user_timeout): void
   {
-    self::$token_timeout = $token_timeout;
+    self::$user_timeout = $user_timeout;
   }
 
   /**
@@ -389,10 +389,11 @@ class cron extends bbn\models\cls\basic{
   public function poll(){
     if ( $this->check() ){
       $this->timer->start('timeout');
-      $this->timer->start('tokens');
+      $this->timer->start('users');
       $admin = new bbn\user\users($this->db);
       $obs = new bbn\appui\observer($this->db);
       echo "START: ".date('H:i:s').PHP_EOL;
+      /*
       foreach ( $admin->get_old_tokens() as $t ){
         $id_user = $admin->get_user_from_token($t['id']);
         @bbn\file\dir::delete(BBN_DATA_PATH."users/$id_user/tmp/tokens/$t[id]", true);
@@ -400,23 +401,23 @@ class cron extends bbn\models\cls\basic{
           echo '-';
         }
       }
+      */
       while ( $this->is_poll_active() ){
         $res = $obs->observe();
         if ( \is_array($res) ){
-          foreach ( $res as $id_token => $o ){
-            $id_user = $admin->get_user_from_token($id_token);
-            $file = BBN_DATA_PATH."users/$id_user/tmp/tokens/$id_token/poller/queue/observer-".time().'.json';
+          foreach ( $res as $id_user => $o ){
+            $file = BBN_DATA_PATH."users/$id_user/tmp/poller/queue/observer-".time().'.json';
             if ( bbn\file\dir::create_path(\dirname($file)) ){
               file_put_contents($file, json_encode(['observers' => $o]));
             }
           }
         }
         sleep(1);
-        if ( $this->timer->measure('tokens') > self::$token_timeout ){
+        if ( $this->timer->measure('users') > self::$user_timeout ){
           echo '?';
-          $admin->clean_tokens();
-          $this->timer->stop('tokens');
-          $this->timer->start('tokens');
+          //$admin->clean_tokens();
+          $this->timer->stop('users');
+          $this->timer->start('users');
         }
         if ( $this->timer->measure('timeout') > self::$poll_timeout ){
           exit("Ending because of timeout: ".date('H:i:s'));

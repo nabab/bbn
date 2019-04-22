@@ -312,13 +312,11 @@ class config extends bbn\models\cls\basic
     if ( !empty($parsed['query']) ){
       parse_str($parsed['query'], $params);
     }
-    if ( isset($params, $params['v']) ){
-      unset($params['v']);
-    }
     $this->cfg['params'] = $params ?? [];
     $this->cfg['hash'] = md5($this->cfg['url'].serialize($this->cfg['params']));
     $this->cfg['cache_file'] = $this->fpath.'cache/'.$this->cfg['hash'].'.cache';
     $this->cfg['ext'] = bbn\str::file_ext($this->cfg['url']);
+    $this->cfg['grouped'] = !empty($params['grouped']);
     $this->_set_cfg();
     $this->_set_files();
     $file = false;

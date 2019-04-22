@@ -18,9 +18,10 @@ class compiler extends bbn\models\cls\basic
     $cfg,
     $final_file;
 
-  public function __construct()
+  public function __construct($cfg)
   {
     $this->set_prefix();
+    $this->cfg = $cfg;
   }
 
   public function minify(string $st, string $lang){
@@ -44,25 +45,54 @@ class compiler extends bbn\models\cls\basic
   }
 
   public function get_content($file, $test = false){
-    $ext = bbn\str::file_ext($file);
-    $minified = false;
-    if ( !is_file($this->fpath.$file) ){
-      return false;
-    }
-    foreach ( self::$min_suffixes as $s ){
-      if ( strpos($file, $s.'.') ){
-        $minified = true;
-        if ( $test && file_exists($this->fpath.str_replace($s.'.', '.', $file)) ){
-          $c = file_get_contents($this->fpath.str_replace($s.'.', '.', $file));
+    if ( is_array($file) ){
+      $ext = bbn\str::file_ext($file[0]);
+      $minified = false;
+      $c = '';
+      foreach ( $file as $f ){
+        $has_content = false;
+        if ( !is_file($this->fpath.$f) ){
+          return false;
         }
-        break;
+        foreach ( self::$min_suffixes as $s ){
+          if ( strpos($f, $s.'.') ){
+            $minified = true;
+            if ( $test && file_exists($this->fpath.str_replace($s.'.', '.', $f)) ){
+              $c .= PHP_EOL.file_get_contents($this->fpath.str_replace($s.'.', '.', $f));
+              $has_content = true;
+            }
+            break;
+          }
+        }
+        if ( !$has_content ){
+          $c .= PHP_EOL.file_get_contents($this->fpath.$f);
+        }
+        if ( !empty($c) ){
+          $c = trim($c);
+        }
       }
     }
-    if ( !isset($c) ){
-      $c = file_get_contents($this->fpath.$file);
-    }
-    if ( \is_string($c) ){
-      $c = trim($c);
+    else{
+      $ext = bbn\str::file_ext($file);
+      $minified = false;
+      if ( !is_file($this->fpath.$file) ){
+        return false;
+      }
+      foreach ( self::$min_suffixes as $s ){
+        if ( strpos($file, $s.'.') ){
+          $minified = true;
+          if ( $test && file_exists($this->fpath.str_replace($s.'.', '.', $file)) ){
+            $c = file_get_contents($this->fpath.str_replace($s.'.', '.', $file));
+          }
+          break;
+        }
+      }
+      if ( !isset($c) ){
+        $c = file_get_contents($this->fpath.$file);
+      }
+      if ( \is_string($c) ){
+        $c = trim($c);
+      }
     }
     if ( $c ){
       switch ( $ext ){
@@ -157,7 +187,17 @@ class compiler extends bbn\models\cls\basic
     $code = '';
     $num_files = \count($files);
     if (  $num_files ){
-      $url = $this->furl.'?files=%s&v='.($this->o['v'] ?? (\defined('BBN_IS_PROD') && BBN_IS_PROD ? '' : time()));
+      $url = $this->furl.'?files=%s&';
+      $params = [];
+      // The v parameter is passed between requests (to refresh)
+      if ( !empty($this->cfg['params']['v']) ){
+        $params['v'] = $this->cfg['params']['v'];
+      }
+      // The test parameter also (for minification)
+      if ( $test ){
+        $params['test'] = 1;
+      }
+      $url .= http_build_query($params);
       $files_json = json_encode($files);
             $code .= <<<JS
   .then(function(){
@@ -194,26 +234,88 @@ JS;
     return strpos($css, 'url(') || (strpos($css, '@import') !== false);
   }
 
-  public function css_links(array $files, $test = false){
+  public function css_links(array $files, $test = false, $prepend_files = []){
     $code = '';
     $num_files = \count($files);
-    if (  $num_files ){
+    if ( $num_files ){
       $dirs = [];
+      $prepended = [];
+      $unprepended = [];
       for ( $i = 0; $i < $num_files; $i++ ){
         if ( is_file($this->fpath.$files[$i]) ){
-          $css = $this->get_content($files[$i], false);
-          if ( $this->has_links($css) ){
-            if ( !isset($dirs[\dirname($files[$i])]) ){
-              $dirs[\dirname($files[$i])] = [];
+          if ( isset($prepend_files[$files[$i]]) ){
+            if ( !isset($prepended[$prepend_files[$files[$i]]]) ){
+              $prepended[$prepend_files[$files[$i]]] = [];
             }
-            $dirs[\dirname($files[$i])][] = basename($files[$i]);
+            $prepended[$prepend_files[$files[$i]]][] = $files[$i];
           }
           else{
-            if ( !isset($dirs['.']) ){
-              $dirs['.'] = [];
-            }
-            $dirs['.'][] = $files[$i];
+            $unprepended[] = $files[$i];
           }
+        }
+      }
+      foreach ( $prepended as $prep => $arr ){
+        $dir = dirname($arr[0]).'/';
+        $files_json = [str_replace($dir, '', $prep)];
+        foreach ( $arr as $ar ){
+          $files_json[] = str_replace($dir, '', $ar);
+        }
+        $files_json = json_encode($files_json);
+        $url = $this->furl.'~~~BBN~~~';
+        $params = [];
+        // The v parameter is passed between requests (to refresh)
+        if ( !empty($this->cfg['params']['v']) ){
+          $params['v'] = $this->cfg['params']['v'];
+        }
+        // The test parameter also (for minification)
+        if ( $test ){
+          $params['test'] = 1;
+        }
+        $url .= http_build_query($params);
+        $jsdir = $dir === '.' ? '' : $dir.'/';
+        $code .= <<<JS
+.then(function(){
+  return new Promise(function(bbn_resolve, bbn_reject){
+    var dir = "$jsdir",
+        files = $files_json,
+        url = "$url",
+        rFiles = [];
+    for ( var i = 0; i < files.length; i++ ){
+      if ( bbnLoadFile(dir + files[i]) ){
+        rFiles.push(files[i]);
+      }
+    }
+    if ( !rFiles.length ){
+      bbn_resolve();
+      return;
+    }
+    var css = document.createElement("link");
+    css.rel = "stylesheet";
+    css.href = url.replace('~~~BBN~~~', dir + '?grouped=1&f=' + rFiles.join(",") + '&');
+    css.onload = function(){
+      bbn_resolve();
+    };
+    css.onerror = function(){
+      bbn_reject();
+    };
+    document.getElementsByTagName("head")[0].appendChild(css);
+  })
+})
+JS;
+      }
+      foreach ( $unprepended as $file ){
+        $css = $this->get_content($file, false);
+        if ( $this->has_links($css) ){
+          if ( !isset($dirs[\dirname($file)]) ){
+            $dirs[\dirname($file)] = [];
+          }
+          $dirs[\dirname($file)][] = basename($file);
+        }
+        else{
+          if ( !isset($dirs['.']) ){
+            $dirs['.'] = [];
+          }
+          $dirs['.'][] = $file;
         }
       }
       if ( \count($dirs) ){
@@ -225,8 +327,8 @@ JS;
 
             $params = [];
             // The v parameter is passed between requests (to refresh)
-            if ( $this->o['v'] || (\defined('BBN_IS_DEV') && BBN_IS_DEV) ){
-              $params['v'] = $this->o['v'] ?? time();
+            if ( !empty($this->cfg['params']['v']) ){
+              $params['v'] = $this->cfg['params']['v'];
             }
             // The test parameter also (for minification)
             if ( $test ){
@@ -253,7 +355,7 @@ JS;
       }
       var css = document.createElement("link");
       css.rel = "stylesheet";
-        css.href = url.replace('~~~BBN~~~', dir + '?f=' + rFiles.join(",") + '&');
+      css.href = url.replace('~~~BBN~~~', dir + '?f=' + rFiles.join(",") + '&');
       css.onload = function(){
         bbn_resolve();
       };
@@ -326,6 +428,34 @@ JS;
         else{
           //die("I can't find the file $f !");
         }
+      }
+      return $codes;
+    }
+  }
+
+  public function group_compile($files, $test = false){
+    if ( !empty( $files) ){
+      /** @var array $codes Will contain the raw content of each files */
+      $codes = [];
+      // Mix of CSS and javascript: the JS adds the CSS to the head before executing
+      if ( $c = $this->get_content($files, $test) ){
+        $e = bbn\str::file_ext($files[0]);
+        foreach ( self::$types as $type => $exts ){
+          foreach ( $exts as $ext ){
+            if ( $ext === $e ){
+              $mode = $type;
+              break;
+            }
+          }
+        }
+        $codes[$mode ?? $e][] = [
+          'code' => $c,
+          'file' => basename(end($files)),
+          'dir' => \dirname(end($files))
+        ];
+      }
+      else{
+        throw new \Exception("Impossible to get content from $f");
       }
       return $codes;
     }

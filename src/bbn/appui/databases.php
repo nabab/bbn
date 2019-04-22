@@ -32,6 +32,7 @@ class databases extends bbn\models\cls\cache
     if ( bbn\str::is_uid($host) ){
       $host = $this->o->code($id_host);
     }
+    
     if (
       ($users = $this->o->from_code('users', $id_host)) &&
       ($user = $this->o->full_options($users)[0])

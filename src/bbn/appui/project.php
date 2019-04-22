@@ -71,7 +71,7 @@ class project extends bbn\models\cls\db {
 
   public static function get_id_asset_lang(){
     if ( !isset(self::$id_type_lang) ){
-      self::$id_type_lang = bbn\appui\options::get_instance()->from_code(
+      self::$id_type_lang = bbn\appui\options::get_instance()->from_root_code(
         self::ASSETS_LANG,
         self::PROJECTS_ASSETS,
         self::BBN_PROJECTS,
@@ -83,13 +83,15 @@ class project extends bbn\models\cls\db {
 
   public static function get_id_asset_path(){
     if ( !isset(self::$id_type_path) ){
-      self::$id_type_path = bbn\appui\options::get_instance()->from_code(
+
+      self::$id_type_path = bbn\appui\options::get_instance()->from_root_code(
         self::ASSETS_PATH,
         self::PROJECTS_ASSETS,
         self::BBN_PROJECTS,
         self::BBN_APPUI
       );
     }
+
     return self::$id_type_path;
   }
 
@@ -134,6 +136,7 @@ class project extends bbn\models\cls\db {
           AND bbn_projects_assets.asset_type = ?",
         hex2bin($this->id),
         hex2bin(self::get_id_asset_path()));
+        
       foreach ( $rows as $i => $row ){
         $rows[$i]['constant'] = $this->options->parent($rows[$i]['id_option'])['code'];
         $rows[$i]['language'] = (string)$this->options->get_prop($rows[$i]['id_option'], 'language');
@@ -223,7 +226,7 @@ class project extends bbn\models\cls\db {
   public function get_root_path($repository){
     if ( \is_string($repository) ){
       $repository = $this->repository($repository);
-    }    
+    }
     if ( !empty($repository) && !empty($repository['bbn_path']) ){
       $repository_path = !empty($repository['path']) ? '/' . $repository['path'] : '';
       $path = self::decipher_path($repository['bbn_path'] . $repository_path) . '/';
@@ -249,7 +252,7 @@ class project extends bbn\models\cls\db {
    * @return array|bool
    */
   public function repositories(string $code=''){
-    $all = $this->options->full_soptions($this->options->from_code('PATHS', 'ide', 'appui'));
+    $all = $this->options->full_soptions($this->options->from_code('PATHS', 'ide', 'appui'));      
     $cats = [];
     $r = [];
     foreach ( $all as $a ){

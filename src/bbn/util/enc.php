@@ -120,4 +120,49 @@ class enc
     return null;
   }
 
+  private static function sshEncodePublicKey($privKey) {
+    $keyInfo = openssl_pkey_get_details($privKey);
+    $buffer  = pack("N", 7) . "ssh-rsa" .
+      self::sshEncodeBuffer($keyInfo['rsa']['e']) .
+      self::sshEncodeBuffer($keyInfo['rsa']['n']);
+    return "ssh-rsa " . base64_encode($buffer);
+  }
+
+  private static function sshEncodeBuffer($buffer) {
+    $len = strlen($buffer);
+    if (ord($buffer[0]) & 0x80) {
+      $len++;
+      $buffer = "\x00" . $buffer;
+    }
+    return pack("Na*", $len, $buffer);
+  }
+
+  public static function generateCert(string $path, string $algo = 'sha512', int $key_bits = 4096): bool
+  {
+    $res = false;
+    if ( !is_dir(dirname($path)) || file_exists($path.'_rsa') || !in_array($algo, hash_algos()) ){
+      return false;
+    }
+    $public = $path.'_rsa.pub';
+    $private = $path.'_rsa';
+    $params = [
+      'digest_alg' => $algo,
+      'private_key_bits' => $key_bits,
+      'private_key_type' => OPENSSL_KEYTYPE_RSA
+    ];
+    $rsaKey = openssl_pkey_new($params);
+    openssl_pkey_export($rsaKey, $privKey);
+    $umask = umask(0066);
+    $privKey = openssl_pkey_get_private($rsaKey);
+    if (
+      openssl_pkey_export_to_file($privKey, $private) && //Private Key
+      ($pubKey = self::sshEncodePublicKey($rsaKey)) && //Public Key
+      file_put_contents($public, $pubKey) //save public key into file
+    ){
+      $res = true;
+    }
+    umask($umask);
+    return $res;
+  }
+
 }

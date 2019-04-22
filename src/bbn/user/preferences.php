@@ -37,7 +37,8 @@ class preferences extends bbn\models\cls\db
 		$_defaults = [
 			'table' => 'bbn_users_options',
       'tables' => [
-        'user_options' => 'bbn_users_options'
+        'user_options' => 'bbn_users_options',
+        'user_options_bits' => 'bbn_users_options_bits'
       ],
 			'arch' => [
 			  'user_options' => [
@@ -49,6 +50,15 @@ class preferences extends bbn\models\cls\db
           'id_alias' => 'id_alias',
           'public' => 'public',
           'id_link' => 'id_link',
+          'text' => 'text',
+          'cfg' => 'cfg'
+        ],
+        'user_options_bits' => [
+          'id' => 'id',
+          'id_user_option' => 'id_user_option',
+          'id_parent' => 'id_parent',
+          'id_option' => 'id_option',
+          'num' => 'num',
           'text' => 'text',
           'cfg' => 'cfg'
         ]
@@ -110,12 +120,13 @@ class preferences extends bbn\models\cls\db
   {
     $json = ($tmp = $this->get_cfg(false, $cfg)) ? json_encode($tmp) : NULL;
     return $this->db->insert($this->class_cfg['table'], [
-      'id_option' => $id_option,
-      'text' => $cfg['text'] ?? NULL,
-      'id_link' => $cfg['id_link'] ?? NULL,
-      'id_alias' => $cfg['id_alias'] ?? NULL,
-      'id_user' => $this->id_user,
-      'cfg' => $json
+      $this->fields['id_option'] => $id_option,
+      $this->fields['num'] => $cfg[$this->fields['num']] ?? NULL,
+      $this->fields['text'] => $cfg[$this->fields['text']] ?? NULL,
+      $this->fields['id_link'] => $cfg[$this->fields['id_link']] ?? NULL,
+      $this->fields['id_alias'] => $cfg[$this->fields['id_alias']] ?? NULL,
+      $this->fields['id_user'] => $this->id_user,
+      $this->fields['cfg'] => $json
     ]);
   }
 
@@ -349,10 +360,10 @@ MYSQL;
    * @param null|array $cfg
    * @return null|array
    */
-  public function get_cfg(string $id = NULL, array $cfg = NULL): ?array
+  public function get_cfg(string $id = null, array $cfg = null): ?array
   {
     if (
-      (NULL !== $cfg) ||
+      (null !== $cfg) ||
       ($cfg = $this->db->select_one(
         $this->class_cfg['table'],
         $this->fields['cfg'],
@@ -372,7 +383,34 @@ MYSQL;
         return $new;
       }
     }
-    return NULL;
+    return null;
+  }
+
+  /**
+   * Gets the cfg array, normalized either from the DB or from the $cfg argument
+   *
+   * @param string $id
+   * @param null|array $cfg
+   * @return null|array
+   */
+  public function get_cfg_by_option(string $id_option, string $id_user = null): ?array
+  {
+    if (
+      ($cfg = $this->db->select_one(
+        $this->class_cfg['table'],
+        $this->fields['cfg'],
+        [
+          $this->fields['id_option'] => $id_option,
+          $this->fields['id_user'] => $id_user ?: $this->id_user,
+        ]
+      ))
+    ){
+      if ( bbn\str::is_json($cfg) ){
+        $cfg = json_decode($cfg, 1);
+      }
+      return $this->get_cfg(false, $cfg);
+    }
+    return null;
   }
 
   /**
@@ -474,6 +512,14 @@ MYSQL;
     return null;
   }
 
+  public function get_by_option(string $id_option, bool $with_config = true): ?array
+  {
+    if ( $id = $this->retrieve_user_ids($id_option, $this->id_user) ){
+      return $this->get($id[0], $with_config);
+    }
+    return null;
+  }
+
   public function option(): ?array
   {
     if ( $o = $this->opt->option(\func_get_args()) ){
@@ -543,7 +589,7 @@ MYSQL;
   /**
    * @todo What does it do???
    */
-  public function order($id_option, int $index){
+  public function order($id_option, int $index, bool $upd = false){
     $id_parent = $this->opt->get_id_parent($id_option);
     if ( ($id_parent !== false) && $this->opt->is_sortable($id_parent) ){
       $items = $this->items($id_parent);
@@ -551,8 +597,8 @@ MYSQL;
       $to_change = false;
       foreach ( $items as $i => $it ){
         $res[] = [
-          'id' => $it,
-          'num' => $i + 1
+          $this->fields['id'] => $it,
+          $this->fields['num'] => $i + 1
         ];
         if ( $cfg = $this->get($it) ){
           $res[$i] = \bbn\x::merge_arrays($res[$i], $cfg);
@@ -564,19 +610,24 @@ MYSQL;
       if ( $to_change !== false ){
         if ( $to_change > $index ){
           for ( $i = $index; $i < $to_change; $i++ ){
-            $res[$i]['num']++;
+            $res[$i][$this->fields['num']]++;
           }
         }
         else if ( $to_change < $index ){
           for ( $i = $to_change + 1; $i <= $index; $i++ ){
-            $res[$i]['num']--;
+            $res[$i][$this->fields['num']]--;
           }
         }
-        $res[$to_change]['num'] = $index + 1;
+        $res[$to_change][$this->fields['num']] = $index + 1;
         foreach ( $res as $i => $r ){
-          $this->add($r['id'], $r);
+          if ( $upd ){
+            $this->update_by_option($r[$this->fields['id']], $r);
+          }
+          else {
+            $this->add($r[$this->fields['id']], $r);
+          }
         }
-        \bbn\x::sort_by($res, 'num');
+        \bbn\x::sort_by($res, $this->fields['num']);
         return $res;
       }
     }
@@ -591,7 +642,7 @@ MYSQL;
    */
   public function set_by_option(string $id_option, array $cfg): int
   {
-    if ( $id = $this->retrieve_ids($id_option) ){
+    if ( $id = $this->retrieve_user_ids($id_option, $this->id_user) ){
       return $this->set($id[0], $cfg);
     }
     return $this->_insert($id_option, $cfg);
@@ -607,9 +658,9 @@ MYSQL;
   public function set(string $id, array $cfg = null): int
   {
     return $this->db->update($this->class_cfg['table'], [
-      'cfg' => $cfg ? json_encode($this->get_cfg(false, $cfg)) : null
+      $this->fields['cfg'] => $cfg ? json_encode($this->get_cfg(false, $cfg)) : null
     ], [
-      'id' => $id
+      $this->fields['id'] => $id
     ]);
   }
 
@@ -623,14 +674,23 @@ MYSQL;
   public function update(string $id, array $cfg): int
   {
     return $this->db->update($this->class_cfg['table'], [
-      'text' => $cfg['text'] ?? NULL,
-      'id_link' => $cfg['id_link'] ?? NULL,
-      'id_alias' => $cfg['id_alias'] ?? NULL,
-      'id_user' => $this->id_user,
-      'cfg' => json_encode($this->get_cfg(false, $cfg))
+      $this->fields['text'] => $cfg[$this->fields['text']] ?? NULL,
+      $this->fields['num'] => $cfg[$this->fields['num']] ?? NULL,
+      $this->fields['id_link'] => $cfg[$this->fields['id_link']] ?? NULL,
+      $this->fields['id_alias'] => $cfg[$this->fields['id_alias']] ?? NULL,
+      $this->fields['id_user'] => $this->id_user,
+      $this->fields['cfg'] => ($mp = $this->get_cfg(false, $cfg)) ? json_encode($tmp) : NULL
     ], [
-      'id' => $id
+      $this->fields['id'] => $id
     ]);
+  }
+
+  public function update_by_option(string $id_option, array $cfg): int
+  {
+    if ( $id = $this->retrieve_user_ids($id_option, $this->id_user) ){
+      return $this->update($id[0], $cfg);
+    }
+    return $this->_insert($id_option, $cfg);
   }
 
   /**
@@ -638,13 +698,14 @@ MYSQL;
    *
    * @param null|string $id_option
    * @param array $cfg
-   * @return null|int
+   * @return null|string
    */
-  public function add(string $id_option = null, array $cfg): ?int
+  public function add(string $id_option = null, array $cfg): ?string
   {
-    return ($id_option = $this->_get_id_option($id_option)) ?
-      $this->_insert($id_option, $cfg) :
-      NULL;
+    return (
+      ($id_option = $this->_get_id_option($id_option)) &&
+      $this->_insert($id_option, $cfg)
+    ) ? $this->db->last_id() : null;
   }
 
   /**
@@ -873,6 +934,459 @@ MYSQL;
         ]);
       }
       return 0;
+    }
+    return null;
+  }
+
+  /**
+   * Adds a bit to a preference
+   *
+   * @param string $id_usr_opt The preference's ID
+   * @param array $cfg The bit's values
+   * @return string|null
+   */
+  public function add_bit(string $id_usr_opt, array $cfg): ?string
+  {
+    if (
+      ($id_usr_opt = $this->_get_id_option($id_usr_opt)) &&
+      ($c = $this->class_cfg['arch']['user_options_bits'])
+    ){
+      $to_cfg = $this->get_bit_cfg(null, $cfg);
+      if ( isset($to_cfg['items']) ){
+        unset($to_cfg['items']);
+      }
+      if ( !empty($to_cfg) ){
+        if ( !empty($cfg[$c['cfg']]) ){
+          if (  \bbn\str::is_json($cfg[$c['cfg']]) ){
+            $cfg[$c['cfg']] = json_decode($cfg[$c['cfg']], true);
+          }
+          if ( \is_array($cfg[$c['cfg']]) ){
+            $cfg[$c['cfg']] = array_merge($cfg[$c['cfg']], $to_cfg);
+          }
+          else {
+            $cfg[$c['cfg']] = $to_cfg;
+          }
+        }
+        else {
+          $cfg[$c['cfg']] = $to_cfg;
+        }
+        $cfg[$c['cfg']] = json_encode($cfg[$c['cfg']]);
+      }
+      if ( $this->db->insert($this->class_cfg['tables']['user_options_bits'], [
+        $c['id_user_option'] => $id_usr_opt,
+        $c['id_parent'] => $cfg[$c['id_parent']] ?? NULL,
+        $c['id_option'] => $cfg[$c['id_option']] ?? NULL,
+        $c['num'] => $cfg[$c['num']] ?? NULL,
+        $c['text'] => $cfg[$c['text']] ?? '',
+        $c['cfg'] => $cfg[$c['cfg']] ?? '',
+      ]) ){
+        return $this->db->last_id();
+      }
+    }
+    return null;
+  }
+
+
+  /**
+   * Deletes a preference's bit
+   *
+   * @param string The bit's ID
+   * @return int|null
+   */
+  public function delete_bit(string $id): ?int
+  {
+    if ( \bbn\str::is_uid($id) ){
+      return $this->db->delete($this->class_cfg['tables']['user_options_bits'], [
+        $this->class_cfg['arch']['user_options_bits']['id'] => $id
+      ]);
+    }
+    return null;
+  }
+
+  /**
+   * Updates a preference's bit
+   *
+   * @param string $id The bit's ID
+   * @param array The bit's values
+   * @return int|null
+   */
+  public function update_bit(string $id, array $cfg, $merge_config = false): ?int
+  {
+    if ( \bbn\str::is_uid($id) ){
+      $c = $this->class_cfg['arch']['user_options_bits'];
+      $fields = array_values($c);
+      if ( \array_key_exists($c['id'], $cfg) ){
+        unset($cfg[$c['id']]);
+      }
+      $to_cfg = $this->get_bit_cfg(null, $cfg);
+      if ( isset($to_cfg['items']) ){
+        unset($to_cfg['items']);
+      }
+      if ( !empty($to_cfg) ){
+        if ( !empty($merge_config) && !empty($cfg[$c['cfg']]) ){
+          if (  \bbn\str::is_json($cfg[$c['cfg']]) ){
+            $cfg[$c['cfg']] = json_decode($cfg[$c['cfg']], true);
+          }
+          if ( \is_array($cfg[$c['cfg']]) ){
+            $cfg[$c['cfg']] = array_merge($cfg[$c['cfg']], $to_cfg);
+          }
+          else {
+            $cfg[$c['cfg']] = $to_cfg;
+          }
+        }
+        else {
+          $cfg[$c['cfg']] = $to_cfg;
+        }
+        $cfg[$c['cfg']] = json_encode($cfg[$c['cfg']]);
+      }
+      return $this->db->update($this->class_cfg['tables']['user_options_bits'], [
+        $c['id_parent'] => $cfg[$c['id_parent']] ?? NULL,
+        $c['id_option'] => $cfg[$c['id_option']] ?? NULL,
+        $c['num'] => $cfg[$c['num']] ?? NULL,
+        $c['text'] => $cfg[$c['text']] ?? '',
+        $c['cfg'] => $cfg[$c['cfg']] ?? '',
+      ], [
+        $c['id'] => $id
+      ]);
+    }
+    return null;
+  }
+
+  /**
+   * Returns a single preference's bit
+   *
+   * @param string $id The bit's ID
+   * @return array
+   */
+  public function get_bit(string $id, bool $with_config = true): array
+  {
+    if (
+      \bbn\str::is_uid($id) &&
+      ($bit = $this->db->rselect($this->class_cfg['tables']['user_options_bits'], [], [
+        $this->class_cfg['arch']['user_options_bits']['id'] => $id
+      ]))
+    ){
+      if ( !empty($with_config) ){
+        return $this->explode_bit_cfg($bit);
+      }
+      return $bit;
+    }
+    return [];
+  }
+
+  /**
+   * Returns the bits list of a preference
+   *
+   * @param string $id The preference's ID
+   * @param null|string $id_parent The bits'parent ID
+   * @return array
+   */
+  public function get_bits(string $id_usr_opt, $id_parent = false, bool $with_config = true): array
+  {
+    $c = $this->class_cfg['arch']['user_options_bits'];
+    $t = $this;
+    $where = [
+      $c['id_user_option'] => $id_usr_opt
+    ];
+    if ( is_null($id_parent) || \bbn\str::is_uid($id_parent) ){
+      $where[$c['id_parent']] = $id_parent;
+    }
+    if (
+      \bbn\str::is_uid($id_usr_opt) &&
+      ($bits = $this->db->rselect_all($this->class_cfg['tables']['user_options_bits'], [], $where, [$c['num'] => 'ASC']))
+    ){
+      if ( !empty($with_config) ){
+        return array_map(function($b) use($t){
+          return $t->explode_bit_cfg($b);
+        }, $bits);
+      }
+      return $bits;
+    }
+    return [];
+  }
+
+  /**
+   * Returns the hierarchical bits list of a preference
+   *
+   * @param string $id_usr_opt The preference's ID
+   * @param string $id_parent The parent's ID of a bit. Default: null
+   * @param bool $with_config Set it to false if you don't want the preference's cfg field values on the results.
+   * @return array
+   */
+  public function get_full_bits(string $id_usr_opt, string $id_parent = null, bool $with_config = true): array
+  {
+    if ( \bbn\str::is_uid($id_usr_opt) ){
+      $c = $this->class_cfg['arch']['user_options_bits'];
+      $t = $this;
+      return array_map(function($b) use($t, $c, $id_usr_opt, $with_config){
+        if ( !empty($with_config) ){
+          $b = $t->explode_bit_cfg($b);
+        }
+        $b['items'] = $t->get_full_bits($id_usr_opt, $b[$c['id']], $with_config);
+        return $b;
+      }, $this->db->rselect_all([
+        'table' => $this->class_cfg['tables']['user_options_bits'],
+        'fields' => [],
+        'where' => [
+          'conditions' => [[
+            'field' => $c['id_user_option'],
+            'value' => $id_usr_opt
+          ], [
+            'field' => $c['id_parent'],
+            empty($id_parent) ? 'operator' : 'value' => $id_parent ?: 'isnull'
+          ]]
+        ],
+        'order' => [$c['num'] => 'ASC']
+      ]));
+    }
+    return [];
+  }
+
+  /**
+   * Returns a preference and its hierarchical bits list
+   *
+   * @param string $id The preference's ID
+   * @param bool $with_config Set it to false if you don't want the preference's cfg field values on the results.
+   */
+  public function get_tree(string $id, bool $with_config = true): array
+  {
+    if (
+      \bbn\str::is_uid($id) &&
+      ($p = $this->get($id, $with_config))
+    ){
+      $p['items'] = $this->get_full_bits($id, null, $with_config);
+      return $p;
+    }
+    return [];
+  }
+
+  public function explode_bit_cfg($bit): array
+  {
+    $c = $this->class_cfg['arch']['user_options_bits'];
+    if (
+      !empty($bit[$c['cfg']]) &&
+      ($cfg = json_decode($bit[$c['cfg']], true))
+    ){
+      foreach ( $cfg as $i => $v ){
+        if ( !array_key_exists($i, $bit) ){
+          $bit[$i] = $v;
+        }
+      }
+    }
+    unset($bit[$c['cfg']]);
+    return $bit;
+  }
+
+  public function next_bit_num(string $id): ?int
+  {
+    if (
+      \bbn\str::is_uid($id) &&
+      ($max = $this->db->select_one(
+        $this->class_cfg['tables']['user_options_bits'],
+        'MAX(num)',
+        [$this->class_cfg['arch']['user_options_bits']['id_user_option'] => $id]
+      ))
+    ){
+      return $max+1;
+    }
+    return null;
+  }
+
+  /**
+   * Gets the bit's cfg array, normalized either from the DB or from the $cfg argument
+   *
+   * @param string $id
+   * @param null|array $cfg
+   * @return null|array
+   */
+
+  public function get_bit_cfg(string $id = null, array $cfg = null): ?array
+  {
+    if (
+      (null !== $cfg) ||
+      ($cfg = $this->db->select_one(
+        $this->class_cfg['tables']['user_options_bits'],
+        $this->class_cfg['arch']['user_options_bits']['cfg'],
+        [$this->class_cfg['arch']['user_options_bits']['id'] => $id ]
+      ))
+    ){
+      $fields = array_values($this->class_cfg['arch']['user_options_bits']);
+      if ( bbn\str::is_json($cfg) ){
+        $cfg = json_decode($cfg, 1);
+      }
+      if ( \is_array($cfg) ){
+        $new = [];
+        foreach ( $cfg as $k => $v){
+          if ( !\in_array($k, $fields, true) ){
+            $new[$k] = $v;
+          }
+        }
+        return $new;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Orders a bit.
+   * 
+   * @param string $id The bit's ID
+   * @param int $pos The new position
+   * @return bool|null
+   */
+  public function order_bit(string $id, int $pos): ?bool
+  {
+    if ( 
+      \bbn\str::is_uid($id) &&
+      ($cf = $this->get_class_cfg()) &&
+      ($cfg = $cf['arch']['user_options_bits']) &&
+      ($bit = $this->get_bit($id)) &&
+      ($old = (int)$bit[$cfg['num']]) &&
+      !empty($pos) &&
+      ($old !== $pos) &&
+      ($bits = $this->get_bits($bit[$cfg['id_user_option']], $bit[$cfg['id_parent']] ?: false))
+    ){    
+      $past_new = false;
+      $past_old = false;
+      $p = 1;
+      $changed = 0;
+      foreach ( $bits as $ele ){
+        $upd = [];
+        if ( $past_old && !$past_new ){
+          $upd[$cfg['num']] = $p-1;
+        }
+        else if ( !$past_old && $past_new ){
+          $upd[$cfg['num']] = $p+1;
+        }
+        if ( $id === $ele['id'] ){
+          $upd[$cfg['num']] = $pos;
+          $past_old = 1;
+        }
+        else if ( $p === $pos ){
+          $upd[$cfg['num']] = $p + ($pos > $old ? -1 : 1);
+          $past_new = 1;
+        }
+        if ( !empty($upd) ){
+          $changed += $this->db->update($cf['tables']['user_options_bits'], $upd, [$cfg['id'] => $ele['id']]);
+        }
+        if ( $past_new && $past_old ){
+          break;
+        }
+        $p++;
+      }
+      return !!$changed;
+    }
+    return null;
+  }
+
+  /**
+   * Moves a bit.
+   * 
+   * @param string $id The bit's ID
+   * @param string|null The new parent's ID
+   * @return bool|null
+   */
+  public function move_bit(string $id, string $id_parent = null): ?bool
+  { 
+    if ( 
+      \bbn\str::is_uid($id) && 
+      (
+        (\bbn\str::is_uid($id_parent) && $this->get_bit($id_parent)) || 
+        \is_null($id_parent)
+      ) &&
+      ($bit = $this->get_bit($id)) &&
+      ($cf = $this->get_class_cfg()) &&
+      ($cfg =  $cf['arch']['user_options_bits'])
+    ){
+      $upd = [
+        $cfg['id_parent'] => $id_parent,
+        $cfg['num'] => $this->get_max_bit_num($bit[$cfg['id_user_option']], $id_parent, true)
+      ];
+      return !!$this->db->update($cf['tables']['user_options_bits'], $upd, [$cfg['id'] => $id]);
+    }
+    return null;
+  }
+
+  /**
+   * Gets the maximum num value of the user option's bits.
+   * 
+   * @param string $id_user_option The user option's ID
+   * @param string|null $id_parent The parent's ID
+   * @param bool $incr Set it to true if you want the result increased by 1
+   * @return int 
+   */
+  public function get_max_bit_num(string $id_user_option, string $id_parent = null, bool $incr = false): int
+  {
+    if ( 
+      \bbn\str::is_uid($id_user_option) &&
+      (\bbn\str::is_uid($id_parent) || is_null($id_parent)) &&
+      ($cf = $this->get_class_cfg()) &&
+      ($cfg =  $cf['arch']['user_options_bits'])
+    ){
+      if ( $max = $this->db->select_one([
+        'table' => $cf['tables']['user_options_bits'], 
+        'fields' => ["MAX($cfg[num])"],
+        'where' => [
+          'conditions' => [[
+            'field' => $cfg['id_user_option'],
+            'value' => $id_user_option
+          ], [
+            'field' => $cfg['id_parent'],
+            empty($id_parent) ? 'operator' : 'value' => $id_parent ?: 'isnull'
+          ]]
+        ]
+      ]) ){
+        $max = (int)$max;
+        return $incr ? $max+1 : $max;
+      }
+      return 0;
+    }
+  }
+
+
+
+
+  /**
+   *  Gets a preference row from a bit ID
+   *
+   * @param string $id The bit's ID
+   * @return array
+   */
+  public function get_by_bit(string $id): ?array
+  {
+    $t =& $this;
+    if ( \bbn\str::is_uid($id) ){
+      return $this->db->rselect([
+        'table' => $this->class_cfg['table'],
+        'fields' => array_map(function($v) use($t){
+          return $this->class_cfg['table'].'.'.$v;
+        }, array_values($this->class_cfg['arch']['user_options'])),
+        'join' => [[
+          'table' => $this->class_cfg['tables']['user_options_bits'],
+          'on' => [
+            'conditions' => [[
+              'field' => $this->class_cfg['arch']['user_options_bits']['id_user_option'],
+              'exp' => $this->class_cfg['table'].'.'.$this->fields['id']
+            ]]
+          ]
+        ]],
+        'where' => [
+          $this->class_cfg['tables']['user_options_bits'].'.'.$this->class_cfg['arch']['user_options_bits']['id'] => $id
+        ]
+      ]);
+    }
+  }
+
+  /**
+   * Gets the preference's ID from a bit ID
+   *
+   * @param string $id The bit's ID
+   * @return string
+   */
+  public function get_id_by_bit(string $id): ?string
+  {
+    if ( \bbn\str::is_uid($id) && ($p = $this->get_by_bit($id)) ){
+      return $p[$this->fields['id']];
     }
     return null;
   }

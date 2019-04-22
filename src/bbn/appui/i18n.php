@@ -21,13 +21,23 @@ class i18n extends bbn\models\cls\cache
     $parser,
     $translations = [],
     $user;
-
+  
+  /**
+   * Initialize the class i18n
+   * 
+   * @param db 
+   */
   public function __construct(bbn\db $db){
     parent::__construct($db);
     $this->parser = new \Gettext\Translations();
     $this->user = \bbn\user::get_instance();
   }
-
+  /**
+   * Returns the strings contained in the given php file
+   *
+   * @param string $file
+   * @return array
+   */
   public function analyze_php(string $file): array
   {
     $res = [];
@@ -44,6 +54,12 @@ class i18n extends bbn\models\cls\cache
     return array_unique($res);
   }
 
+  /**
+   * Returns the strings contained in the given js file
+   *
+   * @param string $file
+   * @return array
+   */
   public function analyze_js(string $file): array
   {
     $res = [];
@@ -82,6 +98,12 @@ class i18n extends bbn\models\cls\cache
     return array_unique($res);
   }
 
+  /**
+   * Returns the strings contained in the given html file
+   *
+   * @param string $file
+   * @return array
+   */
   public function analyze_html(string $file): array
   {
     $res = [];
@@ -98,6 +120,12 @@ class i18n extends bbn\models\cls\cache
     return array_unique($res);
   }
 
+  /**
+   * Returns the strings contained in the given file
+   *
+   * @param string $file
+   * @return array
+   */
   public function analyze_file(string $file): array
   {
     $res = [];
@@ -121,6 +149,13 @@ class i18n extends bbn\models\cls\cache
     return $res;
   }
 
+  /**
+   * Returns an array containing the strings found in the given folder
+   *
+   * @param string $folder
+   * @param boolean $deep
+   * @return array
+   */
   public function analyze_folder(string $folder = '.', bool $deep = false): array
   {
     $res = [];
@@ -143,6 +178,11 @@ class i18n extends bbn\models\cls\cache
     return $res;
   }
 
+  /**
+   * Returns the parser
+   *
+   * @return void
+   */
   public function get_parser(){
     return $this->parser;
   }
@@ -154,7 +194,13 @@ class i18n extends bbn\models\cls\cache
     return array_unique($this->translations);
   }
 
-//get the id of the project from the id_option of a path
+  /**
+   * get the id of the project from the id_option of a path
+   *
+   * @param $id_option
+   * @param $projects
+   * @return void
+   */
   public function get_id_project($id_option, $projects){
     foreach( $projects as $i => $p ){
       foreach ( $projects[$i]['path'] as $idx => $pa ){
@@ -177,19 +223,27 @@ class i18n extends bbn\models\cls\cache
     }
   }
 
-  //get primaries langs from option
+  /**
+   * Gets primaries langs from option
+   *
+   * @return void
+   */
   public function get_primaries_langs(){
-    $uid_languages =  options::get_instance()->from_code('languages', 'i18n', 'appui');
+    $uid_languages =  self::get_appui_option_id('languages');
     $languages = options::get_instance()->full_tree($uid_languages);
     $primaries = array_values(array_filter($languages['items'], function($v) {
-      return isset($v['primary']) && ($v['primary'] == '1');
+      return !empty($v['primary']);
     }));
     return $primaries;
   }
 
 
 
-  /* get the num of items['text'] in original language and num translations foreach lang in configured langs (for this project I use all primaries as configured langs) */
+  /**
+   * get the num of items['text'] in original language and num translations foreach lang in configured langs (for this project uses all primaries as configured langs) 
+   *
+   * @return void
+   */
   public function get_num_options(){
     /** @var  $paths takes all options with i18n property setted*/
     $paths = options::get_instance()->find_i18n();
@@ -245,7 +299,11 @@ class i18n extends bbn\models\cls\cache
 
 
 
-  /* gets the option with the property i18n setted and its items */
+  /**
+   * Gets the option with the property i18n setted and its items 
+   *
+   * @return void
+   */
   public function get_options(){
     /** @var ( array) $paths get all options having i18n property setted and its items */
     $paths = options::get_instance()->find_i18n();
@@ -328,14 +386,21 @@ class i18n extends bbn\models\cls\cache
 
 
   /**
-   * gets the propriety language of the option
+   * Gets the propriety language of the option
    *
    * @param id_option
    */
   public function get_language($id_option){
     return options::get_instance()->get_prop($id_option,'language');
   }
-  /* gets the widgets initial data */
+  
+  /**
+   * Gets the widgets initial data
+   *
+   * @param [type] $id_project
+   * @param [type] $id_option
+   * @return void
+   */
   public function get_translations_widget($id_project, $id_option)
   {
     $success = false;
@@ -350,24 +415,20 @@ class i18n extends bbn\models\cls\cache
       isset($o['language']) ){
         $domain = $o['text'];
 
-        /** @var $to_explore the path to explore */
+        // @var $to_explore the path to explore 
         $to_explore = constant($parent['code']);
-        /** @var $locale_dir the path to locale dir */
-       //exeption for apst_app, don't need the code
-       
+        // @var $locale_dir the path to locale dir 
+        //exeption for apst_app, don't need the code
         if( (constant($parent['code']) === BBN_APP_PATH) && (strrpos('mvc/', $o['code'], 0) === 0) ) {
           $locale_dir = $to_explore.'locale';
         }
         else{
           $locale_dir = $to_explore.$o['code'].'locale';
         }
-        
-
         $domain .= is_file($locale_dir.'/index.txt') ? file_get_contents($locale_dir.'/index.txt') : '';
-
-        /** @var $dirs scans dirs existing in locale folder for this path */
+        // @var $dirs scans dirs existing in locale folder for this path 
         if ( is_dir($locale_dir) ){
-          /** @var array $languages dirs in locale folder*/
+          // @var array $languages dirs in locale folder
           $dirs = \bbn\file\dir::get_dirs($locale_dir) ?: [];
           if(!empty($dirs)){
             foreach ($dirs as $l ){
@@ -377,15 +438,15 @@ class i18n extends bbn\models\cls\cache
         }
         $new = 0;
         $i = 0;
-        /** @var array the languages found in locale dir */
+        // @var array the languages found in locale dir 
         if ( !empty($languages) ){
           $result = [];
           foreach ( $languages as $lng ){
-            /* the root to file po & mo */
+            // the root to file po & mo 
             $po = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$domain.'.po';
             $mo = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$domain.'.mo';
 
-            /* if a file po already exists takes its content */
+            // if a file po already exists takes its content 
             if ( is_file($po) ){
               $fileHandler = new \Sepia\PoParser\SourceHandler\FileSystem($po);
               $poParser = new \Sepia\PoParser\Parser($fileHandler);
@@ -406,7 +467,7 @@ class i18n extends bbn\models\cls\cache
               }
 
             }
-            /* if the file po for the $lng doesn't exist $result is an empty object */
+            // if the file po for the $lng doesn't exist $result is an empty object 
             else{
               if( !empty($this->count_translations_db($id_option)[$lng]) ){
                 $count_translations = $this->count_translations_db($id_option)[$lng];
@@ -436,14 +497,20 @@ class i18n extends bbn\models\cls\cache
     ];
   }
 
+  /**
+   * Returns an array containing the po files found for the id_option
+   *
+   * @param $id_option
+   * @return void
+   */
   public function get_po_files($id_option){
     if (!empty($id_option) && ($o = options::get_instance()->option($id_option)) &&
     ($parent = options::get_instance()->parent($id_option)) &&
     defined($parent['code']) ){
       $tmp = [];
-      /** @var  $to_explore the path to explore */
+      // @var  $to_explore the path to explore 
       $to_explore = constant($parent['code']).$o['code'];
-      /** @var  $locale_dir locale dir in the path*/
+      // @var  $locale_dir locale dir in the path
       $locale_dir = dirname($to_explore).'/locale';
       $dirs = \bbn\file\dir::get_dirs($locale_dir) ?: [];
       $languages = array_map(function($a){
@@ -452,7 +519,7 @@ class i18n extends bbn\models\cls\cache
       if ( !empty($languages) ){
 
         foreach ( $languages as $lng ){
-          /* the path of po and mo files */
+          // the path of po and mo files 
           $idx = is_file($locale_dir.'/index.txt') ? file_get_contents($locale_dir.'/index.txt') : '';
           if ( is_file($locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$idx.'.po') ){
             $tmp[$lng]= $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$idx.'.po';
@@ -465,8 +532,13 @@ class i18n extends bbn\models\cls\cache
       return $tmp;
     }
   }
-  /** @todo  make a method that returns the po files path for each id_option */
-
+  
+  /**
+   * Count how many of the strings contained in po files are already in database
+   *
+   * @param [type] $id_option
+   * @return void
+   */
   public function count_translations_db($id_option){
     $count = [];
     $po = $this->get_po_files($id_option);
@@ -481,14 +553,11 @@ class i18n extends bbn\models\cls\cache
         $count[$lang] = 0;
         foreach( $fromPo as $o ){
           if ( $exp = $o->getMsgId() ){
-
             $id = $this->db->select_one('bbn_i18n', 'id', ['exp' => $exp, 'lang' => $source_language]);
-            //$tmp[$exp]['id'] = $id;
             if ( $string = $this->db->select_one('bbn_i18n_exp', 'expression', [
               'id_exp' => $id,
               'lang' => $lang
             ]) ){
-              //$tmp[$exp]['translations'] = [$lang => $string];
               $count[$lang]++;
             }
           }
@@ -502,6 +571,14 @@ class i18n extends bbn\models\cls\cache
     return $count;
   }
 
+  /**
+   * Returns the strings contained in the given path
+   *
+   * @param $id_option
+   * @param $source_language
+   * @param $languages
+   * @return void
+   */
   public function get_translations_strings($id_option, $source_language, $languages){
 
     if (
@@ -511,13 +588,10 @@ class i18n extends bbn\models\cls\cache
       ($parent = options::get_instance()->option($o['id_parent'])) &&
       \defined($parent['code'])
     ){
-
-      /** @var string $to_explore The path to explore path of mvc */
+      // @var string $to_explore The path to explore path of mvc 
       $to_explore = \constant($parent['code']).($o['code'] === '/' ? '' : $o['code']);
 
       $current_path = \constant($parent['code']);
-
-      
       if ( constant($parent['code']) === BBN_APP_PATH ){
         $current_dirs = bbn\file\dir::get_dirs( constant($parent['code']).($o['code'] === '/' ? '' : $o['code']));
 			}
@@ -539,35 +613,26 @@ class i18n extends bbn\models\cls\cache
       //creates the array $to_explore_dirs containing mvc, plugins e components
       if ( !empty($current_dirs) ){
         foreach ($current_dirs as $key => $value) {
-          //if ( strpos($value, '.') !== 0 ){
           if( constant($parent['code']) === BBN_APP_PATH ){
             if (( strpos($value, 'locale') !== 0 ) && ( strpos($value, 'data') !== 0 ) && ( strpos($value, '.') !== 0 )){
-						//with the full path in $current_dirs all strpos are not more valid!!! I cannot exclude ., locale  e data dirs
-              $to_explore_dirs = $current_dirs;
+						  $to_explore_dirs = $current_dirs;
             }
           }
 
-          if( constant($parent['code']) === BBN_CDN_PATH ){
+          if ( constant($parent['code']) === BBN_CDN_PATH ){
             $to_explore_dirs[] = $current_dirs;
           }
           else if ( $parent['code'] === 'BBN_LIB_PATH'  ){
             //case of plugins appui
             $to_explore_dirs[] = $current_dirs[$key];
-
           }
-
-          //}
         }
       }
-
-
-
-
-      /** @var  $locale_dir  the root of locale dir for this id_option*/
+      // @var  $locale_dir  the root of locale dir for this id_option
       $locale_dir = dirname($to_explore).'/locale';
 
-      /** @var $dirs scans dirs contained in locale folder of this path*/
-      //$dirs = scandir($locale_dir, 1) ?: [];
+      // @var $dirs scans dirs contained in locale folder of this path
+      
       $res = [];
       //case of generate called from table
       if ( empty($languages) ){
@@ -590,9 +655,7 @@ class i18n extends bbn\models\cls\cache
         }
       }
 
-
-      //all strings found in the different dirs $to_explore_dirs
-      //merge all index of $res
+      //all strings found in the different dirs $to_explore_dirs, merge all index of $res
       if(!empty($res)){
          $res = array_merge(...$res);
       }
@@ -601,18 +664,16 @@ class i18n extends bbn\models\cls\cache
       $done = 0;
 
       foreach ( $res as $r => $val ){
-        /*  for each string create a property 'path' containing the files' name in which the string is contained */
+        // for each string create a property 'path' containing the files' name in which the string is contained 
 
         $res[$r] = ['path' => $val];
 
-        /*  checks if the table bbn_i18n of db already contains the string $r for this $source_lang */
+        // checks if the table bbn_i18n of db already contains the string $r for this $source_lang 
         if ( !($id = $this->db->select_one('bbn_i18n', 'id', [
           'exp' => $r,
           'lang' => $source_language
         ])) ){
-
-          //\bbn\x::log( [$r,$source_language, $this->db->check()] , 'find_strings');
-          /* if the string $r is not in 'bbn_i18n' inserts the string */
+          // if the string $r is not in 'bbn_i18n' inserts the string 
           $this->db->insert_ignore('bbn_i18n', [
             'exp' => $r,
             'lang' => $source_language,
@@ -620,21 +681,21 @@ class i18n extends bbn\models\cls\cache
           $id = $this->db->last_id();
 
         }
-        /* create the property 'id_exp' for the string $r */
+        // create the property 'id_exp' for the string $r 
         $res[$r]['id_exp'] = $id;
 
-        /* puts the string $r into the property 'original_exp' (I'll use only array_values at the end) */
+        // puts the string $r into the property 'original_exp' (I'll use only array_values at the end) *
         $res[$r]['original_exp'] = $r;
 
-        /* checks in 'bbn_i18n_exp' if the string $r already exist for this $source_lang */
+        // checks in 'bbn_i18n_exp' if the string $r already exist for this $source_lang 
         if( !( $id_exp = $this->db->select_one('bbn_i18n_exp', 'id_exp', [
           'id_exp' => $id,
           'lang' => $source_language
         ]) ) ){
 
-          /* if the string $r is not in 'bbn_i18n_exp' inserts the string
-            $done will be the number of strings found in the folder $to_explore that haven't been found in the table
-           'bbn_i18n_exp' of db, so $done is the number of new strings inserted in in 'bbn_i18n_exp'*/
+          // if the string $r is not in 'bbn_i18n_exp' inserts the string
+          //  $done will be the number of strings found in the folder $to_explore that haven't been found in the table
+          // 'bbn_i18n_exp' of db, so $done is the number of new strings inserted in in 'bbn_i18n_exp'
           $done += (int)$this->db->insert_ignore('bbn_i18n_exp', [
             'id_exp' => $id,
             'lang' => $source_language,
@@ -643,9 +704,9 @@ class i18n extends bbn\models\cls\cache
           //creates an array of new strings found in the folder;
           $news[] = $r;
         }
-        /* $languages is the array of languages existing in locale dir*/
+        // $languages is the array of languages existing in locale dir
         foreach ( $languages as $lng ){
-          /**  create a property indexed to the code of $lng containing the string $r from 'bbn_i18n_exp' in this $lng */
+          //  create a property indexed to the code of $lng containing the string $r from 'bbn_i18n_exp' in this $lng 
           $res[$r][$lng] = (string)$this->db->select_one(
             'bbn_i18n_exp',
               'expression',
@@ -656,7 +717,6 @@ class i18n extends bbn\models\cls\cache
           );
         }
       }
-
       return [
         'news' => $news,
         'id_option' => $id_option,
@@ -666,22 +726,26 @@ class i18n extends bbn\models\cls\cache
         'path' => $to_explore,
         'success' => true
       ];
-
-
     }
-
   }
 
+  /**
+   * Returns the informations relative to traslation of the given $id_option of a $id_project. The data is formatted to be shown in a table
+   *
+   * @param [type] $id_project
+   * @param [type] $id_option
+   * @return void
+   */
   public function get_translations_table($id_project, $id_option){
     if ( !empty($id_option) &&
       ($o = options::get_instance()->option($id_option)) &&
       ($parent = options::get_instance()->parent($id_option)) &&
       defined($parent['code']) ){
 
-      /** @var  $path_source_lang the property language of the id_option (the path) */
+      // @var  $path_source_lang the property language of the id_option (the path) 
       $path_source_lang = options::get_instance()->get_prop($id_option, 'language');
 
-      /** @var  $to_explore the path to explore */
+      // @var  $to_explore the path to explore 
       $to_explore = constant($parent['code']);
 
        //exeption for apst_app, don't need the code
@@ -691,27 +755,22 @@ class i18n extends bbn\models\cls\cache
       else{
         $locale_dir = $to_explore.$o['code'].'locale';
       }
-        
-
       $languages = array_map(function($a){
         return basename($a);
       }, \bbn\file\dir::get_dirs($locale_dir)) ?: [];
       $i = 0;
       $res = [];
       $project = new bbn\appui\project($this->db, $id_project);
-
-
-
       if ( !empty($languages) ){
         $po_file = [];
         $success = false;
         foreach ( $languages as $lng ){
-          /** the path of po and mo files */
+          // the path of po and mo files 
           $idx = is_file($locale_dir.'/index.txt') ? file_get_contents($locale_dir.'/index.txt') : '';
           $po = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$idx.'.po';
           $mo = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$idx.'.mo';
-          /** if the file po exist takes its content */
-
+          
+          // if the file po exist takes its content 
           if (file_exists($po)){
             $fileHandler = new \Sepia\PoParser\SourceHandler\FileSystem($po);
             $poParser = new \Sepia\PoParser\Parser($fileHandler);
@@ -720,16 +779,16 @@ class i18n extends bbn\models\cls\cache
             if ( !empty( $translations = $Catalog->getEntries() ) ){
               foreach ($translations as $i => $t ){
 
-                /** @var  $original the original expression */
+                // @var  $original the original expression 
                 $original = $t->getMsgId();
 
                 $po_file[$i][$lng]['original'] = $original;
 
-                /** the translation of the string found in the po file */
+                // the translation of the string found in the po file 
                 $po_file[$i][$lng]['translations_po'] =  $t->getMsgStr();
 
 
-                /** @var  $id takes the id of the original expression in db */
+                // @var  $id takes the id of the original expression in db 
                 if ( $id = $this->db->select_one('bbn_i18n',
                   'id',
                   [
@@ -738,17 +797,17 @@ class i18n extends bbn\models\cls\cache
                   ]) ){
                   $po_file[$i][$lng]['translations_db'] = $this->db->select_one('bbn_i18n_exp', 'expression', ['id_exp' => $id, 'lang' => $lng]);
 
-                  /** the id of the string */
+                  // the id of the string 
                   $po_file[$i][$lng]['id_exp'] = $id;
 
-                  /** @var (array) takes $paths of files in which the string was found from the file po */
+                  // @var (array) takes $paths of files in which the string was found from the file po 
                   $paths = $t->getReference();
                    
-                  /** get the url to use it for the link to ide from the table */
+                  // get the url to use it for the link to ide from the table 
                   foreach ( $paths as $p ){
                     $po_file[$i][$lng]['paths'][] = $project->real_to_url_i18n($p);
                   }
-                  /** the number of times the strings is found in the files of the path  */
+                  // the number of times the strings is found in the files of the path  
                   $po_file[$i][$lng]['occurrence'] = !empty($po_file[$i][$path_source_lang]) ? count($po_file[$i][$path_source_lang]['paths']) : 0;
 
                 };

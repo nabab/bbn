@@ -256,17 +256,24 @@ class grid extends bbn\models\cls\cache
     }
     if ( $this->count ){
       $this->chrono->start();
-      $this->num = $this->db->get_one(
-        $this->count.PHP_EOL.
-          $this->db->get_where($this->cfg).
-          $this->db->get_group_by($this->cfg),
-        !empty($this->cfg['values']) ? array_map(function($v){
-          if ( \bbn\str::is_uid($v) ){
-            return hex2bin($v);
-          }
-          return $v;
-        }, $this->cfg['values']) : []
-      );
+      if ( is_string($this->count) ){
+        $this->num = $this->db->get_one(
+          $this->count.PHP_EOL.
+            $this->db->get_where($this->cfg).
+            $this->db->get_group_by($this->cfg),
+          !empty($this->cfg['values']) ? array_map(function($v){
+            if ( \bbn\str::is_uid($v) ){
+              return hex2bin($v);
+            }
+            return $v;
+          }, $this->cfg['values']) : []
+        );
+      }
+      else if ( is_array($this->count) ){
+        $cfg = $this->count;
+        $cfg['where'] = $this->cfg['where'];
+        $this->num = $this->db->select_one($cfg);
+      }
       $this->count_time = $this->chrono->measure();
       $this->chrono->stop();
       $this->set_cache([

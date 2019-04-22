@@ -10,9 +10,9 @@
 namespace bbn\api;
 use bbn;
 
-class cloudminn{
+class cloudmin{
 
-  const cache_name = 'bbn/api/cloudminn';
+  const cache_name = 'bbn/api/cloudmin';
 
   private
     /** @var  Cloudmin username */
@@ -60,7 +60,7 @@ class cloudminn{
     //Concatenating the header url and $url_part to create the full url to be executed
     $url_part = $this->get_header_url() . $url_part;
 
-  
+
     //Calling shell_exec and returning the result array
     return array_map(function($a){
       array_walk($a['values'], function(&$b){

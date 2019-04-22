@@ -19,6 +19,8 @@ class x
 
   private static $counters = [];
 
+  private static $last_curl = null;
+
   /**
   *
   */
@@ -530,7 +532,7 @@ class x
       }
       else if ( \is_object($a) ){
         $n = \get_class($a);
-        if ( $n === '\\stdClass' ){
+        if ( $n === 'stdClass' ){
           $r = str::export($a);
         }
         else{
@@ -1140,6 +1142,7 @@ class x
    */
   public static function curl(string $url, array $param = null, array $options = ['post' => 1]){
     $ch = curl_init();
+    self::$last_curl = $ch;
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     if (\is_object($param) ){
       $param = self::to_array($param);
@@ -1151,15 +1154,20 @@ class x
     }
     $options = array_change_key_case($options, CASE_UPPER);
     foreach ( $options as $opt => $val ){
-      if ( \defined('CURLOPT_'.strtoupper($opt)) ){
-        curl_setopt($ch, constant('CURLOPT_'.strtoupper($opt)), $val);
+      if ( \defined('CURLOPT_'.$opt) ){
+        curl_setopt($ch, constant('CURLOPT_'.$opt), $val);
       }
     }
     if ( $param ){
       if ( !empty($options['POST']) ){
         curl_setopt($ch, CURLOPT_URL, $url);
-        //curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($param));
         curl_setopt($ch, CURLOPT_POSTFIELDS, $param);
+      }
+      else if ( !empty($options['DELETE']) ){
+        //die($url.'?'.http_build_query($param));
+        curl_setopt($ch, CURLOPT_URL, $url.'?'.http_build_query($param));
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');        
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
       }
       else{
         curl_setopt($ch, CURLOPT_URL, $url.'?'.http_build_query($param));
@@ -1167,12 +1175,41 @@ class x
     }
     else{
       curl_setopt($ch, CURLOPT_URL, $url);
+      if ( !empty($options['DELETE']) ){
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      }
     }
+
     $r = curl_exec($ch);
     if ( !$r ){
-      self::log(curl_error($ch), 'curl');
+      self::log(["PROBLEME AVEC L'URL $url", curl_error($ch), curl_getinfo($ch)], 'curl');
     }
     return $r;
+  }
+
+  public static function last_curl_error(){
+    if ( self::$last_curl ){
+      return curl_error(self::$last_curl);
+    }
+    return null;
+  }
+
+  public static function last_curl_code(){
+    if ( self::$last_curl ){
+      $infos = curl_getinfo(self::$last_curl);
+      if ( $infos ){
+        return $infos['http_code'];
+      }
+    }
+    return null;
+  }
+
+  public static function last_curl_info(){
+    if ( self::$last_curl ){
+      return curl_getinfo(self::$last_curl);
+    }
+    return null;
   }
 
   /**
@@ -1357,6 +1394,33 @@ class x
       return filemtime($file1) === filemtime($file2);
     }
   }
+
+  public static function &retrieve_array_var(array $props, array &$ar){
+    $cur =& $ar;
+    foreach ( $props as $p ){
+      if ( \is_array($cur) && array_key_exists($p, $cur) ){
+        $cur =& $cur[$p];
+      }
+      else{
+        throw new \Exception("Impossible to find the value in the array");
+      }
+    }
+    return $cur;
+  }
+
+  public static function &retrieve_object_var(array $props, object &$obj){
+    $cur =& $obj;
+    foreach ( $props as $p ){
+      if ( property_exists($cur, $p) ){
+        $cur =& $cur->{$p};
+      }
+      else{
+        throw new \Exception("Impossible to find the value in the object");
+      }
+    }
+    return $cur;
+  }
+  
 
   /**
   * @todo Comment this
