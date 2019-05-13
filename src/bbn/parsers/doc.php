@@ -131,6 +131,7 @@ class doc {
         'emits' => ['name'],
         'method' => ['name'],
         'prop' => ['type', 'default', 'name'],
+        'required' => ['text'],
         'watch' => ['name', 'description']
       ],
       'php' => [
@@ -229,7 +230,7 @@ class doc {
             !empty($def[1])
           ){
 						$res['default'] = $def[1][0];
-					}
+          }
 					// Get name
 					if ( isset($def[1]) ){
 						$n = $def[0][1] + strlen($def[0][0]) + 1;
