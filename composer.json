@@ -17,7 +17,7 @@
     "ext-mbstring": "*",
     "ext-json": "*",
     "zordius/lightncandy": "dev-master",
-    "greenlion/php-sql-parser": "dev-trunk",
+    "greenlion/php-sql-parser": "dev-master",
     "mpdf/mpdf": "dev-master",
     "squizlabs/php_codesniffer": "dev-master",
     "natxet/CssMin": "dev-master",

@@ -1140,7 +1140,7 @@ class x
    * @param array $options
    * @return mixed
    */
-  public static function curl(string $url, array $param = null, array $options = ['post' => 1]){
+  public static function curl(string $url, $param = null, array $options = ['post' => 1]){
     $ch = curl_init();
     self::$last_curl = $ch;
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -1643,4 +1643,83 @@ class x
     return $res;
   }
 
+  public static function join(array $ar, string $glue = ''): string
+  {
+    return implode($glue, $ar);
+  }
+
+  public static function concat(string $st, string $separator): array
+  {
+    return explode($separator, $st);
+  }
+
+  /**
+   * Searches from start to end
+   */
+  public static function indexOf($subject, $search, int $start = 0): int
+  {
+    $res = false;
+    if ( is_array($subject) ){
+      if ( $start ){
+        $i = 0;
+        foreach ( $subject as $s ){
+          if ( ($i >= $start) && ($s === $search) ){
+            $res = $i;
+            break;
+          }
+          else{
+            $i++;
+          }
+        }
+      }
+      else{
+        $res = array_search($search, $subject, true);
+      }
+    }
+    else if ( is_string($subject) ){
+      $res = strpos($subject, $search, $start);
+    }
+    return $res === false ? -1 : $res;
+  }
+
+  /**
+   * Searches from end to start
+   */
+  public static function lastIndexOf($subject, $search, int $start = null): int
+  {
+    $res = false;
+    if ( is_array($subject) ){
+      $i = count($subject) - 1;
+      if ( $i ){
+        if ( $start > 0 ){
+          if ( $start > $i ){
+            return -1;
+          }
+          $i = $start;
+        }
+        else if ( $start < 0 ){
+          $i -= $start;
+          if ( $i < 0 ){
+            return -1;
+          }
+        }
+        foreach ( $subject as $s ){
+          if ( ($i <= $start) && ($s === $search) ){
+            $res = $i;
+            break;
+          }
+          else{
+            $i--;
+          }
+        }
+      }
+    }
+    else if ( is_string($subject) ){
+      if ( $start > 0 ){
+        $start = strlen($subject) - (strlen($subject) - $start);
+      }
+      $res = strrpos($subject, $search, $start);
+    }
+    return $res === false ? -1 : $res;
+  }
 }

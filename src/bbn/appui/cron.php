@@ -332,7 +332,9 @@ class cron extends bbn\models\cls\basic{
   public function get_log_path(array $cfg): ?string
   {
     if ( isset($cfg['type']) && $this->path ){
-      $dir = isset($cfg['id']) ? bbn\file\dir::create_path($this->path.'log/tasks/'.$cfg['id']) : $this->path.'log/'.$cfg['type'];
+      $dir = bbn\file\dir::create_path($this->path.'log/'
+        .(isset($cfg['id']) ? 'tasks/'.$cfg['id'] : $cfg['type']).
+        '/'.date('Y/m/d'));
       return $dir ? $dir.'/'.date('Y-m-d-H-i-s').'.txt' : null;
     }
     return null;

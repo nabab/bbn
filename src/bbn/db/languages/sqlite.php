@@ -3,6 +3,7 @@
  * @package db
  */
 namespace bbn\db\languages;
+
 use bbn;
 
 /**

@@ -17,7 +17,6 @@ use bbn;
  */
 class manager
 {
-
   protected $messages = [
     'creation' => [
       'subject' => "Account created",

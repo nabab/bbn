@@ -1794,7 +1794,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   {
     $r = [];
     $tables = false;
-    if ( empty($table) || $table === '*' ){
+    if ( empty($table) || ($table === '*') ){
       $tables = $this->get_tables($this->current);
     }
     else if ( \is_string($table) ){
@@ -1805,8 +1805,9 @@ class db extends \PDO implements db\actions, db\api, db\engines
     }
     if ( \is_array($tables) ){
       foreach ( $tables as $t ){
-        $full = $this->tfn($t);
-        $r[$full] = $this->_get_cache($full, 'columns', $force);
+        if ( $full = $this->tfn($t) ){
+          $r[$full] = $this->_get_cache($full, 'columns', $force);
+        }
       }
       if ( \count($r) === 1 ){
         return end($r);

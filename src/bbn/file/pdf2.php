@@ -97,7 +97,7 @@ EOF
   public function __construct($cfg = null){
     $this->reset_config($cfg);
     $this->pdf = new \Mpdf\Mpdf($this->cfg);
-    $this->pdf->SetImportUse();
+    //$this->pdf->SetImportUse();
     if ( \is_string($cfg) ){
       $this->add_page($cfg);
     }
@@ -128,7 +128,7 @@ EOF
         $cfg = $this->get_config($cfg);
         if ( isset($cfg['template']) && is_file($cfg['template']) ){
           $src = $this->pdf->SetSourceFile($cfg['template']);
-          $tpl = $this->pdf->ImportPage($src);
+          $tpl = $this->pdf->importPage($src);
           $this->pdf->SetPageTemplate($tpl);
         }
         else{
@@ -194,12 +194,12 @@ EOF
       if ( !\is_array($files) ){
         $files = [$files];
       }
-      $this->pdf->SetImportUse();
+      //$this->pdf->SetImportUse();
       foreach ( $files as $f ){
         if ( is_file($f) ){
           $pagecount = $this->pdf->SetSourceFile($f);
           for ( $i = 1; $i <= $pagecount; $i++ ){
-            $import_page = $this->pdf->ImportPage($i);
+            $import_page = $this->pdf->importPage($i);
             $this->pdf->UseTemplate($import_page);
             $this->pdf->addPage();
           }
@@ -211,11 +211,11 @@ EOF
 
   public function import_page($file, $page){
     if ( $this->check() ){
-      $this->pdf->SetImportUse();
+      //$this->pdf->SetImportUse();
       if ( is_file($file) ){
         $pagecount = $this->pdf->SetSourceFile($file);
         if ( ($page > 0) && ($page < $pagecount) ){
-          $import_page = $this->pdf->ImportPage($page);
+          $import_page = $this->pdf->importPage($page);
           $this->pdf->UseTemplate($import_page);
           $this->pdf->addPage();
         }

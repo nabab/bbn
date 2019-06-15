@@ -397,8 +397,8 @@ class i18n extends bbn\models\cls\cache
   /**
    * Gets the widgets initial data
    *
-   * @param [type] $id_project
-   * @param [type] $id_option
+   * @param string $id_project
+   * @param string $id_option
    * @return void
    */
   public function get_translations_widget($id_project, $id_option)

@@ -3,6 +3,7 @@
  * @package db
  */
 namespace bbn\db\languages;
+
 use bbn;
 
 /**
@@ -190,6 +191,7 @@ class mysql implements bbn\db\engines
       $db = $this->db->current;
       $table = trim($bits[0]);
     }
+    \bbn\x::log([$table, bbn\str::check_name($db, $table)], 'opt_err');
     if ( bbn\str::check_name($db, $table) ){
       return $escaped ? $this->qte.$db.$this->qte.'.'.$this->qte.$table.$this->qte : $db.'.'.$table;
     }

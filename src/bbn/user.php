@@ -582,6 +582,18 @@ class user extends models\cls\basic
     return false;
   }
 
+  protected function log_in($id): self
+  {
+    if ( $this->check() && $id ){
+      $this
+        ->_authenticate($id)
+        ->_user_info()
+        ->_init_dir(true)
+        ->save_session();
+    }
+    return $this;
+  }
+
   /**
    * Returns a "print", ie an identifier based on the user agent
    * @param false|string $fp

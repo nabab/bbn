@@ -1,21 +1,15 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: BBN
- * Date: 31/01/2019
- * Time: 04:17
- *
- * //$encodings = ['UTF-8', 'WINDOWS-1252', 'ISO-8859-1', 'ISO-8859-15'];
- * $enc = mb_detect_encoding($f, $encodings);
- * if ( $enc !== 'UTF-8' ){
- *   $f = html_entity_decode(htmlentities($f, ENT_QUOTES, $enc), ENT_QUOTES , 'UTF-8');
- * }
- *
+ * @category File
+ * @package bbn
+ * @author Thomas Nabet <thomas.nabet@gmail.com>
+ * @license MIT
+ * @link http://url.com
  */
 
 namespace bbn\file;
-use bbn;
 
+use bbn;
 
 /**
  * Class system
@@ -160,6 +154,15 @@ class system extends bbn\models\cls\basic
   {
     if ( $filter ){
       if ( is_string($filter) ){
+        if ( $filter === 'both' ){
+          return true;
+        }
+        if ( $filter === 'dir' ){
+          return is_dir($item);
+        }
+        if ( $filter === 'file' ){
+          return is_file($item);
+        }
         return strtolower(substr(\is_array($item) ? $item['path'] : $item, - strlen($filter))) === strtolower($filter);
       }
       if ( is_callable($filter) ){
@@ -180,6 +183,9 @@ class system extends bbn\models\cls\basic
   private function _get_items(string $path, $type = 'both', bool $hidden = false, string $detailed = ''): array
   {
     $files = [];
+    $has_type = stripos($detailed, 't') !== false;
+    $has_mod = stripos($detailed, 'm') !== false;
+    $has_size = stripos($detailed, 's') !== false;
     if ( ($this->mode === 'ftp') && ($detailed || ($type !== 'both')) ){
       if ( $fs = ftp_mlsd($this->stream, substr($path, strlen($this->prefix))) ){
         foreach ( $fs as $f ){
@@ -199,10 +205,6 @@ class system extends bbn\models\cls\basic
             }
             if ( $ok ){
               if ( $detailed ){
-                if ( !isset($has_type, $has_mod) ){
-                  $has_type = stripos($detailed, 't') !== false;
-                  $has_mod = stripos($detailed, 'm') !== false;
-                }
                 $tmp = [
                   'path' => $path.'/'.$f['name']
                 ];
@@ -219,6 +221,9 @@ class system extends bbn\models\cls\basic
                 if ( $has_type ){
                   $tmp['dir'] = $f['type'] === 'dir';
                   $tmp['file'] = $f['type'] !== 'dir';
+                }
+                if ( $has_size ){
+                  $tmp['size'] = $f['type'] === 'dir' ? 0 : $this->filesize($path.'/'.$f['name']);
                 }
                 $files[] = $tmp;
               }
@@ -250,6 +255,7 @@ class system extends bbn\models\cls\basic
             }
           }
           else if ( $type === 'file' ){
+            var_dump($path.'/'.$f);
             if ( $ok = is_file($path.'/'.$f) ){
               $is_file = $ok;
               $is_dir = !$ok;
@@ -262,10 +268,6 @@ class system extends bbn\models\cls\basic
           }
           if ( $ok ){
             if ( $detailed ){
-              if ( !isset($has_type, $has_mod) ){
-                $has_type = stripos($detailed, 't') !== false;
-                $has_mod = stripos($detailed, 'm') !== false;
-              }
               $tmp = [
                 'path' => $path.'/'.$f
               ];
@@ -275,6 +277,10 @@ class system extends bbn\models\cls\basic
               if ( $has_type ){
                 $tmp['dir'] = $is_dir ?? is_dir($path.'/'.$f);
                 $tmp['file'] = $is_file ?? is_file($path.'/'.$f);
+              }
+              if ( $has_size ){
+                $is_dir = $tmp['dir'] ?? is_dir($path.'/'.$f);
+                $tmp['size'] = $is_dir ? 0 : $this->filesize($path.'/'.$f);
               }
               $files[] = $tmp;
             }
@@ -315,7 +321,7 @@ class system extends bbn\models\cls\basic
       if ( !$filter || $this->_check_filter($p, $filter) ){
         $all[] = $it;
       }
-      foreach ( $this->_scand($p, $hidden, $hidden, $detailed) as $t ){
+      foreach ( $this->_scand($p, $filter, $hidden, $detailed) as $t ){
         $all[] = $t;
       }
     }
@@ -332,6 +338,9 @@ class system extends bbn\models\cls\basic
   private function _scan(string $path = '', $filter = null, bool $hidden = false, string $detailed = ''): array
   {
     $all = [];
+    if ( !$filter ){
+      $filter = 'both';
+    }
     foreach ( $this->_get_items($path, 'both', $hidden, $detailed) as $it ){
       $p = $detailed ? $it['path'] : $it;
       if ( !$filter || $this->_check_filter($p, $filter) ){
@@ -433,7 +442,6 @@ class system extends bbn\models\cls\basic
   private function _get_empty_dirs($path, bool $hidden_is_empty = false): array
   {
     $res = [];
-    bbn\x::log($path, 'infolegale');
     $all = $this->_get_items($path, 'both', !$hidden_is_empty);
     foreach ( $all as $dir ){
       if ( is_dir($dir) ){
@@ -636,13 +644,23 @@ class system extends bbn\models\cls\basic
    */
   public function cd(string $path): bool
   {
-    if (
-      $this->check() &&
-      ($p = $this->get_real_path($path)) &&
-      \is_dir($p)
-    ){
-      $this->current = $this->clean_path($path);
-      return true;
+    if ($this->check()) {
+      while ( strpos($path, '../') ===  0 ){
+        $tmp = dirname($this->current);
+        if ( $tmp !== $this->current ){
+          $path = substr($path, 3);
+        }
+        else {
+          break;
+        }
+      }
+      if ( isset($tmp) ){
+        $path = $tmp.$path;
+      }
+      if (($p = $this->get_real_path($path)) && \is_dir($p)) {
+        $this->current = $this->clean_path($path);
+        return true;
+      }
     }
     return false;
   }
@@ -984,5 +1002,43 @@ class system extends bbn\models\cls\basic
       }
     }
     return $num;
+  }
+
+  public function search($search, $path, $deep = false, $hidden = false, $filter = 'both'): ?array
+  {
+    if ($this->is_dir($path)) {
+      $files = $deep ? $this->scan($path, $filter) : $this->get_files($path, false, $hidden, $filter);
+      $res = [];
+      foreach ( $files as $f ){
+        $r = $this->search($search, $f);
+        if ( count($r) ){
+          $res[$f] = $r;
+        }
+      }
+      return $res;
+    }
+    else if ( $this->is_file($path) ){
+      $content = $this->get_contents($path);
+      $idx = 0;
+      $res = [];
+      if ( is_array($search) ){
+        foreach ( $search as $s ){
+          $res[$s] = [];
+          while ( ($n = \bbn\x::indexOf($content, $search, $idx)) > -1 ){
+            $res[$s][] = $n;
+            $idx = $n+1;
+          }
+        }
+      }
+      else{
+        while ( ($n = \bbn\x::indexOf($content, $search, $idx)) > -1 ){
+          $res[] = $n;
+          $idx = $n+1;
+        }
+      }
+      return $res;
+    }
+    return null;
+    
   }
 }

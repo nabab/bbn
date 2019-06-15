@@ -544,6 +544,7 @@ class databases extends bbn\models\cls\cache
   }
 
   public function import_host(string $host, bool $full = false){
+    
     if (
       !($id_host = self::get_option_id($host, 'hosts')) &&
       $id_host = $this->o->add([

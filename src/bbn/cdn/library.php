@@ -157,18 +157,28 @@ class library
         if ( !empty($ths) ){
           foreach ( $ths as $th ){
             if ( !empty($info['content']->theme_prepend) ){
-              foreach ( array_reverse($info['content']->theme_files) as $tf ){
+              foreach ( $info['content']->theme_files as $tf ){
                 foreach ( $info['content']->files as $f ){
                   /** @todo Remove!!! */
                   if ( substr($f, -4) === 'less' ){
-                    $info['prepend'][$f] = sprintf(str_replace('%s', '%1$s', $tf), $th);
+                    if ( bbn\x::indexOf($tf, '%s') > -1 ){
+                      $info['prepend'][$f][] = sprintf(str_replace('%s', '%1$s', $tf), $th);
+                    }
+                    else{
+                      $info['prepend'][$f][] = $tf;
+                    }
                   }
                 }
               }
             }
             else{
               foreach ( $info['content']->theme_files as $tf ){
-                $info['content']->files[] = sprintf(str_replace('%s', '%1$s', $tf), $th);
+                if ( bbn\x::indexOf($tf, '%s') > -1 ){
+                  $info['content']->files[] = sprintf(str_replace('%s', '%1$s', $tf), $th);
+                }
+                else{
+                  $info['content']->files[] = $tf;
+                }
               }
             }
           }
@@ -188,7 +198,6 @@ class library
           $info['content']->files = array_merge($info['content']->files, $info['content']->themes->$info['theme']);
         }
       }
-      
       return $info;
     }
     return false;
@@ -239,7 +248,10 @@ class library
               $f = sprintf($f, $this->info['theme']);
             }
             if ( isset($info['prepend'][$f]) ){
-              $prepend[$path.$f] = $path.$info['prepend'][$f];
+              $prepend[$path.$f] = [];
+              foreach ( $info['prepend'][$f] as $p ){
+                $prepend[$path.$f][] = $path.$p;
+              }
             }
             $files[] = $path.$f;
           }

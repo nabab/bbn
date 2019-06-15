@@ -4,3 +4,5 @@ logs
 .history/
 .idea/
 _DS_STORE*
+.DS_Store
+._.DS_Store

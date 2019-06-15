@@ -1932,7 +1932,7 @@ class options extends bbn\models\cls\db
     $items = !empty($it['items']) && \is_array($it['items']) ? $it['items'] : false;
     $id = null;
     if ( $this->_prepare($it) ){
-      $c =& $this->class_cfg['arch']['options'];
+      $c =& $this->class_cfg['arch']['options'];   
       if (
         $force &&
         (null !== $it[$c['code']]) &&
@@ -1941,6 +1941,7 @@ class options extends bbn\models\cls\db
           $c['code'] => $it[$c['code']]
         ]))
       ){
+        
         $res = $this->db->update($this->class_cfg['table'], [
           $c['text'] => $it[$c['text']],
           $c['id_alias'] => $it[$c['id_alias']],
@@ -1951,6 +1952,7 @@ class options extends bbn\models\cls\db
           $c['id'] => $id
         ]);
       }
+      
       if (
         !$id &&
         ($res = $this->db->insert($this->class_cfg['table'], [
@@ -2067,21 +2069,24 @@ class options extends bbn\models\cls\db
    * // (bool) false The option doesn't exist anymore
    * ```
    *
-   * @param mixed $code Any option(s) accepted by {@link from_code()}
+   * @param mixed $code Any option(s) accepted by {@link from_code()} or the uid
    * @return bool|int The number of affected rows or false if option not found
    */
   public function remove_full($code){
+    
     if (
       bbn\str::is_uid($id = $this->from_code(\func_get_args())) &&
       ($id !== $this->default) &&
       ($id !== $this->root)
     ){
+    
       $this->delete_cache($id);
       return $this->db->query(
         "DELETE FROM ".
         $this->db->tfn($this->class_cfg['table'], 1)."
         WHERE ".$this->db->csn($this->class_cfg['arch']['options']['id'], 1)." = $id");
     }
+    
     return null;
   }
 

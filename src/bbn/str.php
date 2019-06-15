@@ -1321,7 +1321,8 @@ class str
         break;
       }
     }
-    return sprintf("%5.2f %s".$unit, $bytes, $units[$i]);
+    $st = $unit === 'B' ? "%d %s" : "%5.2f %s";
+    return sprintf($st.$unit, $bytes, $units[$i]);
   }
 
   /**
@@ -1330,7 +1331,7 @@ class str
    * @param string $unit_dest
    * @return string
    */
-  function convert_size($size, $unit_orig = 'B', $unit_dest = 'MB')
+  public static function convert_size($size, $unit_orig = 'B', $unit_dest = 'MB')
   {
     if ( strlen($unit_orig) <= 1 ){
       $unit_orig .= 'B';
@@ -1351,7 +1352,7 @@ class str
    * @param bool $return_error
    * @return bool|string
    */
-  function check_json(string $json, bool $return_error = false)
+  public static function check_json(string $json, bool $return_error = false)
   {
     json_decode($json);
     $error = json_last_error();

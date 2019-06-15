@@ -244,16 +244,19 @@ JS;
       for ( $i = 0; $i < $num_files; $i++ ){
         if ( is_file($this->fpath.$files[$i]) ){
           if ( isset($prepend_files[$files[$i]]) ){
-            if ( !isset($prepended[$prepend_files[$files[$i]]]) ){
-              $prepended[$prepend_files[$files[$i]]] = [];
+            foreach ( $prepend_files[$files[$i]] as $p ){
+              if ( !isset($prepended[$p]) ){
+                $prepended[$p] = [];
+              }
+              $prepended[$p][] = $files[$i];
             }
-            $prepended[$prepend_files[$files[$i]]][] = $files[$i];
           }
           else{
             $unprepended[] = $files[$i];
           }
         }
       }
+      //die(var_dump($files, $num_files, $prepended));
       foreach ( $prepended as $prep => $arr ){
         $dir = dirname($arr[0]).'/';
         $files_json = [str_replace($dir, '', $prep)];

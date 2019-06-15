@@ -819,7 +819,7 @@ class system2 extends bbn\models\cls\basic
    * @param string $path
    * @return bool
    */
-  public function cd(string $path): bool
+  /*public function cd(string $path): bool
   {
     if (
       $this->check() &&
@@ -830,7 +830,30 @@ class system2 extends bbn\models\cls\basic
       return true;
     }
     return false;
+  }*/
+    public function cd(string $path): bool
+  {
+    if ($this->check()) {
+      while ( strpos($path, '../') ===  0 ){
+        $tmp = dirname($this->current);
+        if ( $tmp !== $this->current ){
+          $path = substr($path, 3);
+        }
+        else {
+          break;
+        }
+      }
+      if ( isset($tmp) ){
+        $path = $tmp.$path;
+      }
+      if (($p = $this->get_real_path($path)) && \is_dir($p)) {
+        $this->current = $this->clean_path($path);
+        return true;
+      }
+    }
+    return false;
   }
+
 
   /**
    * @param string $path
