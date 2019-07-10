@@ -20,7 +20,7 @@
     "greenlion/php-sql-parser": "dev-master",
     "mpdf/mpdf": "dev-master",
     "squizlabs/php_codesniffer": "dev-master",
-    "natxet/CssMin": "dev-master",
+    "natxet/cssmin": "dev-master",
     "sunra/php-simple-html-dom-parser": "dev-master",
     "leafo/lessphp": "dev-master",
     "leafo/scssphp": "dev-master",
