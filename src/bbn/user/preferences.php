@@ -354,6 +354,20 @@ MYSQL;
   }
 
   /**
+   * Sets the given group.
+   * 
+   * @param string $id_group
+   * @return preferences
+   */
+  public function set_group(string $id_group): preferences
+  {
+    if ( \bbn\str::is_uid($id_group) ){
+      $this->id_group = $id_group;
+    }
+    return $this;
+  }
+
+  /**
    * Gets the cfg array, normalized either from the DB or from the $cfg argument
    *
    * @param string $id

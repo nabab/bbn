@@ -148,7 +148,7 @@ You can click the following link to access directly your account:<br>
   }
 
   public function get_email($id){
-    if ( bbn\str::is_integer($id) ){
+    if ( bbn\str::is_uid($id) ){
       $email = $this->db->select_one($this->class_cfg['tables']['users'], $this->class_cfg['arch']['users']['email'], [$this->class_cfg['arch']['users']['id'] => $id]);
       if ( $email && bbn\str::is_email($email) ){
         return $email;

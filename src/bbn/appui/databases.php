@@ -34,8 +34,8 @@ class databases extends bbn\models\cls\cache
     }
     
     if (
-      ($users = $this->o->from_code('users', $id_host)) &&
-      ($user = $this->o->full_options($users)[0])
+      ($users = $this->o->full_options('users', $id_host)) &&
+      ($user = $users[0])
     ){
       $db_user = [
         'code' => $user['code'],

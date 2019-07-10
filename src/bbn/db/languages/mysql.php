@@ -191,7 +191,6 @@ class mysql implements bbn\db\engines
       $db = $this->db->current;
       $table = trim($bits[0]);
     }
-    \bbn\x::log([$table, bbn\str::check_name($db, $table)], 'opt_err');
     if ( bbn\str::check_name($db, $table) ){
       return $escaped ? $this->qte.$db.$this->qte.'.'.$this->qte.$table.$this->qte : $db.'.'.$table;
     }
@@ -500,12 +499,12 @@ MYSQL
         if ( !isset($keys[$index['Key_name']]) ){
           $keys[$index['Key_name']] = [
             'columns' => [$index['Column_name']],
-            'ref_db' => $a && $a['ref_db'] ? $a['ref_db'] : null,
-            'ref_table' => $a && $a['ref_table'] ? $a['ref_table'] : null,
-            'ref_column' => $a && $a['ref_column'] ? $a['ref_column'] : null,
-            'constraint' => $b && $b['name'] ? $b['name'] : null,
-            'update' => $b && $b['update'] ? $b['update'] : null,
-            'delete' => $b && $b['delete'] ? $b['delete'] : null,
+            'ref_db' => isset($a, $a['ref_db']) ? $a['ref_db'] : null,
+            'ref_table' => isset($a, $a['ref_table']) ? $a['ref_table'] : null,
+            'ref_column' => isset($a, $a['ref_column']) ? $a['ref_column'] : null,
+            'constraint' => isset($b, $b['name']) ? $b['name'] : null,
+            'update' => isset($b, $b['update']) ? $b['update'] : null,
+            'delete' => isset($b, $b['delete']) ? $b['delete'] : null,
             'unique' => $index['Non_unique'] ? 0 : 1
           ];
         }

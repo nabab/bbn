@@ -85,8 +85,7 @@ class history
     ){
       // Recording the last ID
       $id = $db->last_id();
-      $last = self::$db->last();
-      $last_params = self::$db->last_params;
+      $db->disable_last();
       self::disable();
       if ( !array_key_exists('old', $cfg) ){
         $cfg['ref'] = null;
@@ -116,8 +115,7 @@ class history
         // Set back the original last ID
         $db->set_last_insert_id($id);
       }
-      self::$db->last_query = $last;
-      self::$db->last_params = $last_params;
+      $db->enable_last();
       self::enable();
       return $res;
     }
@@ -1094,9 +1092,9 @@ MYSQL;
         $primary_where = false;
         $primary_defined = false;
         $primary_value = false;
-        $idx = \bbn\x::find($cfg['values_desc'], ['primary' => true]);
-        if ( $idx !== false ){
-          $primary_where = $cfg['values'][$idx];
+        $idx1 = \bbn\x::find($cfg['values_desc'], ['primary' => true]);
+        if ( $idx1 !== false ){
+          $primary_where = $cfg['values'][$idx1];
         }
         $idx = array_search($s['primary'], $cfg['fields'], true);
         if ( ($idx !== false) && isset($cfg['values'][$idx]) ){

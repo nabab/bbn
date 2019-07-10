@@ -91,7 +91,7 @@ class notes extends bbn\models\cls\db
       $type = self::get_option_id('personal', 'types');
     }
     if ( ($usr = bbn\user::get_instance()) &&
-      $this->db->insert('bbn_notes', [
+      $this->db->insert($cf['table'], [
         $cf['arch']['notes']['id_parent'] => $parent,
 				$cf['arch']['notes']['id_alias'] => $alias,
         $cf['arch']['notes']['id_type'] => $type,
@@ -111,7 +111,7 @@ class notes extends bbn\models\cls\db
 		$cf =& $this->class_cfg;
 		$latest = $this->latest($id_note);
     return ($usr = bbn\user::get_instance()) &&
-      $this->db->insert('bbn_notes_versions', [
+      $this->db->insert($cf['tables']['versions'], [
         $cf['arch']['versions']['id_note'] => $id_note,
         $cf['arch']['versions']['version'] => !empty($latest) ? $latest + 1 : 1,
         $cf['arch']['versions']['title'] => $title,

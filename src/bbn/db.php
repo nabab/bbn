@@ -39,6 +39,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
   protected const E_STOP = 'stop';
 
   /**
+   * When set to true last_query will be filled with the latest statement.
+   * @var bool
+   */
+  private $last_enabled = true;
+
+  /**
    * A PHPSQLParser object
    * @var \PHPSQLParser\PHPSQLParser
    */
@@ -121,6 +127,28 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   protected $hash_contour = '__BBN__';
   /**
+   * @var string \$last_query
+   */
+  protected $last_query;
+  /**
+   * The information that will be accessed by db\query as the current statement's options
+   * @var array $last_params
+   */
+  protected $last_params = ['sequences' => false, 'values' => false];
+  /**
+   * @var string \$last_query
+   */
+  protected $last_real_query;
+  /**
+   * The information that will be accessed by db\query as the current statement's options
+   * @var array $last_params
+   */
+  protected $last_real_params = ['sequences' => false, 'values' => false];
+  /**
+   * @var array $last_cfg
+   */
+  protected $last_cfg;
+  /**
    * @var mixed $last_prepared
    */
   protected $last_prepared;
@@ -154,10 +182,6 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public $last_error = false;
   /**
-   * @var string \$last_query
-   */
-  public $last_query;
-  /**
    * @var boolean $debug
    */
   public $debug = false;
@@ -176,11 +200,6 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @var mixed $current
    */
   public $current;
-  /**
-   * The information that will be accessed by db\query as the current statement's options
-   * @var array $last_params
-   */
-  public $last_params = ['sequences' => false, 'values' => false];
 
   /**
    * Error state of the current connection
@@ -543,6 +562,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
           $cfg['moment'] = 'after';
           $cfg = $this->_trigger($cfg);
         }
+        $this->last_cfg = $cfg;
         if ( !\in_array($cfg['kind'], self::$write_kinds, true) ){
           return $cfg['run'] ?? null;
         }
@@ -1138,14 +1158,17 @@ class db extends \PDO implements db\actions, db\api, db\engines
     if ( \is_array($args) && !empty($args['bbn_db_processed']) ){
       return $args;
     }
-    //var_dump("UPD0", $args);
     if ( empty($args['bbn_db_treated']) ){
       $args = $this->_treat_arguments($args);
     }
     //var_dump("UPD0", $args);
     if ( isset($args['hash']) ){
       if ( isset($this->cfgs[$args['hash']]) ){
-        return array_merge($this->cfgs[$args['hash']], ['values' => $args['values'] ?: [], 'where' => $args['where'] ?: []]);
+        return array_merge($this->cfgs[$args['hash']], [
+          'values' => $args['values'] ?: [],
+          'where' => $args['where'] ?: [],
+          'filters' => $args['filters'] ?: []
+        ]);
       }
       /** @var array $tables_full  Each of the tables' full name. */
       $tables_full = [];
@@ -1374,9 +1397,9 @@ class db extends \PDO implements db\actions, db\api, db\engines
     $this->last_error = end($msg);
     $msg[] = self::get_log_line('QUERY');
     $msg[] = $this->last();
-    if ( $this->last_params['values'] ){
+    if ( $this->last_real_params['values'] ){
       $msg[] =  self::get_log_line('VALUES');
-      foreach ( $this->last_params['values'] as $v ){
+      foreach ( $this->last_real_params['values'] as $v ){
         if ( $v === null ){
           $msg[] = 'NULL';
         }
@@ -1577,12 +1600,17 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @param string $statement
    * @return db
    */
-  public function add_statement($statement): self
+  public function add_statement($statement, $params): self
   {
-    $this->last_query = $statement;
-    //$this->log($statement);
-    if ( $this->debug ){
-      //$this->debug_queries[] = $statement;
+    $this->last_real_query = $statement;
+    $this->last_real_params = $params;
+    if ( $this->last_enabled ){
+      $this->last_query = $statement;
+      $this->last_params = $params;
+      //$this->log($statement);
+      if ( $this->debug ){
+        //$this->debug_queries[] = $statement;
+      }
     }
     return $this;
   }
@@ -2112,6 +2140,21 @@ class db extends \PDO implements db\actions, db\api, db\engines
   public function last(): ?string
   {
     return $this->last_query;
+  }
+
+  /**
+   * Return the last config for this connection.
+   *
+   * ```php
+   * \bbn\x::dump($db->get_last_cfg());
+   * // (array) INSERT INTO `db_example.table_user` (`name`) VALUES (?)
+   * ```
+   *
+   * @return string
+   */
+  public function get_last_cfg(): ?array
+  {
+    return $this->last_cfg;
   }
 
   /**
@@ -3335,9 +3378,9 @@ class db extends \PDO implements db\actions, db\api, db\engines
           $time = $q['last'];
         }
         // That will always contains the parameters of the last query done
-        $this->last_params = $params;
+
         // Adds to $debug_queries if in debug mode and defines $last_query
-        $this->add_statement($q['sql']);
+        $this->add_statement($q['sql'], $params);
         // If the statement is a structure modifier we need to clear the cache
         if ( $q['structure'] ){
           foreach ( $this->queries as $k => $v ){
@@ -3353,7 +3396,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
             // A prepared query already exists for the writing
             /** @var db\query */
             if ( $q['prepared'] ){
-              $r = $q['prepared']->init($this->last_params['values'])->execute();
+              $r = $q['prepared']->init($params['values'])->execute();
             }
             // If there are no values we can assume the statement doesn't need to be prepared and is just executed
             else if ( $num_values === 0 ){
@@ -3376,7 +3419,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
             }
             else{
               // Returns the same db\query object
-              $q['prepared']->init($this->last_params['values']);
+              $q['prepared']->init($params['values']);
             }
           }
           if ( !empty($time) && ($q['exe_time'] === 0) ){
@@ -4431,4 +4474,30 @@ class db extends \PDO implements db\actions, db\api, db\engines
   public function create_table(){
     return $this->language->create_table(...\func_get_args());
   }
+
+  public function enable_last()
+  {
+    $this->last_enabled = true;
+  }
+
+  public function disable_last()
+  {
+    $this->last_enabled = false;
+  }
+
+  public function get_real_last_params(): ?array
+  {
+    return $this->last_real_params;
+  }
+
+  public function real_last(): ?string
+  {
+    return $this->last_real_query;
+  }
+
+  public function get_last_params(): ?array
+  {
+    return $this->last_params;
+  }
+
 }

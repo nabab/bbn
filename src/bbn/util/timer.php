@@ -50,12 +50,11 @@ class timer
    * 
 	 * @return bool
 	 */
-  public function has_started($key)
+  public function has_started($key='default')
   {
-    if ( isset($this->measures[$key]) ){
-      return $this->measures[$key]['start'] > 0;
-    }
-    return false;
+    return
+      isset($this->measures[$key], $this->measures[$key]['start']) &&
+      ($this->measures[$key]['start'] > 0);
   }
   
   
@@ -66,7 +65,7 @@ class timer
 	 */
   public function stop($key='default')
   {
-    if ( isset($this->measures[$key], $this->measures[$key]['start']) ){
+    if ( $this->has_started($key) ){
       $this->measures[$key]['num']++;
       $time = $this->measure($key);
       $this->measures[$key]['sum'] += $time;
@@ -79,7 +78,7 @@ class timer
   }
 
   public function measure($key='default'){
-    if ( isset($this->measures[$key], $this->measures[$key]['start']) ){
+    if ( $this->has_started($key) ){
       return microtime(1) - $this->measures[$key]['start'];
     }
   }

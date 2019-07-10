@@ -56,9 +56,10 @@ class query extends \PDOStatement implements actions
 		if ( !empty($this->queryString) )
 		{
 			$this->db = $db;
-			$this->values = $this->db->last_params['values'] ?? [];
-      $this->write = $this->db->last_params['write'] ?? false;
-      $this->structure = $this->db->last_params['structure'] ?? [];
+      $last = $this->db->get_real_last_params();
+			$this->values = $last['values'] ?? [];
+      $this->write = $last['write'] ?? false;
+      $this->structure = $last['structure'] ?? [];
 		}
 	}
   

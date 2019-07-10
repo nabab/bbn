@@ -219,10 +219,34 @@ class php extends bbn\models\cls\basic
         'isIterateable' => $ref->isIterateable(),
         'isUserDefined' => $ref->isUserDefined(),
         'methods' => $this->addMethods($ref, $type, $file),
+        'properties' => [],
         'traits' => [],
         'unused' => [] 
       ];
 
+      $props = $ref->getProperties(); 
+      if ( !empty($props) ){
+        foreach($props as $prop){ 
+          $type_prop = false; 
+          if ( $prop->isPublic() ){
+            $type_prop = 'public';
+          } 
+          else if ( $prop->isPrivate() ){
+            $type_prop = 'private';
+          }            
+          else if ($prop->isProtected() ){
+            $type_prop = 'protected';
+          }
+          else if( $prop->isStatic() ){
+            $type_prop = 'static';
+          }
+
+          if ( !empty($type_prop) ){
+            
+            $arr['properties'][$type_prop][]= $prop->getName(); 
+          }          
+        } 
+      }
       //for parents 
       $parents = $ref->getParentClass();
       if ( !empty($parents) ){
@@ -244,8 +268,8 @@ class php extends bbn\models\cls\basic
           $arr['traits'][$trait] = $this->analyze($trait, 'trait');
           
           foreach ( $arr['traits'][$trait]['methods'] as $i => $m ){              
-            if ( count($m) ){
-              $arr['methods'][$i] = array_merge($m, $arr['methods'][$i]);                
+            if ( count($m) ){             
+              $arr['methods'][$i] = array_merge($arr['methods'][$i], $m);                
             }
           }           
         }
@@ -286,7 +310,7 @@ class php extends bbn\models\cls\basic
         $doc = is_null($file) ? false :  $meth->getDocComment();
         
         $methods[$idx][$meth->getName()] = [
-          'type' => $meth->isStatic() ? 'static' : 'non-static',
+          'static' => $meth->isStatic(),// ? 'static' : 'non-static',
           'doc' =>  is_null($file) ? false : $doc,
           'parsed' => is_null($file) ? false : $this->parser->parse_docblock($doc),
           'line' => is_null($file) ? false : $meth->getStartLine(),
