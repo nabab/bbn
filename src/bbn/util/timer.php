@@ -11,7 +11,7 @@ namespace bbn\util;
  * @copyright BBN Solutions
  * @since July 11, 2013, 13:08:00 +01:00
  * @category  Utilities
- * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.1
  */
 class timer

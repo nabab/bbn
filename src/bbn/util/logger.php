@@ -13,7 +13,7 @@ namespace bbn\util;
  * @copyright BBN Solutions
  * @since Jan 14, 2013, 23:23:55 +0000
  * @category  Traits
- * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.4
  */
 trait logger

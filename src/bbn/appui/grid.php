@@ -225,12 +225,7 @@ class grid extends bbn\models\cls\cache
       $this->chrono->start();
       if ( $this->query ){
         $this->sql = $this->get_query();
-        $q = $this->db->query($this->sql, !empty($this->cfg['values']) ? array_map(function($v){
-          if ( \bbn\str::is_uid($v) ){
-            return hex2bin($v);
-          }
-          return $v;
-        }, $this->cfg['values']) : []);
+        $q = $this->db->query($this->sql, $this->db->get_query_values($this->cfg));
         $rows = $q->get_rows();
       }
       else {
@@ -261,12 +256,7 @@ class grid extends bbn\models\cls\cache
           $this->count.PHP_EOL.
             $this->db->get_where($this->cfg).
             $this->db->get_group_by($this->cfg),
-          !empty($this->cfg['values']) ? array_map(function($v){
-            if ( \bbn\str::is_uid($v) ){
-              return hex2bin($v);
-            }
-            return $v;
-          }, $this->cfg['values']) : []
+          $this->db->get_query_values($this->cfg)
         );
       }
       else if ( is_array($this->count) ){
@@ -320,7 +310,7 @@ class grid extends bbn\models\cls\cache
       'time' => []
     ];
     if ( $this->check() ){
-      if ( $total = $this->get_total($force) ){
+      if ($total = $this->get_total($force)) {
         if ( $this->cfg['start'] ){
           $r['start'] = $this->cfg['start'];
         }

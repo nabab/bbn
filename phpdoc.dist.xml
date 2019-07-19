@@ -2,7 +2,7 @@
 <phpdocumentor>
   <title>BBN Framework</title>
   <parser>
-    <target>doc</target>
+    <target>../../../../../cdn.thomas.lan/public_html/doc</target>
     <encoding>utf8</encoding>
     <markers>
         <item>TODO</item>
@@ -13,10 +13,10 @@
     </extensions>
   </parser>
   <transformer>
-    <target>doc</target>
+    <target>../../../../../cdn.thomas.lan/public_html/doc</target>
   </transformer>
   <files>
-    <directory>src</directory>
+    <directory>.</directory>
   </files>
   <transformations>
     <template name="responsive" />

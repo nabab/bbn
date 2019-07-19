@@ -14,7 +14,7 @@ use bbn;
  * @copyright BBN Solutions
  * @since July 15, 2016, 14:10:55 +0000
  * @category  Data Observer
- * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.1
  */
 abstract class data extends cache{

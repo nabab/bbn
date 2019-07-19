@@ -17,7 +17,7 @@ use bbn;
  * @since Apr 2, 2013, 23:23:55 +0000
  * @category  HTML
  * @package html
- * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.3
  * @todo Tooltips
  */

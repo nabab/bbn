@@ -2,18 +2,15 @@
 namespace bbn;
 
 /**
- * Model View Controller Class
- *
- *
- * This class, called once per request, holds the environment's variables
- * and routes each request to its according controller, then acts as a
- * link between the controller and models and views it uses
+ * Model View Controller Class.
+ * 
+ * Called once per request, holds the environment's variables and routes each request to its according controller, then acts as a link between the controller and models and views it uses.
  *
  * @author Thomas Nabet <thomas.nabet@gmail.com>
  * @copyright BBN Solutions
  * @since Apr 4, 2011, 23:23:55 +0000
  * @category  MVC
- * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.9
  * @todo Add feature to auto-detect a different corresponding index and redirect to it through Appui
  * @todo Add $this->dom to public controllers (?)

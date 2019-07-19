@@ -4,7 +4,7 @@
  */
 namespace bbn;
 /**
- * A class for dealing with files
+ * Perform a single file objectification and manage its manipulation.
  *
  *
  * @author Thomas Nabet <thomas.nabet@gmail.com>

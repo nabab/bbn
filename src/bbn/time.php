@@ -11,7 +11,7 @@ namespace bbn;
  * 
  * @copyright BBN Solutions
  * @category  Time and Date
- * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT
  */
 class time extends models\cls\basic
 {

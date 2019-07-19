@@ -474,7 +474,6 @@ MYSQL;
             ];
           }
         }
-        bbn\x::log(['-------------------', $d, $diff], 'error');
         $this->_update_next($d['id']);
       }
       echo '.';

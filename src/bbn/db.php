@@ -5,14 +5,15 @@
 namespace bbn;
 
 /**
- * Database Class
+ * Half ORM half DB management, the simplest class for data queries.
  *
+ * Hello world!
  *
  * @author Thomas Nabet <thomas.nabet@gmail.com>
  * @copyright BBN Solutions
  * @since Apr 4, 2011, 23:23:55 +0000
  * @category  Database
- * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 3.1
  */
 
@@ -485,6 +486,60 @@ class db extends \PDO implements db\actions, db\api, db\engines
     }
   }
 
+  public function get_query_values(array $cfg): array
+  {
+    $res = [];
+    if ( !empty($cfg['values']) ) {
+      foreach ( $cfg['values'] as $i => $v ) {
+        // Transforming the values if needed
+        if (
+          ($cfg['values_desc'][$i]['type'] === 'binary') &&
+          ($cfg['values_desc'][$i]['maxlength'] === 16) &&
+          str::is_uid($v)
+        ){
+          $res[] = hex2bin($v);
+        }
+        else if (
+          \is_string($v) && (
+            (
+              ($cfg['values_desc'][$i]['type'] === 'date') &&
+              (\strlen($v) < 10)
+            ) || (
+              ($cfg['values_desc'][$i]['type'] === 'time') &&
+              (\strlen($v) < 8)
+            ) || (
+              ($cfg['values_desc'][$i]['type'] === 'datetime') &&
+              (\strlen($v) < 19)
+            )
+          )
+        ){
+          $res[] = $v.'%';
+        }
+        else if ( !empty($cfg['values_desc'][$i]['operator']) ){
+          switch ( $cfg['values_desc'][$i]['operator'] ){
+            case 'contains':
+            case 'doesnotcontain':
+              $res[] = '%'.$v.'%';
+              break;
+            case 'startswith':
+              $res[] = $v.'%';
+              break;
+            case 'endswith':
+              $res[] = '%'.$v;
+              break;
+            default:
+              $res[] = $v;
+          }
+        }
+        else{
+          $res[] = $v;
+        }
+        $idx++;
+      }
+    }
+    return $res;
+  }
+
   /**
    * @returns null|db\query|int A selection query or the number of affected rows by a writing query
    */
@@ -513,44 +568,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
           /** @todo Put hash back! */
           //$cfg['run'] = $this->query($cfg['sql'], $cfg['hash'], $cfg['values'] ?? []);
           /** @var \bbn\db\query */
-          $cfg['run'] = $this->query($cfg['sql'], array_map(function($i)use($cfg){
-            // Transforming the values if needed
-            if (
-              ($cfg['values_desc'][$i]['type'] === 'binary') &&
-              ($cfg['values_desc'][$i]['maxlength'] === 16) &&
-              str::is_uid($cfg['values'][$i])
-            ){
-              return hex2bin($cfg['values'][$i]);
-            }
-            if (
-              \is_string($cfg['values'][$i]) && (
-                (
-                  ($cfg['values_desc'][$i]['type'] === 'date') &&
-                  (\strlen($cfg['values'][$i]) < 10)
-                ) || (
-                  ($cfg['values_desc'][$i]['type'] === 'time') &&
-                  (\strlen($cfg['values'][$i]) < 8)
-                ) || (
-                  ($cfg['values_desc'][$i]['type'] === 'datetime') &&
-                  (\strlen($cfg['values'][$i]) < 19)
-                )
-              )
-            ){
-              return $cfg['values'][$i].'%';
-            }
-            if ( !empty($cfg['values_desc'][$i]['operator']) ){
-              switch ( $cfg['values_desc'][$i]['operator'] ){
-                case 'contains':
-                case 'doesnotcontain':
-                  return '%'.$cfg['values'][$i].'%';
-                case 'startswith':
-                  return $cfg['values'][$i].'%';
-                case 'endswith':
-                  return '%'.$cfg['values'][$i];
-              }
-            }
-            return $cfg['values'][$i];
-          }, array_keys($cfg['values'])));
+          $cfg['run'] = $this->query($cfg['sql'], $this->get_query_values($cfg));
         }
         if ( !empty($cfg['force']) ){
           $cfg['trig'] = 1;

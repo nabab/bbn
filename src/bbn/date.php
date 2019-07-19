@@ -4,14 +4,14 @@
  */
 namespace bbn;
 /**
- * Class dealing with date manipulation
+ * Deals with date manipulation.
  *
  *
  * @author Thomas Nabet <thomas.nabet@gmail.com>
  * @copyright BBN Solutions
  * @since Apr 4, 2011, 23:23:55 +0000
  * @category  Time and Date
- * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.2r89
  * @todo Plenty of stuff!
  */

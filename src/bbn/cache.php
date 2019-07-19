@@ -2,19 +2,13 @@
 namespace bbn;
 
 /**
- * Universal caching class
- *
- *
- * This class, called once per request, holds the cache system
+ * Universal caching class: called once per request, it holds the cache system.
  *
  * @author Thomas Nabet <thomas.nabet@gmail.com>
  * @copyright BBN Solutions
  * @since Jan 23, 2016, 23:23:55 +0000
  * @category  Cache
- * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @version 0.9
- * @todo Add feature to auto-detect a different corresponding index and redirect to it through Appui
- * @todo Add $this->dom to public controllers (?)
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT
  */
 
 class cache{

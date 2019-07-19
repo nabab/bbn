@@ -9,7 +9,7 @@
  * @copyright BBN Solutions
  * @since Apr 4, 2011, 23:23:55 +0000
  * @category  Database
- * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.2r89
  *
  * This cclass

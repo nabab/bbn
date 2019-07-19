@@ -45,11 +45,9 @@ class cloudmin{
         }
   }
   /**
+   * return list of virtual machine
    *
-   * eturn list of virtual machine
-   *
-   * @return
-   *
+   * @return array   
    **/
   public function list_systems(){
     $this->last_action = "list-systems";

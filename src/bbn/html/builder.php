@@ -13,7 +13,7 @@ use bbn;
  * @copyright BBN Solutions
  * @since Dec 14, 2012, 04:23:55 +0000
  * @category  Appui
- * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.4
 */
 

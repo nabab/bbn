@@ -1660,20 +1660,15 @@ class x
   {
     $res = false;
     if ( is_array($subject) ){
-      if ( $start ){
-        $i = 0;
-        foreach ( $subject as $s ){
-          if ( ($i >= $start) && ($s === $search) ){
-            $res = $i;
-            break;
-          }
-          else{
-            $i++;
-          }
+      $i = 0;
+      foreach ( $subject as $s ){
+        if ( ($i >= $start) && ($s === $search) ){
+          $res = $i;
+          break;
         }
-      }
-      else{
-        $res = array_search($search, $subject, true);
+        else{
+          $i++;
+        }
       }
     }
     else if ( is_string($subject) ){

@@ -1,8 +1,15 @@
 <?php
-
 namespace bbn;
 
-
+/**
+ * (Static) content delivery system through requests using filesystem and internal DB for libraries.
+ *
+ * @author Thomas Nabet <thomas.nabet@gmail.com>
+ * @copyright BBN Solutions
+ * @since Jan 3, 2016, 12:24:36 +0000
+ * @category  Cache
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT
+ */
 class cdn extends models\cls\basic
 {
 

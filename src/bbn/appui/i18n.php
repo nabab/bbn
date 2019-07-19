@@ -536,7 +536,7 @@ class i18n extends bbn\models\cls\cache
   /**
    * Count how many of the strings contained in po files are already in database
    *
-   * @param [type] $id_option
+   * @param string $id_option
    * @return void
    */
   public function count_translations_db($id_option){
@@ -732,8 +732,8 @@ class i18n extends bbn\models\cls\cache
   /**
    * Returns the informations relative to traslation of the given $id_option of a $id_project. The data is formatted to be shown in a table
    *
-   * @param [type] $id_project
-   * @param [type] $id_option
+   * @param string $id_project
+   * @param string $id_option
    * @return void
    */
   public function get_translations_table($id_project, $id_option){

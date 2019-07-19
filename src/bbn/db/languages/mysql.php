@@ -14,7 +14,7 @@ use bbn;
  * @copyright BBN Solutions
  * @since Apr 4, 2011, 23:23:55 +0000
  * @category  Database
- * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.4
  */
 class mysql implements bbn\db\engines
@@ -634,6 +634,7 @@ MYSQL
               break;
 
             case 'doesnotcontains':
+            case 'doesnotcontain':
               $res .= 'NOT LIKE '.($f['exp'] ?? '?');
               break;
 
@@ -705,6 +706,9 @@ MYSQL
               break;
 
             case 'contains':
+              $res .= 'LIKE ?';
+              break;
+
             default:
               $res .= $is_number ? '= ?' : 'LIKE ?';
               break;

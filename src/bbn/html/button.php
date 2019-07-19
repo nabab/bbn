@@ -12,7 +12,7 @@ use bbn;
  * @copyright BBN Solutions
  * @since Apr 2, 2013, 21:27:42 +0000
  * @category  MVC
- * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.4
  * @todo ???
  */

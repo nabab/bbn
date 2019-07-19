@@ -13,7 +13,7 @@ use bbn;
  * @copyright BBN Solutions
  * @since Apr 4, 2011, 23:23:55 +0000
  * @category  MVC
- * @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 0.2r89
  * @todo Merge the output objects and combine JS strings.
  * @todo Stop to rely only on sqlite and offer file-based or any db-based solution.
