@@ -467,7 +467,8 @@ class controller implements api{
         ( $encapsulated ? '(function($){' : '' ).
         ( empty($data) ? '' : 'var data = '.\bbn\x::js_object($data).';' ).
         $r.
-        ( $encapsulated ? '})(jQuery);' : '' ).
+        //( $encapsulated ? '})(jQuery);' : '' ).
+        ( $encapsulated ? '})();' : '' ).
         '</script>';
     }
     return false;
@@ -487,7 +488,8 @@ class controller implements api{
       ( $encapsulated ? '(function($){' : '' ).
       ( empty($data) ? '' : 'var data = '.\bbn\x::js_object($data).';' ).
       $js.
-      ( $encapsulated ? '})(jQuery);' : '' ).
+      //( $encapsulated ? '})(jQuery);' : '' ).
+      ( $encapsulated ? '})();' : '' ).
       '</script>';
     }
     return false;

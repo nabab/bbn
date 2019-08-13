@@ -1653,6 +1653,11 @@ class x
     return explode($separator, $st);
   }
 
+  public static function split(string $st, string $separator): array
+  {
+    return explode($separator, $st);
+  }
+
   /**
    * Searches from start to end
    */

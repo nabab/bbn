@@ -1159,7 +1159,6 @@ MYSQL;
                 }
               }
             }
-            //\bbn\x::log([$primary_defined, $primary_value], 'mirko2');
             if (
               $primary_defined &&
               ($db->select_one(self::$table_uids, self::$column, ['bbn_uid' => $primary_value]) === 0) &&
@@ -1212,6 +1211,9 @@ MYSQL;
               if ( $cfg['value'] = self::$db->update(self::$table_uids, ['bbn_active' => 1], [
                 ['bbn_uid', '=', $primary_value]
               ]) ){
+                // Without this the record won't be write in bbn_history. Added by Mirko 
+                $cfg['trig'] = true;
+                // --------
                 if ( \count($update) > 0 ){
                   self::enable();
                   self::$db->update($table, $update, [

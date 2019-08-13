@@ -126,13 +126,10 @@ class observer extends bbn\models\cls\db
           'id_string' => $this->_get_id_string($request, $params)
         ]);
       }
-      return $this->db->get_one("
-        SELECT id
-        FROM bbn_observers
-        WHERE `request` LIKE ?
-        AND `params` IS NULL
-        AND `public` = 1",
-        $request);
+      return $this->db->select_one('bbn_observers', 'id', [
+        'request' => $request,
+        'params' => null
+      ]);
     }
     return null;
   }
@@ -257,7 +254,7 @@ MYSQL
       $t->start();
       if ( is_string($cfg['request']) ){
         $params = self::sanitize_params($cfg['params'] ?? []);
-        $request = trim($cfg['request']);
+        $request = $cfg['request'];
       }
       else if ( is_array($cfg['request']) ){
         $params = null;
@@ -272,7 +269,7 @@ MYSQL
         $request = json_encode($request);
       }
       $id_alias = $this->_get_id($request, $params);
-      //die(var_dump($id_alias, $this->db->last()));
+      //die(var_dump($id_alias, $this->db->last(), $request, $params));
       // If it is a public observer it will be the id_alias and the main observer
       if (
         !$id_alias &&

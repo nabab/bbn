@@ -416,7 +416,7 @@ class router {
       bindtextdomain($textdomain, $lang_path);
       bind_textdomain_codeset($textdomain, 'UTF-8');
       textdomain($textdomain);
-      \bbn\x::log($textdomain.'/'.BBN_LOCALE, 'textdomain');
+      //\bbn\x::log([$lang_path, $textdomain.'/'.BBN_LOCALE], 'textdomain');
     }
   }
 

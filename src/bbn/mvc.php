@@ -512,11 +512,19 @@ class mvc implements mvc\api{
     if ( !router::is_mode($mode) ){
       die("Incorrect mode $path $mode");
     }
-    if (
-      ($name = $this->plugin_name($plugin)) &&
-      ($file = $this->router->route($path, $mode, BBN_APP_PATH.'plugins/'.$name.'/'.$mode.'/'))
-    ){
-      $view = new mvc\view($file);
+    $route = false;
+    if ( $name = $this->plugin_name($plugin) ){
+      $bits = x::split($path, DIRECTORY_SEPARATOR);
+      // The plugin model can be in another plugin
+      if ( (count($bits) > 1) && ($root = $this->plugin_path($bits[0])) ){
+        $route = $this->router->route(substr($path, strlen($bits[0])+1), $mode, $root.'plugins/'.$name.'/'.$mode.'/');
+      }
+    }
+    if ( !$route ){
+      $route = $this->router->route($path, $mode, BBN_APP_PATH.'plugins/'.$name.'/'.$mode.'/');
+    }
+    if ( $route ){
+      $view = new mvc\view($route);
       if ( $view->check() ){
         return \is_array($data) ? $view->get($data) : $view->get();
       }
@@ -540,10 +548,18 @@ class mvc implements mvc\api{
   }
 
   public function get_plugin_model(string $path, array $data, mvc\controller $ctrl, string $plugin){
-    if (
-      ($name = $this->plugin_name($plugin)) &&
-      ($route = $this->router->route($path, 'model', BBN_APP_PATH.'plugins/'.$name.'/model/'))
-    ){
+    $route = false;
+    if ( $name = $this->plugin_name($plugin) ){
+      $bits = x::split($path, DIRECTORY_SEPARATOR);
+      // The plugin model can be in another plugin
+      if ( (count($bits) > 1) && ($root = $this->plugin_path($bits[0])) ){
+        $route = $this->router->route($path, 'model', $root.'plugins/'.$name.'/model/');
+      }
+    }
+    if ( !$route ){
+      $route = $this->router->route($path, 'model', BBN_APP_PATH.'plugins/'.$name.'/model/');
+    }
+    if ( $route ){
       $model = new mvc\model($this->db, $route, $ctrl, $this);
       return $model->get($data);
     }

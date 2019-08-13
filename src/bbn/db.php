@@ -534,7 +534,6 @@ class db extends \PDO implements db\actions, db\api, db\engines
         else{
           $res[] = $v;
         }
-        $idx++;
       }
     }
     return $res;
@@ -1077,16 +1076,20 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public function get_values_desc(array $where, array $cfg, &$others = []): array
   {
-    if ( isset($where['conditions']) ){
+    if ( !empty($where['conditions']) ){
       foreach ( $where['conditions'] as &$f ){
         if ( isset($f['logic'], $f['conditions']) && \is_array($f['conditions']) ){
           $this->get_values_desc($f, $cfg, $others);
         }
         else if ( array_key_exists('value', $f) ){
-          $desc = null;
+          $desc = [
+            'primary' => false,
+            'type' => null,
+            'maxlength' => null,
+            'operator' => $f['operator'] ?? null
+          ];
           if (
-            isset($cfg['models'], $cfg['available_fields'][$f['field']]) &&
-            //($model = $cfg['models'][$cfg['available_fields'][$f['field']]]['fields']) &&
+            isset($cfg['models'], $f['field'], $cfg['available_fields'][$f['field']], $cfg['models'][$cfg['available_fields'][$f['field']]]) &&
             ($model = $cfg['models'][$cfg['tables_full'][$cfg['available_fields'][$f['field']]]]) &&
             ($fname = $this->csn($f['field']))
           ){
@@ -1109,15 +1112,13 @@ class db extends \PDO implements db\actions, db\api, db\engines
                 'operator' => $f['operator'] ?? null
               ];
             }
-            if ( $desc ){
-              $desc['primary'] = false;
-              if (
-                isset($model['keys']['PRIMARY']) &&
-                (count($model['keys']['PRIMARY']['columns']) === 1) &&
-                ($model['keys']['PRIMARY']['columns'][0] === $fname)
-              ){
-                $desc['primary'] = true;
-              }
+            if (
+              !empty($desc['type']) &&
+              isset($model['keys']['PRIMARY']) &&
+              (count($model['keys']['PRIMARY']['columns']) === 1) &&
+              ($model['keys']['PRIMARY']['columns'][0] === $fname)
+            ){
+              $desc['primary'] = true;
             }
           }
           $others[] = $desc;

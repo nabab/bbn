@@ -1041,4 +1041,8 @@ class system extends bbn\models\cls\basic
     return null;
     
   }
+
+  public function get_num_files($path){
+    return count($this->scan($path));
+  }
 }
