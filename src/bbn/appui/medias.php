@@ -83,7 +83,7 @@ class medias extends bbn\models\cls\db
         if ( isset($file) ){
           rename(
             $name,
-            bbn\file\dir::create_path(BBN_DATA_PATH.'media/'.$id).'/'.$file
+            bbn\file\dir::create_path(bbn\mvc::get_data_path('appui-notes').'media/'.$id).'/'.$file
           );
         }
         return $id;
@@ -96,8 +96,8 @@ class medias extends bbn\models\cls\db
     if ( \bbn\str::is_uid($id) ){
       $cf =& $this->class_cfg;
       if ( $this->db->delete($cf['table'], [$cf['arch']['medias']['id'] => $id]) ){
-        if ( is_dir(BBN_DATA_PATH.'media/'.$id) ){
-          return \bbn\file\dir::delete(BBN_DATA_PATH.'media/'.$id);
+        if ( is_dir(bbn\mvc::get_data_path('appui-notes').'media/'.$id) ){
+          return \bbn\file\dir::delete(bbn\mvc::get_data_path('appui-notes').'media/'.$id);
         }
         return true;
       }
@@ -112,9 +112,9 @@ class medias extends bbn\models\cls\db
       ($link_type = $this->opt->from_code('link', $this->opt_id)) &&
       ($media = $this->db->rselect($cf['table'], [], [$cf['arch']['medias']['id'] => $id])) &&
       ($link_type !== $media[$cf['arch']['medias']['type']]) &&
-      is_file(BBN_DATA_PATH.'media/'.$id.'/'.$media[$cf['arch']['medias']['name']])
+      is_file(bbn\mvc::get_data_path('appui-notes').'media/'.$id.'/'.$media[$cf['arch']['medias']['name']])
     ){
-      $media['path'] = BBN_DATA_PATH.'media/'.$id.'/'.$media[$cf['arch']['medias']['name']];
+      $media['path'] = bbn\mvc::get_data_path('appui-notes').'media/'.$id.'/'.$media[$cf['arch']['medias']['name']];
       return empty($details) ? $media['path'] : $media;
     }
     return false;

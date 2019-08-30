@@ -1011,7 +1011,6 @@ class str
    */
   public static function check_name(): bool
   {
-
     $args = \func_get_args();
     // Each argument must be a string starting with a letter, and having only one character made of letters, numbers and underscores
     foreach ( $args as $a ){
@@ -1021,9 +1020,9 @@ class str
         return false;
       }
     }
-
     return true;
   }
+
   /**
    * Checks if a string doesn't contain a filesystem path.
    *
@@ -1038,15 +1037,43 @@ class str
    */
   public static function check_filename(): bool
   {
-
     $args = \func_get_args();
     // Each argument must be a string starting with a letter, and having than one character made of letters, numbers and underscores
     foreach ( $args as $a ){
-      if ( !\is_string($a) || (strpos($a, '/') !== false) || (strpos($a, '\\') !== false) ){
+      if (($a === '..') || !\is_string($a) || (strpos($a, '/') !== false) || (strpos($a, '\\') !== false) ){
         return false;
       }
     }
     return true;
+  }
+
+  /**
+   * Checks if a string doesn't contain a filesystem path.
+   *
+   * ```php
+   * \bbn\x::dump(\bbn\str::check_filename("Paul"));
+   * // (bool) true
+   * \bbn\x::dump(\bbn\str::check_filename("Paul/"));
+   * // (bool) false
+   * ```
+   *
+   * @return bool
+   */
+  public static function check_path(): bool
+  {
+    if ( $args = \func_get_args() ){
+      // Each argument must be a string starting with a letter, and having than one character made of letters, numbers and underscores
+      foreach ( $args as $a ){
+        $bits = x::split($a, DIRECTORY_SEPARATOR);
+        foreach ( $bits as $b ){
+          if ( !self::check_filename($b) ){
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+    return false;
   }
 
 

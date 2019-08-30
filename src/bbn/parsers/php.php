@@ -276,8 +276,9 @@ class php extends bbn\models\cls\basic
       }
 
       if ( !empty($arr['methods']['private']) ){
-        foreach ( $arr['methods']['private'] as $priv ){          
-          $str = ($priv[$idx]['static'] ? '::' : '->').$priv['name'];
+        foreach ( $arr['methods']['private'] as $name => $priv ){          
+         // $str = ($priv[$idx]['static'] ? '::' : '->').$priv['name'];          
+          $str = ($priv['static'] ? '::' : '->').$name;
           if ( \bbn\x::indexOf($fs->get_contents($arr['file']), $str) === -1 ){
             $arr['unused'][] = $arr['name'].'::'.$priv['name'];
           }

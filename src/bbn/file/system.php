@@ -4,11 +4,17 @@
  * @package bbn
  * @author Thomas Nabet <thomas.nabet@gmail.com>
  * @license MIT
- * @link http://url.com
+ * @link https://php.bbn.io
+ *
+ * //$encodings = ['UTF-8', 'WINDOWS-1252', 'ISO-8859-1', 'ISO-8859-15'];
+ * $enc = mb_detect_encoding($f, $encodings);
+ * if ( $enc !== 'UTF-8' ){
+ *   $f = html_entity_decode(htmlentities($f, ENT_QUOTES, $enc), ENT_QUOTES , 'UTF-8');
+ * }
+ *
  */
 
 namespace bbn\file;
-
 use bbn;
 
 /**
@@ -25,7 +31,7 @@ class system extends bbn\models\cls\basic
   /**
    * @var mixed The connection stream
    */
-  private $stream = '';
+  private $obj = '';
 
   /**
    * @var string The connection prefix (with connection infos)
@@ -42,6 +48,36 @@ class system extends bbn\models\cls\basic
    */
   private $current;
 
+  protected $host;
+
+  protected $timeout = 10;
+
+  /**
+   * Connect to a Nextcloud instance
+   * @param array $cfg
+   * @return bool
+   */
+  private function _connect_nextcloud(array $cfg): bool
+  {
+   
+    if ( isset($cfg['host'], $cfg['user'], $cfg['pass']) && class_exists('\\Sabre\\DAV\\Client') ){
+      $this->prefix = '/remote.php/webdav/';
+      $this->obj = new \Sabre\DAV\Client([
+        'baseUri' => 'http'.(isset($cfg['port']) && ($cfg['port'] === 21) ? '' : 's').'://'.$cfg['host'].$this->prefix.$cfg['path'],
+        'userName' => $cfg['user'],
+        'password' => $cfg['pass']
+      ]);
+      $this->host = 'http'.(isset($cfg['port']) && ($cfg['port'] === 21) ? '' : 's').'://'.$cfg['host'];
+     
+      if ( $this->obj->options() ){
+        $this->current = '';
+        return true;
+      }
+      $this->error = _('Impossible to connect to the WebDAV host');
+    }
+    return false;
+  }
+
   /**
    * Connect to FTP
    * @param array $cfg
@@ -50,35 +86,35 @@ class system extends bbn\models\cls\basic
   private function _connect_ftp(array $cfg): bool
   {
     if ( isset($cfg['host'], $cfg['user'], $cfg['pass']) ){
-      $args = [$cfg['host'], $cfg['port'] ?? 21, $cfg['timeout'] ?? 3];
+      $args = [$cfg['host'], $cfg['port'] ?? 21, $cfg['timeout'] ?? $this->timeout];
       try {
-        $this->stream = ftp_ssl_connect(...$args);
+        $this->obj = ftp_ssl_connect(...$args);
       }
       catch ( \Exception $e ){
-        $this->error = _('Impossible to connect to the FTP host');
+        $this->error = _('Impossible to connect to the FTP host through SSL');
         $this->error .= PHP_EOL.$e->getMessage();
       }
-      if ( $this->stream ){
-        if ( !@ftp_login($this->stream, $cfg['user'], $cfg['pass']) ){
-          try {
-            $this->stream = ftp_connect(...$args);
-          }
-          catch ( \Exception $e ){
-            $this->error = _('Impossible to connect to the FTP host');
-            $this->error .= PHP_EOL.$e->getMessage();
-          }
-          if ( !@ftp_login($this->stream, $cfg['user'], $cfg['pass']) ){
-            $this->error = _('Impossible to login to the FTP host');
-            $this->error .= PHP_EOL.error_get_last()['message'];
-          }
+      if ( !$this->obj ){
+        try {
+          $this->obj = ftp_connect(...$args);
         }
-        if ( !$this->error ){
-          $this->current = ftp_pwd($this->stream);
+        catch ( \Exception $e ){
+          $this->error = _('Impossible to connect to the FTP host');
+          $this->error .= PHP_EOL.$e->getMessage();
+        }
+      }
+      if ( $this->obj ){
+        if ( !@ftp_login($this->obj, $cfg['user'], $cfg['pass']) ){
+          $this->error = _('Impossible to login to the FTP host');
+          $this->error .= PHP_EOL.error_get_last()['message'];
+        }
+        else{
+          $this->current = ftp_pwd($this->obj);
           if (
             !empty($cfg['passive']) ||
             (defined('BBN_SERVER_NAME') && !@fsockopen(BBN_SERVER_NAME, $args[1]))
           ){
-            ftp_pasv($this->stream, true);
+            ftp_pasv($this->obj, true);
           }
           return true;
         }
@@ -96,15 +132,16 @@ class system extends bbn\models\cls\basic
   {
     if ( isset($cfg['host']) ){
       $param = [];
+      // Keys as parans
       if ( isset($cfg['public'], $cfg['private']) ){
         $param['hostkey'] = 'ssh-rsa';
       }
       $this->cn = @ssh2_connect($cfg['host'], $cfg['port'] ?? 22, $param, [
         'debug' => function($message, $language, $always_display){
-          bbn\x::log([$message, $language, $always_display]);
+          bbn\x::log([$message, $language, $always_display], 'connect_ssh_debug');
         },
         'disconnect' => function($reason, $message, $language){
-          bbn\x::log([$reason, $message, $language]);
+          bbn\x::log([$reason, $message, $language], 'connect_ssh_disconnect');
         }
       ]);
       if ( !$this->cn ){
@@ -120,8 +157,8 @@ class system extends bbn\models\cls\basic
         if ( !ssh2_auth_pubkey_file($this->cn, $cfg['user'], $cfg['public'], $cfg['private'], $cfg['pass'] ?? null) ){
           $this->error = _('Authentication rejected by server');
         }
-        else if ( $this->stream = @ssh2_sftp($this->cn) ){
-          $this->current = ssh2_sftp_realpath($this->stream, '.');
+        else if ( $this->obj = @ssh2_sftp($this->cn) ){
+          $this->current = ssh2_sftp_realpath($this->obj, '.');
           return true;
         }
         else{
@@ -130,9 +167,9 @@ class system extends bbn\models\cls\basic
       }
       else if ( isset($cfg['user'], $cfg['pass']) && @ssh2_auth_password($this->cn, $cfg['user'], $cfg['pass']) ){
         //die(_("Could not authenticate with username and password."));
-        $this->stream = @ssh2_sftp($this->cn);
-        if ( $this->stream ){
-          $this->current = ssh2_sftp_realpath($this->stream, '.');
+        $this->obj = @ssh2_sftp($this->cn);
+        if ( $this->obj ){
+          $this->current = ssh2_sftp_realpath($this->obj, '.');
           return true;
         }
         $this->error = _("Could not initialize SFTP subsystem.");
@@ -146,6 +183,8 @@ class system extends bbn\models\cls\basic
 
   /**
    * Checks if the given files name ends with the given suffix string
+   * 
+   * @todo Nextcloud
    * @param array|string $item
    * @param callable|string $filter
    * @return bool
@@ -182,119 +221,133 @@ class system extends bbn\models\cls\basic
    */
   private function _get_items(string $path, $type = 'both', bool $hidden = false, string $detailed = ''): array
   {
-    $files = [];
-    $has_type = stripos($detailed, 't') !== false;
-    $has_mod = stripos($detailed, 'm') !== false;
-    $has_size = stripos($detailed, 's') !== false;
-    if ( ($this->mode === 'ftp') && ($detailed || ($type !== 'both')) ){
-      if ( $fs = ftp_mlsd($this->stream, substr($path, strlen($this->prefix))) ){
+    if ( $this->mode !== 'nextcloud' ){
+      $files = [];
+      $dirs = [];
+      $has_size = stripos((string)$detailed, 's') !== false;
+      $has_type = stripos((string)$detailed, 't') !== false;
+      $has_mod = stripos((string)$detailed, 'm') !== false;
+
+      if ( ($this->mode === 'ftp') && ($detailed || ($type !== 'both')) ){
+        if ( $fs = ftp_mlsd($this->obj, substr($path, strlen($this->prefix))) ){
+          foreach ( $fs as $f ){
+            if ( ($f['name'] !== '.') && ($f['name'] !== '..') && ($hidden || (strpos(basename($f['name']), '.') !== 0)) ){
+              $ok = 0;
+              if ( $type === 'both' ){
+                $ok = 1;
+              }
+              else if ( $type === 'dir' ){
+                $ok = $f['type'] === 'dir';
+              }
+              else if ( $type === 'file' ){
+                $ok = $f['type'] === 'file';
+              }
+              else if ( !is_string($type) || is_file($path.'/'.$f['name']) ){
+                $ok = $this->_check_filter($f['name'], $type);
+              }
+              if ( $ok ){
+                if ($detailed) {
+                  $tmp = [
+                    'path' => $path.'/'.$f['name']
+                  ];
+                  if ($has_mod) {
+                    $tmp['mtime'] = mktime(
+                      substr($f['modify'], 8, 2),
+                      substr($f['modify'], 10, 2),
+                      substr($f['modify'], 12, 2),
+                      substr($f['modify'], 4, 2),
+                      substr($f['modify'], 6, 2),
+                      substr($f['modify'], 0, 4)
+                    );
+                  }
+                  if ($has_type) {
+                    $tmp['dir'] = $f['type'] === 'dir';
+                    $tmp['file'] = $f['type'] !== 'dir';
+                  }
+                  if ($has_size) {
+                    $tmp['size'] = $f['type'] === 'dir' ? 0 : $this->filesize($path.'/'.$f['name']);
+                  }
+                }
+                else{
+                  $tmp = $path.'/'.$f['name'];
+                }
+                if ($f['type'] === 'dir') {
+                  $dirs[] = $tmp;
+                }
+                else {
+                  $files[] = $tmp;
+                }
+              }
+            }
+          }
+        }
+        else{
+          bbn\x::log(error_get_last(), 'filesystem');
+        }
+      }
+      else {
+        $fs = scandir($path, SCANDIR_SORT_ASCENDING);
         foreach ( $fs as $f ){
-          if ( ($f['name'] !== '.') && ($f['name'] !== '..') && ($hidden || (strpos(basename($f['name']), '.') !== 0)) ){
+          if ( ($f !== '.') && ($f !== '..') && ($hidden || (strpos(basename($f), '.') !== 0)) ){
             $ok = 0;
+            $is_dir = null;
+            $is_file = null;
             if ( $type === 'both' ){
               $ok = 1;
             }
             else if ( $type === 'dir' ){
-              $ok = $f['type'] === 'dir';
+              if ( $ok = is_dir($path.'/'.$f) ){
+                $is_dir = $ok;
+                $is_file = !$ok;
+              }
             }
             else if ( $type === 'file' ){
-              $ok = $f['type'] === 'file';
+              //var_dump($path.'/'.$f);
+              if ( $ok = is_file($path.'/'.$f) ){
+                $is_file = $ok;
+                $is_dir = !$ok;
+              }
             }
-            else if ( !is_string($type) || is_file($path.'/'.$f['name']) ){
-              $ok = $this->_check_filter($f['name'], $type);
+            else if ( !is_string($type) || is_file($path.'/'.$f) ){
+              $ok = $this->_check_filter($f, $type);
+              $is_file = true;
+              $is_dir = false;
             }
             if ( $ok ){
               if ( $detailed ){
                 $tmp = [
-                  'path' => $path.'/'.$f['name']
+                  'path' => $path.'/'.$f
                 ];
                 if ( $has_mod ){
-                  $tmp['mtime'] = mktime(
-                    substr($f['modify'], 8, 2),
-                    substr($f['modify'], 10, 2),
-                    substr($f['modify'], 12, 2),
-                    substr($f['modify'], 4, 2),
-                    substr($f['modify'], 6, 2),
-                    substr($f['modify'], 0, 4)
-                  );
+                  $tmp['mtime'] = filemtime($path.'/'.$f);
                 }
                 if ( $has_type ){
-                  $tmp['dir'] = $f['type'] === 'dir';
-                  $tmp['file'] = $f['type'] !== 'dir';
+                  $tmp['dir'] = $is_dir ?? is_dir($path.'/'.$f);
+                  $tmp['file'] = $is_file ?? is_file($path.'/'.$f);
                 }
                 if ( $has_size ){
-                  $tmp['size'] = $f['type'] === 'dir' ? 0 : $this->filesize($path.'/'.$f['name']);
+                  $is_dir = $tmp['dir'] ?? is_dir($path.'/'.$f);
+                  $tmp['size'] = $is_dir ? 0 : $this->filesize($path.'/'.$f);
                 }
-                $files[] = $tmp;
+              }
+              else {
+                $tmp = $path.'/'.$f;
+              }
+              if ($is_dir) {
+                $dirs[] = $tmp;
               }
               else{
-                $files[] = $path.'/'.$f['name'];
+                $files[] = $tmp;
               }
             }
           }
         }
       }
-      else{
-        bbn\x::log(error_get_last(), 'filesystem');
-      }
+      return array_merge($dirs, $files);
     }
-    else{
-      $fs = scandir($path, SCANDIR_SORT_ASCENDING);
-      foreach ( $fs as $f ){
-        if ( ($f !== '.') && ($f !== '..') && ($hidden || (strpos(basename($f), '.') !== 0)) ){
-          $ok = 0;
-          $is_dir = null;
-          $is_file = null;
-          if ( $type === 'both' ){
-            $ok = 1;
-          }
-          else if ( $type === 'dir' ){
-            if ( $ok = is_dir($path.'/'.$f) ){
-              $is_dir = $ok;
-              $is_file = !$ok;
-            }
-          }
-          else if ( $type === 'file' ){
-            var_dump($path.'/'.$f);
-            if ( $ok = is_file($path.'/'.$f) ){
-              $is_file = $ok;
-              $is_dir = !$ok;
-            }
-          }
-          else if ( !is_string($type) || is_file($path.'/'.$f) ){
-            $ok = $this->_check_filter($f, $type);
-            $is_file = true;
-            $is_dir = false;
-          }
-          if ( $ok ){
-            if ( $detailed ){
-              $tmp = [
-                'path' => $path.'/'.$f
-              ];
-              if ( $has_mod ){
-                $tmp['mtime'] = filemtime($path.'/'.$f);
-              }
-              if ( $has_type ){
-                $tmp['dir'] = $is_dir ?? is_dir($path.'/'.$f);
-                $tmp['file'] = $is_file ?? is_file($path.'/'.$f);
-              }
-              if ( $has_size ){
-                $is_dir = $tmp['dir'] ?? is_dir($path.'/'.$f);
-                $tmp['size'] = $is_dir ? 0 : $this->filesize($path.'/'.$f);
-              }
-              $files[] = $tmp;
-            }
-            else {
-              $files[] = $path.'/'.$f;
-            }
-          }
-        }
-      }
+    else {
+      return $this->obj->get_items($path, $type, $hidden, $detailed);
     }
-    if ( \count($files) > 0 ){
-      //bbn\x::sort($files, 'real');
-    }
-    return $files;
   }
 
   /**
@@ -303,7 +356,12 @@ class system extends bbn\models\cls\basic
    */
   private function _exists($path): bool
   {
-    return file_exists($path);
+    if ( $this->mode === 'nextcloud' ){
+      return $this->obj->exists($path);
+    }
+    else {
+      return file_exists($path);
+    }
   }
 
   /**
@@ -346,7 +404,7 @@ class system extends bbn\models\cls\basic
       if ( !$filter || $this->_check_filter($p, $filter) ){
         $all[] = $it;
       }
-      if ( is_dir($p) ){
+      if ( $this->_is_dir($p) ){
         foreach ( $this->_scan($p, $filter, $hidden, $detailed) as $t ){
           $all[] = $t;
         }
@@ -363,7 +421,12 @@ class system extends bbn\models\cls\basic
    */
   private function _mkdir(string $dir, int $chmod = 0755, $recursive = false): bool
   {
-    return is_dir($dir) || (@mkdir($dir, $chmod, $recursive) || is_dir($dir));
+    if ( $this->mode !== 'nextcloud' ){
+      return is_dir($dir) || (@mkdir($dir, $chmod, $recursive) || is_dir($dir));
+    }
+    else {
+      return $this->_is_dir($dir) || $this->obj->mkdir($dir);
+    }
   }
 
   /**
@@ -373,32 +436,43 @@ class system extends bbn\models\cls\basic
    */
   private function _delete(string $path, bool $full = true): bool
   {
-    if ( is_dir($path) ){
-      $files = $this->_get_items($path, 'both', true);
-      foreach ( $files as $file ){
-        $this->_delete($file);
+    if ( $this->mode !== 'nextcloud' ){
+      if ( $this->_is_dir($path) ){
+        $files = $this->_get_items($path, 'both', true);
+        
+        if ( !empty($files) ){
+          foreach ( $files as $file ){
+            $this->_delete($file);
+          }
+        }
+        if ( $full ){
+          if ( $this->mode === 'ssh' ){
+            return @ssh2_sftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
+          }
+          if ( $this->mode === 'ftp' ){
+            return @ftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
+          }
+          else{
+            return rmdir($path);
+          }
+          return false;
+        }
+        return true;
       }
-      if ( $full ){
+      if ( $this->is_file($path) ){
         if ( $this->mode === 'ssh' ){
-          return @ssh2_sftp_rmdir($this->stream, substr($path, strlen($this->prefix)));
+          return ssh2_sftp_unlink($this->obj, substr($path, strlen($this->prefix)));
         }
         if ( $this->mode === 'ftp' ){
-          return @ftp_rmdir($this->stream, substr($path, strlen($this->prefix)));
+          return ftp_delete($this->obj, substr($path, strlen($this->prefix)));
         }
-        return rmdir($path);
+        return @unlink($path);
       }
-      return true;
+      return false;
     }
-    if ( is_file($path) ){
-      if ( $this->mode === 'ssh' ){
-        return ssh2_sftp_unlink($this->stream, substr($path, strlen($this->prefix)));
-      }
-      if ( $this->mode === 'ftp' ){
-        return ftp_delete($this->stream, substr($path, strlen($this->prefix)));
-      }
-      return unlink($path);
+    else {
+      return $this->obj->delete($path);
     }
-    return false;
   }
 
   /**
@@ -408,16 +482,18 @@ class system extends bbn\models\cls\basic
    */
   private function _copy(string $source, string $dest): bool
   {
-    if ( is_file($source) ){
-      return copy($source, $dest);
-    }
-    else if ( is_dir($source) && $this->_mkdir($dest) ){
-      foreach ( $this->_get_items($source, 'both', true) as $it ){
-        $this->_copy($it, $dest.'/'.basename($it));
+    if ( $this->mode  !== 'nextcloud'){
+      if ( $this->_is_file($source) ){
+        return copy($source, $dest);
       }
-      return true;
+      else if ( $this->_is_dir($source) && $this->_mkdir($dest) ){
+        foreach ( $this->_get_items($source, 'both', true) as $it ){
+          $this->_copy($it, $dest.'/'.basename($it));
+        }
+        return true;
+      }
+      return false;
     }
-    return false;
   }
 
   /**
@@ -427,16 +503,21 @@ class system extends bbn\models\cls\basic
    */
   private function _rename($source, $dest): bool
   {
-    $file1 = substr($source, strlen($this->prefix));
-    $file2 = substr($dest, strlen($this->prefix));
-    //die(var_dump($file1, $file2, ftp_rename($this->stream, $file1, $file2), rename($source, $dest)));
-    if ( $this->mode === 'ssh' ){
-      return ssh2_sftp_rename($this->stream, $file1, $file2);
+    if ( $this->mode !== 'nextcloud'){
+      $file1 = substr($source, strlen($this->prefix));
+      $file2 = substr($dest, strlen($this->prefix));
+      if ( $this->mode === 'ssh' ){
+        return ssh2_sftp_rename($this->obj, $file1, $file2);
+      }
+      if ( $this->mode === 'ftp' ){
+        return ftp_rename($this->obj, $file1, $file2);
+      }
+      return rename($file1, $file2);
     }
-    else if ( $this->mode === 'ftp' ){
-      return ftp_rename($this->stream, $file1, $file2);
+    else{
+      
+      return $this->obj->rename($source, $dest);
     }
-    return rename($file1, $file2);
   }
 
   private function _get_empty_dirs($path, bool $hidden_is_empty = false): array
@@ -488,6 +569,64 @@ class system extends bbn\models\cls\basic
     return $num;
   }
 
+  private function _is_file(string $path)
+  {
+    if ( $this->mode === 'nextcloud' ){
+      return $this->obj->is_file($path);
+    }
+    else {
+      return is_file($path);
+    }
+  }
+
+  private function _is_dir(string $path)
+  {
+    if ( $this->mode === 'nextcloud' ){
+      return $this->obj->is_dir($path);
+    }
+    else {
+      return is_dir($path);
+    }
+  }
+  
+  private function _filemtime($path)
+  {
+    if ( $this->mode === 'nextcloud' ){
+      return $this->obj->filemtime($path);
+    }
+    else {
+      return filemtime($path);
+    }
+  }
+ 
+  private function _filesize($path):? int
+  {
+    if ( $this->mode === 'nextcloud' ){
+      return $this->obj->get_size($path);
+    }
+    else {
+      if ( $this->_is_file($path) ){
+        return filesize($path);
+      }
+      return null;
+    }
+  }
+  
+  /**
+   * @param $file
+   */
+  private function _download($file): void
+  {
+    if ( $this->mode === 'nextcloud' ) {
+      $this->obj->download($file);
+    }
+    else {
+      if ( ($f = $this->get_file($file)) && $f->check() ){
+        $f->download();
+      }
+    }
+  }
+
   /**
    * system constructor.
    * @param string $type
@@ -499,13 +638,19 @@ class system extends bbn\models\cls\basic
       case 'ssh':
         if ( $this->_connect_ssh($cfg) ){
           $this->mode = 'ssh';
-          $this->prefix = 'ssh2.sftp://'.$this->stream;
+          $this->prefix = 'ssh2.sftp://'.$this->obj;
         }
         break;
       case 'ftp':
         if ( $this->_connect_ftp($cfg) ){
           $this->mode = 'ftp';
           $this->prefix = 'ftp://'.$cfg['user'].':'.$cfg['pass'].'@'.$cfg['host'].'/';
+        }
+        break;
+      case 'nextcloud':
+        if ( isset($cfg['host'], $cfg['user'], $cfg['pass']) ){
+          $this->mode = 'nextcloud';
+          $this->obj = new \bbn\api\nextcloud($cfg);
         }
         break;
       case 'local':
@@ -524,7 +669,7 @@ class system extends bbn\models\cls\basic
     if ( ($path === '.') || ($path === './') ){
       $path = '';
     }
-    if ( $path && (substr($path, -1) === '/') ){
+    while ( $path && (substr($path, -1) === '/') ){
       $path = substr($path, 0, strlen($path) - 1);
     }
     return $path;
@@ -537,7 +682,11 @@ class system extends bbn\models\cls\basic
   public function get_real_path(string $path): string
   {
     $path = $this->clean_path($path);
-    return $this->prefix.(
+    if ( $this->mode === 'nextcloud' ){
+      return $this->obj->get_real_path($path);
+    }
+    else {
+      return $this->prefix.(
       strpos($path, '/') === 0 ?
         $path :
         (
@@ -549,6 +698,7 @@ class system extends bbn\models\cls\basic
           )
         )
       );
+    }
   }
 
   /**
@@ -558,10 +708,15 @@ class system extends bbn\models\cls\basic
    */
   public function get_system_path(string $file, bool $is_absolute = true): string
   {
-    // The full path without the stream prefix, and if it's not absolute we remove the initial slash
-    $file = substr($file, strlen($this->prefix) + ($is_absolute ? 0 : 1));
-    if ( !$is_absolute && $this->current ){
-      $file = substr($file, strlen($this->current));
+    // The full path without the obj prefix, and if it's not absolute we remove the initial slash
+    if ( $this->mode ===  'nextcloud' ){
+      $file = $this->obj->get_system_path($file, $is_absolute);
+    }
+    else {
+      $file = substr($file, strlen($this->prefix) + ($is_absolute ? 0 : 1));
+      if ( !$is_absolute && $this->current ){
+        $file = substr($file, strlen($this->current));
+      }
     }
     return $file;
   }
@@ -585,8 +740,8 @@ class system extends bbn\models\cls\basic
   /**
    * @return string
    */
-  public function get_stream(){
-    return $this->stream;
+  public function get_obj(){
+    return $this->obj;
   }
 
   /**
@@ -600,21 +755,25 @@ class system extends bbn\models\cls\basic
   public function get_files(string $path = null, $including_dirs = false, $hidden = false, $filter = null, string $detailed = ''): ?array
   {
     if ( $this->check() && $this->is_dir($path) ){
-      $is_absolute = strpos($path, '/') === 0;
-      $fs =& $this;
-      clearstatcache();
-      $type = $including_dirs ? 'both' : 'file';
-      return array_map(function($a)use($is_absolute, $fs, $detailed){
-        if ( $detailed ){
-          $a['path'] = $fs->get_system_path($a['path'], $is_absolute);
-          return $a;
-        }
-        return $fs->get_system_path($a, $is_absolute);
-      }, $this->_get_items($this->get_real_path($path), $filter ?: $type, $hidden, $detailed));
+      if ( $this->mode !== 'nextcloud' ){
+        $is_absolute = strpos($path, '/') === 0;
+        $fs =& $this;
+        clearstatcache();
+        $type = $including_dirs ? 'both' : 'file';
+        return array_map(function($a)use($is_absolute, $fs, $detailed){
+          if ( $detailed ){
+            $a['path'] = $fs->get_system_path($a['path'], $is_absolute);
+            return $a;
+          }
+          return $fs->get_system_path($a, $is_absolute);
+        }, $this->_get_items($this->get_real_path($path), $filter ?: $type, $hidden, $detailed));
+      }
+      else {
+        return $this->obj->get_files($path, $including_dirs, $hidden, $filter, $detailed);
+      }
     }
     return null;
   }
-
   /**
    * @param string $path
    * @param bool $hidden
@@ -639,6 +798,7 @@ class system extends bbn\models\cls\basic
   }
 
   /**
+   * @todo Nextcloud
    * @param string $path
    * @return bool
    */
@@ -687,8 +847,7 @@ class system extends bbn\models\cls\basic
    */
   public function is_file(string $path): bool
   {
-    clearstatcache();
-    return $this->check() && is_file($this->get_real_path($path));
+    return $this->check() && $this->_is_file($this->get_real_path($path));
   }
 
   /**
@@ -697,8 +856,7 @@ class system extends bbn\models\cls\basic
    */
   public function is_dir(string $path): bool
   {
-    clearstatcache();
-    return $this->check() && is_dir($this->get_real_path($path));
+    return $this->check() && $this->_is_dir($this->get_real_path($path));
   }
 
   /**
@@ -718,7 +876,7 @@ class system extends bbn\models\cls\basic
           return $a;
         }
         return $fs->get_system_path($a, $is_absolute);
-      }, $this->_scand($this->get_real_path($path), $hidden, $detailed));
+      }, $this->_scand($this->get_real_path($path), null, $hidden, $detailed));
     }
     return null;
   }
@@ -784,6 +942,7 @@ class system extends bbn\models\cls\basic
   }
 
   /**
+   * @todo Nextcloud
    * @param string $file
    * @param string $content
    * @param bool $append
@@ -811,8 +970,13 @@ class system extends bbn\models\cls\basic
   public function get_contents(string $file):? string
   {
     if ( $this->check() && $this->exists($file) ){
-      $real = $this->get_real_path($file);
-      return file_get_contents($real);
+      if ( $this->mode === 'nextcloud' ){
+        return $this->obj->get_contents($file);
+      }
+      else{
+        $real = $this->get_real_path($file);
+        return file_get_contents($real);
+      }
     }
     return null;
   }
@@ -840,30 +1004,35 @@ class system extends bbn\models\cls\basic
   public function copy(string $source, string $dest, bool $overwrite = false, system $fs = null): bool
   {
     if ( $this->check() ){
-      $nfs =& $this;
-      if ( $fs ){
-        if ( !$fs->check() ){
-          return false;
-        }
-        $nfs =& $fs;
-      }
-      if ( $this->exists($source) && $nfs->exists(dirname($dest)) ){
-        if ( $nfs->exists($dest) ){
-          $dest_is_dir = $nfs->is_dir($dest);
-          if ( $dest_is_dir && $this->is_file($source) ){
-            $dest .= '/'.basename($source);
-          }
-          else if (
-            (!$dest_is_dir && !$overwrite) ||
-            ($dest_is_dir && (count($nfs->get_files($dest, true, true)) > 0) && !$overwrite)
-          ){
+      if ( $this->mode !== 'nextcloud' ){
+        $nfs =& $this;
+        if ( $fs ){
+          if ( !$fs->check() ){
             return false;
           }
-          else{
-            $nfs->delete($dest);
-          }
+          $nfs =& $fs;
         }
-        return $this->_copy($this->get_real_path($source), $nfs->get_real_path($dest));
+        if ( $this->exists($source) && $nfs->exists(dirname($dest)) ){
+          if ( $nfs->exists($dest) ){
+            $dest_is_dir = $nfs->is_dir($dest);
+            if ( $dest_is_dir && $this->is_file($source) ){
+              $dest .= '/'.basename($source);
+            }
+            else if (
+              (!$dest_is_dir && !$overwrite) ||
+              ($dest_is_dir && (count($nfs->get_files($dest, true, true)) > 0) && !$overwrite)
+            ){
+              return false;
+            }
+            else{
+              $nfs->delete($dest);
+            }
+          }
+          return $this->_copy($this->get_real_path($source), $nfs->get_real_path($dest));
+        }
+      }
+      else {
+        $this->obj->copy($source, $dest);
       }
     }
     return false;
@@ -877,9 +1046,9 @@ class system extends bbn\models\cls\basic
    */
   public function rename(string $file, $name, bool $overwrite = false): bool
   {
-    
     if ( $this->exists($file) && (strpos($name, '/') === false) ){
       $path = $this->get_real_path(dirname($file));
+      
       if ( $this->_exists($path.'/'.$name) && (!$overwrite || !$this->_delete($path.'/'.$name)) ){
         return false;
       }
@@ -889,6 +1058,7 @@ class system extends bbn\models\cls\basic
   }
 
   /**
+   * 
    * @param string $source
    * @param string $dest
    * @param bool $overwrite
@@ -925,45 +1095,40 @@ class system extends bbn\models\cls\basic
    */
   public function get_file(string $file): ?bbn\file
   {
-    if ( $this->check() && $this->is_file($file) ){
-      return new bbn\file($this->get_real_path($file));
+    if ( $this->check() ){
+      if ($this->mode === 'nextcloud') {
+        return $this->obj->get_file($file);
+      }
+      if ( $this->is_file($file) ){
+        return new bbn\file($this->get_real_path($file));
+      }
     }
     return null;
   }
 
-  /**
-   * @param $file
-   */
-  public function download($file): void
+  public function download($file)
   {
-    if ( ($f = $this->get_file($file)) && $f->check() ){
-      $f->download();
-    }
+    return $this->_download($this->get_real_path($file));
+  }
+
+  public function filemtime($path)
+  {
+    return $this->_filemtime($this->get_real_path($path));
   }
 
   public function filesize($path): ?int
   {
-    if ( $this->is_file($path) ){
-      return filesize($this->get_real_path($path));
-    }
-    return null;
+    return $this->_filesize($this->get_real_path($path));
   }
 
   private function _dirsize($path): int
   {
-    
-    $files = $this->_get_items($path, 'file', true);
-    $dirs = $this->_get_items($path, 'dir', true);
     $tot = 0;
-    if ( $files ){
-      foreach ( $files as $f ){
-        $tot += filesize($f);
-      }
+    foreach ( $this->_get_items($path, 'file', true) as $f ){
+      $tot += $this->filesize($f);
     }
-    if ( $dirs ){
-      foreach ( $dirs as $d ){
-        $tot += $this->_dirsize($d);
-      }
+    foreach ( $this->_get_items($path, 'dir', true) as $d ){
+      $tot += $this->_dirsize($d);
     }
     return $tot;
   }
@@ -972,8 +1137,14 @@ class system extends bbn\models\cls\basic
   {
     if ( $this->check() ){
       $rpath = $this->get_real_path($path);
-      if ( is_dir($rpath) ){
-        return $this->_dirsize($rpath);
+      
+      if ( $this->mode !== 'nextcloud' ){
+        if ( $this->_is_dir($rpath) ){
+          return $this->_dirsize($rpath);
+        }
+      }
+      else{
+        return $this->obj->get_size($rpath);
       }
     }
   }
@@ -1003,7 +1174,16 @@ class system extends bbn\models\cls\basic
     }
     return $num;
   }
-
+  /**
+   * @todo nextcloud
+   *
+   * @param [type] $search
+   * @param [type] $path
+   * @param boolean $deep
+   * @param boolean $hidden
+   * @param string $filter
+   * @return array|null
+   */
   public function search($search, $path, $deep = false, $hidden = false, $filter = 'both'): ?array
   {
     if ($this->is_dir($path)) {

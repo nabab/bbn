@@ -2275,12 +2275,12 @@ class options extends bbn\models\cls\db
       if ( \is_array($prop) ){
         $change = false;
         foreach ( $prop as $k => $v ){
-          if ( !\in_array($k, $this->class_cfg['arch']['options']) ){
+          //if ( !\in_array($k, $this->class_cfg['arch']['options']) ){
             if ( !isset($o[$k]) || ($o[$k] !== $v) ){
               $change = true;
               $o[$k] = $v;
             }
-          }
+          //}
         }
         if ( $change ){
           return $this->set($id, $o);

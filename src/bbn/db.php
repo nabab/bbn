@@ -1088,37 +1088,40 @@ class db extends \PDO implements db\actions, db\api, db\engines
             'maxlength' => null,
             'operator' => $f['operator'] ?? null
           ];
-          if (
-            isset($cfg['models'], $f['field'], $cfg['available_fields'][$f['field']], $cfg['models'][$cfg['available_fields'][$f['field']]]) &&
-            ($model = $cfg['models'][$cfg['tables_full'][$cfg['available_fields'][$f['field']]]]) &&
-            ($fname = $this->csn($f['field']))
-          ){
-            if ( !empty($model['fields'][$fname]['type']) ){
-              $desc = [
-                'type' => $model['fields'][$fname]['type'],
-                'maxlength' => $model['fields'][$fname]['maxlength'] ?? null,
-                'operator' => $f['operator'] ?? null
-              ];
-            }
-            // Fixing filters using alias
-            else if (
-              isset($cfg['fields'][$f['field']]) &&
-              ($fname = $this->csn($cfg['fields'][$f['field']])) &&
-              !empty($model['fields'][$fname]['type'])
-            ){
-              $desc = [
-                'type' => $model[$fname]['type'],
-                'maxlength' => $model[$fname]['maxlength'] ?? null,
-                'operator' => $f['operator'] ?? null
-              ];
-            }
+          if ( isset($cfg['models'], $f['field'], $cfg['available_fields'][$f['field']]) ){
+            $t = $cfg['available_fields'][$f['field']];
             if (
-              !empty($desc['type']) &&
-              isset($model['keys']['PRIMARY']) &&
-              (count($model['keys']['PRIMARY']['columns']) === 1) &&
-              ($model['keys']['PRIMARY']['columns'][0] === $fname)
+              isset($cfg['models'], $f['field'], $cfg['tables_full'][$t], $cfg['models'][$cfg['tables_full'][$t]]) &&
+              ($model = $cfg['models'][$cfg['tables_full'][$t]]) &&
+              ($fname = $this->csn($f['field']))
             ){
-              $desc['primary'] = true;
+              if ( !empty($model['fields'][$fname]['type']) ){
+                $desc = [
+                  'type' => $model['fields'][$fname]['type'],
+                  'maxlength' => $model['fields'][$fname]['maxlength'] ?? null,
+                  'operator' => $f['operator'] ?? null
+                ];
+              }
+              // Fixing filters using alias
+              else if (
+                isset($cfg['fields'][$f['field']]) &&
+                ($fname = $this->csn($cfg['fields'][$f['field']])) &&
+                !empty($model['fields'][$fname]['type'])
+              ){
+                $desc = [
+                  'type' => $model[$fname]['type'],
+                  'maxlength' => $model[$fname]['maxlength'] ?? null,
+                  'operator' => $f['operator'] ?? null
+                ];
+              }
+              if (
+                !empty($desc['type']) &&
+                isset($model['keys']['PRIMARY']) &&
+                (count($model['keys']['PRIMARY']['columns']) === 1) &&
+                ($model['keys']['PRIMARY']['columns'][0] === $fname)
+              ){
+                $desc['primary'] = true;
+              }
             }
           }
           $others[] = $desc;
@@ -1347,14 +1350,17 @@ class db extends \PDO implements db\actions, db\api, db\engines
         if ( ($res['kind'] === 'INSERT') || ($res['kind'] === 'UPDATE') ){
           foreach ( $res['fields'] as $name ){
             $desc = [];
-            if (
-              isset($res['models'], $res['available_fields'][$name]) &&
-              ($model = $res['models'][$res['available_fields'][$name]]['fields']) &&
-              ($fname = $this->csn($name)) &&
-              !empty($model[$fname]['type'])
-            ){
-              $desc['type'] = $model[$fname]['type'];
-              $desc['maxlength'] = $model[$fname]['maxlength'] ?? null;
+            if ( isset($res['models'], $res['available_fields'][$name]) ){
+              $t = $res['available_fields'][$name];
+              if (
+                isset($tables_full[$t]) &&
+                ($model = $res['models'][$tables_full[$t]]['fields']) &&
+                ($fname = $this->csn($name)) &&
+                !empty($model[$fname]['type'])
+              ){
+                $desc['type'] = $model[$fname]['type'];
+                $desc['maxlength'] = $model[$fname]['maxlength'] ?? null;
+              }
             }
             $res['values_desc'][] = $desc;
           }

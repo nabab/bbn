@@ -27,8 +27,16 @@ if ( !\defined("BBN_CUR_PATH") ){
 	die("BBN_CUR_PATH must be defined");
 }
 
+if ( !\defined("BBN_APP_NAME") ){
+	die("BBN_APP_NAME must be defined");
+}
+
 if ( !\defined("BBN_APP_PATH") ){
 	die("BBN_APP_PATH must be defined");
+}
+
+if ( !\defined("BBN_DATA_PATH") ){
+	die("BBN_DATA_PATH must be defined");
 }
 
 class mvc implements mvc\api{
@@ -42,12 +50,16 @@ class mvc implements mvc\api{
      * The list of views which have been loaded. We keep their content in an array to not have to include the file again. This is useful for loops.
      * @var array
      */
-    $loaded_views = [
+    $_loaded_views = [
       'html' => [],
       'css' => [],
       'js' => []
     ],
-    $is_debug = false;
+    $_is_debug = false,
+    $_app_name,
+    $_app_path,
+    $_cur_path,
+    $_data_path;
 
 	private
     /**
@@ -117,6 +129,86 @@ class mvc implements mvc\api{
 	// These strings are forbidden to use in URL
 	public static
     $reserved = ['_private', '_common', '_htaccess'];
+
+  private static function _init_path(){
+    if ( !self::$_app_name ){
+      self::$_app_name = BBN_APP_NAME;
+      self::$_app_path = BBN_APP_PATH;
+      self::$_cur_path = BBN_CUR_PATH;
+      self::$_data_path = BBN_DATA_PATH;
+    }
+  }
+
+  public static function get_app_name(){
+    return self::$_app_name;
+  }
+
+  public static function get_app_path(){
+    return self::$_app_path;
+  }
+
+  public static function get_cur_path(){
+    return self::$_cur_path;
+  }
+
+  public static function get_data_path(string $plugin = null): string
+  {
+    return BBN_DATA_PATH.($plugin ? 'plugins/'.$plugin.'/' : '');
+  }
+
+  public static function get_tmp_path(string $plugin = null): string
+  {
+    return self::$_app_name ? self::get_data_path().'tmp/'.($plugin ? $plugin.'/' : '') : '';
+  }
+
+  public static function get_log_path(string $plugin = null): string
+  {
+    return self::$_app_name ? self::get_data_path().'logs/'.($plugin ? $plugin.'/' : '') : '';
+  }
+
+  public static function get_cache_path(string $plugin = null): string
+  {
+    return BBN_DATA_PATH.'cache/'.($plugin ? $plugin.'/' : '');
+  }
+
+  public static function get_content_path(string $plugin = null): string
+  {
+    return self::$_app_name ? self::get_data_path().'content/'.($plugin ? 'plugins/'.$plugin.'/' : '') : '';
+  }
+
+  public static function get_user_tmp_path(string $id_user = null, string $plugin = null):? string
+  {
+    if (!self::$_app_name){
+      return null;
+    }
+    if ( !$id_user ){
+      $usr = \bbn\user::get_instance();
+      if ( $usr ){
+        $id_user = $usr->get_id();
+      }
+    }
+    if ( $id_user ){
+      return self::get_data_path().'users/'.$id_user.'/tmp/'.($plugin ? $plugin.'/' : '');;
+    }
+    return null;
+  }
+
+  public static function get_user_data_path(string $id_user = null, string $plugin = null):? string
+  {
+    if (!self::$_app_name){
+      return null;
+    }
+    if ( !$id_user ){
+      $usr = \bbn\user::get_instance();
+      if ( $usr ){
+        $id_user = $usr->get_id();
+      }
+    }
+    if ( $id_user ){
+      return self::get_data_path().'users/'.$id_user.'/data/'.($plugin ? $plugin.'/' : '');;
+    }
+    return null;
+  }
 
   public static function include_model($bbn_inc_file, $model){
     if ( is_file($bbn_inc_file) ){
@@ -222,10 +314,10 @@ class mvc implements mvc\api{
    */
   private static function add_view($path, $mode, mvc\view $view)
   {
-    if ( !isset(self::$loaded_views[$mode][$path]) ){
-      self::$loaded_views[$mode][$path] = $view;
+    if ( !isset(self::$_loaded_views[$mode][$path]) ){
+      self::$_loaded_views[$mode][$path] = $view;
     }
-    return self::$loaded_views[$mode][$path];
+    return self::$_loaded_views[$mode][$path];
   }
 
   /**
@@ -243,11 +335,11 @@ class mvc implements mvc\api{
    * @return bool
    */
   public static function get_debug(){
-    return self::$is_debug;
+    return self::$_is_debug;
   }
 
   public static function debug($state = 1){
-    self::$is_debug = $state;
+    self::$_is_debug = $state;
   }
 
   private function route($url = false){
@@ -291,6 +383,7 @@ class mvc implements mvc\api{
 	 */
 	public function __construct($db = null, $routes = []){
     self::singleton_init($this);
+    self::_init_path();
     $this->env = new mvc\environment();
 		if ( \is_object($db) && ( $class = \get_class($db) ) && ( $class === 'PDO' || strpos($class, '\db') !== false ) ){
 			$this->db = $db;
@@ -425,7 +518,7 @@ class mvc implements mvc\api{
    */
   public function has_view(string $path = '', string $mode = 'html'): bool
   {
-    return array_key_exists($mode, self::$loaded_views[$mode]) && isset(self::$loaded_views[$mode][$path]);
+    return array_key_exists($mode, self::$_loaded_views[$mode]) && isset(self::$_loaded_views[$mode][$path]);
   }
 
   /**
@@ -436,10 +529,10 @@ class mvc implements mvc\api{
    */
   public function add_to_views(string $path, string $mode, mvc\view $view): void
   {
-    if ( !array_key_exists($mode, self::$loaded_views[$mode]) ){
-      self::$loaded_views[$mode] = [];
+    if ( !array_key_exists($mode, self::$_loaded_views[$mode]) ){
+      self::$_loaded_views[$mode] = [];
     }
-    self::$loaded_views[$mode][$path] = $view;
+    self::$_loaded_views[$mode][$path] = $view;
   }
 
   /**
@@ -456,7 +549,7 @@ class mvc implements mvc\api{
     }
     $view = null;
     if ( $this->has_view($path, $mode) ){
-      $view = self::$loaded_views[$mode][$path];
+      $view = self::$_loaded_views[$mode][$path];
     }
     else if ( $info = $this->router->route($path, $mode) ){
       $view = new mvc\view($info);
@@ -485,7 +578,7 @@ class mvc implements mvc\api{
     }
     $view = null;
     if ( $this->has_view($full_path, $mode) ){
-      $view = self::$loaded_views[$mode][$full_path];
+      $view = self::$_loaded_views[$mode][$full_path];
     }
     else if ( $info = $this->router->route(basename($full_path), 'free-'.$mode, \dirname($full_path)) ){
       $view = new mvc\view($info);

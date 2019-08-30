@@ -163,6 +163,47 @@ class x
     return false;
   }
 
+  public static function make_storage_path(string $path, $format = 'Y/m/d', $max = 100, bbn\file\system $fs = null):? string
+  {
+    // One dir per $format
+    $spath = date($format);
+    if ( $spath ){
+      if ( !$fs ){
+        clearstatcache();
+        $path = file\dir::create_path($path.'/'.$spath);
+        if ( is_dir($path) ){
+          // number without . and ..
+          $num = count(scandir($path)) - 2;
+          if ($num) {
+            $num_files = count(scandir("$path/$num")) - 2;
+            if ($num_files >= $max){
+              $num++;
+              return file\dir::create_path("$path/$num");
+            }
+            return "$path/$num";
+          }
+          return file\dir::create_path("$path/1");
+        }
+      }
+      else{
+        $path = $fs->create_path($path.'/'.$spath);
+        if ( $fs->is_dir($path) ) {
+          $num = count($fs->get_dirs($path));
+          if ($num) {
+            $num_files = count($fs->get_files($path.'/'.$num));
+            if ($num_files >= $max){
+              $num++;
+              return $fs->create_path($path.'/'.$num);
+            }
+            return $path.'/'.$num;
+          }
+          return $fs->create_path($path.'/1');
+        }
+      }
+    }
+    return null;
+  }
+
   /**
    * Returns to a merged object from two objects.
    *

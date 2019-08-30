@@ -157,7 +157,7 @@ class cron extends bbn\models\cls\basic{
       // Loooking for a running PID
       if ( is_file($pid) && ($file_content = @file_get_contents($pid)) ){
         $pid_content = explode('|', $file_content);
-        if ( $pid_content[1] && file_exists('/proc/'.$pid_content[0]) ){
+        if ( !empty($pid_content[1]) && file_exists('/proc/'.$pid_content[0]) ){
           // If it's currently running we exit
           exit("There is already a process running with PID ".file_get_contents($pid)." in $pid");
         }
@@ -459,16 +459,6 @@ class cron extends bbn\models\cls\basic{
         }
         sleep(1);
       }
-    }
-  }
-
-  /**
-   *
-
-  public function launch(){
-    if ( $path = $this->ctrl->plugin_data_path() ){
-      $runner_output = $path.'cron/'.date('YmdHis').'.txt';
-      self::execute($this->ctrl->plugin_url('appui-cron').'/cron', $runner_output);
     }
   }
 

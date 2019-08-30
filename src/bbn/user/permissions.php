@@ -95,6 +95,31 @@ class permissions extends bbn\models\cls\basic
     return $parent ?: null;
   }
 
+  public function to_path(string $id_option): ?string
+  {
+    $p = [];
+    while ($id_option && ($id_option !== self::$option_root_id)){
+      if ( ($code = $this->opt->code($id_option)) ){
+        //\bbn\x::dump($code);
+        array_unshift($p, $code);
+        $id_option = $this->opt->get_id_parent($id_option);
+      }
+      else{
+        return null;
+      }
+    }
+    if ( count($p) > 1 ){
+      if ( $p[0] === 'page' ){
+        array_shift($p);
+      }
+      else{
+        //$p[0] = bbn\mvc::
+      }
+      return bbn\x::join($p, '');
+    }
+    return null;
+  }
+
   /**
    * Returns the result of appui\options::options filtered with only the ones authorized to the current user.
    *

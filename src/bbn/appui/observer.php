@@ -406,71 +406,73 @@ MYSQL;
   }
 
   /**
-   * Checks the observers, execute their requests every given interval, it will stop when it finds differences in the
-   * results, and returns the observers to be updated (meant to be executed from a cron task).
+   * Checks the observers, execute their requests if interval is reached, it will stop when it finds differences in the
+   * results, and returns the observers to be updated (meant to be executed from a cron task), indexed by id_user.
    *
    * @return array
    */
   public function observe()
   {
     if ( $this->check() ){
-      $sql = <<<MYSQL
-  SELECT o.id, o.id_user, o.request, o.params,
-  GROUP_CONCAT(HEX(aliases.id) SEPARATOR ',') AS aliases,
-  GROUP_CONCAT(HEX(aliases.id_user) SEPARATOR ',') AS users,
-  GROUP_CONCAT(aliases.result SEPARATOR ',') AS results
-  FROM bbn_observers AS o
-    LEFT JOIN bbn_observers AS aliases
-      ON aliases.id_alias = o.id
-  WHERE o.id_alias IS NULL
-  AND o.next < NOW()
-  GROUP BY o.id
-  HAVING COUNT(aliases.id) > 0
-  OR o.id_user IS NOT NULL
-MYSQL;
-
+      $rows = $this->db->rselect_all([
+        'table' => 'bbn_observers',
+        'fields' => ['id', 'id_user', 'request', 'params', 'result'],
+        'where' => [
+          'conditions' => [
+            [
+              'field' => 'id_alias',
+              'operator' => 'isnull'
+            ], [
+              'field' => 'next',
+              'operator' => '<',
+              'exp' => 'NOW()'
+            ]
+          ]
+        ]
+      ]);
       $diff = [];
-      //MAX: 2000
-      $this->db->query('SET @@group_concat_max_len = ?', 2000 * 32);
-      foreach ( $this->db->get_rows($sql) as $d ){
-        $aliases = $d['aliases'] ? array_map('strtolower', explode(',', $d['aliases'])) : [];
-        $users = $d['users'] ? array_map('strtolower', explode(',', $d['users'])) : [];
-        $results = $d['results'] ? explode(',', $d['results']) : [];
-        if ( \bbn\str::is_json($d['request']) ){
-          $d['request'] = json_decode($d['request'], true);
-          $real_result = $this->_exec_array($d['request']);
-        }
-        else{
-          $real_result = $this->_exec($d['request'], $d['params']);
-        }
-        $db_result = $this->get_result($d['id']);
-        // Only if users are attached to the
-        echo '+';
-        if ( $real_result !== $db_result ){
-          $this->db->update('bbn_observers', ['result' => $real_result], ['id' => $d['id']]);
-          if ( $d['id_user'] ){
-            if ( !isset($diff[$d['id_user']]) ){
-              $diff[$d['id_user']] = [];
+      foreach ( $rows as $d ){
+        // Aliases are the IDs of the observers aliases of the current row
+        $aliases = $this->db->rselect_all('bbn_observers', ['id', 'id_user', 'request', 'params', 'result'], ['id_alias' => $d['id']]);
+        if ( $d['id_user'] || count($aliases) ){
+          if ( \bbn\str::is_json($d['request']) ){
+            $d['request'] = json_decode($d['request'], true);
+            $real_result = $this->_exec_array($d['request']);
+          }
+          else{
+            $real_result = $this->_exec($d['request'], $d['params']);
+          }
+          // If the result is different we update the table
+          if ( $real_result !== $d['result'] ){
+            echo '+';
+            $this->db->update('bbn_observers', ['result' => $real_result], ['id' => $d['id']]);
+            // And if a user is attached to the observer we add it to the result
+            if ( $d['id_user'] ){
+              if ( !isset($diff[$d['id_user']]) ){
+                $diff[$d['id_user']] = [];
+              }
+              $diff[$d['id_user']][] = [
+                'id' => $d['id'],
+                'result' => $real_result
+              ];
             }
-            $diff[$d['id_user']][] = [
-              'id' => $d['id'],
-              'result' => $real_result
-            ];
+            // For each alias we add the entry for the corresponding user...
+            foreach ( $aliases as $a ){
+              // ...If the result differs
+              if ( $real_result !== $a['result'] ){
+                $this->db->update('bbn_observers', ['result' => $real_result], ['id' => $a['id']]);
+                if ( !isset($diff[$a['id_user']]) ){
+                  $diff[$a['id_user']] = [];
+                }
+                $diff[$a['id_user']][] = [
+                  'id' => $a['id'],
+                  'result' => $real_result
+                ];
+              }
+            }
           }
         }
-        foreach ( $aliases as $i => $a ){
-          if ( $real_result !== $results[$i] ){
-            $this->db->update('bbn_observers', ['result' => $real_result], ['id' => $a]);
-            $t = $users[$i];
-            if ( !isset($diff[$t]) ){
-              $diff[$t] = [];
-            }
-            $diff[$t][] = [
-              'id' => $a,
-              'result' => $real_result
-            ];
-          }
-        }
+        // And we update the next time of execution
         $this->_update_next($d['id']);
       }
       echo '.';

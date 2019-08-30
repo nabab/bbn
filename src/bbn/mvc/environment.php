@@ -22,6 +22,8 @@ class environment {
 
   private static $initiated = false;
 
+  private static $input;
+
   private
     /**
      * An array of strings enclosed between the slashes of the requested path
@@ -59,6 +61,7 @@ class environment {
 
   private static function _initialize(){
     self::$initiated = true;
+    self::$input = file_get_contents('php://input');
   }
 
   private function set_params($path)
@@ -76,6 +79,10 @@ class environment {
         }
       }
     }
+  }
+
+  public static function get_input(){
+    return self::$input;
   }
 
   /**
@@ -152,7 +159,6 @@ class environment {
       self::_initialize();
       $this->_init();
     }
-
   }
 
   public function set_prepath($path){
@@ -271,7 +277,12 @@ class environment {
 
   public function get_post(){
     if ( !isset($this->post) ){
-      $this->post = empty($_POST) ? json_decode(file_get_contents('php://input'), 1) : $_POST;
+      if (self::$input && \bbn\str::is_json(self::$input) ){
+        $this->post = json_decode(self::$input, 1);
+      }
+      else if (!empty($_POST)){
+        $this->post = $_POST;
+      }
       if ( !$this->post ){
         $this->post = [];
       }
@@ -316,6 +327,17 @@ class environment {
           }
         }
       }
+      /* @todo Maybe something for managing PUT requests
+      else if (!empty(self::$input) && !bbn\str::is_json(self::$input)) {
+        $this->files[] = [
+          'name' => $v,
+          'tmp_name' => $f['tmp_name'][$i],
+          'type' => $f['type'][$i],
+          'error' => $f['error'][$i],
+          'size' => $f['size'][$i],
+        ];
+      }
+      */
     }
     return $this->files;
   }

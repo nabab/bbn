@@ -79,4 +79,38 @@ trait common {
     return $this->mvc->get_cookie();
   }
 
+  public function data_path(string $plugin = null): string
+  {
+    return \bbn\mvc::get_data_path().($plugin ? 'plugins/'.$plugin.'/' : '');
+  }
+
+  public function tmp_path(string $plugin = null): string
+  {
+    return \bbn\mvc::get_tmp_path($plugin);
+  }
+
+  public function log_path(string $plugin = null): string
+  {
+    return \bbn\mvc::get_log_path($plugin);
+  }
+
+  public function cache_path(string $plugin = null): string
+  {
+    return \bbn\mvc::get_cache_path($plugin);
+  }
+
+  public function content_path(string $plugin = null): string
+  {
+    return \bbn\mvc::get_content_path($plugin);
+  }
+
+  public function user_tmp_path(string $id_user = null, string $plugin = null):? string
+  {
+    return \bbn\mvc::get_user_tmp_path($id_user, $plugin);
+  }
+
+  public function user_data_path(string $id_user = null, string $plugin = null):? string
+  {
+    return \bbn\mvc::get_user_data_path($id_user, $plugin);
+  }
 }

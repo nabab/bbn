@@ -420,7 +420,7 @@ class notes extends bbn\models\cls\db
         if ( isset($file) ){
           rename(
             $name,
-            bbn\file\dir::create_path(BBN_DATA_PATH.'media/'.$id).DIRECTORY_SEPARATOR.$file
+            bbn\file\dir::create_path(bbn\mvc::get_data_path('appui-notes').'media/'.$id).DIRECTORY_SEPARATOR.$file
           );
         }
         return $id;

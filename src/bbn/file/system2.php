@@ -53,7 +53,7 @@ class system2 extends bbn\models\cls\basic
   protected $timeout = 10;
  
   /**
-   * Connect to FTP
+   * Connect to a Nextcloud instance
    * @param array $cfg
    * @return bool
    */
@@ -179,8 +179,8 @@ class system2 extends bbn\models\cls\basic
   //@todo public just to test
   private function _get_items(string $path, $type = 'both', bool $hidden = false, string $detailed = ''): array
   {
-    
     $files = [];
+    $dirs = [];
     if ( $this->mode === 'nextcloud' ) {
       if ( empty($path) || ($path === '.') ){
         $path = $this->prefix;
@@ -198,38 +198,21 @@ class system2 extends bbn\models\cls\basic
               'dir' => empty($c['{DAV:}getcontenttype']) ? true : false,
               'file' => empty($c['{DAV:}getcontenttype']) ? false : true,
             ];
-           
             //arrayt_shift to remove the parent included in the array
-            if ( !empty($detailed) ){
-              $files[] = $tmp;
-            }
-            else if ( empty($detailed) && ( $type === 'both') ){
-              $files[] = $i;
-            }
-            else if ( empty($detailed) && ( $type === 'file') ){
-              if ( !empty($c['{DAV:}getcontenttype']) ){
-                $files[] = $i;
+            if ($type === 'both'){
+              if ($tmp['dir']) {
+                $dirs[] = $detailed ? $tmp : $i;
+              }
+              else{
+                $files[] = $detailed ? $tmp : $i;
               }
             }
-            else if ( empty($detailed) && ( $type === 'dir') ){
-              if ( empty($c['{DAV:}getcontenttype']) ){
-                $files[] = $i;
-              }
+            else if ( $tmp['file'] && ($type === 'file') ){
+              $files[] = $detailed ? $tmp : $i;
             }
-          }
-          
-          if ( ( $type === 'both') && !empty($detailed) ){
-            return $files;  
-          }
-          else if ( ($type === 'file') && !empty($detailed) ){
-            return array_filter($files, function($a){
-              return $a['file'] === true;
-            });
-          }
-          else if ( ($type === 'dir') && !empty($detailed) ){
-            return array_filter($files, function($a){
-              return $a['dir'] === true;
-            });
+            else if ( $tmp['dir'] ($type === 'dir') ){
+              $dirs[] = $detailed ? $tmp : $i;
+            }
           }
         }  
       }
@@ -274,10 +257,23 @@ class system2 extends bbn\models\cls\basic
                 $tmp['dir'] = $f['type'] === 'dir';
                 $tmp['file'] = $f['type'] !== 'dir';
               }
-              $files[] = $tmp;
+              if ( $has_size ){
+                $tmp['size'] = $f['type'] === 'dir' ? 0 : $this->filesize($path.'/'.$f['name']);
+              }
+              if ($f['type'] === 'dir') {
+                $dirs[] = $tmp;
+              }
+              else{
+                $files[] = $tmp;
+              }
             }
             else{
-              $files[] = $path.'/'.$f['name'];
+              if ($f['type'] === 'dir') {
+                $dirs[] = $path.'/'.$f['name'];
+              }
+              else{
+                $files[] = $path.'/'.$f['name'];
+              }
             }
           }
         }
@@ -288,27 +284,19 @@ class system2 extends bbn\models\cls\basic
       foreach ( $fs as $f ){
         if ( ($f !== '.') && ($f !== '..') && ($hidden || (strpos(basename($f), '.') !== 0)) ){
           $ok = 0;
-          $is_dir = null;
-          $is_file = null;
+          $is_dir = is_dir($path.'/'.$f);
+          $is_file = !$is_dir;
           if ( $type === 'both' ){
             $ok = 1;
           }
           else if ( $type === 'dir' ){
-            if ( $ok = is_dir($path.'/'.$f) ){
-              $is_dir = $ok;
-              $is_file = !$ok;
-            }
+            $ok = $is_dir;
           }
           else if ( $type === 'file' ){
-            if ( $ok = is_file($path.'/'.$f) ){
-              $is_file = $ok;
-              $is_dir = !$ok;
-            }
+            $ok = $is_file;
           }
-          else if ( !is_string($type) || is_file($path.'/'.$f) ){
+          else if ( !is_string($type) || $is_file ){
             $ok = $this->_check_filter($f, $type);
-            $is_file = true;
-            $is_dir = false;
           }
           if ( $ok ){
             if ( $detailed ){
@@ -324,21 +312,23 @@ class system2 extends bbn\models\cls\basic
               }
               if ( $has_type ){
                 $tmp['dir'] = $is_dir ?? is_dir($path.'/'.$f);
-                $tmp['file'] = $is_file ?? is_file($path.'/'.$f);
+                $tmp['file'] = !$tmp['dir'];
               }
-              $files[] = $tmp;
             }
             else {
-              $files[] = $path.'/'.$f;
+              $tmp = $path.'/'.$f;
+            }
+            if ($is_dir) {
+              $dirs[] = $tmp;
+            }
+            else{
+              $files[] = $tmp;
             }
           }
         }
       }
     }
-    if ( \count($files) > 0 ){
-      //bbn\x::sort($files, 'real');
-    }
-    return $files;
+    return array_merge($dirs, $files);
   }
 
   /**
@@ -349,8 +339,6 @@ class system2 extends bbn\models\cls\basic
   {
     \bbn\x::log(['_exists' => $path], 'cheSuccede');
     if ( $this->mode === 'nextcloud' ){
-      
-      //die(var_dump($path));
       try {
         if ( $this->obj->propFind($path, [
           '{DAV:}resourcetype',
@@ -391,7 +379,7 @@ class system2 extends bbn\models\cls\basic
       if ( !$filter || $this->_check_filter($p, $filter) ){
         $all[] = $it;
       }
-      foreach ( $this->_scand($p, $hidden, $detailed) as $t ){
+      foreach ( $this->_scand($p, $filter, $hidden, $detailed) as $t ){
         $all[] = $t;
       }
     }
@@ -466,7 +454,10 @@ class system2 extends bbn\models\cls\basic
             return true;
           }
         }
-        return rmdir($path);
+        else{
+          return rmdir($path);
+        }
+        return false;
       }
       return true;
     }
@@ -659,7 +650,7 @@ class system2 extends bbn\models\cls\basic
         }
         break;
       case 'local':
-        $this->mode = $type;
+        $this->mode = 'local';
         $this->current = getcwd();
         break;
     }
@@ -674,7 +665,7 @@ class system2 extends bbn\models\cls\basic
     if ( ($path === '.') || ($path === './') ){
       $path = '';
     }
-    if ( $path && (substr($path, -1) === '/') ){
+    while ( $path && (substr($path, -1) === '/') ){
       $path = substr($path, 0, strlen($path) - 1);
     }
     return $path;
@@ -683,7 +674,6 @@ class system2 extends bbn\models\cls\basic
   private function _get_real_path(string $path): string
   {
     $path = $this->clean_path($path);
-    
     if ( $this->mode === 'nextcloud' ){
       if (  ( '/'.$path.'/' === $this->prefix ) ){
         return $this->prefix; 
@@ -697,7 +687,6 @@ class system2 extends bbn\models\cls\basic
       }
     }
     else {
-      
       return $this->prefix.(
       strpos($path, '/') === 0 ?
         $path :
@@ -863,7 +852,10 @@ class system2 extends bbn\models\cls\basic
   {
     if ( $this->check() ){
       clearstatcache();
-      return $this->_exists($path);
+      $file = $this->get_real_path($path);
+      if ( $file ){
+        return $this->_exists($file);
+      }
     }
     return false;
   }
@@ -1132,7 +1124,8 @@ class system2 extends bbn\models\cls\basic
     if ( $this->mode === 'nextcloud' ){
       /** if  is a file*/
       if ( $f === true ){
-        if ( $res = $this->obj->request('GET') ){ 
+        if ( $res = $this->obj->request('GET') ){
+          tempnam(sys_get_temp_dir());
           if ( empty($this->exists($dest)) ){
             mkdir($dest, 0755, false);
           }
@@ -1200,19 +1193,20 @@ class system2 extends bbn\models\cls\basic
     return null;
   }
   
-  private function _filesize($path)
+  private function _filesize($path):? int
   {
     if ( $this->mode === 'nextcloud' ){
       $size = $this->obj->propFind($path, [
         '{DAV:}getcontentlength'
       ]);
-      if ( !empty($size['{DAV:}getcontentlength']) ){
+      if ( isset($size['{DAV:}getcontentlength']) ){
         return $size['{DAV:}getcontentlength'];
       }
     }
     else {
-      return $this->filesize($path);
+      return filesize($path);
     }
+    return null;
   }
   
   public function filemtime($path)
@@ -1234,33 +1228,28 @@ class system2 extends bbn\models\cls\basic
       return filemtime($path);
     }
   }
-
-  
+ 
   private function _dirsize($path): int
   {
-    $files = $this->_get_items($path, 'file', true);
-    $dirs = $this->_get_items($path, 'dir', true);
     $tot = 0;
-    if ( $files ){
-      foreach ( $files as $f ){
-        $tot += $this->filesize($f);
-      }
+    foreach ( $this->_get_items($path, 'file', true) as $f ){
+      $tot += $this->filesize($f);
     }
-    if ( $dirs ){
-      foreach ( $dirs as $d ){
-        $tot += $this->_dirsize($d);
-      }
+    foreach ( $this->_get_items($path, 'dir', true) as $d ){
+      $tot += $this->_dirsize($d);
     }
     return $tot;
   }
 
   public function dirsize($path): ?int
-  { if ( $this->check() ){
+  {
+    if ( $this->check() ){
       $rpath = $this->get_real_path($path);
       if ( $this->is_dir($rpath) ){
         return $this->_dirsize($rpath);
       }
     }
+    return null;
   }
 
   public function get_empty_dirs($path, bool $hidden_is_empty = false): array

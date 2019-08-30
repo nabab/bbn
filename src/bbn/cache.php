@@ -158,12 +158,7 @@ class cache{
         self::_set_type('memcache');
       }
     }
-    else {
-      $this->path = \defined("BBN_DATA_PATH") ? BBN_DATA_PATH : file\dir::clean(sys_get_temp_dir());
-      if ( substr($this->path, -1) !== '/' ){
-        $this->path .= '/';
-      }
-      $this->path .= 'bbn_cache/';
+    else if ($this->path = mvc::get_cache_path()){
       file\dir::create_path($this->path);
       self::_set_type('files');
     }

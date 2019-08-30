@@ -57,6 +57,15 @@ class timer
       ($this->measures[$key]['start'] > 0);
   }
   
+  public function reset($key='default')
+  {
+    if ($this->has_started($key)) {
+      $this->measures[$key] = [
+        'num' => 0,
+        'sum' => 0
+      ];
+    }
+  }
   
 	/**
    * Stops a timer for a given key

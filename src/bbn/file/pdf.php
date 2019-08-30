@@ -115,7 +115,7 @@ EOF
  
 	public function add_page($html, $cfg=null, $sign=false)
 	{
-		if ( $this->check() ){
+    if ( $this->check() ){
 
       if ( $this->last_cfg !== $cfg ){
         $this->last_cfg = $cfg;

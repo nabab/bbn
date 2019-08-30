@@ -395,7 +395,7 @@ class doc {
     ){
       preg_match('/(?:\{)(\S+)(?:\})/', $text, $type, PREG_OFFSET_CAPTURE);
     }
-    else if ( $this->mode === 'php' ){
+    else if ( $this->mode === 'php' ){      
       preg_match('/(?:\@[a-z]+\s{1})(.+)(?:\s{1}\$)/', $text, $type, PREG_OFFSET_CAPTURE);
       $type[0] = $type[1];
     }

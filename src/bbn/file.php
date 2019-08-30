@@ -229,6 +229,7 @@ class file extends models\cls\basic
       if ( !$this->size ){
         $this->get_size();
       }
+      
       if ( $this->size && ($handle = fopen($this->file, 'r')) ){
         header('Content-type: application/octet-stream');
         header('Content-Disposition: attachment; filename="'.$this->name.'"');

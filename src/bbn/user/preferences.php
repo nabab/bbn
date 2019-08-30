@@ -133,46 +133,62 @@ class preferences extends bbn\models\cls\db
   /**
    * Returns preferences' IDs from the option's ID
    *
-   * @param null|string $id_option
+   * @param string $id_option
    * @param null|string $id_user
    * @param null|string $id_group
    * @return array|null
    */
-  private function _retrieve_ids(string $id_option = null, string $id_user = null, string $id_group = null): ?array
+  private function _retrieve_ids(string $id_option, string $id_user = null, string $id_group = null): ?array
   {
+    if (!$id_user && !$id_group && isset($this->id_user, $this->id_group) ){
+      $id_user = $this->id_user;
+      $id_group = $this->id_group;
+    }
     if ( ($id_user || $id_group) && ($id_option = $this->_get_id_option($id_option)) ){
-      $col_id = $this->db->csn($this->fields['id'], true);
-      $table = $this->db->tsn($this->class_cfg['table'], true);
-      $id_opt = $this->db->csn($this->fields['id_option'], true);
-      $num = $this->db->csn($this->fields['num'], true);
-      $text = $this->db->csn($this->fields['text'], true);
-      $user = $this->db->csn($this->fields['id_user'], true);
-      $group = $this->db->csn($this->fields['id_group'], true);
-      $public = $this->db->csn($this->fields['public'], true);
-      $cond = [];
-      $args = [$id_option];
+      $cond = [
+        'logic' => 'OR',
+        'conditions' => []
+      ];
       if ( null !== $id_user ){
-        $cond[] = "$user = UNHEX(?)";
-        $args[] = $id_user;
+        $cond['conditions'][] = [
+          'field' => $this->fields['id_user'],
+          'value' => $id_user
+        ];
       }
       if ( null !== $id_group ){
-        $cond[] = "$group = UNHEX(?)";
-        $args[] = $id_group;
+        $cond['conditions'][] = [
+          'field' => $this->fields['id_group'],
+          'value' => $id_group
+        ];
       }
-      // Not specific
-      if ( (null !== $id_user) && (null !== $id_group) ){
-        $cond[] = "$public = 1";
+      // Not specific to just a group or a user, so adding the public i.e. all to which the user has right
+      if ( $id_user && $id_group ){
+        $cond['conditions'][] = [
+          'field' => $this->fields['public'],
+          'value' => 1
+        ];
       }
-      $cond = implode(' OR ', $cond);
-      $sql = <<< MYSQL
-SELECT $col_id
-FROM $table
-WHERE $id_opt = UNHEX(?)
-AND ($cond)
-ORDER BY IFNULL($num, $text)
-MYSQL;
-      array_unshift($args, $sql);
-      return $this->db->get_col_array(...$args);
+      $where = [
+        'logic' => 'AND',
+        'conditions' => [
+          [
+            'field' => $this->fields['id_option'],
+            'value' => $id_option
+          ]
+        ]
+      ];
+      if ( count($cond['conditions']) ){
+        $where['conditions'][] = $cond;
+      }
+      return $this->db->get_column_values([
+        'table' => $this->class_cfg['table'],
+        'fields' => [$this->fields['id']],
+        'where' => $where,
+        'order' => [
+          ['field' => $this->fields['num'], 'dir' => 'ASC'],
+          ['field' => $this->fields['text'], 'dir' => 'ASC']
+        ]
+      ]);
     }
     return null;
   }
@@ -271,8 +287,11 @@ MYSQL;
    * @param string $id_user
    * @return array|null
    */
-  public function retrieve_user_ids(string $id_option = null, string $id_user): ?array
+  public function retrieve_user_ids(string $id_option = null, string $id_user = null): ?array
   {
+    if (!$id_user) {
+      $id_user = $this->id_user;
+    }
     return $this->_retrieve_ids($id_option, $id_user);
   }
 
@@ -283,8 +302,11 @@ MYSQL;
    * @param string $id_group
    * @return array|null
    */
-  public function retrieve_group_ids(string $id_option = null, string $id_group): ?array
+  public function retrieve_group_ids(string $id_option = null, string $id_group = null): ?array
   {
+    if (!$id_group) {
+      $id_group = $this->id_group;
+    }
     return $this->_retrieve_ids($id_option, null, $id_group);
   }
 
@@ -447,23 +469,38 @@ MYSQL;
   public function get(string $id, bool $with_config = true): ?array
   {
     if ( bbn\str::is_uid($id) ){
-      $cols = implode(', ', array_map(function($a){
-        return $a;
-      }, $this->fields));
       $table = $this->db->tsn($this->class_cfg['table'], true);
       $uid = $this->db->csn($this->fields['id'], true);
       $id_user = $this->db->csn($this->fields['id_user'], true);
       $id_group = $this->db->csn($this->fields['id_group'], true);
       $public = $this->db->csn($this->fields['public'], true);
-      $sql = <<< MYSQL
-SELECT $cols
-FROM $table
-WHERE $uid = UNHEX(?)
-AND ($id_user = UNHEX(?)
-OR $id_group = UNHEX(?)
-OR $public = 1)
-MYSQL;
-      if ( $row = $this->db->get_row($sql, $id, $this->id_user, $this->id_group) ){
+      if ( $row = $this->db->rselect([
+        'table' => $table,
+        'fields' => $this->fields,
+        'where' => [
+          'logic' => 'AND',
+          'conditions' => [
+            [
+              'field' => $uid,
+              'value' => $id
+            ], [
+              'logic' => 'OR',
+              'conditions' => [
+                [
+                  'field' => $id_user,
+                  'value' => $this->id_user
+                ], [
+                  'field' => $id_group,
+                  'value' => $this->id_group
+                ], [
+                  'field' => $public,
+                  'value' => 1
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]) ){
         $cfg = $row['cfg'];
         unset($row['cfg']);
         if ( ($cfg = json_decode($cfg, true)) && $with_config ){
@@ -489,29 +526,119 @@ MYSQL;
       if ( !$with_config ){
         unset($fields['cfg']);
       }
-      $table = $this->db->tsn($this->class_table, true);
-      $cols = implode(', ', array_map(function($a) use($table){
-        return $a === $this->fields['id'] ? "$table.$a" : "IFNULL(aliases.$a, $table.$a) AS $a";
-      }, $fields));
-      $id_opt = $this->db->cfn($this->fields['id_option'], $this->class_table, true);
-      $id_user = $this->db->cfn($this->fields['id_user'], $this->class_table, true);
-      $id_group = $this->db->cfn($this->fields['id_group'], $this->class_table, true);
-      $num = $this->db->cfn($this->fields['num'], $this->class_table, true);
-      $text = $this->db->cfn($this->fields['text'], $this->class_table, true);
-      $id_alias = $this->db->cfn($this->fields['id_alias'], $this->class_table, true);
-      $public = $this->db->cfn($this->fields['public'], $this->class_table, true);
-      $sql = <<< MYSQL
-SELECT $cols
-FROM $table
-  LEFT JOIN $table as aliases
-    ON aliases.id = $id_alias
-WHERE $id_opt = UNHEX(?)
-AND ($id_user = UNHEX(?)
-OR $id_group = UNHEX(?)
-OR $public = 1)
-ORDER BY IFNULL($num, $text)
-MYSQL;
-      if ( $rows =  $this->db->get_rows($sql, $id_option, $this->id_user, $this->id_group) ){
+      if ( $rows = $this->db->rselect_all([
+        'table' => $this->class_table,
+        'fields' => $fields,
+        'join' => [
+          [
+            'table' => $this->class_table,
+            'type' => 'left',
+            'alias' => 'aliases',
+            'on' => [
+              'conditions' => [
+                [
+                  'field' => $this->fields['id_alias'],
+                  'exp' => 'aliases.id'
+                ]
+              ]
+            ]
+          ]
+        ],
+        'where' => [
+          'logic' => 'AND',
+          'conditions' => [
+            [
+              'field' => $this->fields['id_option'],
+              'value' => $id_option
+            ], [
+              'logic' => 'OR',
+              'conditions' => [
+                [
+                  'field' => $this->fields['id_user'],
+                  'value' => $this->id_user
+                ], [
+                  'field' => $this->fields['id_group'],
+                  'value' => $this->id_group
+                ], [
+                  'field' => $this->fields['public'],
+                  'value' => 1
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]) ) {
+        return $with_config ? array_map(function($a){
+          $cfg = $a['cfg'];
+          unset($a['cfg']);
+          if ( ($cfg = json_decode($cfg, true)) ){
+            $a = bbn\x::merge_arrays($cfg, $a);
+          }
+          return $a;
+        }, $rows) : $rows;
+      }
+      return [];
+    }
+    return null;
+  }
+
+  /**
+   * Returns an array of the users' preferences (the current user and group are excluded) based on the given id_option
+   * @param null|string $id_option
+   * @param bool $with_config
+   * @return array|null
+   */
+  public function get_all_not_mine(string $id_option = null, bool $with_config = true): ?array
+  {
+    if ( $id_option = $this->_get_id_option($id_option) ){
+      $fields = $this->fields;
+      if ( !$with_config ){
+        unset($fields['cfg']);
+      }
+      if ( $rows = $this->db->rselect_all([
+        'table' => $this->class_table,
+        'fields' => $fields,
+        'join' => [[
+          'table' => $this->class_table,
+          'type' => 'left',
+          'alias' => 'aliases',
+          'on' => [
+            'conditions' => [[
+              'field' => $this->fields['id_alias'],
+              'exp' => 'aliases.id'
+            ]]
+          ]
+        ]],
+        'where' => [
+          'conditions' => [[
+            'field' => $this->fields['id_option'],
+            'value' => $id_option
+          ], [
+            'field' => $this->fields['public'],
+            'value' => 0
+          ], [
+            'logic' => 'OR',
+            'conditions' => [[
+              'field' => $this->fields['id_user'],
+              'operator' => '!=',
+              'value' => $this->id_user
+            ], [
+              'field' => $this->fields['id_user'],
+              'operator' => 'isnull'
+            ]]
+          ], [
+            'logic' => 'OR',
+            'conditions' => [[
+              'field' => $this->fields['id_group'],
+              'operator' => 'neq',
+              'value' => $this->id_group
+            ], [
+              'field' => $this->fields['id_group'],
+              'operator' => 'isnull'
+            ]]
+          ]]
+        ]
+      ]) ) {
         return $with_config ? array_map(function($a){
           $cfg = $a['cfg'];
           unset($a['cfg']);
@@ -693,7 +820,7 @@ MYSQL;
       $this->fields['id_link'] => $cfg[$this->fields['id_link']] ?? NULL,
       $this->fields['id_alias'] => $cfg[$this->fields['id_alias']] ?? NULL,
       $this->fields['id_user'] => $this->id_user,
-      $this->fields['cfg'] => ($mp = $this->get_cfg(false, $cfg)) ? json_encode($tmp) : NULL
+      $this->fields['cfg'] => ($tmp = $this->get_cfg(false, $cfg)) ? json_encode($tmp) : NULL
     ], [
       $this->fields['id'] => $id
     ]);
@@ -1401,6 +1528,23 @@ MYSQL;
   {
     if ( \bbn\str::is_uid($id) && ($p = $this->get_by_bit($id)) ){
       return $p[$this->fields['id']];
+    }
+    return null;
+  }
+
+  public function text_value(string $id_option, $id_user = null, $id_group = null):? array
+  {
+    if ( \bbn\str::is_uid($id_option) ){
+      $res = [];
+      if ($ids = $this->_retrieve_ids($id_option, $id_user, $id_group)){
+        foreach ($ids as $id){
+          $res[] = $this->db->rselect($this->class_cfg['table'], [
+            'value' => $this->fields['id'],
+            'text' => $this->fields['text']
+          ], ['id' => $id]);
+        }
+      }
+      return $res;
     }
     return null;
   }

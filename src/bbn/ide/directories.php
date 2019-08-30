@@ -7,7 +7,7 @@ class directories {
 
   use bbn\models\tts\optional;
 
-  const IDE_PATH = 'bbn_ide',
+  const IDE_PATH = 'ide',
         DEV_PATH = 'PATHS',
         PATH_TYPE = 'PTYPES',
         FILES_PREF = 'files';
