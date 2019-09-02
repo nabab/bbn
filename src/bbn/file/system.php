@@ -910,14 +910,16 @@ class system extends bbn\models\cls\basic
    * @param int $chmod
    * @return bool|null
    */
-  public function create_path(string $dir, int $chmod = 0755): ?bool
+  public function create_path(string $dir, int $chmod = 0755): ?string
   {
     if ( $this->check() ){
       if ( !($real = $this->get_real_path($dir)) ){
         return false;
       }
       clearstatcache();
-      return $this->_mkdir($real, $chmod, true);
+      if ( $this->_mkdir($real, $chmod, true) ){
+        return $this->get_system_path($real);
+      }
     }
     return null;
   }
@@ -1048,7 +1050,6 @@ class system extends bbn\models\cls\basic
   {
     if ( $this->exists($file) && (strpos($name, '/') === false) ){
       $path = $this->get_real_path(dirname($file));
-      
       if ( $this->_exists($path.'/'.$name) && (!$overwrite || !$this->_delete($path.'/'.$name)) ){
         return false;
       }

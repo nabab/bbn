@@ -49,9 +49,11 @@ class medias extends bbn\models\cls\db
 
   public function insert($name, $content = null, $title = '', $type='file', $private = false){
     $cf =& $this->class_cfg;
-    if ( !empty($name) &&
+    if (
+      !empty($name) &&
       ($id_type = $this->opt->from_code($type, $this->opt_id))
     ){
+      $content = null;
       $ok = false;
       switch ( $type ){
         case 'link':
@@ -61,12 +63,24 @@ class medias extends bbn\models\cls\db
           $ok = 1;
         break;
         default:
-          if ( is_file($name) ){
-            $file = basename($name);
-            if ( empty($title) ){
-              $title = basename($name);
+          $fs = new bbn\file\system();
+          if ( $fs->is_file($name) ){
+            $root = $fs->create_path($private && $this->usr->check() ? 
+              bbn\mvc::get_user_data_path($this->usr->get_id(), 'appui-notes').'media/' : 
+              bbn\mvc::get_data_path('appui-notes').'media/');
+            if ( $root ){
+              $path = bbn\x::make_storage_path($root, '', 0, $fs);
+              $dpath = substr($path, strlen($root) + 1);
+              $content = [
+                'path' => $dpath,
+                'size' => $fs->filesize($name)
+              ];
+              $file = basename($name);
+              if ( empty($title) ){
+                $title = basename($file);
+              }
+              $ok = 1;
             }
-            $ok = 1;
           }
           break;
       }
@@ -75,15 +89,15 @@ class medias extends bbn\models\cls\db
           $cf['arch']['medias']['id_user'] => $this->usr->get_id(),
           $cf['arch']['medias']['type'] => $id_type,
           $cf['arch']['medias']['title'] => $title,
-          $cf['arch']['medias']['name'] => $file ?? '',
-          $cf['arch']['medias']['content'] => $content,
+          $cf['arch']['medias']['name'] => $file ?? null,
+          $cf['arch']['medias']['content'] => $content ? json_encode($content) : null,
           $cf['arch']['medias']['private'] => $private ? 1 : 0
         ]);
         $id = $this->db->last_id();
-        if ( isset($file) ){
-          rename(
+        if ( isset($file) && $fs->create_path($path.$id) ){
+          $fs->move(
             $name,
-            bbn\file\dir::create_path(bbn\mvc::get_data_path('appui-notes').'media/'.$id).'/'.$file
+            $path.$id
           );
         }
         return $id;
@@ -111,10 +125,21 @@ class medias extends bbn\models\cls\db
       \bbn\str::is_uid($id) &&
       ($link_type = $this->opt->from_code('link', $this->opt_id)) &&
       ($media = $this->db->rselect($cf['table'], [], [$cf['arch']['medias']['id'] => $id])) &&
-      ($link_type !== $media[$cf['arch']['medias']['type']]) &&
-      is_file(bbn\mvc::get_data_path('appui-notes').'media/'.$id.'/'.$media[$cf['arch']['medias']['name']])
+      ($link_type !== $media[$cf['arch']['medias']['type']]) //&&
+      //is_file(bbn\mvc::get_data_path('appui-notes').'media/'.$id.'/'.$media[$cf['arch']['medias']['name']])
     ){
-      $media['path'] = bbn\mvc::get_data_path('appui-notes').'media/'.$id.'/'.$media[$cf['arch']['medias']['name']];
+      $path = '';
+      if ( $media['content'] ){
+        $tmp = json_decode($media[$cf['arch']['medias']['content']], true);
+        if ( isset($tmp['path']) ){
+          $path = $tmp['path'];
+        }
+      }
+      $media['path'] = (
+        $media['private'] ? 
+          bbn\mvc::get_user_data_path('appui-notes') :
+          bbn\mvc::get_data_path('appui-notes')
+      ).'media/'.$path.$id.'/'.$media[$cf['arch']['medias']['name']];
       return empty($details) ? $media['path'] : $media;
     }
     return false;

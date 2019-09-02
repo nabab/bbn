@@ -533,7 +533,7 @@ class user extends models\cls\basic
    */
   private function _init_dir($create = false){
     if ( \defined('BBN_DATA_PATH') && $this->get_id() ){
-      $this->path = BBN_DATA_PATH.'users/'.$this->get_id().'/';
+      $this->path = mvc::get_user_data_path($this->get_id());
       if ( !\defined('BBN_USER_PATH') ){
         define('BBN_USER_PATH', $this->path);
       }
@@ -1221,6 +1221,21 @@ class user extends models\cls\basic
       }
     }
     return false;
+  }
+
+  public function add_to_tmp(string $file, string $name = null):? string
+  {
+    if ( $this->auth ){
+      $fs = new file\system();
+      $path = $this->get_tmp_dir().time().'/';
+      if ( $fs->is_file($file) && $fs->create_path($path) ){
+        $dest = $path.($name ?: basename($file));
+        if ( $fs->move($file, dirname($dest)) && $fs->rename(dirname($dest).'/'.basename($file), basename($dest))){
+          return $dest;
+        }
+      }
+    }
+    return null;
   }
 
 }
