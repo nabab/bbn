@@ -128,7 +128,7 @@ class controller implements api{
 	}
 
   public function reset(array $info, $data = false){
-    if ( \defined('BBN_CUR_PATH') && isset($info['mode'], $info['path'], $info['file'], $info['request'], $info['root']) ){
+    if ( isset($info['mode'], $info['path'], $info['file'], $info['request'], $info['root']) ){
       $this->path = $info['path'];
       $this->plugin = $info['plugin'];
       $this->request = $info['request'];

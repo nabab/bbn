@@ -204,16 +204,24 @@ class project extends bbn\models\cls\db {
    */
   public static function decipher_path(string $st){
     $st = \bbn\str::parse_path($st);
+    
     $bits = explode('/', $st);
     /** @var string $constant The first part of the path must be a constant */
     $constant = $bits[0];
     /** @var string $path The path that will be returned */
     $path = '';
+    
     if ( \defined($constant) ){
-      $path .= constant($constant);
-      array_shift($bits);
+      if ( $constant === 'BBN_APP_PATH' ){
+        $path = \bbn\mvc::get_app_path();
+      }
+      else{
+        $path .= constant($constant);      
+      }      
+      array_shift($bits);      
     }
     $path .= implode('/', $bits);
+   
     return $path;
   }
 

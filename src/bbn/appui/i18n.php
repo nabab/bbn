@@ -419,7 +419,7 @@ class i18n extends bbn\models\cls\cache
         $to_explore = constant($parent['code']);
         // @var $locale_dir the path to locale dir 
         //exeption for apst_app, don't need the code
-        if( (constant($parent['code']) === BBN_APP_PATH) && (strrpos('mvc/', $o['code'], 0) === 0) ) {
+        if( (constant($parent['code']) === \bbn\mvc::get_app_path()) && (strrpos('mvc/', $o['code'], 0) === 0) ) {
           $locale_dir = $to_explore.'locale';
         }
         else{
@@ -592,7 +592,7 @@ class i18n extends bbn\models\cls\cache
       $to_explore = \constant($parent['code']).($o['code'] === '/' ? '' : $o['code']);
 
       $current_path = \constant($parent['code']);
-      if ( constant($parent['code']) === BBN_APP_PATH ){
+      if ( constant($parent['code']) === \bbn\mvc::get_app_path() ){
         $current_dirs = bbn\file\dir::get_dirs( constant($parent['code']).($o['code'] === '/' ? '' : $o['code']));
 			}
 
@@ -613,7 +613,7 @@ class i18n extends bbn\models\cls\cache
       //creates the array $to_explore_dirs containing mvc, plugins e components
       if ( !empty($current_dirs) ){
         foreach ($current_dirs as $key => $value) {
-          if( constant($parent['code']) === BBN_APP_PATH ){
+          if( constant($parent['code']) === \bbn\mvc::get_app_path() ){
             if (( strpos($value, 'locale') !== 0 ) && ( strpos($value, 'data') !== 0 ) && ( strpos($value, '.') !== 0 )){
 						  $to_explore_dirs = $current_dirs;
             }
@@ -749,7 +749,7 @@ class i18n extends bbn\models\cls\cache
       $to_explore = constant($parent['code']);
 
        //exeption for apst_app, don't need the code
-      if( (constant($parent['code']) === BBN_APP_PATH) && (strrpos('mvc/', $o['code'], 0) === 0) ) {
+      if( (constant($parent['code']) === \bbn\mvc::get_app_path()) && (strrpos('mvc/', $o['code'], 0) === 0) ) {
         $locale_dir = $to_explore.'locale';
       }
       else{

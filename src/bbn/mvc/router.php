@@ -117,7 +117,7 @@ class router {
   {
     $this->mvc = $mvc;
     $this->routes = $routes;
-    $this->root = BBN_APP_PATH;
+    $this->root = $this->mvc->app_path();
   }
 
   private function get_root($mode){
@@ -133,7 +133,7 @@ class router {
       self::is_mode($mode) &&
       isset($this->routes['root'][$path ?: $this->alt_root])
     ){
-      return bbn\str::parse_path($this->routes['root'][$path ?: $this->alt_root]['path'].'/mvc/'.( $mode === 'dom' ? 'public' : $mode ).'/');
+      return bbn\str::parse_path($this->routes['root'][$path ?: $this->alt_root]['path'].'/src/mvc/'.( $mode === 'dom' ? 'public' : $mode ).'/');
     }
     return false;
   }
@@ -469,7 +469,7 @@ class router {
         }
         if ( $file ){
           if ( ($t === 'js') && \defined('BBN_LANG') ){
-            $fpath = $plugin ? $this->plugin_path($this->plugin_name($plugin)) : BBN_APP_PATH;
+            $fpath = $plugin ? $this->plugin_path($this->plugin_name($plugin)) : $this->mvc->app_path();
             if ( file_exists($fpath.'locale/'.BBN_LANG.'/'.BBN_LANG.'.json')
             ){
               $i18n = $fpath.'locale/'.BBN_LANG.'/'.BBN_LANG.'.json';

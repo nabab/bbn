@@ -24,7 +24,7 @@ if ( !\defined("BBN_DEFAULT_MODE") ){
 
 // Correspond to the path after the URL to the application's public root (set to '/' for a domain's root)
 if ( !\defined("BBN_CUR_PATH") ){
-	die("BBN_CUR_PATH must be defined");
+	define('BBN_CUR_PATH', '/');
 }
 
 if ( !\defined("BBN_APP_NAME") ){
@@ -130,7 +130,7 @@ class mvc implements mvc\api{
 	public static
     $reserved = ['_private', '_common', '_htaccess'];
 
-  private static function _init_path(){
+  public static function init_path(){
     if ( !self::$_app_name ){
       self::$_app_name = BBN_APP_NAME;
       self::$_app_path = BBN_APP_PATH;
@@ -143,8 +143,8 @@ class mvc implements mvc\api{
     return self::$_app_name;
   }
 
-  public static function get_app_path(){
-    return self::$_app_path;
+  public static function get_app_path($raw = false){
+    return self::$_app_path.($raw ? '' : 'src/');
   }
 
   public static function get_cur_path(){
@@ -359,7 +359,7 @@ class mvc implements mvc\api{
   }
 
   private function init_locale(){
-    if ( defined('BBN_LOCALE') && is_dir(BBN_APP_PATH.'locale') ){
+    if ( defined('BBN_LOCALE') && is_dir(self::get_app_path().'locale') ){
       putenv('LANG='.BBN_LOCALE);
       //setlocale(LC_ALL, '');
       setlocale(LC_MESSAGES,BBN_LOCALE);
@@ -368,7 +368,7 @@ class mvc implements mvc\api{
       //$current = basename($domains[0],'.mo');
       //$timestamp = preg_replace('{messages-}i','',$current);
       $name = defined('BBN_APP_NAME') ? BBN_APP_NAME : 'bbn-app';
-      bindtextdomain($name, BBN_APP_PATH.'locale');
+      bindtextdomain($name, self::get_app_path().'locale');
       bind_textdomain_codeset($name, 'UTF-8');
       textdomain($name);
     }
@@ -383,13 +383,13 @@ class mvc implements mvc\api{
 	 */
 	public function __construct($db = null, $routes = []){
     self::singleton_init($this);
-    self::_init_path();
+    self::init_path();
     $this->env = new mvc\environment();
 		if ( \is_object($db) && ( $class = \get_class($db) ) && ( $class === 'PDO' || strpos($class, '\db') !== false ) ){
 			$this->db = $db;
 		}
 		else{
-			$this->db = false;
+			$this->db = null;
 		}
 		$this->inc = new \stdClass();
     $this->o = $this->inc;
@@ -431,8 +431,10 @@ class mvc implements mvc\api{
     return isset($this->plugins[$plugin]);
   }
 
-  public function plugin_path($plugin){
-    return $this->has_plugin($plugin) ? $this->plugins[$plugin]['path'] : false;
+  public function plugin_path($plugin, $raw = false){
+    if ($this->has_plugin($plugin)) {
+        return $this->plugins[$plugin]['path'].($raw ? '' : 'src/');
+    }
   }
 
   public function plugin_url($plugin){
@@ -614,7 +616,7 @@ class mvc implements mvc\api{
       }
     }
     if ( !$route ){
-      $route = $this->router->route($path, $mode, BBN_APP_PATH.'plugins/'.$name.'/'.$mode.'/');
+      $route = $this->router->route($path, $mode, self::get_app_path().'plugins/'.$name.'/'.$mode.'/');
     }
     if ( $route ){
       $view = new mvc\view($route);
@@ -650,7 +652,7 @@ class mvc implements mvc\api{
       }
     }
     if ( !$route ){
-      $route = $this->router->route($path, 'model', BBN_APP_PATH.'plugins/'.$name.'/model/');
+      $route = $this->router->route($path, 'model', self::get_app_path().'plugins/'.$name.'/model/');
     }
     if ( $route ){
       $model = new mvc\model($this->db, $route, $ctrl, $this);

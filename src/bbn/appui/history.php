@@ -892,33 +892,34 @@ MYSQL;
       ($table = $db->tfn($table))
     ){
       if ( $force || !isset(self::$structures[$table]) ){
-        self::$structures[$table] = [
-          'history' => false,
-          'primary' => false,
-          'primary_type' => null,
-          'primary_length' => 0,
-          'auto_increment' => false,
-          'id' => null,
-          'fields' => []
-        ];
-        if (
-          ($model = $dbc->modelize($table)) &&
-          self::is_linked($table) &&
-          isset($model['keys']['PRIMARY']) &&
-          (\count($model['keys']['PRIMARY']['columns']) === 1) &&
-          ($primary = $model['keys']['PRIMARY']['columns'][0]) &&
-          !empty($model['fields'][$primary])
-        ){
-          // Looking for the config of the table
-          self::$structures[$table]['history'] = 1;
-          self::$structures[$table]['primary'] = $primary;
-          self::$structures[$table]['primary_type'] = $model['fields'][$primary]['type'];
-          self::$structures[$table]['primary_length'] = $model['fields'][$primary]['maxlength'];
-          self::$structures[$table]['auto_increment'] = isset($model['fields'][$primary]['extra']) && ($model['fields'][$primary]['extra'] === 'auto_increment');
-          self::$structures[$table]['id'] = $dbc->table_id($db->tsn($table), $db->current);
-          self::$structures[$table]['fields'] = array_filter($model['fields'], function($a){
-            return $a['id_option'] !== null;
-          });
+        if ( $model = $dbc->modelize($table) ){
+          self::$structures[$table] = [
+            'history' => false,
+            'primary' => false,
+            'primary_type' => null,
+            'primary_length' => 0,
+            'auto_increment' => false,
+            'id' => null,
+            'fields' => []
+          ];
+          if (
+            self::is_linked($table) &&
+            isset($model['keys']['PRIMARY']) &&
+            (\count($model['keys']['PRIMARY']['columns']) === 1) &&
+            ($primary = $model['keys']['PRIMARY']['columns'][0]) &&
+            !empty($model['fields'][$primary])
+          ){
+            // Looking for the config of the table
+            self::$structures[$table]['history'] = 1;
+            self::$structures[$table]['primary'] = $primary;
+            self::$structures[$table]['primary_type'] = $model['fields'][$primary]['type'];
+            self::$structures[$table]['primary_length'] = $model['fields'][$primary]['maxlength'];
+            self::$structures[$table]['auto_increment'] = isset($model['fields'][$primary]['extra']) && ($model['fields'][$primary]['extra'] === 'auto_increment');
+            self::$structures[$table]['id'] = $dbc->table_id($db->tsn($table), $db->current);
+            self::$structures[$table]['fields'] = array_filter($model['fields'], function($a){
+              return $a['id_option'] !== null;
+            });
+          }
         }
       }
       // The table exists and has history
@@ -1238,6 +1239,7 @@ MYSQL;
                 'bbn_uid' => $primary_value,
                 'bbn_table' => $s['id']
               ]) ){
+                \bbn\x::log([$s['fields'], $s['primary']], 'history_thomas');
                 $cfg['history'][] = [
                   'operation' => 'INSERT',
                   'column' => $s['fields'][$s['primary']]['id_option'],

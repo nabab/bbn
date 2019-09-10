@@ -170,12 +170,10 @@ class preferences extends bbn\models\cls\db
       }
       $where = [
         'logic' => 'AND',
-        'conditions' => [
-          [
-            'field' => $this->fields['id_option'],
-            'value' => $id_option
-          ]
-        ]
+        'conditions' => [[
+          'field' => $this->fields['id_option'],
+          'value' => $id_option
+        ]]
       ];
       if ( count($cond['conditions']) ){
         $where['conditions'][] = $cond;
@@ -478,33 +476,30 @@ class preferences extends bbn\models\cls\db
         'table' => $table,
         'fields' => $this->fields,
         'where' => [
-          'logic' => 'AND',
-          'conditions' => [
-            [
-              'field' => $uid,
-              'value' => $id
+          'conditions' => [[
+            'field' => $uid,
+            'value' => $id
+          ], [
+            'logic' => 'OR',
+            'conditions' => [[
+              'field' => $id_user,
+              'value' => $this->id_user
             ], [
-              'logic' => 'OR',
-              'conditions' => [
-                [
-                  'field' => $id_user,
-                  'value' => $this->id_user
-                ], [
-                  'field' => $id_group,
-                  'value' => $this->id_group
-                ], [
-                  'field' => $public,
-                  'value' => 1
-                ]
-              ]
-            ]
-          ]
+              'field' => $id_group,
+              'value' => $this->id_group
+            ], [
+              'field' => $public,
+              'value' => 1
+            ]]
+          ]]
         ]
       ]) ){
-        $cfg = $row['cfg'];
-        unset($row['cfg']);
-        if ( ($cfg = json_decode($cfg, true)) && $with_config ){
-          $row = bbn\x::merge_arrays($cfg, $row);
+        if ( $with_config ){
+          $cfg = $row[$this->fields['cfg']];
+          unset($row[$this->fields['cfg']]);
+          if ( $cfg = json_decode($cfg, true) ){
+            $row = bbn\x::merge_arrays($cfg, $row);
+          }
         }
         return $row;
       }
@@ -521,57 +516,57 @@ class preferences extends bbn\models\cls\db
   public function get_all(string $id_option = null, bool $with_config = true): ?array
   {
     if ( $id_option = $this->_get_id_option($id_option) ){
-
-      $fields = $this->fields;
-      if ( !$with_config ){
-        unset($fields['cfg']);
+      $farch = $this->fields;
+      $fields = [];
+      foreach ( $farch as $k => $f ){
+        $field = $this->class_table . '.' . $f;
+        if ( $k === 'cfg' ){
+          $fields[$farch['cfg']] = "IFNULL($field, aliases.$farch[cfg])";
+        }
+        else if ( $k === 'text' ){
+          $fields[$farch['text']] = "IFNULL($field, aliases.$farch[text])";
+        }
+        else {
+          $fields[] = $field;
+        }
       }
       if ( $rows = $this->db->rselect_all([
         'table' => $this->class_table,
         'fields' => $fields,
-        'join' => [
-          [
-            'table' => $this->class_table,
-            'type' => 'left',
-            'alias' => 'aliases',
-            'on' => [
-              'conditions' => [
-                [
-                  'field' => $this->fields['id_alias'],
-                  'exp' => 'aliases.id'
-                ]
-              ]
-            ]
-          ]
+        'join' => [[
+          'table' => $this->class_table,
+          'type' => 'left',
+          'alias' => 'aliases',
+          'on' => [
+            'conditions' => [[
+              'field' => $farch['id_alias'],
+              'exp' => 'aliases.id'
+            ]]
+          ]]
         ],
         'where' => [
-          'logic' => 'AND',
-          'conditions' => [
-            [
-              'field' => $this->fields['id_option'],
-              'value' => $id_option
+          'conditions' => [[
+            'field' => $farch['id_option'],
+            'value' => $id_option
+          ], [
+            'logic' => 'OR',
+            'conditions' => [[
+              'field' => $farch['id_user'],
+              'value' => $this->id_user
             ], [
-              'logic' => 'OR',
-              'conditions' => [
-                [
-                  'field' => $this->fields['id_user'],
-                  'value' => $this->id_user
-                ], [
-                  'field' => $this->fields['id_group'],
-                  'value' => $this->id_group
-                ], [
-                  'field' => $this->fields['public'],
-                  'value' => 1
-                ]
-              ]
-            ]
-          ]
+              'field' => $farch['id_group'],
+              'value' => $this->id_group
+            ], [
+              'field' => $farch['public'],
+              'value' => 1
+            ]]
+          ]]
         ]
       ]) ) {
-        return $with_config ? array_map(function($a){
-          $cfg = $a['cfg'];
-          unset($a['cfg']);
-          if ( ($cfg = json_decode($cfg, true)) ){
+        return $with_config ? array_map(function($a) use($farch){
+          $cfg = $a[$farch['cfg']];
+          unset($a[$farch['cfg']]);
+          if ( $cfg = json_decode($cfg, true) ){
             $a = bbn\x::merge_arrays($cfg, $a);
           }
           return $a;
@@ -1029,7 +1024,6 @@ class preferences extends bbn\models\cls\db
   public function share_with_group(string $id, string $id_group, bool $cancel = false): ?int
   {
     if ( $cfg = $this->get($id) ){
-
       $id_share = $this->db->select_one($this->class_table, $this->fields['id'], [
         'id_alias' => $id,
         'id_group' => $id_group

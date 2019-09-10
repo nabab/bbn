@@ -479,7 +479,7 @@ class actions {
       if ( isset($dirs[$data['dir']]) ){
         if ( $this->is_mvc($dirs[$data['dir']]) ){
           foreach ( $dirs[$data['dir']]['files'] as $f ){
-            $dest = $root_dest.$data['name'].'/'.str_replace(BBN_APP_PATH, '', $f['fpath']);
+            $dest = $root_dest.$data['name'].'/'.str_replace(\bbn\mvc::get_app_path(), '', $f['fpath']);
             if ( $data['type'] === 'file' ){
               $ext = bbn\str::file_ext($data['path']);
               $path = substr($data['path'], 0, strrpos($data['path'], $ext));

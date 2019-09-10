@@ -25,7 +25,7 @@ class clipboard extends bbn\models\cls\basic
 
   public function check(): bool
   {
-    return $this->user->check();
+    return $this->user->check_session();
   }
 
   public function add($element): ?float

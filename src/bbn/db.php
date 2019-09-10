@@ -3067,12 +3067,16 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * If exist delete row(s) in a table, else ignore.
+   * If exist updates row(s) in a table, else ignore.
    *
    * <code>
-   * $this->db->delete_ignore(
-   *  "table_users",
-   *  ['id' => '20']
+   * $this->db->update_ignore(
+   *   "table_users",
+   *   [
+   *     ['name' => 'Frank'],
+   *     ['surname' => 'Red']
+   *   ],
+   *   ['id' => '20']
    * );
    * </code>
    *
@@ -3112,7 +3116,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   }
 
   /**
-   * If exist delete row(s) in a table, else ignore.
+   * If exist deletess row(s) in a table, else ignore.
    *
    * <code>
    * $this->db->delete_ignore(

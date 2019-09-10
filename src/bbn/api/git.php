@@ -24,9 +24,6 @@ class git extends \Cz\Git\GitRepository
         $api = "https://git.bbn.so/api/v3/user/repos";
       }      
       //todo ceck create repository remote with this api for github
-      /*else if ( $api === 'github' ){
-        $api = ttps://api.github.com/users/vitof84/repos
-      }*/
       try{
     		$res = \bbn\x::curl($api,json_encode($scope),[
           'post' => 1,
@@ -121,7 +118,6 @@ class git extends \Cz\Git\GitRepository
 	}
   
   
-  //example $git->pushInRemote('vitof84/test', username, password) 
   public function pushInRemote(string $repository, string $user, string $passw, string $server="github.com"){
     if ($repository && $user && $passw && $server){
       $remote = NULL;
@@ -288,4 +284,6 @@ class git extends \Cz\Git\GitRepository
       'total' => (int)$this->extractFromCommand('git rev-list --all --count')[0]
     ];
   }
+
+   
 }

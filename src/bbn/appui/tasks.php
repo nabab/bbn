@@ -54,8 +54,8 @@ class tasks extends bbn\models\cls\db{
       $this->mgr = new bbn\user\manager($user);
       $this->_get_references();
       //die(var_dump(BBN_APP_PATH, $this->references));
-      if ( \defined("BBN_APP_PATH") && is_file(BBN_APP_PATH.'plugins/appui-task/reference.php') ){
-        $f = include(BBN_APP_PATH.'plugins/appui-task/reference.php');
+      if ( is_dir(\bbn\mvc::get_app_path()) && is_file(\bbn\mvc::get_app_path().'plugins/appui-task/reference.php') ){
+        $f = include(\bbn\mvc::get_app_path().'plugins/appui-task/reference.php');
         if ( is_callable($f) ){
           $this->template = $f;
         }

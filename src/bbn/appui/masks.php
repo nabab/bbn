@@ -164,11 +164,10 @@ class masks extends bbn\models\cls\db {
       ];
       if ( !empty($cfg['id_type']) ){
         $data['id_type'] = $cfg['id_type'];
-      }
-      if ( 
-        $this->db->update('bbn_notes_masks', $data, ['id_note' => $cfg['id_note']]) ||
-        $this->notes->update($cfg['id_note'], $cfg['title'], $cfg['content'])
-      ){
+      }      
+      $update_mask = $this->db->update('bbn_notes_masks', $data, ['id_note' => $cfg['id_note']]);
+      $update_notes = $this->notes->update($cfg['id_note'], $cfg['title'], $cfg['content']);
+      if ( $update_mask || $update_notes ){
         return true;
       }
     }

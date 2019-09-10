@@ -63,8 +63,8 @@ trait common {
     return $this->mvc->is_plugin($plugin ?: $this->plugin_name($this->plugin));
   }
 
-  public function plugin_path($plugin = null){
-    return $this->mvc->plugin_path($plugin ?: $this->plugin_name($this->plugin));
+  public function plugin_path($plugin = null, $raw = false){
+    return $this->mvc->plugin_path($plugin ?: $this->plugin_name($this->plugin), $raw);
   }
 
   public function plugin_url($plugin = null){
@@ -77,6 +77,11 @@ trait common {
 
   public function get_cookie(){
     return $this->mvc->get_cookie();
+  }
+
+  public function app_path($raw = false): string
+  {
+    return \bbn\mvc::get_app_path($raw);
   }
 
   public function data_path(string $plugin = null): string

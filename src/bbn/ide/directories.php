@@ -219,10 +219,10 @@ class directories {
     $res = [];
     foreach ( $dirs as $i => $d ){
       if ( !empty($d['tabs']) &&
-        \defined('BBN_APP_PATH')
+        is_dir(\bbn\mvc::get_app_path())
       ){
         $d['real_path'] = $this->decipher_path($d['path']);
-        $d['prefix'] = strpos($d['real_path'], BBN_APP_PATH) === 0 ? '' : false;
+        $d['prefix'] = strpos($d['real_path'], \bbn\mvc::get_app_path()) === 0 ? '' : false;
         foreach ( $this->routes as $alias => $route ){
           if ( strpos($d['real_path'], $route) === 0 ){
             $d['prefix'] = $alias.'/';
@@ -1598,7 +1598,7 @@ class directories {
    */
   public function real_to_perm($file, $type='file'){
     if ( !empty($file) &&
-      \defined('BBN_APP_PATH') &&
+      is_dir(\bbn\mvc::get_app_path()) &&
       // It must be a controller
       (strpos($file, '/mvc/public/') !== false)
     ){
@@ -1617,7 +1617,7 @@ class directories {
       }
       // Internal route
       if ( empty($f) ){
-        $root_path = BBN_APP_PATH.'mvc/public/';
+        $root_path = \bbn\mvc::get_app_path().'mvc/public/';
         if ( strpos($file, $root_path) === 0 ){
           // Remove root path
           $f = substr($file, \strlen($root_path), \strlen($file));
@@ -1646,7 +1646,7 @@ class directories {
    */
   public function create_perm_by_real($file, $type='file'){
     if ( !empty($file) &&
-      \defined('BBN_APP_PATH') &&
+      is_dir(\bbn\mvc::get_app_path()) &&
       file_exists($file) &&
       // It must be a controller
       (strpos($file, '/mvc/public/') !== false)
@@ -1665,7 +1665,7 @@ class directories {
       }
       // Internal route
       if ( empty($f) ){
-        $root_path = BBN_APP_PATH.'mvc/public/';
+        $root_path = \bbn\mvc::get_app_path().'mvc/public/';
         if ( strpos($file, $root_path) === 0 ){
           // Remove root path
           $f = substr($file, \strlen($root_path), \strlen($file));
