@@ -209,17 +209,22 @@ class project extends bbn\models\cls\db {
     /** @var string $constant The first part of the path must be a constant */
     $constant = $bits[0];
     /** @var string $path The path that will be returned */
-    $path = '';
-    
+    $path = '';  
     if ( \defined($constant) ){
       if ( $constant === 'BBN_APP_PATH' ){
-        $path = \bbn\mvc::get_app_path();
+        if ( empty($bits[1]) ){
+          $path = \bbn\mvc::get_app_path();
+        }
+        else{
+          $path = \bbn\mvc::get_app_path(true); 
+        }        
       }
       else{
         $path .= constant($constant);      
       }      
       array_shift($bits);      
     }
+    
     $path .= implode('/', $bits);
    
     return $path;
