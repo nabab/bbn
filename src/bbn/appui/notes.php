@@ -122,7 +122,7 @@ class notes extends bbn\models\cls\db
   }
 
   public function update(string $id, string $title, string $content, bool $private = null, bool $locked = null){
-    if ( $old = $this->db->rselect('bbn_notes', [], ['id' => $id]) ){
+    if ( $old = $this->db->rselect('bbn_notes', [], ['id' => $id]) ){      
       $ok = false;
       $new = [];
       if ( !\is_null($private) && ($private != $old['private']) ){
@@ -148,8 +148,8 @@ class notes extends bbn\models\cls\db
           $changed = true;
           $new_v['content'] = $content;
         }
-        if ( !empty($changed) ){
-          $ok = $this->insert_version($id, $new_v['title'], $new_v['content']);
+        if ( !empty($changed) ){         
+          $ok = $this->insert_version($id, $new_v['title'], $new_v['content']);    
         }
       }
       return !!$ok;

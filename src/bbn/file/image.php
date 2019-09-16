@@ -258,6 +258,7 @@ class image extends bbn\file
   protected function make()
   {
     parent::make();
+		
     /* For images as string - to implement
     if ( class_exists('\\Imagick') )
     {

@@ -27,6 +27,7 @@ class system extends bbn\models\cls\basic
    * @var mixed The connection stream only if it is different from the original connection
    */
   private $cn = '';
+  private $error_stream;
 
   /**
    * @var mixed The connection stream
@@ -59,7 +60,6 @@ class system extends bbn\models\cls\basic
    */
   private function _connect_nextcloud(array $cfg): bool
   {
-   
     if ( isset($cfg['host'], $cfg['user'], $cfg['pass']) && class_exists('\\Sabre\\DAV\\Client') ){
       $this->prefix = '/remote.php/webdav/';
       $this->obj = new \Sabre\DAV\Client([
@@ -68,8 +68,8 @@ class system extends bbn\models\cls\basic
         'password' => $cfg['pass']
       ]);
       $this->host = 'http'.(isset($cfg['port']) && ($cfg['port'] === 21) ? '' : 's').'://'.$cfg['host'];
-     
-      if ( $this->obj->options() ){
+      
+     if ( $this->obj->options() ){
         $this->current = '';
         return true;
       }
@@ -115,6 +115,7 @@ class system extends bbn\models\cls\basic
             (defined('BBN_SERVER_NAME') && !@fsockopen(BBN_SERVER_NAME, $args[1]))
           ){
             ftp_pasv($this->obj, true);
+            stream_set_chunk_size($this->obj, 1024 * 1024);
           }
           return true;
         }
@@ -136,18 +137,20 @@ class system extends bbn\models\cls\basic
       if ( isset($cfg['public'], $cfg['private']) ){
         $param['hostkey'] = 'ssh-rsa';
       }
-      $this->cn = @ssh2_connect($cfg['host'], $cfg['port'] ?? 22, $param, [
+      $this->cn = @ssh2_connect($cfg['host'], $cfg['port'] ?? 22, $param/*, [
         'debug' => function($message, $language, $always_display){
           bbn\x::log([$message, $language, $always_display], 'connect_ssh_debug');
         },
         'disconnect' => function($reason, $message, $language){
           bbn\x::log([$reason, $message, $language], 'connect_ssh_disconnect');
         }
-      ]);
+      ]*/);
       if ( !$this->cn ){
         $this->error = _("Could not connect through SSH.");
       }
       else if ( isset($cfg['user'], $cfg['public'], $cfg['private']) ){
+        stream_set_blocking($this->cn, true);
+        stream_set_chunk_size($this->cn, 1024 * 1024);
         /*
         $fingerprint = ssh2_fingerprint($this->cn, SSH2_FINGERPRINT_MD5 | SSH2_FINGERPRINT_HEX);
         if ( strcmp($this->ssh_server_fp, $fingerprint) !== 0 ){
@@ -439,7 +442,6 @@ class system extends bbn\models\cls\basic
     if ( $this->mode !== 'nextcloud' ){
       if ( $this->_is_dir($path) ){
         $files = $this->_get_items($path, 'both', true);
-        
         if ( !empty($files) ){
           foreach ( $files as $file ){
             $this->_delete($file);
@@ -459,7 +461,7 @@ class system extends bbn\models\cls\basic
         }
         return true;
       }
-      if ( $this->is_file($path) ){
+      if ( $this->_is_file($path) ){
         if ( $this->mode === 'ssh' ){
           return ssh2_sftp_unlink($this->obj, substr($path, strlen($this->prefix)));
         }
@@ -657,6 +659,12 @@ class system extends bbn\models\cls\basic
         $this->mode = $type;
         $this->current = getcwd();
         break;
+    }
+  }
+
+  public function __destruct(){
+    if ( $this->mode === 'ssh' ){
+      @fclose($this->cn);
     }
   }
 

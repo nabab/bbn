@@ -289,7 +289,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
             break;
         }
         if ( !\is_array($tmp) ){
-          die("Error while creating the cache for the table $item in mode $mode");
+          die(var_dump($tmp, $keys, $cols, "Error while creating the cache for the table $item in mode $mode"));
         }
         if ( $tmp ){
           $this->cache_set($cache_name, '', $tmp, $this->cache_renewal);

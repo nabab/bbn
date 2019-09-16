@@ -294,7 +294,7 @@ class directories {
     if ( !empty($dir) &&
       \defined($dir['bbn_path'])
     ){
-      $bbn_p = constant($dir['bbn_path']);
+      $bbn_p = $dir['bbn_path'] === 'BBN_APP_PATH' ? \bbn\mvc::get_app_path() : constant($dir['bbn_path']); 
       if ( strpos($file, $bbn_p) === 0 ){
         $f = substr($file, \strlen($bbn_p));
         $timer->stop('real_to_id');
@@ -478,8 +478,8 @@ class directories {
     $constant = $bits[0];
     /** @var string $path The path that will be returned */
     $path = '';
-    if ( \defined($constant) ){
-      $path .= constant($constant);
+    if ( \defined($constant) ){      
+      $path .= $constant === 'BBN_APP_PATH' ? \bbn\mvc::get_app_path() : constant($constant);
       array_shift($bits);
     }
     $path .= implode('/', $bits);

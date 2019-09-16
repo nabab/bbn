@@ -642,7 +642,7 @@ class mvc implements mvc\api{
     return [];
   }
 
-  public function get_plugin_model(string $path, array $data, mvc\controller $ctrl, string $plugin){
+  public function get_plugin_model(string $path, array $data, mvc\controller $ctrl, string $plugin, int $ttl = 0){
     $route = false;
     if ( $name = $this->plugin_name($plugin) ){
       $bits = x::split($path, DIRECTORY_SEPARATOR);
@@ -656,6 +656,9 @@ class mvc implements mvc\api{
     }
     if ( $route ){
       $model = new mvc\model($this->db, $route, $ctrl, $this);
+      if ( $ttl ){
+        return $model->get_from_cache($data, '', $ttl);
+      }
       return $model->get($data);
     }
   }

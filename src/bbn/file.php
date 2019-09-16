@@ -94,8 +94,9 @@ class file extends models\cls\basic
         /* The -2 in strrpos means that if there is a final /, it will be kept in the file name */
         $this->name = substr($file,strrpos($file,'/',-2)+1);
         $this->path = substr($file,0,-\strlen($this->name));
-        if ( substr($this->path,0,2) == '//' )
+        if ( substr($this->path,0,2) == '//' ){
           $this->path = 'http://'.substr($this->path,2);
+        }
       }
       else
       {

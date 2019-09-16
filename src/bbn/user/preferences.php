@@ -330,7 +330,7 @@ class preferences extends bbn\models\cls\db
    * @param string $id_user
    * @return bool
    */
-  public function user_has(string $id_option, string $id_user): bool
+  public function user_has(string $id_option, string $id_user = null): bool
   {
     return (bool)$this->_retrieve_ids($id_option, $id_user);
   }
@@ -545,22 +545,26 @@ class preferences extends bbn\models\cls\db
           ]]
         ],
         'where' => [
-          'conditions' => [[
-            'field' => $farch['id_option'],
-            'value' => $id_option
-          ], [
-            'logic' => 'OR',
-            'conditions' => [[
-              'field' => $farch['id_user'],
-              'value' => $this->id_user
+          'conditions' => [
+            [
+              'field' => $farch['id_option'],
+              'value' => $id_option
             ], [
-              'field' => $farch['id_group'],
-              'value' => $this->id_group
-            ], [
-              'field' => $farch['public'],
-              'value' => 1
-            ]]
-          ]]
+              'logic' => 'OR',
+              'conditions' => [
+                [
+                  'field' => $farch['id_user'],
+                  'value' => $this->id_user
+                ], [
+                  'field' => $farch['id_group'],
+                  'value' => $this->id_group
+                ], [
+                  'field' => $farch['public'],
+                  'value' => 1
+                ]
+              ]
+            ]
+          ]
         ]
       ]) ) {
         return $with_config ? array_map(function($a) use($farch){
@@ -845,14 +849,40 @@ class preferences extends bbn\models\cls\db
   }
 
   /**
-   * Deletes the given permission
+   * Deletes the given preference
    *
    * @param $id
    * @return int|null
    */
   public function delete($id): ?int
   {
-    return $this->db->delete($this->class_cfg['table'], [$this->fields['id'] => $id]);
+    return $this->db->delete([
+      'table' => $this->class_cfg['table'],
+      'where' => [
+        'logic' => 'AND',
+        'conditions' => [
+          [
+            'field' => $this->fields['id'],
+            'value' => $id
+          ],
+          [
+            'logic' => 'OR',
+            'conditions' => [
+              [
+                'field' => $farch['id_user'],
+                'value' => $this->id_user
+              ], [
+                'field' => $farch['id_group'],
+                'value' => $this->id_group
+              ], [
+                'field' => $farch['public'],
+                'value' => 1
+              ]
+            ]
+          ]
+        ]
+      ]
+    ]);
   }
 
   /**
@@ -1138,6 +1168,25 @@ class preferences extends bbn\models\cls\db
     return null;
   }
 
+
+  /**
+   * Deletes all bits from a preference
+   *
+   * @param string The bit's ID
+   * @return int|null
+   */
+  public function delete_bits(string $id_user_option): ?int
+  {
+    if ( \bbn\str::is_uid($id) ){
+      $i = 0;
+      foreach ( $this->get_bits($id_user_option) as $b ){
+        $i += (int)$this->delete_bit($b['id']);
+      }
+      return $i;
+    }
+    return null;
+  }
+
   /**
    * Updates a preference's bit
    *
@@ -1185,6 +1234,10 @@ class preferences extends bbn\models\cls\db
       ]);
     }
     return null;
+  }
+
+  public function set_bit(string $id_user_option, array $cfg){
+    
   }
 
   /**
@@ -1275,6 +1328,25 @@ class preferences extends bbn\models\cls\db
       ]));
     }
     return [];
+  }
+
+  public function get_bits_order(string $id_user_option)
+  {
+    $cfg = $this->class_cfg['arch']['user_options'];
+    $cfg2 = $this->class_cfg['arch']['user_options_bits'];
+    if ( $this->db->select_one(
+      $this->class_cfg['tables']['user_options'],
+      $cfg['id_user'],
+      ['id' => $id_user_option]
+    ) === $this->id_user ){
+      return $this->db->get_column_values(
+        $this->class_cfg['tables']['user_options_bits'],
+        $cfg2['id_option'],
+        [$cfg2['id_user_option'] => $id_user_option],
+        [$cfg2['num'] => 'ASC']
+      );
+    }
+    return null;
   }
 
   /**

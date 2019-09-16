@@ -409,23 +409,15 @@ class i18n extends bbn\models\cls\cache
 
     if ( $id_option &&
       ($o = options::get_instance()->option($id_option)) &&
-      !empty($o['language']) &&
-      ($parent = options::get_instance()->parent($id_option)) &&
-      defined($parent['code']) &&
-      isset($o['language']) ){
+      !empty($o['language']) && isset($o['language']) ){
         $domain = $o['text'];
 
         // @var $to_explore the path to explore 
-        $to_explore = constant($parent['code']);
+        $to_explore = $this->get_path_to_explore($id_option);
         // @var $locale_dir the path to locale dir 
-        //exeption for apst_app, don't need the code
-        if( (constant($parent['code']) === \bbn\mvc::get_app_path()) && (strrpos('mvc/', $o['code'], 0) === 0) ) {
-          $locale_dir = $to_explore.'locale';
-        }
-        else{
-          $locale_dir = $to_explore.$o['code'].'locale';
-        }
-        $domain .= is_file($locale_dir.'/index.txt') ? file_get_contents($locale_dir.'/index.txt') : '';
+        $locale_dir = $this->get_locale_dir_path($id_option);
+        $index = $this->get_index_path($id_option);
+        $domain .= is_file($index) ? file_get_contents($index) : '';
         // @var $dirs scans dirs existing in locale folder for this path 
         if ( is_dir($locale_dir) ){
           // @var array $languages dirs in locale folder
@@ -504,14 +496,14 @@ class i18n extends bbn\models\cls\cache
    * @return void
    */
   public function get_po_files($id_option){
-    if (!empty($id_option) && ($o = options::get_instance()->option($id_option)) &&
+    if ( !empty($id_option) && ($o = options::get_instance()->option($id_option)) &&
     ($parent = options::get_instance()->parent($id_option)) &&
     defined($parent['code']) ){
       $tmp = [];
       // @var  $to_explore the path to explore 
-      $to_explore = constant($parent['code']).$o['code'];
+      $to_explore = $this->get_path_to_explore($id_option);
       // @var  $locale_dir locale dir in the path
-      $locale_dir = dirname($to_explore).'/locale';
+      $locale_dir = $this->get_locale_dir_path($id_option);
       $dirs = \bbn\file\dir::get_dirs($locale_dir) ?: [];
       $languages = array_map(function($a){
         return basename($a);
@@ -580,7 +572,7 @@ class i18n extends bbn\models\cls\cache
    * @return void
    */
   public function get_translations_strings($id_option, $source_language, $languages){
-
+    
     if (
       !empty($id_option) &&
       !empty($source_language) &&
@@ -589,23 +581,15 @@ class i18n extends bbn\models\cls\cache
       \defined($parent['code'])
     ){
       // @var string $to_explore The path to explore path of mvc 
-      $to_explore = \constant($parent['code']).($o['code'] === '/' ? '' : $o['code']);
-
-      $current_path = \constant($parent['code']);
-      if ( constant($parent['code']) === \bbn\mvc::get_app_path() ){
-        $current_dirs = bbn\file\dir::get_dirs( constant($parent['code']).($o['code'] === '/' ? '' : $o['code']));
-			}
-
-      //all dirs contained in current if not in vendor
-      if ( constant($parent['code']) === BBN_LIB_PATH ){
-        //case of plugins
-        $src =  mb_substr($current_path.$o['code'], 0,-4);
-        $current_dirs = bbn\file\dir::get_dirs($src);
-
-      }
-      else if ( constant($parent['code']) === BBN_CDN_PATH ){
-        //case javascript and styles project apst
-        $current_dirs[] =  constant($parent['code']).$o['code'];
+      $to_explore = $this->get_path_to_explore($id_option);
+      
+      $locale_dir =  $this->get_locale_dir_path($id_option);
+      $current_dirs = bbn\file\dir::get_dirs($to_explore);
+     
+      if ( constant($parent['code']) === \bbn\mvc::get_app_path(true) ){
+        
+        //$o['code'] === '/' is the case of mc
+        $current_dirs = bbn\file\dir::get_dirs( \bbn\mvc::get_app_path().($o['code'] === '/' ? '' : $o['code']));
       }
 
       $to_explore_dirs = [];
@@ -613,24 +597,15 @@ class i18n extends bbn\models\cls\cache
       //creates the array $to_explore_dirs containing mvc, plugins e components
       if ( !empty($current_dirs) ){
         foreach ($current_dirs as $key => $value) {
-          if( constant($parent['code']) === \bbn\mvc::get_app_path() ){
-            if (( strpos($value, 'locale') !== 0 ) && ( strpos($value, 'data') !== 0 ) && ( strpos($value, '.') !== 0 )){
-						  $to_explore_dirs = $current_dirs;
-            }
-          }
-
-          if ( constant($parent['code']) === BBN_CDN_PATH ){
-            $to_explore_dirs[] = $current_dirs;
-          }
-          else if ( $parent['code'] === 'BBN_LIB_PATH'  ){
-            //case of plugins appui
-            $to_explore_dirs[] = $current_dirs[$key];
+          if( ( strpos(basename($value), 'locale') !== 0 ) &&
+               ( strpos(basename($value), 'data') !== 0 ) && 
+               ( strpos(basename($value), '.') !== 0 )
+            ){
+            $to_explore_dirs = $current_dirs;
           }
         }
       }
-      // @var  $locale_dir  the root of locale dir for this id_option
-      $locale_dir = dirname($to_explore).'/locale';
-
+      
       // @var $dirs scans dirs contained in locale folder of this path
       
       $res = [];
@@ -641,20 +616,15 @@ class i18n extends bbn\models\cls\cache
           return basename($a);
         }, \bbn\file\dir::get_dirs($locale_dir)) ?: [];
       }
+      
 
-      if ( !empty($to_explore_dirs) && ($parent['code'] !== 'BBN_CDN_PATH' )){
-
+      if ( !empty($to_explore_dirs) ){
         foreach ( $to_explore_dirs as $c ){
 					$res[] = $this->analyze_folder($c, true);
-
-				}
-      }
-      else if( ( $parent['code'] === 'BBN_CDN_PATH' ) && (!empty($current_dirs)) ){
-        foreach($current_dirs as $c ){
-          $res[] = $this->analyze_folder($c, true);
         }
       }
-
+      
+      
       //all strings found in the different dirs $to_explore_dirs, merge all index of $res
       if(!empty($res)){
          $res = array_merge(...$res);
@@ -746,22 +716,19 @@ class i18n extends bbn\models\cls\cache
       $path_source_lang = options::get_instance()->get_prop($id_option, 'language');
 
       // @var  $to_explore the path to explore 
-      $to_explore = constant($parent['code']);
+      $to_explore = $this->get_path_to_explore($id_option);      
 
-       //exeption for apst_app, don't need the code
-      if( (constant($parent['code']) === \bbn\mvc::get_app_path()) && (strrpos('mvc/', $o['code'], 0) === 0) ) {
-        $locale_dir = $to_explore.'locale';
-      }
-      else{
-        $locale_dir = $to_explore.$o['code'].'locale';
-      }
+      $locale_dir = $this->get_locale_dir_path($id_option);      
+      
       $languages = array_map(function($a){
         return basename($a);
       }, \bbn\file\dir::get_dirs($locale_dir)) ?: [];
+      
       $i = 0;
       $res = [];
       $project = new bbn\appui\project($this->db, $id_project);
       if ( !empty($languages) ){
+       
         $po_file = [];
         $success = false;
         foreach ( $languages as $lng ){
@@ -769,9 +736,9 @@ class i18n extends bbn\models\cls\cache
           $idx = is_file($locale_dir.'/index.txt') ? file_get_contents($locale_dir.'/index.txt') : '';
           $po = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$idx.'.po';
           $mo = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$idx.'.mo';
-          
+         
           // if the file po exist takes its content 
-          if (file_exists($po)){
+          if ( file_exists($po) ){
             $fileHandler = new \Sepia\PoParser\SourceHandler\FileSystem($po);
             $poParser = new \Sepia\PoParser\Parser($fileHandler);
             $Catalog  = \Sepia\PoParser\Parser::parseFile($po);
@@ -809,7 +776,6 @@ class i18n extends bbn\models\cls\cache
                   }
                   // the number of times the strings is found in the files of the path  
                   $po_file[$i][$lng]['occurrence'] = !empty($po_file[$i][$path_source_lang]) ? count($po_file[$i][$path_source_lang]['paths']) : 0;
-
                 };
               }
               
@@ -830,6 +796,46 @@ class i18n extends bbn\models\cls\cache
       ];
     }
 
+  }
+  
+  /**
+   * Returns the path to explore relative to the given id_option
+   *
+   * @param String $id_option
+   * @return String|null
+   */
+  public function get_path_to_explore(String $id_option) :? String{
+    $options = options::get_instance();
+    $o = $options->option($id_option);
+    $parent = $options->parent($o['id']);
+    $to_explore = '';
+    if ( constant($parent['code']) === \bbn\mvc::get_app_path(true) ){
+      $to_explore = \bbn\mvc::get_app_path(). ( ($o['code'] !== '/') ? $o['code'] : '' );
+    }
+    else if ( constant($parent['code']) === BBN_LIB_PATH ){
+      $to_explore = constant($parent['code']).$o['code'];
+    }
+    return $to_explore;
+  }
+
+  /**
+   * Returns the path of the locale dir of the given $id_option
+   *
+   * @param String $id_option
+   * @return String
+   */
+  public function get_locale_dir_path(String $id_option) : String {
+    $path = $this->get_path_to_explore($id_option).'locale';
+    return $path;
+  }
+  /**
+   * Returns the path of the file index.txt inside the locale folder
+   *
+   * @param String $id_option
+   * @return void
+   */
+  public function get_index_path(String $id_option) {
+    return $this->get_locale_dir_path($id_option).'/index.txt';
   }
 
 }

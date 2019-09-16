@@ -194,7 +194,7 @@ class router {
     return false;
   }
 
-  private function set_known(array $o){
+  private function set_known(array $o, bool $save = true){
     if ( !isset($o['mode'], $o['path'], $o['file']) || !self::is_mode($o['mode']) || !\is_string($o['path']) || !\is_string($o['file']) ){
       return false;
     }
@@ -252,6 +252,11 @@ class router {
     }
     //$this->log(self::$known[$mode][$path]);
     //\bbn\x::hdump(self::$known[$mode][$path]);
+    if ( !$save ){
+      $o = self::$known[$mode][$path];
+      unset(self::$known[$mode][$path]);
+      return $o;
+    }
     return self::$known[$mode][$path];
   }
 
@@ -437,6 +442,7 @@ class router {
       $file = false;
       $plugin = false;
       $i18n = false;
+      $save = !$root;
       if ( !$root ){
         $root = $this->get_root($mode);
         if ( $alt_path = $this->find_in_roots($path) ){
@@ -482,7 +488,7 @@ class router {
             'mode' => $mode,
             'plugin' => $plugin,
             'i18n' => $i18n
-          ]);
+          ], $save);
         }
       }
     }
@@ -502,7 +508,7 @@ class router {
           'path' => $path,
           'ext' => $t,
           'mode' => $mode
-        ]);
+        ], false);
       }
     }
     return false;

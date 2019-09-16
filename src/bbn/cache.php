@@ -169,6 +169,7 @@ class cache{
    * @return bool|string
    */
   public function has(string $it){
+    
     if ( self::$type ){
       switch ( self::$type ){
         case 'apc':

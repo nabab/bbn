@@ -2273,6 +2273,7 @@ class options extends bbn\models\cls\db
         $prop = [$prop => $args[2]];
       }
       if ( \is_array($prop) ){
+        \bbn\x::log([$o, $prop], "set_prop");
         $change = false;
         foreach ( $prop as $k => $v ){
           //if ( !\in_array($k, $this->class_cfg['arch']['options']) ){

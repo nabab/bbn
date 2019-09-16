@@ -58,7 +58,6 @@ abstract class cache extends bbn\models\cls\basic
 	}
 
 	public function cache_get($uid, $method = ''){
-
 		return $this->cacher->get($this->_cache_name($uid, $method));
 	}
 

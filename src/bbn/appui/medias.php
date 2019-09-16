@@ -13,7 +13,6 @@ class medias extends bbn\models\cls\db
     bbn\models\tts\references,
     bbn\models\tts\dbconfig;
 
-
   protected static
     /** @var array */
     $_defaults = [

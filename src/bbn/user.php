@@ -1223,14 +1223,19 @@ class user extends models\cls\basic
     return false;
   }
 
-  public function add_to_tmp(string $file, string $name = null):? string
+  public function add_to_tmp(string $file, string $name = null, $move = true):? string
   {
     if ( $this->auth ){
       $fs = new file\system();
-      $path = $this->get_tmp_dir().time().'/';
+      $path = $this->get_tmp_dir().microtime(true).'/';
       if ( $fs->is_file($file) && $fs->create_path($path) ){
         $dest = $path.($name ?: basename($file));
-        if ( $fs->move($file, dirname($dest)) && $fs->rename(dirname($dest).'/'.basename($file), basename($dest))){
+        if ( $move ){
+          if ( $fs->move($file, dirname($dest)) && $fs->rename(dirname($dest).'/'.basename($file), basename($dest))){
+            return $dest;
+          }
+        }
+        else if ( $fs->copy($file, $dest) ){
           return $dest;
         }
       }

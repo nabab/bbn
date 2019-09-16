@@ -209,7 +209,7 @@ class project extends bbn\models\cls\db {
     /** @var string $constant The first part of the path must be a constant */
     $constant = $bits[0];
     /** @var string $path The path that will be returned */
-    $path = '';  
+    $path = '';      
     if ( \defined($constant) ){
       if ( $constant === 'BBN_APP_PATH' ){
         if ( empty($bits[1]) ){
@@ -220,13 +220,11 @@ class project extends bbn\models\cls\db {
         }        
       }
       else{
-        $path .= constant($constant);      
-      }      
-      array_shift($bits);      
+        $path = constant($constant);      
+      }
+      array_shift($bits);
     }
-    
-    $path .= implode('/', $bits);
-   
+    $path .= implode('/', $bits);    
     return $path;
   }
 
@@ -239,10 +237,10 @@ class project extends bbn\models\cls\db {
   public function get_root_path($repository){
     if ( \is_string($repository) ){
       $repository = $this->repository($repository);
-    }
+    }    
     if ( !empty($repository) && !empty($repository['bbn_path']) ){
       $repository_path = !empty($repository['path']) ? '/' . $repository['path'] : '';
-      $path = self::decipher_path($repository['bbn_path'] . $repository_path) . '/';
+      $path = self::decipher_path($repository['bbn_path'] . $repository_path) . '/';     
       return \bbn\str::parse_path($path);
     }
     return false;
@@ -254,7 +252,7 @@ class project extends bbn\models\cls\db {
    * @param string $code The repository's name (code)
    * @return array|bool
    */
-  public function repository(string $code){
+  public function repository(string $code){    
     return $this->repositories($code);
   }
 
@@ -268,8 +266,9 @@ class project extends bbn\models\cls\db {
     $all = $this->options->full_soptions($this->options->from_code('PATHS', 'ide', 'appui'));      
     $cats = [];
     $r = [];
+   
     foreach ( $all as $a ){
-      if ( \defined($a['bbn_path']) ){
+      if ( isset($a['bbn_path']) && \defined($a['bbn_path']) ){
         $k = $a['bbn_path'] . '/' . ($a['code'] === '/' ? '' : $a['code']);
         if ( !isset($cats[$a['id_alias']]) ){
           unset($a['alias']['cfg']);
@@ -291,7 +290,7 @@ class project extends bbn\models\cls\db {
     }
     if ( $code ){
       return isset($r[$code]) ? $r[$code] : false;
-    }
+    }    
     return $r;
   }
 
@@ -334,8 +333,7 @@ class project extends bbn\models\cls\db {
         (strpos($file, $root) === 0)
       ){
 				$res = $i;
-        $bits = explode('/', substr($file, \strlen($root)));
-
+        $bits = explode('/', substr($file, \strlen($root)));        
         // MVC
         if ( !empty($d['tabs']) ){
           $tab_path = array_shift($bits);
@@ -364,10 +362,10 @@ class project extends bbn\models\cls\db {
     return false;
   }
 
-    public function real_to_url_i18n(string $file){
-
+  public function real_to_url_i18n(string $file){
+   
     foreach ( $this->repositories() as $i => $d ){
-
+      
       if (
         // Repository's root path
         ($root = $this->get_root_path($d)) &&
@@ -375,22 +373,18 @@ class project extends bbn\models\cls\db {
       ){
 				$res = $i;
 
-        if ( !empty( ( $parent_code = $this->options->code($d['id_parent']) )) ){
-
+        if ( !empty( ( $parent_code = $this->options->code($d['id_parent']) )) ){         
 					$var = str_replace($root, '', $file);
 				  $ext = \bbn\str::file_ext($var);
-
-
 					if ( ( $parent_code === 'BBN_APP_PATH' ) ){
-								//eccezione per apst app che punta ancora su mvc
+            $parent_code = \bbn\mvc::get_app_path();						
 						if ( strpos($res, 'mvc/') ){
 							$res = str_replace('mvc/', '', $res );
 						}
 						else if ( strpos($res, 'plugins/') ){
 							$res = $parent_code.'/';
 						}
-
-						$var = str_replace(constant($parent_code), '', $file);
+						$var = str_replace($parent_code, '', $file);
 					}
 
 					$bits = explode('/', $var);
