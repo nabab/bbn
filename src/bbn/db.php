@@ -1272,15 +1272,17 @@ class db extends \PDO implements db\actions, db\api, db\engines
           strpos($col, '->"$.')  ||
           strpos($col, "->'$.") ||
           strpos($col, '->>"$.')  ||
-          strpos($col, "->>'$.")
+          strpos($col, "->>'$.") ||
+          // String as value
+          preg_match('/^[\\\'\"]{1}[^\\\'\"]*[\\\'\"]{1}$/', $col)
         ){
           $res['available_fields'][$col] = false;
         }
         if ( \is_string($idx) ){
           if ( !isset($res['available_fields'][$col]) ){
             //$this->log($res);
-            $this->error(json_encode($res['available_fields'], JSON_PRETTY_PRINT));
             $this->error("Impossible to find the column $col");
+            $this->error(json_encode($res['available_fields'], JSON_PRETTY_PRINT));
             return null;
           }
           $res['available_fields'][$idx] = $res['available_fields'][$col];
@@ -1303,6 +1305,9 @@ class db extends \PDO implements db\actions, db\api, db\engines
             }
           }
           //\bbn\x::log($res, 'sql');
+          if ( $res['count'] ){
+            $res['fields'] = ['COUNT(*)'];
+          }
           if ( $res['select_st'] = $this->language->get_select($res) ){
             $res['sql'] = $res['select_st'];
           }
@@ -1336,10 +1341,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
 
       if ( !empty($res['sql']) ){
         $res['sql'] .= $res['join_st'].$res['where_st'].$res['group_st'].$res['having_st'];
-        if ( !empty($res['count']) ){
-          $res['sql'] = 'SELECT COUNT(*) FROM ('.$res['sql'].') AS my_count_table';
-        }
-        else {
+        if ( empty($res['count']) ){
           $res['sql'] .= $res['order_st'].$res['limit_st'];
         }
         $res['statement_hash'] = $this->_make_hash($res['sql']);
@@ -2688,6 +2690,57 @@ class db extends \PDO implements db\actions, db\api, db\engines
       $this->log('ERROR IN RSELECT_ONE', $r);
     }
     return false;
+  }
+
+  public function select_union(array $union, array $fields = [], array $where = [], array $order = [], int $start = 0):? array
+  {
+    $cfgs = [];
+    $sql = 'SELECT ';
+    if ( empty($fields) ){
+      $sql .= '* ';
+    }
+    else{
+      foreach ( $fields as $i => $f ){
+        if ( $i ){
+          $sql .= ', ';
+        }
+        $sql .= $this->csn($f, true);
+      }
+    }
+    $sql .= ' FROM (('.PHP_EOL;
+    $vals = [];
+    $i = 0;
+    foreach ( $union as $u ){
+      $cfg = $this->process_cfg($this->_add_kind([$u]));
+      if ( $cfg && $cfg['sql'] ){
+        /** @todo From here needs to analyze the where array to the light of the tables' config */
+        if ( !empty($where) ){
+          if ( empty($fields) ){
+            $fields = $cfg['fields'];
+          }
+          foreach ( $fields as $k => $f ){
+            if ( isset($cfg['available_fields'][$f]) ){
+              if ( $cfg['available_fields'][$f] && ($t = $cfg['models'][$cfg['available_fields'][$f]])
+              ){
+                die(var_dump($t['fields'][$cfg['fields'][$f] ?? $this->csn($f)]));
+              }
+            }
+          }
+        }
+        if ( $i ){
+          $sql .= PHP_EOL.') UNION ('.PHP_EOL;
+        }
+        $sql .= $cfg['sql'];
+        foreach ( $cfg['values'] as $v ){
+          $vals[] = $v;
+        }
+        $i++;
+      }
+    }
+    $sql .= PHP_EOL.')) AS t';
+    return $this->get_rows($sql, ...$vals);
+    //echo nl2br($sql);
+    return [];
   }
 
   /**

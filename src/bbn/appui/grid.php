@@ -244,11 +244,13 @@ class grid extends bbn\models\cls\cache
     if ( $this->num && !$force ){
       return $this->num;
     }
+    /*
     if ( !$force && ($cache = $this->get_cache()) ){
       $this->count_time = $cache['time'];
       $this->num = $cache['num'];
       return $this->num;
     }
+    */
     if ( $this->count ){
       $this->chrono->start();
       if ( is_string($this->count) ){

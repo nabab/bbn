@@ -617,12 +617,14 @@ class system extends bbn\models\cls\basic
   /**
    * @param $file
    */
-  private function _download($file): void
+  private function _download($file): String
   {
+    
     if ( $this->mode === 'nextcloud' ) {
-      $this->obj->download($file);
+      return $this->obj->download($file);
     }
     else {
+      
       if ( ($f = $this->get_file($file)) && $f->check() ){
         $f->download();
       }

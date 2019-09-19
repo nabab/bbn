@@ -159,15 +159,13 @@ class notes extends bbn\models\cls\db
 
   public function latest($id){
     $cf =& $this->class_cfg;
-    return $this->db->get_var("
-      SELECT MAX({$cf['arch']['versions']['version']})
-      FROM {$cf['tables']['versions']}
-      WHERE {$cf['arch']['versions']['id_note']} = ?",
-      hex2bin($id)
-    );
+    return $this->db->select_one($cf['tables']['versions'], 'MAX('.$cf['arch']['versions']['version'].')', [
+      $cf['arch']['versions']['id_note'] => $id
+    ]);
   }
 
-  public function get($id, $version = false, $simple = false){
+  public function get(string $id, int $version = null, bool $simple = false):? array
+  {
     $cf =& $this->class_cfg;
     if ( !\is_int($version) ){
       $version = $this->latest($id);
@@ -195,11 +193,13 @@ class notes extends bbn\models\cls\db
           }
         }
       }
+      return $res;
     }
-    return $res;
+    return null;
   }
 
-  public function get_full($id, $version = false){
+  public function get_full(string $id, int $version = null):? array
+  {
     $cf =& $this->class_cfg;
     if ( !\is_int($version) ){
       $version = $this->latest($id);
@@ -242,7 +242,7 @@ class notes extends bbn\models\cls\db
       $res['medias'] = $this->get_medias($id, $version);
       return $res;
     }
-    return false;
+    return null;
   }
 
   public function get_by_type($type = NULL, $id_user = false, $limit = 0, $start = 0){
@@ -410,13 +410,7 @@ class notes extends bbn\models\cls\db
           $cf['arch']['medias']['private'] => $private ? 1 : 0
         ]);
         $id = $this->db->last_id();
-        $this->db->insert($cf['tables']['nmedias'], [
-          $cf['arch']['nmedias']['id_note'] => $id_note,
-          $cf['arch']['nmedias']['version'] => $version,
-          $cf['arch']['nmedias']['id_media'] => $id,
-          $cf['arch']['nmedias']['id_user'] => $usr->get_id(),
-          $cf['arch']['nmedias']['creation'] => date('Y-m-d H:i:s')
-        ]);
+        $this->add_media_to_note($id, $id_note, $version);
         if ( isset($file) ){
           rename(
             $name,
@@ -427,6 +421,21 @@ class notes extends bbn\models\cls\db
       }
     }
     return false;
+  }
+
+  public function add_media_to_note(string $id_media, string $id_note, int $version):? int
+  {
+    if ( $usr = bbn\user::get_instance() ){
+      $cf =& $this->class_cfg;
+      return $this->db->insert($cf['tables']['nmedias'], [
+        $cf['arch']['nmedias']['id_note'] => $id_note,
+        $cf['arch']['nmedias']['version'] => $version,
+        $cf['arch']['nmedias']['id_media'] => $id_media,
+        $cf['arch']['nmedias']['id_user'] => $usr->get_id(),
+        $cf['arch']['nmedias']['creation'] => date('Y-m-d H:i:s')
+      ]);
+    }
+    return null;
   }
 
   public function remove_media(string $id_media, string $id_note, $version = false){
@@ -455,7 +464,8 @@ class notes extends bbn\models\cls\db
       ]);
   }
 
-	public function get_medias(string $id_note, $version = false, $type = false){
+	public function get_medias(string $id_note, $version = false, $type = false): array
+  {
 		$cf =& $this->class_cfg;
 		if (
 			$this->exists($id_note) &&
@@ -618,6 +628,20 @@ class notes extends bbn\models\cls\db
       }
     }
     return false;
+  }
+
+  public function copy(string $id, int $version = null, bool $private = null):? string
+  {
+    if ( $note = $this->get_full($id, $version) ){
+      if ( $private === null ){
+        $private = $note['private'];
+      }
+      $id_note = $this->insert($note['title'], $note['content'], $note['type'], $private);
+      foreach ( $note['medias'] as $m ){
+        $this->add_media_to_note($m['id'], $id, $note['version']);
+      }
+      return $id_note;
+    }
   }
 
 }

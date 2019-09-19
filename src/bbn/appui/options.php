@@ -870,6 +870,7 @@ class options extends bbn\models\cls\db
   public function text_value_options($id = null, string $text = 'text', string $value = 'value'): ?array
   {
     $res = [];
+    $id = $this->from_code(...func_get_args());
     if ( $cfg = $this->get_cfg($id) ){
       if ( !empty($cfg['show_code']) || !empty($cfg['schema']) ){
         $opts = $this->full_options($id);
@@ -880,8 +881,8 @@ class options extends bbn\models\cls\db
       $i = 0;
       foreach ( $opts as $k => $o ){
         $res[$i] = [
-          $text => \is_array($o) ? $o['text'] : $o,
-          $value => \is_array($o) ? $o['id'] : $k
+          'text' => \is_array($o) ? $o['text'] : $o,
+          'value' => \is_array($o) ? $o['id'] : $k
         ];
         if ( !empty($cfg['show_code']) ){
           $res[$i]['code'] = $o['code'];
@@ -891,7 +892,7 @@ class options extends bbn\models\cls\db
             $cfg['schema'] = json_decode($cfg['schema'], 1);
           }
           foreach ( $cfg['schema'] as $s ){
-            if ( !empty($s['field']) && ($s['field'] !== $text) && ($s['field'] !== $value) && (empty($cfg['show_code']) || ($s['field'] !== 'code')) ){
+            if ( !empty($s['field']) ){
               $res[$i][$s['field']] = $o[$s['field']] ?? null;
             }
           }

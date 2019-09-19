@@ -859,18 +859,6 @@ class controller implements api{
     return $this->dir;
   }
 
-  public function get_routes(){
-    return $this->mvc->get_routes();
-  }
-
-  public function get_aliases(){
-    return $this->mvc->get_routes('alias');
-  }
-
-  public function get_route($path, $mode, $root = null){
-    return $this->mvc->get_route($path, $mode, $root);
-  }
-
   public function get_prepath(){
     if ( $this->exists() ){
       return $this->mvc->get_prepath();

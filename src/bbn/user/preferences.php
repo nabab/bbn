@@ -1177,7 +1177,7 @@ class preferences extends bbn\models\cls\db
    */
   public function delete_bits(string $id_user_option): ?int
   {
-    if ( \bbn\str::is_uid($id) ){
+    if ( \bbn\str::is_uid($id_user_option) ){
       $i = 0;
       foreach ( $this->get_bits($id_user_option) as $b ){
         $i += (int)$this->delete_bit($b['id']);
@@ -1330,21 +1330,17 @@ class preferences extends bbn\models\cls\db
     return [];
   }
 
-  public function get_bits_order(string $id_user_option)
+  /**
+   * 
+   */
+  public function get_bits_order(string $id_user_option): ?array
   {
+    $tab1 =$this->class_cfg['tables']['user_options'];
+    $tab2 = $this->class_cfg['tables']['user_options_bits'];
     $cfg = $this->class_cfg['arch']['user_options'];
     $cfg2 = $this->class_cfg['arch']['user_options_bits'];
-    if ( $this->db->select_one(
-      $this->class_cfg['tables']['user_options'],
-      $cfg['id_user'],
-      ['id' => $id_user_option]
-    ) === $this->id_user ){
-      return $this->db->get_column_values(
-        $this->class_cfg['tables']['user_options_bits'],
-        $cfg2['id_option'],
-        [$cfg2['id_user_option'] => $id_user_option],
-        [$cfg2['num'] => 'ASC']
-      );
+    if ( $this->db->select_one($tab1, $cfg['id_user'], ['id' => $id_user_option]) === $this->id_user ){
+      return $this->db->get_column_values($tab2, $cfg2['id_option'], [$cfg2['id_user_option'] => $id_user_option], [$cfg2['num'] => 'ASC']);
     }
     return null;
   }

@@ -79,6 +79,18 @@ trait common {
     return $this->mvc->get_cookie();
   }
 
+  public function get_routes(){
+    return $this->mvc->get_routes();
+  }
+
+  public function get_aliases(){
+    return $this->mvc->get_routes('alias');
+  }
+
+  public function get_route($path, $mode, $root = null){
+    return $this->mvc->get_route($path, $mode, $root);
+  }
+
   public function app_path($raw = false): string
   {
     return \bbn\mvc::get_app_path($raw);

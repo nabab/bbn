@@ -228,9 +228,10 @@ class nextcloud extends bbn\models\cls\basic{
    * Download the given file
    * @param String $file
    */
-  public function download($file)
+  public function download(String $file):String
   {
     if ( $this->exists($file) && $this->is_file($file) ){
+      $dest = '';
       //gets the content of the file
       $res = $this->obj->request('GET', $this->get_real_path($file));
       if ( !empty($res) && !empty($res['body']) ){
@@ -240,13 +241,14 @@ class nextcloud extends bbn\models\cls\basic{
         if ( $tmp = file_put_contents($dest, $res['body']) ){
           // instantiates the new file to the class \bbn\file
           //$file_istance = new \bbn\file($dest);
-          return $dest;
+          $dest = \bbn\mvc::get_tmp_path().basename($file);;
           //return the content of the tmp file
           //$file_istance->download();
           /* deletes the tmp file
           unlink($dest);*/
         } 
       }
+      return $dest;
     }
   }
   

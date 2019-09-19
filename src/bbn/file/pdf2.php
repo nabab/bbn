@@ -118,6 +118,13 @@ EOF
     else{
       $this->cfg = self::$default_cfg;
     }
+    if (
+      empty($this->cfg['tempDir']) &&
+      ($tmp = bbn\mvc::get_tmp_path()) &&
+      ($path = bbn\file\dir::create_path($tmp))
+    ){
+      $this->cfg['tempDir'] = $path;
+    }
     return $this;
   }
  
