@@ -141,11 +141,11 @@ class router
   private function _get_alt_root(string $mode, string $path = null): ?string
   {
     if (($path || $this->alt_root) &&
-        self::is_mode($mode)) &&
+        self::is_mode($mode) &&
         isset($this->_routes['root'][$path ?: $this->alt_root])
     ) {
-      $fpath = $this->_routes['root'][$path ?: $this->alt_root]['path'] . '/src/mvc/' . ($mode === 'dom' ? 'public' : $mode;
-      $res = bbn\str::parse_path($fpath).'/');
+      $fpath = $this->_routes['root'][$path ?: $this->alt_root]['path'] . '/src/mvc/' . ($mode === 'dom' ? 'public' : $mode);
+      $res = bbn\str::parse_path($fpath).'/';
       return $res;
     }
 
