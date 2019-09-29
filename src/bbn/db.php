@@ -2559,8 +2559,9 @@ class db extends \PDO implements db\actions, db\api, db\engines
   {
     $args = $this->_add_kind($this->_set_limit_1(\func_get_args()));
     if ( $r = $this->_exec(...$args) ){
-      if ( is_int($r) ){
-        \bbn\x::log($args);
+      if ( !is_object($r) ){
+        \bbn\x::log([$args, $this->process_cfg($args)]);
+        die(var_dump($args));
       }
       return $r->get_object();
     }
