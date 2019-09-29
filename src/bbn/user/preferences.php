@@ -869,13 +869,13 @@ class preferences extends bbn\models\cls\db
             'logic' => 'OR',
             'conditions' => [
               [
-                'field' => $farch['id_user'],
+                'field' => $this->fields['id_user'],
                 'value' => $this->id_user
               ], [
-                'field' => $farch['id_group'],
+                'field' => $this->fields['id_group'],
                 'value' => $this->id_group
               ], [
-                'field' => $farch['public'],
+                'field' => $this->fields['public'],
                 'value' => 1
               ]
             ]
@@ -1223,6 +1223,9 @@ class preferences extends bbn\models\cls\db
         }
         $cfg[$c['cfg']] = json_encode($cfg[$c['cfg']]);
       }
+      if ( !\bbn\str::is_json($cfg[$c['cfg']]) ){
+        $cfg[$c['cfg']] = json_encode($cfg[$c['cfg']]);
+      }      
       return $this->db->update($this->class_cfg['tables']['user_options_bits'], [
         $c['id_parent'] => $cfg[$c['id_parent']] ?? NULL,
         $c['id_option'] => $cfg[$c['id_option']] ?? NULL,
@@ -1281,6 +1284,37 @@ class preferences extends bbn\models\cls\db
     }
     if (
       \bbn\str::is_uid($id_usr_opt) &&
+      ($bits = $this->db->rselect_all($this->class_cfg['tables']['user_options_bits'], [], $where, [$c['num'] => 'ASC']))
+    ){
+      if ( !empty($with_config) ){
+        return array_map(function($b) use($t){
+          return $t->explode_bit_cfg($b);
+        }, $bits);
+      }
+      return $bits;
+    }
+    return [];
+  }
+
+  /**
+   * Returns the bits list of an option's id
+   *
+   * @param string $id The id_options
+   * @param null|string $id_parent The bits'parent ID
+   * @return array
+   */
+  public function get_bits_by_id_option(string $id_opt, $id_parent = false, bool $with_config = true): array
+  {
+    $c = $this->class_cfg['arch']['user_options_bits'];
+    $t = $this;
+    $where = [
+      $c['id_option'] => $id_opt
+    ];
+    if ( is_null($id_parent) || \bbn\str::is_uid($id_parent) ){
+      $where[$c['id_parent']] = $id_parent;
+    }
+    if (
+      \bbn\str::is_uid($id_opt) &&
       ($bits = $this->db->rselect_all($this->class_cfg['tables']['user_options_bits'], [], $where, [$c['num'] => 'ASC']))
     ){
       if ( !empty($with_config) ){

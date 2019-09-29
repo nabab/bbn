@@ -180,6 +180,12 @@ class mailings extends bbn\models\cls\db
     }
   }
 
+  /**
+   * Adds a new mailing
+   *
+   * @param [Object] $cfg
+   * @return void
+   */
   public function add($cfg){
     $notes = $this->_note();
     if (
@@ -213,6 +219,12 @@ class mailings extends bbn\models\cls\db
     return null;
   }
 
+  /**
+   * Deletes the mailing and relative emails
+   *
+   * @param string $id 
+   * @return integer|null
+   */
   public function delete(string $id):? int
   {
     // We do not cancel mailings which have been sent
@@ -223,31 +235,71 @@ class mailings extends bbn\models\cls\db
       return 0;
     }
     $success = null;
-    
-    $id_note = $this->get_mailing($id)['id_note'];
-    $notes = $this->_note();
-    
-    if ( !empty($id_note) && $this->db->delete("bbn_emailings", ['id' => $id]) ){
-     
-      $emails = $this->db->rselect_all('bbn_emails',[], ['id_mailing' => $id] );
-      if ( !empty($emails) ){
-        foreach ( $emails as $e ){
-          if ( ($e['status'] === 'ready') || ($e['status'] === 'cancelled') ){
-            $this->db->delete('bbn_emails', ['id' => $e['id']]);
-          }
+    $mailing = $this->get_mailing($id);
+    if ( !empty($mailing['id_note']) ){
+      $notes = $this->_note();
+      //if the notes has media removes media before to remove the note
+      if ( ($medias = $notes->get_medias($mailing['id_note']) )){
+        foreach ( $medias as $media ){
+          $notes->remove_media($media['id'],$mailing['id_note']);
         }
       }
+      //removes the emails ready or cancelled relative to this id_mailing
+      $this->delete_emails($id);
+
+      //update the row giving id_note and version null
+      $this->db->update("bbn_emailings", [
+        'id_note' => null, 
+        'version' => null
+      ], [ 'id' => $id ]);
       
-      $success = $notes->remove($id_note);
+      //deletes the row
+      $success = $this->db->delete("bbn_emailings", ['id' => $id]);
+      //removes the note -- without the second argument true I always have a db error, in this way the note is not deleted but passed on active 0
+      $notes->remove($mailing['id_note']);
+      
     }
     return $success;
   }
 
+  /**
+   * Deletes a sent mailing. If $history is true completely delete the row from history.
+   *
+   * @param string $id
+   * @param boolean $history
+   * @return integer|null
+   */
   public function delete_sent(string $id, $history = false):? int
   {
-
+    $success = false;
+    if ( $mailing = $this->get_mailing($id) ){
+      if ( !empty($mailing['id_note']) && ($mailing['state'] === 'sent') ){
+        if ( !empty($history) ){
+          $notes = $this->_note();
+          if ( ($medias = $notes->get_medias($mailing['id_note']) )){
+            foreach ( $medias as $media ){
+              $notes->remove_media($media['id'],$mailing['id_note']);
+            }
+          }
+          $notes->remove($mailing['id_note']);  
+          $success = $this->db->delete('bbn_$_uids', ['bbn_uid' => $id]);
+        }
+        else {
+          $success = $this->db->delete('bbn_emailings', ['id' => $id]);
+        }
+      }
+      
+    }
+    
+    return $success;
   }
 
+  /**
+   * Undocumented function
+   *
+   * @param string $id_email
+   * @return integer|null
+   */
   public function delete_email(string $id_email):? int
   {
     if ( !empty($id_email) ){
@@ -255,23 +307,85 @@ class mailings extends bbn\models\cls\db
     }
   }
 
-  public function delete_emails(string $id_mailing):? int
+  /**
+   * Deletes all the emails ready or cancelled relative to the given id_mailing
+   *
+   * @param string $id_mailing
+   * @return integer|null
+   */
+  public function delete_all_emails(string $id_mailing):? int
   {
-
+    $success = null;
+    $emails = $this->db->rselect_all('bbn_emails', [], ['id_mailing' => $id_mailing]);
+    if ( !empty($emails) ){
+      $n = 0;
+      foreach ( $emails as $e ){
+        if ( ($e['status'] === 'ready') || ($e['status'] === 'cancelled') ){
+          if (  $this->db->delete('bbn_emails', ['id' => $e['id']]) ){
+            $n++;
+          }
+        }
+      }
+      $success = $n;
+    }
+    return $success;
   }
 
+
+  /**
+   * Changes the status of the given id email
+   *
+   * @param string $id_email
+   * @param string $state
+   * @return boolean
+   */
   public function change_email_status(string $id_email, string $state): bool
   {
     return $this->db->update('bbn_emails', ['status' => $state], [
-    'id' => $id_email,
-   ]);
+      'id' => $id_email,
+    ]);
   }
 
-  public function change_emails_status(string $id_mailing, string $state): bool
+  /**
+   * Returns the array containing all the emails relative to an id_mailing
+   *
+   * @param string $id_mailing
+   * @return void
+   */
+  public function get_emails($id_mailing):? array
   {
-
+    return $this->db->rselect_all('bbn_emails', [],[
+      'id_mailing' => $id_mailing
+    ]);
   }
 
+  /**
+   * Changes the status of the emails relative to the given id_mailing
+   *
+   * @param string $id_mailing
+   * @param string $status
+   * @return boolean
+   */
+  public function change_emails_status(string $id_mailing, string $status): bool
+  { 
+    $count = 0;
+    if ( ($emails = $this->get_emails($id_mailing)) ){
+      foreach ( $emails as $e ){
+        //here I've to check if ready or cancelled??
+        if ( $this->change_email_status($e['id'], $status) ){
+          $count ++;
+        };
+      }
+      return $count;
+    }
+  } 
+
+  /**
+   * Copies the email 
+   *
+   * @param string $id
+   * @return string|null
+   */
   public function copy(string $id):? string
   {
     if ( $row = $this->get_mailing($id) ){

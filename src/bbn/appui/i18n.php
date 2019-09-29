@@ -67,7 +67,8 @@ class i18n extends bbn\models\cls\cache
     if ( $tmp = \Gettext\Translations::fromJsCodeString($js, [
       'functions' => [
         '_' => 'gettext',
-        'bbn._' => 'gettext'
+        'bbn._' => 'gettext',
+        '${bbn._' => 'gettext',
       ],
       'file' => $file
       ]) ){

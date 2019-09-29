@@ -352,6 +352,7 @@ class mvc implements mvc\api{
   private function register_plugin(array $plugin){
     if ( isset($plugin['path'], $plugin['url'], $plugin['name']) ){
       $this->plugins[$plugin['name']] = [
+        'name' => $plugin['name'],
         'url' => $plugin['url'],
         'path' => $plugin['path']
       ];
@@ -592,7 +593,39 @@ class mvc implements mvc\api{
     return '';
   }
 
+  public function get_plugin_from_component(string $name)
+  {
+    return $this->router->get_plugin_from_component($name);
+  }
 
+  public function route_component(string $name)
+  {
+    return $this->router->route_component($name);
+  }
+
+  public function custom_plugin_view(string $path, string $mode, array $data, string $plugin): ?string
+  {
+    if ( $plugin && ($route = $this->router->route_custom_plugin($path, $mode, $plugin)) ){
+      $view = new mvc\view($route);
+      if ( $view->check() ){
+        return \is_array($data) ? $view->get($data) : $view->get();
+      }
+      return '';
+    }
+    return null;
+  }
+
+  public function custom_plugin_model(string $path, array $data, mvc\controller $ctrl, string $plugin, int $ttl = 0): ?array
+  {
+    if ( $plugin && ($route = $this->router->route_custom_plugin($path, 'model', $plugin)) ){
+      $model = new mvc\model($this->db, $route, $ctrl, $this);
+      if ( $ttl ){
+        return $model->get_from_cache($data, '', $ttl);
+      }
+      return $model->get($data);
+    }
+    return null;
+  }
 
   /**
    * This will get a view.
@@ -604,27 +637,7 @@ class mvc implements mvc\api{
    * @return string|false
    */
   public function get_plugin_view(string $path, string $mode, array $data, string $plugin){
-    if ( !router::is_mode($mode) ){
-      die("Incorrect mode $path $mode");
-    }
-    $route = false;
-    if ( $name = $this->plugin_name($plugin) ){
-      $bits = x::split($path, DIRECTORY_SEPARATOR);
-      // The plugin model can be in another plugin
-      if ( (count($bits) > 1) && ($root = $this->plugin_path($bits[0])) ){
-        $route = $this->router->route(substr($path, strlen($bits[0])+1), $mode, $root.'plugins/'.$name.'/'.$mode.'/');
-      }
-    }
-    if ( !$route ){
-      $route = $this->router->route($path, $mode, self::get_app_path().'plugins/'.$name.'/'.$mode.'/');
-    }
-    if ( $route ){
-      $view = new mvc\view($route);
-      if ( $view->check() ){
-        return \is_array($data) ? $view->get($data) : $view->get();
-      }
-      return '';
-    }
+    return $this->custom_plugin_view($path, $mode, $data, $this->plugin_name($plugin));
   }
 
   /**
@@ -643,25 +656,9 @@ class mvc implements mvc\api{
   }
 
   public function get_plugin_model(string $path, array $data, mvc\controller $ctrl, string $plugin, int $ttl = 0){
-    $route = false;
-    if ( $name = $this->plugin_name($plugin) ){
-      $bits = x::split($path, DIRECTORY_SEPARATOR);
-      // The plugin model can be in another plugin
-      if ( (count($bits) > 1) && ($root = $this->plugin_path($bits[0])) ){
-        $route = $this->router->route($path, 'model', $root.'plugins/'.$name.'/model/');
-      }
-    }
-    if ( !$route ){
-      $route = $this->router->route($path, 'model', self::get_app_path().'plugins/'.$name.'/model/');
-    }
-    if ( $route ){
-      $model = new mvc\model($this->db, $route, $ctrl, $this);
-      if ( $ttl ){
-        return $model->get_from_cache($data, '', $ttl);
-      }
-      return $model->get($data);
-    }
+    return $this->custom_plugin_model($path, $data, $ctrl, $this->plugin_name($plugin), $ttl);
   }
+
   /**
    * This will get the model as it is in cache if any and otherwise will save it in cache then return it
    *

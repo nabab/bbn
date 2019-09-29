@@ -68,6 +68,7 @@ class nextcloud extends bbn\models\cls\basic{
   public function delete($path)
   {
     $success = false;
+    //die(var_dump($path));
     if ( !empty($path) && $this->exists($path) && !empty($this->obj->request('DELETE', $path)) ){
       $success = true;
     }
@@ -82,7 +83,6 @@ class nextcloud extends bbn\models\cls\basic{
    */
   public function exists($path)
   {
-    
     try {
       if ( $this->obj->propFind($path, [
         '{DAV:}resourcetype',
@@ -124,6 +124,7 @@ class nextcloud extends bbn\models\cls\basic{
    */
   public function copy(string $source, string $dest): bool
   {
+    
     if ( $this->exists($source) ){
       
       if ( !empty($dest) ){
@@ -386,6 +387,28 @@ class nextcloud extends bbn\models\cls\basic{
     $type = $including_dirs ? 'both' : 'file';
     //die(var_dump($path, $filter , $type, $hidden, $detailed))//die(var_dump($this->get_items('.', 'both', true, 't')));
     return $this->get_items($path, $filter ?: $type, $hidden, $detailed);
+  }
+
+  public function upload(array $files, string $path): bool
+  {
+    $success = false;
+    if ( !empty($files) && !empty($path) ){
+      if ( strpos($path, '.') === 0){
+        $path = '';
+      }
+      foreach ( $files as $f ){
+        if ( is_file($f['tmp_name']) && ($content = file_get_contents($f['tmp_name'])) ){
+          // wanted to put '%' instead of ' ' in the filename but not accepted
+          $full_name =  $path . (($path !== '') ? '/' : '' ) . str_replace(' ', '_',$f['name']);
+          if (!$this->exists($full_name) ){
+            if ( $this->obj->request('PUT', $full_name, $content) ){
+              return $success = true;
+            }
+          }
+        }
+      }
+    }
+    return $success;
   }
 
 }

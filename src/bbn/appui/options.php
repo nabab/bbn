@@ -439,7 +439,7 @@ class options extends bbn\models\cls\db
       if ( $num === 1 ){
         return $args[0];
       }
-      // If there are extra arguments with the ID we check that they correspond to its parent
+      // If there are extra arguments with the ID we check that they correspond to its parent (that would be an extra check)
       if ( $this->get_id_parent($args[0]) === $this->from_code(...\array_slice($args, 1)) ){
         return $args[0];
       }
@@ -458,48 +458,39 @@ class options extends bbn\models\cls\db
       return null;
     }
     // So the target has always the same name
-    $local_cache_name = implode('-', $args);
-
+    // This is the full name with all the arguments plus the root
+    // eg ['c1', 'c2', 'c3', UID]
+    // UID-c3-c4-c5
+    // UID-c3-c4
+    // UID-c3
     // Using the code(s) as argument(s) from now
     $id_parent = array_pop($args);
     $true_code = array_pop($args);
-    $cache_name = 'get_code_'.base64_encode($true_code);
-    $local_cache_name = $id_parent.'-'.$cache_name;
-    if ( !empty($args) ){
-      $cache_name2 = $cache_name.'-'.implode('-', $args);
-      $local_cache_name2 = $id_parent.'-'.$cache_name2;
-      if ( $tmp = $this->_get_local_cache($local_cache_name2) ){
-        return $tmp;
-      }
-      if ( $tmp = $this->cache_get($id_parent, $cache_name2) ){
-        $this->_set_local_cache($local_cache_name2, $tmp);
-        return $tmp;
-      }
-    }
-    if (
-      ($tmp = $this->_get_local_cache($local_cache_name)) ||
-      ($tmp = $this->cache_get($id_parent, $cache_name))
-    ){
+    $enc_code = base64_encode($true_code);
+    // This is the cache name 
+    // get_code_(base64(first_code))
+    $cache_name = 'get_code_'.$enc_code;
+    // UID-get_code_(base64(first_code))
+    if ( ($tmp = $this->cache_get($id_parent, $cache_name)) ){
       if ( !count($args) ){
         return $tmp;
       }
+      $args[] = $tmp;
+      return $this->from_code(...$args);
     }
+
     $c =& $this->class_cfg;
     /** @var int|false $tmp */
     if ( !$tmp && ($tmp = $this->db->select_one($c['table'], $c['arch']['options']['id'], [
         $c['arch']['options']['id_parent'] => $id_parent,
         $c['arch']['options']['code'] => $true_code
       ])) ){
-      $this->_set_local_cache($local_cache_name, $tmp);
       $this->cache_set($id_parent, $cache_name, $tmp);
     }
     if ( $tmp ){
       if ( \count($args) ){
         $args[] = $tmp;
-        if ( $tmp = $this->from_code($args) ){
-          $this->_set_local_cache($local_cache_name2, $tmp);
-          $this->cache_set($id_parent, $cache_name2, $tmp);
-        }
+        return $this->from_code(...$args);
       }
       return $tmp;
 

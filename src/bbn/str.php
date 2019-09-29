@@ -1014,11 +1014,10 @@ class str
     $args = \func_get_args();
     // Each argument must be a string starting with a letter, and having only one character made of letters, numbers and underscores
     foreach ( $args as $a ){
-      $a = self::cast($a);
-      $t = preg_match('#[A-z0-9_]+#',$a,$m);
-      if ( $t !== 1 || $m[0] !== $a ){
+      if ( !is_string($a) ){
         return false;
       }
+      return preg_match('/^[A-z0-9_]+$/', $a);
     }
     return true;
   }

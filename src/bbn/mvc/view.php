@@ -1,6 +1,5 @@
 <?php
-
-/*
+/**
  * Copyright (C) 2014 BBN
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,6 +17,7 @@
  */
 
 namespace bbn\mvc;
+
 use bbn;
 
 class view{
@@ -25,121 +25,132 @@ class view{
   use common;
 
 
-  private
-    /**
-     * The full path to the view file
-     * @var null|string
-     */
-    $file,
-    /**
-     * The local path for the view file
-     * @var null|string
-     */
-    $path,
-    /**
-     * The file's extension
-     * @var null|string
-     */
-    $ext,
-    /**
-     * Included files (only for LESS)
-     * @var null|string
-     */
-    $checkers,
-    /**
-     * A JSON file for adding language to javascript.
-     * @var null|string
-     */
-    $lang_file,
-    /**
-     * The content the view file.
-     * @var null|string
-     */
-		$content;
+  /**
+   * The full path to the view file
+   * @var null|string
+   */
+  private $_file;
+  /**
+   * The local path for the view file
+   * @var null|string
+   */
+  private $_path;
+  /**
+   * The file's extension
+   * @var null|string
+   */
+  private $_ext;
+  /**
+   * Included files (only for LESS)
+   * @var null|string
+   */
+  private $_checkers;
+  /**
+   * true of the view is part of a Vue component
+   * @var bool
+   */
+  private $_component;
+  /**
+   * A JSON file for adding language to javascript.
+   * @var null|string
+   */
+  private $_lang_file;
+  /**
+   * The content the view file.
+   * @var null|string
+   */
+  private $_content;
 
-	/**
-	 * This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).
-	 *
-	 * @param object | string $db The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books/466565 or html/home)</em>
-	 * @param string | object $parent The parent controller</em>
-	 * @return bool
-	 */
-	public function __construct(array $info)
-	{
+  /**
+   * This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).
+   *
+   * @param object | string $db The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books/466565 or html/home)</em>
+   * @param string | object $parent The parent controller</em>
+   * @return bool
+   */
+  public function __construct(array $info)
+  {
     if ( router::is_mode($info['mode']) ){
-      $this->path = $info['path'];
-      $this->ext = $info['ext'];
-      $this->file = $info['file'];
-      $this->checkers = $info['checkers'] ?? [];
-      $this->lang_file = $info['i18n'] ?? null;
-      $this->plugin = $info['plugin'] ?? null;
+      $this->_path = $info['path'];
+      $this->_ext = $info['ext'];
+      $this->_file = $info['file'];
+      $this->_checkers = $info['checkers'] ?? [];
+      $this->_lang_file = $info['i18n'] ?? null;
+      $this->_plugin = $info['plugin'] ?? null;
+      $this->_component = $info['component'] ?? false;
     }
-	}
-
-  public function check(){
-    return !empty($this->file);
   }
 
-	/**
-	 * Processes the controller and checks whether it has been routed or not.
-	 *
-	 * @return bool
-	 */
-	public function get(array $data=null)
-	{
-		if ( $this->check() ){
-			if ( \is_null($this->content) ){
-				$this->content = file_get_contents($this->file);
-			}
-			if ( empty($this->content) ){
-				return '';
-			}
-			if ( $this->checkers ){
-			  $st = '';
-			  foreach ( $this->checkers as $chk ){
-			    $st .= file_get_contents($chk);
-        }
-        $this->content = $st.$this->content;
+  public function check(){
+    return !empty($this->_file);
+  }
+
+  /**
+   * Processes the controller and checks whether it has been routed or not.
+   *
+   * @return bool
+   */
+  public function get(array $data=null)
+  {
+    if ( $this->check() ){
+      if ( \is_null($this->_content) ){
+        $this->_content = file_get_contents($this->_file);
       }
-      switch ( $this->ext ){
+      if ( empty($this->_content) ){
+        return '';
+      }
+      if ( $this->_checkers ){
+        $st = '';
+        foreach ( $this->_checkers as $chk ){
+          $st .= file_get_contents($chk);
+        }
+        $this->_content = $st.$this->_content;
+      }
+      switch ( $this->_ext ){
         case 'js':
           // Language variables inclusions in the javascript files
-          if ( !empty($this->lang_file) ){
-            $tmp = json_decode(file_get_contents($this->lang_file), true);
-            $path = $this->plugin ? substr($this->path, \strlen($this->plugin) + 1) : $this->path;
+          if ( !empty($this->_lang_file) ){
+            $tmp = json_decode(file_get_contents($this->_lang_file), true);
+            $path = $this->_plugin && !$this->_component ? substr($this->_path, \strlen($this->_plugin) + 1) : $this->_path;
             //die(var_dump(count($tmp), 'components/'.$this->path.'/'.$this->path, $tmp));
-            if ( $translations = $tmp['mvc/'.$path] ?? ($tmp['components/'.$path] ?? null) ){
+            $idx = $this->_component ? 'components/' : 'mvc/';
+            //die(var_dump($idx.$path, $this->_path, $this->_plugin, $this->_component, array_keys($tmp)));
+            if ( $translations = ($tmp[$idx.$path] ?? null) ){
               $json = json_encode($translations);
               $tmp = <<<JAVASCRIPT
-(data) => {
+((data) => {
   bbn.fn.autoExtend("lng", $json)
-};
+})();
 JAVASCRIPT;
-              $this->content = $tmp.$this->content;
+              $this->_content = $tmp.$this->_content;
             }
-            unset($tmp, $translations);
+            unset($tmp, $translations, $json);
           }
-					return $this->content;
+          return $this->_content;
         case 'coffee':
-					return $this->content;
+          return $this->_content;
         case 'css':
-					return $this->content;
+          return $this->_content;
         case 'less':
-			    $less = new \lessc();
-          return $less->compile($this->content);
+          $less = new \lessc();
+          return $less->compile($this->_content);
         case 'scss':
           $scss = new \Leafo\ScssPhp\Compiler();
-					return $scss->compile($this->content);
-				case 'html':
-					return empty($data) ? $this->content : bbn\tpl::render($this->content, $data);
+          return $scss->compile($this->_content);
+        case 'html':
+          return empty($data) ? $this->_content : bbn\tpl::render($this->_content, $data);
         case 'php':
           $dir = getcwd();
-          chdir(dirname($this->file));
-          $r = bbn\mvc::include_php_view($this->file, $this->content, $data ?: []);
+          chdir(dirname($this->_file));
+          if ( $this->_plugin ){
+            $router = router::get_instance();
+            $router->apply_locale($this->_plugin);
+          }
+          $r = bbn\mvc::include_php_view($this->_file, $this->_content, $data ?: []);
           chdir($dir);
           return $r;
       }
-		}
-		return false;
-	}
+    }
+    return false;
+  }
 }

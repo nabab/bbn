@@ -1,60 +1,78 @@
 <?php
+
 /**
- * Created by PhpStorm.
- * User: BBN
- * Date: 12/05/2015
- * Time: 12:55
+ * Manages the translations berween the URLs requested and the app filesystem.
+ *
+ * @category  MVC
+ * @package MVC
+ * @author Thomas Nabet <thomas.nabet@gmail.com>
+ * @copyright 2015 BBN Solutions
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT
+ *
+ * @link https://bbn.io/php/doc/bbn/mvc/router
+ * @since May 12, 2015, 12:55:56 +0000
  */
 
 namespace bbn\mvc;
+
 use bbn;
 
-class router {
-
+/**
+ * @category MVC
+ * @package MVC
+ * @author Thomas Nabet <thomas.nabet@gmail.com>
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT
+ * @link https://bbn.io/php/doc/bbn/mvc/router
+ */
+class router
+{
   use common;
+  use bbn\models\tts\retriever;
 
-  private static
-    /**
-     * The path for the default controller
-     * @var array
-     */
-    $def = 'default',
-    /**
-     * The list of types of controllers
-     * @var array
-     */
-    $controllers = ['cli', 'dom', 'content', 'public', 'private'],
-    /**
-     * The list of filetypes for each non controller element
-     * @var array
-     */
-    $filetypes = [
-      'model' => ['php'],
-      'html' => ['html', 'php'],
-      'js' => ['js', 'coffee'],
-      'css' => ['css', 'less', 'scss']
-    ],
-    /**
-     * The list of types
-     * @var array
-     */
-    $types = [
-      'image',
-      'file',
-      'cli',
-      'private',
-      'dom',
-      'public',
-      'model',
-      'html',
-      'js',
-      'css'
-    ],
-    /**
-     * The list of used controllers with their corresponding request, so we don't have to look for them again.
-     * @var array
-     */
-    $known = [
+  /**
+   * The path for the default controller.
+   *
+   * @var array
+   */
+  private static $_def = 'default';
+  /**
+   * The list of types of controllers.
+   *
+   * @var array
+   */
+  private static $_controllers = ['cli', 'dom', 'content', 'public', 'private'];
+  /**
+   * The list of filetypes for each non controller element.
+   *
+   * @var array
+   */
+  private static $_filetypes = [
+    'model' => ['php'],
+    'html' => ['html', 'php'],
+    'js' => ['js', 'coffee'],
+    'css' => ['css', 'less', 'scss'],
+  ];
+  /**
+   * The list of types.
+   *
+   * @var array
+   */
+  private static $_modes = [
+    'image',
+    'file',
+    'cli',
+    'private',
+    'dom',
+    'public',
+    'model',
+    'html',
+    'js',
+    'css',
+  ];
+  /**
+   * @var array list of used routes with each original request to avoid looking for them again
+   */
+  private static $_known = [
     'cli' => [],
     'dom' => [],
     'public' => [],
@@ -62,563 +80,704 @@ class router {
     'model' => [],
     'html' => [],
     'js' => [],
-    'css' => []
+    'css' => [],
+    'component' => [],
   ];
 
-  private
-    /**
-     * The MVC class from which the router is called
-     * @var mvc
-     */
-    $mvc,
-    /**
-     * @var bool
-     */
-    $mode = false,
-    /**
-     * @var string
-     */
-    $prepath,
-    /**
-     * The path to the app root (where is ./mvc)
-     * @var string
-     */
-    $root,
-    /**
-     * The path to an alternate root (where is ./mvc)
-     * @var string
-     */
-    $alt_root = false,
-    /**
-     * The list of known external controllers routes.
-     * @var array
-     */
-    $routes = [];
+  /**
+   * @var string The current mode as defined in self::$_modes
+   */
+  private $_mode;
+  /**
+   * @var string The path to prepend to the given path
+   *
+   * @todo deprecated
+   */
+  private $_prepath;
+  /**
+   * @var string The path to the app root (where is ./mvc)
+   */
+  private $_root;
+  /**
+   * @var array The list of known external controllers routes
+   */
+  private $_routes = [];
 
   /**
-   * @param $mode
+   * Checks whether Yhe given string is a valid mode.
+   *
+   * @param string $mode The mode as defined in self::$_modes
+   *
    * @return bool
    */
-  public static function is_mode($mode): bool
+  public static function is_mode(string $mode): bool
   {
-    if ( strpos($mode, 'free-') === 0 ){
-      $mode = substr($mode, \strlen('free-'));
-    }
-    return \in_array($mode, self::$types, true);
+    return (bool)\in_array($mode, self::$_modes, true);
   }
 
   /**
-   * This will fetch the route to the controller for a given path. Chainable
+   * Get the full path in the mvc/mode of the main app.
    *
-   * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
+   * @param string $mode The mode as defined in self::$_modes
+   *
+   * @return string
+   */
+  private function _get_root(string $mode): string
+  {
+    if (self::is_mode($mode)) {
+      return $this->_root . 'mvc/' . ($mode === 'dom' ? 'public' : $mode) . '/';
+    }
+
+    return null;
+  }
+
+  /**
+   * Get the full path in the mvc/mode of an external app (plugin).
+   *
+   * @param string $mode The mode as defined in self::$_modes
+   * @param string $path The path of the plugin
    * @return void
    */
-  public function __construct(bbn\mvc $mvc, array $routes=[])
+  private function _get_alt_root(string $mode, string $path = null): ?string
   {
-    $this->mvc = $mvc;
-    $this->routes = $routes;
-    $this->root = $this->mvc->app_path();
-  }
-
-  private function get_root($mode){
-    if ( self::is_mode($mode) ){
-      return $this->root.'mvc/'.( $mode === 'dom' ? 'public' : $mode ).'/';
+    if (($path || $this->alt_root) &&
+        self::is_mode($mode)) &&
+        isset($this->_routes['root'][$path ?: $this->alt_root])
+    ) {
+      $fpath = $this->_routes['root'][$path ?: $this->alt_root]['path'] . '/src/mvc/' . ($mode === 'dom' ? 'public' : $mode;
+      $res = bbn\str::parse_path($fpath).'/');
+      return $res;
     }
-    return false;
+
+    return null;
   }
 
-  private function get_alt_root(string $mode, string $path = null){
-    if (
-      ($path || $this->alt_root) &&
-      self::is_mode($mode) &&
-      isset($this->routes['root'][$path ?: $this->alt_root])
-    ){
-      return bbn\str::parse_path($this->routes['root'][$path ?: $this->alt_root]['path'].'/src/mvc/'.( $mode === 'dom' ? 'public' : $mode ).'/');
+  /**
+   * Removes trailing slashes.
+   *
+   * @param string $path
+   *
+   * @return string
+   */
+  private function _parse(string $path): string
+  {
+    $path = bbn\str::parse_path($path, true);
+    $path = trim($path, '/\\ ');
+
+    return $path ?: '.';
+  }
+
+  /**
+   * Checks whether a path is part of the routes['alias'] array.
+   *
+   * @param mixed $path
+   *
+   * @return string|null
+   */
+  private function _is_alias(string $path): ?string
+  {
+    $path = $this->_parse($path);
+    if (isset($this->_routes['alias'][$path])) {
+      return $path;
     }
-    return false;
-  }
-
-  private function set_alt_root($path){
-    $path = $this->parse($path);
-    if ( strpos($path, '/') === 0 ){
-      $path = substr($path, 1);
-    }
-    $prepath = $this->get_prepath();
-    if ( $prepath && (strpos($path, $prepath.'/') === 0) ){
-      $path = substr($path, \strlen($prepath));
-    }
-    if ( !isset($this->routes['root'][$path]) ){
-      die("The alternative root $path doesn't exist!");
-    }
-    $this->alt_root = $path;
-    return $this;
-  }
-
-  private function parse($path){
-    //return $path;
-    return bbn\str::parse_path($path, true);
-  }
-
-  private function has_route($path){
-    return \is_string($path) && isset($this->routes['alias'][$path]);
-  }
-
-  private function get_route($path){
-    if ( $this->has_route($path) ){
-      if ( \is_array($this->routes['alias'][$path]) ){
-        return $this->routes['alias'][$path][0];
-      }
-      else{
-        return $this->routes['alias'][$path];
+    foreach (array_keys($this->_routes['alias']) as $p) {
+      if (strpos($path, $p . '/') === 0) {
+        return $p;
       }
     }
-    return false;
+
+    return null;
   }
 
-  private function is_known($path, $mode){
-    return self::is_mode($mode) && isset(self::$known[$mode][$path]);
+  /**
+   * Checks whether a path is part of the routes['alias'] array.
+   *
+   * @param mixed $path
+   *
+   * @return string|null
+   */
+  private function _get_alias(string $path): ?string
+  {
+    $path = $this->_parse($path);
+    if (isset($this->_routes['alias'][$path])) {
+      return \is_array($this->_routes['alias'][$path]) ? $this->_routes['alias'][$path][0] : $this->_routes['alias'][$path];
+    }
+
+    return null;
   }
 
-  private function get_known($path, $mode){
-    if ( $this->is_known($path, $mode) ){
+  /**
+   * Checks whether a path is know for its corresponding mode.
+   *
+   * @param string $path
+   * @param string $mode
+   *
+   * @return bool
+   */
+  private function _is_known(string $path, string $mode): bool
+  {
+    return self::is_mode($mode) && isset(self::$_known[$mode][$path]);
+  }
+
+  /**
+   * Retrieves the route from a given path in a given mode.
+   *
+   * @param string $path
+   * @param string $mode
+   *
+   * @return array|null
+   */
+  private function _get_known(string $path, string $mode): ?array
+  {
+    if ($this->_is_known($path, $mode)) {
+      // If it's a controller based on an alias the original known array has to be retrieved
       if (
-        \in_array($mode, self::$controllers, true) &&
-        \is_string(self::$known[$mode][$path]) &&
-        isset(self::$known[$mode][self::$known[$mode][$path]])
-      ){
-        $path = self::$known[$mode][$path];
+        \in_array($mode, self::$_controllers, true) &&
+        \is_string(self::$_known[$mode][$path]) &&
+        isset(self::$_known[$mode][self::$_known[$mode][$path]])
+      ) {
+        $path = self::$_known[$mode][$path];
       }
-      //$this->log("known", self::$known);
-      return self::$known[$mode][$path];
+      //$this->log("known", self::$_known);
+      return self::$_known[$mode][$path];
     }
-    return false;
+
+    return null;
   }
 
-  private function set_known(array $o, bool $save = true){
-    if ( !isset($o['mode'], $o['path'], $o['file']) || !self::is_mode($o['mode']) || !\is_string($o['path']) || !\is_string($o['file']) ){
-      return false;
+  /**
+   * Sets and stores a given route, adding the corresponding checkers.
+   *
+   * @param array $o
+   * @param mixed bool
+   */
+  private function _set_known(array $o, bool $save = true): ?array
+  {
+    // mode, path and file indesxes are mandatory
+    if (!isset($o['mode'], $o['path'], $o['file']) || !self::is_mode($o['mode']) || !\is_string($o['path']) || !\is_string($o['file'])) {
+      return null;
     }
     $mode = $o['mode'];
-    $path = $o['path'];
-    $root = $this->get_root($mode);
-
-    if ( !isset(self::$known[$mode][$path]) ){
-      self::$known[$mode][$path] = $o;
-      $s =& self::$known[$mode][$path];
-      if ( isset($o['ext']) && ($o['ext'] === 'less') ){
-        $checker_file = '_mixins.less';
-      }
-      else if ( isset($o['ext']) && ($o['mode'] === 'model') ){
-        $checker_file = '_data.php';
-      }
-      else if ( \in_array($mode, self::$controllers, true) ){
+    $path = $this->_parse($o['path']);
+    // The root in the main application where to search in is defined according to the mode
+    $root = $this->_get_root($mode);
+    if (!empty($o['plugin'])) {
+      $plugin_root = $this->_get_alt_root($mode, $o['plugin']);
+      $plugin_path = substr($path, strlen($o['plugin']) + 1);
+    }
+    // About to define self::$_known[$mode][$path] so first check it has not already been defined
+    if (!isset(self::$_known[$mode][$path])) {
+      self::$_known[$mode][$path] = $o;
+      $s = &self::$_known[$mode][$path];
+      // Defining the checker files' name according to the mode (controllers, models and CSS)
+      if (\in_array($mode, self::$_controllers, true)) {
         $checker_file = '_ctrl.php';
+      } else if (isset($o['ext'])) {
+        if ($o['ext'] === 'less') {
+          $checker_file = '_mixins.less';
+        } else if (($o['mode'] === 'model')) {
+          $checker_file = '_data.php';
+        }
       }
-      if ( !empty($checker_file) ){
+      if (!empty($checker_file)) {
+        // Looking for checker files in each parent directory
         $s['checkers'] = [];
         $tmp = $path;
-        while ( \strlen($tmp) > 0 ){
-          //$this->log("WHILE", $tmp);
-          $tmp = $this->parse(\dirname($tmp));
-
-          $checker = ( $tmp === '.' ? '' : $tmp.'/' ).$checker_file;
-          if ( $this->alt_root ){
-            if ( strpos($path, $this->alt_root) === 0 ){
-              $alt_ctrl = $this->get_alt_root($mode).
-                ( \strlen($tmp) === \strlen($this->alt_root) ?
-                  '' : substr($tmp, \strlen($this->alt_root)+1).'/'
-                ).$checker_file;
-              //$this->log("ALT", $alt_ctrl);
-              if ( is_file($alt_ctrl) && !\in_array($alt_ctrl, $s['checkers'], true) ){
-                array_unshift($s['checkers'], $alt_ctrl);
-              }
+        // Going backwards in the tree, so adding reversely to the array (prepending)
+        while (\strlen($tmp) > 0) {
+          $tmp = $this->_parse(\dirname($tmp));
+          $checker = ($tmp === '.' ? '' : $tmp . '/') . $checker_file;
+          if (!empty($o['plugin'])) {
+            $plugin_path = $this->_parse(\dirname($plugin_path));
+            $alt_ctrl = $plugin_root . ($plugin_path === '.' ? '' : $plugin_path . '/') . $checker_file;
+            //$this->log("ALT", $alt_ctrl);
+            if (is_file($alt_ctrl) && !\in_array($alt_ctrl, $s['checkers'], true)) {
+              array_unshift($s['checkers'], $alt_ctrl);
             }
           }
-          if ( is_file($root.$checker) && !\in_array($root.$checker, $s['checkers'], true) ){
-            array_unshift($s['checkers'], $root.$checker);
+          if (is_file($root . $checker) && !\in_array($root . $checker, $s['checkers'], true)) {
+            array_unshift($s['checkers'], $root . $checker);
           }
-          if ( $tmp === '.' ){
+          if ($tmp === '.') {
             $tmp = '';
           }
         }
-        if ( isset($o['request']) && ($o['path'] !== $o['request']) ){
-          //self::$known[$mode][$o['request']] = $o['path'];
-          self::$known[$mode][$o['request']] = $s;
-        }
-      }
-      else if ( !empty($o['ext']) ){
-        self::$known[$mode][$path] = $o;
       }
     }
-    //$this->log(self::$known[$mode][$path]);
-    //\bbn\x::hdump(self::$known[$mode][$path]);
-    if ( !$save ){
-      $o = self::$known[$mode][$path];
-      unset(self::$known[$mode][$path]);
+    \bbn\x::log(self::$_known[$mode][$path], '_set_known');
+    //\bbn\x::hdump(self::$_known[$mode][$path]);
+    if (!$save) {
+      // If not saving the index is unset and the funciton will be relaunched ion case the same request is done again
+      $o = self::$_known[$mode][$path];
+      unset(self::$_known[$mode][$path]);
+
       return $o;
     }
-    return self::$known[$mode][$path];
+
+    return self::$_known[$mode][$path];
   }
 
   /**
-   * Return the actual controller file corresponding to a gievn path
+   * Return the actual controller file corresponding to a gievn path.
+   *
    * @param string $path
    * @param string $mode
+   *
    * @return mixed
    */
-  private function find_controller($path, $mode){
-    /** @var string $root Where the files will be searched for by default */
-    $root = $this->get_root($mode);
-    /** @var boolean|string $file Once found, full path and filename */
+  private function _find_controller($path, $mode): ?array
+  {
+    // Removing tgrailing slashes
+    $path = $this->_parse($path);
+    // If the result is already known we just return it
+    if ($this->_is_known($path, $mode)) {
+      return $this->_get_known($path, $mode);
+    }
+    /** @var string $root The directory corresponding to mode where the files will be searched for */
+    $root = $this->_get_root($mode);
+    /** @var bool|string $file Once found, full path and filename */
     $file = false;
     /** @var string $tmp Will contain the different states of the path along searching for the file */
-    $tmp = $path ? $path : '.';
+    $tmp = $path;
     /** @var array $args Each element of the URL outside the file path */
     $args = [];
-    /** @var boolean|string $plugin Name of the controller's plugin if it's inside one */
-    $plugin = false;
-    /** @var string $real_path The application path */
+    // Decomposing the path into parts
+    $parts = bbn\x::split($path, '/');
+    // Checking first if the specific route exists (through $routes['alias'])
+    if ($alias_name = $this->_is_alias($tmp)) {
+      // Adding args accordingly
+      while (bbn\x::join($parts, '/') !== $alias_name) {
+        array_unshift($args, array_pop($parts));
+        if (!count($parts)) {
+          break;
+        }
+      }
+      $alias = $this->_get_alias($alias_name);
+      $tmp = $alias;
+    }
+    /** @var array|null $plugin Plugin info if it's inside one */
+    $plugin = $this->_find_plugin($tmp);
+    /** @var string $root The alternative directory corresponding to mode where the files will be searched for */
+    $plugin_root = $plugin ? $this->_get_alt_root($mode, $plugin['url']) : null;
+    /** The path parsed from this alternative root */
+    $plugin_path = $plugin ? substr($tmp, strlen($plugin['url']) + 1) : null;
+    /** @var string $real_path The real application path (ie from root to the controller) */
     $real_path = null;
     // We go through the path, removing a bit each time until we find the corresponding file
-    while ( \strlen($tmp) > 0){
-      // We might already know it!
-      if ($this->is_known($tmp, $mode)){
-        return $this->get_known($tmp, $mode);
-      }
-
-      // if $tmp is a plugin root index setting $this->alt_root and rerouting to reprocess the path
-      if ( isset($this->routes['root'][$tmp]) && ($this->alt_root !== $tmp) ){
-        $this->set_alt_root($tmp);
-        return $this->route($path, $mode, $this->get_alt_root($mode));
-      }
-
+    while (\strlen($tmp) > 0) {
       // navigation (we are in dom and dom is default or we are not in dom, i.e. public)
-      if ( (($mode === 'dom') && (BBN_DEFAULT_MODE === 'dom')) || ($mode !== 'dom') ){
-        // Checking first if the specific route exists (through $routes['alias'])
-        if ( $this->has_route($tmp) ){
-          $real_path = $this->get_route($tmp);
-          if ( is_file($root.$real_path.'.php') ){
-            $file = $root.$real_path.'.php';
-          }
-        }
+      if ((($mode === 'dom') && (BBN_DEFAULT_MODE === 'dom')) || ($mode !== 'dom')) {
         // Then looks for a corresponding file in the regular MVC
-        else if (file_exists($root.$tmp.'.php')){
+        if (file_exists($root . $tmp . '.php')) {
           $real_path = $tmp;
-          $file = $root.$tmp.'.php';
+          $file = $root . $tmp . '.php';
+          $plugin = false;
         }
         // Then looks for a home.php file in the corresponding directory
-        else if ( is_dir($root.$tmp) && is_file($root.$tmp.'/home.php') ){
-          $real_path = $tmp.'/home';
-          $file = $root.$tmp.'/home.php';
+        else if (is_dir($root . $tmp) && is_file($root . $tmp . '/home.php')) {
+          $real_path = $tmp . '/home';
+          $file = $root . $tmp . '/home.php';
+          $plugin = false;
         }
         // If an alternative root exists (plugin), we look into it for the same
-        else if ( $this->alt_root && (strpos($tmp, $this->alt_root) === 0) ){
-          $name = substr($tmp, \strlen($this->alt_root)+1);
+        else if ($plugin) {
           // Corresponding file
-          if ( file_exists($this->get_alt_root($mode).$name.'.php') ){
-            $plugin = $this->alt_root;
+          if (file_exists($plugin_root . $plugin_path . '.php')) {
             $real_path = $tmp;
-            $file = $this->get_alt_root($mode).$name.'.php';
-            $root = $this->get_alt_root($mode);
+            $file = $plugin_root . $plugin_path . '.php';
+            $root = $plugin_root;
           }
           // home.php in corresponding dir
-          else if ( is_dir($this->get_alt_root($mode).$name) && is_file($this->get_alt_root($mode).$name.'/home.php') ){
-            $plugin = $this->alt_root;
-            $real_path = $tmp.'/home';
-            $file = $this->get_alt_root($mode).$name.'/home.php';
-            $root = $this->get_alt_root($mode);
+          else if (is_dir($plugin_root . $plugin_path) && is_file($plugin_root . ($plugin_path ? $plugin_path . '/' : '') . 'home.php')) {
+            $real_path = $tmp . '/home';
+            $file = $plugin_root . $plugin_path . '/home.php';
+            $root = $plugin_root;
           }
         }
       }
       // Full DOM requested
-      if ( !$file && ($mode === 'dom') ){
-        if ( $this->has_route($tmp) ){
-          return $this->find_controller($this->get_route($tmp), $mode);
-        }
+      if (!$file && ($mode === 'dom')) {
         // Root index file (if $tmp is at the root level)
-        else if ( ($tmp === '.') && !$this->alt_root ){
+        if (($tmp === '.') && !$plugin) {
           // If file exists
-          if ( file_exists($root.'index.php') ){
+          if (file_exists($root . 'index.php')) {
             $real_path = '.';
-            $file = $root.'index.php';
+            $file = $root . 'index.php';
           }
           // Otherwise $file will remain undefined
-          else{
-            /** @todo throw an alert as there is no default index */
-            die('Impossible to find a route');
-            break;
+          else {
+            /* @todo throw an alert as there is no default index */
+            $this->log(_('Impossible to find a route'));
+
+            return null;
           }
         }
         // There is an index file in a subfolder
-        else if ( file_exists($root.$tmp.'/index.php') ){
+        else if (file_exists($root . ($tmp === '.' ? '' : $tmp . '/') . 'index.php')) {
           $real_path = $tmp;
-          $file = $root.$tmp.'/index.php';
+          $file = $root . ($tmp === '.' ? '' : $tmp . '/') . 'index.php';
+          $plugin = false;
         }
         // An alternative root exists, we look into it
-        else if ( $this->alt_root && (strpos($tmp, $this->alt_root) === 0) ){
-          if ( $tmp === $this->alt_root ){
-            $name = '';
-          }
-          else{
-            $name = substr($tmp, \strlen($this->alt_root)+1);
-          }
+        else if ($plugin) {
           // Corresponding file
-          if ( file_exists($this->get_alt_root($mode).$name.'/index.php') ){
-            $plugin = $this->alt_root;
+          $dir = $plugin_root . ($plugin_path ? $plugin_path . '/' : '');
+          if (is_dir($dir) && file_exists($dir . 'index.php')) {
             $real_path = $tmp;
-            $file = $this->get_alt_root($mode).$name.'/index.php';
-            $root = $this->get_alt_root($mode);
+            $file = $dir . 'index.php';
+            $root = $plugin_root;
           }
           // home.php in corresponding dir
         }
       }
-      if ( $file ){
+      if ($file) {
         break;
       }
       array_unshift($args, basename($tmp));
       $tmp = strpos($tmp, '/') === false ? '' : substr($tmp, 0, strrpos($tmp, '/'));
-      if ( empty($tmp) && ($mode === 'dom') ){
-        $tmp = '.';
+      if ($plugin) {
+        $plugin_path = strpos($plugin_path, '/') === false ? '' : dirname($plugin_path);
       }
-      else if ( $tmp === '.' ){
+      if (empty($tmp) && ($mode === 'dom')) {
+        $tmp = '.';
+      } else if ($tmp === '.') {
         $tmp = '';
       }
     }
-    /*
+    /**
+     * @todo Should there be a 404? If so, a real one or a default file? For which modes?
+     */
     // Not found, sending the default controllers
-    if ( !$file && is_file($root.'404.php') ){
-      $real_path = '404';
-      $file = $root.'404.php';
-    }
-    */
-    if ( $file ){
-      if ( $plugin ){
-        $this->apply_locale($plugin);
-      }
-      return $this->set_known([
+    /*
+                if ( !$file && is_file($root.'404.php') ){
+                  $real_path = '404';
+                  $file = $root.'404.php';
+                }
+                */
+
+    if ($file) {
+      return $this->_set_known([
         'file' => $file,
         'path' => $real_path,
-        'root' => \dirname($root, 2).'/',
+        'root' => \dirname($root, 2) . '/',
         'request' => $path,
         'mode' => $mode,
-        'plugin' => $plugin,
+        'plugin' => $plugin ? $plugin['url'] : false,
         'args' => $args,
       ]);
     }
+
+    return null;
     // Aaaargh!
     //die(bbn\x::dump("No default file defined for mode $mode $tmp (and no 404 file either)"));
   }
 
-  public function apply_locale(string $plugin){
-    if (
-      \defined('BBN_LOCALE') &&
-      isset($this->routes['root'][$plugin]['name']) &&
-      is_dir($this->routes['root'][$plugin]['path'].'../src/locale')
-    ){
-      $lang_path = \dirname($this->routes['root'][$plugin]['path']).'/src/locale';
-      $textdomain = $this->routes['root'][$plugin]['name'].
-        (is_file($lang_path.'/index.txt') ? (string)file_get_contents($lang_path.'/index.txt') : '');
-      bindtextdomain($textdomain, $lang_path);
-      bind_textdomain_codeset($textdomain, 'UTF-8');
-      textdomain($textdomain);
-      //\bbn\x::log([$lang_path, $textdomain.'/'.BBN_LOCALE], 'textdomain');
-    }
-  }
-
-  private function find_in_roots($path){
-    if ( $this->routes['root'] ){
-      foreach ( $this->routes['root'] as $p => $real ){
-        if ( (strpos($path, $p.'/') === 0) || ($p === $path) ){
+  private function _find_plugin($path): ?array
+  {
+    if ($plugins = $this->get_plugins()) {
+      foreach ($plugins as $p) {
+        if ((strpos($path, $p['url'] . '/') === 0) || ($p['url'] === $path)) {
           return $p;
         }
       }
     }
-    return false;
+
+    return null;
   }
 
-  private function find_mv(string $path, string $mode, string $root = null){
-    if ( self::is_mode($mode) ){
-      /** @var boolean|string $file Once found, full path and filename */
-      $file = false;
-      $plugin = false;
-      $i18n = false;
-      $save = !$root;
-      if ( !$root ){
-        $root = $this->get_root($mode);
-        if ( $alt_path = $this->find_in_roots($path) ){
-          $alt_root = $this->get_alt_root($mode, $alt_path);
-        }
-        else if ( $alt_root = $this->get_alt_root($mode) ){
-          $alt_path = $this->alt_root;
-        }
-      }
-      else if ( substr($root, -1) !== '/' ){
-        $root .= '/';
-      }
-      /** @var string $root Where the files will be searched for by default */
-      foreach ( self::$filetypes[$mode] as $t ){
-        if ( is_file($root.$path.'.'.$t) ){
-          $file = $root . $path . '.' . $t;
-          /** @todo change the system to route components, this is way tooo heavy */
-          if ( (strpos($root, BBN_LIB_PATH) === 0) && ($plugins = $this->get_plugins()) ){
-            foreach ( $plugins as $p ){
-              if ( strpos($root, $p['path']) === 0 ){
-                $plugin = $p['url'];
-                break;
-              }
-            }
-          }
-        }
-        else if ( !empty($alt_path) && is_file($alt_root.substr($path, \strlen($alt_path)+1).'.'.$t) ){
-          $file = $alt_root . substr($path, \strlen($alt_path)+1) . '.' . $t;
-          $plugin = $alt_path;
-        }
-        if ( $file ){
-          if ( ($t === 'js') && \defined('BBN_LANG') ){
-            $fpath = $plugin ? $this->plugin_path($this->plugin_name($plugin)) : $this->mvc->app_path();
-            if ( file_exists($fpath.'locale/'.BBN_LANG.'/'.BBN_LANG.'.json')
-            ){
-              $i18n = $fpath.'locale/'.BBN_LANG.'/'.BBN_LANG.'.json';
-            }
-          }
-          return $this->set_known([
-            'file' => $file,
-            'path' => $path,
-            'ext' => $t,
-            'mode' => $mode,
-            'plugin' => $plugin,
-            'i18n' => $i18n
-          ], $save);
-        }
+  private function _find_translation(string $plugin = null): ?string
+  {
+    if (\defined('BBN_LANG')) {
+      $fpath = $plugin ? $this->plugin_path($plugin) : $this->_mvc->app_path();
+      if (file_exists($fpath . 'locale/' . BBN_LANG . '/' . BBN_LANG . '.json')) {
+        return $fpath . 'locale/' . BBN_LANG . '/' . BBN_LANG . '.json';
       }
     }
-    return false;
+
+    return null;
   }
 
-  private function find_alt_mv(string $path, string $mode, string $root){
-    /** @var boolean|string $file Once found, full path and filename */
-    $file = false;
-    foreach ( self::$filetypes[$mode] as $t ){
-      if ( is_file($root.$path.'.'.$t) ){
-        $file = $root . $path . '.' . $t;
+  private function _get_classic_root($mode): ?string
+  {
+    return $this->_get_root($mode);
+  }
+
+  private function _get_plugin_root($mode, $plugin): ?string
+  {
+    if (self::is_mode($mode)) {
+      return $this->plugin_path($plugin) . 'mvc/' . ($mode === 'dom' ? 'public' : $mode) . '/';
+    }
+  }
+
+  private function _get_custom_root($mode, $plugin): ?string
+  {
+    if (isset(self::$_filetypes[$mode])) {
+      return $this->_root . 'plugins/' . $plugin . '/' . $mode . '/';
+    }
+  }
+
+  private function _find_mv(string $path, string $mode): ?array
+  {
+    // Mode exists
+    if (self::is_mode($mode)) {
+      $plugin = $this->_find_plugin($path);
+      $plugin_url = $plugin ? $plugin['url'] : false;
+      $root = $this->_get_classic_root($mode);
+      $file = false;
+      $alt_root = false;
+      if ($plugin_url) {
+        $p = $this->_routes['root'][$plugin_url];
+        $plugin = $p['name'];
+        $alt_path = substr($path, strlen($plugin_url) + 1);
+        $alt_root = $this->_get_plugin_root($mode, $plugin);
       }
-      if ( $file ){
-        return $this->set_known([
+      foreach (self::$_filetypes[$mode] as $t) {
+        if (is_file($root . $path . '.' . $t)) {
+          $file = $root . $path . '.' . $t;
+          break;
+        } else if ($alt_root) {
+          if (is_file($alt_root . $alt_path . '.' . $t)) {
+            $file = $alt_root . $alt_path . '.' . $t;
+            break;
+          }
+        }
+      }
+      if (!empty($file)) {
+        return $this->_set_known([
           'file' => $file,
           'path' => $path,
+          'plugin' => $plugin_url,
           'ext' => $t,
-          'mode' => $mode
-        ], false);
+          'mode' => $mode,
+          'i18n' => $t === 'js' ? $this->_find_translation($plugin ?? null) : null,
+        ], true);
       }
     }
-    return false;
+    return null;
   }
 
-  public function reset(){
-    $this->alt_root = false;
+  /**
+   * This will fetch the route to the controller for a given path. Chainable.
+   *
+   * @param string $path The request path <em>(e.g books/466565 or xml/books/48465)</em>
+   */
+  public function __construct(bbn\mvc $mvc, array $routes = [])
+  {
+    self::retriever_init($this);
+    $this->_mvc = $mvc;
+    $this->_routes = $routes;
+    $this->_root = $this->_mvc->app_path();
   }
 
-  public function add_routes(array $routes){
-    $this->routes = bbn\x::merge_arrays($this->routes['alias'], $routes);
+  public function apply_locale(string $plugin): self
+  {
+    if (
+      \defined('BBN_LOCALE') &&
+      isset($this->_routes['root'][$plugin]['name']) &&
+      is_dir($this->_routes['root'][$plugin]['path'] . '/src/locale')
+    ) {
+      //$lang_path = \dirname($this->_routes['root'][$plugin]['path']).'/src/locale';
+      if ($lang_path = \dirname($this->_routes['root'][$plugin]['path']) . '/' . $this->_routes['root'][$plugin]['name'] . '/src/locale') {
+        $textdomain = $this->_routes['root'][$plugin]['name'] . (is_file($lang_path . '/index.txt') ? (string) file_get_contents($lang_path . '/index.txt') : '');
+        bindtextdomain($textdomain, $lang_path);
+        bind_textdomain_codeset($textdomain, 'UTF-8');
+        textdomain($textdomain);
+      }
+    }
+
     return $this;
   }
 
-  public function set_prepath($path){
-    if ( !$this->check_path($path) ){
-      die("The prepath $path is not valid");
-    }
-    $this->prepath = $path;
-    if ( substr($this->prepath, -1) !== '/' ){
-      $this->prepath = $this->prepath.'/';
-    }
-    if ( $this->mode ){
-      $this->route($this->mvc->get_url(), $this->mode);
-    }
-    return 1;
+  public function reset(): self
+  {
+    $this->alt_root = false;
+
+    return $this;
   }
 
-  public function get_prepath($with_slash = 1){
-    if ( !empty($this->prepath) ){
-      return $with_slash ? $this->prepath : substr($this->prepath, 0, -1);
+  public function set_prepath($path): bool
+  {
+    if (!$this->check_path($path)) {
+      die("The prepath $path is not valid");
     }
+    $this->_prepath = $path;
+    if (substr($this->_prepath, -1) !== '/') {
+      $this->_prepath = $this->_prepath . '/';
+    }
+    if ($this->_mode) {
+      $this->route($this->_mvc->get_url(), $this->_mode);
+    }
+
+    return true;
+  }
+
+  public function get_prepath($with_slash = 1): string
+  {
+    if (!empty($this->_prepath)) {
+      return $with_slash ? $this->_prepath : substr($this->_prepath, 0, -1);
+    }
+
     return '';
   }
 
-  public function route($path, $mode, $root = null){
-
-    if ( self::is_mode($mode) ){
-      // If there is a prepath defined we prepend it to the path
-      if ( $this->prepath && (strpos($path, '/') !== 0) && (strpos($path, $this->prepath) !== 0) ){
-        $path = $this->prepath.$path;
+  public function get_plugin_from_component(string $name): ?array
+  {
+    foreach ($this->get_plugins() as $n => $p) {
+      if (bbn\x::indexOf($name, $n . '-') === 0) {
+        return $p;
       }
-
-      // We only try to retrieve a file path through a whole URL for controllers
-      if ( \in_array($mode, self::$controllers, true) ){
-        $this->mode = $mode;
-        //$this->log($path);
-        return $this->find_controller($path, $mode);
-      }
-      else if ( $root ){
-        if ( strpos($mode, 'free-') === 0 ){
-          return $this->find_mv($path, substr($mode, \strlen('free-')), $root);
-        }
-        return $this->find_alt_mv($path, $mode, $root);
-      }
-      return $this->find_mv($path, $mode);
     }
-    return false;
+
+    return null;
   }
 
-  public function fetch_dir($path, $mode){
+  public function route_component(string $name): ?array
+  {
+    if ($p = $this->get_plugin_from_component($name)) {
+      $root = $p['path'] . 'src/';
+      $prefix = $p['name'] . '-';
+      $plugin = $p['name'];
+      $plugin_url = $p['url'];
+    } else {
+      $prefix = (defined('BBN_APP_PREFIX') ? BBN_APP_PREFIX : BBN_APP_NAME) . '-';
+      $root = $this->app_path();
+      $plugin = null;
+      $plugin_url = null;
+    }
+    if (!empty($root) && (bbn\x::indexOf($name, $prefix) === 0)) {
+      $local_name = substr($name, strlen($prefix));
+      $parts = explode('-', $local_name);
+      $root .= 'components/';
+      $path = implode('/', $parts);
+      $dir = $root . $path;
+      if (!empty($plugin)) {
+        $this->apply_locale($plugin);
+      }
+      if (is_dir($dir)) {
+        $res = [
+          'js' => [],
+          'html' => [],
+          'css' => [],
+        ];
+        $fpath = $root . $path . '/' . end($parts);
+        foreach ($res as $mode => $c) {
+          foreach (self::$_filetypes[$mode] as $f) {
+            if (is_file($fpath . '.' . $f)) {
+              $res[$mode] = $this->_set_known([
+                'file' => $fpath . '.' . $f,
+                'path' => str_replace('-', '/', $local_name),
+                'plugin' => $plugin_url,
+                'component' => true,
+                'ext' => $f,
+                'mode' => $mode,
+                'i18n' => $mode === 'js' ? $this->_find_translation($plugin ?? null) : null,
+              ], true);
+              break;
+            }
+          }
+        }
 
-    // Only for views and models
-    if ( self::is_mode($mode) && !\in_array($mode, self::$controllers) ){
+        return $res;
+      }
+    }
+    return null;
+  }
 
+  public function route_custom_plugin(string $path, string $mode, string $plugin): ?array
+  {
+    if ($root = $this->_get_custom_root($mode, $plugin)) {
+      foreach (self::$_filetypes[$mode] as $t) {
+        if (is_file($root . $path . '.' . $t)) {
+          $file = $root . $path . '.' . $t;
+          break;
+        }
+      }
+      if (!empty($file)) {
+        return $this->_set_known([
+          'file' => $file,
+          'path' => $path,
+          'ext' => $t,
+          'plugin' => $plugin,
+          'mode' => $mode,
+          'i18n' => $t === 'js' ? $this->_find_translation($plugin ?? null) : null,
+        ], true);
+      }
+    }
+    return null;
+  }
 
+  public function route(string $path, string $mode): ?array
+  {
+    if (self::is_mode($mode)) {
       // If there is a prepath defined we prepend it to the path
-      if ( $this->prepath && (strpos($path, '/') !== 0) && (strpos($path, $this->prepath) !== 0) ){
-        $path = $this->prepath.$path;
+      if ($this->_prepath && (strpos($path, '/') !== 0) && (strpos($path, $this->_prepath) !== 0)) {
+        $path = $this->_prepath . $path;
+      }
+      // We only try to retrieve a file path through a whole URL for controllers
+      if (\in_array($mode, self::$_controllers, true)) {
+        $this->_mode = $mode;
+        //$this->log($path);
+        return $this->_find_controller($path, $mode);
+      }
+      //\bbn\x::log($this->_find_mv($path, $mode), 'translations');
+      return $this->_find_mv($path, $mode);
+    }
+
+    return null;
+  }
+
+  public function fetch_dir($path, $mode): ?array
+  {
+    // Only for views and models
+    if (self::is_mode($mode) && !\in_array($mode, self::$_controllers)) {
+      // If there is a prepath defined we prepend it to the path
+      if ($this->_prepath &&
+          (strpos($path, '/') !== 0) &&
+          (strpos($path, $this->_prepath) !== 0)
+      ) {
+        $path = $this->_prepath . $path;
       }
 
       /** @var string $root Where the files will be searched for by default */
-      $root = $this->get_root($mode);
-      if ( $alt_path = $this->find_in_roots($path) ){
-        $alt_root = $this->get_alt_root($mode, $alt_path);
+      $root = $this->_get_root($mode);
+      $plugin = $this->_find_plugin($path);
+      if ($plugin && ($alt_path = $plugin['url'])) {
+        $alt_root = $this->_get_alt_root($mode, $alt_path);
       }
-      else if ( $alt_root = $this->get_alt_root($mode) ){
+      else if ($alt_root = $this->_get_alt_root($mode)) {
         $alt_path = $this->alt_root;
       }
       $dir = false;
-      foreach ( self::$filetypes[$mode] as $t ){
-        $dir1 = $this->parse($root.$path);
-        if ( is_dir($dir1) && (strpos($dir1, $root) === 0) ){
+      foreach (self::$_filetypes[$mode] as $t) {
+        $dir1 = $this->_parse($root . $path);
+        if (is_dir($dir1) && (strpos($dir1, $root) === 0)) {
           $dir = $dir1;
         }
         else if (
-          $alt_path &&
-          ($dir2 = $this->parse($alt_root.substr($path, \strlen($alt_path)+1))) &&
-          (strpos($dir2, $alt_root) === 0) &&
+          $alt_path && ($dir2 = $this->_parse($alt_root . substr($path, \strlen($alt_path) + 1))) && (strpos($dir2, $alt_root) === 0) &&
           is_dir($dir2)
-        ){
+        ) {
           $dir = $dir2;
         }
-        if ( $dir ){
+        if ($dir) {
           $res = [];
           $files = bbn\file\dir::get_files($dir);
-          foreach ( $files as $f ){
-            if ( \in_array(bbn\str::file_ext($f), self::$filetypes[$mode], true) ){
-              $res[] = $path.'/'.bbn\str::file_ext($f, true)[0];
+          foreach ($files as $f) {
+            if (\in_array(bbn\str::file_ext($f), self::$_filetypes[$mode], true)) {
+              $res[] = $path . '/' . bbn\str::file_ext($f, true)[0];
             }
           }
+
           return $res;
         }
       }
-      return false;
     }
-    return false;
+
+    return null;
   }
 
-  public function get_routes(){
-    return $this->routes;
+  public function get_routes(): array
+  {
+    return $this->_routes;
   }
 }

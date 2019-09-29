@@ -13,6 +13,16 @@ use bbn;
 trait common {
 
   /**
+   * The MVC class from which the controller is called
+   * @var mvc
+   */
+  private $_mvc;
+  /**
+   * @var null|string If the controller is inside a plugin this property will be set to its name
+   */
+  private $_plugin;
+
+  /**
    * This checks whether an argument used for getting controller, view or model - which are files - doesn't contain malicious content.
    *
    * @param string $p The request path <em>(e.g books/466565 or html/home)</em>
@@ -45,50 +55,50 @@ trait common {
 
   public function plugin_data_path($plugin = null): ?string
   {
-    if ( ($this->plugin || $plugin) && \defined ('BBN_DATA_PATH') ){
-      return BBN_DATA_PATH.'plugins/'.$this->plugin_name($plugin ?: $this->plugin).'/';
+    if ( ($this->_plugin || $plugin) && \defined ('BBN_DATA_PATH') ){
+      return BBN_DATA_PATH.'plugins/'.$this->plugin_name($plugin ?: $this->_plugin).'/';
     }
     return null;
   }
 
   public function get_plugins(){
-    return $this->mvc->get_plugins();
+    return $this->_mvc->get_plugins();
   }
 
   public function has_plugin($plugin){
-    return $this->mvc->has_plugin($plugin);
+    return $this->_mvc->has_plugin($plugin);
   }
 
   public function is_plugin($plugin = null){
-    return $this->mvc->is_plugin($plugin ?: $this->plugin_name($this->plugin));
+    return $this->_mvc->is_plugin($plugin ?: $this->plugin_name($this->_plugin));
   }
 
   public function plugin_path($plugin = null, $raw = false){
-    return $this->mvc->plugin_path($plugin ?: $this->plugin_name($this->plugin), $raw);
+    return $this->_mvc->plugin_path($plugin ?: $this->plugin_name($this->_plugin), $raw);
   }
 
   public function plugin_url($plugin = null){
-    return $this->mvc->plugin_url($plugin ?: $this->plugin_name($this->plugin));
+    return $this->_mvc->plugin_url($plugin ?: $this->plugin_name($this->_plugin));
   }
 
   public function plugin_name($path = null){
-    return $this->mvc->plugin_name($path ?: $this->plugin);
+    return $this->_mvc->plugin_name($path ?: $this->_plugin);
   }
 
   public function get_cookie(){
-    return $this->mvc->get_cookie();
+    return $this->_mvc->get_cookie();
   }
 
   public function get_routes(){
-    return $this->mvc->get_routes();
+    return $this->_mvc->get_routes();
   }
 
   public function get_aliases(){
-    return $this->mvc->get_routes('alias');
+    return $this->_mvc->get_routes('alias');
   }
 
   public function get_route($path, $mode, $root = null){
-    return $this->mvc->get_route($path, $mode, $root);
+    return $this->_mvc->get_route($path, $mode, $root);
   }
 
   public function app_path($raw = false): string

@@ -424,12 +424,10 @@ class system extends bbn\models\cls\basic
    */
   private function _mkdir(string $dir, int $chmod = 0755, $recursive = false): bool
   {
-    if ( $this->mode !== 'nextcloud' ){
-      return is_dir($dir) || (@mkdir($dir, $chmod, $recursive) || is_dir($dir));
+    if ( empty($this->_is_dir($dir) ) ){
+      return mkdir($dir, $chmod, $recursive);
     }
-    else {
-      return $this->_is_dir($dir) || $this->obj->mkdir($dir);
-    }
+    return true;
   }
 
   /**
@@ -624,13 +622,33 @@ class system extends bbn\models\cls\basic
       return $this->obj->download($file);
     }
     else {
-      
       if ( ($f = $this->get_file($file)) && $f->check() ){
-        $f->download();
+        return $file;
+        /*die(var_dump($file));
+        $f->download();*/
       }
     }
   }
 
+  
+  private function _upload(array $files, string $path): bool
+  {
+    $success = false;
+    if ( !empty($files) && !empty($path) ){
+      foreach($files as $f){
+        if ( is_file($f['tmp_name']) ){
+          //replace ' ' with '_' like in nextcloud
+          $full_name = $this->get_real_path($path) . '/' . str_replace(' ', '_',$f['name']);
+          if ( !$this->exists($full_name) ){
+            if ( move_uploaded_file($f['tmp_name'], $full_name) ){
+              return $success = true;
+            }
+          }
+        }
+      }
+    }
+    return $success;
+  }
   /**
    * system constructor.
    * @param string $type
@@ -942,6 +960,9 @@ class system extends bbn\models\cls\basic
    */
   public function mkdir(string $dir, int $chmod = 0755, $recursive = false): ?bool
   {
+    if ( $this->mode === 'nextcloud' ){
+      return $this->obj->mkdir($dir);
+    }
     if ( $this->check() ){
       if ( !$dir ){
         return false;
@@ -1236,4 +1257,20 @@ class system extends bbn\models\cls\basic
   public function get_num_files($path){
     return count($this->scan($path));
   }
+  
+  public function upload(array $files,string $path) :bool
+  {
+    $success = false;
+    if ( $this->mode === 'nextcloud' ){
+      return $this->obj->upload($files, $path);   
+    }
+    else if ( $this->mode === 'local' ){
+      return $this->_upload($files, $path);  
+    }
+    else {
+      $success = false;
+    }
+    return $success;
+  }
+  
 }

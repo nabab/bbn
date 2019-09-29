@@ -17,19 +17,19 @@ use bbn;
  * @version 0.2r89
 */
 
-class pdf
-{
-  private static $default_cfg = [
-      'mode' => 'utf-8-s',
+class pdf {
+  private static
+    $default_cfg = [
+      'mode' => 'ISO-8859-2',
       'format' => 'A4',
-      'size' => 8,
-      'font' => 'times',
-      'mgl' => 15,
-      'mgr' => 15,
-      'mgt' => 15,
-      'mgb' => 15,
-      'mgh' => 10,
-      'mgf' => 10,
+      'default_font_size' => 8,
+      'default_font' => 'Times',
+      'margin_left' => 15,
+      'margin_right' => 15,
+      'margin_top' => 15,
+      'margin_bottom' => 15,
+      'margin_header' => 10,
+      'margin_footer' => 10,
       'orientation' => 'P',
       'head' => <<<EOF
 <html>
@@ -57,124 +57,130 @@ EOF
       'text_tpl' => '<div style="text-align:justify; margin-top:30px; margin-bottom:30px">%s</div>',
       'signature' => '<div style="text-align:right">Your signing here</div>'
   ];
-  public $cfg;
-	private
+
+  private
     $pdf = false,
     $last_cfg = [];
- 
+
+  public $cfg;
+
+  private function check(){
+    return ( \get_class($this->pdf) === 'Mpdf\Mpdf' );
+  }
+
+  private function fix_cfg(array $cfg){
+    if ( \is_array($cfg) ){
+      $to_check = [
+        'size' => 'default_font_size',
+        'font' => 'default_font',
+        'mgl' => 'margin_left',
+        'mgr' => 'margin_right',
+        'mgt' => 'margin_top',
+        'mgb' => 'margin_bottom',
+        'mgh' => 'margin_header',
+        'mgf' => 'margin_footer'
+      ];
+      foreach ( $cfg as $i => $c ){
+        if ( isset($to_check[$i]) ){
+          $cfg[$to_check[$i]] = $c;
+          unset($cfg[$i]);
+        }
+      }
+    }
+    return $cfg;
+  }
+
   public static function set_default(array $cfg){
     self::$default_cfg = bbn\x::merge_arrays(self::$default_cfg, $cfg);
   }
-  
-	private function check()
-  {
-    return ( \get_class($this->pdf) === 'mPDF' );
-  }
-  public function __construct($cfg=null)
-	{
-    $this->reset_config($cfg);
 
-    $this->pdf = new \mPDF(
-			$this->cfg['mode'],
-			$this->cfg['format'],
-			$this->cfg['size'],
-			$this->cfg['font'],
-			$this->cfg['mgl'],
-			$this->cfg['mgr'],
-			$this->cfg['mgt'],
-			$this->cfg['mgb'],
-			$this->cfg['mgh'],
-			$this->cfg['mgf'],
-			$this->cfg['orientation']);
-    
-    $this->pdf->SetImportUse();
-    
+  public function __construct($cfg = null){
+    $this->reset_config($cfg);
+    $this->pdf = new \Mpdf\Mpdf($this->cfg);
+    //$this->pdf->SetImportUse();
     if ( \is_string($cfg) ){
       $this->add_page($cfg);
     }
-    return $this;
 	}
   
   
-  public function get_config(array $cfg=null){
-    if ( $cfg ){
-      return bbn\x::merge_arrays($this->cfg, $cfg);
+  public function get_config(array $cfg = null){
+    if ( \is_array($cfg) ){
+      return bbn\x::merge_arrays($this->cfg, $this->fix_cfg($cfg));
     }
     return $this->cfg;
   }
   
   public function reset_config($cfg){
     if ( \is_array($cfg) ){
-      $this->cfg = bbn\x::merge_arrays(self::$default_cfg, $cfg);
+      $this->cfg = bbn\x::merge_arrays(self::$default_cfg, $this->fix_cfg($cfg));
     }
     else{
       $this->cfg = self::$default_cfg;
     }
+    if (
+      empty($this->cfg['tempDir']) &&
+      ($tmp = bbn\mvc::get_tmp_path()) &&
+      ($path = bbn\file\dir::create_path($tmp))
+    ){
+      $this->cfg['tempDir'] = $path;
+    }
     return $this;
   }
  
-	public function add_page($html, $cfg=null, $sign=false)
-	{
-    if ( $this->check() ){
-
+	public function add_page($html, $cfg = null, $sign = false){
+		if ( $this->check() ){
       if ( $this->last_cfg !== $cfg ){
         $this->last_cfg = $cfg;
         $cfg = $this->get_config($cfg);
         if ( isset($cfg['template']) && is_file($cfg['template']) ){
           $src = $this->pdf->SetSourceFile($cfg['template']);
-          $tpl = $this->pdf->ImportPage($src);
+          $tpl = $this->pdf->importPage($src);
           $this->pdf->SetPageTemplate($tpl);
         }
         else{
-          $this->pdf->defHTMLHeaderByName('head', $cfg['head']);
-          $this->pdf->defHTMLFooterByName('foot', $cfg['foot']);
+          $this->pdf->DefHTMLHeaderByName('head', $this->cfg['head']);
+          $this->pdf->DefHTMLFooterByName('foot', $this->cfg['foot']);
         }
       }
-
-      $this->pdf->AddPageByArray(array(
-        'orientation' => $cfg['orientation'],
-        'mgl' => $cfg['mgl'],
-        'mgr' => $cfg['mgr'],
-        'mgt' => $cfg['mgt'],
-        'mgb' => $cfg['mgb'],
-        'mgh' => $cfg['mgh'],
-        'mgf' => $cfg['mgf'],
-				'ohname' => 'head',
-				'ofname' => 'foot',
-        'ohvalue' => 1,
-        'ofvalue' => 1
-			));
+      $this->pdf->AddPageByArray([
+        'orientation' => $this->cfg['orientation'],
+        'margin-left' => $this->cfg['margin_left'],
+        'margin-right' => $this->cfg['margin_right'],
+        'margin-top' => $this->cfg['margin_top'],
+        'margin-bottom' => $this->cfg['margin_bottom'],
+        'margin-header' => $this->cfg['margin_header'],
+        'margin-footer' => $this->cfg['margin_footer'],
+				'odd-header-name' => 'head',
+				'odd-footer-name' => 'foot',
+        'odd-header-value' => 1,
+        'odd-footer-value' => 1
+      ]);
 			if ( $sign ){
 				$this->pdf->WriteHTML($html.$this->cfg['signature']);
       }
 			else{
-        //die(var_dump($html, $cfg['head'], $cfg['foot']));
 				$this->pdf->WriteHTML($html);
       }
 		}
 		return $this;
 	}
   
-  public function add_css($file)
-  {
+  public function add_css($file){
     $this->pdf->WriteHTML(file_get_contents($file), 1);
     return $this;
   }
 
-  public function show($file='MyPDF.pdf')
-	{
-		if ( $this->check() )
-		{
-			$this->pdf->Output($file, "I");
+  public function show($file = 'MyPDF.pdf'){
+		if ( $this->check() ){
+			$this->pdf->Output($file, \Mpdf\Output\Destination::INLINE);
       die();
 		}
 	}
   
-	public function makeAttachment()
-	{
-		if ( $this->check() )
-		{
-			$pdf = $this->pdf->Output("", "S");
+	public function makeAttachment(){
+		if ( $this->check() ){
+			$pdf = $this->pdf->Output("", \Mpdf\Output\Destination::STRING_RETURN);
 			return chunk_split(base64_encode($pdf));
 		}
 	}
@@ -185,7 +191,7 @@ EOF
       if ( !is_dir(dirname($filename)) ){
         die("Error! No destination directory");
       }
-      $this->pdf->Output($filename,'F');
+      $this->pdf->Output($filename, \Mpdf\Output\Destination::FILE);
       return is_file($filename);
     }
   }
@@ -195,12 +201,12 @@ EOF
       if ( !\is_array($files) ){
         $files = [$files];
       }
-      $this->pdf->SetImportUse();
+      //$this->pdf->SetImportUse();
       foreach ( $files as $f ){
         if ( is_file($f) ){
           $pagecount = $this->pdf->SetSourceFile($f);
           for ( $i = 1; $i <= $pagecount; $i++ ){
-            $import_page = $this->pdf->ImportPage($i);
+            $import_page = $this->pdf->importPage($i);
             $this->pdf->UseTemplate($import_page);
             $this->pdf->addPage();
           }
@@ -212,11 +218,11 @@ EOF
 
   public function import_page($file, $page){
     if ( $this->check() ){
-      $this->pdf->SetImportUse();
+      //$this->pdf->SetImportUse();
       if ( is_file($file) ){
         $pagecount = $this->pdf->SetSourceFile($file);
         if ( ($page > 0) && ($page < $pagecount) ){
-          $import_page = $this->pdf->ImportPage($page);
+          $import_page = $this->pdf->importPage($page);
           $this->pdf->UseTemplate($import_page);
           $this->pdf->addPage();
         }

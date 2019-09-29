@@ -238,8 +238,8 @@ class project extends bbn\models\cls\db {
     if ( \is_string($repository) ){
       $repository = $this->repository($repository);
     }    
-    if ( !empty($repository) && !empty($repository['bbn_path']) ){
-      $repository_path = !empty($repository['path']) ? '/' . $repository['path'] : '';
+    if ( !empty($repository) && !empty($repository['bbn_path']) ){      
+      $repository_path = !empty($repository['path']) ? '/' . $repository['path'] : '';      
       $path = self::decipher_path($repository['bbn_path'] . $repository_path) . '/';     
       return \bbn\str::parse_path($path);
     }
@@ -270,6 +270,7 @@ class project extends bbn\models\cls\db {
     foreach ( $all as $a ){
       if ( isset($a['bbn_path']) && \defined($a['bbn_path']) ){
         $k = $a['bbn_path'] . '/' . ($a['code'] === '/' ? '' : $a['code']);
+        
         if ( !isset($cats[$a['id_alias']]) ){
           unset($a['alias']['cfg']);
           $cats[$a['id_alias']] = $a['alias'];
@@ -305,13 +306,13 @@ class project extends bbn\models\cls\db {
     $repository = '';
     $repositories = $this->repositories();
 
-    foreach ( $repositories as $i => $d ){
+    foreach ( $repositories as $i => $d ){     
       if ( (strpos($url, $i) === 0) &&
         (\strlen($i) > \strlen($repository) )
       ){
         $repository = $i;
       }
-    }
+    }    
     if ( !empty($repository) ){
       return empty($obj) ? $repository : $repositories[$repository];
     }

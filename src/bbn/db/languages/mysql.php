@@ -178,18 +178,18 @@ class mysql implements bbn\db\engines
 	 */
 	public function table_full_name(string $table, bool $escaped = false): ?string
 	{
-    $bits = explode('.', str_replace($this->qte, '', $table));
+    $bits = explode('.', $table);
     if ( \count($bits) === 3 ){
-      $db = trim($bits[0]);
+      $db = trim($bits[0], ' '.$this->qte);
       $table = trim($bits[1]);
     }
     else if ( \count($bits) === 2 ){
-      $db = trim($bits[0]);
-      $table = trim($bits[1]);
+      $db = trim($bits[0], ' '.$this->qte);
+      $table = trim($bits[1], ' '.$this->qte);
     }
     else{
       $db = $this->db->current;
-      $table = trim($bits[0]);
+      $table = trim($bits[0], ' '.$this->qte);
     }
     if ( bbn\str::check_name($db, $table) ){
       return $escaped ? $this->qte.$db.$this->qte.'.'.$this->qte.$table.$this->qte : $db.'.'.$table;
@@ -207,16 +207,16 @@ class mysql implements bbn\db\engines
   public function table_simple_name(string $table, bool $escaped = false): ?string
   {
     if ( $table = trim($table) ){
-      $bits = explode('.', str_replace($this->qte, '', $table));
+      $bits = explode('.', $table);
       switch ( \count($bits) ){
         case 1:
-          $table = $bits[0];
+          $table = trim($bits[0], ' '.$this->qte);
           break;
         case 2:
-          $table = $bits[1];
+          $table = trim($bits[1], ' '.$this->qte);
           break;
         case 3:
-          $table = $bits[1];
+          $table = trim($bits[1], ' '.$this->qte);
           break;
       }
       if ( bbn\str::check_name($table) ){
@@ -237,14 +237,14 @@ class mysql implements bbn\db\engines
   public function col_full_name(string $col, $table = null, $escaped = false): ?string
   {
     if ( $col = trim($col) ){
-      $bits = explode('.', str_replace($this->qte, '', $col));
+      $bits = explode('.', $col);
       $ok = null;
-      $col = array_pop($bits);
+      $col = trim(array_pop($bits), ' '.$this->qte);
       if ( $table && ($table = $this->table_simple_name($table)) ){
         $ok = 1;
       }
       else if ( \count($bits) ){
-        $table = array_pop($bits);
+        $table = trim(array_pop($bits), ' '.$this->qte);
         $ok = 1;
       }
       if ( (null !== $ok) && bbn\str::check_name($table, $col) ){
@@ -263,9 +263,8 @@ class mysql implements bbn\db\engines
 	 */
   public function col_simple_name(string $col, bool $escaped=false): ?string
   {
-    if ( $col = trim($col) ){
-      $bits = explode('.', str_replace($this->qte, '', $col));
-      $col = end($bits);
+    if ( $bits = explode('.', $col) ){
+      $col = trim(end($bits), ' '.$this->qte);
       if ( bbn\str::check_name($col) ){
         return $escaped ? $this->qte.$col.$this->qte : $col;
       }

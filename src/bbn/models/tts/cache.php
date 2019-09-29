@@ -24,7 +24,9 @@ trait cache
   }
 
   protected function _cache_name($uid, $method = ''){
-    return $this->_cache_prefix.'/'.$uid.(empty($method) ? '' : '/'.(string)$method);
+    $uid = (string)$uid;
+    $path = \bbn\str::is_uid($uid) ? substr($uid, 0, 3).'/'.substr($uid, 3, 3).'/'.substr($uid, 6) : $uid;
+    return $this->_cache_prefix.'/'.$path.'/'.(empty($method) ? '' : '/'.(string)$method);
   }
 
   protected function cache_delete_all(){

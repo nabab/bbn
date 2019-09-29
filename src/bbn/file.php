@@ -104,6 +104,7 @@ class file extends models\cls\basic
         $this->path = './';
       }
     }
+   
     $this->get_extension();
     if ( \is_string($file) && is_file($file) ){
       $this->file = $file;

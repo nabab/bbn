@@ -26,27 +26,21 @@ class model extends bbn\models\cls\db{
     common,
     bbn\models\tts\cache;
 
-	private
-    /**
-     * The MVC class from which the model is called
-     * @var mvc
-     */
-    $mvc,
-    /**
-     * The file as being requested
-     * @var null|string
-     */
-    $file,
-    /**
-     * The controller instance requesting the model
-     * @var null|string
-     */
-    $ctrl,
-    /**
-     * The path as being requested
-     * @var null|string
-     */
-    $path;
+  /**
+   * The file as being requested
+   * @var null|string
+   */
+  private $_file;
+  /**
+   * The controller instance requesting the model
+   * @var null|string
+   */
+  private $_ctrl;
+  /**
+   * The path as being requested
+   * @var null|string
+   */
+  private $_path;
 
   public
     /**
@@ -78,12 +72,12 @@ class model extends bbn\models\cls\db{
 		if ( isset($info['path']) && $this->check_path($info['path']) ){
       parent::__construct($db);
       $this->cache_init();
-      $this->ctrl = $ctrl;
-      $this->mvc = $mvc;
-			$this->inc = $this->ctrl->inc;
+      $this->_ctrl = $ctrl;
+      $this->_mvc = $mvc;
+			$this->inc = $this->_ctrl->inc;
       if ( is_file($info['file']) ){
-        $this->path = $info['path'];
-        $this->file = $info['file'];
+        $this->_path = $info['path'];
+        $this->_file = $info['file'];
       }
 		}
 		else{
@@ -93,7 +87,7 @@ class model extends bbn\models\cls\db{
 
   public function register_plugin_classes($plugin_path): self
   {
-    $this->ctrl->register_plugin_classes($plugin_path);
+    $this->_ctrl->register_plugin_classes($plugin_path);
     return $this;
   }
 
@@ -103,39 +97,42 @@ class model extends bbn\models\cls\db{
       $data = [];
     }
     $this->data = $data;
-    return bbn\mvc::include_model($this->file, $this);
+    if ( $this->_plugin ){
+      $this->apply_locale($this->_plugin);
+    }
+    return bbn\mvc::include_model($this->_file, $this);
   }
 
   public function get_content(){
-    return $this->ctrl->get_content(...\func_get_args());
+    return $this->_ctrl->get_content(...\func_get_args());
   }
 
   public function get_model(){
-    return $this->ctrl->get_model(...\func_get_args());
+    return $this->_ctrl->get_model(...\func_get_args());
   }
 
   public function get_cached_model(){
-    return $this->ctrl->get_cached_model(...\func_get_args());
+    return $this->_ctrl->get_cached_model(...\func_get_args());
   }
 
   public function get_plugin_model($path, $data = [], $ttl = 0){
-    return $this->ctrl->get_plugin_model(...\func_get_args());
+    return $this->_ctrl->get_plugin_model(...\func_get_args());
   }
 
   public function has_plugin(){
-    return $this->ctrl->has_plugin(...\func_get_args());
+    return $this->_ctrl->has_plugin(...\func_get_args());
   }
 
   public function is_plugin(){
-    return $this->ctrl->is_plugin(...\func_get_args());
+    return $this->_ctrl->is_plugin(...\func_get_args());
   }
 
   public function plugin_path(){
-    return $this->ctrl->plugin_path(...\func_get_args());
+    return $this->_ctrl->plugin_path(...\func_get_args());
   }
 
   public function plugin_url(){
-    return $this->ctrl->plugin_url(...\func_get_args());
+    return $this->_ctrl->plugin_url(...\func_get_args());
   }
   /**
 	 * Checks if data exists or if a specific index exists in the data
@@ -188,8 +185,8 @@ class model extends bbn\models\cls\db{
 	}
 
 	protected function _cache_name($data, $spec = ''){
-    if ( $this->path ){
-      $cn = 'models/'.$this->path;
+    if ( $this->_path ){
+      $cn = 'models/'.$this->_path;
       if ( $spec ){
         $cn .= '/'.$spec;
       }
@@ -201,7 +198,7 @@ class model extends bbn\models\cls\db{
   }
 
   public function set_cache(array $data = null, $spec='', $ttl = 10){
-    if ( $this->path ){
+    if ( $this->_path ){
       $d = $this->get($data);
       $this->cache_set($this->_cache_name($data, $spec), '', $d, $ttl);
     }
@@ -225,4 +222,9 @@ class model extends bbn\models\cls\db{
       return false;
     }
   }
+
+  public function apply_locale($plugin){
+    return $this->_mvc->apply_locale($plugin);
+  }
+
 }

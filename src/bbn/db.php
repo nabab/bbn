@@ -799,8 +799,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
       $args[0]['limit'] = 1;
     }
     else {
-      if ( isset($args[4]) ){
-        $start = $args[4];
+      if ( isset($args[5]) ){
+        $start = $args[5];
       }
       while ( count($args) < 6 ){
         switch ( count($args) ){
@@ -814,6 +814,44 @@ class db extends \PDO implements db\actions, db\api, db\engines
             break;
           case 5:
             $args[] = $start ?? 0;
+        }
+      }
+    }
+    return $args;
+  }
+
+  /**
+   * @param array $args
+   * @return array
+   */
+  private function _set_start(array $args, int $start): array
+  {
+    var_dump($start);
+    if (
+      \is_array($args[0]) &&
+      (isset($args[0]['tables']) || isset($args[0]['table']))
+    ){
+      $args[0]['start'] = $start;
+    }
+    else {
+      if ( isset($args[5]) ){
+        $args[5] = $start;
+      }
+      else{
+        while ( count($args) < 6 ){
+          switch ( count($args) ){
+            case 1:
+            case 2:
+            case 3:
+              $args[] = [];
+              break;
+            case 4:
+              $args[] = 1;
+              break;
+            case 5:
+              $args[] = $start;
+              break;
+          }
         }
       }
     }
@@ -1306,7 +1344,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
           }
           //\bbn\x::log($res, 'sql');
           if ( $res['count'] ){
-            $res['fields'] = ['COUNT(*)'];
+            if ( $res['group_by'] ){
+              $res['fields'] = ['COUNT(DISTINCT '.x::join(array_map($this->db->cfn, $res['group_by']), ',').')'];
+            }
+            else{
+              $res['fields'] = ['COUNT(*)'];
+            }
           }
           if ( $res['select_st'] = $this->language->get_select($res) ){
             $res['sql'] = $res['select_st'];
@@ -1334,7 +1377,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
 
       $res['join_st'] = $this->language->get_join($res);
       $res['where_st'] = $this->language->get_where($res);
-      $res['group_st'] = $this->language->get_group_by($res);
+      $res['group_st'] = $res['count'] ? '' : $this->language->get_group_by($res);
       $res['having_st'] = $this->language->get_having($res);
       $res['order_st'] = $res['count'] ? '' : $this->language->get_order($res);
       $res['limit_st'] = $res['count'] ? '' : $this->language->get_limit($res);
@@ -1763,11 +1806,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
       $tables = [$tables];
     }
     foreach ( $tables as $t ){
-      if ( !($model = $this->modelize($t)) ){
+      if ( !($model = $this->get_columns($t)) ){
         $this->error('Impossible to find the table '.$t);
         die('Impossible to find the table '.$t);
       }
-      foreach ( $model['fields'] as $f => $o ){
+      foreach ( array_keys($model) as $f ){
         $res[] = $this->cfn($f, $t);
       }
     }
@@ -2269,6 +2312,28 @@ class db extends \PDO implements db\actions, db\api, db\engines
         }
         while ( ($i < 100) && $this->select($table, [$id_field], [$id_field => $id]) );
         return $id;
+      }
+    }
+    return null;
+  }
+
+  public function rselect_random($table, array $fields = [], array $where = []):? array
+  {
+    if ( $this->check() && ($num = $this->count($table, $where)) ){
+      $args = $this->_add_kind($this->_set_start($this->_set_limit_1(\func_get_args()), random_int(0, $num - 1)));
+      if ( $r = $this->_exec(...$args) ){
+        return $r->get_row();
+      }
+    }
+    return null;
+  }
+
+  public function select_random($table, array $fields = [], array $where = []):? \stdClass
+  {
+    if ( $this->check() && ($num = $this->count($table, $where)) ){
+      $args = $this->_add_kind($this->_set_start($this->_set_limit_1(\func_get_args()), random_int(0, $num - 1)));
+      if ( $r = $this->_exec(...$args) ){
+        return $r->get_obj();
       }
     }
     return null;

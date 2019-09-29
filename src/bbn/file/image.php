@@ -203,7 +203,7 @@ class image extends bbn\file
 	 * @return string
 	 */
 	public function get_extension(){
-    parent::get_extension();
+		parent::get_extension();
 		if ( !$this->ext2 && $this->file ){
 			if ( function_exists('exif_imagetype') ){
 				if ( $r = exif_imagetype($this->file) ){
@@ -268,8 +268,8 @@ class image extends bbn\file
     else if ( function_exists('imagecreatefromstring') )
      $this->img = imagecreatefromstring($this->file);
     */
-    if ( $this->file ){
-      if ( !$this->img ){
+		if ( $this->file ){
+			if ( !$this->img ){
         if ( class_exists('\\Imagick') ){
           try{
             $this->img = new \Imagick($this->file);
