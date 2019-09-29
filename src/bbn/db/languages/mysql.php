@@ -835,7 +835,7 @@ MYSQL
       $i++;
     }
     if ( count($fields_to_put['fields']) && (count($cfg['tables']) === 1) ){
-      return 'INSERT '.($cfg['ignore'] ? 'IGNORE ' : '').'INTO '.$this->table_simple_name(current($cfg['tables']), true).PHP_EOL.
+      return 'INSERT '.($cfg['ignore'] ? 'IGNORE ' : '').'INTO '.$this->table_full_name(current($cfg['tables']), true).PHP_EOL.
         '('.implode(', ', $fields_to_put['fields']).')'.PHP_EOL.' VALUES ('.
         implode(', ', $fields_to_put['values']).')'.PHP_EOL;
     }
@@ -872,7 +872,7 @@ MYSQL
       }
     }
     if ( count($fields_to_put['fields']) ){
-      $res .= 'UPDATE '.($cfg['ignore'] ? 'IGNORE ' : '').$this->table_simple_name(current($cfg['tables']), true).' SET ';
+      $res .= 'UPDATE '.($cfg['ignore'] ? 'IGNORE ' : '').$this->table_full_name(current($cfg['tables']), true).' SET ';
       $last = count($fields_to_put['fields']) - 1;
       foreach ( $fields_to_put['fields'] as $i => $f ){
         $res .= $f.' = '.$fields_to_put['values'][$i];
