@@ -238,7 +238,6 @@ class router
       ) {
         $path = self::$_known[$mode][$path];
       }
-      //$this->log("known", self::$_known);
       return self::$_known[$mode][$path];
     }
 
@@ -290,7 +289,6 @@ class router
           if (!empty($o['plugin'])) {
             $plugin_path = $this->_parse(\dirname($plugin_path));
             $alt_ctrl = $plugin_root . ($plugin_path === '.' ? '' : $plugin_path . '/') . $checker_file;
-            //$this->log("ALT", $alt_ctrl);
             if (is_file($alt_ctrl) && !\in_array($alt_ctrl, $s['checkers'], true)) {
               array_unshift($s['checkers'], $alt_ctrl);
             }
@@ -304,8 +302,6 @@ class router
         }
       }
     }
-    \bbn\x::log(self::$_known[$mode][$path], '_set_known');
-    //\bbn\x::hdump(self::$_known[$mode][$path]);
     if (!$save) {
       // If not saving the index is unset and the funciton will be relaunched ion case the same request is done again
       $o = self::$_known[$mode][$path];
@@ -716,10 +712,8 @@ class router
       // We only try to retrieve a file path through a whole URL for controllers
       if (\in_array($mode, self::$_controllers, true)) {
         $this->_mode = $mode;
-        //$this->log($path);
         return $this->_find_controller($path, $mode);
       }
-      //\bbn\x::log($this->_find_mv($path, $mode), 'translations');
       return $this->_find_mv($path, $mode);
     }
 

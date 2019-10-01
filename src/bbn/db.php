@@ -981,7 +981,6 @@ class db extends \PDO implements db\actions, db\api, db\engines
   public function treat_conditions(array $where, $full = true){
     if ( !isset($where['conditions']) ){
       $where['conditions'] = $where;
-      $where['logic'] = 'AND';
     }
     if ( isset($where['conditions']) && \is_array($where['conditions']) ){
       if ( !isset($where['logic']) || (strtoupper($where['logic']) !== 'OR') ){
@@ -1345,7 +1344,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
           //\bbn\x::log($res, 'sql');
           if ( $res['count'] ){
             if ( $res['group_by'] ){
-              $res['fields'] = ['COUNT(DISTINCT '.x::join(array_map($this->db->cfn, $res['group_by']), ',').')'];
+              $fn = $this->cfn;
+              $res['fields'] = ['COUNT(DISTINCT '.x::join(array_map($fn, $res['group_by']), ',').')'];
             }
             else{
               $res['fields'] = ['COUNT(*)'];
@@ -2560,10 +2560,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
     $args = $this->_add_kind($this->_set_limit_1(\func_get_args()));
     if ( $r = $this->_exec(...$args) ){
       if ( !is_object($r) ){
-        \bbn\x::log([$args, $this->process_cfg($args)]);
-        die(var_dump($args));
+        $this->log([$args, $this->process_cfg($args)]);
       }
-      return $r->get_object();
+      else{
+        return $r->get_object();
+      }
     }
     return null;
   }
@@ -3044,14 +3045,14 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * Inserts row(s) in a table.
    *
    * <code>
-   * $this->db->insert("table_users", [
+   * $db->insert("table_users", [
    *    ["name" => "Ted"],
    *    ["surname" => "McLow"]
    *  ]);
    * </code>
    *
    * <code>
-   * $this->db->insert("table_users", [
+   * $db->insert("table_users", [
    *    ["name" => "July"],
    *    ["surname" => "O'neill"]
    *  ], [
@@ -3102,7 +3103,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * If not exist inserts row(s) in a table, else update.
    *
    * <code>
-   * $this->db->insert_update(
+   * $db->insert_update(
    *  "table_users",
    *  [
    *    'id' => '12',
@@ -3159,7 +3160,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * Updates row(s) in a table.
    *
    * <code>
-   * $this->db->update(
+   * $db->update(
    *  "table_users",
    *  [
    *    ['name' => 'Frank'],
@@ -3192,7 +3193,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * If exist updates row(s) in a table, else ignore.
    *
    * <code>
-   * $this->db->update_ignore(
+   * $db->update_ignore(
    *   "table_users",
    *   [
    *     ['name' => 'Frank'],
@@ -3217,7 +3218,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * Deletes row(s) in a table.
    *
    * <code>
-   * $this->db->delete("table_users", ['id' => '32']);
+   * $db->delete("table_users", ['id' => '32']);
    * </code>
    *
    * @param string|array $table The table name or the configuration array.
@@ -3241,7 +3242,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * If exist deletess row(s) in a table, else ignore.
    *
    * <code>
-   * $this->db->delete_ignore(
+   * $db->delete_ignore(
    *  "table_users",
    *  ['id' => '20']
    * );
@@ -3261,7 +3262,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * If not exist inserts row(s) in a table, else ignore.
    *
    * <code>
-   * $this->db->insert_ignore(
+   * $db->insert_ignore(
    *  "table_users",
    *  [
    *    ['id' => '19', 'name' => 'Frank'],

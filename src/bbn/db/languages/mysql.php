@@ -538,9 +538,9 @@ MYSQL
     if ( isset($conditions['conditions'], $conditions['logic']) ){
       $logic = isset($conditions['logic']) && ($conditions['logic'] === 'OR') ? 'OR' : 'AND';
       foreach ( $conditions['conditions'] as $key => $f ){
-        if ( \is_array($f) && isset($f['logic']) && !empty($f['conditions']) ){
+        if ( \is_array($f) && isset($f['logic']) && isset($f['conditions']) ){
           if ( $tmp = $this->get_conditions($f, $cfg, $is_having) ){
-            $res .= (empty($res) ? '(' : PHP_EOL."$logic ").$tmp;
+            $res .= (empty($res) ? '(' : PHP_EOL."$logic (").$tmp.")";
           }
         }
         else if ( isset($f['operator'], $f['field']) ){
@@ -559,7 +559,7 @@ MYSQL
             if ( isset($cfg['models'][$table]['fields'][$column]) ){
               $model = $cfg['models'][$table]['fields'][$column];
               $res .= (empty($res) ?
-                  '(' :
+                  '' :
                   " $logic ").(
                 !empty($cfg['available_fields'][$field]) ?
                   $this->col_full_name($cfg['fields'][$field] ?? $field, $cfg['available_fields'][$field], true).' ' :
@@ -571,7 +571,7 @@ MYSQL
               if ( !$is_having && ($table === false) && isset($cfg['fields'][$field]) ){
                 $field = $cfg['fields'][$field];
               }
-              $res .= (empty($res) ? '(' : PHP_EOL."$logic ").$field.' ';
+              $res .= (empty($res) ? '' : PHP_EOL."$logic ").$field.' ';
             }
             if ( !empty($model) ){
               $is_null = (bool)$model['null'];
@@ -596,7 +596,7 @@ MYSQL
             }
           }
           else{
-            $res .= (empty($res) ? '(' : " $logic ").$field.' ';
+            $res .= (empty($res) ? '' : " $logic ").$field.' ';
           }
           switch ( strtolower($f['operator']) ){
             case 'like':
@@ -715,7 +715,7 @@ MYSQL
         }
       }
       if ( !empty($res) ){
-        $res .= ')'.PHP_EOL;
+        $res .= PHP_EOL;
       }
     }
     return $res;

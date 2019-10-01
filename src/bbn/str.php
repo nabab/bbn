@@ -1250,24 +1250,6 @@ class str
         if ( \is_array($v) ){
           $st .= self::export($v, $remove_empty, $lev+1);
         }
-        else if ( $is_object ){
-          $cls = \get_class($v);
-          if ( $cls === 'stdClass' ){
-            $st .= self::export($v, $remove_empty, $lev+1);
-          }
-          else{
-            /*
-            $rc = new \ReflectionClass($cls);
-            if ( $rc->hasMethod('__toString') ){
-              $st .= $v;
-            }
-            else{
-              $st .= 'Object '.$cls;
-            }
-            */
-            $st .= 'Object '.$cls;
-          }
-        }
         else if ( $v === 0 ){
           $st .= '0';
         }
@@ -1280,11 +1262,29 @@ class str
         else if ( \is_int($v) || \is_float($v) ){
           $st .= $v;
         }
-        else if ( !ctype_print($v) && (\strlen($v) === 16) ){
-          $st .= '0x'.bin2hex($v);
+        else if ( is_string($v) ){
+          if ( !ctype_print($v) && (\strlen($v) === 16) ){
+            $st .= '0x'.bin2hex($v);
+          }
+          else if ( !$remove_empty || !empty($v) ){
+            $st .= '"'.self::escape_dquote($v).'"';
+          }
         }
-        else if ( !$remove_empty || !empty($v) ){
-          $st .= '"'.self::escape_dquote($v).'"';
+        else {
+          try{
+            $cls = get_class($v);
+          }
+          catch ( \Exception $e ){
+            $st .= '"Unknown"';
+          }
+          if ( $cls ){
+            if ( $cls === 'stdClass' ){
+              $st .= self::export($v, $remove_empty, $lev+1);
+            }
+            else{
+              $st .= 'Object '.$cls;
+            }
+          }
         }
         $st .= ','.PHP_EOL;
       }

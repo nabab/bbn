@@ -135,7 +135,7 @@ class controller implements api{
       $this->inc = $this->_mvc->inc;
       $this->post = $this->_mvc->get_post();
       $this->get = $this->_mvc->get_get();
-      $this->_files = $this->_mvc->get_files();
+      $this->files = $this->_mvc->get_files();
       $this->params = $this->_mvc->get_params();
       $this->url = $this->get_url();
       $this->obj = new \stdClass();

@@ -453,7 +453,6 @@ class user extends models\cls\basic
    * @return mixed
    */
   private function _get_session($attr){
-    //die(\bbn\x::hdump(self::$sn, $this->session->has(self::$sn), $attr, $this->session->get(self::$sn)));
     if ( $this->session->has(self::$sn) ){
       return $attr ?
         $this->session->get(self::$sn, $attr) :
@@ -467,7 +466,9 @@ class user extends models\cls\basic
    * @return mixed
    */
   private function _check_credentials($params){
+    
     if ( $this->check() ){
+      
       /** @var array $f The form fields sent to identify the users */
       $f =& $this->class_cfg['fields'];
 
@@ -1130,7 +1131,7 @@ class user extends models\cls\basic
 	 * @return boolean
 	 */
 	public function check(){
-		return $this->get_error() ? false : true;
+    return $this->get_error() ? false : true;
 	}
 
   /**
