@@ -472,9 +472,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
           break;
         case 'binary':
           if ( $cfg['primary_length'] === 16 ){
-            x::log($cfg['tables'], 'add_options');
             $val = $this->get_uid();
-            x::log($val, 'add_options');
           }
           break;
       }

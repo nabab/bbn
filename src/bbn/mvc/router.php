@@ -116,6 +116,23 @@ class router
   }
 
   /**
+   * Removes trailing slashes.
+   *
+   * @param string $path
+   *
+   * @return string
+   */
+  public static function parse(string $path): string
+  {
+    while ( strpos($path, '//') !== false ){
+      $path = str_replace('//', '/', $path);
+    }
+    $path = trim($path, '/\\ ');
+
+    return $path ?: '.';
+  }
+
+  /**
    * Get the full path in the mvc/mode of the main app.
    *
    * @param string $mode The mode as defined in self::$_modes
@@ -153,21 +170,6 @@ class router
   }
 
   /**
-   * Removes trailing slashes.
-   *
-   * @param string $path
-   *
-   * @return string
-   */
-  private function _parse(string $path): string
-  {
-    $path = bbn\str::parse_path($path, true);
-    $path = trim($path, '/\\ ');
-
-    return $path ?: '.';
-  }
-
-  /**
    * Checks whether a path is part of the routes['alias'] array.
    *
    * @param mixed $path
@@ -176,7 +178,7 @@ class router
    */
   private function _is_alias(string $path): ?string
   {
-    $path = $this->_parse($path);
+    $path = self::parse($path);
     if (isset($this->_routes['alias'][$path])) {
       return $path;
     }
@@ -198,7 +200,7 @@ class router
    */
   private function _get_alias(string $path): ?string
   {
-    $path = $this->_parse($path);
+    $path = self::parse($path);
     if (isset($this->_routes['alias'][$path])) {
       return \is_array($this->_routes['alias'][$path]) ? $this->_routes['alias'][$path][0] : $this->_routes['alias'][$path];
     }
@@ -257,7 +259,7 @@ class router
       return null;
     }
     $mode = $o['mode'];
-    $path = $this->_parse($o['path']);
+    $path = self::parse($o['path']);
     // The root in the main application where to search in is defined according to the mode
     $root = $this->_get_root($mode);
     if (!empty($o['plugin'])) {
@@ -284,10 +286,10 @@ class router
         $tmp = $path;
         // Going backwards in the tree, so adding reversely to the array (prepending)
         while (\strlen($tmp) > 0) {
-          $tmp = $this->_parse(\dirname($tmp));
+          $tmp = self::parse(\dirname($tmp));
           $checker = ($tmp === '.' ? '' : $tmp . '/') . $checker_file;
           if (!empty($o['plugin'])) {
-            $plugin_path = $this->_parse(\dirname($plugin_path));
+            $plugin_path = self::parse(\dirname($plugin_path));
             $alt_ctrl = $plugin_root . ($plugin_path === '.' ? '' : $plugin_path . '/') . $checker_file;
             if (is_file($alt_ctrl) && !\in_array($alt_ctrl, $s['checkers'], true)) {
               array_unshift($s['checkers'], $alt_ctrl);
@@ -324,7 +326,7 @@ class router
   private function _find_controller($path, $mode): ?array
   {
     // Removing tgrailing slashes
-    $path = $this->_parse($path);
+    $path = self::parse($path);
     // If the result is already known we just return it
     if ($this->_is_known($path, $mode)) {
       return $this->_get_known($path, $mode);
@@ -743,12 +745,12 @@ class router
       }
       $dir = false;
       foreach (self::$_filetypes[$mode] as $t) {
-        $dir1 = $this->_parse($root . $path);
+        $dir1 = self::parse($root . $path);
         if (is_dir($dir1) && (strpos($dir1, $root) === 0)) {
           $dir = $dir1;
         }
         else if (
-          $alt_path && ($dir2 = $this->_parse($alt_root . substr($path, \strlen($alt_path) + 1))) && (strpos($dir2, $alt_root) === 0) &&
+          $alt_path && ($dir2 = self::parse($alt_root . substr($path, \strlen($alt_path) + 1))) && (strpos($dir2, $alt_root) === 0) &&
           is_dir($dir2)
         ) {
           $dir = $dir2;

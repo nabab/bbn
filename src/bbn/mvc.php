@@ -547,7 +547,7 @@ class mvc implements mvc\api{
    * @return string|false
    */
   public function get_view(string $path, string $mode = 'html', array $data=null){
-    if ( !router::is_mode($mode) ){
+    if ( !router::is_mode($mode) || !($path = router::parse($path)) ){
       die("Incorrect mode $path $mode");
     }
     $view = null;
@@ -573,7 +573,7 @@ class mvc implements mvc\api{
    * @return string|false
    */
   public function get_external_view(string $full_path, string $mode = 'html', array $data=null){
-    if ( !router::is_mode($mode) ){
+    if ( !router::is_mode($mode) && ($full_path = str::parse_path($full_path)) ){
       die("Incorrect mode $full_path $mode");
     }
     if ( ($this->get_mode() === 'dom') && (!defined('BBN_DEFAULT_MODE') || (BBN_DEFAULT_MODE !== 'dom')) ){
@@ -605,7 +605,7 @@ class mvc implements mvc\api{
 
   public function custom_plugin_view(string $path, string $mode, array $data, string $plugin): ?string
   {
-    if ( $plugin && ($route = $this->router->route_custom_plugin($path, $mode, $plugin)) ){
+    if ( $plugin && ($route = $this->router->route_custom_plugin(router::parse($path), $mode, $plugin)) ){
       $view = new mvc\view($route);
       if ( $view->check() ){
         return \is_array($data) ? $view->get($data) : $view->get();
@@ -617,7 +617,7 @@ class mvc implements mvc\api{
 
   public function custom_plugin_model(string $path, array $data, mvc\controller $ctrl, string $plugin, int $ttl = 0): ?array
   {
-    if ( $plugin && ($route = $this->router->route_custom_plugin($path, 'model', $plugin)) ){
+    if ( $plugin && ($route = $this->router->route_custom_plugin(router::parse($path), 'model', $plugin)) ){
       $model = new mvc\model($this->db, $route, $ctrl, $this);
       if ( $ttl ){
         return $model->get_from_cache($data, '', $ttl);
@@ -637,7 +637,7 @@ class mvc implements mvc\api{
    * @return string|false
    */
   public function get_plugin_view(string $path, string $mode, array $data, string $plugin){
-    return $this->custom_plugin_view($path, $mode, $data, $this->plugin_name($plugin));
+    return $this->custom_plugin_view(router::parse($path), $mode, $data, $this->plugin_name($plugin));
   }
 
   /**
@@ -648,7 +648,7 @@ class mvc implements mvc\api{
    * @return array|false A data model
    */
   public function get_model($path, array $data, mvc\controller $ctrl){
-    if ( $route = $this->router->route($path, 'model') ){
+    if ( ($path = router::parse($path)) && ($route = $this->router->route($path, 'model')) ){
       $model = new mvc\model($this->db, $route, $ctrl, $this);
       return $model->get($data);
     }
@@ -656,7 +656,7 @@ class mvc implements mvc\api{
   }
 
   public function get_plugin_model(string $path, array $data, mvc\controller $ctrl, string $plugin, int $ttl = 0){
-    return $this->custom_plugin_model($path, $data, $ctrl, $this->plugin_name($plugin), $ttl);
+    return $this->custom_plugin_model(router::parse($path), $data, $ctrl, $this->plugin_name($plugin), $ttl);
   }
 
   /**
@@ -666,11 +666,11 @@ class mvc implements mvc\api{
    * @params array data to send to the model
    * @return array|false A data model
    */
-  public function get_cached_model($path, array $data, mvc\controller $ctrl, $ttl = 10){
+  public function get_cached_model(string $path, array $data, mvc\controller $ctrl, $ttl = 10){
     if ( \is_null($data) ){
       $data = $this->data;
     }
-    if ( $route = $this->router->route($path, 'model') ){
+    if ( $route = $this->router->route(router::parse($path), 'model') ){
       $model = new mvc\model($this->db, $route, $ctrl, $this);
       return $model->get_from_cache($data, '', $ttl);
     }
@@ -688,7 +688,7 @@ class mvc implements mvc\api{
     if ( \is_null($data) ){
       $data = $this->data;
     }
-    if ( $route = $this->router->route($path, 'model') ){
+    if ( $route = $this->router->route(router::parse($path), 'model') ){
       $model = new mvc\model($this->db, $route, $ctrl, $this);
       return $model->set_cache($data, '', $ttl);
     }
@@ -707,7 +707,7 @@ class mvc implements mvc\api{
     if ( \is_null($data) ){
       $data = $this->data;
     }
-    if ( $route = $this->router->route($path, 'model') ){
+    if ( $route = $this->router->route(router::parse($path), 'model') ){
       $model = new mvc\model($this->db, $route, $ctrl, $this);
       return $model->delete_cache($data, '');
     }

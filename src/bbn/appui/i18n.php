@@ -235,18 +235,6 @@ class i18n extends bbn\models\cls\cache
     }
   }
 
-  public function update_db(){
-    foreach ( $this->result() as $st ){
-      $this->db->insert_ignore();
-    }
-  }
-
-  public function insert(){
-    foreach ( $this->result() as $st ){
-      $this->db->insert();
-    }
-  }
-
   /**
    * Gets primaries langs from option
    *
@@ -825,7 +813,6 @@ class i18n extends bbn\models\cls\cache
   public function get_translations_table($id_project, $id_option){
     if ( !empty($id_option) &&
       ($o = options::get_instance()->option($id_option)) ){
-
       // @var  $path_source_lang the property language of the id_option (the path) 
       $path_source_lang = options::get_instance()->get_prop($id_option, 'language');
 
@@ -841,6 +828,7 @@ class i18n extends bbn\models\cls\cache
       $i = 0;
       $res = [];
       $project = new bbn\appui\project($this->db, $id_project);
+      $errors = [];
       if ( !empty($languages) ){
        
         $po_file = [];
@@ -861,73 +849,81 @@ class i18n extends bbn\models\cls\cache
               foreach ($translations as $i => $t ){
                 // @var  $original the original expression 
                 $id = null;
-                $original = $t->getMsgId();
-                $idx = \bbn\x::find($res, ['exp' => $original]);
-                if ( $idx !== false ){
-                  $todo = false;
-                  $row =& $res[$idx];
-                }
-                else{
-                  $todo = true;
-                  $row = [];
-                }
-                // the translation of the string found in the po file 
-                if ( isset($row['id']) ){
-                  $id = $row['id'];
-                }
-                // @var  $id takes the id of the original expression in db 
-                if ( !isset($id) && !($id = $this->db->select_one('bbn_i18n', 'id', [
-                  'exp' => $original,
-                  'lang' => $path_source_lang
-                ])) ){
-                  $this->db->insert('bbn_i18n', [
+                if ( $original = $t->getMsgId() ){
+                  $idx = \bbn\x::find($res, ['exp' => $original]);
+                  if ( $idx !== false ){
+                    $todo = false;
+                    $row =& $res[$idx];
+                  }
+                  else{
+                    $todo = true;
+                    $row = [];
+                  }
+                  // the translation of the string found in the po file 
+                  if ( isset($row['id']) ){
+                    $id = $row['id'];
+                  }
+                  // @var  $id takes the id of the original expression in db 
+                  if ( !isset($id) && !($id = $this->db->select_one('bbn_i18n', 'id', [
                     'exp' => $original,
                     'lang' => $path_source_lang
-                  ]);
-                  $id = $this->db->last_id();
-                }
-                if ( $id ){
-                  $row[$lng.'_po'] = $t->getMsgStr();
-                  $row[$lng.'_db'] = $this->db->select_one('bbn_i18n_exp', 'expression', ['id_exp' => $id, 'lang' => $lng]);
-                  if ( $row[$lng.'_po'] && !$row[$lng.'_db'] ){
-                    if (
-                      (($row[$lng.'_db'] === false) &&
-                      $this->db->insert('bbn_i18n_exp', [
-                        'expression' => $row[$lng.'_po'],
-                        'id_exp' => $id,
-                        'lang' => $lng
-                      ])) ||
-                      $this->db->update('bbn_i18n_exp', [
-                        'expression' => $row[$lng.'_po']
-                      ], [
-                        'id_exp' => $id,
-                        'lang' => $lng
-                      ])
-                    ){
-                      $row[$lng.'_db'] = $row[$lng.'_po'];
+                  ])) ){
+
+                    if ( !$this->db->insert_ignore('bbn_i18n', [
+                      'exp' => $original,
+                      'lang' => $path_source_lang
+                    ]) ){
+                      die(\bbn\x::hdump($original,$t->getReference()));
+                      $errors[] = $original;
+
                     }
                     else{
-                      die("Error");
+                      $id = $this->db->last_id();
                     }
                   }
-                  if ($todo) {
-                    $row['id_exp'] = $id;
-                    $row['paths'] = [];
-                    $row['exp'] = $original;
-                    // @var (array) takes $paths of files in which the string was found from the file po
-                    $paths = $t->getReference();
-                  
-                    // get the url to use it for the link to ide from the table
-                    foreach ($paths as $p) {
-                        $row['paths'][] = $project->real_to_url_i18n($p);
+                  if ( $id ){
+                    $row[$lng.'_po'] = $t->getMsgStr();
+                    $row[$lng.'_db'] = $this->db->select_one('bbn_i18n_exp', 'expression', ['id_exp' => $id, 'lang' => $lng]);
+                    if ( $row[$lng.'_po'] && !$row[$lng.'_db'] ){
+                      if (
+                        (($row[$lng.'_db'] === false) &&
+                        $this->db->insert('bbn_i18n_exp', [
+                          'expression' => $row[$lng.'_po'],
+                          'id_exp' => $id,
+                          'lang' => $lng
+                        ])) ||
+                        $this->db->update('bbn_i18n_exp', [
+                          'expression' => $row[$lng.'_po']
+                        ], [
+                          'id_exp' => $id,
+                          'lang' => $lng
+                        ])
+                      ){
+                        $row[$lng.'_db'] = $row[$lng.'_po'];
+                      }
+                      else{
+                        die("Error");
+                      }
                     }
-                    // the number of times the strings is found in the files of the path
-                    $row['occurrence'] = count($row['paths']);
-                    $res[] = $row;
+                    if ($todo) {
+                      $row['id_exp'] = $id;
+                      $row['paths'] = [];
+                      $row['exp'] = $original;
+                      // @var (array) takes $paths of files in which the string was found from the file po
+                      $paths = $t->getReference();
+                    
+                      // get the url to use it for the link to ide from the table
+                      foreach ($paths as $p) {
+                          $row['paths'][] = $project->real_to_url_i18n($p);
+                      }
+                      // the number of times the strings is found in the files of the path
+                      $row['occurrence'] = count($row['paths']);
+                      $res[] = $row;
+                    }
                   }
-                }
-                else{
-                  die("Error 2");
+                  else{
+                    die("Error 2");
+                  }
                 }
               }
               
@@ -945,6 +941,7 @@ class i18n extends bbn\models\cls\cache
         'total' => count(array_values($po_file)),
         'strings' => $res,
         'id_option' => $id_option,
+        'errors' => $errors
       ];
     }
 

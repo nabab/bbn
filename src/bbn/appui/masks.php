@@ -94,7 +94,6 @@ class masks extends bbn\models\cls\db {
   }
 
   public function get_default($id_type){
-    \bbn\x::log('id_type: '.$id_type,'attestation404');
     if ( !bbn\str::is_uid($id_type) ){
       $id_type = self::get_option_id($id_type);
     }
