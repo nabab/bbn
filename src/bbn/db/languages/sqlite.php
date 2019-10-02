@@ -434,15 +434,16 @@ class sqlite implements bbn\db\engines
    * @param bool $is_having
    * @return string
    */
-  public function get_conditions(array $conditions, array $cfg = [], bool $is_having = false): string
+  public function get_conditions(array $conditions, array $cfg = [], bool $is_having = false, int $indent = 0): string
   {
     $res = '';
     if ( isset($conditions['conditions'], $conditions['logic']) ){
       $logic = isset($conditions['logic']) && ($conditions['logic'] === 'OR') ? 'OR' : 'AND';
       foreach ( $conditions['conditions'] as $key => $f ){
         if ( \is_array($f) && isset($f['logic']) && !empty($f['conditions']) ){
-          if ( $tmp = $this->get_conditions($f, $cfg, $is_having) ){
-            $res .= (empty($res) ? '(' : PHP_EOL."$logic ").$tmp;
+          if ( $tmp = $this->get_conditions($f, $cfg, $is_having, $indent + 2) ){
+            $res .= (empty($res) ? '(' : PHP_EOL.str_repeat(' ', $indent)."$logic (").
+                    $tmp.PHP_EOL.str_repeat(' ', $indent).")";
           }
         }
         else if ( isset($f['operator'], $f['field']) ){
@@ -460,16 +461,18 @@ class sqlite implements bbn\db\engines
             $column = $this->col_simple_name($cfg['fields'][$field] ?? $field);
             if ( isset($cfg['models'][$table]['fields'][$column]) ){
               $model = $cfg['models'][$table]['fields'][$column];
-              $res .= (empty($res) ?
-                  '(' :
-                  " $logic ").(
-                !empty($cfg['available_fields'][$field]) ?
-                  $this->col_full_name($cfg['fields'][$field] ?? $field, $cfg['available_fields'][$field], true).' ' :
-                  $this->col_simple_name($column, true)
-                );
+              $res .= PHP_EOL.str_repeat(' ', $indent).(empty($res) ? '' : "$logic ").
+                      (!empty($cfg['available_fields'][$field]) ?
+                        $this->col_full_name($cfg['fields'][$field] ?? $field, $cfg['available_fields'][$field], true).' '
+                        : $this->col_simple_name($column, true)
+                      );
             }
             else{
-              $res .= (empty($res) ? '(' : PHP_EOL."$logic ").$field.' ';
+              // Remove the alias from where and join but not in having
+              if ( !$is_having && ($table === false) && isset($cfg['fields'][$field]) ){
+                $field = $cfg['fields'][$field];
+              }
+              $res .= (empty($res) ? '' : PHP_EOL.str_repeat(' ', $indent).$logic.' ').$field.' ';
             }
             if ( !empty($model) ){
               $is_null = (bool)$model['null'];
@@ -489,9 +492,12 @@ class sqlite implements bbn\db\engines
             else if ( $f['value'] && \bbn\str::is_uid($f['value']) ){
               $is_uid = true;
             }
+            else if ( is_int($f['value']) || is_float($f['value']) ){
+              $is_number = true;
+            }
           }
           else{
-            $res .= (empty($res) ? '(' : " $logic ").$field.' ';
+            $res .= (empty($res) ? '' : " $logic ").$field.' ';
           }
           switch ( strtolower($f['operator']) ){
             case 'like':
@@ -806,8 +812,9 @@ class sqlite implements bbn\db\engines
     $res = '';
     if ( !empty($cfg['join']) ){
       foreach ( $cfg['join'] as $join ){
-        if ( isset($join['table'], $join['on']) && ($cond = $this->db->get_conditions($join['on'], $cfg)) ){
+        if ( isset($join['table'], $join['on']) && ($cond = $this->db->get_conditions($join['on'], $cfg, false, 4)) ){
           $res .=
+            '  '.
             (isset($join['type']) && ($join['type'] === 'left') ? 'LEFT ' : '').
             'JOIN '.$this->table_full_name($join['table'],true).
             (!empty($join['alias']) ? ' AS '.$this->escape($join['alias']) : '').PHP_EOL.'ON '.$cond;
@@ -868,8 +875,8 @@ class sqlite implements bbn\db\engines
   public function get_having(array $cfg): string
   {
     $res = '';
-    if ( !empty($cfg['group_by']) && !empty($cfg['having']) && ($cond = $this->get_conditions($cfg['having'], $cfg, true)) ){
-      $res .= 'HAVING '.$cond.PHP_EOL;
+    if ( !empty($cfg['group_by']) && !empty($cfg['having']) && ($cond = $this->get_conditions($cfg['having'], $cfg, true, 2)) ){
+      $res .= '  HAVING '.$cond.PHP_EOL;
     }
     return $res;
   }

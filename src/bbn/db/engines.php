@@ -154,7 +154,7 @@ interface engines
    * @param bool $is_having
    * @return string
    */
-  public function get_conditions(array $conditions, array $cfg = [], bool $is_having = false): string;
+  public function get_conditions(array $conditions, array $cfg = [], bool $is_having = false, int $indent = 0): string;
 
   /**
    * Generates a string starting with SELECT ... FROM with corresponding parameters

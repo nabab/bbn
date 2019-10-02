@@ -4072,9 +4072,9 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @param bool $is_having
    * @return string
    */
-  public function get_conditions(array $conditions, array $cfg = [], bool $is_having = false): string
+  public function get_conditions(array $conditions, array $cfg = [], bool $is_having = false, int $indent = 0): string
   {
-    return $this->language->get_conditions($conditions, $cfg, $is_having);
+    return $this->language->get_conditions($conditions, $cfg, $is_having, $indent);
   }
 
   /**
