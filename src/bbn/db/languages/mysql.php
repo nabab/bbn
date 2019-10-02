@@ -715,9 +715,8 @@ MYSQL
       }
     }
     if ( !empty($res) ){
-      $res .= PHP_EOL;
+      return str_replace(PHP_EOL.PHP_EOL, PHP_EOL, $res.PHP_EOL);
     }
-    $res = str_replace(PHP_EOL.PHP_EOL, PHP_EOL, $res);
     return $res;
   }
 

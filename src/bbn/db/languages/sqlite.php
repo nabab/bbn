@@ -440,7 +440,7 @@ class sqlite implements bbn\db\engines
     if ( isset($conditions['conditions'], $conditions['logic']) ){
       $logic = isset($conditions['logic']) && ($conditions['logic'] === 'OR') ? 'OR' : 'AND';
       foreach ( $conditions['conditions'] as $key => $f ){
-        if ( \is_array($f) && isset($f['logic']) && !empty($f['conditions']) ){
+        if ( \is_array($f) && isset($f['logic']) && isset($f['conditions']) ){
           if ( $tmp = $this->get_conditions($f, $cfg, $is_having, $indent + 2) ){
             $res .= (empty($res) ? '(' : PHP_EOL.str_repeat(' ', $indent)."$logic (").
                     $tmp.PHP_EOL.str_repeat(' ', $indent).")";
@@ -463,9 +463,9 @@ class sqlite implements bbn\db\engines
               $model = $cfg['models'][$table]['fields'][$column];
               $res .= PHP_EOL.str_repeat(' ', $indent).(empty($res) ? '' : "$logic ").
                       (!empty($cfg['available_fields'][$field]) ?
-                        $this->col_full_name($cfg['fields'][$field] ?? $field, $cfg['available_fields'][$field], true).' '
+                        $this->col_full_name($cfg['fields'][$field] ?? $field, $cfg['available_fields'][$field], true)
                         : $this->col_simple_name($column, true)
-                      );
+                      ).' ';
             }
             else{
               // Remove the alias from where and join but not in having
@@ -497,7 +497,7 @@ class sqlite implements bbn\db\engines
             }
           }
           else{
-            $res .= (empty($res) ? '' : " $logic ").$field.' ';
+            $res .= (empty($res) ? '' : PHP_EOL.str_repeat(' ', $indent).$logic.' ').$field.' ';
           }
           switch ( strtolower($f['operator']) ){
             case 'like':
@@ -611,9 +611,9 @@ class sqlite implements bbn\db\engines
           }
         }
       }
-      if ( !empty($res) ){
-        $res .= ')'.PHP_EOL;
-      }
+    }
+    if ( !empty($res) ){
+      return str_replace(PHP_EOL.PHP_EOL, PHP_EOL, $res.PHP_EOL);
     }
     return $res;
   }
