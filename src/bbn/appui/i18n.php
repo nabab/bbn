@@ -51,6 +51,15 @@ class i18n extends bbn\models\cls\cache
       }
       $this->parser->mergeWith($tmp);
     }
+    if ( $tmp = \Gettext\Translations::fromVueJsString('<template>'.$php.'</template>', [
+      'functions' => ['_' => 'gettext'],
+      'file' => $file
+      ]) ){
+      foreach ( $tmp->getIterator() as $r => $tr ){
+        $res[] = $tr->getOriginal();
+      }
+      $this->parser->mergeWith($tmp);
+    }
     return array_unique($res);
   }
 
@@ -67,8 +76,7 @@ class i18n extends bbn\models\cls\cache
     if ( $tmp = \Gettext\Translations::fromJsCodeString($js, [
       'functions' => [
         '_' => 'gettext',
-        'bbn._' => 'gettext',
-        '${bbn._' => 'gettext',
+        'bbn._' => 'gettext'
       ],
       'file' => $file
       ]) ){
@@ -76,6 +84,23 @@ class i18n extends bbn\models\cls\cache
         $res[] = $tr->getOriginal();
       }
       $this->parser->mergeWith($tmp);
+    }
+    if ( preg_match_all('/`([^`]*)`/', $js, $matches) ){
+      foreach ( $matches[0] as $st ){
+        if ( $tmp = \Gettext\Translations::fromVueJsString('<template>'.$st.'</template>', [
+          'functions' => [
+            '_' => 'gettext',
+            'bbn._' => 'gettext'
+          ],
+          'file' => $file
+          ])
+        ){
+          foreach ( $tmp->getIterator() as $r => $tr ){
+            $res[] = $tr->getOriginal();
+          }
+          $this->parser->mergeWith($tmp);
+        }
+      }
     }
     /*if($file === '/home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/appui-task/src/components/tab/tracker/tracker.js'){
       die(\bbn\x::hdump($res, $js));
@@ -88,7 +113,7 @@ class i18n extends bbn\models\cls\cache
   {
     $res = [];
     $js = file_get_contents($file);
-    if ( $tmp = \Gettext\Translations::fromJsonString($js, [
+    if ( $tmp = \Gettext\Translations::fromJsCodeString($js, [
       'functions' => [
         '_' => 'gettext',
         'bbn._' => 'gettext'
