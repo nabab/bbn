@@ -561,9 +561,9 @@ MYSQL
               $model = $cfg['models'][$table]['fields'][$column];
               $res .= PHP_EOL.str_repeat(' ', $indent).(empty($res) ? '' : "$logic ").
                       (!empty($cfg['available_fields'][$field]) ?
-                        $this->col_full_name($cfg['fields'][$field] ?? $field, $cfg['available_fields'][$field], true).' '
+                        $this->col_full_name($cfg['fields'][$field] ?? $field, $cfg['available_fields'][$field], true)
                         : $this->col_simple_name($column, true)
-                      );
+                      ).' ';
             }
             else{
               // Remove the alias from where and join but not in having
@@ -595,7 +595,7 @@ MYSQL
             }
           }
           else{
-            $res .= (empty($res) ? '' : " $logic ").$field.' ';
+            $res .= (empty($res) ? '' : PHP_EOL.str_repeat(' ', $indent).$logic.' ').$field.' ';
           }
           switch ( strtolower($f['operator']) ){
             case 'like':
@@ -714,9 +714,10 @@ MYSQL
         }
       }
     }
-    if ( !empty($res) && !$indent ){
+    if ( !empty($res) ){
       $res .= PHP_EOL;
     }
+    $res = str_replace(PHP_EOL.PHP_EOL, PHP_EOL, $res);
     return $res;
   }
 
