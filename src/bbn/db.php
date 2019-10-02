@@ -1344,8 +1344,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
           //\bbn\x::log($res, 'sql');
           if ( $res['count'] ){
             if ( $res['group_by'] ){
-              $fn = $this->cfn;
-              $res['fields'] = ['COUNT(DISTINCT '.x::join(array_map($fn, $res['group_by']), ',').')'];
+              $inst =& $this;
+              $res['fields'] = ['COUNT(DISTINCT '.x::join(array_map([$inst, 'cfn'], $res['group_by']), ',').')'];
             }
             else{
               $res['fields'] = ['COUNT(*)'];
