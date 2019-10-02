@@ -51,21 +51,6 @@ class i18n extends bbn\models\cls\cache
       }
       $this->parser->mergeWith($tmp);
     }
-    try {
-      if ( $tmp = \Gettext\Translations::fromVueJsString('<template>'.$php.'</template>', [
-        'functions' => ['_' => 'gettext'],
-        'file' => $file
-        ])
-      ){
-        foreach ( $tmp->getIterator() as $r => $tr ){
-          $res[] = $tr->getOriginal();
-        }
-        $this->parser->mergeWith($tmp);
-      }
-    }
-    catch ( \Exception $e ){
-      $this->log($e->getMessage());
-    }
     return array_unique($res);
   }
 
@@ -144,8 +129,11 @@ class i18n extends bbn\models\cls\cache
   {
     $res = [];
     $js = file_get_contents($file);
-    if ( $tmp = \Gettext\Translations::fromString($js, [
-      'functions' => ['_' => 'gettext'],
+    if ( $tmp = \Gettext\Translations::fromVueJsString('<template>'.$js.'</template>', [
+      'functions' => [
+        '_' => 'gettext',
+        'bbn._' => 'gettext'
+      ],
       'file' => $file
     ]) ){
       foreach ( $tmp->getIterator() as $r => $tr ){
@@ -169,7 +157,7 @@ class i18n extends bbn\models\cls\cache
     if ( \in_array($ext, self::$extensions, true) && is_file($file) ){
       switch ( $ext ){
         case 'html':
-          $res = $this->analyze_php($file);
+          $res = $this->analyze_html($file);
           break;
         case 'php':
           $res = $this->analyze_php($file);
