@@ -51,14 +51,20 @@ class i18n extends bbn\models\cls\cache
       }
       $this->parser->mergeWith($tmp);
     }
-    if ( $tmp = \Gettext\Translations::fromVueJsString('<template>'.$php.'</template>', [
-      'functions' => ['_' => 'gettext'],
-      'file' => $file
-      ]) ){
-      foreach ( $tmp->getIterator() as $r => $tr ){
-        $res[] = $tr->getOriginal();
+    try {
+      if ( $tmp = \Gettext\Translations::fromVueJsString('<template>'.$php.'</template>', [
+        'functions' => ['_' => 'gettext'],
+        'file' => $file
+        ])
+      ){
+        foreach ( $tmp->getIterator() as $r => $tr ){
+          $res[] = $tr->getOriginal();
+        }
+        $this->parser->mergeWith($tmp);
       }
-      $this->parser->mergeWith($tmp);
+    }
+    catch ( \Exception $e ){
+      $this->log($e->getMessage());
     }
     return array_unique($res);
   }
