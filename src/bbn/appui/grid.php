@@ -275,6 +275,7 @@ class grid extends bbn\models\cls\cache
       return $this->num ?: 0;
     }
     else if ( $this->count_cfg ){
+      //die(bbn\x::dump($this->count_cfg));
       $this->chrono->start();
       $this->num = $this->db->select_one($this->count_cfg);
       $this->count_time = $this->chrono->measure();
