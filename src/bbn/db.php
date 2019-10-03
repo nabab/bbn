@@ -396,6 +396,9 @@ class db extends \PDO implements db\actions, db\api, db\engines
   private function _trigger(array $cfg): array
   {
     if ( $this->triggers_disabled ){
+      if ( $cfg['moment'] === 'after' ){
+        return $cfg;
+      }
       $cfg['run'] = 1;
       $cfg['trig'] = 1;
       return $cfg;
@@ -479,7 +482,6 @@ class db extends \PDO implements db\actions, db\api, db\engines
       if ( $val ){
         array_splice($cfg['values'], $idx, 0, $val);
         $this->set_last_insert_id($val);
-        x::log(['v' => $cfg['values'], 'f' => $cfg['fields']], 'add_options');
       }
     }
   }
@@ -2733,7 +2735,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   public function rselect_all($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array
   {
     if ( $r = $this->_exec(...$this->_add_kind(\func_get_args())) ){
-      if ( \is_object($r) ){
+      if ( method_exists($r, 'get_rows') ){
         return $r->get_rows();
       }
       $this->log('ERROR IN RSELECT_ALL', $r);
@@ -2759,10 +2761,10 @@ class db extends \PDO implements db\actions, db\api, db\engines
   public function select_one($table, $field = null, array $where = [], array $order = [], int $start = 0)
   {
     if ( $r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\func_get_args()))) ){
-      if ( \is_object($r) ){
+      if ( method_exists($r, 'get_irow') ){
         return ($a = $r->get_irow()) ? $a[0] : false;
       }
-      $this->log('ERROR IN RSELECT_ONE', $r);
+      $this->log('ERROR IN RSELECT_ONE', $this->get_last_cfg(), $r, $this->_add_kind($this->_set_limit_1(\func_get_args())));
     }
     return false;
   }

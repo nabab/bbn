@@ -818,7 +818,7 @@ class i18n extends bbn\models\cls\cache
 
       // @var  $to_explore the path to explore 
       $to_explore = $this->get_path_to_explore($id_option);      
-
+      //the path of the locale dirs
       $locale_dir = $this->get_locale_dir_path($id_option);      
       
       $languages = array_map(function($a){
@@ -830,7 +830,6 @@ class i18n extends bbn\models\cls\cache
       $project = new bbn\appui\project($this->db, $id_project);
       $errors = [];
       if ( !empty($languages) ){
-       
         $po_file = [];
         $success = false;
         foreach ( $languages as $lng ){
@@ -877,12 +876,13 @@ class i18n extends bbn\models\cls\cache
                       $errors[] = $original;
 
                     }
-                    else{
+                    else {
                       $id = $this->db->last_id();
                     }
                   }
                   if ( $id ){
                     $row[$lng.'_po'] = $t->getMsgStr();
+                    
                     $row[$lng.'_db'] = $this->db->select_one('bbn_i18n_exp', 'expression', ['id_exp' => $id, 'lang' => $lng]);
                     if ( $row[$lng.'_po'] && !$row[$lng.'_db'] ){
                       if (
@@ -905,7 +905,12 @@ class i18n extends bbn\models\cls\cache
                         die("Error");
                       }
                     }
+                    if ( empty($row[$lng.'_db']) ){
+                      $row[$lng.'_db'] = '';
+                     // die(var_dump($row[$lng.'_db']));
+                    }
                     if ($todo) {
+                      
                       $row['id_exp'] = $id;
                       $row['paths'] = [];
                       $row['exp'] = $original;

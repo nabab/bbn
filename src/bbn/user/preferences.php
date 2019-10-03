@@ -1,5 +1,6 @@
 <?php
 /**
+ *
  * @package user
  */
 namespace bbn\user;

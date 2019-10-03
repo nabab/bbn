@@ -2,7 +2,7 @@
 namespace bbn;
 
 /**
- * A container of tools
+ * A container of tools.
  *
  * @author Thomas Nabet <thomas.nabet@gmail.com>
  * @copyright BBN Solutions
