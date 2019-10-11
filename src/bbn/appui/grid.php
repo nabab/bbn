@@ -151,7 +151,7 @@ class grid extends bbn\models\cls\cache
         }
         else{
           $db_cfg['count'] = true;
-          $this->count_cfg = $db_cfg;
+          $this->count_cfg = $this->db->process_cfg($db_cfg);
         }
         if ( !empty($cfg['num']) ){
           $this->num = $cfg['num'];
@@ -275,6 +275,7 @@ class grid extends bbn\models\cls\cache
       return $this->num ?: 0;
     }
     else if ( $this->count_cfg ){
+      //\bbn\x::log($this->count_cfg, 'mirko');
       //die(bbn\x::dump($this->count_cfg));
       $this->chrono->start();
       $this->num = $this->db->select_one($this->count_cfg);

@@ -15,7 +15,7 @@ class i18n extends bbn\models\cls\cache
   use
     bbn\models\tts\optional;
 
-  protected static $extensions = ['js', 'json', 'php'];
+  protected static $extensions = ['js', 'json', 'php', 'html'];
 
   protected
     $parser,
@@ -133,8 +133,7 @@ class i18n extends bbn\models\cls\cache
       'functions' => [
         '_' => 'gettext',
         'bbn._' => 'gettext'
-      ],
-      'file' => $file
+      ]
     ]) ){
       foreach ( $tmp->getIterator() as $r => $tr ){
         $res[] = $tr->getOriginal();

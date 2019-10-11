@@ -224,6 +224,7 @@ class user extends models\cls\basic
    */
   private function _login($id){
     if ( $this->check() && $id ){
+        die(var_dump("Jkjkjkk", $this->check(), $this->check_salt($params[$f['salt']])));
       $this
         ->_authenticate($id)
         ->_user_info()
@@ -303,6 +304,13 @@ class user extends models\cls\basic
       $this->sess_cfg = $cfg;
     }
     else{
+      if ( isset($id) ){
+        $this->_init_session();
+        $new_id = $this->get_session('id');
+        if ( $new_id !== $id ){
+          return $this->_sess_info($new_id);
+        }
+      }
       $this->set_error(14);
     }
     return $this;
@@ -376,14 +384,13 @@ class user extends models\cls\basic
     }
 
     /** @var int $id_session The ID of the session row in the DB */
-    if ( $id_session = $this->get_id_session() ){
-      $this->sess_cfg = json_decode($this->db->select_one(
-        $this->class_cfg['tables']['sessions'],
-        $this->class_cfg['arch']['sessions']['cfg'],
-        [$this->class_cfg['arch']['sessions']['id'] => $id_session]
-      ), true);
-    }
-    else{
+    if ( !($id_session = $this->get_id_session())
+        || !($this->sess_cfg = json_decode($this->db->select_one(
+              $this->class_cfg['tables']['sessions'],
+              $this->class_cfg['arch']['sessions']['cfg'],
+              [$this->class_cfg['arch']['sessions']['id'] => $id_session]
+            ), true))
+    ){
 
       /** @var string $salt */
       $salt = self::make_fingerprint();
@@ -478,6 +485,7 @@ class user extends models\cls\basic
       else{
         if ( !$this->check_salt($params[$f['salt']]) ){
           $this->set_error(17);
+          $this->session->destroy();
         }
       }
       if ( $this->check() ){
@@ -566,7 +574,7 @@ class user extends models\cls\basic
 
   protected function set_error($err){
     $this->error = $err;
-    //die(var_dump($code, $this->class_cfg['errors'][$code]));
+    //die(var_dump($err));
   }
 
   /**
@@ -690,7 +698,8 @@ class user extends models\cls\basic
    * @return string
    */
   public function get_salt(){
-    return $this->_get_session('salt');
+    $salt = $this->_get_session('salt');
+    return $salt;
   }
 
   /**

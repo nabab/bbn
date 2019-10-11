@@ -629,7 +629,24 @@ class sqlite implements bbn\db\engines
     $res = '';
     if ( \is_array($cfg['tables']) && !empty($cfg['tables']) ){
       $res = 'SELECT ';
-      if ( !empty($cfg['fields']) ){
+      if ( !empty($cfg['count']) ){
+        $indexes = [];
+        if ( $cfg['group_by'] ){
+          foreach ( $cfg['group_by'] as $g ){
+            if (($t = $cfg['available_fields'][$g])
+            && ($cfn = $this->col_full_name($g, $t, true)) ){
+              $indexes[] = $cfn;
+            }
+          }
+        }
+        if ( count($indexes) ){
+          $res .= 'COUNT(DISTINCT '.bbn\x::join($indexes, ',').')';
+        }
+        else{
+          $res .= 'COUNT(*)';
+        }
+      }
+      else if ( !empty($cfg['fields']) ){
         $fields_to_put = [];
         // Checking the selected fields
         foreach ( $cfg['fields'] as $alias => $f ){
@@ -851,9 +868,13 @@ class sqlite implements bbn\db\engines
     $group_to_put = [];
     if ( !empty($cfg['group_by']) ){
       foreach ( $cfg['group_by'] as $g ){
+        if ( isset($cfg['available_fields'][$g]) ){
+          $group_to_put[] = $this->escape($g);
+        /*
         if ( isset($cfg['available_fields'][$this->is_col_full_name($g) ? $this->col_full_name($g) : $this->col_simple_name($g)]) ){
           $group_to_put[] = $this->escape($g);
           //$group_to_put[] = $this->col_full_name($g, $cfg['available_fields'][$g], true);
+          */
         }
         else{
           $this->db->error("Error! The column '$g' doesn't exist for group by ".print_r($cfg, true));
@@ -875,7 +896,7 @@ class sqlite implements bbn\db\engines
   public function get_having(array $cfg): string
   {
     $res = '';
-    if ( !empty($cfg['group_by']) && !empty($cfg['having']) && ($cond = $this->get_conditions($cfg['having'], $cfg, true, 2)) ){
+    if ( !empty($cfg['group_by']) && !empty($cfg['having']) && ($cond = $this->get_conditions($cfg['having'], $cfg, !$cfg['count'], 2)) ){
       $res .= '  HAVING '.$cond.PHP_EOL;
     }
     return $res;

@@ -1342,22 +1342,6 @@ class db extends \PDO implements db\actions, db\api, db\engines
             }
           }
           //\bbn\x::log($res, 'sql');
-          if ( $res['count'] ){
-            $indexes = [];
-            if ( $res['group_by'] ){
-              foreach ( $res['group_by'] as $g ){
-                if ( $cfn = $this->cfn($g) ){
-                  $indexes[] = $cfn;
-                }
-              }
-            }
-            if ( count($indexes) ){
-              $res['fields'] = ['COUNT(DISTINCT '.x::join($indexes, ',').')'];
-            }
-            else{
-              $res['fields'] = ['COUNT(*)'];
-            }
-          }
           if ( $res['select_st'] = $this->language->get_select($res) ){
             $res['sql'] = $res['select_st'];
           }
@@ -1381,7 +1365,6 @@ class db extends \PDO implements db\actions, db\api, db\engines
           }
           break;
       }
-
       $res['join_st'] = $this->language->get_join($res);
       $res['where_st'] = $this->language->get_where($res);
       $res['group_st'] = $res['count'] ? '' : $this->language->get_group_by($res);
@@ -1390,10 +1373,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
       $res['limit_st'] = $res['count'] ? '' : $this->language->get_limit($res);
 
       if ( !empty($res['sql']) ){
-        $res['sql'] .= $res['join_st'].$res['where_st'].$res['group_st'].$res['having_st'];
-        if ( empty($res['count']) ){
-          $res['sql'] .= $res['order_st'].$res['limit_st'];
-        }
+        $res['sql'] .= $res['join_st']
+                      .$res['where_st']
+                      .$res['group_st']
+                      .$res['having_st']
+                      .$res['order_st']
+                      .$res['limit_st'];
         $res['statement_hash'] = $this->_make_hash($res['sql']);
 
         foreach ( $res['join'] as $r ){
@@ -2699,6 +2684,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
   public function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array
   {
     if ( $r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\func_get_args()))) ){
+      
       return $r->get_row();
     }
     return null;

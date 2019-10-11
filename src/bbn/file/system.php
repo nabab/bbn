@@ -1209,8 +1209,8 @@ class system extends bbn\models\cls\basic
   /**
    * @todo nextcloud
    *
-   * @param [type] $search
-   * @param [type] $path
+   * @param string $search
+   * @param string $path
    * @param boolean $deep
    * @param boolean $hidden
    * @param string $filter
@@ -1255,7 +1255,10 @@ class system extends bbn\models\cls\basic
   }
 
   public function get_num_files($path){
-    return count($this->scan($path));
+    if ( ($s = $this->scan($path)) ){
+      return count($s);
+    }
+    return 0;
   }
   
   public function upload(array $files,string $path) :bool

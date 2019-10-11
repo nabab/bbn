@@ -557,7 +557,7 @@ MYSQL
           if ( isset($cfg['available_fields'][$field]) ){
             $table = $cfg['available_fields'][$field];
             $column = $this->col_simple_name($cfg['fields'][$field] ?? $field);
-            if ( isset($cfg['models'][$table]['fields'][$column]) ){
+            if ( $table && $column && isset($cfg['models'][$table]['fields'][$column]) ){
               $model = $cfg['models'][$table]['fields'][$column];
               $res .= PHP_EOL.str_repeat(' ', $indent).(empty($res) ? '' : "$logic ").
                       (!empty($cfg['available_fields'][$field]) ?
@@ -566,9 +566,13 @@ MYSQL
                       ).' ';
             }
             else{
-              // Remove the alias from where and join but not in having
+              // Remove the alias from where and join but not in having execpt if it's a count
               if ( !$is_having && ($table === false) && isset($cfg['fields'][$field]) ){
                 $field = $cfg['fields'][$field];
+                // Same for exp in case it's an alias
+                if ( !empty($f['exp']) && isset($cfg['fields'][$f['exp']]) ){
+                  $f['exp'] = $cfg['fields'][$f['exp']];
+                }
               }
               $res .= (empty($res) ? '' : PHP_EOL.str_repeat(' ', $indent).$logic.' ').$field.' ';
             }
@@ -731,7 +735,24 @@ MYSQL
     $res = '';
     if ( \is_array($cfg['tables']) && !empty($cfg['tables']) ){
       $res = 'SELECT ';
-      if ( !empty($cfg['fields']) ){
+      if ( !empty($cfg['count']) ){
+        $indexes = [];
+        if ( $cfg['group_by'] ){
+          foreach ( $cfg['group_by'] as $g ){
+            if (($t = $cfg['available_fields'][$g])
+            && ($cfn = $this->col_full_name($g, $t, true)) ){
+              $indexes[] = $cfn;
+            }
+          }
+        }
+        if ( count($indexes) ){
+          $res .= 'COUNT(DISTINCT '.bbn\x::join($indexes, ',').')';
+        }
+        else{
+          $res .= 'COUNT(*)';
+        }
+      }
+      else if ( !empty($cfg['fields']) ){
         $fields_to_put = [];
         // Checking the selected fields
         foreach ( $cfg['fields'] as $alias => $f ){
@@ -980,7 +1001,10 @@ MYSQL
   public function get_having(array $cfg): string
   {
     $res = '';
-    if ( !empty($cfg['group_by']) && !empty($cfg['having']) && ($cond = $this->get_conditions($cfg['having'], $cfg, true, 2)) ){
+    if (!empty($cfg['group_by'])
+        && !empty($cfg['having'])
+        && ($cond = $this->get_conditions($cfg['having'], $cfg, $cfg['count'] ? false : true, 2))
+    ){
       $res .= '  HAVING '.$cond.PHP_EOL;
     }
     return $res;

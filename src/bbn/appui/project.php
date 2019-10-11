@@ -239,8 +239,8 @@ class project extends bbn\models\cls\db {
       $repository = $this->repository($repository);
     }    
     if ( !empty($repository) && !empty($repository['bbn_path']) ){      
-      $repository_path = !empty($repository['path']) ? '/' . $repository['path'] : '';      
-      $path = self::decipher_path($repository['bbn_path'] . $repository_path) . '/';     
+      $repository_path = !empty($repository['path']) ? '/' . $repository['path'] : '';
+      $path = self::decipher_path($repository['bbn_path'] . $repository_path) . '/';
       return \bbn\str::parse_path($path);
     }
     return false;

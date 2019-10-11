@@ -236,6 +236,7 @@ class mailings extends bbn\models\cls\db
     }
     $success = null;
     $mailing = $this->get_mailing($id);
+    
     if ( !empty($mailing['id_note']) ){
       $notes = $this->_note();
       //if the notes has media removes media before to remove the note
@@ -244,17 +245,24 @@ class mailings extends bbn\models\cls\db
           $notes->remove_media($media['id'],$mailing['id_note']);
         }
       }
-      //removes the emails ready or cancelled relative to this id_mailing
-      $this->delete_emails($id);
 
-      //update the row giving id_note and version null
+      // if there are emails with the given id_mailing
+      if ( !empty($this->db->rselect_all('bbn_emails', [],[
+      'id_mailing' => $id]))){
+        //it removes the emails ready or cancelled relative to this id_mailing
+        $this->delete_all_emails($id);
+      }
+      
+
+      //updates the row giving id_note and version null
       $this->db->update("bbn_emailings", [
         'id_note' => null, 
         'version' => null
       ], [ 'id' => $id ]);
-      
+
       //deletes the row
       $success = $this->db->delete("bbn_emailings", ['id' => $id]);
+      
       //removes the note -- without the second argument true I always have a db error, in this way the note is not deleted but passed on active 0
       $notes->remove($mailing['id_note']);
       
