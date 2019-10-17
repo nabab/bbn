@@ -49,7 +49,21 @@ class project extends bbn\models\cls\db {
     }
     else {
       $where = bbn\str::is_uid($id) ? ['id' => $id] : ['name' => $id];
-      if ( $row = $this->db->rselect('bbn_projects', [], $where) ){
+      /*if ( $row = $this->db->rselect('bbn_projects', [], $where) ){
+        return $row;
+      }*/
+      if( $row = $this->db->rselect([
+        'tables' => ['bbn_projects'],
+        'fields' => [],
+        'where' => [
+          'conditions' => [[
+            'field' => 'bbn_projects.id',
+            'operator' => '=',
+            'value' => $id
+          ]]
+        ]
+      ]) ){
+        //die(var_dump($row, $this->db->last(), $id));
         return $row;
       }
     }

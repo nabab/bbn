@@ -13,540 +13,745 @@ class databases extends bbn\models\cls\cache
 {
   use bbn\models\tts\optional;
 
-  private
-    $o,
-    $db_alt;
+  /**
+   * The options object.
+   *
+   * @var options
+   */
+  protected $o;
 
-  public function __construct(bbn\db $db){
+  /**
+   * The last alternative connection made with the connection function.
+   * This is a longer description.
+   * <code>
+   * I can put code in it
+   * </code>
+   *
+   * @var bbn\db
+   */
+  protected $db_alt;
+
+  /**
+   * Constructor
+   *
+   * @param bbn\db $db The main database connection (where options are)
+   */
+  public function __construct(bbn\db $db)
+  {
     parent::__construct($db);
     self::optional_init();
     $this->o = bbn\appui\options::get_instance();
   }
 
-  public function connection(string $host, string $db){
-    $id_host = !bbn\str::is_uid($host) ? $this->host_id($host) : $host;
-    $db_user = [
-      'code' => BBN_DB_USER,
-      'pass' => BBN_DB_PASS
-    ];
-    if ( bbn\str::is_uid($host) ){
-      $host = $this->o->code($id_host);
-    }
-    
-    if (
-      ($users = $this->o->full_options('users', $id_host)) &&
-      ($user = $users[0])
-    ){
-      $db_user = [
-        'code' => $user['code'],
-        'pass' => $user['pass']
-      ];
-    }
-    if ( bbn\str::is_uid($id_host) &&
-      !bbn\str::is_uid($host) &&
-      !empty($host) &&
-      !empty($id_host) &&
-      !empty($db) &&
-      !bbn\str::is_uid($db) &&
-      !empty($db_user)
-    ){
-      $this->db_alt = new bbn\db([
-        'host' => $host,
-        'db' => $db,
-        'user' => $db_user['code'],
-        'pass' => $db_user['pass']
-      ]);
-      return $this->db_alt;
-    }
-  }
-
   /**
-   * @param string $host
-   * @return false|int
+   * Returns a connection with the given user@host selecting the given database.
+   *
+   * @param string $host A string user@host
+   * @param string $db   The database name
+   * @return bbn\db|null
    */
-  public function host_id(string $host = ''){
-    return self::get_option_id($host ?: $this->db->host, 'hosts');
-  }
-
-  public function count_hosts(){
-    if ( $id_parent = self::get_option_id('hosts') ){
-      return $this->o->count($id_parent);
-    }
-  }
-
-  /**
-   * @param $adm
-   * @return array|false
-   */
-  public function hosts($adm = false){
-    if ( $id_parent = self::get_option_id('hosts') ){
-      return array_map(function($a) use($adm){
-        $h = [
-          'id' => $a['id'],
-          'text' => $a['text'],
-          'name' => $a['code']
-        ];
-        if ( !empty($adm) ){
-          $h['admin'] = $this->admin($a['id']);
-        }
-        return $h;
-      }, array_values($this->o->code_options($id_parent)));
-    }
-    return false;
-  }
-
-  /**
-   * @return array|false
-   */
-  public function full_hosts(){
-    if ( $id_parent = self::get_option_id('hosts') ){
-      $o =& $this->o;
-      return array_map(function($a) use ($o){
-        $r = [
-          'id' => $a['id'],
-          'text' => $a['text'],
-          'name' => $a['code'],
-          'num_dbs' => 0,
-          'num_users' => 0
-        ];
-        if ( $id_dbs = $o->from_code('dbs', $a['id']) ){
-          $r['num_dbs'] = $o->count($id_dbs);
-        }
-        if ( $id_users = $o->from_code('users', $a['id']) ){
-          $r['num_users'] = $o->count($id_users);
-          $r['admin'] = $this->admin($a['id']);
-
-        }
-        return $r;
-      }, $this->o->full_options($id_parent));
-    }
-    return false;
-  }
-
-  public function admin(string $host){
-    $host = !bbn\str::is_uid($host) ? $this->host_id($host) : $host;
-    if ( ($id_users = $this->o->from_code('users', $host)) &&
-      ($users = $this->o->full_options($id_users))
-    ){
-      $found = array_map(function($u){
-        return [
-          'id' => $u['id'],
-          'username' => $u['code'],
-          'password' => $u['pass']
-        ];
-      }, array_filter($users, function($u){
-        return !empty($u['admin']);
-      }));
-      return $found ?: false;
-    }
-  }
-
-  /**
-   * @param string $db
-   * @param mixed $host
-   * @return false|int
-   */
-  public function db_id(string $db = '', string $host = ''){
-    if ( !bbn\str::is_uid($host) ){
-      $host = $this->host_id($host ?: $this->db->host);
-    }
-    //var_dump("P{ARENT", $host, $this->o->from_code('dbs', $host));
-    if ( bbn\str::is_uid($host) && ($id_parent = $this->o->from_code('dbs', $host)) ){
-      return $this->o->from_code($db ?: $this->db->current, $id_parent);
-    }
-    return false;
-  }
-
-  public function count_dbs(string $host){
-    if ( !bbn\str::is_uid($host) ){
-      $host = $this->host_id($host);
-    }
-    if ( bbn\str::is_uid($host) && ($id_parent = $this->o->from_code('dbs', $host)) ){
-      return $this->o->count($id_parent);
-    }
-  }
-
-  /**
-   * @param mixed $host
-   * @return array|false
-   */
-  public function dbs(string $host = ''){
-    if ( !bbn\str::is_uid($host) ){
-      $host = $this->host_id($host ?: $this->db->host);
-    }
-    if ( bbn\str::is_uid($host) && ($id_parent = $this->o->from_code('dbs', $host)) ){
-      return array_map(function($a){
-        return [
-          'id' => $a['id'],
-          'text' => $a['text'],
-          'name' => $a['code']
-        ];
-      }, $this->o->code_options($id_parent));
-    }
-    return false;
-  }
-
-  /**
-   * @param mixed $host
-   * @return array|false
-   */
-  public function full_dbs(string $host = ''){
-    if ( !bbn\str::is_uid($host) ){
-      $host = $this->host_id($host ?: $this->db->host);
-    }
-    if ( bbn\str::is_uid($host) && ($id_parent = $this->o->from_code('dbs', $host)) ){
-      $o =& $this->o;
-      return array_map(function($a) use ($o){
-        $r = [
-          'id' => $a['id'],
-          'text' => $a['text'],
-          'name' => $a['code'],
-          'num_tables' => 0,
-          'num_procedures' => 0,
-          'num_functions' => 0
-        ];
-        if ( $id_tables = $o->from_code('tables', $a['id']) ){
-          $r['num_tables'] = $o->count($id_tables);
-        }
-        if ( $id_procedures = $o->from_code('procedures', $a['id']) ){
-          $r['num_procedures'] = $o->count($id_procedures);
-        }
-        if ( $id_functions = $o->from_code('functions', $a['id']) ){
-          $r['num_functions'] = $o->count($id_functions);
-        }
-        return $r;
-      }, $this->o->full_options($id_parent));
-    }
-    return false;
-  }
-
-  /**
-   * @param string $table
-   * @param mixed $db
-   * @param string $host
-   * @return false|int
-   */
-  public function table_id(string $table, string $db = '', string $host = ''){
-    if ( !bbn\str::is_uid($db) ){
-      $db = $this->db_id($db, $host);
-    }
-    if ( bbn\str::is_uid($db) && ($id_parent = $this->o->from_code('tables', $db)) ){
-      return $this->o->from_code($table, $id_parent);
-    }
-  }
-
-  public function count_tables(string $db, string $host = ''){
-    if ( !bbn\str::is_uid($db) ){
-      $db = $this->db_id($db, $host);
-    }
-    if ( bbn\str::is_uid($db) && ($id_parent = $this->o->from_code('tables', $db)) ){
-      return $this->o->count($id_parent);
-    }
-  }
-
-  /**
-   * @param mixed $db
-   * @param string $host
-   * @return array|false
-   */
-  public function tables(string $db = '', string $host = ''){
-    if ( !bbn\str::is_uid($db) ){
-      $db = $this->db_id($db ?: $this->db->current, $host ?: $this->db->host);
-    }
-    if ( bbn\str::is_uid($db) && ($id_parent = $this->o->from_code('tables', $db)) ){
-      return array_map(function($a){
-        return [
-          'id' => $a['id'],
-          'text' => $a['text'],
-          'name' => $a['code']
-        ];
-      }, array_values($this->o->code_options($id_parent)));
-    }
-    return false;
-  }
-
-  /**
-   * @param mixed $db
-   * @param string $host
-   * @return array|false
-   */
-  public function full_tables(string $db = '', $host = ''){
-    if ( !bbn\str::is_uid($db) ){
-      $db = $this->db_id($db ?: $this->db->current, $host ?: $this->db->host);
-    }
-    if ( bbn\str::is_uid($db) && ($id_parent = $this->o->from_code('tables', $db)) ){
-      $o =& $this->o;
-      return array_map(function($a) use ($o){
-        $r = [
-          'id' => $a['id'],
-          'text' => $a['text'],
-          'name' => $a['code'],
-          'num_columns' => 0,
-          'num_keys' => 0
-        ];
-        if ( $id_columns = $o->from_code('columns', $a['id']) ){
-          $r['num_columns'] = $o->count($id_columns);
-        }
-        if ( $id_keys = $o->from_code('keys', $a['id']) ){
-          $r['num_keys'] = $o->count($id_keys);
-        }
-        return $r;
-      }, $this->o->full_options($id_parent));
-    }
-    return false;
-  }
-
-  public function table_from_item(string $id_keycol): ?string
+  public function connection(string $host, string $db): ?bbn\db
   {
-    if ( $table = $this->table_id_from_item($id_keycol) ){
-      return $this->o->code($table);
+    $id_host = !bbn\str::is_uid($host) ? $this->host_id($host) : $host;
+    if ($id_host && ($cfg = $this->o->option($id_host))) {
+      $cfg = $this->o->option($id_host);
+      if (isset($cfg['pass']) && strpos($cfg['code'], '@')) {
+        $bits = bbn\x::split($cfg['code'], '@');
+        if (count($bits) === 2) {
+          $db = [
+            'user' => $bits[0],
+            'host' => $bits[1],
+            'db' => $db,
+            'pass' => $cfg['pass']
+          ];
+        }
+        else {
+          $db = [
+            'host' => $cfg['code'],
+            'db' => $db
+          ];
+        }
+        $this->db_alt = new bbn\db($db);
+        return $this->db_alt;
+      }
     }
     return null;
   }
 
+  /**
+   * Returns the ID of a connection.
+   * 
+   * @param string $host The connection code (user@host or host)
+   * @return null|string
+   */
+  public function host_id(string $host = ''): ?string
+  {
+    if (!$host) {
+      if ($this->username) {
+        $host .= $this->username.'@';
+      }
+      $host .= $this->host;
+    }
+    
+    $r = self::get_option_id($host, 'connections');
+    return $r ?: null;
+  }
+
+  /**
+   * Returns the number of connections in the options.
+   *
+   * @return int|null
+   */
+  public function count_hosts(): ?int
+  {
+    if (($id_parent = self::get_option_id('connections')) 
+        && ($num = $this->o->count($id_parent))
+    ) {
+      return $num;
+    }
+    return 0;
+  }
+
+  /**
+   * Returns a list of the connections available.
+   * 
+   * @return array
+   */
+  public function hosts(): array
+  {
+    if (($id_parent = self::get_option_id('connections')) 
+        && ($co = array_values($this->o->code_options($id_parent)))
+    ) {
+      return $co;
+    }
+    return [];
+  }
+
+  /**
+   * Returns the list of the connections
+   *
+   * @return array|null
+   */
+  public function full_hosts(): ?array
+  {
+    if (($id_parent = self::get_option_id('connections'))
+        && ($opt = $this->o->full_options($id_parent))
+    ) {
+      return $opt;
+    }
+    return null;
+  }
+
+  /**
+   * Returns the option's ID of a database.
+   * 
+   * @param string $db The database's name
+   * @return null|string
+   */
+  public function db_id(string $db = ''): ?string
+  { 
+    if (($id_parent = self::get_option_id('dbs'))
+        && ($res = $this->o->from_code($db ?: $this->db->current, $id_parent))
+    ) {
+      
+      return $res;
+    }
+    return null;
+  }
+
+  /**
+   * Returns the number of DBs available for the given connection.
+   *
+   * @param string $host The connection's code
+   * @return int
+   */
+  public function count_dbs(string $host = ''): int
+  {
+    if (!$host) {
+      $num = $this->o->count(self::get_option_id('dbs'));
+      return $num;
+    }
+    elseif (!bbn\str::is_uid($host)) {
+      $host = $this->host_id($host);
+    }
+    $all = $this->o->get_aliases($host);
+    $num = $all ? count($all) : 0;
+    return $num;
+  }
+
+  /**
+   * Returns the list of DBs available for the given connection.
+   * 
+   * @param string $host The connection's code, all DBs are returned if empty.
+   * @return array|null
+   */
+  public function dbs(string $host = ''): array
+  {
+    if (!$host) {
+      $arr = $this->o->full_options(self::get_option_id('dbs'));
+    }
+    elseif (!bbn\str::is_uid($host)) {
+      $host = $this->host_id($host);
+    }
+    if ($host) {
+      $o = &$this->o;
+      $arr = array_map(
+        function ($a) use ($o) {
+          return $o->parent($a['id_parent']);
+        },
+        $this->o->get_aliases($host)
+      );
+    }
+    if (!empty($arr)) {
+      $res = array_map(
+        function ($a) {
+          return [
+            'id' => $a['id'],
+            'text' => $a['text'],
+            'name' => $a['code']
+          ];
+        },
+        $arr
+      );
+      return $res;
+    }
+    return [];
+  }
+
+  /**
+   * Returns the list of DBs available for the given connection with statistics.
+   * 
+   * @param string $host The connection's code, all DBs are returned if empty.
+   * @return array
+   */
+  public function full_dbs(string $host = ''): array
+  {
+    $o =& $this->o;
+    if ($dbs = $this->dbs($host)) {
+      $res = array_map(
+        function ($a) use ($o) {
+          $r = [
+            'id' => $a['id'],
+            'text' => $a['text'],
+            'name' => $a['name'],
+            'num_tables' => 0,
+            'num_connections' => 0,
+            'num_procedures' => 0,
+            'num_functions' => 0
+          ];
+          //die(var_dump( $o->from_code('tables', $a['id'])));
+          if ($id_tables = $o->from_code('tables', $a['id'])) {
+            $r['num_tables'] = $o->count($id_tables);
+          }
+          if ($id_connections = $o->from_code('connections', $a['id'])) {
+            $r['num_connection'] = $o->count($id_connections);
+          }
+          if ($id_procedures = $o->from_code('procedures', $a['id'])) {
+            $r['num_procedures'] = $o->count($id_procedures);
+          }
+          if ($id_functions = $o->from_code('functions', $a['id'])) {
+            $r['num_functions'] = $o->count($id_functions);
+          }
+          return $r;
+        },
+        $dbs
+      );
+      return $res ?: [];
+    }
+    return [];
+  }
+
+  /**
+   * Returns the ID of a table from the options table.
+   * 
+   * @param string $table The name of the table
+   * @param mixed  $db    The name of the DB
+   * @param string $host  The connection's code
+   * @return string|null
+   */
+  public function table_id(string $table, string $db = '', string $host = ''): ?string
+  {
+    if (!bbn\str::is_uid($db)) {
+      $db = $this->db_id($db, $host);
+    }
+    if (bbn\str::is_uid($db)
+        && ($id_parent = $this->o->from_code('tables', $db))
+        && ($id = $this->o->from_code($table, $id_parent))
+    ) {
+      return $id;
+    }
+    return null;
+  }
+
+  /**
+   * Returnms the number of tables in the given database.
+   *
+   * @param string $db   The database name
+   * @param string $host The connection's code
+   * @return int|null
+   */
+  public function count_tables(string $db, string $host = ''): ?int
+  {
+    if (!bbn\str::is_uid($db)) {
+      $db = $this->db_id($db, $host);
+    }
+    if (bbn\str::is_uid($db) && ($id_parent = $this->o->from_code('tables', $db))) {
+      $num = $this->o->count($id_parent);
+      return $num ?: 0;
+    }
+    return null;
+  }
+
+  /**
+   * Returns a list of tables in the given database.
+   * 
+   * @param mixed  $db   The database name
+   * @param string $host The connection's code
+   * @return array|null
+   */
+  public function tables(string $db = '', string $host = ''): ?array
+  {
+    if (!bbn\str::is_uid($db)) {
+      $db = $this->db_id($db, $host);
+    }
+    if (bbn\str::is_uid($db)
+        && ($id_parent = $this->o->from_code('tables', $db))
+        && ($fo = array_values($this->o->code_options($id_parent)))
+    ) {
+      $res = array_map(
+        function ($a) {
+          return [
+            'id' => $a['id'],
+            'text' => $a['text'],
+            'name' => $a['code']
+          ];
+        },
+      );
+      return $res ?: [];
+    }
+    return null;
+  }
+
+  /**
+   * Returns a list of tables in the given database with its statistics.
+   * 
+   * @param mixed  $db   The database name
+   * @param string $host The connection's code
+   * @return array|null
+   */
+  public function full_tables(string $db = '', string $host = ''): ?array
+  {
+    if (!bbn\str::is_uid($db)) {
+      $db = $this->db_id($db ?: $this->db->current, $host);
+    }
+    if (bbn\str::is_uid($db) && ($id_parent = $this->o->from_code('tables', $db))) {
+      $o =& $this->o;
+      if ($fo = $this->o->full_options($id_parent)) {
+        $res = array_map(
+          function ($a) use ($o) {
+            $r = [
+              'id' => $a['id'],
+              'text' => $a['text'],
+              'name' => $a['code'],
+              'num_columns' => 0,
+              'num_keys' => 0
+            ];
+            if ($id_columns = $o->from_code('columns', $a['id'])) {
+              $r['num_columns'] = $o->count($id_columns);
+            }
+            if ($id_keys = $o->from_code('keys', $a['id'])) {
+              $r['num_keys'] = $o->count($id_keys);
+            }
+            return $r;
+          },
+          $fo
+        );
+        return $res ?: [];
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Gets the name of a table from an item's ID (key or column).
+   *
+   * @param string $id_keycol The ID of the item
+   * @return string|null
+   */
+  public function table_from_item(string $id_keycol): ?string
+  {
+    if (($table = $this->table_id_from_item($id_keycol))
+        && ($r = $this->o->code($table))
+    ) {
+      return $r;
+    }
+    return null;
+  }
+
+  /**
+   * Retrieves the ID of a table from an item's ID (key or column).
+   *
+   * @param string $id_keycol The ID of the item
+   * @return string|null
+   */
   public function table_id_from_item(string $id_keycol): ?string
   {
-    if (
-      bbn\str::is_uid($id_keycol) &&
-      ($id_cols = $this->o->get_id_parent($id_keycol)) &&
-      ($id_table = $this->o->get_id_parent($id_cols))
-    ){
+    if (bbn\str::is_uid($id_keycol)
+        && ($id_cols = $this->o->get_id_parent($id_keycol))
+        && ($id_table = $this->o->get_id_parent($id_cols))
+    ) {
       return $id_table;
     }
     return null;
   }
 
+  /**
+   * Retrieves a database name from the ID of a table.
+   *
+   * @param string $id_table The table's ID.
+   * @return string|null
+   */
   public function db_from_table(string $id_table): ?string
   {
-    if ( $id_db = $this->db_id_from_table($id_table) ){
-      return $this->o->code($id_db);
+    if (($id_db = $this->db_id_from_table($id_table))
+        && ($r = $this->o->code($id_db))
+    ) {
+      return $r;
     }
     return null;
   }
 
+  /**
+   * Returns the ID of a DB through the given table.
+   *
+   * @param string $id_table The table's ID.
+   * @return string|null
+   */
   public function db_id_from_table(string $id_table): ?string
   {
-    if (
-      bbn\str::is_uid($id_table) &&
-      ($id_tables = $this->o->get_id_parent($id_table)) &&
-      ($id_db = $this->o->get_id_parent($id_tables))
-    ){
+    if (bbn\str::is_uid($id_table)
+        && ($id_tables = $this->o->get_id_parent($id_table))
+        && ($id_db = $this->o->get_id_parent($id_tables))
+    ) {
       return $id_db;
     }
     return null;
   }
 
-  public function host_from_db(string $id_db): ?string
-  {
-    if ( $id_host = $this->host_id_from_db($id_db) ){
-      return $this->o->code($id_host);
-    }
-    return null;
-  }
-
-  public function host_id_from_db(string $id_db): ?string
-  {
-    if (
-      bbn\str::is_uid($id_db) &&
-      ($id_dbs = $this->o->get_id_parent($id_db)) &&
-      ($id_host = $this->o->get_id_parent($id_dbs))
-    ){
-      return $id_host;
-    }
-    return null;
-  }
-
-  public function host_from_item(string $id_keycol): ?string
-  {
-    if ( $id_host = $this->host_id_from_item($id_keycol) ){
-      return $this->o->code($id_host);
-    }
-    return null;
-  }
-
-  public function host_id_from_item(string $id_keycol): ?string
-  {
-    if (
-      ($id_table = $this->table_id_from_item($id_keycol)) &&
-      ($id_host = $this->host_id_from_table($id_table))
-    ){
-      return $id_host;
-    }
-    return null;
-  }
-
+  /**
+   * Returns the name of a DB through the ID of an item (key or column).
+   *
+   * @param string $id_keycol The ID of the item
+   * @return string|null
+   */
   public function db_from_item(string $id_keycol): ?string
   {
-    if ( $id_db = $this->db_id_from_item($id_keycol) ){
-      return $this->o->code($id_db);
+    if ($id_db = $this->db_id_from_item($id_keycol)
+        && ($r = $this->o->code($id_db))
+    ) {
+      return $r;
     }
     return null;
   }
 
+  /**
+   * Returns the ID of a DB through the ID of an item (key or column).
+   *
+   * @param string $id_keycol The ID of the item
+   * @return string|null
+   */
   public function db_id_from_item(string $id_keycol): ?string
   {
-    if (
-      ($id_table = $this->table_id_from_item($id_keycol)) &&
-      ($id_db = $this->db_id_from_table($id_table))
-    ){
+    if (($id_table = $this->table_id_from_item($id_keycol))
+        && ($id_db = $this->db_id_from_table($id_table))
+    ) {
       return $id_db;
     }
     return null;
   }
 
-  public function host_from_table(string $id_table): ?string
+  /**
+   * Returns the given column's ID.
+   * 
+   * @param string $column The column's name
+   * @param string $table  The table's name
+   * @param string $db     The DB's name
+   * @return string|null
+   */
+  public function column_id(string $column, string $table, string $db = ''): ?string
   {
-    if ( $id_host = $this->host_id_from_table($id_table) ){
-      return $this->o->code($id_host);
+    $res = null;
+    if (bbn\str::is_uid($table)) {
+      $res = $this->o->from_code($this->db->csn($column), 'columns', $table);
+      return $res;
     }
-    return null;
-  }
-
-  public function host_id_from_table(string $id_table): ?string
-  {
-    if (
-      ($id_db = $this->db_id_from_table($id_table)) &&
-      ($id_host = $this->host_id_from_db($id_db))
-    ){
-      return $id_host;
+    $c = $this->db->csn($column);
+    $t = $this->db->tsn($table);
+    if ($tmp = self::get_option_id($c, 'columns', $t, 'tables', $db ?: $this->db->current, 'dbs')) {
+      $res = $tmp;
     }
-    return null;
+    return $res;
   }
 
   /**
-   * @param string $column
-   * @param mixed $table
-   * @param string $db
-   * @param string $host
-   * @return false|int
+   * Returns the number of columns for the given DB.
+   *
+   * @param string $table The table's name
+   * @param string $db    The database's name
+   * @return int
    */
-  public function column_id(string $column, string $table, string $db = '', string $host = ''){
-    if ( bbn\str::is_uid($table) ){
-      return $this->o->from_code($this->db->csn($column), 'columns', $table);
-    }
-    return self::get_option_id($this->db->csn($column), 'columns', $this->db->tsn($table), 'tables', $db ?: $this->db->current, 'dbs', $host ?: $this->db->host, 'hosts');
-  }
-
-  public function count_columns(string $table, string $db = '', string $host = ''){
-    if ( !bbn\str::is_uid($table) ){
+  public function count_columns(string $table, string $db = ''): int
+  {
+    $num = 0;
+    if (!bbn\str::is_uid($table)) {
       $table = $this->table_id($table, $db, $host);
     }
-    if (
-      bbn\str::is_uid($table) &&
-      ($id_parent = $this->o->from_code('columns', $table))
-    ){
-      return $this->o->count($id_parent);
+    if (bbn\str::is_uid($table)
+        && ($id_parent = $this->o->from_code('columns', $table))
+    ) {
+      $num = $this->o->count($id_parent);
     }
+    return $num;
   }
 
   /**
-   * @param string $table
-   * @param string $db
-   * @param string $host
+   * Returns a list of the columns for the given table.
+   * 
+   * @param string $table The table's name
+   * @param string $db    The database's name
    * @return array|false
    */
-  public function columns(string $table, string $db = '', string $host = ''){
-    if ( !bbn\str::is_uid($table) ){
+  public function columns(string $table, string $db = ''): ?array
+  {
+    if (!bbn\str::is_uid($table)) {
       $table = $this->table_id($this->db->tsn($table), $db, $host);
     }
-    if ( bbn\str::is_uid($table) && ($id_parent = $this->o->from_code('columns', $table)) ){
-      return $this->o->options($id_parent);
+    if (bbn\str::is_uid($table)
+        && ($id_parent = $this->o->from_code('columns', $table))
+        && ($res = $this->o->options($id_parent))
+    ) {
+      return $res;
     }
-    return false;
+    return null;
   }
 
   /**
-   * @param string $table
-   * @param string $db
-   * @param string $host
+   * Returns a list of the columns for the given table with all their characteristics.
+   * 
+   * @param string $table The table's name
+   * @param string $db    The database name
    * @return array|false
    */
-  public function full_columns(string $table, string $db = '', string $host = ''){
-    if ( !bbn\str::is_uid($table) ){
+  public function full_columns(string $table, string $db = ''): array
+  {
+    if (!bbn\str::is_uid($table)) {
       $table = $this->table_id($table, $db, $host);
     }
-    if ( bbn\str::is_uid($table) && ($id_parent = $this->o->from_code('columns', $table)) ){
-      return $this->o->full_options($id_parent);
+    if (bbn\str::is_uid($table)
+        && ($id_parent = $this->o->from_code('columns', $table))
+        && ($res = $this->o->full_options($id_parent))
+    ) {
+      return $res;
     }
-    return false;
+    return [];
   }
 
   /**
-   * @param string $key
-   * @param string $table
-   * @param string $db
-   * @param string $host
-   * @return false|int
+   * Returns the ID of a key in the given table.
+   * 
+   * @param string $key   The key;s name.
+   * @param string $table The table's name
+   * @param string $db    The database's name
+   * @return null|string
    */
-  public function key_id(string $key, string $table, string $db = '', string $host = ''){
-    if ( bbn\str::is_uid($key) ){
-      return $this->o->from_code($key, $table);
+  public function key_id(string $key, string $table, string $db = ''): ?string
+  {
+    $res = null;
+    if (bbn\str::is_uid($key)) {
+      $res = $this->o->from_code($key, $table);
     }
-    return self::get_option_id($key, 'keys', $table, 'tables', $db ?: $this->db->current, 'dbs', $host ?: $this->db->host, 'hosts');
-  }
-
-  public function count_keys(string $table, string $db = '', string $host = ''){
-    if ( !bbn\str::is_uid($table) ){
-      $table = $this->table_id($table, $db, $host);
+    elseif ($tmp = self::get_option_id($key, 'keys', $table, 'tables', $db ?: $this->db->current, 'dbs')) {
+      $res = $tmp;
     }
-    if ( bbn\str::is_uid($table) && ($id_parent = $this->o->from_code('keys', $table)) ){
-      return $this->o->count($id_parent);
-    }
+    return $res;
   }
 
   /**
-   * @param string $table
-   * @param string $db
-   * @param string $host
-   * @return array|bool|false
+   * Returns the number of keys in the given table.
+   *
+   * @param string $table The table's name
+   * @param string $db    The database's name
+   * @return int
    */
-  public function keys(string $table, string $db = '', string $host = ''){
-    if ( !bbn\str::is_uid($table) ){
+  public function count_keys(string $table, string $db = ''): int
+  {
+    $num = 0;
+    if (!bbn\str::is_uid($table)) {
       $table = $this->table_id($table, $db, $host);
     }
-    if (
-      bbn\str::is_uid($table) &&
-      ($id_parent = $this->o->from_code('keys', $table)) &&
-      ($tree = $this->o->full_tree($id_parent)) &&
-      $tree['items']
-    ){
+    if (bbn\str::is_uid($table)
+        && ($id_parent = $this->o->from_code('keys', $table))
+    ) {
+      $num = $this->o->count($id_parent);
+    }
+    return $num;
+  }
+
+  /**
+   * Returns a list of keys for the giuven table.
+   * 
+   * @param string $table The table's name
+   * @param string $db    The database's name
+   * @return array
+   */
+  public function keys(string $table, string $db = ''): array
+  {
+    $res = [];
+    if (!bbn\str::is_uid($table)) {
+      $table = $this->table_id($table, $db, $host);
+    }
+    if (bbn\str::is_uid($table)
+        && ($id_parent = $this->o->from_code('keys', $table))
+        && ($tree = $this->o->full_tree($id_parent))
+        && $tree['items']
+    ) {
       $t =& $this;
-      return array_map(function($a) use($t){
-        $key = [
-          'name' => $a['code'],
-          'unique' => $a['unique'],
-          'columns' => [],
-          'ref_column' => $a['id_alias'] ? $a['alias']['code'] : null,
-          'ref_table' => $a['id_alias'] &&
-                         ($id_table = $t->o->get_id_parent($a['alias']['id_parent'])) ?
-                         $t->o->code($id_table) : null,
-          'ref_db' => !empty($id_table) &&
-                      ($id_db = $t->o->get_id_parent($t->o->get_id_parent($id_table))) ?
-                      $t->o->code($id_db) : null
-        ];
-        foreach ( $a['items'] as $col ){
-          $key['columns'][] = $col['code'];
-        }
-        return $key;
-      }, $tree['items']);
+      $res = array_map(
+        function ($a) use ($t) {
+          $key = [
+            'name' => $a['code'],
+            'unique' => $a['unique'],
+            'columns' => [],
+            'ref_column' => $a['id_alias'] ? $a['alias']['code'] : null,
+            'ref_table' => $a['id_alias'] &&
+                          ($id_table = $t->o->get_id_parent($a['alias']['id_parent'])) ?
+                          $t->o->code($id_table) : null,
+            'ref_db' => !empty($id_table) &&
+                        ($id_db = $t->o->get_id_parent($t->o->get_id_parent($id_table))) ?
+                        $t->o->code($id_db) : null
+          ];
+          foreach ($a['items'] as $col){
+            $key['columns'][] = $col['code'];
+          }
+          return $key;
+        },
+        $tree['items']
+      );
     }
-    return false;
+    return $res;
   }
 
   /**
-   * @param string $table
-   * @param string $db
-   * @param string $host
-   * @return array|bool|false
+   * For the moment an alias of get_keys.
+   * 
+   * @param string $table The table's name
+   * @param string $db    The database's name
+   * @return array
    */
-  public function full_keys(string $table, string $db = '', string $host = ''){
+  public function full_keys(string $table, string $db = ''): array
+  {
     return $this->keys($table, $db, $host);
   }
 
+  /**
+   * Deletes a table and all its descendants from the options table.
+   *
+   * @param string $table The table's name
+   * @param string $db    The database's name
+   * @return int
+   */
+  public function remove(string $table, string $db = ''): int
+  {
+    $id = $this->table_id($table, $db);
+    return $this->o->remove_full($id);
+  }
+
+  /**
+   * Deletes a database and all its descendants from the options table.
+   *
+   * @param string $db The database's name
+   * @return int
+   */
+  public function remove_all(string $db = ''): int
+  {
+    $id = $this->db_id($db);
+    return $this->o->remove_full($id);
+  }
+
+  /**
+   * Deletes a connection from the options table.
+   *
+   * @param string $connection The connection's code
+   * @return int
+   */
+  public function remove_host(string $connection): int
+  {
+    $id = $this->host_id($connection);
+    return $this->o->remove_full($id);
+  }
+
+  /**
+   * Returns a database model as bbn\db::modelize but with options IDs.
+   *
+   * @param string $table The table's name
+   * @param string $db    The database's name
+   * @return array|null
+   */
+  public function modelize(string $table = '', string $db = ''): ?array
+  {
+    if (($mod = $this->db->modelize($table)) && \is_array($mod)) {
+      $keys = function (&$a) use (&$table, &$db) {
+        if (\is_array($a['keys'])) {
+          array_walk(
+            $a['keys'],
+            function (&$w, $k) use (&$table, &$db) {
+              $w['id_option'] = $this->key_id($k, $table, $db);
+            }
+          );
+        }
+      };
+      $fields = function (&$a) use (&$table, &$db) {
+        if (\is_array($a['fields'])) {
+          array_walk(
+            $a['fields'],
+            function (&$w, $k) use (&$table, &$db) {
+              $w['id_option'] = $this->column_id($k, $table, $db);
+            }
+          );
+        }
+      };
+      if (empty($table)) {
+        array_walk(
+          $mod,
+          function (&$w, $k) use (&$table, &$db, $keys, $fields) {
+            $table = $this->db->tsn($k);
+            $db = substr($k, 0, strrpos($k, $table)-1);
+            $w['id_option'] = $this->table_id($table, $db);
+            $keys($w);
+            $fields($w);
+          }
+        );
+      }
+      else {
+        $keys($mod);
+        $fields($mod);
+      }
+      return $mod;
+    }
+    return null;
+  }
+
+  /**
+   * Imports a database's structure into the options table.
+   *
+   * @param string $host The connection's code
+   * @param bool   $full If true will connect to the database and get its structure
+   * @return string|null The ID of the generated (or existing) database entry
+   */
   public function import_host(string $host, bool $full = false){
-    
+    return self::get_option_id($host, 'connections');
     if (
-      !($id_host = self::get_option_id($host, 'hosts')) &&
+      !($id_host = self::get_option_id($host, 'connections')) &&
       $id_host = $this->o->add([
         'id_parent' => self::get_option_id('hosts'),
         'text' => $host,
@@ -557,11 +762,11 @@ class databases extends bbn\models\cls\cache
         'allow_children' => 1
       ]);
       if (
-        $id_users = $this->o->add([
-          'id_parent' => $id_host,
-          'text' => _('Users'),
-          'code' => 'users',
-        ])
+      $id_users = $this->o->add([
+        'id_parent' => $id_host,
+        'text' => _('Users'),
+        'code' => 'users',
+      ])
       ){
         $this->o->set_cfg($id_users, [
           'show_code' => 1,
@@ -571,11 +776,11 @@ class databases extends bbn\models\cls\cache
         ]);
       }
       if (
-        $id_dbs = $this->o->add([
-          'id_parent' => $id_host,
-          'text' => _("Databases"),
-          'code' => 'dbs',
-        ])
+      $id_dbs = $this->o->add([
+        'id_parent' => $id_host,
+        'text' => _("Databases"),
+        'code' => 'dbs',
+      ])
       ){
         $this->o->set_cfg($id_dbs, [
           'show_code' => 1,
@@ -586,191 +791,272 @@ class databases extends bbn\models\cls\cache
     return $id_host;
   }
 
-  public function import_db(string $db, string $id_host, $full = false){
-    if ( $id_dbs = $this->o->from_code('dbs', $id_host) ){
-      if (
-        !($id_db = $this->o->from_code($db, $id_dbs)) &&
-        $id_db = $this->o->add([
-          'id_parent' => $id_dbs,
-          'text' => $db,
-          'code' => $db,
-        ])
-      ){
-        $this->o->set_cfg($id_db, [
-          'allow_children' => 1,
-        ]);
-        if (
-          $id_procedures = $this->o->add([
+  /**
+   * Imports a database's structure into the options table.
+   *
+   * @param string $db   The database's name
+   * @param string $host The connection's code
+   * @param bool   $full If true will connect to the database and get its structure
+   * @return string|null The ID of the generated (or existing) database entry
+   */
+  public function import_db(string $db, string $host = '', $full = false): ?string
+  {
+    $id_db = null;
+    if ($id_dbs = self::get_option_id('dbs')) {
+      if (!($id_db = $this->o->from_code($db, $id_dbs))
+          && ($id_db = $this->o->add(
+            [
+              'id_parent' => $id_dbs,
+              'text' => $db,
+              'code' => $db,
+            ]
+          ))
+      ) {
+        $this->o->set_cfg($id_db, ['allow_children' => 1]);
+        if ($id_procedures = $this->o->add(
+          [
             'id_parent' => $id_db,
             'text' => _('Procedures'),
             'code' => 'procedures',
-          ])
-        ){
-          $this->o->set_cfg($id_procedures, [
-            'show_code' => 1,
-            'show_value' => 1,
-            'allow_children' => 1
-          ]);
+          ]
+        )
+        ) {
+          $this->o->set_cfg(
+            $id_procedures,
+            [
+              'show_code' => 1,
+              'show_value' => 1,
+              'allow_children' => 1
+            ]
+          );
         }
-        if (
-          $id_functions = $this->o->add([
+        if ($id_functions = $this->o->add(
+          [
             'id_parent' => $id_db,
             'text' => _('Function'),
             'code' => 'functions',
-          ])
-        ){
-          $this->o->set_cfg($id_functions, [
-            'show_code' => 1,
-            'show_value' => 1,
-            'allow_children' => 1
-          ]);
+          ]
+        )
+        ) {
+          $this->o->set_cfg(
+            $id_functions,
+            [
+              'show_code' => 1,
+              'show_value' => 1,
+              'allow_children' => 1
+            ]
+          );
         }
-        if (
-          $id_tables = $this->o->add([
+        if ($id_tables = $this->o->add(
+          [
             'id_parent' => $id_db,
             'text' => _('Tables'),
             'code' => 'tables',
-          ])
-        ){
-          $this->o->set_cfg($id_tables, [
-            'show_code' => 1,
-            'show_value' => 1,
-            'allow_children' => 1
-          ]);
+          ]
+        )
+        ) {
+          $this->o->set_cfg(
+            $id_tables,
+            [
+              'show_code' => 1,
+              'show_value' => 1,
+              'allow_children' => 1
+            ]
+          );
         }
       }
-      if ( $id_db && $full ){
-        $host = bbn\str::is_uid($id_host) ? $this->o->code($id_host) : $id_host;
-        if ( !empty($host) && !bbn\str::is_uid($host) ){
-          $tables = $this->connection($host, $db)->get_tables();
-          if ( !empty($tables) ){
-            foreach ( $tables as $t ){
+
+      if ($id_db && $full) {
+        if ( $host ){
+          $host_id = bbn\str::is_uid($host) ? $host : $this->host_id($host);
+        }
+        else {
+          $host_id = $this->retrieve_host($id_db);
+        }
+        if (!empty($host_id)) {
+          $tables = $this->connection($host_id, $db)->get_tables();
+          if (!empty($tables)) {
+            foreach ($tables as $t) {
               $this->import_table($t, $id_db);
             }
           }
         }
       }
-      return $id_db;
     }
-    return false;
+    return $id_db;
   }
 
-  public function import_table(string $table, string $id_db){
-    if ( $id_tables = $this->o->from_code('tables', $id_db) ){
-      if (
-        !($id_table = $this->o->from_code($table, $id_tables)) &&
-        $id_table = $this->o->add([
-          'id_parent' => $id_tables,
-          'text' => $table,
-          'code' => $table,
-        ])
-      ){
-        $this->o->set_cfg($id_table, [
-          'allow_children' => 1
-        ]);
-        if ( $id_columns = $this->o->add([
-          'id_parent' => $id_table,
-          'text' => _("Columns"),
-          'code' => 'columns'
-        ]) ){
-          $this->o->set_cfg($id_columns, [
-            'show_code' => 1,
-            'show_value' => 1,
-            'sortable' => 1
-          ]);
+  public function retrieve_host(string $id_db): ?string{
+    
+    if ($this->check()
+        && defined('BBN_DB_USER')
+        && defined('BBN_DB_HOST')
+        && ($connections = $this->o->full_options('connections', $id_db))
+    )
+    {
+      foreach ($connections as $c) {
+        if ($c['alias']['code'] === BBN_DB_USER.'@'.BBN_DB_HOST) {
+          return $c['alias']['id'];
         }
-        if ( $id_keys = $this->o->add([
-          'id_parent' => $id_table,
-          'text' => _("Keys"),
-          'code' => 'keys',
-        ]) ){
-          $this->o->set_cfg($id_keys, [
-            'show_code' => 1,
-            'show_value' => 1,
-            'show_alias' => 1,
-            'allow_children' => 1
-          ]);
+      }    
+    }
+    return null;
+  }
+
+  /**
+   * Imports a table's structure into the options table.
+   *
+   * @param string $table The table's name
+   * @param bool   $id_db The database to which import the table (its id_parent)
+   * @param string $host  The connection's code
+   * @return string|null The ID of the generated table entry
+   */
+  public function import_table(string $table, string $id_db, string $host = ''): ?array
+  {
+    if ($id_tables = $this->o->from_code('tables', $id_db)) {
+      if (!($id_table = $this->o->from_code($table, $id_tables))
+          && ($id_table = $this->o->add(
+            [
+              'id_parent' => $id_tables,
+              'text' => $table,
+              'code' => $table,
+            ]
+          ))
+      ) {
+        $this->o->set_cfg($id_table, ['allow_children' => 1]);
+        if ($id_columns = $this->o->add(
+          [
+            'id_parent' => $id_table,
+            'text' => _("Columns"),
+            'code' => 'columns'
+          ]
+        )
+        ) {
+          $this->o->set_cfg(
+            $id_columns,
+            [
+              'show_code' => 1,
+              'show_value' => 1,
+              'sortable' => 1
+            ]
+          );
+        }
+        if ($id_keys = $this->o->add(
+          [
+            'id_parent' => $id_table,
+            'text' => _("Keys"),
+            'code' => 'keys',
+          ]
+        )
+        ) {
+          $this->o->set_cfg(
+            $id_keys,
+            [
+              'show_code' => 1,
+              'show_value' => 1,
+              'show_alias' => 1,
+              'allow_children' => 1
+            ]
+          );
         }
       }
       else{
         $id_columns = $this->o->from_code('columns', $id_table);
         $id_keys = $this->o->from_code('keys', $id_table);
       }
-      $host = $this->o->parent($this->o->parent($id_db)['id'])['code'];
       $db = $this->o->code($id_db);
-      if ( $id_table &&
-        $id_columns &&
-        $id_keys &&
-        $host &&
-        $db &&
-        ($m = $this->connection($host, $db)->modelize($table))
-      ){
+      if ($id_table
+          && $id_columns
+          && $id_keys
+          && $host
+          && $db
+          && ($m = $this->connection($host, $db)->modelize($table))
+      ) {
         $num_cols = 0;
         $num_cols_rem = 0;
         $fields = [];
-        foreach ( $m['fields'] as $col => $cfg ){
-          if ( $opt_col = $this->o->option($col, $id_columns) ){
+        foreach ($m['fields'] as $col => $cfg) {
+          if ($opt_col = $this->o->option($col, $id_columns)) {
             $num_cols += (int)$this->o->set($opt_col['id'], bbn\x::merge_arrays($opt_col, $cfg));
           }
-          else if ( $id = $this->o->add(bbn\x::merge_arrays($cfg, [
-            'id_parent' => $id_columns,
-            'text' => $col,
-            'code' => $col,
-            'num' => $cfg['position']
-          ])) ){
+          elseif ($id = $this->o->add(
+            bbn\x::merge_arrays(
+              $cfg,
+              [
+                'id_parent' => $id_columns,
+                'text' => $col,
+                'code' => $col,
+                'num' => $cfg['position']
+              ]
+            )
+          )
+          ) {
             $num_cols++;
             $opt_col = $cfg;
             $opt_col['id'] = $id;
           }
-          if ( $opt_col ){
+          if ($opt_col) {
             $fields[$col] = $opt_col['id'];
           }
         }
-        $columns_to_delete = array_filter($this->o->options($id_columns), function($c) use($m){
-          return array_key_exists($c, $m['fields']);
-        });
-        if ( !empty($columns_to_delete) ){
-          foreach ( $columns_to_delete as $id => $c ){
-            if ( bbn\str::is_uid($id) ){
+        $columns_to_delete = array_filter(
+          $this->o->options($id_columns),
+          function ($c) use ($m) {
+            return array_key_exists($c, $m['fields']);
+          }
+        );
+        if (!empty($columns_to_delete)) {
+          foreach ($columns_to_delete as $id => $c){
+            if (bbn\str::is_uid($id)) {
               $num_cols_rem += (int)$this->o->remove($id);
             }
           }
         }
         $num_keys = 0;
         $num_keys_rem = 0;
-        foreach ( $m['keys'] as $key => $cfg ){
+        foreach ($m['keys'] as $key => $cfg) {
           $cols = $cfg['columns'];
           unset($cfg['columns']);
-          if (
-            isset($cfg['ref_db'], $cfg['ref_table'], $cfg['ref_column']) &&
-            ($id_alias = $this->column_id($cfg['ref_column'], $cfg['ref_table'], $cfg['ref_db']))
-          ){
+          if (isset($cfg['ref_db'], $cfg['ref_table'], $cfg['ref_column']) 
+              && ($id_alias = $this->column_id($cfg['ref_column'], $cfg['ref_table'], $cfg['ref_db']))
+          ) {
             $cfg['id_alias'] = $id_alias;
             unset($cfg['ref_db'], $cfg['ref_table'], $cfg['ref_column']);
           }
-          if ( $opt_key = $this->o->option($key, $id_keys) ){
+          if ($opt_key = $this->o->option($key, $id_keys)) {
             $num_keys += (int)$this->o->set($opt_key['id'], bbn\x::merge_arrays($opt_key, $cfg));
           }
-          else if ( $id = $this->o->add(bbn\x::merge_arrays($cfg, [
-            'id_parent' => $id_keys,
-            'text' => $key,
-            'code' => $key
-          ])) ){
-            $this->o->set_cfg($id, [
+          elseif ($id = $this->o->add(
+            bbn\x::merge_arrays(
+              $cfg, [
+              'id_parent' => $id_keys,
+              'text' => $key,
+              'code' => $key
+              ]
+            )
+          ) 
+          ) {
+            $this->o->set_cfg(
+              $id, [
               'show_code' => 1,
               'show_alias' => 1
-            ]);
+              ]
+            );
             $num_keys++;
             $opt_key = $cfg;
             $opt_key['id'] = $id;
           }
-          if ( $opt_key && $cols ){
-            foreach ( $cols as $col ){
-              if ( isset($fields[$col]) ){
-                if ( $opt = $this->o->option($col, $opt_key['id']) ){
-                  $this->o->set($opt['id'], bbn\x::merge_arrays($opt, [
-                    'id_alias' => $fields[$col]
-                  ]));
+          if ($opt_key && $cols) {
+            foreach ($cols as $col){
+              if (isset($fields[$col])) {
+                if ($opt = $this->o->option($col, $opt_key['id'])) {
+                  $this->o->set(
+                    $opt['id'], bbn\x::merge_arrays(
+                      $opt, [
+                      'id_alias' => $fields[$col]
+                      ]
+                    )
+                  );
                 }
                 else{
                   $tmp = [
@@ -779,7 +1065,7 @@ class databases extends bbn\models\cls\cache
                     'code' => $col,
                     'text' => $col
                   ];
-                  if ( $this->o->add($tmp) ){
+                  if ($this->o->add($tmp)) {
                     $opt = $tmp;
                   }
                 }
@@ -787,12 +1073,14 @@ class databases extends bbn\models\cls\cache
             }
           }
         }
-        $keys_to_delete = array_filter($this->o->options($id_keys), function($c) use($m){
-          return array_key_exists($c, $m['keys']);
-        });
-        if ( !empty($keys_to_delete) ){
-          foreach ( $keys_to_delete as $id => $k ){
-            if ( bbn\str::is_uid($id) ){
+        $keys_to_delete = array_filter(
+          $this->o->options($id_keys), function ($c) use ($m) {
+            return array_key_exists($c, $m['keys']);
+          }
+        );
+        if (!empty($keys_to_delete)) {
+          foreach ($keys_to_delete as $id => $k){
+            if (bbn\str::is_uid($id)) {
               $num_keys_rem += (int)$this->o->remove($id);
             }
           }
@@ -805,36 +1093,49 @@ class databases extends bbn\models\cls\cache
         ];
       }
     }
-    return false;
+    return null;
   }
 
-  public function import(string $table){
-    $res = false;
-    if ( $m = $this->db->modelize($table) ){
+  /**
+   * Import a table structure in the options table.
+   *
+   * @param string $table The table's name
+   * @return string|null
+   */
+  public function import(string $table): ?array
+  {
+    $res = null;
+    if ($m = $this->db->modelize($table)) {
       $tf = explode('.', $this->db->tfn($table));
       $db = $tf[0];
       $table = $tf[1];
 
-      if (
-        ($id_host = $this->import_host($this->db->host)) &&
-        ($id_db = $this->import_db($db, $id_host))
-      ){
+      if (($id_host = $this->import_host($this->db->host)) 
+          && ($id_db = $this->import_db($db, $id_host))
+      ) {
         $res = $this->import_table($table, $id_db);
       }
     }
     return $res;
   }
 
-  public function import_all(string $db = ''){
-    $res = false;
-    if ( $tables = $this->db->get_tables($db) ){
+  /**
+   * Imports a whole database structure in the options table.
+   *
+   * @param string $db The database's name
+   * @return array|null The database's model
+   */
+  public function import_all(string $db = ''): ?array
+  {
+    $res = null;
+    if ($tables = $this->db->get_tables($db)) {
       $res = [
         'tables' => 0,
         'columns' => 0,
         'keys' => 0
       ];
-      foreach ( $tables as $t ){
-        if ( $tmp = $this->import(($db ?: $this->db->current).'.'.$t) ){
+      foreach ($tables as $t){
+        if ($tmp = $this->import(($db ?: $this->db->current).'.'.$t)) {
           $res['tables']++;
           $res['columns'] += $tmp['columns'];
           $res['keys'] += $tmp['keys'];
@@ -842,53 +1143,5 @@ class databases extends bbn\models\cls\cache
       }
     }
     return $res;
-  }
-
-  public function remove(string $table, string $db = '', string $host = ''){
-    $id = $this->table_id($table, $db, $host);
-    return $this->o->remove_full($id);
-  }
-
-  public function remove_all(string $db = '', string $host = ''){
-    $id = $this->db_id($db, $host);
-    return $this->o->remove_full($id);
-  }
-
-  public function remove_host(string $host){
-    $id = $this->host_id($host);
-    return $this->o->remove_full($id);
-  }
-
-  public function modelize(string $table = '', string $db = '', string $host = ''){
-    if ( ($mod = $this->db->modelize($table)) && \is_array($mod) ){
-      $keys = function(&$a) use(&$table, &$db, &$host){
-        if ( \is_array($a['keys']) ){
-          array_walk($a['keys'], function(&$w, $k) use(&$table, &$db, &$host){
-            $w['id_option'] = $this->key_id($k, $table, $db, $host);
-          });
-        }
-      };
-      $fields = function(&$a) use(&$table, &$db, &$host){
-        if ( \is_array($a['fields']) ){
-          array_walk($a['fields'], function(&$w, $k) use(&$table, &$db, &$host){
-            $w['id_option'] = $this->column_id($k, $table, $db, $host);
-          });
-        }
-      };
-      if ( empty($table) ){
-        array_walk($mod, function(&$w, $k) use(&$table, &$db, &$host, $keys, $fields){
-          $table = $this->db->tsn($k);
-          $db = substr($k, 0, strrpos($k, $table)-1);
-          $w['id_option'] = $this->table_id($table, $db, $host);
-          $keys($w);
-          $fields($w);
-        });
-      }
-      else {
-        $keys($mod);
-        $fields($mod);
-      }
-      return $mod;
-    }
   }
 }

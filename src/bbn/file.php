@@ -104,7 +104,7 @@ class file extends models\cls\basic
         $this->path = './';
       }
     }
-   
+
     $this->get_extension();
     if ( \is_string($file) && is_file($file) ){
       $this->file = $file;
@@ -134,9 +134,9 @@ class file extends models\cls\basic
   }
 
   /**
-   * @return \Generator
+   * @return Generator
    */
-  public function iterate_lines(): \Generator
+  public function iterate_lines()//: Generator
   {
     if ( $this->file ){
       $f = fopen($this->file, 'r');

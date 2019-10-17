@@ -863,15 +863,15 @@ class i18n extends bbn\models\cls\cache
                   }
                   // @var  $id takes the id of the original expression in db 
                   if ( !isset($id) && !($id = $this->db->select_one('bbn_i18n', 'id', [
-                    'exp' => $original,
-                    'lang' => $path_source_lang
+                    ['exp', 'LIKE', $original],
+                    ['lang', 'LIKE', $path_source_lang]
                   ])) ){
-
+                    $prev= $this->db->last();
                     if ( !$this->db->insert_ignore('bbn_i18n', [
                       'exp' => $original,
                       'lang' => $path_source_lang
                     ]) ){
-                      die(\bbn\x::hdump($original,$t->getReference()));
+                      die(\bbn\x::hdump($original,$prev,$path_source_lang,$t->getReference()));
                       $errors[] = $original;
 
                     }

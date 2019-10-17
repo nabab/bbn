@@ -1239,7 +1239,6 @@ MYSQL;
                 'bbn_uid' => $primary_value,
                 'bbn_table' => $s['id']
               ]) ){
-                \bbn\x::log([$table, $s['fields'], $s['primary']], 'history_thomas');
                 $cfg['history'][] = [
                   'operation' => 'INSERT',
                   'column' => $s['fields'][$s['primary']]['id_option'],

@@ -197,6 +197,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public $host;
   /**
+   * The host of this connection
+   * @var string $host
+   */
+  public $username;
+  /**
    * The currently selected database
    * @var mixed $current
    */
@@ -891,6 +896,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
           $this->current = $cfg['db'];
           $this->engine = $cfg['engine'];
           $this->host = $cfg['host'] ?? '127.0.0.1';
+          $this->username = $cfg['user'] ?? null;
           $this->hash = $this->_make_hash($cfg['args']);
           $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
           if ( !empty($cfg['cache_length']) ){

@@ -16,191 +16,199 @@ namespace bbn;
  * @todo Groups and hotlinks features
  * @todo Implement Cache for session requests' results?
  */
-if ( !\defined('BBN_DATA_PATH') ){
-  exit('The constant BBN_DATA_PATH must be defined');
-}
 class user extends models\cls\basic
 {
-  use
-    models\tts\retriever,
-    models\tts\dbconfig;
+  use models\tts\retriever;
+  use models\tts\dbconfig;
 
-	protected static
-    /** @var string The name of the session index in for session data */
-    $sn = 'bbn_session',
-    /** @var string The name of the session index in for user data */
-    $un = 'bbn_user',
-    /** @var array */
-    $_defaults = [
-      'errors' => [
-        0 => 'login failed',
-        2 => 'password sent',
-        3 => 'no email such as',
-        4 => 'too many attempts',
-        5 => 'impossible to create the user',
-        6 => 'wrong user and/or password',
-        7 => 'different passwords',
-        8 => 'less than 5 mn between emailing password',
-        9 => 'user already exists',
-        10 => 'problem during user creation',
-        11 => 'no salt in session',
-        12 => 'login and password are mandatory',
-        13 => 'impossible to save the session',
-        14 => 'impossible to retrieve the session',
-        15 => 'no session in memory',
-        16 => 'impossible to add session in the database',
-        17 => 'non matching salt',
-        18 => 'incorrect magic string',
-        19 => 'wrong fingerprint'
-      ],
-      'table' => 'bbn_users',
-      'tables' => [
-        'groups' => 'bbn_users_groups',
-        'hotlinks' => 'bbn_users_hotlinks',
-        'passwords' => 'bbn_users_passwords',
-        'sessions' => 'bbn_users_sessions',
-        'users' => 'bbn_users',
-      ],
-      'arch' => [
-        'groups' => [
-          'id' => 'id',
-          'group' => 'group',
-          'cfg' => 'cfg'
-        ],
-        'hotlinks' => [
-          'id' => 'id',
-          'id_user' => 'id_user',
-          'magic_string' => 'magic_string',
-          'expire' => 'expire'
-        ],
-        'passwords' => [
-          'id_user' => 'id_user',
-          'pass' => 'pass',
-          'added' => 'added',
-        ],
-        'sessions' => [
-          'id' => 'id',
-          'id_user' => 'id_user',
-          'sess_id' => 'sess_id',
-          'ip_address' => 'ip_address',
-          'user_agent' => 'user_agent',
-          'opened' => 'opened',
-          'creation' => 'creation',
-          'last_activity' => 'last_activity',
-          'cfg' => 'cfg',
-        ],
-        'users' => [
-          'id' => 'id',
-          'id_group' => 'id_group',
-          'email' => 'email',
-          'username' => 'username',
-          'login' => 'login',
-          'admin' => 'admin',
-          'dev' => 'dev',
-          'cfg' => 'cfg',
-          'active' => 'active'
-        ],
-      ],
-      'fields' => [
-        'user' => 'user',
-        'pass' => 'pass',
-        'salt' => 'appui_salt',
-        'key' => 'key',
+  /** @var string The name of the session index in for session data */
+	 protected static $sn = 'bbn_session';
+  
+  /** @var string The name of the session index in for user data */
+  protected static $un = 'bbn_user';
+  
+  /** @var array */
+  protected static $_defaults = [
+    'errors' => [
+      0 => 'login failed',
+      2 => 'password sent',
+      3 => 'no email such as',
+      4 => 'too many attempts',
+      5 => 'impossible to create the user',
+      6 => 'wrong user and/or password',
+      7 => 'different passwords',
+      8 => 'less than 5 mn between emailing password',
+      9 => 'user already exists',
+      10 => 'problem during user creation',
+      11 => 'no salt in session',
+      12 => 'login and password are mandatory',
+      13 => 'impossible to save the session',
+      14 => 'impossible to retrieve the session',
+      15 => 'no session in memory',
+      16 => 'impossible to add session in the database',
+      17 => 'non matching salt',
+      18 => 'incorrect magic string',
+      19 => 'wrong fingerprint'
+    ],
+    'table' => 'bbn_users',
+    'tables' => [
+      'groups' => 'bbn_users_groups',
+      'hotlinks' => 'bbn_users_hotlinks',
+      'passwords' => 'bbn_users_passwords',
+      'sessions' => 'bbn_users_sessions',
+      'users' => 'bbn_users',
+    ],
+    'arch' => [
+      'groups' => [
         'id' => 'id',
-        'pass1' => 'pass1',
-        'pass2' => 'pass2',
-        'action' => 'appui_action'
+        'group' => 'group',
+        'cfg' => 'cfg'
       ],
-      /**
-       * Password saving encryption
-       * @var string
-       */
-      'encryption' => 'sha1',
-      /**
-       * Additional conditions when querying the users' table
-       * @var array
-       */
-      'conditions' => [],
-      /**
-       * Number of times a user can try to log in the period
-       * @var integer
-       */
-      'max_attempts' => 10,
-      /**
-       * User ban's length in minutes after max attempts is reached
-       * @var integer
-       */
-      'max_sessions' => 5,
-      /**
-       * Sets if the hotlinks features should be in used
-       * @var bool
-       */
-      'hotlinks' => false,
-      'show' => 'name'
-    ];
+      'hotlinks' => [
+        'id' => 'id',
+        'id_user' => 'id_user',
+        'magic_string' => 'magic_string',
+        'expire' => 'expire'
+      ],
+      'passwords' => [
+        'id_user' => 'id_user',
+        'pass' => 'pass',
+        'added' => 'added',
+      ],
+      'sessions' => [
+        'id' => 'id',
+        'id_user' => 'id_user',
+        'sess_id' => 'sess_id',
+        'ip_address' => 'ip_address',
+        'user_agent' => 'user_agent',
+        'opened' => 'opened',
+        'creation' => 'creation',
+        'last_activity' => 'last_activity',
+        'cfg' => 'cfg',
+      ],
+      'users' => [
+        'id' => 'id',
+        'id_group' => 'id_group',
+        'email' => 'email',
+        'username' => 'username',
+        'login' => 'login',
+        'admin' => 'admin',
+        'dev' => 'dev',
+        'cfg' => 'cfg',
+        'active' => 'active'
+      ],
+    ],
+    'fields' => [
+      'user' => 'user',
+      'pass' => 'pass',
+      'salt' => 'appui_salt',
+      'key' => 'key',
+      'id' => 'id',
+      'pass1' => 'pass1',
+      'pass2' => 'pass2',
+      'action' => 'appui_action'
+    ],
+    /**
+     * Password saving encryption
+     * @var string
+     */
+    'encryption' => 'sha1',
+    /**
+     * Additional conditions when querying the users' table
+     * @var array
+     */
+    'conditions' => [],
+    /**
+     * Number of times a user can try to log in the period
+     * @var integer
+     */
+    'max_attempts' => 10,
+    /**
+     * User ban's length in minutes after max attempts is reached
+     * @var integer
+     */
+    'max_sessions' => 5,
+    /**
+     * Sets if the hotlinks features should be in used
+     * @var bool
+     */
+    'hotlinks' => false,
+    'show' => 'name'
+  ];
 
-  private
-    /** @var bool */
-    $just_login = false;
+  /** @var bool Will be true when the user has just logged in. */
+  private $just_login = false;
 
-	protected
-    /** @var user\session */
-    $session = null,
-    /** @var int */
-    $error = null,
-    /** @var string */
-    $user_agent,
-    /** @var string */
-    $ip_address,
-    /** @var string */
-    $accept_lang,
-    /** @var bool */
-    $auth = false,
-    /** @var string */
-    $path,
-    /** @var string */
-    $sql,
-    /** @var int */
-    $id,
-    /** @var int */
-    $id_group,
-    /** @var mixed */
-    $alert,
-    /** @var array */
-    $cfg,
-    /** @var array */
-    $sess_cfg;
+  /** @var user\session */
+ 	protected $session = null;
 
-	public
-    /** @var db */
-    $db,
-    /** @var mixed */
-    $prev_time;
+  /** @var int */
+  protected $error = null;
+
+  /** @var string */
+  protected $user_agent;
+
+  /** @var string */
+  protected $ip_address;
+
+  /** @var string */
+  protected $accept_lang;
+
+  /** @var bool */
+  protected $auth = false;
+
+  /** @var string */
+  protected $path;
+
+  /** @var string */
+  protected $sql;
+
+  /** @var int */
+  protected $id;
+
+  /** @var int */
+  protected $id_group;
+
+  /** @var mixed */
+  protected $alert;
+
+  /** @var array */
+  protected $cfg;
+
+  /** @var array */
+  protected $sess_cfg;
+
+  /** @var db */
+ 	public $db;
+
+  /** @var mixed */
+  public $prev_time;
 
   /**
-   * Returns the latest created connection, ie the current user's object
-   * @return $this
+   * Returns the latest created connection, ie the current user's object.
+   * @return self
    */
-  public static function get_user(){
+  public static function get_user(): ?self
+  {
     return self::get_instance();
   }
 
   /**
-   * Generates a random long string (16-32 chars)
+   * Generates a random long string (16-32 chars) used as unique fingerprint.
    * @return string
    */
-  public static function make_fingerprint(){
+  public static function make_fingerprint(): string
+  {
     return str::genpwd(32, 16);
   }
 
   /**
-   * Creates a magic string which will be used for hotlinks
-   * The hash is stored in the database
-   * The key is sent to the user
-   *7
-	 * @return array
-	 */
-  public static function make_magic_string(){
+   * Returns an array with a key and a magic string used for making hotlinks.
+   *
+   * @return array
+   */
+  public static function make_magic_string(): array
+  {
     $key = self::make_fingerprint();
     return [
       'key' => $key,
@@ -209,22 +217,26 @@ class user extends models\cls\basic
   }
 
   /**
-   * Checks if a magic string complies with a hash
-   * @param string $key
-   * @param string $hash
+   * Checks if a given string corresponds to the given hash.
+   * 
+   * @param string $key  The key
+   * @param string $hash The corresponding hash
    * @return bool
    */
-  public static function is_magic_string($key, $hash){
-    return ( hash('sha256', $key) === $hash );
+  public static function is_magic_string(string $key, string $hash): bool
+  {
+    return hash('sha256', $key) === $hash;
   }
 
   /**
-   * initialize and saves session
-   * @return $this
+   * Initialize and saves the session after authentication.
+   * 
+   * @param string $id The user's ID (as stored in the database).
+   * @return self
    */
-  private function _login($id){
+  private function _login($id): self
+  {
     if ( $this->check() && $id ){
-        die(var_dump("Jkjkjkk", $this->check(), $this->check_salt($params[$f['salt']])));
       $this
         ->_authenticate($id)
         ->_user_info()
@@ -235,14 +247,13 @@ class user extends models\cls\basic
   }
 
   /**
-   * Gathers all the information about a user and puts it in the session
-   * The user's table data can be sent as argument if it has already been fetched
+   * Gathers the user'data from the database and puts it in the session.
    *
-   * @param array $d The user's table data
-   *
-   * @return $this
+   * @param array $data User's table data argument if it is already available
+   * @return self
    */
-  private function _user_info(){
+  private function _user_info(array $data = null): self
+  {
     if ( $this->get_id() ){
       if ( !empty($this->get_session('cfg')) ){
         $this->cfg = $this->get_session('cfg');
@@ -272,13 +283,13 @@ class user extends models\cls\basic
   }
 
   /**
-   * Gathers all the information about the user's session
-   * The session's table data can be sent as argument if it has already been fetched
+   * Gathers all the information about the user's session.
    *
-   * @param mixed $d The session's table data or its ID
-   * @return $this
+   * @param string $d The session's table data or its ID
+   * @return self
    */
-  private function _sess_info($id_session = null){
+  private function _sess_info(string $id_session = null): self
+  {
     if ( !str::is_uid($id_session) ){
       $id_session = $this->get_id_session();
     }
@@ -317,65 +328,76 @@ class user extends models\cls\basic
   }
 
   /**
-   * Checks the conformity of a given string with a hash
-   * @param string $pass_given
-   * @param string $pass_stored
+   * Checks the conformity of a given string with a hash.
+   * 
+   * @param string $pass_given  The password to check
+   * @param string $pass_stored The stored encrypted password to check against
    * @return bool
    */
-  private function _check_password($pass_given, $pass_stored){
-    return ($this->_crypt($pass_given) ===  $pass_stored);
+  private function _check_password(string $pass_given, string $pass_stored): bool
+  {
+    return $this->_crypt($pass_given) === $pass_stored;
   }
 
   /**
-   * Use the configured hash function to convert a string into hash
-   * @param string $st
+   * Use the configured hash function to encrypt a password string.
+   * 
+   * @param string $st The string to crypt
    * @return string
    */
-  private function _crypt($st){
-    if ( !function_exists($this->class_cfg['encryption']) ){
-      die("You need the PHP function {$this->class_cfg['encryption']} to have the user connection class working");
+  private function _crypt(string $st): string
+  {
+    if (!function_exists($this->class_cfg['encryption'])) {
+      $this->class_cfg['encryption'] = 'sha256';
     }
     return eval("return {$this->class_cfg['encryption']}('$st');");
   }
 
   /**
-   * Retrieves all user info from its session and populates the object
-   * @return $this
+   * Retrieves all user info from its session and populates the object.
+   * 
+   * @param bool $force
+   * @return self
    */
-  private function _retrieve_session(){
-    if ( !$this->id ){
+  private function _retrieve_session(bool $force = false): self
+  {
+    // $id mustn't be already defined
+    if (!$this->id || $force) {
       // The user ID must be in the session
       $id_session = $this->get_id_session();
       $id = $this->get_session('id');
-      if ( $id_session && $id ){
+      if ($id_session && $id) {
         $this->_sess_info($id_session);
-        if (
-          isset($this->sess_cfg['fingerprint']) &&
-          ($this->get_print($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint'])
-        ){
+        x::log([$this->sess_cfg, $this->_get_session('fingerprint'), $this->get_print($this->_get_session('fingerprint'))], 'user_login');
+        if (isset($this->sess_cfg['fingerprint']) &&
+            ($this->get_print($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint'])
+        ) {
+          x::log("THe auth should have worked for id $id", 'user_login');
           $this
             ->_authenticate($id)
             ->_user_info()
             ->_init_dir()
             ->save_session();
-        }
-        else{
+          }
+        else {
           $this->set_error(19);
         }
       }
-      else{
-        //$this->set_error(15);
+      else {
+        x::log([$id_session, $id], 'user_login');
+        $this->set_error(15);
       }
     }
     return $this;
   }
 
   /**
-   * Sets the user's session for the first time and creates the session's DB row
-   * @return $this
+   * Gets or creates (also in database) the user's session for the first time.
+   * 
+   * @return self
    */
-  private function _init_session(){
-
+  private function _init_session(): self
+  {
     // Getting or creating the session is it doesn't exist yet
     /** @var user\session */
     $this->session = user\session::get_instance();
@@ -385,13 +407,12 @@ class user extends models\cls\basic
 
     /** @var int $id_session The ID of the session row in the DB */
     if ( !($id_session = $this->get_id_session())
-        || !($this->sess_cfg = json_decode($this->db->select_one(
+        || !($tmp = $this->db->select_one(
               $this->class_cfg['tables']['sessions'],
               $this->class_cfg['arch']['sessions']['cfg'],
               [$this->class_cfg['arch']['sessions']['id'] => $id_session]
-            ), true))
+            ))
     ){
-
       /** @var string $salt */
       $salt = self::make_fingerprint();
 
@@ -431,15 +452,20 @@ class user extends models\cls\basic
         $this->set_error(16);
       }
     }
+    else{
+      $this->sess_cfg = json_decode($tmp, true);
+    }
     return $this;
   }
 
   /**
-   * Sets the "session" part of the session
-   * @param mixed $attr
-   * @return $this $this
+   * Sets an attribute the "session" part of the session.
+   * 
+   * @param mixed $attr Attribute if value follows, or an array with attribute/value keypairs 
+   * @return self
    */
-  private function _set_session($attr){
+  private function _set_session($attr): self
+  {
     if ( $this->session->has(self::$sn) ){
       $args = \func_get_args();
       if ( (\count($args) === 2) && \is_string($args[0]) ){
@@ -455,24 +481,29 @@ class user extends models\cls\basic
   }
 
   /**
-   * Gets the "session" part of the session
-   * @param string $attr
+   * Gets an attribute or the whole the "session" part of the session.
+   * 
+   * @param string $attr Name of the attribute to get
    * @return mixed
    */
-  private function _get_session($attr){
-    if ( $this->session->has(self::$sn) ){
+  private function _get_session(string $attr = null)
+  {
+    if ($this->session->has(self::$sn)) {
       return $attr ?
         $this->session->get(self::$sn, $attr) :
         $this->session->get(self::$sn);
     }
+    return null;
   }
 
   /**
-   * Checks the credentials of a user
-   * @param array $params
-   * @return mixed
+   * Checks the credentials of a user.
+   * 
+   * @param array $params Credentials
+   * @return bool
    */
-  private function _check_credentials($params){
+  private function _check_credentials($params): bool
+  {
     
     if ( $this->check() ){
       
@@ -494,9 +525,14 @@ class user extends models\cls\basic
           $arch =& $this->class_cfg['arch'];
 
           $this->just_login = 1;
+          if ( !$this->check() ){
+            $this->set_error(19);
+            //$this->session->destroy();
+            //$this->_init_session();
+          }
 
           // Database Query
-          if (
+          else if (
             $id = $this->db->select_one(
               $this->class_cfg['tables']['users'],
               $this->fields['id'],
@@ -529,18 +565,17 @@ class user extends models\cls\basic
         }
       }
     }
-    else{
-
-      die(var_dump($this->get_error()));
-    }
     return $this->auth;
   }
 
   /**
-   * If BBN_DATA_PATH is defined creates a directory and removes temp files
-   * @return $this $this
+   * Defines user's directory and constant BBN_USER_PATH if not done yet.
+   * 
+   * @param bool $create If true creates it and remove temp files if any
+   * @return self
    */
-  private function _init_dir($create = false){
+  private function _init_dir(bool $create = false): self
+  {
     if ( \defined('BBN_DATA_PATH') && $this->get_id() ){
       $this->path = mvc::get_user_data_path($this->get_id());
       if ( !\defined('BBN_USER_PATH') ){
@@ -555,14 +590,16 @@ class user extends models\cls\basic
   }
 
   /**
-   * Sets a user as authenticated ($this->auth = 1)
-   * @param int $id
-   * @return $this
+   * Sets a user as authenticated ($this->auth = true).
+   * 
+   * @param string $id
+   * @return self
    */
-  private function _authenticate($id){
+  private function _authenticate(string $id): self
+  {
     if ( $this->check() && $id ){
       $this->id = $id;
-      $this->auth = 1;
+      $this->auth = true;
       $this->db->update($this->class_cfg['tables']['sessions'], [
         $this->class_cfg['arch']['sessions']['id_user'] => $id
       ], [
@@ -572,27 +609,47 @@ class user extends models\cls\basic
     return $this;
   }
 
-  protected function set_error($err){
-    $this->error = $err;
-    //die(var_dump($err));
+  /**
+   * Sets the error property once and for all.
+   *
+   * @param $err The error code
+   * @return self
+   */
+  protected function set_error($err): self
+  {
+    if ( !$this->error ){
+      $this->error = $err;
+      \bbn\x::log($this->get_error(), 'user_login');
+      //die(var_dump($err));
+    }
+    return $this;
   }
 
   /**
-   * Returns the last known error and false if there was no error
-   * @return mixed
+   * Returns the first error in an array with the code and description.
+   * 
+   * @return null|array
    */
-  public function get_error(){
+  public function get_error(): ?array
+  {
     if ( $this->error ){
       return [
         'code' => $this->error,
         'text' => $this->class_cfg['errors'][$this->error]
       ];
     }
-    return false;
+    return null;
   }
 
+  /**
+   * Completes the steps for a full authentication of the user.
+   *
+   * @param [type] $id
+   * @return self
+   */
   protected function log_in($id): self
   {
+    $this->error = null;
     if ( $this->check() && $id ){
       $this
         ->_authenticate($id)
@@ -604,33 +661,39 @@ class user extends models\cls\basic
   }
 
   /**
-   * Returns a "print", ie an identifier based on the user agent
-   * @param false|string $fp
-   * @return string
+   * Returns a "print" based on the user agent + the fingerprint.
+   * 
+   * @param null|string $fp
+   * @return null|string
    */
-  protected function get_print(string $fp = null){
+  protected function get_print(string $fp = null): ?string
+  {
     if ( !$fp ){
       $fp = $this->_get_session('fingerprint');
     }
     if ( $fp ){
       return sha1($this->user_agent.$this->accept_lang./*$this->ip_address .*/ $fp);
     }
-    return false;
+    return null;
   }
 
   /**
-   * Returns the database ID for the session's row if it is in the session
-   * @return int
+   * Returns the database ID for the session's row if it is in the session.
+   * 
+   * @return null|string
    */
-  protected function get_id_session(){
+  protected function get_id_session(): ?string
+  {
     return $this->_get_session('id_session');
   }
 
   /**
-   * Increment the num_attempt variable
-   * @return $this
+   * Increments the num_attempt variable (after unsuccessful login attempt).
+   * 
+   * @return self
    */
-  protected function record_attempt(){
+  protected function record_attempt(): self
+  {
     $this->cfg['num_attempts'] = isset($this->cfg['num_attempts']) ?
       $this->cfg['num_attempts']+1 : 1;
     $this->_set_session('num_attempts', $this->cfg['num_attempts']);
@@ -639,16 +702,17 @@ class user extends models\cls\basic
   }
 
   /**
-   * connection constructor
+   * User constructor.
+   * 
    * @param db $db
    * @param array $cfg
    * @param array $params
    */
-  public function __construct(db $db, array $cfg = [], array $params = []){
+  public function __construct(db $db, array $cfg = [], array $params = [])
+  {
 
     // The database connection
     $this->db = $db;
-
     // The client environment variables
     $this->user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
     $this->ip_address = $_SERVER['REMOTE_ADDR'] ?? '';
@@ -665,8 +729,17 @@ class user extends models\cls\basic
 
     // The user logs in
     if ( isset($params[$f['user']], $params[$f['pass']], $params[$f['salt']]) ){
+      x::log('logging in with salt: '.$params[$f['salt']], 'user_login');
       /** @todo separate credentials and salt checking */
-      $this->_check_credentials($params);
+      //$this->_check_credentials($params);
+      if ( $this->get_print($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint']){
+        /** @todo separate credentials and salt checking */
+        $this->_check_credentials($params);
+      }
+      else{
+        $this->set_error(19);
+        $this->session->destroy();
+      }
     }
     /** @todo revise the process: dying is not the solution! */
     // The user is not known yet
@@ -695,9 +768,10 @@ class user extends models\cls\basic
   /**
    * Returns the salt string kept in session.
    *
-   * @return string
+   * @return null|string
    */
-  public function get_salt(){
+  public function get_salt(): ?string
+  {
     $salt = $this->_get_session('salt');
     return $salt;
   }
@@ -705,9 +779,10 @@ class user extends models\cls\basic
   /**
    * Confronts the given string with the salt string kept in session.
    *
-   * @return boolean
+   * @return bool
    */
-  public function check_salt($salt){
+  public function check_salt($salt): bool
+  {
     return $this->get_salt() === $salt;
   }
 
@@ -717,7 +792,8 @@ class user extends models\cls\basic
    * @param string $attr
    * @return mixed
    */
-  public function get_cfg($attr = ''){
+  public function get_cfg($attr = '')
+  {
     if ( $this->check() ){
       if ( !$this->cfg ){
         $this->cfg = $this->session->get('cfg');
@@ -728,8 +804,8 @@ class user extends models\cls\basic
       if ( isset($this->cfg[$attr]) ){
         return $this->cfg[$attr];
       }
-      return false;
     }
+    return null;
   }
 
   /**
@@ -774,7 +850,8 @@ class user extends models\cls\basic
   }
 
   /**
-   * Returns the list of fields of the given table, and if empty the list of fields for each table.
+   * Returns the list of fields of the given table, and if empty for each table.
+   * 
    * @param string $table
    * @return array|null
    */
@@ -793,7 +870,6 @@ class user extends models\cls\basic
    * Changes the data in the user's table.
    *
    * @param array $d The new data
-   *
    * @return bool
    */
   public function update_info(array $d)
@@ -812,14 +888,16 @@ class user extends models\cls\basic
         }
       }
       if ( \count($update) > 0 ){
-        $r = $this->db->update(
+        $r = (bool)$this->db->update(
                 $this->class_cfg['tables']['users'],
                 $update,
                 [$this->fields['id'] => $this->id]);
         /** @todo Why did I do this?? */
-        $this->set_session(['cfg' => false]);
-        $this->_user_info();
-        return $r;
+        if ( $r ){
+          $this->set_session(['cfg' => false]);
+          $this->_user_info();
+          return $r;
+        }
       }
     }
     return false;
@@ -850,9 +928,10 @@ class user extends models\cls\basic
 	/**
    * Sets the given attribute(s) in the user's session.
    *
-	 * @return $this
+	 * @return self
 	 */
-  public function set_session($attr){
+  public function set_session($attr): self
+  {
     if ( $this->session->has(self::$un) ){
       $args = \func_get_args();
       if ( (\count($args) === 2) && \is_string($args[0]) ){
@@ -873,10 +952,12 @@ class user extends models\cls\basic
    * @param null|string The property to get
 	 * @return mixed
 	 */
-  public function get_session($attr = null){
+  public function get_session($attr = null)
+  {
     if ( $this->session->has(self::$un) ){
       return $attr ? $this->session->get(self::$un, $attr) : $this->session->get(self::$un);
     }
+    return null;
   }
 
 	/**
@@ -910,59 +991,74 @@ class user extends models\cls\basic
   /**
    * Saves the session config in the database.
    *
-	 * @return $this
+   * @todo Use it only when needed!
+	 * @return self
 	 */
   public function save_session(): self
   {
     $id_session = $this->get_id_session();
     //die(var_dump($id_session, $this->check()));
-    if ( $id_session && $this->check() ){
-      $p =& $this->class_cfg['arch']['sessions'];
-      $this->db->update($this->class_cfg['tables']['sessions'], [
-        $p['id_user'] => $this->id,
-        $p['sess_id'] => $this->session->get_id(),
-        $p['ip_address'] => $this->ip_address,
-        $p['user_agent'] => $this->user_agent,
-        $p['opened'] => 1,
-        $p['last_activity'] => date('Y-m-d H:i:s'),
-        $p['cfg'] => json_encode($this->sess_cfg)
-      ], [
-        $p['id'] => $id_session
-      ]);
-    }
-    else{
-      $this->set_error(13);
+    if ( $this->check() ){
+      if ( $id_session ){
+        $p =& $this->class_cfg['arch']['sessions'];
+        // It is normal this is sometimes not changing as different actions can happen in the same
+        $time = time();
+        if ( empty($this->sess_cfg['last_renew']) || ($time - $this->sess_cfg['last_renew'] >= 2) ){
+          if ( !$this->db->update($this->class_cfg['tables']['sessions'], [
+            $p['id_user'] => $this->id,
+            $p['sess_id'] => $this->session->get_id(),
+            $p['ip_address'] => $this->ip_address,
+            $p['user_agent'] => $this->user_agent,
+            $p['opened'] => 1,
+            $p['last_activity'] => date('Y-m-d H:i:s', $time),
+            $p['cfg'] => json_encode($this->sess_cfg)
+          ], [
+            $p['id'] => $id_session
+          ]) ){
+            x::log($this->id, 'user_login');
+            //die(var_dump($this->session));
+          }
+        }
+        else{
+          x::log("Pas besoin", 'user_login');
+        }
+      }
+      else{
+        $this->set_error(13);
+      }
     }
     return $this;
   }
 
   /**
-   * Closes the session in the database, and if $with_session is true, deletes also the session information.
+   * Closes the session in the database.
    *
-   * @param bool $with_session
-   * @return user
+   * @param bool $with_session If true deletes also the session information
+   * @return self
    */
   public function close_session($with_session = false): self
   {
-    $p =& $this->class_cfg['arch']['sessions'];
-    $this->db->update($this->class_cfg['tables']['sessions'], [
-        $p['ip_address'] => $this->ip_address,
-        $p['user_agent'] => $this->user_agent,
-        $p['opened'] => 0,
-        $p['last_activity'] => date('Y-m-d H:i:s'),
-        $p['cfg'] => json_encode($this->sess_cfg)
-      ],[
-        $p['id_user'] => $this->id,
-        $p['sess_id'] => $this->session->get_id()
-      ]);
-    $this->auth = false;
-    $this->id = null;
-    $this->sess_cfg = null;
-    if ( $with_session ){
-      $this->session->set([]);
-    }
-    else{
-      $this->session->set([], self::$un);
+    if ( $this->id ){
+      $p =& $this->class_cfg['arch']['sessions'];
+      $this->db->update($this->class_cfg['tables']['sessions'], [
+          $p['ip_address'] => $this->ip_address,
+          $p['user_agent'] => $this->user_agent,
+          $p['opened'] => 0,
+          $p['last_activity'] => date('Y-m-d H:i:s'),
+          $p['cfg'] => json_encode($this->sess_cfg)
+        ],[
+          $p['id_user'] => $this->id,
+          $p['sess_id'] => $this->session->get_id()
+        ]);
+      $this->auth = false;
+      $this->id = null;
+      $this->sess_cfg = null;
+      if ( $with_session ){
+        $this->session->set([]);
+      }
+      else{
+        $this->session->set([], self::$un);
+      }
     }
     return $this;
   }
@@ -974,21 +1070,23 @@ class user extends models\cls\basic
   public function check_attempts(): bool
   {
     if ( !isset($this->cfg) ){
+      x::log("Checking attempts without user config", 'user_login');
       return false;
     }
-
-    //die(var_dump($this->session->get('num_attempts'), $this->sess_cfg, $this->session->get('attempts')));
     if ( isset($this->cfg['num_attempts']) && $this->cfg['num_attempts'] > $this->class_cfg['max_attempts'] ){
+      x::log("Checking attempts maxed out!", 'user_login');
       return false;
     }
+    x::log("Checking attempts ok", 'user_login');
     return true;
   }
 
   /**
-   * Saves the user's config in the cfg field of the users' table
-   * return connection
+   * Saves the user's config in the cfg field of the users' table.
+   * 
+   * return self
    */
-  public function save_cfg()
+  public function save_cfg(): self
   {
     if ( $this->check() ){
       $this->db->update(
@@ -1000,9 +1098,12 @@ class user extends models\cls\basic
   }
 
   /**
-   * return connection
+   * Saves the attribute(s) values into the session config.
+   * 
+   * return self
    */
-  public function set_cfg($attr){
+  public function set_cfg($attr): self
+  {
     if ( null !== $this->cfg ){
       $args = \func_get_args();
       if ( (\count($args) === 2) && \is_string($attr) ){
@@ -1020,10 +1121,13 @@ class user extends models\cls\basic
   }
 
   /**
+   * Unsets the attribute(s) in the session config.
+   * 
    * @param $attr
-   * @return $this
+   * @return self
    */
-  public function unset_cfg($attr){
+  public function unset_cfg($attr): self
+  {
     if ( null !== $this->cfg ){
       $args = \func_get_args();
       if ( \is_string($attr) ){
@@ -1041,9 +1145,11 @@ class user extends models\cls\basic
   }
 
   /**
-	 * @return $this
+   * Regathers informations from the database.
+   * 
+	 * @return self
 	 */
-	public function refresh_info()
+	public function refresh_info(): self
 	{
     if ( $this->check() ){
       $this->_user_info();
@@ -1053,7 +1159,8 @@ class user extends models\cls\basic
 	}
 
   /**
-   * Returns true if authenticated false otherwise
+   * Returns true if authenticated false otherwise.
+   * 
    * @return bool
    */
   public function is_auth(){
@@ -1061,7 +1168,8 @@ class user extends models\cls\basic
   }
 
 	/**
-   * Retrieves user's info from session if needed and checks if authenticated
+   * Retrieves user's info from session if needed and checks if authenticated.
+   * 
 	 * @return bool
 	 */
 	public function check_session(){
@@ -1072,35 +1180,55 @@ class user extends models\cls\basic
 	}
 
   /**
-   * Returns the user's ID if there is no error
-   * @return false|int
+   * Returns the user's ID if there is no error.
+   * 
+   * @return null|string
    */
-  public function get_id(){
+  public function get_id(): ?string
+  {
     if ( $this->check() ){
       return $this->id;
     }
-    return false;
+    return null;
   }
 
-  public function get_group()
+  /**
+   * Returns the user's group's ID if there is no error.
+   * 
+   * @return null|string
+   */
+  public function get_group(): ?string
   {
     if ( $this->check() ){
       return $this->id_group;
     }
-  }
-
-  public function expire_hotlink($id){
-    return $this->db->update($this->class_cfg['tables']['hotlinks'],
-            [$this->class_cfg['arch']['hotlinks']['expire'] => date('Y-m-d H:i:s')],
-            [$this->class_cfg['arch']['hotlinks']['id'] => $id]);
+    return null;
   }
 
   /**
-   * @param $id
-   * @param $key
-   * @return bool
+   * Expires an hotlink by setting the expire column to now.
+   * 
+   * @return int
    */
-  public function get_id_from_magic_string($id, $key){
+  public function expire_hotlink($id): int
+  {
+    if ( $this->check() ){
+      return $this->db->update($this->class_cfg['tables']['hotlinks'],
+              [$this->class_cfg['arch']['hotlinks']['expire'] => date('Y-m-d H:i:s')],
+              [$this->class_cfg['arch']['hotlinks']['id'] => $id]);
+    }
+    return 0;
+  }
+
+  /**
+   * Retrieves a user's ID from the hotlink's magic string.
+   * 
+   * @param string $id
+   * @param string $key
+   * @return null|string
+   */
+  public function get_id_from_magic_string(string $id, string $key): ?string
+  {
     if ( $val = $this->db->rselect($this->class_cfg['tables']['hotlinks'], [
       $this->class_cfg['arch']['hotlinks']['magic_string'],
       $this->class_cfg['arch']['hotlinks']['id_user'],
@@ -1111,40 +1239,53 @@ class user extends models\cls\basic
         return $val['id_user'];
       }
     }
-    return false;
+    return null;
   }
 
   /**
-   * @return boolean
+   * Checks whether the user is an admin or not.
+   * 
+   * @return bool
    */
-  public function is_admin()
+  public function is_admin(): bool
   {
-    return !!$this->get_session('admin');
+    return (bool)$this->get_session('admin');
   }
 
   /**
-   * @return boolean
+   * Checks whether the user is an dev(eloper) or not.
+   * 
+   * @return bool
    */
-  public function is_dev()
+  public function is_dev(): bool
   {
-    return $this->is_admin() || !!$this->get_session('dev');
+    return (bool)($this->is_admin() || !!$this->get_session('dev'));
   }
 
-  public function get_manager($mail = false){
+  /**
+   * Gets a bbn\user\manager instance.
+   *
+   * @param mail $mail
+   * @return user\manager
+   */
+  public function get_manager(mail $mail = null)
+  {
     $mgr = new user\manager($this, $mail);
     return $mgr;
   }
 
 	/**
-   * Checks if an error has been thrown or not
-	 * @return boolean
+   * Checks if an error has been thrown or not.
+   * 
+	 * @return bool
 	 */
 	public function check(){
     return $this->get_error() ? false : true;
 	}
 
   /**
-   * Unauthenticates, resets the config and destroys the session
+   * Unauthenticates, resets the config and destroys the session.
+   * 
    * @return void
    */
   public function logout(){
@@ -1153,16 +1294,25 @@ class user extends models\cls\basic
     $this->close_session();
   }
 
-  /** Returns an instance of the mailer class */
-  public function get_mailer(){
+  /**
+   * Returns an instance of the mailer class.
+   *
+   * @return mail
+   */
+  public function get_mailer()
+  {
     return new mail();
   }
 
   /**
-   * Change the password in the database after checking the current one
-   * @return boolean
+   * Change the password in the database after checking the current one.
+   * 
+   * @param string $old_pass The current password
+   * @param string $new_pass The new password
+   * @return bool
    */
-  public function set_password($old_pass, $new_pass){
+  public function set_password(string $old_pass, string $new_pass): bool
+  {
     if ( $this->auth ){
       $pwt = $this->class_cfg['tables']['passwords'];
       $pwa = $this->class_cfg['arch']['passwords'];
@@ -1179,12 +1329,14 @@ class user extends models\cls\basic
   }
 
   /**
-   * Change the password in the database
-   * @return boolean
+   * Changes the password in the database.
+   * 
+   * @return bool
    */
-  public function force_password($pass, $id){
+  public function force_password($pass, $id): bool
+  {
     if ( $this->check() ){
-      return $this->db->insert($this->class_cfg['tables']['passwords'], [
+      return (bool)$this->db->insert($this->class_cfg['tables']['passwords'], [
         $this->class_cfg['arch']['passwords']['pass'] => $this->_crypt($pass),
         $this->class_cfg['arch']['passwords']['id_user'] => $id,
         $this->class_cfg['arch']['passwords']['added'] => date('Y-m-d H:i:s')
@@ -1194,10 +1346,12 @@ class user extends models\cls\basic
   }
 
   /**
-   * Returns the written name of this or a user
-   * @return string|false
+   * Returns the full name of the given user or the current one.
+   * 
+   * @return string|null
    */
-  public function get_name($usr = null){
+  public function get_name($usr = null): ?string
+  {
     if ( $this->auth ){
       if ( \is_null($usr) ){
         $usr = $this->get_session();
@@ -1210,14 +1364,16 @@ class user extends models\cls\basic
         return $usr[$this->class_cfg['show']];
       }
     }
-    return false;
+    return null;
   }
 
   /**
-   * Returns the written name of this or a user
-   * @return string|false
+   * Returns the email of the given user or the current one.
+   * 
+   * @return string|null
    */
-  public function get_email($usr = null){
+  public function get_email($usr = null): string
+  {
     if ( $this->auth ){
       if ( \is_null($usr) ){
         $usr = $this->get_session();
@@ -1230,9 +1386,17 @@ class user extends models\cls\basic
         return $usr[$this->class_cfg['email']];
       }
     }
-    return false;
+    return null;
   }
 
+  /**
+   * Adds a file to the tmp folder of the user and returns its path.
+   *
+   * @param string $file
+   * @param string $name
+   * @param bool $move
+   * @return string|null
+   */
   public function add_to_tmp(string $file, string $name = null, $move = true):? string
   {
     if ( $this->auth ){
