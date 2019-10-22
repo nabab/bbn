@@ -7,7 +7,7 @@ _DS_STORE*
 .DS_Store
 ._.DS_Store
 doc/*
-
+build/*
 [core]
 filemode = false
 *.* text eol=lf

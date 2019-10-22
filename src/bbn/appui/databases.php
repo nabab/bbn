@@ -803,83 +803,98 @@ class databases extends bbn\models\cls\cache
   {
     $id_db = null;
     if ($id_dbs = self::get_option_id('dbs')) {
-      if (!($id_db = $this->o->from_code($db, $id_dbs))
-          && ($id_db = $this->o->add(
-            [
-              'id_parent' => $id_dbs,
-              'text' => $db,
-              'code' => $db,
-            ]
-          ))
-      ) {
-        $this->o->set_cfg($id_db, ['allow_children' => 1]);
-        if ($id_procedures = $this->o->add(
-          [
-            'id_parent' => $id_db,
-            'text' => _('Procedures'),
-            'code' => 'procedures',
-          ]
-        )
-        ) {
-          $this->o->set_cfg(
-            $id_procedures,
-            [
-              'show_code' => 1,
-              'show_value' => 1,
-              'allow_children' => 1
-            ]
-          );
-        }
-        if ($id_functions = $this->o->add(
-          [
-            'id_parent' => $id_db,
-            'text' => _('Function'),
-            'code' => 'functions',
-          ]
-        )
-        ) {
-          $this->o->set_cfg(
-            $id_functions,
-            [
-              'show_code' => 1,
-              'show_value' => 1,
-              'allow_children' => 1
-            ]
-          );
-        }
-        if ($id_tables = $this->o->add(
-          [
-            'id_parent' => $id_db,
-            'text' => _('Tables'),
-            'code' => 'tables',
-          ]
-        )
-        ) {
-          $this->o->set_cfg(
-            $id_tables,
-            [
-              'show_code' => 1,
-              'show_value' => 1,
-              'allow_children' => 1
-            ]
-          );
+      if (!($id_db = $this->o->from_code($db, $id_dbs))) {
+        if ($id_db = $this->o->add([
+          'id_parent' => $id_dbs,
+          'text' => $db,
+          'code' => $db,
+        ])) {
+          $this->o->set_cfg($id_db, ['allow_children' => 1, 'show_code' => 1]);
         }
       }
-
-      if ($id_db && $full) {
+      if ($id_db) {
+        if (!($id_procedures = $this->o->from_code('procedures', $id_db))
+            && ($id_procedures = $this->o->add([
+              'id_parent' => $id_db,
+              'text' => _('Procedures'),
+              'code' => 'procedures',
+            ]))
+        ) {
+          $this->o->set_cfg($id_procedures, [
+            'show_code' => 1,
+            'show_value' => 1,
+            'allow_children' => 1
+          ]);
+        }
+        if (!($id_connections = $this->o->from_code('connections', $id_db))
+            && ($id_connections = $this->o->add([
+              'id_parent' => $id_db,
+              'text' => _('Connections'),
+              'code' => 'connections',
+            ]))
+        ) {
+          $this->o->set_cfg($id_connections, [
+            'show_alias' => 1,
+            'notext' => 1,
+            'id_root_alias' => self::get_option_id('connections'),
+            'root_alias' => 'Connections'
+          ]);
+        }
+        if (!($id_functions = $this->o->from_code('functions', $id_db))
+            && ($id_functions = $this->o->add([
+              'id_parent' => $id_db,
+              'text' => _('Function'),
+              'code' => 'functions',
+            ]))
+        ) {
+          $this->o->set_cfg($id_functions, [
+            'show_code' => 1,
+            'show_value' => 1,
+            'allow_children' => 1
+          ]);
+        }
+        if (!($id_tables = $this->o->from_code('tables', $id_db))
+            && ($id_tables = $this->o->add([
+              'id_parent' => $id_db,
+              'text' => _('Tables'),
+              'code' => 'tables',
+            ]))
+        ) {
+          $this->o->set_cfg($id_tables, [
+            'show_code' => 1,
+            'show_value' => 1,
+            'allow_children' => 1
+          ]);
+        }
         if ( $host ){
           $host_id = bbn\str::is_uid($host) ? $host : $this->host_id($host);
         }
         else {
           $host_id = $this->retrieve_host($id_db);
         }
-        if (!empty($host_id)) {
-          $tables = $this->connection($host_id, $db)->get_tables();
-          if (!empty($tables)) {
-            foreach ($tables as $t) {
-              $this->import_table($t, $id_db);
+        if ($host_id && $id_connections && $id_functions && $id_procedures && $id_tables) {
+          if (!$this->db->count('bbn_options', [
+            'id_parent' => $id_connections,
+            'id_alias' => $host_id
+          ])) {
+            $this->o->add([
+              'id_parent' => $id_connections,
+              'id_alias' => $host_id
+            ]);
+          }
+          if ($full) {
+            if (!empty($host_id)) {
+              $tables = $this->connection($host_id, $db)->get_tables();
+              if (!empty($tables)) {
+                foreach ($tables as $t) {
+                  $this->import_table($t, $id_db);
+                }
+              }
             }
           }
+        }
+        else{
+          bbn\x::log("Impossible to find an host ID for DB ".$this->o->code($id_db));
         }
       }
     }
@@ -913,7 +928,13 @@ class databases extends bbn\models\cls\cache
    */
   public function import_table(string $table, string $id_db, string $host = ''): ?array
   {
-    if ($id_tables = $this->o->from_code('tables', $id_db)) {
+    if (empty($host)) {
+      $host_id = $this->retrieve_host($id_db);
+    }
+    else{
+      $host_id = bbn\str::is_uid($host) ? $host : $this->host_id($host);
+    }
+    if ($host_id && ($id_tables = $this->o->from_code('tables', $id_db))) {
       if (!($id_table = $this->o->from_code($table, $id_tables))
           && ($id_table = $this->o->add(
             [
@@ -968,13 +989,15 @@ class databases extends bbn\models\cls\cache
       if ($id_table
           && $id_columns
           && $id_keys
-          && $host
           && $db
-          && ($m = $this->connection($host, $db)->modelize($table))
+          && ($conn = $this->connection($host_id, $db))
+          && ($m = $conn->modelize($table))
+          && !empty($m['fields'])
       ) {
         $num_cols = 0;
         $num_cols_rem = 0;
         $fields = [];
+        $ocols = array_flip($this->o->options($id_columns));
         foreach ($m['fields'] as $col => $cfg) {
           if ($opt_col = $this->o->option($col, $id_columns)) {
             $num_cols += (int)$this->o->set($opt_col['id'], bbn\x::merge_arrays($opt_col, $cfg));
@@ -998,15 +1021,12 @@ class databases extends bbn\models\cls\cache
           if ($opt_col) {
             $fields[$col] = $opt_col['id'];
           }
-        }
-        $columns_to_delete = array_filter(
-          $this->o->options($id_columns),
-          function ($c) use ($m) {
-            return array_key_exists($c, $m['fields']);
+          if (isset($ocols[$col])) {
+            unset($ocols[$col]);
           }
-        );
-        if (!empty($columns_to_delete)) {
-          foreach ($columns_to_delete as $id => $c){
+        }
+        if (!empty($ocols)) {
+          foreach ($ocols as $col => $id) {
             if (bbn\str::is_uid($id)) {
               $num_cols_rem += (int)$this->o->remove($id);
             }
@@ -1014,8 +1034,9 @@ class databases extends bbn\models\cls\cache
         }
         $num_keys = 0;
         $num_keys_rem = 0;
+        $okeys = array_flip($this->o->options($id_keys));
         foreach ($m['keys'] as $key => $cfg) {
-          $cols = $cfg['columns'];
+          $cols = $cfg['columns'] ?? [];
           unset($cfg['columns']);
           if (isset($cfg['ref_db'], $cfg['ref_table'], $cfg['ref_column']) 
               && ($id_alias = $this->column_id($cfg['ref_column'], $cfg['ref_table'], $cfg['ref_db']))
@@ -1046,7 +1067,11 @@ class databases extends bbn\models\cls\cache
             $opt_key = $cfg;
             $opt_key['id'] = $id;
           }
+          if (isset($okeys[$key])) {
+            unset($okeys[$key]);
+          }
           if ($opt_key && $cols) {
+
             foreach ($cols as $col){
               if (isset($fields[$col])) {
                 if ($opt = $this->o->option($col, $opt_key['id'])) {
@@ -1073,14 +1098,13 @@ class databases extends bbn\models\cls\cache
             }
           }
         }
-        $keys_to_delete = array_filter(
-          $this->o->options($id_keys), function ($c) use ($m) {
-            return array_key_exists($c, $m['keys']);
-          }
-        );
-        if (!empty($keys_to_delete)) {
-          foreach ($keys_to_delete as $id => $k){
+        if (!empty($okeys)) {
+          foreach (array_values($okeys) as $id) {
             if (bbn\str::is_uid($id)) {
+              $children = $this->o->items($id);
+              foreach ($children as $cid) {
+                $num_keys_rem += (int)$this->o->remove_full($cid);
+              }
               $num_keys_rem += (int)$this->o->remove($id);
             }
           }

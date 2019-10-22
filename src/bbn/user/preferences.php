@@ -460,7 +460,7 @@ class preferences extends bbn\models\cls\db
   }
 
   /**
-   * Returns the current user's preference based on the given id, his own profile and his group's
+   * Returns the current user's preference based on the given id, his own profile and his group
    * @param string $id
    * @param bool $with_config
    * @return array|null
@@ -496,6 +496,21 @@ class preferences extends bbn\models\cls\db
         ]
       ]) ){
         if ( $with_config ){
+          if ( empty($row['cfg']) && !empty($row['id_alias']) ){
+            //if it's the case of a shared list takes the $cfg and the text from the alias
+            $alias = $this->db->rselect([
+              'table' => $table, 
+              'fields' => ['cfg', 'text'],
+              'where' => [
+                'conditions' => [[
+                  'field' => 'id', 
+                  'value' => $row['id_alias']
+                ]]
+              ]
+            ]);
+            $row['cfg'] = $alias['cfg'];
+            $row['text'] = $alias['text'];
+          }
           $cfg = $row[$this->fields['cfg']];
           unset($row[$this->fields['cfg']]);
           if ( $cfg = json_decode($cfg, true) ){
