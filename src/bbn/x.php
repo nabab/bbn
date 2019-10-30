@@ -163,6 +163,45 @@ class x
     return false;
   }
 
+  /**
+   * Check if an array or an object has the given property
+   *
+   * @param [type] $obj
+   * @param string $prop
+   * @return boolean|null
+   */
+  public static function has_prop($obj, string $prop): ?bool
+  {
+    if (is_array($obj)) {
+      return \array_key_exists($prop, $obj);
+    }
+    elseif (is_object($obj)) {
+      return \property_exists($obj, $prop);
+    }
+    return null;
+  }
+
+  /**
+   * Check if an array or an object has the given properties
+   *
+   * @param [type] $obj
+   * @param array $props
+   * @return boolean|null
+   */
+  public static function has_props($obj, array $props): ?bool
+  {
+    foreach ($props as $p) {
+      $test = self::has_prop($obj, $p);
+      if ($test === null) {
+        return null;
+      }
+      elseif (!$test) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   public static function make_storage_path(string $path, $format = 'Y/m/d', $max = 100, file\system $fs = null):? string
   {
     if ( empty($format) ){

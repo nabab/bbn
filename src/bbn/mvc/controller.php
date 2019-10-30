@@ -792,8 +792,8 @@ class controller implements api{
     ];
   }
 
-  public function get_plugin_model($path, $data = [], $ttl = 0){
-    return $this->_mvc->get_plugin_model($path, $data, $this, $this->get_plugin(), $ttl);
+  public function get_plugin_model($path, $data = [], string $plugin = null, $ttl = 0){
+    return $this->_mvc->get_plugin_model($path, $data, $this, $plugin ?: $this->get_plugin(), $ttl);
   }
 
 /*

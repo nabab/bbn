@@ -1413,4 +1413,13 @@ class str
         return _('Unknown error');
     }
   }
+
+  public static function as_var(string $var, $quote = '"')
+  {
+    if (($quote !== "'") && ($quote !== '"')) {
+      $quote = '"';
+    }
+    $st = $quote === "'" ? self::escape_squotes($var) : self::escape_dquotes($var);
+    return $quote.$st.$quote;
+  }
 }

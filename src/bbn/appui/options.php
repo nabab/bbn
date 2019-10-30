@@ -2071,14 +2071,21 @@ class options extends bbn\models\cls\db
       ($id !== $this->default) &&
       ($id !== $this->root)
     ){
-    
+      $res= 0;
       $this->delete_cache($id);
-      return $this->db->query(
-        "DELETE FROM ".
-        $this->db->tfn($this->class_cfg['table'], 1)."
-        WHERE ".$this->db->csn($this->class_cfg['arch']['options']['id'], 1)." = $id");
+      $all = $this->tree_ids($id);
+      $has_history = history::is_enabled() && history::is_linked($this->class_cfg['table']);
+      foreach ( array_reverse($all) as $a ){
+        if ($has_history) {
+          $res += (int)$this->db->delete('bbn_history_uids', ['bbn_uid' => $a]);
+        }
+        else{
+          $res += (int)$this->db->delete($this->class_cfg['table'], [$this->class_cfg['arch']['options']['id'] => $a]);
+        }
+      }
+      $this->delete_cache($id);
+      return $res;
     }
-    
     return null;
   }
 

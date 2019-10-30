@@ -804,23 +804,30 @@ class db extends \PDO implements db\actions, db\api, db\engines
       $args[0]['limit'] = 1;
     }
     else {
-      if ( isset($args[5]) ){
-        $start = $args[5];
+      x::log($args, 'limit1');
+      $start = $args[4] ?? 0;
+      $num = count($args);
+      // Adding fields
+      if ($num === 1) {
+        $args[] = [];
+        $num++;
       }
-      while ( count($args) < 6 ){
-        switch ( count($args) ){
-          case 1:
-          case 2:
-          case 3:
-            $args[] = [];
-            break;
-          case 4:
-            $args[] = 1;
-            break;
-          case 5:
-            $args[] = $start ?? 0;
-        }
+      // Adding where
+      if ($num === 2) {
+        $args[] = [];
+        $num++;
       }
+      // Adding order
+      if ($num === 3) {
+        $args[] = [];
+        $num++;
+      }
+      if ($num === 4) {
+        $args[] = 1;
+        $num++;
+      }
+      $args = array_slice($args, 0, 5);
+      $args[] = $start;
     }
     return $args;
   }

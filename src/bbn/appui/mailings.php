@@ -122,7 +122,8 @@ class mailings extends bbn\models\cls\db
     return null;
   }
 
-  public function process(int $limit = 10, object $mailer = null){
+  public function process(int $limit = 10)
+  {
     if (!$this->check() || !$this->mailer) {
       die("No mailer defined");
     }
@@ -131,9 +132,29 @@ class mailings extends bbn\models\cls\db
     foreach ( $this->db->rselect_all([
       'table' => 'bbn_emails',
       'fields' => [],
-      'where' => ['status' => 'ready'],
+      'where' => [
+        'conditions' => [
+          [
+            'field' => 'status',
+            'value' => 'ready'
+          ],
+          [
+            'logic' => 'OR',
+            'conditions' => [
+              [
+                'field' => 'delivery',
+                'operator' => 'isnull'
+              ], [
+                'field' => 'delivery',
+                'operator' => '<',
+                'exp' => 'NOW()'
+              ],
+            ]
+          ]
+        ]
+      ],
       'order' => ['priority'],
-      'limit' => 30
+      'limit' => $limit
     ]) as $r ){
       $sent++;
       $ok = false;

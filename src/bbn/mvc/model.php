@@ -115,7 +115,7 @@ class model extends bbn\models\cls\db{
     return $this->_ctrl->get_cached_model(...\func_get_args());
   }
 
-  public function get_plugin_model($path, $data = [], $ttl = 0){
+  public function get_plugin_model($path, $data = [], string $plugin = null, $ttl = 0){
     return $this->_ctrl->get_plugin_model(...\func_get_args());
   }
 
