@@ -166,7 +166,7 @@ class x
   /**
    * Check if an array or an object has the given property
    *
-   * @param [type] $obj
+   * @param array|object $obj
    * @param string $prop
    * @return boolean|null
    */
@@ -184,7 +184,7 @@ class x
   /**
    * Check if an array or an object has the given properties
    *
-   * @param [type] $obj
+   * @param array|object $obj
    * @param array $props
    * @return boolean|null
    */

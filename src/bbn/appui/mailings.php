@@ -95,17 +95,11 @@ class mailings extends bbn\models\cls\db
     return false;
   }
 
-  public function get_medias($id, $version){
-    $med = [];
-    if ( $files = $this->_note()->get_medias($id, $version) ){
-      foreach ( $files as $f ){
-        $t = $f['title'] ?: $f['name'];
-        if ( is_file(BBN_DATA_PATH.$f['file']) && !\array_key_exists($t, $med) ){
-          $med[$t] = BBN_DATA_PATH.$f['file'];
-        }
-      }
+  public function get_medias($id){
+    if ($row = $this->db->select('bbn_emailings', ['id_note', 'version'], ['id' => $id])) {
+      return $this->_note()->get_medias($row->id_note, $row->version);
     }
-    return $med;
+    //die(var_dump($id, $version));
   }
 
   public function get_mailing($id):? array
@@ -210,7 +204,7 @@ class mailings extends bbn\models\cls\db
   public function add($cfg){
     $notes = $this->_note();
     if (
-      isset($cfg['title'], $cfg['recipients'], $cfg['content'], $cfg['sender']) &&
+      bbn\x::has_props($cfg, ['title', 'recipients', 'content', 'sender']) &&
       ($id_type = notes::get_option_id('mailings','types')) &&
       ($id_note = $notes->insert($cfg['title'], $cfg['content'], $id_type))
     ){
@@ -225,12 +219,12 @@ class mailings extends bbn\models\cls\db
         'sent' => $cfg['sent']
       ]) ){
         $id_mailing = $this->db->last_id();
-        if ( !empty($cfg['attachments']) ){
-          $temp_path = BBN_USER_PATH.'tmp/'.$model->data['ref'].'/';
-          foreach ( $model->data['fichiers'] as $f ){
-            if ( is_file($temp_path.$f['attachments']) ){
+        if (!empty($cfg['attachments'])) {
+          $temp_path = BBN_USER_PATH.'tmp/';
+          foreach ( $cfg['attachments'] as $f ){
+            if ( is_file($temp_path.$f) ){
               // Add media
-              $notes->add_media($id_note, $f);
+              $notes->add_media($id_note, $temp_path.$f);
             }
           }
         }
