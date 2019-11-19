@@ -1,6 +1,0 @@
-<?php
-return [
-    'inherit',
-    'normal',
-];
-?>

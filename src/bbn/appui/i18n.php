@@ -308,7 +308,62 @@ class i18n extends bbn\models\cls\cache
     ];
   }
 
-
+  /**
+   * get the num of items['text'] in original language and num translations foreach lang in configured langs (for this project uses all primaries as configured langs) 
+   *
+   * @return void
+   */
+  public function get_num_option($id){
+    /** @var  $paths takes all options with i18n property setted*/
+    $paths = options::get_instance()->find_i18n_option($id);
+    $data = [];
+    /**
+    * creates the property data_widget that will have just num of items found for the option + 1 (the text of the option parent), the * * number of strings translated and the source language indexed to the language
+    */
+    $primaries = $this->get_primaries_langs();
+    foreach ($primaries as $p ){
+      $configured_langs[] = $p['code'];
+    }
+    
+    
+    foreach ( $paths as $p => $val){
+      $parent = options::get_instance()->get_id_parent($paths[$p]['id']);
+      foreach ( $configured_langs as $lang ) {
+        $count = 0;
+        $items = $paths[$p]['items'];
+        /** push the text of the option into the array of strings */
+        $items[] = [
+          'id' => $paths[$p]['id'],
+          'text' => $paths[$p]['text'],
+          'id_parent' => $parent
+        ];
+        foreach ( $items as $idx => $item ){
+          if ( $id = $this->db->select_one('bbn_i18n', 'id', [
+            'exp'=> $item['text'],
+            'lang' => $paths[$p]['language']
+          ])){
+            if ( $this->db->select_one('bbn_i18n_exp', 'id_exp', [
+              'id_exp' => $id,
+              'lang' => $lang
+            ]) ){
+              $count ++;
+            }
+          }
+        }
+        $paths[$p]['data_widget']['result'][$lang] = [
+          'num' => count($items),
+          'num_translations' => $count,
+          'lang' => $lang
+        ];
+      }
+      $paths[$p]['data_widget']['locale_dirs'] = [];
+      unset($paths[$p]['items']);
+      $data[] = $paths[$p];
+    }
+    return [
+      'data'=> $data
+    ];
+  }
 
   /**
    * Gets the option with the property i18n setted and its items 
@@ -354,7 +409,7 @@ class i18n extends bbn\models\cls\cache
                 $res[$p]['strings'][] = [
                   $lang => [
                     'id_exp' => $exp['id'],
-                    'original' => $exp['exp'],
+                    'exp' => $exp['exp'],
                     'translation_db' => $translated_exp
                   ]
                 ];
@@ -381,7 +436,7 @@ class i18n extends bbn\models\cls\cache
             $res[$p]['strings'][] = [
               $paths[$p]['language'] => [
                 'id_exp' => $id,
-                'original' => $paths[$p]['items'][$i]['text'],
+                'exp' => $paths[$p]['items'][$i]['text'],
                 'translation_db' => $paths[$p]['items'][$i]['text']
               ]
             ];
@@ -583,7 +638,6 @@ class i18n extends bbn\models\cls\cache
    * @return void
    */
   public function get_translations_strings($id_option, $source_language, $languages){
-    
     if (
       !empty($id_option) &&
       !empty($source_language) &&
@@ -656,7 +710,7 @@ class i18n extends bbn\models\cls\cache
         ])) ){
           // if the string $r is not in 'bbn_i18n' inserts the string 
           $this->db->insert_ignore('bbn_i18n', [
-            'exp' => $r,
+            'exp' => stripslashes($r),
             'lang' => $source_language,
           ]);
           $id = $this->db->last_id();
@@ -680,7 +734,7 @@ class i18n extends bbn\models\cls\cache
           $done += (int)$this->db->insert_ignore('bbn_i18n_exp', [
             'id_exp' => $id,
             'lang' => $source_language,
-            'expression' => $r
+            'expression' => stripslashes($r)
           ]);
           //creates an array of new strings found in the folder;
           $news[] = $r;
@@ -847,7 +901,7 @@ class i18n extends bbn\models\cls\cache
               foreach ($translations as $i => $t ){
                 // @var  $original the original expression 
                 $id = null;
-                if ( $original = $t->getMsgId() ){
+                if ( $original = stripslashes($t->getMsgId()) ){
                   $idx = \bbn\x::find($res, ['exp' => $original]);
                   if ( $idx !== false ){
                     $todo = false;
@@ -880,7 +934,7 @@ class i18n extends bbn\models\cls\cache
                     }
                   }
                   if ( $id ){
-                    $row[$lng.'_po'] = $t->getMsgStr();
+                    $row[$lng.'_po'] = stripslashes($t->getMsgStr());
                     
                     $row[$lng.'_db'] = $this->db->select_one('bbn_i18n_exp', 'expression', ['id_exp' => $id, 'lang' => $lng]);
                     if ( $row[$lng.'_po'] && !$row[$lng.'_db'] ){

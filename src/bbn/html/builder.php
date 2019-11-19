@@ -76,7 +76,7 @@ class builder
           $label_class = 'bbn-form-label',
           $space_class = 'bbn-line-breaker',
           $field_class = 'bbn-form-field',
-          $button_class = 'k-button';
+          $button_class = 'bbn-button';
   
   public static function give_id(array &$cfg){
     if ( !isset($cfg['attr']) ){

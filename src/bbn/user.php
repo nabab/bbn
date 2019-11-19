@@ -161,6 +161,9 @@ class user extends models\cls\basic
   protected $path;
 
   /** @var string */
+  protected $tmp_path;
+
+  /** @var string */
   protected $sql;
 
   /** @var int */
@@ -578,12 +581,14 @@ class user extends models\cls\basic
   {
     if ( \defined('BBN_DATA_PATH') && $this->get_id() ){
       $this->path = mvc::get_user_data_path($this->get_id());
+      $this->tmp_path = mvc::get_user_tmp_path($this->get_id());
       if ( !\defined('BBN_USER_PATH') ){
         define('BBN_USER_PATH', $this->path);
       }
       if ( $create ){
-        file\dir::create_path(BBN_USER_PATH.'tmp');
-        file\dir::delete(BBN_USER_PATH.'tmp', false);
+        file\dir::create_path($this->path);
+        file\dir::create_path($this->tmp_path);
+        file\dir::delete($this->tmp_path, false);
       }
     }
     return $this;
@@ -644,7 +649,7 @@ class user extends models\cls\basic
   /**
    * Completes the steps for a full authentication of the user.
    *
-   * @param [type] $id
+   * @param type $id
    * @return self
    */
   protected function log_in($id): self
@@ -834,7 +839,7 @@ class user extends models\cls\basic
    */
   public function get_tmp_dir(): ?string
   {
-    return $this->path.'tmp/';
+    return $this->tmp_path;
   }
 
   /**
@@ -942,6 +947,21 @@ class user extends models\cls\basic
           $this->session->set($val, self::$un, $key);
         }
       }
+    }
+    return $this;
+  }
+
+  /**
+   * Sets the given attribute(s) in the user's session.
+   *
+	 * @return self
+	 */
+  public function unset_session($attr): self
+  {
+    $args = \func_get_args();
+    array_unshift($args, self::$un);
+    if ($this->session->has(...$args)) {
+      $this->session->uset(...$args);
     }
     return $this;
   }

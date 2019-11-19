@@ -31,7 +31,7 @@ class str
    * // (string) "1"
    * ```
    *
-   * @param mixed $st The item to cast.
+   * @param mixed $st The item to cast. 
    * @return string
    */
   public static function cast($st)

@@ -2867,6 +2867,9 @@ class options extends bbn\models\cls\db
     return null;
   }
 
+  /**
+   * returns an array containing all options that have the property i18n setted
+   */
   public function find_i18n($id = null, $items = true){
     $res = [];
     $opts = $this->db->rselect_all($this->class_cfg['table'], [
@@ -2890,6 +2893,33 @@ class options extends bbn\models\cls\db
         }
       }
     }
+    return $res;
+  }
+  /**
+   * returns an array containing the option (having the property i18n setted) corresponding to the given id 
+   */
+  public function find_i18n_option($id, $items = true){
+    $res = [];
+    if ( $opt = $this->db->rselect($this->class_cfg['table'], [
+        $this->class_cfg['arch']['options']['id'],
+        $this->class_cfg['arch']['options']['id_parent'],
+        $this->class_cfg['arch']['options']['text'],
+        $this->class_cfg['arch']['options']['cfg']
+    ], [$this->class_cfg['arch']['options']['id'] => $id])
+      ){
+        $opts = $this->full_options($id);
+        $cfg = json_decode($opt['cfg']);
+        if ( !empty($cfg->i18n) ){
+          $opt['language'] = $cfg->i18n;
+        }
+        unset($opt['cfg']);
+        if ( !empty($items) ){
+          $res[] = array_merge($opt, $opts);
+        }
+        else {
+          $res[] = $opt;
+        }
+      };
     return $res;
   }
 }

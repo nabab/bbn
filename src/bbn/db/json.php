@@ -2,7 +2,7 @@
 /**
  * @package db
  */
-namespace bbn\db\languages;
+namespace bbn\db;
 
 use bbn;
 /**

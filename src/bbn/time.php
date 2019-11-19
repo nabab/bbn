@@ -91,8 +91,8 @@ class time extends models\cls\basic
   /**
    * Compares two dates
    *
-   * @param [String|Object] $date the string of the date to compare or an object of this class
-   * @param [String] $comparator allowed comparators '>','>=', '<','<=', '='
+   * @param String|Object $date the string of the date to compare or an object of this class
+   * @param String $comparator allowed comparators '>','>=', '<','<=', '='
    * @return Boolean
    */
   public function compare($date, $comparator)
@@ -126,7 +126,7 @@ class time extends models\cls\basic
   /**
    * Return if $this->time is before of the given $date
    *
-   * @param [String|Object] $date the string of the date to compare or an object of this class
+   * @param String|Object $date the string of the date to compare or an object of this class
    * @return boolean
    */
   public function is_before($date)
@@ -144,7 +144,7 @@ class time extends models\cls\basic
   /**
    * Return if $this->time is after of the given $date
    *
-   * @param [String|Object] $date the string of the date to compare or an object of this class
+   * @param String|Object $date the string of the date to compare or an object of this class
    * @return boolean
    */
 
@@ -163,7 +163,7 @@ class time extends models\cls\basic
   /**
    * Return if $this->time is the same of the given $date
    *
-   * @param [String|Object] $date the string of the date to compare or an object of this class
+   * @param String|Object $date the string of the date to compare or an object of this class
    * @return boolean
    */
   
@@ -211,7 +211,7 @@ class time extends models\cls\basic
   /**
    * Return a reference to $this->time modified of the $modif
    *
-   * @param [type] $modif
+   * @param $modif
    * @param string $format
    * @return void
    */

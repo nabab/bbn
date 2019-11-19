@@ -170,13 +170,13 @@ class x
    * @param string $prop
    * @return boolean|null
    */
-  public static function has_prop($obj, string $prop): ?bool
+  public static function has_prop(iterable $obj, string $prop, bool $check_empty = false): ?bool
   {
     if (is_array($obj)) {
-      return \array_key_exists($prop, $obj);
+      return \array_key_exists($prop, $obj) && (!$check_empty || !empty($obj[$prop]));
     }
     elseif (is_object($obj)) {
-      return \property_exists($obj, $prop);
+      return \property_exists($obj, $prop) && (!$check_empty || !empty($obj->$prop));
     }
     return null;
   }
@@ -188,10 +188,10 @@ class x
    * @param array $props
    * @return boolean|null
    */
-  public static function has_props($obj, array $props): ?bool
+  public static function has_props(iterable $obj, array $props, bool $check_empty = false): ?bool
   {
     foreach ($props as $p) {
-      $test = self::has_prop($obj, $p);
+      $test = self::has_prop($obj, $p, $check_empty);
       if ($test === null) {
         return null;
       }
@@ -235,6 +235,32 @@ class x
       }
     }
     return null;
+  }
+
+  public static function clean_storage_path(string $path, $format = 'Y/m/d', file\system $fs = null): ?int
+  {
+    if ( empty($format) ){
+      $format = 'Y/m/d';
+    }
+    if ( !$fs ){
+      $fs = new file\system();
+    }
+    if (!$fs->is_dir($path)) {
+      return null;
+    }
+    $limit = count(self::split($format, '/')) + 1;
+    $res = 0;
+    while ($limit > 0) {
+      if (!$fs->get_num_files($path) && $fs->delete($path)) {
+        $limit--;
+        $res++;
+        $path = dirname($path);
+      }
+      else{
+        break;
+      }
+    }
+    return $res;
   }
 
   /**
@@ -970,7 +996,7 @@ class x
       foreach ( $ar as $i => $v ){
         $ok = 1;
         foreach ( $where as $k => $w ){
-          if ( !isset($v[$k]) || ($v[$k] !== $w) ){
+          if ( !array_key_exists($k, $v) || ($v[$k] !== $w) ){
             $ok = false;
             break;
           }
@@ -1533,34 +1559,122 @@ class x
   * @param bool $with_titles Set it to false if you don't want the columns titles. Default true
   * @return bool
   */
-  public static function to_excel(array $data, string $file, bool $with_titles = true): bool
+  public static function to_excel(array $data, string $file, bool $with_titles = true, array $cfg = []): bool
   {
-    $checked = false;
-    $todo = [];
-    foreach ( $data as $d ){
-      if ( !$checked && self::is_assoc($d) ){
-        if ( $with_titles ){
-          $line1 = [];
-          $line2 = [];
-          foreach ( $d as $k => $v ){
-            $line1[] = $k;
-            $line2[] = '';
+    $excel = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+    $sheet = $excel->getActiveSheet();
+    $ow = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($excel);
+    $can_save = false;
+    if ( empty($cfg) ){
+      $todo = [];
+      $checked = false;
+      foreach ( $data as $d ){
+        if ( !$checked && self::is_assoc($d) ){
+          if ( $with_titles ){
+            $line1 = [];
+            $line2 = [];
+            foreach ( $d as $k => $v ){
+              $line1[] = $k;
+              $line2[] = '';
+            }
+            $todo[] = $line1;
+            $todo[] = $line2;
           }
-          $todo[] = $line1;
-          $todo[] = $line2;
+          $checked = true;
         }
-        $checked = true;
+        $todo[] = array_values($d);
       }
-      $todo[] = array_values($d);
+      if ( count($todo) ){
+        $sheet->fromArray($todo, NULL, 'A1');
+        $excel
+          ->getDefaultStyle()
+          ->getNumberFormat()
+          ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
+        $can_save = true;
+      }
     }
-    if ( count($todo) ){
-      $objPHPExcel = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-      $objPHPExcel->getActiveSheet()->fromArray($todo, NULL, 'A1');
-      $objPHPExcel
-        ->getDefaultStyle()
-        ->getNumberFormat()
-        ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
-      $ow = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($objPHPExcel);
+    else {
+      foreach ( $cfg as $i => $field ){
+        // Get cell object
+        $cell = $sheet->getCellByColumnAndRow($i+1, 1);
+        // Get colum name
+        $col_idx = $cell->getColumn();
+        // Set auto width to the column
+        $sheet
+          ->getColumnDimension($col_idx)
+          ->setAutoSize(true);
+        // Cell style object
+        $style = $sheet->getStyle("$col_idx:$col_idx");
+        // Get number format object
+        $format = $style->getNumberFormat();
+        // Set the vertical alignment to center
+        $style
+          ->getAlignment()
+          ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP);
+        // Set the correct data type
+        switch ( $field['type'] ){
+          case 'string':
+            // Set code's format to text
+            $format->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
+            // Set wrap text
+            $style
+              ->getAlignment()
+              ->setWrapText(true);
+            break;
+          case 'integer':
+            // Set code's format to number
+            $format->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER);
+            break;
+          case 'decimal':
+            // Set code's format to decimal
+            $format->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_00);
+            break;
+          case 'money':
+            // Set code's format to currency
+            $format->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_EUR);
+            break;
+          case 'date':
+            // Set code's format to date
+            $format->setFormatCode('dd/mm/yyyy');
+            // Set the horizontal alignment to center
+            $style->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+          case 'datetime':
+            // Set code's format to datetime
+            $format->setFormatCode('dd/mm/yyyy hh:mm');
+            // Set the horizontal alignment to center
+            $style->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            break;
+          case 'boolean':
+            // Set the horizontal alignment to center
+            $style->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            break;
+        }
+        if ( $with_titles ){
+          //$cell = $sheet->getCellByColumnAndRow($i+1, 1);
+          $style = $cell->getStyle();
+          // Set code's format to text
+          $style->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
+          // Set the horizontal alignment to center
+          $style->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+          // Set bold to true
+          $style->getFont()->setBold(true);
+          // Set the column's title
+          $cell->setValue($field['title'] ?? $field['field']);
+        }
+      }
+      if ( 
+        is_array($cfg['map']) && 
+        isset($cfg['map']['callable']) &&
+        is_callable($cfg['map']['callable'])   
+      ){
+        array_walk($data, $cfg['map']['callable'], is_array($cfg['map']['params']) ? $cfg['map']['params'] : []);
+      }
+      if ( count($data) ){
+        $sheet->fromArray($data, NULL, 'A' . ($with_titles ? '2' : '1'));
+        $can_save = true;
+      }
+    }
+    if ( $can_save ){
       $ow->save($file);
       return \is_file($file);
     }

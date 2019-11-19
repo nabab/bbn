@@ -13,10 +13,18 @@ class mailings extends bbn\models\cls\db
 {
   use bbn\models\tts\optional;
 
-  private
-    $mailer,
-    $notes;
+  private $_test_emails;
 
+  protected $notes;
+  protected $medias;
+  protected $mailer;
+
+
+  /**
+   * Gets a notes instance by constructing one if needed.
+   *
+   * @return notes
+   */
   private function _note(): notes
   {
     if ( !$this->notes ){
@@ -25,10 +33,24 @@ class mailings extends bbn\models\cls\db
     return $this->notes;
   }
 
+  /**
+   * Gets a medias instance by constructing one if needed.
+   *
+   * @return notes
+   */
+  private function _medias(): medias
+  {
+    if ( !$this->medias ){
+      $this->medias = new medias($this->db);
+    }
+    return $this->medias;
+  }
+
   public function __construct(bbn\db $db, bbn\mail $mailer = null)
   {
     if ( $db->check() ){
       self::optional_init();
+      $this->get_options_text_value('text');
       $this->db = $db;
       if ( $mailer ){
         $this->mailer = $mailer;
@@ -36,12 +58,40 @@ class mailings extends bbn\models\cls\db
     }
   }
 
+  /**
+   * Returns an array of email addresses used for testing purposes.
+   *
+   * @return array
+   */
+  public function get_test_emails(): array
+  {
+    if (!is_array($this->_test_emails)) {
+      $emails = $this->get_options_text_value('test');
+      $this->_test_emails = [];
+      foreach ($emails as $em) {
+        $this->_test_emails[] = $em['text'];
+      }
+    }
+    return $this->_test_emails;
+  }
+
+  /**
+   * Checks if the object is in error state.
+   *
+   * @return boolean
+   */
   public function check(): bool
   {
     return $this->db && $this->db->check();
   }
 
-  public function is_sending($id = null): bool
+  /**
+   * Checks if the given mailing is being sent.
+   *
+   * @param string $id
+   * @return boolean
+   */
+  public function is_sending(string $id = null): bool
   {
     $cond = ['state' => 'sending'];
     if ( $id ){
@@ -50,7 +100,13 @@ class mailings extends bbn\models\cls\db
     return $this->db->count('bbn_emailings', $cond) > 0;
   }
 
-  public function is_suspended($id = null): bool
+  /**
+   * Checks if the given mailing is in suspended state.
+   *
+   * @param string $id
+   * @return boolean
+   */
+  public function is_suspended(string $id = null): bool
   {
     $cond = ['state' => 'suspended'];
     if ( $id ){
@@ -72,6 +128,11 @@ class mailings extends bbn\models\cls\db
   }
   */
 
+  /**
+   * Returns the next mailing to process if any.
+   *
+   * @return array|null
+   */
   public function get_next_mailing(): ?array
   {
     if (
@@ -87,22 +148,42 @@ class mailings extends bbn\models\cls\db
     return null;
   }
 
-  public function change_state($id_mailing, $new_state): ?bool
+  /**
+   * Changes the state of the given mailing.
+   *
+   * @param string $id
+   * @param string $new_state
+   * @return boolean
+   */
+  public function change_state(string $id, string $new_state): bool
   {
     if ( $this->check() ){
-      return (bool)$this->db->update("bbn_emailings", ['state' => $new_state], ['id' => $id_mailing]);
+      return (bool)$this->db->update("bbn_emailings", ['state' => $new_state], ['id' => $id]);
     }
     return false;
   }
 
-  public function get_medias($id){
-    if ($row = $this->db->select('bbn_emailings', ['id_note', 'version'], ['id' => $id])) {
+  /**
+   * Returns the attachments for the given mailing.
+   *
+   * @param string $id
+   * @return array|null
+   */
+  public function get_medias(string $id): ?array
+  {
+    if ($this->check() && ($row = $this->db->select('bbn_emailings', ['id_note', 'version'], ['id' => $id]))) {
       return $this->_note()->get_medias($row->id_note, $row->version);
     }
-    //die(var_dump($id, $version));
+    return null;
   }
 
-  public function get_mailing($id):? array
+  /**
+   * Returns all the information about the given mailing.
+   *
+   * @param string $id
+   * @return array|null
+   */
+  public function get_mailing(string $id): ?array
   {
     if ( $this->check() ){
       $notes = $this->_note();
@@ -116,95 +197,106 @@ class mailings extends bbn\models\cls\db
     return null;
   }
 
-  public function process(int $limit = 10)
+  /**
+   * Sends the emails to be sent in the limit provided.
+   *
+   * @param int $limit
+   * @return int
+   */
+  public function process(int $limit = 10): ?int
   {
-    if (!$this->check() || !$this->mailer) {
-      die("No mailer defined");
-    }
-    $sent = 0;
-    $successes = 0;
-    foreach ( $this->db->rselect_all([
-      'table' => 'bbn_emails',
-      'fields' => [],
-      'where' => [
-        'conditions' => [
-          [
-            'field' => 'status',
-            'value' => 'ready'
-          ],
-          [
-            'logic' => 'OR',
-            'conditions' => [
-              [
-                'field' => 'delivery',
-                'operator' => 'isnull'
-              ], [
-                'field' => 'delivery',
-                'operator' => '<',
-                'exp' => 'NOW()'
-              ],
+    if ($this->check() && $this->mailer) {
+      $sent = 0;
+      $successes = 0;
+      foreach ( $this->db->rselect_all([
+        'table' => 'bbn_emails',
+        'fields' => [],
+        'where' => [
+          'conditions' => [
+            [
+              'field' => 'status',
+              'value' => 'ready'
+            ],
+            [
+              'logic' => 'OR',
+              'conditions' => [
+                [
+                  'field' => 'delivery',
+                  'operator' => 'isnull'
+                ], [
+                  'field' => 'delivery',
+                  'operator' => '<',
+                  'exp' => 'NOW()'
+                ],
+              ]
             ]
           ]
-        ]
-      ],
-      'order' => ['priority'],
-      'limit' => $limit
-    ]) as $r ){
-      $sent++;
-      $ok = false;
-      if ( !empty($r['id_mailing']) ){
-        $mailing = $this->get_mailing($r['id_mailing']);
-        $text = $mailing['content'];
-        $subject = $mailing['title'];
-      }
-      else{
-        $text = $r['text'];
-        $subject = $r['subject'];
-      }
-      if ( $subject && $text && \bbn\str::is_email($r['email']) ){
-        $params = [
-          'to' => $r['email'],
-          'subject' => $subject,
-          'text' => $text
-        ];
-        if ( $r['cfg'] ){
-          $r['cfg'] = json_decode($r['cfg'], true);
-          if ( !empty($r['cfg']['attachments']) ){
-            $att = [];
-            foreach ( $r['cfg']['attachments'] as $i => $a ){
-              /** @todo Check out the path! */
-              /*
-              if ( file_exists($ctrl->content_path().$a) ){
-                $att[$i] = $ctrl->content_path().$a;
+        ],
+        'order' => ['priority'],
+        'limit' => $limit
+      ]) as $r ){
+        $sent++;
+        $ok = false;
+        if ( !empty($r['id_mailing']) ){
+          $mailing = $this->get_mailing($r['id_mailing']);
+          $text = $mailing['content'];
+          $subject = $mailing['title'];
+        }
+        else{
+          $text = $r['text'];
+          $subject = $r['subject'];
+        }
+        if ( $subject && $text && \bbn\str::is_email($r['email']) ){
+          $params = [
+            'to' => $r['email'],
+            'subject' => $subject,
+            'text' => $text
+          ];
+          if ( $r['cfg'] ){
+            $r['cfg'] = json_decode($r['cfg'], true);
+            if ( !empty($r['cfg']['attachments']) ){
+              $att = [];
+              foreach ( $r['cfg']['attachments'] as $i => $a ){
+                /** @todo Check out the path! */
+                /*
+                if ( file_exists($ctrl->content_path().$a) ){
+                  $att[$i] = $ctrl->content_path().$a;
+                }
+                */
               }
-              */
-            }
-            if ( count($att) ){
-              $params['attachments'] = $att;
+              if ( count($att) ){
+                $params['attachments'] = $att;
+              }
             }
           }
+          if ( $ok = $this->mailer->send($params) ){
+            $successes++;
+          }
         }
-        if ( $ok = $this->mailer->send($params) ){
-          $successes++;
-        }
+        $this->db->update('bbn_emails', [
+          'status' => $ok ? 'success' : 'failure',
+          'delivery' => date('Y-m-d H:i:s')
+        ], ['id' => $r['id']]);
       }
-      $this->db->update('bbn_emails', [
-        'status' => $ok ? 'success' : 'failure',
-        'delivery' => date('Y-m-d H:i:s')
-      ], ['id' => $r['id']]);
+      return $successes;
     }
+    $this->set_error(_("No mailer defined"));
+    return null;
   }
 
   /**
-   * Adds a new mailing
+   * Adds a new mailing and returns its ID.
    *
-   * @param [Object] $cfg
-   * @return void
+   * @param array $cfg
+   * @return null|string
    */
-  public function add($cfg){
+  public function add(array $cfg): ?string
+  {
     $notes = $this->_note();
     if (
-      bbn\x::has_props($cfg, ['title', 'recipients', 'content', 'sender']) &&
+      $this->check() &&
+      $notes &&
+      bbn\x::has_props($cfg, ['title', 'content', 'sender', 'recipients'], true) &&
       ($id_type = notes::get_option_id('mailings','types')) &&
       ($id_note = $notes->insert($cfg['title'], $cfg['content'], $id_type))
     ){
@@ -215,16 +307,15 @@ class mailings extends bbn\models\cls\db
         'id_note' => $id_note,
         'version' => 1,
         'sender' => $cfg['sender'],
-        'recipients' => $cfg['recipients'],
+        'recipients' => $cfg['recipients'] ?: null,
         'sent' => $cfg['sent']
       ]) ){
         $id_mailing = $this->db->last_id();
         if (!empty($cfg['attachments'])) {
-          $temp_path = BBN_USER_PATH.'tmp/';
           foreach ( $cfg['attachments'] as $f ){
-            if ( is_file($temp_path.$f) ){
+            if ( is_file($f) ){
               // Add media
-              $notes->add_media($id_note, $temp_path.$f);
+              $notes->add_media($id_note, $f);
             }
           }
         }
@@ -234,19 +325,74 @@ class mailings extends bbn\models\cls\db
     return null;
   }
 
+  public function edit($id, $cfg): ?int
+  {
+    $notes = $this->_note();
+    $user = bbn\user::get_instance();
+    $medias = $this->_medias();
+    $res = 0;
+    if (
+      $this->check() &&
+      $user && $notes &&
+      bbn\x::has_props($cfg, ['title', 'recipients', 'content', 'sender']) &&
+      ($mailing = $this->get_mailing($id)) &&
+      !$this->count_sent($id) &&
+      ($version = $notes->insert_version($mailing['id_note'], $cfg['title'], $cfg['content']))
+    ){
+      foreach ( $cfg['attachments'] as $f ){
+        // It exists already, the file is not sent
+        if (is_array($f)) {
+          $idx = empty($mailing['medias']) ? false : \bbn\x::find($mailing['medias'], ['name' => $f['name']]);
+          if ($idx !== false) {
+            if ($version === $mailing['version']) {
+              // If file found in attachments when note is not modified, it is removed from the original array which can then be used for deleting all remaining attachments
+              array_splice($mailing['medias'], $idx, 1);
+            }
+            else if ($notes->add_media_to_note($mailing['medias'][$idx]['id'], $mailing['id_note'], $version)) {
+              $res++;
+            }
+          }
+        }
+        // The pure path to the file is sent
+        else if ($notes->add_media($mailing['id_note'], $f)) {
+          $res++;
+        }
+      }
+      if ($version === $mailing['version']) {
+        foreach ($mailing['medias'] as $med) {
+          if ($medias->delete($med['id'])) {
+            $res++;
+          }
+        }
+      }
+      else{
+        $res++;
+      }
+      if ( empty($cfg['sent']) ){
+        $cfg['sent'] = null;
+      }
+      $res += (int)$this->db->update('bbn_emailings', [
+        'version' => $version,
+        'sender' => $cfg['sender'],
+        'recipients' => $cfg['recipients'],
+        'sent' => $cfg['sent']
+      ], [
+        'id' => $id
+      ]);
+      return $res;
+    }
+    return null;
+  }
   /**
-   * Deletes the mailing and relative emails
+   * Deletes the mailing and relative emails.
    *
    * @param string $id 
    * @return integer|null
    */
   public function delete(string $id):? int
   {
-    // We do not cancel mailings which have been sent
-    if ( $this->db->rselect_all('bbn_emails', [],[
-      'id_mailing' => $id,
-      'status' => 'sent'
-    ]) ){
+    // We do not delete mailings which have been sent
+    if ($this->count_sent($id)) {
       return 0;
     }
     $success = null;
@@ -255,32 +401,22 @@ class mailings extends bbn\models\cls\db
     if ( !empty($mailing['id_note']) ){
       $notes = $this->_note();
       //if the notes has media removes media before to remove the note
-      if ( ($medias = $notes->get_medias($mailing['id_note']) )){
-        foreach ( $medias as $media ){
-          $notes->remove_media($media['id'],$mailing['id_note']);
+      if ($medias = $notes->get_medias($mailing['id_note'])) {
+        foreach ($medias as $media){
+          $notes->remove_media($media['id'], $mailing['id_note']);
         }
       }
 
       // if there are emails with the given id_mailing
-      if ( !empty($this->db->rselect_all('bbn_emails', [],[
-      'id_mailing' => $id]))){
+      if ($this->db->count('bbn_emails', ['id_mailing' => $id])){
         //it removes the emails ready or cancelled relative to this id_mailing
         $this->delete_all_emails($id);
       }
-      
-
-      //updates the row giving id_note and version null
-      $this->db->update("bbn_emailings", [
-        'id_note' => null, 
-        'version' => null
-      ], [ 'id' => $id ]);
-
-      //deletes the row
-      $success = $this->db->delete("bbn_emailings", ['id' => $id]);
-      
-      //removes the note -- without the second argument true I always have a db error, in this way the note is not deleted but passed on active 0
-      $notes->remove($mailing['id_note']);
-      
+      if (!$this->db->count('bbn_emails', ['id_mailing' => $id])){
+        //deletes the row
+        $success = $this->db->delete("bbn_emailings", ['id' => $id]);
+        $notes->remove($mailing['id_note']);
+      }
     }
     return $success;
   }
@@ -331,7 +467,7 @@ class mailings extends bbn\models\cls\db
   }
 
   /**
-   * Deletes all the emails ready or cancelled relative to the given id_mailing
+   * Deletes all the emails ready or cancelled relative to the given id_mailing.
    *
    * @param string $id_mailing
    * @return integer|null
@@ -356,11 +492,11 @@ class mailings extends bbn\models\cls\db
 
 
   /**
-   * Changes the status of the given id email
+   * Changes the status of the given id email.
    *
    * @param string $id_email
    * @param string $state
-   * @return boolean
+   * @return bool
    */
   public function change_email_status(string $id_email, string $state): bool
   {
@@ -370,22 +506,39 @@ class mailings extends bbn\models\cls\db
   }
 
   /**
-   * Returns the array containing all the emails relative to an id_mailing
+   * Returns the array containing all the emails relative to an id_mailing.
    *
-   * @param string $id_mailing
-   * @return void
+   * @param string $id
+   * @return array
    */
-  public function get_emails($id_mailing):? array
+  public function get_emails(string $id):? array
   {
-    return $this->db->rselect_all('bbn_emails', [],[
-      'id_mailing' => $id_mailing
+    return $this->db->rselect_all('bbn_emails', [], [
+      'id_mailing' => $id
     ]);
   }
 
   /**
-   * Changes the status of the emails relative to the given id_mailing
+   * Returns the number of emails sent for the given mailing.
    *
-   * @param string $id_mailing
+   * @param string $id
+   * @return int|null
+   */
+  public function count_sent(string $id): ?int
+  {
+    if ($this->check()) {
+      return $this->db->count('bbn_emails', [
+        'id_mailing' => $id,
+        ['email', '!=', $this->get_test_emails()]
+      ]);
+    }
+    return null;
+  }
+
+  /**
+   * Changes the status of the emails relative to the given mailing.
+   *
+   * @param string $id
    * @param string $status
    * @return boolean
    */

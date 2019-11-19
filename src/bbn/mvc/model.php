@@ -83,7 +83,25 @@ class model extends bbn\models\cls\db{
 		else{
 			$this->error("The model $info[path] doesn't exist");
 		}
-	}
+  }
+  
+  public function check_action(array $vars = null, bool $check_empty = false) {
+    if (isset($this->data['res'], $this->data['res'])) {
+      if (is_array($vars)) {
+        return bbn\x::has_props($this->data, $vars, $check_empty);
+      }
+      return true;
+    }
+    return false;
+  }
+
+  public function has_var(string $var, bool $check_empty = false) {
+    return bbn\x::has_prop($this->data, $var, $check_empty);
+  }
+
+  public function has_vars(array $vars, bool $check_empty = false) {
+    return bbn\x::has_props($this->data, $vars, $check_empty);
+  }
 
   public function register_plugin_classes($plugin_path): self
   {

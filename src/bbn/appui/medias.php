@@ -2,10 +2,6 @@
 namespace bbn\appui;
 use bbn;
 
-if ( !\defined('BBN_DATA_PATH') ){
-  die("The constant BBN_DATA_PATH must be defined in order to use medias");
-}
-
 class medias extends bbn\models\cls\db
 {
 
@@ -46,7 +42,18 @@ class medias extends bbn\models\cls\db
     $this->opt_id = $this->opt->from_root_code('media', 'notes', 'appui');
   }
 
-  public function insert($name, $content = null, $title = '', $type='file', $private = false){
+  /**
+   * Adds a new media
+   *
+   * @param string $name
+   * @param array $content
+   * @param string $title
+   * @param string $type
+   * @param boolean $private
+   * @return string|null
+   */
+  public function insert(string $name, array $content = null, string $title = '', string $type='file', bool $private = false): ?string
+  {
     $cf =& $this->class_cfg;
     if (
       !empty($name) &&
@@ -70,11 +77,12 @@ class medias extends bbn\models\cls\db
             if ( $root ){
               $path = bbn\x::make_storage_path($root, '', 0, $fs);
               $dpath = substr($path, strlen($root) + 1);
+              $file = basename($name);
               $content = [
                 'path' => $dpath,
-                'size' => $fs->filesize($name)
+                'size' => $fs->filesize($name),
+                'extension' => bbn\str::file_ext($file)
               ];
-              $file = basename($name);
               if ( empty($title) ){
                 $title = basename($file);
               }
@@ -102,15 +110,20 @@ class medias extends bbn\models\cls\db
         return $id;
       }
     }
-    return false;
+    return null;
   }
 
   public function delete(string $id){
     if ( \bbn\str::is_uid($id) ){
       $cf =& $this->class_cfg;
-      if ( $this->db->delete($cf['table'], [$cf['arch']['medias']['id'] => $id]) ){
-        if ( is_dir(bbn\mvc::get_data_path('appui-notes').'media/'.$id) ){
-          return \bbn\file\dir::delete(bbn\mvc::get_data_path('appui-notes').'media/'.$id);
+      $media = $this->get_media($id);
+      if ($media 
+          && ($path = dirname($media['file']))
+          && is_file($media['file'])
+          && $this->db->delete($cf['table'], [$cf['arch']['medias']['id'] => $id])
+      ) {
+        if (\bbn\file\dir::delete($path, false)) {
+          bbn\x::clean_storage_path($path);
         }
         return true;
       }
@@ -130,16 +143,14 @@ class medias extends bbn\models\cls\db
       $path = '';
       if ( $media['content'] ){
         $tmp = json_decode($media[$cf['arch']['medias']['content']], true);
-        if ( isset($tmp['path']) ){
-          $path = $tmp['path'];
-        }
+        $media = array_merge($tmp, $media);
       }
-      $media['path'] = (
+      $media['file'] = (
         $media['private'] ? 
           bbn\mvc::get_user_data_path('appui-notes') :
           bbn\mvc::get_data_path('appui-notes')
-      ).'media/'.$path.$id.'/'.$media[$cf['arch']['medias']['name']];
-      return empty($details) ? $media['path'] : $media;
+      ).'media/'.($media['path'] ?? '').$id.'/'.$media[$cf['arch']['medias']['name']];
+      return empty($details) ? $media['file'] : $media;
     }
     return false;
   }

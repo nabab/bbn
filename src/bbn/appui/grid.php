@@ -73,6 +73,12 @@ class grid extends bbn\models\cls\cache
    * @var string The timer object
    */
   private $chrono;
+  
+  /**
+   * @var array
+   */
+  private $excel = [];
+
   /**
    * Grid constructor.
    *
@@ -103,6 +109,32 @@ class grid extends bbn\models\cls\cache
         'start' => $post['start'] ?? 0,
         'where' => !empty($post['filters']) && !empty($post['filters']['conditions']) ? $post['filters'] : []
       ];
+      if ( !empty($post['excel']) ){
+        $this->excel = $post['excel'];
+        if ( !empty($post['fields']) ){
+          $fields = $db_cfg['fields'];
+          $link = [];
+          $db_cfg['fields'] = [];
+          foreach ( $fields as $a => $f ){
+            $field = is_string($a) ? $a : $this->db->col_simple_name($f);
+            if ( in_array($field, $post['fields'], true) ){
+              $link[$field] = $a;    
+            }
+          }
+          foreach ( $post['fields'] as $f ){
+            if ( isset($fields[$link[$f]]) ){
+              $db_cfg['fields'][$link[$f]] = $fields[$link[$f]];
+            }
+          }
+        }
+        if ( 
+          is_array($cfg['map']) && 
+          isset($cfg['map']['callable']) &&
+          is_callable($cfg['map']['callable']) 
+        ){
+          $this->excel['map'] = $cfg['map'];
+        }
+      }
       // Adding all the fields if fields is empty
       if ( empty($db_cfg['tables']) ){
         $this->log(['NO TABLES!', $db_cfg]);
@@ -341,6 +373,40 @@ class grid extends bbn\models\cls\cache
       $r['error'] = $this->db->last_error;
     }
     return $r;
+  }
+
+  /**
+   * Exports the grid's data or the given data to excel
+   * @param array $data
+   * @return array
+   */
+  public function to_excel(array $data = []): array
+  {
+    $path = \bbn\x::make_storage_path(\bbn\mvc::get_user_tmp_path()) . 'export_' . date('d-m-Y_H-i-s') . '.xlsx';
+    $cfg = $this->excel;
+    $data = array_map(function($row) use($cfg){
+      foreach ( $row as $i => $r ){
+        if ( 
+          (($idx = \bbn\x::find($cfg, ['field' => $i])) === false ) ||
+          !!$cfg[$idx]['hidden']
+        ){
+          unset($row[$i]);
+        }
+      }
+      return $row;
+    }, $data ?: $this->get_data());
+    if ( \bbn\x::to_excel($data, $path, true, $this->excel) ){
+      return ['file' => $path];
+    }
+  }
+
+  /**
+   * Gets the excel property
+   * @return array
+   */
+  public function get_excel(): array
+  {
+   return $this->excel; 
   }
 
   public function check(): bool

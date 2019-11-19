@@ -1061,8 +1061,30 @@ class db extends \PDO implements db\actions, db\api, db\engines
             if ( isset($f[3]) ){
               $tmp['exp'] = $f[3];
             }
-            else if ( array_key_exists(2, $f) ){
-              if ( $f[2] === null ){
+            elseif ( array_key_exists(2, $f) ){
+              if ( is_array($f[2]) ){
+                $tmp = [
+                  'conditions' => [],
+                  'logic' => 'AND'
+                ];
+                foreach ( $f[2] as $v ){
+                  if ( null === $v ){
+                    $tmp['conditions'][] = [
+                      'field' => $f[0],
+                      'operator' => 'isnotnull'
+                    ];
+                  }
+                  else{
+                    $tmp['conditions'][] = [
+                      'field' => $f[0],
+                      'operator' => $f[1],
+                      'value' => $v
+                    ];
+                  }
+                }
+                $res['conditions'][] = $tmp;
+              }
+              elseif ( $f[2] === null ){
                 $tmp['operator'] = $f[2] === '!=' ? 'isnotnull' : 'isnull';
               }
               else{
