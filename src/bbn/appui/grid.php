@@ -128,8 +128,7 @@ class grid extends bbn\models\cls\cache
           }
         }
         if ( 
-          is_array($cfg['map']) && 
-          isset($cfg['map']['callable']) &&
+          isset($cfg['map'], $cfg['map']['callable']) &&
           is_callable($cfg['map']['callable']) 
         ){
           $this->excel['map'] = $cfg['map'];

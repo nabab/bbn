@@ -21,6 +21,7 @@ class notes extends bbn\models\cls\db
     bbn\models\tts\optional,
     bbn\models\tts\dbconfig;
 
+  private $medias; 
 
   protected static
     /** @var array */
@@ -90,7 +91,6 @@ class notes extends bbn\models\cls\db
       $this->medias = new medias($this->db);
     }
     return $this->medias;
-
   }
 
   public function insert(string $title, string $content, string $type = null, bool $private = false, bool $locked = false, string $parent = null, string $alias = null)
@@ -129,7 +129,7 @@ class notes extends bbn\models\cls\db
     if ($this->check() && ($usr = bbn\user::get_instance()) && ($note = $this->get($id_note))) {
       $cf =& $this->class_cfg;
       $latest = $note['version'] ?: 0;
-      if (!$latest || ($note['content'] !== $content) || ($note['title'] !== $title)) {
+      if ( !$latest || ($note['content'] !== $content) || ($note['title'] !== $title) ) {
         $next = $note['version'] + 1;
       }
       if ($next && $this->db->insert($cf['tables']['versions'], [
@@ -423,6 +423,7 @@ class notes extends bbn\models\cls\db
     ){
       return $id_media;
     }
+  
     return null;
   }
 

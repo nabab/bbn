@@ -177,8 +177,10 @@ class cron extends bbn\models\cls\basic{
         $file_content = @file_get_contents($pid);
         // Write the error log if an error is present
         if ( $error = error_get_last() ){
-          @file_put_contents($cron->get_error_log_path($data), \bbn\x::get_dump($error));
-          if ( defined('BBN_DATA_PATH') && is_dir(BBN_DATA_PATH.'logs') ){
+          //@file_put_contents($cron->get_error_log_path($data), \bbn\x::get_dump($error));
+          @file_put_contents($cron->log_path($data, true), \bbn\x::get_dump($error));
+          //if ( defined('BBN_DATA_PATH') && is_dir(BBN_DATA_PATH.'logs') ){
+          if ( is_dir($this->ctrl->data_path().'logs') ){
             bbn\x::log([$data, $error], 'cron');
           }
         }
@@ -246,10 +248,12 @@ class cron extends bbn\models\cls\basic{
    * @param array $cfg
    */
   public function __construct(bbn\mvc\controller $ctrl, array $cfg = []){
-    if ( defined('BBN_DATA_PATH') ){
+    //if ( defined('BBN_DATA_PATH') ){
+    if ( $ctrl->data_path() ){
       $this->ctrl = $ctrl;
       // It must be called from a plugin (appui-cron actually)
-      $this->path = BBN_DATA_PATH.'plugins/appui-cron/';
+      //$this->path = BBN_DATA_PATH.'plugins/appui-cron/';
+      $this->path = $this->ctrl->data_path('appui-cron');
       $this->db = $ctrl->db;
       if ( !empty($ctrl->post) ){
         $this->data = $ctrl->post;
@@ -271,7 +275,8 @@ class cron extends bbn\models\cls\basic{
     exec(sprintf('php -f router.php %s "%s" > %s 2>&1 &',
       $to_exec,
       bbn\str::escape_dquotes(json_encode($cfg)),
-      $this->get_log_path($cfg)
+      //$this->get_log_path($cfg)
+      $this->log_path($cfg)
     ));
   }
 
@@ -329,25 +334,45 @@ class cron extends bbn\models\cls\basic{
     return null;
   }
 
-  public function get_log_path(array $cfg): ?string
+  public function log_path(array $cfg, bool $error = false): ?string
   {
-    if ( isset($cfg['type']) && $this->path ){
-      $dir = bbn\file\dir::create_path($this->path.'log/'
-        .(isset($cfg['id']) ? 'tasks/'.$cfg['id'] : $cfg['type']).
-        '/'.date('Y/m/d'));
-      return $dir ? $dir.'/'.date('Y-m-d-H-i-s').'.txt' : null;
+    //create log in error/task
+    if ( $error ){
+      //replace old get_error_log_path
+      if ( isset($cfg['type']) && $this->path ){
+        $dir = isset($cfg['id']) ? \bbn\x::make_storage_path($this->path.'error/tasks/'.$cfg['id']) : $this->path.'error/'.$cfg['type'];
+        return $dir ? $dir.date('Y-m-d-H-i-s').'.txt' : null;
+      }
+    }
+    //create log in task
+    else {
+      //replace old get_log_path
+      $dir = \bbn\x::make_storage_path($this->path.'log/'.(isset($cfg['id']) ? 'tasks/'.$cfg['id'] : $cfg['type']));
+      return $dir ? $dir.date('Y-m-d-H-i-s').'.txt' : null;
     }
     return null;
   }
 
-  public function get_error_log_path(array $cfg): ?string
+  /*public function get_log_path(array $cfg): ?string
+  {
+    if ( isset($cfg['type']) && $this->path ){
+       $dir = bbn\file\dir::create_path($this->path.'log/'
+        .(isset($cfg['id']) ? 'tasks/'.$cfg['id'] : $cfg['type']).
+        '/'.date('Y/m/d'));
+
+      return $dir ? $dir.'/'.date('Y-m-d-H-i-s').'.txt' : null;
+    }
+    return null;
+  }*/
+
+  /*public function get_error_log_path(array $cfg): ?string
   {
     if ( isset($cfg['type']) && $this->path ){
       $dir = isset($cfg['id']) ? bbn\file\dir::create_path($this->path.'error/tasks/'.$cfg['id']) : $this->path.'error/'.$cfg['type'];
       return $dir ? $dir.'/'.date('Y-m-d-H-i-s').'.txt' : null;
     }
     return null;
-  }
+  }*/
 
   /**
    * Returns true if the file data_folder/.active exists, false otherwise.
@@ -408,7 +433,8 @@ class cron extends bbn\models\cls\basic{
         $res = $obs->observe();
         if ( \is_array($res) ){
           foreach ( $res as $id_user => $o ){
-            $file = BBN_DATA_PATH."users/$id_user/tmp/poller/queue/observer-".time().'.json';
+            //$file = BBN_DATA_PATH."users/$id_user/tmp/poller/queue/observer-".time().'.json';
+            $file = $this->ctrl->data_path()."users/$id_user/tmp/poller/queue/observer-".time().'.json';
             if ( bbn\file\dir::create_path(\dirname($file)) ){
               file_put_contents($file, json_encode(['observers' => $o]));
             }

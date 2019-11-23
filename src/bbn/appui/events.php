@@ -46,22 +46,20 @@ class events extends bbn\models\cls\db
 
   public function insert(array $event): ?string
   {
-    if ( 
-      !empty($event[$this->fields['id_type']]) &&
-      !empty($event[$this->fields['start']])
-    ){
+    $f =& $this->fields;
+    if (bbn\x::has_props($event, [$f['id_type'], $f['start']], true)) {
       if ( 
-        !empty($event[$this->fields['cfg']]) &&
-        !\bbn\str::is_json($event[$this->fields['cfg']])
+        !empty($event[$f['cfg']]) &&
+        !\bbn\str::is_json($event[$f['cfg']])
       ){
-        $event[$this->fields['cfg']] = json_encode($event[$this->fields['cfg']]);
+        $event[$f['cfg']] = json_encode($event[$f['cfg']]);
       }
       if ( $this->db->insert($this->class_table, [
-        $this->fields['id_type'] => $event[$this->fields['id_type']],
-        $this->fields['start'] => $event[$this->fields['start']],
-        $this->fields['end'] => $event[$this->fields['end']] ?? NULL,
-        $this->fields['name'] => $event[$this->fields['name']] ?? NULL,
-        $this->fields['cfg'] => $event[$this->fields['cfg']] ?? NULL
+        $f['id_type'] => $event[$f['id_type']],
+        $f['start'] => $event[$f['start']],
+        $f['end'] => $event[$f['end']] ?? NULL,
+        $f['name'] => $event[$f['name']] ?? NULL,
+        $f['cfg'] => $event[$f['cfg']] ?? NULL
       ]) ){
         return $this->db->last_id();
       }
@@ -72,23 +70,24 @@ class events extends bbn\models\cls\db
   public function edit(string $id, array $event): ?int
   {
     if ( \bbn\str::is_uid($id) ){
-      if ( array_key_exists($this->fields['id'], $event) ){
-        unset($event[$this->fields['id']]);
+      $f =& $this->fields;
+      if ( array_key_exists($f['id'], $event) ){
+        unset($event[$f['id']]);
       }
       if ( 
-        !empty($event[$this->fields['cfg']]) &&
-        !\bbn\str::is_json($event[$this->fields['cfg']])
+        !empty($event[$f['cfg']]) &&
+        !\bbn\str::is_json($event[$f['cfg']])
       ){
-        $event[$this->fields['cfg']] = json_encode($event[$this->fields['cfg']]);
+        $event[$f['cfg']] = json_encode($event[$f['cfg']]);
       }
       return $this->db->update($this->class_table, [
-        $this->fields['id_type'] => $event[$this->fields['id_type']],
-        $this->fields['start'] => $event[$this->fields['start']],
-        $this->fields['end'] => $event[$this->fields['end']] ?? NULL,
-        $this->fields['name'] => $event[$this->fields['name']] ?? NULL,
-        $this->fields['cfg'] => $event[$this->fields['cfg']] ?? NULL
+        $f['id_type'] => $event[$f['id_type']],
+        $f['start'] => $event[$f['start']],
+        $f['end'] => $event[$f['end']] ?? NULL,
+        $f['name'] => $event[$f['name']] ?? NULL,
+        $f['cfg'] => $event[$f['cfg']] ?? NULL
       ], [
-	      $this->fields['id'] => $id
+	      $f['id'] => $id
       ]);
     }
     return null;

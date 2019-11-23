@@ -1663,8 +1663,7 @@ class x
         }
       }
       if ( 
-        is_array($cfg['map']) && 
-        isset($cfg['map']['callable']) &&
+        isset($cfg['map'], $cfg['map']['callable']) &&
         is_callable($cfg['map']['callable'])   
       ){
         array_walk($data, $cfg['map']['callable'], is_array($cfg['map']['params']) ? $cfg['map']['params'] : []);

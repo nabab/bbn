@@ -293,6 +293,7 @@ class mailings extends bbn\models\cls\db
   public function add(array $cfg): ?string
   {
     $notes = $this->_note();
+    $res = ['success' => false];
     if (
       $this->check() &&
       $notes &&
@@ -300,27 +301,74 @@ class mailings extends bbn\models\cls\db
       ($id_type = notes::get_option_id('mailings','types')) &&
       ($id_note = $notes->insert($cfg['title'], $cfg['content'], $id_type))
     ){
-      if ( empty($cfg['sent']) ){
+      if (empty($cfg['sent'])) {
         $cfg['sent'] = null;
       }
-      if ( $this->db->insert('bbn_emailings', [
+      if ($this->db->insert('bbn_emailings', [
         'id_note' => $id_note,
         'version' => 1,
         'sender' => $cfg['sender'],
         'recipients' => $cfg['recipients'] ?: null,
         'sent' => $cfg['sent']
-      ]) ){
+      ])){
         $id_mailing = $this->db->last_id();
         if (!empty($cfg['attachments'])) {
           foreach ( $cfg['attachments'] as $f ){
-            if ( is_file($f) ){
+            if (is_array($f)) {
+              $notes->add_media_to_note($f['id_media'], $id_note, 1);
+            }
+            else if ( is_file($f) ){
               // Add media
               $notes->add_media($id_note, $f);
             }
           }
         }
+        if (bbn\x::has_props($cfg, ['sent', 'emails'], true)) {
+          $this->insert_emails($id_mailing, $cfg['sent'], $cfg['emails']);
+        }
         return $id_mailing;
       }
+    }
+    return null;
+  }
+
+  public function insert_emails(string $id_mailing, string $date, array $emails, int $priority = 5): ?array
+  {
+    if (!empty($date) && \bbn\date::validateSQL($date)) {
+      $num_undone = 0;
+      $num_done = 0;
+      $num_undone = 0;
+      $num_emails = 0;
+      $res = [];
+      if (!empty($emails)) {
+        foreach ($emails as $item) {
+          $num_emails++;
+          if ($id_email = $this->db->select_one('bbn_emails', 'id', [
+            'id_mailing' => $id_mailing,
+            'email' => $item['email']
+          ])) {
+            $num_undone++;
+          }
+          else {
+            $num_done++;
+            $this->db->insert('bbn_emails', [
+              'email' => $item['email'],
+              'id_mailing' => $id_mailing,
+              'priority' => $priority,
+              'status' => 'ready',
+              'delivery' => $date
+            ]);
+            $id_email = $this->db->last_id();
+          }
+          $item['id'] = $id_email;
+          $res[] = $item;
+        }
+      }
+      return [
+        'done' => $num_done,
+        'undone' => $num_undone,
+        'total' => $num_emails
+      ];
     }
     return null;
   }
@@ -371,6 +419,21 @@ class mailings extends bbn\models\cls\db
       if ( empty($cfg['sent']) ){
         $cfg['sent'] = null;
       }
+      if ($mailing['sent'] && !$cfg['sent']) {
+        $this->delete_all_emails($id);
+      }
+      else if (!$mailing['sent'] && $cfg['sent']) {
+        if (!empty($cfg['emails'])) {
+          $this->insert_emails($id, $cfg['sent'], $cfg['emails'], $cfg['priority']);
+        }
+      }
+      else if ($mailing['sent'] !== $cfg['sent']) {
+        $this->delete_all_emails($id);
+        if (!empty($cfg['emails'])) {
+          $this->insert_emails($id, $cfg['sent'], $cfg['emails'], $cfg['priority']);
+        }
+      }
+      //if ($mailing['priority'] !== )
       $res += (int)$this->db->update('bbn_emailings', [
         'version' => $version,
         'sender' => $cfg['sender'],
