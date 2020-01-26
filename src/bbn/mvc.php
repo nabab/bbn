@@ -173,7 +173,7 @@ class mvc implements mvc\api{
 
   public static function get_content_path(string $plugin = null): string
   {
-    return self::$_app_name ? self::get_data_path().'content/'.($plugin ? 'plugins/'.$plugin.'/' : '') : '';
+    return self::$_app_name ? self::get_data_path().($plugin ? 'plugins/'.$plugin.'/' : 'content/') : '';
   }
 
   public static function get_user_tmp_path(string $id_user = null, string $plugin = null):? string
@@ -292,7 +292,7 @@ class mvc implements mvc\api{
    * @return string
    */
   public static function include_controller(string $bbn_inc_file, mvc\controller $ctrl, $bbn_is_super = false){
-    if ( $ctrl->is_cli() === 'direct' ){
+    if ( $ctrl->is_cli() ){
       return require($bbn_inc_file);
     }
     ob_start();
@@ -615,7 +615,7 @@ class mvc implements mvc\api{
     return null;
   }
 
-  public function custom_plugin_model(string $path, array $data, mvc\controller $ctrl, string $plugin, int $ttl = 0): ?array
+  public function custom_plugin_model(string $path, array $data, mvc\controller $ctrl, string $plugin, int $ttl = null): ?array
   {
     if ( $plugin && ($route = $this->router->route_custom_plugin(router::parse($path), 'model', $plugin)) ){
       $model = new mvc\model($this->db, $route, $ctrl, $this);
@@ -655,7 +655,7 @@ class mvc implements mvc\api{
     return [];
   }
 
-  public function get_plugin_model(string $path, array $data, mvc\controller $ctrl, string $plugin, int $ttl = 0){
+  public function get_plugin_model(string $path, array $data, mvc\controller $ctrl, string $plugin, int $ttl = null){
     return $this->custom_plugin_model(router::parse($path), $data, $ctrl, $this->plugin_name($plugin), $ttl);
   }
 
@@ -666,7 +666,7 @@ class mvc implements mvc\api{
    * @params array data to send to the model
    * @return array|false A data model
    */
-  public function get_cached_model(string $path, array $data, mvc\controller $ctrl, $ttl = 10){
+  public function get_cached_model(string $path, array $data, mvc\controller $ctrl, int $ttl = 10){
     if ( \is_null($data) ){
       $data = $this->data;
     }
@@ -690,7 +690,7 @@ class mvc implements mvc\api{
     }
     if ( $route = $this->router->route(router::parse($path), 'model') ){
       $model = new mvc\model($this->db, $route, $ctrl, $this);
-      return $model->set_cache($data, '', $ttl);
+      return $model->model_set_cache($data, '', $ttl);
     }
     return [];
   }

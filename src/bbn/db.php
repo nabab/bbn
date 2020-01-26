@@ -15,6 +15,7 @@ namespace bbn;
  * @category  Database
  * @license   http://www.opensource.org/licenses/mit-license.php MIT
  * @version 3.1
+ * @todo Check for the tables and column names legality in _treat_arguments
  */
 
 class db extends \PDO implements db\actions, db\api, db\engines
@@ -226,6 +227,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
     self::$has_error_all = true;
   }
 
+  public function __toString()
+  {
+    return "Connection {$this->engine} to {$this->host}";
+  }
+
   public static function get_log_line(string $text = ''){
     if ( $text ){
       $text = ' '.$text.' ';
@@ -294,7 +300,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
             break;
         }
         if ( !\is_array($tmp) ){
-          die(var_dump($tmp, $keys, $cols, "Error while creating the cache for the table $item in mode $mode"));
+          $st = "Error while creating the cache for the table $item in mode $mode";
+          $this->log($st);
+          if (defined('BBN_IS_DEV') && BBN_IS_DEV){
+            die(var_dump($st));
+          }
         }
         if ( $tmp ){
           $this->cache_set($cache_name, '', $tmp, $this->cache_renewal);
@@ -618,6 +628,9 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * <li>php</li>
    * <li>done</li>
    * </ul>
+   * 
+   * @todo Check for the tables and column names legality!
+   * 
    * @param $cfg
    * @return array
    */
@@ -804,7 +817,6 @@ class db extends \PDO implements db\actions, db\api, db\engines
       $args[0]['limit'] = 1;
     }
     else {
-      x::log($args, 'limit1');
       $start = $args[4] ?? 0;
       $num = count($args);
       // Adding fields
@@ -1341,10 +1353,16 @@ class db extends \PDO implements db\actions, db\api, db\engines
       foreach ( $res['fields'] as $idx => &$col ){
         if (
           strpos($col, '(') ||
+          strpos($col, '-')  ||
+          strpos($col, "+") ||
+          strpos($col, '*')  ||
+          strpos($col, "/") ||
+          /*
           strpos($col, '->"$.')  ||
           strpos($col, "->'$.") ||
           strpos($col, '->>"$.')  ||
           strpos($col, "->>'$.") ||
+          */
           // String as value
           preg_match('/^[\\\'\"]{1}[^\\\'\"]*[\\\'\"]{1}$/', $col)
         ){
@@ -2130,11 +2148,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
     if ( $ks = $this->get_keys($table) ){
       foreach ( $ks['keys'] as $k ){
         if ( $k['unique'] ){
-          $fields[] = $k['columns'];
+          return $k['columns'];
         }
       }
     }
-    return array_merge(...$fields);
+    return [];
   }
 
   /****************************************************************
@@ -2959,7 +2977,8 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @param array $order The "order" condition
    * @return array | false
    */
-  public function get_field_values($table, $field = null,  array $where = [], array $order = []){
+  public function get_field_values($table, $field = null,  array $where = [], array $order = []): ?array
+  {
     return $this->get_column_values($table, $field, $where, $order);
   }
 
@@ -3022,20 +3041,22 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public function get_column_values($table, string $field = null,  array $where = [], array $order = []): ?array
   {
-    if ( \is_array($table) && isset($table['fields']) && \is_array($table['fields']) && !empty($table['fields'][0]) ){
-      array_splice($table['fields'], 0, 1, 'DISTINCT '.(string)$table['fields'][0]);
-    }
-    else if ( \is_string($table) && \is_string($field) && (stripos($field, 'DISTINCT') !== 0) ){
-      $field = 'DISTINCT '.$field;
-    }
-    if ( $rows = $this->iselect_all($table, $field, $where, $order) ){
-      $r = [];
-      foreach ( $rows as $row ){
-        $r[] = $row[0];
+    $res = null;
+    if ($this->check()) {
+      $res = [];
+      if ( \is_array($table) && isset($table['fields']) && \is_array($table['fields']) && !empty($table['fields'][0]) ){
+        array_splice($table['fields'], 0, 1, 'DISTINCT '.(string)$table['fields'][0]);
       }
-      return $r;
+      else if ( \is_string($table) && \is_string($field) && (stripos($field, 'DISTINCT') !== 0) ){
+        $field = 'DISTINCT '.$field;
+      }
+      if ( $rows = $this->iselect_all($table, $field, $where, $order) ){
+        foreach ( $rows as $row ){
+          $res[] = $row[0];
+        }
+      }
     }
-    return $this->check() ? [] : null;
+    return $res;
   }
 
   /**

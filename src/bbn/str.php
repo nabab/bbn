@@ -574,7 +574,7 @@ class str
   {
     $args = \func_get_args();
     foreach ( $args as $a ){
-      if ( \is_string($a) || (abs($a) > PHP_INT_MAX) ){
+      if ( \is_string($a) ){
         if ( !preg_match('/^-?(?:\d+|\d*\.\d+)$/', $a) ){
           return false;
         }
@@ -583,7 +583,7 @@ class str
         return false;
       }
     }
-    return 1;
+    return true;
   }
 
   /**

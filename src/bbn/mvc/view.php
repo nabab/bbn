@@ -126,7 +126,16 @@ JAVASCRIPT;
             }
             unset($tmp, $translations, $json);
           }
-          return $this->_content;
+          $tmp = false;
+          try {
+            if (!defined('BBN_IS_DEV') || BBN_IS_DEV) {
+              $tmp = \JShrink\Minifier::minify($this->_content, ['flaggedComments' => false]);
+            }
+          }
+          catch ( \RuntimeException $e ){
+            \bbn\x::log([$e->getMessage(), $this->_file], 'js_shrink');
+          }
+          return $tmp ?: $this->_content;
         case 'coffee':
           return $this->_content;
         case 'css':

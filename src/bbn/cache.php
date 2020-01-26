@@ -330,7 +330,7 @@ class cache{
             'expire' => $ttl ? time() + $ttl : 0,
             'value' => $val
           ];
-          return file_put_contents($file, serialize($value)) ? true : false;
+          return file_put_contents($file, json_encode($value, true)) ? true : false;
       }
     }
   }
@@ -360,7 +360,7 @@ class cache{
         case 'files':
           $file = self::_file($it, $this->path);
           if ( $t = file_get_contents($file) ){
-            return unserialize($t, ['allowed_classes' => true]);
+            return json_decode($t, true);
           }
       }
     }

@@ -148,5 +148,30 @@ class date
     return self::is_windows() ? strftime("%m", strtotime("2012-$m-01")) : strftime("%B", strtotime("2012-$m-01"));
   }
 
+  /**
+   * Gets the month's week of the given date.
+   * @param string $date
+   * @param string $firstweekday
+   * @return int
+   */
+  public static function get_month_week(string $date, string $firstweekday = 'monday'): int
+  {
+    $cut = substr($date, 0, 8);
+    $daylen = 86400;
+    $timestamp = strtotime($date);
+    $first = strtotime($cut . "00");
+    $elapsed = ($timestamp - $first) / $daylen;
+    $weeks = 1;
+    for ( $i = 1; $i <= $elapsed; $i++ ){
+      $dayfind = $cut . (strlen($i) < 2 ? '0' . $i : $i);
+      $daytimestamp = strtotime($dayfind);
+      $day = strtolower(date("l", $daytimestamp));
+      if ( $day === strtolower($firstweekday) ){
+        $weeks++;
+      }
+    }
+    return $weeks;
+  }
+
 }
 ?>

@@ -218,27 +218,26 @@ class project extends bbn\models\cls\db {
    */
   public static function decipher_path(string $st){
     $st = \bbn\str::parse_path($st);
-    
     $bits = explode('/', $st);
     /** @var string $constant The first part of the path must be a constant */
     $constant = $bits[0];
     /** @var string $path The path that will be returned */
-    $path = '';      
+    $path = '';
     if ( \defined($constant) ){
       if ( $constant === 'BBN_APP_PATH' ){
         if ( empty($bits[1]) ){
           $path = \bbn\mvc::get_app_path();
         }
         else{
-          $path = \bbn\mvc::get_app_path(true); 
-        }        
+          $path = \bbn\mvc::get_app_path(true);
+        }
       }
       else{
-        $path = constant($constant);      
+        $path = constant($constant);
       }
       array_shift($bits);
     }
-    $path .= implode('/', $bits);    
+    $path .= implode('/', $bits);
     return $path;
   }
 
@@ -251,8 +250,8 @@ class project extends bbn\models\cls\db {
   public function get_root_path($repository){
     if ( \is_string($repository) ){
       $repository = $this->repository($repository);
-    }    
-    if ( !empty($repository) && !empty($repository['bbn_path']) ){      
+    }
+    if ( !empty($repository) && !empty($repository['bbn_path']) ){
       $repository_path = !empty($repository['path']) ? '/' . $repository['path'] : '';
       $path = self::decipher_path($repository['bbn_path'] . $repository_path) . '/';
       return \bbn\str::parse_path($path);

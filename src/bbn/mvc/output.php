@@ -10,7 +10,7 @@ namespace bbn\mvc;
 use bbn;
 
 
-class output {
+class output extends bbn\models\cls\basic {
 
   public function __construct(\stdClass $obj, $mode){
     $this->obj = $obj;
@@ -37,7 +37,6 @@ class output {
       if ( $this->obj->content ){
         echo $this->obj->content;
       }
-      @ob_end_flush();
       exit();
     }
 
@@ -47,7 +46,7 @@ class output {
       }
       else if ( !BBN_IS_DEV ){
         try{
-          $tmp = \JShrink\Minifier::minify($this->obj->prescript);
+          $tmp = \JShrink\Minifier::minify($this->obj->prescript, ['flaggedComments' => false]);
         }
         catch ( \RuntimeException $e ){
           \bbn\x::log($this->obj->prescript, 'js_shrink');
@@ -63,7 +62,7 @@ class output {
       }
       else if ( !BBN_IS_DEV ){
         try{
-          $tmp = \JShrink\Minifier::minify($this->obj->script);
+          $tmp = \JShrink\Minifier::minify($this->obj->script, ['flaggedComments' => false]);
         }
         catch ( \RuntimeException $e ){
           \bbn\x::log($this->obj->script, 'js_shrink');
@@ -71,7 +70,6 @@ class output {
         if ( $tmp ){
           $this->obj->script = $tmp;
         }
-
       }
     }
     if ( isset($this->obj->postscript) ){
@@ -80,7 +78,7 @@ class output {
       }
       else if ( !BBN_IS_DEV ){
         try{
-          $tmp = \JShrink\Minifier::minify($this->obj->postscript);
+          $tmp = \JShrink\Minifier::minify($this->obj->postscript, ['flaggedComments' => false]);
         }
         catch ( \RuntimeException $e ){
           \bbn\x::log($this->obj->postscript, 'js_shrink');
@@ -146,7 +144,12 @@ class output {
 
       case 'public':
         header('Content-type: application/json; charset=utf-8');
-        echo json_encode($this->obj);
+        if (BBN_IS_DEV) {
+          echo json_encode($this->obj, JSON_PRETTY_PRINT);
+        }
+        else {
+          echo json_encode($this->obj);
+        }
         break;
 
       case 'js':

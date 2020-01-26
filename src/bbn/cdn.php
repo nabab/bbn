@@ -450,11 +450,13 @@ JS;
           }
         }
         if ( $code ){
-          $code = sprintf(
+          if (defined('BBN_IS_DEV') && BBN_IS_DEV){
+            $code = sprintf(
               self::head_comment,
               $this->furl.$this->request,
               $c['test'] ? self::test_st : self::no_test_st
             ).$code;
+          }
           file_put_contents($c['cache_file'], $code);
           file_put_contents($c['cache_file'].'.gzip', gzencode($code));
         }

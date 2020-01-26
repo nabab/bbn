@@ -405,6 +405,47 @@ MYSQL;
     return 0;
   }
 
+  protected function is_user_active($id_user, $delay = 120): bool
+  {
+    $max = $this->db->select_one('bbn_users_sessions', 'MAX(bbn_users_sessions.last_activity)', ['id_user' => $id_user]);
+    return $max && (strtotime($max) > (time() - $delay));
+  }
+
+  protected function check_observer($row): bool
+  {
+    if ($row['id_user'] && !$this->is_user_active($row['id_user'])) {
+      $this->db->delete('bbn_observers', ['id' => $row['id']]);
+      return false;
+    }
+    else if ($tmp = $this->db->rselect_all('bbn_observers', ['id', 'id_user'], ['id_alias' => $row['id']])) {
+      $aliases = [];
+      foreach ($tmp as $t){
+        if (!$this->is_user_active($t['id_user'])) {
+          $this->db->delete('bbn_observers', ['id' => $t['id']]);
+          echo '-';
+        }
+        else{
+          $aliases[] = $t;
+        }
+      }
+      if (!count($aliases)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  protected function delete_old()
+  {
+    $this->db->query("
+    DELETE o1
+    FROM bbn_observers AS o1
+      LEFT JOIN bbn_observers AS o2
+        ON o2.id_alias = o1.id
+    WHERE o2.id IS NULL
+    AND o1.id_user IS NULL");
+  }
+
   /**
    * Checks the observers, execute their requests if interval is reached, it will stop when it finds differences in the
    * results, and returns the observers to be updated (meant to be executed from a cron task), indexed by id_user.
@@ -432,9 +473,9 @@ MYSQL;
       ]);
       $diff = [];
       foreach ( $rows as $d ){
-        // Aliases are the IDs of the observers aliases of the current row
-        $aliases = $this->db->rselect_all('bbn_observers', ['id', 'id_user', 'request', 'params', 'result'], ['id_alias' => $d['id']]);
-        if ( $d['id_user'] || count($aliases) ){
+        if ($this->check_observer($d)) {
+          // Aliases are the IDs of the observers aliases of the current row
+          $aliases = $this->db->rselect_all('bbn_observers', ['id', 'id_user', 'request', 'params', 'result'], ['id_alias' => $d['id']]);
           if ( \bbn\str::is_json($d['request']) ){
             $d['request'] = json_decode($d['request'], true);
             $real_result = $this->_exec_array($d['request']);
@@ -476,6 +517,7 @@ MYSQL;
         $this->_update_next($d['id']);
       }
       echo '.';
+      $this->delete_old();
       $this->db->flush();
       if ( count($diff) ){
         bbn\x::dump('Returning diff!', $diff);

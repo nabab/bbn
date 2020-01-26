@@ -9,7 +9,12 @@ class controller implements api{
 
   /**
    * When reroute is used $reroutes will be used to check we're not in an infinite reroute loop
-   * @var array $last_reroute
+   * @var bbn\mvc
+   */
+  private $_mvc;
+  /**
+   * When reroute is used $reroutes will be used to check we're not in an infinite reroute loop
+   * @var array
    */
   private $_reroutes = [];
   /**
@@ -792,7 +797,7 @@ class controller implements api{
     ];
   }
 
-  public function get_plugin_model($path, $data = [], string $plugin = null, $ttl = 0){
+  public function get_plugin_model($path, $data = [], string $plugin = null, int $ttl = 0){
     return $this->_mvc->get_plugin_model($path, $data, $this, $plugin ?: $this->get_plugin(), $ttl);
   }
 
@@ -838,11 +843,11 @@ class controller implements api{
    * @param string $title
    * @param self
    */
-  public function combo($title = null, $data = null, $cached = null): self
+  public function combo(string $title = null, $data = null, int $ttl = null): self
   {
     $this->obj->css = $this
-      ->add_data($cached ?
-        $this->get_cached_model('', bbn\x::merge_arrays($this->post, $this->data), $cached) :
+      ->add_data($ttl ?
+        $this->get_cached_model('', bbn\x::merge_arrays($this->post, $this->data), $ttl) :
         $this->get_model('', bbn\x::merge_arrays($this->post, $this->data))
       )
       ->get_less('', false);
@@ -963,7 +968,7 @@ class controller implements api{
    */
   public function get_cached_model(){
     $args = \func_get_args();
-    $die = 1;
+    $die = false;
     $ttl = 0;
     $data = [];
     foreach ( $args as $a ){
@@ -990,7 +995,7 @@ class controller implements api{
       $data = $this->data;
     }
     $m = $this->_mvc->get_cached_model($path, $data, $this, $ttl);
-    if ( !\is_array($m) && !$die ){
+    if ( !\is_array($m) && $die ){
       die("$path is an invalid model");
     }
     return $m;
@@ -1082,6 +1087,18 @@ class controller implements api{
     if ( !isset($this->inc->{$name}) ){
       $this->inc->{$name} = $obj;
     }
+  }
+
+  public function has_arguments(int $num = 1)
+  {
+    $i = 0;
+    while ($i < $num) {
+      if (!array_key_exists($i, $this->arguments)) {
+        return false;
+      }
+      $i++;
+    }
+    return true;
   }
 
   /**

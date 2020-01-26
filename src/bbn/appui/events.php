@@ -106,20 +106,23 @@ class events extends bbn\models\cls\db
   public function get(string $id): ?array
   {
     if ( \bbn\str::is_uid($id) ){
+      $t =& $this;
       return $this->db->rselect([
         'table' => $this->class_table,
-        'fields' => [],
+        'fields' => array_map(function($f) use($t){
+          return $this->db->col_full_name($f, $t->class_table);
+        }, $this->fields),
         'join' => [[
           'table' => $this->class_cfg['tables']['options'],
           'on' => [
             'conditions' => [[
-              'field' => $this->class_cfg['arch']['options']['id'],
+              'field' => $this->db->col_full_name($this->class_cfg['arch']['options']['id'], $this->class_cfg['tables']['options']),
               'exp' => $this->fields['id_type']
             ]]
           ]
         ]],
         'where' => [
-          $this->fields['id'] => $id
+          $this->db->col_full_name($this->fields['id'], $this->class_table) => $id
         ]
       ]);
     }

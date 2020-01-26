@@ -45,7 +45,6 @@ class dashboard {
         if ( \is_array($prefs) ){
           // Merge the personal widgets with the globals;
           $widgets = \array_merge($widgets, $prefs);
-          
           foreach ( $widgets as $i => $w ){
             // Get the preferences of the single widget
             if ( 
@@ -64,7 +63,7 @@ class dashboard {
               $widgets[$i]['url'] = $url.$w[$this->arch_opt['code']];
             }
             // Set the hidden property
-            $widgets[$i]['hidden'] = $widget['hidden'] ?? false;
+            $widgets[$i]['hidden'] = $widgets[$i]['hidden'] ?? false;
             // Set the widget's key
             $widgets[$i]['key'] = $w[$this->arch_opt['id']];
             unset(

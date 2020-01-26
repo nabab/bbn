@@ -312,6 +312,7 @@ class nextcloud extends bbn\models\cls\basic{
           return $files;
         }
         else {
+          die(var_dump($type));
           return array_merge($dirs, $files);
         }
       }  

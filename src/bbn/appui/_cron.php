@@ -340,7 +340,7 @@ class cron extends bbn\models\cls\basic{
     if ( $error ){
       //replace old get_error_log_path
       if ( isset($cfg['type']) && $this->path ){
-        $dir = isset($cfg['id']) ? \bbn\x::make_storage_path($this->path.'error/tasks/'.$cfg['id']) : $this->path.'error/'.$cfg['type'];
+        $dir = isset($cfg['id']) ? \bbn\x::make_storage_path($this->path.'error/tasks/'.$cfg['id']) : $this->path.'error/'.$cfg['type'].'/';
         return $dir ? $dir.date('Y-m-d-H-i-s').'.txt' : null;
       }
     }
@@ -638,14 +638,37 @@ class cron extends bbn\models\cls\basic{
    */
   public function get_next($id_cron = null): ?array
   {
-    if ( $this->check() && ($data = $this->db->get_row("
-        SELECT *
-        FROM {$this->table}
-        WHERE `active` = 1
-        AND `next` < NOW()".
-        ( bbn\str::is_uid($id_cron) ? " AND `id` = '$id_cron'" : '' )."
-        ORDER BY `priority` ASC, `next` ASC
-        LIMIT 1")) ){
+    $conditions = [[
+      'field' => 'next',
+      'operator' => '<',
+      'exp' => 'NOW()'
+    ], [
+      'field' => 'active',
+      'value' => 1
+    ]];
+    if ( bbn\str::is_uid($id_cron) ){
+      $conditions[] = [
+        'field' => 'id',
+        'value' => $id_cron
+      ];
+    }
+    if ( 
+      $this->check() &&
+      ($data = $this->db->rselect([
+        'table' => $this->table,
+        'fields' => [],
+        'where' => [
+          'conditions' => $conditions
+        ],
+        'order' => [[
+          'field' => 'priority',
+          'dir' => 'ASC'
+        ], [
+          'field' => 'next',
+          'dir' => 'ASC'
+        ]]
+      ]))
+    ){
       // Dans cfg: timeout, et soit: latency, minute, hour, day of month, day of week, date
       $data['cfg'] = json_decode($data['cfg'], 1);
       return $data;
@@ -662,13 +685,28 @@ class cron extends bbn\models\cls\basic{
         $cfg = $a['cfg'] ? json_decode($a['cfg'], true) : [];
         unset($a['cfg']);
         return \bbn\x::merge_arrays($a, $cfg);
-      }, $this->db->get_rows("
-        SELECT *
-        FROM {$this->table}
-        WHERE `active` = 1
-        AND `next` < DATE_ADD(NOW(), INTERVAL $sec SECOND)
-        ORDER BY `priority` ASC, `next` ASC
-        LIMIT $limit"));
+      }, $this->db->rselect_all([
+        'table' => $this->table,
+        'fields' => [],
+        'where' => [
+          'conditions' => [[
+            'field' => 'active',
+            'value' => 1
+          ], [
+            'field' => 'next',
+            'operator' => '<',
+            'exp' => "DATE_ADD(NOW(), INTERVAL $sec SECOND)"
+          ]]
+        ],
+        'order' => [[
+          'field' => 'priority',
+          'dir' => 'ASC'
+        ], [
+          'field' => 'next',
+          'dir' => 'ASC'
+        ]],
+        'limit' => $limit
+      ]));
     }
     return null;
   }
@@ -705,7 +743,6 @@ class cron extends bbn\models\cls\basic{
     }
   }
 
-
   /**
    * @return bool|int
    */
@@ -713,8 +750,9 @@ class cron extends bbn\models\cls\basic{
     $time = 0;
     $done = [];
     while ( ($time < $this->timeout) &&
-           ($cron = $this->get_next()) &&
-           !\in_array($cron['id'], $done) ){
+      ($cron = $this->get_next()) &&
+      !\in_array($cron['id'], $done) 
+    ){
       if ( $ctx = $this->run($cron['id']) ){
         $time += $ctx;
       }

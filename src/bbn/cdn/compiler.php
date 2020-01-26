@@ -30,7 +30,7 @@ class compiler extends bbn\models\cls\basic
     if ( $st ){
       try {
         if ( $lang === 'js' ){
-          $tmp = JShrink\Minifier::minify($st);
+          $tmp = JShrink\Minifier::minify($st, ['flaggedComments' => false]);
         }
         else if ( $lang === 'css' ){
           $tmp = CssMin::minify($st);

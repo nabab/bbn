@@ -33,7 +33,7 @@ trait optional
    *
    * @return false|int
    */
-  protected static function optional_init(){
+  protected static function optional_init(array $path = null){
     if ( !self::$optional_is_init ){
       $opt = bbn\appui\options::get_instance();
       if ( !$opt ){
@@ -45,14 +45,20 @@ trait optional
       if ( !\defined("BBN_APPUI_ROOT") ){
         \define('BBN_APPUI_ROOT', $opt->from_root_code('appui'));
       }
-      if ( !BBN_APPUI || !BBN_APPUI_ROOT ){
-        \bbn\x::log('Impossible to find the option appui for '.__CLASS__, 'errors');
-        return;
+      if (!$path) {
+        if ( !BBN_APPUI || !BBN_APPUI_ROOT ){
+          \bbn\x::log('Impossible to find the option appui for '.__CLASS__, 'errors');
+          return;
+        }
+        $tmp = explode('\\', __CLASS__);
+        $cls = end($tmp);
+        $path = [$cls, BBN_APPUI];
+        self::$option_appui_id = $opt->from_code($cls, BBN_APPUI_ROOT);
       }
-      $tmp = explode('\\', __CLASS__);
-      $cls = end($tmp);
-      self::$option_appui_id = $opt->from_code($cls, BBN_APPUI_ROOT);
-      self::$option_root_id = $opt->from_code($cls, BBN_APPUI);
+      else{
+        self::$option_appui_id = null;
+      }
+      self::$option_root_id = $opt->from_code(...$path);
       //if ( !self::$option_appui_id || !self::$option_root_id ){
       if ( !self::$option_root_id ){
         \bbn\x::log("Impossible to find the option $cls for ".__CLASS__, 'errors');

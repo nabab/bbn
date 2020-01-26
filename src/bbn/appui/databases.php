@@ -318,15 +318,13 @@ class databases extends bbn\models\cls\cache
         && ($id_parent = $this->o->from_code('tables', $db))
         && ($fo = array_values($this->o->code_options($id_parent)))
     ) {
-      $res = array_map(
-        function ($a) {
-          return [
-            'id' => $a['id'],
-            'text' => $a['text'],
-            'name' => $a['code']
-          ];
-        },
-      );
+      $res = array_map(function ($a) {
+        return [
+          'id' => $a['id'],
+          'text' => $a['text'],
+          'name' => $a['code']
+        ];
+      }, $fo);
       return $res ?: [];
     }
     return null;
