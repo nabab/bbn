@@ -187,7 +187,7 @@ class environment
   public function is_cli()
   {
     if (!isset($this->_cli)) {
-      $this->_cli = (php_sapi_name() === 'cli');
+      $this->_cli = bbn\x::is_cli();
       if ($this->_cli) {
         $opt = getopt('', ['cli']);
         if (isset($opt['cli'])) {

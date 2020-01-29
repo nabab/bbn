@@ -17,9 +17,11 @@ namespace bbn;
 class x
 {
 
-  private static $counters = [];
+  private static $_counters = [];
 
-  private static $last_curl = null;
+  private static $_last_curl;
+
+  private static $_cli;
 
   /**
   *
@@ -28,8 +30,8 @@ class x
     if ( !$name ){
       $name = 'num';
     }
-    if ( !isset(self::$counters[$name]) ){
-      self::$counters[$name] = 0;
+    if ( !isset(self::$_counters[$name]) ){
+      self::$_counters[$name] = 0;
     }
   }
 
@@ -39,7 +41,7 @@ class x
    */
   public static function increment(string $name = 'num', int $i = 1){
     self::_init_count($name);
-    self::$counters[$name] += $i;
+    self::$_counters[$name] += $i;
   }
 
   /**
@@ -48,15 +50,15 @@ class x
    */
   public static function count(string $name = 'num'){
     self::_init_count($name);
-    $tmp = self::$counters[$name];
-    unset(self::$counters[$name]);
+    $tmp = self::$_counters[$name];
+    unset(self::$_counters[$name]);
     return $tmp;
   }
 
   public static function count_all($delete = false){
-    $tmp = self::$counters;
+    $tmp = self::$_counters;
     if ( $delete ){
-      self::$counters = [];
+      self::$_counters = [];
     }
     return $tmp;
   }
@@ -595,6 +597,14 @@ class x
     return false;
   }
 
+  public static function is_cli()
+  {
+    if (!isset(self::$_cli)) {
+      self::$_cli = (php_sapi_name() === 'cli');
+    }
+    return self::$_cli;
+  }
+
   /**
    * Returns a dump of the given variable.
    *
@@ -650,7 +660,7 @@ class x
       }
       $st .= $r.PHP_EOL;
     }
-    return PHP_EOL.$st.PHP_EOL;
+    return PHP_EOL.$st;
   }
 
   /**
@@ -660,7 +670,7 @@ class x
    * @return string
    */
   public static function get_hdump(){
-    return '<p>'.nl2br(str_replace("  ", "&nbsp;&nbsp;", htmlentities(self::get_dump(...\func_get_args()))), false).'</p>';
+    return nl2br(str_replace("  ", "&nbsp;&nbsp;", htmlentities(self::get_dump(...\func_get_args()))), false);
   }
 
   /**
@@ -683,6 +693,17 @@ class x
    */
   public static function hdump(){
     echo self::get_hdump(...\func_get_args());
+  }
+
+  /**
+   * Adaptative dump, i.e. dunps in text if CLI, HTML otherwise.
+   *
+   * @param mixed
+   * @return void
+   */
+  public static function adump()
+  {
+    return self::is_cli() ? self::dump(...\func_get_args()) : self::hdump(...\func_get_args());
   }
 
   /**
@@ -928,7 +949,7 @@ class x
    */
   public static function map(callable $fn, array $ar, string $items = null){
     $res = [];
-    foreach ( $ar as $i => $a ){
+    foreach ( $ar as $a ){
       $is_false = $a === false;
       $r = $fn($a);
       if ( $is_false ){
@@ -990,23 +1011,61 @@ class x
    * @param array $where The where condition
    * @return bool|int
    */
-  public static function find(array $ar, array $where){
+  public static function find(array $ar, array $where, int $from = 0){
     //die(var_dump($where));
     if ( !empty($where) ){
       foreach ( $ar as $i => $v ){
-        $ok = 1;
-        foreach ( $where as $k => $w ){
-          if ( !array_key_exists($k, $v) || ($v[$k] !== $w) ){
-            $ok = false;
-            break;
+        if (!$from || ($i >= $from)) {
+          $ok = 1;
+          $v = (array)$v;
+          foreach ( $where as $k => $w ){
+            if ( !array_key_exists($k, $v) || ($v[$k] !== $w) ){
+              $ok = false;
+              break;
+            }
           }
-        }
-        if ( $ok ){
-          return $i;
+          if ( $ok ){
+            return $i;
+          }
         }
       }
     }
     return false;
+  }
+
+  public static function filter(array $ar, array $where): array
+  {
+    $res = [];
+    $num = count($ar);
+    $i = 0;
+    while ($i < $num) {
+      $idx = self::find($ar, $where, $i);
+      if ($idx === false) {
+        break;
+      }
+      else{
+        $res[] = $ar[$idx];
+        $i = $idx + 1;
+      }
+    }
+    return $res;
+  }
+
+  public static function get_rows(array $ar, array $where): array
+  {
+    return self::filter($ar, $where);
+  }
+
+  public static function sum(array $ar, string $field, array $where = null): float
+  {
+    $tot = 0;
+    if ($res = $where ? self::filter($ar, $where) : $ar) {
+      foreach ($res as $r) {
+        $r = (array)$r;
+        $tot += (float)($r[$field]);
+      }
+    }
+    return $tot;
   }
 
   /**
@@ -1242,7 +1301,7 @@ class x
    */
   public static function curl(string $url, $param = null, array $options = ['post' => 1]){
     $ch = curl_init();
-    self::$last_curl = $ch;
+    self::$_last_curl = $ch;
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     if (\is_object($param) ){
       $param = self::to_array($param);
@@ -1289,15 +1348,15 @@ class x
   }
 
   public static function last_curl_error(){
-    if ( self::$last_curl ){
-      return curl_error(self::$last_curl);
+    if ( self::$_last_curl ){
+      return curl_error(self::$_last_curl);
     }
     return null;
   }
 
   public static function last_curl_code(){
-    if ( self::$last_curl ){
-      $infos = curl_getinfo(self::$last_curl);
+    if ( self::$_last_curl ){
+      $infos = curl_getinfo(self::$_last_curl);
       if ( $infos ){
         return $infos['http_code'];
       }
@@ -1306,8 +1365,8 @@ class x
   }
 
   public static function last_curl_info(){
-    if ( self::$last_curl ){
-      return curl_getinfo(self::$last_curl);
+    if ( self::$_last_curl ){
+      return curl_getinfo(self::$_last_curl);
     }
     return null;
   }
@@ -1463,15 +1522,15 @@ class x
 
         // Enclose fields containing $delimiter, $enclosure or whitespace
         if ( $encloseAll || preg_match( "/(?:${delimiter_esc}|${enclosure_esc}|\s)/", $field ) ){
-          $output[] = $enclosure . str_replace($enclosure, '\\' . $enclosure, $field) . $enclosure;
+          $output[] = $enclosure.str_replace($enclosure, '\\'.$enclosure, $field) . $enclosure;
         }
         else {
           $output[] = $field;
         }
       }
-      array_push($lines, implode( $delimiter, $output ));
+      $lines[] = implode($delimiter, $output);
     }
-    return implode( $separator, $lines );
+    return self::join($lines, $separator);
   }
 
   /**
@@ -1673,7 +1732,10 @@ class x
         $can_save = true;
       }
     }
-    if ( $can_save ){
+    if ( 
+      $can_save &&
+      \bbn\file\dir::create_path(dirname($file))
+    ){
       $ow->save($file);
       return \is_file($file);
     }
@@ -1908,5 +1970,37 @@ class x
       $res = strrpos($subject, $search, $start);
     }
     return $res === false ? -1 : $res;
+  }
+
+  public static function output()
+  {
+    $wrote = false;
+    foreach (func_get_args() as $a) {
+      if ($a === null){
+        $st = 'null';
+      }
+      else if ($a === true) {
+        $st = 'true';
+      }
+      else if ($a === false) {
+        $st = 'false';
+      }
+      else if (\bbn\str::is_number($a)) {
+        $st = $a;
+      }
+      else if (!is_string($a)) {
+        $st = self::get_dump($a);
+      }
+      else {
+        $st = $a;
+      }
+      if ($st) {
+        $wrote = true;
+        echo $st.PHP_EOL;
+      }
+    }
+    if ($wrote) {
+      //ob_end_flush();
+    }
   }
 }

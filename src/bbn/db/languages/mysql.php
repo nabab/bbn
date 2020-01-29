@@ -1074,12 +1074,12 @@ MYSQL
     return '';
   }
 
-  public function get_create(string $table, array $model = null): string
+  public function get_create_table(string $table, array $model = null): string
   {
     if ( !$model ){
       $model = $this->db->modelize($table);
     }
-    $st = 'CREATE TABLE '.$this->db->escape(table).' ('.PHP_EOL;
+    $st = 'CREATE TABLE '.$this->db->escape($table).' ('.PHP_EOL;
     $done = false;
     foreach ( $model['fields'] as $name => $col ){
       if ( !$done ){
@@ -1112,32 +1112,107 @@ MYSQL
         }
       }
     }
-    foreach ( $model['keys'] as $name => $key ){
-      $st .= ','.PHP_EOL.'  ';
-      if ( $key['unique'] && (count($key['columns']) === 1) && isset($model['fields'][$key['columns'][0]]) && ($model['fields'][$key['columns'][0]]['key'] === 'PRI') ){
-        $st .= 'PRIMARY KEY';
-      }
-      else if ($key['unique'] ){
-        $st .= 'UNIQUE KEY '.$this->db->escape($name);    
-      }
-      else{
-        $st .= 'KEY '.$this->db->escape($name);
-      }
-      $dbcls =& $this->db;
-      $st .= ' ('.implode(',', array_map(function($a)use(&$dbcls){
-        return $dbcls->escape($a);
-      }, $key['columns'])).')';
-    }
-    foreach ( $model['keys'] as $name => $key ){
-      if ( !empty($key['constraint']) ){
-        $st .= ','.PHP_EOL.'  '.
-          'CONSTRAINT '.$this->db->escape($key['constraint']).' FOREIGN KEY ('.$this->db->escape($name).') '.
-          'REFERENCES '.$this->db->escape($key['ref_table']).' ('.$this->db->escape($key['ref_column']).')'.
-          ($key['delete'] ? ' ON DELETE '.$key['delete'] : '').
-          ($key['update'] ? ' ON UPDATE '.$key['update'] : '');
-      }
-    }
     $st .= PHP_EOL.') ENGINE=InnoDB DEFAULT CHARSET=utf8';
+    return $st;
+  }
+
+  public function get_create_keys(string $table, array $model = null)
+  {
+    $st = '';
+    if ( !$model ){
+      $model = $this->db->modelize($table);
+    }
+    if ($model && !empty($model['keys'])) {
+      $st .= 'ALTER TABLE '.$this->db->escape($table).PHP_EOL;
+      $last = count($model['keys']) - 1;
+      $dbcls =& $this->db;
+      $i = 0;
+      foreach ( $model['keys'] as $name => $key ){
+        $st .= '  ADD ';
+        if ( $key['unique'] && (count($key['columns']) === 1) && isset($model['fields'][$key['columns'][0]]) && ($model['fields'][$key['columns'][0]]['key'] === 'PRI') ){
+          $st .= 'PRIMARY KEY';
+        }
+        else if ($key['unique'] ){
+          $st .= 'UNIQUE KEY '.$this->db->escape($name);    
+        }
+        else{
+          $st .= 'KEY '.$this->db->escape($name);
+        }
+        $st .= ' ('.implode(',', array_map(function($a)use(&$dbcls){
+          return $dbcls->escape($a);
+        }, $key['columns'])).')';
+        $st .= $i === $last ? ';' : ','.PHP_EOL;
+        $i++;
+      }
+    }
+    return $st;
+  }
+
+  public function get_create_constraints(string $table, array $model = null): string
+  {
+    $st = '';
+    if ( !$model ){
+      $model = $this->db->modelize($table);
+    }
+    if ($model && !empty($model['keys'])) {
+      $constraints = array_filter($model['keys'], function($a){
+        return !!$a['ref_table'];
+      });
+      if ($last = count($constraints)) {
+        $st .= 'ALTER TABLE '.$this->db->escape($table).PHP_EOL;
+        $dbcls =& $this->db;
+        $i = 0;
+        foreach ($constraints as $name => $key) {
+          $i++;
+          $st .= '  ADD '.
+            'CONSTRAINT '.$this->db->escape($key['constraint']).' FOREIGN KEY ('.$this->db->escape($name).') '.
+            'REFERENCES '.$this->db->escape($key['ref_table']).' ('.$this->db->escape($key['ref_column']).')'.
+            ($key['delete'] ? ' ON DELETE '.$key['delete'] : '').
+            ($key['update'] ? ' ON UPDATE '.$key['update'] : '').
+            ($i === $last ? ';' : ','.PHP_EOL);
+        }
+      }
+    }
+    return $st;
+  }
+
+  public function get_create(string $table, array $model = null): string
+  {
+    $st = '';
+    if ( !$model ){
+      $model = $this->db->modelize($table);
+    }
+    if ($st = $this->get_create_table($table, $model)) {
+      $lines = \bbn\x::split($st, PHP_EOL);
+      $end = array_pop($lines);
+      $st = \bbn\x::join($lines, PHP_EOL);
+      foreach ( $model['keys'] as $name => $key ){
+        $st .= ','.PHP_EOL.'  ';
+        if ( $key['unique'] && (count($key['columns']) === 1) && isset($model['fields'][$key['columns'][0]]) && ($model['fields'][$key['columns'][0]]['key'] === 'PRI') ){
+          $st .= 'PRIMARY KEY';
+        }
+        else if ($key['unique'] ){
+          $st .= 'UNIQUE KEY '.$this->db->escape($name);    
+        }
+        else{
+          $st .= 'KEY '.$this->db->escape($name);
+        }
+        $dbcls =& $this->db;
+        $st .= ' ('.implode(',', array_map(function($a)use(&$dbcls){
+          return $dbcls->escape($a);
+        }, $key['columns'])).')';
+      }
+      foreach ( $model['keys'] as $name => $key ){
+        if ( !empty($key['ref_table']) ){
+          $st .= ','.PHP_EOL.'  '.
+            'CONSTRAINT '.$this->db->escape($key['constraint']).' FOREIGN KEY ('.$this->db->escape($name).') '.
+            'REFERENCES '.$this->db->escape($key['ref_table']).' ('.$this->db->escape($key['ref_column']).')'.
+            ($key['delete'] ? ' ON DELETE '.$key['delete'] : '').
+            ($key['update'] ? ' ON UPDATE '.$key['update'] : '');
+        }
+      }
+      $st .= PHP_EOL.$end;
+    }
     return $st;
   }
 
@@ -1338,7 +1413,7 @@ MYSQL
     return $uid;
   }
 
-  public function create_table($table_name, array $columns, array $keys = null, string $charset = 'utf8', $engine = 'InnoDB')
+  public function create_table($table_name, array $columns, array $keys = null, bool $with_constraints = false, string $charset = 'utf8', $engine = 'InnoDB')
   {
     $lines = [];
     $sql = '';

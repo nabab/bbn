@@ -167,7 +167,7 @@ class model extends bbn\models\cls\db{
     }
     $args = \func_get_args();
     foreach ( $args as $arg ){
-      if ( !isset($this->data[$idx]) ){
+      if ( !\bbn\x::has_props($this->data, (array)$arg) ){
         return false;
       }
     }

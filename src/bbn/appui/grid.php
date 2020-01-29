@@ -177,7 +177,7 @@ class grid extends bbn\models\cls\cache
         if ( array_key_exists('observer', $cfg) && isset($cfg['observer']['request']) ){
           $this->observer = $cfg['observer'];
         }
-        if ( !empty($cfg['count']) ){
+        if ( bbn\x::has_prop($cfg, 'count') ){
           $this->count = $cfg['count'];
         }
         else{
@@ -365,7 +365,9 @@ class grid extends bbn\models\cls\cache
       //unset($this->count_cfg['where']['conditions'][0]['time']);
       //$this->count_cfg['where']['conditions'][0]['value'] = hex2bin($this->count_cfg['where']['conditions'][0]['value']);
       //die(bbn\x::dump($this->db->select_one($this->count_cfg), $this->db->last(), $this->count_cfg, $this->num, $this->db->last_params));
-      $r['query'] = $this->db->last();
+      if (!BBN_IS_PROD) {
+        $r['query'] = $this->db->last();
+      }
     }
     if ( !$this->db->check() ){
       $r['success'] = false;
@@ -394,7 +396,7 @@ class grid extends bbn\models\cls\cache
       }
       return $row;
     }, $data ?: $this->get_data());
-    if ( \bbn\x::to_excel($data, $path, true, $this->excel) ){
+    if ( \bbn\x::to_excel($data, $path, true, $this->get_excel()) ){
       return ['file' => $path];
     }
   }

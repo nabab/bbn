@@ -53,6 +53,19 @@ class system extends bbn\models\cls\basic
 
   protected $timeout = 10;
 
+  private function _get_password(array $cfg)
+  {
+    if (isset($cfg['pass'])) {
+      if (!empty($cfg['encrypted'])) {
+        if ($tmp = base64_decode($cfg['pass'])) {
+          return \bbn\util\enc::decrypt($tmp, $cfg['encryption_key'] ?? '');
+        }
+      }
+      return $cfg['pass'];
+    }
+    return null;
+  }
+
   /**
    * Connect to a Nextcloud instance
    * @param array $cfg
@@ -63,13 +76,12 @@ class system extends bbn\models\cls\basic
     if ( isset($cfg['host'], $cfg['user'], $cfg['pass']) && class_exists('\\Sabre\\DAV\\Client') ){
       $this->prefix = '/remote.php/webdav/';
       $this->obj = new \Sabre\DAV\Client([
-        'baseUri' => 'http'.(isset($cfg['port']) && ($cfg['port'] === 21) ? '' : 's').'://'.$cfg['host'].$this->prefix.$cfg['path'],
+        'baseUri' => 'http'.(isset($cfg['port']) && ($cfg['port'] === 21) ? '' : 's').'://'.$cfg['host'].$this->prefix.$cfg['name'],
         'userName' => $cfg['user'],
-        'password' => $cfg['pass']
+        'password' => $this->_get_password($cfg)
       ]);
       $this->host = 'http'.(isset($cfg['port']) && ($cfg['port'] === 21) ? '' : 's').'://'.$cfg['host'];
-      
-     if ( $this->obj->options() ){
+      if ( $this->obj->options() ){
         $this->current = '';
         return true;
       }
@@ -104,7 +116,7 @@ class system extends bbn\models\cls\basic
         }
       }
       if ( $this->obj ){
-        if ( !@ftp_login($this->obj, $cfg['user'], $cfg['pass']) ){
+        if ( !@ftp_login($this->obj, $cfg['user'], $this->_get_password($cfg)) ){
           $this->error = _('Impossible to login to the FTP host');
           $this->error .= PHP_EOL.error_get_last()['message'];
         }
@@ -157,7 +169,7 @@ class system extends bbn\models\cls\basic
           $this->error = _('Unable to verify server identity!');
         }
         */
-        if ( !ssh2_auth_pubkey_file($this->cn, $cfg['user'], $cfg['public'], $cfg['private'], $cfg['pass'] ?? null) ){
+        if ( !ssh2_auth_pubkey_file($this->cn, $cfg['user'], $cfg['public'], $cfg['private'], $this->_get_password($cfg)) ){
           $this->error = _('Authentication rejected by server');
         }
         else if ( $this->obj = @ssh2_sftp($this->cn) ){
@@ -168,7 +180,7 @@ class system extends bbn\models\cls\basic
           $this->error = _("Could not connect through SFTP.");
         }
       }
-      else if ( isset($cfg['user'], $cfg['pass']) && @ssh2_auth_password($this->cn, $cfg['user'], $cfg['pass']) ){
+      else if ( isset($cfg['user'], $cfg['pass']) && @ssh2_auth_password($this->cn, $cfg['user'], $this->_get_password($cfg)) ){
         //die(_("Could not authenticate with username and password."));
         $this->obj = @ssh2_sftp($this->cn);
         if ( $this->obj ){
@@ -205,7 +217,7 @@ class system extends bbn\models\cls\basic
         if ( $filter === 'file' ){
           return is_file($item);
         }
-        return strtolower(substr(\is_array($item) ? $item['path'] : $item, - strlen($filter))) === strtolower($filter);
+        return strtolower(substr(\is_array($item) ? $item['name'] : $item, - strlen($filter))) === strtolower($filter);
       }
       if ( is_callable($filter) ){
         return $filter($item);
@@ -230,7 +242,7 @@ class system extends bbn\models\cls\basic
       $has_size = stripos((string)$detailed, 's') !== false;
       $has_type = stripos((string)$detailed, 't') !== false;
       $has_mod = stripos((string)$detailed, 'm') !== false;
-
+      $has_children = stripos((string)$detailed, 'c') !== false;
       if ( ($this->mode === 'ftp') && ($detailed || ($type !== 'both')) ){
         if ( $fs = ftp_mlsd($this->obj, substr($path, strlen($this->prefix))) ){
           foreach ( $fs as $f ){
@@ -251,7 +263,7 @@ class system extends bbn\models\cls\basic
               if ( $ok ){
                 if ($detailed) {
                   $tmp = [
-                    'path' => $path.'/'.$f['name']
+                    'name' => $path.'/'.$f['name']
                   ];
                   if ($has_mod) {
                     $tmp['mtime'] = mktime(
@@ -269,6 +281,9 @@ class system extends bbn\models\cls\basic
                   }
                   if ($has_size) {
                     $tmp['size'] = $f['type'] === 'dir' ? 0 : $this->filesize($path.'/'.$f['name']);
+                  }
+                  if ($has_children && ($f['type'] === 'dir')) {
+                    $tmp['num'] = count($this->get_files($path.'/'.$f['name'], true, $hidden));
                   }
                 }
                 else{
@@ -293,44 +308,35 @@ class system extends bbn\models\cls\basic
         foreach ( $fs as $f ){
           if ( ($f !== '.') && ($f !== '..') && ($hidden || (strpos(basename($f), '.') !== 0)) ){
             $ok = 0;
-            $is_dir = null;
-            $is_file = null;
-            if ( $type === 'both' ){
+            $is_dir = is_dir($path.'/'.$f);
+            $is_file = is_file($path.'/'.$f);
+            if (
+              ($type === 'both') 
+              || (($type === 'file') && $is_file)
+              || (($type === 'dir') && $is_dir)
+            ) {
               $ok = 1;
-            }
-            else if ( $type === 'dir' ){
-              if ( $ok = is_dir($path.'/'.$f) ){
-                $is_dir = $ok;
-                $is_file = !$ok;
-              }
-            }
-            else if ( $type === 'file' ){
-              //var_dump($path.'/'.$f);
-              if ( $ok = is_file($path.'/'.$f) ){
-                $is_file = $ok;
-                $is_dir = !$ok;
-              }
             }
             else if ( !is_string($type) || is_file($path.'/'.$f) ){
               $ok = $this->_check_filter($f, $type);
-              $is_file = true;
-              $is_dir = false;
             }
             if ( $ok ){
               if ( $detailed ){
                 $tmp = [
-                  'path' => $path.'/'.$f
+                  'name' => $path.'/'.$f
                 ];
                 if ( $has_mod ){
                   $tmp['mtime'] = filemtime($path.'/'.$f);
                 }
                 if ( $has_type ){
-                  $tmp['dir'] = $is_dir ?? is_dir($path.'/'.$f);
-                  $tmp['file'] = $is_file ?? is_file($path.'/'.$f);
+                  $tmp['dir'] = $is_dir;
+                  $tmp['file'] = $is_file;
                 }
                 if ( $has_size ){
-                  $is_dir = $tmp['dir'] ?? is_dir($path.'/'.$f);
                   $tmp['size'] = $is_dir ? 0 : $this->filesize($path.'/'.$f);
+                }
+                if ($has_children && $is_dir) {
+                  $tmp['num'] = count($this->get_files($path.'/'.$f, true, $hidden));
                 }
               }
               else {
@@ -378,7 +384,7 @@ class system extends bbn\models\cls\basic
   {
     $all = [];
     foreach ( $this->_get_items($path, 'dir', $hidden, $detailed) as $it ){
-      $p = $detailed ? $it['path'] : $it;
+      $p = $detailed ? $it['name'] : $it;
       if ( !$filter || $this->_check_filter($p, $filter) ){
         $all[] = $it;
       }
@@ -403,7 +409,7 @@ class system extends bbn\models\cls\basic
       $filter = 'both';
     }
     foreach ( $this->_get_items($path, 'both', $hidden, $detailed) as $it ){
-      $p = $detailed ? $it['path'] : $it;
+      $p = $detailed ? $it['name'] : $it;
       if ( !$filter || $this->_check_filter($p, $filter) ){
         $all[] = $it;
       }
@@ -666,7 +672,7 @@ class system extends bbn\models\cls\basic
       case 'ftp':
         if ( $this->_connect_ftp($cfg) ){
           $this->mode = 'ftp';
-          $this->prefix = 'ftp://'.$cfg['user'].':'.$cfg['pass'].'@'.$cfg['host'].'/';
+          $this->prefix = 'ftp://'.$cfg['user'].':'.$this->_get_password($cfg).'@'.$cfg['host'].'/';
         }
         break;
       case 'nextcloud':
@@ -790,7 +796,7 @@ class system extends bbn\models\cls\basic
         $type = $including_dirs ? 'both' : 'file';
         return array_map(function($a)use($is_absolute, $fs, $detailed){
           if ( $detailed ){
-            $a['path'] = $fs->get_system_path($a['path'], $is_absolute);
+            $a['name'] = $fs->get_system_path($a['name'], $is_absolute);
             return $a;
           }
           return $fs->get_system_path($a, $is_absolute);
@@ -816,7 +822,7 @@ class system extends bbn\models\cls\basic
       clearstatcache();
       return array_map(function ($a) use ($is_absolute, $fs, $detailed){
         if ( $detailed ){
-          $a['path'] = $fs->get_system_path($a['path'], $is_absolute);
+          $a['name'] = $fs->get_system_path($a['name'], $is_absolute);
           return $a;
         }
         return $fs->get_system_path($a, $is_absolute);
@@ -900,7 +906,7 @@ class system extends bbn\models\cls\basic
       $fs =& $this;
       return array_map(function($a)use($is_absolute, $fs, $detailed){
         if ( $detailed ){
-          $a['path'] = $fs->get_system_path($a['path'], $is_absolute);
+          $a['name'] = $fs->get_system_path($a['name'], $is_absolute);
           return $a;
         }
         return $fs->get_system_path($a, $is_absolute);
@@ -924,7 +930,7 @@ class system extends bbn\models\cls\basic
       $fs =& $this;
       return array_map(function($a)use($is_absolute, $fs, $detailed){
         if ( $detailed ){
-          $a['path'] = $fs->get_system_path($a['path'], $is_absolute);
+          $a['name'] = $fs->get_system_path($a['name'], $is_absolute);
           return $a;
         }
         return $fs->get_system_path($a, $is_absolute);
@@ -945,7 +951,7 @@ class system extends bbn\models\cls\basic
         return false;
       }
       clearstatcache();
-      if ( $this->_mkdir($real, $chmod, true) ){
+      if ( $this->_mkdir($real, $chmod, true) || $this->_is_dir($real)){
         return $this->get_system_path($real);
       }
     }
@@ -1274,6 +1280,53 @@ class system extends bbn\models\cls\basic
       $success = false;
     }
     return $success;
+  }
+  
+  public function get_tree( $dir,  string $exclude = '', $only_dir = false,  $filter = null,  $hidden = false)
+  {
+    $r = [];
+    $dirs = self::get_dirs($dir, $hidden);
+    if ( \is_array($dirs) ){
+      foreach ( $dirs as $d ){
+        if ( basename($d)!== $exclude){
+          $x = [
+            'name' => $d,
+            'type' => 'dir',
+            'num' => 0,
+            'items' => self::get_tree($d, $exclude, $only_dir, $filter, $hidden)
+          ];
+          $x['num'] = \count($x['items']);
+        }
+        if ( $filter ){
+          if ( $filter($x) ){
+            $r[] = $x;
+          }
+        }
+        else{
+          $r[] = $x;
+        }
+      }
+      if ( !$only_dir ){
+        $files = self::get_files($dir, false, $hidden);
+        
+        foreach ( $files as $f ){
+          $x = [
+            'name' => $f,
+            'type' => 'file',
+            'ext' => bbn\str::file_ext($f)
+          ];
+          if ( $filter ){
+            if ( $filter($x) ){
+              $r[] = $x;
+            }
+          }
+          else{
+            $r[] = $x;
+          }
+        }
+      }
+    }
+    return $r;
   }
   
 }

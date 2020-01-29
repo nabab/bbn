@@ -690,6 +690,8 @@ MYSQL;
         'uid' => $id,
         'col' => $id_col,
         'opr' => 'INSERT'
+      ], [
+        'tst' => 'DESC'
       ]) ){
         self::enable();
         return $r;

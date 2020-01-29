@@ -12,10 +12,10 @@ trait retriever
 {
   protected static
     $retriever_instance,
-    $retriever_exists;
+    $retriever_exists = false;
 
   protected static function retriever_init($instance){
-    self::$retriever_exists = 1;
+    self::$retriever_exists = true;
     self::$retriever_instance = $instance;
   }
 

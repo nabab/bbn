@@ -122,6 +122,19 @@ You can click the following link to access directly your account:<br>
     }
   }
 
+  public function is_online(string $id_user, int $delay = 180): bool
+  {
+    $a =& $this->class_cfg['arch'];
+    $t =& $this->class_cfg['tables'];
+    if (
+      ($max = $this->db->select_one($t['sessions'], 'MAX('.$a['sessions']['last_activity'].')', ['id_user' => $id_user]))
+      &&(strtotime($max) > (time() - $delay))
+    ) {
+      return true;
+    }
+    return false;
+  }
+
   /**
    * Returns all the users' groups - with or without admin
    * @param bool $adm
@@ -565,9 +578,12 @@ You can click the following link to access directly your account:<br>
       $update[$this->class_cfg['arch']['users']['login']] = null;
     }
 
-    return $this->db->update($this->class_cfg['tables']['users'], $update, [
+    if ($this->db->update($this->class_cfg['tables']['users'], $update, [
       $this->class_cfg['arch']['users']['id'] => $id_user
-    ]);
+    ])) {
+      // Deleting existing sessions
+      $this->db->delete($this->class_cfg['tables']['sessions'], [$this->class_cfg['arch']['sessions']['id_user'] => $id_user]);
+    }
 	}
 
 	/**

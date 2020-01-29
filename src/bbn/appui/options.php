@@ -612,8 +612,17 @@ class options extends bbn\models\cls\db
       if ( ($cfg = $this->get_cfg($id)) !== false ){
         // If not sortable returning an array ordered by text
         $order = empty($cfg['sortable']) ?
-          [$this->class_cfg['arch']['options']['text'] => 'ASC'] :
-          [$this->class_cfg['arch']['options']['num'] => 'ASC'];
+          [
+            $this->class_cfg['arch']['options']['text'] => 'ASC',
+            $this->class_cfg['arch']['options']['code'] => 'ASC',
+            $this->class_cfg['arch']['options']['id'] => 'ASC',
+          ] :
+          [
+            $this->class_cfg['arch']['options']['num'] => 'ASC',
+            $this->class_cfg['arch']['options']['text'] => 'ASC',
+            $this->class_cfg['arch']['options']['code'] => 'ASC',
+            $this->class_cfg['arch']['options']['id'] => 'ASC',
+          ];
         $res = $this->db->get_column_values(
           $this->class_cfg['table'],
           $this->class_cfg['arch']['options']['id'], [

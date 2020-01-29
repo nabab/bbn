@@ -47,11 +47,12 @@ use PHPMailer\PHPMailer\PHPMailer;
 class mail extends models\cls\basic
 {
   private static
-    $dest_fields = ['to', 'cc', 'bcc'],
-    $default_template = '<!DOCTYPE html><html><head><title>{{title}}</title><meta http-equiv="Content-Type"
+    $_dest_fields = ['to', 'cc', 'bcc'],
+    $_default_template = '<!DOCTYPE html><html><head><title>{{title}}</title><meta http-equiv="Content-Type"
 content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></html>',
-    $content = '',
-    $hash_content;
+    $_template_checked = false,
+    $_content = '',
+    $_hash_content;
 
   public $mailer;
 
@@ -66,11 +67,21 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
 
   private static function set_content($c){
     $md5 = md5($c);
-    if ( $md5 !== self::$hash_content ){
-      self::$hash_content = $md5;
+    if ( $md5 !== self::$_hash_content ){
+      self::$_hash_content = $md5;
       $inliner = new \TijsVerkoyen\CssToInlineStyles\CssToInlineStyles();
-      self::$content = $inliner->convert($c);
+      self::$_content = $inliner->convert($c);
     }
+  }
+
+  private static function get_default_template(){
+    if (!self::$_template_checked) {
+      self::$_template_checked = true;
+      if (($dir = \bbn\mvc::get_content_path()) && file_exists($dir.'mails/template.html')) {
+        self::$_default_template = file_get_contents($dir.'mails/template.html');
+      }
+    }
+    return self::$_default_template;
   }
 
   public function __construct($cfg){
@@ -93,7 +104,12 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
           $this->mailer->SMTPOptions = ['ssl' => $cfg['ssl']];
         }
         else{
-          $this->mailer->SMTPSecure = 'ssl';
+          $this->mailer->SMTPOptions = [
+            'verify_peer' => false,
+            'verify_peer_name' => false,
+            'verify_host' => false,
+            'allow_self_signed' => false
+          ];
         }
       }
       else{
@@ -112,7 +128,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
       }
     }
     $this->set_from($cfg['from'], isset($cfg['name']) ? $cfg['name'] : 0);
-    $this->set_template(isset($cfg['template']) ? $cfg['template'] : self::$default_template);
+    $this->set_template(isset($cfg['template']) ? $cfg['template'] : self::get_default_template());
   }
 
   public function set_imap($cfg){
@@ -189,7 +205,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
       $valid = 1;
     }
     else{
-      foreach ( self::$dest_fields as $dest_field ){
+      foreach ( self::$_dest_fields as $dest_field ){
         if ( isset($cfg[$dest_field]) ){
           if ( !\is_array($cfg[$dest_field]) ){
             $cfg[$dest_field] = array_map(function($a){
@@ -250,7 +266,7 @@ content="text/html; charset=UTF-8"></head><body><div>{{{text}}}</div></body></ht
       $ar['text'] = $cfg['text'];
       $ar['text'] = $renderer($ar);
       self::set_content($ar['text']);
-      $this->mailer->msgHTML(self::$content, $this->path, true);
+      $this->mailer->msgHTML(self::$_content, $this->path, true);
       $r = $this->mailer->send();
       if ( $r && !empty($this->imap_string) ){
         $mail_string = $this->mailer->getSentMIMEMessage();

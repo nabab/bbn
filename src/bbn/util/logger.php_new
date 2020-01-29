@@ -1,0 +1,80 @@
+<?php
+/**
+ * @package util
+ * 
+ * 
+ */
+namespace bbn\util;
+
+class logger
+{
+	//the difference between the timestamp on the file '.log' and the actual timestamp in seconds
+	protected $time = 30;
+
+	//the name of the file containing the timestamp
+	protected $file =  BBN_DATA_PATH.'logs/.log';
+	protected $log_folder = BBN_DATA_PATH.'logs/';
+	//the max size of the file before to convert it in .gz
+
+
+   
+
+	public function __construct()
+	{
+		$system = new \bbn\file\system();
+		//checks if the file .log exists and take its content (the timestamp)
+		if ( $system->is_file($this->file) ){
+			if ( ($content = $system->get_contents($this->file)) && (time() - $content) > $this->time ) ){
+				//man
+				//$test = fopen($this->log_folder."test.txt","w+");
+				die(var_dump(flock($test,LOCK_EX | LOCK_NB)));
+				flock($this->file,LOCK_EX);
+
+				die(var_dump('c', $content));
+			}
+			
+		}
+		else {
+			//if the file $this->file does not exist it creates the file and put the timestemp as content
+			if ( $system->put_contents($this->file, strtotime(date('Y-m-d H:i:s'))) ){
+				die(var_dump('fatto', $system->get_contents($this->file)));
+			}
+			die(var_dump($this->file));
+		}
+	}
+
+	public function maintain()
+	{
+    
+	}
+
+	public static function log($st, $file='misc'){
+    if ( \defined('BBN_DATA_PATH') ){
+      if ( !\is_string($file) ){
+        $file = 'misc';
+      }
+      $log_file = BBN_DATA_PATH.'logs/'.$file.'.log';
+      $backtrace = array_filter(debug_backtrace(), function($a){
+        return $a['function'] === 'log';
+      });
+      $i = end($backtrace);
+      $r = "[".date('d/m/Y H:i:s')."]\t".$i['file']." - line ".$i['line'].
+        self::get_dump($st).PHP_EOL;
+
+      if ( php_sapi_name() === 'cli' ){
+        global $argv;
+        if ( isset($argv[2]) && ($argv[2] === 'log') ){
+          echo self::get_dump($st).PHP_EOL;
+        }
+      }
+      $s = ( file_exists($log_file) ) ? filesize($log_file) : 0;
+      if ( $s > 1048576 ){
+        file_put_contents($log_file.'.old', file_get_contents($log_file), FILE_APPEND);
+        file_put_contents($log_file, $r);
+      }
+      else{
+        file_put_contents($log_file, $r, FILE_APPEND);
+      }
+    }
+  }
+}

@@ -46,7 +46,7 @@ class tasks extends bbn\models\cls\db{
 
   public function __construct(bbn\db $db){
     parent::__construct($db);
-    self::optional_init($this);
+    self::optional_init();
     if ( $user = bbn\user::get_instance() ){
       $this->user = $user->get_name();
       $this->id_user = $user->get_id();
