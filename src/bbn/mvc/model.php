@@ -41,6 +41,11 @@ class model extends bbn\models\cls\db{
    * @var null|string
    */
   private $_path;
+  /**
+   * Included files
+   * @var null|string
+   */
+  private $_checkers;
 
   public
     /**
@@ -68,7 +73,8 @@ class model extends bbn\models\cls\db{
    * @param controller $ctrl The parent controller
    * @param controller $mvc The parent MVC
 	 */
-	public function __construct(bbn\db $db=null, array $info, controller $ctrl, bbn\mvc $mvc){
+  public function __construct(bbn\db $db=null, array $info, controller $ctrl, bbn\mvc $mvc)
+  {
 		if ( isset($info['path']) && $this->check_path($info['path']) ){
       parent::__construct($db);
       $this->cache_init();
@@ -78,6 +84,7 @@ class model extends bbn\models\cls\db{
       if ( is_file($info['file']) ){
         $this->_path = $info['path'];
         $this->_file = $info['file'];
+        $this->_checkers = $info['checkers'] ?? [];
       }
 		}
 		else{
@@ -85,7 +92,8 @@ class model extends bbn\models\cls\db{
 		}
   }
   
-  public function check_action(array $vars = null, bool $check_empty = false) {
+  public function check_action(array $vars = null, bool $check_empty = false): bool
+  {
     if (isset($this->data['res'], $this->data['res'])) {
       if (is_array($vars)) {
         return bbn\x::has_props($this->data, $vars, $check_empty);
@@ -95,11 +103,31 @@ class model extends bbn\models\cls\db{
     return false;
   }
 
-  public function has_var(string $var, bool $check_empty = false) {
+  public function is_controlled_by(string $path, string $type = 'public'): bool
+  {
+    if ($this->_ctrl && ($this->_ctrl->get_path() === $path)) {
+      if ($type === 'cli') {
+        return $this->mvc->is_cli();
+      }
+      if ($type === $this->_ctrl->mode) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public function get_controller_path()
+  {
+    return $this->_ctrl ? $this->_ctrl->get_path() : false;
+  }
+
+  public function has_var(string $var, bool $check_empty = false): bool
+  {
     return bbn\x::has_prop($this->data, $var, $check_empty);
   }
 
-  public function has_vars(array $vars, bool $check_empty = false) {
+  public function has_vars(array $vars, bool $check_empty = false): bool
+  {
     return bbn\x::has_props($this->data, $vars, $check_empty);
   }
 
@@ -117,6 +145,14 @@ class model extends bbn\models\cls\db{
     $this->data = $data;
     if ( $this->_plugin ){
       $this->apply_locale($this->_plugin);
+    }
+    if ( $this->_checkers ){
+      foreach ( $this->_checkers as $chk ){
+        $d = bbn\mvc::include_model($chk, $this);
+        if (is_array($d)) {
+          $this->add_data($d);
+        }
+      }
     }
     return bbn\mvc::include_model($this->_file, $this);
   }
@@ -157,7 +193,7 @@ class model extends bbn\models\cls\db{
 	 *
 	 * @return bool
 	 */
-	public function has_data($idx=null)
+	public function has_data($idx = null, $check_empty = false)
 	{
     if ( !\is_array($this->data) ){
       return false;
@@ -165,13 +201,7 @@ class model extends bbn\models\cls\db{
     if ( \is_null($idx) ){
       return !empty($this->data);
     }
-    $args = \func_get_args();
-    foreach ( $args as $arg ){
-      if ( !isset($this->data[$idx]) ){
-        return false;
-      }
-    }
-    return true;
+    return \bbn\x::has_props($this->data, (array)$idx, $check_empty);
 	}
 
 	/**
@@ -209,7 +239,8 @@ class model extends bbn\models\cls\db{
         $cn .= '/'.$spec;
       }
       if ( $data ){
-        $cn .= '/'.md5(serialize($data));
+        \bbn\x::log($data, 'iiiii');
+        $cn .= '/'.md5(serialize(is_array($data) ? ksort($data) : $data));
       }
       return $cn;
     }

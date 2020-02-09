@@ -27,6 +27,8 @@ class environment
 
   private static $_input;
 
+  private $_has_post = false;
+
   /**
    * An array of strings enclosed between the slashes of the requested path
    * @var null|array
@@ -116,21 +118,12 @@ class environment
       if (!isset($this->_post)) {
         $this->get_post();
       }
-      if (\count($this->_post)) {
+      if ($this->_has_post) {
         self::_dot_to_array($this->_post);
         /** @todo Remove the json parameter from the bbn.js functions */
-        if (isset($this->_post['appui']) && ($this->_post['appui'] !== 'json')) {
-          $this->set_mode($this->_post['appui']);
-          unset($this->_post['appui']);
-        } else {
-          unset($this->_post['appui']);
-          $this->set_mode(BBN_DEFAULT_MODE);
-        }
-        array_walk_recursive($this->_post, function (&$a) {
-          $a = bbn\str::correct_types($a);
-          return $a;
-        });
-      } else if (\count($_FILES)) {
+        $this->set_mode(BBN_DEFAULT_MODE);
+      }
+      else if (\count($_FILES)) {
         $this->set_mode(BBN_DEFAULT_MODE);
       }
       // If no post, assuming to be a DOM document
@@ -295,7 +288,16 @@ class environment
       if (!$this->_post) {
         $this->_post = [];
       } else {
+        $this->_has_post = true;
         $this->_post = bbn\str::correct_types($this->_post);
+        foreach ($this->_post as $k => $v) {
+          if (\bbn\x::indexOf($k, '_bbn_') === 0) {
+            if (!defined(strtoupper(substr($k, 1)))) {
+              define(strtoupper(substr($k, 1)), $v);
+            }
+            unset($this->_post[$k]);
+          }
+        }
       }
     }
     return $this->_post;

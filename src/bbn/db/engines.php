@@ -242,7 +242,7 @@ interface engines
   * @param string $table The table for which to create the statement
 	* @return string
 	*/
-	public function get_create(string $table): string;
+	public function get_create(string $table, array $model = null): string;
 
 	/**
    * Creates an index
@@ -273,6 +273,14 @@ interface engines
    * @return bool
    */
 	public function create_user(string $user, string $pass, string $db = null): bool;
+
+  /**
+   * Creates a database
+   *
+   * @param string $database
+   * @return bool
+   */
+	public function create_database(string $database): bool;
 
   /**
    * Deletes a database user
@@ -324,5 +332,4 @@ interface engines
    * @return string
    */
   public function get_uid(): string;
-
 }

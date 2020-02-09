@@ -142,10 +142,24 @@ class router
   private function _get_root(string $mode): string
   {
     if (self::is_mode($mode)) {
-      return $this->_root . 'mvc/' . ($mode === 'dom' ? 'public' : $mode) . '/';
+      return $this->_root . $this->_get_mode_path($mode);
     }
 
     return null;
+  }
+
+  private function _get_mode_path(string $mode)
+  {
+    if ($mode === 'dom') {
+      return 'mvc/public/';
+    }
+    if ($mode === 'cli') {
+      return 'cli/';
+    }
+    if (in_array($mode, self::$_modes)) {
+      return 'mvc/'.$mode.'/';
+    }
+    die("The mode $mode doesn't exist in router!");
   }
 
   /**
@@ -161,8 +175,8 @@ class router
         self::is_mode($mode) &&
         isset($this->_routes['root'][$path ?: $this->alt_root])
     ) {
-      $fpath = $this->_routes['root'][$path ?: $this->alt_root]['path'] . '/src/mvc/' . ($mode === 'dom' ? 'public' : $mode);
-      $res = bbn\str::parse_path($fpath).'/';
+      $res = bbn\str::parse_path($this->_routes['root'][$path ?: $this->alt_root]['path']) .
+        '/src/' . $this->_get_mode_path($mode);
       return $res;
     }
 
@@ -273,11 +287,13 @@ class router
       // Defining the checker files' name according to the mode (controllers, models and CSS)
       if (\in_array($mode, self::$_controllers, true)) {
         $checker_file = '_ctrl.php';
-      } else if (isset($o['ext'])) {
+      }
+      else if (isset($o['ext'])) {
         if ($o['ext'] === 'less') {
           $checker_file = '_mixins.less';
-        } else if (($o['mode'] === 'model')) {
-          $checker_file = '_data.php';
+        }
+        else if (($o['mode'] === 'model')) {
+          $checker_file = '_model.php';
         }
       }
       if (!empty($checker_file)) {
@@ -503,7 +519,7 @@ class router
   private function _get_plugin_root($mode, $plugin): ?string
   {
     if (self::is_mode($mode)) {
-      return $this->plugin_path($plugin) . 'mvc/' . ($mode === 'dom' ? 'public' : $mode) . '/';
+      return $this->plugin_path($plugin) . $this->_get_mode_path($mode);
     }
   }
 

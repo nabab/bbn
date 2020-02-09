@@ -386,7 +386,7 @@ JS;
       if ( $codes ){
         $str = '';
         foreach ( $codes as $cd ){
-          $str .= "{name: '$cd[name]', script: function(){try{ $cd[js] } catch(e){bbn.fn.log(e); throw new Error('Impossible to load component $cd[name]');}}";
+          $str .= "{name: '$cd[name]', script: function(){try{ $cd[js] } catch(e){bbn.fn.log(e.message); throw new Error('Impossible to load component $cd[name]');}}";
           if ( !empty($cd['css']) ){
             $str .= ', css: '.json_encode($cd['css']);
           }

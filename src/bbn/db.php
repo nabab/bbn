@@ -227,6 +227,19 @@ class db extends \PDO implements db\actions, db\api, db\engines
     self::$has_error_all = true;
   }
 
+
+  /**
+   * Returns true if the column name is an aggregate function
+   *
+   * @param string $f The string to check
+   * @return bool
+   */
+  public function is_aggregate_function(string $f): bool
+  {
+    $cls = '\\bbn\\db\\languages\\'.$this->engine;
+    return $cls::is_aggregate_function($f);
+  }
+
   public function __toString()
   {
     return "Connection {$this->engine} to {$this->host}";
@@ -572,6 +585,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
         $this->_add_primary($cfg);
       }
       if ( count($cfg['values']) !== count($cfg['values_desc']) ){
+        x::dump($cfg);
         die('Database error in values count');
       }
       // Launching the trigger BEFORE execution
@@ -684,6 +698,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       }
     }
     $res = array_merge($res, [
+      'aliases' => [],
       'values' => [],
       'filters' => [],
       'join' => [],
@@ -701,6 +716,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
     }
     if ( !empty($res['tables']) ){
       foreach ( $res['tables'] as &$t ){
+        if (!is_string($t)){die(var_dump($t));}
         $t = $this->tfn($t);
       }
       unset($t);
@@ -716,13 +732,21 @@ class db extends \PDO implements db\actions, db\api, db\engines
     else if ( !empty($res['columns']) ){
       $res['fields'] = (array)$res['columns'];
     }
-    if (
-      !empty($res['fields']) &&
-      (($res['kind'] === 'INSERT') || ($res['kind'] === 'UPDATE')) &&
-      \is_string(array_keys($res['fields'])[0])
-    ){
-      $res['values'] = array_values($res['fields']);
-      $res['fields'] = array_keys($res['fields']);
+    if (!empty($res['fields'])) {
+      if ($res['kind'] === 'SELECT') {
+        foreach ($res['fields'] as $k => $col) {
+          if (\is_string($k)) {
+            $res['aliases'][$col] = $k;
+          }
+        }
+      }
+      else if (
+        (($res['kind'] === 'INSERT') || ($res['kind'] === 'UPDATE'))
+        && \is_string(array_keys($res['fields'])[0])
+      ) {
+        $res['values'] = array_values($res['fields']);
+        $res['fields'] = array_keys($res['fields']);
+      }
     }
     if ( !\is_array($res['group_by']) ){
       $res['group_by'] = empty($res['group_by']) ? [] : [$res['group_by']];
@@ -781,27 +805,98 @@ class db extends \PDO implements db\actions, db\api, db\engines
         $res['values'][] = $v;
       }
     }
-    if ( empty($cfg['hash']) ){
-      $hash = $this->_make_hash(
-        $res['kind'],
-        $res['ignore'],
-        $res['count'],
-        $res['tables'],
-        $res['fields'],
-        $res['hashed_join'],
-        $res['hashed_where'],
-        $res['hashed_having'],
-        $res['group_by'],
-        $res['order'],
-        $res['limit'] ?? 0,
-        $res['start'] ?? 0
-      );
-      $res['hash'] = $hash;
+    if (!empty($cfg['group_by'])) {
+      $this->_adapt_filters($res);
     }
-    else{
-      $res['hash'] = $cfg['hash'];
-    }
+    $res['hash'] = $cfg['hash'] ?? $this->_make_hash(
+      $res['kind'],
+      $res['ignore'],
+      $res['count'],
+      $res['tables'],
+      $res['fields'],
+      $res['hashed_join'],
+      $res['hashed_where'],
+      $res['hashed_having'],
+      $res['group_by'],
+      $res['order'],
+      $res['limit'] ?? 0,
+      $res['start'] ?? 0
+    );
     return $res;
+  }
+
+  private function _adapt_filters(&$cfg): void
+  {
+    if (!empty($cfg['filters'])) {
+      [$cfg['filters'], $having] = $this->_adapt_bit($cfg, $cfg['filters']);
+      if (empty($cfg['having']['conditions'])) {
+        $cfg['having'] = $having;
+      }
+      else {
+        $cfg['having'] = [
+          'logic' => 'AND',
+          'conditions' => [
+            $cfg['having'],
+            $having
+          ]
+        ];
+      }
+    }
+  }
+
+  private function _adapt_bit($cfg, $where, $having = [])
+  {
+    if (x::has_props($where, ['logic', 'conditions'])) {
+      $new = [
+        'logic' => $where['logic'],
+        'conditions' => []
+      ];
+      foreach ($where['conditions'] as $c) {
+        $is_aggregate = false;
+        if (isset($c['field'])) {
+          $is_aggregate = $this->is_aggregate_function($c['field']);
+          if (!$is_aggregate && isset($cfg['fields'][$c['field']])) {
+            $is_aggregate = $this->is_aggregate_function($cfg['fields'][$c['field']]);
+          }
+        }
+        if (!$is_aggregate && isset($c['exp'])) {
+          $is_aggregate = $this->is_aggregate_function($c['exp']);
+          if (!$is_aggregate && isset($cfg['fields'][$c['exp']])) {
+            $is_aggregate = $this->is_aggregate_function($cfg['fields'][$c['exp']]);
+          }
+        }
+        if (!$is_aggregate) {
+          if (x::has_props($c, ['conditions', 'logic'])) {
+            $tmp = $this->_adapt_bit($cfg, $c, $having);
+            if (!empty($tmp[0]['conditions'])) {
+              $new['conditions'][] = $c;
+            }
+            if (!empty($tmp[1]['conditions'])) {
+              $having = $tmp[1];
+            }
+          }
+          else {
+            $new['conditions'][] = $c;
+          }
+        }
+        else {
+          if (!isset($having['conditions'])) {
+            $having = [
+              'logic' => $where['logic'],
+              'conditions' => []
+            ];
+          }
+          if (isset($cfg['aliases'][$c['field']])) {
+            $c['field'] = $cfg['aliases'][$c['field']];
+          }
+          else if (isset($cfg['aliases'][$c['exp']])) {
+            $c['exp'] = $cfg['aliases'][$c['exp']];
+          }
+          $having['conditions'][] = $c;
+        }
+      }
+      return [$new, $having];
+    }
   }
 
   /**
@@ -850,7 +945,6 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   private function _set_start(array $args, int $start): array
   {
-    var_dump($start);
     if (
       \is_array($args[0]) &&
       (isset($args[0]['tables']) || isset($args[0]['table']))
@@ -907,12 +1001,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
       if ( isset($cfg['on_error']) ){
         $this->on_error = $cfg['on_error'];
       }
-      if ( ($cfg = $this->get_connection($cfg)) && !empty($cfg['db']) ){
+      if ($cfg = $this->get_connection($cfg)) {
         $this->qte = $this->language->qte;
         try{
           parent::__construct(...($cfg['args'] ?: []));
           $this->language->post_creation();
-          $this->current = $cfg['db'];
+          $this->current = $cfg['db'] ?? null;
           $this->engine = $cfg['engine'];
           $this->host = $cfg['host'] ?? '127.0.0.1';
           $this->username = $cfg['user'] ?? null;
@@ -1037,7 +1131,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
               else{
                 $f = [
                   'field' => $key,
-                  'operator' => 'eq',
+                  'operator' => !str::is_uid($f) && is_string($f) ? 'LIKE' : '=',
                   'value' => $f
                 ];
               }
@@ -1057,7 +1151,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
                 else{
                   $tmp['conditions'][] = [
                     'field' => $key,
-                    'operator' => 'eq',
+                    'operator' => !str::is_uid($f) && is_string($f) ? 'LIKE' : '=',
                     'value' => $v
                   ];
                 }
@@ -1124,6 +1218,33 @@ class db extends \PDO implements db\actions, db\api, db\engines
       return $res;
     }
     return false;
+  }
+
+  public function extract_fields(array $cfg, array $conditions, array &$res = null) {
+    if (null === $res) {
+      $res = [];
+    }
+    if (isset($conditions['conditions'])) {
+      $conditions = $conditions['conditions'];
+    }
+    foreach ($conditions as $c) {
+      if ( isset($c['conditions'])) {
+        $this->extract_fields($cfg, $c['conditions'], $res);
+      }
+      else {
+        if (isset($c['field'], $cfg['available_fields'][$c['field']])) {
+          $res[] = $cfg['available_fields'][$c['field']] ?
+            $this->cfn($c['field'], $cfg['available_fields'][$c['field']])
+            : $c['field'];
+        }
+        if (isset($c['exp'])) {
+          $res[] = $cfg['available_fields'][$c['exp']] ?
+            $this->cfn($c['exp'], $cfg['available_fields'][$c['exp']]) 
+            : $c['exp'];
+        }
+      }
+    }
+    return $res;
   }
 
   /**
@@ -1420,18 +1541,17 @@ class db extends \PDO implements db\actions, db\api, db\engines
       }
       $res['join_st'] = $this->language->get_join($res);
       $res['where_st'] = $this->language->get_where($res);
-      $res['group_st'] = $res['count'] ? '' : $this->language->get_group_by($res);
+      $res['group_st'] = $this->language->get_group_by($res);
       $res['having_st'] = $this->language->get_having($res);
       $res['order_st'] = $res['count'] ? '' : $this->language->get_order($res);
       $res['limit_st'] = $res['count'] ? '' : $this->language->get_limit($res);
 
-      if ( !empty($res['sql']) ){
-        $res['sql'] .= $res['join_st']
-                      .$res['where_st']
-                      .$res['group_st']
-                      .$res['having_st']
-                      .$res['order_st']
-                      .$res['limit_st'];
+      if (!empty($res['sql'])) {
+        $res['sql'] .= $res['join_st'].$res['where_st'].$res['group_st'];
+        if ($res['count'] && $res['group_by']) {
+          $res['sql'] .= ') AS t '.PHP_EOL;
+        }
+        $res['sql'] .= $res['having_st'].$res['order_st'].$res['limit_st'];
         $res['statement_hash'] = $this->_make_hash($res['sql']);
 
         foreach ( $res['join'] as $r ){
@@ -2873,7 +2993,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   public function count($table, array $where = []): ?int
   {
-    $args = \is_array($table) && isset($table['tables']) ? $table : [
+    $args = \is_array($table) && (isset($table['tables']) || isset($table['table'])) ? $table : [
       'tables' => [$table],
       'where' => $where
     ];
@@ -4311,9 +4431,24 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @param string $table The table's name
    * @return string | false
    */
-  public function get_create(string $table): string
+  public function get_create(string $table, array $model = null): string
   {
-    return $this->language->get_create($table);
+    return $this->language->get_create($table, $model);
+  }
+
+  public function get_create_table(string $table, array $model = null): string
+  {
+    return $this->language->get_create_table($table, $model);
+  }
+
+  public function get_create_keys(string $table, array $model = null): string
+  {
+    return $this->language->get_create_keys($table, $model);
+  }
+
+  public function get_create_constraints(string $table, array $model = null): string
+  {
+    return $this->language->get_create_constraints($table, $model);
   }
 
   /**
@@ -4674,6 +4809,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
 
   public function create_table(){
     return $this->language->create_table(...\func_get_args());
+  }
+
+  public function create_database(string $database): bool
+  {
+    return $this->language->create_database(...\func_get_args());
   }
 
   public function enable_last()

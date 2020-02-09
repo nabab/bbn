@@ -32,8 +32,32 @@ class sqlite implements bbn\db\engines
   /** @var array Time and date column types don't exist in SQLite */
   public static $date_types = [];
 
+  public static $aggr_functions = [
+    'AVG',
+    'COUNT',
+    'GROUP_CONCAT',
+    'MAX',
+    'MIN',
+    'SUM',
+  ];
   /** @var string The quote character */
   public $qte = '"';
+
+  /**
+   * Returns true if the column name is an aggregate function
+   *
+   * @param string $f The string to check
+   * @return bool
+   */
+  public static function is_aggregate_function(string $f): bool
+  {
+    foreach (self::$aggr_functions as $a) {
+      if (preg_match('/^'.$a.'\\s*\\(/i', $f)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   /**
    * Constructor
@@ -946,7 +970,7 @@ class sqlite implements bbn\db\engines
    * @param null|string $table The table for which to create the statement
    * @return string
 	 */
-	public function get_create(string $table): string
+	public function get_create(string $table, array $model = null): string
 	{
     if ( \bbn\str::check_name($table) ){
       return $this->db->get_one(<<<SQLITE
@@ -1012,6 +1036,20 @@ SQLITE
 		}
 		return false;
 	}
+
+  /**
+   * Creates a database
+   *
+   * @param string $database
+   * @return bool
+   */
+  public function create_database(string $database): bool
+  {
+    if ( bbn\str::check_filename($database) ){
+			return $this->db->change($database);
+    }
+    return false;
+  }
 
   /**
    * Creates a database user

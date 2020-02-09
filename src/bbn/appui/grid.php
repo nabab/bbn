@@ -118,18 +118,18 @@ class grid extends bbn\models\cls\cache
           foreach ( $fields as $a => $f ){
             $field = is_string($a) ? $a : $this->db->col_simple_name($f);
             if ( in_array($field, $post['fields'], true) ){
-              $link[$field] = $a;    
+              $link[$field] = $a;
             }
           }
           foreach ( $post['fields'] as $f ){
-            if ( isset($fields[$link[$f]]) ){
+            if ( isset($link[$f], $fields[$link[$f]]) ){
               $db_cfg['fields'][$link[$f]] = $fields[$link[$f]];
             }
           }
         }
-        if ( 
+        if (
           isset($cfg['map'], $cfg['map']['callable']) &&
-          is_callable($cfg['map']['callable']) 
+          is_callable($cfg['map']['callable'])
         ){
           $this->excel['map'] = $cfg['map'];
         }
@@ -150,7 +150,6 @@ class grid extends bbn\models\cls\cache
       // For the server config both properties where and filters are accepted (backward compatibility)
       if ( empty($cfg['filters']) && !empty($cfg['where']) ){
         $cfg['filters'] = $cfg['where'];
-
       }
       // The (pre)filters set server-side are mandatory and are added to the client-side filters if any
       if ( !empty($cfg['filters']) ){
@@ -183,6 +182,7 @@ class grid extends bbn\models\cls\cache
         else{
           $db_cfg['count'] = true;
           $this->count_cfg = $this->db->process_cfg($db_cfg);
+          //die(\bbn\x::dump($this->count_cfg));
         }
         if ( !empty($cfg['num']) ){
           $this->num = $cfg['num'];
@@ -204,7 +204,16 @@ class grid extends bbn\models\cls\cache
     $this->chrono = new bbn\util\timer();
   }
 
-  protected function fix_filters($where){
+  protected function fix_filters(&$cfg){
+    if (!empty($cfg['group_by'])) {
+      $having = $cfg['having'] ?: [];
+
+    }
+    return $cfg;
+  }
+
+  protected function fix_part($conditions, $cfg)
+  {
 
   }
 
@@ -384,21 +393,37 @@ class grid extends bbn\models\cls\cache
   public function to_excel(array $data = []): array
   {
     $path = \bbn\x::make_storage_path(\bbn\mvc::get_user_tmp_path()) . 'export_' . date('d-m-Y_H-i-s') . '.xlsx';
-    $cfg = $this->excel;
-    $data = array_map(function($row) use($cfg){
+    $cfg = $this->get_excel();
+    $dates = array_values(array_filter($cfg['fields'], function($c){
+      return empty($c['hidden']) && (($c['type'] === 'date') || ($c['type'] === 'datetime'));
+    }));
+    $data = array_map(function($row) use($cfg, $dates){
       foreach ( $row as $i => $r ){
-        if ( 
-          (($idx = \bbn\x::find($cfg, ['field' => $i])) === false ) ||
-          !!$cfg[$idx]['hidden']
+        if ( \is_string($r) ){
+          $row[$i] = strpos($r, '=') === 0 ? ' '.$r : $r;
+        }
+        if ( (($k = \bbn\x::find($dates, ['field' => $i])) !== false ) ){
+          if ( !empty($dates[$k]['format']) && !empty($r) ){
+            $r = date($dates[$k]['format'], strtotime($r));
+          }
+          $row[$i] = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($r);
+        }
+        if (
+          (($idx = \bbn\x::find($cfg['fields'], ['field' => $i])) === false ) ||
+          !!$cfg['fields'][$idx]['hidden']
         ){
           unset($row[$i]);
         }
       }
       return $row;
     }, $data ?: $this->get_data());
-    if ( \bbn\x::to_excel($data, $path, true, $this->get_excel()) ){
+    $cfg['fields'] = array_values(array_filter($cfg['fields'], function($c){
+      return empty($c['hidden']);
+    }));
+    if ( \bbn\x::to_excel($data, $path, true, $cfg) ){
       return ['file' => $path];
     }
+    return ['error' => _('Error')];
   }
 
   /**

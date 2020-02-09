@@ -172,7 +172,23 @@ class image extends bbn\file
       }
     }
     return false;
-  }
+	}
+	
+	public static svg2png($svg, $filename) {
+    if ( class_exists('\\Imagick') ){
+      $img = new \Imagick();
+			if (strpos($svg, '<svg') !== 0) {
+				$svg = @file_get_contents($svg);
+			}
+			$img->setImageFormat("png24");
+			$res = $img->writeImage($filename);
+			$img->clear();
+			$img->destroy();		
+			return $res;
+		}
+		return false;
+
+	}
 
   /**
 	 * Construct

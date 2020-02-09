@@ -629,13 +629,14 @@ MYSQL;
         //die(var_dump($columns, $model['fields']));
         foreach ( $columns as $col ){        
           if ( isset($model['fields'][$col]['id_option']) ){
-            $r[$col] = $db->rselect(self::$table, ['val', 'ref'], [
+            if ($r[$col] = $db->rselect(self::$table, ['val', 'ref'], [
               'uid' => $id,
               'col' => $model['fields'][$col]['id_option'],
               'opr' => 'UPDATE',
               ['tst', '>', $when]
-            ]);
-            $r[$col] = $r[$col]['ref'] ?: ($r[$col]['val'] ?: null);
+            ])) {
+              $r[$col] = $r[$col]['ref'] ?: ($r[$col]['val'] ?: null);
+            }
           }
           if ( $r[$col] === null ){
             $r[$col] = $db->select_one($table, $col, [

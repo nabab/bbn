@@ -335,13 +335,14 @@ MYSQL
       if ( !$d['id_alias'] ){
         return $d;
       }
-      $alias = $this->db->rselect('bbn_observers', [], [
+      if ($alias = $this->db->rselect('bbn_observers', [], [
         'id' => $d['id_alias']
-      ]);
-      $alias['id'] = $d['id'];
-      $alias['result'] = $d['result'];
-      $alias['id_alias'] = $d['id_alias'];
-      return $alias;
+      ])) {
+        $alias['id'] = $d['id'];
+        $alias['result'] = $d['result'];
+        $alias['id_alias'] = $d['id_alias'];
+        return $alias;
+      }
     }
     return null;
   }

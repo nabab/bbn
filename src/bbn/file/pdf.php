@@ -95,6 +95,10 @@ EOF
   }
 
   public function __construct($cfg = null){
+    // Temp path for PDF generation (MPDF)
+    if (!defined('_MPDF_TEMP_PATH') && defined('BBN_DATA_PATH')) {
+      define('_MPDF_TEMP_PATH', BBN_DATA_PATH . 'tmp/');
+    }
     $this->reset_config($cfg);
     $this->pdf = new \Mpdf\Mpdf($this->cfg);
     //$this->pdf->SetImportUse();

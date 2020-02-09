@@ -70,8 +70,42 @@ class mysql implements bbn\db\engines
     'multipolygon',
     'json'
   ];
+
+  public static $aggr_functions = [
+    'AVG',
+    'BIT_AND',
+    'BIT_OR',
+    'COUNT',
+    'GROUP_CONCAT',
+    'MAX',
+    'MIN',
+    'STD',
+    'STDDEV_POP',
+    'STDDEV_SAMP',
+    'STDDEV',
+    'SUM',
+    'VAR_POP',
+    'VAR_SAMP',
+    'VARIANCE'
+  ];
   /** @var string The quote character */
   public $qte = '`';
+
+  /**
+   * Returns true if the column name is an aggregate function
+   *
+   * @param string $f The string to check
+   * @return bool
+   */
+  public static function is_aggregate_function(string $f): bool
+  {
+    foreach (self::$aggr_functions as $a) {
+      if (preg_match('/'.$a.'\\s*\\(/i', $f)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   /**
    * Constructor
@@ -96,36 +130,40 @@ class mysql implements bbn\db\engines
    * @param array $cfg The user's options
    * @return array|null The final configuration
    */
-  public function get_connection(array $cfg = []): ?array
+  public function get_connection(array $cfg = []): array
   {
-    $cfg['engine'] = 'mysql';
-    if ( !isset($cfg['host']) ){
-      $cfg['host'] = \defined('BBN_DB_HOST') ? BBN_DB_HOST : '127.0.0.1';
+    if (!\bbn\x::has_props($cfg, ['host', 'user'])) {
+      if (!defined('BBN_DB_HOST')) {
+        die("No DB host defined");
+      }
+      $cfg = [
+        'host' => BBN_DB_HOST,
+        'user' => defined('BBN_DB_USER') ? BBN_DB_USER :  '',
+        'pass' => defined('BBN_DB_PASS') ? BBN_DB_PASS :  '',
+        'db' => defined('BBN_DATABASE') ? BBN_DATABASE :  ''
+      ];
     }
-    if ( \defined('BBN_DB_USER') && !isset($cfg['user']) ){
-      $cfg['user'] = \defined('BBN_DB_USER') ? BBN_DB_USER : 'root';
+    $cfg['engine'] = 'mysql';
+    if ( empty($cfg['host']) ){
+      $cfg['host'] = '127.0.0.1';
+    }
+    if ( empty($cfg['user']) ){
+      $cfg['user'] = 'root';
     }
     if ( !isset($cfg['pass']) ){
-      $cfg['pass'] = \defined('BBN_DB_PASS') ? BBN_DB_PASS : '';
+      $cfg['pass'] = '';
     }
-    if ( \defined('BBN_DATABASE') && !isset($cfg['db']) ){
-      $cfg['db'] = BBN_DATABASE;
-    }
-		if ( !empty($cfg['db']) )
-		{
-      $cfg['args'] = [
-        'mysql:host='.
-          ( $cfg['host'] === 'localhost' ? '127.0.0.1' : $cfg['host'] ).
-          ';dbname='.$cfg['db'],
-        $cfg['user'],
-        $cfg['pass'],
-        [
-          \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'
-        ]
-      ];
-      return $cfg;
-    }
-    return null;
+    $cfg['args'] = [
+      'mysql:host='.
+        ($cfg['host'] === 'localhost' ? '127.0.0.1' : $cfg['host']).
+        (empty($cfg['db']) ? '' : ';dbname='.$cfg['db']),
+      $cfg['user'],
+      $cfg['pass'],
+      [
+        \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'
+      ]
+    ];
+    return $cfg;
 	}
 
   /**
@@ -380,18 +418,22 @@ MYSQL;
         $p = 1;
         foreach ( $rows as $row ){
           $f = $row['COLUMN_NAME'];
+          $has_length = (stripos($row['DATA_TYPE'], 'text') === false)
+            && (stripos($row['DATA_TYPE'], 'blob') === false)
+            && ($row['EXTRA'] !== 'VIRTUAL GENERATED');
           $r[$f] = [
             'position' => $p++,
             'type' => $row['DATA_TYPE'],
             'null' => $row['IS_NULLABLE'] === 'NO' ? 0 : 1,
             'key' => \in_array($row['COLUMN_KEY'], ['PRI', 'UNI', 'MUL']) ? $row['COLUMN_KEY'] : null,
-            'default' => ($row['COLUMN_DEFAULT'] === null) && ($row['IS_NULLABLE'] !== 'NO') ? 'NULL' : $row['COLUMN_DEFAULT'],
             'extra' => $row['EXTRA'],
             'signed' => strpos($row['COLUMN_TYPE'], ' unsigned') === false,
-            'maxlength' => $row['CHARACTER_MAXIMUM_LENGTH'],
             'virtual' => $row['EXTRA'] === 'VIRTUAL GENERATED',
             'generation' => $row['GENERATION_EXPRESSION']
           ];
+          if (($row['COLUMN_DEFAULT'] !== null) || ($row['IS_NULLABLE'] === 'YES')) {
+            $r[$f]['default'] = \is_null($row['COLUMN_DEFAULT']) ? 'NULL' : $row['COLUMN_DEFAULT'];
+          }
           if ( ($r[$f]['type'] === 'enum') || ($r[$f]['type'] === 'set') ){
             if (
               preg_match_all('/\((.*?)\)/', $row['COLUMN_TYPE'], $matches) &&
@@ -406,8 +448,16 @@ MYSQL;
               $r[$f]['values'] = [];
             }
           }
-          else if ( preg_match_all('/\((.*?)\)/', $row['COLUMN_TYPE'], $matches) ){
-            $r[$f]['maxlength'] = (int)$matches[1][0];
+          else if ( preg_match_all('/\((\d+)?(?:,)|(\d+)\)/', $row['COLUMN_TYPE'], $matches) ){
+            if (empty($matches[1][0])) {
+              if (!empty($matches[2][0])) {
+                $r[$f]['maxlength'] = (int)$matches[2][0];
+              }
+            }
+            else {
+              $r[$f]['maxlength'] = (int)$matches[1][0];
+              $r[$f]['decimals'] = (int)$matches[2][1];
+            }
           }
         }
         /*
@@ -495,6 +545,9 @@ MYSQL
                     $db,
                     $table);
         }
+        else if (isset($b)) {
+          unset($b);
+        }
         if ( !isset($keys[$index['Key_name']]) ){
           $keys[$index['Key_name']] = [
             'columns' => [$index['Column_name']],
@@ -554,7 +607,10 @@ MYSQL
           $is_uid = false;
           $is_date = false;
           $model = null;
-          if ( isset($cfg['available_fields'][$field]) ){
+          if ($is_having) {
+            $res .= PHP_EOL.str_repeat(' ', $indent).(empty($res) ? '' : "$logic ").$field.' ';
+          }
+          else if ( isset($cfg['available_fields'][$field]) ){
             $table = $cfg['available_fields'][$field];
             $column = $this->col_simple_name($cfg['fields'][$field] ?? $field);
             if ( $table && $column && isset($cfg['models'][$table]['fields'][$column]) ){
@@ -602,6 +658,22 @@ MYSQL
             $res .= (empty($res) ? '' : PHP_EOL.str_repeat(' ', $indent).$logic.' ').$field.' ';
           }
           switch ( strtolower($f['operator']) ){
+            case '=':
+              if ( isset($f['exp']) ){
+                $res .= '= '.$f['exp'];
+              }
+              else {
+                $res .= '= ?';
+              }
+              break;
+            case '!=':
+              if ( isset($f['exp']) ){
+                $res .= '!= '.$f['exp'];
+              }
+              else {
+                $res .= '!= ?';
+              }
+              break;
             case 'like':
               $res .= 'LIKE ?';
               break;
@@ -609,7 +681,6 @@ MYSQL
               $res .= 'NOT LIKE ?';
               break;
             case 'eq':
-            case '=':
             case 'is':
               if ( isset($f['exp']) ){
                 $res .= '= '.$f['exp'];
@@ -622,7 +693,6 @@ MYSQL
               }
               break;
             case 'neq':
-            case '!=':
             case 'isnot':
               if ( isset($f['exp']) ){
                 $res .= '!= '.$f['exp'];
@@ -712,7 +782,7 @@ MYSQL
               break;
 
             default:
-              $res .= $is_number ? '= ?' : 'LIKE ?';
+              $res .= '= ?';
               break;
           }
         }
@@ -736,23 +806,72 @@ MYSQL
     if ( \is_array($cfg['tables']) && !empty($cfg['tables']) ){
       $res = 'SELECT ';
       if ( !empty($cfg['count']) ){
-        $indexes = [];
         if ( $cfg['group_by'] ){
+          $indexes = [];
+          $idxs = [];
           foreach ( $cfg['group_by'] as $g ){
+            // Alias
+            if (isset($cfg['fields'][$g])) {
+              $g = $cfg['fields'][$g];
+            }
             if (($t = $cfg['available_fields'][$g])
-            && ($cfn = $this->col_full_name($g, $t, true)) ){
+            && ($cfn = $this->col_full_name($g, $t)) ){
               $indexes[] = $cfn;
+              $idxs[] = $this->col_simple_name($g, true);
+            }
+            else {
+              $indexes[] = $g;
+              $idxs[] = $g;
+            }
+          }
+          if (!empty($cfg['having'])) {
+            if (count($indexes) === count($cfg['group_by'])){
+              $res .= 'COUNT('.bbn\x::join($idxs, ',').') FROM ( SELECT ';
+              $tmp = [];
+              if ($extracted_fields = $this->db->extract_fields($cfg, $cfg['having']['conditions'])) {
+                //die(var_dump($extracted_fields));
+                foreach ($extracted_fields as $ef) {
+                  if (!in_array($ef, $indexes)) {
+                    if (!empty($cfg['fields'][$ef])) {
+                      $tmp[$ef] = $cfg['fields'][$ef];
+                    }
+                    else {
+                      $tmp[] = $ef;
+                    }
+                  }
+                }
+              }
+              $cfg['fields'] = $indexes;
+              foreach ($tmp as $k => $v) {
+                if (is_string($k)) {
+                  $cfg['fields'][$k] = $v;
+                }
+                else {
+                  $cfg['fields'][] = $v;
+                }
+
+              }
+            }
+            else{
+              $res .= 'COUNT(*) FROM ( SELECT ';
+            }
+          }
+          else{
+            if (count($indexes) === count($cfg['group_by'])){
+              $res .= 'COUNT('.bbn\x::join($idxs, ',').') FROM ( SELECT ';
+              $cfg['fields'] = $indexes;
+            }
+            else{
+              $res .= 'COUNT(*) FROM ( SELECT ';
             }
           }
         }
-        if ( count($indexes) ){
-          $res .= 'COUNT(DISTINCT '.bbn\x::join($indexes, ',').')';
-        }
         else{
           $res .= 'COUNT(*)';
+          $cfg['fields'] = [];
         }
       }
-      else if ( !empty($cfg['fields']) ){
+      if ( !empty($cfg['fields']) ){
         $fields_to_put = [];
         // Checking the selected fields
         foreach ( $cfg['fields'] as $alias => $f ){
@@ -802,7 +921,7 @@ MYSQL
             $this->db->error("Error! The column '$f' exists on several tables in '".implode(', ', $cfg['tables']));
           }
           else{
-            $this->db->error("Error! The column '$f' doesn't exist in '".implode(', ', $cfg['tables']).' ('.implode(' - ', array_keys($cfg['available_fields'])).')');
+            $this->db->error("Error! The column '$f' doesn't exist in '".implode(', ', $cfg['tables']));
           }
         }
         $res .= implode(', ', $fields_to_put);
@@ -921,6 +1040,7 @@ MYSQL
     $res = '';
     if ( count($cfg['tables']) === 1 ){
       $res = 'DELETE '.( $cfg['ignore'] ? 'IGNORE ' : '' ).
+        (count($cfg['join']) ? current($cfg['tables']).' ' : '').
         'FROM '.$this->table_full_name(current($cfg['tables']), true).PHP_EOL;
     }
     return $res;
@@ -1003,9 +1123,14 @@ MYSQL
     $res = '';
     if (!empty($cfg['group_by'])
         && !empty($cfg['having'])
-        && ($cond = $this->get_conditions($cfg['having'], $cfg, $cfg['count'] ? false : true, 2))
+        && ($cond = $this->get_conditions($cfg['having'], $cfg, true, 2))
     ){
-      $res .= '  HAVING '.$cond.PHP_EOL;
+      if ($cfg['count']) {
+        $res .= ' WHERE '.$cond.PHP_EOL;
+      }
+      else {
+        $res .= '  HAVING '.$cond.PHP_EOL;
+      }
     }
     return $res;
   }
@@ -1090,10 +1215,23 @@ MYSQL
       }
       $st .= '  '.$this->db->escape($name).' ';
       $st .= $col['type'];
-      if ( !empty($col['maxlength']) ){
-        $st .= '('.$col['maxlength'].')';
+      if ( ($col['type'] === 'enum') || ($col['type'] === 'set') ){
+        $st .= ' ('.$col['extra'].')';
       }
-      if ( (strpos($col['type'], 'int') !== false) && !$col['signed'] ){
+      else if ( !empty($col['maxlength']) ){
+        $st .= '('.$col['maxlength'];
+        if (!empty($col['decimals'])) {
+          $st .= ','.$col['decimals'];
+        }
+        $st .= ')';
+      }
+      if (
+        (
+          (strpos($col['type'], 'int') !== false)
+          || (strpos($col['type'], 'decimal') !== false)
+          || (strpos($col['type'], 'float') !== false)
+        )
+        && !$col['signed'] ){
         $st .= ' UNSIGNED';
       }
       if ( empty($col['null']) ){
@@ -1104,7 +1242,12 @@ MYSQL
       }
       else if ( array_key_exists('default', $col) ){
         $st .= ' DEFAULT ';
-        if ( ($col['default'] === 'NULL') || bbn\str::is_number($col['default']) ){
+        if (
+          ($col['default'] === 'NULL')
+          || bbn\str::is_number($col['default'])
+          || strpos($col['default'], '(')
+          || in_array(strtoupper($col['default']), ['CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP'])
+        ) {
           $st .= (string)$col['default'];
         }
         else{
@@ -1129,7 +1272,7 @@ MYSQL
       $i = 0;
       foreach ( $model['keys'] as $name => $key ){
         $st .= '  ADD ';
-        if ( $key['unique'] && (count($key['columns']) === 1) && isset($model['fields'][$key['columns'][0]]) && ($model['fields'][$key['columns'][0]]['key'] === 'PRI') ){
+        if ( $key['unique'] && isset($model['fields'][$key['columns'][0]]) && ($model['fields'][$key['columns'][0]]['key'] === 'PRI') ){
           $st .= 'PRIMARY KEY';
         }
         else if ($key['unique'] ){
@@ -1156,16 +1299,15 @@ MYSQL
     }
     if ($model && !empty($model['keys'])) {
       $constraints = array_filter($model['keys'], function($a){
-        return !!$a['ref_table'];
+        return !!$a['ref_table'] && isset($a['columns']) && (count($a['columns']) === 1);
       });
       if ($last = count($constraints)) {
         $st .= 'ALTER TABLE '.$this->db->escape($table).PHP_EOL;
-        $dbcls =& $this->db;
         $i = 0;
         foreach ($constraints as $name => $key) {
           $i++;
           $st .= '  ADD '.
-            'CONSTRAINT '.$this->db->escape($key['constraint']).' FOREIGN KEY ('.$this->db->escape($name).') '.
+            'CONSTRAINT '.$this->db->escape($key['constraint']).' FOREIGN KEY ('.$this->db->escape($key['columns'][0]).') '.
             'REFERENCES '.$this->db->escape($key['ref_table']).' ('.$this->db->escape($key['ref_column']).')'.
             ($key['delete'] ? ' ON DELETE '.$key['delete'] : '').
             ($key['update'] ? ' ON UPDATE '.$key['update'] : '').
@@ -1272,6 +1414,22 @@ MYSQL
 		return false;
 	}
 
+  /**
+   * Creates a database
+   *
+   * @param string $database
+   * @param string $enc
+   * @param string $collation
+   * @return bool
+   */
+  public function create_database(string $database, string $enc = 'utf8', string $collation = 'utf8_general_ci'): bool
+  {
+    if ( bbn\str::check_name($database, $enc, $collation) ){
+			return (bool)$this->db->raw_query("CREATE DATABASE IF NOT EXISTS `$database` DEFAULT CHARACTER SET $enc COLLATE $collation;");
+    }
+    return false;
+  }
+
 	/**
    * Creates a database user
    *
@@ -1299,8 +1457,8 @@ MYSQL
 );
 		}
 		return false;
-	}
-
+  }
+  
   /**
    * Deletes a database user
    *

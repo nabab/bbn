@@ -1653,7 +1653,7 @@ class x
       }
     }
     else {
-      foreach ( $cfg as $i => $field ){
+      foreach ( $cfg['fields'] as $i => $field ){
         // Get cell object
         $cell = $sheet->getCellByColumnAndRow($i+1, 1);
         // Get colum name
@@ -1672,14 +1672,6 @@ class x
           ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP);
         // Set the correct data type
         switch ( $field['type'] ){
-          case 'string':
-            // Set code's format to text
-            $format->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
-            // Set wrap text
-            $style
-              ->getAlignment()
-              ->setWrapText(true);
-            break;
           case 'integer':
             // Set code's format to number
             $format->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER);
@@ -1697,6 +1689,7 @@ class x
             $format->setFormatCode('dd/mm/yyyy');
             // Set the horizontal alignment to center
             $style->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            break;
           case 'datetime':
             // Set code's format to datetime
             $format->setFormatCode('dd/mm/yyyy hh:mm');
@@ -1706,6 +1699,15 @@ class x
           case 'boolean':
             // Set the horizontal alignment to center
             $style->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            break;
+          case 'string':
+          default:
+            // Set code's format to text
+            $format->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
+            // Set wrap text
+            $style
+              ->getAlignment()
+              ->setWrapText(true);
             break;
         }
         if ( $with_titles ){
@@ -1721,18 +1723,16 @@ class x
           $cell->setValue($field['title'] ?? $field['field']);
         }
       }
-      if ( 
+      if (
         isset($cfg['map'], $cfg['map']['callable']) &&
-        is_callable($cfg['map']['callable'])   
+        is_callable($cfg['map']['callable'])
       ){
         array_walk($data, $cfg['map']['callable'], is_array($cfg['map']['params']) ? $cfg['map']['params'] : []);
       }
-      if ( count($data) ){
-        $sheet->fromArray($data, NULL, 'A' . ($with_titles ? '2' : '1'));
-        $can_save = true;
-      }
+      $sheet->fromArray($data, NULL, 'A' . ($with_titles ? '2' : '1'));
+      $can_save = true;
     }
-    if ( 
+    if (
       $can_save &&
       \bbn\file\dir::create_path(dirname($file))
     ){

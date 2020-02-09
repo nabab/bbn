@@ -376,6 +376,12 @@ class controller implements api{
         $this->register_plugin_classes($this->plugin_path());
       }
       ob_start();
+      if (defined('BBN_ROOT_CHECKER')) {
+        if (!defined('BBN_ROOT_CHECKER_OK')) {
+          define('BBN_ROOT_CHECKER_OK', true);
+          array_unshift($this->_checkers, BBN_ROOT_CHECKER);
+        }
+      }
       foreach ( $this->_checkers as $appui_checker_file ){
         // If a checker file returns false, the controller is not processed
         // The checker file can define data and inc that can be used in the subsequent controller
@@ -846,7 +852,7 @@ class controller implements api{
   public function combo(string $title = null, $data = null, int $ttl = null): self
   {
     $this->obj->css = $this
-      ->add_data($ttl ?
+      ->add_data($ttl !== null ?
         $this->get_cached_model('', bbn\x::merge_arrays($this->post, $this->data), $ttl) :
         $this->get_model('', bbn\x::merge_arrays($this->post, $this->data))
       )
