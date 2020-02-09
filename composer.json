@@ -18,9 +18,6 @@
       "role": "Developer"
     }
   ],
-  "require-dev": {
-    "phpdocumentor/reflection-docblock": "5.0.*"
-  },
   "require": {
     "php": ">=7.2",
     "ext-mbstring": "*",
@@ -46,7 +43,8 @@
     "nikic/php-parser": "4.3.*",
     "sabre/dav": "4.0.*",
     "erusev/parsedown": "1.7.*",
-    "tplaner/when": "dev-master"
+    "phpdocumentor/reflection-docblock": "4.3.*",
+    "tplaner/when": "3.0.0"
   },
   "autoload": {
     "psr-0": {"bbn": "src/"}
