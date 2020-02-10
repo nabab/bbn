@@ -83,6 +83,7 @@ class cms extends bbn\models\cls\db
 		else{
 			$this->notes = $notes;
 		}
+		
 	}
 
 	//if the note does not exists with type pages and given url it creates the note 
@@ -116,16 +117,21 @@ class cms extends bbn\models\cls\db
 		return false;
 	}
 	
-	public function edit( string $title, string $url, string $type = 'pages', string $content = '' , string $start = null, string $end = null, string $type_event = 'PAGE',string $alias = null)
+	public function edit( string $id_note, string $title, string $url, string $type = 'pages', string $content = '' , string $start = null, string $end = null, string $type_event = 'PAGE',string $alias = null)
 	{
 		$res = [];
-		if ( $note = $this->get($title, $url) ){
-			$this->notes->insert_version($note['id'], $title, $content);
-			$this->set_url($note['id'], $url);
-			$res = $this->notes->get($note['id']);
+		if(
+			!empty($id_note) &&
+			!empty($title) &&
+			!empty($url) &&
+			isset($content) 
+		 ){
+			$this->notes->insert_version($id_note, $title, $content);
+			$this->set_url($id_note, $url);
+			$res = $this->notes->get($id_note);
 			$code = $this->options->from_code($type_event, 'evenements');
-			if ( empty($this->get_event($note['id'])) ){
-				$this->set_event($note['id'], [
+			if ( empty($this->get_event($id_note)) ){
+				$this->set_event($id_note, [
 					'name' => $title,
 					'id_type' => $code,
 					'start' => $start,
@@ -133,16 +139,16 @@ class cms extends bbn\models\cls\db
 				]);
 			}
 			else{
-				$this->update_event($note['id'], [
+				$this->update_event($id_note, [
 					'name' => $title,
 					'id_type' => $code,
 					'start' => $start,
 					'end' => $end,
 				]);
 			}
-			$res['event'] = $this->get_event($note['id']);
-			
-		}
+			$res['event'] = $this->get_event($id_note);
+		 }
+		return $res; 
 	}
 	
 

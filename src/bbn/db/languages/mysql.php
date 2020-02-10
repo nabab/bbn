@@ -826,7 +826,7 @@ MYSQL
           }
           if (!empty($cfg['having'])) {
             if (count($indexes) === count($cfg['group_by'])){
-              $res .= 'COUNT('.bbn\x::join($idxs, ',').') FROM ( SELECT ';
+              $res .= 'COUNT(*) FROM ( SELECT ';
               $tmp = [];
               if ($extracted_fields = $this->db->extract_fields($cfg, $cfg['having']['conditions'])) {
                 //die(var_dump($extracted_fields));
