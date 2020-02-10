@@ -137,7 +137,7 @@ class controller implements api{
       // a second JSON encoded can be used as $this->post
       /** @var bbn\db db */
       $this->db = $this->_mvc->get_db();
-      $this->inc = $this->_mvc->inc;
+      $this->inc = &$this->_mvc->inc;
       $this->post = $this->_mvc->get_post();
       $this->get = $this->_mvc->get_get();
       $this->files = $this->_mvc->get_files();
@@ -1086,13 +1086,12 @@ class controller implements api{
   /**
    * Adds a property to the MVC object inc if it has not been declared.
    *
-   * @return bool
+   * @return self
    */
   public function add_inc($name, $obj)
   {
-    if ( !isset($this->inc->{$name}) ){
-      $this->inc->{$name} = $obj;
-    }
+    $this->_mvc->add_inc($name, $obj);
+    return $this;
   }
 
   public function has_arguments(int $num = 1)

@@ -380,7 +380,7 @@ class mvc implements mvc\api{
 	 * This should be called only once from within the app
 	 *
 	 * @param object | string $db The database object if there is
-	 * @param array $routes An array of routes usually defined in /_appui/current/config/routes.php</em>
+	 * @param array $routes An array of routes usually defined in /_appui/current/cfg/routes.json</em>
 	 */
 	public function __construct($db = null, $routes = []){
     self::singleton_init($this);
@@ -396,6 +396,9 @@ class mvc implements mvc\api{
     $this->o = $this->inc;
     if ( \is_array($routes) && isset($routes['root']) ){
       foreach ( $routes['root'] as $url => &$route ){
+        if (isset($route['root']) && defined('BBN_'.strtoupper($route['root']).'_PATH')) {
+          $route['path'] = constant('BBN_'.strtoupper($route['root']).'_PATH').$route['path'];
+        }
         if ( !empty($route['path']) && (substr($route['path'], -1) !== '/') ){
           $route['path'] .= '/';
         }

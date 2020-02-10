@@ -192,16 +192,17 @@ class router
    */
   private function _is_alias(string $path): ?string
   {
-    $path = self::parse($path);
-    if (isset($this->_routes['alias'][$path])) {
-      return $path;
-    }
-    foreach (array_keys($this->_routes['alias']) as $p) {
-      if (strpos($path, $p . '/') === 0) {
-        return $p;
+    if (!empty($this->_routes['alias'])) {
+      $path = self::parse($path);
+      if (isset($this->_routes['alias'][$path])) {
+        return $path;
+      }
+      foreach (array_keys($this->_routes['alias']) as $p) {
+        if (strpos($path, $p . '/') === 0) {
+          return $p;
+        }
       }
     }
-
     return null;
   }
 

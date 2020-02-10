@@ -366,7 +366,23 @@ You can click the following link to access directly your account:<br>
       }
     }
 		return false;
-	}
+  }
+  
+  public function send_mail(string $id_user, string $subject, string $text, array $attachments = []): ?int
+  {
+    if ( !$this->get_mailer() ){
+      die("Impossible to make hotlinks without a proper mailer parameter");
+    }
+    if ( ($usr = $this->get_user($id_user)) && $usr['email']){
+      return $this->mailer->send([
+        'to' => $usr['email'],
+        'subject' => $subject,
+        'text' => $text,
+        'attachments' => $attachments
+      ]);
+    }
+    return null;
+  }
   
   /**
    *
@@ -376,9 +392,6 @@ You can click the following link to access directly your account:<br>
    * @return manager
    */
   public function make_hotlink($id_user, $message='hotlink', $exp=null){
-    if ( !$this->get_mailer() ){
-      die("Impossible to make hotlinks without a proper mailer parameter");
-    }
     if ( !isset($this->messages[$message]) || empty($this->messages[$message]['link']) ){
       die("Impossible to make hotlinks without a link configured");
     }
@@ -404,12 +417,11 @@ You can click the following link to access directly your account:<br>
       ]);
       $id_link = $this->db->last_id();
       $link = "?id=$id_link&key=".$magic['key'];
-      $this->mailer->send([
-        'to' => $usr['email'],
-        'subject' => $this->messages[$message]['subject'],
-        'text' => sprintf($this->messages[$message]['text'],
-                sprintf($this->messages[$message]['link'], $link))
-      ]);
+      $this->send_mail(
+        $id_user,
+        $this->messages[$message]['subject'],
+        sprintf($this->messages[$message]['text'], sprintf($this->messages[$message]['link'], $link))
+      );
     }
     else{
       die("User $id_user not found");

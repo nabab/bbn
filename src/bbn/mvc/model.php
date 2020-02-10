@@ -80,7 +80,7 @@ class model extends bbn\models\cls\db{
       $this->cache_init();
       $this->_ctrl = $ctrl;
       $this->_mvc = $mvc;
-			$this->inc = $this->_ctrl->inc;
+			$this->inc = &$mvc->inc;
       if ( is_file($info['file']) ){
         $this->_path = $info['path'];
         $this->_file = $info['file'];
@@ -188,6 +188,18 @@ class model extends bbn\models\cls\db{
   public function plugin_url(){
     return $this->_ctrl->plugin_url(...\func_get_args());
   }
+
+  /**
+   * Adds a property to the MVC object inc if it has not been declared.
+   *
+   * @return self
+   */
+  public function add_inc($name, $obj)
+  {
+    $this->_mvc->add_inc($name, $obj);
+    return $this;
+  }
+
   /**
 	 * Checks if data exists or if a specific index exists in the data
 	 *
