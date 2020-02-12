@@ -176,6 +176,7 @@ class mysql implements bbn\db\engines
   }
 
   /**
+   * Changes the current database to the given one.
    * @param string $db The database name or file
 	 * @return bool
 	 */
@@ -311,6 +312,7 @@ class mysql implements bbn\db\engines
   }
 
   /**
+   * Returns true if the given string is the full name of a table ('database.table').
    * @param string $table
    * @return bool
    */
@@ -320,6 +322,7 @@ class mysql implements bbn\db\engines
   }
 
   /**
+   * Returns true if the given string is the full name of a column ('table.column').
    * @param string $col
    * @return bool
    */
@@ -329,7 +332,7 @@ class mysql implements bbn\db\engines
   }
 
   /**
-   * Disable foreign keys check
+   * Disables foreign keys check.
    *
    * @return bbn\db
    */
@@ -340,7 +343,7 @@ class mysql implements bbn\db\engines
   }
 
   /**
-   * Enable foreign keys check
+   * Enables foreign keys check.
    *
    * @return bbn\db
    */
@@ -395,6 +398,7 @@ class mysql implements bbn\db\engines
 	}
 
 	/**
+   * Returns the columns' configuration of the given table.
    * @param null|string $table The table's name
    * @return null|array
 	 */
@@ -489,6 +493,7 @@ MYSQL;
 	}
 
 	/**
+   * Returns the keys of the given table.
    * @param string $table The table's name
    * @return null|array
 	 */
@@ -858,7 +863,7 @@ MYSQL
           }
           else{
             if (count($indexes) === count($cfg['group_by'])){
-              $res .= 'COUNT('.bbn\x::join($idxs, ',').') FROM ( SELECT ';
+              $res .= 'COUNT(*) FROM ( SELECT ';
               $cfg['fields'] = $indexes;
             }
             else{
@@ -942,6 +947,7 @@ MYSQL
   }
 
   /**
+   * Generates a string for the insert from a cfg array.
    * @param array $cfg The configuration array
    * @return string
    */
@@ -1422,12 +1428,25 @@ MYSQL
    * @param string $collation
    * @return bool
    */
-  public function create_database(string $database, string $enc = 'utf8', string $collation = 'utf8_general_ci'): bool
+  public function create_mysql_database(string $database, string $enc = 'utf8', string $collation = 'utf8_general_ci'): bool
   {
     if ( bbn\str::check_name($database, $enc, $collation) ){
 			return (bool)$this->db->raw_query("CREATE DATABASE IF NOT EXISTS `$database` DEFAULT CHARACTER SET $enc COLLATE $collation;");
     }
     return false;
+  }
+
+  /**
+   * Creates a database
+   *
+   * @param string $database
+   * @param string $enc
+   * @param string $collation
+   * @return bool
+   */
+  public function create_database(string $database): bool
+  {
+    return $this->create_mysql_database($database);
   }
 
 	/**

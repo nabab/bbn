@@ -118,6 +118,9 @@ class x
       if ( is_dir(BBN_DATA_PATH.'logs') ){
         $file = BBN_DATA_PATH.'logs/_php_error.json';
         $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20);
+        foreach ($backtrace as &$b) {
+          $b['file'] = str_replace(BBN_APP_PATH, '', $b['file']);
+        }
         $r = false;
         if ( is_file($file) ){
           $r = json_decode(file_get_contents($file), 1);
@@ -129,6 +132,7 @@ class x
         if ( class_exists('\\bbn\\mvc') ){
           $mvc = mvc::get_instance();
         }
+        $errfile = str_replace(BBN_APP_PATH, '', $errfile);
         $idx = self::find($r, [
           'type' => $errno,
           'error' => $errstr,

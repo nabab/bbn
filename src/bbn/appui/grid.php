@@ -376,7 +376,14 @@ class grid extends bbn\models\cls\cache
       //die(bbn\x::dump($this->db->select_one($this->count_cfg), $this->db->last(), $this->count_cfg, $this->num, $this->db->last_params));
       if (!BBN_IS_PROD) {
         $r['query'] = $this->db->last();
+        $r['queryValues'] = array_map(function($a){
+          if (\bbn\str::is_buid($a)) {
+            return bin2hex($a);
+          }
+          return $a;
+        }, $this->db->get_last_values());
       }
+      //die(var_dump($r['query']));
     }
     if ( !$this->db->check() ){
       $r['success'] = false;

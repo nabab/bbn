@@ -319,6 +319,10 @@ class router
             $tmp = '';
           }
         }
+        // Particular case where it's CLI: we want the first _ctrl to be executed
+        if (($mode === 'cli') && is_file($this->_get_root('public').$checker_file)) {
+          array_unshift($s['checkers'], $this->_get_root('public').$checker_file);
+        }
       }
     }
     if (!$save) {

@@ -269,7 +269,8 @@ class sqlite implements bbn\db\engines
    */
   public function is_table_full_name(string $table): bool
   {
-    return true;
+    //return true;
+    return strpos($table, '.') ? true : false;
   }
 
   /**
@@ -1017,7 +1018,8 @@ SQLITE
     }
     $name = bbn\str::cut($name, 50);
 		if ( $table = $this->table_full_name($table, 1) ){
-			return (bool)$this->db->query('CREATE '.( $unique ? 'UNIQUE ' : '' )."INDEX `$name` ON $table ( ".implode(', ', $column).' )');
+      $query = 'CREATE '.( $unique ? 'UNIQUE ' : '' )."INDEX `$name` ON $table ( ".implode(', ', $column).' );';
+     	return (bool)$this->db->query($query);
 		}
 		return false;
 	}
@@ -1043,11 +1045,16 @@ SQLITE
    * @param string $database
    * @return bool
    */
+  
   public function create_database(string $database): bool
-  {
+  {/*
     if ( bbn\str::check_filename($database) ){
+      fopen($this->db->host.$database, 'w');
+      
+      
+      return (bool)$this->db->raw_query("CREATE DATABASE IF NOT EXISTS `$database` DEFAULT CHARACTER SET $enc COLLATE $collation;");
 			return $this->db->change($database);
-    }
+    }*/
     return false;
   }
 
@@ -1112,4 +1119,47 @@ SQLITE
   {
     return bbn\x::make_uid();
   }
+  
+  public function create_table($table_name, array $columns, array $keys = null, bool $with_constraints = false, string $charset = 'UTF-8', $engine = 'sqlite')
+  {
+    $lines = [];
+    $sql = '';
+    foreach ( $columns as $n => $c ){
+      $name = $c['name'] ?? $n;
+      if ( isset($c['type']) && bbn\str::check_name($name) ){
+        $st = $this->col_simple_name($name, true).' '.$c['type'];
+        if ( !empty($c['maxlength']) ){
+          $st .= '('.$c['maxlength'].')';
+        }
+        else if ( !empty($c['values']) && \is_array($c['values']) ){
+          $st .= '(';
+          foreach ( $c['values'] as $i => $v ){
+            $st .= "'".bbn\str::escape_squotes($v)."'";
+            if ( $i < count($c['values']) - 1 ){
+              $st .= ',';
+            }
+          }
+          $st .= ')';
+        }
+        if ( (strpos($c['type'], 'int') !== false) && empty($c['signed']) ){
+          $st .= ' UNSIGNED';
+        }
+        if ( empty($c['null']) ){
+          $st .= ' NOT NULL';
+        }
+        if ( isset($c['default']) ){
+          $st .= ' DEFAULT '.($c['default'] === 'NULL' ? 'NULL' : "'".bbn\str::escape_squotes($c['default'])."'");
+        }
+        $lines[] = $st;
+      }
+    }
+    if ( count($lines) ){
+      $sql = 'CREATE TABLE '.$this->table_simple_name($table_name, true).' ('.PHP_EOL.implode(','.PHP_EOL, $lines).
+        PHP_EOL.'); PRAGMA encoding='.$this->qte.$charset.$this->qte.';';
+    }
+    return $sql;
+  }
+  
+
+
 }

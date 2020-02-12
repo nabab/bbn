@@ -12,13 +12,14 @@ class dbsync
            */
           $db = false,
           $dbs = false,
+          $has_history = false,
           $tables = [],
           $dbs_table = 'dbsync';
 
   protected static $methods = [];
 
   private static
-          $has_history = false,
+          $_is_init = false,
           $default_cfg = [
             'engine' => 'sqlite',
             'host' => 'localhost',
@@ -82,6 +83,7 @@ class dbsync
     self::$db = $db;
     self::def($dbs, $dbs_table);
     self::$tables = $tables;
+    self::$_is_init = true;
     if ( \count(self::$tables) === 0 ){
       self::$tables = self::$db->get_tables();
     }
@@ -95,7 +97,12 @@ class dbsync
             ['before', 'after'],
             self::$tables);
     }
-	}
+  }
+  
+  public static function is_init()
+  {
+    return self::$_is_init;
+  }
 
   public static function first_call(){
     if ( \is_array(self::$dbs) ){
@@ -215,8 +222,11 @@ MYSQL
   // Looking at the rows from the other DB with status = 0 and setting them to 1
   // Comparing the new rows with the ones from this DB
   // Deleting the rows from this DB which have state = 1
-  public static function sync(bbn\db $db, $dbs='', $dbs_table='', $num_try = 0){
-
+  public static function sync(bbn\db $db, $dbs='', $dbs_table='', $num_try = 0)
+  {
+    if (!self::is_init()) {
+      die("DB sync is not initiated");
+    }
     if ( !$num_try ){
       self::def($dbs, $dbs_table);
       self::first_call();

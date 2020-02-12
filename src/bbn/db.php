@@ -774,22 +774,42 @@ class db extends \PDO implements db\actions, db\api, db\engines
               $join['alias'] = $k;
             }
           }
-          if ( isset($join['table'], $join['on']) && ($tmp = $this->treat_conditions($join['on'])) ){
+          if ( isset($join['table'], $join['on']) && ($tmp = $this->treat_conditions($join['on'], false)) ){
             if ( !isset($join['type']) ){
               $join['type'] = 'right';
             }
-            $res['join'][] = array_merge($join, ['on' => $tmp['where']]);
-            $res['hashed_join'][] = $tmp['hashed'];
-            if ( !empty($tmp['values']) ){
-              foreach ( $tmp['values'] as $v ){
-                $res['values'][] = $v;
-              }
-            }
+            $res['join'][] = array_merge($join, ['on' => $tmp]);
           }
         }
       }
     }
-    if ( $tmp = $this->treat_conditions($res['where']) ){
+    if ( $tmp = $this->treat_conditions($res['where'], false) ){
+      $res['filters'] = $tmp;
+    }
+    if ( !empty($res['having']) && ($tmp = $this->treat_conditions($res['having'], false)) ){
+      $res['having'] = $tmp;
+    }
+    if (!empty($res['group_by'])) {
+      $this->_adapt_filters($res);
+    }
+    if (!empty($res['join'])) {
+      $new_join = [];
+      foreach ( $res['join'] as $k => $join ){
+        if ($tmp = $this->treat_conditions($join['on'])){
+          $new_item = $join;
+          $new_item['on'] = $tmp['where'];
+          $res['hashed_join'][] = $tmp['hashed'];
+          if ( !empty($tmp['values']) ){
+            foreach ( $tmp['values'] as $v ){
+              $res['values'][] = $v;
+            }
+          }
+          $new_join[] = $new_item;
+        }
+      }
+      $res['join'] = $new_join;
+    }
+    if ( !empty($res['filters']) && ($tmp = $this->treat_conditions($res['filters'])) ){
       $res['filters'] = $tmp['where'];
       $res['hashed_where'] = $tmp['hashed'];
       if ( \is_array($tmp) && isset($tmp['values']) ){
@@ -804,9 +824,6 @@ class db extends \PDO implements db\actions, db\api, db\engines
       foreach ( $tmp['values'] as $v ){
         $res['values'][] = $v;
       }
-    }
-    if (!empty($cfg['group_by'])) {
-      $this->_adapt_filters($res);
     }
     $res['hash'] = $cfg['hash'] ?? $this->_make_hash(
       $res['kind'],
@@ -889,7 +906,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
           if (isset($cfg['aliases'][$c['field']])) {
             $c['field'] = $cfg['aliases'][$c['field']];
           }
-          else if (isset($cfg['aliases'][$c['exp']])) {
+          else if (isset($c['exp'], $cfg['aliases'][$c['exp']])) {
             $c['exp'] = $cfg['aliases'][$c['exp']];
           }
           $having['conditions'][] = $c;
@@ -2346,18 +2363,22 @@ class db extends \PDO implements db\actions, db\api, db\engines
     if ( $this->parser === null ){
       $this->parser = new \PHPSQLParser\PHPSQLParser();
     }
+    $done = false;
     try {
       $r = $this->parser->parse($statement);
-      if ( !count($r) ){
+      $done = 1;
+    }
+    catch ( \Exception $e ){
+      $this->log('Impossible to parse the query '.$statement);
+    }
+    if ($done) {
+      if (!$r || !count($r) ){
         return null;
       }
       if ( isset($r['BRACKET']) && (\count($r) === 1) ){
         return null;
       }
       return $r;
-    }
-    catch ( \Exception $e ){
-      $this->log('Impossible to parse the query '.$statement);
     }
     return null;
   }
@@ -3590,7 +3611,6 @@ class db extends \PDO implements db\actions, db\api, db\engines
       while ( (\count($args) === 1) && \is_array($args[0]) ){
         $args = $args[0];
       }
-
       if ( !empty($args[0]) && \is_string($args[0]) ){
 
         // The first argument is the statement
@@ -3640,7 +3660,6 @@ class db extends \PDO implements db\actions, db\api, db\engines
             $num_values++;
           }
         }
-
         if ( !isset($this->queries[$hash]) ){
           /** @var int $placeholders The number of placeholders in the statement */
           $placeholders = 0;
@@ -4839,6 +4858,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
   public function get_last_params(): ?array
   {
     return $this->last_params;
+  }
+
+  public function get_last_values(): ?array
+  {
+    return $this->last_params ? $this->last_params['values'] : null;
   }
 
 }

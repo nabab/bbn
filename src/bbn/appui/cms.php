@@ -219,8 +219,10 @@ class cms extends bbn\models\cls\db
 	{
 		if ( $note = $this->notes->get($id_note) ){
 			$this->unpublish($note['id']);
+			if ( $this->get_url($id_note) ){
+				$this->remove_url($id_note);
+			}
 			if(
-				$this->remove_url($note['id']) &&
 				$this->notes->remove($note['id']) 
 			){
 				return true;
@@ -366,18 +368,7 @@ class cms extends bbn\models\cls\db
 	{
 		$note = $this->notes->get($id_note);
 		$event = $this->get_event($id_note);
-		return $this->db->update(
-			$this->class_cfg['table'],
-			[ 
-				$this->fields['id_parent'] => ((!empty($cfg['id_parent']) && ($cfg['id_parent'] !== $event['id_parent']) ) ? $cfg['id_parent'] : $event['id_parent']),
-				$this->fields['id_type'] => ((!empty($cfg['id_type']) && ($cfg['id_type'] !== $event['id_type']) ) ? $cfg['id_type'] : $event['id_type']),
-				$this->fields['start'] => ((!empty($cfg['start']) && ($cfg['start'] !== $event['start']) ) ? $cfg['start'] : $event['start']),
-				$this->fields['end'] => ((!empty($cfg['end']) && ($cfg['end'] !== $event['end']) ) ? $cfg['end'] : $event['end'])
-			],
-			[
-				$this->fields['id'] => $event['id']
-			]	
-		);
+		return $this->events->edit($event['id'], $cfg);
 	}
 
 	/**
