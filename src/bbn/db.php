@@ -2369,13 +2369,15 @@ class db extends \PDO implements db\actions, db\api, db\engines
       $done = 1;
     }
     catch ( \Exception $e ){
-      $this->log('Impossible to parse the query '.$statement);
+      $this->log('Error while parsing the query '.$statement);
     }
     if ($done) {
       if (!$r || !count($r) ){
+        $this->log('Impossible to parse the query '.$statement);
         return null;
       }
       if ( isset($r['BRACKET']) && (\count($r) === 1) ){
+        $this->log('Bracket in the query '.$statement);
         return null;
       }
       return $r;
