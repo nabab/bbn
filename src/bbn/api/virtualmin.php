@@ -140,7 +140,7 @@ class virtualmin {
       // We force even if we don't have the command in the list
       else {
         if ( !empty($arguments) ){
-          $args = $this->process_parameters($arguments[0]);          
+          $args = $this->process_parameters($arguments[0]);
         }
         $url_part = $cmd_name;
         //todo
