@@ -132,7 +132,7 @@ class notes extends bbn\models\cls\db
       if ( !$latest || ($note['content'] !== $content) || ($note['title'] !== $title) ) {
         $next = $latest + 1;
       }
-      if ($next && $this->db->insert($cf['tables']['versions'], [
+      if (isset($next) && $this->db->insert($cf['tables']['versions'], [
         $cf['arch']['versions']['id_note'] => $id_note,
         $cf['arch']['versions']['version'] => $next,
         $cf['arch']['versions']['title'] => $title,

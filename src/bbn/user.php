@@ -95,7 +95,8 @@ class user extends models\cls\basic
         'admin' => 'admin',
         'dev' => 'dev',
         'cfg' => 'cfg',
-        'active' => 'active'
+        'active' => 'active',
+        'enckey' => 'enckey'
       ],
     ],
     'fields' => [
@@ -137,7 +138,9 @@ class user extends models\cls\basic
   ];
 
   /** @var bool Will be true when the user has just logged in. */
-  private $just_login = false;
+  private $_just_login = false;
+
+  private $_encryption_key = null;
 
   /** @var user\session */
  	protected $session = null;
@@ -258,6 +261,10 @@ class user extends models\cls\basic
   private function _user_info(array $data = null): self
   {
     if ( $this->get_id() ){
+      // Removing the encryption key to prevent it being saved in the session
+      if (isset($this->fields['enckey'])) {
+        unset($this->fields['enckey']);
+      }
       if ( !empty($this->get_session('cfg')) ){
         $this->cfg = $this->get_session('cfg');
         $this->id_group = $this->get_session('id_group');
@@ -283,6 +290,16 @@ class user extends models\cls\basic
       }
     }
     return $this;
+  }
+
+  private function _get_encryption_key(): ?string
+  {
+    if (is_null($this->_encryption_key)) {
+      if ($this->auth) {
+        $this->_encryption_key = $this->db->select_one($this->class_cfg['table'], $this->class_cfg['arch']['users']['enckey'], ['id' => $this->id]);
+      }
+    }
+    return $this->_encryption_key;
   }
 
   /**
@@ -527,7 +544,7 @@ class user extends models\cls\basic
           // Table structure
           $arch =& $this->class_cfg['arch'];
 
-          $this->just_login = 1;
+          $this->_just_login = 1;
           if ( !$this->check() ){
             $this->set_error(19);
             //$this->session->destroy();
@@ -927,7 +944,7 @@ class user extends models\cls\basic
    */
   public function is_just_login()
   {
-    return $this->just_login;
+    return $this->_just_login;
   }
 
 	/**
@@ -1433,6 +1450,22 @@ class user extends models\cls\basic
           return $dest;
         }
       }
+    }
+    return null;
+  }
+
+  public function crypt(string $st): ?string
+  {
+    if ($enckey = $this->_get_encryption_key()) {
+      return util\enc::crypt($st, $enckey) ?: null;
+    }
+    return null;
+  }
+
+  public function decrypt(string $st): ?string
+  {
+    if ($enckey = $this->_get_encryption_key()) {
+      return util\enc::decrypt($st, $enckey) ?: null;
     }
     return null;
   }

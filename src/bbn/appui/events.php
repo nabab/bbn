@@ -145,9 +145,8 @@ class events extends bbn\models\cls\db
 
   public function insert(array $event): ?string
   {
-    
     $f =& $this->fields;
-    if ( bbn\x::has_props($event, [$f['id_type'], $f['start']], true) ){
+    if ( (bbn\x::has_props($event, [$f['id_type']], true) ) && (array_key_exists($this->fields['start'], $event))){
       if ( 
         !empty($event[$f['cfg']]) &&
         !\bbn\str::is_json($event[$f['cfg']])

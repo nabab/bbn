@@ -21,6 +21,13 @@ class databases extends bbn\models\cls\cache
   protected $o;
 
   /**
+   * The options object.
+   *
+   * @var passwords
+   */
+  protected $pw;
+
+  /**
    * The last alternative connection made with the connection function.
    * This is a longer description.
    * <code>
@@ -30,6 +37,14 @@ class databases extends bbn\models\cls\cache
    * @var bbn\db
    */
   protected $db_alt;
+
+  protected function get_password($id_option)
+  {
+    if (!$this->pw) {
+      $this->pw = new passwords($this->db);
+    }
+    return $this->pw->get($id_option);
+  }
 
   /**
    * Constructor
@@ -55,14 +70,14 @@ class databases extends bbn\models\cls\cache
     $id_host = !bbn\str::is_uid($host) ? $this->host_id($host) : $host;
     if ($id_host && ($cfg = $this->o->option($id_host))) {
       $cfg = $this->o->option($id_host);
-      if (isset($cfg['pass']) && strpos($cfg['code'], '@')) {
+      if (strpos($cfg['code'], '@')) {
         $bits = bbn\x::split($cfg['code'], '@');
-        if (count($bits) === 2) {
+        if ((count($bits) === 2) && ($password = $this->get_password($id_host))) {
           $db = [
             'user' => $bits[0],
             'host' => $bits[1],
             'db' => $db,
-            'pass' => $cfg['pass']
+            'pass' => $password
           ];
         }
         else {
@@ -885,7 +900,7 @@ class databases extends bbn\models\cls\cache
               $tables = $this->connection($host_id, $db)->get_tables();
               if (!empty($tables)) {
                 foreach ($tables as $t) {
-                  $this->import_table($t, $id_db);
+                  $this->import_table($t, $id_db, $host_id);
                 }
               }
             }

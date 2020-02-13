@@ -30,15 +30,6 @@ class enc
     return hash( 'sha256', $key);
   }
 
-  private static function _get_iv($size){
-    $key = \defined('BBN_ENCRYPTION_KEY') ? BBN_ENCRYPTION_KEY : self::$salt;
-    return substr(hash( 'sha256', 'bbn_'.$key), 0, $size);
-  }
-
-  private static function _get_size($method){
-    return openssl_cipher_iv_length($method);
-  }
-
   private static function _sshEncodePublicKey($privKey) {
     $keyInfo = openssl_pkey_get_details($privKey);
     $buffer  = pack("N", 7) . "ssh-rsa" .

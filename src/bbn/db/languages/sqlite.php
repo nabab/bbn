@@ -995,7 +995,7 @@ SQLITE
    * @param null $length
    * @return bool
    */
-  public function create_index(string $table, $column, bool $unique = false, $length = null): bool
+  public function create_index(string $table, $column, bool $unique = false, $length = null, $order = null): bool
 	{
     if ( !\is_array($column) ){
       $column = [$column];
@@ -1018,8 +1018,15 @@ SQLITE
     }
     $name = bbn\str::cut($name, 50);
 		if ( $table = $this->table_full_name($table, 1) ){
-      $query = 'CREATE '.( $unique ? 'UNIQUE ' : '' )."INDEX `$name` ON $table ( ".implode(', ', $column).' );';
-     	return (bool)$this->db->query($query);
+      $query = 'CREATE '.( $unique ? 'UNIQUE ' : '' )."INDEX `$name` ON $table ( ".implode(', ', $column);
+      if ( ($order === "ASC") || ($order === "DESC") ){
+        $query .= ' '. $order .' );';
+      }
+      else{
+        $query .= ' );';
+      }
+      \bbn\x::log(['index', $query],'vito');
+     	return (bool)$this->db->raw_query($query);
 		}
 		return false;
 	}
@@ -1047,16 +1054,20 @@ SQLITE
    */
   
   public function create_database(string $database): bool
-  {/*
+  {
+  /*
     if ( bbn\str::check_filename($database) ){
       fopen($this->db->host.$database, 'w');
       
       
       return (bool)$this->db->raw_query("CREATE DATABASE IF NOT EXISTS `$database` DEFAULT CHARACTER SET $enc COLLATE $collation;");
 			return $this->db->change($database);
-    }*/
+    }*/    
     return false;
   }
+
+
+  
 
   /**
    * Creates a database user
@@ -1120,7 +1131,7 @@ SQLITE
     return bbn\x::make_uid();
   }
   
-  public function create_table($table_name, array $columns, array $keys = null, bool $with_constraints = false, string $charset = 'UTF-8', $engine = 'sqlite')
+  public function create_table($table_name, array $columns, array $keys = null, bool $with_constraints = false, string $charset = 'UTF-8')
   {
     $lines = [];
     $sql = '';
@@ -1154,12 +1165,66 @@ SQLITE
       }
     }
     if ( count($lines) ){
-      $sql = 'CREATE TABLE '.$this->table_simple_name($table_name, true).' ('.PHP_EOL.implode(','.PHP_EOL, $lines).
+      $sql = 'CREATE TABLE '.$this->table_simple_name($table_name, false).' ('.PHP_EOL.implode(','.PHP_EOL, $lines).
         PHP_EOL.'); PRAGMA encoding='.$this->qte.$charset.$this->qte.';';
     }
     return $sql;
   }
-  
+
+  public function create_table_sqlite($table_name, array $columns, array $keys = null, bool $with_constraints = false, string $charset = 'UTF-8')
+  {
+    $str = $this->create_table($table_name, $columns, $keys, $with_constraints, $charset);
+    if ( $str !== '' ){
+      return (bool)$this->db->raw_query($str);
+    }
+    return false;
+  }
+
+  public function get_create_constraints(string $table, array $model = null): string
+  {
+    $st = '';
+
+    if ( !empty($model) ) {
+
+      if ($last = count($model)) {
+        $st .= 'ALTER TABLE '.$this->db->escape($table).PHP_EOL;
+        $i = 0;
+
+       if ( !is_array($model[0]) ){
+         $constraints[] = $model;
+       }
+       else{
+         $constraints = $model;
+       }
+
+        foreach ($constraints as $name => $key) {
+         \bbn\x::log($key, 'vito');
+          $i++;
+          $st .= '  ADD '.
+            'CONSTRAINT '.$this->db->escape($key['constraint']).
+            ($key['foreign_key'] ? ' FOREIGN KEY ('.$this->db->escape($key['columns'][0]).') ' : '').
+            ($key['unique'] ? ' UNIQUE ('.$this->db->escape($key['ref_table'].'_'.$key['columns'][0]).') ' : '').
+            ($key['primary_key'] ? ' PRIMARY KEY ('.$this->db->escape($key['ref_table'].'_'.$key['columns'][0]).') ' : '').
+            ' FOREIGN KEY ('.$this->db->escape($key['columns'][0]).') '.
+            'REFERENCES '.$this->db->escape($table).'('.$this->db->escape($key['columns'][0]).') '.
+            ($key['delete'] ? ' ON DELETE '.$key['delete'] : '').
+            ($key['update'] ? ' ON UPDATE '.$key['update'] : '').
+            ($i === $last ? ';' : ','.PHP_EOL);
+        }
+      }
+    }
+    return $st;
+  }
+
+  public function create_constraints_sqlite(string $table, array $model = null): bool
+  {
+    $str = $this->get_create_constraints($table,  $model);
+    if ( $str !== '' ){
+      return (bool)$this->db->raw_query($str);
+    }
+    return false;
+  }
+
 
 
 }

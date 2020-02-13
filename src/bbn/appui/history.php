@@ -1244,7 +1244,7 @@ MYSQL;
               ]) ){
                 $cfg['history'][] = [
                   'operation' => 'INSERT',
-                  'column' => $s['fields'][$s['primary']]['id_option'],
+                  'column' => isset($s['fields'][$s['primary']]) ? $s['fields'][$s['primary']]['id_option'] : null,
                   'line' => $primary_value,
                   'chrono' => microtime(true)
                 ];

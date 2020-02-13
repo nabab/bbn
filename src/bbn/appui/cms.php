@@ -6,8 +6,7 @@
  * Time: 20:38
  */
 
-
-//NON POSSONO ESSERE PUBBLICATE SE NON HANNO URL E NON SI PUò CAMBIARE DATA DELL'EVENTO SE NON C'è URL 
+ //the notes inserted with appui/notes have to be type 'pages'
 namespace bbn\appui;
 use bbn;
 
@@ -17,9 +16,9 @@ class cms extends bbn\models\cls\db
     bbn\models\tts\dbconfig;
 
 	private
-    $notes,
-    $options,
-		$events;
+    $_notes,
+    $_options,
+		$_events;
 	
 	protected static  
 		$_defaults = [
@@ -72,90 +71,70 @@ class cms extends bbn\models\cls\db
 			]
 		];
 
+	private static $_id_event;
+
+	private static function _set_id_event($id) {
+		self::$_id_event = $id;
+	}
+	private function _exist_published_url(){
+		
+	}
+	/**
+	 * removes the row corresponding to the given arguments from bbn_notes_events
+	 */
+	private function _remove_note_events($id_note, $id_event): ?bool
+	{
+		return $this->db->delete(
+			$this->class_cfg['tables']['notes_events'], [
+				$this->class_cfg['arch']['notes_events']['id_event'] => $id_event,
+				$this->class_cfg['arch']['notes_events']['id_note'] => $id_note
+			]
+		);
+		return false;
+	}
+
+	/**
+	 * if the row corresponding to the given arguments is not in the table bbn_notes_events it inserts the row
+	 */
+	private function _insert_notes_events($id_note, $id_event): ?bool
+	{ 
+		if ( empty(
+			$this->db->rselect($this->class_cfg['tables']['notes_events'], [], [
+				$this->class_cfg['arch']['notes_events']['id_note'] => $id_note,
+				$this->class_cfg['arch']['notes_events']['id_event'] => $id_event,
+			])
+		) ){
+			return $this->db->insert(
+				$this->class_cfg['tables']['notes_events'],[
+					$this->class_cfg['arch']['notes_events']['id_note'] => $id_note,
+					$this->class_cfg['arch']['notes_events']['id_event'] => $id_event,
+				]
+			);
+		}
+		return false;
+	}
 	public function __construct(bbn\db $db, $notes = null){
 		parent::__construct($db);
 		$this->_init_class_cfg();
-		$this->events = new bbn\appui\events($this->db);
-		$this->options = bbn\appui\options::get_instance();
+		$this->_events = new bbn\appui\events($this->db);
+		$this->_options = bbn\appui\options::get_instance();
+		if (!self::$_id_event) {
+			$id = $this->_options->from_code('publication', 'events', 'appui');
+			self::_set_id_event($id);
+		}
 		if ( $notes === null ){
-			$this->notes = new bbn\appui\notes($this->db);
+			$this->_notes = new bbn\appui\notes($this->db);
 		}
 		else{
-			$this->notes = $notes;
+			$this->_notes = $notes;
 		}
 		
 	}
 
-	//if the note does not exists with type pages and given url it creates the note 
-	//insert a note of type pages - the note will be the parent of future posts
-	public function insert( string $title, string $url, string $type = 'pages', string $content = '' , string $start = null, string $end = null, string $type_event = 'PAGE',string $alias = null)
-	{
-		$type_page = $this->options->from_code('pages', 'types', 'notes', 'appui');
-		if ( empty($this->get($title, $url))){
-			$note = $this->notes->insert($title, $content, $type_page, false, false, null, $alias);
-			$res = [];
-			if ( empty($this->has_url($note)) ){
-				if ( $this->set_url($note, $url) ){
-					$res = $this->notes->get($note);
-					$res['url'] = $this->get_url($note);
-				}
-			}
-			if ( empty($this->get_event($note)) ){
-				$code = $this->options->from_code($type_event, 'evenements');
-				if ( $event = $this->set_event($note, [
-							'name' => $title,
-							'id_type' => $code,
-							'start' => $start,
-							'end' => $end ?: null,
-						])
-				){
-					$res['event'] = $event;
-				}
-			}
-			return $res;
-		}
-		return false;
-	}
-	
-	public function edit( string $id_note, string $title, string $url, string $type = 'pages', string $content = '' , string $start = null, string $end = null, string $type_event = 'PAGE',string $alias = null)
-	{
-		$res = [];
-		if(
-			!empty($id_note) &&
-			!empty($title) &&
-			!empty($url) &&
-			isset($content) 
-		 ){
-			$this->notes->insert_version($id_note, $title, $content);
-			$this->set_url($id_note, $url);
-			$res = $this->notes->get($id_note);
-			$code = $this->options->from_code($type_event, 'evenements');
-			if ( empty($this->get_event($id_note)) ){
-				$this->set_event($id_note, [
-					'name' => $title,
-					'id_type' => $code,
-					'start' => $start,
-					'end' => $end,
-				]);
-			}
-			else{
-				$this->update_event($id_note, [
-					'name' => $title,
-					'id_type' => $code,
-					'start' => $start,
-					'end' => $end,
-				]);
-			}
-			$res['event'] = $this->get_event($id_note);
-		 }
-		return $res; 
-	}
-	
-
 	/**
-	 * returns the object of the note
+	 * returns the note + its URL
 	 */
-	public function get(string $title, string $url)
+	public function get(string $url)
 	{
 		$res = [];
 	 	$id_note = $this->db->rselect([
@@ -169,9 +148,11 @@ class cms extends bbn\models\cls\db
 				], 
 			]
 		)['id_note'];
-		if ( !empty($id_note) && $note = $this->notes->get($id_note)){
+		if ( !empty($id_note) && $note = $this->_notes->get($id_note)){
 			$res = $note;
 			$res['url'] = $this->get_url($id_note);
+			$res['start'] = $this->get_start($id_note);
+			$res['end'] = $this->get_end($id_note);
 		}
 		return $res;
 	}
@@ -179,9 +160,9 @@ class cms extends bbn\models\cls\db
 	/**
 	 * if the argument type is not given it returns all the notes, else returns the notes of the given type
 	 */
-	function get_all(): array 
+	public function get_all(int $limit = 50, int $start = 0): array 
 	{
-		$pages = $this->notes->get_by_type($this->options->from_code('pages', 'types', 'notes', 'appui'));
+		$pages = $this->_notes->get_by_type($this->_options->from_code('pages', 'types', 'notes', 'appui'), false,$limit, $start);
 		$tmp = array_map(function($a){
 			$a['is_published'] = $this->is_published($a['id_note']);
 			$a['url'] = $this->has_url($a['id_note']) ? $this->get_url($a['id_note']) : '';
@@ -193,12 +174,12 @@ class cms extends bbn\models\cls\db
 		return $tmp; 
 	}
 
-	/**
-	 * returns the id_note from the url and the type of the note ('post', 'page')
-	 */
-	function get_by_url(string $url)
+ /**
+ * if the given url correspond to a published note returns the id
+ */
+	public function get_by_url(string $url)
 	{
-		return $this->db->select_one([
+		if ( $id_note = $this->db->select_one([
 			'table' => $this->class_cfg['tables']['notes_url'], 
 			'fields' => [$this->class_cfg['arch']['notes_url']['id_note']],
 			'where' => [
@@ -207,7 +188,12 @@ class cms extends bbn\models\cls\db
 					'value' => $url
 				]]
 			]
-		]);
+		])){
+			if ( $this->is_published($id_note) ){
+				return $id_note;
+			}
+		}
+		return null;
 	}
 	
 
@@ -217,13 +203,12 @@ class cms extends bbn\models\cls\db
 	 */
 	public function delete(string $id_note)
 	{
-		if ( $note = $this->notes->get($id_note) ){
-			$this->unpublish($note['id']);
+		if ( $note = $this->_notes->get($id_note) ){
 			if ( $this->get_url($id_note) ){
 				$this->remove_url($id_note);
 			}
 			if(
-				$this->notes->remove($note['id']) 
+				$this->_notes->remove($note['id']) 
 			){
 				return true;
 			}
@@ -254,7 +239,7 @@ class cms extends bbn\models\cls\db
 	public function get_url(string $id_note) :?string
 	{
 		if ( $this->has_url($id_note) ){
-			$note = $this->notes->get($id_note);
+			$note = $this->_notes->get($id_note);
 			return $this->db->select_one([
 				'table' => $this->class_cfg['tables']['notes_url'], 
 				'fields' => [$this->class_cfg['arch']['notes_url']['url']],
@@ -270,12 +255,14 @@ class cms extends bbn\models\cls\db
 	}
 	
 	/**
-	 * sets the url for the note if it doesn't exist or update the url
+	 * 
+	 * sets the url for the note if it doesn't exist or update the url and if doesn't exists a published note with that url
 	 */
 	public function set_url($id_note, $url): ?bool
 	{	
 		$success = false;
-		if($note = $this->notes->get($id_note)){
+		$idx = \bbn\x::find($this->get_full_published(), ['url' => $url]);
+		if ( $note = $this->_notes->get($id_note)  && empty($idx) ){
 			if ( empty($this->db->rselect([
 				'table' => $this->class_cfg['tables']['notes_url'], 
 				'fields' => [$this->class_cfg['arch']['notes_url']['url']],
@@ -285,8 +272,7 @@ class cms extends bbn\models\cls\db
 						'value' => $id_note
 					]]
 				]
-				])['url']
-				)
+				])['url']) 
 			){
 				$success = $this->db->insert(
 					$this->class_cfg['tables']['notes_url'],
@@ -304,10 +290,10 @@ class cms extends bbn\models\cls\db
 						$this->class_cfg['arch']['notes_url']['id_note'] => $id_note
 					]
 				);
+				
 			}
-			return $success;
 		}
-		
+		return $success;
 	}
 
 	/**
@@ -319,7 +305,7 @@ class cms extends bbn\models\cls\db
 		if ( $this->is_published($id_note) ){
 			$this->unpublish($id_note);
 		} 
-		if ( $note = $this->notes->get($id_note)){
+		if ( $note = $this->_notes->get($id_note)){
 			if ( $this->db->delete([
 				'table' => $this->class_cfg['tables']['notes_url'], 
 				'where' => [
@@ -356,7 +342,7 @@ class cms extends bbn\models\cls\db
 					)
 			){
 				//if the event is not in bbn_notes_events it inserts the row
-				$this->insert_notes_events($id_note, $id_event);
+				$this->_insert_notes_events($id_note, $id_event);
 				$event['id_note'] = $id_note;
 				return $event;
 			}
@@ -366,9 +352,20 @@ class cms extends bbn\models\cls\db
 
 	public function update_event($id_note, $cfg = []): ?bool
 	{
-		$note = $this->notes->get($id_note);
-		$event = $this->get_event($id_note);
-		return $this->events->edit($event['id'], $cfg);
+		if ($this->_check_date($cfg['start'], $cfg['end'])){
+			$event = $this->get_event($id_note);
+			if ( 
+				(strtotime($cfg['start']) !== strtotime($event['start']) ) || 
+				(strtotime($cfg['end']) !== strtotime($event['end']) )
+			){
+				$cfg['id_type'] = self::$_id_event;
+				$note = $this->_notes->get($id_note);
+				return $this->_events->edit($event['id'], $cfg);
+			}
+			else{
+				return true;
+			}
+		}
 	}
 
 	/**
@@ -394,19 +391,31 @@ class cms extends bbn\models\cls\db
 		return null;
 	}
 
+	private function _check_date($start, $end): bool
+	{
+		if ( isset($start) ){
+			if ( !isset($end) || strtotime($end) > strtotime($start) ){
+				return true;
+			}
+		}
+		else {
+			return true;
+		}
+		return false;
+	}
+	
 	public function set_event(string $id_note,array $cfg = null){
-		if ( $note = $this->notes->get($id_note) ){
+		if ( $note = $this->_notes->get($id_note) && ($this->_check_date($cfg['start'], $cfg['end']) )){
 			$title = $note['title'];
 			if ( empty($this->get_event($id_note)) ){
 				//if a type is not given it inserts the event as page
-				$type_event = $this->options->from_code('PAGE', 'evenements');
-				if ( $id_event = $this->events->insert([
+				if ( $id_event = $this->_events->insert([
 					'name' => $title,
-					'id_type' => $cfg['id_type'] ?: $type_event,
+					'id_type' => $cfg['id_type'] ?: self::$_id_event,
 					'start' => $cfg['start'],
 					'end' => $cfg['end'] ?: null,
 				]) ){
-					return $this->insert_notes_events($id_note, $id_event);
+					return $this->_insert_notes_events($id_note, $id_event);
 				}
 			}
 			else {
@@ -419,9 +428,9 @@ class cms extends bbn\models\cls\db
 	}
 
 	/**
-	 * Returns published notes
+	 * Returns all notes that has a link with bbn_events
 	 */
-	public function get_full_published() :?array
+	public function get_full() :?array
 	{
 		//select all events
 		$events = $this->db->rselect_all($this->class_cfg['table']);
@@ -431,7 +440,7 @@ class cms extends bbn\models\cls\db
 			foreach ($events as $e){
 				//takes events without end date of with end date > now
 				if ( 
-					isset($e['start']) && 
+					array_key_exists($this->fields['start'], $e) && 
 					( is_null($e['end']) || (strtotime($e['end']) > $now) )
 				){
 					//gets the note correspondant to the id_event and push it in $res
@@ -440,13 +449,26 @@ class cms extends bbn\models\cls\db
 						$this->class_cfg['arch']['notes_events']['id_event'] => $e['id']
 					]);
 					if ( $this->has_url($id_note)){
-						$res[] = $this->notes->get($id_note);
+						$note = $this->_notes->get($id_note);
+						$note['url'] = $this->get_url($id_note);
+						$note['start'] = $this->get_start($id_note);
+						$note['end'] = $this->get_end($id_note);
+						$res[] = $note;
 					}
 				}
 			}
 		}
 		return $res;
 	}
+	public function get_full_published(){
+		if ( ($full = $this->get_full()) ){
+		  return array_filter($full, function($a){
+				return $a['start'] !== null;
+			});
+		}
+		return [];
+	}
+
 	/**
 	 * if the note has a corresponding event in bbn_events and the date of start is before now, and the date of end if isset is after now and the note has an url it returns true
 	 * 
@@ -467,75 +489,32 @@ class cms extends bbn\models\cls\db
 	}
 
 	/**
-	 * removes the row corresponding to the given arguments from bbn_notes_events
-	 */
-	public function remove_note_events($id_note, $id_event): ?bool
-	{
-		return $this->db->delete(
-			$this->class_cfg['tables']['notes_events'], [
-				$this->class_cfg['arch']['notes_events']['id_event'] => $id_event,
-				$this->class_cfg['arch']['notes_events']['id_note'] => $id_note
-			]
-		);
-		return false;
-	}
-
-	/**
-	 * if the row corresponding to the given arguments is not in the table bbn_notes_events it inserts the row
-	 */
-	public function insert_notes_events($id_note, $id_event): ?bool
-	{ 
-		if ( empty(
-			$this->db->rselect($this->class_cfg['tables']['notes_events'], [], [
-				$this->class_cfg['arch']['notes_events']['id_note'] => $id_note,
-				$this->class_cfg['arch']['notes_events']['id_event'] => $id_event,
-			])
-		) ){
-			return $this->db->insert(
-				$this->class_cfg['tables']['notes_events'],[
-					$this->class_cfg['arch']['notes_events']['id_note'] => $id_note,
-					$this->class_cfg['arch']['notes_events']['id_event'] => $id_event,
-				]
-			);
-		}
-		return false;
-	}
-
-	
-	/**
 	 * publish a note
 	 */
-	public function publish(string $id_note, string $url = '', $start = null, $end = null, string $type_event = null, $id_parent = null) :?bool
+	public function publish(string $id_note,array $cfg) :?bool
 	{
 		if (
 			 !$this->is_published($id_note) && 
-			 ( $note = $this->notes->get($id_note) ) 
+			 ( $note = $this->_notes->get($id_note) ) 
 		){
 			//if $url is given it updates the note_url
-			if ( !empty($url)){
-				$this->set_url($id_note, $url);
+			if ( !empty($cfg['url'])){
+				$this->set_url($id_note, $cfg['url']);
 			}
 			if ( !empty($this->has_url($id_note)) ){
-				$url = $this->get_url('id_note');
 				if ( empty($this->get_event($id_note)) ){
 					return $this->set_event($id_note, [
-						'start' => $start ?: date('Y-m-d H:i:s'), 
-						'end' => $end ?: null,
-						'id_type' => $type_event ?: null
+						'start' => $cfg['start'] ?: date('Y-m-d H:i:s'), 
+						'end' => $cfg['end'] ?: null,
+						'id_type' => self::$_id_event ?: null
 					]);
 				}
 				//case update
 				else if ( $event = $this->get_event($id_note) ){
-					return $this->db->update([
-						$this->class_cfg['table'],
-						[
-							$this->fields['id_parent'] => (!empty($id_parent) && ($id_parent !== $event['id_parent']) ) ? $id_parent : $event['id_parent'],
-							$this->fields['id_type'] => (!empty($type_event) && ($type_event !== $event['id_type']) ) ? $type_event : $event['id_type'],
-							$this->fields['start'] => (!empty($start) && ($start !== $event['start']) ) ? $start : $event['start'],
-						],
-						[
-							$this->fields['id'] => $event['id']
-						]	
+					return $this->update_event($id_note, [
+						'start' => $cfg['start'] ?: date('Y-m-d H:i:s'), 
+						'end' => $cfg['end'] ?: null,
+						'id_type' => self::$_id_event ?: null
 					]);
 				}
 			}
@@ -555,27 +534,16 @@ class cms extends bbn\models\cls\db
 			($event = $this->get_event($id_note)) && 
 			$this->is_published($id_note) 
 		){
-
-			if ( $this->db->update(
-				$this->class_cfg['table'], 
-				[
-					$this->fields['start'] => null,
-					$this->fields['end'] => null
-				],
-				[
-					$this->fields['id'] => $event['id']
+			if ( $this->update_event(
+				$id_note, [
+					'start' => null,
+					'end' => null
 				])
 		  ){
-				return $this->remove_note_events($id_note, $event['id']);
+				return $this->_remove_note_events($id_note, $event['id']);
 			}
 		}
 		return false;
-	}
-	
-
-
-	public function change_event_type(){
-		
 	}
 	 	
 }

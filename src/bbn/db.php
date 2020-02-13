@@ -4469,7 +4469,13 @@ class db extends \PDO implements db\actions, db\api, db\engines
 
   public function get_create_constraints(string $table, array $model = null): string
   {
+    
     return $this->language->get_create_constraints($table, $model);
+  }
+
+  public function create_constraints_sqlite(string $table, array $model = null)
+  {
+    return $this->language->create_constraints_sqlite(...\func_get_args());
   }
 
   /**
@@ -4832,9 +4838,29 @@ class db extends \PDO implements db\actions, db\api, db\engines
     return $this->language->create_table(...\func_get_args());
   }
 
+  public function create_table_sqlite(){
+    return $this->language->create_table_sqlite(...\func_get_args());
+  }
+
   public function create_database(string $database): bool
   {
     return $this->language->create_database(...\func_get_args());
+  }
+
+  /**
+   * test 
+   */
+  public static function create_database_sqlite(string $database){
+    if ( !is_file($database) ){
+      file_put_contents($database,'');
+      if (is_file($database) ){
+        return  [
+          'engine' => 'sqlite',
+          'db' => $database
+        ];
+      }
+    }
+    return false;
   }
 
   public function enable_last()

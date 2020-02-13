@@ -106,10 +106,6 @@ class options extends bbn\models\cls\db
       (!empty($it[$c['text']]) || !empty($it[$c['id_alias']])) &&
       ($parent = $this->option($it[$c['id_parent']]))
     ){
-      // ID shouldn't be updated or created
-      if ( empty($it[$c['id']]) ){
-        unset($it[$c['id']]);
-      }
 
       // If code is empty it MUST be null
       if ( empty($it[$c['code']]) ){
@@ -1954,17 +1950,21 @@ class options extends bbn\models\cls\db
         ]);
       }
       
+      $values = [
+        $c['id_parent'] => $it[$c['id_parent']],
+        $c['text'] => $it[$c['text']],
+        $c['code'] => empty($it[$c['code']]) ? null : $it[$c['code']],
+        $c['id_alias'] => $it[$c['id_alias']],
+        $c['value'] => $it[$c['value']],
+        $c['num'] => $it[$c['num']],
+        $c['cfg'] => \is_array($it[$c['cfg']]) ? json_encode($it[$c['cfg']]) : $it[$c['cfg']]
+      ];
+      if (!empty($it['id'])) {
+        $values['id'] = $it['id'];
+      }
       if (
         !$id &&
-        ($res = $this->db->insert($this->class_cfg['table'], [
-          $c['id_parent'] => $it[$c['id_parent']],
-          $c['text'] => $it[$c['text']],
-          $c['code'] => empty($it[$c['code']]) ? null : $it[$c['code']],
-          $c['id_alias'] => $it[$c['id_alias']],
-          $c['value'] => $it[$c['value']],
-          $c['num'] => $it[$c['num']],
-          $c['cfg'] => \is_array($it[$c['cfg']]) ? json_encode($it[$c['cfg']]) : $it[$c['cfg']]
-        ]))
+        ($res = $this->db->insert($this->class_cfg['table'], $values))
       ){
         $id = $this->db->last_id();
       }
@@ -2004,6 +2004,9 @@ class options extends bbn\models\cls\db
    */
   public function set($id, array $cfg){
     if ( $this->_prepare($cfg) ){
+      if (isset($cfg['id'])) {
+        unset($cfg['id']);
+      }
       $c =& $this->class_cfg['arch']['options'];
       // id_parent cannot be edited this way
       if ( $res = $this->db->update($this->class_cfg['table'], [
