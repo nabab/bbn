@@ -73,11 +73,19 @@ class cms extends bbn\models\cls\db
 
 	private static $_id_event;
 
-	private static function _set_id_event($id) {
+	/**
+	 * 
+	 * @param null|string $id
+	 * @return String
+	 */
+
+	private static function _set_id_event($id): String {
 		self::$_id_event = $id;
 	}
 	/**
-	 * removes the row corresponding to the given arguments from bbn_notes_events
+	 * Removes the row corresponding to the given arguments from bbn_notes_events.
+	 * @param string $id_note
+   * @return Boolean
 	 */
 	private function _remove_note_events($id_note, $id_event): ?bool
 	{
@@ -90,7 +98,9 @@ class cms extends bbn\models\cls\db
 	}
 	
 	/**
-	 * if the row corresponding to the given arguments is not in the table bbn_notes_events it inserts the row
+	 * If the row corresponding to the given arguments is not in the table bbn_notes_events it inserts the row.
+	 * @param string $id_note
+	 * @return Boolean
 	 */
 	private function _insert_notes_events($id_note, $id_event): ?bool
 	{ 
@@ -109,15 +119,19 @@ class cms extends bbn\models\cls\db
 		}
 		return false;
 	}
-	//if a date is given for $end checks if it's after the start date
+	/**
+	 * If a date is given for $end checks if it's after the start date.
+	 * @param date $start
+	 * @param date $end
+	 * @return Boolean
+	 */
 	private function _check_date($start, $end): bool
 	{
 		if ( isset($start) ){
 			if ( !isset($end) || strtotime($end) > strtotime($start) ){
 				return true;
 			}
-		}
-		else {
+		} else {
 			return true;
 		}
 		return false;
@@ -133,17 +147,18 @@ class cms extends bbn\models\cls\db
 		}
 		if ( $notes === null ){
 			$this->_notes = new bbn\appui\notes($this->db);
-		}
-		else{
+		} else {
 			$this->_notes = $notes;
 		}
 		
 	}
 
 	/**
-	 * returns the note + its URL
+	 * Returns the note with its url, start and end date of publication.
+	 * @param String $url
+	 * @return Array
 	 */
-	public function get(string $url)
+	public function get(string $url): array
 	{
 		$res = [];
 	 	$id_note = $this->db->rselect([
@@ -167,7 +182,10 @@ class cms extends bbn\models\cls\db
 	}
 
 	/**
-	 * if the argument type is not given it returns all the notes, else returns the notes of the given type
+	 * Returns all the notes of type 'pages'.
+	 * @param number $limit
+	 * @param number $start
+	 * @return array
 	 */
 	public function get_all(int $limit = 50, int $start = 0): array 
 	{
@@ -184,9 +202,11 @@ class cms extends bbn\models\cls\db
 	}
 
  /**
- * if the given url correspond to a published note returns the id
+ * If the given url correspond to a published note returns the id.
+ * @param $tring $url
+ * @return $string || null
  */
-	public function get_by_url(string $url)
+	public function get_by_url(string $url):? string
 	{
 		if ( $id_note = $this->db->select_one([
 			'table' => $this->class_cfg['tables']['notes_url'], 
@@ -208,9 +228,11 @@ class cms extends bbn\models\cls\db
 
 
 	/**
-	 * delete the given note and unpublish it if published
+	 * Deletes the given note and unpublish it if published.
+	 * @param String $id_note
+	 * @return Boolean
 	 */
-	public function delete(string $id_note)
+	public function delete(string $id_note): bool
 	{
 		if ( $note = $this->_notes->get($id_note) ){
 			if ( $this->get_url($id_note) ){
@@ -226,7 +248,9 @@ class cms extends bbn\models\cls\db
 	}
 	
 	/**
-	 * Returns true if the note is linked to an url
+	 * Returns true if the note is linked to an url.
+	 * @param String $id_note
+	 * @return Boolean
 	 * 
 	 */
 	public function has_url(string $id_note) :?bool
@@ -243,7 +267,9 @@ class cms extends bbn\models\cls\db
 		return false;
 	}
 	/**
-	 * Returns the url of the note
+	 * Returns the url of the note.
+	 * @param String $id_note
+	 * @return String || null
 	 */
 	public function get_url(string $id_note) :?string
 	{
@@ -263,8 +289,10 @@ class cms extends bbn\models\cls\db
 	}
 	
 	/**
-	 * 
-	 * sets the url for the note if it doesn't exist or update the url and if doesn't exists a published note with that url
+	 * Inserts the url for the note if it doesn't exist a published note with the same url or update the url of the given note.
+	 * @param String $id_note
+	 * @param String $url
+	 * @return Boolean
 	 */
 	public function set_url($id_note, $url): ?bool
 	{	
@@ -289,8 +317,7 @@ class cms extends bbn\models\cls\db
 						$this->class_cfg['arch']['notes_url']['id_note'] => $id_note
 					]
 				);
-			}
-			else {
+			}	else {
 				$success = $this->db->update(
 					$this->class_cfg['tables']['notes_url'],
 					[$this->class_cfg['arch']['notes_url']['url'] => $url],
@@ -305,7 +332,9 @@ class cms extends bbn\models\cls\db
 	}
 
 	/**
-	 * removes the url corresponding to the given id_note from bbn_notes_url
+	 * Removes the url corresponding to the given id_note from bbn_notes_url.
+	 * @param String $id_note
+	 * @return bool
 	 */
 	public function remove_url(string $id_note): bool
 	{
@@ -330,7 +359,8 @@ class cms extends bbn\models\cls\db
 		return $success;
 	}
 	/**
-	 * returns the object event
+	 * Returns the object event of the given note.
+	 * @param String $id_note
 	 */
 	public function get_event(string $id_note)
 	{
@@ -358,6 +388,11 @@ class cms extends bbn\models\cls\db
 		return null;
 	}
 
+	/**
+	 * Updates the event relative to the given note.
+	 * @param String $id_note
+	 * @param Array $cfg
+	 */
 	public function update_event(string $id_note, array $cfg = []): ?bool
 	{
 		if ($this->_check_date($cfg['start'], $cfg['end'])){
@@ -368,17 +403,19 @@ class cms extends bbn\models\cls\db
 			){
 				$cfg['id_type'] = self::$_id_event;
 				return $this->_events->edit($event['id'], $cfg);
-			}
-			else{
+			} else {
 				return true;
 			}
 		}
+		return false;
 	}
 
 	/**
-	 * if it exists an event linked to the note it returns the start date
+	 * If it exists an event linked to the note it returns the start date.
+	 * @param String $id_note
+	 * @return String || null
 	 */
-	public function get_start($id_note)
+	public function get_start($id_note): ?String
 	{
 		if ( $event = $this->get_event($id_note) ){
 			return $event['start'];
@@ -388,7 +425,9 @@ class cms extends bbn\models\cls\db
 	
 
 	/**
-	 * if it exists an event linked to the note it returns the end date
+	 * If it exists an event linked to the note it returns the end date.
+	 * @param String $id_note
+	 * @return String || null
 	 */
 	public function get_end($id_note)
 	{
@@ -398,6 +437,12 @@ class cms extends bbn\models\cls\db
 		return null;
 	}
 
+	/**
+	 * Inserts in bbn_events and bbn_notes_events the informations relative to the publication of the given note.
+	 * @param String $id_note
+	 * @param Array $cfg
+	 * @return Boolean || null
+	 */
 	public function set_event(string $id_note,array $cfg = null){
 		if ( ($note = $this->_notes->get($id_note)) && ($this->_check_date($cfg['start'], $cfg['end']) )){
 			$title = $note['title'];
@@ -411,18 +456,16 @@ class cms extends bbn\models\cls\db
 				]) ){
 					return $this->_insert_notes_events($id_note, $id_event);
 				}
-			}
-			else {
+			} else {
 				return $this->update_event($id_note, $cfg);
 			}
 		}
 		return null;
-		//add the row in notes_events
-		//set url al publish
 	}
 
 	/**
-	 * Returns all notes that has a link with bbn_events
+	 * Returns all notes that has a link with bbn_events.
+	 * @return Array
 	 */
 	public function get_full() :?array
 	{
@@ -454,7 +497,12 @@ class cms extends bbn\models\cls\db
 		}
 		return $res;
 	}
-	public function get_full_published(){
+	/**
+	 * Returns an array containing all the published notes.
+	 * @return Array
+	 */
+	public function get_full_published(): array
+	{
 		if ( ($full = $this->get_full()) ){
 		  return array_filter($full, function($a){
 				return $a['start'] !== null;
@@ -464,8 +512,9 @@ class cms extends bbn\models\cls\db
 	}
 
 	/**
-	 * if the note has a corresponding event in bbn_events and the date of start is before now, and the date of end if isset is after now and the note has an url it returns true
-	 * 
+	 * If the note has a corresponding event in bbn_events and the date of start is before now, and the date of end if isset is after now and the note has an url it returns true
+	 * @param String $id_note
+	 * @return Boolean
 	 */
 	public function is_published(string $id_note): ?bool
 	{
@@ -483,7 +532,10 @@ class cms extends bbn\models\cls\db
 	}
 
 	/**
-	 * publish a note
+	 * Publish a note.
+	 * @param String $id_note
+	 * @param Array  $cfg
+	 * @return Boolean
 	 */
 	public function publish(string $id_note,array $cfg) :?bool
 	{
@@ -502,17 +554,15 @@ class cms extends bbn\models\cls\db
 						'end' => $cfg['end'] ?: null,
 						'id_type' => self::$_id_event ?: null
 					]);
-				}
-				//case update
-				else if ( $this->get_event($id_note) ){
+				} else if ( $this->get_event($id_note) ){
+					//case update
 					return $this->update_event($id_note, [
 						'start' => $cfg['start'] ?: date('Y-m-d H:i:s'), 
 						'end' => $cfg['end'] ?: null,
 						'id_type' => self::$_id_event ?: null
 					]);
 				}
-			}
-			else if ( empty($this->has_url($id_note)) ){
+			} else if ( empty($this->has_url($id_note)) ){
 				return false;
 			}
 		}
@@ -520,7 +570,9 @@ class cms extends bbn\models\cls\db
 	}
 	
 	/**
-	 * unpublish a note
+	 * Unpublish a note.
+	 * @param String $id_note
+	 * @return Boolean
 	 */
 	public function unpublish(string $id_note): bool
 	{

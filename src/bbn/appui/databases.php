@@ -761,47 +761,19 @@ class databases extends bbn\models\cls\cache
    * @param bool   $full If true will connect to the database and get its structure
    * @return string|null The ID of the generated (or existing) database entry
    */
-  public function import_host(string $host, bool $full = false){
-    return self::get_option_id($host, 'connections');
-    if (
-      !($id_host = self::get_option_id($host, 'connections')) &&
+  public function import_host(string $host, bool $full = false): ?string
+  {
+    if (!($id_host = self::get_option_id($host, 'connections'))){
       $id_host = $this->o->add([
-        'id_parent' => self::get_option_id('hosts'),
+        'id_parent' => self::get_option_id('connections'),
         'text' => $host,
         'code' => $host,
-      ])
-    ){
-      $this->o->set_cfg($id_host, [
-        'allow_children' => 1
       ]);
-      if (
-      $id_users = $this->o->add([
-        'id_parent' => $id_host,
-        'text' => _('Users'),
-        'code' => 'users',
-      ])
-      ){
-        $this->o->set_cfg($id_users, [
-          'show_code' => 1,
-          'show_value' => 1,
-          'allow_children' => 1,
-
-        ]);
-      }
-      if (
-      $id_dbs = $this->o->add([
-        'id_parent' => $id_host,
-        'text' => _("Databases"),
-        'code' => 'dbs',
-      ])
-      ){
-        $this->o->set_cfg($id_dbs, [
-          'show_code' => 1,
-          'allow_children' => 1,
-        ]);
-      }
     }
-    return $id_host;
+    if ($id_host && $full) {
+      /** @todo but might be heavy */
+    }
+    return $id_host ?: null;
   }
 
   /**
