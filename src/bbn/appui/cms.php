@@ -79,7 +79,7 @@ class cms extends bbn\models\cls\db
 	 * @return String
 	 */
 
-	private static function _set_id_event($id): String {
+	private static function _set_id_event($id) {
 		self::$_id_event = $id;
 	}
 	/**
@@ -196,6 +196,7 @@ class cms extends bbn\models\cls\db
 			$a['type'] = 'pages';
 			$a['start'] = $this->get_start($a['id_note']);
 			$a['end'] = $this->get_end($a['id_note']);
+			$a['files'] = $this->_notes->get_medias($a['id_note']) ?: [];
 			return $a;
 		}, $pages); 
 		return $tmp; 
@@ -448,9 +449,10 @@ class cms extends bbn\models\cls\db
 			$title = $note['title'];
 			if ( empty($this->get_event($id_note)) ){
 				//if a type is not given it inserts the event as page
+				
 				if ( $id_event = $this->_events->insert([
 					'name' => $title,
-					'id_type' => $cfg['id_type'] ?: self::$_id_event,
+					'id_type' => self::$_id_event,
 					'start' => $cfg['start'],
 					'end' => $cfg['end'] ?: null,
 				]) ){

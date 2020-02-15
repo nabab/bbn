@@ -566,8 +566,9 @@ class user extends models\cls\basic
               $this->class_cfg['tables']['passwords'],
               $arch['passwords']['pass'],
               [$arch['passwords']['id_user'] => $id],
-              [$arch['passwords']['added'] => 'DESC']);
-            if ( $this->_check_password($params[$f['pass']], $pass) ){
+              [$arch['passwords']['added'] => 'DESC']
+            );
+            if ($this->_check_password($params[$f['pass']], $pass)) {
               $this->_login($id);
             }
             else{
@@ -730,7 +731,7 @@ class user extends models\cls\basic
    * @param array $cfg
    * @param array $params
    */
-  public function __construct(db $db, array $cfg = [], array $params = [])
+  public function __construct(db $db, array $params = [], array $cfg = [])
   {
 
     // The database connection
@@ -751,9 +752,7 @@ class user extends models\cls\basic
 
     // The user logs in
     if ( isset($params[$f['user']], $params[$f['pass']], $params[$f['salt']]) ){
-      x::log('logging in with salt: '.$params[$f['salt']], 'user_login');
       /** @todo separate credentials and salt checking */
-      //$this->_check_credentials($params);
       if ( $this->get_print($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint']){
         /** @todo separate credentials and salt checking */
         $this->_check_credentials($params);

@@ -453,7 +453,7 @@ class controller implements api{
     }
     if ( $r = $this->get_view($path, 'js', $data) ){
       return '<script>'.
-        ( $encapsulated ? '(function($){' : '' ).
+        ( $encapsulated ? '(function(){' : '' ).
         ( empty($data) ? '' : 'var data = '.\bbn\x::js_object($data).';' ).
         $r.
         //( $encapsulated ? '})(jQuery);' : '' ).
@@ -589,6 +589,9 @@ class controller implements api{
       }
       else if ( \is_array($a) ){
         $this->js_data($a);
+      }
+      else if ( $a === true ){
+        $this->js_data($this->data);
       }
     }
     if ( !$has_path ){
