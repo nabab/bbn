@@ -354,4 +354,190 @@ class permissions extends bbn\models\cls\basic
     }
     return null;
   }
+
+  public function update_all($routes)
+  {
+    $res = ['total' => false];
+    /** @var int The option's ID of the permissions' root $id_permission */
+    if ( $id_permission = $this->get_option_root() ){
+      /** @var int The option's ID of the permissions on options $id_option */
+      $id_option = $this->get_option_id('options');
+      if ( !$id_option ){
+        $id_option = $this->opt->add([
+          'id_parent' => $id_permission,
+          'code' => 'options',
+          'text' => _("Options"),
+          'value' => [
+            'icon' => 'nf nf-fa-cogs'
+          ]
+        ]);
+      }
+
+      /** @var int The option's ID of the permissions on pages (controllers) $id_page */
+      $id_page = $this->get_option_id('page');
+      if ( !$id_page ){
+        $id_page = $this->opt->add([
+          'id_parent' => $id_permission,
+          'code' => 'page',
+          'text' => _("Pages"),
+          'value' => [
+            'icon' => 'nf nf-fa-files'
+          ]
+        ]);
+      }
+
+      /** @var int The option's ID of the permissions on pages (controllers) $id_page */
+      $id_plugins = $this->get_option_id('plugins');
+      if ( !$id_plugins ){
+        $id_plugins = $this->opt->add([
+          'id_parent' => $id_permission,
+          'code' => 'plugins',
+          'text' => _("Plugins"),
+          'value' => [
+            'icon' => 'nf nf-fa-plug'
+          ]
+        ]);
+      }
+
+      // $id_page must be set to generate the page's permissions
+      if ($id_page 
+          &&( $all = bbn\file\dir::get_tree(bbn\mvc::get_app_path().'mvc/public', false, function($a){
+          return (($a['type'] === 'dir') || ($a['ext'] === 'php')) && (basename($a['name']) !== '_ctrl.php');
+        }))
+       ) {
+        $all = $this->_treat($all);
+
+        foreach ( $routes as $url => $route ){
+          if ( $tree = bbn\file\dir::get_tree($route['path'].'/src/mvc/public', false, function ($a){
+            return (($a['type'] === 'dir') || ($a['ext'] === 'php')) && (basename($a['name']) !== '_ctrl.php');
+          })
+          ){
+            $treated = $this->_treat($tree);
+            $this->_merge($all, $treated, $url);
+          }
+
+        }
+
+        usort($all, [$this, '_sort']);
+        array_walk($all, [$this, '_walk']);
+        $res['total'] = 0;
+        //die(\bbn\x::dump($all));
+        foreach ( $all as $i => $it ){
+          $it['cfg'] = json_encode(['order' => $i + 1]);
+          $res['total'] += $this->_add($it, $id_page);
+        }
+      }
+
+      // $id_option must be set to generate the option's permissions
+      if ( $id_option && ($permissions = $this->opt->find_permissions($this->opt->get_root(), true)) ){
+        foreach ( $permissions as $p ){
+          $p['code'] = 'opt'.$p['id'];
+          $p['id_alias'] = $p['id'];
+          $p['id_parent'] = $id_option;
+          $p['type'] = 'option';
+          unset($p['id']);
+
+          $res['total'] += $this->opt->add($p, true, true);
+          $p['id_parent'] = $this->opt->from_code($p['code'], $id_option);
+          $p['code'] = 'write';
+          $p['text'] = 'Écriture';
+          $res['total'] += $this->opt->add($p, true, true);
+        }
+      }
+      $this->opt->delete_cache();
+    }
+    return $res;
+
+  }
+
+  private function _treat(array $tree, $parent=false)
+  {
+    $res = [];
+    foreach ( $tree as $i => $t ){
+      $t['name'] = \bbn\str::change_case($t['name'], 'lower');
+      $code = $t['type'] === 'dir' ? basename($t['name']).'/' : basename($t['name'], '.php');
+      $text = $t['type'] === 'dir' ? basename($t['name']) : basename($t['name'], '.php');
+      $o = [
+        'code' => $code,
+        'text' => $text
+      ];
+      if ( $t['type'] === 'file' ){
+        $o['type'] = 'file';
+      }
+      if ( !empty($t['items']) ){
+        $o['items'] = $this->_treat($t['items'], $o['code']);
+      }
+      array_push($res, $o);
+    }
+    return $res;
+  }
+  
+  // Sort names between folders and files
+  private function _sort($a, $b)
+  {
+    if ( substr($a['code'], -1) === '/' ){
+      $a['code'] = '00'.$a['code'];
+    }
+    if ( substr($b['code'], -1) === '/' ){
+      $b['code'] = '00'.$b['code'];
+    }
+    $a = str_replace('.', '0', str_replace('_', '1', \bbn\str::change_case($a['code'], 'lower')));
+    $b = str_replace('.', '0', str_replace('_', '1', \bbn\str::change_case($b['code'], 'lower')));
+    return strcmp($a, $b);
+  }
+  
+  // Sort items' hierarchy
+  private function _walk(&$a)
+  {
+    if ( !empty($a['items']) ){
+      usort($a['items'], [$this, '_sort']);
+      array_walk($a['items'], [$this, '_walk']);
+    }
+  }
+  
+  // Add options to the options table
+  private function _add($o, $id_parent, $total = 0)
+  {
+    $items = isset($o['items']) ? $o['items'] : false;
+    unset($o['items']);
+    $o['id_parent'] = $id_parent;
+    if ( !($id = $this->opt->from_code($o['code'], $id_parent)) ){
+      $total += (int)$this->opt->add($o, false, true);
+      $id = $db->last_id();
+    }
+    /* No!!!
+    else if ( isset($o['cfg']) ){
+      $this->opt->set($id, $o);
+    }
+    */
+    if ( \is_array($items) ){
+      foreach ( $items as $it ){
+        $total = $this->_add($it, $id, $total);
+      }
+    }
+    return $total;
+  }
+  
+  private function _merge(&$target, $src, $path)
+  {
+    $parts = explode('/', $path);
+    foreach ( $parts as $p ){
+      if ( !empty($p) ){
+        foreach ( $target as $i => $a ){
+          if ( ($a['code'] === $p.'/') && !empty($target[$i]['items']) ){
+            $this->_merge($target[$i]['items'], $src, substr($path, \strlen($p)+1));
+            return;
+          }
+        }
+        array_push($target, [
+          'code' => $p.'/',
+          'text' => $p,
+          'items' => $src
+        ]);
+      }
+    }
+  }
+  
+
+
 }
