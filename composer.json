@@ -10,12 +10,6 @@
       "email": "thomas.nabet@gmail.com",
       "homepage": "http://bbn.solutions",
       "role": "Developer"
-    },
-    {
-      "name": "Thomas Nabet",
-      "email": "thomas.nabet@gmail.com",
-      "homepage": "http://bbn.solutions",
-      "role": "Developer"
     }
   ],
   "require": {
@@ -44,6 +38,7 @@
     "sabre/dav": "4.0.*",
     "erusev/parsedown": "1.7.*",
     "phpdocumentor/reflection-docblock": "4.3.*",
+    "sepia/po-parser": "dev-master",
     "tplaner/when": "3.0.0"
   },
   "autoload": {
