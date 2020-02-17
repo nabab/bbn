@@ -423,7 +423,6 @@ MYSQL;
       foreach ($tmp as $t){
         if (!$this->is_user_active($t['id_user'])) {
           $this->db->delete('bbn_observers', ['id' => $t['id']]);
-          echo '-';
         }
         else{
           $aliases[] = $t;

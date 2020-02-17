@@ -17,6 +17,10 @@ use bbn;
  */
 class manager
 {
+  protected static $admin_group;
+
+  protected static $dev_group;
+
   protected $messages = [
     'creation' => [
       'subject' => "Account created",
@@ -40,27 +44,19 @@ You can click the following link to change your password:<br>
 You can click the following link to access directly your account:<br>
 %1\$s"
     ]
-  ],
+  ];
   // 1 day
-  $hotlink_length = 86400;
+  protected $hotlink_length = 86400;
 
-  protected
-    $list_fields,
-    $usrcls,
-    $mailer = false,
-    $db,
-    $class_cfg = false;
+  protected $list_fields;
 
-  protected function set_default_list_fields(){
-    $fields = $this->class_cfg['arch']['users'];
-    unset($fields['id'], $fields['active'], $fields['cfg']);
-    $this->list_fields = [];
-    foreach ( $fields as $n => $f ){
-      if ( !\in_array($f, $this->list_fields) ){
-        $this->list_fields[$n] = $f;
-      }
-    }
-  }
+  protected $usrcls;
+
+  protected $mailer = false;
+
+  protected $db;
+
+  protected $class_cfg = false;
 
   public function get_list_fields(){
     return $this->list_fields;
@@ -282,6 +278,50 @@ You can click the following link to access directly your account:<br>
       ];
     }
     return $r;
+  }
+
+  public function get_user_id($login)
+  {
+    return $this->db->select_one(
+      $this->class_cfg['tables']['users'], 
+      $this->class_cfg['arch']['users']['id'],
+      [
+        $this->class_cfg['arch']['users']['login'] => $login
+      ]);
+  }
+
+  public function get_admin_group()
+  {
+    if (!self::$admin_group) {
+      if ($res = $this->db->select_one(
+        $this->class_cfg['tables']['groups'], 
+        $this->class_cfg['arch']['groups']['id'],
+        [
+          $this->class_cfg['arch']['groups']['code'] => 'admin'
+        ]
+        )
+      ) {
+        self::set_admin_group($res);
+      }
+    }
+    return self::$admin_group;
+  }
+
+  public function get_dev_group()
+  {
+    if (!self::$dev_group) {
+      if ($res = $this->db->select_one(
+        $this->class_cfg['tables']['groups'], 
+        $this->class_cfg['arch']['groups']['id'],
+        [
+          $this->class_cfg['arch']['groups']['code'] => 'dev'
+        ]
+        )
+      ) {
+        self::set_dev_group($res);
+      }
+    }
+    return self::$dev_group;
   }
 
   public function get_name($user, $full = true){
@@ -612,79 +652,26 @@ You can click the following link to access directly your account:<br>
     return $this;
 	}
 
-	/**
-	 * @return void 
-	 */
-  private function create_tables(){
-    // @todo!!!
-    $sql = "
-      CREATE TABLE IF NOT EXISTS {$this->db->escape($this->class_cfg['tables']['users'])} (
-          {$this->db->escape($this->class_cfg['users']['id'])} int(10) unsigned NOT NULL AUTO_INCREMENT,
-        {$this->db->escape($this->class_cfg['users']['email'])} varchar(100) NOT NULL,".
-        ( $this->class_cfg['users']['login'] !== $this->class_cfg['users']['email'] ? "
-                {$this->db->escape($this->class_cfg['users']['login'])} varchar(35) NOT NULL," : "" )."
-        {$this->db->escape($this->class_cfg['users']['cfg'])} text NOT NULL,
-        PRIMARY KEY ({$this->db->escape($this->class_cfg['users']['id'])}),
-        UNIQUE KEY {$this->db->escape($this->class_cfg['users']['email'])} ({$this->db->escape($this->class_cfg['users']['email'])})
-      ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
-      CREATE TABLE IF NOT EXISTS {$this->db->escape($this->class_cfg['tables']['groups'])} (
-        {$this->db->escape($this->class_cfg['groups']['id'])} int(10) unsigned NOT NULL AUTO_INCREMENT,
-        {$this->db->escape($this->class_cfg['groups']['group'])} varchar(100) NOT NULL,
-        {$this->db->escape($this->class_cfg['groups']['cfg'])} text NOT NULL,
-        PRIMARY KEY ({$this->db->escape($this->class_cfg['groups']['id'])})
-      ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+  protected function set_default_list_fields(){
+    $fields = $this->class_cfg['arch']['users'];
+    unset($fields['id'], $fields['active'], $fields['cfg']);
+    $this->list_fields = [];
+    foreach ( $fields as $n => $f ){
+      if ( !\in_array($f, $this->list_fields) ){
+        $this->list_fields[$n] = $f;
+      }
+    }
+  }
 
-      CREATE TABLE IF NOT EXISTS {$this->db->escape($this->class_cfg['tables']['hotlinks'])} (
-        {$this->db->escape($this->class_cfg['hotlinks']['id'])} int(10) unsigned NOT NULL AUTO_INCREMENT,
-        {$this->db->escape($this->class_cfg['hotlinks']['magic_string'])} varchar(64) NOT NULL,
-        {$this->db->escape($this->class_cfg['hotlinks']['id_user'])} int(10) unsigned NOT NULL,
-        {$this->db->escape($this->class_cfg['hotlinks']['expire'])} datetime NOT NULL,
-        PRIMARY KEY ({$this->db->escape($this->class_cfg['hotlinks']['id'])}),
-        KEY {$this->db->escape($this->class_cfg['hotlinks']['id_user'])} ({$this->db->escape($this->class_cfg['hotlinks']['id_user'])})
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  protected static function set_admin_group($id)
+  {
+    self::$admin_group = $id;
+  }
 
-      CREATE TABLE IF NOT EXISTS {$this->db->escape($this->class_cfg['tables']['passwords'])} (
-        {$this->db->escape($this->class_cfg['passwords']['id_user'])} int(10) unsigned NOT NULL,
-        {$this->db->escape($this->class_cfg['passwords']['pass'])} varchar(128) NOT NULL,
-        {$this->db->escape($this->class_cfg['passwords']['added'])} datetime NOT NULL,
-        KEY {$this->db->escape($this->class_cfg['passwords']['id_user'])} ({$this->db->escape($this->class_cfg['passwords']['id_user'])})
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-      CREATE TABLE IF NOT EXISTS {$this->db->escape($this->class_cfg['tables']['sessions'])} (
-        {$this->db->escape($this->class_cfg['sessions']['id_user'])} int(10) unsigned NOT NULL,
-        {$this->db->escape($this->class_cfg['sessions']['sess_id'])} varchar(128) NOT NULL,
-        {$this->db->escape($this->class_cfg['sessions']['ip_address'])} varchar(15),
-        {$this->db->escape($this->class_cfg['sessions']['user_agent'])} varchar(255),
-        {$this->db->escape($this->class_cfg['sessions']['auth'])} int(1) unsigned NOT NULL,
-        {$this->db->escape($this->class_cfg['sessions']['opened'])} int(1) unsigned NOT NULL,
-        {$this->db->escape($this->class_cfg['sessions']['last_activity'])} datetime NOT NULL,
-        {$this->db->escape($this->class_cfg['sessions']['cfg'])} text NOT NULL,
-        PRIMARY KEY ({$this->db->escape($this->class_cfg['sessions']['id_user'])}, {$this->db->escape($this->class_cfg['sessions']['sess_id'])})
-        KEY {$this->db->escape($this->class_cfg['sessions']['id_user'])} ({$this->db->escape($this->class_cfg['sessions']['id_user'])}),
-        KEY {$this->db->escape($this->class_cfg['sessions']['sess_id'])} ({$this->db->escape($this->class_cfg['sessions']['sess_id'])})
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-      ALTER TABLE {$this->db->escape($this->class_cfg['tables']['hotlinks'])}
-        ADD FOREIGN KEY ({$this->db->escape($this->class_cfg['hotlinks']['id_user'])})
-          REFERENCES {$this->db->escape($this->class_cfg['tables']['users'])} ({$this->db->escape($this->class_cfg['users']['id'])})
-            ON DELETE CASCADE ON UPDATE NO ACTION;
-
-      ALTER TABLE {$this->db->escape($this->class_cfg['tables']['passwords'])}
-        ADD FOREIGN KEY ({$this->db->escape($this->class_cfg['passwords']['id_user'])})
-          REFERENCES {$this->db->escape($this->class_cfg['tables']['users'])} ({$this->db->escape($this->class_cfg['users']['id'])})
-            ON DELETE CASCADE ON UPDATE NO ACTION;
-
-      ALTER TABLE {$this->db->escape($this->class_cfg['tables']['sessions'])}
-        ADD FOREIGN KEY ({$this->db->escape($this->class_cfg['sessions']['id_user'])})
-          REFERENCES {$this->db->escape($this->class_cfg['tables']['users'])} ({$this->db->escape($this->class_cfg['users']['id'])})
-            ON DELETE CASCADE ON UPDATE NO ACTION;
-
-      ALTER TABLE {$this->db->escape($this->class_cfg['tables']['users'])}
-        ADD FOREIGN KEY ({$this->db->escape($this->class_cfg['users']['id_group'])})
-          REFERENCES {$this->db->escape($this->class_cfg['tables']['groups'])} ({$this->db->escape($this->class_cfg['groups']['id'])})
-            ON DELETE CASCADE ON UPDATE NO ACTION;";
-    $db->raw_query($sql);
+  protected static function set_dev_group($id)
+  {
+    self::$dev_group = $id;
   }
 
 }

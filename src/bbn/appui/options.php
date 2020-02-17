@@ -899,6 +899,16 @@ class options extends bbn\models\cls\db
     return $res;
   }
 
+  public function siblings(): ?array
+  {
+    if ($id = $this->from_code(...func_get_args())) {
+      return array_filter($this->full_options($this->id_parent($id)), function($a) use ($id) {
+        return $a['id'] !== $id;
+      });
+    }
+    return null;
+  }
+
   /**
    * Returns an array of full options arrays for a given parent
    *

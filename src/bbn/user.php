@@ -62,6 +62,7 @@ class user extends models\cls\basic
       'groups' => [
         'id' => 'id',
         'group' => 'group',
+        'code' => 'code',
         'cfg' => 'cfg'
       ],
       'hotlinks' => [
@@ -189,540 +190,6 @@ class user extends models\cls\basic
 
   /** @var mixed */
   public $prev_time;
-
-  /**
-   * Returns the latest created connection, ie the current user's object.
-   * @return self
-   */
-  public static function get_user(): ?self
-  {
-    return self::get_instance();
-  }
-
-  /**
-   * Generates a random long string (16-32 chars) used as unique fingerprint.
-   * @return string
-   */
-  public static function make_fingerprint(): string
-  {
-    return str::genpwd(32, 16);
-  }
-
-  /**
-   * Returns an array with a key and a magic string used for making hotlinks.
-   *
-   * @return array
-   */
-  public static function make_magic_string(): array
-  {
-    $key = self::make_fingerprint();
-    return [
-      'key' => $key,
-      'hash' => hash('sha256', $key)
-    ];
-  }
-
-  /**
-   * Checks if a given string corresponds to the given hash.
-   * 
-   * @param string $key  The key
-   * @param string $hash The corresponding hash
-   * @return bool
-   */
-  public static function is_magic_string(string $key, string $hash): bool
-  {
-    return hash('sha256', $key) === $hash;
-  }
-
-  /**
-   * Initialize and saves the session after authentication.
-   * 
-   * @param string $id The user's ID (as stored in the database).
-   * @return self
-   */
-  private function _login($id): self
-  {
-    if ( $this->check() && $id ){
-      $this
-        ->_authenticate($id)
-        ->_user_info()
-        ->_init_dir(true)
-        ->save_session();
-    }
-    return $this;
-  }
-
-  /**
-   * Gathers the user'data from the database and puts it in the session.
-   *
-   * @param array $data User's table data argument if it is already available
-   * @return self
-   */
-  private function _user_info(array $data = null): self
-  {
-    if ( $this->get_id() ){
-      // Removing the encryption key to prevent it being saved in the session
-      if (isset($this->fields['enckey'])) {
-        unset($this->fields['enckey']);
-      }
-      if ( !empty($this->get_session('cfg')) ){
-        $this->cfg = $this->get_session('cfg');
-        $this->id_group = $this->get_session('id_group');
-      }
-      else if ( $d = $this->db->rselect(
-        $this->class_cfg['tables']['users'],
-        array_unique(array_values($this->fields)),
-        x::merge_arrays(
-          $this->class_cfg['conditions'],
-          [$this->fields['active'] => 1],
-          [$this->fields['id'] => $this->id]))
-      ){
-        $r = [];
-        foreach ( $d as $key => $val ){
-          $this->$key = $val;
-          $r[$key] = $key === $this->fields['cfg'] ? json_decode($val, true) : $val;
-        }
-        $this->cfg = $r['cfg'] ?: [];
-        // Group
-        $this->id_group = $r['id_group'];
-        $this->session->set($r, self::$un);
-        $this->save_session();
-      }
-    }
-    return $this;
-  }
-
-  private function _get_encryption_key(): ?string
-  {
-    if (is_null($this->_encryption_key)) {
-      if ($this->auth) {
-        $this->_encryption_key = $this->db->select_one($this->class_cfg['table'], $this->class_cfg['arch']['users']['enckey'], ['id' => $this->id]);
-      }
-    }
-    return $this->_encryption_key;
-  }
-
-  /**
-   * Gathers all the information about the user's session.
-   *
-   * @param string $d The session's table data or its ID
-   * @return self
-   */
-  private function _sess_info(string $id_session = null): self
-  {
-    if ( !str::is_uid($id_session) ){
-      $id_session = $this->get_id_session();
-    }
-    else{
-      $cfg = $this->_get_session('cfg');
-    }
-    if (
-      empty($cfg) &&
-      str::is_uid($id_session) &&
-      ($id = $this->get_session('id')) &&
-      ($d = $this->db->rselect(
-        $this->class_cfg['tables']['sessions'],
-        $this->class_cfg['arch']['sessions'],
-        [
-          $this->class_cfg['arch']['sessions']['id'] => $id_session,
-          $this->class_cfg['arch']['sessions']['id_user'] => $id,
-          $this->class_cfg['arch']['sessions']['opened'] => 1,
-        ]))
-    ){
-      $cfg = json_decode($d['cfg'], true);
-    }
-    if ( \is_array($cfg) ){
-      $this->sess_cfg = $cfg;
-    }
-    else{
-      if ( isset($id) ){
-        $this->_init_session();
-        $new_id = $this->get_session('id');
-        if ( $new_id !== $id ){
-          return $this->_sess_info($new_id);
-        }
-      }
-      $this->set_error(14);
-    }
-    return $this;
-  }
-
-  /**
-   * Checks the conformity of a given string with a hash.
-   * 
-   * @param string $pass_given  The password to check
-   * @param string $pass_stored The stored encrypted password to check against
-   * @return bool
-   */
-  private function _check_password(string $pass_given, string $pass_stored): bool
-  {
-    return $this->_crypt($pass_given) === $pass_stored;
-  }
-
-  /**
-   * Use the configured hash function to encrypt a password string.
-   * 
-   * @param string $st The string to crypt
-   * @return string
-   */
-  private function _crypt(string $st): string
-  {
-    if (!function_exists($this->class_cfg['encryption'])) {
-      $this->class_cfg['encryption'] = 'sha256';
-    }
-    return eval("return {$this->class_cfg['encryption']}('$st');");
-  }
-
-  /**
-   * Retrieves all user info from its session and populates the object.
-   * 
-   * @param bool $force
-   * @return self
-   */
-  private function _retrieve_session(bool $force = false): self
-  {
-    // $id mustn't be already defined
-    if (!$this->id || $force) {
-      // The user ID must be in the session
-      $id_session = $this->get_id_session();
-      $id = $this->get_session('id');
-      if ($id_session && $id) {
-        $this->_sess_info($id_session);
-        x::log([$this->sess_cfg, $this->_get_session('fingerprint'), $this->get_print($this->_get_session('fingerprint'))], 'user_login');
-        if (isset($this->sess_cfg['fingerprint']) &&
-            ($this->get_print($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint'])
-        ) {
-          x::log("THe auth should have worked for id $id", 'user_login');
-          $this
-            ->_authenticate($id)
-            ->_user_info()
-            ->_init_dir()
-            ->save_session();
-          }
-        else {
-          $this->set_error(19);
-        }
-      }
-      else {
-        x::log([$id_session, $id], 'user_login');
-        $this->set_error(15);
-      }
-    }
-    return $this;
-  }
-
-  /**
-   * Gets or creates (also in database) the user's session for the first time.
-   * 
-   * @return self
-   */
-  private function _init_session(): self
-  {
-    // Getting or creating the session is it doesn't exist yet
-    /** @var user\session */
-    $this->session = user\session::get_instance();
-    if ( !$this->session ){
-      $this->session = new user\session();
-    }
-
-    /** @var int $id_session The ID of the session row in the DB */
-    if ( !($id_session = $this->get_id_session())
-        || !($tmp = $this->db->select_one(
-              $this->class_cfg['tables']['sessions'],
-              $this->class_cfg['arch']['sessions']['cfg'],
-              [$this->class_cfg['arch']['sessions']['id'] => $id_session]
-            ))
-    ){
-      /** @var string $salt */
-      $salt = self::make_fingerprint();
-
-      /** @var string $fingerprint */
-      $fingerprint = self::make_fingerprint();
-
-
-      /** @var array $p The fields of the sessions table */
-      $p =& $this->class_cfg['arch']['sessions'];
-
-      $this->sess_cfg = [
-        'fingerprint' => $this->get_print($fingerprint),
-        'last_renew' => time()
-      ];
-
-      // Inserting the session in the database
-      if ( $this->db->insert($this->class_cfg['tables']['sessions'], [
-        $p['sess_id'] => $this->session->get_id(),
-        $p['ip_address'] => $this->ip_address,
-        $p['user_agent'] => $this->user_agent,
-        $p['opened'] => 1,
-        $p['last_activity'] => date('Y-m-d H:i:s'),
-        $p['creation'] => date('Y-m-d H:i:s'),
-        $p['cfg'] => json_encode($this->sess_cfg)
-      ]) ){
-        // Setting the session with its ID
-        $id_session = $this->db->last_id();
-        $this->session->set([
-          'fingerprint' => $fingerprint,
-          'tokens' => [],
-          'id_session' => $id_session,
-          'salt' => $salt
-        ], self::$sn);
-        $this->save_session();
-      }
-      else{
-        $this->set_error(16);
-      }
-    }
-    else{
-      $this->sess_cfg = json_decode($tmp, true);
-    }
-    return $this;
-  }
-
-  /**
-   * Sets an attribute the "session" part of the session.
-   * 
-   * @param mixed $attr Attribute if value follows, or an array with attribute/value keypairs 
-   * @return self
-   */
-  private function _set_session($attr): self
-  {
-    if ( $this->session->has(self::$sn) ){
-      $args = \func_get_args();
-      if ( (\count($args) === 2) && \is_string($args[0]) ){
-        $attr = [$args[0] => $args[1]];
-      }
-      foreach ( $attr as $key => $val ){
-        if ( \is_string($key) ){
-          $this->session->set($val, self::$sn, $key);
-        }
-      }
-    }
-    return $this;
-  }
-
-  /**
-   * Gets an attribute or the whole the "session" part of the session.
-   * 
-   * @param string $attr Name of the attribute to get
-   * @return mixed
-   */
-  private function _get_session(string $attr = null)
-  {
-    if ($this->session->has(self::$sn)) {
-      return $attr ?
-        $this->session->get(self::$sn, $attr) :
-        $this->session->get(self::$sn);
-    }
-    return null;
-  }
-
-  /**
-   * Checks the credentials of a user.
-   * 
-   * @param array $params Credentials
-   * @return bool
-   */
-  private function _check_credentials($params): bool
-  {
-    
-    if ( $this->check() ){
-      
-      /** @var array $f The form fields sent to identify the users */
-      $f =& $this->class_cfg['fields'];
-
-      if ( !isset($params[$f['salt']]) ){
-        $this->set_error(11);
-      }
-      else{
-        if ( !$this->check_salt($params[$f['salt']]) ){
-          $this->set_error(17);
-          $this->session->destroy();
-        }
-      }
-      if ( $this->check() ){
-        if ( isset($params[$f['user']], $params[$f['pass']]) ){
-          // Table structure
-          $arch =& $this->class_cfg['arch'];
-
-          $this->_just_login = 1;
-          if ( !$this->check() ){
-            $this->set_error(19);
-            //$this->session->destroy();
-            //$this->_init_session();
-          }
-
-          // Database Query
-          else if (
-            $id = $this->db->select_one(
-              $this->class_cfg['tables']['users'],
-              $this->fields['id'],
-              x::merge_arrays(
-                $this->class_cfg['conditions'],
-                [$arch['users']['active'] => 1],
-                [($arch['users']['login'] ?? $arch['users']['email']) => $params[$f['user']]])
-            )
-          ){
-            $pass = $this->db->select_one(
-              $this->class_cfg['tables']['passwords'],
-              $arch['passwords']['pass'],
-              [$arch['passwords']['id_user'] => $id],
-              [$arch['passwords']['added'] => 'DESC']
-            );
-            if ($this->_check_password($params[$f['pass']], $pass)) {
-              $this->_login($id);
-            }
-            else{
-              $this->record_attempt();
-              // Canceling authentication if num_attempts > max_attempts
-              $this->set_error($this->check_attempts() ? 6 : 4);
-            }
-          }
-          else{
-            $this->set_error(6);
-          }
-        }
-        else{
-          $this->set_error(12);
-        }
-      }
-    }
-    return $this->auth;
-  }
-
-  /**
-   * Defines user's directory and constant BBN_USER_PATH if not done yet.
-   * 
-   * @param bool $create If true creates it and remove temp files if any
-   * @return self
-   */
-  private function _init_dir(bool $create = false): self
-  {
-    if ( \defined('BBN_DATA_PATH') && $this->get_id() ){
-      $this->path = mvc::get_user_data_path($this->get_id());
-      $this->tmp_path = mvc::get_user_tmp_path($this->get_id());
-      if ( !\defined('BBN_USER_PATH') ){
-        define('BBN_USER_PATH', $this->path);
-      }
-      if ( $create ){
-        file\dir::create_path($this->path);
-        file\dir::create_path($this->tmp_path);
-        file\dir::delete($this->tmp_path, false);
-      }
-    }
-    return $this;
-  }
-
-  /**
-   * Sets a user as authenticated ($this->auth = true).
-   * 
-   * @param string $id
-   * @return self
-   */
-  private function _authenticate(string $id): self
-  {
-    if ( $this->check() && $id ){
-      $this->id = $id;
-      $this->auth = true;
-      $this->db->update($this->class_cfg['tables']['sessions'], [
-        $this->class_cfg['arch']['sessions']['id_user'] => $id
-      ], [
-        $this->class_cfg['arch']['sessions']['id'] => $this->get_id_session()
-      ]);
-    }
-    return $this;
-  }
-
-  /**
-   * Sets the error property once and for all.
-   *
-   * @param $err The error code
-   * @return self
-   */
-  protected function set_error($err): self
-  {
-    if ( !$this->error ){
-      $this->error = $err;
-      \bbn\x::log($this->get_error(), 'user_login');
-      //die(var_dump($err));
-    }
-    return $this;
-  }
-
-  /**
-   * Returns the first error in an array with the code and description.
-   * 
-   * @return null|array
-   */
-  public function get_error(): ?array
-  {
-    if ( $this->error ){
-      return [
-        'code' => $this->error,
-        'text' => $this->class_cfg['errors'][$this->error]
-      ];
-    }
-    return null;
-  }
-
-  /**
-   * Completes the steps for a full authentication of the user.
-   *
-   * @param type $id
-   * @return self
-   */
-  protected function log_in($id): self
-  {
-    $this->error = null;
-    if ( $this->check() && $id ){
-      $this
-        ->_authenticate($id)
-        ->_user_info()
-        ->_init_dir(true)
-        ->save_session();
-    }
-    return $this;
-  }
-
-  /**
-   * Returns a "print" based on the user agent + the fingerprint.
-   * 
-   * @param null|string $fp
-   * @return null|string
-   */
-  protected function get_print(string $fp = null): ?string
-  {
-    if ( !$fp ){
-      $fp = $this->_get_session('fingerprint');
-    }
-    if ( $fp ){
-      return sha1($this->user_agent.$this->accept_lang./*$this->ip_address .*/ $fp);
-    }
-    return null;
-  }
-
-  /**
-   * Returns the database ID for the session's row if it is in the session.
-   * 
-   * @return null|string
-   */
-  protected function get_id_session(): ?string
-  {
-    return $this->_get_session('id_session');
-  }
-
-  /**
-   * Increments the num_attempt variable (after unsuccessful login attempt).
-   * 
-   * @return self
-   */
-  protected function record_attempt(): self
-  {
-    $this->cfg['num_attempts'] = isset($this->cfg['num_attempts']) ?
-      $this->cfg['num_attempts']+1 : 1;
-    $this->_set_session('num_attempts', $this->cfg['num_attempts']);
-    $this->save_session();
-    return $this;
-  }
 
   /**
    * User constructor.
@@ -1469,4 +936,539 @@ class user extends models\cls\basic
     return null;
   }
 
-}
+  /**
+   * Returns the latest created connection, ie the current user's object.
+   * @return self
+   */
+  public static function get_user(): ?self
+  {
+    return self::get_instance();
+  }
+
+  /**
+   * Generates a random long string (16-32 chars) used as unique fingerprint.
+   * @return string
+   */
+  public static function make_fingerprint(): string
+  {
+    return str::genpwd(32, 16);
+  }
+
+  /**
+   * Returns an array with a key and a magic string used for making hotlinks.
+   *
+   * @return array
+   */
+  public static function make_magic_string(): array
+  {
+    $key = self::make_fingerprint();
+    return [
+      'key' => $key,
+      'hash' => hash('sha256', $key)
+    ];
+  }
+
+  /**
+   * Checks if a given string corresponds to the given hash.
+   * 
+   * @param string $key  The key
+   * @param string $hash The corresponding hash
+   * @return bool
+   */
+  public static function is_magic_string(string $key, string $hash): bool
+  {
+    return hash('sha256', $key) === $hash;
+  }
+
+
+  /**
+   * Sets the error property once and for all.
+   *
+   * @param $err The error code
+   * @return self
+   */
+  protected function set_error($err): self
+  {
+    if ( !$this->error ){
+      $this->error = $err;
+      \bbn\x::log($this->get_error(), 'user_login');
+      //die(var_dump($err));
+    }
+    return $this;
+  }
+
+  /**
+   * Returns the first error in an array with the code and description.
+   * 
+   * @return null|array
+   */
+  public function get_error(): ?array
+  {
+    if ( $this->error ){
+      return [
+        'code' => $this->error,
+        'text' => $this->class_cfg['errors'][$this->error]
+      ];
+    }
+    return null;
+  }
+
+  /**
+   * Completes the steps for a full authentication of the user.
+   *
+   * @param type $id
+   * @return self
+   */
+  protected function log_in($id): self
+  {
+    $this->error = null;
+    if ( $this->check() && $id ){
+      $this
+        ->_authenticate($id)
+        ->_user_info()
+        ->_init_dir(true)
+        ->save_session();
+    }
+    return $this;
+  }
+
+  /**
+   * Returns a "print" based on the user agent + the fingerprint.
+   * 
+   * @param null|string $fp
+   * @return null|string
+   */
+  protected function get_print(string $fp = null): ?string
+  {
+    if ( !$fp ){
+      $fp = $this->_get_session('fingerprint');
+    }
+    if ( $fp ){
+      return sha1($this->user_agent.$this->accept_lang./*$this->ip_address .*/ $fp);
+    }
+    return null;
+  }
+
+  /**
+   * Returns the database ID for the session's row if it is in the session.
+   * 
+   * @return null|string
+   */
+  protected function get_id_session(): ?string
+  {
+    return $this->_get_session('id_session');
+  }
+
+  /**
+   * Increments the num_attempt variable (after unsuccessful login attempt).
+   * 
+   * @return self
+   */
+  protected function record_attempt(): self
+  {
+    $this->cfg['num_attempts'] = isset($this->cfg['num_attempts']) ?
+      $this->cfg['num_attempts']+1 : 1;
+    $this->_set_session('num_attempts', $this->cfg['num_attempts']);
+    $this->save_session();
+    return $this;
+  }
+
+  /**
+   * Initialize and saves the session after authentication.
+   * 
+   * @param string $id The user's ID (as stored in the database).
+   * @return self
+   */
+   private function _login($id): self
+   {
+     if ( $this->check() && $id ){
+       $this
+         ->_authenticate($id)
+         ->_user_info()
+         ->_init_dir(true)
+         ->save_session();
+     }
+     return $this;
+   }
+ 
+   /**
+    * Gathers the user'data from the database and puts it in the session.
+    *
+    * @param array $data User's table data argument if it is already available
+    * @return self
+    */
+   private function _user_info(array $data = null): self
+   {
+     if ( $this->get_id() ){
+       // Removing the encryption key to prevent it being saved in the session
+       if (isset($this->fields['enckey'])) {
+         unset($this->fields['enckey']);
+       }
+       if ( !empty($this->get_session('cfg')) ){
+         $this->cfg = $this->get_session('cfg');
+         $this->id_group = $this->get_session('id_group');
+       }
+       else if ( $d = $this->db->rselect(
+         $this->class_cfg['tables']['users'],
+         array_unique(array_values($this->fields)),
+         x::merge_arrays(
+           $this->class_cfg['conditions'],
+           [$this->fields['active'] => 1],
+           [$this->fields['id'] => $this->id]))
+       ){
+         $r = [];
+         foreach ( $d as $key => $val ){
+           $this->$key = $val;
+           $r[$key] = $key === $this->fields['cfg'] ? json_decode($val, true) : $val;
+         }
+         $this->cfg = $r['cfg'] ?: [];
+         // Group
+         $this->id_group = $r['id_group'];
+         $this->session->set($r, self::$un);
+         $this->save_session();
+       }
+     }
+     return $this;
+   }
+ 
+   private function _get_encryption_key(): ?string
+   {
+     if (is_null($this->_encryption_key)) {
+       if ($this->auth) {
+         $this->_encryption_key = $this->db->select_one($this->class_cfg['table'], $this->class_cfg['arch']['users']['enckey'], ['id' => $this->id]);
+       }
+     }
+     return $this->_encryption_key;
+   }
+ 
+   /**
+    * Gathers all the information about the user's session.
+    *
+    * @param string $d The session's table data or its ID
+    * @return self
+    */
+   private function _sess_info(string $id_session = null): self
+   {
+     if ( !str::is_uid($id_session) ){
+       $id_session = $this->get_id_session();
+     }
+     else{
+       $cfg = $this->_get_session('cfg');
+     }
+     if (
+       empty($cfg) &&
+       str::is_uid($id_session) &&
+       ($id = $this->get_session('id')) &&
+       ($d = $this->db->rselect(
+         $this->class_cfg['tables']['sessions'],
+         $this->class_cfg['arch']['sessions'],
+         [
+           $this->class_cfg['arch']['sessions']['id'] => $id_session,
+           $this->class_cfg['arch']['sessions']['id_user'] => $id,
+           $this->class_cfg['arch']['sessions']['opened'] => 1,
+         ]))
+     ){
+       $cfg = json_decode($d['cfg'], true);
+     }
+     if ( \is_array($cfg) ){
+       $this->sess_cfg = $cfg;
+     }
+     else{
+       if ( isset($id) ){
+         $this->_init_session();
+         $new_id = $this->get_session('id');
+         if ( $new_id !== $id ){
+           return $this->_sess_info($new_id);
+         }
+       }
+       $this->set_error(14);
+     }
+     return $this;
+   }
+ 
+   /**
+    * Checks the conformity of a given string with a hash.
+    * 
+    * @param string $pass_given  The password to check
+    * @param string $pass_stored The stored encrypted password to check against
+    * @return bool
+    */
+   private function _check_password(string $pass_given, string $pass_stored): bool
+   {
+     return $this->_crypt($pass_given) === $pass_stored;
+   }
+ 
+   /**
+    * Use the configured hash function to encrypt a password string.
+    * 
+    * @param string $st The string to crypt
+    * @return string
+    */
+   private function _crypt(string $st): string
+   {
+     if (!function_exists($this->class_cfg['encryption'])) {
+       $this->class_cfg['encryption'] = 'sha256';
+     }
+     return eval("return {$this->class_cfg['encryption']}('$st');");
+   }
+ 
+   /**
+    * Retrieves all user info from its session and populates the object.
+    * 
+    * @param bool $force
+    * @return self
+    */
+   private function _retrieve_session(bool $force = false): self
+   {
+     // $id mustn't be already defined
+     if (!$this->id || $force) {
+       // The user ID must be in the session
+       $id_session = $this->get_id_session();
+       $id = $this->get_session('id');
+       if ($id_session && $id) {
+         $this->_sess_info($id_session);
+         x::log([$this->sess_cfg, $this->_get_session('fingerprint'), $this->get_print($this->_get_session('fingerprint'))], 'user_login');
+         if (isset($this->sess_cfg['fingerprint']) &&
+             ($this->get_print($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint'])
+         ) {
+           x::log("THe auth should have worked for id $id", 'user_login');
+           $this
+             ->_authenticate($id)
+             ->_user_info()
+             ->_init_dir()
+             ->save_session();
+           }
+         else {
+           $this->set_error(19);
+         }
+       }
+       else {
+         x::log([$id_session, $id], 'user_login');
+         $this->set_error(15);
+       }
+     }
+     return $this;
+   }
+ 
+   /**
+    * Gets or creates (also in database) the user's session for the first time.
+    * 
+    * @return self
+    */
+   private function _init_session(): self
+   {
+     // Getting or creating the session is it doesn't exist yet
+     /** @var user\session */
+     $this->session = user\session::get_instance();
+     if ( !$this->session ){
+       $this->session = new user\session();
+     }
+ 
+     /** @var int $id_session The ID of the session row in the DB */
+     if ( !($id_session = $this->get_id_session())
+         || !($tmp = $this->db->select_one(
+               $this->class_cfg['tables']['sessions'],
+               $this->class_cfg['arch']['sessions']['cfg'],
+               [$this->class_cfg['arch']['sessions']['id'] => $id_session]
+             ))
+     ){
+       /** @var string $salt */
+       $salt = self::make_fingerprint();
+ 
+       /** @var string $fingerprint */
+       $fingerprint = self::make_fingerprint();
+ 
+ 
+       /** @var array $p The fields of the sessions table */
+       $p =& $this->class_cfg['arch']['sessions'];
+ 
+       $this->sess_cfg = [
+         'fingerprint' => $this->get_print($fingerprint),
+         'last_renew' => time()
+       ];
+ 
+       // Inserting the session in the database
+       if ( $this->db->insert($this->class_cfg['tables']['sessions'], [
+         $p['sess_id'] => $this->session->get_id(),
+         $p['ip_address'] => $this->ip_address,
+         $p['user_agent'] => $this->user_agent,
+         $p['opened'] => 1,
+         $p['last_activity'] => date('Y-m-d H:i:s'),
+         $p['creation'] => date('Y-m-d H:i:s'),
+         $p['cfg'] => json_encode($this->sess_cfg)
+       ]) ){
+         // Setting the session with its ID
+         $id_session = $this->db->last_id();
+         $this->session->set([
+           'fingerprint' => $fingerprint,
+           'tokens' => [],
+           'id_session' => $id_session,
+           'salt' => $salt
+         ], self::$sn);
+         $this->save_session();
+       }
+       else{
+         $this->set_error(16);
+       }
+     }
+     else{
+       $this->sess_cfg = json_decode($tmp, true);
+     }
+     return $this;
+   }
+ 
+   /**
+    * Sets an attribute the "session" part of the session.
+    * 
+    * @param mixed $attr Attribute if value follows, or an array with attribute/value keypairs 
+    * @return self
+    */
+   private function _set_session($attr): self
+   {
+     if ( $this->session->has(self::$sn) ){
+       $args = \func_get_args();
+       if ( (\count($args) === 2) && \is_string($args[0]) ){
+         $attr = [$args[0] => $args[1]];
+       }
+       foreach ( $attr as $key => $val ){
+         if ( \is_string($key) ){
+           $this->session->set($val, self::$sn, $key);
+         }
+       }
+     }
+     return $this;
+   }
+ 
+   /**
+    * Gets an attribute or the whole the "session" part of the session.
+    * 
+    * @param string $attr Name of the attribute to get
+    * @return mixed
+    */
+   private function _get_session(string $attr = null)
+   {
+     if ($this->session->has(self::$sn)) {
+       return $attr ?
+         $this->session->get(self::$sn, $attr) :
+         $this->session->get(self::$sn);
+     }
+     return null;
+   }
+ 
+   /**
+    * Checks the credentials of a user.
+    * 
+    * @param array $params Credentials
+    * @return bool
+    */
+   private function _check_credentials($params): bool
+   {
+     
+     if ( $this->check() ){
+       
+       /** @var array $f The form fields sent to identify the users */
+       $f =& $this->class_cfg['fields'];
+ 
+       if ( !isset($params[$f['salt']]) ){
+         $this->set_error(11);
+       }
+       else{
+         if ( !$this->check_salt($params[$f['salt']]) ){
+           $this->set_error(17);
+           $this->session->destroy();
+         }
+       }
+       if ( $this->check() ){
+         if ( isset($params[$f['user']], $params[$f['pass']]) ){
+           // Table structure
+           $arch =& $this->class_cfg['arch'];
+ 
+           $this->_just_login = 1;
+           if ( !$this->check() ){
+             $this->set_error(19);
+             //$this->session->destroy();
+             //$this->_init_session();
+           }
+ 
+           // Database Query
+           else if (
+             $id = $this->db->select_one(
+               $this->class_cfg['tables']['users'],
+               $this->fields['id'],
+               x::merge_arrays(
+                 $this->class_cfg['conditions'],
+                 [$arch['users']['active'] => 1],
+                 [($arch['users']['login'] ?? $arch['users']['email']) => $params[$f['user']]])
+             )
+           ){
+             $pass = $this->db->select_one(
+               $this->class_cfg['tables']['passwords'],
+               $arch['passwords']['pass'],
+               [$arch['passwords']['id_user'] => $id],
+               [$arch['passwords']['added'] => 'DESC']
+             );
+             if ($this->_check_password($params[$f['pass']], $pass)) {
+               $this->_login($id);
+             }
+             else{
+               $this->record_attempt();
+               // Canceling authentication if num_attempts > max_attempts
+               $this->set_error($this->check_attempts() ? 6 : 4);
+             }
+           }
+           else{
+             $this->set_error(6);
+           }
+         }
+         else{
+           $this->set_error(12);
+         }
+       }
+     }
+     return $this->auth;
+   }
+ 
+   /**
+    * Defines user's directory and constant BBN_USER_PATH if not done yet.
+    * 
+    * @param bool $create If true creates it and remove temp files if any
+    * @return self
+    */
+   private function _init_dir(bool $create = false): self
+   {
+     if ( \defined('BBN_DATA_PATH') && $this->get_id() ){
+       $this->path = mvc::get_user_data_path($this->get_id());
+       $this->tmp_path = mvc::get_user_tmp_path($this->get_id());
+       if ( !\defined('BBN_USER_PATH') ){
+         define('BBN_USER_PATH', $this->path);
+       }
+       if ( $create ){
+         file\dir::create_path($this->path);
+         file\dir::create_path($this->tmp_path);
+         file\dir::delete($this->tmp_path, false);
+       }
+     }
+     return $this;
+   }
+ 
+   /**
+    * Sets a user as authenticated ($this->auth = true).
+    * 
+    * @param string $id
+    * @return self
+    */
+   private function _authenticate(string $id): self
+   {
+     if ( $this->check() && $id ){
+       $this->id = $id;
+       $this->auth = true;
+       $this->db->update($this->class_cfg['tables']['sessions'], [
+         $this->class_cfg['arch']['sessions']['id_user'] => $id
+       ], [
+         $this->class_cfg['arch']['sessions']['id'] => $this->get_id_session()
+       ]);
+     }
+     return $this;
+   }
+ }
+ 
