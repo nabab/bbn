@@ -262,7 +262,12 @@ class db extends \PDO implements db\actions, db\api, db\engines
    */
   private function _db_cache_name($item, $mode){
     $r = false;
-    $h = str::sanitize($this->host);
+    if ($this->engine === 'sqlite') {
+      $h = md5($this->host.dirname($this->current));
+    }
+    else {
+      $h = str::sanitize($this->host);
+    }
     switch ( $mode ){
       case 'columns':
         $r = $this->engine.'/'.$h.'/'.str_replace('.', '/', $this->tfn($item));
@@ -291,6 +296,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
     if ( $force && isset($this->cache[$cache_name]) ){
       unset($this->cache[$cache_name]);
     }
+    
     if ( !isset($this->cache[$cache_name]) ){
       if ( $force || !($tmp = $this->cache_get($cache_name)) ){
         switch ( $mode ){
@@ -4532,7 +4538,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @param string $db
    * @return bool
    */
-  public function create_user(string $user, string $pass, string $db = null): bool
+  public function create_user(string $user = null, string $pass = null, string $db = null): bool
   {
     return $this->language->create_user($user, $pass, $db);
   }
@@ -4550,7 +4556,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
    * @param string $user
    * @return bool
    */
-  public function delete_user(string $user): bool
+  public function delete_user(string $user = null): bool
   {
     return $this->language->delete_user($user);
   }

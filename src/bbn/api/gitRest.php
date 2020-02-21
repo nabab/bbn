@@ -7,13 +7,29 @@
  */
 namespace bbn\api;
 use bbn;
-use function GuzzleHttp\json_encode;
 
-class git extends \Cz\Git\GitRepository
+class gitRest extends \bbn\api\rest
 {
+ private $git;
+  public function __construct( array $cfg ){
+    $this->git = $cfg;
+    parent::__construct($cfg);
+  }
+
+  
+  public function issues($rep){
+    $post = [
+      'state' => 'opened',
+      'page' => 1
+    ];
+    $res = $this->_get_url($this->git['user'].'/'.$rep.'/issues', "1/comments", $post);
+    return $res ;
+  }
+
   public function listRemote(){
     return $this->extractFromCommand('git remote -v');
   }
+
 
   public function createRepositoryRemote(string $token, array $scope, string $api="gitbucket"){
     if ( $token &&

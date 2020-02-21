@@ -106,6 +106,11 @@ trait common {
     return \bbn\mvc::get_app_path($raw);
   }
 
+  public function lib_path(): string
+  {
+    return \bbn\mvc::get_lib_path();
+  }
+
   public function data_path(string $plugin = null): string
   {
     return \bbn\mvc::get_data_path().($plugin ? 'plugins/'.$plugin.'/' : '');

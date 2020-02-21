@@ -509,10 +509,7 @@ MYSQL;
           ]]
         ],
         'where' => $where,
-        'order' => [
-          'field' => $chrono,
-          'dir' => 'ASC'
-        ]
+        'order' => [$chrono => 'ASC']
       ]);
       self::enable();
       return $res;
@@ -627,7 +624,7 @@ MYSQL;
         }
         $r = [];
         //die(var_dump($columns, $model['fields']));
-        foreach ( $columns as $col ){        
+        foreach ( $columns as $col ){
           if ( isset($model['fields'][$col]['id_option']) ){
             if ($r[$col] = $db->rselect(self::$table, ['val', 'ref'], [
               'uid' => $id,

@@ -1479,6 +1479,8 @@ MYSQL
   }
   
   /**
+   * There's an error in the query REVOKE ALL PRIVILEGES ON *.*
+   *   FROM $user
    * Deletes a database user
    *
    * @param string $user
@@ -1489,8 +1491,8 @@ MYSQL
 		if ( bbn\str::check_name($user) ){
 			$this->db->raw_query("
 			REVOKE ALL PRIVILEGES ON *.*
-			FROM $user");
-			return (bool)$this->db->query("DROP USER $user");
+      FROM $user");
+      return (bool)$this->db->query("DROP USER $user");
 		}
 		return false;
 	}

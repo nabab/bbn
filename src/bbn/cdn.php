@@ -151,6 +151,7 @@ class cdn extends models\cls\basic
       $this->db = $db;
     }
     $this->request = $request;
+    x::log($request, 'cdn_errors');
     // Creation of a config object
     $config = new cdn\config($request, $this->db);
     // Checking request validity
@@ -482,7 +483,11 @@ JS;
       return false;
     }
     $file = empty($this->cfg['file']) || $this->cfg['is_component'] ? $this->cfg['cache_file'] : $this->fpath.$this->cfg['file'];
-    return $file && is_file($file);
+    if ($file && is_file($file)) {
+      return true;
+    }
+    x::log("Impossible to find $file", 'cdn_errors');
+    return false;
   }
 
   /**

@@ -119,7 +119,9 @@ class x
         $file = BBN_DATA_PATH.'logs/_php_error.json';
         $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20);
         foreach ($backtrace as &$b) {
-          $b['file'] = str_replace(BBN_APP_PATH, '', $b['file']);
+          if (!empty($b['file'])) {
+            $b['file'] = str_replace(BBN_APP_PATH, '', $b['file']);
+          }
         }
         $r = false;
         if ( is_file($file) ){

@@ -871,18 +871,15 @@ class str
           return $st;
         }
         $st = trim($st);
-        // Not starting with a zero or ending with a zero decimal
-        if ( !preg_match('/^0[^.]+|\.[0-9]*0$/', $st) ){
-          if ( self::is_integer($st) && ((substr((string)$st, 0, 1) !== '0') || ($st === '0')) ){
-            $tmp = (int)$st;
-            if ( ($tmp < PHP_INT_MAX) && ($tmp > -PHP_INT_MAX) ){
-              return $tmp;
-            }
+        if ( self::is_integer($st) && ((substr((string)$st, 0, 1) !== '0') || ($st === '0')) ){
+          $tmp = (int)$st;
+          if ( ($tmp < PHP_INT_MAX) && ($tmp > -PHP_INT_MAX) ){
+            return $tmp;
           }
-          // If it is a decimal, not starting or ending with a zero
-          else if ( self::is_decimal($st) ){
-            return (float)$st;
-          }
+        }
+        // If it is a decimal, not starting or ending with a zero
+        else if ( self::is_decimal($st) ){
+          return (float)$st;
         }
       }
     }

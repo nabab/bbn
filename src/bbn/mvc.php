@@ -59,6 +59,7 @@ class mvc implements mvc\api{
     $_app_name,
     $_app_path,
     $_cur_path,
+    $_lib_path,
     $_data_path;
 
 	private
@@ -135,6 +136,7 @@ class mvc implements mvc\api{
       self::$_app_name = BBN_APP_NAME;
       self::$_app_path = BBN_APP_PATH;
       self::$_cur_path = BBN_CUR_PATH;
+      self::$_lib_path = BBN_LIB_PATH;
       self::$_data_path = BBN_DATA_PATH;
     }
   }
@@ -149,6 +151,10 @@ class mvc implements mvc\api{
 
   public static function get_cur_path(){
     return self::$_cur_path;
+  }
+
+  public static function get_lib_path(){
+    return self::$_lib_path;
   }
 
   public static function get_data_path(string $plugin = null): string

@@ -363,7 +363,7 @@ class sqlite implements bbn\db\engines
       return null;
     }
     $r = [];
-		if ( $table = $this->table_full_name($table) ){
+    if ( $table = $this->table_full_name($table) ){
       $p = 1;
       if ( $rows = $this->db->get_rows("PRAGMA table_info($table)") ){
         foreach ( $rows as $row ){
@@ -1040,8 +1040,11 @@ SQLITE
    */
   public function delete_index(string $table, string $key): bool
 	{
-		if ( ( $table = $this->table_full_name($table, 1) ) && bbn\str::check_name($key) ){
-			return (bool)$this->db->query("ALTER TABLE $table DROP INDEX `$key`");
+   	if ( ( $table = $this->table_full_name($table, 1) ) && bbn\str::check_name($key) ){
+    
+      //changed the row above because if the table has no rows query() returns 0
+      //return (bool)$this->db->query("ALTER TABLE $table DROP INDEX `$key`");
+      return $this->db->query('DROP INDEX IF EXISTS '.$key) !== false;
 		}
 		return false;
 	}
@@ -1055,14 +1058,15 @@ SQLITE
   
   public function create_database(string $database): bool
   {
-  /*
     if ( bbn\str::check_filename($database) ){
-      fopen($this->db->host.$database, 'w');
-      
-      
-      return (bool)$this->db->raw_query("CREATE DATABASE IF NOT EXISTS `$database` DEFAULT CHARACTER SET $enc COLLATE $collation;");
-			return $this->db->change($database);
-    }*/    
+      if(empty(strpos($database, '.sqlite'))){
+        $database = $database.'.sqlite';
+      }
+      if( empty(file_exists($this->db->host.$database))){
+        fopen($this->db->host.$database, 'w');
+        return file_exists($this->db->host.$database);
+      }
+    }  
     return false;
   }
 
@@ -1077,7 +1081,7 @@ SQLITE
    * @param string $db
    * @return bool
    */
-  public function create_user(string $user, string $pass, string $db = null): bool
+  public function create_user(string $user = null, string $pass = null, string $db = null): bool
   {
     return true;
   }
@@ -1088,7 +1092,7 @@ SQLITE
    * @param string $user
    * @return bool
    */
-  public function delete_user(string $user): bool
+  public function delete_user(string $user = null): bool
   {
     return true;
   }
@@ -1119,7 +1123,8 @@ SQLITE
       $cur = $this->db->current;
       $this->db->change($database);
     }
-    $r = $this->db->get_row('SHOW TABLE STATUS WHERE Name LIKE ?', $table);
+    //$r = $this->db->get_row('SHOW TABLE STATUS WHERE Name LIKE ?', $table);
+    $r = $this->db->get_row('SELECT * FROM dbstat WHERE Name LIKE ?', $table);
     if ( null !== $cur ){
       $this->db->change($cur);
     }
@@ -1183,9 +1188,7 @@ SQLITE
   public function get_create_constraints(string $table, array $model = null): string
   {
     $st = '';
-
     if ( !empty($model) ) {
-
       if ($last = count($model)) {
         $st .= 'ALTER TABLE '.$this->db->escape($table).PHP_EOL;
         $i = 0;

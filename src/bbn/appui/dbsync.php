@@ -227,14 +227,14 @@ MYSQL
     if (!self::is_init()) {
       die("DB sync is not initiated");
     }
+    self::disable();
+    $mode_db = self::$db->get_error_mode();
+    $mode_dbs = self::$dbs->get_error_mode();
+    self::$db->set_error_mode("continue");
+    self::$dbs->set_error_mode("continue");
     if ( !$num_try ){
       self::def($dbs, $dbs_table);
       self::first_call();
-      self::disable();
-      $mode_db = self::$db->get_error_mode();
-      $mode_dbs = self::$dbs->get_error_mode();
-      self::$db->set_error_mode("continue");
-      self::$dbs->set_error_mode("continue");
     }
 
     $num_try++;
@@ -425,13 +425,11 @@ MYSQL
         $res[$k] = $v;
       }
     }
+    self::$db->set_error_mode($mode_db);
+    self::$dbs->set_error_mode($mode_dbs);
+    self::enable();
     if ( $retry && ( $num_try <= self::$max_retry ) ){
       $res = bbn\x::merge_arrays($res, self::sync($db, $dbs, $dbs_table, $num_try));
-    }
-    else{
-      self::$db->set_error_mode($mode_db);
-      self::$dbs->set_error_mode($mode_dbs);
-      self::enable();
     }
     return $res;
   }
