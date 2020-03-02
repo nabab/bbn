@@ -251,8 +251,10 @@ class model extends bbn\models\cls\db{
         $cn .= '/'.$spec;
       }
       if ( $data ){
-        \bbn\x::log($data, 'iiiii');
-        $cn .= '/'.md5(serialize(is_array($data) ? ksort($data) : $data));
+        if (is_array($data)) {
+          ksort($data);
+        }
+        $cn .= '/'.md5(serialize($data));
       }
       return $cn;
     }

@@ -161,6 +161,7 @@ class medias extends bbn\models\cls\db
     }
     if ( 
       is_array($medias) &&
+      \bbn\file\dir::create_path(dirname($dest)) &&
       ($zip = new \ZipArchive()) &&
       (
         (

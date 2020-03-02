@@ -252,6 +252,35 @@ class permissions extends bbn\models\cls\basic
   }
 
   /**
+   * Checks if a user and/or a group has a permission for the given option or for its childern.
+   *
+   * @param mixed $id_option
+   * @param string $type
+   * @param bool $force
+   * @return bool
+   */
+  public function has_deep(string $id_option = null, string $type = 'page', bool $force = false): bool
+  {
+    if ( !$force && $this->user && $this->user->is_dev() ){
+      return true;
+    }
+    if ( $this->has($id_option, $type, $force) ){
+      return true;
+    }
+    if (
+      ($id_option = $this->_get_id_option($id_option, $type)) &&
+      ($options = $this->opt->full_options($id_option))
+    ){
+      foreach ( $options as $option ){
+        if ( $this->has_deep($option['id'], $type, $force) ){
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
    * Checks if an option corresponds to the given path.
    *
    * @param string $path

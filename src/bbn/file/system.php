@@ -482,6 +482,7 @@ class system extends bbn\models\cls\basic
   }
 
   /**
+   * Copy either the file to the new path or the ocntent of the dir inside the new dir
    * @param string $source
    * @param string $dest
    * @return bool
