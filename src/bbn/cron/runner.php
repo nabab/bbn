@@ -32,7 +32,6 @@ class runner extends bbn\models\cls\basic
    */
   private function _run(): void
   {
-    $this->output('PID', getmypid());
     // The DB and the controller exist
     if ($this->check() && isset($this->data['type'])) {
       if (defined('BBN_EXTERNAL_USER_ID') && class_exists('\\bbn\\appui\\history')) {
@@ -79,7 +78,7 @@ class runner extends bbn\models\cls\basic
         }
       }
       // We create the PID file corresponding to the current process
-      if (file_put_contents($pid_file, getmypid() . '|' . time())) {
+      if (file_put_contents($pid_file, BBN_PID . '|' . time())) {
         // Shutdown function, will be always executed, except if the server is stopped
         register_shutdown_function([$this, 'shutdown']);
         // And here we really do what we have to do
@@ -171,9 +170,9 @@ class runner extends bbn\models\cls\basic
     // We check if there is a problem with the PID file (it's only debug it shouldn't be necessary)
     if ($file_content) {
       $pid_content = explode('|', $file_content);
-      if ($pid_content[1] && ($pid_content[0] != getmypid())) {
-        $this->output(_('Different processes'), $pid_content[0] . '/' . getmypid());
-        bbn\x::log(_('Different processes') . ': ' . $pid_content[0] . '/' . getmypid(), 'cron');
+      if ($pid_content[1] && ($pid_content[0] != BBN_PID)) {
+        $this->output(_('Different processes'), $pid_content[0] . '/' . BBN_PID);
+        bbn\x::log(_('Different processes') . ': ' . $pid_content[0] . '/' . BBN_PID, 'cron');
         $ok = false;
       }
     }
