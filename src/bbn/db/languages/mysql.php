@@ -822,7 +822,9 @@ MYSQL
             if (($t = $cfg['available_fields'][$g])
             && ($cfn = $this->col_full_name($g, $t)) ){
               $indexes[] = $cfn;
-              $idxs[] = $this->col_simple_name($g, true);
+              //$idxs[] = $this->col_simple_name($g, true);
+              // Changed by Mirko
+              $idxs[] = $this->col_simple_name($cfg['aliases'][$g] ?? $g, true);
             }
             else {
               $indexes[] = $g;
@@ -864,7 +866,9 @@ MYSQL
           else{
             if (count($indexes) === count($cfg['group_by'])){
               $res .= 'COUNT(*) FROM ( SELECT ';
-              $cfg['fields'] = $indexes;
+              //$cfg['fields'] = $indexes;
+              // Changed by Mirko
+              $cfg['fields'] = array_combine($idxs, $indexes);
             }
             else{
               $res .= 'COUNT(*) FROM ( SELECT ';

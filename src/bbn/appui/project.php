@@ -319,13 +319,13 @@ class project extends bbn\models\cls\db {
     $repository = '';
     $repositories = $this->repositories();
 
-    foreach ( $repositories as $i => $d ){     
+    foreach ( $repositories as $i => $d ){
       if ( (strpos($url, $i) === 0) &&
         (\strlen($i) > \strlen($repository) )
       ){
         $repository = $i;
       }
-    }    
+    }
     if ( !empty($repository) ){
       return empty($obj) ? $repository : $repositories[$repository];
     }

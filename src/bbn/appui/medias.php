@@ -116,13 +116,15 @@ class medias extends bbn\models\cls\db
   public function delete(string $id){
     if ( \bbn\str::is_uid($id) ){
       $cf =& $this->class_cfg;
-      $media = $this->get_media($id);
+      $media = $this->get_media($id, true);
+      $fs = new bbn\file\system();
+      
       if ($media 
           && ($path = dirname($media['file']))
           && is_file($media['file'])
           && $this->db->delete($cf['table'], [$cf['arch']['medias']['id'] => $id])
       ) {
-        if (\bbn\file\dir::delete($path, false)) {
+        if ($fs->delete($path, false)) {
           bbn\x::clean_storage_path($path);
         }
         return true;
@@ -180,4 +182,39 @@ class medias extends bbn\models\cls\db
     }
     return false;
   }
+
+  public function get_medias( $start = 0, $limit ){
+    $note = new notes($this->db);
+    $res = [];
+    $res = $this->db->rselect_all([
+      'table'=> 'bbn_medias', 
+      'fields' => [], 
+      'where' => [
+        'conditions'=> [[
+          'field' => 'private',
+          'value' => 0
+        ],[
+          'field' => 'content',
+          'operator' => 'isnotnull'
+        ]]
+      ],
+      'start'  => $start,
+      'limit' => $limit
+    ]);
+    if ( !empty($res) ){
+      $db = $this->db;
+      $res = array_map(function($a)use($db, $note){
+        $ids = $db->rselect_all('bbn_notes_medias', ['id_note', 'version'], ['id_media' => $a['id']]);
+        if ( !empty($ids) ){
+          foreach($ids as $i){
+            $a['notes'][] = $note->get($i['id_note']);
+          }
+        }
+        return $a;
+      }, $res);
+    }
+    
+    return $res;
+  }
+
 }

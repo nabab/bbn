@@ -270,7 +270,7 @@ MYSQL
     $ds = self::$dbs->rselect_all(self::$dbs_table, ['id', 'tab', 'vals', 'chrono'], [
       ['db', '!=', self::$db->current],
       ['state', '=', 0],
-      ['action', '=', 'insert']
+      ['action', 'LIKE', 'INSERT']
     ], [
       'chrono' => 'ASC',
       'id' => 'ASC'
@@ -396,11 +396,12 @@ MYSQL
       }
       // Proceeding to the actions update is after in case we needed to restore
       if ( strtolower($d['action']) === 'update' ){
+        \bbn\x::log(bbn\x::merge_arrays($d['rows'], $d['vals']), 'synct');
         if ( self::$db->update($d['tab'], $d['vals'], $d['rows']) ){
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
           $to_log['updated_real']++;
         }
-        else if ( self::$db->select($d['tab'], [], bbn\x::merge_arrays($d['rows'], $d['vals'])) ){
+        elseif ( self::$db->select($d['tab'], [], bbn\x::merge_arrays($d['rows'], $d['vals'])) ){
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
         }
         else{

@@ -299,7 +299,7 @@ class cms extends bbn\models\cls\db
 	{	
 		$success = false;
 		$idx = \bbn\x::find($this->get_full_published(), ['url' => $url]);
-		if ( $this->_notes->get($id_note)  && empty($idx) ){
+		if ( $this->_notes->get($id_note) && empty($idx) ){
 			if ( empty($this->db->rselect([
 				'table' => $this->class_cfg['tables']['notes_url'], 
 				'fields' => [$this->class_cfg['arch']['notes_url']['url']],
@@ -328,6 +328,9 @@ class cms extends bbn\models\cls\db
 				);
 				
 			}
+		}
+		elseif ( !empty($idx) ) {
+			throw new \Exception(_('The url you are trying to insert already belongs to a published note. Unpublish the note or change the url!'));
 		}
 		return $success;
 	}
@@ -547,7 +550,14 @@ class cms extends bbn\models\cls\db
 		){
 			//if $url is given it updates the note_url
 			if ( !empty($cfg['url'])){
-				$this->set_url($id_note, $cfg['url']);
+				try {
+					$this->set_url($id_note, $cfg['url']);
+				}
+				catch ( \Exception $e ){
+					return [
+						'error' => $e->getMessage()
+					];
+				}
 			}
 			if ( !empty($this->has_url($id_note)) ){
 				if ( empty($this->get_event($id_note)) ){

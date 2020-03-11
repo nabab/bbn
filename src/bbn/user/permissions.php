@@ -25,9 +25,10 @@ class permissions extends bbn\models\cls\basic
       bbn\models\tts\current;
 
   protected
-          $opt,
-          $pref,
-          $user;
+    $opt,
+    $pref,
+    $user,
+    $db;
 
   /**
    * @param string|null $id_option
@@ -64,6 +65,7 @@ class permissions extends bbn\models\cls\basic
     }
     self::retriever_init($this);
     self::optional_init();
+    $this->db = \bbn\db::get_instance();
 	}
 
   /**
@@ -532,7 +534,7 @@ class permissions extends bbn\models\cls\basic
     $o['id_parent'] = $id_parent;
     if ( !($id = $this->opt->from_code($o['code'], $id_parent)) ){
       $total += (int)$this->opt->add($o, false, true);
-      $id = $db->last_id();
+      $id = $this->db->last_id();
     }
     /* No!!!
     else if ( isset($o['cfg']) ){

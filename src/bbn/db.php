@@ -728,6 +728,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       unset($t);
     }
     else{
+      throw new Error(_('No table given'));
       return [];
     }
     if ( !empty($res['fields']) ){
@@ -1566,8 +1567,19 @@ class db extends \PDO implements db\actions, db\api, db\engines
       $res['where_st'] = $this->language->get_where($res);
       $res['group_st'] = $this->language->get_group_by($res);
       $res['having_st'] = $this->language->get_having($res);
-      $res['order_st'] = $res['count'] ? '' : $this->language->get_order($res);
-      $res['limit_st'] = $res['count'] ? '' : $this->language->get_limit($res);
+      $cls = '\\bbn\\db\\languages\\'.$this->engine;
+      if (
+        empty($res['count'])
+        && (count($res['fields']) === 1)
+        && ($cls::is_aggregate_function(reset($res['fields'])))
+      ) {
+        $res['order_st'] = '';
+        $res['limit_st'] = '';
+      }
+      else {
+        $res['order_st'] = $res['count'] ? '' : $this->language->get_order($res);
+        $res['limit_st'] = $res['count'] ? '' : $this->language->get_limit($res);
+      }
 
       if (!empty($res['sql'])) {
         $res['sql'] .= $res['join_st'].$res['where_st'].$res['group_st'];
@@ -2952,7 +2964,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
       if ( method_exists($r, 'get_irow') ){
         return ($a = $r->get_irow()) ? $a[0] : false;
       }
-      $this->log('ERROR IN RSELECT_ONE', $this->get_last_cfg(), $r, $this->_add_kind($this->_set_limit_1(\func_get_args())));
+      $this->log('ERROR IN SELECT_ONE', $this->get_last_cfg(), $r, $this->_add_kind($this->_set_limit_1(\func_get_args())));
     }
     return false;
   }

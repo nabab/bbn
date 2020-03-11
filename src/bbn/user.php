@@ -217,8 +217,13 @@ class user extends models\cls\basic
 
     $f =& $this->class_cfg['fields'];
 
+    if (\bbn\x::is_cli() && isset($params['id'])) {
+      $this->id = $params['id'];
+      $this->auth = true;
+    }
     // The user logs in
-    if ( isset($params[$f['user']], $params[$f['pass']], $params[$f['salt']]) ){
+    elseif ( isset($params[$f['user']], $params[$f['pass']], $params[$f['salt']]) ){
+
       /** @todo separate credentials and salt checking */
       if ( $this->get_print($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint']){
         /** @todo separate credentials and salt checking */
@@ -231,7 +236,7 @@ class user extends models\cls\basic
     }
     /** @todo revise the process: dying is not the solution! */
     // The user is not known yet
-    else if (
+    elseif (
       isset($params[$f['key']], $params[$f['id']], $params[$f['pass1']], $params[$f['pass2']], $params[$f['action']]) &&
       ($params[$f['action']] === 'init_password') &&
       ($params[$f['pass1']] === $params[$f['pass2']])

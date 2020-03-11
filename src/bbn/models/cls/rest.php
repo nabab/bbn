@@ -43,7 +43,7 @@ abstract class rest extends bbn\models\cls\basic{
     return false;
   }
 
-  public function build_url()
+  public function build_url($url, $alt_param)
   {
     return $this->cfg['url'] ?? null;
   }
