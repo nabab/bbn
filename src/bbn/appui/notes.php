@@ -693,4 +693,83 @@ class notes extends bbn\models\cls\db
     }
   }
 
+  /**
+   * Selects from db all medias that have the property content not null and a correspondant existing file.
+   *
+   * @param integer $start
+   * @param integer $limit
+   * @return array
+   */
+	public function get_medias_notes(int $start = 0, $limit ): array
+  {
+    $res = [];
+    $cf =& $this->class_cfg;
+    $all = $this->db->rselect_all([
+      'table'=> $cf['tables']['medias'],
+      'fields' => $cf['arch']['medias'],
+      'where' => [
+        'conditions'=> [[
+          'field' => $cf['arch']['medias']['private'],
+          'value' => 0
+        ],[
+          'field' => $cf['arch']['medias']['content'],
+          'operator' => 'isnotnull'
+        ]]
+      ],
+      'start'  => $start,
+      'limit' => $limit
+    ]);
+    if ( !empty($all) ){
+      $root = \bbn\mvc::get_data_path('appui-notes').'media/';
+      foreach ($all as $i => $a) {
+        if (bbn\str::is_json($a['content']) && ($media_obj = $this->get_media_instance())) {
+          $content = json_decode($a['content'], true);
+          $path = $root.$content['path'].'/';  
+          $full_path =  $path.$a['id'].'/'.$a['name'];  
+          if ( file_exists($full_path)){
+            $all[$i]['notes'] = $this->get_media_notes($a['id']);
+            //if the media is an image it takes the thumb 60, 60 for src
+            if ($media_obj->is_image($full_path) && ($thumb = $media_obj->get_thumbs($full_path))) {
+              $all[$i]['is_image'] = true;
+            }
+            $res[] = $all[$i];
+            
+          }
+        }
+      }
+    }
+    return $res;
+  }
+
+  /**
+   * returns all the notes linked to the media
+   *
+   * @param string $id_media
+   * @return void
+   */
+  public function get_media_notes(string $id_media)
+  {
+  	$notes = [];
+    $cms = new \bbn\appui\cms($this->db);
+    $ids = $this->db->rselect_all(
+      $this->class_cfg['tables']['nmedias'], [
+        $this->class_cfg['arch']['nmedias']['id_note'],
+        $this->class_cfg['arch']['nmedias']['version']
+      ], 
+      [
+        $this->class_cfg['arch']['nmedias']['id_media'] => $id_media
+      ]
+    );   
+    
+    if ( !empty($ids) ){
+    	foreach($ids as $i){
+        $tmp = $this->get($i['id_note']);
+        $tmp['is_published'] = $cms->is_published($i['id_note']);
+        $notes[] = $tmp;
+				//return $notes;
+      }
+    }
+    return $notes;
+  }
+  
 }

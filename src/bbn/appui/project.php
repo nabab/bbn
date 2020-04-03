@@ -11,109 +11,96 @@ use bbn;
 
 
 class project extends bbn\models\cls\db {
-
-  const
-    BBN_APPUI = 'appui',
-    BBN_PROJECTS = 'projects',
-    PROJECTS_ASSETS = 'assets',
-    ASSETS_LANG = 'lang',
-    ASSETS_PATH = 'path';
-
-  protected static
-    $extensions = ['js', 'json', 'php'],
-    $id_type_path,
-    $id_type_lang;
-
-  protected
+  protected 
     $id,
+    $id_langs,
+    $id_path, 
     $name,
     $lang,
-    $assets = [
-      'path' => [],
-      'langs' => []
-    ];
+    $code, 
+    $option, 
+    $repositories,
+    $fs;
 
-  private
-    $options;
 
-  private function get_project_info(string $id = ''){
-    if (
-      empty($id) ||
-      ($id === $this->id)
-    ){
-      return [
-        'id' => $this->id,
-        'name' => $this->name,
-        'lang' => $this->lang
-      ];
-    }
-    else {
-      $where = bbn\str::is_uid($id) ? ['id' => $id] : ['name' => $id];
-      /*if ( $row = $this->db->rselect('bbn_projects', [], $where) ){
-        return $row;
-      }*/
-      if( $row = $this->db->rselect([
-        'tables' => ['bbn_projects'],
-        'fields' => [],
-        'where' => [
-          'conditions' => [[
-            'field' => 'bbn_projects.id',
-            'operator' => '=',
-            'value' => $id
-          ]]
-        ]
-      ]) ){
-        //die(var_dump($row, $this->db->last(), $id));
-        return $row;
+   
+  /**
+   * Defines the variables 
+   *
+   * @param  $id
+   * @param string $name
+   * @param string $lang
+   * @return void
+   */
+  private function set_project_info(string $id){
+    if ( $o = $this->options->option($id) ){
+      $cfg = $this->options->get_cfg($id);
+      $this->name = $o['text'];
+      $this->lang = $cfg['i18n'] ?: ''; 
+      $this->code = $o['code'];
+      $this->option = $o;
+      $this->repositories = $this->get_repositories($o['text']);
+      //the id of the child option 'lang' (children of this option are all languages for which the project is configured)
+      if ( !$this->id_langs = $this->options->from_code('lang', $o['code'], 'projects', 'appui') ){
+        $this->id_langs = $this->set_id_langs();
       }
+      //the id of the child option 'path'
+      $this->id_path = $this->options->from_code('path', $o['code'], 'projects', 'appui') ?: null;
+      return true;
     }
     return false;
   }
 
-  private function set_project_info($id, string $name = '', string $lang = ''){
-    if ( \is_array($id) ){
-      $args = $id;
+  /**
+   * Change the value of the property i18n on the option of the project
+   *
+   * @param string $lang
+   * @return void
+   */
+  public function change_project_lang(string $lang){
+    if ( $cfg = $this->options->get_cfg($this->id) ){
+      $cfg['i18n'] = $lang;
+      $this->lang = $lang;
+      $success = $this->options->set_cfg($this->id, $cfg);
+      $this->options->delete_cache($this->id, true);
+      return $success;
     }
-    else if ( count(func_get_args()) === 1 ){
-      $args = $this->get_project_info(func_get_args()[0]);
-    }
-    $this->id = !empty($args) ? $args['id'] : $id;
-    $this->name = !empty($args) ? $args['name'] : $name;
-    $this->lang = !empty($args) ? $args['lang'] : $lang;
+    return false;
   }
 
-
-  public static function get_id_asset_lang(){
-    if ( !isset(self::$id_type_lang) ){
-      self::$id_type_lang = bbn\appui\options::get_instance()->from_root_code(
-        self::ASSETS_LANG,
-        self::PROJECTS_ASSETS,
-        self::BBN_PROJECTS,
-        self::BBN_APPUI
+  /**
+   * If the child option lang is not yet created it creates the option
+   *
+   * @return void
+   */
+  private function set_id_langs(){
+    
+    if ( empty($this->id_langs)){
+      $this->id_langs = $this->options->add(
+        [
+          'text' => 'Languages',
+          'code' => 'lang',
+          'id_parent' => $this->id,
+        ]
       );
     }
-    return self::$id_type_lang;
   }
-
-  public static function get_id_asset_path(){
-    if ( !isset(self::$id_type_path) ){
-
-      self::$id_type_path = bbn\appui\options::get_instance()->from_root_code(
-        self::ASSETS_PATH,
-        self::PROJECTS_ASSETS,
-        self::BBN_PROJECTS,
-        self::BBN_APPUI
-      );
-    }
-
-    return self::$id_type_path;
-  }
-
-  public function __construct(bbn\db $db, string $id = ''){
+  /**
+   * Construct the class project
+   *
+   * @param bbn\db $db
+   * @param string $id
+   */  
+  public function __construct(bbn\db $db, string $id = null)
+  {
     parent::__construct($db);
     $this->options = bbn\appui\options::get_instance();
-    if ( empty($id) && defined('BBN_PROJECT') ){
-      $id = BBN_PROJECT;
+    $this->fs = new \bbn\file\system();
+    if ( !empty($id) && \bbn\str::is_uid($id) ){
+      $this->id = $id;
+    }
+    else if ( empty($id) || empty(\bbn\str::is_uid($id))){
+      $id = $this->options->from_code('apst-app', 'projects', 'appui');
     }
     $this->set_project_info($id);
   }
@@ -121,124 +108,127 @@ class project extends bbn\models\cls\db {
   public function check(){
     return parent::check() && !empty($this->id);
   }
-
-  public function get_translations_strings(){
-
+  /**
+   * Returns the main infos of the given project
+   *
+   * @param string $id
+   * @return void
+   */
+  public function get_project_info()
+  {
+    if ( $this->id ){
+      return [
+        'path' => $this->get_paths(),
+        'langs' => $this->get_langs_ids(),
+        'id' => $this->id,
+        'lang' => $this->get_lang(),
+        'name' => $this->get_name()
+      ];
+    }
+    return [];
+  }
+  public function get_id_lang()
+  {
+    return $this->id_langs;
   }
 
-  public function get_lang(){
+  public function get_lang()
+  {
     return $this->lang;
   }
 
-  public function get_id(){
+  public function get_id()
+  {
     return $this->id;
   }
 
-  public function get_name(){
+  public function get_name()
+  {
     return $this->name;
   }
 
-  public function get_path(){
-    if ( $this->check() ){
-      $rows = $this->db->get_rows("
-        SELECT bbn_projects_assets.id_option,
-          bbn_options.text, bbn_options.code
-        FROM bbn_projects_assets
-          JOIN bbn_options
-            ON bbn_projects_assets.id_option = bbn_options.id
-        WHERE bbn_projects_assets.id_project = ?
-          AND bbn_projects_assets.asset_type = ?",
-        hex2bin($this->id),
-        hex2bin(self::get_id_asset_path()));
-        
-      foreach ( $rows as $i => $row ){
-        $rows[$i]['constant'] = $this->options->parent($rows[$i]['id_option'])['code'];
-        $rows[$i]['language'] = (string)$this->options->get_prop($rows[$i]['id_option'], 'language');
+  /**
+   * Returns an array containing about the repositories in  the project
+   *
+   * @return void
+   */
+  public function get_paths(){
+    $paths = [];
+    if ( $this->check() && $this->id_path && !empty($this->repositories)){
+      foreach($this->repositories as $rep){
+        $paths[] = [
+          'id_option' => $rep['id'],
+          'path' => $this->get_root_path($rep['name']),
+          'code' => $rep['code'],
+          'language' => $rep['language'] ?? '',
+        ];  
       }
-      return $rows;
     }
-    return false;
+    return $paths;
   }
 
-  public function get_path_text($t){
-    return $this->options->text($t);
-  }
-
-  public function get_langs_id(){
-    if ( $this->check() ){
-      return $this->db->get_field_values('bbn_projects_assets', 'id_option', [
-        'id_project' => $this->id,
-        'asset_type' => self::get_id_asset_lang()
-      ]);
+  /**
+   * Returns an array including the ids of the languages for which the project is configured or creates the options for the configured languages
+   * ( the arraay contains the id_alias of the options corresponding to the real option of the language)
+   * @return array
+   */
+  public function get_langs_ids()
+  { 
+    $ids = [];
+    $res = [];
+    $this->options->delete_cache($this->id, true);
+    if ( $this->check() && isset($this->id_langs) ){
+      if ( $ids = array_keys($this->options->options($this->id_langs))){
+        foreach($ids as $i){
+          if ( !empty($this->options->alias($i)) ){
+            $res[] = $this->options->alias($i);
+          }
+        }
+        return $res;
+      }
     }
+    return $res;
   }
 
-  public function get_langs_text(){
-    if ( $ids = $this->get_langs_id() ){
-      return array_map(function($v){
-        return $this->options->text($v);
-      }, $ids);
-    }
+  /**
+   * Returns languages that have primary in cfg
+   *
+   * @return void
+   */
+  public function get_primaries_langs(){
+    $uid_languages =  $this->options->from_code('languages', 'i18n', 'appui');
+    $languages = $this->options->full_tree($uid_languages);
+    $primaries = array_values(array_filter($languages['items'], function($v) {
+      return !empty($v['primary']);
+    }));
+    return $primaries ?: [];
   }
 
-  public function get_langs_code(){
-    if ( $ids = $this->get_langs_id() ){
-      return array_map(function($v){
-        return $this->options->code($v);
-      }, $ids);
-    }
-  }
-
-  public function get_langs(){
-    $tmp = $this->get_langs_id();
-    if ( !empty($tmp) ){
+  /**
+   * Creates the children of the option lang, if no arguments is given it uses the array of primaries languages
+   *
+   * @param array $langs
+   * @return void
+   */
+  public function creates_lang_options(array $langs = [])
+  {
+    if ( empty($langs) ){
+      $primaries = $this->get_primaries_langs();
+      $langs = $primaries;
+      $id_langs = $this->id_langs;
       $res = [];
-      $lang = $this->get_lang();
-      foreach ( $tmp as $t ){
-        $o = $this->options->option($t);
-        $res[$o['code']] = [
-          'id' => $o['id'],
-          'code' => $o['code'],
-          'text' => $o['text'],
-          'default' => $o['code'] === $lang
-        ];
+      foreach($langs as $l ){
+        if ( $id_opt = $this->options->add([
+            'text' => $l['text'],
+            'code' => $l['code'],
+            'id_parent' => $this->id_langs,
+            'id_alias' => $l['id'], 
+          ]) ){
+          $res[] = $l;
+        }
       }
       return $res;
     }
-  }
-
-
-  /************************* FROM IDE **************************/
-
-  /**
-   * Replaces the constant at the first part of the path with its value.
-   *
-   * @param string $st
-   * @return bool|string
-   */
-  public static function decipher_path(string $st){
-    $st = \bbn\str::parse_path($st);
-    $bits = explode('/', $st);
-    /** @var string $constant The first part of the path must be a constant */
-    $constant = $bits[0];
-    /** @var string $path The path that will be returned */
-    $path = '';
-    if ( \defined($constant) ){
-      if ( $constant === 'BBN_APP_PATH' ){
-        if ( empty($bits[1]) ){
-          $path = \bbn\mvc::get_app_path();
-        }
-        else{
-          $path = \bbn\mvc::get_app_path(true);
-        }
-      }
-      else{
-        $path = constant($constant);
-      }
-      array_shift($bits);
-    }
-    $path .= implode('/', $bits);
-    return $path;
   }
 
   /**
@@ -247,16 +237,134 @@ class project extends bbn\models\cls\db {
    * @param string|array $repository The repository's name (code) or the repository's configuration
    * @return bool|string
    */
-  public function get_root_path($repository){
-    if ( \is_string($repository) ){
-      $repository = $this->repository($repository);
+  public function get_root_path($rep){
+    //if only name else get info repository
+    $path = '';
+    $repository = \is_string($rep) ? $this->repositories[$rep] : $rep;
+    if ( (!empty($repository) && is_array($repository)) &&
+      !empty($repository['path']) &&
+      !empty($repository['root']) &&
+      !empty($repository['code'])
+    ){
+      switch( $repository['root'] ){
+        case 'app':
+          $path = $this->get_app_path();
+        break;
+      /* case 'cdn':
+          die(var_dump('cdn'));
+        break;*/
+        case 'lib':
+          $path = $this->get_lib_path();
+          $path .= $repository['path'];
+          if ( $repository['alias_code'] === 'bbn-project' ){
+            $path .= '/src/';
+          }
+        break;
+      }
     }
-    if ( !empty($repository) && !empty($repository['bbn_path']) ){
-      $repository_path = !empty($repository['path']) ? '/' . $repository['path'] : '';
-      $path = self::decipher_path($repository['bbn_path'] . $repository_path) . '/';
-      return \bbn\str::parse_path($path);
+    return $path;
+  }
+  /**
+   * Gets the app path
+   *
+   * @return void
+   */
+  public function get_app_path(){
+     if ( $this->name === 'apst-app' ){
+       return \bbn\mvc::get_app_path();
+     }
+     else{// case bbn-vue
+       $file_envinroment = \bbn\mvc::get_app_path().'cfg/environment.json';
+       if ( $this->fs->is_file($file_envinroment) ){
+         $content = json_decode($this->fs->get_contents($file_envinroment), true)[0];
+       }
+       if ( !empty($content) && !empty($content['app_path']) ){
+         return $content['app_path'].'src/';
+       }
+     }
+   }
+ 
+  /**
+   * Gets the lib path
+   *
+   * @return void
+   */ 
+  public function get_lib_path(){
+    if ( $this->name === 'apst-app' ){
+      return \bbn\mvc::get_lib_path();
     }
-    return false;
+    else {// case bbn-vue
+      $file_envinroment = \bbn\mvc::get_app_path().'cfg/environment.json';
+      if ( $this->fs->is_file($file_envinroment) ){
+        $content = json_decode($this->fs->get_contents($file_envinroment), true)[0];
+      }
+      if ( !empty($content) && !empty($content['app_path']) ){
+        return $content['lib_path'].'bbn\/';
+      }
+    }
+  }
+
+   /**
+   * Makes the repositories' configurations.
+   *
+   * @param string $code The repository's name (code)
+   * @return array|bool
+   */
+  public function get_repositories(string $project_name =''){
+    $cats = [];
+    $repositories = [];
+    if ( strlen($project_name) === 0 ){
+      $project_name = $this->name;
+    }
+    $projects =  $this->options->full_tree($this->options->from_code('path',$project_name, 'projects', 'appui'));
+    if ( !empty($projects) && !empty($projects['items']) ){
+      $projects = $projects['items'];
+      foreach ( $projects as $i => $project){
+        $paths =  $this->options->full_tree($project['id']);
+        if ( isset($paths['items']) && count($paths['items']) ){
+          foreach ( $paths['items'] as $repository ){
+              $name = $paths['code'] . '/' . $repository['code'];
+            if ( !isset($cats[$repository['id_alias']]) ){
+              unset($repository['alias']['cfg']);
+              $cats[$repository['id_alias']] = $repository['alias'];
+            }
+            unset($repository['cfg']);
+            unset($repository['alias']);
+            $repositories[$name] = $repository;
+            $repositories[$name]['title'] = $repository['text'];
+            $repositories[$name]['root'] = $paths['code'];
+            $repositories[$name]['name'] = $name;
+            $repositories[$name]['alias_code'] = $cats[$repository['id_alias']]['code'];
+            if ( !empty($cats[$repository['id_alias']]['tabs']) ){
+              $repositories[$name]['tabs'] = $cats[$repository['id_alias']]['tabs'];
+            }
+            elseif ( !empty($cats[$repository['id_alias']]['extensions']) ){
+              $repositories[$name]['extensions'] = $cats[$repository['id_alias']]['extensions'];
+            }
+            elseif ( !empty($cats[$repository['id_alias']]['types']) ){
+              $repositories[$name]['types'] = $cats[$repository['id_alias']]['types'];
+            }
+            unset($repositories[$name]['alias']);
+          }
+        }
+      }
+    }
+    return $repositories;
+  }
+
+  /**
+   * Returns the repository object basing on the given id
+   *
+   * @param string $id
+   * @return void
+   */
+  public function repository_by_id(string $id)
+  {
+    $idx = \bbn\x::find($this->repositories, ['id' => $id]) ?: '';
+    if ( !empty($idx) ){
+      return $this->repositories[$idx];
+    }
+    return [];
   }
 
   /**
@@ -265,48 +373,63 @@ class project extends bbn\models\cls\db {
    * @param string $code The repository's name (code)
    * @return array|bool
    */
-  public function repository(string $code){    
-    return $this->repositories($code);
-  }
+  public function repository($name){
+    if ( !empty($this->repositories) &&
+      is_array($this->repositories) &&
+      !empty(array_key_exists($name, $this->repositories))
+    ){
+      return $this->repositories[$name];
+    }
+    return false;
+   }
 
   /**
-   * Makes the repositories' configurations.
+   * Returns the file's URL from the real file's path.
    *
-   * @param string $code The repository's name (code)
-   * @return array|bool
+   * @param string $file The real file's path
+   * @return bool|string
    */
-  public function repositories(string $code=''){
-    $all = $this->options->full_soptions($this->options->from_code('PATHS', 'ide', 'appui'));      
-    $cats = [];
-    $r = [];
-   
-    foreach ( $all as $a ){
-      if ( isset($a['bbn_path']) && \defined($a['bbn_path']) ){
-        $k = $a['bbn_path'] . '/' . ($a['code'] === '/' ? '' : $a['code']);
-        
-        if ( !isset($cats[$a['id_alias']]) ){
-          unset($a['alias']['cfg']);
-          $cats[$a['id_alias']] = $a['alias'];
-        }
-        unset($a['cfg']);
-        unset($a['alias']);
-        $r[$k] = $a;
-        $r[$k]['title'] = $r[$k]['text'];
-        $r[$k]['alias_code'] = $cats[$a['id_alias']]['code'];
-        if ( !empty($cats[$a['id_alias']]['tabs']) ){
-          $r[$k]['tabs'] = $cats[$a['id_alias']]['tabs'];
-        }
-        else if( !empty($cats[$a['id_alias']]['extensions']) ){
-          $r[$k]['extensions'] = $cats[$a['id_alias']]['extensions'];
-        }
-        unset($r[$k]['alias']);
+  public function real_to_url(string $file){
+    foreach ( $this->repositories as $i => $d ){
+    $root = isset($d['root_path']) ? $d['root_path'] : $this->get_root_path($d['name']);
+      if (
+        $root &&
+        (strpos($file, $root) === 0)
+      ){
+        $rep = $i;
+        break;
       }
     }
-    if ( $code ){
-      return isset($r[$code]) ? $r[$code] : false;
-    }    
-    return $r;
-  }
+    if ( isset($rep) ){
+      $res = $rep.'/src/';
+      
+      $bits = explode('/', substr($file, \strlen($root)));
+      // MVC
+      if ( !empty($d['tabs']) ){
+        $tab_path = array_shift($bits);
+        $fn = array_pop($bits);
+        $ext = \bbn\str::file_ext($fn);
+        $fn = \bbn\str::file_ext($fn, 1)[0];
+        $res .= implode('/', $bits);
+        foreach ( $d['tabs'] as $k => $t ){
+          if (
+            empty($t['fixed']) &&
+            ($t['path'] === $tab_path . '/')
+          ){
+            $res .= "/$fn/$t[url]";
+            break;
+          }
+        }
+      }
+      // Normal file
+      else {
+        $res .= implode('/', $bits);
+      }
+      return \bbn\str::parse_path($res);
+    }
+    return false;
+   }
+ 
 
   /**
    * Returns the repository's name or object from an URL.
@@ -316,133 +439,23 @@ class project extends bbn\models\cls\db {
    * @return bool|int|string
    */
   public function repository_from_url(string $url, bool $obj = false){
-    $repository = '';
-    $repositories = $this->repositories();
-
-    foreach ( $repositories as $i => $d ){
-      if ( (strpos($url, $i) === 0) &&
-        (\strlen($i) > \strlen($repository) )
-      ){
-        $repository = $i;
-      }
-    }
-    if ( !empty($repository) ){
-      return empty($obj) ? $repository : $repositories[$repository];
-    }
-    return false;
-  }
-
-  /**
-   * Returns the file's URL from the real file's path.
-   *
-   * @param string $file The real file's path
-   * @return bool|string
-   */
-  public function real_to_url(string $file){
-
-    foreach ( $this->repositories() as $i => $d ){
-      if (
-        // Repository's root path
-        ($root = $this->get_root_path($d)) &&
-        (strpos($file, $root) === 0)
-      ){
-				$res = $i;
-        $bits = explode('/', substr($file, \strlen($root)));        
-        // MVC
-        if ( !empty($d['tabs']) ){
-          $tab_path = array_shift($bits);
-          $fn = array_pop($bits);
-          $ext = \bbn\str::file_ext($fn);
-          $fn = \bbn\str::file_ext($fn, 1)[0];
-          $res .= implode('/', $bits);
-          foreach ( $d['tabs'] as $k => $t ){
-            if (
-              empty($t['fixed']) &&
-              ($t['path'] === $tab_path . '/')
-            ){
-              $res .= "/$fn/$t[url]";
-              break;
-            }
-          }
+    //search repository
+    if ( is_array($this->repositories) &&
+      count($this->repositories)
+    ){//if in url name of repository break loop
+      foreach ( $this->repositories as $i => $d ){
+        if ( (strpos($url, $i) === 0) ){
+          $repository = $i;
+          break;
         }
-        // Normal file
-        else {
-          $res .= implode('/', $bits);
-
-        }
-        return \bbn\str::parse_path($res);
+      }
+      //if there is name repository or total info
+      if ( !empty($repository) ){
+        return empty($obj) ? $repository : $this->repositories[$repository];
       }
     }
     return false;
+    //return $this->projects->repository_from_url($url, $obj);
   }
-
-  public function real_to_url_i18n(string $file){
-   
-    foreach ( $this->repositories() as $i => $d ){
-      
-      if (
-        // Repository's root path
-        ($root = $this->get_root_path($d)) &&
-        (strpos($file, $root) === 0)
-      ){
-				$res = $i;
-
-        if ( !empty( ( $parent_code = $this->options->code($d['id_parent']) )) ){         
-					$var = str_replace($root, '', $file);
-				  $ext = \bbn\str::file_ext($var);
-					if ( ( $parent_code === 'BBN_APP_PATH' ) ){
-            $parent_code = \bbn\mvc::get_app_path();						
-						if ( strpos($res, 'mvc/') ){
-							$res = str_replace('mvc/', '', $res );
-						}
-						else if ( strpos($res, 'plugins/') ){
-							$res = $parent_code.'/';
-						}
-						$var = str_replace($parent_code, '', $file);
-					}
-
-					$bits = explode('/', $var);
-					$name = str_replace('.'.$ext, '', array_pop($bits));
-
-					if ( (strpos($var, 'mvc') === 0) && ($bits[1] !== 'cli') || ( strpos($var, 'plugins') === 0 ) ){
-
-						$tab_path = $bits[1];
-						if( strpos($var, 'plugins') === 0 ){
-
-							$tab_path = $bits[2];
-							unset($bits[2]);
-						}
-						else{
-							$tab_path = $bits[1];
-							unset($bits[1]);
-						}
-						if ( $tab_path === 'html' ){
-							$ext = 'html';
-					  }
-						else if ( $tab_path === 'public' ){
-							$ext = 'php';
-						}
-						else if ( $tab_path === 'model' ){
-							$ext = 'model';
-						}
-
-					}
-					else if ( (strpos($var, 'components') === 0) && ($ext !== 'js') ){
-						$ext = 'html';
-					}
-
-					$res .= implode($bits, '/').'/'.$name.'/'.$ext;
-
-
-				}
-
-
-        return \bbn\str::parse_path($res);
-      }
-    }
-    return false;
-  }
-
-
-
+  
 }

@@ -6,27 +6,26 @@ use bbn;
 class dbsync
 {
 
-	public static
-          /**
-           * @var db The DB connection
-           */
-          $db = false,
-          $dbs = false,
-          $has_history = false,
-          $tables = [],
-          $dbs_table = 'dbsync';
+  /**
+   * @var db The DB connection
+   */
+	public static $db = false;
+  public static $dbs = false;
+  public static $has_history = false;
+  public static $tables = [];
+  public static $dbs_table = 'dbsync';
 
   protected static $methods = [];
 
-  private static
-          $_is_init = false,
-          $default_cfg = [
-            'engine' => 'sqlite',
-            'host' => 'localhost',
-            'db' => 'dbsync'
-          ],
-          $disabled = false,
-          $max_retry = 5;
+  private static $_is_init = false;
+  private static $_is_checked;
+  private static $default_cfg = [
+    'engine' => 'sqlite',
+    'host' => 'localhost',
+    'db' => 'dbsync'
+  ];
+  private static $disabled = false;
+  private static $max_retry = 5;
 
 
   final public static function __callStatic($name, $arguments)
@@ -159,7 +158,10 @@ MYSQL
 	 * @return bool
 	 */
   public static function check(){
-    return ( \is_object(self::$db) && \is_object(self::$dbs) && self::$db->check() && self::$dbs->check() );
+    if (!isset(self::$_is_checked)) {
+      self::$_is_checked = \is_object(self::$db) && \is_object(self::$dbs) && self::$db->check() && self::$dbs->check();
+    }
+    return self::$_is_checked;
   }
 
   public static function disable(){
@@ -219,6 +221,27 @@ MYSQL
     self::addMethod('cbf2', $f);
   }
 
+  public static function delete_completed(float $start = null)
+  {
+    if (!self::is_init()) {
+      die("DB sync is not initiated");
+    }
+    if (!$start
+        || !($start = self::$dbs->select_one(self::$dbs_table, 'MIN(chrono)', [
+          ['db', 'NOT LIKE', self::$db->current],
+          'state' => 0
+        ]))
+    ) {
+      $start = time();
+    }
+    // Deleting the entries prior to this sync we produced and have been seen by the twin process
+    return self::$dbs->delete(self::$dbs_table, [
+      'db' => self::$db->current,
+      'state'=> 1,
+      ['chrono', '<', $start]
+    ]);
+  }
+
   // Looking at the rows from the other DB with status = 0 and setting them to 1
   // Comparing the new rows with the ones from this DB
   // Deleting the rows from this DB which have state = 1
@@ -250,21 +273,9 @@ MYSQL
       'problems' => []
     ];
 
+    $to_log['deleted_sync'] = self::delete_completed();
 
     $retry = false;
-
-    $start = ( $test = self::$dbs->get_one("
-      SELECT MIN(chrono)
-      FROM ".self::$dbs->escape(self::$dbs_table)."
-      WHERE db NOT LIKE ?
-      AND state = 0",
-      self::$db->current) ) ? $test : time();
-    // Deleting the entries prior to this sync we produced and have been seen by the twin process
-    $to_log['deleted_sync'] = self::$dbs->delete(self::$dbs_table, [
-      ['db', '=', self::$db->current],
-      ['state', '=', 1],
-      ['chrono', '<', $start]
-    ]);
 
     // Selecting the entries inserted
     $ds = self::$dbs->rselect_all(self::$dbs_table, ['id', 'tab', 'vals', 'chrono'], [
@@ -364,6 +375,7 @@ MYSQL
         $to_log['problems'][] = "Conflict!";
         $to_log['problems'][] = $d;
         foreach ( $each as $e ){
+          $e['vals'] = bbn\x::json_base64_decode($e['vals']);
           // If it's deleted locally and updated on the twin we restore
           if ( strtolower($e['action']) === 'delete' ){
             if ( strtolower($d['action']) === 'update' ){
@@ -401,7 +413,7 @@ MYSQL
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
           $to_log['updated_real']++;
         }
-        elseif ( self::$db->select($d['tab'], [], bbn\x::merge_arrays($d['rows'], $d['vals'])) ){
+        elseif ( self::$db->count($d['tab'], bbn\x::merge_arrays($d['rows'], $d['vals'])) ){
           self::$dbs->update(self::$dbs_table, ["state" => 1], ["id" => $d['id']]);
         }
         else{
@@ -434,4 +446,5 @@ MYSQL
     }
     return $res;
   }
+
 }

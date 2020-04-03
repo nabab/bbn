@@ -1706,6 +1706,22 @@ class options extends bbn\models\cls\db
   }
 
   /**
+   * Returns the id_alias relative to the given id_option
+   *
+   * @param string $uid
+   * @return string|null
+   */
+  public function alias(string $id): ?string
+  {
+    if ( bbn\str::is_uid($id) ){
+      return $this->db->select_one($this->class_cfg['table'], $this->class_cfg['arch']['options']['id_alias'], [
+        $this->class_cfg['arch']['options']['id'] => $id
+      ]);
+    }
+    return null;
+  }
+
+  /**
    * Returns translation of an option's text
    *
    * ```php
@@ -2087,7 +2103,6 @@ class options extends bbn\models\cls\db
    * @return bool|int The number of affected rows or false if option not found
    */
   public function remove_full($code){
-    
     if (
       bbn\str::is_uid($id = $this->from_code(\func_get_args())) &&
       ($id !== $this->default) &&
@@ -2096,6 +2111,7 @@ class options extends bbn\models\cls\db
       $res= 0;
       $this->delete_cache($id);
       $all = $this->tree_ids($id);
+      
       $has_history = history::is_enabled() && history::is_linked($this->class_cfg['table']);
       foreach ( array_reverse($all) as $a ){
         if ($has_history) {

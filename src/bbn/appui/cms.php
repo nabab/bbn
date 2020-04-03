@@ -146,7 +146,7 @@ class cms extends bbn\models\cls\db
 			self::_set_id_event($id);
 		}
 		if ( $notes === null ){
-			$this->_notes = new bbn\appui\notes($this->db);
+			$this->_notes = new \bbn\appui\notes($this->db);
 		} else {
 			$this->_notes = $notes;
 		}
@@ -413,7 +413,6 @@ class cms extends bbn\models\cls\db
 		}
 		return false;
 	}
-
 	/**
 	 * If it exists an event linked to the note it returns the start date.
 	 * @param String $id_note
@@ -426,8 +425,6 @@ class cms extends bbn\models\cls\db
 		}
 		return null;
 	}
-	
-
 	/**
 	 * If it exists an event linked to the note it returns the end date.
 	 * @param String $id_note
@@ -452,7 +449,6 @@ class cms extends bbn\models\cls\db
 			$title = $note['title'];
 			if ( empty($this->get_event($id_note)) ){
 				//if a type is not given it inserts the event as page
-				
 				if ( $id_event = $this->_events->insert([
 					'name' => $title,
 					'id_type' => self::$_id_event,
@@ -605,4 +601,3 @@ class cms extends bbn\models\cls\db
 	}
 	 	
 }
-

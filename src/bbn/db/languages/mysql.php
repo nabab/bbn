@@ -1070,7 +1070,7 @@ MYSQL
         if ( isset($join['table'], $join['on']) && ($cond = $this->db->get_conditions($join['on'], $cfg, false, 4)) ){
           $res .=
             '  '.
-            (isset($join['type']) && ($join['type'] === 'left') ? 'LEFT ' : '').
+            (isset($join['type']) && (strtolower($join['type']) === 'left') ? 'LEFT ' : '').
             'JOIN '.$this->table_full_name($join['table'],true).
             (!empty($join['alias']) ? ' AS '.$this->escape($join['alias']) : '')
             .PHP_EOL.'    ON '.$cond;

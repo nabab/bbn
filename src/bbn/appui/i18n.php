@@ -20,17 +20,23 @@ class i18n extends bbn\models\cls\cache
   protected
     $parser,
     $translations = [],
-    $user;
-  
+    $user,
+    $options,
+    $id_project;
   /**
    * Initialize the class i18n
    * 
    * @param db 
    */
-  public function __construct(bbn\db $db){
+  public function __construct(bbn\db $db, string $code = null){
     parent::__construct($db);
     $this->parser = new \Gettext\Translations();
     $this->user = \bbn\user::get_instance();
+    $this->options = new \bbn\appui\options($db);
+    if ( empty($code) ){
+      $code = 'apst-app';
+    }  
+    $this->id_project = \bbn\str::is_uid($code) ? $code : $this->options->from_code($code, 'projects', 'appui');
   }
   /**
    * Returns the strings contained in the given php file
@@ -240,8 +246,8 @@ class i18n extends bbn\models\cls\cache
    * @return void
    */
   public function get_primaries_langs(){
-    $uid_languages =  self::get_appui_option_id('languages');
-    $languages = options::get_instance()->full_tree($uid_languages);
+    $uid_languages =  $this->options->from_code('languages', 'i18n', 'appui');
+    $languages = $this->options->full_tree($uid_languages);
     $primaries = array_values(array_filter($languages['items'], function($v) {
       return !empty($v['primary']);
     }));
@@ -257,7 +263,7 @@ class i18n extends bbn\models\cls\cache
    */
   public function get_num_options(){
     /** @var  $paths takes all options with i18n property setted*/
-    $paths = options::get_instance()->find_i18n();
+    $paths = $this->options->find_i18n();
 
     $data = [];
     /**
@@ -268,7 +274,7 @@ class i18n extends bbn\models\cls\cache
       $configured_langs[] = $p['code'];
     }
     foreach ( $paths as $p => $val){
-      $parent = options::get_instance()->get_id_parent($paths[$p]['id']);
+      $parent = $this->options->get_id_parent($paths[$p]['id']);
 
       foreach ( $configured_langs as $lang ) {
         $count = 0;
@@ -315,7 +321,7 @@ class i18n extends bbn\models\cls\cache
    */
   public function get_num_option($id){
     /** @var  $paths takes all options with i18n property setted*/
-    $paths = options::get_instance()->find_i18n_option($id);
+    $paths = $this->options->find_i18n_option($id);
     $data = [];
     /**
     * creates the property data_widget that will have just num of items found for the option + 1 (the text of the option parent), the * * number of strings translated and the source language indexed to the language
@@ -327,7 +333,7 @@ class i18n extends bbn\models\cls\cache
     
     
     foreach ( $paths as $p => $val){
-      $parent = options::get_instance()->get_id_parent($paths[$p]['id']);
+      $parent = $this->options->get_id_parent($paths[$p]['id']);
       foreach ( $configured_langs as $lang ) {
         $count = 0;
         $items = $paths[$p]['items'];
@@ -372,7 +378,7 @@ class i18n extends bbn\models\cls\cache
    */
   public function get_options(){
     /** @var ( array) $paths get all options having i18n property setted and its items */
-    $paths = options::get_instance()->find_i18n();
+    $paths = $this->options->find_i18n();
     $res = [];
     foreach ( $paths as $p => $val ){
       $res[$p] = [
@@ -457,7 +463,7 @@ class i18n extends bbn\models\cls\cache
    * @param id_option
    */
   public function get_language($id_option){
-    return options::get_instance()->get_prop($id_option,'language');
+    return $this->options->get_prop($id_option,'language');
   }
   
   /**
@@ -472,23 +478,26 @@ class i18n extends bbn\models\cls\cache
     $success = false;
     $result = [];
     $locale_dirs = [];
-
+    
     if ( $id_option &&
-      ($o = options::get_instance()->option($id_option)) &&
-      !empty($o['language']) && isset($o['language']) ){
-        $domain = $o['text'];
+      ($o = $this->options->option($id_option)) &&
+      isset($o['language']) ){
 
         // @var $to_explore the path to explore 
         $to_explore = $this->get_path_to_explore($id_option);
         // @var $locale_dir the path to locale dir 
         $locale_dir = $this->get_locale_dir_path($id_option);
+       
+        //the txt file in the locale folder
         $index = $this->get_index_path($id_option);
-        $domain .= is_file($index) ? file_get_contents($index) : '';
+        
+        //the text of the option . the number written in the $index file
+        $domain =$o['text'].(is_file($index) ? file_get_contents($index) : '');
         // @var $dirs scans dirs existing in locale folder for this path 
         if ( is_dir($locale_dir) ){
           // @var array $languages dirs in locale folder
           $dirs = \bbn\file\dir::get_dirs($locale_dir) ?: [];
-          if(!empty($dirs)){
+          if ( !empty($dirs)){
             foreach ($dirs as $l ){
               $languages[] = basename($l);
             }
@@ -503,7 +512,6 @@ class i18n extends bbn\models\cls\cache
             // the root to file po & mo 
             $po = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$domain.'.po';
             $mo = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$domain.'.mo';
-
             // if a file po already exists takes its content 
             if ( is_file($po) ){
               $fileHandler = new \Sepia\PoParser\SourceHandler\FileSystem($po);
@@ -523,7 +531,6 @@ class i18n extends bbn\models\cls\cache
                   'num_translations_db' => $this->count_translations_db($id_option) ? $this->count_translations_db($id_option)[$lng] : 0
                 ];
               }
-
             }
             // if the file po for the $lng doesn't exist $result is an empty object 
             else{
@@ -541,6 +548,7 @@ class i18n extends bbn\models\cls\cache
               ];
             }
           }
+         
         }
       $i++;
       $success = true;
@@ -548,6 +556,7 @@ class i18n extends bbn\models\cls\cache
         $locale_dirs = $languages;
       }
     }
+    
     return [
       'locale_dirs' => $locale_dirs,
       'result' => $result,
@@ -562,8 +571,8 @@ class i18n extends bbn\models\cls\cache
    * @return void
    */
   public function get_po_files($id_option){
-    if ( !empty($id_option) && ($o = options::get_instance()->option($id_option)) &&
-    ($parent = options::get_instance()->parent($id_option)) &&
+    if ( !empty($id_option) && ($o = $this->options->option($id_option)) &&
+    ($parent = $this->options->parent($id_option)) &&
     defined($parent['code']) ){
       $tmp = [];
       // @var  $to_explore the path to explore 
@@ -637,43 +646,31 @@ class i18n extends bbn\models\cls\cache
    * @param $languages
    * @return void
    */
-  public function get_translations_strings($id_option, $source_language, $languages){
+  public function get_translations_strings($id_option, $source_language, $languages)
+  {
     if (
       !empty($id_option) &&
-      !empty($source_language) &&
-      ($o = options::get_instance()->option($id_option)) &&
-      ($parent = options::get_instance()->option($o['id_parent'])) &&
-      \defined($parent['code'])
+      !empty($source_language) 
     ){
       // @var string $to_explore The path to explore path of mvc 
       $to_explore = $this->get_path_to_explore($id_option);
-      
+      //the position of locale dir    
       $locale_dir =  $this->get_locale_dir_path($id_option);
-      $current_dirs = bbn\file\dir::get_dirs($to_explore);
-     
-      if ( constant($parent['code']) === \bbn\mvc::get_app_path(true) ){
-        
-        //$o['code'] === '/' is the case of mc
-        $current_dirs = bbn\file\dir::get_dirs( \bbn\mvc::get_app_path().($o['code'] === '/' ? '' : $o['code']));
-      }
-
-      $to_explore_dirs = [];
-
+      
+      
       //creates the array $to_explore_dirs containing mvc, plugins e components
-      if ( !empty($current_dirs) ){
-        foreach ($current_dirs as $key => $value) {
-          if( ( strpos(basename($value), 'locale') !== 0 ) &&
-               ( strpos(basename($value), 'data') !== 0 ) && 
-               ( strpos(basename($value), '.') !== 0 )
+      if ( $to_explore_dirs = bbn\file\dir::get_dirs($to_explore) ){
+        $current_dirs = array_values(array_filter($to_explore_dirs, function($a){
+          if( ( strpos(basename($a), 'locale') !== 0 ) &&
+               ( strpos(basename($a), 'data') !== 0 ) && 
+               ( strpos(basename($a), '.') !== 0 )
             ){
-            $to_explore_dirs = $current_dirs;
+            return $a;
           }
-        }
+        }));
       }
-      
-      // @var $dirs scans dirs contained in locale folder of this path
-      
       $res = [];
+      
       //case of generate called from table
       if ( empty($languages) ){
         /** @var (array) $languages based on locale dirs found in the path*/
@@ -681,23 +678,19 @@ class i18n extends bbn\models\cls\cache
           return basename($a);
         }, \bbn\file\dir::get_dirs($locale_dir)) ?: [];
       }
-      
-
       if ( !empty($to_explore_dirs) ){
         foreach ( $to_explore_dirs as $c ){
 					$res[] = $this->analyze_folder($c, true);
         }
       }
-      
-      
       //all strings found in the different dirs $to_explore_dirs, merge all index of $res
-      if(!empty($res)){
+      if ( !empty($res) ){
          $res = array_merge(...$res);
       }
 
       $news = [];
       $done = 0;
-
+      
       foreach ( $res as $r => $val ){
         // for each string create a property 'path' containing the files' name in which the string is contained 
 
@@ -773,12 +766,11 @@ class i18n extends bbn\models\cls\cache
    */
   public function get_translations_table_complete($id_project, $id_option){
     if ( !empty($id_option) &&
-      ($o = options::get_instance()->option($id_option)) &&
-      ($parent = options::get_instance()->parent($id_option)) &&
+      ($o = $this->options->option($id_option)) &&
+      ($parent = $this->options->parent($id_option)) &&
       defined($parent['code']) ){
-
       // @var  $path_source_lang the property language of the id_option (the path) 
-      $path_source_lang = options::get_instance()->get_prop($id_option, 'language');
+      $path_source_lang = $this->options->get_prop($id_option, 'language');
 
       // @var  $to_explore the path to explore 
       $to_explore = $this->get_path_to_explore($id_option);      
@@ -818,7 +810,6 @@ class i18n extends bbn\models\cls\cache
 
                 // the translation of the string found in the po file 
                 $po_file[$i][$lng]['translations_po'] =  $t->getMsgStr();
-
 
                 // @var  $id takes the id of the original expression in db 
                 if ( $id = $this->db->select_one('bbn_i18n',
@@ -865,15 +856,15 @@ class i18n extends bbn\models\cls\cache
   
   public function get_translations_table($id_project, $id_option){
     if ( !empty($id_option) &&
-      ($o = options::get_instance()->option($id_option)) ){
+      ($o = $this->options->option($id_option)) ){
       // @var  $path_source_lang the property language of the id_option (the path) 
-      $path_source_lang = options::get_instance()->get_prop($id_option, 'language');
-
+      //on the option the property is language, on the project i18n
+      $path_source_lang = $this->options->get_prop($id_option, 'language');
+      
       // @var  $to_explore the path to explore 
       $to_explore = $this->get_path_to_explore($id_option);      
       //the path of the locale dirs
       $locale_dir = $this->get_locale_dir_path($id_option);      
-      
       $languages = array_map(function($a){
         return basename($a);  
       }, \bbn\file\dir::get_dirs($locale_dir)) ?: [];
@@ -881,6 +872,7 @@ class i18n extends bbn\models\cls\cache
       $i = 0;
       $res = [];
       $project = new bbn\appui\project($this->db, $id_project);
+   
       $errors = [];
       if ( !empty($languages) ){
         $po_file = [];
@@ -890,7 +882,6 @@ class i18n extends bbn\models\cls\cache
           $idx = is_file($locale_dir.'/index.txt') ? file_get_contents($locale_dir.'/index.txt') : '';
           $po = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$idx.'.po';
           $mo = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$idx.'.mo';
-         
           // if the file po exist takes its content 
           if ( file_exists($po) ){
             $fileHandler = new \Sepia\PoParser\SourceHandler\FileSystem($po);
@@ -925,7 +916,7 @@ class i18n extends bbn\models\cls\cache
                       'exp' => $original,
                       'lang' => $path_source_lang
                     ]) ){
-                      die(\bbn\x::hdump($original,$prev,$path_source_lang,$t->getReference()));
+                      \bbn\x::hdump($original,$prev,$path_source_lang,$t->getReference());
                       $errors[] = $original;
 
                     }
@@ -972,7 +963,7 @@ class i18n extends bbn\models\cls\cache
                     
                       // get the url to use it for the link to ide from the table
                       foreach ($paths as $p) {
-                          $row['paths'][] = $project->real_to_url_i18n($p);
+                        $row['paths'][] = $project->real_to_url($p);
                       }
                       // the number of times the strings is found in the files of the path
                       $row['occurrence'] = count($row['paths']);
@@ -992,6 +983,7 @@ class i18n extends bbn\models\cls\cache
       }
       
       return [
+        
         'path_source_lang' => $path_source_lang,
         'path' => $o['text'],
         'success' => $success,
@@ -1007,22 +999,24 @@ class i18n extends bbn\models\cls\cache
 
   /**
    * Returns the path to explore relative to the given id_option
+   * It only works if i18n class is constructed by giving the id_project
    *
    * @param String $id_option
    * @return String|null
    */
-  public function get_path_to_explore(String $id_option) :? String{
-    $options = options::get_instance();
-    $o = $options->option($id_option);
-    $parent = $options->parent($o['id']);
-    $to_explore = '';
-    if ( constant($parent['code']) === \bbn\mvc::get_app_path(true) ){
-      $to_explore = \bbn\mvc::get_app_path(). ( ($o['code'] !== '/') ? $o['code'] : '' );
+  public function get_path_to_explore(string $id_option) :? String
+  {
+    if ( $this->id_project ){
+      
+      $project = new \bbn\appui\project($this->db, $this->id_project);
+      //the repository
+      $rep = $project->repository_by_id($id_option);
+      
+      //the root of this repositoryu
+      $path = $project->get_root_path($rep);
+      return $path;  
     }
-    else if ( constant($parent['code']) === BBN_LIB_PATH ){
-      $to_explore = constant($parent['code']).$o['code'];
-    }
-    return $to_explore;
+    return '';
   }
 
   /**

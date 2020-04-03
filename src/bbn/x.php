@@ -2009,4 +2009,18 @@ class x
       //ob_end_flush();
     }
   }
+
+  public static function __callStatic($name, $arguments)
+  {
+    if ((strpos($name, 'is_') === 0) && function_exists($name)) {
+      $res = null;
+      foreach ($arguments as $a) {
+        $res = $name($a);
+        if (!$res) {
+          return $res;
+        }
+      }
+      return $res;
+    }
+  }
 }

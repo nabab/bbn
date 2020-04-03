@@ -838,7 +838,12 @@ class str
    */
   public static function is_date_sql($st): bool
   {
-    return date::validateSQL($st);
+    foreach (func_get_args() as $a) {
+      if (!date::validateSQL($a)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
@@ -1021,10 +1026,14 @@ class str
     $args = \func_get_args();
     // Each argument must be a string starting with a letter, and having only one character made of letters, numbers and underscores
     foreach ( $args as $a ){
-      if ( !is_string($a) ){
+      if (\is_array($a)) {
+        x::log($args, 'check_name_args');
+        x::log(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20), 'check_name_args');
+      }
+      if ( !\is_string($a) ){
         return false;
       }
-      return preg_match('/^[A-z0-9_]+$/', $a);
+      return \preg_match('/^[A-z]{1}[A-z0-9_]*$/', $a);
     }
     return true;
   }
