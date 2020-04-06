@@ -26,8 +26,8 @@ class ide {
   public static
     $backup_path,
     $backup_pref_path;
-  
-  private 
+
+  private
     /** @var string $project name for get repositories*/
     $project = '',
     $repository_default = '',
@@ -48,7 +48,7 @@ class ide {
     $current_file = false,
     /** @var bool|string $current_id */
     $current_id = false;
-    
+
 
   protected
     /** @var \bbn\db $db */
@@ -83,11 +83,18 @@ class ide {
    *
    * @param $id
    */
+  /*private static function _init_ide(){
+    self::$ide_path = self::$option_root_id;
+    self::$backup_path = $this->get_data_path('appui-ide').'backup/';
+    self::$backup_pref_path = $this->get_data_path('appui-ide').'backup/preference/';
+  }*/
+
   private static function _init_ide(){
     self::$ide_path = self::$option_root_id;
     self::$backup_path = \bbn\mvc::get_data_path('appui-ide').'backup/';
     self::$backup_pref_path = \bbn\mvc::get_data_path('appui-ide').'backup/preference/';
   }
+
 
   /**
    * Gets the ID of the development paths option
@@ -1218,7 +1225,6 @@ class ide {
     $this->pref = $pref;
     $this->fs = new \bbn\file\system();
     $this->origin = $plugin;
-    $this->_ide_path();
     $this->set_project($project);
   }
 
@@ -1262,6 +1268,7 @@ class ide {
     $this->project = $project_name;
     if ( $project_name && !empty($this->projects) ){
       $this->init();
+      $this->_ide_path();
     }
     return $project_name;
   }
@@ -1524,6 +1531,10 @@ class ide {
 
   public function get_lib_path(){
     return $this->projects->get_lib_path();
+  }
+
+  public function get_data_path(){
+    return $this->projects->get_data_path();
   }
 
   public function get_name_project(){

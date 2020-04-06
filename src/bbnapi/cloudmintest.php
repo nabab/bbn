@@ -1,7 +1,7 @@
 <?php
 /**
  * Class virtualmin
- * @package appi  
+ * @package api
  *
  * @author Edwin Mugendi <edwinmugendi@gmail.com>
  * @author Thomas Nabet <thomas.nabet@gmail.com>
@@ -458,3 +458,4 @@ $create_domain_param = array(
   echo '</pre>';
  *
  */
+/*fff*/

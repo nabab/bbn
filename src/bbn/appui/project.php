@@ -304,6 +304,32 @@ class project extends bbn\models\cls\db {
     }
   }
 
+  /**
+   * Gets the data path
+   *
+   * @return void
+   */
+  public function get_data_path(string $plugin = ''){
+    if ( $this->name === 'apst-app' ){
+      return \bbn\mvc::get_data_path($plugin);
+    }
+    else {// case bbn-vue
+      $file_envinroment = \bbn\mvc::get_app_path().'cfg/environment.json';
+      if ( $this->fs->is_file($file_envinroment) ){
+        $content = json_decode($this->fs->get_contents($file_envinroment), true)[0];
+      }
+      if ( !empty($content) && !empty($content['data_path']) ){
+        $path = $content['data_path'];
+        if ( strlen($plugin) > 0 ){
+          $path .= 'plugins/'.$plugin.'/';
+        }
+        else{
+          return $path;
+        }
+      }
+    }
+  }
+
    /**
    * Makes the repositories' configurations.
    *
