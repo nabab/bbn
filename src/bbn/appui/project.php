@@ -323,9 +323,7 @@ class project extends bbn\models\cls\db {
         if ( strlen($plugin) > 0 ){
           $path .= 'plugins/'.$plugin.'/';
         }
-        else{
-          return $path;
-        }
+        return $path;
       }
     }
   }

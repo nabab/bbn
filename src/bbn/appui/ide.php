@@ -73,7 +73,7 @@ class ide {
   private function _ide_path(){
     self::optional_init();
     if ( !self::$ide_path ){
-      self::_init_ide();
+      $this->_init_ide();
     }
     return self::$ide_path;
   }
@@ -83,19 +83,18 @@ class ide {
    *
    * @param $id
    */
-  /*private static function _init_ide(){
+  private function _init_ide(){
     self::$ide_path = self::$option_root_id;
     self::$backup_path = $this->get_data_path('appui-ide').'backup/';
     self::$backup_pref_path = $this->get_data_path('appui-ide').'backup/preference/';
-  }*/
-
-  private static function _init_ide(){
+  }
+/*
+  private function _init_ide(){
     self::$ide_path = self::$option_root_id;
     self::$backup_path = \bbn\mvc::get_data_path('appui-ide').'backup/';
     self::$backup_pref_path = \bbn\mvc::get_data_path('appui-ide').'backup/preference/';
   }
-
-
+*/
   /**
    * Gets the ID of the development paths option
    *
@@ -726,7 +725,7 @@ class ide {
     $backup_path = $this->get_path_backup($file);
 
     $backup = $backup_path['path_preference'].$file['filename'].'.json';
-
+\bbn\x::log([$backup, $this->get_data_path('appui-ide')],'pref');
     if ( !empty($backup_path) ){
       if ( ($type === 'create') ){
         if ( $this->fs->create_path(dirname($backup)) &&
@@ -1484,7 +1483,6 @@ class ide {
    * @return bool
    */
   public function is_MVC_from_url(string $url){
-  
     $ele = explode("/",$url);
     if ( is_array($ele) ){
       if ( $ele[2] === 'mvc' ){
@@ -1492,7 +1490,6 @@ class ide {
       }
     }
     return false;
-    
   }
 
 
@@ -1533,8 +1530,15 @@ class ide {
     return $this->projects->get_lib_path();
   }
 
-  public function get_data_path(){
-    return $this->projects->get_data_path();
+  public function get_data_path(string $plugin = ''){
+    if ( $this->project !== 'apst-app' ){
+      if ( (strlen($plugin) > 0) &&
+        empty(array_search(substr($plugin, strlen('appui-')),array_keys($this->routes)))
+      ){
+        return false;
+      }
+    }
+    return $this->projects->get_data_path($plugin);
   }
 
   public function get_name_project(){
