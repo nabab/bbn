@@ -142,12 +142,14 @@ You can click the following link to access directly your account:<br>
     $id = $this->db->cfn($a['groups']['id'], $t['groups'], 1);
     $group = $this->db->cfn($a['groups']['group'], $t['groups'], 1);
     $id_group = $this->db->cfn($a['users']['id_group'], $t['users'], 1);
+    $type = $this->db->cfn($a['groups']['type'], $t['groups'], 1);
+    $code = $this->db->cfn($a['groups']['code'], $t['groups'], 1);
     $active = $this->db->cfn($a['users']['active'], $t['users'], 1);
     $users_id = $this->db->cfn($a['users']['id'], $t['users'], 1);
     $groups = $this->db->escape($t['groups']);
     $users = $this->db->escape($t['users']);
     return $this->db->get_rows("
-      SELECT $id, $group,
+      SELECT $id, $group, $type, $code,
       COUNT($users_id) AS `num`
       FROM $groups
         LEFT JOIN $users
@@ -341,15 +343,21 @@ You can click the following link to access directly your account:<br>
     return '';
   }
 
+  public function get_group_type($id_group)
+  {
+    $g =& $this->class_cfg['arch']['groups'];
+    return $this->db->select_one($this->class_cfg['tables']['groups'], $g['type'], [$g['id'] => $id_group]);
+  }
+
   /**
    * Creates a new user and returns its configuration (with the new ID)
    * 
    * @param array $cfg A configuration array
 	 * @return array|false
 	 */
-	public function add($cfg)
+	public function add($cfg): ?array
 	{
-	  $u =& $this->class_cfg['arch']['users'];
+    $u =& $this->class_cfg['arch']['users'];
     $fields = array_unique(array_values($u));
     $cfg[$u['active']] = 1;
     $cfg[$u['cfg']] = '{}';
@@ -361,17 +369,32 @@ You can click the following link to access directly your account:<br>
     if ( isset($cfg['id']) ){
       unset($cfg['id']);
     }
-    if (
-      bbn\str::is_email($cfg[$u['email']]) &&
-            $this->db->insert($this->class_cfg['tables']['users'], $cfg)
-    ){
-      $cfg[$u['id']] = $this->db->last_id();
-
-      // Envoi d'un lien
-      $this->make_hotlink($cfg[$this->class_cfg['arch']['users']['id']], 'creation');
-      return $cfg;
-    }
-		return false;
+    if (!empty($cfg[$u['id_group']])) {
+      $group = $this->get_group_type($cfg[$u['id_group']]);
+      switch ($group) {
+        case 'real':
+          if (
+            bbn\str::is_email($cfg[$u['email']]) &&
+                  $this->db->insert($this->class_cfg['tables']['users'], $cfg)
+          ){
+            $cfg[$u['id']] = $this->db->last_id();
+  
+            // Envoi d'un lien
+            $this->make_hotlink($cfg[$this->class_cfg['arch']['users']['id']], 'creation');
+            return $cfg;
+          }
+          break;
+        case 'api':
+          $cfg[$u['email']] = null;
+          $cfg[$u['login']] = null;
+          if ($this->db->insert($this->class_cfg['tables']['users'], $cfg)) {
+            $cfg[$u['id']] = $this->db->last_id();
+            return $cfg;
+          }
+          break;
+      }
+    }   
+		return null;
 	}
   
 	/**
@@ -475,13 +498,13 @@ You can click the following link to access directly your account:<br>
    * @param int $id_group Group ID
    * @return manager
    */
-  public function set_unique_group($id_user, $id_group){
-    $this->db->update($this->class_cfg['tables']['users'], [
+  public function set_unique_group($id_user, $id_group): bool
+  {
+    return (bool)$this->db->update($this->class_cfg['tables']['users'], [
       $this->class_cfg['arch']['users']['id_group'] => $id_group
     ], [
       $this->class_cfg['arch']['users']['id'] => $id_user
     ]);
-    return $this;
   }
 
   public function user_has_option($id_user, $id_option, $with_group = true){

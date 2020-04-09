@@ -62,6 +62,7 @@ class user extends models\cls\basic
       'groups' => [
         'id' => 'id',
         'group' => 'group',
+        'type' => 'type',
         'code' => 'code',
         'cfg' => 'cfg'
       ],
