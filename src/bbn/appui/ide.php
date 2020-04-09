@@ -21,7 +21,8 @@ class ide {
         PATH_TYPE = 'PTYPES',
        // FILES_PREF = 'files',
         OPENED_FILE = 'opened',
-        RECENT_FILE = 'recent';
+        RECENT_FILE = 'recent',
+        THEME = 'theme';
 
   public static
     $backup_path,
@@ -2092,7 +2093,6 @@ class ide {
   public function get_file_preferences(array $cfg = []): ?array
   {
     if ( !empty($cfg) ){
-      
       if ( !empty($backup = $this->get_path_backup($cfg)) && !empty($backup['path_preference']) &&
         $this->fs->exists($backup['path_preference'].$cfg['filename'].'.json')
       ){
@@ -2110,20 +2110,81 @@ class ide {
     return null;
   }
 
-  /*public function preference_theme(string $theme){
-    $id_option = $this->options->from_code(self::IDE_PATH, self::BBN_APPUI);
-    $this->pref->add($id_option,[
-      'cfg' => [
-        "theme" => $theme
-      ]
-    ])
-  }*/
+  /**
+   * Get theme current of the project
+   *
+   * @return string
+   */
+  public function get_theme(){
+    $opt_theme = $this->options->from_code(self::THEME, self::IDE_PATH, self::BBN_APPUI);
+    $pref_arch = $this->pref->get_class_cfg();
+    $pref = $this->db->select_one( $pref_arch['tables']['users_options'],  $pref_arch['arch']['user_options']['id'], [
+      $pref_arch['arch']['user_options']['id_user'] => $this->pref->get_user(),
+      $pref_arch['arch']['user_options']['id_option'] => $this->projects->get_id()
+    ]);
+    //if there is no preference, the theme value will take it from the option
+    if ( !empty($pref) ){
+      $val =  $this->db->select_one( $pref_arch['tables']['user_options_bits'],  'cfg', [
+        $pref_arch['arch']['user_options_bits']['id_user_option'] => $pref,
+        $pref_arch['arch']['user_options_bits']['id_option'] => $opt_theme,
+      ]);
+      $val = json_decode($val, true);
+      if ( isset($val['theme']) ){
+        return $val['theme'];
+      }
+    }
+    return '';
+  }
+
+ /**
+  * Function for set preference theme for every single project
+  *
+  * @param string $theme
+  * @return string
+  */
+  public function set_theme(string $theme = ''){
+    $opt_theme = $this->options->from_code(self::THEME, self::IDE_PATH, self::BBN_APPUI);
+    $pref_arch = $this->pref->get_class_cfg();
+
+    if ( !empty($opt_theme) ){
+      //id_option is the project
+      $pref = $this->db->select_one( $pref_arch['tables']['users_options'],  $pref_arch['arch']['user_options']['id'], [
+        $pref_arch['arch']['user_options']['id_user'] => $this->pref->get_user(),
+        $pref_arch['arch']['user_options']['id_option'] => $this->projects->get_id()
+      ]);
+      //if it does not exist, the preference for user and project is created
+      if ( empty($pref) ){
+        $pref  = $this->pref->add($this->projects->get_id(), []);
+      }
+
+      if ( !empty($pref) ){
+        $id_bit = $this->db->select_one( $pref_arch['tables']['user_options_bits'],  $pref_arch['arch']['user_options_bits']['id'], [
+          $pref_arch['arch']['user_options_bits']['id_user_option'] => $pref,
+          $pref_arch['arch']['user_options_bits']['id_option'] => $opt_theme
+        ]);
+        $cfg = [
+          'id_option' => $opt_theme,
+          'cfg' =>  json_encode(['theme' => $theme])
+        ];
+
+        if ( !empty($id_bit) && \bbn\str::is_uid($id_bit) ){
+          if ( !empty($this->pref->update_bit($id_bit, $cfg, true)) ){
+            return true;
+          }
+        }
+        else{
+          if ( !empty($this->pref->add_bit($pref, $cfg)) ){
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
 
  /******************** END PREFERENCES ************************/
 
   /******************** OPENED AND RECENT FILES BIT ************************/
-
-
 
 
   /**

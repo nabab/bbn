@@ -152,4 +152,29 @@ class enc
     return $res;
   }
 
+  public static function generateCert2(string $algo = 'sha512', int $key_bits = 4096): ?array
+  {
+    $res = null;
+    $params = [
+      'digest_alg' => $algo,
+      'private_key_bits' => $key_bits,
+      'private_key_type' => OPENSSL_KEYTYPE_RSA
+    ];
+    $rsaKey = openssl_pkey_new($params);
+    //openssl_pkey_export($rsaKey, $priv);
+    $umask = umask(0066);
+    $privKey = openssl_pkey_get_private($rsaKey);
+    $pubKey = openssl_pkey_get_details($rsaKey);
+    if (openssl_pkey_export($privKey, $priv)
+        && ($pub = $pubKey['key'])
+    ){
+      $res = [
+        'private' => $priv,
+        'public' => $pub
+      ];
+    }
+    umask($umask);
+    return $res;
+  }
+
 }
