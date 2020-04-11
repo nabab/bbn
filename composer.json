@@ -31,7 +31,7 @@
     "dusterio/link-preview": "1.2.*",
     "wapmorgan/unified-archive": "0.1.*",
     "pear/archive_tar": "1.4.*",
-    "alchemy/zippy": "0.4.*",
+    "alchemy/zippy": "0.4.9*",
     "gettext/gettext": "4.8.1",
     "nesbot/carbon": "2.*",
     "nikic/php-parser": "4.3.*",
