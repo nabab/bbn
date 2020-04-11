@@ -249,7 +249,7 @@ class project extends bbn\models\cls\db {
       switch( $repository['root'] ){
         case 'app':
           $path = $this->get_app_path();
-        break;
+          break;
       /* case 'cdn':
           die(var_dump('cdn'));
         break;*/
@@ -259,8 +259,11 @@ class project extends bbn\models\cls\db {
           if ( $repository['alias_code'] === 'bbn-project' ){
             $path .= '/src/';
           }
-        break;
-      }
+          break;
+        case 'cdn':
+          $path = $this->get_cdn_path();
+          break;
+        }
     }
     return $path;
   }
@@ -284,6 +287,26 @@ class project extends bbn\models\cls\db {
      }
    }
  
+  /**
+   * Gets the app path
+   *
+   * @return void
+   */
+  public function get_cdn_path(){
+    if ( $this->name === 'apst-app' ){
+      return BBN_CDN_PATH;
+    }
+    else{// case bbn-vue
+      $file_envinroment = \bbn\mvc::get_app_path().'cfg/environment.json';
+      if ( $this->fs->is_file($file_envinroment) ){
+        $content = json_decode($this->fs->get_contents($file_envinroment), true)[0];
+      }
+      if ( !empty($content) && !empty($content['app_path']) ){
+        return $content['app_path'].'src/';
+      }
+    }
+  }
+
   /**
    * Gets the lib path
    *

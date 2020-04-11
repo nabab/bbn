@@ -117,6 +117,27 @@ class git extends \Cz\Git\GitRepository
     return $arr;
 	}
 
+  public function pushInRemoteT(string $repository, string $user, string $token, string $server="github.com"){
+    if ($repository && $user && $passw && $server){
+      $remote = NULL;
+      //https://[USERNAME]:[NEW TOKEN]@github.com/[USERNAME]/[REPO].git
+      $params['--repo'] = 'https://'.$user.':'.$token.'@'.$server.'/'.$user.'/'.$repository.'.git';
+      try{
+        $output = $this->begin()
+          ->run("git push $remote", $params)
+          ->end();
+  		}
+    	catch(Exception $e) {
+        die(var_dump($e->getMessage(), $params['--repo']));
+     		return false;
+   		}
+      return is_object($output);
+		}
+    return false;
+  }
+
+  
+  
   public function pushInRemote(string $repository, string $user, string $passw, string $server="github.com"){
     if ($repository && $user && $passw && $server){
       $remote = NULL;
@@ -281,5 +302,4 @@ class git extends \Cz\Git\GitRepository
       'total' => (int)$this->extractFromCommand('git rev-list --all --count')[0]
     ];
   }
-
 }

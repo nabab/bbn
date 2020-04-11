@@ -2118,7 +2118,8 @@ class ide {
   public function get_theme(){
     $opt_theme = $this->options->from_code(self::THEME, self::IDE_PATH, self::BBN_APPUI);
     $pref_arch = $this->pref->get_class_cfg();
-    $pref = $this->db->select_one( $pref_arch['tables']['users_options'],  $pref_arch['arch']['user_options']['id'], [
+    
+    $pref = $this->db->select_one( $pref_arch['tables']['user_options'],  $pref_arch['arch']['user_options']['id'], [
       $pref_arch['arch']['user_options']['id_user'] => $this->pref->get_user(),
       $pref_arch['arch']['user_options']['id_option'] => $this->projects->get_id()
     ]);
@@ -2148,7 +2149,7 @@ class ide {
 
     if ( !empty($opt_theme) ){
       //id_option is the project
-      $pref = $this->db->select_one( $pref_arch['tables']['users_options'],  $pref_arch['arch']['user_options']['id'], [
+      $pref = $this->db->select_one( $pref_arch['tables']['user_options'],  $pref_arch['arch']['user_options']['id'], [
         $pref_arch['arch']['user_options']['id_user'] => $this->pref->get_user(),
         $pref_arch['arch']['user_options']['id_option'] => $this->projects->get_id()
       ]);
