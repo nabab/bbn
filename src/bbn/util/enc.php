@@ -124,7 +124,7 @@ class enc
     return null;
   }
 
-  public static function generateCert(string $path, string $algo = 'sha512', int $key_bits = 4096): bool
+  public static function generateCertFiles(string $path, string $algo = 'sha512', int $key_bits = 4096): bool
   {
     $res = false;
     if ( !is_dir(dirname($path)) || file_exists($path.'_rsa') || !in_array($algo, hash_algos()) ){
@@ -152,7 +152,7 @@ class enc
     return $res;
   }
 
-  public static function generateCert2(string $algo = 'sha512', int $key_bits = 4096): ?array
+  public static function generateCert(string $algo = 'sha512', int $key_bits = 4096): ?array
   {
     $res = null;
     $params = [

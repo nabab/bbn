@@ -391,8 +391,14 @@ class x
    */
   public static function to_array($obj){
     if ( \is_string($obj) ){
-      return json_decode($obj, 1);
+      $res = json_decode($obj, 1);
     }
+    foreach ($obj as $p => &$v) {
+      if (is_object($v)) {
+        $v = self::to_array($v);
+      }
+    }
+    unset($v);
     return (array)$obj;
   }
 
@@ -955,9 +961,9 @@ class x
    */
   public static function map(callable $fn, array $ar, string $items = null){
     $res = [];
-    foreach ( $ar as $a ){
+    foreach ( $ar as $key => $a ){
       $is_false = $a === false;
-      $r = $fn($a);
+      $r = $fn($a, $key);
       if ( $is_false ){
         $res[] = $r;
       }

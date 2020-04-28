@@ -217,7 +217,22 @@ class system extends bbn\models\cls\basic
         if ( $filter === 'file' ){
           return is_file($item);
         }
-        return strtolower(substr(\is_array($item) ? $item['name'] : $item, - strlen($filter))) === strtolower($filter);
+        // If it is an extension we check also that it's a file
+        if (!is_file($item)) {
+          return false;
+        }
+        $extensions = array_map(function($a) {
+          if (substr($a, 0, 1) !== '.') {
+            $a = '.'.$a;
+          }
+          return strtolower($a);
+        }, \bbn\x::split($filter, '|'));
+        foreach ($extensions as $ext) {
+          if (strtolower(substr(\is_array($item) ? $item['name'] : $item, - strlen($ext))) === $ext) {
+            return true;
+          }
+        }
+        return false;
       }
       if ( is_callable($filter) ){
         return $filter($item);
@@ -1228,29 +1243,43 @@ class system extends bbn\models\cls\basic
     if ($this->is_dir($path)) {
       $files = $deep ? $this->scan($path, $filter) : $this->get_files($path, false, $hidden, $filter);
       $res = [];
-      foreach ( $files as $f ){
+      foreach ($files as $f) {
         $r = $this->search($search, $f);
         if ( count($r) ){
-          $res[$f] = $r;
+          if (is_array($search)) {
+            foreach ($r as $s => $found) {
+              if (count($found)) {
+                if (!isset($res[$s])) {
+                  $res[$s] = [];
+                }
+                $res[$s][$f] = $found;
+              }
+            }
+
+          }
+          else {
+            $res[$f] = $r;
+          }
         }
       }
       return $res;
     }
-    else if ( $this->is_file($path) ){
+    else if ($this->is_file($path)) {
       $content = $this->get_contents($path);
-      $idx = 0;
       $res = [];
-      if ( is_array($search) ){
-        foreach ( $search as $s ){
+      if (is_array($search)) {
+        foreach ($search as $s) {
+          $idx = 0;
           $res[$s] = [];
-          while ( ($n = \bbn\x::indexOf($content, $search, $idx)) > -1 ){
+          while (($n = \bbn\x::indexOf($content, $s, $idx)) > -1) {
             $res[$s][] = $n;
-            $idx = $n+1;
+            $idx = $n+strlen($s);
           }
         }
       }
-      else{
-        while ( ($n = \bbn\x::indexOf($content, $search, $idx)) > -1 ){
+      else {
+        $idx = 0;
+        while (($n = \bbn\x::indexOf($content, $search, $idx)) > -1) {
           $res[] = $n;
           $idx = $n+1;
         }

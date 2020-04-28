@@ -6,197 +6,12 @@ use bbn;
 class php extends bbn\models\cls\basic
 {
   /**
-   * Function that returns the content of an element of a class
-   *
-   * @param \ReflectionMethod $rfx
-   * @return void
-   */
-  private function _closureSource(\ReflectionMethod $rfx)
-  {
-    $args = [];
-    $default = '88888888888888888888888888888888';
-    $i = 0;
-    foreach($rfx->getParameters() as $p){
-      $args[] = ($p->isArray() ? 'array ' : ($p->getClass() ? $p->getClass()->name.' ' : ''))
-        .($p->isPassedByReference() ? '&' : '').'$'.$p->name;
-      try {
-        if ( $p->isOptional() ){
-          $default = $p->getDefaultValue();
-          if ( $default !== '88888888888888888888888888888888' ){
-            $args[$i] .= ' = '.($default === [] ? '[]' : var_export($default,true));
-          }
-        }
-      }
-      catch ( \ReflectionException $e ){
-        //die(var_dump($e));
-      }
-      $i++;
-    }
-    $content = file($rfx->getFileName());
-    $s = $rfx->getStartLine();
-    if ( strpos($content[$s-1], '  {') === false ){
-      $s++;
-    }
-    return 'function(' . implode(', ', $args) .')'.PHP_EOL.'  {'.PHP_EOL
-      . implode('', array_slice($content, $s, $rfx->getEndLine()-$s-1)).'  }';
-  }
-
-  /**
-   * Order the elements (methods, porperties and costant of the class) used and the functions analyze
-   *
-   * @param array $elements
-   * @param string $typeEle
-   * @param \ReflectionClass $rc
-   * @return array|null
-   */
-  private function orderElement(array $elements, string $typeEle, \ReflectionClass $rc): ?array
-  {
-
-    if ( is_array($elements) && is_string($typeEle) ){
-      if ( $typeEle === 'methods' ){
-        $arr = [
-          'private' => [],
-          'protected' => [],
-          'public' => []
-        ];
-      }
-      foreach ( $elements as $ele ){
-        if ( $typeEle === 'methods' ){
-          $idx = 'public';
-          if ( $ele->isPrivate() ){
-            $idx = 'private';
-          }
-          else if ( $ele->isProtected() ){
-            $idx = 'protected';
-          }
-          $ret = null;
-          if ($ele->hasReTurnType()) {
-            $type = $ele->getReturnType();
-            $ret = [(string)$type];
-            if ($type->allowsNull()) {
-              $ret[] = null;
-            }
-          }
-          /*$arr[$idx][$ele->getName()] = [
-            'static' => $ele->isStatic(),
-            'returns' => $ret
-          ];*/
-          $arr[$idx][$ele->getName()] = array_filter($this->analyzeMethod($ele->getName(), $rc), function($m, $i){
-            if ( $i !== 'name' ){
-              return $m;
-            }
-          }, ARRAY_FILTER_USE_BOTH);
-        }
-        else if ( $typeEle === 'properties' ){
-          $arr[$ele->name] =  array_filter( $this->analyzeProperty($ele->name, $rc), function($p, $i){
-            if ( $i !== 'name' ){
-              return $p;
-            }
-          }, ARRAY_FILTER_USE_BOTH);
-        }
-        else if ( $typeEle === 'constants' ){
-          $arr[$ele->name] = $this->analyzeConstant($ele->name, $rc);
-        }
-      }
-    }
-    return isset($arr) ? $arr : null;
-  }
-
-  /**
    * Construct function
    */
   public function __construct()
   {
     $this->docParser = \phpDocumentor\Reflection\DocBlockFactory::createInstance();
     $this->parser = new \bbn\parsers\doc('', 'php');
-  }
-
-  /**
-   * This function analyzes the docblock of a method by returning the information in a structured way
-   *
-   * @param string $txt docBlock
-   * @return array|null
-   */
-  protected function parseMethodComments(string $txt): ?array
-  {
-    if ( is_string($txt) ){
-      $arr = $this->parser->parse_docblock($txt);
-      $docBlock = $this->docParser->create($txt);
-      if ( count($arr['tags']) ){
-        $tags = $arr['tags'];
-        unset($arr['tags']);
-        $arr['params'] = [];
-        $arr['return'] = '';
-        foreach( $tags as $tag ){
-          if ( $tag['tag'] === 'param' ){
-            $arr['params'][$tag['name']] = [
-              'type' => isset($tag['type']) ? $tag['type'] : '',
-              'description' => isset($tag['description']) ? $tag['description'] : ''
-            ];
-          }
-          else if ( $tag['tag'] === 'return' ){
-            $arr['return'] = isset($tag['description']) ? $tag['description'] : '';
-          }
-        }
-      }
-      if ( $arr['description'] ){
-        $start_example = stripos($arr['description'],  "* ```php");
-        $end_example = strpos($arr['description'],  "```");
-        if ( ($start_example !== false) && ($end_example !== false) ){
-          $arr['example_method'] =  (string)$docBlock->getDescription(); //substr($arr['description'], $start_example+1,);
-          $arr['description'] = $this->parser->parse_docblock($txt);//$docBlock->getSummary();
-        }
-      }
-    }
-    return (isset($arr) && is_array($arr)) ? $arr : null;
-
-  }
-
-  /**
-   * This function analyzes the docblock of a property by returning the information in a structured way
-   *
-   * @param string $txt docblock
-   * @return array|null
-   */
-  protected function parsePropertyComments(string $txt): ?array
-  {
-    if ( is_string($txt) ){
-      $arr = $this->parser->parse_docblock($txt);
-      if ( count($arr['tags']) ){
-        $arr['tags'] = array_map(function($ele){
-          return [
-            'tag' => $ele['tag'],
-            'type' => $ele['description']
-          ];
-        }, $arr['tags']);
-
-      }
-    }
-    return (isset($arr) && is_array($arr)) ? $arr : null;
-  }
-
-  /**
-   *This function analyzes the docblock of a class by returning the information in a structured way
-   *
-   * @param string $txt dockBlock
-   * @return array|null
-   */
-  protected function parseClassComments(string $txt): ?array
-  {
-    if ( is_string($txt) ){
-      $arr = $this->parser->parse_docblock($txt);
-      if ( is_array($arr) ){
-        if ( count($arr['tags']) ){
-          $tags = $arr['tags'];
-          $arr['tags'] = [];
-          foreach( $tags as $tag ){
-            $arr['tags'][$tag['tag']] = $tag['text'];
-          }
-        }
-
-      }
-    }
-    return (isset($arr) && is_array($arr)) ? $arr : null;
   }
 
   /**
@@ -803,4 +618,188 @@ class php extends bbn\models\cls\basic
     return $methods;
   }
 
+  /**
+   * This function analyzes the docblock of a method by returning the information in a structured way
+   *
+   * @param string $txt docBlock
+   * @return array|null
+   */
+  protected function parseMethodComments(string $txt): ?array
+  {
+    if ( is_string($txt) ){
+      $arr = $this->parser->parse_docblock($txt);
+      $docBlock = $this->docParser->create($txt);
+      if ( count($arr['tags']) ){
+        $tags = $arr['tags'];
+        unset($arr['tags']);
+        $arr['params'] = [];
+        $arr['return'] = '';
+        foreach( $tags as $tag ){
+          if ( $tag['tag'] === 'param' ){
+            $arr['params'][$tag['name']] = [
+              'type' => isset($tag['type']) ? $tag['type'] : '',
+              'description' => isset($tag['description']) ? $tag['description'] : ''
+            ];
+          }
+          else if ( $tag['tag'] === 'return' ){
+            $arr['return'] = isset($tag['description']) ? $tag['description'] : '';
+          }
+        }
+      }
+      if ( $arr['description'] ){
+        $start_example = stripos($arr['description'],  "* ```php");
+        $end_example = strpos($arr['description'],  "```");
+        if ( ($start_example !== false) && ($end_example !== false) ){
+          $arr['example_method'] =  (string)$docBlock->getDescription(); //substr($arr['description'], $start_example+1,);
+          $arr['description'] = $this->parser->parse_docblock($txt);//$docBlock->getSummary();
+        }
+      }
+    }
+    return (isset($arr) && is_array($arr)) ? $arr : null;
+
+  }
+
+  /**
+   * This function analyzes the docblock of a property by returning the information in a structured way
+   *
+   * @param string $txt docblock
+   * @return array|null
+   */
+  protected function parsePropertyComments(string $txt): ?array
+  {
+    if ( is_string($txt) ){
+      $arr = $this->parser->parse_docblock($txt);
+      if ( count($arr['tags']) ){
+        $arr['tags'] = array_map(function($ele){
+          return [
+            'tag' => $ele['tag'],
+            'type' => $ele['description']
+          ];
+        }, $arr['tags']);
+
+      }
+    }
+    return (isset($arr) && is_array($arr)) ? $arr : null;
+  }
+
+  /**
+   *This function analyzes the docblock of a class by returning the information in a structured way
+   *
+   * @param string $txt dockBlock
+   * @return array|null
+   */
+  protected function parseClassComments(string $txt): ?array
+  {
+    if ( is_string($txt) ){
+      $arr = $this->parser->parse_docblock($txt);
+      if ( is_array($arr) ){
+        if ( count($arr['tags']) ){
+          $tags = $arr['tags'];
+          $arr['tags'] = [];
+          foreach( $tags as $tag ){
+            $arr['tags'][$tag['tag']] = $tag['text'];
+          }
+        }
+
+      }
+    }
+    return (isset($arr) && is_array($arr)) ? $arr : null;
+  }
+
+  /**
+   * Function that returns the content of an element of a class
+   *
+   * @param \ReflectionMethod $rfx
+   * @return void
+   */
+  private function _closureSource(\ReflectionMethod $rfx)
+  {
+    $args = [];
+    $default = '88888888888888888888888888888888';
+    $i = 0;
+    foreach($rfx->getParameters() as $p){
+      $args[] = ($p->isArray() ? 'array ' : ($p->getClass() ? $p->getClass()->name.' ' : ''))
+        .($p->isPassedByReference() ? '&' : '').'$'.$p->name;
+      try {
+        if ( $p->isOptional() ){
+          $default = $p->getDefaultValue();
+          if ( $default !== '88888888888888888888888888888888' ){
+            $args[$i] .= ' = '.($default === [] ? '[]' : var_export($default,true));
+          }
+        }
+      }
+      catch ( \ReflectionException $e ){
+        //die(var_dump($e));
+      }
+      $i++;
+    }
+    $content = file($rfx->getFileName());
+    $s = $rfx->getStartLine();
+    if ( strpos($content[$s-1], '  {') === false ){
+      $s++;
+    }
+    return 'function(' . implode(', ', $args) .')'.PHP_EOL.'  {'.PHP_EOL
+      . implode('', array_slice($content, $s, $rfx->getEndLine()-$s-1)).'  }';
+  }
+
+  /**
+   * Order the elements (methods, porperties and costant of the class) used and the functions analyze
+   *
+   * @param array $elements
+   * @param string $typeEle
+   * @param \ReflectionClass $rc
+   * @return array|null
+   */
+  private function orderElement(array $elements, string $typeEle, \ReflectionClass $rc): ?array
+  {
+
+    if ( is_array($elements) && is_string($typeEle) ){
+      if ( $typeEle === 'methods' ){
+        $arr = [
+          'private' => [],
+          'protected' => [],
+          'public' => []
+        ];
+      }
+      foreach ( $elements as $ele ){
+        if ( $typeEle === 'methods' ){
+          $idx = 'public';
+          if ( $ele->isPrivate() ){
+            $idx = 'private';
+          }
+          else if ( $ele->isProtected() ){
+            $idx = 'protected';
+          }
+          $ret = null;
+          if ($ele->hasReTurnType()) {
+            $type = $ele->getReturnType();
+            $ret = [(string)$type];
+            if ($type->allowsNull()) {
+              $ret[] = null;
+            }
+          }
+          /*$arr[$idx][$ele->getName()] = [
+            'static' => $ele->isStatic(),
+            'returns' => $ret
+          ];*/
+          $arr[$idx][$ele->getName()] = array_filter($this->analyzeMethod($ele->getName(), $rc), function($m, $i){
+            if ( $i !== 'name' ){
+              return $m;
+            }
+          }, ARRAY_FILTER_USE_BOTH);
+        }
+        else if ( $typeEle === 'properties' ){
+          $arr[$ele->name] =  array_filter( $this->analyzeProperty($ele->name, $rc), function($p, $i){
+            if ( $i !== 'name' ){
+              return $p;
+            }
+          }, ARRAY_FILTER_USE_BOTH);
+        }
+        else if ( $typeEle === 'constants' ){
+          $arr[$ele->name] = $this->analyzeConstant($ele->name, $rc);
+        }
+      }
+    }
+    return isset($arr) ? $arr : null;
+  }
 }

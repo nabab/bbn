@@ -308,18 +308,13 @@ class menus extends bbn\models\cls\basic{
    */
   public function add($id_menu, array $cfg = null): ?string
   {
-    $ids = [];
+    $id = false;
     if ( \is_array($id_menu) ){
       $cfg = $id_menu;
-      $id_opt = $this->from_path('menus');      
+      $id_opt = $this->from_path('menus');
     }
     if ( !empty($cfg) ){
-      if ( \bbn\str::is_uid($id_menu) ){
-        $id = $this->pref->add_bit($id_menu, $cfg);
-      }
-      else {
-        $id = $this->pref->add($id_opt, $cfg);
-      }
+      $id = \bbn\str::is_uid($id_menu) ? $this->pref->add_bit($id_menu, $cfg) : $this->pref->add($id_opt, $cfg);
     }
     if ( !empty($id) ){
       if ( \bbn\str::is_uid($id_menu) ){
@@ -416,13 +411,15 @@ class menus extends bbn\models\cls\basic{
   public function get_menus($k_text = 'text', $k_value = 'value'): ?array
   {
     $c = $this->pref->get_class_cfg();
-    return array_map(function($e) use($c, $k_text, $k_value){
+    $pref =& $this->pref;
+    return array_map(function($e) use($c, $k_text, $k_value, $pref){
       return [
         $k_text => $e[$c['arch']['user_options']['text']],
         $k_value => $e[$c['arch']['user_options']['id']],
         $c['arch']['user_options']['public'] => $e[$c['arch']['user_options']['public']],
         $c['arch']['user_options']['id_user'] => $e[$c['arch']['user_options']['id_user']],
-        $c['arch']['user_options']['id_group'] => $e[$c['arch']['user_options']['id_group']]
+        $c['arch']['user_options']['id_group'] => $e[$c['arch']['user_options']['id_group']],
+        'hasItems' => !!count($pref->get_bits($e[$c['arch']['user_options']['id']]))
       ];
     }, $this->pref->get_all(self::get_appui_option_id('menus')));
   }
@@ -503,6 +500,20 @@ class menus extends bbn\models\cls\basic{
     return null;
   }
 
+  public function fix_order(string $id, $id_parent = null, $deep = false): ?int
+  {
+    if (
+      \bbn\str::is_uid($id) &&
+      (empty($id_parent) || \bbn\str::is_uid($id_parent))
+    ){
+      $fixed = $this->pref->fix_bits_order($id, $id_parent, $deep);
+      if ( $fixed ){
+        $this->delete_cache($id);
+      }
+      return (int)$fixed;
+    }
+    return null;
+  }
   /**
    * Orders a section/link.
    *
@@ -512,7 +523,10 @@ class menus extends bbn\models\cls\basic{
    */
   public function order(string $id, int $pos): bool
   {
-    if ( $res = $this->pref->order_bit($id, $pos) ){
+    if (
+      \bbn\str::is_uid($id) &&
+      $this->pref->order_bit($id, $pos)
+    ){
       $this->delete_cache($this->get_id_menu($id));
       return true;
     }

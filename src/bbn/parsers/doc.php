@@ -37,12 +37,12 @@ class doc {
         'copyright' => ['text'],
         'deprecated' => ['text'],
         'example' => ['text'],
-        'global' => ['type', 'name', 'description'],
         'ignore' => [],
         'license' => ['text'],
         'link' => ['text'],
         'package' => ['text'],
         'return' => ['type', 'description'],
+        'returns' => ['type', 'description'],
         'since' => ['text'],
         'throws' => ['type', 'description'],
         'todo' => ['text'],
@@ -81,6 +81,7 @@ class doc {
         'func' => 'function',
         'function' => ['name'],
         'generator' => [],
+        'global' => [],
         'hidecontructor' => [],
         'host' => 'external',
         'implements' => [],
@@ -138,6 +139,7 @@ class doc {
         'api' => [],
         'category' => ['text'],
         'filesource' => [],
+        'global' => ['type', 'name', 'description'],
         'internal' => ['text'],
         'method' => ['text'],
         'package' => ['text'],
@@ -191,7 +193,7 @@ class doc {
 	 * @return string
 	 */
 	private function clear_text(string $text){
-    return trim(str_replace('   ', ' ', str_replace('  ', ' ', preg_replace('/\n\s*\*\s{1}/', PHP_EOL, $text))));
+    return trim(str_replace('   ', ' ', str_replace('  ', ' ', preg_replace('/\n\s+\*\s{0,1}/', PHP_EOL, $text))));
 	}
 
 	/**

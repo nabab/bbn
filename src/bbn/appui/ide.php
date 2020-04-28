@@ -997,6 +997,7 @@ class ide {
    * @return bool
    */
   private function operations(array $cfg, string $ope){
+    //die(var_dump($cfg, $ope));
     if ( is_string($ope) &&
       !empty($cfg['repository']) &&
       !empty($cfg['name']) &&
@@ -1088,7 +1089,7 @@ class ide {
               if ( $ope === 'rename' ){
                 //case rename file
                 if ( $this->fs->is_file($t['old']) ){
-                  $new_name = $cfg['new_name'].'.'.$cfg['ext'];
+                  $new_name = basename($t['new']);
                 }
                 //case rename folder
                 else{
@@ -1103,7 +1104,7 @@ class ide {
                   (strpos($t['old'], '/mvc/public/') !== false)
                 ){
                   if ( !$this->create_perm_by_real($t['old']) ){
-                    return $this->error("Impossible to create the option for rename");
+                    return $this->error(_("Impossible to create the option for rename"));
                   }
                 }
                 if ( !empty($t['perms']) &&
@@ -1124,7 +1125,7 @@ class ide {
                     !empty($cfg['is_file']) && (strpos($t['old'], '/mvc/public/') !== false)
                   ){
                   if ( !$this->create_perm_by_real($t['old']) ){
-                    return $this->error("Impossible to create the option for move");
+                    return $this->error(_("Impossible to create the option for move"));
                   }
                 }
                 if ( !empty($t['perms']) &&
@@ -2967,7 +2968,7 @@ class ide {
       $base =  $info['repository']['name'];
       $base_rep = $this->get_root_path($base);
       //function that defines whether the search is sensitive or non-sensitive
-      $typeSearch= function($element, $code, $type){
+      $typeSearch = function($element, $code, $type){
         if ( $type === "sensitive"){
           return strpos($element, $code);
         }
@@ -3106,9 +3107,8 @@ class ide {
                     }
                    //info file
                     $fileData = [
-                      'text' => basename($path_file)."&nbsp;<span class='bbn-badge bbn-s bbn-bg-lightgrey'>".count($list)."</span>",
+                      'text' =>  $path.'/'.$file_name."&nbsp;<span class='bbn-badge bbn-s bbn-bg-lightgrey'>".count($list)."</span>",
                       'icon' => 'nf nf-fa-file_code_o',
-                      'num' => count($list),
                       'numChildren' => count($list),
                       'repository' => $info['repository']['path'],
                       'uid' => $path.$file_name,
@@ -3117,32 +3117,36 @@ class ide {
                       'tab' =>  !empty($tab) ? $tab : false,
                       'items' => $list,
                     ];
-                    if ( !isset($result[$name_path]) ){
+                    $result[] = $fileData;
+
+                    //die(var_dump($path.$name_path,$base_rep));
+                    /*if ( !isset($result[$path.$name_path]) ){
                       //info folder
-                      $result[$name_path]= [
+                      $result[$path.$name_path]= [
                         'text' => dirname($path.$file_name),
                         'num' => 1,
                         'numChildren' => 1,
                         'items' => [],
                         'icon' => !empty($info['component']) || ($info['type'] === 'components')  ? 'nf nf-mdi-vuejs' : 'nf nf-fa-folder'
                       ];
-                      $result[$name_path]['items'][] = $fileData;
+                      $result[$path.$name_path]['items'][] = $fileData;
                     }
                     else {
                       $ctrlFile = false;
                       //  check if the file where we found one or more search results is not reinserted
-                      foreach( $result[$name_path]['items'] as $key => $item ){
-                        if ( $item['file'] === basename($path_file) ){
+                      foreach( $result[$path.$name_path]['items'] as $key => $item ){
+                        if ( $item['file'] === dirname($path_file) ){
                           $ctrlFile = true;
                         }
                       }
                       //if we do not have the file, we will insert it
                       if ( empty($ctrlFile) ){
-                        $result[$name_path]['items'][] = $fileData;
-                        $result[$name_path]['num']++;
-                        $result[$name_path]['numChildren']++;
+                        $result[$path.$name_path]['items'][] = $fileData;
+                        $result[$path.$name_path]['num']++;
+                        $result[$path.$name_path]['numChildren']++;
                       }
-                    }
+                    }*/
+
                   }
                 }
               }
@@ -3165,7 +3169,7 @@ class ide {
                     $text = "<strong>".'line ' . $lineNumber . ' : '."</strong>";
                     $text .= str_replace($info['search'], "<strong><span class='underlineSeach'>".$info['search']."</span></strong>", $lineCurrent);
                     $occourences = $occourences + substr_count($lineCurrent, $info['search']);
-                    //see  
+                    //see
                     $path = str_replace($base, (strpos($path_file, $this->get_app_path()) === 0 ? 'app/' : 'lib/'), $path);
 
                     if ( !empty($info['mvc']) ){
@@ -3195,7 +3199,7 @@ class ide {
                   $totLines .= count($list);
                   // info for file who contain a code
                   $fileData = [
-                    'text' => basename($path_file)."&nbsp;<span class='bbn-badge bbn-s bbn-bg-lightgrey'>".count($list)."</span>",
+                    'text' => basename($path_file),
                     'icon' => 'nf nf-fa-file_code',
                     'num' => count($list),
                     'numChildren' => count($list),
@@ -3206,31 +3210,8 @@ class ide {
                     'tab' => !empty($tab) ? $tab : false,
                     'items' => $list
                   ];
-                  if( !isset($result[$name_path]) ){
-                    $result[$name_path]= [
-                      'text' => $name_path,
-                      'num' => 1,
-                      'numChildren' => 1,
-                      'items' => [],
-                      'icon' => !empty($info['component']) ? 'nf nf-mdi-vuejs' : 'nf nf-fa-folder'
-                    ];
-                    $result[$name_path]['items'][] = $fileData;
-                  }
-                  else{
-                    $ctrlFile = false;
-                    //  check if the file where we found one or more search results is not reinserted
-                    foreach( $result[$name_path]['items'] as $key => $item ){
-                      if ( $item['file'] === basename($path_file) ){
-                        $ctrlFile = true;
-                      }
-                    }
-                    //if we do not have the file, we will insert it
-                    if ( empty($ctrlFile) ){
-                      $result[$name_path]['items'][] = $fileData;
-                      $result[$name_path]['num']++;
-                      $result[$name_path]['numChildren']++;
-                    }
-                  }
+
+                  $result[] = $fileData;
                 }
               }
             }
@@ -3241,17 +3222,140 @@ class ide {
         $totFiles = 0;
         foreach ($result as $key => $value) {
           $totFiles = $totFiles + $value['items'][0]['numChildren'];
-          $result[$key]['text'] = str_replace($result[$key]['text'], $result[$key]['text']."&nbsp;<span class='bbn-badge bbn-s bbn-bg-lightgrey'>".$result[$key]['numChildren']."</span>",$result[$key]['text']);
         }
         return [
           'list' => array_values($result),
           'occurences' => $occourences,
-          'totFiles' => $totFiles,
-          'allFiles' => $tot_num_files++,
+          'totFiles' => $tot_num_files,
+          'filesFound' => count($result),//$tot_num_files++,
           'totLines' => $totLines
         ];
       }
     }
     return false;
+  }
+
+  public function searchAll(string $seek){
+    if ( isset($seek) ) {
+      $res = [];
+      $occourences = 0;
+      $totalFiles =  0;
+      $numRepositories = 0;
+      $foundRepos =[];
+      foreach ( $this->repositories as $rep ) {
+        //temporaney 
+        if ( $rep['root'] !== 'cdn' ){
+          $totalFiles += $this->fs->get_num_files($rep['root_path']);
+          if ( $found = $this->fs->search($seek, $rep['root_path'], true, false, 'js|php|less|html') ) {
+            foreach ( $found as $fn => $val ){
+              $list = [];
+              // case file into folder
+              if ( $this->fs->is_file($fn) ){
+                $path_file=  $val;
+                //object initialization with every single file to check the lines that contain it
+                $file = new \SplFileObject($fn);
+                $totLines = 0;
+                //cycle that reads all the lines of the file, it means until it has finished reading a file
+                while( !$file->eof() ){
+                  //current line reading
+                  $lineCurrent = $file->current();
+                  //if we find what we are looking for in this line and that this is not '\ n' then we will take the coirispjective line number with the key function, insert it into the array and the line number
+                  if ( !empty($position = strpos($lineCurrent, $seek) !== false) && (strpos($lineCurrent, '\n') === false) ){
+                    $lineNumber = $file->key()+1;
+                    $name_path = $rep['path'].substr(dirname($val), strlen($base_rep));
+                    $line = "<strong>".'line ' . $lineNumber . ' : '."</strong>";
+
+                    $text = $line;
+                    $text .= str_replace($seek, "<strong><span class='underlineSeach'>".$seek."</span></strong>", $lineCurrent);
+                    $file_name = basename($path_file);
+
+                    $occourences = $occourences + substr_count($lineCurrent, $seek);
+                    if ( in_array($rep['name'], $foundRepos) === false ){
+                      $foundRepos[] =  $rep['name'];
+                      $numRepositories++;
+                    }
+                    // info for code
+                    $list[] = [
+                      'text' => strlen($text) > 1000 ? $line."<strong><i>"._('content too long to be shown')."</i></strong>" : $text,
+                      'line' =>  $lineNumber-1,
+                      'position' => $position,
+                     // 'link' => $link,
+                      'tab' =>  !empty($tab) ? $tab : false,
+                      'code' => true,
+                      'uid' => $rep['path'].'/'.$file_name,
+                      'icon' => 'nf nf-fa-code'
+                    ];
+                  }
+                  //next line
+                  $file->next();
+                }
+                //if we find rows then we will create the tree structure with all the information
+                if ( count($list) > 0 ){
+                  $totLines = $totLines + count($list);
+                  if ( explode("/",$path_file)[1] === "public" ){
+                    $tab = 'php';
+                  }
+                  else {
+                    $tab = explode("/",$path_file)[1];
+                  }
+                  $link =  explode(".",substr($path_file, strlen(explode("/",$path_file)[0].'/'.explode("/",$path_file)[1])+1))[0];
+                }
+                //info file
+                $ext = \bbn\str::file_ext($fn,0);
+                $fileData = [
+                  'text' =>  $rep['name'].'/'.substr($fn, strlen($rep['root_path']))."&nbsp;<span class='bbn-badge bbn-s bbn-bg-lightgrey'>".count($list)."</span>",
+                  'icon' => 'nf nf-fa-file_code_o',
+                  'numChildren' => count($list),
+                  'repository' => $rep['name'],
+                  'uid' => $rep['name'].'/'.substr($fn, strlen($rep['root_path'])),
+                  'file' => basename($fn),
+                  'items' => $list,
+                ];
+
+                $path = explode('/', substr($fn, strlen($rep['root_path'])));
+                //die(var_dump("sss", $path));
+                if ( $path[0] === 'mvc' ){
+                  if ( $path[1] === "public" ){
+                    $tab = 'php';
+                  }
+                  else{
+                    $tab = $path[1];
+                  }
+                }
+                elseif ( $path[0] === 'components' ){
+                  $tab = $ext;
+                  $components = true;
+                }
+                unset($path[1]);
+                $path = implode('/', $path);
+
+                $link = $components === true ? $rep['name'].'/'.substr($path, 0,  strpos($path,'.'.$ext)).'/'.basename($path, '.'.$ext) : $rep['name'].'/'.substr($path, 0,  strpos($path,'.'.$ext));
+                $fileData['tab'] = !empty($tab) ? $tab : false;
+                $fileData['link'] = $link;
+                foreach ( $fileData['items'] as &$item ){
+                  $item['link'] = $link;
+                  $item['tab'] =   !empty($tab) ? $tab : false;
+                }
+                $result[] = $fileData;
+              }
+            }
+          }
+        }
+      }
+    }
+    if ( !empty($result) ){
+      return [
+        'list' => array_values($result),
+        'occurences' => $occourences,
+        'totFiles' => $totalFiles,
+        'filesFound' => count($result),
+        'repositoriesFound' => $numRepositories,
+        'totalRepositories' => count($this->repositories),
+        'totLines' => $totLines
+      ];
+    }
+    else {
+      return ['success'  => false];
+    }
   }
 }

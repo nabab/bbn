@@ -1292,15 +1292,29 @@ class preferences extends bbn\models\cls\db
   {
     $c = $this->class_cfg['arch']['user_options_bits'];
     $t = $this;
-    $where = [
-      $c['id_user_option'] => $id_usr_opt
-    ];
-    if ( is_null($id_parent) || \bbn\str::is_uid($id_parent) ){
-      $where[$c['id_parent']] = $id_parent;
+    $where = [[
+      'field' => $c['id_user_option'],
+      'value' => $id_usr_opt
+    ]];
+    if ( \is_null($id_parent) || \bbn\str::is_uid($id_parent) ){
+      $where[] = [
+        'field' => $c['id_parent'],
+        empty($id_parent) ? 'operator' : 'value' => $id_parent ?: 'isnull'
+      ];
     }
     if (
       \bbn\str::is_uid($id_usr_opt) &&
-      ($bits = $this->db->rselect_all($this->class_cfg['tables']['user_options_bits'], [], $where, [$c['num'] => 'ASC']))
+      ($bits = $this->db->rselect_all([
+        'table' => $this->class_cfg['tables']['user_options_bits'],
+        'fields' => [],
+        'where' => [
+          'conditions' => $where
+        ],
+        'order' => [[
+          'field' => $c['num'],
+          'dir' => 'ASC'
+        ]]
+      ]))
     ){
       if ( !empty($with_config) ){
         return array_map(function($b) use($t){
@@ -1323,15 +1337,27 @@ class preferences extends bbn\models\cls\db
   {
     $c = $this->class_cfg['arch']['user_options_bits'];
     $t = $this;
-    $where = [
-      $c['id_option'] => $id_opt
-    ];
-    if ( is_null($id_parent) || \bbn\str::is_uid($id_parent) ){
-      $where[$c['id_parent']] = $id_parent;
+    $where = [[
+      'field' => $c['id_user_option'],
+      'value' => $id_opt
+    ]];
+    if ( \is_null($id_parent) || \bbn\str::is_uid($id_parent) ){
+      $where[] = [
+        'field' => $c['id_parent'],
+        empty($id_parent) ? 'operator' : 'value' => $id_parent ?: 'isnull'
+      ];
     }
     if (
       \bbn\str::is_uid($id_opt) &&
-      ($bits = $this->db->rselect_all($this->class_cfg['tables']['user_options_bits'], [], $where, [$c['num'] => 'ASC']))
+      ($bits = $this->db->rselect_all([
+        'table' => $this->class_cfg['tables']['user_options_bits'],
+        'fields' => [],
+        'where' => $where,
+        'order' => [[
+          'field' => $c['num'],
+          'dir' => 'ASC'
+        ]]
+      ]))
     ){
       if ( !empty($with_config) ){
         return array_map(function($b) use($t){
@@ -1482,14 +1508,14 @@ class preferences extends bbn\models\cls\db
 
   /**
    * Orders a bit.
-   * 
+   *
    * @param string $id The bit's ID
    * @param int $pos The new position
    * @return bool|null
    */
   public function order_bit(string $id, int $pos): ?bool
   {
-    if ( 
+    if (
       \bbn\str::is_uid($id) &&
       ($cf = $this->get_class_cfg()) &&
       ($cfg = $cf['arch']['user_options_bits']) &&
@@ -1497,8 +1523,8 @@ class preferences extends bbn\models\cls\db
       ($old = (int)$bit[$cfg['num']]) &&
       !empty($pos) &&
       ($old !== $pos) &&
-      ($bits = $this->get_bits($bit[$cfg['id_user_option']], $bit[$cfg['id_parent']] ?: false))
-    ){    
+      ($bits = $this->get_bits($bit[$cfg['id_user_option']], $bit[$cfg['id_parent']]))
+    ){
       $past_new = false;
       $past_old = false;
       $p = 1;
@@ -1532,6 +1558,27 @@ class preferences extends bbn\models\cls\db
     return null;
   }
 
+  public function fix_bits_order(string $id_user_option, string $id_parent = null, $deep = false): ?int
+  {
+    if (
+      \bbn\str::is_uid($id_user_option) &&
+      (\bbn\str::is_uid($id_parent) || \is_null($id_parent))
+    ){
+      $cfg = $this->class_cfg['arch']['user_options_bits'];
+      $fixed = 0;
+      foreach ( $this->get_bits($id_user_option, $id_parent, false) as $i => $b ){
+        if ( $deep ){
+          $fixed += $this->fix_bits_order($id_user_option, $b[$cfg['id']], $deep);
+        }
+        if ( $b[$cfg['num']] !== ($i + 1) ){
+          $fixed += $this->db->update($this->class_cfg['tables']['user_options_bits'], [$cfg['num'] => $i + 1], [$cfg['id'] => $b[$cfg['id']]]);
+        }
+      }
+      return $fixed;
+    }
+    return null;
+  }
+
   /**
    * Moves a bit.
    * 
@@ -1540,11 +1587,11 @@ class preferences extends bbn\models\cls\db
    * @return bool|null
    */
   public function move_bit(string $id, string $id_parent = null): ?bool
-  { 
-    if ( 
-      \bbn\str::is_uid($id) && 
+  {
+    if (
+      \bbn\str::is_uid($id) &&
       (
-        (\bbn\str::is_uid($id_parent) && $this->get_bit($id_parent)) || 
+        (\bbn\str::is_uid($id_parent) && $this->get_bit($id_parent)) ||
         \is_null($id_parent)
       ) &&
       ($bit = $this->get_bit($id)) &&
