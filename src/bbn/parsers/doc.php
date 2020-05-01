@@ -29,6 +29,10 @@ class doc {
       'php'
     ],
     /**
+     * @var array $tags
+     */
+    $tags = [],
+    /**
      * @var array $all_tags
      */
     $all_tags = [
@@ -160,7 +164,8 @@ class doc {
     $pattern = [
       'start' => '/\/\*\*/m',
       'end' => '/\s\*\//m',
-      'tag' => '/\n\s+\*\s{1}\@/m'
+      //'tag' => '/\n\s+\*\s{1}\@/m'
+      'tag' => '/(\n\s+\*)*\n\s+\*\s{1}\@/m'
     ],
     /**
      * @var array $parsed
@@ -193,7 +198,8 @@ class doc {
 	 * @return string
 	 */
 	private function clear_text(string $text){
-    return trim(str_replace('   ', ' ', str_replace('  ', ' ', preg_replace('/\n\s+\*\s{0,1}/', PHP_EOL, $text))));
+    //return trim(str_replace('   ', ' ', str_replace('  ', ' ', preg_replace('/\n\s+\*\s{0,1}/', PHP_EOL, $text))));
+    return trim(str_replace('   ', ' ', str_replace('  ', ' ', str_replace(PHP_EOL.' ', PHP_EOL, preg_replace('/\n\s*\*{1}/', PHP_EOL, $text)))));
 	}
 
 	/**
@@ -203,12 +209,14 @@ class doc {
 	 * @return array|false
 	 */
 	private function parse_tag(string $text){
-		$res = [];
+    $res = [];
 		$text = $this->clear_text($text);
-		$tag_end = strpos($text, ' ');
+    //$tag_end = strpos($text, ' ');
+    preg_match('/^\@{1}\w+\s{0,1}/', $text, $tag);
+    $tag_end = !empty($tag) && !empty($tag[0]) ? strlen($tag[0]) - 1 : false;
 		if ( $tag_end !== false ){
 			// Get tag
-			$res['tag'] = substr($text, 1, $tag_end - 1);
+      $res['tag'] = substr($text, 1, $tag_end - 1);
 			if ( in_array($res['tag'], array_keys($this->tags)) ){
         if (
           $this->tag_has_text($res['tag']) &&
@@ -223,7 +231,7 @@ class doc {
             ($type = $this->tag_get_type($text)) &&
             !empty($type[1])
           ){
-						$res['type'] = $type[1][0];
+            $res['type'] = $type[1][0];
 					}
 					// Get default value
 					if (
@@ -308,7 +316,7 @@ class doc {
     }
     return array_map(function($r){
       if ( is_array($r) && (count($r) === 1) ){
-        return $r[0];
+        //return $r[0];
       }
       return $r;
     }, $res);
@@ -397,9 +405,11 @@ class doc {
     ){
       preg_match('/(?:\{)(\S+)(?:\})/', $text, $type, PREG_OFFSET_CAPTURE);
     }
-    else if ( $this->mode === 'php' ){      
-      preg_match('/(?:\@[a-z]+\s{1})(.+)(?:\s{1}\$)/', $text, $type, PREG_OFFSET_CAPTURE);
-      $type[0] = $type[1];
+    else if ( $this->mode === 'php' ){
+      preg_match('/(?:\@[a-z]+\s{1})(\S+)(?:\s{0,1})/', $text, $type, PREG_OFFSET_CAPTURE);
+      if ( !empty($type) && isset($type[1]) ){
+        $type[0] = $type[1];
+      }
     }
     return $type;
   }
@@ -648,7 +658,9 @@ class doc {
         preg_match($this->pattern['end'], $this->source, $mat, PREG_OFFSET_CAPTURE, $match[1]);
         $start = $match[1];
         $length = isset($mat[0]) ? ($mat[0][1] - $start) + 3 : 0;
-        $this->parsed[] = $this->parse_docblock(substr($this->source, $start, $length));
+        if ( $db = $this->parse_docblock(substr($this->source, $start, $length)) ){
+          $this->parsed[] = $db;
+        }
       }
     }
     return $this->parsed;
@@ -659,9 +671,10 @@ class doc {
    * Parses a given docblock
    *
    * @param string $block The docblock
-   * @return array
+   * @return array|null
    */
-  public function parse_docblock(string $block){
+  public function parse_docblock(string $block): ?array
+  {
     $b = [
 			'description' => '',
 			'tags' => []
@@ -680,6 +693,9 @@ class doc {
         ) ||
 				($t = $this->parse_tag(substr($block, $tag[1])))
 			){
+        if ( !empty($t['tag']) && ($t['tag'] === 'ignore') ){
+          return null;
+        }
 				$b['tags'][] = $t;
 			}
     }

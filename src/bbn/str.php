@@ -459,10 +459,11 @@ class str
    * Returns the file extension.
    *
    * ```php
-   * \bbn\x::dump(str::file_ext(\"c:\\Desktop\\test.txt\"));
    * // (string) "txt"
-   * \bbn\x::dump(\bbn\str::file_ext('/home/user/Desktop/test.txt',1));
+   * \bbn\x::dump(str::file_ext("/test/test.txt"));
+   * 
    * // (array) [ "test", "txt", ]
+   * \bbn\x::dump(\bbn\str::file_ext('/home/user/Desktop/test.txt', true));
    * ```
    *
    * @param string $file The file path.

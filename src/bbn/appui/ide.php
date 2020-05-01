@@ -395,7 +395,7 @@ class ide {
   /**
    * Delete the bits that all have the same id_option
    *
-   * @param [type] $id_option
+   * @param string $id_option
    * @return boolean|null
    */
   private function delete_bits_preferences(string $id_option): ?bool
@@ -2251,7 +2251,6 @@ class ide {
   /**
    * Add or update option file in repository
    *
-   * @param string| $id_rep The file's ID
    * @return bool
    */
   public function tracking(array $file, string $file_code, array $info, bool $setRecent = true): bool

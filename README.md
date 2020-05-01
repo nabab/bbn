@@ -1,23 +1,56 @@
 bbn
 ===
 
-[![Join the chat at https://gitter.im/nabab/bbn](https://badges.gitter.im/nabab/bbn.svg)](https://gitter.im/nabab/bbn?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+<!--[![Join the chat at https://gitter.im/nabab/bbn](https://badges.gitter.im/nabab/bbn.svg)](https://gitter.im/nabab/bbn?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)-->
 
-A simple PHP framework targeted at Single Page Application.
+## The complete PHP library used by [app-UI](https://app-ui.com) targeted at Single Page Applications.
 
-Check out the [Documentation](http://doc.babna.com).
+### Check out the [Documentation](https://bbn.io/php).
 
 This library includes:
 
-* a Database class, working with mySQL and SQLite: supports database analysis and plenty of return methods
-* a History class allowing to store each change done in the database and revert them
-* files, images, and PDF files manipulation classes
+* An MVC framework
+* A powerful ORM supporting database structure analysis and plenty of return methods
+* An options' class on which most app-UI features are based
+* API classes for integrating external services (Virtualmin, Cloudmin, Github...)
+* A History class allowing to store each change done in the database and revert them
+* Files, images, and PDF files manipulation classes
+* Filesystems explorator
+* An automated task management system
+* A universal caching system
 * HTML generation classes
-* various string classes
-* users management classes
-* an MVC framework
-* various tools
+* Users and groups management classes
+* Parsers for PHP, Javascript and VueJS components
+* Specific classes for app-UI features such as:
+  * Notes
+  * Medias
+  * Chat
+  * Clipboard
+  * CMS
+  * Dashboard
+  * Databases management system
+  * Databases synchronization system
+  * IDE
+  * Automated mailings
+  * Internationalization
+  * Masking system for letters and texts
+  * A notification system
+  * Data's observers
+  * Passwords management
+  * Planning and events management
+  * Specific projects management system targetted at app-UI
+  * A statistics system
+  * A general project and workflow management system
+* A bunch of static methods for manipulating all kind of data and other useful functions
+* And many other features!
 
+It is not yet released and there is a big work of code review, translation and documentation ahead.  
+
+Also no testing has been implemented yet, knowledge and ressources are needed...
+
+Any help is welcome!
+
+<!-->
 Usage
 -----
 
@@ -49,6 +82,4 @@ $db = new \bbn\db($cfg);
 \bbn\x::hdump($db->get_var("SELECT id FROM mytable WHERE name LIKE ?", "tri%"));
 ```
 
-
-[![API DOCS](http://apigenerator.org/badge.png)](http://nabab.github.io/bbn/)
-
+-->

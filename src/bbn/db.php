@@ -631,6 +631,7 @@ class db extends \PDO implements db\actions, db\api, db\engines
 
   /**
    * Normalizes arguments by making it a uniform array.
+   * 
    * <ul><h3>The array will have the following indexes:</h3>
    * <li>fields</li>
    * <li>where</li>
@@ -1063,13 +1064,13 @@ class db extends \PDO implements db\actions, db\api, db\engines
 
   /**
    * Gets the last hash created.
-   * @todo chiedere e thomas se deve diventare private e se va bene la descrizione
    *
    * ```php
    * \bbn\x::dump($db->get_hash());
    * // (string) 3819056v431b210daf45f9b5dc2
    * ```
    *
+   * @todo chiedere e thomas se deve diventare private e se va bene la descrizione
    * @return string
    */
   public function get_hash()

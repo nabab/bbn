@@ -6,16 +6,16 @@ namespace bbn\file;
 use bbn;
 
 /**
-		* A class for dealing with directories (folders)
-		*
-		*
-		* @author Thomas Nabet <thomas.nabet@gmail.com>
-		* @copyright BBN Solutions
-		* @since Apr 4, 2011, 23:23:55 +0000
-		* @category  Files ressources
-		* @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
-		* @version 0.2r89
-		*/
+	* A class for dealing with directories (folders)
+	*
+	*
+	* @author Thomas Nabet <thomas.nabet@gmail.com>
+	* @copyright BBN Solutions
+	* @since Apr 4, 2011, 23:23:55 +0000
+	* @category  Files ressources
+	* @license   http://www.opensource.org/licenses/lgpl-license.php LGPL
+	* @version 0.2r89
+	*/
 class dir extends bbn\models\cls\basic
 {
 	/**

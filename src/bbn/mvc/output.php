@@ -137,8 +137,8 @@ class output extends bbn\models\cls\basic {
       $this->mode = '';
     }
     else if ( !empty($this->obj->content) && !empty($this->obj->help) ){
-      $Parsedown = new \Parsedown();
-      $this->obj->help = $Parsedown->text($this->obj->help);
+      $mdParser = new \Parsedown();
+      $this->obj->help = $mdParser->text($this->obj->help);
     }
     switch ( $this->mode ){
 

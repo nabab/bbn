@@ -15,14 +15,11 @@ class git extends \Cz\Git\GitRepository
     return $this->extractFromCommand('git remote -v');
   }
 
-  public function createRepositoryRemote(string $token, array $scope, string $api="gitbucket"){
+  public function createRepositoryRemote(string $token, array $scope, string $api=""){
     if ( $token &&
         !empty($scope['name']) &&
-        $api
+        (strlen($api) > 0)
     ){
-      if ( $api === 'gitbucket' ){
-        $api = "https://git.bbn.so/api/v3/user/repos";
-      }
       //todo ceck create repository remote with this api for github
       try{
     		$res = \bbn\x::curl($api,json_encode($scope),[

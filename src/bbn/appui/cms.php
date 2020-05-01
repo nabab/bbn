@@ -204,8 +204,9 @@ class cms extends bbn\models\cls\db
 
  /**
  * If the given url correspond to a published note returns the id.
- * @param $tring $url
- * @return $string || null
+ * 
+ * @param string $url
+ * @return string || null
  */
 	public function get_by_url(string $url):? string
 	{

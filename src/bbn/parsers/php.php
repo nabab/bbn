@@ -23,75 +23,27 @@ class php extends bbn\models\cls\basic
    */
   public function analyzeMethod(string $meth, \ReflectionClass $cls): ?array
   {
+    $arr = null;
     if ( !empty($meth) &&
       !empty($cls) &&
       $cls->hasMethod($meth)
     ){
       $f  = &$this;
-      $getInfo = function($method) use($f){
-        $ret = null;
-        if ( $method->hasReturnType() ){
-          $type = $method->getReturnType();
-          $ret = [(string)$type];
-          if ( $type->allowsNull() ){
-            $ret[] = null;
-          }
-        }
-        if  ( $method->isPrivate() || $method->isProtected() ){
-          $method->setAccessible(true);
-        }
-        return [
-          'name' => $method->getName(),
-          'file' => $method->getDeclaringClass()->getName(),
-          'static' => $method->isStatic(),
-          'private' => $method->isPrivate(),
-          'protected' => $method->isProtected(),
-          'public' => $method->isPublic(),
-          'final' => $method->isFinal(),
-          'code' => $f->_closureSource($method),
-          'startLine' => $method->getStartLine(),
-          'doc' =>  !empty($method->getDocComment()) ? $f->parseMethodComments($method->getDocComment()) : '',
-          'endLine' => $method->getEndLine(),
-         // 'isClosure' => $method->isClousure(),
-          'isDeprecated' => $method->isDeprecated(),
-          'isGenerator' => $method->isGenerator(),
-          'isInternal' => $method->isInternal(),
-          'isUserDefined' => $method->isUserDefined(),
-          'isVariadic' => $method->isVariadic(),
-          'returnsReference' => $method->returnsReference(),
-          'numberOfParameters' => $method->getNumberOfParameters(),
-          'numberOfRequiredParameters' => $method->getNumberOfRequiredParameters(),
-          'returns' => $ret,
-          'parent' => false,
-          'arguments' => array_map(function($p){
-            return [
-              'name' => $p->getName(),
-              'position' => $p->getPosition(),
-              'type' => $p->getType(),
-              'required' => !$p->isOptional(),
-              'has_default' => $p->isDefaultValueAvailable(),
-              'default' => $p->isDefaultValueAvailable() ? $p->getDefaultValue() : '',
-              'default_name' => $p->isDefaultValueAvailable() && $p->isDefaultValueConstant() ?
-                $p->getDefaultValueConstantName() : ''
-            ];
-          }, $method->getParameters())
-        ];
-      };
 
       //get method in current class
-      $arr = $getInfo($cls->getMethod($meth));
+      $arr = $this->_get_method_info($cls->getMethod($meth));
 
       //get method in parent class
       $parent = $cls->getParentClass();
 
       while( $parent ){
         if ( $parent->hasMethod($meth) ){
-          $arr['parent'] = $getInfo($parent->getMethod($meth));
+          $arr['parent'] = $this->_get_method_info($parent->getMethod($meth));
         }
         $parent = $parent->getParentClass();
       }
     }
-    return isset($arr) && is_array($arr) ? $arr : null;
+    return $arr ?: null;
   }
 
   /**
@@ -103,48 +55,17 @@ class php extends bbn\models\cls\basic
    */
   public function analyzeProperty(string $prop, \ReflectionClass $cls): ?array
   {
-    if ( !empty($prop) &&
-      !empty($cls) &&
-      $cls->hasProperty($prop)
-    ){
-      $property = $cls->getProperty($prop);
-      $arr = [
-        'name' => $property->getName(),
-        'static' => $property->isStatic(),
-        'private' => $property->isPrivate(),
-        'protected' => $property->isProtected(),
-        'public' => $property->isPublic(),
-        'doc' => empty($property->getDocComment()) ? '' : $this->parsePropertyComments($property->getDocComment()),
-        'parent' => false
-      ];
-      if ( $arr['public'] ){
-        $arr['value'] = $property->getValue($prop);
-      }
-
+    if ($arr = $this->_get_property_info($prop, $cls)) {
       $parent = $cls->getParentClass();
       while( $parent ){
-        if ( $parent->hasProperty($prop) ){
-          $property = $parent->getProperty($prop);
-          $arr['parent'] =  [
-            'name' => $property->getName(),
-            'static' => $property->isStatic(),
-            'private' => $property->isPrivate(),
-            'protected' => $property->isProtected(),
-            'public' => $property->isPublic(),
-            'doc' => empty($property->getDocComment()) ? $this->parsePropertyComments($property->getDocComment()) : '',
-            'parent' => $parent->name
-          ];
-          if ( $arr['parent']['public'] ){
-            $arr['parent']['value'] = $property->getValue();
-          }
+        if ($arr_parent = $this->_get_property_info($prop, $parent)) {
+          $arr['parent'] = $arr_parent;
+          break;
         }
         $parent = $parent->getParentClass();
       }
     }
-    if ( isset($arr) ){
-      return $arr;
-    }
-    return null;
+    return $arr ?: null;
   }
 
   /**
@@ -206,30 +127,36 @@ class php extends bbn\models\cls\basic
     $rc = new \ReflectionClass($cls);
     \bbn\x::log([$cls], 'vito');
     if ( !empty($cls) && is_object($rc) ){
+      $methods = $rc->getMethods(\ReflectionMethod::IS_PUBLIC);
+      $props = $rc->getProperties(\ReflectionMethod::IS_PUBLIC);
+      $statprops = $rc->getStaticProperties(\ReflectionMethod::IS_PUBLIC);
+      $constants = $rc->getConstants(\ReflectionMethod::IS_PUBLIC);
       return [
         'doc' =>  $this->parseClassComments($rc->getDocComment()),
         'name' => $rc->getName(),
         'namespace' => $rc->getNamespaceName(),
-        'traits' => $rc->getTraits(),
+        'traits' => $rc->getTraitNames(),
         'interfaces' => $rc->getInterfaces(),
-        'isInstantiable' => $rc->isInstantiable(),
-        'cloneable' =>  $rc->isCloneable(),
+        //'isInstantiable' => $rc->isInstantiable(),
+        //'cloneable' =>  $rc->isCloneable(),
         'fileName' => $rc->getFileName(),
         'startLine' => $rc->getStartLine(),
         'endLine' => $rc->getEndLine(),
-        'contentConstructor' => !empty($rc->getConstructor()) ? array_filter($this->analyzeMethod($rc->getConstructor()->name, $rc), function($m, $i){
-          if ( !in_array($i,['file', 'returns']) ){
-            return $m;
-          }
-        }, ARRAY_FILTER_USE_BOTH) : null,
-        'methods' => !empty($rc->getMethods()) ? $this->orderElement($rc->getMethods(), 'methods', $rc) : null,
-        'properties' => !empty($rc->getProperties()) ? $this->orderElement($rc->getProperties(), 'properties', $rc) : null,
-        'staticProperties' => $rc->getStaticProperties(),
-        'costants' =>  !empty($rc->getConstants()) ? $this->orderElement($rc->getConstants(), 'costants', $rc) : null,
-        'numMethods' => count($rc->getMethods()),
-        'numProperties' => count( $rc->getProperties()),
-        'numConstants' => count($rc->getConstants()),
-        'numStaticProperties' => count($rc->getStaticProperties()),
+        'contentConstructor' => !empty($rc->getConstructor()) ?
+          array_filter(
+            $this->analyzeMethod($rc->getConstructor()->name, $rc),
+            function($m, $i){
+              return in_array($i,['file', 'returns']);
+            }, ARRAY_FILTER_USE_BOTH)
+          : null,
+        'methods' => $methods ? $this->orderElement($methods, 'methods', $rc) : null,
+        'properties' => $props ? $this->orderElement($props, 'properties', $rc) : null,
+        'staticProperties' => $statprops,
+        'constants' =>  $constants ? $this->orderElement($constants, 'costants', $rc) : null,
+        'numMethods' => count($methods),
+        'numProperties' => count( $props),
+        'numConstants' => count($constants),
+        'numStaticProperties' => count($statprops),
         'interfaces' =>  $rc->getInterfaces(),
         'interfaceNames' =>  $rc->getInterfaceNames(),
         'isInterface' =>  $rc->isInterface(),
@@ -262,30 +189,35 @@ class php extends bbn\models\cls\basic
   public function analyzeLibrary(string $path, string $namespace = ''): ?array
   {
     if ( !empty($path) &&
-      !empty($namespace) &&
-      is_dir($path)
+      !empty($namespace)
     ){
-      $files = \bbn\file\dir::get_files($path);
-      $arr = [
-        'nameSpace' => '',
-        'classes' => []
-      ];
-      if ( is_array($files) && count($files) ){
-        foreach ( $files as $file ){
-          if ( is_file($file) ){
-            $name =  \bbn\str::file_ext(basename($file), 1)[0];
-            $class = '\\'.$namespace.'\\'.$name;
-            $arr['classes'][$name] = $this->analyzeCLass($class);
+      $fs = new \bbn\file\system();
+      if ($fs->cd($path)) {
+        $files = $fs->scan('.', '.php', false);
+        $arr = [];
+        if ( is_array($files) && count($files) ){
+          foreach ( $files as $file ){
+            $bits = \bbn\x::split($file, '/');
+            $name = basename(array_pop($bits), '.php');
+            $class = $namespace.'\\'.(empty($bits) ? '' : \bbn\x::join($bits, '\\').'\\').$name;
+            if (class_exists($class)) {
+              try {
+                $arr[$file] = $this->analyzeCLass($class);
+              }
+              catch (\Exception $e) {
+                die(var_dump($file, $e));
+                if (isset($arr[$file])) {
+                  unset($arr[$file]);
+                }
+              }
+            }
           }
         }
+
       }
-      $num_class = count($arr['classes']);
-      if ( $num_class > 0 ){
-        $arr['nameSpace'] = $namespace;
-        $arr['numClass'] = $num_class;
-      }
+      return $arr;
     }
-    return isset($arr) ? $arr : null;
+    return null;
   }
 
   /**
@@ -468,17 +400,6 @@ class php extends bbn\models\cls\basic
 
     if ( $ok ){
       $fs = new bbn\file\system();
-      $idx = 'class';
-
-      if ( $ref->isTrait() ){
-        $idx = 'trait';
-      }
-      else if ( $ref->isAbstract() ){
-        $idx = 'abstract';
-      }
-      else if ( $ref->isInterface() ){
-        $idx = 'interface';
-      }
       $tmp = $ref->getFileName();
       $file = $tmp && $fs->is_file($tmp) ? $tmp : null;
       $arr = [
@@ -550,7 +471,6 @@ class php extends bbn\models\cls\basic
 
       if ( !empty($arr['methods']['private']) ){
         foreach ( $arr['methods']['private'] as $name => $priv ){
-         // $str = ($priv[$idx]['static'] ? '::' : '->').$priv['name'];
           $str = ($priv['static'] ? '::' : '->').$name;
           if ( \bbn\x::indexOf($fs->get_contents($arr['file']), $str) === -1 ){
             $arr['unused'][] = $arr['name'].'::'.$priv['name'];
@@ -626,9 +546,15 @@ class php extends bbn\models\cls\basic
    */
   protected function parseMethodComments(string $txt): ?array
   {
-    if ( is_string($txt) ){
+    if ( !empty($txt) ){
       $arr = $this->parser->parse_docblock($txt);
-      $docBlock = $this->docParser->create($txt);
+      try {
+        $docBlock = $this->docParser->create($txt);
+      }
+      catch (\Exception $e) {
+        $this->log($e->getMessage().PHP_EOL.PHP_EOL.$txt);
+        return null;
+      }
       if ( count($arr['tags']) ){
         $tags = $arr['tags'];
         unset($arr['tags']);
@@ -636,13 +562,13 @@ class php extends bbn\models\cls\basic
         $arr['return'] = '';
         foreach( $tags as $tag ){
           if ( $tag['tag'] === 'param' ){
-            $arr['params'][$tag['name']] = [
-              'type' => isset($tag['type']) ? $tag['type'] : '',
-              'description' => isset($tag['description']) ? $tag['description'] : ''
-            ];
+            $arr['params'][] = $tag;
           }
           else if ( $tag['tag'] === 'return' ){
             $arr['return'] = isset($tag['description']) ? $tag['description'] : '';
+          }
+          else {
+            $arr[$tag['tag']] = $tag;
           }
         }
       }
@@ -669,15 +595,6 @@ class php extends bbn\models\cls\basic
   {
     if ( is_string($txt) ){
       $arr = $this->parser->parse_docblock($txt);
-      if ( count($arr['tags']) ){
-        $arr['tags'] = array_map(function($ele){
-          return [
-            'tag' => $ele['tag'],
-            'type' => $ele['description']
-          ];
-        }, $arr['tags']);
-
-      }
     }
     return (isset($arr) && is_array($arr)) ? $arr : null;
   }
@@ -733,13 +650,16 @@ class php extends bbn\models\cls\basic
       }
       $i++;
     }
-    $content = file($rfx->getFileName());
-    $s = $rfx->getStartLine();
-    if ( strpos($content[$s-1], '  {') === false ){
-      $s++;
+    if ($filename = $rfx->getFileName()) {
+      $content = file($filename);
+      $s = $rfx->getStartLine();
+      if ( strpos($content[$s-1], '  {') === false ){
+        $s++;
+      }
+      return 'function(' . implode(', ', $args) .')'.PHP_EOL.'  {'.PHP_EOL
+        . implode('', array_slice($content, $s, $rfx->getEndLine()-$s-1)).'  }';
     }
-    return 'function(' . implode(', ', $args) .')'.PHP_EOL.'  {'.PHP_EOL
-      . implode('', array_slice($content, $s, $rfx->getEndLine()-$s-1)).'  }';
+    return '';
   }
 
   /**
@@ -754,22 +674,9 @@ class php extends bbn\models\cls\basic
   {
 
     if ( is_array($elements) && is_string($typeEle) ){
-      if ( $typeEle === 'methods' ){
-        $arr = [
-          'private' => [],
-          'protected' => [],
-          'public' => []
-        ];
-      }
+      $arr = [];
       foreach ( $elements as $ele ){
         if ( $typeEle === 'methods' ){
-          $idx = 'public';
-          if ( $ele->isPrivate() ){
-            $idx = 'private';
-          }
-          else if ( $ele->isProtected() ){
-            $idx = 'protected';
-          }
           $ret = null;
           if ($ele->hasReTurnType()) {
             $type = $ele->getReturnType();
@@ -782,11 +689,7 @@ class php extends bbn\models\cls\basic
             'static' => $ele->isStatic(),
             'returns' => $ret
           ];*/
-          $arr[$idx][$ele->getName()] = array_filter($this->analyzeMethod($ele->getName(), $rc), function($m, $i){
-            if ( $i !== 'name' ){
-              return $m;
-            }
-          }, ARRAY_FILTER_USE_BOTH);
+          $arr[$ele->getName()] = $this->analyzeMethod($ele->getName(), $rc);
         }
         else if ( $typeEle === 'properties' ){
           $arr[$ele->name] =  array_filter( $this->analyzeProperty($ele->name, $rc), function($p, $i){
@@ -802,4 +705,135 @@ class php extends bbn\models\cls\basic
     }
     return isset($arr) ? $arr : null;
   }
+
+  private function _get_method_info(\ReflectionMethod $method) {
+    $ret = null;
+    if ( $method->hasReturnType() ){
+      $type = $method->getReturnType();
+      $ret = [(string)$type];
+      if ( $type->allowsNull() ){
+        $ret[] = null;
+      }
+    }
+    if  ( $method->isPrivate() || $method->isProtected() ){
+      $method->setAccessible(true);
+    }
+    $ar = [
+      'name' => $method->getName(),
+      'summary' => '',
+      'description' => '',
+      'description_parts' => [],
+      'file' => $method->getDeclaringClass()->getName(),
+      'static' => $method->isStatic(),
+      'visibility' => $method->isPrivate() ? 'private' : ($method->isProtected() ? 'protected' : 'public'),
+      'final' => $method->isFinal(),
+      'code' => $this->_closureSource($method),
+      'startLine' => $method->getStartLine(),
+      'doc' =>  $this->parseMethodComments($method->getDocComment()),
+      'endLine' => $method->getEndLine(),
+     // 'isClosure' => $method->isClousure(),
+      'isDeprecated' => $method->isDeprecated(),
+      'isGenerator' => $method->isGenerator(),
+      'isInternal' => $method->isInternal(),
+      'isUserDefined' => $method->isUserDefined(),
+      'isVariadic' => $method->isVariadic(),
+      'returnsReference' => $method->returnsReference(),
+      'numberOfParameters' => $method->getNumberOfParameters(),
+      'numberOfRequiredParameters' => $method->getNumberOfRequiredParameters(),
+      'returns' => $ret,
+      'parent' => false,
+      'arguments' => array_map(function($p){
+        return [
+          'name' => $p->getName(),
+          'position' => $p->getPosition(),
+          'type' => (string)$p->getType(),
+          'required' => !$p->isOptional(),
+          'has_default' => $p->isDefaultValueAvailable(),
+          'default' => $p->isDefaultValueAvailable() ? $p->getDefaultValue() : '',
+          'default_name' => $p->isDefaultValueAvailable() && $p->isDefaultValueConstant() ?
+            $p->getDefaultValueConstantName() : ''
+        ];
+      }, $method->getParameters())
+    ];
+    if (!empty($ar['doc']['description'])) {
+      $desc = trim($ar['doc']['description']);
+      $bits = \bbn\x::split($desc, PHP_EOL);
+      if (!empty($bits)) {
+        $ar['summary'] = trim(array_shift($bits));
+        if (!empty($bits)) {
+          $ar['description'] = trim(\bbn\x::join($bits, PHP_EOL));
+          $num_matches = preg_match_all('/```php([^```]+)```/', $ar['description'], $matches, PREG_OFFSET_CAPTURE);
+          $len = strlen($ar['description']);
+          $start = 0;
+          if ($num_matches) {
+            foreach ($matches[0] as $i => $m) {
+              if (isset($m[1])) {
+                if (($i === 0)
+                    && $tmp = trim(substr($ar['description'], $start, $m[1]))
+                ) {
+                  $ar['description_parts'][] = [
+                    'type' => 'text',
+                    'content' => $tmp
+                  ];
+                }
+                $ar['description_parts'][] = [
+                  'type' => 'code',
+                  'content' => trim($matches[1][$i][0])
+                ];
+                $start = $m[1] + strlen($m[0]);
+                $end = isset($matches[0][$i+1]) ? $matches[0][$i+1][1] : $len;
+                if (
+                  ($start < $len)
+                  && ($tmp = trim(substr($ar['description'], $start, $end - $start)))
+                ) {
+                  $ar['description_parts'][] = [
+                    'type' => 'text',
+                    'content' => $tmp
+                  ];
+                }
+              }
+            }
+          }
+          else {
+            $ar['description_parts'][] = [
+              'type' => 'text',
+              'content' => $ar['description']
+            ];
+          }
+        }
+      }
+    }
+    if (!empty($ar['doc']['params'])) {
+      foreach ($ar['doc']['params'] as $i => $a) {
+        if (!empty($a['description']) && isset($ar['arguments'][$i])) {
+          $ar['arguments'][$i]['description'] = $a['description'];
+
+        }
+      }
+      unset($a);
+    }
+    return $ar;
+  }
+
+  private function _get_property_info(string $prop, \ReflectionClass $cls): ?array
+  {
+    $arr = null;
+    if ( !empty($prop) &&
+      !empty($cls) &&
+      $cls->hasProperty($prop)
+    ){
+      $property = $cls->getProperty($prop);
+      $defaults = $cls->getDefaultProperties();
+      $arr = [
+        'name' => $property->getName(),
+        'static' => $property->isStatic(),
+        'visibility' => $property->isPrivate() ? 'private' : ($property->isProtected() ? 'protected' : 'public'),
+        'doc' => empty($property->getDocComment()) ? '' : $this->parsePropertyComments($property->getDocComment()),
+        'parent' => false,
+        'value' => $defaults[$prop] ?? null
+      ];
+    }
+    return $arr ?: null;
+  }
+
 }

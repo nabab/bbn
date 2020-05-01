@@ -28,7 +28,7 @@ class file extends models\cls\basic
     $ext;
 
   /**
-   * @var $fs file\system
+   * @var file\system $fs
    */
   protected $fs;
 
@@ -70,7 +70,7 @@ class file extends models\cls\basic
    * $file=new bbn\file('/home/user/Desktop/test.txt');
    * ```
    *
-   * @params mixed $file
+   * @param mixed $file
    * @return $this
    */
   public function __construct($file, file\system $fs = null)

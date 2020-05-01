@@ -19,7 +19,6 @@ abstract class rest extends bbn\models\cls\basic{
   /**
    * instantiate the class infolegale
    *
-   * @param [type] $session ($session->get('infolegale'))
    */
   public function __construct($cfg = null)
   {
