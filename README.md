@@ -3,11 +3,11 @@ bbn
 
 <!--[![Join the chat at https://gitter.im/nabab/bbn](https://badges.gitter.im/nabab/bbn.svg)](https://gitter.im/nabab/bbn?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)-->
 
-## The complete PHP library used by [app-UI](https://app-ui.com) targeted at Single Page Applications.
+## The PHP library used by [app-UI](https://app-ui.com)
 
-### Check out the [Documentation](https://bbn.io/php).
+### Check out the [Documentation](https://bbn.io/php)
 
-This library includes:
+#### A library targeted at Single Page Applications that includes:
 
 * An MVC framework
 * A powerful ORM supporting database structure analysis and plenty of return methods
