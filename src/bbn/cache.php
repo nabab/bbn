@@ -168,7 +168,7 @@ class cache{
    * @param string $it
    * @return bool|string
    */
-  public function has(string $it){
+  public function has(string $it, $ttl = 0){
     
     if ( self::$type ){
       switch ( self::$type ){
@@ -180,7 +180,10 @@ class cache{
           $file = self::_file($it, $this->path);
           if ( is_file($file) ){
             $t = json_decode(file_get_contents($file), true);
-            if ( !$t['expire'] || ($t['expire'] > time()) ){
+            if ( 
+              (!$ttl || !isset($t['ttl']) || ($ttl === $t['ttl']))
+              && (!$t['expire'] || ($t['expire'] > time()))
+            ) {
               return true;
             }
             unlink($file);
@@ -308,15 +311,17 @@ class cache{
       $hash = self::make_hash($val);
       switch ( self::$type ){
         case 'apc':
-          return apc_store($it, [
+          return \apc_store($it, [
             'timestamp' => microtime(1),
             'hash' => $hash,
+            'ttl' => $ttl,
             'value' => $val
           ], $ttl);
         case 'memcache':
           return $this->obj->set($it, [
             'timestamp' => microtime(1),
             'hash' => $hash,
+            'ttl' => $ttl,
             'value' => $val
           ], false, $ttl);
         case 'files':
@@ -328,9 +333,10 @@ class cache{
             'timestamp' => microtime(1),
             'hash' => $hash,
             'expire' => $ttl ? time() + $ttl : 0,
+            'ttl' => $ttl,
             'value' => $val
           ];
-          return file_put_contents($file, json_encode($value, true)) ? true : false;
+          return file_put_contents($file, json_encode($value, JSON_PRETTY_PRINT)) ? true : false;
       }
     }
   }
@@ -350,28 +356,53 @@ class cache{
    * @param string $it
    * @return array|bool|mixed|string
    */
-  private function get_raw(string $it){
-    if ( $this->has($it) ){
-      switch ( self::$type ){
-        case 'apc':
-          return apc_fetch($it);
-        case 'memcache':
-          return $this->obj->get($it);
-        case 'files':
-          $file = self::_file($it, $this->path);
-          if ( $t = file_get_contents($file) ){
-            return json_decode($t, true);
+  private function get_raw(string $it, $ttl = 0){
+    switch ( self::$type ){
+      case 'apc':
+        if (\apc_exists($it)) {
+          return \apc_fetch($it);
+        }
+        break;
+      case 'memcache':
+        $tmp = $this->obj->get($it);
+        if ($tmp !== $it) {
+          return $tmp;
+        }
+        break;
+      case 'files':
+        $file = self::_file($it, $this->path);
+        if (file_exists($file) && ($t = file_get_contents($file))) {
+          $t = json_decode($t, true);
+          if ($t
+              && (!$ttl || !isset($t['ttl']) || ($ttl === $t['ttl']))
+              && (!$t['expire'] || ($t['expire'] > time()))
+          ) {
+            return $t;
           }
-      }
+        }
+        break;
     }
     return false;
   }
 
-  public function get(string $it){
-    if ( $r = $this->get_raw($it) ){
+  public function get(string $it, $ttl = 0){
+    if ( $r = $this->get_raw($it, $ttl) ){
       return $r['value'];
     }
     return false;
+  }
+
+  public function set_get(callable $fn, string $it, int $ttl = 0)
+  {
+    $tmp = $this->get_raw($it, $ttl);
+    if (!$tmp) {
+      $data = $fn();
+      $this->set($it, $data, $ttl);
+    }
+    else {
+      $data = $tmp['value'];
+    }
+    return $data;
   }
 
   /**

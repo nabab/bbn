@@ -517,8 +517,10 @@ class mvc implements mvc\api{
 		$this->is_controlled = null;
     $this->info = null;
     $this->router->reset();
-		$this->route();
-    $this->info['args'] = $arguments;
+    $this->route();
+    if ($arguments || !isset($this->info['args'])) {
+      $this->info['args'] = $arguments;
+    }
     $this->controller->reset($this->info);
 		return $this;
 	}
@@ -571,6 +573,41 @@ class mvc implements mvc\api{
       return \is_array($data) ? $view->get($data) : $view->get();
     }
     return '';
+  }
+
+  /**
+   * Checks whether the given view exists or not.
+   *
+   * @param string $path
+   * @param string $mode
+   * @return boolean
+   */
+  public function view_exists(string $path, string $mode = 'html'): bool
+  {
+    if ( !router::is_mode($mode) || !($path = router::parse($path)) ){
+      return false;
+    }
+    if ( $this->has_view($path, $mode) ){
+      return true;
+    }
+    if ($this->router->route($path, $mode)) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Checks whether the given model exists or not.
+   *
+   * @param string $path
+   * @return boolean
+   */
+  public function model_exists(string $path): bool
+  {
+    if ($this->router->route($path, 'model')) {
+      return true;
+    }
+    return false;
   }
 
   /**

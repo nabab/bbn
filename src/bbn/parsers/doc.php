@@ -41,6 +41,7 @@ class doc {
         'copyright' => ['text'],
         'deprecated' => ['text'],
         'example' => ['text'],
+        'file' => ['text'],
         'ignore' => [],
         'license' => ['text'],
         'link' => ['text'],

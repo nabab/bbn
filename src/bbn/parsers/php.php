@@ -200,7 +200,7 @@ class php extends bbn\models\cls\basic
             $bits = \bbn\x::split($file, '/');
             $name = basename(array_pop($bits), '.php');
             $class = $namespace.'\\'.(empty($bits) ? '' : \bbn\x::join($bits, '\\').'\\').$name;
-            if (class_exists($class)) {
+            if (class_exists($class, true) || interface_exists($class, true) || trait_exists($class, true)) {
               try {
                 $arr[$file] = $this->analyzeCLass($class);
               }

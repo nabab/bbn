@@ -57,8 +57,8 @@ abstract class cache extends bbn\models\cls\basic
 		return $this;
 	}
 
-	public function cache_get($uid, $method = ''){
-		return $this->cacher->get($this->_cache_name($uid, $method));
+	public function cache_get($uid, $method = '', $ttl = 0){
+		return $this->cacher->get($this->_cache_name($uid, $method), $ttl);
 	}
 
 	public function cache_set($uid, $method = '', $data = null, $ttl = 0){
@@ -66,8 +66,21 @@ abstract class cache extends bbn\models\cls\basic
 		return $this;
 	}
 
-  public function cache_has($uid, $method = ''){
+	public function cache_set_get(callable $fn, $uid, $method = '', $data = null, $ttl = 0){
+		$cn = $this->_cache_name($uid, $method);
+		if (!($tmp = $this->cacher->get_raw($cn, $ttl))) {
+			if ($data = $fn()) {
+				$this->cacher->set($cn, $data, $ttl);
+			}
+		}
+		else {
+			$data = $tmp['value'];
+		}
+		return $data ?: false;
+	}
 
-    return $this->cache_get($uid, $method) ? true : false;
+	public function cache_has($uid, $method = '', $ttl = 0){
+
+    return $this->cache_get($uid, $method, $ttl) ? true : false;
   }
 }

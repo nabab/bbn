@@ -208,6 +208,9 @@ MYSQL
   {
     $user = \bbn\user::get_instance();
     $this->id_user = $user ? $user->get_id() : null;
+    if (defined('BBN_EXTERNAL_USER_ID') && ($this->id_user === BBN_EXTERNAL_USER_ID)) {
+      $this->id_user = null;
+    }
     parent::__construct($db);
   }
 
@@ -414,7 +417,7 @@ MYSQL;
 
   protected function check_observer($row): bool
   {
-    if ($row['id_user'] && !$this->is_user_active($row['id_user'])) {
+    if ($row['id_user'] && (!defined('BBN_USER_EXTERNAL_ID') || ($row['id_user'] !== BBN_EXTERNAL_USER_ID)) && !$this->is_user_active($row['id_user'])) {
       $this->db->delete('bbn_observers', ['id' => $row['id']]);
       return false;
     }

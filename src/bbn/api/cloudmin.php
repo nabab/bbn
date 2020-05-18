@@ -1,10 +1,10 @@
 <?php
 /**
- * Class virtualmin
+ * A class for executing Cloudmin commands.
+ * 
  * @package api
- *
- * @author Edwin Mugendi <edwinmugendi@gmail.com>
  * @author Thomas Nabet <thomas.nabet@gmail.com>
+ * @author Vito Fava <vito.nabet@gmail.com>
  *
  */
 namespace bbn\api;

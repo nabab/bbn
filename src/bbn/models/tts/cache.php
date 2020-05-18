@@ -48,6 +48,10 @@ trait cache
     return $this;
   }
 
+  protected function cache_set_get(callable $fn, $uid, $method = '', $ttl = 0){
+    return $this->cache_engine->set_get($fn, $this->_cache_name($uid, $method), $ttl);
+  }
+
   protected function cache_has($uid, $method = ''){
     return $this->cache_get($uid, $method) ? true : false;
   }

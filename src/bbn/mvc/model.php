@@ -76,7 +76,9 @@ class model extends bbn\models\cls\db{
   public function __construct(bbn\db $db=null, array $info, controller $ctrl, bbn\mvc $mvc)
   {
 		if ( isset($info['path']) && $this->check_path($info['path']) ){
-      parent::__construct($db);
+      if ($db) {
+        parent::__construct($db);
+      }
       $this->cache_init();
       $this->_ctrl = $ctrl;
       $this->_mvc = $mvc;
@@ -275,15 +277,13 @@ class model extends bbn\models\cls\db{
 
   public function get_from_cache(array $data = null, $spec='', $ttl = 10){
     if ( $cn = $this->_cache_name($data, $spec) ){
-      if ( \is_int($ttl) && $this->cache_has($cn) ){
-        return $this->cache_get($cn);
-      }
-      $this->set_cache($data, $spec, $ttl);
-      if ( $this->cache_has($cn) ){
-        return $this->cache_get($cn);
-      }
-      return false;
+      $model =& $this;
+      return $this->cache_set_get(function() use($model, $data){
+        return $model->get($data);
+
+      }, $cn, '', $ttl);
     }
+    return false;
   }
 
   public function apply_locale($plugin){

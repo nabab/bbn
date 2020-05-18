@@ -274,7 +274,7 @@ class controller implements api{
    * @return void
    */
   public function render($view, $model=''){
-    if ( empty($model) && $this->has_data() ){
+    if ( empty($model) && !empty($this->data) ){
       $model = $this->data;
     }
     if ( \is_string($view) ){
@@ -1125,17 +1125,20 @@ class controller implements api{
   }
 
   /**
-   * Checks if data exists
-   *
-   * @return bool
-   */
-  public function has_data($data=null)
-  {
-    if ( \is_null($data) ){
-      $data = $this->data;
+	 * Checks if data exists or if a specific index exists in the data
+	 *
+	 * @return bool
+	 */
+	public function has_data($idx = null, $check_empty = false)
+	{
+    if ( !\is_array($this->data) ){
+      return false;
     }
-    return ( \is_array($data) && (\count($data) > 0) ) ? 1 : false;
-  }
+    if ( \is_null($idx) ){
+      return !empty($this->data);
+    }
+    return \bbn\x::has_props($this->data, (array)$idx, $check_empty);
+	}
 
   /**
    * Checks if there is ny HTML content in the object
@@ -1211,7 +1214,7 @@ class controller implements api{
     $ar = \func_get_args();
     foreach ( $ar as $d ){
       if ( \is_array($d) ){
-        $this->data = $this->has_data() ? array_merge($this->data, $d) : $d;
+        $this->data = empty($this->data) ? $d : array_merge($this->data, $d);
       }
     }
     return $this;
@@ -1257,5 +1260,29 @@ class controller implements api{
   public function get_result(){
     return $this->obj;
   }
+
+  /**
+   * Checks whether the given view exists or not.
+   *
+   * @param string $path
+   * @param string $mode
+   * @return boolean
+   */
+  public function view_exists(string $path, string $mode = 'html'): bool
+  {
+    return $this->_mvc->view_exists($path, $mode);
+  }
+
+  /**
+   * Checks whether the given model exists or not.
+   *
+   * @param string $path
+   * @return boolean
+   */
+  public function model_exists(string $path): bool
+  {
+    return $this->_mvc->model_exists($path);
+  }
+
 
 }
