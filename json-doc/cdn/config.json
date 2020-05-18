@@ -1,0 +1,792 @@
+{
+    "doc": {
+        "description": "Makes a usable configuration array out of a request string",
+        "tags": {
+            "package": "cdn"
+        }
+    },
+    "name": "bbn\\cdn\\config",
+    "namespace": true,
+    "traits": [
+        "bbn\\cdn\\common"
+    ],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/cdn\/config.php",
+    "startLine": 17,
+    "endLine": 380,
+    "contentConstructor": {
+        "file": "bbn\\cdn\\config",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "config constructor.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cdn\\config",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($request, bbn\\db $db = NULL)\n  {\n      $this->error('You must define the constant BBN_PUBLIC as the root of your public document');\n    }\n    $this->set_prefix();\n    if ( !$db ){\n      $db = bbn\\db::get_instance();\n    }\n    if ( !$db ){\n      die(_('Impossible to initialize the CDN without a DB connection'));\n    }\n    $this->db = $db;\n\n    $parsed = parse_url($request);\n\n    $this->cfg['url'] = empty($parsed['path']) ? '' : substr($parsed['path'], 1 + strlen($this->prefix));\n    if ( !empty($parsed['query']) ){\n      parse_str($parsed['query'], $params);\n    }\n    $this->cfg['params'] = $params ?? [];\n    $this->cfg['hash'] = md5($this->cfg['url'].serialize($this->cfg['params']));\n    $this->cfg['cache_file'] = $this->fpath.'cache\/'.$this->cfg['hash'].'.cache';\n    $this->cfg['ext'] = bbn\\str::file_ext($this->cfg['url']);\n    $this->cfg['grouped'] = !empty($params['grouped']);\n    $this->_set_cfg();\n    $this->_set_files();\n    $file = false;\n    \/\/ We give the number already when it's components\n    if ( empty($this->cfg['num']) ){\n      $this->cfg['num'] = 0;\n      foreach ( $this->cfg['content'] as $type => $content ){\n        if ( ($type !== 'libraries') && \\is_array($content) ){\n          if ( \\count($content) ){\n            $this->cfg['num'] += \\count($content);\n            \/\/ For a sole file\n            if ( $this->cfg['num'] === 1 ){\n              $file = $content[0];\n            }\n          }\n        }\n      }\n    }\n    \/*\n    \/\/die(var_dump($file, \"Heho\", $this->cfg['num'], BBN_PUBLIC.$this->cfg['url'], is_file(BBN_PUBLIC.$this->cfg['url'])));\n    if ( !$file && !$this->cfg['num'] && is_file(BBN_PUBLIC.$this->cfg['url']) ){\n      $this->cfg['num'] = 1;\n      $file = $this->cfg['url'];\n    }\n    *\/\n    if ( !empty($this->cfg['content']['js']) || $this->cfg['is_component'] ){\n      $this->mode = 'js';\n    }\n    else if ( !empty($this->cfg['content']['css']) ){\n      $this->mode = 'css';\n    }\n    else if ( $file && ($this->cfg['num'] === 1) ){\n      $this->cfg['file'] = $file;\n    }\n  }",
+            "startLine": 296,
+            "doc": {
+                "description": "config constructor.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$request"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bbn\\db",
+                        "name": "$db"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 354,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "request",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "db",
+                    "position": 1,
+                    "type": "bbn\\db",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getDefaultLanguage": {
+            "name": "getDefaultLanguage",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cdn\\config",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::$default_language;\n  }",
+            "startLine": 359,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 362,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "setDefaultLanguage": {
+            "name": "setDefaultLanguage",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cdn\\config",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($default_language)\n  {\n    self::$default_language = $default_language;\n  }",
+            "startLine": 367,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$default",
+                        "description": "language"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 370,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "void"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "default_language",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "language"
+                }
+            ]
+        },
+        "get": {
+            "name": "get",
+            "summary": "Returns the configuration array",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cdn\\config",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 376,
+            "doc": {
+                "description": "Returns the configuration array",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 378,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "test": {
+            "name": "test",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+            "startLine": 45,
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 50,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "test",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+                "startLine": 45,
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 50,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "check": {
+            "name": "check",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+            "startLine": 56,
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 61,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "check",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+                "startLine": 56,
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 61,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "get_error": {
+            "name": "get_error",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 72,
+            "doc": null,
+            "endLine": 74,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_error",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 72,
+                "doc": null,
+                "endLine": 74,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "get_errors": {
+            "name": "get_errors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 76,
+            "doc": null,
+            "endLine": 78,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_errors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 76,
+                "doc": null,
+                "endLine": 78,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+            "startLine": 80,
+            "doc": null,
+            "endLine": 88,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+                "startLine": 80,
+                "doc": null,
+                "endLine": 88,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "__call": {
+            "name": "__call",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
+            "startLine": 95,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$arguments"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 99,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": {
+                "name": "__call",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
+                "startLine": 95,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string",
+                            "name": "$name"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "array",
+                            "name": "$arguments"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 99,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 2,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "name",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "arguments",
+                        "position": 1,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "arguments",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_debug": {
+            "name": "is_debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 104,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "is_debug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 104,
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 106,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "set_debug": {
+            "name": "set_debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($debug)\n  {\n  }",
+            "startLine": 112,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 114,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "set_debug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($debug)\n  {\n  }",
+                "startLine": 112,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 114,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "debug",
+                        "position": 0,
+                        "type": "bool",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "debug",
+                    "position": 0,
+                    "type": "bool",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": {
+        "types": {
+            "static": true,
+            "visibility": "public",
+            "value": {
+                "js": [
+                    "js",
+                    "coffee"
+                ],
+                "css": [
+                    "css",
+                    "less",
+                    "sass",
+                    "scss"
+                ],
+                "html": [
+                    "html",
+                    "php"
+                ],
+                "lang": [
+                    "lang"
+                ]
+            }
+        }
+    },
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 12,
+    "numProperties": 1,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\cdn\\common"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\models\\cls\\basic",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "default_language": "en",
+        "types": {
+            "js": [
+                "js",
+                "coffee"
+            ],
+            "css": [
+                "css",
+                "less",
+                "sass",
+                "scss"
+            ],
+            "html": [
+                "html",
+                "php"
+            ],
+            "lang": [
+                "lang"
+            ]
+        },
+        "cfg": [],
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": [],
+        "prefix": "",
+        "fpath": "",
+        "furl": ""
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\cdn",
+    "shortName": "config"
+}

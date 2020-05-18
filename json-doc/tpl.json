@@ -1,0 +1,120 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\tpl",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/tpl.php",
+    "startLine": 6,
+    "endLine": 39,
+    "contentConstructor": null,
+    "methods": {
+        "renderer": {
+            "name": "renderer",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\tpl",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($st)\n  {\n      $dir = sys_get_temp_dir();\n      if ( !@mkdir($dir.'\/tmp') && !is_dir($dir.'\/tmp') ){\n        die('Impossible to create the template directory in '.$dir);\n      }\n      define('BBN_DATA_PATH', $dir.'\/');\n    }\n    $md5 = md5($st);\n    $file = BBN_DATA_PATH.'tmp\/tpl.'.$md5.'.php';\n    if ( file_exists($file) ){\n      return include($file);\n    }\n    $tpl = LightnCandy::compile($st, [\n      'flags' => LightnCandy::FLAG_MUSTACHELOOKUP |\n        LightnCandy::FLAG_PARENT |\n        LightnCandy::FLAG_HANDLEBARSJS |\n        LightnCandy::FLAG_ERROR_LOG\n    ]);\n    file_put_contents($file, '<?php '.$tpl.'?>');\n    return include($file);\n  }",
+            "startLine": 10,
+            "doc": null,
+            "endLine": 31,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "render": {
+            "name": "render",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\tpl",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($st, $data)\n  {\n      return $tpl($data);\n    }\n    return '';\n  }",
+            "startLine": 33,
+            "doc": null,
+            "endLine": 38,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 2,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "engine": null,
+        "tmp": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn",
+    "shortName": "tpl"
+}

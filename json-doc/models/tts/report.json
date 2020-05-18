@@ -1,0 +1,41 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\models\\tts\\report",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/models\/tts\/report.php",
+    "startLine": 13,
+    "endLine": 22,
+    "contentConstructor": null,
+    "methods": null,
+    "properties": null,
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 0,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "_error": null,
+        "_last_error": null,
+        "_debug": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\models\\tts",
+    "shortName": "report"
+}

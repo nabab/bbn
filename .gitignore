@@ -9,9 +9,6 @@ _DS_STORE*
 doc/*
 docs/*
 build/*
-json-doc/*
-bbn-php-full.json
-bbn-php.json
 [core]
 filemode = false
 *.* text eol=lf

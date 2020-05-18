@@ -1,0 +1,141 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\models\\tts\\dbconfig",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/models\/tts\/dbconfig.php",
+    "startLine": 14,
+    "endLine": 78,
+    "contentConstructor": null,
+    "methods": {
+        "exists": {
+            "name": "exists",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\tts\\dbconfig",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n      $this->class_cfg['arch'][$this->class_table_index]['id'] => $id\n    ]);\n  }",
+            "startLine": 59,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$id"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 63,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_class_cfg": {
+            "name": "get_class_cfg",
+            "summary": "Return the",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\tts\\dbconfig",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 69,
+            "doc": {
+                "description": "Return the",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 71,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_fields": {
+            "name": "get_fields",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\tts\\dbconfig",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 73,
+            "doc": null,
+            "endLine": 75,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        }
+    },
+    "properties": null,
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 3,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "class_cfg": null,
+        "fields": null,
+        "class_table": null,
+        "class_table_index": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\models\\tts",
+    "shortName": "dbconfig"
+}

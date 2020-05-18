@@ -1,0 +1,162 @@
+{
+    "doc": {
+        "description": "Database Class",
+        "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
+            "copyright": "BBN Solutions",
+            "since": "Apr 4, 2011, 23:23:55 +0000",
+            "category": "Database",
+            "license": "http:\/\/www.opensource.org\/licenses\/mit-license.php MIT",
+            "version": "0.2r89"
+        }
+    },
+    "name": "bbn\\db\\json",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/db\/json.php",
+    "startLine": 19,
+    "endLine": 34,
+    "contentConstructor": {
+        "file": "bbn\\db\\json",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\db\\json",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file)\n  {\n  }",
+            "startLine": 30,
+            "doc": {
+                "description": "",
+                "tags": []
+            },
+            "endLine": 32,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": {
+        "operators": {
+            "static": true,
+            "visibility": "public",
+            "value": [
+                "!=",
+                "=",
+                "<>",
+                "<",
+                "<=",
+                ">",
+                ">=",
+                "like",
+                "clike",
+                "slike",
+                "not",
+                "is",
+                "is not",
+                "in",
+                "between",
+                "not like"
+            ]
+        },
+        "numeric_types": {
+            "static": true,
+            "visibility": "public",
+            "value": [
+                "integer",
+                "int",
+                "smallint",
+                "tinyint",
+                "mediumint",
+                "bigint",
+                "decimal",
+                "numeric",
+                "float",
+                "double"
+            ]
+        },
+        "qte": {
+            "visibility": "public",
+            "value": "`"
+        }
+    },
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 1,
+    "numProperties": 3,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "operators": [
+            "!=",
+            "=",
+            "<>",
+            "<",
+            "<=",
+            ">",
+            ">=",
+            "like",
+            "clike",
+            "slike",
+            "not",
+            "is",
+            "is not",
+            "in",
+            "between",
+            "not like"
+        ],
+        "numeric_types": [
+            "integer",
+            "int",
+            "smallint",
+            "tinyint",
+            "mediumint",
+            "bigint",
+            "decimal",
+            "numeric",
+            "float",
+            "double"
+        ],
+        "db": null,
+        "qte": "`"
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\db",
+    "shortName": "json"
+}

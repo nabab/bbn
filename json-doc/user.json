@@ -1,0 +1,2685 @@
+{
+    "doc": {
+        "description": "A user authentication Class",
+        "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
+            "copyright": "BBN Solutions",
+            "since": "Apr 4, 2011, 23:23:55 +0000",
+            "category": "Authentication",
+            "license": "http:\/\/opensource.org\/licenses\/MIT MIT",
+            "version": "0.2r89",
+            "todo": "Implement Cache for session requests' results?"
+        }
+    },
+    "name": "bbn\\user",
+    "namespace": true,
+    "traits": [
+        "bbn\\models\\tts\\retriever",
+        "bbn\\models\\tts\\dbconfig"
+    ],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/user.php",
+    "startLine": 19,
+    "endLine": 1479,
+    "contentConstructor": {
+        "file": "bbn\\user",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "User constructor.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bbn\\db $db, array $params = [], array $cfg = [])\n  {\n\n    \/\/ The database connection\n    $this->db = $db;\n    \/\/ The client environment variables\n    $this->user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';\n    $this->ip_address = $_SERVER['REMOTE_ADDR'] ?? '';\n    $this->accept_lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';\n\n    \/\/ Setting up the class configuration\n    $this->_init_class_cfg($cfg);\n\n    \/\/ Creating the session's variables if they don't exist yet\n    $this->_init_session();\n    self::retriever_init($this);\n\n    $f =& $this->class_cfg['fields'];\n\n    if (\\bbn\\x::is_cli() && isset($params['id'])) {\n      $this->id = $params['id'];\n      $this->auth = true;\n    }\n    \/\/ The user logs in\n    elseif ( isset($params[$f['user']], $params[$f['pass']], $params[$f['salt']]) ){\n\n      \/** @todo separate credentials and salt checking *\/\n      if ( $this->get_print($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint']){\n        \/** @todo separate credentials and salt checking *\/\n        $this->_check_credentials($params);\n      }\n      else{\n        $this->set_error(19);\n        $this->session->destroy();\n      }\n    }\n    \/** @todo revise the process: dying is not the solution! *\/\n    \/\/ The user is not known yet\n    elseif (\n      isset($params[$f['key']], $params[$f['id']], $params[$f['pass1']], $params[$f['pass2']], $params[$f['action']]) &&\n      ($params[$f['action']] === 'init_password') &&\n      ($params[$f['pass1']] === $params[$f['pass2']])\n    ){\n      if ( $id = $this->get_id_from_magic_string($params[$f['id']], $params[$f['key']]) ){\n        $this->expire_hotlink($params[$f['id']]);\n        $this->force_password($params[$f['pass2']], $id);\n        $this->session->set([]);\n        \/\/ Reloads the page\n        header('Location: .\/');\n        die();\n      }\n      else{\n        $this->set_error(18);\n      }\n    }\n    else {\n      $this->check_session();\n    }\n  }",
+            "startLine": 202,
+            "doc": {
+                "description": "User constructor.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "db",
+                        "name": "$db"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$params"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 260,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "bbn\\db",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "params",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_salt": {
+            "name": "get_salt",
+            "summary": "Returns the salt string kept in session.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $salt = $this->_get_session('salt');\n    return $salt;\n  }",
+            "startLine": 267,
+            "doc": {
+                "description": "Returns the salt string kept in session.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 271,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "check_salt": {
+            "name": "check_salt",
+            "summary": "Confronts the given string with the salt string kept in session.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($salt)\n  {\n    return $this->get_salt() === $salt;\n  }",
+            "startLine": 278,
+            "doc": {
+                "description": "Confronts the given string with the salt string kept in session.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 281,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "salt",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_cfg": {
+            "name": "get_cfg",
+            "summary": "Returns the current user's configuration.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($attr = '')\n  {\n    if ( $this->check() ){\n      if ( !$this->cfg ){\n        $this->cfg = $this->session->get('cfg');\n      }\n      if ( empty($attr) ){\n        return $this->cfg;\n      }\n      if ( isset($this->cfg[$attr]) ){\n        return $this->cfg[$attr];\n      }\n    }\n    return null;\n  }",
+            "startLine": 289,
+            "doc": {
+                "description": "Returns the current user's configuration.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$attr"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 303,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "attr",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_class_cfg": {
+            "name": "get_class_cfg",
+            "summary": "Returns the current configuration of this very class.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->class_cfg;\n  }",
+            "startLine": 310,
+            "doc": {
+                "description": "Returns the current configuration of this very class.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 313,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "get_path": {
+            "name": "get_path",
+            "summary": "Returns the directory path for the user.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->path;\n  }",
+            "startLine": 320,
+            "doc": {
+                "description": "Returns the directory path for the user.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 323,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "get_tmp_dir": {
+            "name": "get_tmp_dir",
+            "summary": "Returns the tmp directory path for the user.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->tmp_path;\n  }",
+            "startLine": 329,
+            "doc": {
+                "description": "Returns the tmp directory path for the user.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 332,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "get_tables": {
+            "name": "get_tables",
+            "summary": "Returns the list of tables used by the current class.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( !empty($this->class_cfg) ){\n      return $this->class_cfg['tables'];\n    }\n    return null;\n  }",
+            "startLine": 338,
+            "doc": {
+                "description": "Returns the list of tables used by the current class.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 344,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "get_fields": {
+            "name": "get_fields",
+            "summary": "Returns the list of fields of the given table, and if empty for each table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table = '')\n  {\n    if ( !empty($this->class_cfg) ){\n      if ( $table ){\n        return $this->class_cfg['arch'][$table] ?? null;\n      }\n      return $this->class_cfg['arch'];\n    }\n    return null;\n  }",
+            "startLine": 352,
+            "doc": {
+                "description": "Returns the list of fields of the given table, and if empty for each table.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 361,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "update_info": {
+            "name": "update_info",
+            "summary": "Changes the data in the user's table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $d)\n  {\n    if ( $this->check_session() ){\n      $update = [];\n      foreach ( $d as $key => $val ){\n        if (\n          ($key !== $this->fields['id']) &&\n          ($key !== $this->fields['cfg']) &&\n          ($key !== 'auth') &&\n          ($key !== 'pass') &&\n          \\in_array($key, $this->fields)\n        ){\n          $update[$key] = $val;\n        }\n      }\n      if ( \\count($update) > 0 ){\n        $r = (bool)$this->db->update(\n                $this->class_cfg['tables']['users'],\n                $update,\n                [$this->fields['id'] => $this->id]);\n        \/** @todo Why did I do this?? *\/\n        if ( $r ){\n          $this->set_session(['cfg' => false]);\n          $this->_user_info();\n          return $r;\n        }\n      }\n    }\n    return false;\n  }",
+            "startLine": 369,
+            "doc": {
+                "description": "Changes the data in the user's table.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$d",
+                        "description": "The new data"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 398,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "d",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The new data"
+                }
+            ]
+        },
+        "get_password": {
+            "name": "get_password",
+            "summary": "Encrypts the given string to match the password.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($st)\n  {\n    return $this->_crypt($st);\n  }",
+            "startLine": 407,
+            "doc": {
+                "description": "Encrypts the given string to match the password.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$st"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 410,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_just_login": {
+            "name": "is_just_login",
+            "summary": "Returns true after the log in moment.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->_just_login;\n  }",
+            "startLine": 417,
+            "doc": {
+                "description": "Returns true after the log in moment.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 420,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "set_session": {
+            "name": "set_session",
+            "summary": "Sets the given attribute(s) in the user's session.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($attr)\n  {\n    if ( $this->session->has(self::$un) ){\n      $args = \\func_get_args();\n      if ( (\\count($args) === 2) && \\is_string($args[0]) ){\n        $attr = [$args[0] => $args[1]];\n      }\n      foreach ( $attr as $key => $val ){\n        if ( \\is_string($key) ){\n          $this->session->set($val, self::$un, $key);\n        }\n      }\n    }\n    return $this;\n  }",
+            "startLine": 427,
+            "doc": {
+                "description": "Sets the given attribute(s) in the user's session.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 441,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "self"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "attr",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "unset_session": {
+            "name": "unset_session",
+            "summary": "Sets the given attribute(s) in the user's session.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($attr)\n  {\n    $args = \\func_get_args();\n    array_unshift($args, self::$un);\n    if ($this->session->has(...$args)) {\n      $this->session->uset(...$args);\n    }\n    return $this;\n  }",
+            "startLine": 448,
+            "doc": {
+                "description": "Sets the given attribute(s) in the user's session.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 456,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "self"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "attr",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_session": {
+            "name": "get_session",
+            "summary": "Returns session property from the session's user array.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($attr = NULL)\n  {\n    if ( $this->session->has(self::$un) ){\n      return $attr ? $this->session->get(self::$un, $attr) : $this->session->get(self::$un);\n    }\n    return null;\n  }",
+            "startLine": 464,
+            "doc": {
+                "description": "Returns session property from the session's user array.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "null|string",
+                        "description": "The property to get"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 470,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "attr",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The property to get"
+                }
+            ]
+        },
+        "has_session": {
+            "name": "has_session",
+            "summary": "Checks if the given attribute exists in the user's session.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($attr)\n  {\n    return $this->session->has(self::$un, $attr);\n  }",
+            "startLine": 477,
+            "doc": {
+                "description": "Checks if the given attribute exists in the user's session.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 480,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "attr",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "update_activity": {
+            "name": "update_activity",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $id_session = $this->get_id_session();\n    \/\/die(var_dump($id_session, $this->check()));\n    if ( $id_session && $this->check() ){\n      $p =& $this->class_cfg['arch']['sessions'];\n      $this->db->update($this->class_cfg['tables']['sessions'], [\n        $p['last_activity'] => date('Y-m-d H:i:s')\n      ], [\n        $p['id'] => $id_session\n      ]);\n    }\n    else{\n      $this->set_error(13);\n    }\n    return $this;\n  }",
+            "startLine": 482,
+            "doc": null,
+            "endLine": 498,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "self"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "save_session": {
+            "name": "save_session",
+            "summary": "Saves the session config in the database.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $id_session = $this->get_id_session();\n    \/\/die(var_dump($id_session, $this->check()));\n    if ( $this->check() ){\n      if ( $id_session ){\n        $p =& $this->class_cfg['arch']['sessions'];\n        \/\/ It is normal this is sometimes not changing as different actions can happen in the same\n        $time = time();\n        if ( empty($this->sess_cfg['last_renew']) || ($time - $this->sess_cfg['last_renew'] >= 2) ){\n          if ( !$this->db->update($this->class_cfg['tables']['sessions'], [\n            $p['id_user'] => $this->id,\n            $p['sess_id'] => $this->session->get_id(),\n            $p['ip_address'] => $this->ip_address,\n            $p['user_agent'] => $this->user_agent,\n            $p['opened'] => 1,\n            $p['last_activity'] => date('Y-m-d H:i:s', $time),\n            $p['cfg'] => json_encode($this->sess_cfg)\n          ], [\n            $p['id'] => $id_session\n          ]) ){\n            x::log($this->id, 'user_login');\n            \/\/die(var_dump($this->session));\n          }\n        }\n        else{\n          x::log(\"Pas besoin\", 'user_login');\n        }\n      }\n      else{\n        $this->set_error(13);\n      }\n    }\n    return $this;\n  }",
+            "startLine": 506,
+            "doc": {
+                "description": "Saves the session config in the database.",
+                "params": [],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "Use it only when needed!"
+                }
+            },
+            "endLine": 540,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "self"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "close_session": {
+            "name": "close_session",
+            "summary": "Closes the session in the database.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($with_session = false)\n  {\n    if ( $this->id ){\n      $p =& $this->class_cfg['arch']['sessions'];\n      $this->db->update($this->class_cfg['tables']['sessions'], [\n          $p['ip_address'] => $this->ip_address,\n          $p['user_agent'] => $this->user_agent,\n          $p['opened'] => 0,\n          $p['last_activity'] => date('Y-m-d H:i:s'),\n          $p['cfg'] => json_encode($this->sess_cfg)\n        ],[\n          $p['id_user'] => $this->id,\n          $p['sess_id'] => $this->session->get_id()\n        ]);\n      $this->auth = false;\n      $this->id = null;\n      $this->sess_cfg = null;\n      if ( $with_session ){\n        $this->session->set([]);\n      }\n      else{\n        $this->session->set([], self::$un);\n      }\n    }\n    return $this;\n  }",
+            "startLine": 548,
+            "doc": {
+                "description": "Closes the session in the database.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$with",
+                        "description": "session If true deletes also the session information"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 573,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "self"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "with_session",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "session If true deletes also the session information"
+                }
+            ]
+        },
+        "check_attempts": {
+            "name": "check_attempts",
+            "summary": "Returns false if the max number of connections attempts has been reached",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( !isset($this->cfg) ){\n      x::log(\"Checking attempts without user config\", 'user_login');\n      return false;\n    }\n    if ( isset($this->cfg['num_attempts']) && $this->cfg['num_attempts'] > $this->class_cfg['max_attempts'] ){\n      x::log(\"Checking attempts maxed out!\", 'user_login');\n      return false;\n    }\n    x::log(\"Checking attempts ok\", 'user_login');\n    return true;\n  }",
+            "startLine": 579,
+            "doc": {
+                "description": "Returns false if the max number of connections attempts has been reached",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 591,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "save_cfg": {
+            "name": "save_cfg",
+            "summary": "Saves the user's config in the cfg field of the users' table.",
+            "description": "return self",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "return self"
+                }
+            ],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( $this->check() ){\n      $this->db->update(\n          $this->class_cfg['tables']['users'],\n          [$this->fields['cfg'] => json_encode($this->cfg)],\n          [$this->fields['id'] => $this->id]);\n    }\n    return $this;\n  }",
+            "startLine": 598,
+            "doc": {
+                "description": "Saves the user's config in the cfg field of the users' table.\n\nreturn self",
+                "tags": []
+            },
+            "endLine": 607,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "self"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "set_cfg": {
+            "name": "set_cfg",
+            "summary": "Saves the attribute(s) values into the session config.",
+            "description": "return self",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "return self"
+                }
+            ],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($attr)\n  {\n    if ( null !== $this->cfg ){\n      $args = \\func_get_args();\n      if ( (\\count($args) === 2) && \\is_string($attr) ){\n        \/** @var array $attr *\/\n        $attr = [$args[0] => $args[1]];\n      }\n      foreach ( $attr as $key => $val ){\n        if ( \\is_string($key) ){\n          $this->cfg[$key] = $val;\n        }\n      }\n      $this->set_session(['cfg' => $this->cfg]);\n    }\n    return $this;\n  }",
+            "startLine": 614,
+            "doc": {
+                "description": "Saves the attribute(s) values into the session config.\n\nreturn self",
+                "tags": []
+            },
+            "endLine": 630,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "self"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "attr",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "unset_cfg": {
+            "name": "unset_cfg",
+            "summary": "Unsets the attribute(s) in the session config.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($attr)\n  {\n    if ( null !== $this->cfg ){\n      $args = \\func_get_args();\n      if ( \\is_string($attr) ){\n        \/** @var array $attr *\/\n        $attr = [$attr];\n      }\n      foreach ( $attr as $key ){\n        if ( isset($key) ){\n          unset($this->cfg[$key]);\n        }\n      }\n      $this->set_session(['cfg' => $this->cfg]);\n    }\n    return $this;\n  }",
+            "startLine": 638,
+            "doc": {
+                "description": "Unsets the attribute(s) in the session config.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$attr"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 654,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "self"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "attr",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "refresh_info": {
+            "name": "refresh_info",
+            "summary": "Regathers informations from the database.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( $this->check() ){\n      $this->_user_info();\n      $this->_sess_info();\n    }\n    return $this;\n  }",
+            "startLine": 661,
+            "doc": {
+                "description": "Regathers informations from the database.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 668,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "self"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "is_auth": {
+            "name": "is_auth",
+            "summary": "Returns true if authenticated false otherwise.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 675,
+            "doc": {
+                "description": "Returns true if authenticated false otherwise.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 677,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "check_session": {
+            "name": "check_session",
+            "summary": "Retrieves user's info from session if needed and checks if authenticated.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $this->_retrieve_session();\n      return $this->auth;\n    }\n  }",
+            "startLine": 684,
+            "doc": {
+                "description": "Retrieves user's info from session if needed and checks if authenticated.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 689,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_id": {
+            "name": "get_id",
+            "summary": "Returns the user's ID if there is no error.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( $this->check() ){\n      return $this->id;\n    }\n    return null;\n  }",
+            "startLine": 696,
+            "doc": {
+                "description": "Returns the user's ID if there is no error.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 702,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "get_group": {
+            "name": "get_group",
+            "summary": "Returns the user's group's ID if there is no error.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( $this->check() ){\n      return $this->id_group;\n    }\n    return null;\n  }",
+            "startLine": 709,
+            "doc": {
+                "description": "Returns the user's group's ID if there is no error.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 715,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "expire_hotlink": {
+            "name": "expire_hotlink",
+            "summary": "Expires an hotlink by setting the expire column to now.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    if ( $this->check() ){\n      return $this->db->update($this->class_cfg['tables']['hotlinks'],\n              [$this->class_cfg['arch']['hotlinks']['expire'] => date('Y-m-d H:i:s')],\n              [$this->class_cfg['arch']['hotlinks']['id'] => $id]);\n    }\n    return 0;\n  }",
+            "startLine": 722,
+            "doc": {
+                "description": "Expires an hotlink by setting the expire column to now.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 730,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_id_from_magic_string": {
+            "name": "get_id_from_magic_string",
+            "summary": "Retrieves a user's ID from the hotlink's magic string.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id, $key)\n  {\n    if ( $val = $this->db->rselect($this->class_cfg['tables']['hotlinks'], [\n      $this->class_cfg['arch']['hotlinks']['magic_string'],\n      $this->class_cfg['arch']['hotlinks']['id_user'],\n    ],[\n      $this->class_cfg['arch']['hotlinks']['id'] => $id\n    ]) ){\n      if ( self::is_magic_string($key, $val[$this->class_cfg['arch']['hotlinks']['magic_string']]) ){\n        return $val['id_user'];\n      }\n    }\n    return null;\n  }",
+            "startLine": 739,
+            "doc": {
+                "description": "Retrieves a user's ID from the hotlink's magic string.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 752,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "key",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_admin": {
+            "name": "is_admin",
+            "summary": "Checks whether the user is an admin or not.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return (bool)$this->get_session('admin');\n  }",
+            "startLine": 759,
+            "doc": {
+                "description": "Checks whether the user is an admin or not.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 762,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "is_dev": {
+            "name": "is_dev",
+            "summary": "Checks whether the user is an dev(eloper) or not.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return (bool)($this->is_admin() || !!$this->get_session('dev'));\n  }",
+            "startLine": 769,
+            "doc": {
+                "description": "Checks whether the user is an dev(eloper) or not.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 772,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "get_manager": {
+            "name": "get_manager",
+            "summary": "Gets a bbn\\user\\manager instance.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bbn\\mail $mail = NULL)\n  {\n    $mgr = new user\\manager($this, $mail);\n    return $mgr;\n  }",
+            "startLine": 780,
+            "doc": {
+                "description": "Gets a bbn\\user\\manager instance.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mail",
+                        "name": "$mail"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 784,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "mail",
+                    "position": 0,
+                    "type": "bbn\\mail",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "check": {
+            "name": "check",
+            "summary": "Checks if an error has been thrown or not.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 791,
+            "doc": {
+                "description": "Checks if an error has been thrown or not.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 793,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "check",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+                "startLine": 56,
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 61,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "logout": {
+            "name": "logout",
+            "summary": "Unauthenticates, resets the config and destroys the session.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $this->cfg = [];\n    $this->close_session();\n  }",
+            "startLine": 800,
+            "doc": {
+                "description": "Unauthenticates, resets the config and destroys the session.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 804,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_mailer": {
+            "name": "get_mailer",
+            "summary": "Returns an instance of the mailer class.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return new mail();\n  }",
+            "startLine": 811,
+            "doc": {
+                "description": "Returns an instance of the mailer class.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 814,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "set_password": {
+            "name": "set_password",
+            "summary": "Change the password in the database after checking the current one.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($old_pass, $new_pass)\n  {\n    if ( $this->auth ){\n      $pwt = $this->class_cfg['tables']['passwords'];\n      $pwa = $this->class_cfg['arch']['passwords'];\n      $stored_pass = $this->db->select_one($pwt, $pwa['pass'], [\n        $this->class_cfg['arch']['passwords']['id_user'] => $this->id\n      ], [\n        $this->class_cfg['arch']['passwords']['added'] => 'DESC'\n      ]);\n      if ( $this->_check_password($old_pass, $stored_pass) ){\n        return $this->force_password($new_pass, $this->get_id());\n      }\n    }\n    return false;\n  }",
+            "startLine": 823,
+            "doc": {
+                "description": "Change the password in the database after checking the current one.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$old",
+                        "description": "pass The current password"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$new",
+                        "description": "pass The new password"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 838,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "old_pass",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "pass The current password"
+                },
+                {
+                    "name": "new_pass",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "pass The new password"
+                }
+            ]
+        },
+        "force_password": {
+            "name": "force_password",
+            "summary": "Changes the password in the database.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($pass, $id)\n  {\n    if ( $this->check() ){\n      return (bool)$this->db->insert($this->class_cfg['tables']['passwords'], [\n        $this->class_cfg['arch']['passwords']['pass'] => $this->_crypt($pass),\n        $this->class_cfg['arch']['passwords']['id_user'] => $id,\n        $this->class_cfg['arch']['passwords']['added'] => date('Y-m-d H:i:s')\n      ]);\n    }\n    return false;\n  }",
+            "startLine": 845,
+            "doc": {
+                "description": "Changes the password in the database.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 855,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "pass",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_name": {
+            "name": "get_name",
+            "summary": "Returns the full name of the given user or the current one.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($usr = NULL)\n  {\n    if ( $this->auth ){\n      if ( \\is_null($usr) ){\n        $usr = $this->get_session();\n      }\n      else if ( str::is_uid($usr) ){\n        $mgr = $this->get_manager();\n        $usr = $mgr->get_user($usr);\n      }\n      if ( isset($usr[$this->class_cfg['show']]) ){\n        return $usr[$this->class_cfg['show']];\n      }\n    }\n    return null;\n  }",
+            "startLine": 862,
+            "doc": {
+                "description": "Returns the full name of the given user or the current one.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 877,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "usr",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_email": {
+            "name": "get_email",
+            "summary": "Returns the email of the given user or the current one.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($usr = NULL)\n  {\n    if ( $this->auth ){\n      if ( \\is_null($usr) ){\n        $usr = $this->get_session();\n      }\n      else if ( str::is_uid($usr) ){\n        $mgr = $this->get_manager();\n        $usr = $mgr->get_user($usr);\n      }\n      if ( isset($usr[$this->class_cfg['email']]) ){\n        return $usr[$this->class_cfg['email']];\n      }\n    }\n    return null;\n  }",
+            "startLine": 884,
+            "doc": {
+                "description": "Returns the email of the given user or the current one.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 899,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "usr",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "add_to_tmp": {
+            "name": "add_to_tmp",
+            "summary": "Adds a file to the tmp folder of the user and returns its path.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file, $name = NULL, $move = true)\n  {\n    if ( $this->auth ){\n      $fs = new file\\system();\n      $path = $this->get_tmp_dir().microtime(true).'\/';\n      if ( $fs->is_file($file) && $fs->create_path($path) ){\n        $dest = $path.($name ?: basename($file));\n        if ( $move ){\n          if ( $fs->move($file, dirname($dest)) && $fs->rename(dirname($dest).'\/'.basename($file), basename($dest))){\n            return $dest;\n          }\n        }\n        else if ( $fs->copy($file, $dest) ){\n          return $dest;\n        }\n      }\n    }\n    return null;\n  }",
+            "startLine": 909,
+            "doc": {
+                "description": "Adds a file to the tmp folder of the user and returns its path.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$move"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 927,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "name",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "move",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                }
+            ]
+        },
+        "crypt": {
+            "name": "crypt",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($st)\n  {\n    if ($enckey = $this->_get_encryption_key()) {\n      return util\\enc::crypt($st, $enckey) ?: null;\n    }\n    return null;\n  }",
+            "startLine": 929,
+            "doc": null,
+            "endLine": 935,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "decrypt": {
+            "name": "decrypt",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($st)\n  {\n    if ($enckey = $this->_get_encryption_key()) {\n      return util\\enc::decrypt($st, $enckey) ?: null;\n    }\n    return null;\n  }",
+            "startLine": 937,
+            "doc": null,
+            "endLine": 943,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_user": {
+            "name": "get_user",
+            "summary": "Returns the latest created connection, ie the current user's object.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::get_instance();\n  }",
+            "startLine": 949,
+            "doc": {
+                "description": "Returns the latest created connection, ie the current user's object.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 952,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "self",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "make_fingerprint": {
+            "name": "make_fingerprint",
+            "summary": "Generates a random long string (16-32 chars) used as unique fingerprint.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return str::genpwd(32, 16);\n  }",
+            "startLine": 958,
+            "doc": {
+                "description": "Generates a random long string (16-32 chars) used as unique fingerprint.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 961,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "make_magic_string": {
+            "name": "make_magic_string",
+            "summary": "Returns an array with a key and a magic string used for making hotlinks.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $key = self::make_fingerprint();\n    return [\n      'key' => $key,\n      'hash' => hash('sha256', $key)\n    ];\n  }",
+            "startLine": 968,
+            "doc": {
+                "description": "Returns an array with a key and a magic string used for making hotlinks.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 975,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "is_magic_string": {
+            "name": "is_magic_string",
+            "summary": "Checks if a given string corresponds to the given hash.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($key, $hash)\n  {\n    return hash('sha256', $key) === $hash;\n  }",
+            "startLine": 984,
+            "doc": {
+                "description": "Checks if a given string corresponds to the given hash.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key",
+                        "description": "The key"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$hash",
+                        "description": "The corresponding hash"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 987,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "key",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The key"
+                },
+                {
+                    "name": "hash",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The corresponding hash"
+                }
+            ]
+        },
+        "get_error": {
+            "name": "get_error",
+            "summary": "Returns the first error in an array with the code and description.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( $this->error ){\n      return [\n        'code' => $this->error,\n        'text' => $this->class_cfg['errors'][$this->error]\n      ];\n    }\n    return null;\n  }",
+            "startLine": 1011,
+            "doc": {
+                "description": "Returns the first error in an array with the code and description.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 1020,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": {
+                "name": "get_error",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 72,
+                "doc": null,
+                "endLine": 74,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "test": {
+            "name": "test",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+            "startLine": 45,
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 50,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "test",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+                "startLine": 45,
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 50,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "get_errors": {
+            "name": "get_errors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 76,
+            "doc": null,
+            "endLine": 78,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_errors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 76,
+                "doc": null,
+                "endLine": 78,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+            "startLine": 80,
+            "doc": null,
+            "endLine": 88,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+                "startLine": 80,
+                "doc": null,
+                "endLine": 88,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "__call": {
+            "name": "__call",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
+            "startLine": 95,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$arguments"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 99,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": {
+                "name": "__call",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
+                "startLine": 95,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string",
+                            "name": "$name"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "array",
+                            "name": "$arguments"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 99,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 2,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "name",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "arguments",
+                        "position": 1,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "arguments",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_debug": {
+            "name": "is_debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 104,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "is_debug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 104,
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 106,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "set_debug": {
+            "name": "set_debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($debug)\n  {\n  }",
+            "startLine": 112,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 114,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "set_debug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($debug)\n  {\n  }",
+                "startLine": 112,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 114,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "debug",
+                        "position": 0,
+                        "type": "bool",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "debug",
+                    "position": 0,
+                    "type": "bool",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_instance": {
+            "name": "get_instance",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 25,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 27,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "retriever_exists": {
+            "name": "retriever_exists",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 29,
+            "doc": null,
+            "endLine": 31,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "exists": {
+            "name": "exists",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n      $this->class_cfg['arch'][$this->class_table_index]['id'] => $id\n    ]);\n  }",
+            "startLine": 59,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$id"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 63,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": {
+        "db": {
+            "visibility": "public",
+            "doc": {
+                "description": "@var db",
+                "tags": []
+            }
+        },
+        "prev_time": {
+            "visibility": "public",
+            "doc": {
+                "description": "@var mixed",
+                "tags": []
+            }
+        }
+    },
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 57,
+    "numProperties": 2,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\models\\tts\\retriever",
+        "bbn\\models\\tts\\dbconfig"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\models\\cls\\basic",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "sn": "bbn_session",
+        "un": "bbn_user",
+        "_defaults": {
+            "errors": {
+                "0": "login failed",
+                "2": "password sent",
+                "3": "no email such as",
+                "4": "too many attempts",
+                "5": "impossible to create the user",
+                "6": "wrong user and\/or password",
+                "7": "different passwords",
+                "8": "less than 5 mn between emailing password",
+                "9": "user already exists",
+                "10": "problem during user creation",
+                "11": "no salt in session",
+                "12": "login and password are mandatory",
+                "13": "impossible to save the session",
+                "14": "impossible to retrieve the session",
+                "15": "no session in memory",
+                "16": "impossible to add session in the database",
+                "17": "non matching salt",
+                "18": "incorrect magic string",
+                "19": "wrong fingerprint"
+            },
+            "table": "bbn_users",
+            "tables": {
+                "groups": "bbn_users_groups",
+                "hotlinks": "bbn_users_hotlinks",
+                "passwords": "bbn_users_passwords",
+                "sessions": "bbn_users_sessions",
+                "users": "bbn_users"
+            },
+            "arch": {
+                "groups": {
+                    "id": "id",
+                    "group": "group",
+                    "type": "type",
+                    "code": "code",
+                    "cfg": "cfg"
+                },
+                "hotlinks": {
+                    "id": "id",
+                    "id_user": "id_user",
+                    "magic_string": "magic_string",
+                    "expire": "expire"
+                },
+                "passwords": {
+                    "id_user": "id_user",
+                    "pass": "pass",
+                    "added": "added"
+                },
+                "sessions": {
+                    "id": "id",
+                    "id_user": "id_user",
+                    "sess_id": "sess_id",
+                    "ip_address": "ip_address",
+                    "user_agent": "user_agent",
+                    "opened": "opened",
+                    "creation": "creation",
+                    "last_activity": "last_activity",
+                    "cfg": "cfg"
+                },
+                "users": {
+                    "id": "id",
+                    "id_group": "id_group",
+                    "email": "email",
+                    "username": "username",
+                    "login": "login",
+                    "admin": "admin",
+                    "dev": "dev",
+                    "cfg": "cfg",
+                    "active": "active",
+                    "enckey": "enckey"
+                }
+            },
+            "fields": {
+                "user": "user",
+                "pass": "pass",
+                "salt": "appui_salt",
+                "key": "key",
+                "id": "id",
+                "pass1": "pass1",
+                "pass2": "pass2",
+                "action": "appui_action"
+            },
+            "encryption": "sha1",
+            "conditions": [],
+            "max_attempts": 10,
+            "max_sessions": 5,
+            "hotlinks": false,
+            "show": "name"
+        },
+        "retriever_instance": {
+            "db": {
+                "last_error": false,
+                "debug": false,
+                "engine": "mysql",
+                "host": "mysql.lan",
+                "username": "bbn",
+                "current": "apst_app"
+            },
+            "prev_time": null
+        },
+        "retriever_exists": true,
+        "_just_login": false,
+        "_encryption_key": null,
+        "session": null,
+        "error": null,
+        "user_agent": null,
+        "ip_address": null,
+        "accept_lang": null,
+        "auth": false,
+        "path": null,
+        "tmp_path": null,
+        "sql": null,
+        "id": null,
+        "id_group": null,
+        "alert": null,
+        "cfg": null,
+        "sess_cfg": null,
+        "db": null,
+        "prev_time": null,
+        "errors": [],
+        "debug": false,
+        "log": [],
+        "class_cfg": null,
+        "fields": null,
+        "class_table": null,
+        "class_table_index": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn",
+    "shortName": "user"
+}

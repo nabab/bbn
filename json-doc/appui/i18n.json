@@ -1,0 +1,2664 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\appui\\i18n",
+    "namespace": true,
+    "traits": [
+        "bbn\\models\\tts\\optional"
+    ],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/appui\/i18n.php",
+    "startLine": 13,
+    "endLine": 1042,
+    "contentConstructor": {
+        "file": "bbn\\appui\\i18n",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "Initialize the class i18n",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bbn\\db $db, $code = NULL)\n  {\n    $this->parser = new \\Gettext\\Translations();\n    $this->user = \\bbn\\user::get_instance();\n    $this->options = new \\bbn\\appui\\options($db);\n    if ( empty($code) ){\n      $code = 'apst-app';\n    }  \n    $this->id_project = \\bbn\\str::is_uid($code) ? $code : $this->options->from_code($code, 'projects', 'appui');\n  }",
+            "startLine": 31,
+            "doc": {
+                "description": "Initialize the class i18n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "db"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 40,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "__construct",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\cache",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function(bbn\\db $db)\n  {\n\t\t$this->cacher = bbn\\cache::get_engine();\n\t\t$this->_cache_prefix = str_replace('\\\\', '\/', \\get_class($this)).'\/';\n  }",
+                "startLine": 33,
+                "doc": null,
+                "endLine": 37,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "db",
+                        "position": 0,
+                        "type": "bbn\\db",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "bbn\\db",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "code",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "analyze_php": {
+            "name": "analyze_php",
+            "summary": "Returns the strings contained in the given php file",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file)\n  {\n    $res = [];\n    $php = file_get_contents($file);\n    if ( $tmp = \\Gettext\\Translations::fromPhpCodeString($php, [\n      'functions' => ['_' => 'gettext'],\n      'file' => $file\n      ]) ){\n      foreach ( $tmp->getIterator() as $r => $tr ){\n        $res[] = $tr->getOriginal();\n      }\n      $this->parser->mergeWith($tmp);\n    }\n    return array_unique($res);\n  }",
+            "startLine": 47,
+            "doc": {
+                "description": "Returns the strings contained in the given php file",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 61,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "analyze_js": {
+            "name": "analyze_js",
+            "summary": "Returns the strings contained in the given js file",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file)\n  {\n    $res = [];\n    $js = file_get_contents($file);\n    if ( $tmp = \\Gettext\\Translations::fromJsCodeString($js, [\n      'functions' => [\n        '_' => 'gettext',\n        'bbn._' => 'gettext'\n      ],\n      'file' => $file\n      ]) ){\n      foreach ( $tmp->getIterator() as $r => $tr ){\n        $res[] = $tr->getOriginal();\n      }\n      $this->parser->mergeWith($tmp);\n    }\n    if ( preg_match_all('\/`([^`]*)`\/', $js, $matches) ){\n      foreach ( $matches[0] as $st ){\n        if ( $tmp = \\Gettext\\Translations::fromVueJsString('<template>'.$st.'<\/template>', [\n          'functions' => [\n            '_' => 'gettext',\n            'bbn._' => 'gettext'\n          ],\n          'file' => $file\n          ])\n        ){\n          foreach ( $tmp->getIterator() as $r => $tr ){\n            $res[] = $tr->getOriginal();\n          }\n          $this->parser->mergeWith($tmp);\n        }\n      }\n    }\n    \/*if($file === '\/home\/thomas\/domains\/apstapp2.thomas.lan\/_appui\/vendor\/bbn\/appui-task\/src\/components\/tab\/tracker\/tracker.js'){\n      die(\\bbn\\x::hdump($res, $js));\n    }*\/\n    \n    return array_unique($res);\n  }",
+            "startLine": 69,
+            "doc": {
+                "description": "Returns the strings contained in the given js file",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 107,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "analyze_json": {
+            "name": "analyze_json",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file)\n  {\n    $res = [];\n    $js = file_get_contents($file);\n    if ( $tmp = \\Gettext\\Translations::fromJsCodeString($js, [\n      'functions' => [\n        '_' => 'gettext',\n        'bbn._' => 'gettext'\n      ],\n      'file' => $file\n      ]) ){\n      foreach ( $tmp->getIterator() as $r => $tr ){\n        $res[] = $tr->getOriginal();\n      }\n      $this->parser->mergeWith($tmp);\n    }\n    return array_unique($res);\n  }",
+            "startLine": 109,
+            "doc": null,
+            "endLine": 126,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "analyze_html": {
+            "name": "analyze_html",
+            "summary": "Returns the strings contained in the given html file",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file)\n  {\n    $res = [];\n    $js = file_get_contents($file);\n    if ( $tmp = \\Gettext\\Translations::fromVueJsString('<template>'.$js.'<\/template>', [\n      'functions' => [\n        '_' => 'gettext',\n        'bbn._' => 'gettext'\n      ]\n    ]) ){\n      foreach ( $tmp->getIterator() as $r => $tr ){\n        $res[] = $tr->getOriginal();\n      }\n      $this->parser->mergeWith($tmp);\n    }\n    return array_unique($res);\n  }",
+            "startLine": 134,
+            "doc": {
+                "description": "Returns the strings contained in the given html file",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 150,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "analyze_file": {
+            "name": "analyze_file",
+            "summary": "Returns the strings contained in the given file",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file)\n  {\n    $res = [];\n    $ext = bbn\\str::file_ext($file);\n    if ( \\in_array($ext, self::$extensions, true) && is_file($file) ){\n      switch ( $ext ){\n        case 'html':\n          $res = $this->analyze_html($file);\n          break;\n        case 'php':\n          $res = $this->analyze_php($file);\n          break;\n        case 'js':\n          $res = $this->analyze_js($file);\n          break;\n        \/*case 'json':\n          $res = $this->analyze_json($file);\n          break;*\/\n      }\n    }\n    return $res;\n  }",
+            "startLine": 158,
+            "doc": {
+                "description": "Returns the strings contained in the given file",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 179,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "analyze_folder": {
+            "name": "analyze_folder",
+            "summary": "Returns an array containing the strings found in the given folder",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($folder = '.', $deep = false)\n  {\n    $res = [];\n\t\tif (  \\is_dir($folder) ){\n\n      $files = $deep ? bbn\\file\\dir::scan($folder, 'file') : bbn\\file\\dir::get_files($folder);\n\t\t  foreach ( $files as $f ){\n\n        $words = $this->analyze_file($f);\n        foreach ( $words as $word ){\n          if ( !isset($res[$word]) ){\n            $res[$word] = [];\n          }\n          if ( !in_array($f, $res[$word]) ){\n            $res[$word][] = $f;\n          }\n        }\n      }\n    }\n    return $res;\n  }",
+            "startLine": 188,
+            "doc": {
+                "description": "Returns an array containing the strings found in the given folder",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$folder"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$deep"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 208,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "folder",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": ".",
+                    "default_name": ""
+                },
+                {
+                    "name": "deep",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_parser": {
+            "name": "get_parser",
+            "summary": "Returns the parser",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 215,
+            "doc": {
+                "description": "Returns the parser",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 217,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "result": {
+            "name": "result",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $this->translations[] = $tr->getOriginal();\n    }\n    return array_unique($this->translations);\n  }",
+            "startLine": 219,
+            "doc": null,
+            "endLine": 224,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_id_project": {
+            "name": "get_id_project",
+            "summary": "get the id of the project from the id_option of a path",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option, $projects)\n  {\n      foreach ( $projects[$i]['path'] as $idx => $pa ){\n        if ( $projects[$i]['path'][$idx]['id_option'] === $id_option ){\n          return $projects[$i]['id'];\n        }\n      }\n    }\n  }",
+            "startLine": 233,
+            "doc": {
+                "description": "get the id of the project from the id_option of a path",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$id_option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$projects"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 241,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "projects",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_primaries_langs": {
+            "name": "get_primaries_langs",
+            "summary": "Gets primaries langs from option",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $languages = $this->options->full_tree($uid_languages);\n    $primaries = array_values(array_filter($languages['items'], function($v) {\n      return !empty($v['primary']);\n    }));\n    return $primaries;\n  }",
+            "startLine": 248,
+            "doc": {
+                "description": "Gets primaries langs from option",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 255,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_num_options": {
+            "name": "get_num_options",
+            "summary": "get the num of items['text'] in original language and num translations foreach lang in configured langs (for this project uses all primaries as configured langs)",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $paths = $this->options->find_i18n();\n\n    $data = [];\n    \/**\n    * creates the property data_widget that will have just num of items found for the option + 1 (the text of the option parent), the * * number of strings translated and the source language indexed to the language\n    *\/\n    $primaries = $this->get_primaries_langs();\n    foreach ($primaries as $p ){\n      $configured_langs[] = $p['code'];\n    }\n    foreach ( $paths as $p => $val){\n      $parent = $this->options->get_id_parent($paths[$p]['id']);\n\n      foreach ( $configured_langs as $lang ) {\n        $count = 0;\n        $items = $paths[$p]['items'];\n        \/** push the text of the option into the array of strings *\/\n        $items[] = [\n          'id' => $paths[$p]['id'],\n          'text' => $paths[$p]['text'],\n          'id_parent' => $parent\n        ];\n        foreach ( $items as $idx => $item ){\n          if ( $id = $this->db->select_one('bbn_i18n', 'id', [\n            'exp'=> $item['text'],\n            'lang' => $paths[$p]['language']\n          ])){\n            if ( $this->db->select_one('bbn_i18n_exp', 'id_exp', [\n              'id_exp' => $id,\n              'lang' => $lang\n            ]) ){\n              $count ++;\n            }\n          }\n        }\n        $paths[$p]['data_widget']['result'][$lang] = [\n          'num' => count($items),\n          'num_translations' => $count,\n          'lang' => $lang\n        ];\n      }\n      $paths[$p]['data_widget']['locale_dirs'] = [];\n\n      unset($paths[$p]['items']);\n      $data[] = $paths[$p];\n    }\n    return [\n      'data'=> $data\n    ];\n  }",
+            "startLine": 264,
+            "doc": {
+                "description": "get the num of items['text'] in original language and num translations foreach lang in configured langs (for this project uses all primaries as configured langs)",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 315,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_num_option": {
+            "name": "get_num_option",
+            "summary": "get the num of items['text'] in original language and num translations foreach lang in configured langs (for this project uses all primaries as configured langs)",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    $paths = $this->options->find_i18n_option($id);\n    $data = [];\n    \/**\n    * creates the property data_widget that will have just num of items found for the option + 1 (the text of the option parent), the * * number of strings translated and the source language indexed to the language\n    *\/\n    $primaries = $this->get_primaries_langs();\n    foreach ($primaries as $p ){\n      $configured_langs[] = $p['code'];\n    }\n    \n    \n    foreach ( $paths as $p => $val){\n      $parent = $this->options->get_id_parent($paths[$p]['id']);\n      foreach ( $configured_langs as $lang ) {\n        $count = 0;\n        $items = $paths[$p]['items'];\n        \/** push the text of the option into the array of strings *\/\n        $items[] = [\n          'id' => $paths[$p]['id'],\n          'text' => $paths[$p]['text'],\n          'id_parent' => $parent\n        ];\n        foreach ( $items as $idx => $item ){\n          if ( $id = $this->db->select_one('bbn_i18n', 'id', [\n            'exp'=> $item['text'],\n            'lang' => $paths[$p]['language']\n          ])){\n            if ( $this->db->select_one('bbn_i18n_exp', 'id_exp', [\n              'id_exp' => $id,\n              'lang' => $lang\n            ]) ){\n              $count ++;\n            }\n          }\n        }\n        $paths[$p]['data_widget']['result'][$lang] = [\n          'num' => count($items),\n          'num_translations' => $count,\n          'lang' => $lang\n        ];\n      }\n      $paths[$p]['data_widget']['locale_dirs'] = [];\n      unset($paths[$p]['items']);\n      $data[] = $paths[$p];\n    }\n    return [\n      'data'=> $data\n    ];\n  }",
+            "startLine": 322,
+            "doc": {
+                "description": "get the num of items['text'] in original language and num translations foreach lang in configured langs (for this project uses all primaries as configured langs)",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 372,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_options": {
+            "name": "get_options",
+            "summary": "Gets the option with the property i18n setted and its items",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $paths = $this->options->find_i18n();\n    $res = [];\n    foreach ( $paths as $p => $val ){\n      $res[$p] = [\n        'text'=> $paths[$p]['text'],\n        'opt_language' => $paths[$p]['language'],\n        'strings' => [],\n        'id_option' => $paths[$p]['id']\n      ];\n\n      \/** @todo AT THE MOMENT I'M NOT CONSIDERING LANGUAGES OF TRANSLATION *\/\n      foreach ($paths[$p]['items'] as $i => $value){\n\n        \/* check if the opt text is in bbn_i18n and takes translations from db *\/\n        if ( $exp = $this->db->rselect('bbn_i18n',['id', 'exp', 'lang'] , [\n            'exp' => $paths[$p]['items'][$i]['text'],\n            'lang' => $paths[$p]['language']\n          ]\n        ) ){\n\n          $translated = $this->db->rselect_all('bbn_i18n_exp', ['id_exp', 'expression', 'lang'],  ['id_exp' => $exp['id'] ]);\n          if ( !empty($translated) ){\n            \/** @var  $languages the array of languages found in db for the options*\/\n            $languages = [];\n            $translated_exp = '';\n\n            foreach ($translated as $t => $trans){\n              if ( !in_array($translated[$t]['lang'], $translated) ){\n                $languages[] = $translated[$t]['lang'];\n              }\n              $translated_exp = $translated[$t]['expression'];\n            }\n            if ( !empty($languages) ){\n              foreach($languages as $lang){\n                $res[$p]['strings'][] = [\n                  $lang => [\n                    'id_exp' => $exp['id'],\n                    'exp' => $exp['exp'],\n                    'translation_db' => $translated_exp\n                  ]\n                ];\n              }\n            }\n          }\n        }\n        else {\n          if ( $this->db->insert('bbn_i18n', [\n            'exp' => $paths[$p]['items'][$i]['text'],\n            'lang' =>  $paths[$p]['language'],\n            \/\/'id_user'=> $this->user->get_id(),\n            \/\/'last_modified' => date('H-m-d H:i:s')\n\n          ]) ){\n            $id = $this->db->last_id();\n            $this->db->insert_ignore(\n              'bbn_i18n_exp', [\n                'id_exp' => $id,\n                'expression'=> $paths[$p]['items'][$i]['text'],\n                'lang' => $paths[$p]['language']\n              ]\n            );\n            $res[$p]['strings'][] = [\n              $paths[$p]['language'] => [\n                'id_exp' => $id,\n                'exp' => $paths[$p]['items'][$i]['text'],\n                'translation_db' => $paths[$p]['items'][$i]['text']\n              ]\n            ];\n          };\n\n\n        }\n\n      }\n    }\n    return $res;\n  }",
+            "startLine": 379,
+            "doc": {
+                "description": "Gets the option with the property i18n setted and its items",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 457,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_language": {
+            "name": "get_language",
+            "summary": "Gets the propriety language of the option",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option)\n  {\n  }",
+            "startLine": 465,
+            "doc": {
+                "description": "Gets the propriety language of the option",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "id_option"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 467,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_translations_widget": {
+            "name": "get_translations_widget",
+            "summary": "Gets the widgets initial data",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_project, $id_option)\n  {\n    $success = false;\n    $result = [];\n    $locale_dirs = [];\n    \n    if ( $id_option &&\n      ($o = $this->options->option($id_option)) &&\n      isset($o['language']) ){\n\n        \/\/ @var $to_explore the path to explore \n        $to_explore = $this->get_path_to_explore($id_option);\n        \/\/ @var $locale_dir the path to locale dir \n        $locale_dir = $this->get_locale_dir_path($id_option);\n       \n        \/\/the txt file in the locale folder\n        $index = $this->get_index_path($id_option);\n        \n        \/\/the text of the option . the number written in the $index file\n        $domain =$o['text'].(is_file($index) ? file_get_contents($index) : '');\n        \/\/ @var $dirs scans dirs existing in locale folder for this path \n        if ( is_dir($locale_dir) ){\n          \/\/ @var array $languages dirs in locale folder\n          $dirs = \\bbn\\file\\dir::get_dirs($locale_dir) ?: [];\n          if ( !empty($dirs)){\n            foreach ($dirs as $l ){\n              $languages[] = basename($l);\n            }\n          }\n        }\n        $new = 0;\n        $i = 0;\n        \/\/ @var array the languages found in locale dir \n        if ( !empty($languages) ){\n          $result = [];\n          foreach ( $languages as $lng ){\n            \/\/ the root to file po & mo \n            $po = $locale_dir.'\/'.$lng.'\/LC_MESSAGES\/'.$domain.'.po';\n            $mo = $locale_dir.'\/'.$lng.'\/LC_MESSAGES\/'.$domain.'.mo';\n            \/\/ if a file po already exists takes its content \n            if ( is_file($po) ){\n              $fileHandler = new \\Sepia\\PoParser\\SourceHandler\\FileSystem($po);\n              $poParser = new \\Sepia\\PoParser\\Parser($fileHandler);\n              $Catalog  = \\Sepia\\PoParser\\Parser::parseFile($po);\n              $num_translations = 0;\n              if ( $translations = $Catalog->getEntries() ){\n                foreach( $translations as $tr ){\n                  if ( $tr->getMsgStr() ){\n                    $num_translations ++;\n                  }\n                }\n                $result[$lng] = [\n                  'num' => count($translations),\n                  'num_translations' => $num_translations,\n                  'lang' => $lng,\n                  'num_translations_db' => $this->count_translations_db($id_option) ? $this->count_translations_db($id_option)[$lng] : 0\n                ];\n              }\n            }\n            \/\/ if the file po for the $lng doesn't exist $result is an empty object \n            else{\n              if( !empty($this->count_translations_db($id_option)[$lng]) ){\n                $count_translations = $this->count_translations_db($id_option)[$lng];\n              }\n              else{\n                $count_translations = 0;\n              }\n              $result[$lng] = [\n                'num' => 0,\n                'num_translations' => 0,\n                'lang' => $lng,\n                'num_translations_db' => $count_translations\n              ];\n            }\n          }\n         \n        }\n      $i++;\n      $success = true;\n      if ( !empty($languages) ){\n        $locale_dirs = $languages;\n      }\n    }\n    \n    return [\n      'locale_dirs' => $locale_dirs,\n      'result' => $result,\n      'success' => $success,\n    ];\n  }",
+            "startLine": 476,
+            "doc": {
+                "description": "Gets the widgets initial data",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "project"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "option"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 565,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "project"
+                },
+                {
+                    "name": "id_option",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "option"
+                }
+            ]
+        },
+        "get_po_files": {
+            "name": "get_po_files",
+            "summary": "Returns an array containing the po files found for the id_option",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option)\n  {\n    ($parent = $this->options->parent($id_option)) &&\n    defined($parent['code']) ){\n      $tmp = [];\n      \/\/ @var  $to_explore the path to explore \n      $to_explore = $this->get_path_to_explore($id_option);\n      \/\/ @var  $locale_dir locale dir in the path\n      $locale_dir = $this->get_locale_dir_path($id_option);\n      $dirs = \\bbn\\file\\dir::get_dirs($locale_dir) ?: [];\n      $languages = array_map(function($a){\n        return basename($a);\n      }, $dirs) ?: [];\n      if ( !empty($languages) ){\n\n        foreach ( $languages as $lng ){\n          \/\/ the path of po and mo files \n          $idx = is_file($locale_dir.'\/index.txt') ? file_get_contents($locale_dir.'\/index.txt') : '';\n          if ( is_file($locale_dir.'\/'.$lng.'\/LC_MESSAGES\/'.$o['text'].$idx.'.po') ){\n            $tmp[$lng]= $locale_dir.'\/'.$lng.'\/LC_MESSAGES\/'.$o['text'].$idx.'.po';\n          }\n\n        }\n\n      }\n\n      return $tmp;\n    }\n  }",
+            "startLine": 573,
+            "doc": {
+                "description": "Returns an array containing the po files found for the id_option",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$id_option"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 601,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "count_translations_db": {
+            "name": "count_translations_db",
+            "summary": "Count how many of the strings contained in po files are already in database",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option)\n  {\n    $po = $this->get_po_files($id_option);\n    if (!empty($po)){\n      foreach ($po as $lang => $file) {\n        $fileHandler = new \\Sepia\\PoParser\\SourceHandler\\FileSystem($file);\n        $poParser = new \\Sepia\\PoParser\\Parser($fileHandler);\n        $Catalog  = \\Sepia\\PoParser\\Parser::parseFile($file);\n        $fromPo = $Catalog->getEntries();\n        $source_language = $this->get_language($id_option);\n\n        $count[$lang] = 0;\n        foreach( $fromPo as $o ){\n          if ( $exp = $o->getMsgId() ){\n            $id = $this->db->select_one('bbn_i18n', 'id', ['exp' => $exp, 'lang' => $source_language]);\n            if ( $string = $this->db->select_one('bbn_i18n_exp', 'expression', [\n              'id_exp' => $id,\n              'lang' => $lang\n            ]) ){\n              $count[$lang]++;\n            }\n          }\n\n        }\n\n      }\n\n    }\n\n    return $count;\n  }",
+            "startLine": 609,
+            "doc": {
+                "description": "Count how many of the strings contained in po files are already in database",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "option"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 639,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "option"
+                }
+            ]
+        },
+        "get_translations_strings": {
+            "name": "get_translations_strings",
+            "summary": "Returns the strings contained in the given path",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option, $source_language, $languages)\n  {\n    if (\n      !empty($id_option) &&\n      !empty($source_language) \n    ){\n      \/\/ @var string $to_explore The path to explore path of mvc \n      $to_explore = $this->get_path_to_explore($id_option);\n      \/\/the position of locale dir    \n      $locale_dir =  $this->get_locale_dir_path($id_option);\n      \n      \n      \/\/creates the array $to_explore_dirs containing mvc, plugins e components\n      if ( $to_explore_dirs = bbn\\file\\dir::get_dirs($to_explore) ){\n        $current_dirs = array_values(array_filter($to_explore_dirs, function($a){\n          if( ( strpos(basename($a), 'locale') !== 0 ) &&\n               ( strpos(basename($a), 'data') !== 0 ) && \n               ( strpos(basename($a), '.') !== 0 )\n            ){\n            return $a;\n          }\n        }));\n      }\n      $res = [];\n      \n      \/\/case of generate called from table\n      if ( empty($languages) ){\n        \/** @var (array) $languages based on locale dirs found in the path*\/\n        $languages = array_map(function($a){\n          return basename($a);\n        }, \\bbn\\file\\dir::get_dirs($locale_dir)) ?: [];\n      }\n      if ( !empty($to_explore_dirs) ){\n        foreach ( $to_explore_dirs as $c ){\n\t\t\t\t\t$res[] = $this->analyze_folder($c, true);\n        }\n      }\n      \/\/all strings found in the different dirs $to_explore_dirs, merge all index of $res\n      if ( !empty($res) ){\n         $res = array_merge(...$res);\n      }\n\n      $news = [];\n      $done = 0;\n      \n      foreach ( $res as $r => $val ){\n        \/\/ for each string create a property 'path' containing the files' name in which the string is contained \n\n        $res[$r] = ['path' => $val];\n\n        \/\/ checks if the table bbn_i18n of db already contains the string $r for this $source_lang \n        if ( !($id = $this->db->select_one('bbn_i18n', 'id', [\n          'exp' => $r,\n          'lang' => $source_language\n        ])) ){\n          \/\/ if the string $r is not in 'bbn_i18n' inserts the string \n          $this->db->insert_ignore('bbn_i18n', [\n            'exp' => stripslashes($r),\n            'lang' => $source_language,\n          ]);\n          $id = $this->db->last_id();\n\n        }\n        \/\/ create the property 'id_exp' for the string $r \n        $res[$r]['id_exp'] = $id;\n\n        \/\/ puts the string $r into the property 'original_exp' (I'll use only array_values at the end) *\n        $res[$r]['original_exp'] = $r;\n\n        \/\/ checks in 'bbn_i18n_exp' if the string $r already exist for this $source_lang \n        if( !( $id_exp = $this->db->select_one('bbn_i18n_exp', 'id_exp', [\n          'id_exp' => $id,\n          'lang' => $source_language\n        ]) ) ){\n\n          \/\/ if the string $r is not in 'bbn_i18n_exp' inserts the string\n          \/\/  $done will be the number of strings found in the folder $to_explore that haven't been found in the table\n          \/\/ 'bbn_i18n_exp' of db, so $done is the number of new strings inserted in in 'bbn_i18n_exp'\n          $done += (int)$this->db->insert_ignore('bbn_i18n_exp', [\n            'id_exp' => $id,\n            'lang' => $source_language,\n            'expression' => stripslashes($r)\n          ]);\n          \/\/creates an array of new strings found in the folder;\n          $news[] = $r;\n        }\n        \/\/ $languages is the array of languages existing in locale dir\n        foreach ( $languages as $lng ){\n          \/\/  create a property indexed to the code of $lng containing the string $r from 'bbn_i18n_exp' in this $lng \n          $res[$r][$lng] = (string)$this->db->select_one(\n            'bbn_i18n_exp',\n              'expression',\n            [\n              'id_exp' => $id,\n              'lang' => $lng\n            ]\n          );\n        }\n      }\n      return [\n        'news' => $news,\n        'id_option' => $id_option,\n        'res' => array_values($res),\n        'done' => $done,\n        'languages' => $languages,\n        'path' => $to_explore,\n        'success' => true\n      ];\n    }\n  }",
+            "startLine": 649,
+            "doc": {
+                "description": "Returns the strings contained in the given path",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$id_option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$source_language"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$languages"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 758,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "source_language",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "languages",
+                    "position": 2,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_translations_table_complete": {
+            "name": "get_translations_table_complete",
+            "summary": "Returns the informations relative to traslation of the given $id_option of a $id_project. The data is formatted to be shown in a table",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_project, $id_option)\n  {\n      ($o = $this->options->option($id_option)) &&\n      ($parent = $this->options->parent($id_option)) &&\n      defined($parent['code']) ){\n      \/\/ @var  $path_source_lang the property language of the id_option (the path) \n      $path_source_lang = $this->options->get_prop($id_option, 'language');\n\n      \/\/ @var  $to_explore the path to explore \n      $to_explore = $this->get_path_to_explore($id_option);      \n\n      $locale_dir = $this->get_locale_dir_path($id_option);      \n      \n      $languages = array_map(function($a){\n        return basename($a);\n      }, \\bbn\\file\\dir::get_dirs($locale_dir)) ?: [];\n      \n      $i = 0;\n      $res = [];\n      $project = new bbn\\appui\\project($this->db, $id_project);\n      if ( !empty($languages) ){\n       \n        $po_file = [];\n        $success = false;\n        foreach ( $languages as $lng ){\n          \/\/ the path of po and mo files \n          $idx = is_file($locale_dir.'\/index.txt') ? file_get_contents($locale_dir.'\/index.txt') : '';\n          $po = $locale_dir.'\/'.$lng.'\/LC_MESSAGES\/'.$o['text'].$idx.'.po';\n          $mo = $locale_dir.'\/'.$lng.'\/LC_MESSAGES\/'.$o['text'].$idx.'.mo';\n         \n          \/\/ if the file po exist takes its content \n          if ( file_exists($po) ){\n            $fileHandler = new \\Sepia\\PoParser\\SourceHandler\\FileSystem($po);\n            $poParser = new \\Sepia\\PoParser\\Parser($fileHandler);\n            $Catalog  = \\Sepia\\PoParser\\Parser::parseFile($po);\n\n            if ( !empty( $translations = $Catalog->getEntries() ) ){\n              foreach ($translations as $i => $t ){\n\n                \/\/ @var  $original the original expression \n                $original = $t->getMsgId();\n\n                $po_file[$i][$lng]['original'] = $original;\n\n                \/\/ the translation of the string found in the po file \n                $po_file[$i][$lng]['translations_po'] =  $t->getMsgStr();\n\n                \/\/ @var  $id takes the id of the original expression in db \n                if ( $id = $this->db->select_one('bbn_i18n',\n                  'id',\n                  [\n                    'exp' => $original,\n                    'lang' => $path_source_lang\n                  ]) ){\n                  $po_file[$i][$lng]['translations_db'] = $this->db->select_one('bbn_i18n_exp', 'expression', ['id_exp' => $id, 'lang' => $lng]);\n\n                  \/\/ the id of the string \n                  $po_file[$i][$lng]['id_exp'] = $id;\n\n                  \/\/ @var (array) takes $paths of files in which the string was found from the file po \n                  $paths = $t->getReference();\n                   \n                  \/\/ get the url to use it for the link to ide from the table \n                  foreach ( $paths as $p ){\n                    $po_file[$i][$lng]['paths'][] = $project->real_to_url_i18n($p);\n                  }\n                  \/\/ the number of times the strings is found in the files of the path  \n                  $po_file[$i][$lng]['occurrence'] = !empty($po_file[$i][$path_source_lang]) ? count($po_file[$i][$path_source_lang]['paths']) : 0;\n                };\n              }\n              \n              $success = true;\n            }\n          }\n        }\n      }\n      \n      return [\n        'path_source_lang' => $path_source_lang,\n        'path' => $o['text'],\n        'success' => $success,\n        'languages' => $languages,\n        'total' => count(array_values($po_file)),\n        'strings' => array_values($po_file),\n        'id_option' => $id_option,\n      ];\n    }\n\n  }",
+            "startLine": 767,
+            "doc": {
+                "description": "Returns the informations relative to traslation of the given $id_option of a $id_project. The data is formatted to be shown in a table",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "project"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "option"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 855,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "project"
+                },
+                {
+                    "name": "id_option",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "option"
+                }
+            ]
+        },
+        "get_translations_table": {
+            "name": "get_translations_table",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_project, $id_option)\n  {\n      ($o = $this->options->option($id_option)) ){\n      \/\/ @var  $path_source_lang the property language of the id_option (the path) \n      \/\/on the option the property is language, on the project i18n\n      $path_source_lang = $this->options->get_prop($id_option, 'language');\n      \n      \/\/ @var  $to_explore the path to explore \n      $to_explore = $this->get_path_to_explore($id_option);      \n      \/\/the path of the locale dirs\n      $locale_dir = $this->get_locale_dir_path($id_option);      \n      $languages = array_map(function($a){\n        return basename($a);  \n      }, \\bbn\\file\\dir::get_dirs($locale_dir)) ?: [];\n      \n      $i = 0;\n      $res = [];\n      $project = new bbn\\appui\\project($this->db, $id_project);\n   \n      $errors = [];\n      if ( !empty($languages) ){\n        $po_file = [];\n        $success = false;\n        foreach ( $languages as $lng ){\n          \/\/ the path of po and mo files \n          $idx = is_file($locale_dir.'\/index.txt') ? file_get_contents($locale_dir.'\/index.txt') : '';\n          $po = $locale_dir.'\/'.$lng.'\/LC_MESSAGES\/'.$o['text'].$idx.'.po';\n          $mo = $locale_dir.'\/'.$lng.'\/LC_MESSAGES\/'.$o['text'].$idx.'.mo';\n          \/\/ if the file po exist takes its content \n          if ( file_exists($po) ){\n            $fileHandler = new \\Sepia\\PoParser\\SourceHandler\\FileSystem($po);\n            $poParser = new \\Sepia\\PoParser\\Parser($fileHandler);\n            $Catalog  = \\Sepia\\PoParser\\Parser::parseFile($po);\n\n            if ( !empty( $translations = $Catalog->getEntries() ) ){\n              foreach ($translations as $i => $t ){\n                \/\/ @var  $original the original expression \n                $id = null;\n                if ( $original = stripslashes($t->getMsgId()) ){\n                  $idx = \\bbn\\x::find($res, ['exp' => $original]);\n                  if ( $idx !== false ){\n                    $todo = false;\n                    $row =& $res[$idx];\n                  }\n                  else{\n                    $todo = true;\n                    $row = [];\n                  }\n                  \/\/ the translation of the string found in the po file \n                  if ( isset($row['id']) ){\n                    $id = $row['id'];\n                  }\n                  \/\/ @var  $id takes the id of the original expression in db \n                  if ( !isset($id) && !($id = $this->db->select_one('bbn_i18n', 'id', [\n                    ['exp', 'LIKE', $original],\n                    ['lang', 'LIKE', $path_source_lang]\n                  ])) ){\n                    $prev= $this->db->last();\n                    if ( !$this->db->insert_ignore('bbn_i18n', [\n                      'exp' => $original,\n                      'lang' => $path_source_lang\n                    ]) ){\n                      \\bbn\\x::hdump($original,$prev,$path_source_lang,$t->getReference());\n                      $errors[] = $original;\n\n                    }\n                    else {\n                      $id = $this->db->last_id();\n                    }\n                  }\n                  if ( $id ){\n                    $row[$lng.'_po'] = stripslashes($t->getMsgStr());\n                    \n                    $row[$lng.'_db'] = $this->db->select_one('bbn_i18n_exp', 'expression', ['id_exp' => $id, 'lang' => $lng]);\n                    if ( $row[$lng.'_po'] && !$row[$lng.'_db'] ){\n                      if (\n                        (($row[$lng.'_db'] === false) &&\n                        $this->db->insert('bbn_i18n_exp', [\n                          'expression' => $row[$lng.'_po'],\n                          'id_exp' => $id,\n                          'lang' => $lng\n                        ])) ||\n                        $this->db->update('bbn_i18n_exp', [\n                          'expression' => $row[$lng.'_po']\n                        ], [\n                          'id_exp' => $id,\n                          'lang' => $lng\n                        ])\n                      ){\n                        $row[$lng.'_db'] = $row[$lng.'_po'];\n                      }\n                      else{\n                        die(\"Error\");\n                      }\n                    }\n                    if ( empty($row[$lng.'_db']) ){\n                      $row[$lng.'_db'] = '';\n                     \/\/ die(var_dump($row[$lng.'_db']));\n                    }\n                    if ($todo) {\n                      \n                      $row['id_exp'] = $id;\n                      $row['paths'] = [];\n                      $row['exp'] = $original;\n                      \/\/ @var (array) takes $paths of files in which the string was found from the file po\n                      $paths = $t->getReference();\n                    \n                      \/\/ get the url to use it for the link to ide from the table\n                      foreach ($paths as $p) {\n                        $row['paths'][] = $project->real_to_url($p);\n                      }\n                      \/\/ the number of times the strings is found in the files of the path\n                      $row['occurrence'] = count($row['paths']);\n                      $res[] = $row;\n                    }\n                  }\n                  else{\n                    die(\"Error 2\");\n                  }\n                }\n              }\n              \n              $success = true;\n            }\n          }\n        }\n      }\n      \n      return [\n        \n        'path_source_lang' => $path_source_lang,\n        'path' => $o['text'],\n        'success' => $success,\n        'languages' => $languages,\n        'total' => count(array_values($po_file)),\n        'strings' => $res,\n        'id_option' => $id_option,\n        'errors' => $errors\n      ];\n    }\n\n  }",
+            "startLine": 857,
+            "doc": null,
+            "endLine": 998,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_option",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_path_to_explore": {
+            "name": "get_path_to_explore",
+            "summary": "Returns the path to explore relative to the given id_option",
+            "description": "It only works if i18n class is constructed by giving the id_project",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "It only works if i18n class is constructed by giving the id_project"
+                }
+            ],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option)\n  {\n    if ( $this->id_project ){\n      \n      $project = new \\bbn\\appui\\project($this->db, $this->id_project);\n      \/\/the repository\n      $rep = $project->repository_by_id($id_option);\n      \n      \/\/the root of this repositoryu\n      $path = $project->get_root_path($rep);\n      return $path;  \n    }\n    return '';\n  }",
+            "startLine": 1007,
+            "doc": {
+                "description": "Returns the path to explore relative to the given id_option\nIt only works if i18n class is constructed by giving the id_project",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "String",
+                        "name": "$id",
+                        "description": "option"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1020,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "option"
+                }
+            ]
+        },
+        "get_locale_dir_path": {
+            "name": "get_locale_dir_path",
+            "summary": "Returns the path of the locale dir of the given $id_option",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option)\n  {\n    return $path;\n  }",
+            "startLine": 1028,
+            "doc": {
+                "description": "Returns the path of the locale dir of the given $id_option",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "String",
+                        "name": "$id",
+                        "description": "option"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1031,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "option"
+                }
+            ]
+        },
+        "get_index_path": {
+            "name": "get_index_path",
+            "summary": "Returns the path of the file index.txt inside the locale folder",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option)\n  {\n  }",
+            "startLine": 1038,
+            "doc": {
+                "description": "Returns the path of the file index.txt inside the locale folder",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "String",
+                        "name": "$id",
+                        "description": "option"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1040,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "option"
+                }
+            ]
+        },
+        "cache_delete_all": {
+            "name": "cache_delete_all",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\treturn $this;\n  }",
+            "startLine": 50,
+            "doc": null,
+            "endLine": 53,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "cache_delete_all",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\cache",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\treturn $this;\n  }",
+                "startLine": 50,
+                "doc": null,
+                "endLine": 53,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "cache_delete": {
+            "name": "cache_delete",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($uid)\n  {\n\t\treturn $this;\n  }",
+            "startLine": 55,
+            "doc": null,
+            "endLine": 58,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "cache_delete",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\cache",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($uid)\n  {\n\t\treturn $this;\n  }",
+                "startLine": 55,
+                "doc": null,
+                "endLine": 58,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "uid",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "cache_get": {
+            "name": "cache_get",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($uid, $method = '', $ttl = 0)\n  {\n  }",
+            "startLine": 60,
+            "doc": null,
+            "endLine": 62,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "cache_get",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\cache",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($uid, $method = '', $ttl = 0)\n  {\n  }",
+                "startLine": 60,
+                "doc": null,
+                "endLine": 62,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 3,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "uid",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "method",
+                        "position": 1,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "ttl",
+                        "position": 2,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": 0,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "cache_set": {
+            "name": "cache_set",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($uid, $method = '', $data = NULL, $ttl = 0)\n  {\n\t\treturn $this;\n  }",
+            "startLine": 64,
+            "doc": null,
+            "endLine": 67,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "cache_set",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\cache",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($uid, $method = '', $data = NULL, $ttl = 0)\n  {\n\t\treturn $this;\n  }",
+                "startLine": 64,
+                "doc": null,
+                "endLine": 67,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 4,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "uid",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "method",
+                        "position": 1,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "data",
+                        "position": 2,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    },
+                    {
+                        "name": "ttl",
+                        "position": 3,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": 0,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 3,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "cache_set_get": {
+            "name": "cache_set_get",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($fn, $uid, $method = '', $data = NULL, $ttl = 0)\n  {\n\t\tif (!($tmp = $this->cacher->get_raw($cn, $ttl))) {\n\t\t\tif ($data = $fn()) {\n\t\t\t\t$this->cacher->set($cn, $data, $ttl);\n\t\t\t}\n\t\t}\n\t\telse {\n\t\t\t$data = $tmp['value'];\n\t\t}\n\t\treturn $data ?: false;\n  }",
+            "startLine": 69,
+            "doc": null,
+            "endLine": 80,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": {
+                "name": "cache_set_get",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\cache",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($fn, $uid, $method = '', $data = NULL, $ttl = 0)\n  {\n\t\tif (!($tmp = $this->cacher->get_raw($cn, $ttl))) {\n\t\t\tif ($data = $fn()) {\n\t\t\t\t$this->cacher->set($cn, $data, $ttl);\n\t\t\t}\n\t\t}\n\t\telse {\n\t\t\t$data = $tmp['value'];\n\t\t}\n\t\treturn $data ?: false;\n  }",
+                "startLine": 69,
+                "doc": null,
+                "endLine": 80,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 5,
+                "numberOfRequiredParameters": 2,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "fn",
+                        "position": 0,
+                        "type": "callable",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "uid",
+                        "position": 1,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "method",
+                        "position": 2,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "data",
+                        "position": 3,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    },
+                    {
+                        "name": "ttl",
+                        "position": 4,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": 0,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "fn",
+                    "position": 0,
+                    "type": "callable",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "uid",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 3,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 4,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "cache_has": {
+            "name": "cache_has",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($uid, $method = '', $ttl = 0)\n  {\n    return $this->cache_get($uid, $method, $ttl) ? true : false;\n  }",
+            "startLine": 82,
+            "doc": null,
+            "endLine": 85,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "cache_has",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\cache",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($uid, $method = '', $ttl = 0)\n  {\n    return $this->cache_get($uid, $method, $ttl) ? true : false;\n  }",
+                "startLine": 82,
+                "doc": null,
+                "endLine": 85,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 3,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "uid",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "method",
+                        "position": 1,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "ttl",
+                        "position": 2,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": 0,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "test": {
+            "name": "test",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+            "startLine": 45,
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 50,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "test",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+                "startLine": 45,
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 50,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "check": {
+            "name": "check",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+            "startLine": 56,
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 61,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "check",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+                "startLine": 56,
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 61,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "get_error": {
+            "name": "get_error",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 72,
+            "doc": null,
+            "endLine": 74,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_error",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 72,
+                "doc": null,
+                "endLine": 74,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "get_errors": {
+            "name": "get_errors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 76,
+            "doc": null,
+            "endLine": 78,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_errors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 76,
+                "doc": null,
+                "endLine": 78,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+            "startLine": 80,
+            "doc": null,
+            "endLine": 88,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+                "startLine": 80,
+                "doc": null,
+                "endLine": 88,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "__call": {
+            "name": "__call",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
+            "startLine": 95,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$arguments"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 99,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": {
+                "name": "__call",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
+                "startLine": 95,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string",
+                            "name": "$name"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "array",
+                            "name": "$arguments"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 99,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 2,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "name",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "arguments",
+                        "position": 1,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "arguments",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_debug": {
+            "name": "is_debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 104,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "is_debug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 104,
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 106,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "set_debug": {
+            "name": "set_debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($debug)\n  {\n  }",
+            "startLine": 112,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 114,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "set_debug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($debug)\n  {\n  }",
+                "startLine": 112,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 114,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "debug",
+                        "position": 0,
+                        "type": "bool",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "debug",
+                    "position": 0,
+                    "type": "bool",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_option_root": {
+            "name": "get_option_root",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::$option_root_id;\n  }",
+            "startLine": 71,
+            "doc": null,
+            "endLine": 74,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_root": {
+            "name": "get_appui_root",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::$option_appui_id;\n  }",
+            "startLine": 76,
+            "doc": null,
+            "endLine": 79,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_option_id": {
+            "name": "get_option_id",
+            "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 87,
+            "doc": {
+                "description": "Returns The option's ID of a category, i.e. direct children of option's root",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 89,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options_ids": {
+            "name": "get_options_ids",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return $a !== null;\n    }));\n  }",
+            "startLine": 91,
+            "doc": null,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options_tree": {
+            "name": "get_options_tree",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $tree['items'] : [];\n  }",
+            "startLine": 97,
+            "doc": null,
+            "endLine": 100,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_option": {
+            "name": "get_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 106,
+            "doc": null,
+            "endLine": 108,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options_text_value": {
+            "name": "get_options_text_value",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      bbn\\appui\\options::get_instance()->text_value_options($id): [];\n  }",
+            "startLine": 110,
+            "doc": null,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_option_id": {
+            "name": "get_appui_option_id",
+            "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 121,
+            "doc": {
+                "description": "Returns The option's ID of a category, i.e. direct children of option's root",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 123,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options_ids": {
+            "name": "get_appui_options_ids",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return $a !== null;\n    }));\n  }",
+            "startLine": 125,
+            "doc": null,
+            "endLine": 129,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options_tree": {
+            "name": "get_appui_options_tree",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $tree['items'] : [];\n  }",
+            "startLine": 131,
+            "doc": null,
+            "endLine": 134,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options": {
+            "name": "get_appui_options",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 136,
+            "doc": null,
+            "endLine": 138,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_option": {
+            "name": "get_appui_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 140,
+            "doc": null,
+            "endLine": 142,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options_text_value": {
+            "name": "get_appui_options_text_value",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\i18n",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      bbn\\appui\\options::get_instance()->text_value_options($id) : [];\n  }",
+            "startLine": 144,
+            "doc": null,
+            "endLine": 147,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        }
+    },
+    "properties": null,
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 51,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\models\\tts\\optional"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\models\\cls\\cache",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "extensions": [
+            "js",
+            "json",
+            "php",
+            "html"
+        ],
+        "optional_is_init": false,
+        "option_appui_id": null,
+        "option_root_id": null,
+        "parser": null,
+        "translations": [],
+        "user": null,
+        "options": null,
+        "id_project": null,
+        "db": null,
+        "_cache_prefix": null,
+        "cacher": null,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": []
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\appui",
+    "shortName": "i18n"
+}

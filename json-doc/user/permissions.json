@@ -1,0 +1,2089 @@
+{
+    "doc": {
+        "description": "A permission system linked to options, user classes and preferences.\nFrom the moment a user or a group has a preference on an item, it is considered to have a permission. Deleting a permission deletes the preference",
+        "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
+            "copyright": "BBN Solutions",
+            "since": "Nov 24, 2016, 13:23:12 +0000",
+            "category": "Authentication",
+            "license": "http:\/\/opensource.org\/licenses\/MIT MIT",
+            "version": "0.1",
+            "todo": "Store the deleted preferences? And restore them if the a permission is re-given"
+        }
+    },
+    "name": "bbn\\user\\permissions",
+    "namespace": true,
+    "traits": [
+        "bbn\\models\\tts\\retriever",
+        "bbn\\models\\tts\\optional",
+        "bbn\\models\\tts\\current"
+    ],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/user\/permissions.php",
+    "startLine": 21,
+    "endLine": 574,
+    "contentConstructor": {
+        "file": "bbn\\user\\permissions",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "permissions constructor.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\tif ( !($this->opt = bbn\\appui\\options::get_instance()) ){\n      die('Impossible to construct permissions: you need to instantiate options before');\n    }\n    if ( !($this->user = bbn\\user::get_instance()) ){\n      die('Impossible to construct permissions: you need to instantiate user before');\n    }\n    if ( !($this->pref = bbn\\user\\preferences::get_instance()) ){\n      die('Impossible to construct permissions: you need to instantiate preferences before');\n    }\n    self::retriever_init($this);\n    self::optional_init();\n    $this->db = \\bbn\\db::get_instance();\n  }",
+            "startLine": 55,
+            "doc": {
+                "description": "permissions constructor.",
+                "tags": []
+            },
+            "endLine": 69,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "from_path": {
+            "name": "from_path",
+            "summary": "Returns the option's ID corresponds to the given path.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path, $type = 'page')\n  {\n    $parent = null;\n    if ( $root = $this->opt->from_code($type, self::$option_root_id) ){\n      $parts = explode('\/', $path);\n      $parent = $root;\n      foreach ( $parts as $i => $p ){\n        $is_not_last = $i < (\\count($parts) - 1);\n        if ( !empty($p) ){\n          $prev_parent = $parent;\n          \/\/ Adds a slash for each bit of the path except the last one\n          $parent = $this->opt->from_code($p.($is_not_last ? '\/' : ''), $prev_parent);\n          \/\/ If not found looking for a subpermission\n          if ( !$parent && $is_not_last ){\n            $parent = $this->opt->from_code($p, $prev_parent);\n          }\n        }\n      }\n    }\n    return $parent ?: null;\n  }",
+            "startLine": 78,
+            "doc": {
+                "description": "Returns the option's ID corresponds to the given path.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 98,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "page",
+                    "default_name": ""
+                }
+            ]
+        },
+        "to_path": {
+            "name": "to_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option)\n  {\n    $p = [];\n    while ($id_option && ($id_option !== self::$option_root_id)){\n      if ( ($code = $this->opt->code($id_option)) ){\n        \/\/\\bbn\\x::dump($code);\n        array_unshift($p, $code);\n        $id_option = $this->opt->get_id_parent($id_option);\n      }\n      else{\n        return null;\n      }\n    }\n    if ( count($p) > 1 ){\n      if ( $p[0] === 'page' ){\n        array_shift($p);\n      }\n      else{\n        \/\/$p[0] = bbn\\mvc::\n      }\n      return bbn\\x::join($p, '');\n    }\n    return null;\n  }",
+            "startLine": 100,
+            "doc": null,
+            "endLine": 123,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "options": {
+            "name": "options",
+            "summary": "Returns the result of appui\\options::options filtered with only the ones authorized to the current user.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option = NULL, $type = 'page')\n  {\n    if (\n      ($id_option = $this->_get_id_option($id_option, $type)) &&\n      ($os = $this->opt->options(\\func_get_args()))\n    ){\n      $res = [];\n      foreach ( $os as $o ){\n        if ( $this->pref->has($o['id']) ){\n          $res[] = $o;\n        }\n      }\n      return $res;\n    }\n    return null;\n  }",
+            "startLine": 132,
+            "doc": {
+                "description": "Returns the result of appui\\options::options filtered with only the ones authorized to the current user.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 147,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "page",
+                    "default_name": ""
+                }
+            ]
+        },
+        "full_options": {
+            "name": "full_options",
+            "summary": "Returns the result of appui\\options::full_options filtered with only the ones authorized to the current user.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option = NULL, $type = 'page')\n  {\n    if (\n      ($id_option = $this->_get_id_option($id_option, $type)) &&\n      ($os = $this->opt->full_options(\\func_get_args()))\n    ){\n      $res = [];\n      foreach ( $os as $o ){\n        if ( ($ids = $this->pref->retrieve_ids($o['id'])) && ($cfg = $this->pref->get($ids[0])) ){\n          $res[] = bbn\\x::merge_arrays($o, $cfg);\n        }\n      }\n      return $res;\n    }\n    return null;\n  }",
+            "startLine": 156,
+            "doc": {
+                "description": "Returns the result of appui\\options::full_options filtered with only the ones authorized to the current user.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 171,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "page",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_all": {
+            "name": "get_all",
+            "summary": "Returns the full list of permissions existing in the given option",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option = NULL, $type = 'page')\n  {\n    if ( $id_option = $this->_get_id_option($id_option, $type) ){\n      return $this->pref->options($id_option ?: $this->get_current());\n    }\n    return null;\n  }",
+            "startLine": 180,
+            "doc": {
+                "description": "Returns the full list of permissions existing in the given option",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "null|string",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 186,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "page",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_full": {
+            "name": "get_full",
+            "summary": "Returns the full list of permissions existing in the given option with all the current user's preferences",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option = NULL, $type = 'page')\n  {\n    if ( $id_option = $this->_get_id_option($id_option, $type) ){\n      return $this->pref->full_options($id_option ?: $this->get_current());\n    }\n    return null;\n  }",
+            "startLine": 195,
+            "doc": {
+                "description": "Returns the full list of permissions existing in the given option with all the current user's preferences",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "null|string",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 201,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "page",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get": {
+            "name": "get",
+            "summary": "Returns an option combined with its sole\/first permission",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option = NULL, $type = 'page', $force = false)\n  {\n    \/*\n    if ( $all = $this->get_all($id_option, $type) ){\n      $r = [];\n      foreach ( $all as $a ){\n        if ( $this->has($a['id'], '', $force) ){\n          $r[] = $a;\n        }\n      }\n      return $r;\n    }\n    *\/\n    if (\n      ($id_option = $this->_get_id_option($id_option, $type)) &&\n      $this->has($id_option, $type, $force)\n    ){\n      return $this->pref->option($id_option);\n    }\n    return null;\n  }",
+            "startLine": 211,
+            "doc": {
+                "description": "Returns an option combined with its sole\/first permission",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$force"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 231,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "page",
+                    "default_name": ""
+                },
+                {
+                    "name": "force",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "has": {
+            "name": "has",
+            "summary": "Checks if a user and\/or a group has a permission.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option = NULL, $type = 'page', $force = false)\n  {\n    if ( !$force && $this->user && $this->user->is_dev() ){\n      return true;\n    }\n    if ( $id_option = $this->_get_id_option($id_option, $type) ){\n      $option = $this->opt->option($id_option);\n      if ( !empty($option['public']) ){\n        return true;\n      }\n      return $this->pref->has($id_option, $force);\n    }\n    return false;\n  }",
+            "startLine": 241,
+            "doc": {
+                "description": "Checks if a user and\/or a group has a permission.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$force"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 254,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "page",
+                    "default_name": ""
+                },
+                {
+                    "name": "force",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "has_deep": {
+            "name": "has_deep",
+            "summary": "Checks if a user and\/or a group has a permission for the given option or for its childern.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option = NULL, $type = 'page', $force = false)\n  {\n    if ( !$force && $this->user && $this->user->is_dev() ){\n      return true;\n    }\n    if ( $this->has($id_option, $type, $force) ){\n      return true;\n    }\n    if (\n      ($id_option = $this->_get_id_option($id_option, $type)) &&\n      ($options = $this->opt->full_options($id_option))\n    ){\n      foreach ( $options as $option ){\n        if ( $this->has_deep($option['id'], $type, $force) ){\n          return true;\n        }\n      }\n    }\n    return false;\n  }",
+            "startLine": 264,
+            "doc": {
+                "description": "Checks if a user and\/or a group has a permission for the given option or for its childern.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$force"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 283,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "page",
+                    "default_name": ""
+                },
+                {
+                    "name": "force",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "is": {
+            "name": "is",
+            "summary": "Checks if an option corresponds to the given path.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path, $type = 'page')\n  {\n    return $this->from_path($path, $type);\n  }",
+            "startLine": 292,
+            "doc": {
+                "description": "Checks if an option corresponds to the given path.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 295,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "page",
+                    "default_name": ""
+                }
+            ]
+        },
+        "customize": {
+            "name": "customize",
+            "summary": "Adapts a given array of options' to user's permissions",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $arr)\n  {\n    $res = [];\n    if ( isset($arr[0]) ){\n      foreach ( $arr as $a ){\n        if ( isset($a['id']) && $this->has($a['id']) ){\n          $res[] = $a;\n        }\n      }\n    }\n    else if ( isset($arr['items']) ){\n      $res = $arr;\n      unset($res['items']);\n      foreach ( $arr['items'] as $a ){\n        if ( isset($a['id']) && $this->has($a['id']) ){\n          if ( !isset($res['items']) ){\n            $res['items'] = [];\n          }\n          $res['items'][] = $a;\n        }\n      }\n    }\n    return $res;\n  }",
+            "startLine": 303,
+            "doc": {
+                "description": "Adapts a given array of options' to user's permissions",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$arr"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 326,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "arr",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "add": {
+            "name": "add",
+            "summary": "Grants a new permission to a user or a group",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option, $type = 'page')\n  {\n    if ( $id_option = $this->_get_id_option($id_option, $type) ){\n      return $this->pref->set_by_option($id_option, []);\n    }\n    return null;\n  }",
+            "startLine": 334,
+            "doc": {
+                "description": "Grants a new permission to a user or a group",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "null|string",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 340,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "page",
+                    "default_name": ""
+                }
+            ]
+        },
+        "remove": {
+            "name": "remove",
+            "summary": "Deletes a preference for a path or an ID.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option, $type = 'page')\n  {\n    if ( $id_option = $this->_get_id_option($id_option, $type) ){\n      return $this->pref->delete($id_option);\n    }\n    return null;\n  }",
+            "startLine": 349,
+            "doc": {
+                "description": "Deletes a preference for a path or an ID.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "null|string",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 355,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "page",
+                    "default_name": ""
+                }
+            ]
+        },
+        "read_option": {
+            "name": "read_option",
+            "summary": "Checks if the category represented by the given option ID is readable by the current user",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option = NULL)\n  {\n    if ( bbn\\str::is_uid($id_option) ){\n      $root = self::get_option_id('options');\n      $id_to_check = $this->opt->from_code('opt'.$id_option, $root);\n      return $this->has($id_to_check, 'options');\n    }\n    return null;\n  }",
+            "startLine": 363,
+            "doc": {
+                "description": "Checks if the category represented by the given option ID is readable by the current user",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$id",
+                        "description": "option"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 371,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "option"
+                }
+            ]
+        },
+        "write_option": {
+            "name": "write_option",
+            "summary": "Checks if the category represented by the given option ID is writable by the current user",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option)\n  {\n    if ( bbn\\str::is_uid($id_option) ){\n      $root = self::get_option_id('opt'.$id_option, 'options');\n      $id_to_check = $this->opt->from_code('write', $root);\n      return $this->has($id_to_check, 'options');\n    }\n    return null;\n  }",
+            "startLine": 379,
+            "doc": {
+                "description": "Checks if the category represented by the given option ID is writable by the current user",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$id",
+                        "description": "option"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 387,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "option"
+                }
+            ]
+        },
+        "update_all": {
+            "name": "update_all",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($routes)\n  {\n    $res = ['total' => false];\n    \/** @var int The option's ID of the permissions' root $id_permission *\/\n    if ( $id_permission = $this->get_option_root() ){\n      \/** @var int The option's ID of the permissions on options $id_option *\/\n      $id_option = $this->get_option_id('options');\n      if ( !$id_option ){\n        $id_option = $this->opt->add([\n          'id_parent' => $id_permission,\n          'code' => 'options',\n          'text' => _(\"Options\"),\n          'value' => [\n            'icon' => 'nf nf-fa-cogs'\n          ]\n        ]);\n      }\n\n      \/** @var int The option's ID of the permissions on pages (controllers) $id_page *\/\n      $id_page = $this->get_option_id('page');\n      if ( !$id_page ){\n        $id_page = $this->opt->add([\n          'id_parent' => $id_permission,\n          'code' => 'page',\n          'text' => _(\"Pages\"),\n          'value' => [\n            'icon' => 'nf nf-fa-files'\n          ]\n        ]);\n      }\n\n      \/** @var int The option's ID of the permissions on pages (controllers) $id_page *\/\n      $id_plugins = $this->get_option_id('plugins');\n      if ( !$id_plugins ){\n        $id_plugins = $this->opt->add([\n          'id_parent' => $id_permission,\n          'code' => 'plugins',\n          'text' => _(\"Plugins\"),\n          'value' => [\n            'icon' => 'nf nf-fa-plug'\n          ]\n        ]);\n      }\n\n      \/\/ $id_page must be set to generate the page's permissions\n      if ($id_page \n          &&( $all = bbn\\file\\dir::get_tree(bbn\\mvc::get_app_path().'mvc\/public', false, function($a){\n          return (($a['type'] === 'dir') || ($a['ext'] === 'php')) && (basename($a['name']) !== '_ctrl.php');\n        }))\n       ) {\n        $all = $this->_treat($all);\n\n        foreach ( $routes as $url => $route ){\n          if ( $tree = bbn\\file\\dir::get_tree($route['path'].'\/src\/mvc\/public', false, function ($a){\n            return (($a['type'] === 'dir') || ($a['ext'] === 'php')) && (basename($a['name']) !== '_ctrl.php');\n          })\n          ){\n            $treated = $this->_treat($tree);\n            $this->_merge($all, $treated, $url);\n          }\n\n        }\n\n        usort($all, [$this, '_sort']);\n        array_walk($all, [$this, '_walk']);\n        $res['total'] = 0;\n        \/\/die(\\bbn\\x::dump($all));\n        foreach ( $all as $i => $it ){\n          $it['cfg'] = json_encode(['order' => $i + 1]);\n          $res['total'] += $this->_add($it, $id_page);\n        }\n      }\n\n      \/\/ $id_option must be set to generate the option's permissions\n      if ( $id_option && ($permissions = $this->opt->find_permissions($this->opt->get_root(), true)) ){\n        foreach ( $permissions as $p ){\n          $p['code'] = 'opt'.$p['id'];\n          $p['id_alias'] = $p['id'];\n          $p['id_parent'] = $id_option;\n          $p['type'] = 'option';\n          unset($p['id']);\n\n          $res['total'] += $this->opt->add($p, true, true);\n          $p['id_parent'] = $this->opt->from_code($p['code'], $id_option);\n          $p['code'] = 'write';\n          $p['text'] = '\u00c9criture';\n          $res['total'] += $this->opt->add($p, true, true);\n        }\n      }\n      $this->opt->delete_cache();\n    }\n    return $res;\n\n  }",
+            "startLine": 389,
+            "doc": null,
+            "endLine": 482,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "routes",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "test": {
+            "name": "test",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+            "startLine": 45,
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 50,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "test",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+                "startLine": 45,
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 50,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "check": {
+            "name": "check",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+            "startLine": 56,
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 61,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "check",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+                "startLine": 56,
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 61,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "get_error": {
+            "name": "get_error",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 72,
+            "doc": null,
+            "endLine": 74,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_error",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 72,
+                "doc": null,
+                "endLine": 74,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "get_errors": {
+            "name": "get_errors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 76,
+            "doc": null,
+            "endLine": 78,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_errors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 76,
+                "doc": null,
+                "endLine": 78,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+            "startLine": 80,
+            "doc": null,
+            "endLine": 88,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+                "startLine": 80,
+                "doc": null,
+                "endLine": 88,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "__call": {
+            "name": "__call",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
+            "startLine": 95,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$arguments"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 99,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": {
+                "name": "__call",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
+                "startLine": 95,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string",
+                            "name": "$name"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "array",
+                            "name": "$arguments"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 99,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 2,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "name",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "arguments",
+                        "position": 1,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "arguments",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_debug": {
+            "name": "is_debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 104,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "is_debug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 104,
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 106,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "set_debug": {
+            "name": "set_debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($debug)\n  {\n  }",
+            "startLine": 112,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 114,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "set_debug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($debug)\n  {\n  }",
+                "startLine": 112,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 114,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "debug",
+                        "position": 0,
+                        "type": "bool",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "debug",
+                    "position": 0,
+                    "type": "bool",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_instance": {
+            "name": "get_instance",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 25,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 27,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "retriever_exists": {
+            "name": "retriever_exists",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 29,
+            "doc": null,
+            "endLine": 31,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_option_root": {
+            "name": "get_option_root",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::$option_root_id;\n  }",
+            "startLine": 71,
+            "doc": null,
+            "endLine": 74,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_root": {
+            "name": "get_appui_root",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::$option_appui_id;\n  }",
+            "startLine": 76,
+            "doc": null,
+            "endLine": 79,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_option_id": {
+            "name": "get_option_id",
+            "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 87,
+            "doc": {
+                "description": "Returns The option's ID of a category, i.e. direct children of option's root",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 89,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options_ids": {
+            "name": "get_options_ids",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return $a !== null;\n    }));\n  }",
+            "startLine": 91,
+            "doc": null,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options_tree": {
+            "name": "get_options_tree",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $tree['items'] : [];\n  }",
+            "startLine": 97,
+            "doc": null,
+            "endLine": 100,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options": {
+            "name": "get_options",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 102,
+            "doc": null,
+            "endLine": 104,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_option": {
+            "name": "get_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 106,
+            "doc": null,
+            "endLine": 108,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options_text_value": {
+            "name": "get_options_text_value",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      bbn\\appui\\options::get_instance()->text_value_options($id): [];\n  }",
+            "startLine": 110,
+            "doc": null,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_option_id": {
+            "name": "get_appui_option_id",
+            "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 121,
+            "doc": {
+                "description": "Returns The option's ID of a category, i.e. direct children of option's root",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 123,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options_ids": {
+            "name": "get_appui_options_ids",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return $a !== null;\n    }));\n  }",
+            "startLine": 125,
+            "doc": null,
+            "endLine": 129,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options_tree": {
+            "name": "get_appui_options_tree",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $tree['items'] : [];\n  }",
+            "startLine": 131,
+            "doc": null,
+            "endLine": 134,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options": {
+            "name": "get_appui_options",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 136,
+            "doc": null,
+            "endLine": 138,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_option": {
+            "name": "get_appui_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 140,
+            "doc": null,
+            "endLine": 142,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options_text_value": {
+            "name": "get_appui_options_text_value",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      bbn\\appui\\options::get_instance()->text_value_options($id) : [];\n  }",
+            "startLine": 144,
+            "doc": null,
+            "endLine": 147,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "set_current": {
+            "name": "set_current",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option)\n  {\n    self::_set_current($id_option);\n  }",
+            "startLine": 29,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "option"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 32,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "void"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "option"
+                }
+            ]
+        },
+        "get_current": {
+            "name": "get_current",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\permissions",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::$current;\n  }",
+            "startLine": 37,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 40,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        }
+    },
+    "properties": null,
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 43,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\models\\tts\\retriever",
+        "bbn\\models\\tts\\optional",
+        "bbn\\models\\tts\\current"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\models\\cls\\basic",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "retriever_instance": {},
+        "retriever_exists": true,
+        "optional_is_init": true,
+        "option_appui_id": "05c471dc025011e8beb3005056014c9f",
+        "option_root_id": "05c471dc025011e8beb3005056014c9f",
+        "current": "86e54c8f985e11ea98cb366237393031",
+        "opt": null,
+        "pref": null,
+        "user": null,
+        "db": null,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": []
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\user",
+    "shortName": "permissions"
+}

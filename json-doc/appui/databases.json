@@ -1,0 +1,3766 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\appui\\databases",
+    "namespace": true,
+    "traits": [
+        "bbn\\models\\tts\\optional"
+    ],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/appui\/databases.php",
+    "startLine": 12,
+    "endLine": 1156,
+    "contentConstructor": {
+        "file": "bbn\\appui\\databases",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "Constructor",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bbn\\db $db)\n  {\n    parent::__construct($db);\n    self::optional_init();\n    $this->o = bbn\\appui\\options::get_instance();\n  }",
+            "startLine": 54,
+            "doc": {
+                "description": "Constructor",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "bbn\\db",
+                        "name": "$db",
+                        "description": "The main database connection (where options are)"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 59,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "__construct",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\cache",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function(bbn\\db $db)\n  {\n\t\t$this->cacher = bbn\\cache::get_engine();\n\t\t$this->_cache_prefix = str_replace('\\\\', '\/', \\get_class($this)).'\/';\n  }",
+                "startLine": 33,
+                "doc": null,
+                "endLine": 37,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "db",
+                        "position": 0,
+                        "type": "bbn\\db",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "bbn\\db",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The main database connection (where options are)"
+                }
+            ]
+        },
+        "connection": {
+            "name": "connection",
+            "summary": "Returns a connection with the given user@host selecting the given database.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($host, $db)\n  {\n    $id_host = !bbn\\str::is_uid($host) ? $this->host_id($host) : $host;\n    if ($id_host && ($cfg = $this->o->option($id_host))) {\n      $cfg = $this->o->option($id_host);\n      if (strpos($cfg['code'], '@')) {\n        $bits = bbn\\x::split($cfg['code'], '@');\n        if ((count($bits) === 2) && ($password = $this->get_password($id_host))) {\n          $db = [\n            'user' => $bits[0],\n            'host' => $bits[1],\n            'db' => $db,\n            'pass' => $password\n          ];\n        }\n        else {\n          $db = [\n            'host' => $cfg['code'],\n            'db' => $db\n          ];\n        }\n        $this->db_alt = new bbn\\db($db);\n        return $this->db_alt;\n      }\n    }\n    return null;\n  }",
+            "startLine": 68,
+            "doc": {
+                "description": "Returns a connection with the given user@host selecting the given database.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$host",
+                        "description": "A string user@host"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$db",
+                        "description": "The database name"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 94,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bbn\\db",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "host",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "A string user@host"
+                },
+                {
+                    "name": "db",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The database name"
+                }
+            ]
+        },
+        "host_id": {
+            "name": "host_id",
+            "summary": "Returns the ID of a connection.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($host = '')\n  {\n    if (!$host) {\n      if ($this->username) {\n        $host .= $this->username.'@';\n      }\n      $host .= $this->host;\n    }\n    \n    $r = self::get_option_id($host, 'connections');\n    return $r ?: null;\n  }",
+            "startLine": 102,
+            "doc": {
+                "description": "Returns the ID of a connection.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$host",
+                        "description": "The connection code (user@host or host)"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "host",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The connection code (user@host or host)"
+                }
+            ]
+        },
+        "count_hosts": {
+            "name": "count_hosts",
+            "summary": "Returns the number of connections in the options.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if (($id_parent = self::get_option_id('connections')) \n        && ($num = $this->o->count($id_parent))\n    ) {\n      return $num;\n    }\n    return 0;\n  }",
+            "startLine": 120,
+            "doc": {
+                "description": "Returns the number of connections in the options.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 128,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "hosts": {
+            "name": "hosts",
+            "summary": "Returns a list of the connections available.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if (($id_parent = self::get_option_id('connections')) \n        && ($co = array_values($this->o->code_options($id_parent)))\n    ) {\n      return $co;\n    }\n    return [];\n  }",
+            "startLine": 135,
+            "doc": {
+                "description": "Returns a list of the connections available.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 143,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "full_hosts": {
+            "name": "full_hosts",
+            "summary": "Returns the list of the connections",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if (($id_parent = self::get_option_id('connections'))\n        && ($opt = $this->o->full_options($id_parent))\n    ) {\n      return $opt;\n    }\n    return null;\n  }",
+            "startLine": 150,
+            "doc": {
+                "description": "Returns the list of the connections",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 158,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "db_id": {
+            "name": "db_id",
+            "summary": "Returns the option's ID of a database.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($db = '')\n  {\n    if (($id_parent = self::get_option_id('dbs'))\n        && ($res = $this->o->from_code($db ?: $this->db->current, $id_parent))\n    ) {\n      \n      return $res;\n    }\n    return null;\n  }",
+            "startLine": 166,
+            "doc": {
+                "description": "Returns the option's ID of a database.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$db",
+                        "description": "The database's name"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 175,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The database's name"
+                }
+            ]
+        },
+        "count_dbs": {
+            "name": "count_dbs",
+            "summary": "Returns the number of DBs available for the given connection.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($host = '')\n  {\n    if (!$host) {\n      $num = $this->o->count(self::get_option_id('dbs'));\n      return $num;\n    }\n    elseif (!bbn\\str::is_uid($host)) {\n      $host = $this->host_id($host);\n    }\n    $all = $this->o->get_aliases($host);\n    $num = $all ? count($all) : 0;\n    return $num;\n  }",
+            "startLine": 183,
+            "doc": {
+                "description": "Returns the number of DBs available for the given connection.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$host",
+                        "description": "The connection's code"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 195,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "host",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The connection's code"
+                }
+            ]
+        },
+        "dbs": {
+            "name": "dbs",
+            "summary": "Returns the list of DBs available for the given connection.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($host = '')\n  {\n    if (!$host) {\n      $arr = $this->o->full_options(self::get_option_id('dbs'));\n    }\n    elseif (!bbn\\str::is_uid($host)) {\n      $host = $this->host_id($host);\n    }\n    if ($host) {\n      $o = &$this->o;\n      $arr = array_map(\n        function ($a) use ($o) {\n          return $o->parent($a['id_parent']);\n        },\n        $this->o->get_aliases($host)\n      );\n    }\n    if (!empty($arr)) {\n      $res = array_map(\n        function ($a) {\n          return [\n            'id' => $a['id'],\n            'text' => $a['text'],\n            'name' => $a['code']\n          ];\n        },\n        $arr\n      );\n      return $res;\n    }\n    return [];\n  }",
+            "startLine": 203,
+            "doc": {
+                "description": "Returns the list of DBs available for the given connection.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$host",
+                        "description": "The connection's code, all DBs are returned if empty."
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 234,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "host",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The connection's code, all DBs are returned if empty."
+                }
+            ]
+        },
+        "full_dbs": {
+            "name": "full_dbs",
+            "summary": "Returns the list of DBs available for the given connection with statistics.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($host = '')\n  {\n    $o =& $this->o;\n    if ($dbs = $this->dbs($host)) {\n      $res = array_map(\n        function ($a) use ($o) {\n          $r = [\n            'id' => $a['id'],\n            'text' => $a['text'],\n            'name' => $a['name'],\n            'num_tables' => 0,\n            'num_connections' => 0,\n            'num_procedures' => 0,\n            'num_functions' => 0\n          ];\n          \/\/die(var_dump( $o->from_code('tables', $a['id'])));\n          if ($id_tables = $o->from_code('tables', $a['id'])) {\n            $r['num_tables'] = $o->count($id_tables);\n          }\n          if ($id_connections = $o->from_code('connections', $a['id'])) {\n            $r['num_connection'] = $o->count($id_connections);\n          }\n          if ($id_procedures = $o->from_code('procedures', $a['id'])) {\n            $r['num_procedures'] = $o->count($id_procedures);\n          }\n          if ($id_functions = $o->from_code('functions', $a['id'])) {\n            $r['num_functions'] = $o->count($id_functions);\n          }\n          return $r;\n        },\n        $dbs\n      );\n      return $res ?: [];\n    }\n    return [];\n  }",
+            "startLine": 242,
+            "doc": {
+                "description": "Returns the list of DBs available for the given connection with statistics.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$host",
+                        "description": "The connection's code, all DBs are returned if empty."
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 277,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "host",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The connection's code, all DBs are returned if empty."
+                }
+            ]
+        },
+        "table_id": {
+            "name": "table_id",
+            "summary": "Returns the ID of a table from the options table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $db = '', $host = '')\n  {\n    if (!bbn\\str::is_uid($db)) {\n      $db = $this->db_id($db, $host);\n    }\n    if (bbn\\str::is_uid($db)\n        && ($id_parent = $this->o->from_code('tables', $db))\n        && ($id = $this->o->from_code($table, $id_parent))\n    ) {\n      return $id;\n    }\n    return null;\n  }",
+            "startLine": 287,
+            "doc": {
+                "description": "Returns the ID of a table from the options table.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The name of the table"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$db",
+                        "description": "The name of the DB"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$host",
+                        "description": "The connection's code"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 299,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the table"
+                },
+                {
+                    "name": "db",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the DB"
+                },
+                {
+                    "name": "host",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The connection's code"
+                }
+            ]
+        },
+        "count_tables": {
+            "name": "count_tables",
+            "summary": "Returnms the number of tables in the given database.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($db, $host = '')\n  {\n    if (!bbn\\str::is_uid($db)) {\n      $db = $this->db_id($db, $host);\n    }\n    if (bbn\\str::is_uid($db) && ($id_parent = $this->o->from_code('tables', $db))) {\n      $num = $this->o->count($id_parent);\n      return $num ?: 0;\n    }\n    return null;\n  }",
+            "startLine": 308,
+            "doc": {
+                "description": "Returnms the number of tables in the given database.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$db",
+                        "description": "The database name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$host",
+                        "description": "The connection's code"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 318,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The database name"
+                },
+                {
+                    "name": "host",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The connection's code"
+                }
+            ]
+        },
+        "tables": {
+            "name": "tables",
+            "summary": "Returns a list of tables in the given database.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($db = '', $host = '')\n  {\n    if (!bbn\\str::is_uid($db)) {\n      $db = $this->db_id($db, $host);\n    }\n    if (bbn\\str::is_uid($db)\n        && ($id_parent = $this->o->from_code('tables', $db))\n        && ($fo = array_values($this->o->code_options($id_parent)))\n    ) {\n      $res = array_map(function ($a) {\n        return [\n          'id' => $a['id'],\n          'text' => $a['text'],\n          'name' => $a['code']\n        ];\n      }, $fo);\n      return $res ?: [];\n    }\n    return null;\n  }",
+            "startLine": 327,
+            "doc": {
+                "description": "Returns a list of tables in the given database.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$db",
+                        "description": "The database name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$host",
+                        "description": "The connection's code"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 346,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The database name"
+                },
+                {
+                    "name": "host",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The connection's code"
+                }
+            ]
+        },
+        "full_tables": {
+            "name": "full_tables",
+            "summary": "Returns a list of tables in the given database with its statistics.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($db = '', $host = '')\n  {\n    if (!bbn\\str::is_uid($db)) {\n      $db = $this->db_id($db ?: $this->db->current, $host);\n    }\n    if (bbn\\str::is_uid($db) && ($id_parent = $this->o->from_code('tables', $db))) {\n      $o =& $this->o;\n      if ($fo = $this->o->full_options($id_parent)) {\n        $res = array_map(\n          function ($a) use ($o) {\n            $r = [\n              'id' => $a['id'],\n              'text' => $a['text'],\n              'name' => $a['code'],\n              'num_columns' => 0,\n              'num_keys' => 0\n            ];\n            if ($id_columns = $o->from_code('columns', $a['id'])) {\n              $r['num_columns'] = $o->count($id_columns);\n            }\n            if ($id_keys = $o->from_code('keys', $a['id'])) {\n              $r['num_keys'] = $o->count($id_keys);\n            }\n            return $r;\n          },\n          $fo\n        );\n        return $res ?: [];\n      }\n    }\n    return null;\n  }",
+            "startLine": 355,
+            "doc": {
+                "description": "Returns a list of tables in the given database with its statistics.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$db",
+                        "description": "The database name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$host",
+                        "description": "The connection's code"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 386,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The database name"
+                },
+                {
+                    "name": "host",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The connection's code"
+                }
+            ]
+        },
+        "table_from_item": {
+            "name": "table_from_item",
+            "summary": "Gets the name of a table from an item's ID (key or column).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_keycol)\n  {\n    if (($table = $this->table_id_from_item($id_keycol))\n        && ($r = $this->o->code($table))\n    ) {\n      return $r;\n    }\n    return null;\n  }",
+            "startLine": 394,
+            "doc": {
+                "description": "Gets the name of a table from an item's ID (key or column).",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "keycol The ID of the item"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 402,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_keycol",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "keycol The ID of the item"
+                }
+            ]
+        },
+        "table_id_from_item": {
+            "name": "table_id_from_item",
+            "summary": "Retrieves the ID of a table from an item's ID (key or column).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_keycol)\n  {\n    if (bbn\\str::is_uid($id_keycol)\n        && ($id_cols = $this->o->get_id_parent($id_keycol))\n        && ($id_table = $this->o->get_id_parent($id_cols))\n    ) {\n      return $id_table;\n    }\n    return null;\n  }",
+            "startLine": 410,
+            "doc": {
+                "description": "Retrieves the ID of a table from an item's ID (key or column).",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "keycol The ID of the item"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 419,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_keycol",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "keycol The ID of the item"
+                }
+            ]
+        },
+        "db_from_table": {
+            "name": "db_from_table",
+            "summary": "Retrieves a database name from the ID of a table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_table)\n  {\n    if (($id_db = $this->db_id_from_table($id_table))\n        && ($r = $this->o->code($id_db))\n    ) {\n      return $r;\n    }\n    return null;\n  }",
+            "startLine": 427,
+            "doc": {
+                "description": "Retrieves a database name from the ID of a table.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "table The table's ID."
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 435,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "table The table's ID."
+                }
+            ]
+        },
+        "db_id_from_table": {
+            "name": "db_id_from_table",
+            "summary": "Returns the ID of a DB through the given table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_table)\n  {\n    if (bbn\\str::is_uid($id_table)\n        && ($id_tables = $this->o->get_id_parent($id_table))\n        && ($id_db = $this->o->get_id_parent($id_tables))\n    ) {\n      return $id_db;\n    }\n    return null;\n  }",
+            "startLine": 443,
+            "doc": {
+                "description": "Returns the ID of a DB through the given table.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "table The table's ID."
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 452,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "table The table's ID."
+                }
+            ]
+        },
+        "db_from_item": {
+            "name": "db_from_item",
+            "summary": "Returns the name of a DB through the ID of an item (key or column).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_keycol)\n  {\n    if ($id_db = $this->db_id_from_item($id_keycol)\n        && ($r = $this->o->code($id_db))\n    ) {\n      return $r;\n    }\n    return null;\n  }",
+            "startLine": 460,
+            "doc": {
+                "description": "Returns the name of a DB through the ID of an item (key or column).",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "keycol The ID of the item"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 468,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_keycol",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "keycol The ID of the item"
+                }
+            ]
+        },
+        "db_id_from_item": {
+            "name": "db_id_from_item",
+            "summary": "Returns the ID of a DB through the ID of an item (key or column).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_keycol)\n  {\n    if (($id_table = $this->table_id_from_item($id_keycol))\n        && ($id_db = $this->db_id_from_table($id_table))\n    ) {\n      return $id_db;\n    }\n    return null;\n  }",
+            "startLine": 476,
+            "doc": {
+                "description": "Returns the ID of a DB through the ID of an item (key or column).",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "keycol The ID of the item"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 484,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_keycol",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "keycol The ID of the item"
+                }
+            ]
+        },
+        "column_id": {
+            "name": "column_id",
+            "summary": "Returns the given column's ID.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($column, $table, $db = '')\n  {\n    $res = null;\n    if (bbn\\str::is_uid($table)) {\n      $res = $this->o->from_code($this->db->csn($column), 'columns', $table);\n      return $res;\n    }\n    $c = $this->db->csn($column);\n    $t = $this->db->tsn($table);\n    if ($tmp = self::get_option_id($c, 'columns', $t, 'tables', $db ?: $this->db->current, 'dbs')) {\n      $res = $tmp;\n    }\n    return $res;\n  }",
+            "startLine": 494,
+            "doc": {
+                "description": "Returns the given column's ID.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$column",
+                        "description": "The column's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$db",
+                        "description": "The DB's name"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 507,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "column",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The column's name"
+                },
+                {
+                    "name": "table",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                },
+                {
+                    "name": "db",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The DB's name"
+                }
+            ]
+        },
+        "count_columns": {
+            "name": "count_columns",
+            "summary": "Returns the number of columns for the given DB.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $db = '')\n  {\n    $num = 0;\n    if (!bbn\\str::is_uid($table)) {\n      $table = $this->table_id($table, $db, $host);\n    }\n    if (bbn\\str::is_uid($table)\n        && ($id_parent = $this->o->from_code('columns', $table))\n    ) {\n      $num = $this->o->count($id_parent);\n    }\n    return $num;\n  }",
+            "startLine": 516,
+            "doc": {
+                "description": "Returns the number of columns for the given DB.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$db",
+                        "description": "The database's name"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 528,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                },
+                {
+                    "name": "db",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The database's name"
+                }
+            ]
+        },
+        "columns": {
+            "name": "columns",
+            "summary": "Returns a list of the columns for the given table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $db = '')\n  {\n    if (!bbn\\str::is_uid($table)) {\n      $table = $this->table_id($this->db->tsn($table), $db, $host);\n    }\n    if (bbn\\str::is_uid($table)\n        && ($id_parent = $this->o->from_code('columns', $table))\n        && ($res = $this->o->options($id_parent))\n    ) {\n      return $res;\n    }\n    return null;\n  }",
+            "startLine": 537,
+            "doc": {
+                "description": "Returns a list of the columns for the given table.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$db",
+                        "description": "The database's name"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 549,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                },
+                {
+                    "name": "db",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The database's name"
+                }
+            ]
+        },
+        "full_columns": {
+            "name": "full_columns",
+            "summary": "Returns a list of the columns for the given table with all their characteristics.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $db = '')\n  {\n    if (!bbn\\str::is_uid($table)) {\n      $table = $this->table_id($table, $db, $host);\n    }\n    if (bbn\\str::is_uid($table)\n        && ($id_parent = $this->o->from_code('columns', $table))\n        && ($res = $this->o->full_options($id_parent))\n    ) {\n      return $res;\n    }\n    return [];\n  }",
+            "startLine": 558,
+            "doc": {
+                "description": "Returns a list of the columns for the given table with all their characteristics.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$db",
+                        "description": "The database name"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 570,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                },
+                {
+                    "name": "db",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The database name"
+                }
+            ]
+        },
+        "key_id": {
+            "name": "key_id",
+            "summary": "Returns the ID of a key in the given table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($key, $table, $db = '')\n  {\n    $res = null;\n    if (bbn\\str::is_uid($key)) {\n      $res = $this->o->from_code($key, $table);\n    }\n    elseif ($tmp = self::get_option_id($key, 'keys', $table, 'tables', $db ?: $this->db->current, 'dbs')) {\n      $res = $tmp;\n    }\n    return $res;\n  }",
+            "startLine": 580,
+            "doc": {
+                "description": "Returns the ID of a key in the given table.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key",
+                        "description": "The key;s name."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$db",
+                        "description": "The database's name"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 590,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "key",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The key;s name."
+                },
+                {
+                    "name": "table",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                },
+                {
+                    "name": "db",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The database's name"
+                }
+            ]
+        },
+        "count_keys": {
+            "name": "count_keys",
+            "summary": "Returns the number of keys in the given table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $db = '')\n  {\n    $num = 0;\n    if (!bbn\\str::is_uid($table)) {\n      $table = $this->table_id($table, $db, $host);\n    }\n    if (bbn\\str::is_uid($table)\n        && ($id_parent = $this->o->from_code('keys', $table))\n    ) {\n      $num = $this->o->count($id_parent);\n    }\n    return $num;\n  }",
+            "startLine": 599,
+            "doc": {
+                "description": "Returns the number of keys in the given table.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$db",
+                        "description": "The database's name"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 611,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                },
+                {
+                    "name": "db",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The database's name"
+                }
+            ]
+        },
+        "keys": {
+            "name": "keys",
+            "summary": "Returns a list of keys for the giuven table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $db = '')\n  {\n    $res = [];\n    if (!bbn\\str::is_uid($table)) {\n      $table = $this->table_id($table, $db, $host);\n    }\n    if (bbn\\str::is_uid($table)\n        && ($id_parent = $this->o->from_code('keys', $table))\n        && ($tree = $this->o->full_tree($id_parent))\n        && $tree['items']\n    ) {\n      $t =& $this;\n      $res = array_map(\n        function ($a) use ($t) {\n          $key = [\n            'name' => $a['code'],\n            'unique' => $a['unique'],\n            'columns' => [],\n            'ref_column' => $a['id_alias'] ? $a['alias']['code'] : null,\n            'ref_table' => $a['id_alias'] &&\n                          ($id_table = $t->o->get_id_parent($a['alias']['id_parent'])) ?\n                          $t->o->code($id_table) : null,\n            'ref_db' => !empty($id_table) &&\n                        ($id_db = $t->o->get_id_parent($t->o->get_id_parent($id_table))) ?\n                        $t->o->code($id_db) : null\n          ];\n          foreach ($a['items'] as $col){\n            $key['columns'][] = $col['code'];\n          }\n          return $key;\n        },\n        $tree['items']\n      );\n    }\n    return $res;\n  }",
+            "startLine": 620,
+            "doc": {
+                "description": "Returns a list of keys for the giuven table.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$db",
+                        "description": "The database's name"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 655,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                },
+                {
+                    "name": "db",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The database's name"
+                }
+            ]
+        },
+        "full_keys": {
+            "name": "full_keys",
+            "summary": "For the moment an alias of get_keys.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $db = '')\n  {\n    return $this->keys($table, $db, $host);\n  }",
+            "startLine": 664,
+            "doc": {
+                "description": "For the moment an alias of get_keys.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$db",
+                        "description": "The database's name"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 667,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                },
+                {
+                    "name": "db",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The database's name"
+                }
+            ]
+        },
+        "remove": {
+            "name": "remove",
+            "summary": "Deletes a table and all its descendants from the options table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $db = '')\n  {\n    $id = $this->table_id($table, $db);\n    return $this->o->remove_full($id);\n  }",
+            "startLine": 676,
+            "doc": {
+                "description": "Deletes a table and all its descendants from the options table.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$db",
+                        "description": "The database's name"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 680,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                },
+                {
+                    "name": "db",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The database's name"
+                }
+            ]
+        },
+        "remove_all": {
+            "name": "remove_all",
+            "summary": "Deletes a database and all its descendants from the options table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($db = '')\n  {\n    $id = $this->db_id($db);\n    return $this->o->remove_full($id);\n  }",
+            "startLine": 688,
+            "doc": {
+                "description": "Deletes a database and all its descendants from the options table.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$db",
+                        "description": "The database's name"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 692,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The database's name"
+                }
+            ]
+        },
+        "remove_host": {
+            "name": "remove_host",
+            "summary": "Deletes a connection from the options table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($connection)\n  {\n    $id = $this->host_id($connection);\n    return $this->o->remove_full($id);\n  }",
+            "startLine": 700,
+            "doc": {
+                "description": "Deletes a connection from the options table.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$connection",
+                        "description": "The connection's code"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 704,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "connection",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The connection's code"
+                }
+            ]
+        },
+        "modelize": {
+            "name": "modelize",
+            "summary": "Returns a database model as bbn\\db::modelize but with options IDs.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table = '', $db = '')\n  {\n    if (($mod = $this->db->modelize($table)) && \\is_array($mod)) {\n      $keys = function (&$a) use (&$table, &$db) {\n        if (\\is_array($a['keys'])) {\n          array_walk(\n            $a['keys'],\n            function (&$w, $k) use (&$table, &$db) {\n              $w['id_option'] = $this->key_id($k, $table, $db);\n            }\n          );\n        }\n      };\n      $fields = function (&$a) use (&$table, &$db) {\n        if (\\is_array($a['fields'])) {\n          array_walk(\n            $a['fields'],\n            function (&$w, $k) use (&$table, &$db) {\n              $w['id_option'] = $this->column_id($k, $table, $db);\n            }\n          );\n        }\n      };\n      if (empty($table)) {\n        array_walk(\n          $mod,\n          function (&$w, $k) use (&$table, &$db, $keys, $fields) {\n            $table = $this->db->tsn($k);\n            $db = substr($k, 0, strrpos($k, $table)-1);\n            $w['id_option'] = $this->table_id($table, $db);\n            $keys($w);\n            $fields($w);\n          }\n        );\n      }\n      else {\n        $keys($mod);\n        $fields($mod);\n      }\n      return $mod;\n    }\n    return null;\n  }",
+            "startLine": 713,
+            "doc": {
+                "description": "Returns a database model as bbn\\db::modelize but with options IDs.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$db",
+                        "description": "The database's name"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 755,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                },
+                {
+                    "name": "db",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The database's name"
+                }
+            ]
+        },
+        "import_host": {
+            "name": "import_host",
+            "summary": "Imports a database's structure into the options table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($host, $full = false)\n  {\n    if (!($id_host = self::get_option_id($host, 'connections'))){\n      $id_host = $this->o->add([\n        'id_parent' => self::get_option_id('connections'),\n        'text' => $host,\n        'code' => $host,\n      ]);\n    }\n    if ($id_host && $full) {\n      \/** @todo but might be heavy *\/\n    }\n    return $id_host ?: null;\n  }",
+            "startLine": 764,
+            "doc": {
+                "description": "Imports a database's structure into the options table.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$host",
+                        "description": "The connection's code"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$full",
+                        "description": "If true will connect to the database and get its structure"
+                    }
+                ],
+                "return": "The ID of the generated (or existing) database entry"
+            },
+            "endLine": 777,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "host",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The connection's code"
+                },
+                {
+                    "name": "full",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If true will connect to the database and get its structure"
+                }
+            ]
+        },
+        "import_db": {
+            "name": "import_db",
+            "summary": "Imports a database's structure into the options table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($db, $host = '', $full = false)\n  {\n    $id_db = null;\n    if ($id_dbs = self::get_option_id('dbs')) {\n      if (!($id_db = $this->o->from_code($db, $id_dbs))) {\n        if ($id_db = $this->o->add([\n          'id_parent' => $id_dbs,\n          'text' => $db,\n          'code' => $db,\n        ])) {\n          $this->o->set_cfg($id_db, ['allow_children' => 1, 'show_code' => 1]);\n        }\n      }\n      if ($id_db) {\n        if (!($id_procedures = $this->o->from_code('procedures', $id_db))\n            && ($id_procedures = $this->o->add([\n              'id_parent' => $id_db,\n              'text' => _('Procedures'),\n              'code' => 'procedures',\n            ]))\n        ) {\n          $this->o->set_cfg($id_procedures, [\n            'show_code' => 1,\n            'show_value' => 1,\n            'allow_children' => 1\n          ]);\n        }\n        if (!($id_connections = $this->o->from_code('connections', $id_db))\n            && ($id_connections = $this->o->add([\n              'id_parent' => $id_db,\n              'text' => _('Connections'),\n              'code' => 'connections',\n            ]))\n        ) {\n          $this->o->set_cfg($id_connections, [\n            'show_alias' => 1,\n            'notext' => 1,\n            'id_root_alias' => self::get_option_id('connections'),\n            'root_alias' => 'Connections'\n          ]);\n        }\n        if (!($id_functions = $this->o->from_code('functions', $id_db))\n            && ($id_functions = $this->o->add([\n              'id_parent' => $id_db,\n              'text' => _('Function'),\n              'code' => 'functions',\n            ]))\n        ) {\n          $this->o->set_cfg($id_functions, [\n            'show_code' => 1,\n            'show_value' => 1,\n            'allow_children' => 1\n          ]);\n        }\n        if (!($id_tables = $this->o->from_code('tables', $id_db))\n            && ($id_tables = $this->o->add([\n              'id_parent' => $id_db,\n              'text' => _('Tables'),\n              'code' => 'tables',\n            ]))\n        ) {\n          $this->o->set_cfg($id_tables, [\n            'show_code' => 1,\n            'show_value' => 1,\n            'allow_children' => 1\n          ]);\n        }\n        if ( $host ){\n          $host_id = bbn\\str::is_uid($host) ? $host : $this->host_id($host);\n        }\n        else {\n          $host_id = $this->retrieve_host($id_db);\n        }\n        if ($host_id && $id_connections && $id_functions && $id_procedures && $id_tables) {\n          if (!$this->db->count('bbn_options', [\n            'id_parent' => $id_connections,\n            'id_alias' => $host_id\n          ])) {\n            $this->o->add([\n              'id_parent' => $id_connections,\n              'id_alias' => $host_id\n            ]);\n          }\n          if ($full) {\n            if (!empty($host_id)) {\n              $tables = $this->connection($host_id, $db)->get_tables();\n              if (!empty($tables)) {\n                foreach ($tables as $t) {\n                  $this->import_table($t, $id_db, $host_id);\n                }\n              }\n            }\n          }\n        }\n        else{\n          bbn\\x::log(\"Impossible to find an host ID for DB \".$this->o->code($id_db));\n        }\n      }\n    }\n    return $id_db;\n  }",
+            "startLine": 787,
+            "doc": {
+                "description": "Imports a database's structure into the options table.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$db",
+                        "description": "The database's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$host",
+                        "description": "The connection's code"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$full",
+                        "description": "If true will connect to the database and get its structure"
+                    }
+                ],
+                "return": "The ID of the generated (or existing) database entry"
+            },
+            "endLine": 887,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The database's name"
+                },
+                {
+                    "name": "host",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The connection's code"
+                },
+                {
+                    "name": "full",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If true will connect to the database and get its structure"
+                }
+            ]
+        },
+        "retrieve_host": {
+            "name": "retrieve_host",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_db)\n  {\n    if ($this->check()\n        && defined('BBN_DB_USER')\n        && defined('BBN_DB_HOST')\n        && ($connections = $this->o->full_options('connections', $id_db))\n    )\n    {\n      foreach ($connections as $c) {\n        if ($c['alias']['code'] === BBN_DB_USER.'@'.BBN_DB_HOST) {\n          return $c['alias']['id'];\n        }\n      }    \n    }\n    return null;\n  }",
+            "startLine": 889,
+            "doc": null,
+            "endLine": 904,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_db",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "import_table": {
+            "name": "import_table",
+            "summary": "Imports a table's structure into the options table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table, $id_db, $host = '')\n  {\n    if (empty($host)) {\n      $host_id = $this->retrieve_host($id_db);\n    }\n    else{\n      $host_id = bbn\\str::is_uid($host) ? $host : $this->host_id($host);\n    }\n    if ($host_id && ($id_tables = $this->o->from_code('tables', $id_db))) {\n      if (!($id_table = $this->o->from_code($table, $id_tables))\n          && ($id_table = $this->o->add(\n            [\n              'id_parent' => $id_tables,\n              'text' => $table,\n              'code' => $table,\n            ]\n          ))\n      ) {\n        $this->o->set_cfg($id_table, ['allow_children' => 1]);\n        if ($id_columns = $this->o->add(\n          [\n            'id_parent' => $id_table,\n            'text' => _(\"Columns\"),\n            'code' => 'columns'\n          ]\n        )\n        ) {\n          $this->o->set_cfg(\n            $id_columns,\n            [\n              'show_code' => 1,\n              'show_value' => 1,\n              'sortable' => 1\n            ]\n          );\n        }\n        if ($id_keys = $this->o->add(\n          [\n            'id_parent' => $id_table,\n            'text' => _(\"Keys\"),\n            'code' => 'keys',\n          ]\n        )\n        ) {\n          $this->o->set_cfg(\n            $id_keys,\n            [\n              'show_code' => 1,\n              'show_value' => 1,\n              'show_alias' => 1,\n              'allow_children' => 1\n            ]\n          );\n        }\n      }\n      else{\n        $id_columns = $this->o->from_code('columns', $id_table);\n        $id_keys = $this->o->from_code('keys', $id_table);\n      }\n      $db = $this->o->code($id_db);\n      if ($id_table\n          && $id_columns\n          && $id_keys\n          && $db\n          && ($conn = $this->connection($host_id, $db))\n          && ($m = $conn->modelize($table))\n          && !empty($m['fields'])\n      ) {\n        $num_cols = 0;\n        $num_cols_rem = 0;\n        $fields = [];\n        $ocols = array_flip($this->o->options($id_columns));\n        foreach ($m['fields'] as $col => $cfg) {\n          if ($opt_col = $this->o->option($col, $id_columns)) {\n            $num_cols += (int)$this->o->set($opt_col['id'], bbn\\x::merge_arrays($opt_col, $cfg));\n          }\n          elseif ($id = $this->o->add(\n            bbn\\x::merge_arrays(\n              $cfg,\n              [\n                'id_parent' => $id_columns,\n                'text' => $col,\n                'code' => $col,\n                'num' => $cfg['position']\n              ]\n            )\n          )\n          ) {\n            $num_cols++;\n            $opt_col = $cfg;\n            $opt_col['id'] = $id;\n          }\n          if ($opt_col) {\n            $fields[$col] = $opt_col['id'];\n          }\n          if (isset($ocols[$col])) {\n            unset($ocols[$col]);\n          }\n        }\n        if (!empty($ocols)) {\n          foreach ($ocols as $col => $id) {\n            if (bbn\\str::is_uid($id)) {\n              $num_cols_rem += (int)$this->o->remove($id);\n            }\n          }\n        }\n        $num_keys = 0;\n        $num_keys_rem = 0;\n        $okeys = array_flip($this->o->options($id_keys));\n        foreach ($m['keys'] as $key => $cfg) {\n          $cols = $cfg['columns'] ?? [];\n          unset($cfg['columns']);\n          if (isset($cfg['ref_db'], $cfg['ref_table'], $cfg['ref_column']) \n              && ($id_alias = $this->column_id($cfg['ref_column'], $cfg['ref_table'], $cfg['ref_db']))\n          ) {\n            $cfg['id_alias'] = $id_alias;\n            unset($cfg['ref_db'], $cfg['ref_table'], $cfg['ref_column']);\n          }\n          if ($opt_key = $this->o->option($key, $id_keys)) {\n            $num_keys += (int)$this->o->set($opt_key['id'], bbn\\x::merge_arrays($opt_key, $cfg));\n          }\n          elseif ($id = $this->o->add(\n            bbn\\x::merge_arrays(\n              $cfg, [\n              'id_parent' => $id_keys,\n              'text' => $key,\n              'code' => $key\n              ]\n            )\n          ) \n          ) {\n            $this->o->set_cfg(\n              $id, [\n              'show_code' => 1,\n              'show_alias' => 1\n              ]\n            );\n            $num_keys++;\n            $opt_key = $cfg;\n            $opt_key['id'] = $id;\n          }\n          if (isset($okeys[$key])) {\n            unset($okeys[$key]);\n          }\n          if ($opt_key && $cols) {\n\n            foreach ($cols as $col){\n              if (isset($fields[$col])) {\n                if ($opt = $this->o->option($col, $opt_key['id'])) {\n                  $this->o->set(\n                    $opt['id'], bbn\\x::merge_arrays(\n                      $opt, [\n                      'id_alias' => $fields[$col]\n                      ]\n                    )\n                  );\n                }\n                else{\n                  $tmp = [\n                    'id_parent' => $opt_key['id'],\n                    'id_alias' => $fields[$col],\n                    'code' => $col,\n                    'text' => $col\n                  ];\n                  if ($this->o->add($tmp)) {\n                    $opt = $tmp;\n                  }\n                }\n              }\n            }\n          }\n        }\n        if (!empty($okeys)) {\n          foreach (array_values($okeys) as $id) {\n            if (bbn\\str::is_uid($id)) {\n              $children = $this->o->items($id);\n              foreach ($children as $cid) {\n                $num_keys_rem += (int)$this->o->remove_full($cid);\n              }\n              $num_keys_rem += (int)$this->o->remove($id);\n            }\n          }\n        }\n        return [\n          'columns' => $num_cols,\n          'keys' => $num_keys,\n          'columns_removed' => $num_cols_rem,\n          'keys_removed' => $num_keys_rem\n        ];\n      }\n    }\n    return null;\n  }",
+            "startLine": 914,
+            "doc": {
+                "description": "Imports a table's structure into the options table.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$id",
+                        "description": "db The database to which import the table (its id_parent)"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$host",
+                        "description": "The connection's code"
+                    }
+                ],
+                "return": "The ID of the generated table entry"
+            },
+            "endLine": 1106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                },
+                {
+                    "name": "id_db",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "db The database to which import the table (its id_parent)"
+                },
+                {
+                    "name": "host",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The connection's code"
+                }
+            ]
+        },
+        "import": {
+            "name": "import",
+            "summary": "Import a table structure in the options table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table)\n  {\n    $res = null;\n    if ($m = $this->db->modelize($table)) {\n      $tf = explode('.', $this->db->tfn($table));\n      $db = $tf[0];\n      $table = $tf[1];\n\n      if (($id_host = $this->import_host($this->db->host)) \n          && ($id_db = $this->import_db($db, $id_host))\n      ) {\n        $res = $this->import_table($table, $id_db);\n      }\n    }\n    return $res;\n  }",
+            "startLine": 1114,
+            "doc": {
+                "description": "Import a table structure in the options table.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table's name"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1129,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The table's name"
+                }
+            ]
+        },
+        "import_all": {
+            "name": "import_all",
+            "summary": "Imports a whole database structure in the options table.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($db = '')\n  {\n    $res = null;\n    if ($tables = $this->db->get_tables($db)) {\n      $res = [\n        'tables' => 0,\n        'columns' => 0,\n        'keys' => 0\n      ];\n      foreach ($tables as $t){\n        if ($tmp = $this->import(($db ?: $this->db->current).'.'.$t)) {\n          $res['tables']++;\n          $res['columns'] += $tmp['columns'];\n          $res['keys'] += $tmp['keys'];\n        }\n      }\n    }\n    return $res;\n  }",
+            "startLine": 1137,
+            "doc": {
+                "description": "Imports a whole database structure in the options table.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$db",
+                        "description": "The database's name"
+                    }
+                ],
+                "return": "The database's model"
+            },
+            "endLine": 1155,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The database's name"
+                }
+            ]
+        },
+        "cache_delete_all": {
+            "name": "cache_delete_all",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\treturn $this;\n  }",
+            "startLine": 50,
+            "doc": null,
+            "endLine": 53,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "cache_delete_all",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\cache",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\treturn $this;\n  }",
+                "startLine": 50,
+                "doc": null,
+                "endLine": 53,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "cache_delete": {
+            "name": "cache_delete",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($uid)\n  {\n\t\treturn $this;\n  }",
+            "startLine": 55,
+            "doc": null,
+            "endLine": 58,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "cache_delete",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\cache",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($uid)\n  {\n\t\treturn $this;\n  }",
+                "startLine": 55,
+                "doc": null,
+                "endLine": 58,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "uid",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "cache_get": {
+            "name": "cache_get",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($uid, $method = '', $ttl = 0)\n  {\n  }",
+            "startLine": 60,
+            "doc": null,
+            "endLine": 62,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "cache_get",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\cache",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($uid, $method = '', $ttl = 0)\n  {\n  }",
+                "startLine": 60,
+                "doc": null,
+                "endLine": 62,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 3,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "uid",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "method",
+                        "position": 1,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "ttl",
+                        "position": 2,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": 0,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "cache_set": {
+            "name": "cache_set",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($uid, $method = '', $data = NULL, $ttl = 0)\n  {\n\t\treturn $this;\n  }",
+            "startLine": 64,
+            "doc": null,
+            "endLine": 67,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "cache_set",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\cache",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($uid, $method = '', $data = NULL, $ttl = 0)\n  {\n\t\treturn $this;\n  }",
+                "startLine": 64,
+                "doc": null,
+                "endLine": 67,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 4,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "uid",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "method",
+                        "position": 1,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "data",
+                        "position": 2,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    },
+                    {
+                        "name": "ttl",
+                        "position": 3,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": 0,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 3,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "cache_set_get": {
+            "name": "cache_set_get",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($fn, $uid, $method = '', $data = NULL, $ttl = 0)\n  {\n\t\tif (!($tmp = $this->cacher->get_raw($cn, $ttl))) {\n\t\t\tif ($data = $fn()) {\n\t\t\t\t$this->cacher->set($cn, $data, $ttl);\n\t\t\t}\n\t\t}\n\t\telse {\n\t\t\t$data = $tmp['value'];\n\t\t}\n\t\treturn $data ?: false;\n  }",
+            "startLine": 69,
+            "doc": null,
+            "endLine": 80,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": {
+                "name": "cache_set_get",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\cache",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($fn, $uid, $method = '', $data = NULL, $ttl = 0)\n  {\n\t\tif (!($tmp = $this->cacher->get_raw($cn, $ttl))) {\n\t\t\tif ($data = $fn()) {\n\t\t\t\t$this->cacher->set($cn, $data, $ttl);\n\t\t\t}\n\t\t}\n\t\telse {\n\t\t\t$data = $tmp['value'];\n\t\t}\n\t\treturn $data ?: false;\n  }",
+                "startLine": 69,
+                "doc": null,
+                "endLine": 80,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 5,
+                "numberOfRequiredParameters": 2,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "fn",
+                        "position": 0,
+                        "type": "callable",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "uid",
+                        "position": 1,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "method",
+                        "position": 2,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "data",
+                        "position": 3,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    },
+                    {
+                        "name": "ttl",
+                        "position": 4,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": 0,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "fn",
+                    "position": 0,
+                    "type": "callable",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "uid",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 3,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 4,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "cache_has": {
+            "name": "cache_has",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($uid, $method = '', $ttl = 0)\n  {\n    return $this->cache_get($uid, $method, $ttl) ? true : false;\n  }",
+            "startLine": 82,
+            "doc": null,
+            "endLine": 85,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "cache_has",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\cache",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($uid, $method = '', $ttl = 0)\n  {\n    return $this->cache_get($uid, $method, $ttl) ? true : false;\n  }",
+                "startLine": 82,
+                "doc": null,
+                "endLine": 85,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 3,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "uid",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "method",
+                        "position": 1,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "ttl",
+                        "position": 2,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": 0,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "test": {
+            "name": "test",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+            "startLine": 45,
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 50,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "test",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+                "startLine": 45,
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 50,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "check": {
+            "name": "check",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+            "startLine": 56,
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 61,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "check",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+                "startLine": 56,
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 61,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "get_error": {
+            "name": "get_error",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 72,
+            "doc": null,
+            "endLine": 74,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_error",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 72,
+                "doc": null,
+                "endLine": 74,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "get_errors": {
+            "name": "get_errors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 76,
+            "doc": null,
+            "endLine": 78,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_errors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 76,
+                "doc": null,
+                "endLine": 78,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+            "startLine": 80,
+            "doc": null,
+            "endLine": 88,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+                "startLine": 80,
+                "doc": null,
+                "endLine": 88,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "__call": {
+            "name": "__call",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
+            "startLine": 95,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$arguments"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 99,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": {
+                "name": "__call",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
+                "startLine": 95,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string",
+                            "name": "$name"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "array",
+                            "name": "$arguments"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 99,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 2,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "name",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "arguments",
+                        "position": 1,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "arguments",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_debug": {
+            "name": "is_debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 104,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "is_debug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 104,
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 106,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "set_debug": {
+            "name": "set_debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($debug)\n  {\n  }",
+            "startLine": 112,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 114,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "set_debug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($debug)\n  {\n  }",
+                "startLine": 112,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 114,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "debug",
+                        "position": 0,
+                        "type": "bool",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "debug",
+                    "position": 0,
+                    "type": "bool",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_option_root": {
+            "name": "get_option_root",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::$option_root_id;\n  }",
+            "startLine": 71,
+            "doc": null,
+            "endLine": 74,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_root": {
+            "name": "get_appui_root",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::$option_appui_id;\n  }",
+            "startLine": 76,
+            "doc": null,
+            "endLine": 79,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_option_id": {
+            "name": "get_option_id",
+            "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 87,
+            "doc": {
+                "description": "Returns The option's ID of a category, i.e. direct children of option's root",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 89,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options_ids": {
+            "name": "get_options_ids",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return $a !== null;\n    }));\n  }",
+            "startLine": 91,
+            "doc": null,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options_tree": {
+            "name": "get_options_tree",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $tree['items'] : [];\n  }",
+            "startLine": 97,
+            "doc": null,
+            "endLine": 100,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options": {
+            "name": "get_options",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 102,
+            "doc": null,
+            "endLine": 104,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_option": {
+            "name": "get_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 106,
+            "doc": null,
+            "endLine": 108,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options_text_value": {
+            "name": "get_options_text_value",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      bbn\\appui\\options::get_instance()->text_value_options($id): [];\n  }",
+            "startLine": 110,
+            "doc": null,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_option_id": {
+            "name": "get_appui_option_id",
+            "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 121,
+            "doc": {
+                "description": "Returns The option's ID of a category, i.e. direct children of option's root",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 123,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options_ids": {
+            "name": "get_appui_options_ids",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return $a !== null;\n    }));\n  }",
+            "startLine": 125,
+            "doc": null,
+            "endLine": 129,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options_tree": {
+            "name": "get_appui_options_tree",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $tree['items'] : [];\n  }",
+            "startLine": 131,
+            "doc": null,
+            "endLine": 134,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options": {
+            "name": "get_appui_options",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 136,
+            "doc": null,
+            "endLine": 138,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_option": {
+            "name": "get_appui_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 140,
+            "doc": null,
+            "endLine": 142,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options_text_value": {
+            "name": "get_appui_options_text_value",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\databases",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      bbn\\appui\\options::get_instance()->text_value_options($id) : [];\n  }",
+            "startLine": 144,
+            "doc": null,
+            "endLine": 147,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        }
+    },
+    "properties": null,
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 66,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\models\\tts\\optional"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\models\\cls\\cache",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "optional_is_init": false,
+        "option_appui_id": null,
+        "option_root_id": null,
+        "o": null,
+        "pw": null,
+        "db_alt": null,
+        "db": null,
+        "_cache_prefix": null,
+        "cacher": null,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": []
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\appui",
+    "shortName": "databases"
+}

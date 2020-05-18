@@ -1,0 +1,1614 @@
+{
+    "doc": {
+        "description": "A class for managing users",
+        "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
+            "copyright": "BBN Solutions",
+            "since": "Apr 4, 2011, 23:23:55 +0000",
+            "category": "Authentication",
+            "license": "http:\/\/www.opensource.org\/licenses\/mit-license.php MIT",
+            "version": "0.2r89"
+        }
+    },
+    "name": "bbn\\user\\manager",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/user\/manager.php",
+    "startLine": 18,
+    "endLine": 700,
+    "contentConstructor": {
+        "file": "bbn\\user\\manager",
+        "returns": null
+    },
+    "methods": {
+        "get_list_fields": {
+            "name": "get_list_fields",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 61,
+            "doc": null,
+            "endLine": 63,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_mailer": {
+            "name": "get_mailer",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $this->mailer = $this->usrcls->get_mailer();\n    }\n    return $this->mailer;\n  }",
+            "startLine": 65,
+            "doc": null,
+            "endLine": 70,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "find_sessions": {
+            "name": "find_sessions",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user = NULL, $minutes = 5)\n  {\n    $cfg = [\n      'table' => $this->class_cfg['tables']['sessions'],\n      'fields' => [],\n      'where' => [\n        [\n          'field' => $this->class_cfg['arch']['sessions']['last_activity'],\n          'operator' => '<',\n          'value' => 'DATE_SUB(NOW(), INTERVAL '.$this->db->csn($this->class_cfg['sess_length'], true).' MINUTE)'\n        ]\n      ]\n    ];\n    if ( !\\is_null($id_user) ){\n      $cfg['where'][] = [\n        'field' => $this->class_cfg['arch']['sessions']['id_user'],\n        'value' => $id_user\n      ];\n    }\n    return $this->db->rselect_all($cfg);\n  }",
+            "startLine": 72,
+            "doc": null,
+            "endLine": 92,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "minutes",
+                    "position": 1,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 5,
+                    "default_name": ""
+                }
+            ]
+        },
+        "destroy_sessions": {
+            "name": "destroy_sessions",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user, $minutes = 5)\n  {\n    $sessions = $this->find_sessions($id_user, $minutes);    \n    \/\/$num = count($sessions);\n    foreach ( $sessions as $s ){\n      $this->db->delete($this->class_cfg['tables']['sessions'], [$this->class_cfg['arch']['sessions']['id'] => $s['id']]);\n    }    \n    return true;\n  }",
+            "startLine": 94,
+            "doc": null,
+            "endLine": 102,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "minutes",
+                    "position": 1,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 5,
+                    "default_name": ""
+                }
+            ]
+        },
+        "__construct": {
+            "name": "__construct",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bbn\\user $obj)\n  {\n    if ( \\is_object($obj) && method_exists($obj, 'get_class_cfg') ){\n      $this->usrcls = $obj;\n      $this->class_cfg = $this->usrcls->get_class_cfg();\n      if ( !$this->list_fields ){\n        $this->set_default_list_fields();\n      }\n      $this->db =& $this->usrcls->db;\n    }\n  }",
+            "startLine": 109,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "object",
+                        "name": "$obj",
+                        "description": "A user's connection object (\\connection or subclass)"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "object|false",
+                        "name": "$mailer",
+                        "description": "A mail object with the send method"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 119,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "obj",
+                    "position": 0,
+                    "type": "bbn\\user",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "A user's connection object (\\connection or subclass)"
+                }
+            ]
+        },
+        "is_online": {
+            "name": "is_online",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user, $delay = 180)\n  {\n    $a =& $this->class_cfg['arch'];\n    $t =& $this->class_cfg['tables'];\n    if (\n      ($max = $this->db->select_one($t['sessions'], 'MAX('.$a['sessions']['last_activity'].')', ['id_user' => $id_user]))\n      &&(strtotime($max) > (time() - $delay))\n    ) {\n      return true;\n    }\n    return false;\n  }",
+            "startLine": 121,
+            "doc": null,
+            "endLine": 132,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "delay",
+                    "position": 1,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 180,
+                    "default_name": ""
+                }
+            ]
+        },
+        "groups": {
+            "name": "groups",
+            "summary": "Returns all the users' groups - with or without admin",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $t =& $this->class_cfg['tables'];\n    $id = $this->db->cfn($a['groups']['id'], $t['groups'], 1);\n    $group = $this->db->cfn($a['groups']['group'], $t['groups'], 1);\n    $id_group = $this->db->cfn($a['users']['id_group'], $t['users'], 1);\n    $type = $this->db->cfn($a['groups']['type'], $t['groups'], 1);\n    $code = $this->db->cfn($a['groups']['code'], $t['groups'], 1);\n    $active = $this->db->cfn($a['users']['active'], $t['users'], 1);\n    $users_id = $this->db->cfn($a['users']['id'], $t['users'], 1);\n    $groups = $this->db->escape($t['groups']);\n    $users = $this->db->escape($t['users']);\n    return $this->db->get_rows(\"\n      SELECT $id, $group, $type, $code,\n      COUNT($users_id) AS `num`\n      FROM $groups\n        LEFT JOIN $users\n          ON $id_group = $id\n      GROUP BY $id\");\n  }",
+            "startLine": 139,
+            "doc": {
+                "description": "Returns all the users' groups - with or without admin",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$adm"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 158,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "text_value_groups": {
+            "name": "text_value_groups",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $this->class_cfg['tables']['groups'], [\n        'value' => $this->class_cfg['arch']['groups']['id'],\n        'text' => $this->class_cfg['arch']['groups']['group'],\n      ]);\n  }",
+            "startLine": 160,
+            "doc": null,
+            "endLine": 166,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_email": {
+            "name": "get_email",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n      $email = $this->db->select_one($this->class_cfg['tables']['users'], $this->class_cfg['arch']['users']['email'], [$this->class_cfg['arch']['users']['id'] => $id]);\n      if ( $email && bbn\\str::is_email($email) ){\n        return $email;\n      }\n    }\n    return false;\n  }",
+            "startLine": 168,
+            "doc": null,
+            "endLine": 176,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_list": {
+            "name": "get_list",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($group_id = NULL)\n  {\n    $arch =& $this->class_cfg['arch'];\n    $s =& $arch['sessions'];\n    $tables =& $this->class_cfg['tables'];\n\n    if ( !empty($arch['users']['username']) ){\n      $sort = $arch['users']['username'];\n    }\n    else if ( !empty($arch['users']['login']) ){\n      $sort = $arch['users']['login'];\n    }\n    else{\n      $sort = $arch['users']['email'];\n    }\n\n    $sql = \"SELECT \";\n    $done = [];\n    foreach ( $arch['users'] as $n => $f ){\n      if ( !\\in_array($f, $done) ){\n        $sql .= $db->cfn($f, $tables['users'], 1).', ';\n        array_push($done, $f);\n      }\n    }\n    $gr = !empty($group_id) && \\bbn\\str::is_uid($group_id) ?\n      \"AND \" . $db->cfn($arch['groups']['id'], $tables['groups'], 1) . \" = UNHEX('$group_id')\" : '';\n    $sql .= \"\n      MAX({$db->cfn($s['last_activity'], $tables['sessions'], 1)}) AS {$db->csn($s['last_activity'], 1)},\n      COUNT({$db->cfn($s['sess_id'], $tables['sessions'])}) AS {$db->csn($s['sess_id'], 1)}\n      FROM {$db->escape($tables['users'])}\n        JOIN {$db->tsn($tables['groups'], 1)}\n          ON {$db->cfn($arch['users']['id_group'], $tables['users'], 1)} = {$db->cfn($arch['groups']['id'], $tables['groups'], 1)}\n          $gr\n        LEFT JOIN {$db->tsn($tables['sessions'])}\n          ON {$db->cfn($s['id_user'], $tables['sessions'], 1)} = {$db->cfn($arch['users']['id'], $tables['users'], 1)}\n      WHERE {$db->cfn($arch['users']['active'], $tables['users'], 1)} = 1\n      GROUP BY {$db->cfn($arch['users']['id'], $tables['users'], 1)}\n      ORDER BY {$db->cfn($sort, $tables['users'], 1)}\";\n    return $db->get_rows($sql);\n  }",
+            "startLine": 178,
+            "doc": null,
+            "endLine": 217,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "group_id",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_user": {
+            "name": "get_user",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    if ( bbn\\str::is_uid($id) ){\n      $where = [$u['id'] => $id];\n    }\n    else{\n      $where = [$u['login'] => $id];\n    }\n    if ( $user = $this->db->rselect(\n      $this->class_cfg['tables']['users'],\n      array_values($u),\n      $where)\n    ){\n      if ( $session = $this->db->rselect(\n        $this->class_cfg['tables']['sessions'],\n        array_values($this->class_cfg['arch']['sessions']),\n        [$this->class_cfg['arch']['sessions']['id_user'] => $user[$u['id']]],\n        [$this->class_cfg['arch']['sessions']['last_activity'] => 'DESC']\n      ) ){\n        $session['id_session'] = $session['id'];\n      }\n      else{\n        $session = array_fill_keys(\n          array_values($this->class_cfg['arch']['sessions']),\n          '');\n        $session['id_session'] = false;\n      }\n      return array_merge($session, $user);\n    }\n    return false;\n  }",
+            "startLine": 219,
+            "doc": null,
+            "endLine": 249,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_group": {
+            "name": "get_group",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    if ( $group = $this->db->rselect($this->class_cfg['tables']['groups'], [], [\n      $g['id'] => $id\n    ]) ){\n      $group[$g['cfg']] = $group[$g['cfg']] ? json_decode($group[$g['cfg']], 1) : [];\n      return $group;\n    }\n    return false;\n  }",
+            "startLine": 251,
+            "doc": null,
+            "endLine": 260,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_users": {
+            "name": "get_users",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($group_id = NULL)\n  {\n      SELECT \".$this->class_cfg['arch']['users']['id'].\"\n      FROM \".$this->class_cfg['tables']['users'].\"\n      WHERE {$this->db->escape($this->class_cfg['tables']['users'].'.'.$this->class_cfg['arch']['users']['active'])} = 1\n      AND \".$this->class_cfg['arch']['users']['id_group'].\" \".( $group_id ? \"= \".(int)$group_id : \"!= 1\" )\n    );\n  }",
+            "startLine": 262,
+            "doc": null,
+            "endLine": 269,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "group_id",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "full_list": {
+            "name": "full_list",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $u = $this->class_cfg['arch']['users'];\n    foreach ( $this->db->rselect_all('bbn_users') as $a ){\n      $r[] = [\n        'value' => $a[$u['id']],\n        'text' => $this->get_name($a, false),\n        'id_group' => $a[$u['id_group']],\n        'active' => $a[$u['active']] ? true : false\n      ];\n    }\n    return $r;\n  }",
+            "startLine": 271,
+            "doc": null,
+            "endLine": 283,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_user_id": {
+            "name": "get_user_id",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($login)\n  {\n    return $this->db->select_one(\n      $this->class_cfg['tables']['users'], \n      $this->class_cfg['arch']['users']['id'],\n      [\n        $this->class_cfg['arch']['users']['login'] => $login\n      ]);\n  }",
+            "startLine": 285,
+            "doc": null,
+            "endLine": 293,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "login",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_admin_group": {
+            "name": "get_admin_group",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if (!self::$admin_group) {\n      if ($res = $this->db->select_one(\n        $this->class_cfg['tables']['groups'], \n        $this->class_cfg['arch']['groups']['id'],\n        [\n          $this->class_cfg['arch']['groups']['code'] => 'admin'\n        ]\n        )\n      ) {\n        self::set_admin_group($res);\n      }\n    }\n    return self::$admin_group;\n  }",
+            "startLine": 295,
+            "doc": null,
+            "endLine": 310,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_dev_group": {
+            "name": "get_dev_group",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if (!self::$dev_group) {\n      if ($res = $this->db->select_one(\n        $this->class_cfg['tables']['groups'], \n        $this->class_cfg['arch']['groups']['id'],\n        [\n          $this->class_cfg['arch']['groups']['code'] => 'dev'\n        ]\n        )\n      ) {\n        self::set_dev_group($res);\n      }\n    }\n    return self::$dev_group;\n  }",
+            "startLine": 312,
+            "doc": null,
+            "endLine": 327,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_name": {
+            "name": "get_name",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($user, $full = true)\n  {\n      $user = $this->get_user($user);\n    }\n    if ( \\is_array($user) ){\n      $idx = 'email';\n      if ( !empty($this->class_cfg['arch']['users']['username']) ){\n        $idx = 'username';\n      }\n      else if ( !empty($this->class_cfg['arch']['users']['login']) ){\n        $idx = 'login';\n      }\n      return $user[$this->class_cfg['arch']['users'][$idx]];\n    }\n    return '';\n  }",
+            "startLine": 329,
+            "doc": null,
+            "endLine": 344,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "user",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "full",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_group_type": {
+            "name": "get_group_type",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_group)\n  {\n    $g =& $this->class_cfg['arch']['groups'];\n    return $this->db->select_one($this->class_cfg['tables']['groups'], $g['type'], [$g['id'] => $id_group]);\n  }",
+            "startLine": 346,
+            "doc": null,
+            "endLine": 350,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_group",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "add": {
+            "name": "add",
+            "summary": "Creates a new user and returns its configuration (with the new ID)",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($cfg)\n  {\n    $u =& $this->class_cfg['arch']['users'];\n    $fields = array_unique(array_values($u));\n    $cfg[$u['active']] = 1;\n    $cfg[$u['cfg']] = '{}';\n    foreach ( $cfg as $k => $v ){\n      if ( !\\in_array($k, $fields) ){\n        unset($cfg[$k]);\n      }\n    }\n    if ( isset($cfg['id']) ){\n      unset($cfg['id']);\n    }\n    if (!empty($cfg[$u['id_group']])) {\n      $group = $this->get_group_type($cfg[$u['id_group']]);\n      switch ($group) {\n        case 'real':\n          if (\n            bbn\\str::is_email($cfg[$u['email']]) &&\n                  $this->db->insert($this->class_cfg['tables']['users'], $cfg)\n          ){\n            $cfg[$u['id']] = $this->db->last_id();\n  \n            \/\/ Envoi d'un lien\n            $this->make_hotlink($cfg[$this->class_cfg['arch']['users']['id']], 'creation');\n            return $cfg;\n          }\n          break;\n        case 'api':\n          $cfg[$u['email']] = null;\n          $cfg[$u['login']] = null;\n          if ($this->db->insert($this->class_cfg['tables']['users'], $cfg)) {\n            $cfg[$u['id']] = $this->db->last_id();\n            return $cfg;\n          }\n          break;\n      }\n    }   \n\t\treturn null;\n  }",
+            "startLine": 358,
+            "doc": {
+                "description": "Creates a new user and returns its configuration (with the new ID)",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg",
+                        "description": "A configuration array"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 398,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "A configuration array"
+                }
+            ]
+        },
+        "edit": {
+            "name": "edit",
+            "summary": "Creates a new user and returns its configuration (with the new ID)",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($cfg, $id_user = false)\n  {\n\t  $u =& $this->class_cfg['arch']['users'];\n    $fields = array_unique(array_values($this->class_cfg['arch']['users']));\n    $cfg[$u['active']] = 1;\n    foreach ( $cfg as $k => $v ){\n      if ( !\\in_array($k, $fields) ){\n        unset($cfg[$k]);\n      }\n    }\n    if ( !$id_user && isset($cfg[$u['id']]) ){\n      $id_user = $cfg[$u['id']];\n    }\n    if ( $id_user && (\n            !isset($cfg[$this->class_cfg['arch']['users']['email']]) ||\n            bbn\\str::is_email($cfg[$this->class_cfg['arch']['users']['email']])\n          )\n    ){\n      if ( $this->db->update($this->class_cfg['tables']['users'], $cfg, [\n        $u['id'] => $id_user\n      ]) ){\n        $cfg['id'] = $id_user;\n        return $cfg;\n      }\n    }\n\t\treturn false;\n  }",
+            "startLine": 406,
+            "doc": {
+                "description": "Creates a new user and returns its configuration (with the new ID)",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg",
+                        "description": "A configuration array"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 432,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "A configuration array"
+                },
+                {
+                    "name": "id_user",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "send_mail": {
+            "name": "send_mail",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user, $subject, $text, array $attachments = [])\n  {\n    if ( !$this->get_mailer() ){\n      die(\"Impossible to make hotlinks without a proper mailer parameter\");\n    }\n    if ( ($usr = $this->get_user($id_user)) && $usr['email']){\n      return $this->mailer->send([\n        'to' => $usr['email'],\n        'subject' => $subject,\n        'text' => $text,\n        'attachments' => $attachments\n      ]);\n    }\n    return null;\n  }",
+            "startLine": 434,
+            "doc": null,
+            "endLine": 448,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "subject",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "text",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "attachments",
+                    "position": 3,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "make_hotlink": {
+            "name": "make_hotlink",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user, $message = 'hotlink', $exp = NULL)\n  {\n      die(\"Impossible to make hotlinks without a link configured\");\n    }\n    if ( $usr = $this->get_user($id_user) ){\n      \/\/ Expiration date\n      if ( !\\is_int($exp) || ($exp < 1) ){\n        $exp = time() + $this->hotlink_length;\n      }\n      $hl =& $this->class_cfg['arch']['hotlinks'];\n      \/\/ Expire existing valid hotlinks\n      $this->db->update($this->class_cfg['tables']['hotlinks'], [\n        $hl['expire'] => date('Y-m-d H:i:s')\n      ],[\n        [$hl['id_user'], '=', $id_user],\n        [$hl['expire'], '>', date('Y-m-d H:i:s')]\n      ]);\n      $magic = $this->usrcls->make_magic_string();\n      \/\/ Create hotlink\n      $this->db->insert($this->class_cfg['tables']['hotlinks'], [\n        $hl['magic_string'] => $magic['hash'],\n        $hl['id_user'] => $id_user,\n        $hl['expire'] => date('Y-m-d H:i:s', $exp)\n      ]);\n      $id_link = $this->db->last_id();\n      $link = \"?id=$id_link&key=\".$magic['key'];\n      $this->send_mail(\n        $id_user,\n        $this->messages[$message]['subject'],\n        sprintf($this->messages[$message]['text'], sprintf($this->messages[$message]['link'], $link))\n      );\n    }\n    else{\n      die(\"User $id_user not found\");\n    }\n    return $this;\n  }",
+            "startLine": 457,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "user User ID"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$message",
+                        "description": "Type of the message"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$exp",
+                        "description": "Timestamp of the expiration date"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 493,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "user User ID"
+                },
+                {
+                    "name": "message",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "hotlink",
+                    "default_name": "",
+                    "description": "Type of the message"
+                },
+                {
+                    "name": "exp",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Timestamp of the expiration date"
+                }
+            ]
+        },
+        "set_unique_group": {
+            "name": "set_unique_group",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user, $id_group)\n  {\n    return (bool)$this->db->update($this->class_cfg['tables']['users'], [\n      $this->class_cfg['arch']['users']['id_group'] => $id_group\n    ], [\n      $this->class_cfg['arch']['users']['id'] => $id_user\n    ]);\n  }",
+            "startLine": 501,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "user User ID"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "group Group ID"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 508,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "user User ID"
+                },
+                {
+                    "name": "id_group",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "group Group ID"
+                }
+            ]
+        },
+        "user_has_option": {
+            "name": "user_has_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user, $id_option, $with_group = true)\n  {\n      $id_group = $user[$this->class_cfg['arch']['users']['id_group']];\n      if ( $this->group_has_option($id_group, $id_option) ){\n        return true;\n      }\n    }\n    if ( $pref = preferences::get_preferences() ){\n      if ( $cfg = $pref->get_class_cfg() ){\n        return $this->db->count($cfg['table'], [\n          $cfg['cols']['id_option'] => $id_option,\n          $cfg['cols']['id_user'] => $id_user\n        ]) ? true : false;\n      }\n    }\n    return false;\n  }",
+            "startLine": 510,
+            "doc": null,
+            "endLine": 526,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_option",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "with_group",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                }
+            ]
+        },
+        "group_has_option": {
+            "name": "group_has_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_group, $id_option)\n  {\n      ($pref = preferences::get_preferences()) &&\n      ($cfg = $pref->get_class_cfg())\n    ){\n      return $this->db->count($cfg['table'], [\n        $cfg['cols']['id_option'] => $id_option,\n        $cfg['cols']['id_group'] => $id_group\n      ]) ? true : false;\n    }\n    return false;\n  }",
+            "startLine": 528,
+            "doc": null,
+            "endLine": 539,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_group",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_option",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "user_insert_option": {
+            "name": "user_insert_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user, $id_option)\n  {\n      ($pref = preferences::get_preferences()) &&\n      ($cfg = $pref->get_class_cfg())\n    ){\n      return $this->db->insert_ignore($cfg['table'], [\n        $cfg['cols']['id_option'] => $id_option,\n        $cfg['cols']['id_user'] => $id_user\n      ]);\n    }\n    return false;\n  }",
+            "startLine": 541,
+            "doc": null,
+            "endLine": 552,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_option",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "group_insert_option": {
+            "name": "group_insert_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_group, $id_option)\n  {\n      ($pref = preferences::get_preferences()) &&\n      ($cfg = $pref->get_class_cfg())\n    ){\n      return $this->db->insert_ignore($cfg['table'], [\n        $cfg['cols']['id_option'] => $id_option,\n        $cfg['cols']['id_group'] => $id_group\n      ]);\n    }\n    return false;\n  }",
+            "startLine": 554,
+            "doc": null,
+            "endLine": 565,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_group",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_option",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "user_delete_option": {
+            "name": "user_delete_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user, $id_option)\n  {\n      ($pref = preferences::get_preferences()) &&\n      ($cfg = $pref->get_class_cfg())\n    ){\n      return $this->db->delete_ignore($cfg['table'], [\n        $cfg['cols']['id_option'] => $id_option,\n        $cfg['cols']['id_user'] => $id_user\n      ]);\n    }\n    return false;\n  }",
+            "startLine": 567,
+            "doc": null,
+            "endLine": 578,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_option",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "group_delete_option": {
+            "name": "group_delete_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_group, $id_option)\n  {\n      ($pref = preferences::get_preferences()) &&\n      ($cfg = $pref->get_class_cfg())\n    ){\n      return $this->db->delete_ignore($cfg['table'], [\n        $cfg['cols']['id_option'] => $id_option,\n        $cfg['cols']['id_group'] => $id_group\n      ]);\n    }\n    return false;\n  }",
+            "startLine": 580,
+            "doc": null,
+            "endLine": 591,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_group",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_option",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "group_num_users": {
+            "name": "group_num_users",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_group)\n  {\n    return $this->db->count($this->class_cfg['tables']['users'], [\n      $u['id_group'] => $id_group\n    ]);\n  }",
+            "startLine": 593,
+            "doc": null,
+            "endLine": 598,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_group",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "group_insert": {
+            "name": "group_insert",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($data)\n  {\n    if ( isset($data[$g['group']]) ){\n      if ( $this->db->insert($this->class_cfg['tables']['groups'], [\n        $g['group'] => $data[$g['group']],\n        $g['cfg'] => !empty($g['cfg']) && !empty($data[$g['cfg']]) ? $data[$g['cfg']] : '{}'\n      ]) ){\n        return $this->db->last_id();\n      }\n    }\n    return false;\n  }",
+            "startLine": 600,
+            "doc": null,
+            "endLine": 611,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "data",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "group_rename": {
+            "name": "group_rename",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id, $name)\n  {\n    return $this->db->update($this->class_cfg['tables']['groups'], [\n      $g['group'] => $name\n    ], [\n      $g['id'] => $id\n    ]);\n  }",
+            "startLine": 613,
+            "doc": null,
+            "endLine": 620,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "name",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "group_set_cfg": {
+            "name": "group_set_cfg",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id, $cfg)\n  {\n    return $this->db->update($this->class_cfg['tables']['groups'], [\n      $g['cfg'] => $cfg ?: '{}'\n    ], [\n      $g['id'] => $id\n    ]);\n  }",
+            "startLine": 622,
+            "doc": null,
+            "endLine": 629,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "group_delete": {
+            "name": "group_delete",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    if ( $this->group_num_users($id) ){\n      \/** @todo Error management *\/\n      die(\"This group has users...\");\n    }\n    return $this->db->delete($this->class_cfg['tables']['groups'], [\n      $g['id'] => $id\n    ]);\n  }",
+            "startLine": 631,
+            "doc": null,
+            "endLine": 640,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "deactivate": {
+            "name": "deactivate",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user)\n  {\n      $this->class_cfg['arch']['users']['active'] => 0,\n      $this->class_cfg['arch']['users']['email'] => null,\n    ];\n    if ( !empty($this->class_cfg['arch']['users']['login']) ){\n      $update[$this->class_cfg['arch']['users']['login']] = null;\n    }\n\n    if ($this->db->update($this->class_cfg['tables']['users'], $update, [\n      $this->class_cfg['arch']['users']['id'] => $id_user\n    ])) {\n      \/\/ Deleting existing sessions\n      $this->db->delete($this->class_cfg['tables']['sessions'], [$this->class_cfg['arch']['sessions']['id_user'] => $id_user]);\n    }\n  }",
+            "startLine": 647,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "user User ID"
+                    }
+                ],
+                "return": "Update result"
+            },
+            "endLine": 662,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "user User ID"
+                }
+            ]
+        },
+        "reactivate": {
+            "name": "reactivate",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\manager",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user)\n  {\n      $this->class_cfg['arch']['users']['active'] => 1\n    ], [\n      $this->class_cfg['arch']['users']['id'] => $id_user\n    ]);\n    return $this;\n  }",
+            "startLine": 669,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "user User ID"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 676,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "user User ID"
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 37,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "admin_group": null,
+        "dev_group": null,
+        "messages": {
+            "creation": {
+                "subject": "Account created",
+                "link": "",
+                "text": "\nA new user has been created for you.<br>\nPlease click the link below in order to activate your account:<br>\n%1$s"
+            },
+            "password": {
+                "subject": "Password change",
+                "link": "",
+                "text": "\nYou can click the following link to change your password:<br>\n%1$s"
+            },
+            "hotlink": {
+                "subject": "Hotlink",
+                "link": "",
+                "text": "\nYou can click the following link to access directly your account:<br>\n%1$s"
+            }
+        },
+        "hotlink_length": 86400,
+        "list_fields": null,
+        "usrcls": null,
+        "mailer": false,
+        "db": null,
+        "class_cfg": false
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\user",
+    "shortName": "manager"
+}

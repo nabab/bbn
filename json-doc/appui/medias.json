@@ -1,0 +1,1680 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\appui\\medias",
+    "namespace": true,
+    "traits": [
+        "bbn\\models\\tts\\references",
+        "bbn\\models\\tts\\dbconfig"
+    ],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/appui\/medias.php",
+    "startLine": 5,
+    "endLine": 435,
+    "contentConstructor": {
+        "file": "bbn\\appui\\medias",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bbn\\db $db)\n  {\n    $this->_init_class_cfg();\n    $this->opt = bbn\\appui\\options::get_instance();\n    $this->usr = bbn\\user::get_instance();\n    $this->opt_id = $this->opt->from_root_code('media', 'notes', 'appui');\n  }",
+            "startLine": 40,
+            "doc": null,
+            "endLine": 46,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "__construct",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\db",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function(bbn\\db $db)\n  {\n  }",
+                "startLine": 27,
+                "doc": null,
+                "endLine": 29,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "db",
+                        "position": 0,
+                        "type": "bbn\\db",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "bbn\\db",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "insert": {
+            "name": "insert",
+            "summary": "Adds a new media",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name, array $content = NULL, $title = '', $type = 'file', $private = false)\n  {\n    $cf =& $this->class_cfg;\n    if (\n      !empty($name) &&\n      ($id_type = $this->opt->from_code($type, $this->opt_id))\n    ){\n      $content = null;\n      $ok = false;\n      switch ( $type ){\n        case 'link':\n          if ( empty($title) ){\n            $title = basename($name);\n          }\n          $ok = 1;\n        break;\n        default:\n          $fs = new bbn\\file\\system();\n          if ( $fs->is_file($name) ){\n            $root = $fs->create_path($private && $this->usr->check() ? \n              bbn\\mvc::get_user_data_path($this->usr->get_id(), 'appui-notes').'media\/' : \n              bbn\\mvc::get_data_path('appui-notes').'media\/');\n            if ( $root ){\n              $path = bbn\\x::make_storage_path($root, '', 0, $fs);\n              $dpath = substr($path, strlen($root) + 1);\n              $file = basename($name);\n              $content = [\n                'path' => $dpath,\n                'size' => $fs->filesize($name),\n                'extension' => bbn\\str::file_ext($file)\n              ];\n              \n              if ( empty($title) ){\n                $title = basename($file);\n              }\n              $ok = 1;\n            }\n          }\n          break;\n      }\n      if ( $ok ){\n        $this->db->insert($cf['table'], [\n          $cf['arch']['medias']['id_user'] => $this->usr->get_id(),\n          $cf['arch']['medias']['type'] => $id_type,\n          $cf['arch']['medias']['title'] => $title,\n          $cf['arch']['medias']['name'] => $file ?? null,\n          $cf['arch']['medias']['content'] => $content ? json_encode($content) : null,\n          $cf['arch']['medias']['private'] => $private ? 1 : 0\n        ]);\n        $id = $this->db->last_id();\n        if ( isset($file) && $fs->create_path($path.$id) ){\n           $fs->move(\n            $name,\n            $path.$id\n          );\n          }\n        if ( $this->is_image($path.$id.'\/'.basename($name)) ){\n          $image = new \\bbn\\file\\image($path.$id.'\/'.basename($name), $fs);\n          $image->thumbs($path.$id, $this->thumbs_sizes);\n        }\n        return $id;\n      }\n    }\n    return null;\n  }",
+            "startLine": 58,
+            "doc": {
+                "description": "Adds a new media",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$content"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$title"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$private"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 122,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "content",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "title",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "type",
+                    "position": 3,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "file",
+                    "default_name": ""
+                },
+                {
+                    "name": "private",
+                    "position": 4,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_thumbs": {
+            "name": "get_thumbs",
+            "summary": "Returns the path to the img for the given $path and size",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path, array $size = array (\n  0 => 60,\n  1 => 60,\n))\n  {\n    $st = '';\n    $ext = '.'.pathinfo($path, PATHINFO_EXTENSION);\n    $name = str_replace($ext, '',basename($path));\n    $_path = str_replace($name.$ext, '', $path);\n    $st .= $_path.$name.'_w'.$size[0].'h'.$size[1].$ext;\n    if ( file_exists($st) ){\n      return $st;\n    }\n    return null;\n  }",
+            "startLine": 129,
+            "doc": {
+                "description": "Returns the path to the img for the given $path and size",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path",
+                        "description": "* @param array $size"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 140,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "* @param array $size"
+                },
+                {
+                    "name": "size",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [
+                        60,
+                        60
+                    ],
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_thumbs_path": {
+            "name": "get_thumbs_path",
+            "summary": "If the thumbs files exists for this path it returns an array of the the thumbs filename",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path)\n  {\n    $res = [];\n    $size = [];\n    if ( file_exists($path) && $this->is_image($path) ){\n      foreach($this->thumbs_sizes as $size ){\n        $res[] = $this->get_thumbs($path, $size);\n      }\n    }\n    return $res;\n  }",
+            "startLine": 148,
+            "doc": {
+                "description": "If the thumbs files exists for this path it returns an array of the the thumbs filename",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 158,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "remove_thumbs": {
+            "name": "remove_thumbs",
+            "summary": "Remove the thums files",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path)\n  {\n    if ( $thumbs = $this->get_thumbs_path($path) ){\n      foreach($thumbs as $th ){\n        if(file_exists($th)){\n          unlink($th);\n        }\n      }\n    }\n  }",
+            "startLine": 166,
+            "doc": {
+                "description": "Remove the thums files",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 175,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_thumbs_name": {
+            "name": "get_thumbs_name",
+            "summary": "Returns the name of the thumb file corresponding to the given name and size",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name, array $size = array (\n  0 => 60,\n  1 => 60,\n))\n  {\n    $tmp = explode('.', $name);\n    if ( $ext = '.'.$tmp[1]){\n      return $tmp[0].'_w'.$size[0].'h'.$size[1].$ext;\n    }\n    return null;\n  }",
+            "startLine": 182,
+            "doc": {
+                "description": "Returns the name of the thumb file corresponding to the given name and size",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name",
+                        "description": "* @param array $size"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 189,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "* @param array $size"
+                },
+                {
+                    "name": "size",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [
+                        60,
+                        60
+                    ],
+                    "default_name": ""
+                }
+            ]
+        },
+        "delete": {
+            "name": "delete",
+            "summary": "Deletes the given media",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    if ( \\bbn\\str::is_uid($id) ){\n      $cf =& $this->class_cfg;\n      $media = $this->get_media($id, true);\n      $fs = new bbn\\file\\system();\n      \n      if ($media \n          && ($path = dirname($media['file']))\n          && is_file($media['file'])\n          && $this->db->delete($cf['table'], [$cf['arch']['medias']['id'] => $id])\n      ) {\n        if ($fs->delete($path, false)) {\n          bbn\\x::clean_storage_path($path);\n        }\n        return true;\n      }\n    }\n    return false;\n  }",
+            "startLine": 198,
+            "doc": {
+                "description": "Deletes the given media",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 217,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_image": {
+            "name": "is_image",
+            "summary": "Returns true if the given path is an image",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path)\n  {\n    if ( is_string($path) ){\n      $content_type = mime_content_type($path);\n      if ( strpos($content_type, 'image\/' ) === 0 ){\n        return true;\n      }\n    }\n    return false;\n  }",
+            "startLine": 225,
+            "doc": {
+                "description": "Returns true if the given path is an image",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 234,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_media": {
+            "name": "get_media",
+            "summary": "Returns the object of the media",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id, $details = false)\n  {\n    $cf =& $this->class_cfg;\n    $fs = new \\bbn\\file\\system();\n    if (\n      \\bbn\\str::is_uid($id) &&\n      ($link_type = $this->opt->from_code('link', $this->opt_id)) &&\n      ($media = $this->db->rselect($cf['table'], [], [$cf['arch']['medias']['id'] => $id])) &&\n      ($link_type !== $media[$cf['arch']['medias']['type']]) \n    ){\n      $path = '';\n      if ( $media['content'] ){\n        $tmp = json_decode($media[$cf['arch']['medias']['content']], true);\n        $media = array_merge($tmp, $media);\n      }\n      $media['file'] = (\n        $media['private'] ?\n          bbn\\mvc::get_user_data_path('appui-notes') :\n          bbn\\mvc::get_data_path('appui-notes')\n      ).'media\/'.($media['path'] ?? '').$id.'\/'.$media[$cf['arch']['medias']['name']];\n      if ($fs->is_file($media['file']) && $this->is_image($media['file']) ){\n        $media['is_image'] = true;\n      }\n      return empty($details) ? $media['file'] : $media;\n    }\n    return false;\n  }",
+            "startLine": 243,
+            "doc": {
+                "description": "Returns the object of the media",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$details"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 269,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "details",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "zip": {
+            "name": "zip",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($medias, $dest)\n  {\n    if ( is_string($medias) ){\n      $medias = [$medias];\n    }\n    if ( \n      is_array($medias) &&\n      \\bbn\\file\\dir::create_path(dirname($dest)) &&\n      ($zip = new \\ZipArchive()) &&\n      (\n        (\n          is_file($dest) &&\n          ($zip->open($dest, \\ZipArchive::OVERWRITE) === true)\n        ) ||\n        ($zip->open($dest, \\ZipArchive::CREATE) === true)\n      )\n    ){\n      foreach ( $medias as $media ){\n        if ( $file = $this->get_media($media) ){\n          $zip->addFile($file, basename($file));\n        }\n      }\n      return $zip->close();\n    }\n    return false;\n  }",
+            "startLine": 271,
+            "doc": null,
+            "endLine": 296,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "medias",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "dest",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "update": {
+            "name": "update",
+            "summary": "updates the title or the name or the title of the given media at the level of the file and database",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_media, $name, $title)\n  {\n    $new = [];\n    \/\/the old media\n    $fs = new bbn\\file\\system();\n    $old = $this->get_media($id_media, true);\n    $root = bbn\\mvc::get_data_path('appui-notes').'media\/';\n    if ( $old && \n        (($old['name'] !== $name) || ($old['title'] !== $title)) \n       ){\n    \t$content = json_decode($old['content'], true);  \n      $path = $root.$content['path'].'\/';\n  \n      if ( $fs->exists($path.$id_media.'\/'.$old['name']) ){\n        if ( $old['name'] !== $name ){\n          \/\/if the media is an image has to update also the thumbs names\n          if ( $this->is_image($path.$id_media.'\/'.$old['name'])){\n            $thumbs_names = [\n              [\n                'old' => $this->get_thumbs_name($old['name'], [60,60]),\n                'new' =>  $this->get_thumbs_name($name, [60,60])\n              ],[\n                'old' => $this->get_thumbs_name($old['name'], [100,100]),\n                'new' =>  $this->get_thumbs_name($name, [100,100])\n              ],[\n                'old' => $this->get_thumbs_name($old['name'], [125,125]),\n                'new' =>  $this->get_thumbs_name($name, [125,125])\n              ]\n            ];\n            foreach ( $thumbs_names as $t ){\n              $fs->rename($path.$id_media.'\/'.$t['old'], $t['new'], true);\n            }\n          }\n          $fs->rename($path.$id_media.'\/'.$old['name'], $name, true);\n        }\n        if ( $this->update_db($id_media, $name, $title)){\n          $new = $this->get_media($id_media, true);\n        }      \n      }\n      return $new;\n    }\n    return $new;\n  }",
+            "startLine": 306,
+            "doc": {
+                "description": "updates the title or the name or the title of the given media at the level of the file and database",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "media"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$title"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 348,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_media",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "media"
+                },
+                {
+                    "name": "name",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "title",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "update_db": {
+            "name": "update_db",
+            "summary": "Updates the media on the databases",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_media, $name, $title, array $content = [])\n  {\n      $this->class_cfg['arch']['medias']['name'] => $name,\n\t\t\t$this->class_cfg['arch']['medias']['title'] => $title\n    ];\n    if(!empty($content)){\n      $fields[$this->class_cfg['arch']['medias']['content']] = json_encode($content);\n    }\n    return $this->db->update([\n      'table'=> $this->class_cfg['table'],\n      'fields' => $fields,\n\t\t\t'where'=> [\n        'conditions' => [[\n          'field'=> $this->class_cfg['arch']['medias']['id'],\n          'value' => $id_media\n        ]]\n      ]]\n    );\n  }",
+            "startLine": 358,
+            "doc": {
+                "description": "Updates the media on the databases",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "media"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$title"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$content"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 376,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_media",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "media"
+                },
+                {
+                    "name": "name",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "title",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "content",
+                    "position": 3,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "update_content": {
+            "name": "update_content",
+            "summary": "Updates the content of the media when it's deleted and replaced in the bbn-upload",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_media, $ref, $oldName, $newName, $title)\n  {\n    $fs = new \\bbn\\file\\system();\n    $new_media = [];\n    if ( $fs->is_file($tmp_path) ){\n      $file_content = file_get_contents($tmp_path);\n      $root = \\bbn\\mvc::get_data_path('appui-notes').'media\/';\n      \n      if ( ($media = $this->get_media($id_media, true)) ){\n        $old_path = $this->get_media_path($id_media, $oldName);\n        $full_path = $this->get_media_path($id_media, $newName);\n        if ( $fs->put_contents($full_path, $file_content)){\n          if ( $this->is_image($full_path)){\n            $image = new \\bbn\\file\\image($full_path);\n            $this->remove_thumbs($old_path);\n            $image->thumbs(dirname($full_path), $this->thumbs_sizes);\n            $media['is_image'] = true;\n\t\t\t\t\t}\n        }\n      }\n      if( $this->update_db($id_media, $newName, $title, [\n        'path' => $media['path'],\n        'size' => $fs->filesize($full_path),\n        'extension' => pathinfo($newName, PATHINFO_EXTENSION)\n      ])){\n        $new_media = $this->get_media($id_media, true);\n      }\n    }\n    return $new_media;\n    \n  }",
+            "startLine": 388,
+            "doc": {
+                "description": "Updates the content of the media when it's deleted and replaced in the bbn-upload",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "media"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$ref"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$old",
+                        "description": "ame"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$new",
+                        "description": "ame"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$title"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 418,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 5,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_media",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "media"
+                },
+                {
+                    "name": "ref",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "oldName",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ame"
+                },
+                {
+                    "name": "newName",
+                    "position": 3,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ame"
+                },
+                {
+                    "name": "title",
+                    "position": 4,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_media_path": {
+            "name": "get_media_path",
+            "summary": "Returns the path of the given id_media",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_media, $name = NULL)\n  {\n      $content = json_decode($media['content'], true);\n      $path = bbn\\mvc::get_data_path('appui-notes').'media\/'.$content['path'].$id_media.'\/'.($name ? $name : $media['name']);\n      return $path;\n    }\n    return null;\n  }",
+            "startLine": 427,
+            "doc": {
+                "description": "Returns the path of the given id_media",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "media"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 434,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_media",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "media"
+                },
+                {
+                    "name": "name",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "test": {
+            "name": "test",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+            "startLine": 45,
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 50,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "test",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+                "startLine": 45,
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 50,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "check": {
+            "name": "check",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+            "startLine": 56,
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 61,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "check",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+                "startLine": 56,
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 61,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "get_error": {
+            "name": "get_error",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 72,
+            "doc": null,
+            "endLine": 74,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_error",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 72,
+                "doc": null,
+                "endLine": 74,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "get_errors": {
+            "name": "get_errors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 76,
+            "doc": null,
+            "endLine": 78,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_errors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 76,
+                "doc": null,
+                "endLine": 78,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+            "startLine": 80,
+            "doc": null,
+            "endLine": 88,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+                "startLine": 80,
+                "doc": null,
+                "endLine": 88,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "__call": {
+            "name": "__call",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
+            "startLine": 95,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$arguments"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 99,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": {
+                "name": "__call",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
+                "startLine": 95,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string",
+                            "name": "$name"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "array",
+                            "name": "$arguments"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 99,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 2,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "name",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "arguments",
+                        "position": 1,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "arguments",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_debug": {
+            "name": "is_debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 104,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "is_debug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 104,
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 106,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "set_debug": {
+            "name": "set_debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($debug)\n  {\n  }",
+            "startLine": 112,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 114,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "set_debug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($debug)\n  {\n  }",
+                "startLine": 112,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 114,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "debug",
+                        "position": 0,
+                        "type": "bool",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "debug",
+                    "position": 0,
+                    "type": "bool",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_references": {
+            "name": "get_references",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return [\n      'select' => $this->references_select,\n      'join' => $this->references_join\n    ];\n  }",
+            "startLine": 52,
+            "doc": null,
+            "endLine": 58,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "exists": {
+            "name": "exists",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n      $this->class_cfg['arch'][$this->class_table_index]['id'] => $id\n    ]);\n  }",
+            "startLine": 59,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$id"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 63,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_class_cfg": {
+            "name": "get_class_cfg",
+            "summary": "Return the",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 69,
+            "doc": {
+                "description": "Return the",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 71,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_fields": {
+            "name": "get_fields",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\medias",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 73,
+            "doc": null,
+            "endLine": 75,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        }
+    },
+    "properties": {
+        "img_extensions": {
+            "visibility": "public",
+            "value": [
+                "jpeg",
+                "jpg",
+                "png",
+                "gif"
+            ]
+        },
+        "thumbs_sizes": {
+            "visibility": "public",
+            "value": [
+                [
+                    60,
+                    60
+                ],
+                [
+                    100,
+                    100
+                ],
+                [
+                    125,
+                    125
+                ]
+            ]
+        }
+    },
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 26,
+    "numProperties": 2,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\models\\tts\\references",
+        "bbn\\models\\tts\\dbconfig"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\models\\cls\\db",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "_defaults": {
+            "table": "bbn_medias",
+            "tables": {
+                "medias": "bbn_medias"
+            },
+            "arch": {
+                "medias": {
+                    "id": "id",
+                    "id_user": "id_user",
+                    "type": "type",
+                    "name": "name",
+                    "title": "title",
+                    "content": "content",
+                    "private": "private"
+                }
+            }
+        },
+        "opt": null,
+        "usr": null,
+        "opt_id": null,
+        "img_extensions": [
+            "jpeg",
+            "jpg",
+            "png",
+            "gif"
+        ],
+        "thumbs_sizes": [
+            [
+                60,
+                60
+            ],
+            [
+                100,
+                100
+            ],
+            [
+                125,
+                125
+            ]
+        ],
+        "db": null,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": [],
+        "references": null,
+        "references_select": "",
+        "references_join": "",
+        "class_cfg": null,
+        "fields": null,
+        "class_table": null,
+        "class_table_index": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\appui",
+    "shortName": "medias"
+}

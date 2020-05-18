@@ -1,0 +1,1442 @@
+{
+    "doc": {
+        "description": "Class cron",
+        "tags": {
+            "package": "bbn\\appui"
+        }
+    },
+    "name": "bbn\\cron\\launcher",
+    "namespace": true,
+    "traits": [
+        "bbn\\cron\\common"
+    ],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/cron\/launcher.php",
+    "startLine": 14,
+    "endLine": 73,
+    "contentConstructor": {
+        "file": "bbn\\cron\\launcher",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "Constructor",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cron\\launcher",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bbn\\cron $cron)\n  {\n    if ($cron->check()) {\n      $this->cron = $cron;\n      $this->exe_path = $cron->get_exe_path();\n    }\n  }",
+            "startLine": 27,
+            "doc": {
+                "description": "Constructor",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$exe",
+                        "description": "path"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 33,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cron",
+                    "position": 0,
+                    "type": "bbn\\cron",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "path"
+                }
+            ]
+        },
+        "launch": {
+            "name": "launch",
+            "summary": "Launch a parallel process",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cron\\launcher",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n    if ($this->exe_path) {\n      $cfg['exe_path'] = $this->exe_path;\n      $log = $this->cron->get_log_path($cfg).date('Y-m-d-H-i-s').'.txt';\n      $this->log(['launch', $log, $cfg]);\n      exec(sprintf('php -f router.php %s \"%s\" > %s 2>&1 &',\n        $this->exe_path,\n        bbn\\str::escape_dquotes(json_encode($cfg)),\n        $log\n      ));\n      return $log;\n    }\n    return null;\n  }",
+            "startLine": 41,
+            "doc": {
+                "description": "Launch a parallel process",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 55,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "launch_poll": {
+            "name": "launch_poll",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cron\\launcher",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ($this->is_poll_active()) {\n      return $this->launch(['type' => 'poll']);\n    }\n    return null;\n  }",
+            "startLine": 57,
+            "doc": null,
+            "endLine": 63,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "launch_task_system": {
+            "name": "launch_task_system",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cron\\launcher",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ($this->is_cron_active()) {\n      return $this->launch(['type' => 'cron']);\n    }\n    return null;\n  }",
+            "startLine": 65,
+            "doc": null,
+            "endLine": 71,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "test": {
+            "name": "test",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+            "startLine": 45,
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 50,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "test",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+                "startLine": 45,
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 50,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "check": {
+            "name": "check",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+            "startLine": 56,
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 61,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "check",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+                "startLine": 56,
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 61,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "get_error": {
+            "name": "get_error",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 72,
+            "doc": null,
+            "endLine": 74,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_error",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 72,
+                "doc": null,
+                "endLine": 74,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "get_errors": {
+            "name": "get_errors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 76,
+            "doc": null,
+            "endLine": 78,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_errors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 76,
+                "doc": null,
+                "endLine": 78,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+            "startLine": 80,
+            "doc": null,
+            "endLine": 88,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+                "startLine": 80,
+                "doc": null,
+                "endLine": 88,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "__call": {
+            "name": "__call",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
+            "startLine": 95,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$arguments"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 99,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": {
+                "name": "__call",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
+                "startLine": 95,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string",
+                            "name": "$name"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "array",
+                            "name": "$arguments"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 99,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 2,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "name",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "arguments",
+                        "position": 1,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "arguments",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_debug": {
+            "name": "is_debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 104,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "is_debug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 104,
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 106,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "set_debug": {
+            "name": "set_debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($debug)\n  {\n  }",
+            "startLine": 112,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 114,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "set_debug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($debug)\n  {\n  }",
+                "startLine": 112,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 114,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "debug",
+                        "position": 0,
+                        "type": "bool",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "debug",
+                    "position": 0,
+                    "type": "bool",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_cron_timeout": {
+            "name": "get_cron_timeout",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cron\\launcher",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::$cron_timeout;\n  }",
+            "startLine": 57,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 60,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "set_cron_timeout": {
+            "name": "set_cron_timeout",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cron\\launcher",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($cron_timeout)\n  {\n    self::$cron_timeout = $cron_timeout;\n  }",
+            "startLine": 65,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$cron",
+                        "description": "timeout"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 68,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "void"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cron_timeout",
+                    "position": 0,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "timeout"
+                }
+            ]
+        },
+        "get_poll_timeout": {
+            "name": "get_poll_timeout",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cron\\launcher",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::$poll_timeout;\n  }",
+            "startLine": 73,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 76,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "set_poll_timeout": {
+            "name": "set_poll_timeout",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cron\\launcher",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($poll_timeout)\n  {\n    self::$poll_timeout = $poll_timeout;\n  }",
+            "startLine": 81,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$poll",
+                        "description": "timeout"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 84,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "void"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "poll_timeout",
+                    "position": 0,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "timeout"
+                }
+            ]
+        },
+        "get_user_timeout": {
+            "name": "get_user_timeout",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cron\\launcher",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::$user_timeout;\n  }",
+            "startLine": 89,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 92,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "set_user_timeout": {
+            "name": "set_user_timeout",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cron\\launcher",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($user_timeout)\n  {\n    self::$user_timeout = $user_timeout;\n  }",
+            "startLine": 97,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$user",
+                        "description": "timeout"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 100,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "void"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "user_timeout",
+                    "position": 0,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "timeout"
+                }
+            ]
+        },
+        "init": {
+            "name": "init",
+            "summary": "cron constructor.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cron\\launcher",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg = [])\n  {\n    $this->path = bbn\\mvc::get_data_path('appui-cron');\n  }",
+            "startLine": 108,
+            "doc": {
+                "description": "cron constructor.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "bbn\\mvc\\controller",
+                        "name": "$ctrl"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 111,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_path": {
+            "name": "get_path",
+            "summary": "Returns the $data property.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cron\\launcher",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->path;\n  }",
+            "startLine": 117,
+            "doc": {
+                "description": "Returns the $data property.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 120,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "get_status_path": {
+            "name": "get_status_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cron\\launcher",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($type)\n  {\n  }",
+            "startLine": 122,
+            "doc": null,
+            "endLine": 124,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "type",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_pid_path": {
+            "name": "get_pid_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cron\\launcher",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n    if ($this->path && (isset($cfg['type']) || isset($cfg['id']))) {\n      return $this->path.'pid\/.'.($cfg['id'] ?? $cfg['type']);\n    }\n    return null;\n  }",
+            "startLine": 126,
+            "doc": null,
+            "endLine": 132,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_log_path": {
+            "name": "get_log_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cron\\launcher",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg, $error = false, $no_path = false)\n  {\n    $path = null;\n    if ($this->path && (isset($cfg['type']) || isset($cfg['id']))) {\n      if ( $error ){\n        $path = $this->path.'error\/'.(isset($cfg['id']) ? 'tasks\/'.$cfg['id'] : $cfg['type']);\n      }\n      else {\n        $path = $this->path.'log\/'.(isset($cfg['id']) ? 'tasks\/'.$cfg['id'] : $cfg['type']);\n      }\n      if ($error || $no_path) {\n        $path .= '\/';\n      }\n      else {\n        $path = \\bbn\\x::make_storage_path($path);\n      }\n    }\n    return $path;\n  }",
+            "startLine": 134,
+            "doc": null,
+            "endLine": 152,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "error",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                },
+                {
+                    "name": "no_path",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_log_tree": {
+            "name": "get_log_tree",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cron\\launcher",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg, $error = false)\n  {\n    $fs = new bbn\\file\\system();\n    if (($path = $this->get_log_path($cfg, $error, true)) && $fs->is_dir($path)) {\n      $fs->cd($path);\n      $dirs = array_reverse($fs->get_files('.\/', true, true, null, 'cts'));\n      $tmp =& $dirs;\n      $tpath = '';\n      for ($i = 0; $i < 4; $i++) {\n        if (!count($tmp)) {\n          break;\n        }\n        else{\n          $ok = false;\n          foreach ($tmp as &$t) {\n            if (!empty($t['num'])) {\n              $tpath .= '\/'.$t['name'];\n              $fs->cd($path.$tpath);\n              $t['expanded'] = true;\n              $t['items'] = array_reverse($fs->get_files('.\/', true, true, null, 'cts'));\n              $tmp =& $t['items'];\n              $ok = true;\n              break;\n            }\n          }\n          if (!$ok) {\n            break;\n          }\n        }\n      }\n      return $dirs;\n    }\n  }",
+            "startLine": 154,
+            "doc": null,
+            "endLine": 186,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "error",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_last_logs": {
+            "name": "get_last_logs",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cron\\launcher",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg, $error = false, $start = 0, $num = 10)\n  {\n    $fs = new \\bbn\\file\\system();\n    if (($path = $this->get_log_path($cfg, $error, true)) && $fs->is_dir($path)) {\n      $res = [];\n      $fs->cd($path);\n      $years = array_reverse($fs->get_dirs($path));\n      foreach ($years as $y) {\n        $months = array_reverse($fs->get_dirs($y));\n        foreach ($months as $m) {\n          $days = array_reverse($fs->get_dirs($m));\n          foreach ($days as $d) {\n            $nums = array_reverse($fs->get_dirs($d));\n            foreach ($nums as $num) {\n              foreach (array_reverse($fs->get_files($num)) as $f) {\n                if ($start) {\n                  $start--;\n                }\n                if (!$start) {\n                  $res[] = $f;\n                  if (count($res) >= $num) {\n                    return $res;\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n      return $res;\n    }\n    return null;\n  }",
+            "startLine": 188,
+            "doc": null,
+            "endLine": 220,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "error",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                },
+                {
+                    "name": "start",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                },
+                {
+                    "name": "num",
+                    "position": 3,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": 10,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_last_log": {
+            "name": "get_last_log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cron\\launcher",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg, $error = false)\n  {\n    if ($tmp = $this->get_last_logs($cfg, $error, 0, 1)) {\n      return $tmp[0];\n    }\n    return null;\n\n  }",
+            "startLine": 222,
+            "doc": null,
+            "endLine": 229,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "error",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_active": {
+            "name": "is_active",
+            "summary": "Returns true if the file data_folder\/.active exists, false otherwise.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cron\\launcher",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( $this->check() ){\n      return file_exists($this->get_status_path('active'));\n    }\n    return false;\n  }",
+            "startLine": 244,
+            "doc": {
+                "description": "Returns true if the file data_folder\/.active exists, false otherwise.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 250,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "is_cron_active": {
+            "name": "is_cron_active",
+            "summary": "Returns true if the file data_folder\/.cron exists, false otherwise.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cron\\launcher",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( $this->check() ){\n      return file_exists($this->get_status_path('cron'));\n    }\n    return false;\n  }",
+            "startLine": 256,
+            "doc": {
+                "description": "Returns true if the file data_folder\/.cron exists, false otherwise.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 262,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "is_poll_active": {
+            "name": "is_poll_active",
+            "summary": "Returns true if the file data_folder\/.poll exists, false otherwise.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cron\\launcher",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( $this->check() ){\n      return file_exists($this->get_status_path('poll'));\n    }\n    return false;\n  }",
+            "startLine": 268,
+            "doc": {
+                "description": "Returns true if the file data_folder\/.poll exists, false otherwise.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 274,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": []
+        }
+    },
+    "properties": null,
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 29,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\cron\\common"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\models\\cls\\basic",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "cron_timeout": 300,
+        "poll_timeout": 600,
+        "user_timeout": 480,
+        "exe_path": null,
+        "cron": null,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": [],
+        "prefix": "bbn_",
+        "path": null,
+        "db": null,
+        "ctrl": null,
+        "mail": null,
+        "data": null,
+        "enabled": true,
+        "timeout": 50
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\cron",
+    "shortName": "launcher"
+}

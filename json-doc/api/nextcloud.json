@@ -1,0 +1,1539 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\api\\nextcloud",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/api\/nextcloud.php",
+    "startLine": 6,
+    "endLine": 415,
+    "contentConstructor": {
+        "file": "bbn\\api\\nextcloud",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "Instantiate the class nextcloud by connecting the given user to the given url",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\nextcloud",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n    if ( isset($cfg['host'], $cfg['user'], $cfg['pass']) ){\n      $this->path = 'https:\/\/'.$cfg['host'].self::prefix;\n      $this->obj = new \\Sabre\\DAV\\Client([\n        'baseUri' => $this->path,\n        'userName' => $cfg['user'],\n        'password' => $cfg['pass']\n      ]);\n    }\n    if ( !$this->obj ){\n      $this->error = _(\"Missing parameters\");\n    }\n  }",
+            "startLine": 17,
+            "doc": {
+                "description": "Instantiate the class nextcloud by connecting the given user to the given url",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 30,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_size": {
+            "name": "get_size",
+            "summary": "Returns the size of the given dir or file, if no path is given it returns the size of the root folder",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\nextcloud",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path = '')\n  {\n    $size = null;\n    $tmp = $path;\n    $path = $this->get_real_path($path);\n    \n    $type = $this->obj->propFind($tmp, array( \n  \t  '{DAV:}resourcetype',\n    ));\n    \/\/case of files\n    if ( $this->is_file($path) ){\n      $size = $this->obj->propFind($tmp, [\n        '{DAV:}getcontentlength'\n      ])['{DAV:}getcontentlength'];\n    }\n    \/\/case of folder\n    else {\n      $size = $this->obj->propFind($tmp, [\n        '{DAV:}quota-used-bytes'\n      ])['{DAV:}quota-used-bytes'];\n    }\n    return $size;\n  }",
+            "startLine": 38,
+            "doc": {
+                "description": "Returns the size of the given dir or file, if no path is given it returns the size of the root folder",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "String",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 60,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "delete": {
+            "name": "delete",
+            "summary": "Deletes the given file or folder",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\nextcloud",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path)\n  {\n    $success = false;\n    \/\/die(var_dump($path));\n    if ( !empty($path) && $this->exists($path) && !empty($this->obj->request('DELETE', $path)) ){\n      $success = true;\n    }\n    return $success;\n  }",
+            "startLine": 68,
+            "doc": {
+                "description": "Deletes the given file or folder",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "String",
+                        "name": "$file"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 76,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "exists": {
+            "name": "exists",
+            "summary": "Returns true if the given $path exists",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\nextcloud",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path)\n  {\n    try {\n      if ( $this->obj->propFind($path, [\n        '{DAV:}resourcetype',\n        '{DAV:}getcontenttype'\n      ], 0) ){\n        return true;\n      }\n    }\n    catch ( \\Exception $e ){\n      if ( $e->getResponse()->getStatus() === 404 ){\n        return false;\n      }\n      else{\n        $this->error = $e->getResponse()->getStatusText();\n      }\n    }\n    return false;\n  }",
+            "startLine": 84,
+            "doc": {
+                "description": "Returns true if the given $path exists",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "String",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 103,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "mkdir": {
+            "name": "mkdir",
+            "summary": "Creates a dir at the given path",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\nextcloud",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($dir)\n  {\n    if ( !$this->exists($dir) && !empty($this->obj->request('MKCOL', $dir)) ){\n      $success = true;\n    }\n    return $success;\n  }",
+            "startLine": 111,
+            "doc": {
+                "description": "Creates a dir at the given path",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "String",
+                        "name": "$dir"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 117,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "dir",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "copy": {
+            "name": "copy",
+            "summary": "Copies the given file or folder to the given destination, if the given destination already exists throws an error.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\nextcloud",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($source, $dest)\n  {\n    \n    if ( $this->exists($source) ){\n      \n      if ( !empty($dest) ){\n        if ( !$this->exists($dest) ){\n          return (bool)$this->obj->request('COPY', $source, null, [\n            'Destination' => self::prefix.$dest\n          ]);\n        }\n        else {\n          $this->error = _(\"The given destination already exists\");\n          return false;\n        }\n      }\n    }\n  }",
+            "startLine": 125,
+            "doc": {
+                "description": "Copies the given file or folder to the given destination, if the given destination already exists throws an error.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "String",
+                        "name": "$source"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "String",
+                        "name": "$dest"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 142,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "source",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "dest",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "rename": {
+            "name": "rename",
+            "summary": "Renames files or folder from the $old name to the $new name-",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\nextcloud",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($old, $new)\n  {\n    if ( $this->exists($old) ){\n      if ( !$this->exists($new) ){\n        return (bool)$this->obj->request('MOVE', $old, null, [\n          'Destination' => $new\n        ]);\n      }\n      else {\n        $this->error = _(\"The new name given already exists\");\n        return false;\n      }\n    }\n    else {\n      $this->error = _(\"The given path does not correspond to a file or a directory\");\n      return false;\n    }\n  }",
+            "startLine": 149,
+            "doc": {
+                "description": "Renames files or folder from the $old name to the $new name-",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "String",
+                        "name": "$old"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "String",
+                        "name": "$new"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 166,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "old",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "new",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_file": {
+            "name": "is_file",
+            "summary": "Returns true if the given $path corresponds to a file.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\nextcloud",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path)\n  {\n    if ( $this->exists($path) && !empty( $this->obj->propFind($path, ['{DAV:}getcontenttype'], 0) ) ){\n      return true;\n    }\n    else {\n      return false;\n    }\n  }",
+            "startLine": 173,
+            "doc": {
+                "description": "Returns true if the given $path corresponds to a file.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "String",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 181,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_dir": {
+            "name": "is_dir",
+            "summary": "Returns true if the given $path corresponds to a directory.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\nextcloud",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path)\n  {\n    if ( $this->exists($path) && empty( $this->obj->propFind($path, ['{DAV:}getcontenttype'], 0) ) ){\n      return true;\n    }\n    else {\n      return false;\n    }\n  }",
+            "startLine": 188,
+            "doc": {
+                "description": "Returns true if the given $path corresponds to a directory.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "String",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 196,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "filemtime": {
+            "name": "filemtime",
+            "summary": "Returns the date of last modification of the given path",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\nextcloud",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path)\n  {\n    if ( $this->exists($path) ){\n      $mtime = $this->obj->propFind($path, [\n        '{DAV:}getlastmodified'\n      ]);\n      if ( !empty($mtime['{DAV:}getlastmodified']) ){\n        return $mtime['{DAV:}getlastmodified'];\n      }\n      else {\n        $this->error = _(\"The last modification date cannot be retrieved\");\n        return null;\n      }  \n    }\n    else {\n       $this->error = _(\"The given path doesn't exist\");\n    }\n  }",
+            "startLine": 202,
+            "doc": {
+                "description": "Returns the date of last modification of the given path",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "String",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 219,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_file": {
+            "name": "get_file",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\nextcloud",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file)\n  {\n    if ( $this->is_file($file) ){\n      return new \\bbn\\file(\\bbn\\mvc::get_tmp_path().basename($file));\n    }\n  }",
+            "startLine": 221,
+            "doc": null,
+            "endLine": 226,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bbn\\file",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "download": {
+            "name": "download",
+            "summary": "Download the given file",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\nextcloud",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file)\n  {\n    if ( $this->exists($file) && $this->is_file($file) ){\n      $dest = '';\n      \/\/gets the content of the file\n      $res = $this->obj->request('GET', $this->get_real_path($file));\n      if ( !empty($res) && !empty($res['body']) ){\n        \/\/the tmp file destination\n        $dest = \\bbn\\mvc::get_tmp_path().basename($file);\n        \/\/ the tmp file created\n        if ( $tmp = file_put_contents($dest, $res['body']) ){\n          \/\/ instantiates the new file to the class \\bbn\\file\n          \/\/$file_istance = new \\bbn\\file($dest);\n          $dest = \\bbn\\mvc::get_tmp_path().basename($file);;\n          \/\/return the content of the tmp file\n          \/\/$file_istance->download();\n          \/* deletes the tmp file\n          unlink($dest);*\/\n        } \n      }\n      return $dest;\n    }\n  }",
+            "startLine": 232,
+            "doc": {
+                "description": "Download the given file",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "String",
+                        "name": "$file"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 254,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_items": {
+            "name": "get_items",
+            "summary": "Returns an array of items contained in the given path, if no path is given it returns the root content, if the argument $detailed is given includes details of size and last modification time in the item",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\nextcloud",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path = '', $type = 'both', $hidden = false, $detailed = '')\n  {\n    if ( empty($path) || ($path === '.') ){\n      $path = self::prefix;\n    }\n   \/\/ $path = $this->get_system_path($path);\n    if ( $this->exists($path) && $this->is_dir($path) ){\n      $props = ['{DAV:}getcontenttype'];\n      $collection = $this->obj->propFind($path, $props, 1);\n      if ( !empty($collection) ){\n        \/\/arrayt_shift to remove the parent included in the array\n        array_shift($collection);\n        $dirs = [];\n        $files = [];\n        foreach ( $collection as $i => $c ){\n          $tmp = [\n            'path' => str_replace(self::prefix, '', $i),\n            'dir' => empty($c['{DAV:}getcontenttype']) ? true : false,\n            'file' => empty($c['{DAV:}getcontenttype']) ? false : true,\n            'name' => basename($i),\n          ];\n          \/\/if details has to be included on the item\n          if ( !empty($detailed) ){\n            $tmp['mtime'] = $this->filemtime($i);\n            $tmp['size'] = $this->get_size($i);\n          }\n          if ($type === 'both'){\n           \n            if ($tmp['dir']) {\n              $dirs[] = $tmp;\n            }\n            else{\n              $files[] = $tmp ;\n            }\n          }\n          else if ( $tmp['file'] && ($type === 'file') ){\n            $files[] = $tmp;\n          }\n          else if ( $tmp['dir'] && ($type === 'dir') ){\n            $dirs[] = $tmp;\n          }\n        }\n        \n        if ( $type === 'dir' ){\n          return $dirs;\n        }\n        else if ( $type === 'file' ){\n          return $files;\n        }\n        else {\n          die(var_dump($type));\n          return array_merge($dirs, $files);\n        }\n      }  \n    }\n    else {\n      $this->error = _(\"The path doesn't exists or it's not a directory\");\n    }\n  }",
+            "startLine": 265,
+            "doc": {
+                "description": "Returns an array of items contained in the given path, if no path is given it returns the root content, if the argument $detailed is given includes details of size and last modification time in the item",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "(both, files, dirs)"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$hidden"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$detailed"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 323,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "both",
+                    "default_name": "",
+                    "description": "(both, files, dirs)"
+                },
+                {
+                    "name": "hidden",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                },
+                {
+                    "name": "detailed",
+                    "position": 3,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_real_path": {
+            "name": "get_real_path",
+            "summary": "Returns the real path.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\nextcloud",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path)\n  {\n    if ( strpos($path, self::prefix) !== 0 ){\n      return self::prefix.$path;\n    }\n    else {\n      return $path;\n    }\n  }",
+            "startLine": 330,
+            "doc": {
+                "description": "Returns the real path.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "String",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 338,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_system_path": {
+            "name": "get_system_path",
+            "summary": "Returns the system path.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\nextcloud",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file, $is_absolute = true)\n  {\n    if ( strpos($file, self::prefix) === 0 ){\n      return substr($file, strlen(self::prefix) + ($is_absolute ? 0 : 1) -1 );\n    }\n    else {\n      return $path;\n    }\n  }",
+            "startLine": 347,
+            "doc": {
+                "description": "Returns the system path.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "String",
+                        "name": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "Boolean",
+                        "name": "$is",
+                        "description": "absolute"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 355,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "is_absolute",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": "",
+                    "description": "absolute"
+                }
+            ]
+        },
+        "get_contents": {
+            "name": "get_contents",
+            "summary": "Returns the content of the given file",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\nextcloud",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file)\n  {\n    if ( $this->exists($file) && $this->is_file($file) ){\n    \/\/gets the content of the file\n      $res = $this->obj->request('GET', $this->get_real_path($file));\n      if ( !empty($res) && !empty($res['body']) ){\n        return $res['body'];\n      }\n    }\n  }",
+            "startLine": 363,
+            "doc": {
+                "description": "Returns the content of the given file",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "String",
+                        "name": "$file"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 372,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_files": {
+            "name": "get_files",
+            "summary": "Returns the fies contained in the given $path",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\nextcloud",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path = NULL, $including_dirs = false, $hidden = false, $filter = NULL, $detailed = '')\n  {\n    \/\/exists and is_dir is checked $path in the function get_items\n    $is_absolute = strpos($path, '\/') === 0;\n    $type = $including_dirs ? 'both' : 'file';\n    \/\/die(var_dump($path, $filter , $type, $hidden, $detailed))\/\/die(var_dump($this->get_items('.', 'both', true, 't')));\n    return $this->get_items($path, $filter ?: $type, $hidden, $detailed);\n  }",
+            "startLine": 384,
+            "doc": {
+                "description": "Returns the fies contained in the given $path",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$including",
+                        "description": "dirs"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$hidden"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$filter"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$detailed"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 391,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "including_dirs",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "dirs"
+                },
+                {
+                    "name": "hidden",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                },
+                {
+                    "name": "filter",
+                    "position": 3,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "detailed",
+                    "position": 4,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "upload": {
+            "name": "upload",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\nextcloud",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $files, $path)\n  {\n    $success = false;\n    if ( !empty($files) && !empty($path) ){\n      if ( strpos($path, '.') === 0){\n        $path = '';\n      }\n      foreach ( $files as $f ){\n        if ( is_file($f['tmp_name']) && ($content = file_get_contents($f['tmp_name'])) ){\n          \/\/ wanted to put '%' instead of ' ' in the filename but not accepted\n          $full_name =  $path . (($path !== '') ? '\/' : '' ) . str_replace(' ', '_',$f['name']);\n          if (!$this->exists($full_name) ){\n            if ( $this->obj->request('PUT', $full_name, $content) ){\n              return $success = true;\n            }\n          }\n        }\n      }\n    }\n    return $success;\n  }",
+            "startLine": 393,
+            "doc": null,
+            "endLine": 413,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "files",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "path",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "test": {
+            "name": "test",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+            "startLine": 45,
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 50,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "test",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+                "startLine": 45,
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 50,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "check": {
+            "name": "check",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+            "startLine": 56,
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 61,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "check",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+                "startLine": 56,
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 61,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "get_error": {
+            "name": "get_error",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 72,
+            "doc": null,
+            "endLine": 74,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_error",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 72,
+                "doc": null,
+                "endLine": 74,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "get_errors": {
+            "name": "get_errors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 76,
+            "doc": null,
+            "endLine": 78,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_errors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 76,
+                "doc": null,
+                "endLine": 78,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+            "startLine": 80,
+            "doc": null,
+            "endLine": 88,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+                "startLine": 80,
+                "doc": null,
+                "endLine": 88,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "__call": {
+            "name": "__call",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
+            "startLine": 95,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$arguments"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 99,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": {
+                "name": "__call",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
+                "startLine": 95,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string",
+                            "name": "$name"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "array",
+                            "name": "$arguments"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 99,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 2,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "name",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "arguments",
+                        "position": 1,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "arguments",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_debug": {
+            "name": "is_debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 104,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "is_debug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 104,
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 106,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "set_debug": {
+            "name": "set_debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($debug)\n  {\n  }",
+            "startLine": 112,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 114,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "set_debug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($debug)\n  {\n  }",
+                "startLine": 112,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 114,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "debug",
+                        "position": 0,
+                        "type": "bool",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "debug",
+                    "position": 0,
+                    "type": "bool",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 26,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\models\\cls\\basic",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "obj": null,
+        "path": null,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": []
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\api",
+    "shortName": "nextcloud"
+}

@@ -1,0 +1,198 @@
+{
+    "doc": {
+        "description": "A user authentication Class",
+        "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
+            "copyright": "BBN Solutions",
+            "since": "Apr 4, 2011, 23:23:55 +0000",
+            "category": "Authentication",
+            "license": "http:\/\/opensource.org\/licenses\/MIT MIT",
+            "version": "0.2r89",
+            "todo": "Implement Cache for session requests' results?"
+        }
+    },
+    "name": "bbn\\user\\profile",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/user\/profile.php",
+    "startLine": 20,
+    "endLine": 82,
+    "contentConstructor": {
+        "file": "bbn\\user\\profile",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "connection constructor.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\profile",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bbn\\db $db, bbn\\user $user, array $cfg = [])\n  {\n      $this->id = $tmp['id'];\n      $this->id_group = $tmp['id_group'];\n      $this->id_user = $tmp['id_user'];\n      $this->db = $db;\n      $this->user = $user;\n      $this->cfg = bbn\\x::merge_arrays(self::$_defaults, $cfg);\n    }\n    return $this;\n  }",
+            "startLine": 52,
+            "doc": {
+                "description": "connection constructor.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "db",
+                        "name": "$db"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "session",
+                        "name": "$session"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$credentials"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 62,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "bbn\\db",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "user",
+                    "position": 1,
+                    "type": "bbn\\user",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_id": {
+            "name": "get_id",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\profile",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( $this->check() ){\n      return $this->id;\n    }\n  }",
+            "startLine": 67,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 72,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "check": {
+            "name": "check",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\profile",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\treturn $this->auth;\n  }",
+            "startLine": 77,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 80,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        }
+    },
+    "properties": null,
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 3,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "_defaults": {
+            "table": "bbn_users_profiles",
+            "cols": {
+                "id": "id",
+                "id_group": "id_group",
+                "id_user": "id_user"
+            }
+        },
+        "db": null,
+        "id": null,
+        "cfg": [],
+        "user": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\user",
+    "shortName": "profile"
+}

@@ -1,0 +1,399 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\api\\cloudmin",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/api\/cloudmin.php",
+    "startLine": 13,
+    "endLine": 391,
+    "contentConstructor": {
+        "file": "bbn\\api\\cloudmin",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "virtualmin constructor.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\cloudmin",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n      $this->user = $cfg['user'];\n      $this->pass = $cfg['pass'];\n      $this->hostname = 'cloudmin.lan';\n      $this->checked = true;\n        }\n  }",
+            "startLine": 39,
+            "doc": {
+                "description": "virtualmin constructor.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 46,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "list_systems": {
+            "name": "list_systems",
+            "summary": "return list of virtual machine",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\cloudmin",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    \/\/Defining  the $url_part and the command to be executed\n    $url_part = \"list-systems\";\n    \/\/Concatenating the closing single quote\n    $url_part .=\"'\";\n    \/\/Concatenating the header url and $url_part to create the full url to be executed\n    $url_part = $this->get_header_url() . $url_part;\n\n\n    \/\/Calling shell_exec and returning the result array\n    return array_map(function($a){\n      array_walk($a['values'], function(&$b){\n        if ( \\is_array($b) && array_key_exists(0, $b) && (count($b) === 1) ){\n          $b = $b[0];\n        }\n      });\n      $a['values']['name'] = $a['name'];\n      if ( $a['values']['filesystem'] ){\n        array_walk($a['values']['filesystem'], function(&$b){\n          $tmp = explode(' ', $b);\n          $b = [\n            'name' => $tmp[0],\n            'size' => $tmp[2],\n            'size_unit' => $tmp[3],\n            'used' => $tmp[5],\n            'used_unit' => $tmp[6],\n            'free' => $tmp[8],\n            'free_unit' => $tmp[9]\n          ];\n        });\n      }\n      $a['values']['available_updates'] = count(explode(', ', $a['values']['available_updates']));\n      return $a['values'];\n    }, $this->call_shell_exec($url_part));\n  }",
+            "startLine": 52,
+            "doc": {
+                "description": "return list of virtual machine",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 87,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "__call": {
+            "name": "__call",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\cloudmin",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name, $arguments)\n  {\n      $cmd_name = str_replace('-', '_', $name);\n\n\n      \/\/ TODO ho tolto il controllo $this->commands[$cmd_name]\n      \/\/ if ( isset($this->commands[$cmd_name]) ){\n\n      \/\/Setting the last action performed\n      $this->last_action = $cmd_name;\n      \/\/Defining  the $url_part and the command to be executed\n      $url_part = $cmd_name;\n      if ( !empty($arguments[0]) ){\n        \/\/Prepping, processing and validating the create user parameters\n        $args = $this->process_parameters($arguments[0]);\n\n        \/\/ TODO tolto i comandi, messo gli argomenti\n        foreach ( $args as $k => $v ){\n          if ( !empty($v['mandatory']) && !isset($args[$k]) ){\n            if ( (strpos($k, 'pass') === false) &&\n              (!isset($args['pass']) && !isset($args['encpass']) && !isset($args['passfile']))\n            ){\n              var_dump(\"Parameter $k mandatory for $name!\");\n              return false;\n            }\n          }\n          \/\/ TODO controlllo se questi valori sono boolean e se nono  a true\n          if ( isset($v) ){\n            if ( is_bool($v['binary']) &&\n              ($v['binary'] == true)\n            ){\n              $url_part .= \"&$k\";\n            }\n            else if ( \\is_array($v) &&\n              is_bool($v['multiple']) &&\n              ($v['multiple'] == true)\n            ){\n              foreach ( $v as $w ){\n                $url_part .= \"&$k=$w\";\n              }\n            }\n            else{\n              $url_part .= \"&$k=\".$args[$k];\n            }\n          }\n        }\n        \/\/ }\n        \/\/Concatenating the closing single quote\n        $url_part .= \"'\";\n        \/\/Concatenating the header url and $url_part to create the full url to be executed\n        $url_part = $this->get_header_url() . $url_part;\n        \/\/Calling shell_exec and returning the result array\n        return $this->call_shell_exec($url_part);\n      }\n      \/\/ We force even if we don't have the command in the list\n      else if ( !empty($arguments[1]) ){\n        $args = $this->process_parameters($arguments[0]);\n        $url_part = $cmd_name;\n        foreach ( $args as $k => $v ){\n          if ( \\is_array($v) ){\n            foreach ( $v as $w ){\n              $url_part .= \"&$k=$w\";\n            }\n          }\n          else if ( $v === 1 ){\n            $url_part .= \"&$k\";\n          }\n          else{\n            $url_part .= \"&$k=$v\";\n          }\n        }\n        \/\/Concatenating the closing single quote\n        $url_part .= \"'\";\n        \/\/Concatenating the header url and $url_part to create the full url to be executed\n        $url_part = $this->get_header_url() . $url_part;\n        \\bbn\\x::log($url_part, 'webmin');\n        \/\/Calling shell_exec and returning the result array\n        return $this->call_shell_exec($url_part);\n      }\n      else{\n        die(\"The command $name doesn't exist...\");\n      }\n    }\n    return false;\n  }",
+            "startLine": 94,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$arguments"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 178,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "arguments",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_args": {
+            "name": "get_args",
+            "summary": "Returns the arguments description of a given command",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\cloudmin",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name)\n  {\n      $cmd_name = str_replace('_', '-', $name);\n      return isset($this->commands[$cmd_name], $this->commands[$cmd_name]['args']) ? $this->commands[$cmd_name]['args'] : [];\n    }\n  }",
+            "startLine": 308,
+            "doc": {
+                "description": "Returns the arguments description of a given command",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$name",
+                        "description": "The command name"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 313,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The command name"
+                }
+            ]
+        },
+        "get_commands": {
+            "name": "get_commands",
+            "summary": "Returns an array containing all the commands and their parameters",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\cloudmin",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return $this->commands;\n    }\n  }",
+            "startLine": 319,
+            "doc": {
+                "description": "Returns an array containing all the commands and their parameters",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 323,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "list_commands": {
+            "name": "list_commands",
+            "summary": "Gets all the commands directly from the API",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\cloudmin",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($param = [])\n  {\n    $param = $this->process_parameters($param);\n    \/\/Setting the last action performed\n    $this->last_action = \"list-commands\";\n\n    \/\/Defining  the $url_part and the command to be executed\n    $url_part = \"list-commands\";\n    if (isset($param['short'])){\/\/short parameter is set\n      $url_part .= \"&short\";\n    }\n\n    if (isset($param['nameonly'])){\/\/nameonly parameter is set\n      $url_part .= \"&nameonly\";\n    }\n    \/\/Concatenating the closing single quote\n    $url_part .=\"'\";\n    \/\/Concatenating the header url and $url_part to create the full url to be executed\n    $url_part = $this->get_header_url() . $url_part;\n    \/\/Calling shell_exec and returning the result array\n    return $this->call_shell_exec($url_part);\n  }",
+            "startLine": 331,
+            "doc": {
+                "description": "Gets all the commands directly from the API",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$param"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 352,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "param",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_command": {
+            "name": "get_command",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\cloudmin",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($command)\n  {\n    \/\/Setting the last action performed\n    $this->last_action = \"get-command\";\n\n    \/\/Defining  the $url_part and the command to be executed\n    $url_part = \"get-command&command=\".$this->sanitize($command);\n    \/\/Concatenating the closing single quote\n    $url_part .=\"'\";\n    \/\/Concatenating the header url and $url_part to create the full url to be executed\n    $url_part = $this->get_header_url() . $url_part;\n    \/\/Calling shell_exec and returning the result array\n    return $this->call_shell_exec($url_part);\n  }",
+            "startLine": 358,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$command"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 371,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "command",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "generate": {
+            "name": "generate",
+            "summary": "Returns a string of PHP code for executing a given command with all its possible parameters pre-populated",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\cloudmin",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($command)\n  {\n    if ( isset($this->commands[$perl_cmd]) ){\n      $cmd = $this->commands[$perl_cmd];\n      $st = '$vm->'.$command.'(['.PHP_EOL;\n      foreach ( $cmd['args'] as $k => $v ){\n        $st .= \"'$k' => \".($v['binary'] ? '0' : \"''\").PHP_EOL;\n      }\n      $st .= ']);';\n      return $st;\n    }\n    return false;\n  }",
+            "startLine": 378,
+            "doc": {
+                "description": "Returns a string of PHP code for executing a given command with all its possible parameters pre-populated",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$command"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 390,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "command",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": {
+        "last_action": {
+            "visibility": "public"
+        },
+        "error": {
+            "visibility": "public"
+        },
+        "message": {
+            "visibility": "public"
+        }
+    },
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 8,
+    "numProperties": 3,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "user": null,
+        "pass": null,
+        "checked": false,
+        "commands": false,
+        "cacher": null,
+        "last_action": false,
+        "error": false,
+        "message": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\api",
+    "shortName": "cloudmin"
+}

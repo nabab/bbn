@@ -1,0 +1,4412 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\api\\git",
+    "namespace": true,
+    "traits": [],
+    "interfaces": {
+        "Cz\\Git\\IGit": {
+            "name": "Cz\\Git\\IGit"
+        }
+    },
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/api\/git.php",
+    "startLine": 12,
+    "endLine": 302,
+    "contentConstructor": {
+        "file": "Cz\\Git\\GitRepository",
+        "returns": null
+    },
+    "methods": {
+        "listRemote": {
+            "name": "listRemote",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\git",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 14,
+            "doc": null,
+            "endLine": 16,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "createRepositoryRemote": {
+            "name": "createRepositoryRemote",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\git",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($token, array $scope, $api = '')\n  {\n        !empty($scope['name']) &&\n        (strlen($api) > 0)\n    ){\n      \/\/todo ceck create repository remote with this api for github\n      try{\n    \t\t$res = \\bbn\\x::curl($api,json_encode($scope),[\n          'post' => 1,\n          'HTTPHEADER' => ['Authorization: token  '.$token]\n        ]);\n        return true;\n      }\n      catch(Exception $e) {\n      \treturn false;\n   \t\t}\n    }\n  }",
+            "startLine": 18,
+            "doc": null,
+            "endLine": 35,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "token",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "scope",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "api",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "diff": {
+            "name": "diff",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\git",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( is_array($output) && !empty($output) ){\n      $arr = [];\n\n      foreach ( $output as $i => $val ){\n\n        $sigle = substr($val, 0, 2);\n\n        $element =[\n        \t'file' => false,\n          'folder' => false,\n          'action' => false,\n          'commit' => false,\n          'added' => (strpos($val, 'A') == 0) ? true : false,\n          'other' => false\n      \t];\n\n        \/\/ for name file\n        if ( strpos($val, '\"') == 3){\n          if ( substr($val, -1, 1) === \"\/\" ){\n            $element['folder'] = substr($val, 4);\n          }\n          else{\n          \t$element['file'] = substr($val, 4);\n          }\n        }\n        else{\n          if ( substr($val, -1, 1) === \"\/\" ){\n            $element['folder'] = substr($val, 3);\n          }\n          else{\n          \t$element['file'] = substr($val, 3);\n          }\n        }\n\n        \/\/for action and assign value for only file\n        switch( $sigle ){\n          case '??':\n            $element['action'] = 'untracked';\n            $element['commit'] = false;\n            $element['added'] = false;\n          break;\n          case 'D ':\n            $element['action'] = 'deleted';\n            $element['commit'] = true;\n            $element['added'] = true;\n          break;\n          case ' D':\n            $element['action'] = 'deleted';\n            $element['commit'] = false;\n            $element['added'] = false;\n          break;\n          case 'R ':\n            $files = explode(' -> ', $file);\n            $element['action'] = 'renamed';\n            $elemnt['old_file'] = $files[0];\n            $elemnt['new_file'] = $files[1];\n            $element['commit'] = true;\n            $element['added'] = true;\n          break;\n          case 'M ':\n            $element['action'] = 'updated';\n            $element['commit'] = true;\n            $element['added'] = true;\n          break;\n          case ' M':\n            $element['action'] = 'update';\n            $element['commit'] = false;\n            $element['added'] = false;\n          break;\n          default:\n            $element['other'] = $sigle === \"A \" ? \"'A ' (Only added)\" : $sigle;\n        }\n        $arr[]= $element;\n      }\n    }\n    return $arr;\n  }",
+            "startLine": 37,
+            "doc": null,
+            "endLine": 115,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "pushInRemoteT": {
+            "name": "pushInRemoteT",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\git",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($repository, $user, $token, $server = 'github.com')\n  {\n      $remote = NULL;\n      \/\/https:\/\/[USERNAME]:[NEW TOKEN]@github.com\/[USERNAME]\/[REPO].git\n      $params['--repo'] = 'https:\/\/'.$user.':'.$token.'@'.$server.'\/'.$user.'\/'.$repository.'.git';\n      try{\n        $output = $this->begin()\n          ->run(\"git push $remote\", $params)\n          ->end();\n  \t\t}\n    \tcatch(Exception $e) {\n        die(var_dump($e->getMessage(), $params['--repo']));\n     \t\treturn false;\n   \t\t}\n      return is_object($output);\n\t\t}\n    return false;\n  }",
+            "startLine": 117,
+            "doc": null,
+            "endLine": 134,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "repository",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "user",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "token",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "server",
+                    "position": 3,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "github.com",
+                    "default_name": ""
+                }
+            ]
+        },
+        "pushInRemote": {
+            "name": "pushInRemote",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\git",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($repository, $user, $passw, $server = 'github.com')\n  {\n      $remote = NULL;\n      $params['--repo'] = 'https:\/\/'.$user.':'.$passw.'@'.$server.'\/'.$user.'\/'.$repository.'.git';\n      try{\n        $output = $this->begin()\n          ->run(\"git push $remote\", $params)\n          ->end();\n  \t\t}\n    \tcatch(Exception $e) {\n        die(var_dump($e->getMessage(), $params['--repo']));\n     \t\treturn false;\n   \t\t}\n      return is_object($output);\n\t\t}\n    return false;\n  }",
+            "startLine": 138,
+            "doc": null,
+            "endLine": 154,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "repository",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "user",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "passw",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "server",
+                    "position": 3,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "github.com",
+                    "default_name": ""
+                }
+            ]
+        },
+        "removeLocalBranch": {
+            "name": "removeLocalBranch",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\git",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($branch)\n  {\n      try{\n\t  \t  $output = $this->begin()\n  \t      \t      ->run(\"git branch -d $branch\")\n    \t    \t      ->end();\n     \t}\n    \tcatch(Exception $e) {\n     \t\treturn false;\n   \t\t}\n    \treturn is_object($output);\n    }\n    return false;\n  }",
+            "startLine": 156,
+            "doc": null,
+            "endLine": 169,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "branch",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "removeRemoteBranch": {
+            "name": "removeRemoteBranch",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\git",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($repository, $branch, $user, $passw, $server = 'github.com')\n  {\n       \t$remote = 'https:\/\/'.$user.':'.$passw.'@'.$server.'\/'.$repository.'.git';\n        try{\n      \t\t$output = $this->begin()\n                \t\t->run(\"git push --delete $remote $branch\")\n       \t \t          ->end();\n    \t\t}\n    \t\tcatch(Exception $e) {\n      \t\treturn false;\n   \t\t\t}\n      \treturn is_object($output);\n\t\t}\n    return false;\n  }",
+            "startLine": 171,
+            "doc": null,
+            "endLine": 185,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 4,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "repository",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "branch",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "user",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "passw",
+                    "position": 3,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "server",
+                    "position": 4,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "github.com",
+                    "default_name": ""
+                }
+            ]
+        },
+        "createRemoteRepository": {
+            "name": "createRemoteRepository",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\git",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($repository, $user, $passw, $localPath, $server = 'github.com')\n  {\n\t\t\t$rep = self::init($localPath);\n      if ( is_object($rep) ){\n        $remote = 'https:\/\/'.$server.'\/'.$user.'\/'.$repository.'.git';\n        if ( !empty($this->addRemote('origin', $remote)) ){\n         \tfile_put_contents($localPath.'\/README.md', '#README');\n          if ( !empty($this->addAllChanges()) ){\n            if ( !empty($this->commit(\"New Repository\")) ){\n           \t  return $this->pushInRemote($repository, $user, $passw, $server);\n           \t}\n          }\n        }\n\t\t\t}\n    }\n    return false;\n  }",
+            "startLine": 187,
+            "doc": null,
+            "endLine": 203,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 4,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "repository",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "user",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "passw",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "localPath",
+                    "position": 3,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "server",
+                    "position": 4,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "github.com",
+                    "default_name": ""
+                }
+            ]
+        },
+        "difference": {
+            "name": "difference",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\git",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $arr= [];\n    $status = [\n      '@@ -1 +0,0 @@' => 'delete in local',\n      '@@ -1 +1 @@' => 'different',\n      '@@ +1 -1 @@' => 'different',\n      '@@ 0,0 -1 @@' => 'delete in remote',\n    ];\n\n    foreach ($diff as $i => $ele){\n\n      $start = strpos($ele, '--git');\n\n      if ( $start != 0){\n        $idx = 0;\n        $file = substr($ele, $start+5);\n        $file = substr($file, strpos($file, 'a\/')+2, strpos($file, 'b\/')-3);\n\n        $idx= $i+5;\n\n        if ( strpos($diff[$i + 5], '@@') === false ){\n        \t$idx--;\n        }\n        if ( !empty($diff[$idx+1]) ){\n\n          $x = strpos($diff[$idx+1],'-]{+') === false ? '-]' : '-]{+';\n\n          $remote_code = false;\n          $local_code = false;\n\n          \/\/for code remote\n          if ( $x === '-]{+' ){\n   \t\t\t\t\t$code = substr($diff[$idx+1],strpos($diff[$idx+1],$x)+4);\n         \t  $remote_code = substr($code,0, strpos($code,'+}'));\n          }\n\n          \/\/for code local\n          if ( strpos($diff[$idx+1], '[-') !== false ){\n            $code = substr($diff[$idx+1],  strpos($diff[$idx+1], '[-')+2);\n            $local_code = substr($code,0, strpos($code, $x));\n          }\n          $arr[] = [\n            'file' => $file,\n            'status' => $status[$diff[$idx]],\n            'code' => [\n              'local' => $local_code,\n              'remote'=> $remote_code\n            ]\n          ];\n      \t}\n    \t}\n    }\n    return $arr;\n  }",
+            "startLine": 207,
+            "doc": null,
+            "endLine": 261,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "logs": {
+            "name": "logs",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\api\\git",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($start = 0, $limit = 0)\n  {\n    \/*\n     for get info the commits\n      %n new line,\n      %an author,\n      %h hash commit abbrev.\n      %H hash commit\n      %ad date\n      %cN committer\n      %N note commit\n    *\/\n    $cmd = 'git log --pretty=format:\"%h%n%H%n%an%n%s%n%ae%n%ad%n%cN%n%N%n__commit__\" --date=format-local:\"%Y-%m-%d %H:%M:%S\" --skip='.$start;\n\n    if ( $limit > 0 ){\n      $cmd .= ' --max-count='.$limit;\n    }\n    $field = ['sha1', 'commit', 'author', 'title_commit', 'email_author', 'date', 'committer', 'notes'];\n    $commits = [];\n    $arr = [];\n    $i = 0;\n    $logs = $this->extractFromCommand($cmd);\n\n    foreach( $logs as $val ){\n      if ( $val !== '__commit__' ){\n        $arr[$field[$i]] = $val;\n        $i++;\n      }\n      else {\n        $commits[] = $arr;\n        $i = 0;\n      }\n    }\n\n    return [\n      'commits' => $commits,\n      'total' => (int)$this->extractFromCommand('git rev-list --all --count')[0]\n    ];\n  }",
+            "startLine": 263,
+            "doc": null,
+            "endLine": 301,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "start",
+                    "position": 0,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                },
+                {
+                    "name": "limit",
+                    "position": 1,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "__construct": {
+            "name": "__construct",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($repository)\n  {\n\t\t\tif(basename($repository) === '.git')\n\t\t\t{\n\t\t\t\t$repository = dirname($repository);\n\t\t\t}\n\n\t\t\t$this->repository = realpath($repository);\n\n\t\t\tif($this->repository === FALSE)\n\t\t\t{\n\t\t\t\tthrow new GitException(\"Repository '$repository' not found.\");\n\t\t\t}\n  }",
+            "startLine": 24,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 37,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "__construct",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($repository)\n  {\n\t\t\tif(basename($repository) === '.git')\n\t\t\t{\n\t\t\t\t$repository = dirname($repository);\n\t\t\t}\n\n\t\t\t$this->repository = realpath($repository);\n\n\t\t\tif($this->repository === FALSE)\n\t\t\t{\n\t\t\t\tthrow new GitException(\"Repository '$repository' not found.\");\n\t\t\t}\n  }",
+                "startLine": 24,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 37,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "repository",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "repository",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getRepositoryPath": {
+            "name": "getRepositoryPath",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\t\treturn $this->repository;\n  }",
+            "startLine": 43,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 46,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "getRepositoryPath",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\t\treturn $this->repository;\n  }",
+                "startLine": 43,
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 46,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "createTag": {
+            "name": "createTag",
+            "summary": "Creates a tag.",
+            "description": "`git tag <name>`",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "`git tag <name>`"
+                }
+            ],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name, $options = NULL)\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t->run('git tag', $options, $name)\n\t\t\t\t->end();\n  }",
+            "startLine": 57,
+            "doc": {
+                "description": "Creates a tag.\n`git tag <name>`",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|NULL"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 62,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "createTag",
+                "summary": "Creates a tag.",
+                "description": "`git tag <name>`",
+                "description_parts": [
+                    {
+                        "type": "text",
+                        "content": "`git tag <name>`"
+                    }
+                ],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($name, $options = NULL)\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t->run('git tag', $options, $name)\n\t\t\t\t->end();\n  }",
+                "startLine": 57,
+                "doc": {
+                    "description": "Creates a tag.\n`git tag <name>`",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "array|NULL"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 62,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "name",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "options",
+                        "position": 1,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "options",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "removeTag": {
+            "name": "removeTag",
+            "summary": "Removes tag.",
+            "description": "`git tag -d <name>`",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "`git tag -d <name>`"
+                }
+            ],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name)\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t->run('git tag', array(\n\t\t\t\t\t'-d' => $name,\n\t\t\t\t))\n\t\t\t\t->end();\n  }",
+            "startLine": 72,
+            "doc": {
+                "description": "Removes tag.\n`git tag -d <name>`",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 79,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "removeTag",
+                "summary": "Removes tag.",
+                "description": "`git tag -d <name>`",
+                "description_parts": [
+                    {
+                        "type": "text",
+                        "content": "`git tag -d <name>`"
+                    }
+                ],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($name)\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t->run('git tag', array(\n\t\t\t\t\t'-d' => $name,\n\t\t\t\t))\n\t\t\t\t->end();\n  }",
+                "startLine": 72,
+                "doc": {
+                    "description": "Removes tag.\n`git tag -d <name>`",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 79,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "name",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "renameTag": {
+            "name": "renameTag",
+            "summary": "Renames tag.",
+            "description": "`git tag <new> <old>`\n`git tag -d <old>`",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "`git tag <new> <old>`\n`git tag -d <old>`"
+                }
+            ],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($oldName, $newName)\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t\/\/ http:\/\/stackoverflow.com\/a\/1873932\n\t\t\t\t\/\/ create new as alias to old (`git tag NEW OLD`)\n\t\t\t\t->run('git tag', $newName, $oldName)\n\t\t\t\t\/\/ delete old (`git tag -d OLD`)\n\t\t\t\t->removeTag($oldName) \/\/ WARN! removeTag() calls end() method!!!\n\t\t\t\t->end();\n  }",
+            "startLine": 91,
+            "doc": {
+                "description": "Renames tag.\n`git tag <new> <old>`\n`git tag -d <old>`",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 100,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": {
+                "name": "renameTag",
+                "summary": "Renames tag.",
+                "description": "`git tag <new> <old>`\n`git tag -d <old>`",
+                "description_parts": [
+                    {
+                        "type": "text",
+                        "content": "`git tag <new> <old>`\n`git tag -d <old>`"
+                    }
+                ],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($oldName, $newName)\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t\/\/ http:\/\/stackoverflow.com\/a\/1873932\n\t\t\t\t\/\/ create new as alias to old (`git tag NEW OLD`)\n\t\t\t\t->run('git tag', $newName, $oldName)\n\t\t\t\t\/\/ delete old (`git tag -d OLD`)\n\t\t\t\t->removeTag($oldName) \/\/ WARN! removeTag() calls end() method!!!\n\t\t\t\t->end();\n  }",
+                "startLine": 91,
+                "doc": {
+                    "description": "Renames tag.\n`git tag <new> <old>`\n`git tag -d <old>`",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "string"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 100,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 2,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "oldName",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "newName",
+                        "position": 1,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "oldName",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "newName",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getTags": {
+            "name": "getTags",
+            "summary": "Returns list of tags in repo.",
+            "description": "",
+            "description_parts": [],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\t\treturn $this->extractFromCommand('git tag', 'trim');\n  }",
+            "startLine": 108,
+            "doc": {
+                "description": "Returns list of tags in repo.",
+                "params": [],
+                "return": "NULL => no tags",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 111,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "getTags",
+                "summary": "Returns list of tags in repo.",
+                "description": "",
+                "description_parts": [],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\t\treturn $this->extractFromCommand('git tag', 'trim');\n  }",
+                "startLine": 108,
+                "doc": {
+                    "description": "Returns list of tags in repo.",
+                    "params": [],
+                    "return": "NULL => no tags",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 111,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "merge": {
+            "name": "merge",
+            "summary": "Merges branches.",
+            "description": "`git merge <options> <name>`",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "`git merge <options> <name>`"
+                }
+            ],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($branch, $options = NULL)\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t->run('git merge', $options, $branch)\n\t\t\t\t->end();\n  }",
+            "startLine": 122,
+            "doc": {
+                "description": "Merges branches.\n`git merge <options> <name>`",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|NULL"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 127,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "merge",
+                "summary": "Merges branches.",
+                "description": "`git merge <options> <name>`",
+                "description_parts": [
+                    {
+                        "type": "text",
+                        "content": "`git merge <options> <name>`"
+                    }
+                ],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($branch, $options = NULL)\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t->run('git merge', $options, $branch)\n\t\t\t\t->end();\n  }",
+                "startLine": 122,
+                "doc": {
+                    "description": "Merges branches.\n`git merge <options> <name>`",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "array|NULL"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 127,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "branch",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "options",
+                        "position": 1,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "branch",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "options",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "createBranch": {
+            "name": "createBranch",
+            "summary": "Creates new branch.",
+            "description": "`git branch <name>`\n(optionaly) `git checkout <name>`",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "`git branch <name>`\n(optionaly) `git checkout <name>`"
+                }
+            ],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name, $checkout = false)\n  {\n\t\t\t$this->begin();\n\n\t\t\t\/\/ git branch $name\n\t\t\t$this->run('git branch', $name);\n\n\t\t\tif($checkout)\n\t\t\t{\n\t\t\t\t$this->checkout($name);\n\t\t\t}\n\n\t\t\treturn $this->end();\n  }",
+            "startLine": 139,
+            "doc": {
+                "description": "Creates new branch.\n`git branch <name>`\n(optionaly) `git checkout <name>`",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 152,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "createBranch",
+                "summary": "Creates new branch.",
+                "description": "`git branch <name>`\n(optionaly) `git checkout <name>`",
+                "description_parts": [
+                    {
+                        "type": "text",
+                        "content": "`git branch <name>`\n(optionaly) `git checkout <name>`"
+                    }
+                ],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($name, $checkout = false)\n  {\n\t\t\t$this->begin();\n\n\t\t\t\/\/ git branch $name\n\t\t\t$this->run('git branch', $name);\n\n\t\t\tif($checkout)\n\t\t\t{\n\t\t\t\t$this->checkout($name);\n\t\t\t}\n\n\t\t\treturn $this->end();\n  }",
+                "startLine": 139,
+                "doc": {
+                    "description": "Creates new branch.\n`git branch <name>`\n(optionaly) `git checkout <name>`",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "bool"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 152,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "name",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "checkout",
+                        "position": 1,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": false,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "checkout",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "removeBranch": {
+            "name": "removeBranch",
+            "summary": "Removes branch.",
+            "description": "`git branch -d <name>`",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "`git branch -d <name>`"
+                }
+            ],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name)\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t->run('git branch', array(\n\t\t\t\t\t'-d' => $name,\n\t\t\t\t))\n\t\t\t\t->end();\n  }",
+            "startLine": 162,
+            "doc": {
+                "description": "Removes branch.\n`git branch -d <name>`",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 169,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "removeBranch",
+                "summary": "Removes branch.",
+                "description": "`git branch -d <name>`",
+                "description_parts": [
+                    {
+                        "type": "text",
+                        "content": "`git branch -d <name>`"
+                    }
+                ],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($name)\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t->run('git branch', array(\n\t\t\t\t\t'-d' => $name,\n\t\t\t\t))\n\t\t\t\t->end();\n  }",
+                "startLine": 162,
+                "doc": {
+                    "description": "Removes branch.\n`git branch -d <name>`",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 169,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "name",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getCurrentBranchName": {
+            "name": "getCurrentBranchName",
+            "summary": "Gets name of current branch",
+            "description": "`git branch` + magic",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "`git branch` + magic"
+                }
+            ],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\t\ttry\n\t\t\t{\n\t\t\t\t$branch = $this->extractFromCommand('git branch -a', function($value) {\n\t\t\t\t\tif(isset($value[0]) && $value[0] === '*')\n\t\t\t\t\t{\n\t\t\t\t\t\treturn trim(substr($value, 1));\n\t\t\t\t\t}\n\n\t\t\t\t\treturn FALSE;\n\t\t\t\t});\n\n\t\t\t\tif(is_array($branch))\n\t\t\t\t{\n\t\t\t\t\treturn $branch[0];\n\t\t\t\t}\n\t\t\t}\n\t\t\tcatch(GitException $e) {}\n\t\t\tthrow new GitException('Getting current branch name failed.');\n  }",
+            "startLine": 178,
+            "doc": {
+                "description": "Gets name of current branch\n`git branch` + magic",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 198,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "getCurrentBranchName",
+                "summary": "Gets name of current branch",
+                "description": "`git branch` + magic",
+                "description_parts": [
+                    {
+                        "type": "text",
+                        "content": "`git branch` + magic"
+                    }
+                ],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\t\ttry\n\t\t\t{\n\t\t\t\t$branch = $this->extractFromCommand('git branch -a', function($value) {\n\t\t\t\t\tif(isset($value[0]) && $value[0] === '*')\n\t\t\t\t\t{\n\t\t\t\t\t\treturn trim(substr($value, 1));\n\t\t\t\t\t}\n\n\t\t\t\t\treturn FALSE;\n\t\t\t\t});\n\n\t\t\t\tif(is_array($branch))\n\t\t\t\t{\n\t\t\t\t\treturn $branch[0];\n\t\t\t\t}\n\t\t\t}\n\t\t\tcatch(GitException $e) {}\n\t\t\tthrow new GitException('Getting current branch name failed.');\n  }",
+                "startLine": 178,
+                "doc": {
+                    "description": "Gets name of current branch\n`git branch` + magic",
+                    "params": [],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 198,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "getBranches": {
+            "name": "getBranches",
+            "summary": "Returns list of all (local & remote) branches in repo.",
+            "description": "",
+            "description_parts": [],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\t\treturn $this->extractFromCommand('git branch -a', function($value) {\n\t\t\t\treturn trim(substr($value, 1));\n\t\t\t});\n  }",
+            "startLine": 206,
+            "doc": {
+                "description": "Returns list of all (local & remote) branches in repo.",
+                "params": [],
+                "return": "NULL => no branches",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 211,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "getBranches",
+                "summary": "Returns list of all (local & remote) branches in repo.",
+                "description": "",
+                "description_parts": [],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\t\treturn $this->extractFromCommand('git branch -a', function($value) {\n\t\t\t\treturn trim(substr($value, 1));\n\t\t\t});\n  }",
+                "startLine": 206,
+                "doc": {
+                    "description": "Returns list of all (local & remote) branches in repo.",
+                    "params": [],
+                    "return": "NULL => no branches",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 211,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "getRemoteBranches": {
+            "name": "getRemoteBranches",
+            "summary": "Returns list of remote branches in repo.",
+            "description": "",
+            "description_parts": [],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\t\treturn $this->extractFromCommand('git branch -r', function($value) {\n\t\t\t\treturn trim(substr($value, 1));\n\t\t\t});\n  }",
+            "startLine": 219,
+            "doc": {
+                "description": "Returns list of remote branches in repo.",
+                "params": [],
+                "return": "NULL => no branches",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 224,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "getRemoteBranches",
+                "summary": "Returns list of remote branches in repo.",
+                "description": "",
+                "description_parts": [],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\t\treturn $this->extractFromCommand('git branch -r', function($value) {\n\t\t\t\treturn trim(substr($value, 1));\n\t\t\t});\n  }",
+                "startLine": 219,
+                "doc": {
+                    "description": "Returns list of remote branches in repo.",
+                    "params": [],
+                    "return": "NULL => no branches",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 224,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "getLocalBranches": {
+            "name": "getLocalBranches",
+            "summary": "Returns list of local branches in repo.",
+            "description": "",
+            "description_parts": [],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\t\treturn $this->extractFromCommand('git branch', function($value) {\n\t\t\t\treturn trim(substr($value, 1));\n\t\t\t});\n  }",
+            "startLine": 232,
+            "doc": {
+                "description": "Returns list of local branches in repo.",
+                "params": [],
+                "return": "NULL => no branches",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 237,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "getLocalBranches",
+                "summary": "Returns list of local branches in repo.",
+                "description": "",
+                "description_parts": [],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\t\treturn $this->extractFromCommand('git branch', function($value) {\n\t\t\t\treturn trim(substr($value, 1));\n\t\t\t});\n  }",
+                "startLine": 232,
+                "doc": {
+                    "description": "Returns list of local branches in repo.",
+                    "params": [],
+                    "return": "NULL => no branches",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 237,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "checkout": {
+            "name": "checkout",
+            "summary": "Checkout branch.",
+            "description": "`git checkout <branch>`",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "`git checkout <branch>`"
+                }
+            ],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name)\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t->run('git checkout', $name)\n\t\t\t\t->end();\n  }",
+            "startLine": 247,
+            "doc": {
+                "description": "Checkout branch.\n`git checkout <branch>`",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 252,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "checkout",
+                "summary": "Checkout branch.",
+                "description": "`git checkout <branch>`",
+                "description_parts": [
+                    {
+                        "type": "text",
+                        "content": "`git checkout <branch>`"
+                    }
+                ],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($name)\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t->run('git checkout', $name)\n\t\t\t\t->end();\n  }",
+                "startLine": 247,
+                "doc": {
+                    "description": "Checkout branch.\n`git checkout <branch>`",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 252,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "name",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "removeFile": {
+            "name": "removeFile",
+            "summary": "Removes file(s).",
+            "description": "`git rm <file>`",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "`git rm <file>`"
+                }
+            ],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file)\n  {\n\t\t\tif(!is_array($file))\n\t\t\t{\n\t\t\t\t$file = func_get_args();\n\t\t\t}\n\n\t\t\t$this->begin();\n\n\t\t\tforeach($file as $item)\n\t\t\t{\n\t\t\t\t$this->run('git rm', $item, '-r');\n\t\t\t}\n\n\t\t\treturn $this->end();\n  }",
+            "startLine": 262,
+            "doc": {
+                "description": "Removes file(s).\n`git rm <file>`",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|string[]"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 277,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "removeFile",
+                "summary": "Removes file(s).",
+                "description": "`git rm <file>`",
+                "description_parts": [
+                    {
+                        "type": "text",
+                        "content": "`git rm <file>`"
+                    }
+                ],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($file)\n  {\n\t\t\tif(!is_array($file))\n\t\t\t{\n\t\t\t\t$file = func_get_args();\n\t\t\t}\n\n\t\t\t$this->begin();\n\n\t\t\tforeach($file as $item)\n\t\t\t{\n\t\t\t\t$this->run('git rm', $item, '-r');\n\t\t\t}\n\n\t\t\treturn $this->end();\n  }",
+                "startLine": 262,
+                "doc": {
+                    "description": "Removes file(s).\n`git rm <file>`",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string|string[]"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 277,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "file",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "addFile": {
+            "name": "addFile",
+            "summary": "Adds file(s).",
+            "description": "`git add <file>`",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "`git add <file>`"
+                }
+            ],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file)\n  {\n\t\t\tif(!is_array($file))\n\t\t\t{\n\t\t\t\t$file = func_get_args();\n\t\t\t}\n\n\t\t\t$this->begin();\n\n\t\t\tforeach($file as $item)\n\t\t\t{\n\t\t\t\t\/\/ make sure the given item exists\n\t\t\t\t\/\/ this can be a file or an directory, git supports both\n\t\t\t\t$path = self::isAbsolute($item) ? $item : ($this->getRepositoryPath() . DIRECTORY_SEPARATOR . $item);\n\n\t\t\t\tif (!file_exists($path)) {\n\t\t\t\t\tthrow new GitException(\"The path at '$item' does not represent a valid file.\");\n\t\t\t\t}\n\n\t\t\t\t$this->run('git add', $item);\n\t\t\t}\n\n\t\t\treturn $this->end();\n  }",
+            "startLine": 287,
+            "doc": {
+                "description": "Adds file(s).\n`git add <file>`",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|string[]"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 310,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "addFile",
+                "summary": "Adds file(s).",
+                "description": "`git add <file>`",
+                "description_parts": [
+                    {
+                        "type": "text",
+                        "content": "`git add <file>`"
+                    }
+                ],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($file)\n  {\n\t\t\tif(!is_array($file))\n\t\t\t{\n\t\t\t\t$file = func_get_args();\n\t\t\t}\n\n\t\t\t$this->begin();\n\n\t\t\tforeach($file as $item)\n\t\t\t{\n\t\t\t\t\/\/ make sure the given item exists\n\t\t\t\t\/\/ this can be a file or an directory, git supports both\n\t\t\t\t$path = self::isAbsolute($item) ? $item : ($this->getRepositoryPath() . DIRECTORY_SEPARATOR . $item);\n\n\t\t\t\tif (!file_exists($path)) {\n\t\t\t\t\tthrow new GitException(\"The path at '$item' does not represent a valid file.\");\n\t\t\t\t}\n\n\t\t\t\t$this->run('git add', $item);\n\t\t\t}\n\n\t\t\treturn $this->end();\n  }",
+                "startLine": 287,
+                "doc": {
+                    "description": "Adds file(s).\n`git add <file>`",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string|string[]"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 310,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "file",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "addAllChanges": {
+            "name": "addAllChanges",
+            "summary": "Adds all created, modified & removed files.",
+            "description": "`git add --all`",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "`git add --all`"
+                }
+            ],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t->run('git add --all')\n\t\t\t\t->end();\n  }",
+            "startLine": 319,
+            "doc": {
+                "description": "Adds all created, modified & removed files.\n`git add --all`",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 324,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "addAllChanges",
+                "summary": "Adds all created, modified & removed files.",
+                "description": "`git add --all`",
+                "description_parts": [
+                    {
+                        "type": "text",
+                        "content": "`git add --all`"
+                    }
+                ],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t->run('git add --all')\n\t\t\t\t->end();\n  }",
+                "startLine": 319,
+                "doc": {
+                    "description": "Adds all created, modified & removed files.\n`git add --all`",
+                    "params": [],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 324,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "renameFile": {
+            "name": "renameFile",
+            "summary": "Renames file(s).",
+            "description": "`git mv <file>`",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "`git mv <file>`"
+                }
+            ],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file, $to = NULL)\n  {\n\t\t\tif(!is_array($file)) \/\/ rename(file, to);\n\t\t\t{\n\t\t\t\t$file = array(\n\t\t\t\t\t$file => $to,\n\t\t\t\t);\n\t\t\t}\n\n\t\t\t$this->begin();\n\n\t\t\tforeach($file as $from => $to)\n\t\t\t{\n\t\t\t\t$this->run('git mv', $from, $to);\n\t\t\t}\n\n\t\t\treturn $this->end();\n  }",
+            "startLine": 335,
+            "doc": {
+                "description": "Renames file(s).\n`git mv <file>`",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|string[]",
+                        "description": "from: array('from' => 'to', ...) || (from, to)"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|NULL"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 352,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "renameFile",
+                "summary": "Renames file(s).",
+                "description": "`git mv <file>`",
+                "description_parts": [
+                    {
+                        "type": "text",
+                        "content": "`git mv <file>`"
+                    }
+                ],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($file, $to = NULL)\n  {\n\t\t\tif(!is_array($file)) \/\/ rename(file, to);\n\t\t\t{\n\t\t\t\t$file = array(\n\t\t\t\t\t$file => $to,\n\t\t\t\t);\n\t\t\t}\n\n\t\t\t$this->begin();\n\n\t\t\tforeach($file as $from => $to)\n\t\t\t{\n\t\t\t\t$this->run('git mv', $from, $to);\n\t\t\t}\n\n\t\t\treturn $this->end();\n  }",
+                "startLine": 335,
+                "doc": {
+                    "description": "Renames file(s).\n`git mv <file>`",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string|string[]",
+                            "description": "from: array('from' => 'to', ...) || (from, to)"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "string|NULL"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 352,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "file",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": "",
+                        "description": "from: array('from' => 'to', ...) || (from, to)"
+                    },
+                    {
+                        "name": "to",
+                        "position": 1,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "from: array('from' => 'to', ...) || (from, to)"
+                },
+                {
+                    "name": "to",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "commit": {
+            "name": "commit",
+            "summary": "Commits changes",
+            "description": "`git commit <params> -m <message>`",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "`git commit <params> -m <message>`"
+                }
+            ],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($message, $params = NULL)\n  {\n\t\t\tif(!is_array($params))\n\t\t\t{\n\t\t\t\t$params = array();\n\t\t\t}\n\n\t\t\treturn $this->begin()\n\t\t\t\t->run(\"git commit\", $params, array(\n\t\t\t\t\t'-m' => $message,\n\t\t\t\t))\n\t\t\t\t->end();\n  }",
+            "startLine": 363,
+            "doc": {
+                "description": "Commits changes\n`git commit <params> -m <message>`",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string[]",
+                        "description": "param => value"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 375,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "commit",
+                "summary": "Commits changes",
+                "description": "`git commit <params> -m <message>`",
+                "description_parts": [
+                    {
+                        "type": "text",
+                        "content": "`git commit <params> -m <message>`"
+                    }
+                ],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($message, $params = NULL)\n  {\n\t\t\tif(!is_array($params))\n\t\t\t{\n\t\t\t\t$params = array();\n\t\t\t}\n\n\t\t\treturn $this->begin()\n\t\t\t\t->run(\"git commit\", $params, array(\n\t\t\t\t\t'-m' => $message,\n\t\t\t\t))\n\t\t\t\t->end();\n  }",
+                "startLine": 363,
+                "doc": {
+                    "description": "Commits changes\n`git commit <params> -m <message>`",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "string[]",
+                            "description": "param => value"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 375,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "message",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "params",
+                        "position": 1,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": "",
+                        "description": "param => value"
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "message",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "params",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "param => value"
+                }
+            ]
+        },
+        "getLastCommitId": {
+            "name": "getLastCommitId",
+            "summary": "Returns last commit ID on current branch",
+            "description": "`git log --pretty=format:\"%H\" -n 1`",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "`git log --pretty=format:\"%H\" -n 1`"
+                }
+            ],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\t\t$this->begin();\n\t\t\t$lastLine = exec('git log --pretty=format:\"%H\" -n 1 2>&1');\n\t\t\t$this->end();\n\t\t\tif (preg_match('\/^[0-9a-f]{40}$\/i', $lastLine)) {\n\t\t\t\treturn $lastLine;\n\t\t\t}\n\t\t\treturn NULL;\n  }",
+            "startLine": 384,
+            "doc": {
+                "description": "Returns last commit ID on current branch\n`git log --pretty=format:\"%H\" -n 1`",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 393,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "getLastCommitId",
+                "summary": "Returns last commit ID on current branch",
+                "description": "`git log --pretty=format:\"%H\" -n 1`",
+                "description_parts": [
+                    {
+                        "type": "text",
+                        "content": "`git log --pretty=format:\"%H\" -n 1`"
+                    }
+                ],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\t\t$this->begin();\n\t\t\t$lastLine = exec('git log --pretty=format:\"%H\" -n 1 2>&1');\n\t\t\t$this->end();\n\t\t\tif (preg_match('\/^[0-9a-f]{40}$\/i', $lastLine)) {\n\t\t\t\treturn $lastLine;\n\t\t\t}\n\t\t\treturn NULL;\n  }",
+                "startLine": 384,
+                "doc": {
+                    "description": "Returns last commit ID on current branch\n`git log --pretty=format:\"%H\" -n 1`",
+                    "params": [],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 393,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "hasChanges": {
+            "name": "hasChanges",
+            "summary": "Exists changes?",
+            "description": "`git status` + magic",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "`git status` + magic"
+                }
+            ],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\t\t\/\/ Make sure the `git status` gets a refreshed look at the working tree.\n\t\t\t$this->begin()\n\t\t\t\t->run('git update-index -q --refresh')\n\t\t\t\t->end();\n\n\t\t\t$output = $this->extractFromCommand('git status --porcelain');\n\t\t\treturn !empty($output);\n  }",
+            "startLine": 402,
+            "doc": {
+                "description": "Exists changes?\n`git status` + magic",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 411,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "hasChanges",
+                "summary": "Exists changes?",
+                "description": "`git status` + magic",
+                "description_parts": [
+                    {
+                        "type": "text",
+                        "content": "`git status` + magic"
+                    }
+                ],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\t\t\/\/ Make sure the `git status` gets a refreshed look at the working tree.\n\t\t\t$this->begin()\n\t\t\t\t->run('git update-index -q --refresh')\n\t\t\t\t->end();\n\n\t\t\t$output = $this->extractFromCommand('git status --porcelain');\n\t\t\treturn !empty($output);\n  }",
+                "startLine": 402,
+                "doc": {
+                    "description": "Exists changes?\n`git status` + magic",
+                    "params": [],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 411,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "isChanges": {
+            "name": "isChanges",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\t\treturn $this->hasChanges();\n  }",
+            "startLine": 418,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": "",
+                "deprecated": {
+                    "tag": "deprecated",
+                    "text": "@throws GitException"
+                },
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 421,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "isChanges",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\t\treturn $this->hasChanges();\n  }",
+                "startLine": 418,
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": "",
+                    "deprecated": {
+                        "tag": "deprecated",
+                        "text": "@throws GitException"
+                    },
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 421,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "pull": {
+            "name": "pull",
+            "summary": "Pull changes from a remote",
+            "description": "",
+            "description_parts": [],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($remote = NULL, array $params = NULL)\n  {\n\t\t\tif(!is_array($params))\n\t\t\t{\n\t\t\t\t$params = array();\n\t\t\t}\n\n\t\t\treturn $this->begin()\n\t\t\t\t->run(\"git pull $remote\", $params)\n\t\t\t\t->end();\n  }",
+            "startLine": 431,
+            "doc": {
+                "description": "Pull changes from a remote",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|NULL"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|NULL"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 441,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "pull",
+                "summary": "Pull changes from a remote",
+                "description": "",
+                "description_parts": [],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($remote = NULL, array $params = NULL)\n  {\n\t\t\tif(!is_array($params))\n\t\t\t{\n\t\t\t\t$params = array();\n\t\t\t}\n\n\t\t\treturn $this->begin()\n\t\t\t\t->run(\"git pull $remote\", $params)\n\t\t\t\t->end();\n  }",
+                "startLine": 431,
+                "doc": {
+                    "description": "Pull changes from a remote",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string|NULL"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "array|NULL"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 441,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "remote",
+                        "position": 0,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    },
+                    {
+                        "name": "params",
+                        "position": 1,
+                        "type": "array",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "remote",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "params",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "push": {
+            "name": "push",
+            "summary": "Push changes to a remote",
+            "description": "",
+            "description_parts": [],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($remote = NULL, array $params = NULL)\n  {\n\t\t\tif(!is_array($params))\n\t\t\t{\n\t\t\t\t$params = array();\n\t\t\t}\n\n\t\t\treturn $this->begin()\n\t\t\t\t->run(\"git push $remote\", $params)\n\t\t\t\t->end();\n  }",
+            "startLine": 451,
+            "doc": {
+                "description": "Push changes to a remote",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|NULL"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|NULL"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 461,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "push",
+                "summary": "Push changes to a remote",
+                "description": "",
+                "description_parts": [],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($remote = NULL, array $params = NULL)\n  {\n\t\t\tif(!is_array($params))\n\t\t\t{\n\t\t\t\t$params = array();\n\t\t\t}\n\n\t\t\treturn $this->begin()\n\t\t\t\t->run(\"git push $remote\", $params)\n\t\t\t\t->end();\n  }",
+                "startLine": 451,
+                "doc": {
+                    "description": "Push changes to a remote",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string|NULL"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "array|NULL"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 461,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "remote",
+                        "position": 0,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    },
+                    {
+                        "name": "params",
+                        "position": 1,
+                        "type": "array",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "remote",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "params",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "fetch": {
+            "name": "fetch",
+            "summary": "Run fetch command to get latest branches",
+            "description": "",
+            "description_parts": [],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($remote = NULL, array $params = NULL)\n  {\n\t\t\tif(!is_array($params))\n\t\t\t{\n\t\t\t\t$params = array();\n\t\t\t}\n\n\t\t\treturn $this->begin()\n\t\t\t\t->run(\"git fetch $remote\", $params)\n\t\t\t\t->end();\n  }",
+            "startLine": 471,
+            "doc": {
+                "description": "Run fetch command to get latest branches",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|NULL"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|NULL"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 481,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "fetch",
+                "summary": "Run fetch command to get latest branches",
+                "description": "",
+                "description_parts": [],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($remote = NULL, array $params = NULL)\n  {\n\t\t\tif(!is_array($params))\n\t\t\t{\n\t\t\t\t$params = array();\n\t\t\t}\n\n\t\t\treturn $this->begin()\n\t\t\t\t->run(\"git fetch $remote\", $params)\n\t\t\t\t->end();\n  }",
+                "startLine": 471,
+                "doc": {
+                    "description": "Run fetch command to get latest branches",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string|NULL"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "array|NULL"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 481,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "remote",
+                        "position": 0,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    },
+                    {
+                        "name": "params",
+                        "position": 1,
+                        "type": "array",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "remote",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "params",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "addRemote": {
+            "name": "addRemote",
+            "summary": "Adds new remote repository",
+            "description": "",
+            "description_parts": [],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name, $url, array $params = NULL)\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t->run('git remote add', $params, $name, $url)\n\t\t\t\t->end();\n  }",
+            "startLine": 492,
+            "doc": {
+                "description": "Adds new remote repository",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|NULL"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 497,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": {
+                "name": "addRemote",
+                "summary": "Adds new remote repository",
+                "description": "",
+                "description_parts": [],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($name, $url, array $params = NULL)\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t->run('git remote add', $params, $name, $url)\n\t\t\t\t->end();\n  }",
+                "startLine": 492,
+                "doc": {
+                    "description": "Adds new remote repository",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "string"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "array|NULL"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 497,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 3,
+                "numberOfRequiredParameters": 2,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "name",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "url",
+                        "position": 1,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "params",
+                        "position": 2,
+                        "type": "array",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "url",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "params",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "renameRemote": {
+            "name": "renameRemote",
+            "summary": "Renames remote repository",
+            "description": "",
+            "description_parts": [],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($oldName, $newName)\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t->run('git remote rename', $oldName, $newName)\n\t\t\t\t->end();\n  }",
+            "startLine": 507,
+            "doc": {
+                "description": "Renames remote repository",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 512,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": {
+                "name": "renameRemote",
+                "summary": "Renames remote repository",
+                "description": "",
+                "description_parts": [],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($oldName, $newName)\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t->run('git remote rename', $oldName, $newName)\n\t\t\t\t->end();\n  }",
+                "startLine": 507,
+                "doc": {
+                    "description": "Renames remote repository",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "string"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 512,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 2,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "oldName",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "newName",
+                        "position": 1,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "oldName",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "newName",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "removeRemote": {
+            "name": "removeRemote",
+            "summary": "Removes remote repository",
+            "description": "",
+            "description_parts": [],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name)\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t->run('git remote remove', $name)\n\t\t\t\t->end();\n  }",
+            "startLine": 521,
+            "doc": {
+                "description": "Removes remote repository",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 526,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "removeRemote",
+                "summary": "Removes remote repository",
+                "description": "",
+                "description_parts": [],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($name)\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t->run('git remote remove', $name)\n\t\t\t\t->end();\n  }",
+                "startLine": 521,
+                "doc": {
+                    "description": "Removes remote repository",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 526,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "name",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "setRemoteUrl": {
+            "name": "setRemoteUrl",
+            "summary": "Changes remote repository URL",
+            "description": "",
+            "description_parts": [],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name, $url, array $params = NULL)\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t->run('git remote set-url', $params, $name, $url)\n\t\t\t\t->end();\n  }",
+            "startLine": 537,
+            "doc": {
+                "description": "Changes remote repository URL",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|NULL"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 542,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": {
+                "name": "setRemoteUrl",
+                "summary": "Changes remote repository URL",
+                "description": "",
+                "description_parts": [],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($name, $url, array $params = NULL)\n  {\n\t\t\treturn $this->begin()\n\t\t\t\t->run('git remote set-url', $params, $name, $url)\n\t\t\t\t->end();\n  }",
+                "startLine": 537,
+                "doc": {
+                    "description": "Changes remote repository URL",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "string"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "array|NULL"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 542,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 3,
+                "numberOfRequiredParameters": 2,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "name",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "url",
+                        "position": 1,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "params",
+                        "position": 2,
+                        "type": "array",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "url",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "params",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "execute": {
+            "name": "execute",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($cmd)\n  {\n\t\t\tif (!is_array($cmd)) {\n\t\t\t\t$cmd = array($cmd);\n\t\t\t}\n\n\t\t\tarray_unshift($cmd, 'git');\n\t\t\t$cmd = self::processCommand($cmd);\n\n\t\t\t$this->begin();\n\t\t\texec($cmd . ' 2>&1', $output, $ret);\n\t\t\t$this->end();\n\n\t\t\tif($ret !== 0)\n\t\t\t{\n\t\t\t\tthrow new GitException(\"Command '$cmd' failed (exit-code $ret).\", $ret);\n\t\t\t}\n\n\t\t\treturn $output;\n  }",
+            "startLine": 550,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|string[]"
+                    }
+                ],
+                "return": "returns output",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 569,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "execute",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($cmd)\n  {\n\t\t\tif (!is_array($cmd)) {\n\t\t\t\t$cmd = array($cmd);\n\t\t\t}\n\n\t\t\tarray_unshift($cmd, 'git');\n\t\t\t$cmd = self::processCommand($cmd);\n\n\t\t\t$this->begin();\n\t\t\texec($cmd . ' 2>&1', $output, $ret);\n\t\t\t$this->end();\n\n\t\t\tif($ret !== 0)\n\t\t\t{\n\t\t\t\tthrow new GitException(\"Command '$cmd' failed (exit-code $ret).\", $ret);\n\t\t\t}\n\n\t\t\treturn $output;\n  }",
+                "startLine": 550,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string|string[]"
+                        }
+                    ],
+                    "return": "returns output",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 569,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "cmd",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "cmd",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "init": {
+            "name": "init",
+            "summary": "Init repo in directory",
+            "description": "",
+            "description_parts": [],
+            "file": "Cz\\Git\\GitRepository",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($directory, array $params = NULL)\n  {\n\t\t\tif(is_dir(\"$directory\/.git\"))\n\t\t\t{\n\t\t\t\tthrow new GitException(\"Repo already exists in $directory.\");\n\t\t\t}\n\n\t\t\tif(!is_dir($directory) && !@mkdir($directory, 0777, TRUE)) \/\/ intentionally @; not atomic; from Nette FW\n\t\t\t{\n\t\t\t\tthrow new GitException(\"Unable to create directory '$directory'.\");\n\t\t\t}\n\n\t\t\t$cwd = getcwd();\n\t\t\tchdir($directory);\n\t\t\texec(self::processCommand(array(\n\t\t\t\t'git init',\n\t\t\t\t$params,\n\t\t\t\t$directory,\n\t\t\t)), $output, $returnCode);\n\n\t\t\tif($returnCode !== 0)\n\t\t\t{\n\t\t\t\tthrow new GitException(\"Git init failed (directory $directory).\");\n\t\t\t}\n\n\t\t\t$repo = getcwd();\n\t\t\tchdir($cwd);\n\n\t\t\treturn new static($repo);\n  }",
+            "startLine": 710,
+            "doc": {
+                "description": "Init repo in directory",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|NULL"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 739,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "init",
+                "summary": "Init repo in directory",
+                "description": "",
+                "description_parts": [],
+                "file": "Cz\\Git\\GitRepository",
+                "static": true,
+                "visibility": "public",
+                "final": false,
+                "code": "function($directory, array $params = NULL)\n  {\n\t\t\tif(is_dir(\"$directory\/.git\"))\n\t\t\t{\n\t\t\t\tthrow new GitException(\"Repo already exists in $directory.\");\n\t\t\t}\n\n\t\t\tif(!is_dir($directory) && !@mkdir($directory, 0777, TRUE)) \/\/ intentionally @; not atomic; from Nette FW\n\t\t\t{\n\t\t\t\tthrow new GitException(\"Unable to create directory '$directory'.\");\n\t\t\t}\n\n\t\t\t$cwd = getcwd();\n\t\t\tchdir($directory);\n\t\t\texec(self::processCommand(array(\n\t\t\t\t'git init',\n\t\t\t\t$params,\n\t\t\t\t$directory,\n\t\t\t)), $output, $returnCode);\n\n\t\t\tif($returnCode !== 0)\n\t\t\t{\n\t\t\t\tthrow new GitException(\"Git init failed (directory $directory).\");\n\t\t\t}\n\n\t\t\t$repo = getcwd();\n\t\t\tchdir($cwd);\n\n\t\t\treturn new static($repo);\n  }",
+                "startLine": 710,
+                "doc": {
+                    "description": "Init repo in directory",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "array|NULL"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 739,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "directory",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "params",
+                        "position": 1,
+                        "type": "array",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "directory",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "params",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "cloneRepository": {
+            "name": "cloneRepository",
+            "summary": "Clones GIT repository from $url into $directory",
+            "description": "",
+            "description_parts": [],
+            "file": "Cz\\Git\\GitRepository",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($url, $directory = NULL, array $params = NULL)\n  {\n\t\t\tif($directory !== NULL && is_dir(\"$directory\/.git\"))\n\t\t\t{\n\t\t\t\tthrow new GitException(\"Repo already exists in $directory.\");\n\t\t\t}\n\n\t\t\t$cwd = getcwd();\n\n\t\t\tif($directory === NULL)\n\t\t\t{\n\t\t\t\t$directory = self::extractRepositoryNameFromUrl($url);\n\t\t\t\t$directory = \"$cwd\/$directory\";\n\t\t\t}\n\t\t\telseif(!self::isAbsolute($directory))\n\t\t\t{\n\t\t\t\t$directory = \"$cwd\/$directory\";\n\t\t\t}\n\n\t\t\tif ($params === NULL) {\n\t\t\t\t$params = '-q';\n\t\t\t}\n\n\t\t\t$descriptorspec = array(\n\t\t\t\t0 => array('pipe', 'r'), \/\/ stdin\n\t\t\t\t1 => array('pipe', 'w'), \/\/ stdout\n\t\t\t\t2 => array('pipe', 'w'), \/\/ stderr\n\t\t\t);\n\n\t\t\t$pipes = [];\n\t\t\t$command = self::processCommand(array(\n\t\t\t\t'git clone',\n\t\t\t\t$params,\n\t\t\t\t$url,\n\t\t\t\t$directory\n\t\t\t));\n\t\t\t$process = proc_open($command, $descriptorspec, $pipes);\n\n\t\t\tif (!$process)\n\t\t\t{\n\t\t\t\tthrow new GitException(\"Git clone failed (directory $directory).\");\n\t\t\t}\n\n\t\t\t\/\/ Reset output and error\n\t\t\t$stdout = '';\n\t\t\t$stderr = '';\n\n\t\t\twhile (TRUE)\n\t\t\t{\n\t\t\t\t\/\/ Read standard output\n\t\t\t\t$output = fgets($pipes[1], 1024);\n\n\t\t\t\tif ($output)\n\t\t\t\t{\n\t\t\t\t\t$stdout .= $output;\n\t\t\t\t}\n\n\t\t\t\t\/\/ Read error output\n\t\t\t\t$output_err = fgets($pipes[2], 1024);\n\n\t\t\t\tif ($output_err)\n\t\t\t\t{\n\t\t\t\t\t$stderr .= $output_err;\n\t\t\t\t}\n\n\t\t\t\t\/\/ We are done\n\t\t\t\tif ((feof($pipes[1]) OR $output === FALSE) AND (feof($pipes[2]) OR $output_err === FALSE))\n\t\t\t\t{\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t$returnCode = proc_close($process);\n\n\t\t\tif($returnCode !== 0)\n\t\t\t{\n\t\t\t\tthrow new GitException(\"Git clone failed (directory $directory).\" . ($stderr !== '' ? (\"\\n$stderr\") : ''));\n\t\t\t}\n\n\t\t\treturn new static($directory);\n  }",
+            "startLine": 750,
+            "doc": {
+                "description": "Clones GIT repository from $url into $directory",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|NULL"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|NULL"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 830,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "cloneRepository",
+                "summary": "Clones GIT repository from $url into $directory",
+                "description": "",
+                "description_parts": [],
+                "file": "Cz\\Git\\GitRepository",
+                "static": true,
+                "visibility": "public",
+                "final": false,
+                "code": "function($url, $directory = NULL, array $params = NULL)\n  {\n\t\t\tif($directory !== NULL && is_dir(\"$directory\/.git\"))\n\t\t\t{\n\t\t\t\tthrow new GitException(\"Repo already exists in $directory.\");\n\t\t\t}\n\n\t\t\t$cwd = getcwd();\n\n\t\t\tif($directory === NULL)\n\t\t\t{\n\t\t\t\t$directory = self::extractRepositoryNameFromUrl($url);\n\t\t\t\t$directory = \"$cwd\/$directory\";\n\t\t\t}\n\t\t\telseif(!self::isAbsolute($directory))\n\t\t\t{\n\t\t\t\t$directory = \"$cwd\/$directory\";\n\t\t\t}\n\n\t\t\tif ($params === NULL) {\n\t\t\t\t$params = '-q';\n\t\t\t}\n\n\t\t\t$descriptorspec = array(\n\t\t\t\t0 => array('pipe', 'r'), \/\/ stdin\n\t\t\t\t1 => array('pipe', 'w'), \/\/ stdout\n\t\t\t\t2 => array('pipe', 'w'), \/\/ stderr\n\t\t\t);\n\n\t\t\t$pipes = [];\n\t\t\t$command = self::processCommand(array(\n\t\t\t\t'git clone',\n\t\t\t\t$params,\n\t\t\t\t$url,\n\t\t\t\t$directory\n\t\t\t));\n\t\t\t$process = proc_open($command, $descriptorspec, $pipes);\n\n\t\t\tif (!$process)\n\t\t\t{\n\t\t\t\tthrow new GitException(\"Git clone failed (directory $directory).\");\n\t\t\t}\n\n\t\t\t\/\/ Reset output and error\n\t\t\t$stdout = '';\n\t\t\t$stderr = '';\n\n\t\t\twhile (TRUE)\n\t\t\t{\n\t\t\t\t\/\/ Read standard output\n\t\t\t\t$output = fgets($pipes[1], 1024);\n\n\t\t\t\tif ($output)\n\t\t\t\t{\n\t\t\t\t\t$stdout .= $output;\n\t\t\t\t}\n\n\t\t\t\t\/\/ Read error output\n\t\t\t\t$output_err = fgets($pipes[2], 1024);\n\n\t\t\t\tif ($output_err)\n\t\t\t\t{\n\t\t\t\t\t$stderr .= $output_err;\n\t\t\t\t}\n\n\t\t\t\t\/\/ We are done\n\t\t\t\tif ((feof($pipes[1]) OR $output === FALSE) AND (feof($pipes[2]) OR $output_err === FALSE))\n\t\t\t\t{\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t$returnCode = proc_close($process);\n\n\t\t\tif($returnCode !== 0)\n\t\t\t{\n\t\t\t\tthrow new GitException(\"Git clone failed (directory $directory).\" . ($stderr !== '' ? (\"\\n$stderr\") : ''));\n\t\t\t}\n\n\t\t\treturn new static($directory);\n  }",
+                "startLine": 750,
+                "doc": {
+                    "description": "Clones GIT repository from $url into $directory",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "string|NULL"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "array|NULL"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 830,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 3,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "url",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "directory",
+                        "position": 1,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    },
+                    {
+                        "name": "params",
+                        "position": 2,
+                        "type": "array",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "directory",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "params",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "isRemoteUrlReadable": {
+            "name": "isRemoteUrlReadable",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "Cz\\Git\\GitRepository",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($url, array $refs = NULL)\n  {\n\t\t\t$env = '';\n\n\t\t\tif (DIRECTORY_SEPARATOR === '\\\\') { \/\/ Windows\n\t\t\t\t$env = 'set GIT_TERMINAL_PROMPT=0 &&';\n\n\t\t\t} else {\n\t\t\t\t$env = 'GIT_TERMINAL_PROMPT=0';\n\t\t\t}\n\n\t\t\texec(self::processCommand(array(\n\t\t\t\t$env . ' git ls-remote',\n\t\t\t\t'--heads',\n\t\t\t\t'--quiet',\n\t\t\t\t'--exit-code',\n\t\t\t\t$url,\n\t\t\t\t$refs,\n\t\t\t)) . ' 2>&1', $output, $returnCode);\n\n\t\t\treturn $returnCode === 0;\n  }",
+            "startLine": 838,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|NULL"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 859,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "isRemoteUrlReadable",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "Cz\\Git\\GitRepository",
+                "static": true,
+                "visibility": "public",
+                "final": false,
+                "code": "function($url, array $refs = NULL)\n  {\n\t\t\t$env = '';\n\n\t\t\tif (DIRECTORY_SEPARATOR === '\\\\') { \/\/ Windows\n\t\t\t\t$env = 'set GIT_TERMINAL_PROMPT=0 &&';\n\n\t\t\t} else {\n\t\t\t\t$env = 'GIT_TERMINAL_PROMPT=0';\n\t\t\t}\n\n\t\t\texec(self::processCommand(array(\n\t\t\t\t$env . ' git ls-remote',\n\t\t\t\t'--heads',\n\t\t\t\t'--quiet',\n\t\t\t\t'--exit-code',\n\t\t\t\t$url,\n\t\t\t\t$refs,\n\t\t\t)) . ' 2>&1', $output, $returnCode);\n\n\t\t\treturn $returnCode === 0;\n  }",
+                "startLine": 838,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "array|NULL"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 859,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "url",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "refs",
+                        "position": 1,
+                        "type": "array",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "refs",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "extractRepositoryNameFromUrl": {
+            "name": "extractRepositoryNameFromUrl",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "Cz\\Git\\GitRepository",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($url)\n  {\n\t\t\t\/\/ \/path\/to\/repo.git => repo\n\t\t\t\/\/ host.xz:foo\/.git => foo\n\t\t\t$directory = rtrim($url, '\/');\n\t\t\tif(substr($directory, -5) === '\/.git')\n\t\t\t{\n\t\t\t\t$directory = substr($directory, 0, -5);\n\t\t\t}\n\n\t\t\t$directory = basename($directory, '.git');\n\n\t\t\tif(($pos = strrpos($directory, ':')) !== FALSE)\n\t\t\t{\n\t\t\t\t$directory = substr($directory, $pos + 1);\n\t\t\t}\n\n\t\t\treturn $directory;\n  }",
+            "startLine": 866,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "description": "\/path\/to\/repo.git | host.xz:foo\/.git | ..."
+                    }
+                ],
+                "return": "repo | foo | ..."
+            },
+            "endLine": 884,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "extractRepositoryNameFromUrl",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "Cz\\Git\\GitRepository",
+                "static": true,
+                "visibility": "public",
+                "final": false,
+                "code": "function($url)\n  {\n\t\t\t\/\/ \/path\/to\/repo.git => repo\n\t\t\t\/\/ host.xz:foo\/.git => foo\n\t\t\t$directory = rtrim($url, '\/');\n\t\t\tif(substr($directory, -5) === '\/.git')\n\t\t\t{\n\t\t\t\t$directory = substr($directory, 0, -5);\n\t\t\t}\n\n\t\t\t$directory = basename($directory, '.git');\n\n\t\t\tif(($pos = strrpos($directory, ':')) !== FALSE)\n\t\t\t{\n\t\t\t\t$directory = substr($directory, $pos + 1);\n\t\t\t}\n\n\t\t\treturn $directory;\n  }",
+                "startLine": 866,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string",
+                            "description": "\/path\/to\/repo.git | host.xz:foo\/.git | ..."
+                        }
+                    ],
+                    "return": "repo | foo | ..."
+                },
+                "endLine": 884,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "url",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": "",
+                        "description": "\/path\/to\/repo.git | host.xz:foo\/.git | ..."
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "\/path\/to\/repo.git | host.xz:foo\/.git | ..."
+                }
+            ]
+        },
+        "isAbsolute": {
+            "name": "isAbsolute",
+            "summary": "Is path absolute?",
+            "description": "Method from Nette\\Utils\\FileSystem",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "Method from Nette\\Utils\\FileSystem"
+                }
+            ],
+            "file": "Cz\\Git\\GitRepository",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path)\n  {\n\t\t\treturn (bool) preg_match('#[\/\\\\\\\\]|[a-zA-Z]:[\/\\\\\\\\]|[a-z][a-z0-9+.-]*:\/\/#Ai', $path);\n  }",
+            "startLine": 893,
+            "doc": {
+                "description": "Is path absolute?\nMethod from Nette\\Utils\\FileSystem",
+                "params": [],
+                "return": "",
+                "link": {
+                    "tag": "link",
+                    "text": "https:\/\/github.com\/nette\/nette\/blob\/master\/Nette\/Utils\/FileSystem.php"
+                }
+            },
+            "endLine": 896,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "isAbsolute",
+                "summary": "Is path absolute?",
+                "description": "Method from Nette\\Utils\\FileSystem",
+                "description_parts": [
+                    {
+                        "type": "text",
+                        "content": "Method from Nette\\Utils\\FileSystem"
+                    }
+                ],
+                "file": "Cz\\Git\\GitRepository",
+                "static": true,
+                "visibility": "public",
+                "final": false,
+                "code": "function($path)\n  {\n\t\t\treturn (bool) preg_match('#[\/\\\\\\\\]|[a-zA-Z]:[\/\\\\\\\\]|[a-z][a-z0-9+.-]*:\/\/#Ai', $path);\n  }",
+                "startLine": 893,
+                "doc": {
+                    "description": "Is path absolute?\nMethod from Nette\\Utils\\FileSystem",
+                    "params": [],
+                    "return": "",
+                    "link": {
+                        "tag": "link",
+                        "text": "https:\/\/github.com\/nette\/nette\/blob\/master\/Nette\/Utils\/FileSystem.php"
+                    }
+                },
+                "endLine": 896,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "path",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getCommitMessage": {
+            "name": "getCommitMessage",
+            "summary": "Returns commit message from specific commit",
+            "description": "`git log -1 --format={%s|%B} )--pretty=format:'%H' -n 1`",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "`git log -1 --format={%s|%B} )--pretty=format:'%H' -n 1`"
+                }
+            ],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($commit, $oneline = false)\n  {\n\t\t\t$this->begin();\n\t\t\texec('git log -1 --format=' . ($oneline ? '%s' : '%B') . ' ' . $commit . ' 2>&1', $message);\n\t\t\t$this->end();\n\t\t\treturn implode(PHP_EOL, $message);\n  }",
+            "startLine": 907,
+            "doc": {
+                "description": "Returns commit message from specific commit\n`git log -1 --format={%s|%B} )--pretty=format:'%H' -n 1`",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "description": "commit ID"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "description": "use %s instead of %B if TRUE"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 913,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "getCommitMessage",
+                "summary": "Returns commit message from specific commit",
+                "description": "`git log -1 --format={%s|%B} )--pretty=format:'%H' -n 1`",
+                "description_parts": [
+                    {
+                        "type": "text",
+                        "content": "`git log -1 --format={%s|%B} )--pretty=format:'%H' -n 1`"
+                    }
+                ],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($commit, $oneline = false)\n  {\n\t\t\t$this->begin();\n\t\t\texec('git log -1 --format=' . ($oneline ? '%s' : '%B') . ' ' . $commit . ' 2>&1', $message);\n\t\t\t$this->end();\n\t\t\treturn implode(PHP_EOL, $message);\n  }",
+                "startLine": 907,
+                "doc": {
+                    "description": "Returns commit message from specific commit\n`git log -1 --format={%s|%B} )--pretty=format:'%H' -n 1`",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string",
+                            "description": "commit ID"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "bool",
+                            "description": "use %s instead of %B if TRUE"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 913,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "commit",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": "",
+                        "description": "commit ID"
+                    },
+                    {
+                        "name": "oneline",
+                        "position": 1,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": false,
+                        "default_name": "",
+                        "description": "use %s instead of %B if TRUE"
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "commit",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "commit ID"
+                },
+                {
+                    "name": "oneline",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "use %s instead of %B if TRUE"
+                }
+            ]
+        },
+        "getCommitData": {
+            "name": "getCommitData",
+            "summary": "Returns array of commit metadata from specific commit",
+            "description": "`git show --raw <sha1>`",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "`git show --raw <sha1>`"
+                }
+            ],
+            "file": "Cz\\Git\\GitRepository",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($commit)\n  {\n\t\t\t$message = $this->getCommitMessage($commit);\n\t\t\t$subject = $this->getCommitMessage($commit, TRUE);\n\n\t\t\t$this->begin();\n\t\t\texec('git show --raw ' . $commit . ' 2>&1', $output);\n\t\t\t$this->end();\n\t\t\t$data = array(\n\t\t\t\t'commit' => $commit,\n\t\t\t\t'subject' => $subject,\n\t\t\t\t'message' => $message,\n\t\t\t\t'author' => NULL,\n\t\t\t\t'committer' => NULL,\n\t\t\t\t'date' => NULL,\n\t\t\t);\n\n\t\t\t\/\/ git show is a porcelain command and output format may changes\n\t\t\t\/\/ in future git release or custom config.\n\t\t\tforeach ($output as $index => $info) {\n\t\t\t\tif (preg_match('`Author: *(.*)`', $info, $author)) {\n\t\t\t\t\t$data['author'] = trim($author[1]);\n\t\t\t\t\tunset($output[$index]);\n\t\t\t\t}\n\n\t\t\t\tif (preg_match('`Commit: *(.*)`', $info, $committer)) {\n\t\t\t\t\t$data['committer'] = trim($committer[1]);\n\t\t\t\t\tunset($output[$index]);\n\t\t\t\t}\n\n\t\t\t\tif (preg_match('`Date: *(.*)`', $info, $date)) {\n\t\t\t\t\t$data['date'] = trim($date[1]);\n\t\t\t\t\tunset($output[$index]);\n\t\t\t\t}\n\t\t\t}\n\n\t\t\treturn $data;\n  }",
+            "startLine": 923,
+            "doc": {
+                "description": "Returns array of commit metadata from specific commit\n`git show --raw <sha1>`",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "description": "commit ID"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "GitException"
+                }
+            },
+            "endLine": 960,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "getCommitData",
+                "summary": "Returns array of commit metadata from specific commit",
+                "description": "`git show --raw <sha1>`",
+                "description_parts": [
+                    {
+                        "type": "text",
+                        "content": "`git show --raw <sha1>`"
+                    }
+                ],
+                "file": "Cz\\Git\\GitRepository",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($commit)\n  {\n\t\t\t$message = $this->getCommitMessage($commit);\n\t\t\t$subject = $this->getCommitMessage($commit, TRUE);\n\n\t\t\t$this->begin();\n\t\t\texec('git show --raw ' . $commit . ' 2>&1', $output);\n\t\t\t$this->end();\n\t\t\t$data = array(\n\t\t\t\t'commit' => $commit,\n\t\t\t\t'subject' => $subject,\n\t\t\t\t'message' => $message,\n\t\t\t\t'author' => NULL,\n\t\t\t\t'committer' => NULL,\n\t\t\t\t'date' => NULL,\n\t\t\t);\n\n\t\t\t\/\/ git show is a porcelain command and output format may changes\n\t\t\t\/\/ in future git release or custom config.\n\t\t\tforeach ($output as $index => $info) {\n\t\t\t\tif (preg_match('`Author: *(.*)`', $info, $author)) {\n\t\t\t\t\t$data['author'] = trim($author[1]);\n\t\t\t\t\tunset($output[$index]);\n\t\t\t\t}\n\n\t\t\t\tif (preg_match('`Commit: *(.*)`', $info, $committer)) {\n\t\t\t\t\t$data['committer'] = trim($committer[1]);\n\t\t\t\t\tunset($output[$index]);\n\t\t\t\t}\n\n\t\t\t\tif (preg_match('`Date: *(.*)`', $info, $date)) {\n\t\t\t\t\t$data['date'] = trim($date[1]);\n\t\t\t\t\tunset($output[$index]);\n\t\t\t\t}\n\t\t\t}\n\n\t\t\treturn $data;\n  }",
+                "startLine": 923,
+                "doc": {
+                    "description": "Returns array of commit metadata from specific commit\n`git show --raw <sha1>`",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string",
+                            "description": "commit ID"
+                        }
+                    ],
+                    "return": "",
+                    "throws": {
+                        "tag": "throws",
+                        "type": "GitException"
+                    }
+                },
+                "endLine": 960,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "commit",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": "",
+                        "description": "commit ID"
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "commit",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "commit ID"
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 47,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [
+        "Cz\\Git\\IGit"
+    ],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "Cz\\Git\\GitRepository",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "repository": null,
+        "cwd": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\api",
+    "shortName": "git"
+}

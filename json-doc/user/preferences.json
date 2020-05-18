@@ -1,0 +1,4777 @@
+{
+    "doc": {
+        "description": "A user's preference system linked to options and user classes\n\nA preference consists in a row with an ID_OPTION and a ID_USER, ID_GROUP, or PUBLIC.\nThe class needs a user object on which each query will be based.\nThis class must be able to:\n- read options with the same arguments as the option class (filtered based on preference existence)\n- retrieve preference(s) for an option\n- write preference by adding to an existing set or setting a unique",
+        "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
+            "copyright": "BBN Solutions",
+            "since": "Oct 28, 2015, 10:23:55 +0000",
+            "category": "Authentication",
+            "license": "http:\/\/opensource.org\/licenses\/MIT MIT",
+            "version": "0.1",
+            "todo": "Groups and hotlinks features"
+        }
+    },
+    "name": "bbn\\user\\preferences",
+    "namespace": true,
+    "traits": [
+        "bbn\\models\\tts\\retriever",
+        "bbn\\models\\tts\\dbconfig",
+        "bbn\\models\\tts\\optional",
+        "bbn\\models\\tts\\current"
+    ],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/user\/preferences.php",
+    "startLine": 29,
+    "endLine": 1710,
+    "contentConstructor": {
+        "file": "bbn\\user\\preferences",
+        "returns": null
+    },
+    "methods": {
+        "get_preferences": {
+            "name": "get_preferences",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::get_instance();\n  }",
+            "startLine": 241,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 244,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bbn\\user\\preferences",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "__construct": {
+            "name": "__construct",
+            "summary": "preferences constructor.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bbn\\db $db, array $cfg = [])\n  {\n    $this->_init_class_cfg($cfg);\n\t  if ( $user = bbn\\user::get_instance() ){\n      $this->_init_user($user);\n    }\n    $this->opt = bbn\\appui\\options::get_instance();\n    if ( $this->user && $this->opt ){\n      self::retriever_init($this);\n    }\n  }",
+            "startLine": 251,
+            "doc": {
+                "description": "preferences constructor.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "bbn\\db",
+                        "name": "$db"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 261,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "__construct",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\db",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function(bbn\\db $db)\n  {\n  }",
+                "startLine": 27,
+                "doc": null,
+                "endLine": 29,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "db",
+                        "position": 0,
+                        "type": "bbn\\db",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "bbn\\db",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_class_cfg": {
+            "name": "get_class_cfg",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->class_cfg;\n  }",
+            "startLine": 266,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 269,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "retrieve_ids": {
+            "name": "retrieve_ids",
+            "summary": "Returns preferences' IDs from the option's ID",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option = NULL)\n  {\n    return $this->_retrieve_ids($id_option, $this->id_user, $this->id_group);\n  }",
+            "startLine": 277,
+            "doc": {
+                "description": "Returns preferences' IDs from the option's ID",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "null|string",
+                        "name": "$id",
+                        "description": "option"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 280,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "option"
+                }
+            ]
+        },
+        "retrieve_user_ids": {
+            "name": "retrieve_user_ids",
+            "summary": "Returns preferences' IDs from the option's ID and the given user ID",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option = NULL, $id_user = NULL)\n  {\n    if (!$id_user) {\n      $id_user = $this->id_user;\n    }\n    return $this->_retrieve_ids($id_option, $id_user);\n  }",
+            "startLine": 289,
+            "doc": {
+                "description": "Returns preferences' IDs from the option's ID and the given user ID",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "null|string",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "user"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 295,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "id_user",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "user"
+                }
+            ]
+        },
+        "retrieve_group_ids": {
+            "name": "retrieve_group_ids",
+            "summary": "Returns preferences' IDs from the option's ID and the given group ID",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option = NULL, $id_group = NULL)\n  {\n    if (!$id_group) {\n      $id_group = $this->id_group;\n    }\n    return $this->_retrieve_ids($id_option, null, $id_group);\n  }",
+            "startLine": 304,
+            "doc": {
+                "description": "Returns preferences' IDs from the option's ID and the given group ID",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "null|string",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "group"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 310,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "id_group",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "group"
+                }
+            ]
+        },
+        "has": {
+            "name": "has",
+            "summary": "Returns true if the current user can access a preference, false otherwise",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option = NULL, $force = false)\n  {\n    if ( !$force && $this->user->is_dev() ){\n      return true;\n    }\n    return (bool)$this->retrieve_ids($id_option);\n  }",
+            "startLine": 319,
+            "doc": {
+                "description": "Returns true if the current user can access a preference, false otherwise",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$force"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 325,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "force",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "user_has": {
+            "name": "user_has",
+            "summary": "Checks if a user has the given preference",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option, $id_user = NULL)\n  {\n    return (bool)$this->_retrieve_ids($id_option, $id_user);\n  }",
+            "startLine": 334,
+            "doc": {
+                "description": "Checks if a user has the given preference",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "user"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 337,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "id_user",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "user"
+                }
+            ]
+        },
+        "group_has": {
+            "name": "group_has",
+            "summary": "Checks if a group has the given preference",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option, $id_group)\n  {\n    return (bool)$this->_retrieve_ids($id_option, null, $id_group);\n  }",
+            "startLine": 346,
+            "doc": {
+                "description": "Checks if a group has the given preference",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "group"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 349,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "id_group",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "group"
+                }
+            ]
+        },
+        "get_user": {
+            "name": "get_user",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->id_user;\n  }",
+            "startLine": 354,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 357,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "get_group": {
+            "name": "get_group",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->id_group;\n  }",
+            "startLine": 362,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 365,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "set_user": {
+            "name": "set_user",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bbn\\user $user)\n  {\n    $this->_init_user($user);\n    return $this;\n  }",
+            "startLine": 371,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "bbn\\user",
+                        "name": "$user"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 375,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bbn\\user\\preferences"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "user",
+                    "position": 0,
+                    "type": "bbn\\user",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "set_group": {
+            "name": "set_group",
+            "summary": "Sets the given group.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_group)\n  {\n    if ( \\bbn\\str::is_uid($id_group) ){\n      $this->id_group = $id_group;\n    }\n    return $this;\n  }",
+            "startLine": 383,
+            "doc": {
+                "description": "Sets the given group.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "group"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 389,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bbn\\user\\preferences"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_group",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "group"
+                }
+            ]
+        },
+        "get_cfg": {
+            "name": "get_cfg",
+            "summary": "Gets the cfg array, normalized either from the DB or from the $cfg argument",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id = NULL, array $cfg = NULL)\n  {\n    if (\n      (null !== $cfg) ||\n      ($cfg = $this->db->select_one(\n        $this->class_cfg['table'],\n        $this->fields['cfg'],\n        [$this->fields['id'] => $id ]\n      ))\n    ){\n      if ( bbn\\str::is_json($cfg) ){\n        $cfg = json_decode($cfg, 1);\n      }\n      if ( \\is_array($cfg) ){\n        $new = [];\n        foreach ( $cfg as $k => $v){\n          if ( !\\in_array($k, $this->fields, true) ){\n            $new[$k] = $v;\n          }\n        }\n        return $new;\n      }\n    }\n    return null;\n  }",
+            "startLine": 398,
+            "doc": {
+                "description": "Gets the cfg array, normalized either from the DB or from the $cfg argument",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "null|array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 422,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_cfg_by_option": {
+            "name": "get_cfg_by_option",
+            "summary": "Gets the cfg array, normalized either from the DB or from the $cfg argument",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option, $id_user = NULL)\n  {\n    if (\n      ($cfg = $this->db->select_one(\n        $this->class_cfg['table'],\n        $this->fields['cfg'],\n        [\n          $this->fields['id_option'] => $id_option,\n          $this->fields['id_user'] => $id_user ?: $this->id_user,\n        ]\n      ))\n    ){\n      if ( bbn\\str::is_json($cfg) ){\n        $cfg = json_decode($cfg, 1);\n      }\n      return $this->get_cfg(false, $cfg);\n    }\n    return null;\n  }",
+            "startLine": 431,
+            "doc": {
+                "description": "Gets the cfg array, normalized either from the DB or from the $cfg argument",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "null|array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 449,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_user",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_links": {
+            "name": "get_links",
+            "summary": "Gets the preferences which have the option's $id as id_link",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    return $this->_get_links($id, $this->id_user, $this->id_group);\n  }",
+            "startLine": 457,
+            "doc": {
+                "description": "Gets the preferences which have the option's $id as id_link",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 460,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get": {
+            "name": "get",
+            "summary": "Returns the current user's preference based on the given id, his own profile and his group",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id, $with_config = true)\n  {\n    if ( bbn\\str::is_uid($id) ){\n      $table = $this->db->tsn($this->class_cfg['table'], true);\n      $uid = $this->db->csn($this->fields['id'], true);\n      $id_user = $this->db->csn($this->fields['id_user'], true);\n      $id_group = $this->db->csn($this->fields['id_group'], true);\n      $public = $this->db->csn($this->fields['public'], true);\n      if ( $row = $this->db->rselect([\n        'table' => $table,\n        'fields' => $this->fields,\n        'where' => [\n          'conditions' => [[\n            'field' => $uid,\n            'value' => $id\n          ], [\n            'logic' => 'OR',\n            'conditions' => [[\n              'field' => $id_user,\n              'value' => $this->id_user\n            ], [\n              'field' => $id_group,\n              'value' => $this->id_group\n            ], [\n              'field' => $public,\n              'value' => 1\n            ]]\n          ]]\n        ]\n      ]) ){\n        if ( $with_config ){\n          if ( empty($row['cfg']) && !empty($row['id_alias']) ){\n            \/\/if it's the case of a shared list takes the $cfg and the text from the alias\n            $alias = $this->db->rselect([\n              'table' => $table, \n              'fields' => ['cfg', 'text'],\n              'where' => [\n                'conditions' => [[\n                  'field' => 'id', \n                  'value' => $row['id_alias']\n                ]]\n              ]\n            ]);\n            $row['cfg'] = $alias['cfg'];\n            $row['text'] = $alias['text'];\n          }\n          $cfg = $row[$this->fields['cfg']];\n          unset($row[$this->fields['cfg']]);\n          if ( $cfg = json_decode($cfg, true) ){\n            $row = bbn\\x::merge_arrays($cfg, $row);\n          }\n        }\n        return $row;\n      }\n    }\n    return null;\n  }",
+            "startLine": 468,
+            "doc": {
+                "description": "Returns the current user's preference based on the given id, his own profile and his group",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$with",
+                        "description": "config"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 524,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "with_config",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": "",
+                    "description": "config"
+                }
+            ]
+        },
+        "get_all": {
+            "name": "get_all",
+            "summary": "Returns an array of the current user's preferences based on the given id_option, his own profile and his group's",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option = NULL, $with_config = true)\n  {\n    if ( $id_option = $this->_get_id_option($id_option) ){\n      $farch = $this->fields;\n      $fields = [];\n      foreach ( $farch as $k => $f ){\n        $field = $this->class_table . '.' . $f;\n        if ( $k === 'cfg' ){\n          $fields[$farch['cfg']] = \"IFNULL($field, aliases.$farch[cfg])\";\n        }\n        else if ( $k === 'text' ){\n          $fields[$farch['text']] = \"IFNULL($field, aliases.$farch[text])\";\n        }\n        else {\n          $fields[] = $field;\n        }\n      }\n      if ( $rows = $this->db->rselect_all([\n        'table' => $this->class_table,\n        'fields' => $fields,\n        'join' => [[\n          'table' => $this->class_table,\n          'type' => 'left',\n          'alias' => 'aliases',\n          'on' => [\n            'conditions' => [[\n              'field' => $farch['id_alias'],\n              'exp' => 'aliases.id'\n            ]]\n          ]]\n        ],\n        'where' => [\n          'conditions' => [\n            [\n              'field' => $farch['id_option'],\n              'value' => $id_option\n            ], [\n              'logic' => 'OR',\n              'conditions' => [\n                [\n                  'field' => $farch['id_user'],\n                  'value' => $this->id_user\n                ], [\n                  'field' => $farch['id_group'],\n                  'value' => $this->id_group\n                ], [\n                  'field' => $farch['public'],\n                  'value' => 1\n                ]\n              ]\n            ]\n          ]\n        ]\n      ]) ) {\n        return $with_config ? array_map(function($a) use($farch){\n          $cfg = $a[$farch['cfg']];\n          unset($a[$farch['cfg']]);\n          if ( $cfg = json_decode($cfg, true) ){\n            $a = bbn\\x::merge_arrays($cfg, $a);\n          }\n          return $a;\n        }, $rows) : $rows;\n      }\n      return [];\n    }\n    return null;\n  }",
+            "startLine": 532,
+            "doc": {
+                "description": "Returns an array of the current user's preferences based on the given id_option, his own profile and his group's",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "null|string",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$with",
+                        "description": "config"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 598,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "with_config",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": "",
+                    "description": "config"
+                }
+            ]
+        },
+        "get_all_not_mine": {
+            "name": "get_all_not_mine",
+            "summary": "Returns an array of the users' preferences (the current user and group are excluded) based on the given id_option",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option = NULL, $with_config = true)\n  {\n    if ( $id_option = $this->_get_id_option($id_option) ){\n      $fields = $this->fields;\n      if ( !$with_config ){\n        unset($fields['cfg']);\n      }\n      if ( $rows = $this->db->rselect_all([\n        'table' => $this->class_table,\n        'fields' => $fields,\n        'join' => [[\n          'table' => $this->class_table,\n          'type' => 'left',\n          'alias' => 'aliases',\n          'on' => [\n            'conditions' => [[\n              'field' => $this->fields['id_alias'],\n              'exp' => 'aliases.id'\n            ]]\n          ]\n        ]],\n        'where' => [\n          'conditions' => [[\n            'field' => $this->fields['id_option'],\n            'value' => $id_option\n          ], [\n            'field' => $this->fields['public'],\n            'value' => 0\n          ], [\n            'logic' => 'OR',\n            'conditions' => [[\n              'field' => $this->fields['id_user'],\n              'operator' => '!=',\n              'value' => $this->id_user\n            ], [\n              'field' => $this->fields['id_user'],\n              'operator' => 'isnull'\n            ]]\n          ], [\n            'logic' => 'OR',\n            'conditions' => [[\n              'field' => $this->fields['id_group'],\n              'operator' => 'neq',\n              'value' => $this->id_group\n            ], [\n              'field' => $this->fields['id_group'],\n              'operator' => 'isnull'\n            ]]\n          ]]\n        ]\n      ]) ) {\n        return $with_config ? array_map(function($a){\n          $cfg = $a['cfg'];\n          unset($a['cfg']);\n          if ( ($cfg = json_decode($cfg, true)) ){\n            $a = bbn\\x::merge_arrays($cfg, $a);\n          }\n          return $a;\n        }, $rows) : $rows;\n      }\n      return [];\n    }\n    return null;\n  }",
+            "startLine": 606,
+            "doc": {
+                "description": "Returns an array of the users' preferences (the current user and group are excluded) based on the given id_option",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "null|string",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$with",
+                        "description": "config"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 669,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "with_config",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": "",
+                    "description": "config"
+                }
+            ]
+        },
+        "get_by_option": {
+            "name": "get_by_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option, $with_config = true)\n  {\n    if ( $id = $this->retrieve_user_ids($id_option, $this->id_user) ){\n      return $this->get($id[0], $with_config);\n    }\n    return null;\n  }",
+            "startLine": 671,
+            "doc": null,
+            "endLine": 677,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "with_config",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                }
+            ]
+        },
+        "option": {
+            "name": "option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( $o = $this->opt->option(\\func_get_args()) ){\n      if ( ($ids = $this->retrieve_ids($o['id'])) && ($cfg = $this->get($ids[0])) ){\n        $o = bbn\\x::merge_arrays($o, $cfg);\n      }\n      return $o;\n    }\n    return null;\n  }",
+            "startLine": 679,
+            "doc": null,
+            "endLine": 688,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "text": {
+            "name": "text",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option)\n  {\n      return $this->db->select_one($this->class_table, $this->fields['text'], [$this->fields['id'] => $id_option]);\n    }\n    return null;\n  }",
+            "startLine": 690,
+            "doc": null,
+            "endLine": 695,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "items": {
+            "name": "items",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($code)\n  {\n      $res = [];\n      foreach ( $items as $i => $it ){\n        $res[] = ['id' => $it, 'num' => $i + 1];\n        if (\n          ($tmp = $this->get($it)) &&\n          (isset($tmp['num']))\n        ){\n          $res[$i]['num'] = $tmp['num'];\n        }\n      }\n      \\bbn\\x::sort_by($res, 'num');\n      return array_map(function($a){\n        return $a['id'];\n      }, $res);\n    }\n    return $items;\n  }",
+            "startLine": 701,
+            "doc": null,
+            "endLine": 719,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "options": {
+            "name": "options",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($code)\n  {\n    if ( $list = $this->items(\\func_get_args()) ){\n      $res = [];\n      foreach ( $list as $i => $li ){\n        $res[$i] = $this->opt->option($li);\n        $res[$i]['items'] = $this->get($li);\n      }\n      return $res;\n    }\n    return null;\n  }",
+            "startLine": 721,
+            "doc": null,
+            "endLine": 732,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "full_options": {
+            "name": "full_options",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($code)\n  {\n    if ( $ops = $this->opt->full_options(\\func_get_args()) ){\n      foreach ( $ops as &$o ){\n        $o['items'] = $this->get_all($o['id']);\n      }\n      return $ops;\n    }\n    return null;\n  }",
+            "startLine": 734,
+            "doc": null,
+            "endLine": 743,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "order": {
+            "name": "order",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option, $index, $upd = false)\n  {\n    if ( ($id_parent !== false) && $this->opt->is_sortable($id_parent) ){\n      $items = $this->items($id_parent);\n      $res = [];\n      $to_change = false;\n      foreach ( $items as $i => $it ){\n        $res[] = [\n          $this->fields['id'] => $it,\n          $this->fields['num'] => $i + 1\n        ];\n        if ( $cfg = $this->get($it) ){\n          $res[$i] = \\bbn\\x::merge_arrays($res[$i], $cfg);\n        }\n        if ( $it === $id_option ){\n          $to_change = $i;\n        }\n      }\n      if ( $to_change !== false ){\n        if ( $to_change > $index ){\n          for ( $i = $index; $i < $to_change; $i++ ){\n            $res[$i][$this->fields['num']]++;\n          }\n        }\n        else if ( $to_change < $index ){\n          for ( $i = $to_change + 1; $i <= $index; $i++ ){\n            $res[$i][$this->fields['num']]--;\n          }\n        }\n        $res[$to_change][$this->fields['num']] = $index + 1;\n        foreach ( $res as $i => $r ){\n          if ( $upd ){\n            $this->update_by_option($r[$this->fields['id']], $r);\n          }\n          else {\n            $this->add($r[$this->fields['id']], $r);\n          }\n        }\n        \\bbn\\x::sort_by($res, $this->fields['num']);\n        return $res;\n      }\n    }\n  }",
+            "startLine": 748,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "What does it do???"
+                }
+            },
+            "endLine": 790,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "index",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "upd",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "set_by_option": {
+            "name": "set_by_option",
+            "summary": "Sets the permission row for the current user by the option's ID",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option, array $cfg)\n  {\n    if ( $id = $this->retrieve_user_ids($id_option, $this->id_user) ){\n      return $this->set($id[0], $cfg);\n    }\n    return $this->_insert($id_option, $cfg);\n  }",
+            "startLine": 799,
+            "doc": {
+                "description": "Sets the permission row for the current user by the option's ID",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 805,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "set": {
+            "name": "set",
+            "summary": "Sets the permission config for the current user by the preference's ID",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id, array $cfg = NULL)\n  {\n    return $this->db->update($this->class_cfg['table'], [\n      $this->fields['cfg'] => $cfg ? json_encode($this->get_cfg(false, $cfg)) : null\n    ], [\n      $this->fields['id'] => $id\n    ]);\n  }",
+            "startLine": 814,
+            "doc": {
+                "description": "Sets the permission config for the current user by the preference's ID",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 821,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "update": {
+            "name": "update",
+            "summary": "Sets the permission row for the current user by the preference's ID",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id, array $cfg)\n  {\n    return $this->db->update($this->class_cfg['table'], [\n      $this->fields['text'] => $cfg[$this->fields['text']] ?? NULL,\n      $this->fields['num'] => $cfg[$this->fields['num']] ?? NULL,\n      $this->fields['id_link'] => $cfg[$this->fields['id_link']] ?? NULL,\n      $this->fields['id_alias'] => $cfg[$this->fields['id_alias']] ?? NULL,\n      $this->fields['id_user'] => $this->id_user,\n      $this->fields['cfg'] => ($tmp = $this->get_cfg(false, $cfg)) ? json_encode($tmp) : NULL\n    ], [\n      $this->fields['id'] => $id\n    ]);\n  }",
+            "startLine": 830,
+            "doc": {
+                "description": "Sets the permission row for the current user by the preference's ID",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 842,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "update_by_option": {
+            "name": "update_by_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option, array $cfg)\n  {\n    if ( $id = $this->retrieve_user_ids($id_option, $this->id_user) ){\n      return $this->update($id[0], $cfg);\n    }\n    return $this->_insert($id_option, $cfg);\n  }",
+            "startLine": 844,
+            "doc": null,
+            "endLine": 850,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "add": {
+            "name": "add",
+            "summary": "Adds a new preference for the given option for the current user.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option, array $cfg)\n  {\n    return (\n      ($id_option = $this->_get_id_option($id_option)) &&\n      $this->_insert($id_option, $cfg)\n    ) ? $this->db->last_id() : null;\n  }",
+            "startLine": 859,
+            "doc": {
+                "description": "Adds a new preference for the given option for the current user.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "null|string",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 865,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "delete": {
+            "name": "delete",
+            "summary": "Deletes the given preference",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    return $this->db->delete([\n      'table' => $this->class_cfg['table'],\n      'where' => [\n        'logic' => 'AND',\n        'conditions' => [\n          [\n            'field' => $this->fields['id'],\n            'value' => $id\n          ],\n          [\n            'logic' => 'OR',\n            'conditions' => [\n              [\n                'field' => $this->fields['id_user'],\n                'value' => $this->id_user\n              ], [\n                'field' => $this->fields['id_group'],\n                'value' => $this->id_group\n              ], [\n                'field' => $this->fields['public'],\n                'value' => 1\n              ]\n            ]\n          ]\n        ]\n      ]\n    ]);\n  }",
+            "startLine": 873,
+            "doc": {
+                "description": "Deletes the given preference",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$id"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 902,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "delete_user_option": {
+            "name": "delete_user_option",
+            "summary": "Deletes all the given or current user's permissions for the given option",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option, $id_user = NULL)\n  {\n    if ( $id_option = $this->_get_id_option($id_option) ){\n      return $this->db->delete($this->class_cfg['table'], [\n        $this->fields['id_option'] => $id_option,\n        $this->fields['id_user'] => $id_user ?: $this->id_user\n      ]);\n    }\n    return null;\n  }",
+            "startLine": 911,
+            "doc": {
+                "description": "Deletes all the given or current user's permissions for the given option",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "null|string",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "null|string",
+                        "name": "$id",
+                        "description": "user"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 920,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "id_user",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "user"
+                }
+            ]
+        },
+        "delete_group_option": {
+            "name": "delete_group_option",
+            "summary": "Deletes all the given group's permissions for the given option",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option, $id_group)\n  {\n    if ( $id_option = $this->_get_id_option($id_option) ){\n      return $this->db->delete($this->class_cfg['table'], [\n        $this->fields['id_option'] => $id_option,\n        $this->fields['id_group'] => $id_group\n      ]);\n    }\n    return null;\n  }",
+            "startLine": 929,
+            "doc": {
+                "description": "Deletes all the given group's permissions for the given option",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "null|string",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "group"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 938,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "id_group",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "group"
+                }
+            ]
+        },
+        "set_cfg": {
+            "name": "set_cfg",
+            "summary": "Sets (or unsets) the cfg field of a given preference based on its ID",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id = NULL, array $cfg = NULL)\n  {\n    if ( null !== $cfg ){\n      $cfg = $this->get_cfg(null, $cfg);\n      $config = json_encode($cfg);\n    }\n    else{\n      $config = null;\n    }\n    return $this->db->update($this->class_cfg['table'], [\n      $this->fields['cfg'] => $config\n    ], [\n      $this->fields['id'] => $id\n    ]);\n  }",
+            "startLine": 947,
+            "doc": {
+                "description": "Sets (or unsets) the cfg field of a given preference based on its ID",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "null|array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 961,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "set_text": {
+            "name": "set_text",
+            "summary": "Sets (or unsets) the text field of the given preference and returns the result of the executed query",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id, $text = NULL)\n  {\n    return $this->db->update($this->class_cfg['table'], [\n      $this->fields['text'] => $text\n    ], [\n      $this->fields['id'] => $id\n    ]);\n  }",
+            "startLine": 970,
+            "doc": {
+                "description": "Sets (or unsets) the text field of the given preference and returns the result of the executed query",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "null|string",
+                        "name": "$text"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 977,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "text",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "set_link": {
+            "name": "set_link",
+            "summary": "Sets (or unsets) the id_link field of the given preference and returns the result of the executed query",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id, $id_link = NULL)\n  {\n    return $this->db->update($this->class_cfg['table'], [\n      $this->fields['id_link'] => $id_link\n    ], [\n      $this->fields['id'] => $id\n    ]);\n  }",
+            "startLine": 986,
+            "doc": {
+                "description": "Sets (or unsets) the id_link field of the given preference and returns the result of the executed query",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "link"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 993,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_link",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "link"
+                }
+            ]
+        },
+        "add_link": {
+            "name": "add_link",
+            "summary": "Sets (or unsets) the id_link field of the given preference and returns the result of the executed query",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option, $id_link)\n  {\n    $id = $this->db->select_one($this->class_cfg['table'], $this->fields['id'], [\n      $this->fields['id_user'] => $this->id_user,\n      $this->fields['id_option'] => $id_option\n    ]);\n    if ( $id ){\n      if ( $this->db->update($this->class_cfg['table'], [\n        $this->fields['id_link'] => $id_link\n      ], ['id' => $id]) ){\n        return $id;\n      }\n    }\n    else if ( $this->db->insert($this->class_cfg['table'], [\n      $this->fields['id_user'] => $this->id_user,\n      $this->fields['id_option'] => $id_option,\n      $this->fields['id_link'] => $id_link\n    ]) ){\n      return $this->db->last_id();\n    }\n    return null;\n  }",
+            "startLine": 1002,
+            "doc": {
+                "description": "Sets (or unsets) the id_link field of the given preference and returns the result of the executed query",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "link"
+                    }
+                ],
+                "return": "The inserted or updated preference's ID"
+            },
+            "endLine": 1023,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "id_link",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "link"
+                }
+            ]
+        },
+        "get_shared": {
+            "name": "get_shared",
+            "summary": "Returns an array",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    if ( bbn\\str::is_uid($id) ){\n      return $this->db->rselect_all($this->class_table, [\n        $this->fields['id'],\n        $this->fields['id_user'],\n        $this->fields['id_group']\n      ], [\n        $this->fields['id_alias'] => $id\n      ]);\n    }\n    return null;\n  }",
+            "startLine": 1031,
+            "doc": {
+                "description": "Returns an array",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1043,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "make_public": {
+            "name": "make_public",
+            "summary": "Makes (or unmakes) the given preference public.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id, $cancel = false)\n  {\n    if ( $cfg = $this->get($id) ){\n      return $this->db->update($this->class_table, ['public' => $cancel ? 0 : 1], [\n        $this->fields['id'] => $id\n      ]);\n    }\n    return null;\n  }",
+            "startLine": 1052,
+            "doc": {
+                "description": "Makes (or unmakes) the given preference public.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$cancel"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1060,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cancel",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "share_with_group": {
+            "name": "share_with_group",
+            "summary": "Shares (or unshares) the given preference to the given group.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id, $id_group, $cancel = false)\n  {\n    if ( $cfg = $this->get($id) ){\n      $id_share = $this->db->select_one($this->class_table, $this->fields['id'], [\n        'id_alias' => $id,\n        'id_group' => $id_group\n      ]);\n      if ( $cancel && $id_share ){\n        return $this->db->delete($this->class_table, [$this->fields['id'] => $id_share]);\n      }\n      else if ( !$cancel && !$id_share ){\n        return $this->db->insert($this->class_table, [\n          'id_option' => $cfg['id_option'],\n          'id_alias' => $id,\n          'id_group' => $id_group\n        ]);\n      }\n      return 0;\n    }\n    return null;\n  }",
+            "startLine": 1070,
+            "doc": {
+                "description": "Shares (or unshares) the given preference to the given group.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "group"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$cancel"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1090,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_group",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "group"
+                },
+                {
+                    "name": "cancel",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "share_with_user": {
+            "name": "share_with_user",
+            "summary": "Shares (or unshares) the given preference to the given user",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id, $id_user, $cancel = false)\n  {\n    if ( $cfg = $this->get($id) ){\n      $id_share = $this->db->select_one($this->class_table, $this->fields['id'], [\n        'id_alias' => $id,\n        'id_user' => $id_user\n      ]);\n      if ( $cancel && $id_share ){\n        return $this->db->delete($this->class_table, [$this->fields['id'] => $id_share]);\n      }\n      else if ( !$cancel && !$id_share ){\n        return $this->db->insert($this->class_table, [\n          'id_option' => $cfg['id_option'],\n          'id_alias' => $id,\n          'id_user' => $id_user\n        ]);\n      }\n      return 0;\n    }\n    return null;\n  }",
+            "startLine": 1100,
+            "doc": {
+                "description": "Shares (or unshares) the given preference to the given user",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "user"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$cancel"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1120,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_user",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "user"
+                },
+                {
+                    "name": "cancel",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "add_bit": {
+            "name": "add_bit",
+            "summary": "Adds a bit to a preference",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_usr_opt, array $cfg)\n  {\n    if (\n      ($id_usr_opt = $this->_get_id_option($id_usr_opt)) &&\n      ($c = $this->class_cfg['arch']['user_options_bits'])\n    ){\n      $to_cfg = $this->get_bit_cfg(null, $cfg);\n      if ( isset($to_cfg['items']) ){\n        unset($to_cfg['items']);\n      }\n      if ( !empty($to_cfg) ){\n        if ( !empty($cfg[$c['cfg']]) ){\n          if (  \\bbn\\str::is_json($cfg[$c['cfg']]) ){\n            $cfg[$c['cfg']] = json_decode($cfg[$c['cfg']], true);\n          }\n          if ( \\is_array($cfg[$c['cfg']]) ){\n            $cfg[$c['cfg']] = array_merge($cfg[$c['cfg']], $to_cfg);\n          }\n          else {\n            $cfg[$c['cfg']] = $to_cfg;\n          }\n        }\n        else {\n          $cfg[$c['cfg']] = $to_cfg;\n        }\n        $cfg[$c['cfg']] = json_encode($cfg[$c['cfg']]);\n      }\n      if ( $this->db->insert($this->class_cfg['tables']['user_options_bits'], [\n        $c['id_user_option'] => $id_usr_opt,\n        $c['id_parent'] => $cfg[$c['id_parent']] ?? NULL,\n        $c['id_option'] => $cfg[$c['id_option']] ?? NULL,\n        $c['num'] => $cfg[$c['num']] ?? NULL,\n        $c['text'] => $cfg[$c['text']] ?? '',\n        $c['cfg'] => $cfg[$c['cfg']] ?? '',\n      ]) ){\n        return $this->db->last_id();\n      }\n    }\n    return null;\n  }",
+            "startLine": 1129,
+            "doc": {
+                "description": "Adds a bit to a preference",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "usr_opt The preference's ID"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg",
+                        "description": "The bit's values"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1168,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_usr_opt",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "usr_opt The preference's ID"
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The bit's values"
+                }
+            ]
+        },
+        "delete_bit": {
+            "name": "delete_bit",
+            "summary": "Deletes a preference's bit",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    if ( \\bbn\\str::is_uid($id) ){\n      return $this->db->delete($this->class_cfg['tables']['user_options_bits'], [\n        $this->class_cfg['arch']['user_options_bits']['id'] => $id\n      ]);\n    }\n    return null;\n  }",
+            "startLine": 1177,
+            "doc": {
+                "description": "Deletes a preference's bit",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "description": "The bit's ID"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1185,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The bit's ID"
+                }
+            ]
+        },
+        "delete_bits": {
+            "name": "delete_bits",
+            "summary": "Deletes all bits from a preference",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user_option)\n  {\n    if ( \\bbn\\str::is_uid($id_user_option) ){\n      $i = 0;\n      foreach ( $this->get_bits($id_user_option) as $b ){\n        $i += (int)$this->delete_bit($b['id']);\n      }\n      return $i;\n    }\n    return null;\n  }",
+            "startLine": 1194,
+            "doc": {
+                "description": "Deletes all bits from a preference",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "description": "The bit's ID"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1204,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The bit's ID"
+                }
+            ]
+        },
+        "update_bit": {
+            "name": "update_bit",
+            "summary": "Updates a preference's bit",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id, array $cfg, $merge_config = false)\n  {\n    if ( \\bbn\\str::is_uid($id) ){\n      $c = $this->class_cfg['arch']['user_options_bits'];\n      $fields = array_values($c);\n      if ( \\array_key_exists($c['id'], $cfg) ){\n        unset($cfg[$c['id']]);\n      }\n      $to_cfg = $this->get_bit_cfg(null, $cfg);\n      if ( isset($to_cfg['items']) ){\n        unset($to_cfg['items']);\n      }\n      if ( !empty($to_cfg) ){\n        if ( !empty($merge_config) && !empty($cfg[$c['cfg']]) ){\n          if (  \\bbn\\str::is_json($cfg[$c['cfg']]) ){\n            $cfg[$c['cfg']] = json_decode($cfg[$c['cfg']], true);\n          }\n          if ( \\is_array($cfg[$c['cfg']]) ){\n            $cfg[$c['cfg']] = array_merge($cfg[$c['cfg']], $to_cfg);\n          }\n          else {\n            $cfg[$c['cfg']] = $to_cfg;\n          }\n        }\n        else {\n          $cfg[$c['cfg']] = $to_cfg;\n        }\n        $cfg[$c['cfg']] = json_encode($cfg[$c['cfg']]);\n      }\n      if ( !\\bbn\\str::is_json($cfg[$c['cfg']]) ){\n        $cfg[$c['cfg']] = json_encode($cfg[$c['cfg']]);\n      }      \n      return $this->db->update($this->class_cfg['tables']['user_options_bits'], [\n        $c['id_parent'] => $cfg[$c['id_parent']] ?? NULL,\n        $c['id_option'] => $cfg[$c['id_option']] ?? NULL,\n        $c['num'] => $cfg[$c['num']] ?? NULL,\n        $c['text'] => $cfg[$c['text']] ?? '',\n        $c['cfg'] => $cfg[$c['cfg']] ?? '',\n      ], [\n        $c['id'] => $id\n      ]);\n    }\n    return null;\n  }",
+            "startLine": 1213,
+            "doc": {
+                "description": "Updates a preference's bit",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "The bit's ID"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "description": "The bit's values"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1256,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The bit's ID"
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The bit's values"
+                },
+                {
+                    "name": "merge_config",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "set_bit": {
+            "name": "set_bit",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user_option, array $cfg)\n  {\n  }",
+            "startLine": 1258,
+            "doc": null,
+            "endLine": 1260,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_bit": {
+            "name": "get_bit",
+            "summary": "Returns a single preference's bit",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id, $with_config = true)\n  {\n    if (\n      \\bbn\\str::is_uid($id) &&\n      ($bit = $this->db->rselect($this->class_cfg['tables']['user_options_bits'], [], [\n        $this->class_cfg['arch']['user_options_bits']['id'] => $id\n      ]))\n    ){\n      if ( !empty($with_config) ){\n        return $this->explode_bit_cfg($bit);\n      }\n      return $bit;\n    }\n    return [];\n  }",
+            "startLine": 1268,
+            "doc": {
+                "description": "Returns a single preference's bit",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "The bit's ID"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1282,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The bit's ID"
+                },
+                {
+                    "name": "with_config",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_bits": {
+            "name": "get_bits",
+            "summary": "Returns the bits list of a preference",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_usr_opt, $id_parent = false, $with_config = true)\n  {\n    $c = $this->class_cfg['arch']['user_options_bits'];\n    $t = $this;\n    $where = [[\n      'field' => $c['id_user_option'],\n      'value' => $id_usr_opt\n    ]];\n    if ( \\is_null($id_parent) || \\bbn\\str::is_uid($id_parent) ){\n      $where[] = [\n        'field' => $c['id_parent'],\n        empty($id_parent) ? 'operator' : 'value' => $id_parent ?: 'isnull'\n      ];\n    }\n    if (\n      \\bbn\\str::is_uid($id_usr_opt) &&\n      ($bits = $this->db->rselect_all([\n        'table' => $this->class_cfg['tables']['user_options_bits'],\n        'fields' => [],\n        'where' => [\n          'conditions' => $where\n        ],\n        'order' => [[\n          'field' => $c['num'],\n          'dir' => 'ASC'\n        ]]\n      ]))\n    ){\n      if ( !empty($with_config) ){\n        return array_map(function($b) use($t){\n          return $t->explode_bit_cfg($b);\n        }, $bits);\n      }\n      return $bits;\n    }\n    return [];\n  }",
+            "startLine": 1291,
+            "doc": {
+                "description": "Returns the bits list of a preference",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "The preference's ID"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "null|string",
+                        "name": "$id",
+                        "description": "parent The bits'parent ID"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1327,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_usr_opt",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The preference's ID"
+                },
+                {
+                    "name": "id_parent",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "parent The bits'parent ID"
+                },
+                {
+                    "name": "with_config",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_bits_by_id_option": {
+            "name": "get_bits_by_id_option",
+            "summary": "Returns the bits list of an option's id",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_opt, $id_parent = false, $with_config = true)\n  {\n    $c = $this->class_cfg['arch']['user_options_bits'];\n    $t = $this;\n    $where = [[\n      'field' => $c['id_user_option'],\n      'value' => $id_opt\n    ]];\n    if ( \\is_null($id_parent) || \\bbn\\str::is_uid($id_parent) ){\n      $where[] = [\n        'field' => $c['id_parent'],\n        empty($id_parent) ? 'operator' : 'value' => $id_parent ?: 'isnull'\n      ];\n    }\n    if (\n      \\bbn\\str::is_uid($id_opt) &&\n      ($bits = $this->db->rselect_all([\n        'table' => $this->class_cfg['tables']['user_options_bits'],\n        'fields' => [],\n        'where' => $where,\n        'order' => [[\n          'field' => $c['num'],\n          'dir' => 'ASC'\n        ]]\n      ]))\n    ){\n      if ( !empty($with_config) ){\n        return array_map(function($b) use($t){\n          return $t->explode_bit_cfg($b);\n        }, $bits);\n      }\n      return $bits;\n    }\n    return [];\n  }",
+            "startLine": 1336,
+            "doc": {
+                "description": "Returns the bits list of an option's id",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "The id_options"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "null|string",
+                        "name": "$id",
+                        "description": "parent The bits'parent ID"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1370,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_opt",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The id_options"
+                },
+                {
+                    "name": "id_parent",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "parent The bits'parent ID"
+                },
+                {
+                    "name": "with_config",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_full_bits": {
+            "name": "get_full_bits",
+            "summary": "Returns the hierarchical bits list of a preference",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_usr_opt, $id_parent = NULL, $with_config = true)\n  {\n    if ( \\bbn\\str::is_uid($id_usr_opt) ){\n      $c = $this->class_cfg['arch']['user_options_bits'];\n      $t = $this;\n      return array_map(function($b) use($t, $c, $id_usr_opt, $with_config){\n        if ( !empty($with_config) ){\n          $b = $t->explode_bit_cfg($b);\n        }\n        $b['items'] = $t->get_full_bits($id_usr_opt, $b[$c['id']], $with_config);\n        return $b;\n      }, $this->db->rselect_all([\n        'table' => $this->class_cfg['tables']['user_options_bits'],\n        'fields' => [],\n        'where' => [\n          'conditions' => [[\n            'field' => $c['id_user_option'],\n            'value' => $id_usr_opt\n          ], [\n            'field' => $c['id_parent'],\n            empty($id_parent) ? 'operator' : 'value' => $id_parent ?: 'isnull'\n          ]]\n        ],\n        'order' => [$c['num'] => 'ASC']\n      ]));\n    }\n    return [];\n  }",
+            "startLine": 1380,
+            "doc": {
+                "description": "Returns the hierarchical bits list of a preference",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "usr_opt The preference's ID"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "parent The parent's ID of a bit. Default: null"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$with",
+                        "description": "config Set it to false if you don't want the preference's cfg field values on the results."
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1407,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_usr_opt",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "usr_opt The preference's ID"
+                },
+                {
+                    "name": "id_parent",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "parent The parent's ID of a bit. Default: null"
+                },
+                {
+                    "name": "with_config",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": "",
+                    "description": "config Set it to false if you don't want the preference's cfg field values on the results."
+                }
+            ]
+        },
+        "get_bits_order": {
+            "name": "get_bits_order",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user_option)\n  {\n    $tab1 =$this->class_cfg['tables']['user_options'];\n    $tab2 = $this->class_cfg['tables']['user_options_bits'];\n    $cfg = $this->class_cfg['arch']['user_options'];\n    $cfg2 = $this->class_cfg['arch']['user_options_bits'];\n    if ( $this->db->select_one($tab1, $cfg['id_user'], ['id' => $id_user_option]) === $this->id_user ){\n      return $this->db->get_column_values($tab2, $cfg2['id_option'], [$cfg2['id_user_option'] => $id_user_option], [$cfg2['num'] => 'ASC']);\n    }\n    return null;\n  }",
+            "startLine": 1412,
+            "doc": {
+                "description": "",
+                "tags": []
+            },
+            "endLine": 1422,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_tree": {
+            "name": "get_tree",
+            "summary": "Returns a preference and its hierarchical bits list",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id, $with_config = true)\n  {\n    if (\n      \\bbn\\str::is_uid($id) &&\n      ($p = $this->get($id, $with_config))\n    ){\n      $p['items'] = $this->get_full_bits($id, null, $with_config);\n      return $p;\n    }\n    return [];\n  }",
+            "startLine": 1430,
+            "doc": {
+                "description": "Returns a preference and its hierarchical bits list",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "The preference's ID"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$with",
+                        "description": "config Set it to false if you don't want the preference's cfg field values on the results."
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1440,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The preference's ID"
+                },
+                {
+                    "name": "with_config",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": "",
+                    "description": "config Set it to false if you don't want the preference's cfg field values on the results."
+                }
+            ]
+        },
+        "explode_bit_cfg": {
+            "name": "explode_bit_cfg",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($bit)\n  {\n    $c = $this->class_cfg['arch']['user_options_bits'];\n    if (\n      !empty($bit[$c['cfg']]) &&\n      ($cfg = json_decode($bit[$c['cfg']], true))\n    ){\n      foreach ( $cfg as $i => $v ){\n        if ( !array_key_exists($i, $bit) ){\n          $bit[$i] = $v;\n        }\n      }\n    }\n    unset($bit[$c['cfg']]);\n    return $bit;\n  }",
+            "startLine": 1442,
+            "doc": null,
+            "endLine": 1457,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "bit",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "next_bit_num": {
+            "name": "next_bit_num",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    if (\n      \\bbn\\str::is_uid($id) &&\n      ($max = $this->db->select_one(\n        $this->class_cfg['tables']['user_options_bits'],\n        'MAX(num)',\n        [$this->class_cfg['arch']['user_options_bits']['id_user_option'] => $id]\n      ))\n    ){\n      return $max+1;\n    }\n    return null;\n  }",
+            "startLine": 1459,
+            "doc": null,
+            "endLine": 1472,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_bit_cfg": {
+            "name": "get_bit_cfg",
+            "summary": "Gets the bit's cfg array, normalized either from the DB or from the $cfg argument",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id = NULL, array $cfg = NULL)\n  {\n    if (\n      (null !== $cfg) ||\n      ($cfg = $this->db->select_one(\n        $this->class_cfg['tables']['user_options_bits'],\n        $this->class_cfg['arch']['user_options_bits']['cfg'],\n        [$this->class_cfg['arch']['user_options_bits']['id'] => $id ]\n      ))\n    ){\n      $fields = array_values($this->class_cfg['arch']['user_options_bits']);\n      if ( bbn\\str::is_json($cfg) ){\n        $cfg = json_decode($cfg, 1);\n      }\n      if ( \\is_array($cfg) ){\n        $new = [];\n        foreach ( $cfg as $k => $v){\n          if ( !\\in_array($k, $fields, true) ){\n            $new[$k] = $v;\n          }\n        }\n        return $new;\n      }\n    }\n    return null;\n  }",
+            "startLine": 1482,
+            "doc": {
+                "description": "Gets the bit's cfg array, normalized either from the DB or from the $cfg argument",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "null|array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1507,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "order_bit": {
+            "name": "order_bit",
+            "summary": "Orders a bit.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id, $pos)\n  {\n    if (\n      \\bbn\\str::is_uid($id) &&\n      ($cf = $this->get_class_cfg()) &&\n      ($cfg = $cf['arch']['user_options_bits']) &&\n      ($bit = $this->get_bit($id)) &&\n      ($old = (int)$bit[$cfg['num']]) &&\n      !empty($pos) &&\n      ($old !== $pos) &&\n      ($bits = $this->get_bits($bit[$cfg['id_user_option']], $bit[$cfg['id_parent']]))\n    ){\n      $past_new = false;\n      $past_old = false;\n      $p = 1;\n      $changed = 0;\n      foreach ( $bits as $ele ){\n        $upd = [];\n        if ( $past_old && !$past_new ){\n          $upd[$cfg['num']] = $p-1;\n        }\n        else if ( !$past_old && $past_new ){\n          $upd[$cfg['num']] = $p+1;\n        }\n        if ( $id === $ele['id'] ){\n          $upd[$cfg['num']] = $pos;\n          $past_old = 1;\n        }\n        else if ( $p === $pos ){\n          $upd[$cfg['num']] = $p + ($pos > $old ? -1 : 1);\n          $past_new = 1;\n        }\n        if ( !empty($upd) ){\n          $changed += $this->db->update($cf['tables']['user_options_bits'], $upd, [$cfg['id'] => $ele['id']]);\n        }\n        if ( $past_new && $past_old ){\n          break;\n        }\n        $p++;\n      }\n      return !!$changed;\n    }\n    return null;\n  }",
+            "startLine": 1516,
+            "doc": {
+                "description": "Orders a bit.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "The bit's ID"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$pos",
+                        "description": "The new position"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1559,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The bit's ID"
+                },
+                {
+                    "name": "pos",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The new position"
+                }
+            ]
+        },
+        "fix_bits_order": {
+            "name": "fix_bits_order",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user_option, $id_parent = NULL, $deep = false)\n  {\n    if (\n      \\bbn\\str::is_uid($id_user_option) &&\n      (\\bbn\\str::is_uid($id_parent) || \\is_null($id_parent))\n    ){\n      $cfg = $this->class_cfg['arch']['user_options_bits'];\n      $fixed = 0;\n      foreach ( $this->get_bits($id_user_option, $id_parent, false) as $i => $b ){\n        if ( $deep ){\n          $fixed += $this->fix_bits_order($id_user_option, $b[$cfg['id']], $deep);\n        }\n        if ( $b[$cfg['num']] !== ($i + 1) ){\n          $fixed += $this->db->update($this->class_cfg['tables']['user_options_bits'], [$cfg['num'] => $i + 1], [$cfg['id'] => $b[$cfg['id']]]);\n        }\n      }\n      return $fixed;\n    }\n    return null;\n  }",
+            "startLine": 1561,
+            "doc": null,
+            "endLine": 1580,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_parent",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "deep",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "move_bit": {
+            "name": "move_bit",
+            "summary": "Moves a bit.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id, $id_parent = NULL)\n  {\n    if (\n      \\bbn\\str::is_uid($id) &&\n      (\n        (\\bbn\\str::is_uid($id_parent) && $this->get_bit($id_parent)) ||\n        \\is_null($id_parent)\n      ) &&\n      ($bit = $this->get_bit($id)) &&\n      ($cf = $this->get_class_cfg()) &&\n      ($cfg =  $cf['arch']['user_options_bits'])\n    ){\n      $upd = [\n        $cfg['id_parent'] => $id_parent,\n        $cfg['num'] => $this->get_max_bit_num($bit[$cfg['id_user_option']], $id_parent, true)\n      ];\n      return !!$this->db->update($cf['tables']['user_options_bits'], $upd, [$cfg['id'] => $id]);\n    }\n    return null;\n  }",
+            "startLine": 1589,
+            "doc": {
+                "description": "Moves a bit.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "The bit's ID"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "description": "The new parent's ID"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1608,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The bit's ID"
+                },
+                {
+                    "name": "id_parent",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The new parent's ID"
+                }
+            ]
+        },
+        "get_max_bit_num": {
+            "name": "get_max_bit_num",
+            "summary": "Gets the maximum num value of the user option's bits.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user_option, $id_parent = NULL, $incr = false)\n  {\n    if ( \n      \\bbn\\str::is_uid($id_user_option) &&\n      (\\bbn\\str::is_uid($id_parent) || is_null($id_parent)) &&\n      ($cf = $this->get_class_cfg()) &&\n      ($cfg =  $cf['arch']['user_options_bits'])\n    ){\n      if ( $max = $this->db->select_one([\n        'table' => $cf['tables']['user_options_bits'], \n        'fields' => [\"MAX($cfg[num])\"],\n        'where' => [\n          'conditions' => [[\n            'field' => $cfg['id_user_option'],\n            'value' => $id_user_option\n          ], [\n            'field' => $cfg['id_parent'],\n            empty($id_parent) ? 'operator' : 'value' => $id_parent ?: 'isnull'\n          ]]\n        ]\n      ]) ){\n        $max = (int)$max;\n        return $incr ? $max+1 : $max;\n      }\n      return 0;\n    }\n  }",
+            "startLine": 1618,
+            "doc": {
+                "description": "Gets the maximum num value of the user option's bits.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "user_option The user option's ID"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$id",
+                        "description": "parent The parent's ID"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$incr",
+                        "description": "Set it to true if you want the result increased by 1"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1644,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "user_option The user option's ID"
+                },
+                {
+                    "name": "id_parent",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "parent The parent's ID"
+                },
+                {
+                    "name": "incr",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "Set it to true if you want the result increased by 1"
+                }
+            ]
+        },
+        "get_by_bit": {
+            "name": "get_by_bit",
+            "summary": "Gets a preference row from a bit ID",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    $t =& $this;\n    if ( \\bbn\\str::is_uid($id) ){\n      return $this->db->rselect([\n        'table' => $this->class_cfg['table'],\n        'fields' => array_map(function($v) use($t){\n          return $this->class_cfg['table'].'.'.$v;\n        }, array_values($this->class_cfg['arch']['user_options'])),\n        'join' => [[\n          'table' => $this->class_cfg['tables']['user_options_bits'],\n          'on' => [\n            'conditions' => [[\n              'field' => $this->class_cfg['arch']['user_options_bits']['id_user_option'],\n              'exp' => $this->class_cfg['table'].'.'.$this->fields['id']\n            ]]\n          ]\n        ]],\n        'where' => [\n          $this->class_cfg['tables']['user_options_bits'].'.'.$this->class_cfg['arch']['user_options_bits']['id'] => $id\n        ]\n      ]);\n    }\n  }",
+            "startLine": 1655,
+            "doc": {
+                "description": "Gets a preference row from a bit ID",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "The bit's ID"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1678,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The bit's ID"
+                }
+            ]
+        },
+        "get_id_by_bit": {
+            "name": "get_id_by_bit",
+            "summary": "Gets the preference's ID from a bit ID",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n    if ( \\bbn\\str::is_uid($id) && ($p = $this->get_by_bit($id)) ){\n      return $p[$this->fields['id']];\n    }\n    return null;\n  }",
+            "startLine": 1686,
+            "doc": {
+                "description": "Gets the preference's ID from a bit ID",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "The bit's ID"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1692,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The bit's ID"
+                }
+            ]
+        },
+        "text_value": {
+            "name": "text_value",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option, $id_user = NULL, $id_group = NULL)\n  {\n    if ( \\bbn\\str::is_uid($id_option) ){\n      $res = [];\n      if ($ids = $this->_retrieve_ids($id_option, $id_user, $id_group)){\n        foreach ($ids as $id){\n          $res[] = $this->db->rselect($this->class_cfg['table'], [\n            'value' => $this->fields['id'],\n            'text' => $this->fields['text']\n          ], ['id' => $id]);\n        }\n      }\n      return $res;\n    }\n    return null;\n  }",
+            "startLine": 1694,
+            "doc": null,
+            "endLine": 1709,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_user",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "id_group",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "test": {
+            "name": "test",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+            "startLine": 45,
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 50,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "test",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+                "startLine": 45,
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 50,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "check": {
+            "name": "check",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+            "startLine": 56,
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 61,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "check",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+                "startLine": 56,
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 61,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "get_error": {
+            "name": "get_error",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 72,
+            "doc": null,
+            "endLine": 74,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_error",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 72,
+                "doc": null,
+                "endLine": 74,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "get_errors": {
+            "name": "get_errors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 76,
+            "doc": null,
+            "endLine": 78,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_errors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 76,
+                "doc": null,
+                "endLine": 78,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+            "startLine": 80,
+            "doc": null,
+            "endLine": 88,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+                "startLine": 80,
+                "doc": null,
+                "endLine": 88,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "__call": {
+            "name": "__call",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
+            "startLine": 95,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$arguments"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 99,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": {
+                "name": "__call",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
+                "startLine": 95,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string",
+                            "name": "$name"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "array",
+                            "name": "$arguments"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 99,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 2,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "name",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "arguments",
+                        "position": 1,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "arguments",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_debug": {
+            "name": "is_debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 104,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "is_debug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 104,
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 106,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "set_debug": {
+            "name": "set_debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($debug)\n  {\n  }",
+            "startLine": 112,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 114,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "set_debug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($debug)\n  {\n  }",
+                "startLine": 112,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 114,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "debug",
+                        "position": 0,
+                        "type": "bool",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "debug",
+                    "position": 0,
+                    "type": "bool",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_instance": {
+            "name": "get_instance",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 25,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 27,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "retriever_exists": {
+            "name": "retriever_exists",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 29,
+            "doc": null,
+            "endLine": 31,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "exists": {
+            "name": "exists",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n      $this->class_cfg['arch'][$this->class_table_index]['id'] => $id\n    ]);\n  }",
+            "startLine": 59,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$id"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 63,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_fields": {
+            "name": "get_fields",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 73,
+            "doc": null,
+            "endLine": 75,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_option_root": {
+            "name": "get_option_root",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::$option_root_id;\n  }",
+            "startLine": 71,
+            "doc": null,
+            "endLine": 74,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_root": {
+            "name": "get_appui_root",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::$option_appui_id;\n  }",
+            "startLine": 76,
+            "doc": null,
+            "endLine": 79,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_option_id": {
+            "name": "get_option_id",
+            "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 87,
+            "doc": {
+                "description": "Returns The option's ID of a category, i.e. direct children of option's root",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 89,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options_ids": {
+            "name": "get_options_ids",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return $a !== null;\n    }));\n  }",
+            "startLine": 91,
+            "doc": null,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options_tree": {
+            "name": "get_options_tree",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $tree['items'] : [];\n  }",
+            "startLine": 97,
+            "doc": null,
+            "endLine": 100,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options": {
+            "name": "get_options",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 102,
+            "doc": null,
+            "endLine": 104,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_option": {
+            "name": "get_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 106,
+            "doc": null,
+            "endLine": 108,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options_text_value": {
+            "name": "get_options_text_value",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      bbn\\appui\\options::get_instance()->text_value_options($id): [];\n  }",
+            "startLine": 110,
+            "doc": null,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_option_id": {
+            "name": "get_appui_option_id",
+            "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 121,
+            "doc": {
+                "description": "Returns The option's ID of a category, i.e. direct children of option's root",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 123,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options_ids": {
+            "name": "get_appui_options_ids",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return $a !== null;\n    }));\n  }",
+            "startLine": 125,
+            "doc": null,
+            "endLine": 129,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options_tree": {
+            "name": "get_appui_options_tree",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $tree['items'] : [];\n  }",
+            "startLine": 131,
+            "doc": null,
+            "endLine": 134,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options": {
+            "name": "get_appui_options",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 136,
+            "doc": null,
+            "endLine": 138,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_option": {
+            "name": "get_appui_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 140,
+            "doc": null,
+            "endLine": 142,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options_text_value": {
+            "name": "get_appui_options_text_value",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      bbn\\appui\\options::get_instance()->text_value_options($id) : [];\n  }",
+            "startLine": 144,
+            "doc": null,
+            "endLine": 147,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "set_current": {
+            "name": "set_current",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option)\n  {\n    self::_set_current($id_option);\n  }",
+            "startLine": 29,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "option"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 32,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "void"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "option"
+                }
+            ]
+        },
+        "get_current": {
+            "name": "get_current",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user\\preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::$current;\n  }",
+            "startLine": 37,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 40,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        }
+    },
+    "properties": null,
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 91,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\models\\tts\\retriever",
+        "bbn\\models\\tts\\dbconfig",
+        "bbn\\models\\tts\\optional",
+        "bbn\\models\\tts\\current"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\models\\cls\\db",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "_defaults": {
+            "table": "bbn_users_options",
+            "tables": {
+                "user_options": "bbn_users_options",
+                "user_options_bits": "bbn_users_options_bits"
+            },
+            "arch": {
+                "user_options": {
+                    "id": "id",
+                    "id_option": "id_option",
+                    "num": "num",
+                    "id_user": "id_user",
+                    "id_group": "id_group",
+                    "id_alias": "id_alias",
+                    "public": "public",
+                    "id_link": "id_link",
+                    "text": "text",
+                    "cfg": "cfg"
+                },
+                "user_options_bits": {
+                    "id": "id",
+                    "id_user_option": "id_user_option",
+                    "id_parent": "id_parent",
+                    "id_option": "id_option",
+                    "num": "num",
+                    "text": "text",
+                    "cfg": "cfg"
+                }
+            }
+        },
+        "retriever_instance": {},
+        "retriever_exists": true,
+        "optional_is_init": false,
+        "option_appui_id": null,
+        "option_root_id": null,
+        "current": null,
+        "opt": null,
+        "user": null,
+        "id_user": null,
+        "id_group": null,
+        "db": null,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": [],
+        "class_cfg": null,
+        "fields": null,
+        "class_table": null,
+        "class_table_index": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\user",
+    "shortName": "preferences"
+}

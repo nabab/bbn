@@ -1,0 +1,437 @@
+{
+    "doc": {
+        "description": "Encryption Class",
+        "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
+            "copyright": "BBN Solutions",
+            "since": "Apr 4, 2011, 23:23:55 +0000",
+            "category": "Utilities",
+            "license": "http:\/\/www.opensource.org\/licenses\/mit-license.php MIT",
+            "version": "0.2r89"
+        }
+    },
+    "name": "bbn\\util\\enc",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/util\/enc.php",
+    "startLine": 17,
+    "endLine": 180,
+    "contentConstructor": null,
+    "methods": {
+        "crypt": {
+            "name": "crypt",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\util\\enc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($s, $key = '')\n  {\n\t  $key = self::_get_key($key);\n\t  return self::encryptOpenssl($s, $key);\n  }",
+            "startLine": 57,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$s"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 61,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "s",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "key",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "decrypt": {
+            "name": "decrypt",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\util\\enc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($s, $key = '')\n  {\n    $key = self::_get_key($key);\n    return self::decryptOpenssl($s, $key);\n  }",
+            "startLine": 68,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$s"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 72,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "s",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "key",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "encryptOpenssl": {
+            "name": "encryptOpenssl",
+            "summary": "Encrypt string using openSSL module",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\util\\enc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($textToEncrypt, $secretHash = NULL, $password = '')\n  {\n    if ( !$secretHash ){\n      $secretHash = self::$salt;\n    }\n    if ( $length = openssl_cipher_iv_length(self::$method) ){\n      $iv = substr(md5(self::$prefix.$password), 0, $length);\n      $res = null;\n      try{\n        $res = openssl_encrypt($textToEncrypt, self::$method, $secretHash, true, $iv);\n      }\n      catch ( \\Exception $e ){\n        bbn\\x::log(\"Impossible to decrypt\");\n      }\n      return $res;\n    }\n    return null;\n  }",
+            "startLine": 81,
+            "doc": {
+                "description": "Encrypt string using openSSL module",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$text",
+                        "description": "oEncrypt"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$secret",
+                        "description": "ash Any random secure SALT string for your website"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$password",
+                        "description": "User's optional password"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 98,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "textToEncrypt",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "oEncrypt"
+                },
+                {
+                    "name": "secretHash",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "ash Any random secure SALT string for your website"
+                },
+                {
+                    "name": "password",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "User's optional password"
+                }
+            ]
+        },
+        "decryptOpenssl": {
+            "name": "decryptOpenssl",
+            "summary": "Decrypt string using openSSL module",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\util\\enc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($textToDecrypt, $secretHash = NULL, $password = '')\n  {\n    if ( !$secretHash ){\n      $secretHash = self::$salt;\n    }\n    if ( $length = openssl_cipher_iv_length(self::$method) ){\n      $iv = substr(md5(self::$prefix.$password), 0, $length);\n      try {\n        $res = openssl_decrypt($textToDecrypt, self::$method, $secretHash, true, $iv);\n      }\n      catch ( \\Exception $e ){\n        \\bbn\\x::log($e->getMessage());\n      }\n      if ( $res ){\n        return $res;\n      }\n    }\n    return null;\n  }",
+            "startLine": 107,
+            "doc": {
+                "description": "Decrypt string using openSSL module",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$text",
+                        "description": "oDecrypt"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$secret",
+                        "description": "ash Any random secure SALT string for your website"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$password",
+                        "description": "User's optional password"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 125,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "textToDecrypt",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "oDecrypt"
+                },
+                {
+                    "name": "secretHash",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "ash Any random secure SALT string for your website"
+                },
+                {
+                    "name": "password",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "User's optional password"
+                }
+            ]
+        },
+        "generateCertFiles": {
+            "name": "generateCertFiles",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\util\\enc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path, $algo = 'sha512', $key_bits = 4096)\n  {\n    $res = false;\n    if ( !is_dir(dirname($path)) || file_exists($path.'_rsa') || !in_array($algo, hash_algos()) ){\n      return false;\n    }\n    $public = $path.'_rsa.pub';\n    $private = $path.'_rsa';\n    $params = [\n      'digest_alg' => $algo,\n      'private_key_bits' => $key_bits,\n      'private_key_type' => OPENSSL_KEYTYPE_RSA\n    ];\n    $rsaKey = openssl_pkey_new($params);\n    openssl_pkey_export($rsaKey, $privKey);\n    $umask = umask(0066);\n    $privKey = openssl_pkey_get_private($rsaKey);\n    if (\n      openssl_pkey_export_to_file($privKey, $private) && \/\/Private Key\n      ($pubKey = self::_sshEncodePublicKey($rsaKey)) && \/\/Public Key\n      file_put_contents($public, $pubKey) \/\/save public key into file\n    ){\n      $res = true;\n    }\n    umask($umask);\n    return $res;\n  }",
+            "startLine": 127,
+            "doc": null,
+            "endLine": 153,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "algo",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "sha512",
+                    "default_name": ""
+                },
+                {
+                    "name": "key_bits",
+                    "position": 2,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 4096,
+                    "default_name": ""
+                }
+            ]
+        },
+        "generateCert": {
+            "name": "generateCert",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\util\\enc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($algo = 'sha512', $key_bits = 4096)\n  {\n    $res = null;\n    $params = [\n      'digest_alg' => $algo,\n      'private_key_bits' => $key_bits,\n      'private_key_type' => OPENSSL_KEYTYPE_RSA\n    ];\n    $rsaKey = openssl_pkey_new($params);\n    \/\/openssl_pkey_export($rsaKey, $priv);\n    $umask = umask(0066);\n    $privKey = openssl_pkey_get_private($rsaKey);\n    $pubKey = openssl_pkey_get_details($rsaKey);\n    if (openssl_pkey_export($privKey, $priv)\n        && ($pub = $pubKey['key'])\n    ){\n      $res = [\n        'private' => $priv,\n        'public' => $pub\n      ];\n    }\n    umask($umask);\n    return $res;\n  }",
+            "startLine": 155,
+            "doc": null,
+            "endLine": 178,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "algo",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "sha512",
+                    "default_name": ""
+                },
+                {
+                    "name": "key_bits",
+                    "position": 1,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 4096,
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 6,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "method": "AES-256-CFB",
+        "salt": "dsjfjsdvcb34YhXZLW",
+        "prefix": "bbn-"
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\util",
+    "shortName": "enc"
+}

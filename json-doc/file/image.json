@@ -1,0 +1,2447 @@
+{
+    "doc": {
+        "description": "Image Class\n\n\nThis class is used to upload, delete and transform images, and create thumbnails.",
+        "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
+            "copyright": "BBN Solutions",
+            "since": "Apr 4, 2011, 23:23:55 +0000",
+            "category": "Files ressources",
+            "license": "http:\/\/www.opensource.org\/licenses\/lgpl-license.php LGPL",
+            "version": "0.2r89",
+            "package": "bbn\\file",
+            "todo": "Add a static function and var to check for available libraries (Imagick\/GD)"
+        }
+    },
+    "name": "bbn\\file\\image",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/file\/image.php",
+    "startLine": 23,
+    "endLine": 1057,
+    "contentConstructor": {
+        "file": "bbn\\file\\image",
+        "returns": null
+    },
+    "methods": {
+        "jpg2pdf": {
+            "name": "jpg2pdf",
+            "summary": "Converts one or more jpg image(s) to a pdf file. If the pdf file doesn't exist will be created.",
+            "description": "```php\nbbn\\x::dump(bbn\\file\\image::jpg2pdf([\"\/home\/data\/test\/two.jpg\",\"\/home\/data\/test\/one.jpeg\"], \"\/home\/data\/test\/doc.pdf\"));\n\/\/ (string) \"\/home\/data\/test\/doc.pdf\"\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "bbn\\x::dump(bbn\\file\\image::jpg2pdf([\"\/home\/data\/test\/two.jpg\",\"\/home\/data\/test\/one.jpeg\"], \"\/home\/data\/test\/doc.pdf\"));\n\/\/ (string) \"\/home\/data\/test\/doc.pdf\""
+                }
+            ],
+            "file": "bbn\\file\\image",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($jpg, $pdf)\n  {\n      if ( \\is_array($jpg) ){\n        $img = new \\Imagick();\n        $img->setResolution(200, 200);\n        if ( \\count($jpg) === 1 ){\n          $img->readImage($jpg[0]);\n        }\n        else {\n          $img->readImages($jpg);\n        }\n        $img->setImageFormat('pdf');\n        if ( \\count($jpg) === 1 ){\n          $img->writeImage($pdf);\n        }\n        else {\n          $img->writeImages($pdf, 1);\n        }\n        return $pdf;\n      }\n    }\n    return false;\n  }",
+            "startLine": 84,
+            "doc": {
+                "description": "Converts one or more jpg image(s) to a pdf file. If the pdf file doesn't exist will be created.\n\n```php\nbbn\\x::dump(bbn\\file\\image::jpg2pdf([\"\/home\/data\/test\/two.jpg\",\"\/home\/data\/test\/one.jpeg\"], \"\/home\/data\/test\/doc.pdf\"));\n\/\/ (string) \"\/home\/data\/test\/doc.pdf\"\n```",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$jpg",
+                        "description": "The path of jpg file(s) to convert"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$pdf",
+                        "description": "The path of the pdf file"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "jpg",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The path of jpg file(s) to convert"
+                },
+                {
+                    "name": "pdf",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The path of the pdf file"
+                }
+            ]
+        },
+        "pdf2jpg": {
+            "name": "pdf2jpg",
+            "summary": "Converts pdf file to jpg image(s).",
+            "description": "```php\nbbn\\x::dump(bbn\\file\\image::pdf2jpg(\"\/home\/data\/test\/doc.pdf\"));\n\/\/ (string) \"\/home\/data\/test\/doc.jpg\"\nbbn\\x::dump(bbn\\file\\image::pdf2jpg(\"\/home\/data\/test\/doc.pdf\",'', all));\n\/\/ (array) [\"\/home\/data\/test\/doc-0.jpg\",\"\/home\/data\/test\/doc-1.jpg\"]\nbbn\\x::dump(bbn\\file\\image::pdf2jpg(\"\/home\/data\/test\/doc.pdf\",'\/home\/data\/test\/Folder\/image.jpg', all));\n\/\/ (array) [\"\/home\/data\/test\/Folder\/image-0.jpg\", \"\/home\/data\/test\/Folder\/image-1.jpg\"],\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "bbn\\x::dump(bbn\\file\\image::pdf2jpg(\"\/home\/data\/test\/doc.pdf\"));\n\/\/ (string) \"\/home\/data\/test\/doc.jpg\"\nbbn\\x::dump(bbn\\file\\image::pdf2jpg(\"\/home\/data\/test\/doc.pdf\",'', all));\n\/\/ (array) [\"\/home\/data\/test\/doc-0.jpg\",\"\/home\/data\/test\/doc-1.jpg\"]\nbbn\\x::dump(bbn\\file\\image::pdf2jpg(\"\/home\/data\/test\/doc.pdf\",'\/home\/data\/test\/Folder\/image.jpg', all));\n\/\/ (array) [\"\/home\/data\/test\/Folder\/image-0.jpg\", \"\/home\/data\/test\/Folder\/image-1.jpg\"],"
+                }
+            ],
+            "file": "bbn\\file\\image",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($pdf, $jpg = '', $num = 0)\n  {\n      $img = new \\Imagick();\n      $img->setResolution(200, 200);\n      $img->readImage($pdf);\n      $img->setFormat('jpg');\n      if ( empty($jpg) ){\n        $dir = dirname($pdf);\n        if ( !empty($dir) ){\n          $dir .= '\/';\n        }\n        $f = bbn\\str::file_ext($pdf, 1);\n        $jpg = $dir.$f[0].'.jpg';\n      }\n      if ( $num !== 'all' ){\n        $img->setIteratorIndex($num);\n        $img = self::remove_alpha_imagick($img);\n        if ( $img->writeImage($jpg) ){\n          return $jpg;\n        }\n      }\n      else {\n        $pages_number = $img->getNumberImages();\n        $f = bbn\\str::file_ext($jpg, 1);\n        $dir = dirname($jpg);\n        $r = [];\n        if ( !empty($dir) ){\n          $dir .= '\/';\n        }\n        for ( $i = 0; $i < $pages_number; $i++ ){\n          $img->setIteratorIndex($i);\n          $img = self::remove_alpha_imagick($img);\n          $filename = $dir.$f[0];\n          if ( $pages_number > 1 ){\n            $l = \\strlen((string)$i);\n            if ( $l < $pages_number ){\n              $filename .= '-'.str_repeat('0', \\strlen($pages_number) - $l).$i;\n            }\n          }\n          $filename .= '.'.$f[1];\n          if ( $img->writeImage($filename) ){\n            array_push($r, $filename);\n          }\n        }\n        if ( \\count($r) === $pages_number ){\n          return $r;\n        }\n      }\n    }\n    return false;\n  }",
+            "startLine": 125,
+            "doc": {
+                "description": "Converts pdf file to jpg image(s).\n\n```php\nbbn\\x::dump(bbn\\file\\image::pdf2jpg(\"\/home\/data\/test\/doc.pdf\"));\n\/\/ (string) \"\/home\/data\/test\/doc.jpg\"\nbbn\\x::dump(bbn\\file\\image::pdf2jpg(\"\/home\/data\/test\/doc.pdf\",'', all));\n\/\/ (array) [\"\/home\/data\/test\/doc-0.jpg\",\"\/home\/data\/test\/doc-1.jpg\"]\nbbn\\x::dump(bbn\\file\\image::pdf2jpg(\"\/home\/data\/test\/doc.pdf\",'\/home\/data\/test\/Folder\/image.jpg', all));\n\/\/ (array) [\"\/home\/data\/test\/Folder\/image-0.jpg\", \"\/home\/data\/test\/Folder\/image-1.jpg\"],\n```",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$pdf",
+                        "description": "The path of pdf file to convert"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$jpg",
+                        "description": "The destination filename. If empty is used the same path of pdf. Default: empty."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$num",
+                        "description": "The index page of pdf file to convert. If set 'all' all pages to convert. Default: 0(first page)."
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 175,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "pdf",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The path of pdf file to convert"
+                },
+                {
+                    "name": "jpg",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The destination filename. If empty is used the same path of pdf. Default: empty."
+                },
+                {
+                    "name": "num",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The index page of pdf file to convert. If set 'all' all pages to convert. Default: 0(first page)."
+                }
+            ]
+        },
+        "svg2png": {
+            "name": "svg2png",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\file\\image",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($svg, $filename)\n  {\n      $img = new \\Imagick();\n\t\t\tif (strpos($svg, '<svg') !== 0) {\n\t\t\t\t$svg = @file_get_contents($svg);\n\t\t\t}\n\t\t\t$img->setImageFormat(\"png24\");\n\t\t\t$res = $img->writeImage($filename);\n\t\t\t$img->clear();\n\t\t\t$img->destroy();\t\t\n\t\t\treturn $res;\n\t\t}\n\t\treturn false;\n\n  }",
+            "startLine": 177,
+            "doc": null,
+            "endLine": 191,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "svg",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "filename",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "__construct": {
+            "name": "__construct",
+            "summary": "Construct",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\file\\image",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file, bbn\\file\\system $fs = NULL)\n  {\n\t\tparent::__construct($file, $fs);\n\t\tif ( !\\in_array($this->get_extension(),bbn\\file\\image::$allowed_extensions) )\n\t\t{\n\t\t\t$this->name = false;\n\t\t\t$this->path = false;\n\t\t\t$this->file = false;\n\t\t\t$this->size = false;\n\t\t\t$this->title = false;\n\t\t}\n  }",
+            "startLine": 197,
+            "doc": {
+                "description": "Construct",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 208,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "__construct",
+                "summary": "Constructor.",
+                "description": "```php\n$file=new bbn\\file('\/home\/user\/Desktop\/test.txt');\n```",
+                "description_parts": [
+                    {
+                        "type": "code",
+                        "content": "$file=new bbn\\file('\/home\/user\/Desktop\/test.txt');"
+                    }
+                ],
+                "file": "bbn\\file",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($file, bbn\\file\\system $fs = NULL)\n  {\n    $this->fs = $fs ?: new file\\system();\n    if ( \\is_array($file) )\n    {\n      if ( isset($file['name'],$file['tmp_name']) )\n      {\n        $this->path = '';\n        $this->name = $file['name'];\n        $this->size = $file['size'];\n        $file = $file['tmp_name'];\n      }\n    }\n    else if ( \\is_string($file) )\n    {\n      $file = trim($file);\n      if ( strrpos($file,'\/') !== false )\n      {\n        \/* The -2 in strrpos means that if there is a final \/, it will be kept in the file name *\/\n        $this->name = substr($file,strrpos($file,'\/',-2)+1);\n        $this->path = substr($file,0,-\\strlen($this->name));\n        if ( substr($this->path,0,2) == '\/\/' ){\n          $this->path = 'http:\/\/'.substr($this->path,2);\n        }\n      }\n      else\n      {\n        $this->name = $file;\n        $this->path = '.\/';\n      }\n    }\n\n    $this->get_extension();\n    if ( \\is_string($file) && is_file($file) ){\n      $this->file = $file;\n    }\n    else{\n      $this->make();\n    }\n  }",
+                "startLine": 76,
+                "doc": {
+                    "description": "Constructor.\n\n```php\n$file=new bbn\\file('\/home\/user\/Desktop\/test.txt');\n```",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "mixed",
+                            "name": "$file"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 115,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "file",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "fs",
+                        "position": 1,
+                        "type": "bbn\\file\\system",
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "fs",
+                    "position": 1,
+                    "type": "bbn\\file\\system",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_extension": {
+            "name": "get_extension",
+            "summary": "Returns the extension of the image. If the file has jpg extension will return 'jpeg'.",
+            "description": "```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\nbbn\\x::dump($img->get_extension());\n\/\/ (string) \"jpeg\"\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\nbbn\\x::dump($img->get_extension());\n\/\/ (string) \"jpeg\""
+                }
+            ],
+            "file": "bbn\\file\\image",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\tif ( !$this->ext2 && $this->file ){\n\t\t\tif ( function_exists('exif_imagetype') ){\n\t\t\t\tif ( $r = exif_imagetype($this->file) ){\n          if ( !array_key_exists($r, bbn\\file\\image::$allowed_extensions) ){\n            $this->ext = false;\n          }\n\t\t\t\t}\n\t\t\t\telse{\n          $this->ext = false;\n        }\n\t\t\t}\n\t\t\tif ( $this->ext ){\n\t\t\t\t$this->ext2 = $this->ext;\n\t\t\t\tif ( $this->ext2 === 'jpg' ){\n          $this->ext2 = 'jpeg';\n        }\n\t\t\t}\n\t\t}\n\t\treturn $this->ext;\n  }",
+            "startLine": 221,
+            "doc": {
+                "description": "Returns the extension of the image. If the file has jpg extension will return 'jpeg'.\n\n```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\nbbn\\x::dump($img->get_extension());\n\/\/ (string) \"jpeg\"\n```",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 242,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_extension",
+                "summary": "Return the extension of the file.",
+                "description": "```php\n$file = new file('C:\/Test\/file.txt');\nbbn\\x::dump($file->get_extension());\n\/\/(string) 'txt'\n```",
+                "description_parts": [
+                    {
+                        "type": "code",
+                        "content": "$file = new file('C:\/Test\/file.txt');\nbbn\\x::dump($file->get_extension());\n\/\/(string) 'txt'"
+                    }
+                ],
+                "file": "bbn\\file",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n    if ( $this->name ){\n      if ( !isset($this->ext) ){\n        if ( strpos($this->name, '.') !== false ){\n          $p = str::file_ext($this->name, 1);\n          $this->ext = $p[1];\n          $this->title = $p[0];\n        }\n        else{\n          $this->ext = '';\n          $this->title = substr($this->name,-1) === '\/' ? substr($this->name,0,-1) : $this->name;\n        }\n      }\n      return $this->ext;\n    }\n    return false;\n  }",
+                "startLine": 165,
+                "doc": {
+                    "description": "Return the extension of the file.\n\n```php\n$file = new file('C:\/Test\/file.txt');\nbbn\\x::dump($file->get_extension());\n\/\/(string) 'txt'\n```",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 182,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "test": {
+            "name": "test",
+            "summary": "Tests if the object is a image.",
+            "description": "```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\nbbn\\x::dump($img->test());\n\/\/ (bool) true\n$img = new bbn\\file\\image(\"\/home\/data\/test\/file.doc\");\nbbn\\x::dump($img->test());\n\/\/ (bool) false\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\nbbn\\x::dump($img->test());\n\/\/ (bool) true\n$img = new bbn\\file\\image(\"\/home\/data\/test\/file.doc\");\nbbn\\x::dump($img->test());\n\/\/ (bool) false"
+                }
+            ],
+            "file": "bbn\\file\\image",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\tif ( $this->make() )\n\t\t{\n\t\t\tif ( $this->error ){\n\t\t\t\treturn false;\n\t\t\t}\n\t\t\treturn true;\n\t\t}\n\t\treturn false;\n  }",
+            "startLine": 258,
+            "doc": {
+                "description": "Tests if the object is a image.\n\n```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\nbbn\\x::dump($img->test());\n\/\/ (bool) true\n$img = new bbn\\file\\image(\"\/home\/data\/test\/file.doc\");\nbbn\\x::dump($img->test());\n\/\/ (bool) false\n```",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 268,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "test",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+                "startLine": 45,
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 50,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "display": {
+            "name": "display",
+            "summary": "Sends the image with Content-Type.",
+            "description": "```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->display();\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->display();"
+                }
+            ],
+            "file": "bbn\\file\\image",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\tif ( $this->test() ){\n\t\t\tif ( !headers_sent() ){\n\t\t\t\theader('Content-Type: image\/'.$this->ext2);\n\t\t\t}\n\t\t\tif ( class_exists('\\\\Imagick') ){\n\t\t\t\techo $this->img;\n\t\t\t\t$this->img->clear();\n\t\t\t\t$this->img->destroy();\n\t\t\t}\n\t\t\telse{\n\t\t\t\t\\call_user_func('image'.$this->ext2, $this->img);\n\t\t\t\timagedestroy($this->img);\n\t\t\t}\n\t\t}\n\t\treturn $this;\n  }",
+            "startLine": 355,
+            "doc": {
+                "description": "Sends the image with Content-Type.\n\n```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->display();\n```",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 372,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "save": {
+            "name": "save",
+            "summary": "Save the image in a new destination if given or overwrite the file (default).",
+            "description": "```php\n$new_file=\"\/home\/data\/test\/Folder_test\/image_test.jpeg\";\n$img2=new bbn\\file\\image($new_file);\nbbn\\x::dump($img2->test());\n\/\/ (bool) false\nbbn\\x::dump($img->save($new_file));\nbbn\\x::dump($img2->test());\n\/\/ (bool) true\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$new_file=\"\/home\/data\/test\/Folder_test\/image_test.jpeg\";\n$img2=new bbn\\file\\image($new_file);\nbbn\\x::dump($img2->test());\n\/\/ (bool) false\nbbn\\x::dump($img->save($new_file));\nbbn\\x::dump($img2->test());\n\/\/ (bool) true"
+                }
+            ],
+            "file": "bbn\\file\\image",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($dest = false)\n  {\n\t\tif ( $this->test() ){\n\t\t\tif ( !$dest ){\n\t\t\t\t$dest = $this->file;\n\t\t\t}\n\t\t\tif ( class_exists('\\\\Imagick') ){\n        try{\n\t\t\t\t\t$this->img->writeImage($dest);\n\t\t\t\t}\n\t\t\t\tcatch ( \\Exception $e ){\n\t\t\t\t\tdie(var_dump($dest, $this->file));\n          $this->error = \\defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?\n            BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';\n        }\n      }\n\t\t\telse if ( function_exists('image'.$this->ext2) ){\n        if ( !\\call_user_func('image'.$this->ext2, $this->img, $dest) ){\n          $this->error = \\defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?\n            BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';\n        }\n\t\t\t}\n\t\t}\n\t\treturn $this;\n  }",
+            "startLine": 390,
+            "doc": {
+                "description": "Save the image in a new destination if given or overwrite the file (default).\n\n```php\n$new_file=\"\/home\/data\/test\/Folder_test\/image_test.jpeg\";\n$img2=new bbn\\file\\image($new_file);\nbbn\\x::dump($img2->test());\n\/\/ (bool) false\nbbn\\x::dump($img->save($new_file));\nbbn\\x::dump($img2->test());\n\/\/ (bool) true\n```",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dest",
+                        "description": "The destination of the file to save. Default = false, the file will overwrited."
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 414,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "save",
+                "summary": "That feature saves the file as a parameter, and accepts a string that contains the path where to save.",
+                "description": "```php\n $file->save('\/home\/user\/desktop\/');\n```",
+                "description_parts": [
+                    {
+                        "type": "code",
+                        "content": "$file->save('\/home\/user\/desktop\/');"
+                    }
+                ],
+                "file": "bbn\\file",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($dest = '.\/')\n  {\n    $new_name = false;\n    if ( substr($dest,-1) === '\/' ){\n      if ( is_dir($dest) ){\n        $new_name = 0;\n      }\n    }\n    else if ( is_dir($dest) ){\n      $dest .= '\/';\n      $new_name = 0;\n    }\n    else if ( is_dir(substr($dest,0,strrpos($dest,'\/'))) ){\n      $new_name = 1;\n    }\n    if ( $new_name !== false ){\n      if ( $new_name === 0 ){\n        $dest .= $this->name;\n      }\n      if ( null !== $_FILES ){\n        move_uploaded_file($this->file,$dest);\n        $this->file = $dest;\n        $this->uploaded = 1;\n      }\n      else{\n        copy($this->file, $dest);\n      }\n    }\n    return $this;\n  }",
+                "startLine": 302,
+                "doc": {
+                    "description": "That feature saves the file as a parameter, and accepts a string that contains the path where to save.\n\n```php\n $file->save('\/home\/user\/desktop\/');\n```",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string",
+                            "name": "$dest"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 331,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "dest",
+                        "position": 0,
+                        "type": "",
+                        "required": false,
+                        "has_default": true,
+                        "default": ".\/",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "dest",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "The destination of the file to save. Default = false, the file will overwrited."
+                }
+            ]
+        },
+        "get_width": {
+            "name": "get_width",
+            "summary": "If the file is an image will return its width in pixel.",
+            "description": "```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\nbbn\\x::dump($img->get_width());\n\/\/ (int) 265\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\nbbn\\x::dump($img->get_width());\n\/\/ (int) 265"
+                }
+            ],
+            "file": "bbn\\file\\image",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\tif ( $this->test() ){\n\t\t\tif ( isset($this->w) ){\n\t\t\t\treturn $this->w;\n\t\t\t}\n\t\t}\n\t\treturn 0;\n  }",
+            "startLine": 427,
+            "doc": {
+                "description": "If the file is an image will return its width in pixel.\n\n```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\nbbn\\x::dump($img->get_width());\n\/\/ (int) 265\n```",
+                "params": [],
+                "return": "| false"
+            },
+            "endLine": 435,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_height": {
+            "name": "get_height",
+            "summary": "If the file is an image will return its height in pixel.",
+            "description": "```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\nbbn\\x::dump($img->get_height());\n\/\/ (int) 190\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\nbbn\\x::dump($img->get_height());\n\/\/ (int) 190"
+                }
+            ],
+            "file": "bbn\\file\\image",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\tif ( $this->test() ){\n\t\t\tif ( isset($this->h) ){\n\t\t\t\treturn $this->h;\n\t\t\t}\n\t\t}\n\t\treturn 0;\n  }",
+            "startLine": 448,
+            "doc": {
+                "description": "If the file is an image will return its height in pixel.\n\n```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\nbbn\\x::dump($img->get_height());\n\/\/ (int) 190\n```",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 456,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "resize": {
+            "name": "resize",
+            "summary": "Resize the width and the height of the image. If is given only width or height the other dimension will be set on auto.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\file\\image",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($w = false, $h = false, $crop = false, $max_w = false, $max_h = false)\n  {\n\t\t$max_w = false;\n\t\t$max_h = false;\n\t\tif ( \\is_array($w) ){\n\t\t\t$max_w = isset($w['max_w']) ? $w['max_w'] : false;\n\t\t\t$max_h = isset($w['max_h']) ? $w['max_h'] : false;\n\t\t\t$crop = isset($w['crop']) ? $w['crop'] : false;\n\t\t\t$h = isset($w['h']) ? $w['h'] : false;\n\t\t\t$w = isset($w['w']) ? $w['w'] : false;\n\t\t}\n\t\tif ( ( $w || $h ) && $this->test() ){\n\t\t\tif ( $w && $h ){\n\t\t\t\tif ( $crop && ( ( $this->w \/ $this->h ) != ( $w \/ $h ) ) ){\n\t\t\t\t\tif ( ( $this->w \/ $this->h ) < ( $w \/ $h ) ){\n\t\t\t\t\t\t$w2 = $w;\n\t\t\t\t\t\t$h2 = floor(($w2*$this->h)\/$this->w);\n\t\t\t\t\t\t$x = 0;\n\t\t\t\t\t\t$y = floor(($h2-$h)\/2);\n\t\t\t\t\t}\n\t\t\t\t\telse if ( ( $this->w \/ $this->h ) > ( $w \/ $h ) ){\n\t\t\t\t\t\t$h2 = $h;\n\t\t\t\t\t\t$w2 = floor(($h2*$this->w)\/$this->h);\n\t\t\t\t\t\t$y = 0;\n\t\t\t\t\t\t$x = floor(($w2-$w)\/2);\n\t\t\t\t\t}\n\t\t\t\t\tif ( class_exists('\\\\Imagick') ){\n\t\t\t\t\t\t$res = $this->img->resizeImage($w2,$h2,\\Imagick::FILTER_LANCZOS,1);\n\t\t\t\t\t}\n\t\t\t\t\telse{\n\t\t\t\t\t\t$image = imagecreatetruecolor($w2,$h2);\n            if ( $this->ext == 'png' || $this->ext == 'gif' || $this->ext == 'svg' ){\n              imageColorAllocateAlpha($image, 0, 0, 0, 127);\n              imagealphablending($image, false);\n              imagesavealpha($image, true);\n            }\n            $res = imagecopyresampled($image,$this->img,0,0,0,0,$w2,$h2,$this->w,$this->h);\n\t\t\t\t\t\t$this->img = $image;\n\t\t\t\t\t}\n\t\t\t\t\tif ( $res === true ){\n\t\t\t\t\t\t$this->w = $w2;\n\t\t\t\t\t\t$this->h = $h2;\n\t\t\t\t\t\tif ( $this->crop($w,$h,$x,$y) ){\n\t\t\t\t\t\t\t$this->w = $w;\n\t\t\t\t\t\t\t$this->h = $h;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\telse{\n\t\t\t\t\t$w2 = $w;\n\t\t\t\t\t$h2 = $h;\n\t\t\t\t\tif ( class_exists('\\\\Imagick') ){\n\t\t\t\t\t\t$res = $this->img->resizeImage($w2,$h2,\\Imagick::FILTER_LANCZOS,1);\n\t\t\t\t\t}\n\t\t\t\t\telse{\n\t\t\t\t\t\t$image = imagecreatetruecolor($w2,$h2);\n            if ( $this->ext == 'png' || $this->ext == 'gif' || $this->ext == 'svg' ){\n              imageColorAllocateAlpha($image, 0, 0, 0, 127);\n              imagealphablending($image, false);\n              imagesavealpha($image, true);\n            }\n\t\t\t\t\t\t$res = imagecopyresampled($image,$this->img,0,0,0,0,$w2,$h2,$this->w,$this->h);\n\t\t\t\t\t\t$this->img = $image;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\telse{\n\t\t\t\tif ( $w > 0 ){\n\t\t\t\t\t$w2 = $w;\n\t\t\t\t\t$h2 = floor(($w2*$this->h)\/$this->w);\n\t\t\t\t}\n\t\t\t\tif ( $h > 0 ){\n\t\t\t\t\tif ( isset($h2) ){\n\t\t\t\t\t\tif ( $h2 > $h ){\n\t\t\t\t\t\t\t$h2 = $h;\n\t\t\t\t\t\t\t$w2 = floor(($h2*$this->w)\/$this->h);\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\telse{\n\t\t\t\t\t\t$h2 = $h;\n\t\t\t\t\t\t$w2 = floor(($h2*$this->w)\/$this->h);\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tif ( isset($w2,$h2) ){\n\t\t\t\t\tif ( class_exists('\\\\Imagick') ){\n\t\t\t\t\t\t$res = $this->img->resizeImage($w2,$h2,\\Imagick::FILTER_LANCZOS,1);\n\t\t\t\t\t}\n\t\t\t\t\telse{\n\t\t\t\t\t\t$image = imagecreatetruecolor($w2,$h2);\n            if ( $this->ext == 'png' || $this->ext == 'gif' || $this->ext == 'svg' ){\n              imageColorAllocateAlpha($image, 0, 0, 0, 127);\n              imagealphablending($image, false);\n              imagesavealpha($image, true);\n            }\n\t\t\t\t\t\t$res = imagecopyresampled($image,$this->img,0,0,0,0,$w2,$h2,$this->w,$this->h);\n\t\t\t\t\t\t$this->img = $image;\n\t\t\t\t\t}\n\t\t\t\t\tif ( $res === true ){\n\t\t\t\t\t\t$this->w = $w2;\n\t\t\t\t\t\t$this->h = $h2;\n\t\t\t\t\t}\n\t\t\t\t\telse{\n\t\t\t\t\t\t$this->error = \\defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?\n\t\t\t\t\t\t\tBBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\telse{\n\t\t\t\t\t$this->error = \\defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?\n\t\t\t\t\t\tBBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn $this;\n  }",
+            "startLine": 484,
+            "doc": {
+                "description": "Resize the width and the height of the image. If is given only width or height the other dimension will be set on auto.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int|bool",
+                        "name": "$w",
+                        "description": "The new width."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int|bool",
+                        "name": "$h",
+                        "description": "The new height."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$crop",
+                        "description": "If cropping the image. Default = false."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int|bool",
+                        "name": "$max",
+                        "description": "w The maximum value for new width."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int|bool",
+                        "name": "$max",
+                        "description": "h The maximum valure for new height."
+                    }
+                ],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "$max_h and $max_w doesn't work.\n\n```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\nbbn\\x::hdump($img->get_width(),$img->get_height());\n\/\/ (int) 345 146\nbbn\\x::hdump($img->resize(200,\"\" ));\nbbn\\x::hdump($img->get_width(),$img->get_height());\n\/\/ (int) 200 84\nbbn\\x::hdump($img->get_width(),$img->get_height());\n\/\/ (int) 345 146\nbbn\\x::dump($img->resize(205, 100, 1));\nbbn\\x::dump($img->get_width(),$img->get_height());\n\/\/ (int) 205 100\n```"
+                }
+            },
+            "endLine": 597,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "w",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "The new width."
+                },
+                {
+                    "name": "h",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "The new height."
+                },
+                {
+                    "name": "crop",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If cropping the image. Default = false."
+                },
+                {
+                    "name": "max_w",
+                    "position": 3,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "w The maximum value for new width."
+                },
+                {
+                    "name": "max_h",
+                    "position": 4,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "h The maximum valure for new height."
+                }
+            ]
+        },
+        "autoresize": {
+            "name": "autoresize",
+            "summary": "Resize the image with constant values, if the width is not given it will be set to auto.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\file\\image",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($w = 'BBN_MAX_WIDTH', $h = 'BBN_MAX_HEIGHT')\n  {\n\t\tif ( !$w ){\n\t\t\t$w = \\defined('BBN_MAX_WIDTH') ? BBN_MAX_WIDTH : self::$max_width;\n\t\t}\n\t\tif ( $this->test() && is_numeric($w) && is_numeric($h) )\n\t\t{\n\t\t\tif ( $this->w > $w ){\n\t\t\t\t$this->resize($w);\n\t\t\t}\n\t\t\tif ( $this->h > $h ){\n\t\t\t\t$this->resize(false,$h);\n\t\t\t}\n\t\t}\n\t\telse{\n\t\t\t$this->error = \\defined('BBN_ARGUMENTS_MUST_BE_NUMERIC') ?\n\t\t\t\tBBN_ARGUMENTS_MUST_BE_NUMERIC : 'Arguments must be numeric';\n\t\t}\n\t\treturn $this;\n  }",
+            "startLine": 616,
+            "doc": {
+                "description": "Resize the image with constant values, if the width is not given it will be set to auto.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$w",
+                        "description": "default BBN_MAX_WIDTH"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$h",
+                        "description": "default BBN_MAX_HEIGHT"
+                    }
+                ],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "BBN_MAX_WIDTH and BBN_MAX_HEIGHT ?\n\n```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\nbbn\\x::dump($img->get_width(),$img->get_height());\n\/\/ (int) 345 146\n$img->autoresize(\"\", 100);\nbbn\\x::dump($img->get_width(),$img->get_height());\n\/\/ (int) 236 100\n```"
+                }
+            },
+            "endLine": 635,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "w",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "BBN_MAX_WIDTH",
+                    "default_name": "bbn\\file\\BBN_MAX_WIDTH",
+                    "description": "default BBN_MAX_WIDTH"
+                },
+                {
+                    "name": "h",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "BBN_MAX_HEIGHT",
+                    "default_name": "bbn\\file\\BBN_MAX_HEIGHT",
+                    "description": "default BBN_MAX_HEIGHT"
+                }
+            ]
+        },
+        "crop": {
+            "name": "crop",
+            "summary": "Returns a crop of the image.",
+            "description": "```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\nbbn\\x::dump($img->get_width(),$img->get_height());\n\/\/ (int) 345 146\n$img->crop(10, 10, 30, 30)->save(\"\/home\/data\/test\/img2.jpeg\");\n$img2 = new \\bbn\\file\\image(\"\/home\/data\/test\/img2.jpeg\");\nbbn\\x::hdump($img2->get_width(),$img2->get_height());\n\/\/ (int) 10 10\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\nbbn\\x::dump($img->get_width(),$img->get_height());\n\/\/ (int) 345 146\n$img->crop(10, 10, 30, 30)->save(\"\/home\/data\/test\/img2.jpeg\");\n$img2 = new \\bbn\\file\\image(\"\/home\/data\/test\/img2.jpeg\");\nbbn\\x::hdump($img2->get_width(),$img2->get_height());\n\/\/ (int) 10 10"
+                }
+            ],
+            "file": "bbn\\file\\image",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($w, $h, $x, $y)\n  {\n\t\tif ( $this->test() ){\n\t\t\t$args = \\func_get_args();\n\t\t\tforeach ( $args as $arg ){\n\t\t\t\tif ( !is_numeric($arg) ){\n\t\t\t\t\t$this->error = \\defined('BBN_ARGUMENTS_MUST_BE_NUMERIC') ?\n\t\t\t\t\t\tBBN_ARGUMENTS_MUST_BE_NUMERIC : 'Arguments must be numeric';\n\t\t\t\t}\n\t\t\t}\n\t\t\tif ( $w + $x > $this->w ){\n\t\t\t\treturn false;\n\t\t\t}\n\t\t\tif ( $h + $y > $this->h ){\n\t\t\t\treturn false;\n\t\t\t}\n\t\t\tif ( class_exists('\\\\Imagick') ){\n\t\t\t\tif ( !$this->img->cropImage($w,$h,$x,$y) ){\n\t\t\t\t\t$this->error = \\defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?\n\t\t\t\t\t\tBBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';\n\t\t\t\t}\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\t$img = imagecreatetruecolor($w,$h);\n        if ( $this->ext == 'png' || $this->ext == 'gif' || $this->ext == 'svg' ){\n          imageColorAllocateAlpha($img, 0, 0, 0, 127);\n          imagealphablending($img, false);\n          imagesavealpha($img, true);\n        }\n\t\t\t\tif ( imagecopyresampled($img,$this->img,0,0,$x,$y,$w,$h,$w,$h) ){\n\t\t\t\t\t$this->img = $img;\n\t\t\t\t}\n\t\t\t\telse{\n\t\t\t\t\t$this->error = \\defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?\n\t\t\t\t\t\tBBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn $this;\n  }",
+            "startLine": 656,
+            "doc": {
+                "description": "Returns a crop of the image.\n\n```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\nbbn\\x::dump($img->get_width(),$img->get_height());\n\/\/ (int) 345 146\n$img->crop(10, 10, 30, 30)->save(\"\/home\/data\/test\/img2.jpeg\");\n$img2 = new \\bbn\\file\\image(\"\/home\/data\/test\/img2.jpeg\");\nbbn\\x::hdump($img2->get_width(),$img2->get_height());\n\/\/ (int) 10 10\n```",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$w",
+                        "description": "the new width"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$h",
+                        "description": "the new height"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$x",
+                        "description": "X coordinate"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$y",
+                        "description": "Y coordinate"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 696,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 4,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "w",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "the new width"
+                },
+                {
+                    "name": "h",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "the new height"
+                },
+                {
+                    "name": "x",
+                    "position": 2,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "X coordinate"
+                },
+                {
+                    "name": "y",
+                    "position": 3,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Y coordinate"
+                }
+            ]
+        },
+        "rotate": {
+            "name": "rotate",
+            "summary": "Rotates the image.",
+            "description": "_\n```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->rotate( 90 )->save();\n```",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "_"
+                },
+                {
+                    "type": "code",
+                    "content": "$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->rotate( 90 )->save();"
+                }
+            ],
+            "file": "bbn\\file\\image",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($angle)\n  {\n\t\t$ok = false;\n\t\tif ( $this->test() ){\n\t\t\tif ( class_exists('\\\\Imagick') ){\n\t\t\t\tif ( $this->img->rotateImage(new \\ImagickPixel(),$angle) ){\n\t\t\t\t\t$ok = 1;\n        }\n\t\t\t}\n\t\t\telse if ( function_exists('imagerotate') ){\n\t\t\t\tif ( $this->img = imagerotate($this->img, $angle, 0) ){\n          if ( $this->ext == 'png' || $this->ext == 'gif' || $this->ext == 'svg' ){\n            imageColorAllocateAlpha($this->img, 0, 0, 0, 127);\n            imagealphablending($this->img, false);\n            imagesavealpha($this->img, true);\n          }\n\t\t\t\t\t$ok = 1;\n\t\t\t\t}\n\t\t\t}\n\t\t\tif ( $ok ){\n\t\t\t\tif ( $angle == 90 || $angle == 270 ){\n\t\t\t\t\t$h = $this->h;\n\t\t\t\t\t$this->h = $this->w;\n\t\t\t\t\t$this->w = $h;\n\t\t\t\t}\n\t\t\t}\n\t\t\telse{\n\t\t\t\t$this->error = \\defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?\n\t\t\t\t\tBBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';\n\t\t\t}\n\t\t}\n\t\treturn $this;\n  }",
+            "startLine": 709,
+            "doc": {
+                "description": "Rotates the image.\n_\n```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->rotate( 90 )->save();\n```",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$angle",
+                        "description": "The angle of rotation."
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 741,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "angle",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The angle of rotation."
+                }
+            ]
+        },
+        "flip": {
+            "name": "flip",
+            "summary": "Flips the image.",
+            "description": "```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->flip()->save();\n$img->flip(\"h\")->save();\n$img->flip()->save();\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->flip()->save();\n$img->flip(\"h\")->save();\n$img->flip()->save();"
+                }
+            ],
+            "file": "bbn\\file\\image",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($mode = 'v')\n  {\n\t\t{\n\t\t\tif ( class_exists('\\\\Imagick') )\n\t\t\t{\n\t\t\t\tif ( $mode == 'v' )\n\t\t\t\t{\n\t\t\t\t\tif ( !$this->img->flipImage() ){\n\t\t\t\t\t\t$this->error = \\defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?\n\t\t\t\t\t\t\tBBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\telse if ( !$this->img->flopImage() ){\n\t\t\t\t\t$this->error = \\defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?\n\t\t\t\t\t\tBBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';\n\t\t\t\t}\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\t$w = imagesx($this->img);\n\t\t\t\t$h = imagesy($this->img);\n\t\t\t\tif ( $mode == 'v' ){\n\t\t\t\t\timageflip($this->img, IMG_FLIP_VERTICAL);\n\t\t\t\t}\n\t\t\t\telse{\n\t\t\t\t\timageflip($this->img, IMG_FLIP_HORIZONTAL);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn $this;\n  }",
+            "startLine": 756,
+            "doc": {
+                "description": "Flips the image.\n\n```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->flip()->save();\n$img->flip(\"h\")->save();\n$img->flip()->save();\n```",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode",
+                        "description": "Vertical (\"v\") or Horizontal (\"h\") flip, default: \"v\"."
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 786,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "mode",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "v",
+                    "default_name": "",
+                    "description": "Vertical (\"v\") or Horizontal (\"h\") flip, default: \"v\"."
+                }
+            ]
+        },
+        "quality": {
+            "name": "quality",
+            "summary": "Compresses and sets the image's quality (JPEG image only).",
+            "description": "```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->quality(60, 6)->save();\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->quality(60, 6)->save();"
+                }
+            ],
+            "file": "bbn\\file\\image",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($q = 80, $comp = 8)\n  {\n      ((strtolower($this->get_extension()) === 'jpg') ||\n        (strtolower($this->get_extension()) === 'jpeg'))\n    ){\n      if ( class_exists('\\\\Imagick') ){\n        $this->img->setImageCompression($comp);\n        $this->img->setImageCompressionQuality($q);\n        $this->img->stripImage();\n      }\n    }\n    return $this;\n  }",
+            "startLine": 800,
+            "doc": {
+                "description": "Compresses and sets the image's quality (JPEG image only).\n\n```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->quality(60, 6)->save();\n```",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$q",
+                        "description": "The quality level (0-100)"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$comp",
+                        "description": "The compression type"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 812,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "q",
+                    "position": 0,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 80,
+                    "default_name": "",
+                    "description": "The quality level (0-100)"
+                },
+                {
+                    "name": "comp",
+                    "position": 1,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 8,
+                    "default_name": "",
+                    "description": "The compression type"
+                }
+            ]
+        },
+        "brightness": {
+            "name": "brightness",
+            "summary": "Adjusts the image's brightness.",
+            "description": "```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->brightness();\n$img->brightness(\"-\");\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->brightness();\n$img->brightness(\"-\");"
+                }
+            ],
+            "file": "bbn\\file\\image",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($val = '+')\n  {\n\t\tif ( $this->test() )\n\t\t{\n\t\t\tif ( class_exists('\\\\Imagick') )\n\t\t\t{\n\t\t\t\t$p = ( $val == '-' ) ? 90 : 110;\n\t\t\t\tif ( !$this->img->modulateImage($p,100,100) ){\n\t\t\t\t\t$this->error = \\defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?\n\t\t\t\t\t\tBBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';\n\t\t\t\t}\n\t\t\t}\n\t\t\telse if ( function_exists('imagefilter') )\n\t\t\t{\n\t\t\t\t$p = ( $val == '-' ) ? -20 : 20;\n\t\t\t\tif ( !imagefilter($this->img,IMG_FILTER_BRIGHTNESS,-20) ){\n\t\t\t\t\t$this->error = \\defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?\n\t\t\t\t\t\tBBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn $this;\n  }",
+            "startLine": 826,
+            "doc": {
+                "description": "Adjusts the image's brightness.\n\n```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->brightness();\n$img->brightness(\"-\");\n```",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$val",
+                        "description": "The value \"+\" (default) increases the brightness, the value (\"-\") reduces it."
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 848,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "val",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "+",
+                    "default_name": "",
+                    "description": "The value \"+\" (default) increases the brightness, the value (\"-\") reduces it."
+                }
+            ]
+        },
+        "contrast": {
+            "name": "contrast",
+            "summary": "Adjusts the image contrast.",
+            "description": "```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->contrast(\"-\");\n$img->contrast();\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->contrast(\"-\");\n$img->contrast();"
+                }
+            ],
+            "file": "bbn\\file\\image",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($val = '+')\n  {\n\t\tif ( $this->test() )\n\t\t{\n\t\t\tif ( class_exists('\\\\Imagick') )\n\t\t\t{\n\t\t\t\t$p = ( $val == '-' ) ? 0 : 1;\n\t\t\t\tif ( !$this->img->contrastImage($p) ){\n\t\t\t\t\t$this->error = \\defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?\n\t\t\t\t\t\tBBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';\n\t\t\t\t}\n\t\t\t}\n\t\t\telse if ( function_exists('imagefilter') )\n\t\t\t{\n\t\t\t\t$p = ( $val == '-' ) ? -20 : 20;\n\t\t\t\tif ( !imagefilter($this->img,IMG_FILTER_CONTRAST,-20) ){\n\t\t\t\t\t$this->error = \\defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?\n\t\t\t\t\t\tBBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn $this;\n  }",
+            "startLine": 862,
+            "doc": {
+                "description": "Adjusts the image contrast.\n\n```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->contrast(\"-\");\n$img->contrast();\n```",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$val",
+                        "description": "The value \"+\" (default), increases the contrast, the value (\"-\") reduces it."
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 884,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "val",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "+",
+                    "default_name": "",
+                    "description": "The value \"+\" (default), increases the contrast, the value (\"-\") reduces it."
+                }
+            ]
+        },
+        "grayscale": {
+            "name": "grayscale",
+            "summary": "Converts the image's color to grayscale.",
+            "description": "```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->grayscale()->save();\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->grayscale()->save();"
+                }
+            ],
+            "file": "bbn\\file\\image",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\tif ( $this->test() )\n\t\t{\n\t\t\tif ( class_exists('\\\\Imagick') )\n\t\t\t{\n\t\t\t\tif ( !$this->img->modulateImage(100,0,100) ){\n\t\t\t\t\t$this->error = \\defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?\n\t\t\t\t\t\tBBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';\n\t\t\t\t}\n\t\t\t}\n\t\t\telse if ( function_exists('imagefilter') )\n\t\t\t{\n\t\t\t\tif ( !imagefilter($this->img,IMG_FILTER_GRAYSCALE) ){\n\t\t\t\t\t$this->error = \\defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?\n\t\t\t\t\t\tBBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn $this;\n  }",
+            "startLine": 896,
+            "doc": {
+                "description": "Converts the image's color to grayscale.\n\n```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->grayscale()->save();\n```",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 916,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "negate": {
+            "name": "negate",
+            "summary": "Converts the image's color to negative.",
+            "description": "```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->negate();\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->negate();"
+                }
+            ],
+            "file": "bbn\\file\\image",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\tif ( $this->test() )\n\t\t{\n\t\t\tif ( class_exists('\\\\Imagick') )\n\t\t\t{\n\t\t\t\tif ( !$this->img->negateImage(false) ){\n\t\t\t\t\t$this->error = \\defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?\n\t\t\t\t\t\tBBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';\n\t\t\t\t}\n\t\t\t}\n\t\t\telse if ( function_exists('imagefilter') )\n\t\t\t{\n\t\t\t\tif ( !imagefilter($this->img,IMG_FILTER_NEGATE) ){\n\t\t\t\t\t$this->error = \\defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?\n\t\t\t\t\t\tBBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn $this;\n  }",
+            "startLine": 928,
+            "doc": {
+                "description": "Converts the image's color to negative.\n\n```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->negate();\n```",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 948,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "polaroid": {
+            "name": "polaroid",
+            "summary": "Converts the image's color with polaroid filter.",
+            "description": "```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->polaroid()->save();\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->polaroid()->save();"
+                }
+            ],
+            "file": "bbn\\file\\image",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\tif ( $this->test() ){\n\t\t\tif ( class_exists('\\\\Imagick') ){\n\t\t\t\tif ( !$this->img->polaroidImage(new \\ImagickDraw(), 0) ){\n\t\t\t\t\t$this->error = \\defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ?\n\t\t\t\t\t\tBBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn $this;\n  }",
+            "startLine": 961,
+            "doc": {
+                "description": "Converts the image's color with polaroid filter.\n\n```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->polaroid()->save();\n```",
+                "params": [],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "Transparency of png files."
+                }
+            },
+            "endLine": 972,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "thumbs": {
+            "name": "thumbs",
+            "summary": "Creates miniature of the image",
+            "description": "```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->thumbs()->save(\/home\/data\/test\/image_test.jpg\");\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->thumbs()->save(\/home\/data\/test\/image_test.jpg\");"
+                }
+            ],
+            "file": "bbn\\file\\image",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($dest = '.', $sizes = array (\n  0 => \n  array (\n    0 => false,\n    1 => 960,\n  ),\n  1 => \n  array (\n    0 => false,\n    1 => 480,\n  ),\n  2 => \n  array (\n    0 => false,\n    1 => 192,\n  ),\n  3 => \n  array (\n    0 => false,\n    1 => 96,\n  ),\n  4 => \n  array (\n    0 => false,\n    1 => 48,\n  ),\n), $mask = '_%s', $crop = false, $bigger = false)\n  {\n      $this->get_extension();\n\t\t\t$w = $this->get_width();\n\t\t\t$h = $this->get_height();\n\t\t\t$d = $w >= $h ? 'w' : 'h';\n      $res = [];\n      if ( bbn\\str::is_integer($sizes) ){\n        $sizes = [[$sizes, false]];\n      }\n\t\t\tif ( $$d \/ ($d === 'w' ? $h : $w) < 5 ){\n\t\t\t\t$mask = ($dest === '.' ? '' : $dest.'\/').$this->title.$mask.'.'.$this->ext;\n        \/\/die(var_dump($mask));\n\t\t\t\tforeach ( $sizes as $s ){\n          if ( bbn\\str::is_integer($s) ){\n            $s = [$s, false];\n          }\n          if (\n            (!empty($s[0]) && ($w > $s[0])) ||\n            (!empty($s[1]) && ($h > $s[1])) ||\n            $bigger\n          ){\n            $smask = (empty($s[0]) ? '' : 'w'.$s[0]).(empty($s[1]) ? '' : 'h'.$s[1]);\n            $fn = sprintf($mask, $smask);\n            if ( $s[0] && $s[1] ){\n              if ( $crop ){\n                $this->resize($s[0], $s[1], true);\n              }\n              else{\n                $this->resize($d === 'w' ? $s[0] : false, $d === 'h' ? $s[1] : false, false, $s[0], $s[1]);\n              }\n            }\n            else{\n              $this->resize($s[0], $s[1], $crop);\n            }\n            $this->save($fn);\n            $res[$smask] = $fn;\n          }\n\t\t\t\t}\n\t\t\t\treturn $res;\n\t\t\t}\n\t\t}\n    return false;\n  }",
+            "startLine": 984,
+            "doc": {
+                "description": "Creates miniature of the image\n\n```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\n$img->thumbs()->save(\/home\/data\/test\/image_test.jpg\");\n```",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 1027,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "dest",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": ".",
+                    "default_name": ""
+                },
+                {
+                    "name": "sizes",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": [
+                        [
+                            false,
+                            960
+                        ],
+                        [
+                            false,
+                            480
+                        ],
+                        [
+                            false,
+                            192
+                        ],
+                        [
+                            false,
+                            96
+                        ],
+                        [
+                            false,
+                            48
+                        ]
+                    ],
+                    "default_name": ""
+                },
+                {
+                    "name": "mask",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "_%s",
+                    "default_name": ""
+                },
+                {
+                    "name": "crop",
+                    "position": 3,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                },
+                {
+                    "name": "bigger",
+                    "position": 4,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "toString": {
+            "name": "toString",
+            "summary": "Return the image as string.",
+            "description": "```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\nbbn\\x::hdump($img->toString());\n\/\/ (string)\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\nbbn\\x::hdump($img->toString());\n\/\/ (string)"
+                }
+            ],
+            "file": "bbn\\file\\image",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\tif ( $this->test() )\n\t\t{\n\t\t\tif ( class_exists('\\\\Imagick') )\n\t\t\t\t$m = $this->img;\n\t\t\telse\n\t\t\t{\n\t\t\t\tob_start();\n\t\t\t\t\\call_user_func('image'.$this->ext2,$this->img);\n\t\t\t\t$m = ob_get_contents();\n\t\t\t\tob_end_clean();\n\t\t\t}\n\t\t\treturn 'data:image\/'.$this->ext.';base64,'.base64_encode($m);\n\t\t}\n  }",
+            "startLine": 1040,
+            "doc": {
+                "description": "Return the image as string.\n\n```php\n$img = new bbn\\file\\image(\"\/home\/data\/test\/image.jpg\");\nbbn\\x::hdump($img->toString());\n\/\/ (string)\n```",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 1055,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_size": {
+            "name": "get_size",
+            "summary": "Return the filesize in byte.",
+            "description": "```php\n$file = new bbn\\file('C:\/Test\/file.txt');\nbbn\\x::dump($file->get_size());\n\/\/ (int) 314\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$file = new bbn\\file('C:\/Test\/file.txt');\nbbn\\x::dump($file->get_size());\n\/\/ (int) 314"
+                }
+            ],
+            "file": "bbn\\file",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( $this->file && $this->size === 0 ){\n      $this->size = filesize($this->file);\n    }\n    return $this->size;\n  }",
+            "startLine": 128,
+            "doc": {
+                "description": "Return the filesize in byte.\n\n```php\n$file = new bbn\\file('C:\/Test\/file.txt');\nbbn\\x::dump($file->get_size());\n\/\/ (int) 314\n```",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 134,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_size",
+                "summary": "Return the filesize in byte.",
+                "description": "```php\n$file = new bbn\\file('C:\/Test\/file.txt');\nbbn\\x::dump($file->get_size());\n\/\/ (int) 314\n```",
+                "description_parts": [
+                    {
+                        "type": "code",
+                        "content": "$file = new bbn\\file('C:\/Test\/file.txt');\nbbn\\x::dump($file->get_size());\n\/\/ (int) 314"
+                    }
+                ],
+                "file": "bbn\\file",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n    if ( $this->file && $this->size === 0 ){\n      $this->size = filesize($this->file);\n    }\n    return $this->size;\n  }",
+                "startLine": 128,
+                "doc": {
+                    "description": "Return the filesize in byte.\n\n```php\n$file = new bbn\\file('C:\/Test\/file.txt');\nbbn\\x::dump($file->get_size());\n\/\/ (int) 314\n```",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 134,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "iterate_lines": {
+            "name": "iterate_lines",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\file",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( $this->file ){\n      $f = fopen($this->file, 'r');\n      try {\n        while ($line = fgets($f)) {\n          yield $line;\n        }\n      }\n      finally {\n        fclose($f);\n      }\n    }\n  }",
+            "startLine": 139,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 152,
+            "isDeprecated": false,
+            "isGenerator": true,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "iterate_lines",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\file",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n    if ( $this->file ){\n      $f = fopen($this->file, 'r');\n      try {\n        while ($line = fgets($f)) {\n          yield $line;\n        }\n      }\n      finally {\n        fclose($f);\n      }\n    }\n  }",
+                "startLine": 139,
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 152,
+                "isDeprecated": false,
+                "isGenerator": true,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "download": {
+            "name": "download",
+            "summary": "Downloads the file. At the end of the script the user will be invited to choose the file's destination. If the file doesn't exist return an object with parameter file = null.",
+            "description": "```php\n$f = new \\bbn\\file('C:\/Test\/file.png');\n$f->download();\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$f = new \\bbn\\file('C:\/Test\/file.png');\n$f->download();"
+                }
+            ],
+            "file": "bbn\\file",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( $this->file ){\n      if ( !$this->size ){\n        $this->get_size();\n      }\n      \n      if ( $this->size && ($handle = fopen($this->file, 'r')) ){\n        header('Content-type: application\/octet-stream');\n        header('Content-Disposition: attachment; filename=\"'.$this->name.'\"');\n        while ( !feof($handle) ){\n          echo fread($handle, 65536);\n        }\n        fclose($handle);\n      }\n      else{\n        die('Impossible to read the file '.$this->name);\n      }\n    }\n    return $this;\n  }",
+            "startLine": 228,
+            "doc": {
+                "description": "Downloads the file. At the end of the script the user will be invited to choose the file's destination. If the file doesn't exist return an object with parameter file = null.\n\n```php\n$f = new \\bbn\\file('C:\/Test\/file.png');\n$f->download();\n```",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 248,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "download",
+                "summary": "Downloads the file. At the end of the script the user will be invited to choose the file's destination. If the file doesn't exist return an object with parameter file = null.",
+                "description": "```php\n$f = new \\bbn\\file('C:\/Test\/file.png');\n$f->download();\n```",
+                "description_parts": [
+                    {
+                        "type": "code",
+                        "content": "$f = new \\bbn\\file('C:\/Test\/file.png');\n$f->download();"
+                    }
+                ],
+                "file": "bbn\\file",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n    if ( $this->file ){\n      if ( !$this->size ){\n        $this->get_size();\n      }\n      \n      if ( $this->size && ($handle = fopen($this->file, 'r')) ){\n        header('Content-type: application\/octet-stream');\n        header('Content-Disposition: attachment; filename=\"'.$this->name.'\"');\n        while ( !feof($handle) ){\n          echo fread($handle, 65536);\n        }\n        fclose($handle);\n      }\n      else{\n        die('Impossible to read the file '.$this->name);\n      }\n    }\n    return $this;\n  }",
+                "startLine": 228,
+                "doc": {
+                    "description": "Downloads the file. At the end of the script the user will be invited to choose the file's destination. If the file doesn't exist return an object with parameter file = null.\n\n```php\n$f = new \\bbn\\file('C:\/Test\/file.png');\n$f->download();\n```",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 248,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "get_hash": {
+            "name": "get_hash",
+            "summary": "Return the hash of the file.",
+            "description": "```php\n$file = new file('C:\/Test\/file.txt');\nbbn\\x::dump($file->get_hash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "$file = new file('C:\/Test\/file.txt');\nbbn\\x::dump($file->get_hash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'"
+                }
+            ],
+            "file": "bbn\\file",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( $this->file ){\n      return md5_file($this->file);\n    }\n    return '';\n  }",
+            "startLine": 261,
+            "doc": {
+                "description": "Return the hash of the file.\n\n```php\n$file = new file('C:\/Test\/file.txt');\nbbn\\x::dump($file->get_hash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'\n```",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 267,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_hash",
+                "summary": "Return the hash of the file.",
+                "description": "```php\n$file = new file('C:\/Test\/file.txt');\nbbn\\x::dump($file->get_hash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'\n```",
+                "description_parts": [
+                    {
+                        "type": "code",
+                        "content": "$file = new file('C:\/Test\/file.txt');\nbbn\\x::dump($file->get_hash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'"
+                    }
+                ],
+                "file": "bbn\\file",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n    if ( $this->file ){\n      return md5_file($this->file);\n    }\n    return '';\n  }",
+                "startLine": 261,
+                "doc": {
+                    "description": "Return the hash of the file.\n\n```php\n$file = new file('C:\/Test\/file.txt');\nbbn\\x::dump($file->get_hash());\n\/\/ (string) '9a3182g36a83adtd9c9c2l59ap2a719c'\n```",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 267,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "delete": {
+            "name": "delete",
+            "summary": "Deletes the file.",
+            "description": "```php\nbbn\\x::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new file('C:\/Test\/file.txt');\n$file->delete();\nbbn\\x::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false\n```",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "bbn\\x::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new file('C:\/Test\/file.txt');\n$file->delete();\nbbn\\x::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false"
+                }
+            ],
+            "file": "bbn\\file",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( $this->file ){\n      unlink($this->file);\n    }\n    $this->file = false;\n    return $this;\n  }",
+            "startLine": 283,
+            "doc": {
+                "description": "Deletes the file.\n\n```php\nbbn\\x::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new file('C:\/Test\/file.txt');\n$file->delete();\nbbn\\x::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false\n```",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 290,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "delete",
+                "summary": "Deletes the file.",
+                "description": "```php\nbbn\\x::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new file('C:\/Test\/file.txt');\n$file->delete();\nbbn\\x::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false\n```",
+                "description_parts": [
+                    {
+                        "type": "code",
+                        "content": "bbn\\x::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new file('C:\/Test\/file.txt');\n$file->delete();\nbbn\\x::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false"
+                    }
+                ],
+                "file": "bbn\\file",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n    if ( $this->file ){\n      unlink($this->file);\n    }\n    $this->file = false;\n    return $this;\n  }",
+                "startLine": 283,
+                "doc": {
+                    "description": "Deletes the file.\n\n```php\nbbn\\x::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) true\n$file = new file('C:\/Test\/file.txt');\n$file->delete();\nbbn\\x::hdump( is_file('C:\/Test\/file.txt') );\n\/\/ (bool) false\n```",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 290,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "check": {
+            "name": "check",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+            "startLine": 56,
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 61,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "check",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
+                "startLine": 56,
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 61,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "get_error": {
+            "name": "get_error",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 72,
+            "doc": null,
+            "endLine": 74,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_error",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 72,
+                "doc": null,
+                "endLine": 74,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "get_errors": {
+            "name": "get_errors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 76,
+            "doc": null,
+            "endLine": 78,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "get_errors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 76,
+                "doc": null,
+                "endLine": 78,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+            "startLine": 80,
+            "doc": null,
+            "endLine": 88,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
+                "startLine": 80,
+                "doc": null,
+                "endLine": 88,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "__call": {
+            "name": "__call",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
+            "startLine": 95,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$arguments"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 99,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": {
+                "name": "__call",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
+                "startLine": 95,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "string",
+                            "name": "$name"
+                        },
+                        {
+                            "tag": "param",
+                            "type": "array",
+                            "name": "$arguments"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 99,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 2,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "name",
+                        "position": 0,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "arguments",
+                        "position": 1,
+                        "type": "",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "arguments",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_debug": {
+            "name": "is_debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 104,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": {
+                "name": "is_debug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function()\n  {\n  }",
+                "startLine": 104,
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "endLine": 106,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "returns": null,
+                "parent": false,
+                "arguments": []
+            },
+            "arguments": []
+        },
+        "set_debug": {
+            "name": "set_debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\cls\\basic",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($debug)\n  {\n  }",
+            "startLine": 112,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 114,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": {
+                "name": "set_debug",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "file": "bbn\\models\\cls\\basic",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "function($debug)\n  {\n  }",
+                "startLine": 112,
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "endLine": 114,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 1,
+                "numberOfRequiredParameters": 1,
+                "returns": null,
+                "parent": false,
+                "arguments": [
+                    {
+                        "name": "debug",
+                        "position": 0,
+                        "type": "bool",
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "name": "debug",
+                    "position": 0,
+                    "type": "bool",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": {
+        "path": {
+            "visibility": "public",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "path",
+                "static": false,
+                "visibility": "public",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": null
+            }
+        },
+        "name": {
+            "visibility": "public",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "name",
+                "static": false,
+                "visibility": "public",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": null
+            }
+        },
+        "file": {
+            "visibility": "public",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "mixed"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "file",
+                "static": false,
+                "visibility": "public",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "mixed"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": null
+            }
+        },
+        "title": {
+            "visibility": "public",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "mixed"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "title",
+                "static": false,
+                "visibility": "public",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "mixed"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": null
+            }
+        },
+        "uploaded": {
+            "visibility": "public",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "int"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "uploaded",
+                "static": false,
+                "visibility": "public",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "int"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": 0
+            }
+        }
+    },
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 35,
+    "numProperties": 5,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": "bbn\\file",
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "exif": false,
+        "allowed_extensions": [
+            "jpg",
+            "gif",
+            "jpeg",
+            "png",
+            "svg"
+        ],
+        "max_width": 5000,
+        "ext2": null,
+        "w": null,
+        "h": null,
+        "img": null,
+        "size": 0,
+        "ext": null,
+        "fs": null,
+        "hash": null,
+        "path": null,
+        "name": null,
+        "file": null,
+        "title": null,
+        "uploaded": 0,
+        "errors": [],
+        "error": false,
+        "debug": false,
+        "log": []
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\file",
+    "shortName": "image"
+}

@@ -1,0 +1,2679 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\ide\\directories",
+    "namespace": true,
+    "traits": [
+        "bbn\\models\\tts\\optional"
+    ],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/ide\/directories.php",
+    "startLine": 6,
+    "endLine": 1946,
+    "contentConstructor": {
+        "file": "bbn\\ide\\directories",
+        "returns": null
+    },
+    "methods": {
+        "has_error": {
+            "name": "has_error",
+            "summary": "Returns true if the error function has been called.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 188,
+            "doc": {
+                "description": "Returns true if the error function has been called.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 190,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_last_error": {
+            "name": "get_last_error",
+            "summary": "Returns last recorded error, and null if none.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 197,
+            "doc": {
+                "description": "Returns last recorded error, and null if none.",
+                "params": [],
+                "return": "last recorded error, and null if none"
+            },
+            "endLine": 199,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "__construct": {
+            "name": "__construct",
+            "summary": "Constructor.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bbn\\appui\\options $options, $routes)\n  {\n    $this->routes = $routes;\n    $this->_ide_path();\n  }",
+            "startLine": 206,
+            "doc": {
+                "description": "Constructor.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "bbn\\appui\\options",
+                        "name": "$options"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 210,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "options",
+                    "position": 0,
+                    "type": "bbn\\appui\\options",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "routes",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "add_routes": {
+            "name": "add_routes",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $routes)\n  {\n    return $this;\n  }",
+            "startLine": 212,
+            "doc": null,
+            "endLine": 215,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "routes",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "mvc_dirs": {
+            "name": "mvc_dirs",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $res = [];\n    foreach ( $dirs as $i => $d ){\n      if ( !empty($d['tabs']) &&\n        is_dir(\\bbn\\mvc::get_app_path())\n      ){\n        $d['real_path'] = $this->decipher_path($d['path']);\n        $d['prefix'] = strpos($d['real_path'], \\bbn\\mvc::get_app_path()) === 0 ? '' : false;\n        foreach ( $this->routes as $alias => $route ){\n          if ( strpos($d['real_path'], $route) === 0 ){\n            $d['prefix'] = $alias.'\/';\n            break;\n          }\n        }\n        $res[$i] = $d;\n      }\n    }\n    return $res;\n  }",
+            "startLine": 217,
+            "doc": null,
+            "endLine": 236,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "real_to_url": {
+            "name": "real_to_url",
+            "summary": "Returns the file's URL from the real file's path.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file, $mvc = false)\n  {\n    foreach ( $dirs as $i => $d ){\n      \/\/ Dir's root path (directories)\n      $root = $this->get_root_path($i);\n      if ( strpos($file, $root) === 0 ){\n        $res = $i . '\/';\n        $bits = explode('\/', substr($file, \\strlen($root)));\n        \/\/ MVC\n        if ( !empty($d['tabs']) ){\n          $tab_path = array_shift($bits);\n          $fn = array_pop($bits);\n          $ext = bbn\\str::file_ext($fn);\n          $fn = bbn\\str::file_ext($fn, 1)[0];\n          $res .= implode('\/', $bits);\n          foreach ( $d['tabs'] as $t ){\n            if ( empty($t['fixed']) &&\n              ($t['path'] === $tab_path . '\/')\n            ){\n              $res .= '\/' . $fn;\n              if ( empty($mvc) ){\n                $res .= '\/' . $t['url'];\n              }\n              break;\n            }\n          }\n        }\n        \/\/ Normal file\n        else {\n          $res .= implode('\/', $bits);\n        }\n        return bbn\\str::parse_path($res);\n      }\n    }\n    return false;\n  }",
+            "startLine": 245,
+            "doc": {
+                "description": "Returns the file's URL from the real file's path.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file",
+                        "description": "The real file's path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$mvc",
+                        "description": "If true the function returns the global MVC's URL"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 280,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The real file's path"
+                },
+                {
+                    "name": "mvc",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If true the function returns the global MVC's URL"
+                }
+            ]
+        },
+        "real_to_id": {
+            "name": "real_to_id",
+            "summary": "Returns the file's ID from the real file's path.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file)\n  {\n    $timer->start('real_to_id');\n    $url = self::real_to_url($file);\n    $dir = self::dir(self::dir_from_url($url));\n    if ( !empty($dir) &&\n      \\defined($dir['bbn_path'])\n    ){\n      $bbn_p = $dir['bbn_path'] === 'BBN_APP_PATH' ? \\bbn\\mvc::get_app_path() : constant($dir['bbn_path']); \n      if ( strpos($file, $bbn_p) === 0 ){\n        $f = substr($file, \\strlen($bbn_p));\n        $timer->stop('real_to_id');\n        bbn\\x::log($timer->results(), \"directories\");\n        return bbn\\str::parse_path($dir['bbn_path'].'\/'.$f);\n      }\n    }\n\n    \/\/ OLD VERSION\n    \/*\n    $dirs = $this->dirs();\n    $len = 0;\n    $bbn_path = '';\n    $f = '';\n    foreach ( $dirs as $i => $d ){\n      if ( !empty($d['bbn_path']) ){\n        $bbn_p = constant($d['bbn_path']);\n        if ( strpos($file, $bbn_p) === 0 ){\n          $p = substr($file, \\strlen($bbn_p));\n          if ( strpos($p, $d['code']) === 0 ){\n            die(var_dump($file, $bbn_p, $p));\n            $len_tmp = \\count(explode('\/', $d['code']));\n            if ( $len_tmp > $len ){\n              $len = $len_tmp;\n              $bbn_path = $d['bbn_path'];\n              $f = $p;\n            }\n          }\n        }\n      }\n    }\n    return bbn\\str::parse_path($bbn_path.'\/'.$f);\n    *\/\n  }",
+            "startLine": 289,
+            "doc": {
+                "description": "Returns the file's ID from the real file's path.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file",
+                        "description": "The real file's path"
+                    }
+                ],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "Fix the slowness!"
+                }
+            },
+            "endLine": 331,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The real file's path"
+                }
+            ]
+        },
+        "url_to_real": {
+            "name": "url_to_real",
+            "summary": "Gets the real file's path from an URL",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($url)\n  {\n      ($dir = $this->dir($dn)) &&\n      ($res = $this->get_root_path($dn))\n    ){\n      $bits = explode('\/', substr($url, \\strlen($dn), \\strlen($url)));\n      if ( !empty($dir['tabs']) && !empty($bits) ){\n        \/\/ Tab's nane\n        $tab = array_pop($bits);\n        \/\/ File's name\n        $fn = array_pop($bits);\n        \/\/ File's path\n        $fp = implode('\/', $bits).'\/';\n        \/\/ Check if the file is a superior super-controller\n        $ssc = $this->superior_sctrl($tab, $fp);\n        $tab = $ssc['tab'];\n        $fp = $ssc['path'];\n        if ( !empty($dir['tabs'][$tab]) ){\n          $tab = $dir['tabs'][$tab];\n          $res .= $tab['path'];\n          if ( !empty($tab['fixed']) ){\n            $res .= $fp . $tab['fixed'];\n          }\n          else {\n            $res .= $fp . $fn;\n            $ext_ok = false;\n            foreach ( $tab['extensions'] as $e ){\n              $ext = '.' . $e['ext'];\n              if ( is_file($res . $ext) ){\n                $res .= $ext;\n                $ext_ok = true;\n                break;\n              }\n            }\n            if ( empty($ext_ok) ){\n              $res .= '.' . $tab['extensions'][0]['ext'];\n            }\n          }\n        }\n        else {\n          return false;\n        }\n      }\n      else {\n        \/\/ Remove the last element of the path if it's 'code' (it's the tab's URL in a non MVC architecture)\n        if ( end($bits) === 'code' ){\n          array_pop($bits);\n        }\n        $res .= implode('\/', $bits);\n      }\n      return bbn\\str::parse_path($res);\n    }\n    return false;\n  }",
+            "startLine": 339,
+            "doc": {
+                "description": "Gets the real file's path from an URL",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url",
+                        "description": "The file's URL"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 392,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file's URL"
+                }
+            ]
+        },
+        "dir_from_url": {
+            "name": "dir_from_url",
+            "summary": "Returns the dir's name from an URL",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($url)\n  {\n    foreach ( $this->dirs() as $i => $d ){\n      if ( (strpos($url, $i) === 0) &&\n        (\\strlen($i) > \\strlen($dir) )\n      ){\n        $dir = $i;\n        break;\n      }\n    }\n    return $dir;\n  }",
+            "startLine": 400,
+            "doc": {
+                "description": "Returns the dir's name from an URL",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 411,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "id_to_real": {
+            "name": "id_to_real",
+            "summary": "Returns the real file's path from its ID",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n  }",
+            "startLine": 419,
+            "doc": {
+                "description": "Returns the real file's path from its ID",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "The file's ID"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 421,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file's ID"
+                }
+            ]
+        },
+        "url_to_id": {
+            "name": "url_to_id",
+            "summary": "Returns the file's ID from its URL",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($url)\n  {\n      return $this->real_to_id($file);\n    }\n    return false;\n  }",
+            "startLine": 429,
+            "doc": {
+                "description": "Returns the file's ID from its URL",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url",
+                        "description": "The file's URL"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 434,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file's URL"
+                }
+            ]
+        },
+        "id_to_url": {
+            "name": "id_to_url",
+            "summary": "Returns the file's URL from its ID",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n      return $this->real_to_url($file);\n    }\n    return false;\n  }",
+            "startLine": 442,
+            "doc": {
+                "description": "Returns the file's URL from its ID",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "The file's ID"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 447,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file's ID"
+                }
+            ]
+        },
+        "get_root_path": {
+            "name": "get_root_path",
+            "summary": "Gets the real root path from a directory's id as recorded in the options.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($code)\n  {\n    $dir = $this->dir($code);\n    if ( $dir ){\n      $path = $this->decipher_path(bbn\\str::parse_path($dir['bbn_path'].(!empty($dir['path']) ? '\/' . $dir['path'] : '')));\n\n      $r = bbn\\str::parse_path($path.'\/');\n      return $r;\n    }\n    return false;\n  }",
+            "startLine": 455,
+            "doc": {
+                "description": "Gets the real root path from a directory's id as recorded in the options.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code",
+                        "description": "The dir's name (code)"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 465,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The dir's name (code)"
+                }
+            ]
+        },
+        "decipher_path": {
+            "name": "decipher_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($st)\n  {\n    $st = bbn\\str::parse_path($st);\n    $bits = explode('\/', $st);\n    \/** @var string $constant The first path of the path which might be a constant *\/\n    $constant = $bits[0];\n    \/** @var string $path The path that will be returned *\/\n    $path = '';\n    if ( \\defined($constant) ){      \n      $path .= $constant === 'BBN_APP_PATH' ? \\bbn\\mvc::get_app_path() : constant($constant);\n      array_shift($bits);\n    }\n    $path .= implode('\/', $bits);\n    return $path;\n  }",
+            "startLine": 473,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$st"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 487,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "add": {
+            "name": "add",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($data)\n  {\n      SELECT MAX(position) AS pos\n      FROM bbn_ide_directories') + 1;\n    if ( $this->db->insert('bbn_ide_directories', [\n      'name' => $data['name'],\n      'path' => bbn\\str::parse_path($data['path']),\n      'fcolor' => $data['fcolor'],\n      'bcolor' => $data['bcolor'],\n      'outputs' => \\strlen($data['outputs']) ? $data['outputs'] : NULL,\n      'files' => $data['files'],\n      'position' => $data['position']\n    ]) ){\n      $data['id'] = $this->db->last_id();\n      return $data;\n    }\n    return $this->error('Error: Add.');\n  }",
+            "startLine": 493,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$data"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 510,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "data",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "edit": {
+            "name": "edit",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($data)\n  {\n      'name' => $data['name'],\n      'path' => bbn\\str::parse_path($data['path']),\n      'fcolor' => $data['fcolor'],\n      'bcolor' => $data['bcolor'],\n      'outputs' => \\strlen($data['outputs']) ? $data['outputs'] : NULL,\n      'files' => $data['files'],\n      'position' => $data['position']\n    ], ['id' => $data['id']]) ){\n      return 1;\n    }\n    return $this->error('Error: Edit.');\n  }",
+            "startLine": 516,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$data"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 529,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "data",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get": {
+            "name": "get",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name = '')\n  {\n    die(\\bbn\\x::dump($all));\n    if ( empty($name) ){\n      return $all;\n    }\n    else{\n      return isset($all[$name]) ? $all[$name] : false;\n    }\n  }",
+            "startLine": 535,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 544,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "dirs": {
+            "name": "dirs",
+            "summary": "Make dirs' configurations",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($code = false)\n  {\n    $cats = [];\n    $r = [];\n    foreach ( $all as $a ){\n      if ( \\defined($a['bbn_path']) ){\n        $k = $a['bbn_path'] . '\/' . ($a['code'] === '\/' ? '' : $a['code']);\n        if ( !isset($cats[$a['id_alias']]) ){\n          unset($a['alias']['cfg']);\n          $cats[$a['id_alias']] = $a['alias'];\n        }\n        unset($a['cfg']);\n        unset($a['alias']);\n        $r[$k] = $a;\n        $r[$k]['title'] = $r[$k]['text'];\n        $r[$k]['alias_code'] = $cats[$a['id_alias']]['code'];\n        if ( !empty($cats[$a['id_alias']]['tabs']) ){\n          $r[$k]['tabs'] = $cats[$a['id_alias']]['tabs'];\n        }\n        else{\n          $r[$k]['extensions'] = $cats[$a['id_alias']]['extensions'];\n        }\n        unset($r[$k]['alias']);\n      }\n    }\n    if ( $code ){\n      return isset($r[$code]) ? $r[$code] : false;\n    }\n    return $r;\n  }",
+            "startLine": 552,
+            "doc": {
+                "description": "Make dirs' configurations",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|bool",
+                        "name": "$code",
+                        "description": "The dir's name (code)"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 581,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "The dir's name (code)"
+                }
+            ]
+        },
+        "dir": {
+            "name": "dir",
+            "summary": "Gets a dir's configuration",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($code)\n  {\n  }",
+            "startLine": 589,
+            "doc": {
+                "description": "Gets a dir's configuration",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code",
+                        "description": "The dir's name (code)"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 591,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The dir's name (code)"
+                }
+            ]
+        },
+        "option_id": {
+            "name": "option_id",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file_id)\n  {\n  }",
+            "startLine": 593,
+            "doc": null,
+            "endLine": 595,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file_id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "has_option": {
+            "name": "has_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file_id)\n  {\n  }",
+            "startLine": 597,
+            "doc": null,
+            "endLine": 599,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file_id",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "create": {
+            "name": "create",
+            "summary": "Creates a a new file or a new directory.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($dir, $tab, $path, $name, $type)\n  {\n      ($root = $this->get_root_path($dir))\n    ){\n      $path = $path === '.\/' ? '' : $path . '\/';\n      $ext = bbn\\str::file_ext($name);\n      $default = '';\n\n      \/\/ MVC\n      if ( !empty($cfg['tabs']) &&\n        !empty($tab)\n      ){\n        $cfg = $cfg['tabs'][$tab];\n        $root = $root . $cfg['path'];\n      }\n      \/\/ New file\n      if ( $type === 'file' ){\n        if ( !empty($ext) ){\n          $ext_ok = array_filter($cfg['extensions'], function($e) use ($ext){\n            return ( $e['ext'] === $ext );\n          });\n          if ( !empty($ext_ok) ){\n            $default = array_values($ext_ok)[0]['default'];\n          }\n        }\n        if ( empty($ext) ||\n          (!empty($ext) && empty($ext_ok))\n        ){\n          $ext = $cfg['extensions'][0]['ext'];\n          $default = $cfg['extensions'][0]['default'];\n        }\n        $file = $path . bbn\\str::file_ext($name, 1)[0] . '.' . $ext;\n        $real = $root . $file;\n        if ( is_file($real) ){\n          return $this->error(\"The file already exists\");\n        }\n        if ( !bbn\\file\\dir::create_path(dirname($real)) ){\n          return $this->error(\"Impossible to create the container directory\");\n        }\n        if ( !file_put_contents($real, $default) ){\n          return $this->error(\"Impossible to create the file\");\n        }\n        \/\/ Add item to options table for permissions\n        if ( $tab === 'php' ){\n          if ( !$this->create_perm_by_real($real) ){\n            return $this->error(\"Impossible to create the option\");\n          }\n        }\n      }\n      \/\/New directory\n      else if ( $type === 'dir' ){\n        $file = $path . '\/' . $name;\n        $real = $root . $file;\n        if ( is_dir($real) ){\n          return $this->error(\"The directory already exists\");\n        }\n        if ( !bbn\\file\\dir::create_path($real) ){\n          return $this->error(\"Impossible to create the directory\");\n        }\n      }\n      return $file;\n    }\n    return $this->error(\"There is a problem in the name (dir) you entered\");\n  }",
+            "startLine": 611,
+            "doc": {
+                "description": "Creates a a new file or a new directory.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dir",
+                        "description": "The source's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|false",
+                        "name": "$tab",
+                        "description": "The tab's name (MVC)"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path",
+                        "description": "The file\/directory's path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name",
+                        "description": "The file\/directory's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "If it's a file or a directory (file|dir)"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 674,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 5,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "dir",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The source's name"
+                },
+                {
+                    "name": "tab",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The tab's name (MVC)"
+                },
+                {
+                    "name": "path",
+                    "position": 2,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file\/directory's path"
+                },
+                {
+                    "name": "name",
+                    "position": 3,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file\/directory's name"
+                },
+                {
+                    "name": "type",
+                    "position": 4,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "If it's a file or a directory (file|dir)"
+                }
+            ]
+        },
+        "load": {
+            "name": "load",
+            "summary": "Loads a file.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file, $dir, $tab, bbn\\user\\preferences $pref = NULL)\n  {\n    $res = false;\n    $file = bbn\\str::parse_path($file);\n\n    if ( $file && $dir ){\n      \/** @var array $dir_cfg The directory configuration from DB *\/\n      if ( \\is_array($dir) ){\n        $dir_cfg = $dir;\n        $dir = $dir_cfg['value'] ?? $dir_cfg['path'];\n      }\n      else{\n        $dir_cfg = $this->dir($dir);\n      }\n      if ( !\\is_array($dir_cfg) ){\n        die(\\bbn\\x::dump(\"Problem with the function directories::dir with argument \".$dir));\n      }\n      $res = $this->get_file($file, $dir, $tab, $dir_cfg, $pref);\n    }\n    return $res;\n  }",
+            "startLine": 685,
+            "doc": {
+                "description": "Loads a file.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$dir"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$tab"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bbn\\user\\preferences|null",
+                        "name": "$pref"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 705,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "dir",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "tab",
+                    "position": 2,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "pref",
+                    "position": 3,
+                    "type": "bbn\\user\\preferences",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "save": {
+            "name": "save",
+            "summary": "Saves a file.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file, $code, array $cfg = NULL, bbn\\user\\preferences $pref = NULL)\n  {\n    if ( ($file = bbn\\str::parse_path($file)) &&\n      ($real = $this->url_to_real($file)) &&\n      ($dir = $this->dir($this->dir_from_url($file))) &&\n      \\defined('BBN_USER_PATH')\n    ){\n      $id_file = $this->real_to_id($real);\n      $ext = bbn\\str::file_ext($real, 1);\n      $id_user = false;\n      if ( $session = bbn\\user\\session::get_instance() ){\n        $id_user = $session->get('user', 'id');\n      }\n      \/\/ We delete the file if code is empty and we aren't in a _ctrl file\n      if ( empty($code) ){\n        $bits = explode('\/', $file);\n        if ( !empty($dir['tabs']) && !empty($bits) ){\n          $tab = $this->superior_sctrl(array_pop($bits))['tab'];\n          if ( !empty($dir['tabs'][$tab]) &&\n            empty($dir['tabs'][$tab]['fixed'])\n          ){\n            if ( @unlink($real) ){\n              \/\/ Remove permissions\n              $this->delete_perm($real);\n              if ( $id_file ){\n                \/\/ Remove file's options\n                $this->options->remove($this->options->from_code($id_file, $this->_files_pref()));\n                \/\/ Remove ide backups\n                bbn\\file\\dir::delete(dirname(BBN_USER_PATH.\"ide\/backup\/$id_file\").\"\/$ext[0]\/\", 1);\n              }\n              return [\n                'deleted' => 1\n              ];\n            }\n          }\n        }\n      }\n      if ( is_file($real) && $id_file ){\n        $filename = empty($dir['tabs']) ? $ext[0].'.'.$ext[1] : $ext[0];\n        $backup = dirname(BBN_USER_PATH.\"ide\/backup\/\".$id_file).'\/'.$filename.'\/'.date('Y-m-d His').'.'.$ext[1];\n        bbn\\file\\dir::create_path(dirname($backup));\n        rename($real, $backup);\n      }\n      else if ( !is_dir(dirname($real)) ){\n        bbn\\file\\dir::create_path(dirname($real));\n      }\n      file_put_contents($real, $code);\n      if ( $pref && $id_user ){\n        $this->set_preferences($id_user, $id_file, md5($code), $cfg, $pref);\n      }\n      return [\n        'success' => 1,\n        'path' => $real\n      ];\n    }\n    return $this->error('Error: Save');\n  }",
+            "startLine": 876,
+            "doc": {
+                "description": "Saves a file.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file",
+                        "description": "The file's URL"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code",
+                        "description": "The file's content"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$cfg",
+                        "description": "The user preferences"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bbn\\user\\preferences|null",
+                        "name": "$pref"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 932,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file's URL"
+                },
+                {
+                    "name": "code",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file's content"
+                },
+                {
+                    "name": "cfg",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The user preferences"
+                },
+                {
+                    "name": "pref",
+                    "position": 3,
+                    "type": "bbn\\user\\preferences",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "set_preferences": {
+            "name": "set_preferences",
+            "summary": "Sets user's preferences for a file.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user, $id_file, $md5, array $cfg = NULL, bbn\\user\\preferences $pref = NULL)\n  {\n      $change['md5'] = $md5;\n      if ( !empty($cfg['selections']) ){\n        $change['selections'] = $cfg['selections'];\n      }\n      if ( isset($cfg, $cfg['marks']) ){\n        $change['marks'] = $cfg['marks'];\n      }\n      if ( !empty($change) ){\n        $id_option = $this->option_id($id_file);\n        if ( $pref->set($id_option, $change, $id_user) ){\n          return true;\n        }\n      }\n    }\n    return false;\n  }",
+            "startLine": 944,
+            "doc": {
+                "description": "Sets user's preferences for a file.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "user The user's id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "file The file's id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$md",
+                        "description": "The file's md5"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$cfg"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bbn\\user\\preferences|null",
+                        "name": "$pref"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 961,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 3,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "user The user's id"
+                },
+                {
+                    "name": "id_file",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "file The file's id"
+                },
+                {
+                    "name": "md5",
+                    "position": 2,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file's md5"
+                },
+                {
+                    "name": "cfg",
+                    "position": 3,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "pref",
+                    "position": 4,
+                    "type": "bbn\\user\\preferences",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "copy": {
+            "name": "copy",
+            "summary": "Duplicates a file or a directory, MVC or not.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($dir, $path, $name, $type, $file)\n  {\n      ($root = $this->get_root_path($dir)) &&\n      bbn\\str::check_filename($name)\n    ){\n      $is_file = $type === 'file';\n      $wtype = $is_file ? 'file' : 'directory';\n      $path = $path === '.\/' ? '' : $path . '\/';\n      $bits = explode('\/', $file);\n      \/\/ File cfg\n      $file_cfg =  bbn\\str::file_ext(array_pop($bits), 1);\n      \/\/ Existing filename without its extension\n      $fn = $file_cfg[0];\n      \/\/ Existing file's extension\n      $fe = $file_cfg[1];\n      \/\/ Existing file's path\n      $fp = implode('\/', $bits);\n      $files = [];\n      $ext = false;\n      \/\/ MVC\n      if ( !empty($cfg['tabs']) ){\n        foreach ( $cfg['tabs'] as $t ){\n          if (empty($t['fixed']) ){\n            if ( $is_file ){\n              \/\/ Check all extensions\n              foreach ( $t['extensions'] as $e ){\n                $real = $root . $t['path'] . $fp . '\/' . $fn . '.' . $e['ext'];\n                $real_new = $root. $t['path'] . $path . $name . '.' . $e['ext'];\n                if( file_exists($real) ){\n                  if ( !file_exists($real_new) ){\n                    $files[$real] = $real_new;\n                    $ext = empty($ext) ? $e['ext'] : $ext;\n                    if ( $t['url'] === 'php' ){\n                      $perms = $real_new;\n                    }\n                  }\n                  else {\n                    $this->error(\"The file $real_new is already exists.\");\n                    return false;\n                  }\n                }\n              }\n            }\n            else {\n              $real = $root . $t['path'] . $fp . '\/' . $fn;\n              $real_new = $root. $t['path'] . $path . $name;\n              if ( file_exists($real) ){\n                if ( !file_exists($real_new) ){\n                  $files[$real] = $real_new;\n                  if ( $t['url'] === 'php' ){\n                    $perms = $real_new;\n                  }\n                }\n                else {\n                  $this->error(\"The directory $real_new is already exists.\");\n                  return false;\n                }\n              }\n            }\n          }\n        }\n      }\n      else {\n        $real = $root . $file;\n        $real_new = $root. $path . $name . '.' . $fe;\n        if ( file_exists($real) ){\n          if ( !file_exists($real_new) ){\n            $files[$real] = $real_new;\n          }\n          else {\n            $this->error(\"The $wtype $real_new is already exists.\");\n            return false;\n          }\n        }\n      }\n      foreach ($files as $s => $d ){\n        if ( !file_exists(dirname($d)) ){\n          if ( !bbn\\file\\dir::create_path(dirname($d)) ){\n            $this->error(\"Impossible to create the path $d\");\n            return false;\n          }\n        }\n        if ( !bbn\\file\\dir::copy($s, $d) ){\n          $this->error(\"Impossible to duplicate the $wtype: $s -> $d\");\n          return false;\n        }\n      }\n\n      \/\/ Create permissions\n      if ( !empty($perms) ){\n        if ( $is_file ){\n          self::create_perm_by_real($perms);\n        }\n        else {\n          $dir_perms = function($fd) use(&$dir_perms){\n            foreach ( $fd as $f ){\n              if ( is_file($f) &&\n                (basename($f) !== '_ctrl.php')\n              ){\n                self::create_perm_by_real($f);\n              }\n              else if ( is_dir($f) ){\n                $dir_perms(bbn\\file\\dir::get_files($f, 1));\n              }\n            }\n          };\n          $dir_perms(bbn\\file\\dir::get_files($perms, 1));\n        }\n      }\n\n      if ( $is_file ){\n        return (!empty($path) ? $path : '') . $name . '.' . (!empty($cfg['tabs']) ? $ext : $fe);\n      }\n      return true;\n    }\n    return false;\n  }",
+            "startLine": 974,
+            "doc": {
+                "description": "Duplicates a file or a directory, MVC or not.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dir",
+                        "description": "The source's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path",
+                        "description": "The new file's path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name",
+                        "description": "The new filename"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "file|dir"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file",
+                        "description": "The existing file path and name"
+                    }
+                ],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "Duplicate the users' permissions when duplicating a controller file"
+                }
+            },
+            "endLine": 1090,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 5,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "dir",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The source's name"
+                },
+                {
+                    "name": "path",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The new file's path"
+                },
+                {
+                    "name": "name",
+                    "position": 2,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The new filename"
+                },
+                {
+                    "name": "type",
+                    "position": 3,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "file|dir"
+                },
+                {
+                    "name": "file",
+                    "position": 4,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The existing file path and name"
+                }
+            ]
+        },
+        "delete": {
+            "name": "delete",
+            "summary": "Deletes a file or a directory.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($dir, $path, $name, $type = 'file')\n  {\n      ($root = $this->get_root_path($dir))\n    ){\n      $is_file = $type === 'file';\n      $wtype = $is_file ? 'file' : 'directory';\n      $delete = [];\n      if ( !empty($cfg['tabs']) ){\n        foreach ( $cfg['tabs'] as $t ){\n          if ( empty($t['fixed']) ){\n            $real = $root . $t['path'];\n            if ( dirname($path) !== '.' ){\n              $real .= dirname($path) . '\/';\n            }\n            if ( $is_file ){\n              foreach ( $t['extensions'] as $e ){\n                $tmp = $real . $name . '.' . $e['ext'];\n                if ( file_exists($tmp) && !\\in_array($tmp, $delete) ){\n                  array_push($delete, $tmp);\n                  if ( $t['url'] === 'php' ){\n                    $del_perm = $tmp;\n                  }\n                }\n              }\n            }\n            else {\n              $real .= $name;\n              if ( file_exists($real) && !\\in_array($real, $delete) ){\n                array_push($delete, $real);\n                if ( $t['url'] === 'php' ){\n                  $del_perm = $real;\n                }\n              }\n            }\n          }\n        }\n      }\n      else {\n        $real = $root . $path;\n        if ( file_exists($real) ){\n          array_push($delete, $real);\n        }\n      }\n      $files = [];\n      \/\/ Remove permissions\n      if ( !empty($del_perm) ){\n        $this->delete_perm($del_perm, $type);\n      }\n      foreach ( $delete as $d ){\n        if ( $is_file ){\n          \/\/ Add it to files to be closed\n          array_push($files, $this->real_to_url($d));\n          \/\/ Delete file\n          if ( !unlink($d) ){\n            $this->error(\"Impossible to delete the file $d\");\n            return false;\n          }\n          \/\/ Remove file's options\n          $this->options->remove($this->options->from_code($this->real_to_id($d), $this->_files_pref()));\n        }\n        else {\n          $f = $this->rem_dir_opt($d);\n          $files = array_merge($files, $f);\n          \/\/ Delete directory\n          if ( !bbn\\file\\dir::delete($d) ){\n            $this->error(\"Impossible to delete the directory $d\");\n            return false;\n          }\n        }\n      }\n      return ['files' => $files];\n    }\n    return false;\n  }",
+            "startLine": 1101,
+            "doc": {
+                "description": "Deletes a file or a directory.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dir",
+                        "description": "The source's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path",
+                        "description": "The file|directory's path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name",
+                        "description": "The file|directory's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "The type (file|dir)"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1174,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "dir",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The source's name"
+                },
+                {
+                    "name": "path",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file|directory's path"
+                },
+                {
+                    "name": "name",
+                    "position": 2,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file|directory's name"
+                },
+                {
+                    "name": "type",
+                    "position": 3,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "file",
+                    "default_name": "",
+                    "description": "The type (file|dir)"
+                }
+            ]
+        },
+        "export": {
+            "name": "export",
+            "summary": "Exports a file or a directory, normal or MVC.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($dir, $path, $name, $type = 'file')\n  {\n      ($root = $this->get_root_path($dir)) &&\n      \\defined('BBN_USER_PATH')\n    ){\n      $is_file = $type === 'file';\n      $wtype = $is_file ? 'file' : 'directory';\n      $rnd = bbn\\str::genpwd();\n      $root_dest = BBN_USER_PATH . 'tmp\/' . $rnd . '\/';\n      $files = [];\n      if ( !empty($cfg['tabs']) ){\n        $root_dest_mvc = $root_dest . $name . '\/mvc\/';\n        foreach ( $cfg['tabs'] as $t ){\n          if ( empty($t['fixed']) ){\n            $real = $t['path'];\n            if ( dirname($path) !== '.' ){\n              $real .= dirname($path) . '\/';\n            }\n            if ( $is_file ){\n              foreach ( $t['extensions'] as $e ){\n                if ( is_file($root . $real . $name . '.' . $e['ext']) ){\n                  $real .= $name . '.' . $e['ext'];\n                  array_push($files, [\n                    'src' => $root . $real,\n                    'dest' => $root_dest_mvc . $real,\n                    'is_file' => $is_file\n                  ]);\n                  break;\n                }\n              }\n            }\n            else {\n              $real .= $name;\n              if ( is_dir($root . $real) ){\n                array_push($files, [\n                  'src' =>$root . $real,\n                  'dest' => $root_dest_mvc . $real,\n                  'is_file' => $is_file\n                ]);\n              }\n            }\n          }\n        }\n      }\n      else {\n        if ( file_exists($root . $path) ){\n          array_push($files, [\n            'src' => $root . $path,\n            'dest' => $root_dest . $path,\n            'is_file' => $is_file\n          ]);\n        }\n      }\n      foreach ( $files as $f ){\n        if ( $f['is_file'] ){\n          if ( !bbn\\file\\dir::create_path(dirname($f['dest'])) ){\n            $this->error(\"Impossible to create the path \" . dirname($f['dest']));\n            return false;\n          }\n        }\n        if ( !bbn\\file\\dir::copy($f['src'], $f['dest']) ){\n          $this->error('Impossible to export the ' . $wtype . ' ' . $f['src']);\n          return false;\n        }\n      }\n\n      if ( class_exists('\\\\ZipArchive') ){\n        $filezip = BBN_USER_PATH.'tmp\/'.$name.'.zip';\n        $zip = new \\ZipArchive();\n        if ( $err = $zip->open($filezip, \\ZipArchive::OVERWRITE) ){\n          if ( file_exists($root_dest) ){\n            if ( (!$is_file) || !empty($cfg['tabs']) ){\n              \/\/ Create recursive directory iterator\n              $files = bbn\\file\\dir::scan($root_dest);\n              foreach ($files as $file){\n                $tmp_dest = str_replace(\n                  $root_dest . (empty($cfg['tabs']) ? '\/' : ''),\n                  (!empty($cfg['tabs']) ? 'mvc\/' : ''),\n                  $file\n                );\n                \/\/ Add current file to archive\n                if ( ($file !== $root_dest.$name) &&\n                  is_file($file) &&\n                  !$zip->addFile($file, $tmp_dest)\n                ){\n                  $this->error(\"Impossible to add $file\");\n                  return false;\n                }\n              }\n            }\n            else {\n              if ( !$zip->addFile($root_dest, $path) ){\n                $this->error(\"Impossible to add $root_dest\");\n                return false;\n              }\n            }\n            if ( $zip->close() ){\n              if ( !bbn\\file\\dir::delete(BBN_USER_PATH . 'tmp\/' . $rnd, 1) ){\n                $this->error(\"Impossible to delete the directory \" . BBN_USER_PATH . 'tmp\/' . $rnd);\n                return false;\n              }\n              return $filezip;\n            }\n            $this->error(\"Impossible to close the zip file $filezip\");\n            return false;\n          }\n          $this->error(\"The path does not exist: $root_dest\");\n          return false;\n        }\n        $this->error(\"Impossible to create $filezip ($err)\");\n        return false;\n      }\n\n      $this->error(\"ZipArchive class non-existent\");\n      return false;\n    }\n  }",
+            "startLine": 1185,
+            "doc": {
+                "description": "Exports a file or a directory, normal or MVC.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dir",
+                        "description": "The source's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path",
+                        "description": "The file|directory's path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name",
+                        "description": "The file|directory's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "file|dir"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1301,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "dir",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The source's name"
+                },
+                {
+                    "name": "path",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file|directory's path"
+                },
+                {
+                    "name": "name",
+                    "position": 2,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file|directory's name"
+                },
+                {
+                    "name": "type",
+                    "position": 3,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "file",
+                    "default_name": "",
+                    "description": "file|dir"
+                }
+            ]
+        },
+        "rename": {
+            "name": "rename",
+            "summary": "Renames a file or a directory.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($dir, $path, $new, $type = 'file')\n  {\n      ($root = $this->get_root_path($dir)) &&\n      bbn\\str::check_filename($new)\n    ){\n      $is_file = $type === 'file';\n      $wtype = $is_file ? 'file' : 'directory';\n      $pi = pathinfo($path);\n      $files = [];\n      if ( $pi['filename'] !== $new ){\n        if ( !empty($cfg['tabs']) ){\n          $ext = false;\n          foreach ( $cfg['tabs'] as $t ){\n            if ( empty($t['fixed']) ){\n              \/\/ MVC tab's path\n              $real = $root . $t['path'];\n              if ( $pi['dirname'] !== '.' ){\n                $real .= $pi['dirname'] . '\/';\n              }\n              if ( $is_file ){\n                foreach ( $t['extensions'] as $e ){\n                  $real_new = $real . $new . '.' . $e['ext'];\n                  $real_ext = $real . $pi['filename'] . '.' . $e['ext'];\n                  if ( file_exists($real_ext) ){\n                    if ( !file_exists($real_new) ){\n                      $ext = empty($ext) ? $e['ext'] : $ext;\n                      $files[$real_ext] = $real_new;\n                      if ( $t['url'] === 'php' ){\n                        $change_perm = [\n                          'old' => $real_ext,\n                          'new' => $real_new,\n                          'type' => 'file'\n                        ];\n                      }\n                    }\n                    else {\n                      $this->error(\"The file $real_new is already exists.\");\n                      return false;\n                    }\n                  }\n                }\n                if ( !empty($t['default']) ){\n                  $file_url = $this->real_to_url($real_ext);\n                  $file_new_url = $this->real_to_url($real_new);\n                }\n              }\n              else {\n                $real_new = $real . $new;\n                $real .= $pi['filename'];\n                if ( file_exists($real) ){\n                  if ( !file_exists($real_new) ){\n                    $files[$real] = $real_new;\n                    if ( $t['url'] === 'php' ){\n                      $change_perm = [\n                        'old' => $real,\n                        'new' => $real_new,\n                        'type' => 'dir'\n                      ];\n                    }\n                  }\n                  else {\n                    $this->error(\"The directory $real_new is already exists.\");\n                    return false;\n                  }\n                }\n              }\n              if ( !empty($t['default']) ){\n                $file_new = (($pi['dirname'] !== '.') ? $pi['dirname'] . '\/' : '') . $new;\n                $file_new_name = (($pi['dirname'] !== '.') ? $pi['dirname'] . '\/' : '') . $new;\n              }\n            }\n          }\n        }\n        else {\n          $real = $root . $path;\n          $real_new = $root . $new . ($is_file ?  '.' . $pi['extension'] : '');\n          if ( file_exists($real) ){\n            if ( !file_exists($real_new) ){\n              $files[$real] = $real_new;\n            }\n            else {\n              $this->error(\"The $wtype $real_new is already exists.\");\n              return false;\n            }\n            if ( $is_file ){\n              $file_url = $this->real_to_url($real);\n              $file_new_url = $this->real_to_url($real_new);\n              $file_new = (($pi['dirname'] !== '.') ? $pi['dirname'] . '\/' : '') . $new . '.' . $pi['extension'];\n              $file_new_name = (($pi['dirname'] !== '.') ? $pi['dirname'] . '\/' : '') . $new . '.' . $pi['extension'];\n            }\n            else {\n              $file_new = (($pi['dirname'] !== '.') ? $pi['dirname'] . '\/' : '') . $new;\n              $file_new_name = (($pi['dirname'] !== '.') ? $pi['dirname'] . '\/' : '') . $new;\n            }\n          }\n        }\n\n        foreach ( $files as $s => $d ){\n          if ( !rename($s, $d) ){\n            $this->error(\"Impossible to rename the $wtype: $s -> $d\");\n            return false;\n          }\n          if ( is_file($s) ){\n            \/\/ Remove file's options\n            $this->options->remove($this->options->from_code($this->real_to_id($s), $this->_files_pref()));\n          }\n          else {\n            $this->rem_dir_opt($s);\n          }\n        }\n\n        \/\/ Change permission\n        if ( !empty($change_perm) ){\n          $this->change_perm_by_real($change_perm['old'], $change_perm['new'], $change_perm['type']);\n        }\n\n        return [\n          'file_url' => $file_url,\n          'file_new_url' => $file_new_url,\n          'file_new' => $file_new,\n          'file_new_name' => $file_new_name,\n          'file_new_ext' => $ext\n        ];\n      }\n      $this->error(\"The old name and the new name are identical.\");\n      return false;\n    }\n  }",
+            "startLine": 1312,
+            "doc": {
+                "description": "Renames a file or a directory.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dir",
+                        "description": "The source's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path",
+                        "description": "The file|directory's old path (included filename and its extension)"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$new",
+                        "description": "The new file's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "file|dir"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1439,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "dir",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The source's name"
+                },
+                {
+                    "name": "path",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file|directory's old path (included filename and its extension)"
+                },
+                {
+                    "name": "new",
+                    "position": 2,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The new file's name"
+                },
+                {
+                    "name": "type",
+                    "position": 3,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "file",
+                    "default_name": "",
+                    "description": "file|dir"
+                }
+            ]
+        },
+        "move": {
+            "name": "move",
+            "summary": "Moves a file or a directory.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($dir, $src, $dest, $type = 'file')\n  {\n      ($root = $this->get_root_path($dir))\n    ){\n      $is_file = $type === 'file';\n      $wtype = $is_file ? 'file' : 'directory';\n      $pi = pathinfo($src);\n      $pi['dirname'] = $pi['dirname'] === '.' ? '' : $pi['dirname'];\n      $files = [];\n      if ( $pi['dirname'] !== $dest ){\n        if ( !empty($cfg['tabs']) ){\n          $ext = false;\n          foreach ( $cfg['tabs'] as $t ){\n            if ( empty($t['fixed']) ){\n              \/\/ MVC tab's path\n              $real = $root . $t['path'];\n              if ( $is_file ){\n                foreach ( $t['extensions'] as $e ){\n                  $real_new = $real . $dest . '\/' . $pi['filename']. '.' . $e['ext'];\n                  $real_ext = $real . $pi['dirname'] . '\/' . $pi['filename'] . '.' . $e['ext'];\n                  if ( file_exists($real_ext) ){\n                    if ( !file_exists($real_new) ){\n                      $ext = empty($ext) ? $e['ext'] : $ext;\n                      $files[$real_ext] = $real_new;\n                      if ( $t['url'] === 'php' ){\n                        $change_perm = [\n                          'old' => $real_ext,\n                          'new' => $real_new,\n                          'type' => 'file'\n                        ];\n                      }\n                    }\n                    else {\n                      $this->error(\"The file $real_new is already exists.\");\n                      return false;\n                    }\n                  }\n                }\n                if ( !empty($t['default']) ){\n                  $file_url = $this->real_to_url($real_ext);\n                  $file_new_url = $this->real_to_url($real_new);\n                }\n              }\n              else {\n                $real_new = $real . $dest . '\/' . $pi['basename'];\n                $real .= $src;\n                if ( file_exists($real) ){\n                  if ( !file_exists($real_new) ){\n                    $files[$real] = $real_new;\n                    if ( $t['url'] === 'php' ){\n                      $change_perm = [\n                        'old' => $real,\n                        'new' => $real_new,\n                        'type' => 'dir'\n                      ];\n                    }\n                  }\n                  else {\n                    $this->error(\"The directory $real_new is already exists.\");\n                    return false;\n                  }\n                }\n              }\n              if ( !empty($t['default']) ){\n                $file_new = $dest . '\/' . $pi['basename'];\n              }\n            }\n          }\n        }\n        else {\n          $real = $root . $src;\n          $real_new = $root . $dest . '\/' . $pi['basename'];\n          if ( file_exists($real) ){\n            if ( !file_exists($real_new) ){\n              $files[$real] = $real_new;\n            }\n            else {\n              $this->error(\"The $wtype $real_new is already exists.\");\n              return false;\n            }\n            if ( $is_file ){\n              $file_url = $this->real_to_url($real);\n              $file_new_url = $this->real_to_url($real_new);\n            }\n            $file_new = $dest . '\/' . $pi['basename'];\n          }\n        }\n\n        foreach ( $files as $s => $d ){\n          if ( !bbn\\file\\dir::move($s, $d) ){\n            $this->error(\"Impossible to rename the $wtype: $s -> $d\");\n            return false;\n          }\n          if ( is_file($s) ){\n            \/\/ Remove file's options (preferences)\n            $this->options->remove($this->options->from_code($this->real_to_id($s), $this->_files_pref()));\n          }\n          else {\n            \/\/ Remove dir's options (preferences)\n            $this->rem_dir_opt($s);\n          }\n        }\n\n        \/\/ Change permission\n        if ( !empty($change_perm) ){\n          $this->change_perm_by_real($change_perm['old'], $change_perm['new'], $change_perm['type']);\n        }\n\n        return [\n          'file_url' => $file_url,\n          'file_new_url' => $file_new_url,\n          'file_new' => $file_new,\n        ];\n      }\n      $this->error(\"The old name and the new name are identical.\");\n      return false;\n    }\n  }",
+            "startLine": 1450,
+            "doc": {
+                "description": "Moves a file or a directory.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dir",
+                        "description": "The source's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$src",
+                        "description": "The file|directory's old path (included filename and its extension)"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dest",
+                        "description": "The destination path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "file|dir"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1567,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "dir",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The source's name"
+                },
+                {
+                    "name": "src",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file|directory's old path (included filename and its extension)"
+                },
+                {
+                    "name": "dest",
+                    "position": 2,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The destination path"
+                },
+                {
+                    "name": "type",
+                    "position": 3,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "file",
+                    "default_name": "",
+                    "description": "file|dir"
+                }
+            ]
+        },
+        "change_ext": {
+            "name": "change_ext",
+            "summary": "Changes the extension to a file.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($ext, $file)\n  {\n      !empty($file) &&\n      file_exists($file)\n    ){\n      $pi = pathinfo($file);\n      $new = $pi['dirname'].'\/'.$pi['filename'].'.'.$ext;\n      bbn\\file\\dir::move($file, $new, true);\n      return [\n        'file' => $new,\n        'file_url' => $this->real_to_url($new)\n      ];\n    }\n    $this->error(\"Error.\");\n  }",
+            "startLine": 1576,
+            "doc": {
+                "description": "Changes the extension to a file.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$ext",
+                        "description": "The new extension"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file",
+                        "description": "The file to change"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1590,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "ext",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The new extension"
+                },
+                {
+                    "name": "file",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file to change"
+                }
+            ]
+        },
+        "real_to_perm": {
+            "name": "real_to_perm",
+            "summary": "Returns the permission's id from a real file\/dir's path",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file, $type = 'file')\n  {\n      is_dir(\\bbn\\mvc::get_app_path()) &&\n      \/\/ It must be a controller\n      (strpos($file, '\/mvc\/public\/') !== false)\n    ){\n      $is_file = $type === 'file';\n      \/\/ Check if it's an external route\n      foreach ( $this->routes as $i => $r ){\n        if ( strpos($file, $r) === 0 ){\n          \/\/ Remove route\n          $f = substr($file, \\strlen($r), \\strlen($file));\n          \/\/ Remove \/mvc\/public\n          $f = substr($f, \\strlen('\/mvc\/public'), \\strlen($f));\n          \/\/ Add the route's name to path\n          $f = $i . $f;\n          break;\n        }\n      }\n      \/\/ Internal route\n      if ( empty($f) ){\n        $root_path = \\bbn\\mvc::get_app_path().'mvc\/public\/';\n        if ( strpos($file, $root_path) === 0 ){\n          \/\/ Remove root path\n          $f = substr($file, \\strlen($root_path), \\strlen($file));\n        }\n      }\n      $id_parent = $this->options->from_code('page', 'bbn_permissions');\n      if ( !empty($f) ){\n        $bits = bbn\\x::remove_empty(explode('\/', $f));\n        $code = $is_file ? bbn\\str::file_ext(array_pop($bits), 1)[0] : array_pop($bits).'\/';\n        foreach ( $bits as $b ){\n          $id_parent = $this->options->from_code($b.'\/', $id_parent);\n        }\n\n        return $this->options->from_code($code, $id_parent);\n      }\n    }\n    return false;\n  }",
+            "startLine": 1599,
+            "doc": {
+                "description": "Returns the permission's id from a real file\/dir's path",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file",
+                        "description": "The real file\/dir's path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "The type (file\/dir)"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1638,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The real file\/dir's path"
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "file",
+                    "default_name": "",
+                    "description": "The type (file\/dir)"
+                }
+            ]
+        },
+        "create_perm_by_real": {
+            "name": "create_perm_by_real",
+            "summary": "Creates a permission option from a real file\/dir's path",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file, $type = 'file')\n  {\n      is_dir(\\bbn\\mvc::get_app_path()) &&\n      file_exists($file) &&\n      \/\/ It must be a controller\n      (strpos($file, '\/mvc\/public\/') !== false)\n    ){\n      $is_file = $type === 'file';\n      \/\/ Check if it's an external route\n      foreach ( $this->routes as $i => $r ){\n        if ( strpos($file, $r) === 0 ){\n          \/\/ Remove route\n          $f = substr($file, \\strlen($r), \\strlen($file));\n          \/\/ Remove \/mvc\/public\n          $f = substr($f, \\strlen('\/mvc\/public'), \\strlen($f));\n          \/\/ Add the route's name to path\n          $f = $i . $f;\n        }\n      }\n      \/\/ Internal route\n      if ( empty($f) ){\n        $root_path = \\bbn\\mvc::get_app_path().'mvc\/public\/';\n        if ( strpos($file, $root_path) === 0 ){\n          \/\/ Remove root path\n          $f = substr($file, \\strlen($root_path), \\strlen($file));\n        }\n      }\n      if ( !empty($f) ){\n        $bits = bbn\\x::remove_empty(explode('\/', $f));\n        $code = $is_file ? bbn\\str::file_ext(array_pop($bits), 1)[0] : array_pop($bits).'\/';\n        $id_parent = $this->options->from_code('page', 'bbn_permissions');\n        foreach ( $bits as $b ){\n          if ( !$this->options->from_code($b.'\/', $id_parent) ){\n            $this->options->add([\n              'id_parent' => $id_parent,\n              'code' => $b.'\/',\n              'text' => $b\n            ]);\n          }\n          $id_parent = $this->options->from_code($b.'\/', $id_parent);\n        }\n        if ( !$this->options->from_code($code, $id_parent) ){\n          $this->options->add([\n            'id_parent' => $id_parent,\n            'code' => $code,\n            'text' => $code\n          ]);\n        }\n        return $this->options->from_code($code, $id_parent);\n      }\n      else if ( !$is_file ){\n        return $this->options->from_code('page', 'bbn_permissions');\n      }\n      return true;\n    }\n    return false;\n  }",
+            "startLine": 1647,
+            "doc": {
+                "description": "Creates a permission option from a real file\/dir's path",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file",
+                        "description": "The real file\/dir's path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "The type of real (file\/dir)"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1703,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The real file\/dir's path"
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "file",
+                    "default_name": "",
+                    "description": "The type of real (file\/dir)"
+                }
+            ]
+        },
+        "change_perm_by_real": {
+            "name": "change_perm_by_real",
+            "summary": "Changes permissions to a file\/dir from the old and new real file\/dir's path",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file, $file_new, $type = 'file')\n  {\n      !empty($file_new) &&\n      file_exists($file_new) &&\n      ($id_opt = $this->real_to_perm($file, $type)) &&\n      !$this->real_to_perm($file_new, $type)\n    ){\n      $is_file = $type === 'file';\n      $code = $is_file ? bbn\\str::file_ext(basename($file_new), 1)[0] : basename($file_new).'\/';\n      if ( ($id_parent = $this->create_perm_by_real(dirname($file_new).'\/', 'dir'))\n      ){\n        $this->options->set_prop($id_opt, ['code' => $code]);\n        $this->options->move($id_opt, $id_parent);\n        return true;\n      }\n    }\n    return false;\n  }",
+            "startLine": 1713,
+            "doc": {
+                "description": "Changes permissions to a file\/dir from the old and new real file\/dir's path",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file",
+                        "description": "The old real file\/dir's path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file",
+                        "description": "new The new real file\/dir's path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "The type (file\/dir)"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1730,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The old real file\/dir's path"
+                },
+                {
+                    "name": "file_new",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "new The new real file\/dir's path"
+                },
+                {
+                    "name": "type",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "file",
+                    "default_name": "",
+                    "description": "The type (file\/dir)"
+                }
+            ]
+        },
+        "delete_perm": {
+            "name": "delete_perm",
+            "summary": "Deletes permission from a real file\/dir's path",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file, $type = 'file')\n  {\n      ($id_opt = $this->real_to_perm($file, $type)) &&\n      $this->options->remove($id_opt)\n    ){\n      return true;\n    }\n    return false;\n  }",
+            "startLine": 1739,
+            "doc": {
+                "description": "Deletes permission from a real file\/dir's path",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file",
+                        "description": "The real file\/dir's path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "The type (file\/dir)"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1747,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The real file\/dir's path"
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "file",
+                    "default_name": "",
+                    "description": "The type (file\/dir)"
+                }
+            ]
+        },
+        "history": {
+            "name": "history",
+            "summary": "Returns all backup history of a file.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($url)\n  {\n      ( $dir = $this->dir_from_url($url) ) &&\n      ( $dir_cfg = $this->dir($dir) ) &&\n      \\defined('BBN_USER_PATH')\n    ){\n      $res = [];\n      $all = [];\n      \/\/ IDE backup path\n      $path = BBN_USER_PATH.\"ide\/backup\/$dir\";\n      \/\/ Remove dir name from url\n      $file = substr($url, \\strlen($dir), \\strlen($url));\n      \/\/ MVC\n      if ( !empty($dir_cfg['tabs']) ){\n        foreach ( $dir_cfg['tabs'] as $t ){\n          if ( empty($t['fixed']) ){\n            \/\/ The file's backup path of the MVC's tab\n            $p = $path . $t['path'] . $file . '\/';\n            \/\/ Get history\n            $all = self::get_history($p, $t, $all, true);\n          }\n        }\n      }\n      else {\n        \/\/ The file's backup path of the MVC's tab\n        $p = $path . $file . '\/';\n        \/\/ Get history\n        $all = self::get_history($p, $dir_cfg, $all);\n      }\n      if ( !empty($all) ){\n        foreach ( $all as $i => $a ){\n          if ( !empty($dir_cfg['tabs']) ){\n            $tmp = [];\n            foreach ( $a as $k => $b ){\n              array_push($tmp, [\n                'text' => $k,\n                'items' => $b\n              ]);\n            }\n          }\n          array_push($res, [\n            'text' => $i,\n            'items' => !empty($tmp) ? $tmp : $a\n          ]);\n        }\n      }\n      return ['list' => $res];\n    }\n  }",
+            "startLine": 1819,
+            "doc": {
+                "description": "Returns all backup history of a file.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url",
+                        "description": "The file's URL"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1867,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file's URL"
+                }
+            ]
+        },
+        "history_clear": {
+            "name": "history_clear",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($url = '')\n  {\n      $path = BBN_USER_PATH.'ide\/backup\/';\n    }\n    if ( !empty($url) &&\n      ( $dir = $this->dir_from_url($url) ) &&\n      ( $dir_cfg = $this->dir($dir) )\n    ){\n      \/\/ Remove dir name from url\n      $file = substr($url, \\strlen($dir), \\strlen($url));\n      $path .= $dir . $file;\n    }\n    if ( is_dir($path) &&\n      bbn\\file\\dir::delete($path, !empty($url))\n    ){\n      return ['success' => 1];\n    }\n    $this->error('Error to delete the backup directory');\n    return false;\n  }",
+            "startLine": 1869,
+            "doc": null,
+            "endLine": 1888,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "modes": {
+            "name": "modes",
+            "summary": "Returns",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($type = false)\n  {\n      $r = [\n        'html' => [\n          'name' => 'HTML',\n          'mode' => 'htmlmixed',\n          'code' => is_file(BBN_DATA_PATH.'ide\/defaults\/default.html') ? file_get_contents(BBN_DATA_PATH.'ide\/defaults\/default.html') : ''\n        ],\n        'xml' => [\n          'name' => 'XML',\n          'mode' => 'text\/xml',\n          'code' => is_file(BBN_DATA_PATH.'ide\/defaults\/default.xml') ? file_get_contents(BBN_DATA_PATH.'ide\/defaults\/default.xml') : ''\n        ],\n        'js' => [\n          'name' => 'JavaScript',\n          'mode' => 'javascript',\n          'code' => is_file(BBN_DATA_PATH.'ide\/defaults\/default.js') ? file_get_contents(BBN_DATA_PATH.'ide\/defaults\/default.js') : ''\n        ],\n        'svg' => [\n          'name' => 'SVG',\n          'mode' => 'text\/xml',\n          'code' => is_file(BBN_DATA_PATH.'ide\/defaults\/default.svg') ? file_get_contents(BBN_DATA_PATH.'ide\/defaults\/default.svg') : ''\n        ],\n        'php' => [\n          'name' => 'PHP',\n          'mode' => 'application\/x-httpd-php',\n          'code' => is_file(BBN_DATA_PATH.'ide\/defaults\/default.php') ? file_get_contents(BBN_DATA_PATH.'ide\/defaults\/default.php') : ''\n        ],\n        'css' => [\n          'name' => 'CSS',\n          'mode' => 'text\/css',\n          'code' => is_file(BBN_DATA_PATH.'ide\/defaults\/default.css') ? file_get_contents(BBN_DATA_PATH.'ide\/defaults\/default.css') : ''\n        ],\n        'less' => [\n          'name' => 'LESS',\n          'mode' => 'text\/x-less',\n          'code' => is_file(BBN_DATA_PATH.'ide\/defaults\/default.css') ? file_get_contents(BBN_DATA_PATH.'ide\/defaults\/default.css') : ''\n        ],\n        'sql' => [\n          'name' => 'SQL',\n          'mode' => 'text\/x-sql',\n          'code' => is_file(BBN_DATA_PATH.'ide\/defaults\/default.sql') ? file_get_contents(BBN_DATA_PATH.'ide\/defaults\/default.sql') : ''\n        ],\n        'def' => [\n          'mode' => 'application\/x-httpd-php',\n          'code' => is_file(BBN_DATA_PATH.'ide\/defaults\/default.php') ? file_get_contents(BBN_DATA_PATH.'ide\/defaults\/default.php') : ''\n        ]\n      ];\n      return $type ? ( isset($r[$type]) ? $r[$type] : false ) : $r;\n    }\n    return false;\n  }",
+            "startLine": 1894,
+            "doc": {
+                "description": "Returns",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 1945,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "type",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_option_root": {
+            "name": "get_option_root",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::$option_root_id;\n  }",
+            "startLine": 71,
+            "doc": null,
+            "endLine": 74,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_root": {
+            "name": "get_appui_root",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::$option_appui_id;\n  }",
+            "startLine": 76,
+            "doc": null,
+            "endLine": 79,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_option_id": {
+            "name": "get_option_id",
+            "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 87,
+            "doc": {
+                "description": "Returns The option's ID of a category, i.e. direct children of option's root",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 89,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options_ids": {
+            "name": "get_options_ids",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return $a !== null;\n    }));\n  }",
+            "startLine": 91,
+            "doc": null,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options_tree": {
+            "name": "get_options_tree",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $tree['items'] : [];\n  }",
+            "startLine": 97,
+            "doc": null,
+            "endLine": 100,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options": {
+            "name": "get_options",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 102,
+            "doc": null,
+            "endLine": 104,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_option": {
+            "name": "get_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 106,
+            "doc": null,
+            "endLine": 108,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options_text_value": {
+            "name": "get_options_text_value",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      bbn\\appui\\options::get_instance()->text_value_options($id): [];\n  }",
+            "startLine": 110,
+            "doc": null,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_option_id": {
+            "name": "get_appui_option_id",
+            "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 121,
+            "doc": {
+                "description": "Returns The option's ID of a category, i.e. direct children of option's root",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 123,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options_ids": {
+            "name": "get_appui_options_ids",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return $a !== null;\n    }));\n  }",
+            "startLine": 125,
+            "doc": null,
+            "endLine": 129,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options_tree": {
+            "name": "get_appui_options_tree",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $tree['items'] : [];\n  }",
+            "startLine": 131,
+            "doc": null,
+            "endLine": 134,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options": {
+            "name": "get_appui_options",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 136,
+            "doc": null,
+            "endLine": 138,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_option": {
+            "name": "get_appui_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 140,
+            "doc": null,
+            "endLine": 142,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options_text_value": {
+            "name": "get_appui_options_text_value",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\ide\\directories",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      bbn\\appui\\options::get_instance()->text_value_options($id) : [];\n  }",
+            "startLine": 144,
+            "doc": null,
+            "endLine": 147,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        }
+    },
+    "properties": null,
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 52,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\models\\tts\\optional"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "ide_path": false,
+        "dev_path": false,
+        "path_type": false,
+        "files_pref": false,
+        "optional_is_init": false,
+        "option_appui_id": null,
+        "option_root_id": null,
+        "options": null,
+        "last_error": null,
+        "routes": []
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\ide",
+    "shortName": "directories"
+}

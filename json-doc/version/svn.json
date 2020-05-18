@@ -1,0 +1,274 @@
+{
+    "doc": {
+        "description": "Class for Subversion usage. It will use the PHP SVN functions if available, and will try to use SVN commands through <em>system<\/em> otherwise.",
+        "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
+            "copyright": "BBN Solutions",
+            "since": "Apr 4, 2011, 23:23:55 +0000",
+            "category": "Utilities",
+            "license": "http:\/\/www.opensource.org\/licenses\/mit-license.php MIT",
+            "version": "0.2r89"
+        }
+    },
+    "name": "bbn\\version\\svn",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/version\/svn.php",
+    "startLine": 17,
+    "endLine": 169,
+    "contentConstructor": {
+        "file": "bbn\\version\\svn",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\version\\svn",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($url, $user = false, $pass = false)\n  {\n\t\t$this->url = $url;\n\t\t$this->user = $user;\n\t\t$this->pass = $pass;\n    $this->hash = md5($url.(string)$user.(string)$pass);\n\t\tif ( function_exists('svn_export') ){\n\t\t\t$this->has_svn = 1;\n\t\t}\n  }",
+            "startLine": 76,
+            "doc": null,
+            "endLine": 85,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "user",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                },
+                {
+                    "name": "pass",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "export": {
+            "name": "export",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\version\\svn",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($to, $rev = '')\n  {\n\t\tif ( is_dir($to) ){\n\t\t\tif ( $this->has_svn ){\n        $this->auth();\n\t\t\t\treturn svn_export($this->url, $to, false);\n\t\t\t}\n\t\t\telse{\n        ob_start();\n\t\t\t\tsystem(\"svn export \".$this->args().\" $to --force\");\n        $st = ob_get_contents();\n        ob_end_clean();\n        return $st;\n\t\t\t}\n\t\t}\n  }",
+            "startLine": 87,
+            "doc": null,
+            "endLine": 102,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "to",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "rev",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "info": {
+            "name": "info",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\version\\svn",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path = '\/')\n  {\n    if ( $this->has_svn ){\n      $this->auth();\n      return svn_status($this->url.$path, SVN_NON_RECURSIVE|SVN_ALL);\n    }\n    else{\n      ob_start();\n      system(\"svn info \".$this->args());\n      $st = ob_get_contents();\n      ob_end_clean();\n      bbn\\x::hdump($st);\n      return $this->parseCMD($st);\n    }\n  }",
+            "startLine": 104,
+            "doc": null,
+            "endLine": 118,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "\/",
+                    "default_name": ""
+                }
+            ]
+        },
+        "last": {
+            "name": "last",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\version\\svn",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path = '\/')\n  {\n    if ( $this->has_svn ){\n      $this->auth();\n      return svn_status($this->url.$path, SVN_NON_RECURSIVE|SVN_ALL);\n    }\n    else{\n      ob_start();\n      header('Content-Type: text\/plain; charset=UTF-8');\n      print(shell_exec(\"svn info --xml \".$this->args()));\n      $st = ob_get_contents();\n      ob_end_clean();\n      $log = new \\SimpleXMLElement($st);\n      if ( isset($log->entry['revision']) ){\n        return (int)$log->entry['revision'];\n      }\n    }\n    \n  }",
+            "startLine": 120,
+            "doc": null,
+            "endLine": 138,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "\/",
+                    "default_name": ""
+                }
+            ]
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\version\\svn",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path = '\/', $num = 5)\n  {\n    if ( $this->has_svn ){\n      $this->auth();\n      return svn_log($this->url.$path);\n      \/\/return svn_status($path, SVN_NON_RECURSIVE|SVN_ALL);\n    }\n    else{\n      if ( !$num ){\n        $num = $this->last($this->url.$path);\n      }\n      ob_start();\n      header('Content-Type: text\/plain; charset=UTF-8');\n      print(shell_exec(\"svn log -l $num \".$this->args()));\n      $st = ob_get_contents();\n      ob_end_clean();\n      $log = new \\SimpleXMLElement($st);\n      $r = [];\n      \/\/bbn\\x::hdump($st);\n      foreach ( $log->logentry as $l ){\n        $r[(int)$l['revision']] = [\n          'author' => (string)$l->author,\n          'date' => date('Y-m-d H:i:s', strtotime($l->date)),\n          'msg' => (string)$l->msg\n        ];\n      }\n      return $r;\n    }\n  }",
+            "startLine": 140,
+            "doc": null,
+            "endLine": 168,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "\/",
+                    "default_name": ""
+                },
+                {
+                    "name": "num",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": 5,
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": {
+        "url": {
+            "visibility": "public"
+        },
+        "has_svn": {
+            "visibility": "public"
+        }
+    },
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 5,
+    "numProperties": 2,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "current": "",
+        "url": null,
+        "has_svn": false,
+        "hash": null,
+        "auth": false,
+        "user": null,
+        "pass": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\version",
+    "shortName": "svn"
+}

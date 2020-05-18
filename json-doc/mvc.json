@@ -1,0 +1,3473 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\mvc",
+    "namespace": true,
+    "traits": [
+        "bbn\\models\\tts\\singleton",
+        "bbn\\mvc\\common"
+    ],
+    "interfaces": {
+        "bbn\\mvc\\api": {
+            "name": "bbn\\mvc\\api"
+        }
+    },
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/mvc.php",
+    "startLine": 42,
+    "endLine": 869,
+    "contentConstructor": {
+        "file": "bbn\\mvc",
+        "returns": null
+    },
+    "methods": {
+        "init_path": {
+            "name": "init_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      self::$_app_name = BBN_APP_NAME;\n      self::$_app_path = BBN_APP_PATH;\n      self::$_cur_path = BBN_CUR_PATH;\n      self::$_lib_path = BBN_LIB_PATH;\n      self::$_data_path = BBN_DATA_PATH;\n    }\n  }",
+            "startLine": 134,
+            "doc": null,
+            "endLine": 142,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_app_name": {
+            "name": "get_app_name",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 144,
+            "doc": null,
+            "endLine": 146,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_app_path": {
+            "name": "get_app_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($raw = false)\n  {\n  }",
+            "startLine": 148,
+            "doc": null,
+            "endLine": 150,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "raw",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_cur_path": {
+            "name": "get_cur_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 152,
+            "doc": null,
+            "endLine": 154,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_lib_path": {
+            "name": "get_lib_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 156,
+            "doc": null,
+            "endLine": 158,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_data_path": {
+            "name": "get_data_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin = NULL)\n  {\n    return BBN_DATA_PATH.($plugin ? 'plugins\/'.$plugin.'\/' : '');\n  }",
+            "startLine": 160,
+            "doc": null,
+            "endLine": 163,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_tmp_path": {
+            "name": "get_tmp_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin = NULL)\n  {\n    return self::$_app_name ? self::get_data_path().'tmp\/'.($plugin ? $plugin.'\/' : '') : '';\n  }",
+            "startLine": 165,
+            "doc": null,
+            "endLine": 168,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_log_path": {
+            "name": "get_log_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin = NULL)\n  {\n    return self::$_app_name ? self::get_data_path().'logs\/'.($plugin ? $plugin.'\/' : '') : '';\n  }",
+            "startLine": 170,
+            "doc": null,
+            "endLine": 173,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_cache_path": {
+            "name": "get_cache_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin = NULL)\n  {\n    return BBN_DATA_PATH.'cache\/'.($plugin ? $plugin.'\/' : '');\n  }",
+            "startLine": 175,
+            "doc": null,
+            "endLine": 178,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_content_path": {
+            "name": "get_content_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin = NULL)\n  {\n    return self::$_app_name ? self::get_data_path().($plugin ? 'plugins\/'.$plugin.'\/' : 'content\/') : '';\n  }",
+            "startLine": 180,
+            "doc": null,
+            "endLine": 183,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_user_tmp_path": {
+            "name": "get_user_tmp_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user = NULL, $plugin = NULL)\n  {\n    if (!self::$_app_name){\n      return null;\n    }\n    if ( !$id_user ){\n      $usr = \\bbn\\user::get_instance();\n      if ( $usr ){\n        $id_user = $usr->get_id();\n      }\n    }\n    if ( $id_user ){\n      return self::get_data_path().'users\/'.$id_user.'\/tmp\/'.($plugin ? $plugin.'\/' : '');;\n    }\n    return null;\n  }",
+            "startLine": 185,
+            "doc": null,
+            "endLine": 200,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "plugin",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_user_data_path": {
+            "name": "get_user_data_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user = NULL, $plugin = NULL)\n  {\n    if (!self::$_app_name){\n      return null;\n    }\n    if ( !$id_user ){\n      $usr = \\bbn\\user::get_instance();\n      if ( $usr ){\n        $id_user = $usr->get_id();\n      }\n    }\n    if ( $id_user ){\n      return self::get_data_path().'users\/'.$id_user.'\/data\/'.($plugin ? $plugin.'\/' : '');;\n    }\n    return null;\n  }",
+            "startLine": 202,
+            "doc": null,
+            "endLine": 217,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "plugin",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "include_model": {
+            "name": "include_model",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($bbn_inc_file, $model)\n  {\n      ob_start();\n      $d = include($bbn_inc_file);\n      ob_end_clean();\n      if ( \\is_object($d) ){\n        $d = x::to_array($d);\n      }\n      if ( !\\is_array($d) ){\n        return false;\n      }\n      return $d;\n    }\n    return false;\n  }",
+            "startLine": 219,
+            "doc": null,
+            "endLine": 233,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "bbn_inc_file",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "model",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_cookie": {
+            "name": "get_cookie",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 235,
+            "doc": null,
+            "endLine": 237,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "set_root": {
+            "name": "set_root",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($root)\n  {\n    if ( strpos($root, -1) !== '\/' ){\n      $root .= '\/';\n    }\n    if ( 1 ){\n      $this->root = $root;\n    }\n  }",
+            "startLine": 239,
+            "doc": null,
+            "endLine": 247,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "root",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_root": {
+            "name": "get_root",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 249,
+            "doc": null,
+            "endLine": 251,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "fetch_dir": {
+            "name": "fetch_dir",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($dir, $mode)\n  {\n  }",
+            "startLine": 253,
+            "doc": null,
+            "endLine": 255,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "dir",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "mode",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "apply_locale": {
+            "name": "apply_locale",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin)\n  {\n  }",
+            "startLine": 257,
+            "doc": null,
+            "endLine": 259,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "include_php_view": {
+            "name": "include_php_view",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($bbn_inc_file, $bbn_inc_content, array $bbn_inc_data = [])\n  {\n    $randoms = [];\n    $_random = function($i) use (&$randoms){\n      if ( !isset($randoms[$i]) ){\n        $randoms[$i] = md5(\\bbn\\str::genpwd());\n      }\n      return $randoms[$i];\n    };\n    $fn = function() use($bbn_inc_file, $bbn_inc_content, $bbn_inc_data, $_random){\n      if ( $bbn_inc_content ){\n        ob_start();\n        if ( \\count($bbn_inc_data) ){\n          foreach ( $bbn_inc_data as $bbn_inc_key => $bbn_inc_val ){\n            $$bbn_inc_key = $bbn_inc_val;\n          }\n          unset($bbn_inc_key, $bbn_inc_val);\n        }\n        unset($bbn_inc_data);\n        try{\n          eval('?>'.$bbn_inc_content);\n        }\n        catch ( \\Exception $e){\n          x::log_error($e->getCode(), $e->getMessage(), $bbn_inc_file, 1);\n        }\n        $c = ob_get_contents();\n        ob_end_clean();\n        return $c;\n      }\n      return '';\n    };\n    return $fn();\n  }",
+            "startLine": 261,
+            "doc": null,
+            "endLine": 293,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "bbn_inc_file",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "bbn_inc_content",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "bbn_inc_data",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "include_controller": {
+            "name": "include_controller",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($bbn_inc_file, bbn\\mvc\\controller $ctrl, $bbn_is_super = false)\n  {\n      return require($bbn_inc_file);\n    }\n    ob_start();\n    $r = require($bbn_inc_file);\n    if ( $output = ob_get_contents() ){\n      ob_end_clean();\n    }\n    if ( $bbn_is_super ){\n      return $r ? true : false;\n    }\n    return $output;\n  }",
+            "startLine": 300,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$bbn",
+                        "description": "inc_file"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "mvc\\controller",
+                        "name": "$ctrl"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 313,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "bbn_inc_file",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "inc_file"
+                },
+                {
+                    "name": "ctrl",
+                    "position": 1,
+                    "type": "bbn\\mvc\\controller",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "bbn_is_super",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "set_db_in_controller": {
+            "name": "set_db_in_controller",
+            "summary": "This function gets the content of a view file and adds it to the loaded_views array.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($r = false)\n  {\n    self::$db_in_controller = $r ? true : false;\n  }",
+            "startLine": 335,
+            "doc": {
+                "description": "This function gets the content of a view file and adds it to the loaded_views array.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$p",
+                        "description": "The full path to the view file"
+                    }
+                ],
+                "return": "The content of the view"
+            },
+            "endLine": 338,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "r",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "The full path to the view file"
+                }
+            ]
+        },
+        "get_debug": {
+            "name": "get_debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 343,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 345,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "debug": {
+            "name": "debug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($state = 1)\n  {\n  }",
+            "startLine": 347,
+            "doc": null,
+            "endLine": 349,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "state",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": 1,
+                    "default_name": ""
+                }
+            ]
+        },
+        "__construct": {
+            "name": "__construct",
+            "summary": "This should be called only once from within the app",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($db = NULL, $routes = [])\n  {\n    self::init_path();\n    $this->env = new mvc\\environment();\n\t\tif ( \\is_object($db) && ( $class = \\get_class($db) ) && ( $class === 'PDO' || strpos($class, '\\db') !== false ) ){\n\t\t\t$this->db = $db;\n\t\t}\n\t\telse{\n\t\t\t$this->db = null;\n\t\t}\n\t\t$this->inc = new \\stdClass();\n    $this->o = $this->inc;\n    if ( \\is_array($routes) && isset($routes['root']) ){\n      foreach ( $routes['root'] as $url => &$route ){\n        if (isset($route['root']) && defined('BBN_'.strtoupper($route['root']).'_PATH')) {\n          $route['path'] = constant('BBN_'.strtoupper($route['root']).'_PATH').$route['path'];\n        }\n        if ( !empty($route['path']) && (substr($route['path'], -1) !== '\/') ){\n          $route['path'] .= '\/';\n        }\n        if ( isset($route['path']) ){\n          $route['url'] = $url;\n          $this->register_plugin($route);\n        }\n      }\n    }\n    $this->init_locale();\n    $this->router = new mvc\\router($this, $routes);\n    $this->route();\n  }",
+            "startLine": 391,
+            "doc": {
+                "description": "This should be called only once from within the app",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "object",
+                        "name": "$db",
+                        "description": "The database object if there is"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$routes",
+                        "description": "An array of routes usually defined in \/_appui\/current\/cfg\/routes.json<\/em>"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 420,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The database object if there is"
+                },
+                {
+                    "name": "routes",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "An array of routes usually defined in \/_appui\/current\/cfg\/routes.json<\/em>"
+                }
+            ]
+        },
+        "check": {
+            "name": "check",
+            "summary": "Checks whether a corresponding file has been found or not.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 427,
+            "doc": {
+                "description": "Checks whether a corresponding file has been found or not.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 429,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_plugins": {
+            "name": "get_plugins",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 431,
+            "doc": null,
+            "endLine": 433,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "has_plugin": {
+            "name": "has_plugin",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin)\n  {\n  }",
+            "startLine": 435,
+            "doc": null,
+            "endLine": 437,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_plugin": {
+            "name": "is_plugin",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin)\n  {\n    return isset($this->plugins[$plugin]);\n  }",
+            "startLine": 439,
+            "doc": null,
+            "endLine": 442,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "plugin_path": {
+            "name": "plugin_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin, $raw = false)\n  {\n        return $this->plugins[$plugin]['path'].($raw ? '' : 'src\/');\n    }\n  }",
+            "startLine": 444,
+            "doc": null,
+            "endLine": 448,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "raw",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "plugin_url": {
+            "name": "plugin_url",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin)\n  {\n  }",
+            "startLine": 450,
+            "doc": null,
+            "endLine": 452,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "plugin_name": {
+            "name": "plugin_name",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path)\n  {\n      if ( $p['url'] === $path ){\n        return $name;\n      }\n    }\n    return false;\n  }",
+            "startLine": 454,
+            "doc": null,
+            "endLine": 461,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_route": {
+            "name": "get_route",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path, $mode, $root = NULL)\n  {\n  }",
+            "startLine": 468,
+            "doc": null,
+            "endLine": 470,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "mode",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "root",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_file": {
+            "name": "get_file",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 472,
+            "doc": null,
+            "endLine": 474,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_url": {
+            "name": "get_url",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 476,
+            "doc": null,
+            "endLine": 478,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_params": {
+            "name": "get_params",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 480,
+            "doc": null,
+            "endLine": 482,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_post": {
+            "name": "get_post",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 484,
+            "doc": null,
+            "endLine": 486,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_get": {
+            "name": "get_get",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 488,
+            "doc": null,
+            "endLine": 490,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_files": {
+            "name": "get_files",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 492,
+            "doc": null,
+            "endLine": 494,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_mode": {
+            "name": "get_mode",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 496,
+            "doc": null,
+            "endLine": 498,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "set_mode": {
+            "name": "set_mode",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($mode)\n  {\n  }",
+            "startLine": 500,
+            "doc": null,
+            "endLine": 502,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "mode",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_cli": {
+            "name": "is_cli",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 504,
+            "doc": null,
+            "endLine": 506,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "reroute": {
+            "name": "reroute",
+            "summary": "This will reroute a controller to another one seemlessly. Chainable",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path = '', $post = false, $arguments = false)\n  {\n\t\t$this->is_routed = false;\n\t\t$this->is_controlled = null;\n    $this->info = null;\n    $this->router->reset();\n    $this->route();\n    if ($arguments || !isset($this->info['args'])) {\n      $this->info['args'] = $arguments;\n    }\n    $this->controller->reset($this->info);\n\t\treturn $this;\n  }",
+            "startLine": 514,
+            "doc": {
+                "description": "This will reroute a controller to another one seemlessly. Chainable",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path",
+                        "description": "The request path <em>(e.g books\/466565 or xml\/books\/48465)<\/em>"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 526,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The request path <em>(e.g books\/466565 or xml\/books\/48465)<\/em>"
+                },
+                {
+                    "name": "post",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                },
+                {
+                    "name": "arguments",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "has_view": {
+            "name": "has_view",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path = '', $mode = 'html')\n  {\n    return array_key_exists($mode, self::$_loaded_views[$mode]) && isset(self::$_loaded_views[$mode][$path]);\n  }",
+            "startLine": 533,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 536,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "mode",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "html",
+                    "default_name": ""
+                }
+            ]
+        },
+        "add_to_views": {
+            "name": "add_to_views",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path, $mode, bbn\\mvc\\view $view)\n  {\n    if ( !array_key_exists($mode, self::$_loaded_views[$mode]) ){\n      self::$_loaded_views[$mode] = [];\n    }\n    self::$_loaded_views[$mode][$path] = $view;\n  }",
+            "startLine": 544,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "mvc\\view",
+                        "name": "$view"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 550,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "void"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "mode",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "view",
+                    "position": 2,
+                    "type": "bbn\\mvc\\view",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_view": {
+            "name": "get_view",
+            "summary": "This will get a view.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path, $mode = 'html', array $data = NULL)\n  {\n      die(\"Incorrect mode $path $mode\");\n    }\n    $view = null;\n    if ( $this->has_view($path, $mode) ){\n      $view = self::$_loaded_views[$mode][$path];\n    }\n    else if ( $info = $this->router->route($path, $mode) ){\n      $view = new mvc\\view($info);\n      $this->add_to_views($path, $mode, $view);\n    }\n    if ( \\is_object($view) && $view->check() ){\n      return \\is_array($data) ? $view->get($data) : $view->get();\n    }\n    return '';\n  }",
+            "startLine": 560,
+            "doc": {
+                "description": "This will get a view.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$data"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 576,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "mode",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "html",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "view_exists": {
+            "name": "view_exists",
+            "summary": "Checks whether the given view exists or not.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path, $mode = 'html')\n  {\n    if ( !router::is_mode($mode) || !($path = router::parse($path)) ){\n      return false;\n    }\n    if ( $this->has_view($path, $mode) ){\n      return true;\n    }\n    if ($this->router->route($path, $mode)) {\n      return true;\n    }\n    return false;\n  }",
+            "startLine": 585,
+            "doc": {
+                "description": "Checks whether the given view exists or not.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 597,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "mode",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "html",
+                    "default_name": ""
+                }
+            ]
+        },
+        "model_exists": {
+            "name": "model_exists",
+            "summary": "Checks whether the given model exists or not.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path)\n  {\n    if ($this->router->route($path, 'model')) {\n      return true;\n    }\n    return false;\n  }",
+            "startLine": 605,
+            "doc": {
+                "description": "Checks whether the given model exists or not.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 611,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_external_view": {
+            "name": "get_external_view",
+            "summary": "This will get a view from a different root.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($full_path, $mode = 'html', array $data = NULL)\n  {\n      die(\"Incorrect mode $full_path $mode\");\n    }\n    if ( ($this->get_mode() === 'dom') && (!defined('BBN_DEFAULT_MODE') || (BBN_DEFAULT_MODE !== 'dom')) ){\n      $full_path .= ($full_path === '' ? '' : '\/').'index';\n    }\n    $view = null;\n    if ( $this->has_view($full_path, $mode) ){\n      $view = self::$_loaded_views[$mode][$full_path];\n    }\n    else if ( $info = $this->router->route(basename($full_path), 'free-'.$mode, \\dirname($full_path)) ){\n      $view = new mvc\\view($info);\n      $this->add_to_views($full_path, $mode, $view);\n    }\n    if ( \\is_object($view) && $view->check() ){\n      return \\is_array($data) ? $view->get($data) : $view->get();\n    }\n    return '';\n  }",
+            "startLine": 621,
+            "doc": {
+                "description": "This will get a view from a different root.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$full",
+                        "description": "path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$data"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 640,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "full_path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "path"
+                },
+                {
+                    "name": "mode",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "html",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 2,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_plugin_from_component": {
+            "name": "get_plugin_from_component",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name)\n  {\n    return $this->router->get_plugin_from_component($name);\n  }",
+            "startLine": 642,
+            "doc": null,
+            "endLine": 645,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "route_component": {
+            "name": "route_component",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name)\n  {\n    return $this->router->route_component($name);\n  }",
+            "startLine": 647,
+            "doc": null,
+            "endLine": 650,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "custom_plugin_view": {
+            "name": "custom_plugin_view",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path, $mode, array $data, $plugin)\n  {\n    if ( $plugin && ($route = $this->router->route_custom_plugin(router::parse($path), $mode, $plugin)) ){\n      $view = new mvc\\view($route);\n      if ( $view->check() ){\n        return \\is_array($data) ? $view->get($data) : $view->get();\n      }\n      return '';\n    }\n    return null;\n  }",
+            "startLine": 652,
+            "doc": null,
+            "endLine": 662,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 4,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "mode",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 2,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "plugin",
+                    "position": 3,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "custom_plugin_model": {
+            "name": "custom_plugin_model",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path, array $data, bbn\\mvc\\controller $ctrl, $plugin, $ttl = NULL)\n  {\n    if ( $plugin && ($route = $this->router->route_custom_plugin(router::parse($path), 'model', $plugin)) ){\n      $model = new mvc\\model($this->db, $route, $ctrl, $this);\n      if ( $ttl ){\n        return $model->get_from_cache($data, '', $ttl);\n      }\n      return $model->get($data);\n    }\n    return null;\n  }",
+            "startLine": 664,
+            "doc": null,
+            "endLine": 674,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 4,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ctrl",
+                    "position": 2,
+                    "type": "bbn\\mvc\\controller",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "plugin",
+                    "position": 3,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 4,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_plugin_view": {
+            "name": "get_plugin_view",
+            "summary": "This will get a view.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path, $mode, array $data, $plugin)\n  {\n  }",
+            "startLine": 685,
+            "doc": {
+                "description": "This will get a view.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$data"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$plugin"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 687,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 4,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "mode",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 2,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "plugin",
+                    "position": 3,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_model": {
+            "name": "get_model",
+            "summary": "This will get the model. There is no order for the arguments.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path, array $data, bbn\\mvc\\controller $ctrl)\n  {\n      $model = new mvc\\model($this->db, $route, $ctrl, $this);\n      return $model->get($data);\n    }\n    return [];\n  }",
+            "startLine": 696,
+            "doc": {
+                "description": "This will get the model. There is no order for the arguments.",
+                "params": [],
+                "return": "A data model"
+            },
+            "endLine": 702,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ctrl",
+                    "position": 2,
+                    "type": "bbn\\mvc\\controller",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_plugin_model": {
+            "name": "get_plugin_model",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path, array $data, bbn\\mvc\\controller $ctrl, $plugin, $ttl = NULL)\n  {\n  }",
+            "startLine": 704,
+            "doc": null,
+            "endLine": 706,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 4,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ctrl",
+                    "position": 2,
+                    "type": "bbn\\mvc\\controller",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "plugin",
+                    "position": 3,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 4,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_cached_model": {
+            "name": "get_cached_model",
+            "summary": "This will get the model as it is in cache if any and otherwise will save it in cache then return it",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path, array $data, bbn\\mvc\\controller $ctrl, $ttl = 10)\n  {\n      $data = $this->data;\n    }\n    if ( $route = $this->router->route(router::parse($path), 'model') ){\n      $model = new mvc\\model($this->db, $route, $ctrl, $this);\n      return $model->get_from_cache($data, '', $ttl);\n    }\n    return [];\n  }",
+            "startLine": 715,
+            "doc": {
+                "description": "This will get the model as it is in cache if any and otherwise will save it in cache then return it",
+                "params": [],
+                "return": "A data model"
+            },
+            "endLine": 724,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ctrl",
+                    "position": 2,
+                    "type": "bbn\\mvc\\controller",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 3,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 10,
+                    "default_name": ""
+                }
+            ]
+        },
+        "set_cached_model": {
+            "name": "set_cached_model",
+            "summary": "This will set the model in cache",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path, array $data, bbn\\mvc\\controller $ctrl, $ttl = 10)\n  {\n      $data = $this->data;\n    }\n    if ( $route = $this->router->route(router::parse($path), 'model') ){\n      $model = new mvc\\model($this->db, $route, $ctrl, $this);\n      return $model->model_set_cache($data, '', $ttl);\n    }\n    return [];\n  }",
+            "startLine": 733,
+            "doc": {
+                "description": "This will set the model in cache",
+                "params": [],
+                "return": "A data model"
+            },
+            "endLine": 742,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ctrl",
+                    "position": 2,
+                    "type": "bbn\\mvc\\controller",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 3,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": 10,
+                    "default_name": ""
+                }
+            ]
+        },
+        "delete_cached_model": {
+            "name": "delete_cached_model",
+            "summary": "This will unset the model in cache",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path, array $data, bbn\\mvc\\controller $ctrl)\n  {\n      $data = $this->data;\n    }\n    if ( $route = $this->router->route(router::parse($path), 'model') ){\n      $model = new mvc\\model($this->db, $route, $ctrl, $this);\n      return $model->delete_cache($data, '');\n    }\n    return [];\n  }",
+            "startLine": 752,
+            "doc": {
+                "description": "This will unset the model in cache",
+                "params": [],
+                "return": "A data model"
+            },
+            "endLine": 761,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 1,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ctrl",
+                    "position": 2,
+                    "type": "bbn\\mvc\\controller",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "add_inc": {
+            "name": "add_inc",
+            "summary": "Adds a property to the MVC object inc if it has not been declared.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name, $obj)\n  {\n\t\t\t$this->inc->{$name} = $obj;\n\t\t}\n  }",
+            "startLine": 768,
+            "doc": {
+                "description": "Adds a property to the MVC object inc if it has not been declared.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 772,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "obj",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "process": {
+            "name": "process",
+            "summary": "Returns the rendered result from the current mvc if successufully processed",
+            "description": "process() (or check()) must have been called before.",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "process() (or check()) must have been called before."
+                }
+            ],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $this->obj = new \\stdClass();\n      if ( !\\is_array($this->info)){\n        $this->log(\"No info in MVC\", $this->info);\n        die(\"No info in MVC\");\n      }\n      if ( !$this->controller ){\n        $this->controller = new mvc\\controller($this, $this->info, $this->data, $this->obj);\n      }\n      $this->controller->process();\n    }\n  }",
+            "startLine": 780,
+            "doc": {
+                "description": "Returns the rendered result from the current mvc if successufully processed\nprocess() (or check()) must have been called before.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 792,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "has_content": {
+            "name": "has_content",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return $this->controller->has_content();\n    }\n    return false;\n  }",
+            "startLine": 794,
+            "doc": null,
+            "endLine": 799,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "transform": {
+            "name": "transform",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($fn)\n  {\n      $this->controller->transform($fn);\n    }\n  }",
+            "startLine": 801,
+            "doc": null,
+            "endLine": 805,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "fn",
+                    "position": 0,
+                    "type": "callable",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "output": {
+            "name": "output",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $obj = $this->controller->get();\n      if ($this->is_cli()){\n        die(isset($obj->content) ? $obj->content : \"no output\");\n      }\n      if ( \\is_array($obj) ){\n        $obj = x::to_object($obj);\n      }\n\t\t\tif ( (\\gettype($obj) !== 'object') || (\\get_class($obj) !== 'stdClass') ){\n\t\t\t\tdie(x::dump(\"Unexpected output: \".\\gettype($obj)));\n\t\t\t}\n\t\t\tif ( x::count_properties($this->obj) ){\n\t\t\t  $obj = x::merge_objects($obj, $this->obj);\n      }\n      $output = new mvc\\output($obj, $this->get_mode());\n      $output->run();\n    }\n    else{\n      header('HTTP\/1.0 404 Not Found');\n      exit();\n    }\n  }",
+            "startLine": 807,
+            "doc": null,
+            "endLine": 829,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_db": {
+            "name": "get_db",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ( self::$db_in_controller && $this->db ){\n      return $this->db;\n    }\n    return null;\n  }",
+            "startLine": 834,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 840,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bbn\\db",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "set_prepath": {
+            "name": "set_prepath",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path)\n  {\n      if ( $this->router->get_prepath(false) === $path ){\n        return 1;\n      }\n      if ( $this->env->set_prepath($path) && $this->router->set_prepath($path) ){\n        $this->params = $this->get_params();\n        return 1;\n      }\n    }\n    die(\"The set_prepath method cannot be used in this MVC\");\n  }",
+            "startLine": 842,
+            "doc": null,
+            "endLine": 853,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_prepath": {
+            "name": "get_prepath",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return $this->router->get_prepath();\n    }\n  }",
+            "startLine": 855,
+            "doc": null,
+            "endLine": 859,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_routes": {
+            "name": "get_routes",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($type = 'root')\n  {\n      $routes = $this->router->get_routes();\n      return isset($routes[$type]) ? $routes[$type] : false;\n    }\n  }",
+            "startLine": 861,
+            "doc": null,
+            "endLine": 866,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "type",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "root",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_instance": {
+            "name": "get_instance",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 25,
+            "doc": null,
+            "endLine": 27,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "singleton_exists": {
+            "name": "singleton_exists",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 29,
+            "doc": null,
+            "endLine": 31,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $ar = \\func_get_args();\n      bbn\\x::log(\\count($ar) > 1 ? $ar : $ar[0], 'mvc');\n    }\n  }",
+            "startLine": 49,
+            "doc": null,
+            "endLine": 54,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "plugin_data_path": {
+            "name": "plugin_data_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin = NULL)\n  {\n    if ( ($this->_plugin || $plugin) && \\defined ('BBN_DATA_PATH') ){\n      return BBN_DATA_PATH.'plugins\/'.$this->plugin_name($plugin ?: $this->_plugin).'\/';\n    }\n    return null;\n  }",
+            "startLine": 56,
+            "doc": null,
+            "endLine": 62,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_aliases": {
+            "name": "get_aliases",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 96,
+            "doc": null,
+            "endLine": 98,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "app_path": {
+            "name": "app_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($raw = false)\n  {\n    return \\bbn\\mvc::get_app_path($raw);\n  }",
+            "startLine": 104,
+            "doc": null,
+            "endLine": 107,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "raw",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "lib_path": {
+            "name": "lib_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return \\bbn\\mvc::get_lib_path();\n  }",
+            "startLine": 109,
+            "doc": null,
+            "endLine": 112,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "data_path": {
+            "name": "data_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin = NULL)\n  {\n    return \\bbn\\mvc::get_data_path().($plugin ? 'plugins\/'.$plugin.'\/' : '');\n  }",
+            "startLine": 114,
+            "doc": null,
+            "endLine": 117,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "tmp_path": {
+            "name": "tmp_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin = NULL)\n  {\n    return \\bbn\\mvc::get_tmp_path($plugin);\n  }",
+            "startLine": 119,
+            "doc": null,
+            "endLine": 122,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "log_path": {
+            "name": "log_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin = NULL)\n  {\n    return \\bbn\\mvc::get_log_path($plugin);\n  }",
+            "startLine": 124,
+            "doc": null,
+            "endLine": 127,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "cache_path": {
+            "name": "cache_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin = NULL)\n  {\n    return \\bbn\\mvc::get_cache_path($plugin);\n  }",
+            "startLine": 129,
+            "doc": null,
+            "endLine": 132,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "content_path": {
+            "name": "content_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin = NULL)\n  {\n    return \\bbn\\mvc::get_content_path($plugin);\n  }",
+            "startLine": 134,
+            "doc": null,
+            "endLine": 137,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "user_tmp_path": {
+            "name": "user_tmp_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user = NULL, $plugin = NULL)\n  {\n    return \\bbn\\mvc::get_user_tmp_path($id_user, $plugin);\n  }",
+            "startLine": 139,
+            "doc": null,
+            "endLine": 142,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "plugin",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "user_data_path": {
+            "name": "user_data_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\mvc",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user = NULL, $plugin = NULL)\n  {\n    return \\bbn\\mvc::get_user_data_path($id_user, $plugin);\n  }",
+            "startLine": 144,
+            "doc": null,
+            "endLine": 147,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "plugin",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": {
+        "inc": {
+            "visibility": "public",
+            "doc": {
+                "description": "An external object that can be filled after the object creation and can be used as a global with the function add_inc",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "stdClass"
+                    }
+                ]
+            }
+        },
+        "data": {
+            "visibility": "public",
+            "doc": {
+                "description": "An external object that can be filled after the object creation and can be used as a global with the function add_inc",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "stdClass"
+                    }
+                ]
+            }
+        },
+        "o": {
+            "visibility": "public"
+        },
+        "obj": {
+            "visibility": "public",
+            "doc": {
+                "description": "The output object",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "null|object"
+                    }
+                ]
+            }
+        },
+        "reserved": {
+            "static": true,
+            "visibility": "public",
+            "value": [
+                "_private",
+                "_common",
+                "_htaccess"
+            ]
+        }
+    },
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 81,
+    "numProperties": 5,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [
+        "bbn\\mvc\\api"
+    ],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\models\\tts\\singleton",
+        "bbn\\mvc\\common"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "_loaded_views": {
+            "html": [],
+            "css": [],
+            "js": []
+        },
+        "_is_debug": 1,
+        "_app_name": "apst",
+        "_app_path": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/",
+        "_cur_path": "\/",
+        "_lib_path": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/",
+        "_data_path": "\/home\/thomas\/domains\/apstapp.thomas.lan\/APST_DATA\/",
+        "db_in_controller": true,
+        "reserved": [
+            "_private",
+            "_common",
+            "_htaccess"
+        ],
+        "singleton_instance": {
+            "inc": {
+                "options": {},
+                "session": {},
+                "user": {
+                    "db": {
+                        "last_error": false,
+                        "debug": false,
+                        "engine": "mysql",
+                        "host": "mysql.lan",
+                        "username": "bbn",
+                        "current": "apst_app"
+                    },
+                    "prev_time": null
+                },
+                "pref": {},
+                "perm": {},
+                "outils": {}
+            },
+            "data": [],
+            "o": {
+                "options": {},
+                "session": {},
+                "user": {
+                    "db": {
+                        "last_error": false,
+                        "debug": false,
+                        "engine": "mysql",
+                        "host": "mysql.lan",
+                        "username": "bbn",
+                        "current": "apst_app"
+                    },
+                    "prev_time": null
+                },
+                "pref": {},
+                "perm": {},
+                "outils": {}
+            },
+            "obj": {}
+        },
+        "singleton_exists": 1,
+        "controller": null,
+        "db": null,
+        "env": null,
+        "router": null,
+        "info": null,
+        "root": null,
+        "plugins": null,
+        "loaded": {
+            "views": {
+                "html": [],
+                "css": [],
+                "js": []
+            },
+            "models": [],
+            "ctrls": []
+        },
+        "inc": null,
+        "data": [],
+        "o": null,
+        "obj": null,
+        "_mvc": null,
+        "_plugin": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn",
+    "shortName": "mvc"
+}

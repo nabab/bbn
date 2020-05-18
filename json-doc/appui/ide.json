@@ -1,0 +1,3616 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\appui\\ide",
+    "namespace": true,
+    "traits": [
+        "bbn\\models\\tts\\optional",
+        "bbn\\mvc\\common"
+    ],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/appui\/ide.php",
+    "startLine": 10,
+    "endLine": 3360,
+    "contentConstructor": {
+        "file": "bbn\\appui\\ide",
+        "returns": null
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "ide constructor.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(bbn\\db $db, bbn\\appui\\options $options, $routes, bbn\\user\\preferences $pref, $project = '', $plugin = 'appui-ide')\n  {\n    $this->options = $options;\n    $this->routes = $routes;\n    $this->pref = $pref;\n    $this->fs = new \\bbn\\file\\system();\n    $this->origin = $plugin;\n    $this->set_project($project);\n  }",
+            "startLine": 1222,
+            "doc": {
+                "description": "ide constructor.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "\\bbn\\appui\\options",
+                        "name": "$options"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$routes"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "\\bbn\\user\\preferences",
+                        "name": "$pref"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1230,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 6,
+            "numberOfRequiredParameters": 4,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "bbn\\db",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "options",
+                    "position": 1,
+                    "type": "bbn\\appui\\options",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "routes",
+                    "position": 2,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "pref",
+                    "position": 3,
+                    "type": "bbn\\user\\preferences",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "project",
+                    "position": 4,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "plugin",
+                    "position": 5,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "appui-ide",
+                    "default_name": ""
+                }
+            ]
+        },
+        "init": {
+            "name": "init",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $this->repository_default = '';\n      $this->repositories = $this->get_repositories();\n      foreach( $this->repositories as $i => $rep ){\n        if ( empty($this->repository_default) ){\n          $this->repository_default = $rep['name'];\n        }\n        $this->repositories[$i]['root_path'] = $this->get_root_path($rep['name']);\n        if ( !empty($rep['default']) ){\n          $this->repository_default = $rep['name'];\n        }\n      }\n    }\n  }",
+            "startLine": 1232,
+            "doc": null,
+            "endLine": 1246,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_default_repository": {
+            "name": "get_default_repository",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 1248,
+            "doc": null,
+            "endLine": 1250,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "set_project": {
+            "name": "set_project",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project)\n  {\n    \/\/case project is uid\n    if ( \\bbn\\str::is_uid($project) && !empty($rep = $this->options->option($project)) ){\n      $this->projects = new \\bbn\\appui\\project($this->db, $project);\n      $project_name = $rep['name'];\n    }\n    \/\/case project is name\n    elseif( (strlen($project) > 0) && !empty($opt = $this->options->from_code($project, self::IDE_PROJECTS, self::BBN_APPUI)) ){\n      $this->projects = new \\bbn\\appui\\project($this->db, $opt);\n      $project_name = $project;\n    }\n    \/\/ case project is not defined get default\n    elseif ( defined('BBN_PROJECT_NAME') && !empty($opt = $this->options->from_code(constant('BBN_PROJECT_NAME'), self::IDE_PROJECTS, self::BBN_APPUI)) ){\n      $this->projects = new \\bbn\\appui\\project($this->db, $opt);\n      $project_name = constant('BBN_PROJECT_NAME');\n    }\n    $this->project = $project_name;\n    if ( $project_name && !empty($this->projects) ){\n      $this->init();\n      $this->_ide_path();\n    }\n    return $project_name;\n  }",
+            "startLine": 1252,
+            "doc": null,
+            "endLine": 1275,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_project": {
+            "name": "is_project",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($url)\n  {\n    \/\/$repository = $this->repositories($rep);\n    $repository = $this->repository($rep);\n    if ( is_array($repository) && !empty($repository) ){\n      if ( ($repository['alias_code'] === 'bbn-project') ){\n        return true;\n      }\n    }\n    return false;\n  }",
+            "startLine": 1277,
+            "doc": null,
+            "endLine": 1287,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_origin": {
+            "name": "get_origin",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 1289,
+            "doc": null,
+            "endLine": 1291,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "is_component": {
+            "name": "is_component",
+            "summary": "Checks if a repository is a Component manager",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($rep)\n  {\n    $rep = $this->repository($rep);\n    if ( $rep && isset($rep['tabs']) && ($rep['alias_code']  === \"components\") ){\n      return true;\n    }\n    return false;\n  }",
+            "startLine": 1299,
+            "doc": {
+                "description": "Checks if a repository is a Component manager",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$rep"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1306,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "rep",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_component_from_url": {
+            "name": "is_component_from_url",
+            "summary": "Checks if a repository is a Component from URL",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($url)\n  {\n    if ( is_array($ele) ){\n      if ( $ele[2] === 'components' ){\n        return true;\n      }\n    }\n    return false;\n  }",
+            "startLine": 1314,
+            "doc": {
+                "description": "Checks if a repository is a Component from URL",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1322,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_lib_from_url": {
+            "name": "is_lib_from_url",
+            "summary": "Checks if is a Lib from URL",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($url)\n  {\n    if ( is_array($ele) ){\n      if ( $ele[2] === 'lib' ){\n        return true;\n      }\n    }\n    return false;\n  }",
+            "startLine": 1330,
+            "doc": {
+                "description": "Checks if is a Lib from URL",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1338,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_cli_from_url": {
+            "name": "is_cli_from_url",
+            "summary": "Checks if is a Cli from URL",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($url)\n  {\n    if ( is_array($ele) ){\n      if ( $ele[2] === 'cli' ){\n        return true;\n      }\n    }\n    return false;\n  }",
+            "startLine": 1346,
+            "doc": {
+                "description": "Checks if is a Cli from URL",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1354,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "list_tabs_with_file": {
+            "name": "list_tabs_with_file",
+            "summary": "Function that returns the list of tab that contains a file or not for mvc and component",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($type, $path, $repository)\n  {\n    $list = [];\n    $root = $this->get_root_path($repository);\n    if ( $type === 'mvc' ){\n      if ( is_string($path) ){\n        if ( strpos($path, 'mvc\/') === 0 ){\n          $path = substr($path, 4);\n        }\n        if ( strpos($path, '\/mvc') === 0 ){\n          $path = substr($path, 5);\n        }\n      }\n    }\n\n    $tabs = $this->tabs_of_type_project($type);\n\n    if ( is_string($path) && is_array($tabs) ){\n      foreach($tabs as $tab){\n        $exist= false;\n        if ( $type === 'mvc' ){\n          $file =  $root.'mvc\/'.$tab['path'].$path.'.';\n        }\n        elseif ( $type === 'components' ){\n          $file = $root. $path.'.';\n        }\n        foreach($tab['extensions'] as $ext ){\n          if ( $this->fs->exists($file.$ext['ext']) ){\n            $exist= true;\n            break;\n          }\n        }\n        if ( ($exist === false) && !in_array($tab['url'], $list) ){\n          $list[] = $tab['url'];\n        }\n      }\n      return $list;\n    }\n    return false;\n  }",
+            "startLine": 1363,
+            "doc": {
+                "description": "Function that returns the list of tab that contains a file or not for mvc and component",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "type project of check"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path",
+                        "description": "path project"
+                    }
+                ],
+                "return": "list file with property extension and value the path of the file existing or not"
+            },
+            "endLine": 1402,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "type",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "type project of check"
+                },
+                {
+                    "name": "path",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "path project"
+                },
+                {
+                    "name": "repository",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "has_error": {
+            "name": "has_error",
+            "summary": "Returns true if the error function has been called.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 1409,
+            "doc": {
+                "description": "Returns true if the error function has been called.",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 1411,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_last_error": {
+            "name": "get_last_error",
+            "summary": "Returns last recorded error, and null if none.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 1418,
+            "doc": {
+                "description": "Returns last recorded error, and null if none.",
+                "params": [],
+                "return": "last recorded error, and null if none"
+            },
+            "endLine": 1420,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_repositories": {
+            "name": "get_repositories",
+            "summary": "Makes the repositories' configurations.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project_name = '')\n  {\n  }",
+            "startLine": 1430,
+            "doc": {
+                "description": "Makes the repositories' configurations.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code",
+                        "description": "The repository's name (code)"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1432,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project_name",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The repository's name (code)"
+                }
+            ]
+        },
+        "repository": {
+            "name": "repository",
+            "summary": "Gets a repository's configuration.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($name)\n  {\n  }",
+            "startLine": 1440,
+            "doc": {
+                "description": "Gets a repository's configuration.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code",
+                        "description": "The repository's name (code)"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1442,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The repository's name (code)"
+                }
+            ]
+        },
+        "repository_by_id": {
+            "name": "repository_by_id",
+            "summary": "Returns the repository object basing on the given id",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id)\n  {\n  }",
+            "startLine": 1450,
+            "doc": {
+                "description": "Returns the repository object basing on the given id",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1452,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "repository_from_url": {
+            "name": "repository_from_url",
+            "summary": "Returns the repository's name or object from an URL.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($url, $obj = false)\n  {\n    return $this->projects->repository_from_url($url, $obj);\n  }",
+            "startLine": 1461,
+            "doc": {
+                "description": "Returns the repository's name or object from an URL.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$obj"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1464,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "obj",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_MVC": {
+            "name": "is_MVC",
+            "summary": "Checks if a repository is a MVC",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $rep)\n  {\n       ($rep['alias_code'] === 'mvc')\n    ){\n      return true;\n    }\n    return false;\n  }",
+            "startLine": 1472,
+            "doc": {
+                "description": "Checks if a repository is a MVC",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$rep"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1479,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "rep",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_MVC_from_url": {
+            "name": "is_MVC_from_url",
+            "summary": "Checks if a repository is a MVC from URL",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($url)\n  {\n    if ( is_array($ele) ){\n      if ( $ele[2] === 'mvc' ){\n        return true;\n      }\n    }\n    return false;\n  }",
+            "startLine": 1487,
+            "doc": {
+                "description": "Checks if a repository is a MVC from URL",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1495,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "decipher_path": {
+            "name": "decipher_path",
+            "summary": "Replaces the constant at the first part of the path with its value.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($st)\n  {\n    $st = \\bbn\\str::parse_path($st);\n    \/\/get root absolute of the file\n    foreach( $this->repositories as $i => $rep){\n      if ( strpos($st, $rep['name']) === 0 ){\n        $root = $rep['root_path'];\/\/$this->get_root_path($i);\n        $bit_rep = explode('\/', $i);\n        break;\n      }\n    }\n    \/\/the root of the file is removed\n    if ( !empty($root) && !empty($bit_rep) ){\n      $bits = explode('\/', $st);\n      $part_bits = array_diff($bits, $bit_rep);\n      array_shift($part_bits);\n      \/** @var string $path The path that will be returned *\/\n      $path = $root.'\/'.implode('\/', $part_bits);\n      return  \\bbn\\str::parse_path($path);\n    }\n    return false;\n  }",
+            "startLine": 1504,
+            "doc": {
+                "description": "Replaces the constant at the first part of the path with its value.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$st"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1525,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_app_path": {
+            "name": "get_app_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 1527,
+            "doc": null,
+            "endLine": 1529,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_lib_path": {
+            "name": "get_lib_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 1531,
+            "doc": null,
+            "endLine": 1533,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_data_path": {
+            "name": "get_data_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin = '')\n  {\n      if ( (strlen($plugin) > 0) &&\n        empty(array_search(substr($plugin, strlen('appui-')),array_keys($this->routes)))\n      ){\n        return false;\n      }\n    }\n    return $this->projects->get_data_path($plugin);\n  }",
+            "startLine": 1535,
+            "doc": null,
+            "endLine": 1544,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_name_project": {
+            "name": "get_name_project",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 1546,
+            "doc": null,
+            "endLine": 1548,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_root_path": {
+            "name": "get_root_path",
+            "summary": "Gets the real root path from a repository's id as recorded in the options.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($rep)\n  {\n  }",
+            "startLine": 1556,
+            "doc": {
+                "description": "Gets the real root path from a repository's id as recorded in the options.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$repository",
+                        "description": "The repository's name (code) or the repository's configuration"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1558,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "rep",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The repository's name (code) or the repository's configuration"
+                }
+            ]
+        },
+        "load": {
+            "name": "load",
+            "summary": "(Load)s a file.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($url)\n  {\n    $real = $this->url_to_real($url, true);\n\n    if ( is_array($real) &&\n      !empty($real['file']) &&\n      !empty($real['mode']) &&\n      !empty($real['repository'])\n    ){\n\n      $this->set_current_file($real['file']);\n      $f = [\n        'mode' => $real['mode'],\n        'tab' => $real['tab'],\n        'ssctrl' => $real['ssctrl'] ?? 0,\n        'extension' => \\bbn\\str::file_ext(self::$current_file),\n        'permissions' => false,\n        'selections' => false,\n        'line' => false,\n        'char' => false,\n        'marks' => false,\n        'repository' => $real['repository']['code'],\n        \/\/'file' => self::$current_file\n      ];\n\n      if ( $this->fs->is_file(self::$current_file) ){\n       \n        $f['value'] = $this->fs->get_contents(self::$current_file);\n\n        $root = $this->get_root_path($real['repository']['name']);\n\n        $file = substr($real['file'], strlen($root));\n        $file_name = \\bbn\\str::file_ext($real['file'],1)[0];\n\n        $file_path = substr($url,  strlen($real['repository']['name'])+1);\n\n        $file_path = substr($file_path, 0, strpos($file_path,$file_name)-1);\n\n        $val = [\n          'repository' => $real['repository'],\n          'filePath' => dirname($file),\n          'ssctrl' => $real['ssctrl'] ?? 0,\n          'filename' => $file_name,\n          'component_vue' => $this->is_component_from_url($url),\n          'extension'=> \\bbn\\str::file_ext($real['file'],1)[1],\n          'full_path' => \\bbn\\str::parse_path($real['repository']['path'].'\/'.$file),\n          'path' => $file_path, \/\/ substr($file_path,  strlen($real['repository']['path'])+1),\n          'tab' => $real['tab']\n        ];\n\n        if ( $preferences = $this->get_file_preferences($val) ){\n          $f = array_merge($f, $preferences);\n        }\n        if ( ($permissions = $this->get_file_permissions()) && (($this->project === 'apst-app') || (constant('BBN_PROJECT_NAME') === 'apst-app')) ){\n          $f = array_merge($f, $permissions);\n          \/*if ( $id_opt = $this->option_id() ){\n            $val_opt = $this->options->option($id_opt);\n          }*\/\n          \/*if( !empty($val_opt) ){\n            foreach ( $f as $n => $v ){\n              if ( isset($val_opt[$n]) ){\n                $f[$n] = $val_opt[$n];\n              }\n            }\n          }*\/\n        }\n\n      }\n      elseif ( !empty($real['tab']) &&\n       ( ($i = \\bbn\\x::find($real['repository']['tabs'], ['url' => $real['tab']])) !== false )\n      ){\n        if( !empty($real['repository']['tabs'][$i]['extensions'][0]['default']) ){\n          $f['value'] = $real['repository']['tabs'][$i]['extensions'][0]['default'];\n        }\n      }\n      elseif (!empty($real['repository']['extensions'][0]['default'])){\n        $f['value'] = $real['repository']['extensions'][0]['default'];\n      }\n      else {\n        $f['value'] = '';\n      }\n      $f['id'] = self::$current_id;\n      return $f;\n    }\n    return false;\n  }",
+            "startLine": 1569,
+            "doc": {
+                "description": "(Load)s a file.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url",
+                        "description": "File's URL"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1654,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "File's URL"
+                }
+            ]
+        },
+        "save": {
+            "name": "save",
+            "summary": "Saves a file.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $file)\n  {\n      \/*if ( $this->get_origin() !== 'appui-ide' ){\n        die(var_dump(self::$current_file, self::$current_id));\n      }*\/\n\n      \/\/ Delete the file if code is empty and if it isn't a super controller\n      if ( empty($file['code']) && ($file['tab'] !== '_ctrl') ){\n\n        if ( @unlink(self::$current_file) ){\n          \/\/temporaney\n          if ( $this->get_origin() !== 'appui-ide' ){\n            \/\/ Remove permissions\n            $this->delete_perm();\n          }\n          if ( !empty(self::$current_id) ){\n            \/\/ Remove ide backups ad file preference\n            $this->backup_history( $file ,'delete');\n          }\n          return ['deleted' => true];\n        }\n      }\n      \/\/in case of file create or modify history and if exists file prference modify\n      if ( $this->fs->is_file(self::$current_file) ){\n        $this->backup_history( $file ,'create');\n        $this->backup_preference_files($file, $file['state'], 'change');\n      }\n      elseif ( !$this->fs->is_dir(dirname(self::$current_file)) ){\n        $this->fs->create_path(dirname(self::$current_file));\n      }\n\n      if ( !empty($file['tab']) && ($file['tab'] === 'php') && !$this->fs->is_file(self::$current_file) ){\n        if ( !$this->create_perm_by_real($file['full_path']) ){\n          return $this->error(_(\"Impossible to create the option\"));\n        }\n      }\n   \n      if ( !file_put_contents(self::$current_file, $file['code']) ){\n        return $this->error(_('Error: Save'));\n      };\n      return ['success' => true];\n    }\n    return $this->error(_('Error: Save'));\n  }",
+            "startLine": 1662,
+            "doc": {
+                "description": "Saves a file.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$file"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1705,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "create": {
+            "name": "create",
+            "summary": "Creates a new file|directory",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n      !empty($cfg['repository']['path']) &&\n      !empty($cfg['name']) &&\n      !empty($cfg['path']) &&\n      isset($cfg['is_file'], $cfg['extension'], $cfg['tab'], $cfg['tab_path'], $cfg['type'])\n    ){\n\n      $path = $this->get_root_path($cfg['repository']['name']);\n\n      if ( ($cfg['repository']['alias_code'] === 'bbn-project') && !empty($cfg['type']) ){\n        if ( $cfg['type'] === 'components' ){\n          $path .= $cfg['path'].$cfg['name'];\n        }\n        if ( $cfg['type'] === 'mvc' ){\n          if ( $cfg['path'] === 'mvc\/' ){\n            $path .= 'mvc\/'.$cfg['tab_path'];\n          }\n          else{\n            $path .= 'mvc\/'.$cfg['tab_path'].$cfg['path'];\n          }\n        }\n        if ( ($cfg['type'] === 'lib') || ($cfg['type'] === 'cli') ){\n          $path .= $cfg['path'];\n        }\n      }\n      else {\n        if ( !empty($cfg['tab_path']) ){\n          $path .= $cfg['tab_path'];\n        }\n      }\n\n      if ( ($cfg['path'] !== '.\/') && empty($cfg['type']) ){\n        $path .= $cfg['path'];\n      }\n\n\n      \/\/ New folder\n      if ( empty($cfg['is_file']) ){\n        if ( $this->fs->is_dir($path.$cfg['name']) ){\n          $this->error(_(\"Directory exists\"));\n          return false;\n        }\n        if ( (($cfg['repository']['alias_code'] !== 'bbn-project')) ||\n          (($cfg['repository']['alias_code'] === 'bbn-project') && !empty($cfg['type'])) &&\n           ($cfg['type'] !== 'components')\n        ){\n          $path .= $cfg['name'];\n        }\n        if ( empty($this->fs->create_path($path)) ){\n          $this->error(_(\"Impossible to create the directory\"));\n          return false;\n        }\n        return true;\n      }\n      \/\/ New file\n      elseif ( !empty($cfg['is_file']) && !empty($cfg['extension']) ){\n        $file = $path .'\/'. $cfg['name'] . '.' . $cfg['extension'];\n        $file = str_replace('\/\/','\/', $file);\n        if ( !$this->fs->is_dir($path) && empty($this->fs->create_path($path)) ){\n          $this->error(_(\"Impossible to create the container directory\"));\n          return false;\n        }\n\n        if ( $this->fs->is_dir($path) ){\n          if ( $this->fs->is_file($file) ){\n            $this->error(_(\"File exists\"));\n            return false;\n          }\n          if ( !file_put_contents($file, $cfg['default_text']) ){\n            $this->error(_(\"Impossible to create the file\"));\n            return false;\n          }\n        }\n        \/\/ Add item to options table for permissions\n        if ( (empty($cfg['type']) || ($cfg['type'] !== 'components')) &&\n          !empty($cfg['tab']) && ($cfg['tab_url'] === 'php') && !empty($file)\n        ){\n          if ( !$this->create_perm_by_real($file) ){\n            return $this->error(_(\"Impossible to create the option\"));\n          }\n        }\n        return true;\n      }\n    }\n    return false;\n  }",
+            "startLine": 1713,
+            "doc": {
+                "description": "Creates a new file|directory",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1799,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "copy": {
+            "name": "copy",
+            "summary": "Copies a file or a folder.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n  }",
+            "startLine": 1807,
+            "doc": {
+                "description": "Copies a file or a folder.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1809,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "rename": {
+            "name": "rename",
+            "summary": "Renames a file or a folder.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n  }",
+            "startLine": 1817,
+            "doc": {
+                "description": "Renames a file or a folder.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1819,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "move": {
+            "name": "move",
+            "summary": "Moves a file or a folder.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n  }",
+            "startLine": 1827,
+            "doc": {
+                "description": "Moves a file or a folder.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1829,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "delete": {
+            "name": "delete",
+            "summary": "Renames a file or a folder.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg)\n  {\n  }",
+            "startLine": 1837,
+            "doc": {
+                "description": "Renames a file or a folder.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1839,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_file_permissions": {
+            "name": "get_file_permissions",
+            "summary": "Gets file's permissions",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file = NULL)\n  {\n      $file = self::$current_file;\n    }\n    if ( !empty($file) &&\n      ($id_opt = $this->real_to_perm($file)) &&\n      ($opt = $this->options->option($id_opt))\n    ){\n      $ret = [\n        'permissions' => [\n          'id' => $opt['id'],\n          'code' => $opt['code'],\n          'text' => $opt['text'],\n          'children' => []\n        ]\n      ];\n      if ( isset($opt['help']) ){\n        $ret['permissions']['help'] = $opt['help'];\n      }\n      $sopt = $this->options->full_options($opt['id']);\n      foreach ( $sopt as $so ){\n        array_push($ret['permissions']['children'], [\n          'code' => $so['code'],\n          'text' => $so['text']\n        ]);\n      }\n      return $ret;\n    }\n    return false;\n  }",
+            "startLine": 1851,
+            "doc": {
+                "description": "Gets file's permissions",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file",
+                        "description": "The file's path"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1880,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The file's path"
+                }
+            ]
+        },
+        "create_perm_by_real": {
+            "name": "create_perm_by_real",
+            "summary": "Creates a permission option from a real file\/dir's path",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file, $type = 'file')\n  {\n    if ( !empty($file) &&\n      $this->fs->is_dir($this->get_app_path()) &&\n      \/\/ It must be a controller\n      (strpos($file, '\/mvc\/public\/') !== false)\n    ){\n      $is_file = $type === 'file';\n      \/\/ Check if it's an external route\n      foreach ( $this->routes as $r ){\n        if ( strpos($file, $r['path']) === 0 ){\n          \/\/ Remove route\n          $f = substr($file, \\strpos($file, 'src\/mvc\/public'));\n          \/\/ Remove \/mvc\/public\n          $f = substr($f, \\strlen('src\/mvc\/public'));\n          \/\/ Add the route's name to path\n          $f = $r['url'] . '\/' . $f;\n          break;\n        }\n      }\n    \n      \/\/ Internal route\n      if ( empty($f) ){\n        $root_path = $this->get_app_path().'mvc\/public\/';\n        if ( strpos($file, $root_path) === 0 ){\n          \/\/ Remove root path\n          $f = substr($file, \\strlen($root_path), \\strlen($file));\n        }\n      }\n      if ( !empty($f) ){\n        $bits = \\bbn\\x::remove_empty(explode('\/', $f));\n\n        $code = $is_file ? \\bbn\\str::file_ext(array_pop($bits), 1)[0] : array_pop($bits).'\/';\n        $id_parent = $this->options->from_code(self::BBN_PAGE, self::BBN_PERMISSIONS, self::BBN_APPUI);\n\n        foreach ( $bits as $b ){\n          if ( !$this->options->from_code($b.'\/', $id_parent) ){\n            $this->options->add([\n              'id_parent' => $id_parent,\n              'code' => $b.'\/',\n              'text' => $b\n            ]);\n          }\n          $id_parent = $this->options->from_code($b.'\/', $id_parent);\n        }\n        if ( !$this->options->from_code($code, $id_parent) ){\n          $this->options->add([\n            'id_parent' => $id_parent,\n            'code' => $code,\n            'text' => $code\n          ]);\n        }\n\n        if( !empty($code)  && !empty($opt = $this->options->from_code($code, $id_parent)) ){\n          return $opt;\n        }\n      }\n      elseif ( !$is_file ){\n        return $this->options->from_code(self::BBN_PAGE, self::BBN_PERMISSIONS, self::BBN_APPUI);\n      }\n      return true;\n    }\n    return false;\n  }",
+            "startLine": 1889,
+            "doc": {
+                "description": "Creates a permission option from a real file\/dir's path",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file",
+                        "description": "The real file\/dir's path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "The type of real (file\/dir)"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1952,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The real file\/dir's path"
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "file",
+                    "default_name": "",
+                    "description": "The type of real (file\/dir)"
+                }
+            ]
+        },
+        "delete_perm": {
+            "name": "delete_perm",
+            "summary": "Deletes permission from a real file's path",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file = NULL)\n  {\n    if ( empty($file) ){\n      $file = self::$current_file;\n    }\n    if ( !empty($file) && ($id_opt = $this->real_to_perm($file)) && $this->options->remove($id_opt) ){\n      return true;\n    }\n    return false;\n  }",
+            "startLine": 1960,
+            "doc": {
+                "description": "Deletes permission from a real file's path",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file",
+                        "description": "The real file's path"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1969,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The real file's path"
+                }
+            ]
+        },
+        "change_perm_by_real": {
+            "name": "change_perm_by_real",
+            "summary": "Changes permissions to a file\/dir from the old and new real file\/dir's path",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($old, $new, $type = 'file')\n  {\n    $type = strtolower($type);\n    if ( !empty($old) &&\n      !empty($new) &&\n      !empty($this->fs->exists($new)) &&\n      ($id_opt = $this->real_to_perm($old, $type)) &&\n      !$this->real_to_perm($new, $type)\n    ){\n\n      $is_file = $type === 'file';\n      $code = $is_file ? \\bbn\\str::file_ext(basename($new), 1)[0] : basename($new).'\/';\n      if ( $id_parent = $this->create_perm_by_real(dirname($new).'\/', 'dir') ){\n        $this->options->set_code($id_opt, $code);\n        $this->options->move($id_opt, $id_parent);\n        return true;\n      }\n    }\n    return false;\n  }",
+            "startLine": 1979,
+            "doc": {
+                "description": "Changes permissions to a file\/dir from the old and new real file\/dir's path",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$old",
+                        "description": "The old file\/dir's path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$new",
+                        "description": "The new file\/dir's path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "The type (file\/dir)"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 1998,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "old",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The old file\/dir's path"
+                },
+                {
+                    "name": "new",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The new file\/dir's path"
+                },
+                {
+                    "name": "type",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "file",
+                    "default_name": "",
+                    "description": "The type (file\/dir)"
+                }
+            ]
+        },
+        "move_perm_by_real": {
+            "name": "move_perm_by_real",
+            "summary": "Moves permissions to a file\/dir from the old and new real file\/dir's path",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($old, $new, $type = 'file')\n  {\n    $type = strtolower($type);\n    if ( !empty($old) &&\n      !empty($new) &&\n      !empty($this->fs->exists($new))\n    ){\n      $id_opt = $this->real_to_perm($old, $type);\n      $id_new_opt = $this->real_to_perm($new, $type);\n      if ( empty($id_new_opt) ){\n        $id_new_opt = $this->create_perm_by_real(dirname($new).'\/', 'dir');\n      }\n      if ( ($id_opt !== $id_new_opt) && !empty($id_new_opt) ){\n        $is_file = $type === 'file';\n        $code = $is_file ? \\bbn\\str::file_ext(basename($new), 1)[0] : basename($new).'\/';\n        if ( $id_parent = $this->create_perm_by_real(dirname($new).'\/', 'dir') ){\n          $this->options->set_code($id_opt, $code);\n          $this->options->move($id_opt, $id_parent);\n          return true;\n        }\n      }\n    }\n    return false;\n  }",
+            "startLine": 2008,
+            "doc": {
+                "description": "Moves permissions to a file\/dir from the old and new real file\/dir's path",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$old",
+                        "description": "The old file\/dir's path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$new",
+                        "description": "The new file\/dir's path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "The type (file\/dir)"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 2031,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "old",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The old file\/dir's path"
+                },
+                {
+                    "name": "new",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The new file\/dir's path"
+                },
+                {
+                    "name": "type",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "file",
+                    "default_name": "",
+                    "description": "The type (file\/dir)"
+                }
+            ]
+        },
+        "real_to_perm": {
+            "name": "real_to_perm",
+            "summary": "Returns the permission's id from a real file\/dir's path",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file, $type = 'file')\n  {\n      $file = self::$current_file;\n    }\n    if ( !empty($file) &&\n      $this->fs->is_dir($this->get_app_path()) &&\n      \/\/ It must be a controller\n      (strpos($file, '\/mvc\/public\/') !== false)\n    ){\n      $is_file = $type === 'file';\n      \/\/ Check if it's an external route\n      foreach ( $this->routes as  $r ){\n        if ( strpos($file, $r['path']) === 0 ){\n          \/\/ Remove route\n          $f = substr($file, \\strlen($r['path']), \\strlen($file));\n          \/\/ Remove \/mvc\/public\n          $f = substr($f, \\strlen('src\/mvc\/public'), \\strlen($f));\n          \/\/ Add the route's name to path\n          $f = $r['url'] . '\/' . $f;\n          break;\n        }\n      }\n      \/\/ Internal route\n      if ( empty($f) ){\n        $root_path = $this->get_app_path().'mvc\/public\/';\n        if ( strpos($file, $root_path) === 0 ){\n          \/\/ Remove root path\n          $f = substr($file, \\strlen($root_path), \\strlen($file));\n        }\n      }\n      if ( !empty($f) ){\n        $bits = \\bbn\\x::remove_empty(explode('\/', $f));\n        $code = $is_file ? \\bbn\\str::file_ext(array_pop($bits), 1)[0] : array_pop($bits).'\/';\n        $bits = array_map(function($b){\n          return $b.'\/';\n        }, array_reverse($bits));\n        array_unshift($bits, $code);\n        array_push($bits, $this->_permissions());\n        return $this->options->from_code($bits);\n      }\n    }\n    return false;\n  }",
+            "startLine": 2040,
+            "doc": {
+                "description": "Returns the permission's id from a real file\/dir's path",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file",
+                        "description": "The real file\/dir's path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "The path type (file or dir)"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 2082,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The real file\/dir's path"
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "file",
+                    "default_name": "",
+                    "description": "The path type (file or dir)"
+                }
+            ]
+        },
+        "get_file_preferences": {
+            "name": "get_file_preferences",
+            "summary": "Gets file's preferences",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $cfg = [])\n  {\n    if ( !empty($cfg) ){\n      if ( !empty($backup = $this->get_path_backup($cfg)) && !empty($backup['path_preference']) &&\n        $this->fs->exists($backup['path_preference'].$cfg['filename'].'.json')\n      ){\n        $pref = json_decode($this->fs->get_contents($backup['path_preference'].$cfg['filename'].'.json'), true);\n        if ( !empty($pref) ){\n          return [\n            'selections' => $pref['selections'] ?: [],\n            'marks' => isset($pref['marks']) ? $pref['marks'] : [],\n            'line' => (int)$pref['line'] ?: 0,\n            'char' => (int)$pref['char'] ?: 0,\n          ];\n        }\n      }\n    }\n    return null;\n  }",
+            "startLine": 2094,
+            "doc": {
+                "description": "Gets file's preferences",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$cfg",
+                        "description": "info for get file json"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 2112,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "info for get file json"
+                }
+            ]
+        },
+        "get_theme": {
+            "name": "get_theme",
+            "summary": "Get theme current of the project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $pref_arch = $this->pref->get_class_cfg();\n    \n    $pref = $this->db->select_one( $pref_arch['tables']['user_options'],  $pref_arch['arch']['user_options']['id'], [\n      $pref_arch['arch']['user_options']['id_user'] => $this->pref->get_user(),\n      $pref_arch['arch']['user_options']['id_option'] => $this->projects->get_id()\n    ]);\n    \/\/if there is no preference, the theme value will take it from the option\n    if ( !empty($pref) ){\n      $val =  $this->db->select_one( $pref_arch['tables']['user_options_bits'],  'cfg', [\n        $pref_arch['arch']['user_options_bits']['id_user_option'] => $pref,\n        $pref_arch['arch']['user_options_bits']['id_option'] => $opt_theme,\n      ]);\n      $val = json_decode($val, true);\n      if ( isset($val['theme']) ){\n        return $val['theme'];\n      }\n    }\n    return '';\n  }",
+            "startLine": 2119,
+            "doc": {
+                "description": "Get theme current of the project",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 2139,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "set_theme": {
+            "name": "set_theme",
+            "summary": "Function for set preference theme for every single project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($theme = '')\n  {\n    $pref_arch = $this->pref->get_class_cfg();\n\n    if ( !empty($opt_theme) ){\n      \/\/id_option is the project\n      $pref = $this->db->select_one( $pref_arch['tables']['user_options'],  $pref_arch['arch']['user_options']['id'], [\n        $pref_arch['arch']['user_options']['id_user'] => $this->pref->get_user(),\n        $pref_arch['arch']['user_options']['id_option'] => $this->projects->get_id()\n      ]);\n      \/\/if it does not exist, the preference for user and project is created\n      if ( empty($pref) ){\n        $pref  = $this->pref->add($this->projects->get_id(), []);\n      }\n\n      if ( !empty($pref) ){\n        $id_bit = $this->db->select_one( $pref_arch['tables']['user_options_bits'],  $pref_arch['arch']['user_options_bits']['id'], [\n          $pref_arch['arch']['user_options_bits']['id_user_option'] => $pref,\n          $pref_arch['arch']['user_options_bits']['id_option'] => $opt_theme\n        ]);\n        $cfg = [\n          'id_option' => $opt_theme,\n          'cfg' =>  json_encode(['theme' => $theme])\n        ];\n\n        if ( !empty($id_bit) && \\bbn\\str::is_uid($id_bit) ){\n          if ( !empty($this->pref->update_bit($id_bit, $cfg, true)) ){\n            return true;\n          }\n        }\n        else{\n          if ( !empty($this->pref->add_bit($pref, $cfg)) ){\n            return true;\n          }\n        }\n      }\n    }\n    return false;\n  }",
+            "startLine": 2147,
+            "doc": {
+                "description": "Function for set preference theme for every single project",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$theme"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 2185,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "theme",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "set_recent_file": {
+            "name": "set_recent_file",
+            "summary": "Create or update bit recent file preference",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file)\n  {\n    $bit = false;\n    $id_recent_file = $this->options->from_code(self::RECENT_FILE, self::IDE_PATH, self::BBN_APPUI);\n    if ( !empty($id_recent_file) ){\n      \/\/search preference and if not exsist preference add a new\n      $pref = $this->pref->get_by_option($id_recent_file);\n      $id_pref = !empty($pref) ? $pref['id'] : $this->pref->add($id_recent_file, []);\n    }\n    if ( !empty($id_pref) ){\n      \/\/search bit in relation at user preference\n      $bit_data = $this->get_bit_by_file($file, $id_pref);\n    }\n\n    $date = date('Y-m-d H:i:s');\n    $cfg =[];\n    \/\/set bit\n    if ( ($bit_data !== null) ){\n      $info= json_decode($bit_data['cfg'], true);\n      $cfg = [\n        'id_option' => null,\n        'text' => $file,\n        'cfg' => [\n          'bit_creation' => $info['bit_creation'],\n          'last_date' => $date,\n          'number' => $info['number'] + 1,\n        ]\n      ];\n      if ( !empty($this->pref->update_bit($bit_data['id'], $cfg, true)) ){\n        $bit = true;\n      }\n    }\n    \/\/add bit\n    else{\n      $cfg = [\n        'bit_creation' => $date,\n        'last_date' => $date,\n        'number' => 0,\n      ];\n      if ( !empty($id_pref) && $this->pref->add_bit($id_pref,[\n        \/\/'id_option' => $id_link,\n        'id_option' => null,\n        'cfg' =>  json_encode($cfg),\n        'text' => $file,\n        ])\n      ){\n        $bit = true;\n      }\n    }\n    return !empty($bit) && !empty($id_pref);\n  }",
+            "startLine": 2199,
+            "doc": {
+                "description": "Create or update bit recent file preference",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file",
+                        "description": "code option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "link id option file preference"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 2249,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "code option"
+                }
+            ]
+        },
+        "tracking": {
+            "name": "tracking",
+            "summary": "Add or update option file in repository",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $file, $file_code, array $info, $setRecent = true)\n  {\n    $bit = false;\n    if ( ($id_option_opened = $this->options->from_code(self::OPENED_FILE,self::IDE_PATH, self::BBN_APPUI)) ){\n      \/\/search preference and if not exsist preference add a new\n      $pref = $this->pref->get_by_option($id_option_opened);\n      $id_pref = !empty($pref) ? $pref['id'] : $this->pref->add($id_option_opened, []);\n      $pref_file = $this->backup_preference_files($file, $info, 'create');\n      if ( !empty($pref_file) && !empty($id_pref) ){\n        $file_path = $file['repository']['name'].'\/'.$file_code;\n        $bit_data = $this->get_bit_by_file($pref_file, $id_pref);\n        if ( $bit_data !== null ){\n          $cfg = [\n            'cfg' =>[\n              'last_open' => date('Y-m-d H:i:s')\n            ]\n          ];\n          \/\/set bit why exist\n          if (!empty($this->pref->update_bit($bit_data['id'], $cfg, true)) ){\n            $bit = true;\n          }\n        }\n        \/\/add bit why not exist\n        else {\n          $cfg = [\n            'last_open' => date('Y-m-d H:i:s')\n          ];\n\n          if ( !empty($id_pref) && $this->pref->add_bit($id_pref,[\n            'id_option' => null,\n            'cfg' => json_encode($cfg),\n            'text' => $file_path\n          ])){\n            $bit = true;\n          }\n        }\n        if ( $setRecent ){\n          return !empty($bit) && !empty($pref_file) && !empty($id_pref) && $this->set_recent_file($file_path);\n        }\n        else{\n          return !empty($bit) && !empty($pref_file) && !empty($id_pref);\n        }\n      }\n    }\n    return $pref_file;\n  }",
+            "startLine": 2256,
+            "doc": {
+                "description": "Add or update option file in repository",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 2301,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "file_code",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "info",
+                    "position": 2,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "setRecent",
+                    "position": 3,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_recent_files": {
+            "name": "get_recent_files",
+            "summary": "return list files preferences",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($limit = 10)\n  {\n    $perm = $this->options->from_code(self::RECENT_FILE, self::IDE_PATH, self::BBN_APPUI);\n    $all = [];\n    if ( !empty($perm) ){\n      $pref = $this->pref->get_by_option($perm);\n      if ( !empty($pref['id']) ){\n        $pref_arch = $this->pref->get_class_cfg();\n        $recents =  $this->db->rselect_all([\n          'table' => $pref_arch['tables']['user_options_bits'],\n          'fields' => [\n            $pref_arch['arch']['user_options_bits']['id'],\n            $pref_arch['arch']['user_options_bits']['id_user_option'],\n            $pref_arch['arch']['user_options_bits']['id_option'],\n            $pref_arch['arch']['user_options_bits']['cfg'],\n            $pref_arch['arch']['user_options_bits']['text'],\n            'date' => 'bbn_users_options_bits.cfg->\"$.last_date\"',\n            'num' => 'bbn_users_options_bits.cfg->\"$.number\"'\n          ],\n          'where' => [\n            'conditions' => [[\n              'field' => $pref_arch['arch']['user_options_bits']['id_user_option'],\n              'value' => $pref['id']\n            ]]\n          ],\n          'limit' => 10,\n          'order' =>['date' => \"DESC\"]\n        ]);\n        \/\/configure path for link  for each recent file\n        foreach ( $recents as $id => $bit ){\n          \/\/path for link\n          $arr = explode(\"\/\",$bit['text']);\n          $type = '';\n          $root = $arr[0].'\/'.$arr[1];\n          if ( !empty($arr[2]) ){\n            $type = $arr[2];\n            unset($arr[2]);\n          }\n          unset($arr[0]);\n          unset($arr[1]);\n          if ( ($type !== 'mvc') && ($type !== 'components') ){\n            $tab = 'code';\n          }\n          else{\n\n            $tab = array_shift($arr);\n            $tab = $tab=== 'public' ? 'php' : $tab;\n          }\n\n          $arr = implode('\/', $arr);\n          $file = explode('.', $arr)[0];\n          $path = \\bbn\\str::parse_path('file\/'.$root.'\/'.$type.'\/'.$file.'\/_end_\/'.$tab);\n\n          $value = json_decode($bit['cfg'], true);\n          $all[] = [\n            'cfg' => !empty($value['file_json']) ? json_decode($this->fs->get_contents(self::$backup_path.$value['file_json']), true) : [],\n            'file' =>  \\bbn\\str::parse_path($bit['text']),\n            'repository' =>  $root,\n            'path' => $path,\n            'type' => $type === '' ? false : $type\n          ];\n        }\n      }\n    }\n    return !empty($all) ? $all : null;\n  }",
+            "startLine": 2309,
+            "doc": {
+                "description": "return list files preferences",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$limit",
+                        "description": "file numbers to be taken"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 2374,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "limit",
+                    "position": 0,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 10,
+                    "default_name": "",
+                    "description": "file numbers to be taken"
+                }
+            ]
+        },
+        "real_to_url": {
+            "name": "real_to_url",
+            "summary": "Returns the file's URL from the real file's path.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($file)\n  {\n   \/\/get root for path\n    \/\/foreach ( $this->repositories() as $i => $d ){\n   \/* foreach ( $this->repositories as $i => $d ){\n      $root = $d['root_path'];\n      if (\n        $root &&\n        (strpos($file, $root) === 0)\n      ){\n        $rep = $i;\n        break;\n      }\n    }\n    if ( isset($rep) ){\n      $res = $rep.'\/src\/';\n      $bits = explode('\/', substr($file, \\strlen($root)));\n\n      \/\/ MVC\n      if ( !empty($d['tabs']) ){\n        $tab_path = array_shift($bits);\n        $fn = array_pop($bits);\n        $ext = \\bbn\\str::file_ext($fn);\n        $fn = \\bbn\\str::file_ext($fn, 1)[0];\n        $res .= implode('\/', $bits);\n        foreach ( $d['tabs'] as $k => $t ){\n          if (\n            empty($t['fixed']) &&\n            ($t['path'] === $tab_path . '\/')\n          ){\n            $res .= \"\/$fn\/$t[url]\";\n            break;\n          }\n        }\n      }\n      \/\/ Normal file\n      else {\n        $res .= implode('\/', $bits);\n      }\n      return \\bbn\\str::parse_path($res);\n    }\n    return false;*\/\n  }",
+            "startLine": 2388,
+            "doc": {
+                "description": "Returns the file's URL from the real file's path.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file",
+                        "description": "The real file's path"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 2430,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "file",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The real file's path"
+                }
+            ]
+        },
+        "is_plugin": {
+            "name": "is_plugin",
+            "summary": "check if $path is of a plugin",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path)\n  {\n    if ( is_array($this->routes) ){\n      foreach( $this->routes as $route ){\n        if ( $path === $route['path'].'src\/'){\n          $plugin = true;\n          break;\n        }\n      }\n    }\n    return $plugin;\n  }",
+            "startLine": 2439,
+            "doc": {
+                "description": "check if $path is of a plugin",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 2450,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "url_to_real": {
+            "name": "url_to_real",
+            "summary": "Gets the real file's path from an URL",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($url, $obj = false)\n  {\n    if ( ($rep = $this->repository_from_url($url, true)) &&\n      ($res = $this->get_root_path($rep['name']))\n    ){\n      $plugin = $this->is_plugin($res);\n      \/\/for analyze url for get tab , type etc..\n      $bits = explode('\/', substr($url, \\strlen($rep['name'])+1));\n      \/\/if is project get tabs or if is components or is mvc\n      if ( $rep['alias_code'] === 'bbn-project' ){\n        if ( !empty($this->is_component_from_url($url)) &&\n          !empty($ptype = $this->get_type('components'))\n        ){\n          $rep['tabs'] = $ptype['tabs'];\n        }\n        if ( !empty($this->is_MVC_from_url($url)) &&\n          !empty($ptype = $this->get_type('mvc'))\n        ){\n          $rep['tabs'] = $ptype['tabs'];\n        }\n      }\n\n      $o = [\n        'mode' => false,\n        'repository' => $rep,\n        'tab' => false\n      ];\n      $position_end = $bits[count($bits)-2] === '_end_' ? count($bits)-2 : false;\n      if ( !empty($bits) && $position_end ){\n        \/\/ Tab's nane\n        \/\/case component or mvc\n        if ( !empty($rep['tabs']) && (end($bits) !== 'code') ){\n          \/\/ Tab's nane\n          $tab = $bits[$position_end+1];\n          unset($bits[$position_end+1]);\n          \/\/ File's name\n          $file_name = $bits[$position_end-1];\n          unset($bits[$position_end-1]);\n\n          unset($bits[$position_end]);\n          array_shift($bits);\n          \/\/ File's path\n          $file_path = implode('\/', $bits);\n          \/\/ Check if the file is a superior super-controller\n          $ssc = $this->superior_sctrl($tab, $file_path);\n          $tab = $ssc['tab'];\n          $o['tab'] = $tab;\n          $file_path = $ssc['path'].'\/';\n          if ( ($i = \\bbn\\x::find($rep['tabs'], ['url' => $tab])) !== false ){\n            $tab = $rep['tabs'][$i];\n            if( !empty($this->is_MVC_from_url($url)) ){\n              $res .= 'mvc\/';\n            }\n            if( empty($this->is_component_from_url($url)) ){\n              $res .= $tab['path'];\n            }\n            elseif ( !empty($this->is_component_from_url($url)) ){\n              $res .= 'components\/';\n            }\n            if ( !empty($tab['fixed']) ){\n              $res .= $file_path . $tab['fixed'];\n              $o['mode'] = $tab['extensions'][0]['mode'];\n              $o['ssctrl'] = $ssc['ssctrl'];\n            }\n            else {\n              $res .=  $file_path . $file_name;\n              $ext_ok = false;\n              foreach ( $tab['extensions'] as $e ){\n                if ( $this->fs->is_file(\"$res.$e[ext]\") ){\n                  $res .= \".$e[ext]\";\n                  $ext_ok = true;\n                  $o['mode'] = $e['mode'];\n                  break;\n                }\n              }\n              if ( empty($ext_ok) ){\n                $res .= '.' . $tab['extensions'][0]['ext'];\n                $o['mode'] = $tab['extensions'][0]['mode'];\n              }\n            }\n          }\n          \/*else {\n            return false;\n          }*\/\n        }\n        else {\n          unset($bits[$position_end+1]);\n          \/\/ File's name\n          $file_name = $bits[$position_end-1];\n          unset($bits[$position_end]);\n          $res .= '\/'.implode('\/', $bits);\n          if( is_array($rep) ){\n            \/\/temporaney for lib plugin\n            if ( !empty($rep['extensions'] ) ){\n              foreach ( $rep['extensions'] as $ext ){\n                if ( $this->fs->is_file(\"$res.$ext[ext]\") ){\n                  $res .= \".$ext[ext]\";\n                  $o['mode'] = $ext['mode'];\n                }\n              }\n            }\n            else{\n              if ( $this->fs->is_file($res.'.php') ){\n                $res .= \".php\";\n                $o['mode'] = 'php';\n              }\n            }\n          }\n          if ( empty($o['mode']) && !empty($rep['extensions']) ){\n            $res .= '.' . $rep['extensions'][0]['ext'];\n            $o['mode'] = $rep['extensions'][0]['mode'];\n          }\n        }\n        $res = \\bbn\\str::parse_path($res);\n        if ( $obj ){\n          $o['file'] = $res;\n          return $o;\n        }\n        return $res;\n      }\n    }\n    return false;\n  }",
+            "startLine": 2459,
+            "doc": {
+                "description": "Gets the real file's path from an URL",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url",
+                        "description": "The file's URL"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$obj"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 2581,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file's URL"
+                },
+                {
+                    "name": "obj",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "history": {
+            "name": "history",
+            "summary": "Returns all backups of a file.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($url, array $repository = [], $all = false)\n  {\n    $copy_url = explode(\"\/\", $url);\n    $backups = [];\n    $history_ctrl = [];\n    if ( !empty($repository) && !empty($repository['name']) ){\n      $path = self::$backup_path . $repository['root'].'\/'.substr($url, strpos($url,$repository['code'],1));\n    }\n    else{\n      \/\/ File's backup path\n      $path = self::$backup_path . $url;\n    }\n    if ( !empty($url) && !empty(self::$backup_path) ){\n      $ctrl_path = explode(\"\/\", $path);\n      for($y=0; $y <2; $y++){\n        array_pop($ctrl_path);\n      }\n      \/\/check if there is \"_ctrl\" in the url as the last step of the \"$url\"; in that case we tart $url to give the right path to get it to take its own backup files.\n      if ( end($copy_url) === \"_ctrl\" ){\n        $url = explode(\"\/\", $url);\n        array_pop($url);\n        $url = implode(\"\/\", $url);\n        $check_ctrl_files = true;\n        $copy_url = explode(\"\/\", $url);\n        for($y=0; $y <2; $y++){\n          array_pop($copy_url);\n        }\n        $copy_url = implode(\"\/\", $copy_url).\"\/\".\"_ctrl\";\n      }\n\n      \/\/First, check the presence of _ctrl backups.\n      $ctrl_path = implode(\"\/\", $ctrl_path).\"\/\".\"_ctrl\";\n      \/\/ read _ctrl if exsist\n       if ( $this->fs->is_dir($ctrl_path) ){\n           \/\/If there is a \"_ctrl\" backup, insert it into the array that will be merged with the remaining backup at the end of the function.\n          if ( $files_ctrl = $this->fs->get_files($ctrl_path) ){\n             $mode = basename($ctrl_path);\n\n             $history_ctrl = [\n               'text' => basename($ctrl_path),\n               'icon' => 'folder-icon',\n               'folder' => true,\n               'items' => [],\n               'num_items' => \\count($this->fs->get_files($ctrl_path))\n               \/\/'num_items' => \\count(\\bbn\\file\\dir::get_files($files_ctrl))\n             ];\n\n             \/\/If we are requesting all files with their contents, this block returns to the \"_ctrl\" block.\n             if ( $all === true ){\n\n             foreach ( $files_ctrl as $file ){\n               $filename = \\bbn\\str::file_ext($file, true)[0];\n               $file_name = $filename;\n               $moment = strtotime(str_replace('_', ' ', $filename));\n               $date = date('d\/m\/Y', $moment);\n               $time = date('H:i:s', $moment);\n\n               if ( ($i = \\bbn\\x::find($history_ctrl['items'], ['text' => $date])) === false ){\n                 array_push($history_ctrl['items'], [\n                   'text' => $date,\n                   'items'=> [],\n                   'folder' => true,\n                   'icon' => 'folder-icon'\n                 ]);\n\n                 $i = \\count($history_ctrl['items']) - 1;\n                 if ( ($idx = \\bbn\\x::find($history_ctrl['items'][$i]['items'], ['text' => $time])) === false ){\n                   array_push($history_ctrl['items'][$i]['items'], [\n                     'text' => $time,\n                     'mode' => basename($ctrl_path),\n                     'file' => $file_name,\n                     'ext' => \\bbn\\str::file_ext($file, true)[1],\n                     'uid' => $url,\n                     'folder' => false\n                   ]);\n                 }\n               }\n               else {\n                 $j = \\bbn\\x::find($history_ctrl['items'], ['text' => $date]);\n                 if ( ($idx = \\bbn\\x::find($history_ctrl['items'][$j]['items'], ['text' => $time])) === false ){\n                   array_push($history_ctrl['items'][$j]['items'], [\n                     'text' => $time,\n                     'code' => $this->fs->get_contents($file),\n                     'folder' => false,\n                     'mode' => basename($ctrl_path),\n                     'folder' => false\n                   ]);\n                 }\n               }\n             }\n           }\n           \/\/otherwise pass some useful parameters to get information with other posts see block in case of \"$all\" to false.\n           else{\n             $check_ctrl = true;\n           }\n         }\n       }\n       \/\/taken or not the backup of the \"_ctrl\" we move on to acquire the date of the project, if set to true then as done before, we will take into consideration all the date including the contents of the files.\n      if ( $all === true ){\n\n        \/\/if ( is_dir($path) ){\n        if ( $this->fs->is_dir($path) ){\n          \/\/if we pass a path that contains all the backups\n          if ( $dirs = $this->fs->get_dirs($path) ){\n            if ( !empty($dirs) ){\n              $mode = basename($path) === \"_ctrl\" || basename($path) === \"model\" ? \"php\" : basename($path);\n              foreach ( $dirs as $dir ){\n                \/\/if ( $files = \\bbn\\file\\dir::get_files($dir) ){\n                if ( $files = $this->fs->get_files($dir) ){\n                  foreach ( $files as $file ){\n                    $filename = \\bbn\\str::file_ext($file, true)[0];\n                    $moment = strtotime(str_replace('_', ' ', $filename));\n                    $date = date('d\/m\/Y', $moment);\n                    $time = date('H:i:s', $moment);\n                    if ( ($i = \\bbn\\x::find($backups, ['text' => $date])) === false ){\n                      array_push($backups, [\n                        'text' => $date,\n                        'folder' => true,\n                        'items' => [],\n                        'icon' => 'folder-icon'\n                      ]);\n                      $i = \\count($backups) - 1;\n                    }\n                    if ( ($idx = \\bbn\\x::find($backups[$i]['items'], ['title' => $d])) === false ){\n                      array_push($backups[$i]['items'], [\n                        'text' => $d,\n                        'folder' => true,\n                        'items' => [],\n                        'icon' => 'folder-icon'\n                      ]);\n                      $idx = \\count($backups[$i]['items']) - 1;\n                    }\n                    array_push($backups[$i]['items'][$idx]['items'], [\n                      'text' => $time,\n                      'mode' => $mode,\n                      'code' => $this->fs->get_contents($file),\n                      'folder' => false\n                    ]);\n                  }\n                }\n              }\n            }\n          }\n          \/\/If we pass a path that contains the specific backups of a type and is set to \"$all\" to true then all backups of this type will return.\n          else {\n            if ( $files = $this->fs->get_files($path) ){\n              if ( !empty($files) ){\n                $mode = basename($path) === \"_ctrl\" || basename($path) === \"model\" ? \"php\" : basename($path);\n                foreach ( $files as $file ){\n\n                  $filename = \\bbn\\str::file_ext($file, true)[0];\n                  $file_name = $filename;\n                  $moment = strtotime(str_replace('_', ' ', $filename));\n                  $date = date('d\/m\/Y', $moment);\n                  $time = date('H:i:s', $moment);\n\n                  if ( ($i = \\bbn\\x::find($backups, ['text' => $date])) === false ){\n                    array_push($backups, [\n                      'text' => $date,\n                      'folder' => true,\n                      'items' => [],\n                      'icon' => 'folder-icon'\n                    ]);\n\n                    $i = \\count($backups) - 1;\n                    if ( ($idx = \\bbn\\x::find($backups[$i]['items'], ['text' => $time])) === false ){\n                      array_push($backups[$i]['items'], [\n                        'text' => $time,\n                        'mode' => $mode,\n                        'code' => $this->fs->get_contents($file),\n                        'folder' => false\n                      ]);\n                    }\n                  } else {\n                    $j = \\bbn\\x::find($backups, ['text' => $date]);\n                    if ( ($idx = \\bbn\\x::find($backups[$j]['items'], ['text' => $time])) === false ){\n                      array_push($backups[$j]['items'], [\n                        'text' => $time,\n                        'mode' => $mode,\n                        'code' => $this->fs->get_contents($file),\n                        'folder' => false\n                      ]);\n                    }\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\/\/otherwise returns the useful information for processing and to make any subsequent postings.\n      else {\n        \/\/if we want you to return all the backup information useful to process and make other posts\n        $listDir = $this->fs->get_dirs($path);\n        if ( !empty($listDir) && !isset($check_ctrl_files) ){\n\n          foreach ( $listDir as $val ){\n            array_push($backups, [\n              'text' => basename($val),\n              'icon' => 'folder-icon',\n              'folder' => true,\n              \/\/'num_items' => \\count(\\bbn\\file\\dir::get_files($val))\n              'num_items' => \\count($this->fs->get_files($val))\n            ]);\n          }\n          \/\/If the _ctrl backup folder exists, then it will be added to the list.\n          if( $check_ctrl === true ){\n            array_push($backups, $history_ctrl);\n          }\n        }\/\/If we pass a path that contains the specific backups of a type and is not set \"$all\" then the backup of with useful information for any other posts returns.\n        else {\n          \/\/If we are requesting ctrl backup files then we give it the right path and \"$check_ctrl_files\" is a variable that makes us understand whether or not we ask for backup files of \"_ctrl\".\n          if ( isset($check_ctrl_files) && ($check_ctrl_files === true) ){\n            $url= $copy_url;\n            $path = self::$backup_path . $url;\n          }\n          \/\/if ( $files = \\bbn\\file\\dir::get_files($path) ){\n          if ( $files = $this->fs->get_files($path) ){\n            if ( !empty($files) ){\n              $mode = basename($path) === \"_ctrl\" || basename($path) === \"model\" ? \"php\" : basename($path);\n              foreach ( $files as $file ){\n                if ( \\bbn\\str::file_ext($file, true)[1] !== 'json' ){\n                  $filename = \\bbn\\str::file_ext($file, true)[0];\n                  $file_name = $filename;\n                  $moment = strtotime(str_replace('_', ' ', $filename));\n                  $date = date('d\/m\/Y', $moment);\n                  $time = date('H:i:s', $moment);\n  \n                  if ( ($i = \\bbn\\x::find($backups, ['text' => $date])) === false ){\n                    array_push($backups, [\n                      'text' => $date,\n                      'folder' => true,\n                      'items' => [],\n                      'icon' => 'folder-icon'\n                    ]);\n  \n                    $i = \\count($backups) - 1;\n                    if ( ($idx = \\bbn\\x::find($backups[$i]['items'], ['text' => $time])) === false ){\n                      array_push($backups[$i]['items'], [\n                        'text' => $time,\n                        'mode' => $mode,\n                        'file' => $file_name,\n                        'ext' => \\bbn\\str::file_ext($file, true)[1],\n                        'uid' => $url,\n                        'folder' => false\n                      ]);\n                    }\n                  }\n                  else {\n                    $j = \\bbn\\x::find($backups, ['text' => $date]);\n                    if ( ($idx = \\bbn\\x::find($backups[$j]['items'], ['text' => $time])) === false ){\n                      array_push($backups[$j]['items'], [\n                        'text' => $time,\n                        'mode' => $mode,\n                        'file' => $file_name,\n                        'ext' => \\bbn\\str::file_ext($file, true)[1],\n                        'uid' => $url,\n                        'folder' => false\n                      ]);\n                    }\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n    \/\/If you add the \"_ctrl \" backup, enter it to the rest of the date.\n    if( !empty($history_ctrl) && !empty($backups) && $all === true && $check_ctrl === false  ){\n      array_push($backups, $history_ctrl);\n    }\/\/if you have only the backups of the super _ctrl and no other, it has been differentiated because of different paths\n    else if( !empty($history_ctrl) && empty($backups) && $check_ctrl === true  ){\n      array_push($backups, $history_ctrl);\n    }\n    return $backups;\n  }",
+            "startLine": 2642,
+            "doc": {
+                "description": "Returns all backups of a file.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url",
+                        "description": "The file's URL"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$all",
+                        "description": "Tparameter that allows you to have all the code if it is set to true"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 2917,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The file's URL"
+                },
+                {
+                    "name": "repository",
+                    "position": 1,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "Tparameter that allows you to have all the code if it is set to true"
+                },
+                {
+                    "name": "all",
+                    "position": 2,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_type": {
+            "name": "get_type",
+            "summary": "Returns all data of type repository",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($type)\n  {\n      return self::get_appui_option($type, self::PATH_TYPE);\n    }\n  }",
+            "startLine": 2925,
+            "doc": {
+                "description": "Returns all data of type repository",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "name ohf type"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 2929,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "type",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "name ohf type"
+                }
+            ]
+        },
+        "get_types": {
+            "name": "get_types",
+            "summary": "Returns all data of all types repository",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::get_appui_option(self::PATH_TYPE);\n  }",
+            "startLine": 2936,
+            "doc": {
+                "description": "Returns all data of all types repository",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 2939,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "tabs_of_type_project": {
+            "name": "tabs_of_type_project",
+            "summary": "Returns the tabs of type repository",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($type)\n  {\n      return !empty($ptype['tabs']) ? $ptype['tabs'] : false;\n    }\n  }",
+            "startLine": 2947,
+            "doc": {
+                "description": "Returns the tabs of type repository",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "name ohf type"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 2951,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "type",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "name ohf type"
+                }
+            ]
+        },
+        "search": {
+            "name": "search",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $info)\n  {\n\n    if ( !empty($info['search']) &&\n        !empty($info['nameRepository']) &&\n        !empty($info['repository']) &&\n        isset($info['typeSearch'])\n    ){\n      $list = [];\n      $fileData = [];\n      $result = [];\n      $totLines = 0;\n      $tot_num_files = 0;\n      $occourences = 0;\n      $base =  $info['repository']['name'];\n      $base_rep = $this->get_root_path($base);\n      \/\/function that defines whether the search is sensitive or non-sensitive\n      $typeSearch = function($element, $code, $type){\n        if ( $type === \"sensitive\"){\n          return strpos($element, $code);\n        }\n        else{\n          return stripos($element, $code);\n        }\n      };\n\n      if ( !empty($info['isProject']) ){\n        $part = $info['type'];\n      }\n      else{\n        $part = $info['repository']['path'];\n      }\n\n      $path = $base_rep.$part;\n\n      $all = $this->fs->get_files($path, true);\n      if ( is_array($all) && count($all) ){\n        foreach($all as $i => $v){\n          if ( basename($v) !== \"cfg\"  ){\n            \/\/if folder\n            if ( $this->fs->is_dir($v) ){\n              \/\/case tree\n              if ( !empty($info['searchFolder']) ){\n                if ( !empty($info['mvc']) || ($info['type'] === 'mvc') ){\n                  $content = $v;\n                }\n                else{\n                  $content = $path;\n                }\n                $content .= $info['searchFolder'];\n              }\n              else{\n                $content = $v;\n              }\n\n              $content = $this->fs->scan($content);\n              if ( is_array($content) && count($content) ){\n                foreach ( $content as $j => $val ){\n                  $list = [];\n                  \/\/ case file into folder\n                  if ( $this->fs->is_file($val) ){\n                    $tot_num_files++;\n                    if ( $typeSearch($this->fs->get_contents($val), $info['search'], $info['typeSearch']) !== false ){\n                      $path = $base_rep.$part;\n                      $path_file= $val;\n                      $link = explode(\"\/\", substr($val, strlen($path)+1, strlen($val)));\n                      if ( (!empty($info['isProject']) && $info['type'] === 'mvc') ||\n                        !empty($info['mvc'])\n                      ){\n                        $tab = array_shift($link);\n                        $link = implode('\/', $link);\n                        $link = explode('.', $link);\n                        $link = array_shift($link);\n                      }\n                      elseif ( (!empty($info['isProject']) && ($info['type'] === 'components') ) ||\n                        !empty($info['components'])\n                      ){\n                        $link = implode('\/', $link);\n                        $link = explode('.', $link);\n                        $tab = array_pop($link);\n                        $link = $link[0];\n                      }\n                      elseif (  !empty($info['isProject']) && (($info['type'] === 'lib') || ($info['type'] === 'cli')) ){\n                        $link = implode('\/', $link);\n                        $link = explode('.', $link);\n                        $tab = 'code';\n                        $link = $link[0];\n                      }\n                      elseif( empty($info['isProject']) && empty($info['type']) ) {\n                        $file = $link[count($link)-1];\n                        $file = explode('.', $file);\n                        $tab = array_pop($file);\n                        $link[count($link)-1] = array_shift($file);\n                        $link = implode('\/', $link);\n                      }\n                      \/\/object initialization with every single file to check the lines that contain it\n                      $file = new \\SplFileObject($val);\n                      \/\/cycle that reads all the lines of the file, it means until it has finished reading a file\n                      while( !$file->eof() ){\n                        \/\/current line reading\n                        $lineCurrent = $file->current();\n                        \/\/if we find what we are looking for in this line and that this is not '\\ n' then we will take the coirispjective line number with the key function, insert it into the array and the line number\n                        if ( ($typeSearch($lineCurrent, $info['search'], $info['typeSearch']) !== false) && (strpos($lineCurrent, '\\n') === false) ){\n                          $lineNumber = $file->key()+1;\n                          $name_path = $info['repository']['path'].substr(dirname($val), strlen($base_rep));\n                          $position = $typeSearch($lineCurrent, $info['search'], $info['typeSearch']);\n                          $line = \"<strong>\".'line ' . $lineNumber . ' : '.\"<\/strong>\";\n\n                          $text = $line;\n                          if ( !empty($info['mvc']) ||\n                            (!empty($info['isProject']) && $info['type'] === 'mvc')\n                          ){\n                            if ( $tab === \"public\" ){\n                              $tab = 'php';\n                            }\n                            else{\n                              if ( explode(\"\/\",$path_file)[1] === \"html\" ){\n                                $lineCurrent = htmlentities($lineCurrent);\n                              }\n                            }\n                          }\n                          $text .= str_replace($info['search'], \"<strong><span class='underlineSeach'>\".$info['search'].\"<\/span><\/strong>\", $lineCurrent);\n                          $file_name = basename($path_file);\n                          $path = dirname($base.'\/'.substr($path_file, strlen($base_rep)));\n                          $occourences = $occourences + substr_count($lineCurrent, $info['search']);\n                          \/\/ info for code\n                          $list[] = [\n                            'text' => strlen($text) > 1000 ? $line.\"<strong><i>\"._('content too long to be shown').\"<\/i><\/strong>\" : $text,\n                            'line' =>  $lineNumber-1,\n                            'position' => $position,\n                            'link' => $link,\n                            'tab' =>  !empty($tab) ? $tab : false,\n                            'code' => true,\n                            'uid' => $path.'\/'.$file_name,\n                            'icon' => 'nf nf-fa-code'\n                          ];\n                        }\n                        \/\/next line\n                        $file->next();\n                      }\n                    }\n                  }\n                  \/\/if we find rows then we will create the tree structure with all the information\n                  if ( count($list) > 0 ){\n                    $totLines = $totLines + count($list);\n                    if ( !empty($info['mvc']) ){\n                      if ( explode(\"\/\",$path_file)[1] === \"public\" ){\n                        $tab = 'php';\n                      }\n                      else{\n                        $tab = explode(\"\/\",$path_file)[1];\n                      }\n                      $link =  explode(\".\",substr($path_file, strlen(explode(\"\/\",$path_file)[0].'\/'.explode(\"\/\",$path_file)[1])+1))[0];\n                    }\n                   \/\/info file\n                    $fileData = [\n                      'text' =>  $path.'\/'.$file_name.\"&nbsp;<span class='bbn-badge bbn-s bbn-bg-lightgrey'>\".count($list).\"<\/span>\",\n                      'icon' => 'nf nf-fa-file_code_o',\n                      'numChildren' => count($list),\n                      'repository' => $info['repository']['path'],\n                      'uid' => $path.$file_name,\n                      'file' => basename($path_file),\n                      'link' => !empty($link) ? $link : false,\n                      'tab' =>  !empty($tab) ? $tab : false,\n                      'items' => $list,\n                    ];\n                    $result[] = $fileData;\n\n                    \/\/die(var_dump($path.$name_path,$base_rep));\n                    \/*if ( !isset($result[$path.$name_path]) ){\n                      \/\/info folder\n                      $result[$path.$name_path]= [\n                        'text' => dirname($path.$file_name),\n                        'num' => 1,\n                        'numChildren' => 1,\n                        'items' => [],\n                        'icon' => !empty($info['component']) || ($info['type'] === 'components')  ? 'nf nf-mdi-vuejs' : 'nf nf-fa-folder'\n                      ];\n                      $result[$path.$name_path]['items'][] = $fileData;\n                    }\n                    else {\n                      $ctrlFile = false;\n                      \/\/  check if the file where we found one or more search results is not reinserted\n                      foreach( $result[$path.$name_path]['items'] as $key => $item ){\n                        if ( $item['file'] === dirname($path_file) ){\n                          $ctrlFile = true;\n                        }\n                      }\n                      \/\/if we do not have the file, we will insert it\n                      if ( empty($ctrlFile) ){\n                        $result[$path.$name_path]['items'][] = $fileData;\n                        $result[$path.$name_path]['num']++;\n                        $result[$path.$name_path]['numChildren']++;\n                      }\n                    }*\/\n\n                  }\n                }\n              }\n            } \/\/ file not contained in the folder\n            else {\n              $tot_num_files++;\n              $list= [];\n              if ( $typeSearch($this->fs->get_contents($v), $info['search'], $info['typeSearch']) !== false ){\n                $path_file = substr($v, strpos($v, $info['repository']['path']));\n                $file = new \\SplFileObject($v);\n                while( !$file->eof() ){\n                  $lineCurrent = $file->current();\n                  if ( ($typeSearch($lineCurrent, $info['search'], $info['typeSearch']) !== false) &&\n                    (strpos($lineCurrent, '\\n') === false)\n                  ){\n                    $lineNumber = $file->key()+1;\n                    $link =  explode(\".\",substr($path_file, strlen(explode(\"\/\",$path_file)[0].'\/'.explode(\"\/\",$path_file)[1])+1))[0];\n                    $name_path = substr(dirname($v), strpos($v, $info['repository']['path']));\n                    $position = $typeSearch($lineCurrent, $info['search'], $info['typeSearch']);\n                    $text = \"<strong>\".'line ' . $lineNumber . ' : '.\"<\/strong>\";\n                    $text .= str_replace($info['search'], \"<strong><span class='underlineSeach'>\".$info['search'].\"<\/span><\/strong>\", $lineCurrent);\n                    $occourences = $occourences + substr_count($lineCurrent, $info['search']);\n                    \/\/see\n                    $path = str_replace($base, (strpos($path_file, $this->get_app_path()) === 0 ? 'app\/' : 'lib\/'), $path);\n\n                    if ( !empty($info['mvc']) ){\n                      if ( explode(\"\/\",$path_file)[1] === \"public\" ){\n                        $tab = 'php';\n                      }\n                      else{\n                        $tab = explode(\"\/\",$path_file)[1];\n                      }\n                      $link =  explode(\".\",substr($path_file, strlen(explode(\"\/\",$path_file)[0].'\/'.explode(\"\/\",$path_file)[1])+1))[0];\n                    }\n                    \/\/ info for file\n                    $list[] = [\n                      'text' => strlen($text) > 1000 ?  $line.\"<strong><i>\"._('content too long to be shown').\"<\/i><\/strong>\" : $text,\n                      'line' =>  $lineNumber-1,\n                      'position' => $position,\n                      'code' => true,\n                      'uid' =>  $path.'\/'.$file_name,\n                      'icon' => 'nf nf-fa-code',\n                      'linkPosition' => explode(\".\",substr($path_file, strlen(explode(\"\/\",$path_file)[0].'\/'.explode(\"\/\",$path_file)[1])+1))[0],\n                      'tab' =>  !empty($tab) ? $tab : false\n                    ];\n                  }\n                  $file->next();\n                }\n                if ( count($list) > 0 ) {\n                  $totLines .= count($list);\n                  \/\/ info for file who contain a code\n                  $fileData = [\n                    'text' => basename($path_file),\n                    'icon' => 'nf nf-fa-file_code',\n                    'num' => count($list),\n                    'numChildren' => count($list),\n                    'repository' => $info['repository']['bbn_path'].'\/',\n                    'uid' => $path.'\/'.$file_name,\n                    'file' => basename($path_file),\n                    'link' => !empty($link) ? $link : false,\n                    'tab' => !empty($tab) ? $tab : false,\n                    'items' => $list\n                  ];\n\n                  $result[] = $fileData;\n                }\n              }\n            }\n          }\n        }\n      }\n      if( !empty($result) ){\n        $totFiles = 0;\n        foreach ($result as $key => $value) {\n          $totFiles = $totFiles + $value['items'][0]['numChildren'];\n        }\n        return [\n          'list' => array_values($result),\n          'occurences' => $occourences,\n          'totFiles' => $tot_num_files,\n          'filesFound' => count($result),\/\/$tot_num_files++,\n          'totLines' => $totLines\n        ];\n      }\n    }\n    return false;\n  }",
+            "startLine": 2953,
+            "doc": null,
+            "endLine": 3235,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "info",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "searchAll": {
+            "name": "searchAll",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($seek)\n  {\n      $res = [];\n      $occourences = 0;\n      $totalFiles =  0;\n      $numRepositories = 0;\n      $foundRepos =[];\n      foreach ( $this->repositories as $rep ) {\n        \/\/temporaney \n        if ( $rep['root'] !== 'cdn' ){\n          $totalFiles += $this->fs->get_num_files($rep['root_path']);\n          if ( $found = $this->fs->search($seek, $rep['root_path'], true, false, 'js|php|less|html') ) {\n            foreach ( $found as $fn => $val ){\n              $list = [];\n              \/\/ case file into folder\n              if ( $this->fs->is_file($fn) ){\n                $path_file=  $val;\n                \/\/object initialization with every single file to check the lines that contain it\n                $file = new \\SplFileObject($fn);\n                $totLines = 0;\n                \/\/cycle that reads all the lines of the file, it means until it has finished reading a file\n                while( !$file->eof() ){\n                  \/\/current line reading\n                  $lineCurrent = $file->current();\n                  \/\/if we find what we are looking for in this line and that this is not '\\ n' then we will take the coirispjective line number with the key function, insert it into the array and the line number\n                  if ( !empty($position = strpos($lineCurrent, $seek) !== false) && (strpos($lineCurrent, '\\n') === false) ){\n                    $lineNumber = $file->key()+1;\n                    $name_path = $rep['path'].substr(dirname($val), strlen($base_rep));\n                    $line = \"<strong>\".'line ' . $lineNumber . ' : '.\"<\/strong>\";\n\n                    $text = $line;\n                    $text .= str_replace($seek, \"<strong><span class='underlineSeach'>\".$seek.\"<\/span><\/strong>\", $lineCurrent);\n                    $file_name = basename($path_file);\n\n                    $occourences = $occourences + substr_count($lineCurrent, $seek);\n                    if ( in_array($rep['name'], $foundRepos) === false ){\n                      $foundRepos[] =  $rep['name'];\n                      $numRepositories++;\n                    }\n                    \/\/ info for code\n                    $list[] = [\n                      'text' => strlen($text) > 1000 ? $line.\"<strong><i>\"._('content too long to be shown').\"<\/i><\/strong>\" : $text,\n                      'line' =>  $lineNumber-1,\n                      'position' => $position,\n                     \/\/ 'link' => $link,\n                      'tab' =>  !empty($tab) ? $tab : false,\n                      'code' => true,\n                      'uid' => $rep['path'].'\/'.$file_name,\n                      'icon' => 'nf nf-fa-code'\n                    ];\n                  }\n                  \/\/next line\n                  $file->next();\n                }\n                \/\/if we find rows then we will create the tree structure with all the information\n                if ( count($list) > 0 ){\n                  $totLines = $totLines + count($list);\n                  if ( explode(\"\/\",$path_file)[1] === \"public\" ){\n                    $tab = 'php';\n                  }\n                  else {\n                    $tab = explode(\"\/\",$path_file)[1];\n                  }\n                  $link =  explode(\".\",substr($path_file, strlen(explode(\"\/\",$path_file)[0].'\/'.explode(\"\/\",$path_file)[1])+1))[0];\n                }\n                \/\/info file\n                $ext = \\bbn\\str::file_ext($fn,0);\n                $fileData = [\n                  'text' =>  $rep['name'].'\/'.substr($fn, strlen($rep['root_path'])).\"&nbsp;<span class='bbn-badge bbn-s bbn-bg-lightgrey'>\".count($list).\"<\/span>\",\n                  'icon' => 'nf nf-fa-file_code_o',\n                  'numChildren' => count($list),\n                  'repository' => $rep['name'],\n                  'uid' => $rep['name'].'\/'.substr($fn, strlen($rep['root_path'])),\n                  'file' => basename($fn),\n                  'items' => $list,\n                ];\n\n                $path = explode('\/', substr($fn, strlen($rep['root_path'])));\n                \/\/die(var_dump(\"sss\", $path));\n                if ( $path[0] === 'mvc' ){\n                  if ( $path[1] === \"public\" ){\n                    $tab = 'php';\n                  }\n                  else{\n                    $tab = $path[1];\n                  }\n                }\n                elseif ( $path[0] === 'components' ){\n                  $tab = $ext;\n                  $components = true;\n                }\n                unset($path[1]);\n                $path = implode('\/', $path);\n\n                $link = $components === true ? $rep['name'].'\/'.substr($path, 0,  strpos($path,'.'.$ext)).'\/'.basename($path, '.'.$ext) : $rep['name'].'\/'.substr($path, 0,  strpos($path,'.'.$ext));\n                $fileData['tab'] = !empty($tab) ? $tab : false;\n                $fileData['link'] = $link;\n                foreach ( $fileData['items'] as &$item ){\n                  $item['link'] = $link;\n                  $item['tab'] =   !empty($tab) ? $tab : false;\n                }\n                $result[] = $fileData;\n              }\n            }\n          }\n        }\n      }\n    }\n    if ( !empty($result) ){\n      return [\n        'list' => array_values($result),\n        'occurences' => $occourences,\n        'totFiles' => $totalFiles,\n        'filesFound' => count($result),\n        'repositoriesFound' => $numRepositories,\n        'totalRepositories' => count($this->repositories),\n        'totLines' => $totLines\n      ];\n    }\n    else {\n      return ['success'  => false];\n    }\n  }",
+            "startLine": 3237,
+            "doc": null,
+            "endLine": 3359,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "seek",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_option_root": {
+            "name": "get_option_root",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::$option_root_id;\n  }",
+            "startLine": 71,
+            "doc": null,
+            "endLine": 74,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_root": {
+            "name": "get_appui_root",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::$option_appui_id;\n  }",
+            "startLine": 76,
+            "doc": null,
+            "endLine": 79,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_option_id": {
+            "name": "get_option_id",
+            "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 87,
+            "doc": {
+                "description": "Returns The option's ID of a category, i.e. direct children of option's root",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 89,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options_ids": {
+            "name": "get_options_ids",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return $a !== null;\n    }));\n  }",
+            "startLine": 91,
+            "doc": null,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options_tree": {
+            "name": "get_options_tree",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $tree['items'] : [];\n  }",
+            "startLine": 97,
+            "doc": null,
+            "endLine": 100,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options": {
+            "name": "get_options",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 102,
+            "doc": null,
+            "endLine": 104,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_option": {
+            "name": "get_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 106,
+            "doc": null,
+            "endLine": 108,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_options_text_value": {
+            "name": "get_options_text_value",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      bbn\\appui\\options::get_instance()->text_value_options($id): [];\n  }",
+            "startLine": 110,
+            "doc": null,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_option_id": {
+            "name": "get_appui_option_id",
+            "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 121,
+            "doc": {
+                "description": "Returns The option's ID of a category, i.e. direct children of option's root",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 123,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options_ids": {
+            "name": "get_appui_options_ids",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      return $a !== null;\n    }));\n  }",
+            "startLine": 125,
+            "doc": null,
+            "endLine": 129,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options_tree": {
+            "name": "get_appui_options_tree",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $tree['items'] : [];\n  }",
+            "startLine": 131,
+            "doc": null,
+            "endLine": 134,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options": {
+            "name": "get_appui_options",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 136,
+            "doc": null,
+            "endLine": 138,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_option": {
+            "name": "get_appui_option",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 140,
+            "doc": null,
+            "endLine": 142,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_appui_options_text_value": {
+            "name": "get_appui_options_text_value",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      bbn\\appui\\options::get_instance()->text_value_options($id) : [];\n  }",
+            "startLine": 144,
+            "doc": null,
+            "endLine": 147,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      $ar = \\func_get_args();\n      bbn\\x::log(\\count($ar) > 1 ? $ar : $ar[0], 'mvc');\n    }\n  }",
+            "startLine": 49,
+            "doc": null,
+            "endLine": 54,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "plugin_data_path": {
+            "name": "plugin_data_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin = NULL)\n  {\n    if ( ($this->_plugin || $plugin) && \\defined ('BBN_DATA_PATH') ){\n      return BBN_DATA_PATH.'plugins\/'.$this->plugin_name($plugin ?: $this->_plugin).'\/';\n    }\n    return null;\n  }",
+            "startLine": 56,
+            "doc": null,
+            "endLine": 62,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_plugins": {
+            "name": "get_plugins",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 64,
+            "doc": null,
+            "endLine": 66,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "has_plugin": {
+            "name": "has_plugin",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin)\n  {\n  }",
+            "startLine": 68,
+            "doc": null,
+            "endLine": 70,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "plugin_path": {
+            "name": "plugin_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin = NULL, $raw = false)\n  {\n  }",
+            "startLine": 76,
+            "doc": null,
+            "endLine": 78,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "raw",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "plugin_url": {
+            "name": "plugin_url",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin = NULL)\n  {\n  }",
+            "startLine": 80,
+            "doc": null,
+            "endLine": 82,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "plugin_name": {
+            "name": "plugin_name",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path = NULL)\n  {\n  }",
+            "startLine": 84,
+            "doc": null,
+            "endLine": 86,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_cookie": {
+            "name": "get_cookie",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 88,
+            "doc": null,
+            "endLine": 90,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_routes": {
+            "name": "get_routes",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 92,
+            "doc": null,
+            "endLine": 94,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_aliases": {
+            "name": "get_aliases",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 96,
+            "doc": null,
+            "endLine": 98,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "get_route": {
+            "name": "get_route",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($path, $mode, $root = NULL)\n  {\n  }",
+            "startLine": 100,
+            "doc": null,
+            "endLine": 102,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "mode",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "root",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "app_path": {
+            "name": "app_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($raw = false)\n  {\n    return \\bbn\\mvc::get_app_path($raw);\n  }",
+            "startLine": 104,
+            "doc": null,
+            "endLine": 107,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "raw",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "lib_path": {
+            "name": "lib_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return \\bbn\\mvc::get_lib_path();\n  }",
+            "startLine": 109,
+            "doc": null,
+            "endLine": 112,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "data_path": {
+            "name": "data_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin = NULL)\n  {\n    return \\bbn\\mvc::get_data_path().($plugin ? 'plugins\/'.$plugin.'\/' : '');\n  }",
+            "startLine": 114,
+            "doc": null,
+            "endLine": 117,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "tmp_path": {
+            "name": "tmp_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin = NULL)\n  {\n    return \\bbn\\mvc::get_tmp_path($plugin);\n  }",
+            "startLine": 119,
+            "doc": null,
+            "endLine": 122,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "log_path": {
+            "name": "log_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin = NULL)\n  {\n    return \\bbn\\mvc::get_log_path($plugin);\n  }",
+            "startLine": 124,
+            "doc": null,
+            "endLine": 127,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "cache_path": {
+            "name": "cache_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin = NULL)\n  {\n    return \\bbn\\mvc::get_cache_path($plugin);\n  }",
+            "startLine": 129,
+            "doc": null,
+            "endLine": 132,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "content_path": {
+            "name": "content_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($plugin = NULL)\n  {\n    return \\bbn\\mvc::get_content_path($plugin);\n  }",
+            "startLine": 134,
+            "doc": null,
+            "endLine": 137,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "user_tmp_path": {
+            "name": "user_tmp_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user = NULL, $plugin = NULL)\n  {\n    return \\bbn\\mvc::get_user_tmp_path($id_user, $plugin);\n  }",
+            "startLine": 139,
+            "doc": null,
+            "endLine": 142,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "plugin",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "user_data_path": {
+            "name": "user_data_path",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\appui\\ide",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_user = NULL, $plugin = NULL)\n  {\n    return \\bbn\\mvc::get_user_data_path($id_user, $plugin);\n  }",
+            "startLine": 144,
+            "doc": null,
+            "endLine": 147,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_user",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "plugin",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": {
+        "backup_path": {
+            "static": true,
+            "visibility": "public"
+        },
+        "backup_pref_path": {
+            "static": true,
+            "visibility": "public"
+        }
+    },
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 87,
+    "numProperties": 2,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\models\\tts\\optional",
+        "bbn\\mvc\\common"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "backup_path": null,
+        "backup_pref_path": null,
+        "ide_path": false,
+        "dev_path": false,
+        "path_type": false,
+        "permissions": false,
+        "current_file": false,
+        "current_id": false,
+        "optional_is_init": false,
+        "option_appui_id": null,
+        "option_root_id": null,
+        "project": "",
+        "repository_default": "",
+        "origin": "",
+        "db": null,
+        "options": null,
+        "last_error": null,
+        "routes": [],
+        "pref": null,
+        "projects": null,
+        "repositories_list": [],
+        "_mvc": null,
+        "_plugin": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\appui",
+    "shortName": "ide"
+}

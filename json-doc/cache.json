@@ -1,0 +1,957 @@
+{
+    "doc": {
+        "description": "Universal caching class: called once per request, it holds the cache system.",
+        "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
+            "copyright": "BBN Solutions",
+            "since": "Jan 23, 2016, 23:23:55 +0000",
+            "category": "Cache",
+            "license": "http:\/\/www.opensource.org\/licenses\/mit-license.php MIT"
+        }
+    },
+    "name": "bbn\\cache",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/cache.php",
+    "startLine": 14,
+    "endLine": 493,
+    "contentConstructor": {
+        "file": "bbn\\cache",
+        "returns": null
+    },
+    "methods": {
+        "make_hash": {
+            "name": "make_hash",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cache",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($value)\n  {\n      $value = serialize($value);\n    }\n    return md5($value);\n  }",
+            "startLine": 82,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$value"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 87,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "value",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_type": {
+            "name": "get_type",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cache",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n  }",
+            "startLine": 92,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 94,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "ttl": {
+            "name": "ttl",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cache",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($ttl)\n  {\n      return $ttl;\n    }\n    if ( \\is_string($ttl) ){\n      switch ( $ttl ){\n        case 'xxs':\n          return 30;\n        case 'xs':\n          return 60;\n        case 's':\n          return 300;\n        case 'm':\n          return 3600;\n        case 'l':\n          return 3600*24;\n        case 'xl':\n          return 3600*24*7;\n        case 'xxl':\n          return 3600*24*30;\n      }\n    }\n    return 0;\n  }",
+            "startLine": 100,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$ttl"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 123,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "ttl",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_cache": {
+            "name": "get_cache",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cache",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($engine = NULL)\n  {\n    return self::$engine;\n  }",
+            "startLine": 129,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "null",
+                        "name": "$engine"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 132,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "engine",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "get_engine": {
+            "name": "get_engine",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cache",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function($engine = NULL)\n  {\n  }",
+            "startLine": 138,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "null",
+                        "name": "$engine"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 140,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "engine",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "__construct": {
+            "name": "__construct",
+            "summary": "cache constructor.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($engine = NULL)\n  {\n    if ( self::$is_init ){\n      die(\"Only one cache object can be called. Use static function cache::get_engine()\");\n    }\n\n    if ( function_exists('apc_clear_cache') && (!$engine || ($engine === 'apc')) ){\n      self::_set_type('apc');\n    }\n    else if ( class_exists(\"Memcache\") && (!$engine || ($engine === 'memcache')) ){\n      $this->obj = new \\Memcache();\n      if ( $this->obj->connect(\"127.0.0.1\", 11211) ){\n        self::_set_type('memcache');\n      }\n    }\n    else if ($this->path = mvc::get_cache_path()){\n      file\\dir::create_path($this->path);\n      self::_set_type('files');\n    }\n  }",
+            "startLine": 146,
+            "doc": {
+                "description": "cache constructor.",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "null",
+                        "name": "$engine"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 165,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "engine",
+                    "position": 0,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "has": {
+            "name": "has",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($it, $ttl = 0)\n  {\n    if ( self::$type ){\n      switch ( self::$type ){\n        case 'apc':\n          return apc_exists($it);\n        case 'memcache':\n          return $this->obj->get($it) !== $it;\n        case 'files':\n          $file = self::_file($it, $this->path);\n          if ( is_file($file) ){\n            $t = json_decode(file_get_contents($file), true);\n            if ( \n              (!$ttl || !isset($t['ttl']) || ($ttl === $t['ttl']))\n              && (!$t['expire'] || ($t['expire'] > time()))\n            ) {\n              return true;\n            }\n            unlink($file);\n          }\n          return false;\n      }\n    }\n  }",
+            "startLine": 171,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$it"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 194,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "it",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "delete": {
+            "name": "delete",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($it)\n  {\n      switch ( self::$type ){\n        case 'apc':\n          return apc_delete($it);\n        case 'memcache':\n          return $this->obj->delete($it);\n        case 'files':\n          $file = self::_file($it, $this->path);\n          if ( is_file($file) ){\n            return unlink($file);\n          }\n          return 1;\n      }\n    }\n  }",
+            "startLine": 200,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$it"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 215,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "it",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "delete_all": {
+            "name": "delete_all",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($st = NULL)\n  {\n      $dir = self::_dir($st, $this->path, false);\n      if ( is_dir($dir) ){\n        return file\\dir::delete($dir, $dir === $this->path ? false : true);\n      }\n      else if ( is_file($dir.'.bbn.cache') ){\n        unlink($dir.'.bbn.cache');\n      }\n    }\n    else if ( self::$type ){\n      $its = $this->items($st);\n      $res = 0;\n      foreach ( $its as $it ){\n        if ( !$st || strpos($it, $st) === 0 ){\n          switch ( self::$type ){\n            case 'apc':\n              $res += (int)apc_delete($it);\n              break;\n            case 'memcache':\n              $res += (int)$this->obj->delete($it);\n              break;\n            case 'files':\n              $file = self::_file($it, $this->path);\n              if ( is_file($file) ){\n                $res += (int)unlink($file);\n              }\n              break;\n          }\n        }\n      }\n      return $res;\n    }\n    return false;\n  }",
+            "startLine": 221,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$st"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 255,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "clear": {
+            "name": "clear",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this;\n  }",
+            "startLine": 260,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 263,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "timestamp": {
+            "name": "timestamp",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($it)\n  {\n      return $r['timestamp'];\n    }\n    return false;\n  }",
+            "startLine": 269,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$it"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 274,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "it",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "hash": {
+            "name": "hash",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($it)\n  {\n      return $r['hash'];\n    }\n    return false;\n  }",
+            "startLine": 280,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$it"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 285,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "it",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_new": {
+            "name": "is_new",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($it, $time = NULL)\n  {\n      $time = time();\n    }\n    if ( $r = $this->get_raw($it) ){\n      return $r['timestamp'] > $time;\n    }\n    return true;\n  }",
+            "startLine": 292,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$it"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "null",
+                        "name": "$time"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 300,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "it",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "time",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "set": {
+            "name": "set",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($it, $val, $ttl = 10)\n  {\n      $ttl = self::ttl($ttl);\n      $hash = self::make_hash($val);\n      switch ( self::$type ){\n        case 'apc':\n          return \\apc_store($it, [\n            'timestamp' => microtime(1),\n            'hash' => $hash,\n            'ttl' => $ttl,\n            'value' => $val\n          ], $ttl);\n        case 'memcache':\n          return $this->obj->set($it, [\n            'timestamp' => microtime(1),\n            'hash' => $hash,\n            'ttl' => $ttl,\n            'value' => $val\n          ], false, $ttl);\n        case 'files':\n          $file = self::_file($it, $this->path);\n          if ( $dir = self::_dir($it, $this->path) ){\n            file\\dir::create_path($dir);\n          }\n          $value = [\n            'timestamp' => microtime(1),\n            'hash' => $hash,\n            'expire' => $ttl ? time() + $ttl : 0,\n            'ttl' => $ttl,\n            'value' => $val\n          ];\n          return file_put_contents($file, json_encode($value, JSON_PRETTY_PRINT)) ? true : false;\n      }\n    }\n  }",
+            "startLine": 308,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$it"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$val"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 342,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "it",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "val",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": 10,
+                    "default_name": ""
+                }
+            ]
+        },
+        "is_changed": {
+            "name": "is_changed",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($it, $hash)\n  {\n      return $hash !== $r['hash'];\n    }\n  }",
+            "startLine": 349,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$it"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$hash"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 353,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "it",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "hash",
+                    "position": 1,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "get": {
+            "name": "get",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($it, $ttl = 0)\n  {\n      return $r['value'];\n    }\n    return false;\n  }",
+            "startLine": 388,
+            "doc": null,
+            "endLine": 393,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "it",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "set_get": {
+            "name": "set_get",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($fn, $it, $ttl = 0)\n  {\n    $tmp = $this->get_raw($it, $ttl);\n    if (!$tmp) {\n      $data = $fn();\n      $this->set($it, $data, $ttl);\n    }\n    else {\n      $data = $tmp['value'];\n    }\n    return $data;\n  }",
+            "startLine": 395,
+            "doc": null,
+            "endLine": 406,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "fn",
+                    "position": 0,
+                    "type": "callable",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "it",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 2,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "info": {
+            "name": "info",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      switch ( self::$type ){\n        case 'apc':\n          return apc_cache_info();\n        case 'memcache':\n          return $this->obj->getStats('slabs');\n        case 'files':\n          return file\\dir::get_files($this->path);\n      }\n    }\n  }",
+            "startLine": 411,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 422,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "stat": {
+            "name": "stat",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n      switch ( self::$type ){\n        case 'apc':\n          return apc_cache_info();\n        case 'memcache':\n          return $this->obj->getStats();\n        case 'files':\n          return file\\dir::get_files($this->path);\n      }\n    }\n  }",
+            "startLine": 427,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 438,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
+        "items": {
+            "name": "items",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\cache",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($dir = '')\n  {\n      switch ( self::$type ){\n        case 'apc':\n          $all = apc_cache_info();\n          $list = [];\n          foreach ( $all['cache_list'] as $a ){\n            array_push($list, $a['info']);\n          }\n          return $list;\n        case 'memcache':\n          $list = [];\n          $allSlabs = $this->obj->getExtendedStats('slabs');\n          foreach ( $allSlabs as $server => $slabs ){\n            foreach ( $slabs as $slabId => $slabMeta ){\n              $cdump = $this->obj->getExtendedStats('cachedump',(int)$slabId);\n              foreach ( $cdump AS $keys => $arrVal ){\n                foreach ( $arrVal AS $k => $v ){\n                  if ( $k !== 'CLIENT_ERROR' ){\n                    echo array_push($list, $k);\n                  }\n                }\n              }\n            }\n          }\n          return $list;\n        case 'files':\n          $cache =& $this;\n          $list = array_filter(array_map(function($a) use ($dir){\n            return ( $dir ? $dir.'\/' : '' ).basename($a, '.bbn.cache');\n          }, file\\dir::get_files($this->path.($dir ? '\/'.$dir : ''))),\n            function($a) use ($cache){\n            \/\/ Only gives valid cache\n              return $cache->has($a);\n          });\n          $dirs = file\\dir::get_dirs($this->path.($dir ? '\/'.$dir : ''));\n          if ( \\count($dirs) ){\n            foreach ( $dirs as $d ){\n              $res = $this->items($dir ? $dir.'\/'.basename($d) : basename($d));\n              foreach ( $res as $r ){\n                array_push($list, $r);\n              }\n            }\n          }\n          return $list;\n      }\n    }\n  }",
+            "startLine": 444,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dir"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 491,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "dir",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 20,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "is_init": 1,
+        "type": "files",
+        "engine": {},
+        "path": null,
+        "obj": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn",
+    "shortName": "cache"
+}

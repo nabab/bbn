@@ -1,0 +1,121 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\models\\tts\\current",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/models\/tts\/current.php",
+    "startLine": 13,
+    "endLine": 42,
+    "contentConstructor": null,
+    "methods": {
+        "set_current": {
+            "name": "set_current",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\tts\\current",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($id_option)\n  {\n    self::_set_current($id_option);\n  }",
+            "startLine": 29,
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "option"
+                    }
+                ],
+                "return": ""
+            },
+            "endLine": 32,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "void"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "option"
+                }
+            ]
+        },
+        "get_current": {
+            "name": "get_current",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\models\\tts\\current",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::$current;\n  }",
+            "startLine": 37,
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "endLine": 40,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string",
+                null
+            ],
+            "parent": false,
+            "arguments": []
+        }
+    },
+    "properties": null,
+    "staticProperties": null,
+    "constants": null,
+    "numMethods": 2,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "current": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\models\\tts",
+    "shortName": "current"
+}
