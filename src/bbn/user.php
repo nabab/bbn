@@ -144,6 +144,8 @@ class user extends models\cls\basic
 
   private $_encryption_key = null;
 
+  protected $password_reset = false;
+
   /** @var user\session */
  	protected $session = null;
 
@@ -239,17 +241,19 @@ class user extends models\cls\basic
     // The user is not known yet
     elseif (
       isset($params[$f['key']], $params[$f['id']], $params[$f['pass1']], $params[$f['pass2']], $params[$f['action']]) &&
-      ($params[$f['action']] === 'init_password') &&
-      ($params[$f['pass1']] === $params[$f['pass2']])
+      ($params[$f['action']] === 'init_password')
     ){
       if ( $id = $this->get_id_from_magic_string($params[$f['id']], $params[$f['key']]) ){
-        $this->expire_hotlink($params[$f['id']]);
-        $this->id = $id;
-        $this->force_password($params[$f['pass2']]);
-        $this->session->set([]);
-        // Reloads the page
-        header('Location: ./');
-        die();
+        $this->password_reset = true;
+        if (($params[$f['pass1']] === $params[$f['pass2']])){ 
+          $this->expire_hotlink($params[$f['id']]);
+          $this->id = $id;
+          $this->force_password($params[$f['pass2']]);
+          $this->session->set([]);
+        }
+        else{
+          $this->set_error(7);
+        }
       }
       else{
         $this->set_error(18);
@@ -258,6 +262,11 @@ class user extends models\cls\basic
     else {
       $this->check_session();
     }
+  }
+
+  public function is_reset()
+  {
+    return $this->password_reset;
   }
 
   /**
@@ -833,7 +842,7 @@ class user extends models\cls\basic
         $this->class_cfg['arch']['passwords']['added'] => 'DESC'
       ]);
       if ( $this->_check_password($old_pass, $stored_pass) ){
-        return $this->force_password($new_pass, $this->get_id());
+        return $this->force_password($new_pass);
       }
     }
     return false;
