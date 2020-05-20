@@ -1659,7 +1659,7 @@ class preferences extends bbn\models\cls\db
       return $this->db->rselect([
         'table' => $this->class_cfg['table'],
         'fields' => array_map(function($v) use($t){
-          return $this->class_cfg['table'].'.'.$v;
+          return $t->class_cfg['table'].'.'.$v;
         }, array_values($this->class_cfg['arch']['user_options'])),
         'join' => [[
           'table' => $this->class_cfg['tables']['user_options_bits'],
@@ -1686,7 +1686,22 @@ class preferences extends bbn\models\cls\db
   public function get_id_by_bit(string $id): ?string
   {
     if ( \bbn\str::is_uid($id) && ($p = $this->get_by_bit($id)) ){
-      return $p[$this->fields['id']];
+      return $this->db->select_one([
+        'table' => $this->class_cfg['table'],
+        'field' => $this->class_cfg['table'].'.'.$this->fields['id'],
+        'join' => [[
+          'table' => $this->class_cfg['tables']['user_options_bits'],
+          'on' => [
+            'conditions' => [[
+              'field' => $this->class_cfg['arch']['user_options_bits']['id_user_option'],
+              'exp' => $this->class_cfg['table'].'.'.$this->fields['id']
+            ]]
+          ]
+        ]],
+        'where' => [
+          $this->class_cfg['tables']['user_options_bits'].'.'.$this->class_cfg['arch']['user_options_bits']['id'] => $id
+        ]
+      ]);
     }
     return null;
   }

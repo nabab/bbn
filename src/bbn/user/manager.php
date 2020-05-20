@@ -430,6 +430,100 @@ You can click the following link to access directly your account:<br>
     }
 		return false;
   }
+
+  public function copy(string $type, string $id, array $data): ?string
+  {
+    $pref = preferences::get_preferences();
+    $cfg = $pref->get_class_cfg();
+    switch ($type) {
+      case 'user':
+        if ($src = $this->get_user($id)) {
+          $data = \bbn\x::merge_arrays($src, $data);
+          unset($data[$this->class_cfg['arch']['users']['id']]);
+          $col = $cfg['arch']['user_options']['id_user'];
+          $id_new = $this->add($data);
+        }
+        break;
+      case 'group':
+        if ($src = $this->get_group($id)) {
+          $data = \bbn\x::merge_arrays($src, $data);
+          unset($data[$this->class_cfg['arch']['groups']['id']]);
+          $col = $cfg['arch']['user_options']['id_group'];
+          $id_new = $this->group_insert($data);
+        }
+        break;
+    }
+    if (!empty($id_new)) {
+      if ($options = $this->get_options($type, $id)) {
+        $ids = [];
+        foreach ($options as $o) {
+          $old_id = $o['id'];
+          unset($o['id']);
+          $o[$col] = $id_new;
+          if ($this->db->insert_ignore($cfg['table'], $o)) {
+            $ids[$old_id] = $this->db->last_id();
+          }
+        }
+        $bids = [];
+        foreach ($ids as $oid => $nid) {
+          $bits = $this->db->rselect_all($cfg['tables']['user_options_bits'], [], [
+            $cfg['arch']['user_options_bits']['id_user_option'] => $oid,
+            $cfg['arch']['user_options_bits']['id_parent'] => null
+          ]);
+          foreach ($bits as $bit) {
+            $old_id = $bit[$cfg['arch']['user_options_bits']['id']];
+            unset($bit[$cfg['arch']['user_options_bits']['id']]);
+            $bit[$cfg['arch']['user_options_bits']['id_user_option']] = $nid;
+            $this->db->insert($cfg['tables']['user_options_bits'], $bit);
+            $bids[$old_id] = $this->db->last_id();
+          }
+        }
+        $remaining = -1;
+        $before = 0;
+        $done = [];
+        while ($remaining && ($before !== $remaining)) {
+          if ($remaining === -1) {
+            $before = 0;
+          }
+          else {
+            $before = $remaining;
+          }
+          $remaining = 0;
+          foreach ($ids as $oid => $nid) {
+            if (in_array($nid, $done)) {
+              continue;
+            }
+            $bits = $this->db->rselect_all($cfg['tables']['user_options_bits'], [], [
+              $cfg['arch']['user_options_bits']['id_user_option'] => $oid,
+              [$cfg['arch']['user_options_bits']['id_parent'], 'isnotnull']
+            ]);
+            if (!count($bits)) {
+              $done[] = $nid;
+              continue;
+            }
+            foreach ($bits as $bit) {
+              $old_id = $bit[$cfg['arch']['user_options_bits']['id']];
+              if (isset($bids[$old_id])) {
+                continue;
+              }
+              if (!isset($bids[$bit[$cfg['arch']['user_options_bits']['id_parent']]])) {
+                $remaining++;
+              }
+              else {
+                unset($bit[$cfg['arch']['user_options_bits']['id']]);
+                $bit[$cfg['arch']['user_options_bits']['id_user_option']] = $nid;
+                $bit[$cfg['arch']['user_options_bits']['id_parent']] = $bids[$bit[$cfg['arch']['user_options_bits']['id_parent']]];
+                $this->db->insert($cfg['tables']['user_options_bits'], $bit);
+                $bids[$old_id] = $this->db->last_id();
+              }
+            }
+          }
+        }
+      }
+      return $id_new;
+    }
+    return null;
+  }
   
   public function send_mail(string $id_user, string $subject, string $text, array $attachments = []): ?int
   {
@@ -517,8 +611,8 @@ You can click the following link to access directly your account:<br>
     if ( $pref = preferences::get_preferences() ){
       if ( $cfg = $pref->get_class_cfg() ){
         return $this->db->count($cfg['table'], [
-          $cfg['cols']['id_option'] => $id_option,
-          $cfg['cols']['id_user'] => $id_user
+          $cfg['arch']['user_options']['id_option'] => $id_option,
+          $cfg['arch']['user_options']['id_user'] => $id_user
         ]) ? true : false;
       }
     }
@@ -531,11 +625,31 @@ You can click the following link to access directly your account:<br>
       ($cfg = $pref->get_class_cfg())
     ){
       return $this->db->count($cfg['table'], [
-        $cfg['cols']['id_option'] => $id_option,
-        $cfg['cols']['id_group'] => $id_group
+        $cfg['arch']['user_options']['id_option'] => $id_option,
+        $cfg['arch']['user_options']['id_group'] => $id_group
       ]) ? true : false;
     }
     return false;
+  }
+
+  public function get_options(string $type, string $id): ?array
+  {
+    if (
+      ($pref = preferences::get_preferences()) &&
+      ($cfg = $pref->get_class_cfg())
+    ){
+      if (stripos($type,  'group') === 0) {
+        return $this->db->rselect_all($cfg['table'], [], [
+          $cfg['arch']['user_options']['id_group'] => $id
+        ]);
+      }
+      elseif (stripos($type, 'user') === 0) {
+        return $this->db->rselect_all($cfg['table'], [], [
+          $cfg['arch']['user_options']['id_user'] => $id
+        ]);
+      }
+    }
+    return null;
   }
 
   public function user_insert_option($id_user, $id_option){
@@ -544,8 +658,8 @@ You can click the following link to access directly your account:<br>
       ($cfg = $pref->get_class_cfg())
     ){
       return $this->db->insert_ignore($cfg['table'], [
-        $cfg['cols']['id_option'] => $id_option,
-        $cfg['cols']['id_user'] => $id_user
+        $cfg['arch']['user_options']['id_option'] => $id_option,
+        $cfg['arch']['user_options']['id_user'] => $id_user
       ]);
     }
     return false;
@@ -557,8 +671,8 @@ You can click the following link to access directly your account:<br>
       ($cfg = $pref->get_class_cfg())
     ){
       return $this->db->insert_ignore($cfg['table'], [
-        $cfg['cols']['id_option'] => $id_option,
-        $cfg['cols']['id_group'] => $id_group
+        $cfg['arch']['user_options']['id_option'] => $id_option,
+        $cfg['arch']['user_options']['id_group'] => $id_group
       ]);
     }
     return false;
@@ -570,8 +684,8 @@ You can click the following link to access directly your account:<br>
       ($cfg = $pref->get_class_cfg())
     ){
       return $this->db->delete_ignore($cfg['table'], [
-        $cfg['cols']['id_option'] => $id_option,
-        $cfg['cols']['id_user'] => $id_user
+        $cfg['arch']['user_options']['id_option'] => $id_option,
+        $cfg['arch']['user_options']['id_user'] => $id_user
       ]);
     }
     return false;
@@ -583,8 +697,8 @@ You can click the following link to access directly your account:<br>
       ($cfg = $pref->get_class_cfg())
     ){
       return $this->db->delete_ignore($cfg['table'], [
-        $cfg['cols']['id_option'] => $id_option,
-        $cfg['cols']['id_group'] => $id_group
+        $cfg['arch']['user_options']['id_option'] => $id_option,
+        $cfg['arch']['user_options']['id_group'] => $id_group
       ]);
     }
     return false;
@@ -600,6 +714,9 @@ You can click the following link to access directly your account:<br>
   public function group_insert($data){
     $g = $this->class_cfg['arch']['groups'];
     if ( isset($data[$g['group']]) ){
+      if (!empty($data[$g['cfg']]) && is_array($data[$g['cfg']])) {
+        $data[$g['cfg']] = json_encode($data[$g['cfg']]);
+      }
       if ( $this->db->insert($this->class_cfg['tables']['groups'], [
         $g['group'] => $data[$g['group']],
         $g['cfg'] => !empty($g['cfg']) && !empty($data[$g['cfg']]) ? $data[$g['cfg']] : '{}'
