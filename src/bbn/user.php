@@ -244,7 +244,8 @@ class user extends models\cls\basic
     ){
       if ( $id = $this->get_id_from_magic_string($params[$f['id']], $params[$f['key']]) ){
         $this->expire_hotlink($params[$f['id']]);
-        $this->force_password($params[$f['pass2']], $id);
+        $this->id = $id;
+        $this->force_password($params[$f['pass2']]);
         $this->session->set([]);
         // Reloads the page
         header('Location: ./');
@@ -742,7 +743,8 @@ class user extends models\cls\basic
       $this->class_cfg['arch']['hotlinks']['magic_string'],
       $this->class_cfg['arch']['hotlinks']['id_user'],
     ],[
-      $this->class_cfg['arch']['hotlinks']['id'] => $id
+      $this->class_cfg['arch']['hotlinks']['id'] => $id,
+      [$this->class_cfg['arch']['hotlinks']['expire'], '>', date('Y-m-d H:i:s')]
     ]) ){
       if ( self::is_magic_string($key, $val[$this->class_cfg['arch']['hotlinks']['magic_string']]) ){
         return $val['id_user'];
@@ -842,12 +844,12 @@ class user extends models\cls\basic
    * 
    * @return bool
    */
-  public function force_password($pass, $id): bool
+  public function force_password($pass): bool
   {
-    if ( $this->check() ){
+    if ( $this->id ){
       return (bool)$this->db->insert($this->class_cfg['tables']['passwords'], [
         $this->class_cfg['arch']['passwords']['pass'] => $this->_crypt($pass),
-        $this->class_cfg['arch']['passwords']['id_user'] => $id,
+        $this->class_cfg['arch']['passwords']['id_user'] => $this->id,
         $this->class_cfg['arch']['passwords']['added'] => date('Y-m-d H:i:s')
       ]);
     }
