@@ -441,7 +441,7 @@ class options extends bbn\models\cls\db
       }
     }
     // We can use whatever alphanumeric value for code
-    if ( !\is_string($args[0]) && !is_numeric($args[0]) ){
+    if ( empty($args) || (!\is_string($args[0]) && !is_numeric($args[0])) ){
       return null;
     }
     // They must all have the same form at start with an id_parent as last argument
