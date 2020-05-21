@@ -416,6 +416,8 @@ class mailings extends bbn\models\cls\db
         'sent' => $cfg['sent']
       ])){
         $cfg['id'] = $this->db->last_id();
+        $cfg['id_note'] = $id_note;
+        $cfg['version'] = 1;
         if (!empty($cfg['attachments'])) {
           foreach ( $cfg['attachments'] as $f ){
             if (is_array($f)) {
