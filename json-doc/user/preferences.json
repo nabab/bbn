@@ -22,7 +22,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/user\/preferences.php",
     "startLine": 29,
-    "endLine": 1710,
+    "endLine": 1725,
     "contentConstructor": {
         "file": "bbn\\user\\preferences",
         "returns": null
@@ -3451,7 +3451,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    $t =& $this;\n    if ( \\bbn\\str::is_uid($id) ){\n      return $this->db->rselect([\n        'table' => $this->class_cfg['table'],\n        'fields' => array_map(function($v) use($t){\n          return $this->class_cfg['table'].'.'.$v;\n        }, array_values($this->class_cfg['arch']['user_options'])),\n        'join' => [[\n          'table' => $this->class_cfg['tables']['user_options_bits'],\n          'on' => [\n            'conditions' => [[\n              'field' => $this->class_cfg['arch']['user_options_bits']['id_user_option'],\n              'exp' => $this->class_cfg['table'].'.'.$this->fields['id']\n            ]]\n          ]\n        ]],\n        'where' => [\n          $this->class_cfg['tables']['user_options_bits'].'.'.$this->class_cfg['arch']['user_options_bits']['id'] => $id\n        ]\n      ]);\n    }\n  }",
+            "code": "function($id)\n  {\n    $t =& $this;\n    if ( \\bbn\\str::is_uid($id) ){\n      return $this->db->rselect([\n        'table' => $this->class_cfg['table'],\n        'fields' => array_map(function($v) use($t){\n          return $t->class_cfg['table'].'.'.$v;\n        }, array_values($this->class_cfg['arch']['user_options'])),\n        'join' => [[\n          'table' => $this->class_cfg['tables']['user_options_bits'],\n          'on' => [\n            'conditions' => [[\n              'field' => $this->class_cfg['arch']['user_options_bits']['id_user_option'],\n              'exp' => $this->class_cfg['table'].'.'.$this->fields['id']\n            ]]\n          ]\n        ]],\n        'where' => [\n          $this->class_cfg['tables']['user_options_bits'].'.'.$this->class_cfg['arch']['user_options_bits']['id'] => $id\n        ]\n      ]);\n    }\n  }",
             "startLine": 1655,
             "doc": {
                 "description": "Gets a preference row from a bit ID",
@@ -3501,7 +3501,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    if ( \\bbn\\str::is_uid($id) && ($p = $this->get_by_bit($id)) ){\n      return $p[$this->fields['id']];\n    }\n    return null;\n  }",
+            "code": "function($id)\n  {\n    if ( \\bbn\\str::is_uid($id) && ($p = $this->get_by_bit($id)) ){\n      return $this->db->select_one([\n        'table' => $this->class_cfg['table'],\n        'field' => $this->class_cfg['table'].'.'.$this->fields['id'],\n        'join' => [[\n          'table' => $this->class_cfg['tables']['user_options_bits'],\n          'on' => [\n            'conditions' => [[\n              'field' => $this->class_cfg['arch']['user_options_bits']['id_user_option'],\n              'exp' => $this->class_cfg['table'].'.'.$this->fields['id']\n            ]]\n          ]\n        ]],\n        'where' => [\n          $this->class_cfg['tables']['user_options_bits'].'.'.$this->class_cfg['arch']['user_options_bits']['id'] => $id\n        ]\n      ]);\n    }\n    return null;\n  }",
             "startLine": 1686,
             "doc": {
                 "description": "Gets the preference's ID from a bit ID",
@@ -3515,7 +3515,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 1692,
+            "endLine": 1707,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3552,9 +3552,9 @@
             "visibility": "public",
             "final": false,
             "code": "function($id_option, $id_user = NULL, $id_group = NULL)\n  {\n    if ( \\bbn\\str::is_uid($id_option) ){\n      $res = [];\n      if ($ids = $this->_retrieve_ids($id_option, $id_user, $id_group)){\n        foreach ($ids as $id){\n          $res[] = $this->db->rselect($this->class_cfg['table'], [\n            'value' => $this->fields['id'],\n            'text' => $this->fields['text']\n          ], ['id' => $id]);\n        }\n      }\n      return $res;\n    }\n    return null;\n  }",
-            "startLine": 1694,
+            "startLine": 1709,
             "doc": null,
-            "endLine": 1709,
+            "endLine": 1724,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,

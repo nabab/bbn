@@ -1016,9 +1016,11 @@ class db extends \PDO implements db\actions, db\api, db\engines
       $cfg['engine'] = BBN_DB_ENGINE;
     }
     if ( isset($cfg['engine']) ){
-      $cls = '\\bbn\\db\\languages\\'.$cfg['engine'];
+      $engine = $cfg['engine'];
+      $db = $cfg['db'] ?? (defined('BBN_DATABASE') ? BBN_DATABASE : '?');
+      $cls = '\\bbn\\db\\languages\\'.$engine;
       if ( !class_exists($cls) ){
-        die("Sorry the engine class $cfg[engine] does not exist");
+        die("Sorry the engine class $engine does not exist");
       }
       self::retriever_init($this);
       $this->cache_init();
@@ -1043,14 +1045,14 @@ class db extends \PDO implements db\actions, db\api, db\engines
           $this->start_fancy_stuff();
         }
         catch ( \PDOException $e ){
-          $this->log(["Impossible to create the connection for $cfg[engine]/$cfg[db]", $e]);
+          $this->log(["Impossible to create the connection for $engine/$db", $e]);
           die(\defined('BBN_IS_DEV') && BBN_IS_DEV ? x::get_dump($e) : 'Impossible to create the database connection');
         }
       }
     }
     if ( !$this->engine ){
       $this->log("Impossible to create the connection for $cfg[engine]/$cfg[db]");
-      die('Impossible to create the database connection');
+      die("Impossible to create the connection for $cfg[engine]/$cfg[db]");
     }
   }
 

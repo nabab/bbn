@@ -30,7 +30,7 @@
     },
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/db.php",
     "startLine": 21,
-    "endLine": 4915,
+    "endLine": 4917,
     "contentConstructor": {
         "file": "bbn\\db",
         "returns": null
@@ -196,7 +196,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg = [])\n  {\n    if ( \\defined('BBN_DB_ENGINE') && !isset($cfg['engine']) ){\n      $cfg['engine'] = BBN_DB_ENGINE;\n    }\n    if ( isset($cfg['engine']) ){\n      $cls = '\\\\bbn\\\\db\\\\languages\\\\'.$cfg['engine'];\n      if ( !class_exists($cls) ){\n        die(\"Sorry the engine class $cfg[engine] does not exist\");\n      }\n      self::retriever_init($this);\n      $this->cache_init();\n      $this->language = new $cls($this);\n      if ( isset($cfg['on_error']) ){\n        $this->on_error = $cfg['on_error'];\n      }\n      if ($cfg = $this->get_connection($cfg)) {\n        $this->qte = $this->language->qte;\n        try{\n          parent::__construct(...($cfg['args'] ?: []));\n          $this->language->post_creation();\n          $this->current = $cfg['db'] ?? null;\n          $this->engine = $cfg['engine'];\n          $this->host = $cfg['host'] ?? '127.0.0.1';\n          $this->username = $cfg['user'] ?? null;\n          $this->hash = $this->_make_hash($cfg['args']);\n          $this->setAttribute(\\PDO::ATTR_ERRMODE, \\PDO::ERRMODE_EXCEPTION);\n          if ( !empty($cfg['cache_length']) ){\n            $this->cache_renewal = (int)$cfg['cache_length'];\n          }\n          $this->start_fancy_stuff();\n        }\n        catch ( \\PDOException $e ){\n          $this->log([\"Impossible to create the connection for $cfg[engine]\/$cfg[db]\", $e]);\n          die(\\defined('BBN_IS_DEV') && BBN_IS_DEV ? x::get_dump($e) : 'Impossible to create the database connection');\n        }\n      }\n    }\n    if ( !$this->engine ){\n      $this->log(\"Impossible to create the connection for $cfg[engine]\/$cfg[db]\");\n      die('Impossible to create the database connection');\n    }\n  }",
+            "code": "function(array $cfg = [])\n  {\n    if ( \\defined('BBN_DB_ENGINE') && !isset($cfg['engine']) ){\n      $cfg['engine'] = BBN_DB_ENGINE;\n    }\n    if ( isset($cfg['engine']) ){\n      $engine = $cfg['engine'];\n      $db = $cfg['db'] ?? (defined('BBN_DATABASE') ? BBN_DATABASE : '?');\n      $cls = '\\\\bbn\\\\db\\\\languages\\\\'.$engine;\n      if ( !class_exists($cls) ){\n        die(\"Sorry the engine class $engine does not exist\");\n      }\n      self::retriever_init($this);\n      $this->cache_init();\n      $this->language = new $cls($this);\n      if ( isset($cfg['on_error']) ){\n        $this->on_error = $cfg['on_error'];\n      }\n      if ($cfg = $this->get_connection($cfg)) {\n        $this->qte = $this->language->qte;\n        try{\n          parent::__construct(...($cfg['args'] ?: []));\n          $this->language->post_creation();\n          $this->current = $cfg['db'] ?? null;\n          $this->engine = $cfg['engine'];\n          $this->host = $cfg['host'] ?? '127.0.0.1';\n          $this->username = $cfg['user'] ?? null;\n          $this->hash = $this->_make_hash($cfg['args']);\n          $this->setAttribute(\\PDO::ATTR_ERRMODE, \\PDO::ERRMODE_EXCEPTION);\n          if ( !empty($cfg['cache_length']) ){\n            $this->cache_renewal = (int)$cfg['cache_length'];\n          }\n          $this->start_fancy_stuff();\n        }\n        catch ( \\PDOException $e ){\n          $this->log([\"Impossible to create the connection for $engine\/$db\", $e]);\n          die(\\defined('BBN_IS_DEV') && BBN_IS_DEV ? x::get_dump($e) : 'Impossible to create the database connection');\n        }\n      }\n    }\n    if ( !$this->engine ){\n      $this->log(\"Impossible to create the connection for $cfg[engine]\/$cfg[db]\");\n      die(\"Impossible to create the connection for $cfg[engine]\/$cfg[db]\");\n    }\n  }",
             "startLine": 1013,
             "doc": {
                 "description": "Constructor\n\n```php\n$dbtest = new bbn\\db(['db_user' => 'test','db_engine' => 'mysql','db_host' => 'host','db_pass' => 't6pZDwRdfp4IM']);\n \/\/ (void)\n```",
@@ -210,7 +210,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 1055,
+            "endLine": 1057,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -310,7 +310,7 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->hash;\n  }",
-            "startLine": 1076,
+            "startLine": 1078,
             "doc": {
                 "description": "Gets the last hash created.\n\n```php\n\\bbn\\x::dump($db->get_hash());\n\/\/ (string) 3819056v431b210daf45f9b5dc2\n```",
                 "params": [],
@@ -320,7 +320,7 @@
                     "text": "chiedere e thomas se deve diventare private e se va bene la descrizione"
                 }
             },
-            "endLine": 1079,
+            "endLine": 1081,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -343,9 +343,9 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $conditions, $old_name, $new_name)\n  {\n    return \\bbn\\x::map(function($a)use($old_name, $new_name){\n      if ( !empty($a['field']) ){\n        $a['field'] = preg_replace(\"\/(\\\\W|^)$old_name([\\\\`\\\\']*\\\\s*)\\\\.\/\", '$1'.$new_name.'$2.', $a['field']);\n      }\n      if ( !empty($a['exp']) ){\n        $a['exp'] = preg_replace(\"\/(\\\\W|^)$old_name([\\\\`\\\\']*\\\\s*)\\\\.\/\", '$1'.$new_name.'$2.', $a['exp']);\n      }\n      return $a;\n    }, $conditions, 'conditions');\n  }",
-            "startLine": 1081,
+            "startLine": 1083,
             "doc": null,
-            "endLine": 1092,
+            "endLine": 1094,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -396,7 +396,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($hash)\n  {\n    if ( isset($this->queries[$hash]) ){\n      if ( \\is_string($this->queries[$hash]) ){\n        $hash = $this->queries[$hash];\n      }\n      return $this->queries[$hash];\n    }\n    return null;\n  }",
-            "startLine": 1099,
+            "startLine": 1101,
             "doc": {
                 "description": "Retrieves a query array based on its hash.",
                 "params": [
@@ -408,7 +408,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 1108,
+            "endLine": 1110,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -444,7 +444,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($hash)\n  {\n    return $this->cfgs[$hash] ?? null;\n  }",
-            "startLine": 1115,
+            "startLine": 1117,
             "doc": {
                 "description": "Retrieves a configuration array based on its hash.",
                 "params": [
@@ -456,7 +456,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 1118,
+            "endLine": 1120,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -492,7 +492,7 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $where, $full = true)\n  {\n      $where['conditions'] = $where;\n    }\n    if ( isset($where['conditions']) && \\is_array($where['conditions']) ){\n      if ( !isset($where['logic']) || (strtoupper($where['logic']) !== 'OR') ){\n        $where['logic'] = 'AND';\n      }\n      $res = [\n        'conditions' => [],\n        'logic' => $where['logic']\n      ];\n      foreach ( $where['conditions'] as $key => $f ){\n        $is_array = \\is_array($f);\n        if (\n          $is_array &&\n          array_key_exists('conditions', $f) &&\n          \\is_array($f['conditions'])\n        ){\n          $res['conditions'][] = $this->treat_conditions($f, false);\n        }\n        else {\n          if ( \\is_string($key) ){\n            \/\/ 'id_user' => [1, 2] Will do OR\n            if ( !$is_array ) {\n              if ( null === $f ){\n                $f = [\n                  'field' => $key,\n                  'operator' => 'isnull'\n                ];\n              }\n              else{\n                $f = [\n                  'field' => $key,\n                  'operator' => !str::is_uid($f) && is_string($f) ? 'LIKE' : '=',\n                  'value' => $f\n                ];\n              }\n            }\n            else if ( isset($f[0]) ){\n              $tmp = [\n                'conditions' => [],\n                'logic' => 'OR'\n              ];\n              foreach ( $f as $v ){\n                if ( null === $v ){\n                  $tmp['conditions'][] = [\n                    'field' => $key,\n                    'operator' => 'isnull'\n                  ];\n                }\n                else{\n                  $tmp['conditions'][] = [\n                    'field' => $key,\n                    'operator' => !str::is_uid($f) && is_string($f) ? 'LIKE' : '=',\n                    'value' => $v\n                  ];\n                }\n              }\n              $res['conditions'][] = $tmp;\n            }\n          }\n          else if ( $is_array && !x::is_assoc($f) && count($f) >= 2 ){\n            $tmp = [\n              'field' => $f[0],\n              'operator' => $f[1]\n            ];\n            if ( isset($f[3]) ){\n              $tmp['exp'] = $f[3];\n            }\n            elseif ( array_key_exists(2, $f) ){\n              if ( is_array($f[2]) ){\n                $tmp = [\n                  'conditions' => [],\n                  'logic' => 'AND'\n                ];\n                foreach ( $f[2] as $v ){\n                  if ( null === $v ){\n                    $tmp['conditions'][] = [\n                      'field' => $f[0],\n                      'operator' => 'isnotnull'\n                    ];\n                  }\n                  else{\n                    $tmp['conditions'][] = [\n                      'field' => $f[0],\n                      'operator' => $f[1],\n                      'value' => $v\n                    ];\n                  }\n                }\n                $res['conditions'][] = $tmp;\n              }\n              elseif ( $f[2] === null ){\n                $tmp['operator'] = $f[2] === '!=' ? 'isnotnull' : 'isnull';\n              }\n              else{\n                $tmp['value'] = $f[2];\n              }\n            }\n            $f = $tmp;\n          }\n          if ( isset($f['field']) ){\n            if ( !isset($f['operator']) ){\n              $f['operator'] = 'eq';\n            }\n            $res['conditions'][] = $f;\n          }\n        }\n      }\n      if ( $full ){\n        $tmp = $this->_remove_conditions_value($res);\n        $res = [\n          'hashed' => $tmp['hashed'],\n          'values' => $tmp['values'],\n          'where' => $res\n        ];\n      }\n      return $res;\n    }\n    return false;\n  }",
-            "startLine": 1125,
+            "startLine": 1127,
             "doc": {
                 "description": "",
                 "params": [
@@ -509,7 +509,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 1246,
+            "endLine": 1248,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -551,9 +551,9 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $cfg, array $conditions, array &$res = NULL)\n  {\n      $res = [];\n    }\n    if (isset($conditions['conditions'])) {\n      $conditions = $conditions['conditions'];\n    }\n    foreach ($conditions as $c) {\n      if ( isset($c['conditions'])) {\n        $this->extract_fields($cfg, $c['conditions'], $res);\n      }\n      else {\n        if (isset($c['field'], $cfg['available_fields'][$c['field']])) {\n          $res[] = $cfg['available_fields'][$c['field']] ?\n            $this->cfn($c['field'], $cfg['available_fields'][$c['field']])\n            : $c['field'];\n        }\n        if (isset($c['exp'])) {\n          $res[] = $cfg['available_fields'][$c['exp']] ?\n            $this->cfn($c['exp'], $cfg['available_fields'][$c['exp']]) \n            : $c['exp'];\n        }\n      }\n    }\n    return $res;\n  }",
-            "startLine": 1248,
+            "startLine": 1250,
             "doc": null,
-            "endLine": 1273,
+            "endLine": 1275,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -604,7 +604,7 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $cfg, $field, $operator = NULL)\n  {\n    if ( isset($cfg['filters']) ){\n      $f = function($cond, &$res = []) use (&$f, $field, $operator){\n        foreach ( $cond as $c ){\n          if ( isset($c['conditions']) ){\n            $f($c['conditions'], $res);\n          }\n          else if ( ($c['field'] === $field) && (!$operator || ($operator === $c['operator'])) ){\n            $res[] = $c;\n          }\n        }\n        return $res;\n      };\n      return isset($cfg['filters']['conditions']) ? $f($cfg['filters']['conditions']) : [];\n    }\n    return null;\n  }",
-            "startLine": 1283,
+            "startLine": 1285,
             "doc": {
                 "description": "Retrieve an array of specific filters among the existing ones.",
                 "params": [
@@ -625,7 +625,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 1300,
+            "endLine": 1302,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -679,7 +679,7 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $where, array $cfg, &$others = [])\n  {\n    if ( !empty($where['conditions']) ){\n      foreach ( $where['conditions'] as &$f ){\n        if ( isset($f['logic'], $f['conditions']) && \\is_array($f['conditions']) ){\n          $this->get_values_desc($f, $cfg, $others);\n        }\n        else if ( array_key_exists('value', $f) ){\n          $desc = [\n            'primary' => false,\n            'type' => null,\n            'maxlength' => null,\n            'operator' => $f['operator'] ?? null\n          ];\n          if ( isset($cfg['models'], $f['field'], $cfg['available_fields'][$f['field']]) ){\n            $t = $cfg['available_fields'][$f['field']];\n            if (\n              isset($cfg['models'], $f['field'], $cfg['tables_full'][$t], $cfg['models'][$cfg['tables_full'][$t]]) &&\n              ($model = $cfg['models'][$cfg['tables_full'][$t]]) &&\n              ($fname = $this->csn($f['field']))\n            ){\n              if ( !empty($model['fields'][$fname]['type']) ){\n                $desc = [\n                  'type' => $model['fields'][$fname]['type'],\n                  'maxlength' => $model['fields'][$fname]['maxlength'] ?? null,\n                  'operator' => $f['operator'] ?? null\n                ];\n              }\n              \/\/ Fixing filters using alias\n              else if (\n                isset($cfg['fields'][$f['field']]) &&\n                ($fname = $this->csn($cfg['fields'][$f['field']])) &&\n                !empty($model['fields'][$fname]['type'])\n              ){\n                $desc = [\n                  'type' => $model[$fname]['type'],\n                  'maxlength' => $model[$fname]['maxlength'] ?? null,\n                  'operator' => $f['operator'] ?? null\n                ];\n              }\n              if (\n                !empty($desc['type']) &&\n                isset($model['keys']['PRIMARY']) &&\n                (count($model['keys']['PRIMARY']['columns']) === 1) &&\n                ($model['keys']['PRIMARY']['columns'][0] === $fname)\n              ){\n                $desc['primary'] = true;\n              }\n            }\n          }\n          $others[] = $desc;\n        }\n      }\n    }\n    return $others;\n  }",
-            "startLine": 1307,
+            "startLine": 1309,
             "doc": {
                 "description": "",
                 "params": [
@@ -696,7 +696,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 1362,
+            "endLine": 1364,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -749,9 +749,9 @@
             "visibility": "public",
             "final": false,
             "code": "function(array &$conditions, array $cfg)\n  {\n    if ( !empty($cfg['available_fields']) && isset($conditions['conditions']) ){\n      foreach ( $conditions['conditions'] as &$c ){\n        if ( array_key_exists('conditions', $c) && \\is_array($c['conditions']) ){\n          $this->arrange_conditions($c, $cfg);\n        }\n        else if ( isset($c['field']) && empty($cfg['available_fields'][$c['field']]) && !$this->is_col_full_name($c['field']) ){\n          foreach ( $cfg['tables'] as $t => $o ){\n            if ( isset($cfg['available_fields'][$this->col_full_name($c['field'], $t)]) ){\n              $c['field'] = $this->col_full_name($c['field'], $t);\n              break;\n            }\n          }\n        }\n      }\n    }\n  }",
-            "startLine": 1364,
+            "startLine": 1366,
             "doc": null,
-            "endLine": 1381,
+            "endLine": 1383,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -795,7 +795,7 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $cfg)\n  {\n    unset($cfg['bbn_db_processed']);\n    unset($cfg['bbn_db_treated']);\n    unset($this->cfgs[$cfg['hash']]);\n    $tmp = $this->process_cfg($cfg, true);\n    if ( !empty($cfg['values']) && (count($cfg['values']) === count($tmp['values'])) ){\n      $tmp = array_merge($tmp, ['values' => $cfg['values']]);\n    }\n    return $tmp;\n  }",
-            "startLine": 1387,
+            "startLine": 1389,
             "doc": {
                 "description": "",
                 "params": [
@@ -807,7 +807,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 1397,
+            "endLine": 1399,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -843,7 +843,7 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $args, $force = false)\n  {\n    \/\/ Avoid confusion when\n    while ( \\is_array($args) && isset($args[0]) && \\is_array($args[0]) ){\n      $args = $args[0];\n    }\n    if ( \\is_array($args) && !empty($args['bbn_db_processed']) ){\n      return $args;\n    }\n    if ( empty($args['bbn_db_treated']) ){\n      $args = $this->_treat_arguments($args);\n    }\n    \/\/var_dump(\"UPD0\", $args);\n    if ( isset($args['hash']) ){\n      if ( isset($this->cfgs[$args['hash']]) ){\n        return array_merge($this->cfgs[$args['hash']], [\n          'values' => $args['values'] ?: [],\n          'where' => $args['where'] ?: [],\n          'filters' => $args['filters'] ?: []\n        ]);\n      }\n      \/** @var array $tables_full  Each of the tables' full name. *\/\n      $tables_full = [];\n      $res = array_merge($args, [\n        'tables' => [],\n        'values_desc' => [],\n        'bbn_db_processed' => true,\n        'available_fields' => [],\n        'generate_id' => false\n      ]);\n      $models = [];\n\n      foreach ( $args['tables'] as $key => $tab ){\n        $tfn = $this->tfn($tab);\n\n        \/\/ 2 tables in the same statement can't have the same idx\n        $idx = \\is_string($key) ? $key : $tfn;\n        \/\/ Error if they do\n        if ( isset($tables_full[$idx]) ){\n          $this->error('You cannot use twice the same table with the same alias'.PHP_EOL.x::get_dump($args['tables']));\n          return null;\n        }\n        $tables_full[$idx] = $tfn;\n        $res['tables'][$idx] = $tfn;\n        if ( !isset($models[$tfn]) && ($model = $this->modelize($tfn)) ){\n          $models[$tfn] = $model;\n        }\n      }\n      if (\n        (\\count($res['tables']) === 1) &&\n        ($tfn = array_values($res['tables'])[0]) &&\n        isset($models[$tfn]['keys']['PRIMARY']) &&\n        (\\count($models[$tfn]['keys']['PRIMARY']['columns']) === 1) &&\n        ($res['primary'] = $models[$tfn]['keys']['PRIMARY']['columns'][0])\n      ){\n        $p = $models[$tfn]['fields'][$res['primary']];\n        $res['auto_increment'] = isset($p['extra']) && ($p['extra'] === 'auto_increment');\n        $res['primary_length'] = $p['maxlength'];\n        $res['primary_type'] = $p['type'];\n        if (\n          ($res['kind'] === 'INSERT') &&\n          !$res['auto_increment'] &&\n          !\\in_array($this->csn($res['primary']), $res['fields'], true)\n        ){\n          $res['generate_id'] = true;\n          $res['fields'][] = $res['primary'];\n        }\n      }\n      foreach ( $args['join'] as $key => $join ){\n        if ( !empty($join['table']) && !empty($join['on']) ){\n          $tfn = $this->tfn($join['table']);\n          if ( !isset($models[$tfn]) && ($model = $this->modelize($tfn)) ){\n            $models[$tfn] = $model;\n          }\n          $idx = $join['alias'] ?? $tfn;\n          $tables_full[$idx] = $tfn;\n        }\n        else{\n          $this->error('Error! The join array must have on and table defined'.PHP_EOL.x::get_dump($join));\n        }\n      }\n      foreach ( $tables_full as $idx => $tfn ){\n        foreach ( $models[$tfn]['fields'] as $col => $cfg ){\n          $res['available_fields'][$this->cfn($col, $idx)] = $idx;\n          $csn = $this->csn($col);\n          if ( !isset($res['available_fields'][$csn]) ){\n            \/*\n            $res['available_fields'][$csn] = false;\n          }\n          else{\n            *\/\n            $res['available_fields'][$csn] = $idx;\n          }\n        }\n      }\n      foreach ( $res['fields'] as $idx => &$col ){\n        if (\n          strpos($col, '(') ||\n          strpos($col, '-')  ||\n          strpos($col, \"+\") ||\n          strpos($col, '*')  ||\n          strpos($col, \"\/\") ||\n          \/*\n          strpos($col, '->\"$.')  ||\n          strpos($col, \"->'$.\") ||\n          strpos($col, '->>\"$.')  ||\n          strpos($col, \"->>'$.\") ||\n          *\/\n          \/\/ String as value\n          preg_match('\/^[\\\\\\'\\\"]{1}[^\\\\\\'\\\"]*[\\\\\\'\\\"]{1}$\/', $col)\n        ){\n          $res['available_fields'][$col] = false;\n        }\n        if ( \\is_string($idx) ){\n          if ( !isset($res['available_fields'][$col]) ){\n            \/\/$this->log($res);\n            $this->error(\"Impossible to find the column $col\");\n            $this->error(json_encode($res['available_fields'], JSON_PRETTY_PRINT));\n            return null;\n          }\n          $res['available_fields'][$idx] = $res['available_fields'][$col];\n        }\n      }\n      \/\/ From here the available fields are defined\n      if ( !empty($res['filters']) ){\n        $this->arrange_conditions($res['filters'], $res);\n      }\n      unset($col);\n      $res['models'] = $models;\n      $res['tables_full'] = $tables_full;\n      switch ( $res['kind'] ){\n        case 'SELECT':\n          if ( empty($res['fields']) ){\n            foreach ( array_keys($res['available_fields']) as $f ){\n              if ( $this->is_col_full_name($f) ){\n                $res['fields'][] = $f;\n              }\n            }\n          }\n          \/\/\\bbn\\x::log($res, 'sql');\n          if ( $res['select_st'] = $this->language->get_select($res) ){\n            $res['sql'] = $res['select_st'];\n          }\n          break;\n        case 'INSERT':\n          $res = $this->remove_virtual($res);\n          if ( $res['insert_st'] = $this->language->get_insert($res) ){\n            $res['sql'] = $res['insert_st'];\n          }\n          \/\/var_dump($res);\n          break;\n        case 'UPDATE':\n          $res = $this->remove_virtual($res);\n          if ( $res['update_st'] = $this->get_update($res) ){\n            $res['sql'] = $res['update_st'];\n          }\n          break;\n        case 'DELETE':\n          if ( $res['delete_st'] = $this->get_delete($res) ){\n            $res['sql'] = $res['delete_st'];\n          }\n          break;\n      }\n      $res['join_st'] = $this->language->get_join($res);\n      $res['where_st'] = $this->language->get_where($res);\n      $res['group_st'] = $this->language->get_group_by($res);\n      $res['having_st'] = $this->language->get_having($res);\n      $cls = '\\\\bbn\\\\db\\\\languages\\\\'.$this->engine;\n      if (\n        empty($res['count'])\n        && (count($res['fields']) === 1)\n        && ($cls::is_aggregate_function(reset($res['fields'])))\n      ) {\n        $res['order_st'] = '';\n        $res['limit_st'] = '';\n      }\n      else {\n        $res['order_st'] = $res['count'] ? '' : $this->language->get_order($res);\n        $res['limit_st'] = $res['count'] ? '' : $this->language->get_limit($res);\n      }\n\n      if (!empty($res['sql'])) {\n        $res['sql'] .= $res['join_st'].$res['where_st'].$res['group_st'];\n        if ($res['count'] && $res['group_by']) {\n          $res['sql'] .= ') AS t '.PHP_EOL;\n        }\n        $res['sql'] .= $res['having_st'].$res['order_st'].$res['limit_st'];\n        $res['statement_hash'] = $this->_make_hash($res['sql']);\n\n        foreach ( $res['join'] as $r ){\n          $this->get_values_desc($r['on'], $res, $res['values_desc']);\n        }\n        if ( ($res['kind'] === 'INSERT') || ($res['kind'] === 'UPDATE') ){\n          foreach ( $res['fields'] as $name ){\n            $desc = [];\n            if ( isset($res['models'], $res['available_fields'][$name]) ){\n              $t = $res['available_fields'][$name];\n              if (\n                isset($tables_full[$t]) &&\n                ($model = $res['models'][$tables_full[$t]]['fields']) &&\n                ($fname = $this->csn($name)) &&\n                !empty($model[$fname]['type'])\n              ){\n                $desc['type'] = $model[$fname]['type'];\n                $desc['maxlength'] = $model[$fname]['maxlength'] ?? null;\n              }\n            }\n            $res['values_desc'][] = $desc;\n          }\n        }\n        $this->get_values_desc($res['filters'], $res, $res['values_desc']);\n        $this->get_values_desc($res['having'], $res, $res['values_desc']);\n        $this->cfgs[$res['hash']] = $res;\n      }\n      return $res;\n    }\n    $this->error('Impossible to process the config (no hash)'.PHP_EOL.print_r($args, true));\n    return null;\n  }",
-            "startLine": 1404,
+            "startLine": 1406,
             "doc": {
                 "description": "",
                 "params": [
@@ -855,7 +855,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 1622,
+            "endLine": 1624,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -900,9 +900,9 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $res)\n  {\n    if ( isset($res['fields']) ){\n      $to_remove = [];\n      foreach ( $res['fields'] as $i => $f ){\n        if (\n          !empty($res['available_fields'][$f]) &&\n          isset($res['models'][$res['available_fields'][$f]]['fields'][$this->csn($f)]) &&\n          $res['models'][$res['available_fields'][$f]]['fields'][$this->csn($f)]['virtual']\n        ){\n          array_unshift($to_remove, $i);\n        }\n      }\n      foreach ($to_remove as $i) {\n        array_splice($res['fields'], $i, 1);\n        array_splice($res['values'], $i, 1);\n      }\n    }\n    return $res;\n  }",
-            "startLine": 1624,
+            "startLine": 1626,
             "doc": null,
-            "endLine": 1643,
+            "endLine": 1645,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -937,7 +937,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($e)\n  {\n    $this->has_error = true;\n    self::has_error();\n    $msg = [\n      self::$line,\n      self::get_log_line('ERROR DB!'),\n      self::$line\n    ];\n    if ( \\is_string($e) ){\n      $msg[] = self::get_log_line('USER MESSAGE');\n      $msg[] = $e;\n    }\n    else if ( method_exists($e, 'getMessage') ){\n      $msg[] = self::get_log_line('DB MESSAGE');\n      $msg[] = $e->getMessage();\n    }\n    $this->last_error = end($msg);\n    $msg[] = self::get_log_line('QUERY');\n    $msg[] = $this->last();\n    if ( $this->last_real_params['values'] ){\n      $msg[] =  self::get_log_line('VALUES');\n      foreach ( $this->last_real_params['values'] as $v ){\n        if ( $v === null ){\n          $msg[] = 'NULL';\n        }\n        else if ( \\is_bool($v) ){\n          $msg[] = $v ? 'TRUE' : 'FALSE';\n        }\n        else if ( \\is_string($v) ){\n          $msg[] = str::is_buid($v) ? bin2hex($v) : str::cut($v, 30);\n        }\n        else{\n          $msg[] = $v;\n        }\n      }\n    }\n    $msg[] =  self::get_log_line('BACKTRACE');\n    $dbt = array_reverse(debug_backtrace());\n    array_walk($dbt, function($a, $i) use(&$msg){\n      $msg[] = str_repeat(' ', $i).($i ? '->' : '').\"{$a['function']}  (\".basename(dirname($a['file'])).'\/'.basename($a['file']).\":{$a['line']})\";\n    });\n    $this->log(implode(PHP_EOL, $msg));\n    if ( $this->on_error === self::E_DIE ){\n      die(\\defined('BBN_IS_DEV') && BBN_IS_DEV ? '<pre>'.PHP_EOL.implode(PHP_EOL, $msg).PHP_EOL.'<\/pre>' : 'Database error');\n    }\n  }",
-            "startLine": 1651,
+            "startLine": 1653,
             "doc": {
                 "description": "Set an error and acts appropriately based oon the error mode",
                 "params": [
@@ -948,7 +948,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 1697,
+            "endLine": 1699,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -988,13 +988,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $this->current !== null ){\n      \/\/ if $on_error is set to E_CONTINUE returns true\n      if ( $this->on_error === self::E_CONTINUE ){\n        return true;\n      }\n      \/\/ If any connection has an error with mode E_STOP_ALL\n      if ( self::$has_error_all && ($this->on_error !== self::E_STOP_ALL) ){\n        return false;\n      }\n      \/\/ If this connection has an error with mode E_STOP\n      if ( $this->has_error && ($this->on_error !== self::E_STOP) ){\n        return false;\n      }\n      return true;\n    }\n    return false;\n  }",
-            "startLine": 1708,
+            "startLine": 1710,
             "doc": {
                 "description": "Checks if the database is ready to process a query.\n\n```php\nbbn\\x::dump($db->check());\n\/\/ (bool)\n```",
                 "params": [],
                 "return": ""
             },
-            "endLine": 1726,
+            "endLine": 1728,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1024,7 +1024,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($st)\n  {\n    $args = \\func_get_args();\n    foreach ( $args as $a ){\n      x::log($a, 'db');\n    }\n    return $this;\n  }",
-            "startLine": 1737,
+            "startLine": 1739,
             "doc": {
                 "description": "Writes in data\/logs\/db.log.\n\n```php\n$db->$db->log('test');\n```",
                 "params": [
@@ -1036,7 +1036,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 1744,
+            "endLine": 1746,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1076,7 +1076,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($mode)\n  {\n    $this->on_error = $mode;\n    return $this;\n  }",
-            "startLine": 1757,
+            "startLine": 1759,
             "doc": {
                 "description": "Sets the error mode.\n\n```php\n$db->set_error_mode('continue'|'die'|'stop_all|'stop');\n\/\/ (void)\n```",
                 "params": [
@@ -1089,7 +1089,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 1761,
+            "endLine": 1763,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1130,13 +1130,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->on_error;\n  }",
-            "startLine": 1772,
+            "startLine": 1774,
             "doc": {
                 "description": "Gets the error mode.\n\n```php\nbbn\\x::dump($db->get_error_mode());\n\/\/ (string) stop_all\n```",
                 "params": [],
                 "return": ""
             },
-            "endLine": 1775,
+            "endLine": 1777,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1166,7 +1166,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($item, $mode)\n  {\n    $cache_name = $this->_cache_name($item, $mode);\n    if ( $this->cache_has($cache_name) ){\n      $this->cache_delete($cache_name);\n    }\n    return $this;\n  }",
-            "startLine": 1789,
+            "startLine": 1791,
             "doc": {
                 "description": "Deletes a specific item from the cache.\n\n```php\nbbn\\x::dump($db->clear_cache('db_example','tables'));\n\/\/ (db)\n```",
                 "params": [
@@ -1185,7 +1185,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 1796,
+            "endLine": 1798,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1236,13 +1236,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->cache_delete_all();\n    return $this;\n  }",
-            "startLine": 1808,
+            "startLine": 1810,
             "doc": {
                 "description": "Clears the cache.\n\n```php\nbbn\\x::dump($db->clear_all_cache());\n\/\/ (db)\n```",
                 "params": [],
                 "return": ""
             },
-            "endLine": 1812,
+            "endLine": 1814,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1272,13 +1272,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->setAttribute(\\PDO::ATTR_STATEMENT_CLASS, [\\PDOStatement::class]);\n    $this->fancy = false;\n    return $this;\n  }",
-            "startLine": 1824,
+            "startLine": 1826,
             "doc": {
                 "description": "Stops fancy stuff.\n\n```php\n $db->stop_fancy_stuff();\n\/\/ (void)\n```",
                 "params": [],
                 "return": ""
             },
-            "endLine": 1829,
+            "endLine": 1831,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1308,13 +1308,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->setAttribute(\\PDO::ATTR_STATEMENT_CLASS, [db\\query::class, [$this]]);\n    $this->fancy = 1;\n    return $this;\n  }",
-            "startLine": 1840,
+            "startLine": 1842,
             "doc": {
                 "description": "Starts fancy stuff.\n\n```php\n$db->start_fancy_stuff();\n\/\/ (void)\n```",
                 "params": [],
                 "return": ""
             },
-            "endLine": 1845,
+            "endLine": 1847,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1344,13 +1344,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->queries = [];\n    return $this;\n  }",
-            "startLine": 1857,
+            "startLine": 1859,
             "doc": {
                 "description": "Clear.\n\n```php\n$db->clear()\n\/\/ (void)\n```",
                 "params": [],
                 "return": ""
             },
-            "endLine": 1861,
+            "endLine": 1863,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1380,7 +1380,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($statement, $params)\n  {\n    $this->last_real_query = $statement;\n    $this->last_real_params = $params;\n    if ( $this->last_enabled ){\n      $this->last_query = $statement;\n      $this->last_params = $params;\n      \/\/$this->log($statement);\n      if ( $this->debug ){\n        \/\/$this->debug_queries[] = $statement;\n      }\n    }\n    return $this;\n  }",
-            "startLine": 1874,
+            "startLine": 1876,
             "doc": {
                 "description": "Return an object with all the properties of the statement and where it is carried out.\n\n```php\n\\bbn\\x::dump($db->add_statement('SELECT name FROM table_users'));\n\/\/ (db)\n```",
                 "params": [
@@ -1392,7 +1392,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 1887,
+            "endLine": 1889,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1436,13 +1436,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->triggers_disabled = false;\n    return $this;\n  }",
-            "startLine": 1902,
+            "startLine": 1904,
             "doc": {
                 "description": "Enable the triggers' functions",
                 "params": [],
                 "return": ""
             },
-            "endLine": 1906,
+            "endLine": 1908,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1467,13 +1467,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->triggers_disabled = true;\n    return $this;\n  }",
-            "startLine": 1913,
+            "startLine": 1915,
             "doc": {
                 "description": "Disable the triggers' functions",
                 "params": [],
                 "return": ""
             },
-            "endLine": 1917,
+            "endLine": 1919,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1498,9 +1498,9 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return !$this->triggers_disabled;\n  }",
-            "startLine": 1919,
+            "startLine": 1921,
             "doc": null,
-            "endLine": 1922,
+            "endLine": 1924,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1525,9 +1525,9 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->triggers_disabled;\n  }",
-            "startLine": 1924,
+            "startLine": 1926,
             "doc": null,
-            "endLine": 1927,
+            "endLine": 1929,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1552,7 +1552,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($function, $kind = NULL, $moment = NULL, $tables = '*')\n  {\n    $kinds = ['SELECT', 'INSERT', 'UPDATE', 'DELETE'];\n    $moments = ['before', 'after'];\n    if ( empty($kind) ){\n      $kind = $kinds;\n    }\n    else if ( !\\is_array($kind) ){\n      $kind = (array)strtoupper($kind);\n    }\n    else{\n      $kind = array_map('strtoupper', $kind);\n    }\n    if ( empty($moment) ){\n      $moment = $moments;\n    }\n    else {\n      $moment = !\\is_array($moment) ? (array)strtolower($moment) : array_map('strtolower', $moment);\n    }\n    foreach ( $kind as $k ){\n      if ( \\in_array($k, $kinds, true) ){\n        foreach ( $moment as $m ){\n          if ( array_key_exists($m, $this->triggers[$k]) && \\in_array($m, $moments, true) ){\n            if ( $tables === '*' ){\n              $tables = $this->get_tables();\n            }\n            else if ( str::check_name($tables) ){\n              $tables = [$tables];\n            }\n            if ( \\is_array($tables) ){\n              foreach ( $tables as $table ){\n                $t = $this->tfn($table);\n                if ( !isset($this->triggers[$k][$m][$t]) ){\n                  $this->triggers[$k][$m][$t] = [];\n                }\n                $this->triggers[$k][$m][$t][] = $function;\n              }\n            }\n          }\n        }\n      }\n    }\n    return $this;\n  }",
-            "startLine": 1938,
+            "startLine": 1940,
             "doc": {
                 "description": "Apply a function each time the methods $kind are used",
                 "params": [
@@ -1582,7 +1582,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 1981,
+            "endLine": 1983,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1647,13 +1647,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->triggers;\n  }",
-            "startLine": 1986,
+            "startLine": 1988,
             "doc": {
                 "description": "",
                 "params": [],
                 "return": ""
             },
-            "endLine": 1989,
+            "endLine": 1991,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1678,7 +1678,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($tables)\n  {\n    $res = [];\n    if ( !\\is_array($tables) ){\n      $tables = [$tables];\n    }\n    foreach ( $tables as $t ){\n      if ( !($model = $this->get_columns($t)) ){\n        $this->error('Impossible to find the table '.$t);\n        die('Impossible to find the table '.$t);\n      }\n      foreach ( array_keys($model) as $f ){\n        $res[] = $this->cfn($f, $t);\n      }\n    }\n    return $res;\n  }",
-            "startLine": 2003,
+            "startLine": 2005,
             "doc": {
                 "description": "",
                 "params": [
@@ -1689,7 +1689,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2019,
+            "endLine": 2021,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1729,7 +1729,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($col, $table, $db = NULL)\n  {\n    if ( !$db ){\n      $db = $this->current;\n    }\n    $res = [];\n    $model = $this->modelize();\n    foreach ( $model as $tn => $m ){\n      foreach ( $m['keys'] as $k => $t ){\n        if ( ($t['ref_table'] === $table) &&\n          ($t['ref_column'] === $col) &&\n          ($t['ref_db'] === $db) &&\n          (\\count($t['columns']) === 1)\n        ){\n          if ( !isset($res[$tn]) ){\n            $res[$tn] = [$t['columns'][0]];\n          }\n          else{\n            $res[$tn][] = $t['columns'][0];\n          }\n        }\n      }\n    }\n    return $res;\n  }",
-            "startLine": 2034,
+            "startLine": 2036,
             "doc": {
                 "description": "Return an array with tables and fields related to the searched foreign key.\n\n```php\nbbn\\x::dump($db->get_foreign_keys('id', 'table_users', 'db_example'));\n\/\/ (Array)\n```",
                 "params": [
@@ -1754,7 +1754,7 @@
                 ],
                 "return": "with tables and fields related to the searched foreign key"
             },
-            "endLine": 2058,
+            "endLine": 2060,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1819,7 +1819,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table)\n  {\n    return ($model = $this->modelize($table)) &&\n      isset($model['keys']['PRIMARY']) &&\n      (\\count($model['keys']['PRIMARY']['columns']) === 1) &&\n      ($model['fields'][$model['keys']['PRIMARY']['columns'][0]]['extra'] === 'auto_increment');\n  }",
-            "startLine": 2072,
+            "startLine": 2074,
             "doc": {
                 "description": "Return true if in the table there are fields with auto-increment.\nWorking only on mysql.\n\n```php\n\\bbn\\x::dump($db->has_id_increment('table_users'));\n\/\/ (bool) 1\n```",
                 "params": [
@@ -1832,7 +1832,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2078,
+            "endLine": 2080,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1873,7 +1873,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table = NULL, $force = false)\n  {\n    $r = [];\n    $tables = false;\n    if ( empty($table) || ($table === '*') ){\n      $tables = $this->get_tables($this->current);\n    }\n    else if ( \\is_string($table) ){\n      $tables = [$table];\n    }\n    else if ( \\is_array($table) ){\n      $tables = $table;\n    }\n    if ( \\is_array($tables) ){\n      foreach ( $tables as $t ){\n        if ( $full = $this->tfn($t) ){\n          $r[$full] = $this->_get_cache($full, 'columns', $force);\n        }\n      }\n      if ( \\count($r) === 1 ){\n        return end($r);\n      }\n      return $r;\n    }\n    return null;\n  }",
-            "startLine": 2092,
+            "startLine": 2094,
             "doc": {
                 "description": "Return the table's structure as an indexed array.\n\n```php\n\\bbn\\x::dump($db->modelize(\"table_users\"));\n\/\/ (array) [keys] => Array ( [PRIMARY] => Array ( [columns] => Array ( [0] => userid [1] => userdataid ) [ref_db] => [ref_table] => [ref_column] => [unique] => 1 ) [table_users_userId_userdataId_info] => Array ( [columns] => Array ( [0] => userid [1] => userdataid [2] => info ) [ref_db] => [ref_table] => [ref_column] => [unique] => 0 ) ) [cols] => Array ( [userid] => Array ( [0] => PRIMARY [1] => table_users_userId_userdataId_info ) [userdataid] => Array ( [0] => PRIMARY [1] => table_users_userId_userdataId_info ) [info] => Array ( [0] => table_users_userId_userdataId_info ) ) [fields] => Array ( [userid] => Array ( [position] => 1 [null] => 0 [key] => PRI [default] => [extra] => [signed] => 1 [maxlength] => 11 [type] => int ) [userdataid] => Array ( [position] => 2 [null] => 0 [key] => PRI [default] => [extra] => [signed] => 1 [maxlength] => 11 [type] => int ) [info] => Array ( [position] => 3 [null] => 1 [key] => [default] => NULL [extra] => [signed] => 0 [maxlength] => 200 [type] => varchar ) )\n```",
                 "params": [
@@ -1892,7 +1892,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2117,
+            "endLine": 2119,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1939,7 +1939,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table = '', $force = false)\n  {\n    if ( $res = $this->modelize(...\\func_get_args()) ){\n      foreach ( $res['fields'] as $n => $f ){\n        $res['fields'][$n]['name'] = $n;\n        $res['fields'][$n]['keys'] = [];\n        if ( isset($res['cols'][$n]) ){\n          foreach ( $res['cols'][$n] as $key ){\n            $res['fields'][$n]['keys'][$key] = $res['keys'][$key];\n          }\n        }\n      }\n      return $res['fields'];\n    }\n    return null;\n  }",
-            "startLine": 2124,
+            "startLine": 2126,
             "doc": {
                 "description": "",
                 "params": [
@@ -1956,7 +1956,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2139,
+            "endLine": 2141,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2001,7 +2001,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($column, $db = '')\n  {\n    $changed = false;\n    if ( $db && ($db !== $this->current) ){\n      $changed = $this->current;\n      $this->change($db);\n    }\n    $column = $this->cfn($column);\n    $bits = explode('.', $column);\n    if ( \\count($bits) === 2 ){\n      array_unshift($bits, $this->current);\n    }\n    if ( \\count($bits) !== 3 ){\n\n      return false;\n    }\n    $refs = [];\n    $schema = $this->modelize();\n    $test = function($key) use($bits){\n      return ($key['ref_db'] === $bits[0]) && ($key['ref_table'] === $bits[1]) && ($key['ref_column'] === $bits[2]);\n    };\n    foreach ( $schema as $table => $cfg ){\n      foreach ( $cfg['keys'] as $k ){\n        if ( $test($k) ){\n          $refs[] = $table.'.'.$k['columns'][0];\n        }\n      }\n    }\n    if ( $changed ){\n      $this->change($changed);\n    }\n    return $refs;\n  }",
-            "startLine": 2149,
+            "startLine": 2151,
             "doc": {
                 "description": "find_references",
                 "params": [
@@ -2017,7 +2017,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2181,
+            "endLine": 2183,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2061,7 +2061,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($column, $db = '')\n  {\n    $changed = false;\n    if ( $db && ($db !== $this->current) ){\n      $changed = $this->current;\n      $this->change($db);\n    }\n    $column = $this->cfn($column);\n    $bits = explode('.', $column);\n    if ( \\count($bits) === 2 ){\n      array_unshift($bits, $db ?: $this->current);\n    }\n    if ( \\count($bits) !== 3 ){\n      return null;\n    }\n    $table = $bits[1];\n    $refs = [];\n    $schema = $this->modelize();\n    $test = function($key) use($bits){\n      return ($key['ref_db'] === $bits[0]) && ($key['ref_table'] === $bits[1]) && ($key['ref_column'] === $bits[2]);\n    };\n    foreach ( $schema as $tf => $cfg ){\n      $t = $this->tsn($tf);\n      if ( $t !== $table ){\n        foreach ( $cfg['keys'] as $k ){\n          if ( $test($k) ){\n            foreach ( $cfg['keys'] as $k2 ){\n              \/\/ Is not the same table\n              if ( !$test($k2) &&\n                \/\/ Has a reference\n                !empty($k2['ref_column']) &&\n                \/\/ and refers to a single column\n                (\\count($k['columns']) === 1) &&\n                \/\/ A unique reference\n                (\\count($k2['columns']) === 1) &&\n                \/\/ To a table with a primary\n                isset($schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']]) &&\n                \/\/ which is a sole column\n                (\\count($schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']]) === 1) &&\n                \/\/ We retrieve the key name\n                ($key_name = $schema[$this->tfn($k2['ref_table'])]['cols'][$k2['ref_column']][0]) &&\n                \/\/ which is unique\n                !empty($schema[$this->tfn($k2['ref_table'])]['keys'][$key_name]['unique'])\n              ){\n                if ( !isset($refs[$t]) ){\n                  $refs[$t] = ['column' => $k['columns'][0], 'refs' => []];\n                }\n                $refs[$t]['refs'][$k2['columns'][0]] = $k2['ref_table'].'.'.$k2['ref_column'];\n              }\n            }\n          }\n        }\n      }\n    }\n    if ( $changed ){\n      $this->change($changed);\n    }\n    return $refs;\n  }",
-            "startLine": 2190,
+            "startLine": 2192,
             "doc": {
                 "description": "find_relations",
                 "params": [
@@ -2077,7 +2077,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2248,
+            "endLine": 2250,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2127,7 +2127,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table)\n  {\n    if ( ($keys = $this->get_keys($table)) && isset($keys['keys']['PRIMARY']) ){\n      return $keys['keys']['PRIMARY']['columns'];\n    }\n    return [];\n  }",
-            "startLine": 2261,
+            "startLine": 2263,
             "doc": {
                 "description": "Return primary keys of a table as a numeric array.\n\n```php\n\\bbn\\x::dump($db-> get_primary('table_users'));\n\/\/ (array) [\"id\"]\n```",
                 "params": [
@@ -2140,7 +2140,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2267,
+            "endLine": 2269,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2181,7 +2181,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table)\n  {\n    if ( ($keys = $this->get_keys($table)) &&\n      isset($keys['keys']['PRIMARY']) &&\n      (\\count($keys['keys']['PRIMARY']['columns']) === 1) ){\n      return $keys['keys']['PRIMARY']['columns'][0];\n    }\n    return null;\n  }",
-            "startLine": 2280,
+            "startLine": 2282,
             "doc": {
                 "description": "Return the unique primary key of the given table.\n\n```php\n\\bbn\\x::dump($db->get_unique_primary('table_users'));\n\/\/ (string) id\n```",
                 "params": [
@@ -2194,7 +2194,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2288,
+            "endLine": 2290,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2236,7 +2236,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table)\n  {\n    $fields = [[]];\n    if ( $ks = $this->get_keys($table) ){\n      foreach ( $ks['keys'] as $k ){\n        if ( $k['unique'] ){\n          return $k['columns'];\n        }\n      }\n    }\n    return [];\n  }",
-            "startLine": 2301,
+            "startLine": 2303,
             "doc": {
                 "description": "Return the unique keys of a table as a numeric array.\n\n```php\n\\bbn\\x::dump($db->get_unique_keys('table_users'));\n\/\/ (array) [\"userid\", \"userdataid\"]\n```",
                 "params": [
@@ -2249,7 +2249,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2312,
+            "endLine": 2314,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2290,7 +2290,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($value, $esc = '\\'')\n  {\n    return str_replace('%', '\\\\%', $esc === '\"' ?\n      str::escape_dquotes($value) :\n      str::escape_squotes($value));\n  }",
-            "startLine": 2335,
+            "startLine": 2337,
             "doc": {
                 "description": "Return a string with quotes and percent escaped.\n\n```php\nbbn\\x::dump($db->escape_value(\"My father's job is interesting\");\n\/\/ (string) My father\\'s job is interesting\n```",
                 "params": [
@@ -2308,7 +2308,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2340,
+            "endLine": 2342,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2353,7 +2353,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($id = '')\n  {\n    if ( $id === '' ){\n      if ( $this->id_just_inserted ){\n        $id = $this->id_just_inserted;\n        $this->id_just_inserted = null;\n      }\n      else{\n        $id = $this->lastInsertId();\n        if ( \\is_string($id) && str::is_integer($id) ){\n          $id = (int)$id;\n        }\n      }\n    }\n    else{\n      $this->id_just_inserted = $id;\n    }\n    $this->last_insert_id = $id;\n    return $this;\n  }",
-            "startLine": 2353,
+            "startLine": 2355,
             "doc": {
                 "description": "Changes the value of last_insert_id (used by history).",
                 "params": [
@@ -2370,7 +2370,7 @@
                     "text": "this function should be private\n\n```php\nbbn\\x::dump($db->set_last_insert_id());\n\/\/ (db)\n```"
                 }
             },
-            "endLine": 2372,
+            "endLine": 2374,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2406,7 +2406,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($statement)\n  {\n    if ( $this->parser === null ){\n      $this->parser = new \\PHPSQLParser\\PHPSQLParser();\n    }\n    $done = false;\n    try {\n      $r = $this->parser->parse($statement);\n      $done = 1;\n    }\n    catch ( \\Exception $e ){\n      $this->log('Error while parsing the query '.$statement);\n    }\n    if ($done) {\n      if (!$r || !count($r) ){\n        $this->log('Impossible to parse the query '.$statement);\n        return null;\n      }\n      if ( isset($r['BRACKET']) && (\\count($r) === 1) ){\n        $this->log('Bracket in the query '.$statement);\n        return null;\n      }\n      return $r;\n    }\n    return null;\n  }",
-            "startLine": 2380,
+            "startLine": 2382,
             "doc": {
                 "description": "Parses a SQL query and return an array.",
                 "params": [
@@ -2418,7 +2418,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2405,
+            "endLine": 2407,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2459,13 +2459,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->last_query;\n  }",
-            "startLine": 2417,
+            "startLine": 2419,
             "doc": {
                 "description": "Return the last query for this connection.\n\n```php\n\\bbn\\x::dump($db->last());\n\/\/ (string) INSERT INTO `db_example.table_user` (`name`) VALUES (?)\n```",
                 "params": [],
                 "return": ""
             },
-            "endLine": 2420,
+            "endLine": 2422,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2496,13 +2496,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->last_cfg;\n  }",
-            "startLine": 2432,
+            "startLine": 2434,
             "doc": {
                 "description": "Return the last config for this connection.\n\n```php\n\\bbn\\x::dump($db->get_last_cfg());\n\/\/ (array) INSERT INTO `db_example.table_user` (`name`) VALUES (?)\n```",
                 "params": [],
                 "return": ""
             },
-            "endLine": 2435,
+            "endLine": 2437,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2533,13 +2533,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $this->last_insert_id ){\n      return str::is_buid($this->last_insert_id) ? bin2hex($this->last_insert_id) : $this->last_insert_id;\n    }\n    return false;\n  }",
-            "startLine": 2447,
+            "startLine": 2449,
             "doc": {
                 "description": "Return the last inserted ID.\n\n```php\n\\bbn\\x::dump($db->last_id());\n\/\/ (int) 26\n```",
                 "params": [],
                 "return": ""
             },
-            "endLine": 2453,
+            "endLine": 2455,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2562,13 +2562,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $num = \\count($this->queries);\n    $this->queries = [];\n    return $num;\n  }",
-            "startLine": 2460,
+            "startLine": 2462,
             "doc": {
                 "description": "Deletes all the queries recorded and returns their (ex) number.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 2465,
+            "endLine": 2467,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2598,13 +2598,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return parent::query(...\\func_get_args());\n  }",
-            "startLine": 2476,
+            "startLine": 2478,
             "doc": {
                 "description": "Executes the original PDO query function\n\n```php\n\\bbn\\x::dump($db->raw_query());\n\/\/ (bool)\n```",
                 "params": [],
                 "return": ""
             },
-            "endLine": 2479,
+            "endLine": 2481,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2632,7 +2632,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, $min = 1)\n  {\n    if ( \\count($tab['keys']['PRIMARY']['columns']) !== 1 ){\n      die(\"Error! Unique numeric primary key doesn't exist\");\n    }\n    if (\n      ($id_field = $tab['keys']['PRIMARY']['columns'][0]) &&\n      ($maxlength = $tab['fields'][$id_field]['maxlength'] )&&\n      ($maxlength > 1)\n    ){\n      $max = (10 ** $maxlength) - 1;\n      if ( $max >= mt_getrandmax() ){\n        $max = mt_getrandmax();\n      }\n      if ( ($max > $min) && ($table = $this->tfn($table, true)) ){\n        $i = 0;\n        do {\n          $id = random_int($min, $max);\n          \/** @todo *\/\n          \/*\n          if ( strpos($tab['fields'][$id_field]['type'], 'char') !== false ){\n            $id = substr(md5('bbn'.$id), 0, random_int(1, 10 ** $maxlength));\n          }\n          *\/\n          $i++;\n        }\n        while ( ($i < 100) && $this->select($table, [$id_field], [$id_field => $id]) );\n        return $id;\n      }\n    }\n    return null;\n  }",
-            "startLine": 2494,
+            "startLine": 2496,
             "doc": {
                 "description": "Generate a new casual id based on the max number of characters of id's column structure in the given table\n\n```php\n\\bbn\\x::dump($db->new_id('table_users', 18));\n\/\/ (int) 69991701\n```",
                 "params": [
@@ -2654,7 +2654,7 @@
                     "text": "Either get rid of th efunction or include the UID types"
                 }
             },
-            "endLine": 2525,
+            "endLine": 2527,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2697,9 +2697,9 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, array $fields = [], array $where = [])\n  {\n    if ( $this->check() && ($num = $this->count($table, $where)) ){\n      $args = $this->_add_kind($this->_set_start($this->_set_limit_1(\\func_get_args()), random_int(0, $num - 1)));\n      if ( $r = $this->_exec(...$args) ){\n        return $r->get_row();\n      }\n    }\n    return null;\n  }",
-            "startLine": 2527,
+            "startLine": 2529,
             "doc": null,
-            "endLine": 2536,
+            "endLine": 2538,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2753,9 +2753,9 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, array $fields = [], array $where = [])\n  {\n    if ( $this->check() && ($num = $this->count($table, $where)) ){\n      $args = $this->_add_kind($this->_set_start($this->_set_limit_1(\\func_get_args()), random_int(0, $num - 1)));\n      if ( $r = $this->_exec(...$args) ){\n        return $r->get_obj();\n      }\n    }\n    return null;\n  }",
-            "startLine": 2538,
+            "startLine": 2540,
             "doc": null,
-            "endLine": 2547,
+            "endLine": 2549,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2809,7 +2809,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($col, $table)\n  {\n    if ( ($tab = $this->modelize($table)) && isset($tab['fields'][$col]) ){\n      foreach ( $tab['keys'] as $key => $cfg ){\n        if (\n          $cfg['unique'] &&\n          !empty($cfg['ref_column']) &&\n          (\\count($cfg['columns']) === 1) &&\n          ($col === $cfg['columns'][0])\n        ){\n          return ($num = $this->count($cfg['ref_column'])) ? $this->select_one([\n            'tables' [$cfg['ref_table']],\n            'fields' => [$cfg['ref_column']],\n            'start' => random_int(0, $num - 1)\n          ]) : null;\n        }\n      }\n      switch ( $tab['fields'][$col]['type'] ){\n        case 'int':\n          if ( ($tab['fields'][$col]['maxlength'] === 1) && !$tab['fields'][$col]['signed'] ){\n            $val = microtime(true) % 2 === 0 ? 1 : 0;\n          }\n          else {\n            $max = 10 ** $tab['fields'][$col]['maxlength'] - 1;\n            if ( $max > mt_getrandmax() ){\n              $max = mt_getrandmax();\n            }\n            if ( $tab['fields'][$col]['signed'] ){\n              $max \/= 2;\n            }\n            $min = $tab['fields'][$col]['signed'] ? -$max : 0;\n            $val = random_int($min, $max);\n          }\n          break;\n        case 'float':\n        case 'double':\n        case 'decimal':\n          break;\n        case 'varchar':\n          break;\n        case 'text':\n          break;\n        case 'date':\n          break;\n        case 'datetime':\n          break;\n        case 'timestamp':\n          break;\n        case 'time':\n          break;\n        case 'year':\n          break;\n        case 'blob':\n          break;\n        case 'binary':\n          break;\n        case 'varbinary':\n          break;\n        case 'enum':\n          break;\n      }\n    }\n    return $val;\n  }",
-            "startLine": 2557,
+            "startLine": 2559,
             "doc": {
                 "description": "Returns a random value fitting the requested column's type",
                 "params": [
@@ -2828,7 +2828,7 @@
                     "text": "This great function has to be done properly"
                 }
             },
-            "endLine": 2620,
+            "endLine": 2622,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2870,13 +2870,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return \\count($this->queries);\n  }",
-            "startLine": 2625,
+            "startLine": 2627,
             "doc": {
                 "description": "",
                 "params": [],
                 "return": ""
             },
-            "endLine": 2628,
+            "endLine": 2630,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2906,7 +2906,7 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $r = $this->query(...\\func_get_args()) ){\n      return $r->fetchColumn(0);\n    }\n    return false;\n  }",
-            "startLine": 2650,
+            "startLine": 2652,
             "doc": {
                 "description": "Executes the given query with given vars, and extracts the first cell's result.\n\n```php\n\\bbn\\x::dump($db->get_one(\"SELECT name FROM table_users WHERE id>?\", 138));\n\/\/ (string) John\n```",
                 "params": [
@@ -2923,7 +2923,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2656,
+            "endLine": 2658,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2955,7 +2955,7 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n  }",
-            "startLine": 2671,
+            "startLine": 2673,
             "doc": {
                 "description": "Execute the given query with given vars, and extract the first cell's result.\n(similar to {@link get_one()})\n\n```php\n\\bbn\\x::dump($db->get_var(\"SELECT telephone FROM table_users WHERE id>?\", 1));\n\/\/ (int) 123554154\n```",
                 "params": [
@@ -2972,7 +2972,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2673,
+            "endLine": 2675,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3004,7 +3004,7 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $r = $this->query(...\\func_get_args()) ){\n      if ( $rows = $r->get_rows() ){\n        return x::index_by_first_val($rows);\n      }\n      return [];\n    }\n    return null;\n  }",
-            "startLine": 2706,
+            "startLine": 2708,
             "doc": {
                 "description": "Return an array indexed on the first field of the request.\nThe value will be an array if the request has more than two fields.\n\n```php\n\\bbn\\x::dump($db->get_key_val(\"SELECT name,id_group FROM table_users\"));\n\/*\n(array)[\n \"John\" => 1,\n \"Michael\" => 1,\n \"Barbara\" => 1\n  ]\n\n\\bbn\\x::dump($db->get_key_val(\"SELECT name, surname, id FROM table_users WHERE id > 2 \"));\n\/*\n(array)[\n  \"John\" => [\n   \"surname\" => \"Brown\",\n   \"id\" => 3\n  ],\n  \"Michael\" => [\n   \"surname\" => \"Smith\",\n   \"id\" => 4\n  ]\n  ]\n```",
                 "params": [
@@ -3021,7 +3021,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2715,
+            "endLine": 2717,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3052,7 +3052,7 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $r = $this->get_by_columns(...\\func_get_args()) ){\n      return array_values(current($r));\n    }\n    return [];\n  }",
-            "startLine": 2730,
+            "startLine": 2732,
             "doc": {
                 "description": "Return an array with the values of single field resulting from the query.\n\n```php\n\\bbn\\x::dump($db->get_col_array(\"SELECT id FROM table_users\"));\n\/*\n(array)[1, 2, 3, 4]\n```",
                 "params": [
@@ -3069,7 +3069,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2736,
+            "endLine": 2738,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3099,7 +3099,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, $fields = [], array $where = [], array $order = [], $start = 0)\n  {\n    $args = $this->_add_kind($this->_set_limit_1(\\func_get_args()));\n    if ( $r = $this->_exec(...$args) ){\n      if ( !is_object($r) ){\n        $this->log([$args, $this->process_cfg($args)]);\n      }\n      else{\n        return $r->get_object();\n      }\n    }\n    return null;\n  }",
-            "startLine": 2765,
+            "startLine": 2767,
             "doc": {
                 "description": "Returns the first row resulting from the query as an object.\n\n```php\n\\bbn\\x::dump($db->select('table_users', ['name', 'surname'], [['id','>','2']]));\n\/*\n(object){\n \"name\": \"John\",\n \"surname\": \"Smith\",\n}\n```",
                 "params": [
@@ -3136,7 +3136,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2777,
+            "endLine": 2779,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3218,7 +3218,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0)\n  {\n    if ( $r = $this->_exec(...$this->_add_kind(\\func_get_args())) ){\n      return $r->get_objects();\n    }\n    return null;\n  }",
-            "startLine": 2807,
+            "startLine": 2809,
             "doc": {
                 "description": "Return table's rows resulting from the query as an array of objects.\n\n```php\n\\bbn\\x::dump($db->select_all(\"tab_users\", [\"id\", \"name\", \"surname\"],[[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n\/*\n(array)[\n  Object stdClass: df {\n   \"id\" => 2,\n   \"name\" => \"John\",\n   \"surname\" => \"Smith\",\n   },\n  Object stdClass: df {\n   \"id\" => 3,\n   \"name\" => \"Thomas\",\n   \"surname\" => \"Jones\",\n  }\n  ]\n```",
                 "params": [
@@ -3261,7 +3261,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2813,
+            "endLine": 2815,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3353,7 +3353,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, $fields = [], array $where = [], array $order = [], $start = 0)\n  {\n    if ( $r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\\func_get_args()))) ){\n      return $r->get_irow();\n    }\n    return null;\n  }",
-            "startLine": 2835,
+            "startLine": 2837,
             "doc": {
                 "description": "Return the first row resulting from the query as a numeric array.\n\n```php\n\\bbn\\x::dump($db->iselect(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n\/*\n(array)[\n   4,\n  \"Jack\",\n   \"Stewart\"\n  ]\n```",
                 "params": [
@@ -3390,7 +3390,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2841,
+            "endLine": 2843,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3472,7 +3472,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0)\n  {\n    if ( $r = $this->_exec(...$this->_add_kind(\\func_get_args())) ){\n      return $r->get_irows();\n    }\n    return null;\n  }",
-            "startLine": 2871,
+            "startLine": 2873,
             "doc": {
                 "description": "Return the searched rows as an array of numeric arrays.\n\n```php\n\\bbn\\x::dump($db->iselect_all(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]],[\"id\" => \"ASC\"],2));\n\/*\n(array)[\n   [\n  2,\n  \"John\",\n  \"Smith\",\n   ],\n   [\n  3,\n  \"Thomas\",\n  \"Jones\",\n   ]\n  ]\n```",
                 "params": [
@@ -3514,7 +3514,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2877,
+            "endLine": 2879,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3606,7 +3606,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, $fields = [], array $where = [], array $order = [], $start = 0)\n  {\n    if ( $r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\\func_get_args()))) ){\n      \n      return $r->get_row();\n    }\n    return null;\n  }",
-            "startLine": 2899,
+            "startLine": 2901,
             "doc": {
                 "description": "Return the first row resulting from the query as an indexed array.\n\n```php\n\\bbn\\x::dump($db->rselect(\"tab_users\", [\"id\", \"name\", \"surname\"], [\"id\", \">\", 1], [\"id\" => \"ASC\"], 2));\n\/*\n(array) [\n   \"id\" => 4,\n   \"name\" => \"John\",\n   \"surname\" => \"Smith\"\n  ]\n```",
                 "params": [
@@ -3643,7 +3643,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2906,
+            "endLine": 2908,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3725,7 +3725,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0)\n  {\n    if ( $r = $this->_exec(...$this->_add_kind(\\func_get_args())) ){\n      if ( method_exists($r, 'get_rows') ){\n        return $r->get_rows();\n      }\n      $this->log('ERROR IN RSELECT_ALL', $r);\n    }\n    return [];\n  }",
-            "startLine": 2936,
+            "startLine": 2938,
             "doc": {
                 "description": "Return table's rows as an array of indexed arrays.\n\n```php\n\\bbn\\x::dump($db->rselect_all(\"tab_users\", [\"id\", \"name\", \"surname\"], [[\"id\", \">\", 1]], [\"id\" => \"ASC\"], 2));\n\/*\n(array) [\n   [\n   \"id\" => 2,\n   \"name\" => \"John\",\n   \"surname\" => \"Smith\",\n   ],\n   [\n   \"id\" => 3,\n   \"name\" => \"Thomas\",\n   \"surname\" => \"Jones\",\n   ]\n  ]\n```",
                 "params": [
@@ -3768,7 +3768,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2945,
+            "endLine": 2947,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3860,7 +3860,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, $field = NULL, array $where = [], array $order = [], $start = 0)\n  {\n    if ( $r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\\func_get_args()))) ){\n      if ( method_exists($r, 'get_irow') ){\n        return ($a = $r->get_irow()) ? $a[0] : false;\n      }\n      $this->log('ERROR IN SELECT_ONE', $this->get_last_cfg(), $r, $this->_add_kind($this->_set_limit_1(\\func_get_args())));\n    }\n    return false;\n  }",
-            "startLine": 2962,
+            "startLine": 2964,
             "doc": {
                 "description": "Return a single value\n\n```php\n\\bbn\\x::dump($db->select_one(\"tab_users\", \"name\", [[\"id\", \">\", 1]], [\"id\" => \"DESC\"], 2));\n (string) 'Michael'\n```",
                 "params": [
@@ -3897,7 +3897,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 2971,
+            "endLine": 2973,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -3971,9 +3971,9 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $union, array $fields = [], array $where = [], array $order = [], $start = 0)\n  {\n    $cfgs = [];\n    $sql = 'SELECT ';\n    if ( empty($fields) ){\n      $sql .= '* ';\n    }\n    else{\n      foreach ( $fields as $i => $f ){\n        if ( $i ){\n          $sql .= ', ';\n        }\n        $sql .= $this->csn($f, true);\n      }\n    }\n    $sql .= ' FROM (('.PHP_EOL;\n    $vals = [];\n    $i = 0;\n    foreach ( $union as $u ){\n      $cfg = $this->process_cfg($this->_add_kind([$u]));\n      if ( $cfg && $cfg['sql'] ){\n        \/** @todo From here needs to analyze the where array to the light of the tables' config *\/\n        if ( !empty($where) ){\n          if ( empty($fields) ){\n            $fields = $cfg['fields'];\n          }\n          foreach ( $fields as $k => $f ){\n            if ( isset($cfg['available_fields'][$f]) ){\n              if ( $cfg['available_fields'][$f] && ($t = $cfg['models'][$cfg['available_fields'][$f]])\n              ){\n                die(var_dump($t['fields'][$cfg['fields'][$f] ?? $this->csn($f)]));\n              }\n            }\n          }\n        }\n        if ( $i ){\n          $sql .= PHP_EOL.') UNION ('.PHP_EOL;\n        }\n        $sql .= $cfg['sql'];\n        foreach ( $cfg['values'] as $v ){\n          $vals[] = $v;\n        }\n        $i++;\n      }\n    }\n    $sql .= PHP_EOL.')) AS t';\n    return $this->get_rows($sql, ...$vals);\n    \/\/echo nl2br($sql);\n    return [];\n  }",
-            "startLine": 2973,
+            "startLine": 2975,
             "doc": null,
-            "endLine": 3022,
+            "endLine": 3024,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -4050,7 +4050,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, array $where = [])\n  {\n    $args = \\is_array($table) && (isset($table['tables']) || isset($table['table'])) ? $table : [\n      'tables' => [$table],\n      'where' => $where\n    ];\n    $args['count'] = true;\n    if ( !empty($args['bbn_db_processed']) ){\n      unset($args['bbn_db_processed']);\n    }\n    if ( \\is_object($r = $this->_exec($args)) ){\n      $a = $r->get_irow();\n      return $a ? (int)$a[0] : null;\n    }\n    return null;\n  }",
-            "startLine": 3036,
+            "startLine": 3038,
             "doc": {
                 "description": "Return the number of records in the table corresponding to the $where condition (non mandatory).\n\n```php\n\\bbn\\x::dump($db->count('table_users', ['name' => 'John']));\n\/\/ (int) 2\n```",
                 "params": [
@@ -4069,7 +4069,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 3051,
+            "endLine": 3053,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -4125,7 +4125,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, array $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0)\n  {\n    if ( $rows = $this->rselect_all($table, $fields, $where, $order, $limit, $start) ){\n      return x::index_by_first_val($rows);\n    }\n    return $this->check() ? [] : null;\n  }",
-            "startLine": 3081,
+            "startLine": 3083,
             "doc": {
                 "description": "Return an array indexed on the first field of the request.\nThe value will be an array if the request has more than two fields.\nReturn the same value as \"get_key_val\".\n\n```php\n\\bbn\\x::dump($db->select_all_by_keys(\"table_users\", [\"name\",\"id\",\"surname\"], [[\"id\", \">\", \"1\"]], [\"id\" => \"ASC\"]);\n\/*\n(array)[\n  \"John\" => [\n   \"surname\" => \"Brown\",\n   \"id\" => 3\n   ],\n  \"Michael\" => [\n   \"surname\" => \"Smith\",\n   \"id\" => 4\n  ]\n ]\n```",
                 "params": [
@@ -4168,7 +4168,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 3087,
+            "endLine": 3089,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -4260,7 +4260,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, $column, array $where = [], array $order = [])\n  {\n      return $this->rselect_all([\n        'tables' => [$table],\n        'fields' => [\n          $column,\n          'num' => 'COUNT(*)'\n        ],\n        'where' => $where,\n        'order' => $order,\n        'group_by' => [$column]\n      ]);\n    }\n    return null;\n  }",
-            "startLine": 3112,
+            "startLine": 3114,
             "doc": {
                 "description": "Return an array with the count of values corresponding to the where conditions.\n\n```php\n\\bbn\\x::dump($db->stat('table_user', 'name', ['name' => '%n']));\n\/* (array)\n[\n [\n \"num\" => 1,\n \"name\" => \"alan\",\n ], [\n \"num\" => 1,\n \"name\" => \"karen\",\n ],\n]\n```",
                 "params": [
@@ -4291,7 +4291,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 3126,
+            "endLine": 3128,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -4363,7 +4363,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, $field = NULL, array $where = [], array $order = [])\n  {\n    return $this->get_column_values($table, $field, $where, $order);\n  }",
-            "startLine": 3142,
+            "startLine": 3144,
             "doc": {
                 "description": "Return the unique values of a column of a table as a numeric indexed array.\n\n```php\n\\bbn\\x::dump($db->get_field_values(\"table_users\", \"surname\", [['id', '>', '2']], 1, 1));\n\/\/ (array) [\"Smiths\", \"White\"]\n```",
                 "params": [
@@ -4394,7 +4394,7 @@
                 ],
                 "return": "| false"
             },
-            "endLine": 3145,
+            "endLine": 3147,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -4466,7 +4466,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, $field = NULL, array $where = [], array $order = [])\n  {\n      $args = $table;\n      $field = array_values($table['fields'])[0];\n    }\n    else{\n      $args = [\n        'tables' => [$table],\n        'where' => $where,\n        'order' => $order\n      ];\n    }\n    $args = array_merge($args, [\n      'kind' => 'SELECT',\n      'fields' => [\n        'val' => $field,\n        'num' => 'COUNT(*)'\n      ],\n      'group_by' => [$field]\n    ]);\n    return $this->rselect_all($args);\n  }",
-            "startLine": 3161,
+            "startLine": 3163,
             "doc": {
                 "description": "Return a count of identical values in a field as array, reporting a structure type 'num' - 'val'.\n\n```php\n\\bbn\\x::dump($db->count_field_values('table_users','surname',[['name','=','John']]));\n\/\/ (array) [\"num\" => 2, \"val\" => \"John\"]\n```",
                 "params": [
@@ -4497,7 +4497,7 @@
                 ],
                 "return": "| false"
             },
-            "endLine": 3182,
+            "endLine": 3184,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -4566,7 +4566,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, $field = NULL, array $where = [], array $order = [])\n  {\n    $res = null;\n    if ($this->check()) {\n      $res = [];\n      if ( \\is_array($table) && isset($table['fields']) && \\is_array($table['fields']) && !empty($table['fields'][0]) ){\n        array_splice($table['fields'], 0, 1, 'DISTINCT '.(string)$table['fields'][0]);\n      }\n      else if ( \\is_string($table) && \\is_string($field) && (stripos($field, 'DISTINCT') !== 0) ){\n        $field = 'DISTINCT '.$field;\n      }\n      if ( $rows = $this->iselect_all($table, $field, $where, $order) ){\n        foreach ( $rows as $row ){\n          $res[] = $row[0];\n        }\n      }\n    }\n    return $res;\n  }",
-            "startLine": 3204,
+            "startLine": 3206,
             "doc": {
                 "description": "Return a numeric indexed array with the values of the unique column ($field) from the selected $table\n\n```php\n\\bbn\\x::dump($db->get_column_values('table_users','surname',['id','>',1]));\n\/*\narray [\n  \"Smith\",\n  \"Jones\",\n  \"Williams\",\n  \"Taylor\"\n]\n```",
                 "params": [
@@ -4597,7 +4597,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 3222,
+            "endLine": 3224,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -4669,7 +4669,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, $field, array $where, $order)\n  {\n    return $this->count_field_values($table, $field, $where, $order);\n  }",
-            "startLine": 3242,
+            "startLine": 3244,
             "doc": {
                 "description": "Return a string with the sql query to count equal values in a field of the table.\n\n```php\n\\bbn\\x::dump($db->get_values_count('table_users','name',['surname','=','smith']));\n\/*\n(string)\n SELECT COUNT(*) AS num, `name` AS val FROM `db_example`.`table_users`\n  GROUP BY `name`\n  ORDER BY `name`\n```",
                 "params": [
@@ -4700,7 +4700,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 3245,
+            "endLine": 3247,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -4771,7 +4771,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, array $values = NULL, $ignore = false)\n  {\n    if ( \\is_array($table) && isset($table['values']) ){\n      $values = $table['values'];\n    }\n    \/\/ Array of arrays\n    if (\n      \\is_array($values) &&\n      count($values) &&\n      !x::is_assoc($values) &&\n      \\is_array($values[0])\n    ){\n      $res = 0;\n\n      foreach ( $values as $v ){\n        $res += $this->insert($table, $v, $ignore);\n      }\n      return $res;\n    }\n\n    $cfg = \\is_array($table) ? $table : [\n      'tables' => [$table],\n      'fields' => $values,\n      'ignore' => $ignore\n    ];\n    $cfg['kind'] = 'INSERT';\n    return $this->_exec($cfg);\n  }",
-            "startLine": 3284,
+            "startLine": 3286,
             "doc": {
                 "description": "Inserts row(s) in a table.\n\n<code>\n$db->insert(\"table_users\", [\n  [\"name\" => \"Ted\"],\n  [\"surname\" => \"McLow\"]\n ]);\n<\/code>\n\n<code>\n$db->insert(\"table_users\", [\n  [\"name\" => \"July\"],\n  [\"surname\" => \"O'neill\"]\n ], [\n  [\"name\" => \"Peter\"],\n  [\"surname\" => \"Griffin\"]\n ], [\n  [\"name\" => \"Marge\"],\n  [\"surname\" => \"Simpson\"]\n ]);\n<\/code>",
                 "params": [
@@ -4796,7 +4796,7 @@
                 ],
                 "return": "Number affected rows."
             },
-            "endLine": 3311,
+            "endLine": 3313,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -4858,7 +4858,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, array $values = NULL)\n  {\n    if ( \\is_array($table) && isset($table['values']) ){\n      $values = $table['values'];\n    }\n    if ( !x::is_assoc($values) ){\n      $res = 0;\n      foreach ( $values as $v ){\n        $res += $this->insert_update($table, $v);\n      }\n      return $res;\n    }\n    $keys = $this->get_keys($table);\n    $unique = [];\n    foreach ( $keys['keys'] as $k ){\n      \/\/ Checking each unique key\n      if ( $k['unique'] ){\n        $i = 0;\n        foreach ( $k['columns'] as $c ){\n          if ( isset($values[$c]) ){\n            $unique[$c] = $values[$c];\n            $i++;\n          }\n        }\n        \/\/ Only if the number of known field values matches the number of columns qhich are parts of the unique key\n        if ( ($i === \\count($k['columns'])) && $this->count($table, $unique) ){\n          \/\/ Removing unique matching fields from the values (as it is the where)\n          foreach ( $unique as $f => $v ){\n            unset($values[$f]);\n          }\n          \/\/ For updating\n          return $this->update($table, $values, $unique);\n        }\n      }\n    }\n    \/\/ No need to update, inserting\n    return $this->insert($table, $values);\n  }",
-            "startLine": 3331,
+            "startLine": 3333,
             "doc": {
                 "description": "If not exist inserts row(s) in a table, else update.\n\n<code>\n$db->insert_update(\n \"table_users\",\n [\n  'id' => '12',\n  'name' => 'Frank'\n ]\n);\n<\/code>",
                 "params": [
@@ -4877,7 +4877,7 @@
                 ],
                 "return": "The number of rows inserted or updated."
             },
-            "endLine": 3368,
+            "endLine": 3370,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -4929,7 +4929,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, array $values = NULL, array $where = NULL, $ignore = false)\n  {\n    $cfg = \\is_array($table) ? $table : [\n      'tables' => [$table],\n      'where' => $where,\n      'fields' => $values,\n      'ignore' => $ignore\n    ];\n    $cfg['kind'] = 'UPDATE';\n    return $this->_exec($cfg);\n  }",
-            "startLine": 3391,
+            "startLine": 3393,
             "doc": {
                 "description": "Updates row(s) in a table.\n\n<code>\n$db->update(\n \"table_users\",\n [\n  ['name' => 'Frank'],\n  ['surname' => 'Red']\n ],\n ['id' => '127']\n);\n<\/code>",
                 "params": [
@@ -4960,7 +4960,7 @@
                 ],
                 "return": "The number of rows updated."
             },
-            "endLine": 3401,
+            "endLine": 3403,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -5032,7 +5032,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, array $values = NULL, array $where = NULL)\n  {\n    return $this->update($table, $values, $where, true);\n  }",
-            "startLine": 3423,
+            "startLine": 3425,
             "doc": {
                 "description": "If exist updates row(s) in a table, else ignore.\n\n<code>\n$db->update_ignore(\n \"table_users\",\n [\n  ['name' => 'Frank'],\n  ['surname' => 'Red']\n ],\n ['id' => '20']\n);\n<\/code>",
                 "params": [
@@ -5056,7 +5056,7 @@
                 ],
                 "return": "The number of rows deleted."
             },
-            "endLine": 3426,
+            "endLine": 3428,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -5117,7 +5117,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, array $where = NULL, $ignore = false)\n  {\n    $cfg = \\is_array($table) ? $table : [\n      'tables' => [$table],\n      'where' => $where,\n      'ignore' => $ignore\n    ];\n    $cfg['kind'] = 'DELETE';\n    return $this->_exec($cfg);\n  }",
-            "startLine": 3441,
+            "startLine": 3443,
             "doc": {
                 "description": "Deletes row(s) in a table.\n\n<code>\n$db->delete(\"table_users\", ['id' => '32']);\n<\/code>",
                 "params": [
@@ -5142,7 +5142,7 @@
                 ],
                 "return": "The number of rows deleted."
             },
-            "endLine": 3450,
+            "endLine": 3452,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -5204,7 +5204,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, array $where = NULL)\n  {\n    return $this->delete(\\is_array($table) ? array_merge($table, ['ignore' => true]) : $table, $where, true);\n  }",
-            "startLine": 3467,
+            "startLine": 3469,
             "doc": {
                 "description": "If exist deletess row(s) in a table, else ignore.\n\n<code>\n$db->delete_ignore(\n \"table_users\",\n ['id' => '20']\n);\n<\/code>",
                 "params": [
@@ -5223,7 +5223,7 @@
                 ],
                 "return": "The number of rows deleted."
             },
-            "endLine": 3470,
+            "endLine": 3472,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -5275,7 +5275,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, array $values = NULL)\n  {\n    return $this->insert(\\is_array($table) ? array_merge($table, ['ignore' => true]) : $table, $values, true);\n  }",
-            "startLine": 3490,
+            "startLine": 3492,
             "doc": {
                 "description": "If not exist inserts row(s) in a table, else ignore.\n\n<code>\n$db->insert_ignore(\n \"table_users\",\n [\n  ['id' => '19', 'name' => 'Frank'],\n  ['id' => '20', 'name' => 'Ted'],\n ]\n);\n<\/code>",
                 "params": [
@@ -5294,7 +5294,7 @@
                 ],
                 "return": "The number of rows inserted."
             },
-            "endLine": 3493,
+            "endLine": 3495,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -5341,7 +5341,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table)\n  {\n    return $this->delete($table, []);\n  }",
-            "startLine": 3499,
+            "startLine": 3501,
             "doc": {
                 "description": "",
                 "params": [
@@ -5352,7 +5352,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 3502,
+            "endLine": 3504,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -5393,7 +5393,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($query)\n  {\n      return $r->fetch();\n    }\n    return false;\n  }",
-            "startLine": 3527,
+            "startLine": 3529,
             "doc": {
                 "description": "Return an indexed array with the first result of the query or false if there are no results.\n\n```php\n\\bbn\\x::dump($db->fetch(\"SELECT name FROM users WHERE id = 10\"));\n\/* (array)\n[\n \"name\" => \"john\",\n 0 => \"john\",\n]\n```",
                 "params": [
@@ -5405,7 +5405,7 @@
                 ],
                 "return": "| false"
             },
-            "endLine": 3532,
+            "endLine": 3534,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -5443,7 +5443,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($query)\n  {\n      return $r->fetchAll();\n    }\n    return false;\n  }",
-            "startLine": 3563,
+            "startLine": 3565,
             "doc": {
                 "description": "Return an array of indexed array with all results of the query or false if there are no results.\n\n```php\n\\bbn\\x::dump($db->fetchAll(\"SELECT 'surname', 'name', 'id' FROM users WHERE name = 'john'\"));\n\/* (array)\n [\n  [\n  \"surname\" => \"White\",\n  0 => \"White\",\n  \"name\" => \"Michael\",\n  1 => \"Michael\",\n  \"id\" => 1,\n  2 => 1,\n  ],\n  [\n  \"surname\" => \"Smith\",\n  0 => \"Smith\",\n  \"name\" => \"John\",\n  1 => \"John\",\n  \"id\" => 2,\n  2 => 2,\n  ],\n ]\n```",
                 "params": [
@@ -5455,7 +5455,7 @@
                 ],
                 "return": "| false"
             },
-            "endLine": 3568,
+            "endLine": 3570,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -5488,7 +5488,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($query, $num = 0)\n  {\n    if ( $r = $this->query(...\\func_get_args()) ){\n      return $r->fetchColumn($num);\n    }\n    return false;\n  }",
-            "startLine": 3578,
+            "startLine": 3580,
             "doc": {
                 "description": "Transposition of the original fetchColumn method, but with the query included. Return an arra or false if no result",
                 "params": [
@@ -5508,7 +5508,7 @@
                     "text": "confusion between result's index and this->query arguments(IMPORTANT). Missing the example because the function doesn't work"
                 }
             },
-            "endLine": 3584,
+            "endLine": 3586,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -5555,7 +5555,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($query)\n  {\n    if ( $r = $this->query(...\\func_get_args()) ){\n      return $r->fetchObject();\n    }\n    return false;\n  }",
-            "startLine": 3601,
+            "startLine": 3603,
             "doc": {
                 "description": "Return an array with stdClass object or false if no result.\n\n```php\n\\bbn\\x::dump($db->fetchObject(\"SELECT * FROM table_users WHERE name = 'john'\"));\n\/\/ stdClass Object {\n    \"id\" => 1,\n    \"name\" => \"John\",\n    \"surname\" => \"Smith\",\n    }\n```",
                 "params": [
@@ -5567,7 +5567,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 3607,
+            "endLine": 3609,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -5600,7 +5600,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($statement)\n  {\n    if ( $this->check() ){\n      $args = \\func_get_args();\n      \/\/ If fancy is false we just use the regular PDO query function\n      if ( !$this->fancy ){\n        return parent::query(...$args);\n      }\n      \/\/ The function can be called directly with func_get_args()\n      while ( (\\count($args) === 1) && \\is_array($args[0]) ){\n        $args = $args[0];\n      }\n      if ( !empty($args[0]) && \\is_string($args[0]) ){\n\n        \/\/ The first argument is the statement\n        $statement = trim(array_shift($args));\n        $hash = $this->_make_hash($statement);\n\n        \/\/ Sending a hash as second argument from helper functions will bind it to the saved statement\n        if (\n          count($args) &&\n          \\is_string($args[0]) &&\n          (strpos($args[0], $this->hash_contour) === 0) &&\n          (\\strlen($args[0]) === (32 + 2*\\strlen($this->hash_contour))) &&\n          (substr($args[0],-\\strlen($this->hash_contour)) === $this->hash_contour)\n        ){\n          $hash_sent = array_shift($args);\n        }\n\n        $driver_options = [];\n        if (\n          count($args) &&\n          \\is_array($args[0])\n        ){\n          \/\/ Case where drivers are arguments\n          if ( !array_key_exists(0, $args[0]) ){\n            $driver_options = array_shift($args);\n          }\n          \/\/ Case where values are in a single argument\n          else if ( \\count($args) === 1 ){\n            $args = $args[0];\n          }\n        }\n\n        \/** @var array $params Will become the property last_params each time a query is executed *\/\n        $params = [\n          'statement' => $statement,\n          'values' => [],\n          'last' => microtime(true)\n        ];\n        $num_values = 0;\n        foreach ( $args as $i => $arg ){\n          if ( !\\is_array($arg) ){\n            $params['values'][] = $arg;\n            $num_values++;\n          }\n          else if ( isset($arg[2]) ){\n            $params['values'][] = $arg[2];\n            $num_values++;\n          }\n        }\n        if ( !isset($this->queries[$hash]) ){\n          \/** @var int $placeholders The number of placeholders in the statement *\/\n          $placeholders = 0;\n          if ( $sequences = $this->parse_query($statement) ){\n            \/* Or looking for question marks *\/\n            $sequences = array_keys($sequences);\n            preg_match_all('\/(\\?)\/', $statement, $exp);\n            $placeholders = isset($exp[1]) && \\is_array($exp[1]) ? \\count($exp[1]) : 0;\n            while ( $sequences[0] === 'OPTIONS' ){\n              array_shift($sequences);\n            }\n            $params['kind'] = $sequences[0];\n            $params['union'] = isset($sequences['UNION']);\n            $params['write'] = \\in_array($params['kind'], self::$write_kinds, true);\n            $params['structure'] = \\in_array($params['kind'], self::$structure_kinds, true);\n          }\n          else if ( ($this->engine === 'sqlite') && (strpos($statement, 'PRAGMA') === 0) ){\n            $params['kind'] = 'PRAGMA';\n          }\n          else{\n            die(\\defined('BBN_IS_DEV') && BBN_IS_DEV ? \"Impossible to parse the query $statement\" : 'Impossible to parse the query');\n          }\n          \/\/ This will add to the queries array\n          $this->_add_query(\n            $hash,\n            $statement,\n            $params['kind'],\n            $placeholders,\n            $driver_options);\n          if ( !empty($hash_sent) ){\n            $this->queries[$hash_sent] = $hash;\n          }\n        }\n        \/\/ The hash of the hash for retrieving a query based on the helper's config's hash\n        else if ( \\is_string($this->queries[$hash]) ){\n          $hash = $this->queries[$hash];\n        }\n\n        $q =& $this->queries[$hash];\n        \/* If the number of values is inferior to the number of placeholders we fill the values with the last given value *\/\n        if ( !empty($params['values']) && ($num_values < $q['placeholders']) ){\n          $params['values'] = array_merge(\n            $params['values'],\n            array_fill($num_values, $q['placeholders'] - $num_values, end($params['values']))\n          );\n          $num_values = \\count($params['values']);\n        }\n        \/* The number of values must match the number of placeholders to bind *\/\n        if ( $num_values !== $q['placeholders'] ){\n          $this->error('Incorrect arguments count (your values: '.$num_values.', in the statement: '.$q['placeholders'].\"\\n\\n\".$statement.\"\\n\\n\".'start of values'.print_r($params['values'], 1).'Arguments:'.print_r(\\func_get_args(),true));\n          exit;\n        }\n        $q['num']++;\n        $q['last'] = microtime(true);\n        if ( $q['exe_time'] === 0 ){\n          $time = $q['last'];\n        }\n        \/\/ That will always contains the parameters of the last query done\n\n        \/\/ Adds to $debug_queries if in debug mode and defines $last_query\n        $this->add_statement($q['sql'], $params);\n        \/\/ If the statement is a structure modifier we need to clear the cache\n        if ( $q['structure'] ){\n          foreach ( $this->queries as $k => $v ){\n            if ( $k !== $hash ){\n              unset($this->queries[$k]);\n            }\n          }\n          \/** @todo Clear the cache *\/\n        }\n        try{\n          \/\/ This is a writing statement, it will execute the statement and return the number of affected rows\n          if ( $q['write'] ){\n            \/\/ A prepared query already exists for the writing\n            \/** @var db\\query *\/\n            if ( $q['prepared'] ){\n              $r = $q['prepared']->init($params['values'])->execute();\n            }\n            \/\/ If there are no values we can assume the statement doesn't need to be prepared and is just executed\n            else if ( $num_values === 0 ){\n              \/\/ Native PDO function which returns the number of affected rows\n              $r = $this->exec($q['sql']);\n            }\n            \/\/ Preparing the query\n            else{\n              \/\/ Native PDO function which will use db\\query as base class\n              \/** @var db\\query *\/\n              $q['prepared'] = $this->prepare($q['sql'], $q['options']);\n              $r = $q['prepared']->execute();\n            }\n          }\n          \/\/ This is a reading statement, it will prepare the statement and return a query object\n          else{\n            if ( !$q['prepared'] ){\n              \/\/ Native PDO function which will use db\\query as base class\n              $q['prepared'] = $this->prepare($q['sql'], $driver_options);\n            }\n            else{\n              \/\/ Returns the same db\\query object\n              $q['prepared']->init($params['values']);\n            }\n          }\n          if ( !empty($time) && ($q['exe_time'] === 0) ){\n            $q['exe_time'] = microtime(true) - $time;\n          }\n        }\n        catch (\\PDOException $e ){\n          $this->error($e);\n        }\n        if ( $this->check() ){\n          \/\/ So if read statement returns the query object\n          if ( !$q['write'] ){\n            return $q['prepared'];\n          }\n          \/\/ If it is a write statement returns the number of affected rows\n          if ( $q['prepared'] && $q['write'] ){\n            $r = $q['prepared']->rowCount();\n          }\n          \/\/ If it is an insert statement we (try to) set the last inserted ID\n          if ( ($q['kind'] === 'INSERT') && $r ){\n            $this->set_last_insert_id();\n          }\n          return $r ?? false;\n        }\n      }\n    }\n    return false;\n  }",
-            "startLine": 3623,
+            "startLine": 3625,
             "doc": {
                 "description": "Executes a writing statement and return the number of affected rows or return a query object for the reading * statement",
                 "params": [
@@ -5616,7 +5616,7 @@
                     "text": "far vedere a thomams perche non funziona in lettura\n\n```php\n\\bbn\\x::dump($db->query(\"DELETE FROM table_users WHERE name LIKE '%lucy%'\"));\n\/\/ (int) 3\n\\bbn\\x::dump($db->query(\"SELECT * FROM table_users WHERE name = 'John\"));\n\/\/ (bbn\\db\\query) Object\n```"
                 }
             },
-            "endLine": 3811,
+            "endLine": 3813,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -5678,7 +5678,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, $escaped = false)\n  {\n    return $this->table_full_name($table, $escaped);\n  }",
-            "startLine": 3837,
+            "startLine": 3839,
             "doc": {
                 "description": "Return table's simple name.\n(similar to {@link table_simple_name()})\n\n```php\n\\bbn\\x::dump($db->tsn(\"work_db.table_users\"));\n\/\/ (string) table_users\n\\bbn\\x::dump($db->tsn(\"work_db.table_users\", true));\n\/\/ (string) `table_users`\n```",
                 "params": [
@@ -5697,7 +5697,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 3840,
+            "endLine": 3842,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -5749,7 +5749,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, $escaped = false)\n  {\n    return $this->table_simple_name($table, $escaped);\n  }",
-            "startLine": 3857,
+            "startLine": 3859,
             "doc": {
                 "description": "Return table's simple name.\n(similar to {@link table_simple_name()})\n\n```php\n\\bbn\\x::dump($db->tsn(\"work_db.table_users\"));\n\/\/ (string) table_users\n\\bbn\\x::dump($db->tsn(\"work_db.table_users\", true));\n\/\/ (string) `table_users`\n```",
                 "params": [
@@ -5768,7 +5768,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 3860,
+            "endLine": 3862,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -5820,7 +5820,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($col, $table = NULL, $escaped = false)\n  {\n    return $this->col_full_name($col, $table, $escaped);\n  }",
-            "startLine": 3878,
+            "startLine": 3880,
             "doc": {
                 "description": "Return column's full name.\n(similar to {@link col_full_name()})\n\n```php\n\\bbn\\x::dump($db->cfn(\"name\", \"table_users\"));\n\/\/ (string) table_users.name\n\\bbn\\x::dump($db->cfn(\"name\", \"table_users\", true));\n\/\/ (string) \\`table_users\\`.\\`name\\`\n```",
                 "params": [
@@ -5845,7 +5845,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 3881,
+            "endLine": 3883,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -5907,7 +5907,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($col, $escaped = false)\n  {\n    return $this->col_simple_name($col, $escaped);\n  }",
-            "startLine": 3898,
+            "startLine": 3900,
             "doc": {
                 "description": "Return the column's simple name.\n(similar to {@link col_simple_name()})\n\n```php\n\\bbn\\x::dump($db->csn(\"table_users.name\"));\n\/\/ (string) name\n\\bbn\\x::dump($db->csn(\"table_users.name\", true));\n\/\/ (string) `name`\n```",
                 "params": [
@@ -5926,7 +5926,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 3901,
+            "endLine": 3903,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -5973,7 +5973,7 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $cfg = [])\n  {\n    if ( $this->language ){\n      return $this->language->get_connection($cfg);\n    }\n    return null;\n  }",
-            "startLine": 3915,
+            "startLine": 3917,
             "doc": {
                 "description": "",
                 "params": [
@@ -5986,7 +5986,7 @@
                 ],
                 "return": "The final configuration"
             },
-            "endLine": 3921,
+            "endLine": 3923,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6023,13 +6023,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $this->language && !$this->engine ){\n      $this->language->post_creation();\n    }\n    return;\n  }",
-            "startLine": 3928,
+            "startLine": 3930,
             "doc": {
                 "description": "Actions to do once the PDO object has been created",
                 "params": [],
                 "return": ""
             },
-            "endLine": 3934,
+            "endLine": 3936,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6057,7 +6057,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($db)\n  {\n    if ( $this->language->change($db) ){\n      $this->current = $db;\n    }\n    return $this;\n  }",
-            "startLine": 3948,
+            "startLine": 3950,
             "doc": {
                 "description": "Changes the database used to the given one.\n\n```php\n$db = new db();\nx::dump($db->change('db_example'));\n\/\/ (db)\n```",
                 "params": [
@@ -6070,7 +6070,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 3954,
+            "endLine": 3956,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6111,7 +6111,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($item)\n  {\n    return $this->language->escape($item);\n  }",
-            "startLine": 3967,
+            "startLine": 3969,
             "doc": {
                 "description": "Escapes names with the appropriate quotes (db, tables, columns, keys...)\n\n```php\nbbn\\x::dump($db->escape(\"table_users\"));\n\/\/ (string) `table_users`\n```",
                 "params": [
@@ -6124,7 +6124,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 3970,
+            "endLine": 3972,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6165,7 +6165,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, $escaped = false)\n  {\n    return $this->language->table_full_name($table, $escaped);\n  }",
-            "startLine": 3986,
+            "startLine": 3988,
             "doc": {
                 "description": "Return table's full name.\n\n```php\nbbn\\x::dump($db->table_full_name(\"table_users\"));\n\/\/ (String) db_example.table_users\nbbn\\x::dump($db->table_full_name(\"table_users\", true));\n\/\/ (String) `db_example`.`table_users`\n```",
                 "params": [
@@ -6184,7 +6184,7 @@
                 ],
                 "return": "| false"
             },
-            "endLine": 3989,
+            "endLine": 3991,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6236,7 +6236,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table)\n  {\n    return $this->language->is_table_full_name($table);\n  }",
-            "startLine": 4005,
+            "startLine": 4007,
             "doc": {
                 "description": "Returns true if the string corresponds to the tipology of a table full name.\n(similar to {@link table_full_name()})\n\n```php\n\\bbn\\x::dump($db->tfn(\"table_users\"));\n\/\/ (String) db_example.table_users\n\\bbn\\x::dump($db->tfn(\"table_users\", true));\n\/\/ (String) `db_example`.`table_users`\n```",
                 "params": [
@@ -6249,7 +6249,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 4008,
+            "endLine": 4010,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6285,7 +6285,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($col)\n  {\n    return $this->language->is_col_full_name($col);\n  }",
-            "startLine": 4014,
+            "startLine": 4016,
             "doc": {
                 "description": "",
                 "params": [
@@ -6297,7 +6297,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 4017,
+            "endLine": 4019,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6337,7 +6337,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, $escaped = false)\n  {\n    return $this->language->table_simple_name($table, $escaped);\n  }",
-            "startLine": 4033,
+            "startLine": 4035,
             "doc": {
                 "description": "Return table's simple name.\n\n```php\n\\bbn\\x::dump($db->table_simple_name(\"example_db.table_users\"));\n\/\/ (string) table_users\n\\bbn\\x::dump($db->table_simple_name(\"example.table_users\", true));\n\/\/ (string) `table_users`\n```",
                 "params": [
@@ -6356,7 +6356,7 @@
                 ],
                 "return": "| false"
             },
-            "endLine": 4036,
+            "endLine": 4038,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6408,7 +6408,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($col, $table = '', $escaped = false)\n  {\n    return $this->language->col_full_name($col, $table, $escaped);\n  }",
-            "startLine": 4053,
+            "startLine": 4055,
             "doc": {
                 "description": "Return column's full name.\n\n```php\n\\bbn\\x::dump($db->col_full_name(\"name\", \"table_users\"));\n\/\/ (string) table_users.name\n\\bbn\\x::dump($db->col_full_name(\"name\", \"table_users\", true));\n\/\/ (string) \\`table_users\\`.\\`name\\`\n```",
                 "params": [
@@ -6433,7 +6433,7 @@
                 ],
                 "return": "| false"
             },
-            "endLine": 4056,
+            "endLine": 4058,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6495,7 +6495,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($col, $escaped = false)\n  {\n    return $this->language->col_simple_name($col, $escaped);\n  }",
-            "startLine": 4072,
+            "startLine": 4074,
             "doc": {
                 "description": "Return the column's simple name.\n\n```php\n\\bbn\\x::dump($db->col_simple_name(\"table_users.name\"));\n\/\/ (string) name\n\\bbn\\x::dump($db->col_simple_name(\"table_users.name\", true));\n\/\/ (string) `name`\n```",
                 "params": [
@@ -6514,7 +6514,7 @@
                 ],
                 "return": "| false"
             },
-            "endLine": 4075,
+            "endLine": 4077,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6566,13 +6566,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->language->disable_keys();\n    return $this;\n  }",
-            "startLine": 4087,
+            "startLine": 4089,
             "doc": {
                 "description": "Disables foreign keys constraints.\n\n```php\n\\bbn\\x::dump($db->disable_keys());\n\/\/ (db)\n```",
                 "params": [],
                 "return": ""
             },
-            "endLine": 4091,
+            "endLine": 4093,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6602,13 +6602,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->language->enable_keys();\n    return $this;\n  }",
-            "startLine": 4103,
+            "startLine": 4105,
             "doc": {
                 "description": "Enables foreign keys constraints.\n\n```php\n\\bbn\\x::dump($db->enable_keys());\n\/\/ (db)\n```",
                 "params": [],
                 "return": ""
             },
-            "endLine": 4107,
+            "endLine": 4109,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6638,13 +6638,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->_get_cache('', 'databases');\n  }",
-            "startLine": 4126,
+            "startLine": 4128,
             "doc": {
                 "description": "Return databases' names as an array.\n\n```php\n\\bbn\\x::dump($db->get_databases());\n\/*\n(array)[\n \"db_customers\",\n \"db_clients\",\n \"db_empty\",\n \"db_example\",\n \"db_mail\"\n ]\n```",
                 "params": [],
                 "return": ""
             },
-            "endLine": 4129,
+            "endLine": 4131,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6675,7 +6675,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($database = '')\n  {\n    if ( empty($database) ){\n      $database = $this->current;\n    }\n    return $this->_get_cache($database, 'tables');\n  }",
-            "startLine": 4158,
+            "startLine": 4160,
             "doc": {
                 "description": "Return tables' names of a database as an array.\n\n```php\n\\bbn\\x::dump($db->get_tables('db_example'));\n\/*\n(array) [\n  \"clients\",\n  \"columns\",\n  \"cron\",\n  \"journal\",\n  \"dbs\",\n  \"examples\",\n  \"history\",\n  \"hosts\",\n  \"keys\",\n  \"mails\",\n  \"medias\",\n  \"notes\",\n  \"medias\",\n  \"versions\"\n  ]\n```",
                 "params": [
@@ -6688,7 +6688,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 4164,
+            "endLine": 4166,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6730,7 +6730,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table)\n  {\n    if ( $tmp = $this->_get_cache($table) ){\n      return $tmp['fields'];\n    }\n    return null;\n  }",
-            "startLine": 4218,
+            "startLine": 4220,
             "doc": {
                 "description": "Return colums' structure of a table as an array indexed with the fields names.\n\n```php\n\\bbn\\x::dump($db->get_columns('table_users'));\n\/* (array)[\n  \"id\" => [\n   \"position\" => 1,\n   \"null\" => 0,\n   \"key\" => \"PRI\",\n   \"default\" => null,\n   \"extra\" => \"auto_increment\",\n   \"signed\" => 0,\n   \"maxlength\" => \"8\",\n   \"type\" => \"int\",\n  ],\n   \"name\" => [\n   \"position\" => 2,\n   \"null\" => 0,\n   \"key\" => null,\n   \"default\" => null,\n   \"extra\" => \"\",\n   \"signed\" => 0,\n   \"maxlength\" => \"30\",\n   \"type\" => \"varchar\",\n  ],\n  \"surname\" => [\n   \"position\" => 3,\n   \"null\" => 0,\n   \"key\" => null,\n   \"default\" => null,\n   \"extra\" => \"\",\n   \"signed\" => 0,\n   \"maxlength\" => \"30\",\n   \"type\" => \"varchar\",\n  ],\n  \"address\" => [\n   \"position\" => 4,\n   \"null\" => 0,\n   \"key\" => \"UNI\",\n   \"default\" => null,\n   \"extra\" => \"\",\n   \"signed\" => 0,\n   \"maxlength\" => \"30\",\n   \"type\" => \"varchar\",\n  ],\n   ]\n```",
                 "params": [
@@ -6743,7 +6743,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 4224,
+            "endLine": 4226,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6785,7 +6785,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table)\n  {\n    if ( $tmp = $this->_get_cache($table) ){\n      return [\n        'keys' => $tmp['keys'],\n        'cols' => $tmp['cols']\n      ];\n    }\n    return null;\n  }",
-            "startLine": 4267,
+            "startLine": 4269,
             "doc": {
                 "description": "Return the table's keys as an array indexed with the fields names.\n\n```php\n\\bbn\\x::dump($db->get_keys(\"table_users\"));\n\/*\n(array)[\n \"keys\" => [\n  \"PRIMARY\" => [\n   \"columns\" => [\n  \"id\",\n   ],\n   \"ref_db\" => null,\n   \"ref_table\" => null,\n   \"ref_column\" => null,\n   \"unique\" => 1,\n  ],\n  \"number\" => [\n   \"columns\" => [\n  \"number\",\n   ],\n   \"ref_db\" => null,\n   \"ref_table\" => null,\n   \"ref_column\" => null,\n  \"unique\" => 1,\n  ],\n ],\n \"cols\" => [\n  \"id\" => [\n   \"PRIMARY\",\n  ],\n  \"number\" => [\n   \"number\",\n  ],\n ],\n]\n```",
                 "params": [
@@ -6798,7 +6798,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 4276,
+            "endLine": 4278,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6835,7 +6835,7 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $conditions, array $cfg = [], $is_having = false, $indent = 0)\n  {\n    return $this->language->get_conditions($conditions, $cfg, $is_having, $indent);\n  }",
-            "startLine": 4284,
+            "startLine": 4286,
             "doc": {
                 "description": "",
                 "params": [
@@ -6858,7 +6858,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 4287,
+            "endLine": 4289,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6926,7 +6926,7 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $cfg)\n  {\n    return $this->language->get_select(...$this->_add_kind(\\func_get_args()));\n  }",
-            "startLine": 4304,
+            "startLine": 4306,
             "doc": {
                 "description": "Return SQL code for row(s) SELECT.\n\n```php\n\\bbn\\x::dump($db->get_select('table_users',['name','surname']));\n\/*\n(string)\n SELECT\n  `table_users`.`name`,\n  `table_users`.`surname`\n```",
                 "params": [
@@ -6939,7 +6939,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 4307,
+            "endLine": 4309,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6980,7 +6980,7 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $cfg)\n  {\n    $cfg['kind'] = 'INSERT';\n    return $this->language->get_insert($this->process_cfg($cfg));\n  }",
-            "startLine": 4327,
+            "startLine": 4329,
             "doc": {
                 "description": "Returns the SQL code for an INSERT statement.\n\n```php\n\\bbn\\x::dump($db->get_insert([\n 'tables' => ['table_users'],\n 'fields' => ['name','surname']\n]));\n\/*\n(string)\n INSERT INTO `db_example`.`table_users` (\n   `name`, `surname`)\n   VALUES (?, ?)\n```",
                 "params": [
@@ -6993,7 +6993,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 4331,
+            "endLine": 4333,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -7034,7 +7034,7 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $cfg)\n  {\n    $cfg['kind'] = 'UPDATE';\n    return $this->language->get_update($this->process_cfg($cfg));\n  }",
-            "startLine": 4351,
+            "startLine": 4353,
             "doc": {
                 "description": "Returns the SQL code for an UPDATE statement.\n\n```php\n\\bbn\\x::dump($db->get_update([\n 'tables' => ['table_users'],\n 'fields' => ['name','surname']\n]));\n\/*\n(string)\n  UPDATE `db_example`.`table_users`\n  SET `table_users`.`name` = ?,\n  `table_users`.`surname` = ?\n```",
                 "params": [
@@ -7047,7 +7047,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 4355,
+            "endLine": 4357,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -7088,7 +7088,7 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $cfg)\n  {\n    $cfg['kind'] = 'DELETE';\n    return $this->language->get_delete($this->process_cfg($cfg));\n  }",
-            "startLine": 4368,
+            "startLine": 4370,
             "doc": {
                 "description": "Returns the SQL code for a DELETE statement.\n\n```php\n\\bbn\\x::dump($db->get_delete('table_users',['id'=>1]));\n\/\/ (string) DELETE FROM `db_example`.`table_users` * WHERE 1 AND `table_users`.`id` = ?\n```",
                 "params": [
@@ -7101,7 +7101,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 4372,
+            "endLine": 4374,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -7137,7 +7137,7 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $cfg)\n  {\n    return $this->language->get_join($cfg);\n  }",
-            "startLine": 4380,
+            "startLine": 4382,
             "doc": {
                 "description": "Returns a string with the JOIN part of the query if there is, empty otherwise",
                 "params": [
@@ -7149,7 +7149,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 4383,
+            "endLine": 4385,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -7189,7 +7189,7 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $cfg)\n  {\n    return $this->language->get_where($cfg);\n  }",
-            "startLine": 4396,
+            "startLine": 4398,
             "doc": {
                 "description": "Return a string with 'where' conditions.\n\n```php\n\\bbn\\x::dump($db->get_where(['id' => 9], 'table_users'));\n\/\/ (string) WHERE 1 AND `table_users`.`id` = ?\n```",
                 "params": [
@@ -7201,7 +7201,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 4399,
+            "endLine": 4401,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -7236,7 +7236,7 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $cfg)\n  {\n    return $this->language->get_group_by($cfg);\n  }",
-            "startLine": 4407,
+            "startLine": 4409,
             "doc": {
                 "description": "Returns a string with the GROUP BY part of the query if there is, empty otherwise",
                 "params": [
@@ -7248,7 +7248,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 4410,
+            "endLine": 4412,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -7283,7 +7283,7 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $cfg)\n  {\n    return $this->language->get_having($cfg);\n  }",
-            "startLine": 4418,
+            "startLine": 4420,
             "doc": {
                 "description": "Returns a string with the HAVING part of the query if there is, empty otherwise",
                 "params": [
@@ -7295,7 +7295,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 4421,
+            "endLine": 4423,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -7335,7 +7335,7 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $cfg)\n  {\n    return $this->language->get_order($cfg);\n  }",
-            "startLine": 4434,
+            "startLine": 4436,
             "doc": {
                 "description": "Get a string starting with ORDER BY with corresponding parameters to $order.\n\n```php\n\\bbn\\x::dump($db->get_order(['name' => 'DESC' ],'table_users'));\n\/\/ (string) ORDER BY `name` DESC\n```",
                 "params": [
@@ -7347,7 +7347,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 4437,
+            "endLine": 4439,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -7387,7 +7387,7 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $cfg)\n  {\n    return $this->language->get_limit($cfg);\n  }",
-            "startLine": 4450,
+            "startLine": 4452,
             "doc": {
                 "description": "Get a string starting with LIMIT with corresponding parameters to $limit.\n\n```php\n\\bbn\\x::dump($db->get_limit(3,1));\n\/\/ (string) LIMIT 1, 3\n```",
                 "params": [
@@ -7399,7 +7399,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 4453,
+            "endLine": 4455,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -7439,7 +7439,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, array $model = NULL)\n  {\n    return $this->language->get_create($table, $model);\n  }",
-            "startLine": 4474,
+            "startLine": 4476,
             "doc": {
                 "description": "Return SQL code for table creation.\n\n```php\n\\bbn\\x::dump($db->get_create(\"table_users\"));\n\/*\n(string)\n  CREATE TABLE `table_users` (\n `userid` int(11) NOT NULL,\n `userdataid` int(11) NOT NULL,\n `info` char(200) DEFAULT NULL,\n PRIMARY KEY (`userid`,`userdataid`),\n KEY `table_users_userId_userdataId_info` (`userid`,`userdataid`,`info`)\n  ) ENGINE=InnoDB DEFAULT CHARSET=utf8\n\n```",
                 "params": [
@@ -7452,7 +7452,7 @@
                 ],
                 "return": "| false"
             },
-            "endLine": 4477,
+            "endLine": 4479,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -7497,9 +7497,9 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, array $model = NULL)\n  {\n    return $this->language->get_create_table($table, $model);\n  }",
-            "startLine": 4479,
+            "startLine": 4481,
             "doc": null,
-            "endLine": 4482,
+            "endLine": 4484,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -7543,9 +7543,9 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, array $model = NULL)\n  {\n    return $this->language->get_create_keys($table, $model);\n  }",
-            "startLine": 4484,
+            "startLine": 4486,
             "doc": null,
-            "endLine": 4487,
+            "endLine": 4489,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -7589,9 +7589,9 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, array $model = NULL)\n  {\n    \n    return $this->language->get_create_constraints($table, $model);\n  }",
-            "startLine": 4489,
+            "startLine": 4491,
             "doc": null,
-            "endLine": 4493,
+            "endLine": 4495,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -7635,9 +7635,9 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, array $model = NULL)\n  {\n    return $this->language->create_constraints_sqlite(...\\func_get_args());\n  }",
-            "startLine": 4495,
+            "startLine": 4497,
             "doc": null,
-            "endLine": 4498,
+            "endLine": 4500,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -7679,7 +7679,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, $column, $unique = false, $length = NULL)\n  {\n    return $this->language->create_index($table, $column, $unique);\n  }",
-            "startLine": 4516,
+            "startLine": 4518,
             "doc": {
                 "description": "Creates an index on one or more column(s) of the table",
                 "params": [
@@ -7710,7 +7710,7 @@
                     "text": "return data\n\n```php\n\\bbn\\x::dump($db->create_db_index('table_users','id_group'));\n\/\/ (void)\n```"
                 }
             },
-            "endLine": 4519,
+            "endLine": 4521,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -7772,7 +7772,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, $key)\n  {\n    return $this->language->delete_index($table, $key);\n  }",
-            "startLine": 4535,
+            "startLine": 4537,
             "doc": {
                 "description": "Deletes index on a column of the table.",
                 "params": [
@@ -7795,7 +7795,7 @@
                     "text": "far vedere a thomas perch\u00e8 non funziona\/return data\n\n```php\n\\bbn\\x::dump($db->delete_db_index('table_users','id_group'));\n\/\/ (void)\n```"
                 }
             },
-            "endLine": 4538,
+            "endLine": 4540,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -7841,7 +7841,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($user = NULL, $pass = NULL, $db = NULL)\n  {\n    return $this->language->create_user($user, $pass, $db);\n  }",
-            "startLine": 4554,
+            "startLine": 4556,
             "doc": {
                 "description": "Creates an user for a specific db.",
                 "params": [
@@ -7867,7 +7867,7 @@
                     "text": "return data\n\n```php\n\\bbn\\x::dump($db->create_db_user('Michael','22101980','db_example'));\n\/\/ (void)\n```"
                 }
             },
-            "endLine": 4557,
+            "endLine": 4559,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -7920,7 +7920,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($user = NULL)\n  {\n    return $this->language->delete_user($user);\n  }",
-            "startLine": 4572,
+            "startLine": 4574,
             "doc": {
                 "description": "Deletes a db user.",
                 "params": [
@@ -7936,7 +7936,7 @@
                     "text": "non mi funziona ma forse per una questione di permessi\/ return data\n\n```php\n\\bbn\\x::dump($db->delete_db_user('Michael'));\n\/\/ (void)\n```"
                 }
             },
-            "endLine": 4575,
+            "endLine": 4577,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -7971,7 +7971,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($user = '', $host = '')\n  {\n    return $this->language->get_users($user, $host);\n  }",
-            "startLine": 4593,
+            "startLine": 4595,
             "doc": {
                 "description": "Return an array including privileges of a specific db_user or all db_users.",
                 "params": [
@@ -7994,7 +7994,7 @@
                     "text": "far vedere a th la descrizione\n\n```php\n\\bbn\\x::dump($db->get_users('Michael'));\n\/* (array) [\n\"GRANT USAGE ON *.* TO 'Michael'@''\",\nGRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER ON `db_example`.* TO 'Michael'@''\"\n ]\n```"
                 }
             },
-            "endLine": 4596,
+            "endLine": 4598,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8041,7 +8041,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($database = '', $type = '')\n  {\n    return $this->language->db_size($database, $type);\n  }",
-            "startLine": 4603,
+            "startLine": 4605,
             "doc": {
                 "description": "",
                 "params": [
@@ -8058,7 +8058,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 4606,
+            "endLine": 4608,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8102,7 +8102,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table, $type = '')\n  {\n    return $this->language->table_size($table, $type);\n  }",
-            "startLine": 4613,
+            "startLine": 4615,
             "doc": {
                 "description": "",
                 "params": [
@@ -8119,7 +8119,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 4616,
+            "endLine": 4618,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8163,7 +8163,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table = '', $database = '')\n  {\n    return $this->language->status($table, $database);\n  }",
-            "startLine": 4623,
+            "startLine": 4625,
             "doc": {
                 "description": "",
                 "params": [
@@ -8180,7 +8180,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 4626,
+            "endLine": 4628,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8222,13 +8222,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    \/\/return hex2bin(str_replace('-', '', \\bbn\\x::make_uid()));\n    return $this->language->get_uid();\n  }",
-            "startLine": 4631,
+            "startLine": 4633,
             "doc": {
                 "description": "",
                 "params": [],
                 "return": ""
             },
-            "endLine": 4635,
+            "endLine": 4637,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8258,7 +8258,7 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $r = $this->query(...\\func_get_args()) ){\n      return $r->get_row();\n    }\n    return null;\n  }",
-            "startLine": 4662,
+            "startLine": 4664,
             "doc": {
                 "description": "Return the first row resulting from the query as an array indexed with the fields' name.\n\n```php\n\\bbn\\x::dump($db->get_row(\"SELECT id, name FROM table_users WHERE id > ? \", 2));;\n\n\/* (array)[\n  \"id\" => 3,\n  \"name\" => \"thomas\",\n  ]\n```",
                 "params": [
@@ -8275,7 +8275,7 @@
                 ],
                 "return": "| false"
             },
-            "endLine": 4668,
+            "endLine": 4670,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8306,7 +8306,7 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $r = $this->query(...\\func_get_args()) ){\n      return $r->get_rows();\n    }\n    return null;\n  }",
-            "startLine": 4691,
+            "startLine": 4693,
             "doc": {
                 "description": "Return an array that includes indexed arrays for every row resultant from the query.\n\n```php\n\\bbn\\x::dump($db->get_rows(\"SELECT id, name FROM table_users WHERE id > ? LIMIT ?\", 2));\n\/* (array)[\n  [\n  \"id\" => 3,\n  \"name\" => \"john\",\n  ],\n  [\n  \"id\" => 4,\n  \"name\" => \"barbara\",\n  ],\n   ]\n```",
                 "params": [
@@ -8322,7 +8322,7 @@
                 ],
                 "return": "| false"
             },
-            "endLine": 4697,
+            "endLine": 4699,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8353,7 +8353,7 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $r = $this->query(...\\func_get_args()) ){\n      return $r->get_irow();\n    }\n    return null;\n  }",
-            "startLine": 4715,
+            "startLine": 4717,
             "doc": {
                 "description": "Return a row as a numeric indexed array.\n\n```php\n\\bbn\\x::dump($db->get_irow(\"SELECT id, name, surname FROM table_users WHERE id > ?\", 2));\n\/* (array) [\n   3,\n   \"john\",\n   \"brown\",\n  ]\n```",
                 "params": [
@@ -8370,7 +8370,7 @@
                 ],
                 "return": "| false"
             },
-            "endLine": 4721,
+            "endLine": 4723,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8401,13 +8401,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $r = $this->query(...\\func_get_args()) ){\n      return $r->get_irows();\n    }\n    return null;\n  }",
-            "startLine": 4743,
+            "startLine": 4745,
             "doc": {
                 "description": "Return an array of numeric indexed rows.\n\n```php\n\\bbn\\x::dump($db->get_irows(\"SELECT id, name FROM table_users WHERE id > ? LIMIT ?\", 2, 2));\n\/*\n(array)[\n  [\n   3,\n  \"john\"\n  ],\n  [\n  4,\n  \"barbara\"\n  ]\n ]\n```",
                 "params": [],
                 "return": ""
             },
-            "endLine": 4749,
+            "endLine": 4751,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8438,7 +8438,7 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $r = $this->query(...\\func_get_args()) ){\n      return $r->get_by_columns();\n    }\n    return null;\n  }",
-            "startLine": 4772,
+            "startLine": 4774,
             "doc": {
                 "description": "Return an array indexed on the searched field's in which there are all the values of the column.\n\n```php\n\\bbn\\x::dump($db->get_by_columns(\"SELECT name, surname FROM table_users WHERE id > 2\"));\n\/*\n(array) [\n \"name\" => [\n \"John\",\n \"Michael\"\n ],\n \"surname\" => [\n  \"Brown\",\n  \"Smith\"\n ]\n  ]\n```",
                 "params": [
@@ -8450,7 +8450,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 4778,
+            "endLine": 4780,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8481,13 +8481,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->get_object(\\func_get_args());\n  }",
-            "startLine": 4793,
+            "startLine": 4795,
             "doc": {
                 "description": "Return the first row resulting from the query as an object (similar to {@link get_object()}).\n\n```php\n\\bbn\\x::dump($db->get_obj(\"SELECT surname FROM table_users\"));\n\/*\n(obj){\n \"name\" => \"Smith\"\n }\n```",
                 "params": [],
                 "return": ""
             },
-            "endLine": 4796,
+            "endLine": 4798,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8522,13 +8522,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $r = $this->query(...\\func_get_args()) ){\n      return $r->get_object();\n    }\n    return null;\n  }",
-            "startLine": 4812,
+            "startLine": 4814,
             "doc": {
                 "description": "Return the first row resulting from the query as an object.\nSynonym of get_obj.\n\n```php\n\\bbn\\x::dump($db->get_object(\"SELECT name FROM table_users\"));\n\/*\n(obj){\n \"name\" => \"John\"\n }\n```",
                 "params": [],
                 "return": ""
             },
-            "endLine": 4818,
+            "endLine": 4820,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8559,13 +8559,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $r = $this->query(...\\func_get_args()) ){\n      return $r->get_objects();\n    }\n    return [];\n  }",
-            "startLine": 4848,
+            "startLine": 4850,
             "doc": {
                 "description": "Return an array of stdClass objects.\n\n```php\n\\bbn\\x::dump($db->get_objects(\"SELECT name FROM table_users\"));\n\n\/*\n(array) [\n   Object stdClass: df {\n  \"name\" => \"John\",\n   },\n   Object stdClass: df {\n  \"name\" => \"Michael\",\n   },\n   Object stdClass: df {\n  \"name\" => \"Thomas\",\n   },\n   Object stdClass: df {\n  \"name\" => \"William\",\n   },\n   Object stdClass: df {\n  \"name\" => \"Jake\",\n   },\n  ]\n```",
                 "params": [],
                 "return": ""
             },
-            "endLine": 4854,
+            "endLine": 4856,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8591,9 +8591,9 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n  }",
-            "startLine": 4856,
+            "startLine": 4858,
             "doc": null,
-            "endLine": 4858,
+            "endLine": 4860,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8616,9 +8616,9 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n  }",
-            "startLine": 4860,
+            "startLine": 4862,
             "doc": null,
-            "endLine": 4862,
+            "endLine": 4864,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8641,9 +8641,9 @@
             "visibility": "public",
             "final": false,
             "code": "function($database)\n  {\n    return $this->language->create_database(...\\func_get_args());\n  }",
-            "startLine": 4864,
+            "startLine": 4866,
             "doc": null,
-            "endLine": 4867,
+            "endLine": 4869,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8678,12 +8678,12 @@
             "visibility": "public",
             "final": false,
             "code": "function($database)\n  {\n      file_put_contents($database,'');\n      if (is_file($database) ){\n        return  [\n          'engine' => 'sqlite',\n          'db' => $database\n        ];\n      }\n    }\n    return false;\n  }",
-            "startLine": 4872,
+            "startLine": 4874,
             "doc": {
                 "description": "test",
                 "tags": []
             },
-            "endLine": 4883,
+            "endLine": 4885,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8716,9 +8716,9 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->last_enabled = true;\n  }",
-            "startLine": 4885,
+            "startLine": 4887,
             "doc": null,
-            "endLine": 4888,
+            "endLine": 4890,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8741,9 +8741,9 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->last_enabled = false;\n  }",
-            "startLine": 4890,
+            "startLine": 4892,
             "doc": null,
-            "endLine": 4893,
+            "endLine": 4895,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8766,9 +8766,9 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->last_real_params;\n  }",
-            "startLine": 4895,
+            "startLine": 4897,
             "doc": null,
-            "endLine": 4898,
+            "endLine": 4900,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8794,9 +8794,9 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->last_real_query;\n  }",
-            "startLine": 4900,
+            "startLine": 4902,
             "doc": null,
-            "endLine": 4903,
+            "endLine": 4905,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8822,9 +8822,9 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->last_params;\n  }",
-            "startLine": 4905,
+            "startLine": 4907,
             "doc": null,
-            "endLine": 4908,
+            "endLine": 4910,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -8850,9 +8850,9 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->last_params ? $this->last_params['values'] : null;\n  }",
-            "startLine": 4910,
+            "startLine": 4912,
             "doc": null,
-            "endLine": 4913,
+            "endLine": 4915,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -9956,7 +9956,7 @@
             "last_error": false,
             "debug": false,
             "engine": "sqlite",
-            "host": "\/home\/thomas\/domains\/cdn.thomas.lan\/_appui\/src\/data\/db\/",
+            "host": "\/home\/thomas\/domains\/cdn2.thomas.lan\/app-ui\/src\/data\/db\/",
             "username": null,
             "current": "main"
         },

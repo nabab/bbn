@@ -854,12 +854,14 @@ class controller implements api{
    */
   public function combo(string $title = null, $data = null, int $ttl = null): self
   {
-    $this->obj->css = $this
-      ->add_data($ttl !== null ?
-        $this->get_cached_model('', bbn\x::merge_arrays($this->post, $this->data), $ttl) :
-        $this->get_model('', bbn\x::merge_arrays($this->post, $this->data))
-      )
-      ->get_less('', false);
+    $model = $ttl === null ?
+      $this->get_model('', bbn\x::merge_arrays($this->post, $this->data))
+      : $this->get_cached_model('', bbn\x::merge_arrays($this->post, $this->data), $ttl);
+    if ($model && is_array($model)) {
+      $this->add_data($model);
+    }
+
+    $this->obj->css = $this->get_less('', false);
     if ( $new_title = $this->retrieve_var($title) ){
       $this->set_title($new_title);
     }

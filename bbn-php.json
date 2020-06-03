@@ -171,75 +171,6 @@
             },
             {
                 "type": "classes",
-                "value": "gitRest",
-                "text": "gitRest",
-                "url": "bbn-php\/doc\/class\/api\/gitRest",
-                "desc": "",
-                "items": [
-                    {
-                        "text": "createRemoteRepository",
-                        "value": "createRemoteRepository",
-                        "url": "bbn-php\/doc\/method\/api\/gitRest\/createRemoteRepository",
-                        "desc": ""
-                    },
-                    {
-                        "text": "createRepositoryRemote",
-                        "value": "createRepositoryRemote",
-                        "url": "bbn-php\/doc\/method\/api\/gitRest\/createRepositoryRemote",
-                        "desc": ""
-                    },
-                    {
-                        "text": "diff",
-                        "value": "diff",
-                        "url": "bbn-php\/doc\/method\/api\/gitRest\/diff",
-                        "desc": ""
-                    },
-                    {
-                        "text": "difference",
-                        "value": "difference",
-                        "url": "bbn-php\/doc\/method\/api\/gitRest\/difference",
-                        "desc": ""
-                    },
-                    {
-                        "text": "issues",
-                        "value": "issues",
-                        "url": "bbn-php\/doc\/method\/api\/gitRest\/issues",
-                        "desc": ""
-                    },
-                    {
-                        "text": "listRemote",
-                        "value": "listRemote",
-                        "url": "bbn-php\/doc\/method\/api\/gitRest\/listRemote",
-                        "desc": ""
-                    },
-                    {
-                        "text": "logs",
-                        "value": "logs",
-                        "url": "bbn-php\/doc\/method\/api\/gitRest\/logs",
-                        "desc": ""
-                    },
-                    {
-                        "text": "pushInRemote",
-                        "value": "pushInRemote",
-                        "url": "bbn-php\/doc\/method\/api\/gitRest\/pushInRemote",
-                        "desc": ""
-                    },
-                    {
-                        "text": "removeLocalBranch",
-                        "value": "removeLocalBranch",
-                        "url": "bbn-php\/doc\/method\/api\/gitRest\/removeLocalBranch",
-                        "desc": ""
-                    },
-                    {
-                        "text": "removeRemoteBranch",
-                        "value": "removeRemoteBranch",
-                        "url": "bbn-php\/doc\/method\/api\/gitRest\/removeRemoteBranch",
-                        "desc": ""
-                    }
-                ]
-            },
-            {
-                "type": "classes",
                 "value": "nextcloud",
                 "text": "nextcloud",
                 "url": "bbn-php\/doc\/class\/api\/nextcloud",
@@ -668,231 +599,6 @@
                         "value": "update_event",
                         "url": "bbn-php\/doc\/method\/appui\/cms\/update_event",
                         "desc": "Updates the event relative to the given note."
-                    }
-                ]
-            },
-            {
-                "type": "classes",
-                "value": "cron",
-                "text": "cron",
-                "url": "bbn-php\/doc\/class\/appui\/cron",
-                "desc": "",
-                "items": [
-                    {
-                        "text": "activate",
-                        "value": "activate",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/activate",
-                        "desc": ""
-                    },
-                    {
-                        "text": "check",
-                        "value": "check",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/check",
-                        "desc": ""
-                    },
-                    {
-                        "text": "deactivate",
-                        "value": "deactivate",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/deactivate",
-                        "desc": ""
-                    },
-                    {
-                        "text": "execute",
-                        "value": "execute",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/execute",
-                        "desc": ""
-                    },
-                    {
-                        "text": "finish",
-                        "value": "finish",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/finish",
-                        "desc": ""
-                    },
-                    {
-                        "text": "get_article",
-                        "value": "get_article",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/get_article",
-                        "desc": ""
-                    },
-                    {
-                        "text": "get_cron",
-                        "value": "get_cron",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/get_cron",
-                        "desc": ""
-                    },
-                    {
-                        "text": "get_cron_timeout",
-                        "value": "get_cron_timeout",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/get_cron_timeout",
-                        "desc": ""
-                    },
-                    {
-                        "text": "get_data",
-                        "value": "get_data",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/get_data",
-                        "desc": ""
-                    },
-                    {
-                        "text": "get_error_log_path",
-                        "value": "get_error_log_path",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/get_error_log_path",
-                        "desc": ""
-                    },
-                    {
-                        "text": "get_log_path",
-                        "value": "get_log_path",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/get_log_path",
-                        "desc": ""
-                    },
-                    {
-                        "text": "get_next",
-                        "value": "get_next",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/get_next",
-                        "desc": ""
-                    },
-                    {
-                        "text": "get_next_date",
-                        "value": "get_next_date",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/get_next_date",
-                        "desc": ""
-                    },
-                    {
-                        "text": "get_next_rows",
-                        "value": "get_next_rows",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/get_next_rows",
-                        "desc": ""
-                    },
-                    {
-                        "text": "get_path",
-                        "value": "get_path",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/get_path",
-                        "desc": ""
-                    },
-                    {
-                        "text": "get_pid_path",
-                        "value": "get_pid_path",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/get_pid_path",
-                        "desc": ""
-                    },
-                    {
-                        "text": "get_poll_timeout",
-                        "value": "get_poll_timeout",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/get_poll_timeout",
-                        "desc": ""
-                    },
-                    {
-                        "text": "get_status_path",
-                        "value": "get_status_path",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/get_status_path",
-                        "desc": ""
-                    },
-                    {
-                        "text": "get_user_timeout",
-                        "value": "get_user_timeout",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/get_user_timeout",
-                        "desc": ""
-                    },
-                    {
-                        "text": "is_active",
-                        "value": "is_active",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/is_active",
-                        "desc": ""
-                    },
-                    {
-                        "text": "is_cron_active",
-                        "value": "is_cron_active",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/is_cron_active",
-                        "desc": ""
-                    },
-                    {
-                        "text": "is_poll_active",
-                        "value": "is_poll_active",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/is_poll_active",
-                        "desc": ""
-                    },
-                    {
-                        "text": "is_running",
-                        "value": "is_running",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/is_running",
-                        "desc": ""
-                    },
-                    {
-                        "text": "is_timeout",
-                        "value": "is_timeout",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/is_timeout",
-                        "desc": ""
-                    },
-                    {
-                        "text": "launch",
-                        "value": "launch",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/launch",
-                        "desc": ""
-                    },
-                    {
-                        "text": "launch_poll",
-                        "value": "launch_poll",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/launch_poll",
-                        "desc": ""
-                    },
-                    {
-                        "text": "launch_task_system",
-                        "value": "launch_task_system",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/launch_task_system",
-                        "desc": ""
-                    },
-                    {
-                        "text": "poll",
-                        "value": "poll",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/poll",
-                        "desc": ""
-                    },
-                    {
-                        "text": "run",
-                        "value": "run",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/run",
-                        "desc": ""
-                    },
-                    {
-                        "text": "run_all",
-                        "value": "run_all",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/run_all",
-                        "desc": ""
-                    },
-                    {
-                        "text": "run_task",
-                        "value": "run_task",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/run_task",
-                        "desc": ""
-                    },
-                    {
-                        "text": "run_task_system",
-                        "value": "run_task_system",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/run_task_system",
-                        "desc": ""
-                    },
-                    {
-                        "text": "set_cron_timeout",
-                        "value": "set_cron_timeout",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/set_cron_timeout",
-                        "desc": ""
-                    },
-                    {
-                        "text": "set_poll_timeout",
-                        "value": "set_poll_timeout",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/set_poll_timeout",
-                        "desc": ""
-                    },
-                    {
-                        "text": "set_user_timeout",
-                        "value": "set_user_timeout",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/set_user_timeout",
-                        "desc": ""
-                    },
-                    {
-                        "text": "start",
-                        "value": "start",
-                        "url": "bbn-php\/doc\/method\/appui\/cron\/start",
-                        "desc": ""
                     }
                 ]
             },
@@ -2756,6 +2462,12 @@
                         "value": "delete_cache",
                         "url": "bbn-php\/doc\/method\/appui\/menus\/delete_cache",
                         "desc": "Clears the menu cache"
+                    },
+                    {
+                        "text": "fix_order",
+                        "value": "fix_order",
+                        "url": "bbn-php\/doc\/method\/appui\/menus\/fix_order",
+                        "desc": ""
                     },
                     {
                         "text": "from_path",
@@ -7296,6 +7008,12 @@
                                 "value": "cache_set",
                                 "url": "bbn-php\/doc\/method\/models\/cls\/cache\/cache_set",
                                 "desc": ""
+                            },
+                            {
+                                "text": "cache_set_get",
+                                "value": "cache_set_get",
+                                "url": "bbn-php\/doc\/method\/models\/cls\/cache\/cache_set_get",
+                                "desc": ""
                             }
                         ]
                     },
@@ -7984,6 +7702,12 @@
                         "desc": ""
                     },
                     {
+                        "text": "model_exists",
+                        "value": "model_exists",
+                        "url": "bbn-php\/doc\/method\/mvc\/controller\/model_exists",
+                        "desc": "Checks whether the given model exists or not."
+                    },
+                    {
                         "text": "process",
                         "value": "process",
                         "url": "bbn-php\/doc\/method\/mvc\/controller\/process",
@@ -8090,6 +7814,12 @@
                         "value": "transform",
                         "url": "bbn-php\/doc\/method\/mvc\/controller\/transform",
                         "desc": ""
+                    },
+                    {
+                        "text": "view_exists",
+                        "value": "view_exists",
+                        "url": "bbn-php\/doc\/method\/mvc\/controller\/view_exists",
+                        "desc": "Checks whether the given view exists or not."
                     }
                 ]
             },
@@ -8747,21 +8477,6 @@
                         "desc": "Function that analyzes the class by returning the information in detail"
                     }
                 ]
-            },
-            {
-                "type": "classes",
-                "value": "phpparser",
-                "text": "phpparser",
-                "url": "bbn-php\/doc\/class\/parsers\/phpparser",
-                "desc": "",
-                "items": [
-                    {
-                        "text": "parse",
-                        "value": "parse",
-                        "url": "bbn-php\/doc\/method\/parsers\/phpparser\/parse",
-                        "desc": ""
-                    }
-                ]
             }
         ]
     },
@@ -8802,57 +8517,6 @@
                         "desc": ""
                     }
                 ]
-            },
-            {
-                "type": "classes",
-                "value": "utf8",
-                "text": "utf8",
-                "url": "bbn-php\/doc\/class\/str\/utf8",
-                "desc": "",
-                "items": [
-                    {
-                        "text": "_charToUtf8",
-                        "value": "_charToUtf8",
-                        "url": "bbn-php\/doc\/method\/str\/utf8\/_charToUtf8",
-                        "desc": ""
-                    },
-                    {
-                        "text": "_utf8ToChar",
-                        "value": "_utf8ToChar",
-                        "url": "bbn-php\/doc\/method\/str\/utf8\/_utf8ToChar",
-                        "desc": ""
-                    },
-                    {
-                        "text": "loadCharset",
-                        "value": "loadCharset",
-                        "url": "bbn-php\/doc\/method\/str\/utf8\/loadCharset",
-                        "desc": ""
-                    },
-                    {
-                        "text": "onError",
-                        "value": "onError",
-                        "url": "bbn-php\/doc\/method\/str\/utf8\/onError",
-                        "desc": ""
-                    },
-                    {
-                        "text": "strToUtf8",
-                        "value": "strToUtf8",
-                        "url": "bbn-php\/doc\/method\/str\/utf8\/strToUtf8",
-                        "desc": ""
-                    },
-                    {
-                        "text": "utf8",
-                        "value": "utf8",
-                        "url": "bbn-php\/doc\/method\/str\/utf8\/utf8",
-                        "desc": ""
-                    },
-                    {
-                        "text": "utf8ToStr",
-                        "value": "utf8ToStr",
-                        "url": "bbn-php\/doc\/method\/str\/utf8\/utf8ToStr",
-                        "desc": ""
-                    }
-                ]
             }
         ]
     },
@@ -8873,6 +8537,12 @@
                         "value": "add",
                         "url": "bbn-php\/doc\/method\/user\/manager\/add",
                         "desc": "Creates a new user and returns its configuration (with the new ID)"
+                    },
+                    {
+                        "text": "copy",
+                        "value": "copy",
+                        "url": "bbn-php\/doc\/method\/user\/manager\/copy",
+                        "desc": ""
                     },
                     {
                         "text": "deactivate",
@@ -8956,6 +8626,12 @@
                         "text": "get_name",
                         "value": "get_name",
                         "url": "bbn-php\/doc\/method\/user\/manager\/get_name",
+                        "desc": ""
+                    },
+                    {
+                        "text": "get_options",
+                        "value": "get_options",
+                        "url": "bbn-php\/doc\/method\/user\/manager\/get_options",
                         "desc": ""
                     },
                     {
@@ -9250,6 +8926,12 @@
                         "text": "explode_bit_cfg",
                         "value": "explode_bit_cfg",
                         "url": "bbn-php\/doc\/method\/user\/preferences\/explode_bit_cfg",
+                        "desc": ""
+                    },
+                    {
+                        "text": "fix_bits_order",
+                        "value": "fix_bits_order",
+                        "url": "bbn-php\/doc\/method\/user\/preferences\/fix_bits_order",
                         "desc": ""
                     },
                     {
@@ -9975,55 +9657,55 @@
                 "text": "clear",
                 "value": "clear",
                 "url": "bbn-php\/doc\/method\/cache\/clear",
-                "desc": ""
+                "desc": "Deletes all the cache globally."
             },
             {
                 "text": "delete",
                 "value": "delete",
                 "url": "bbn-php\/doc\/method\/cache\/delete",
-                "desc": ""
+                "desc": "Removes the given item from the cache."
             },
             {
                 "text": "delete_all",
                 "value": "delete_all",
                 "url": "bbn-php\/doc\/method\/cache\/delete_all",
-                "desc": ""
+                "desc": "Deletes all the cache from the given path or globally if none is given."
             },
             {
                 "text": "get",
                 "value": "get",
                 "url": "bbn-php\/doc\/method\/cache\/get",
-                "desc": ""
+                "desc": "Returns the cache value, false otherwise."
             },
             {
                 "text": "get_cache",
                 "value": "get_cache",
                 "url": "bbn-php\/doc\/method\/cache\/get_cache",
-                "desc": ""
+                "desc": "Returns the cache object (and creates one of the given type if it doesn't exist)."
             },
             {
                 "text": "get_engine",
                 "value": "get_engine",
                 "url": "bbn-php\/doc\/method\/cache\/get_engine",
-                "desc": ""
+                "desc": "Alias of get_cache."
             },
             {
                 "text": "get_type",
                 "value": "get_type",
                 "url": "bbn-php\/doc\/method\/cache\/get_type",
-                "desc": ""
+                "desc": "Returns the type of cache engine running in the class."
             },
             {
                 "text": "has",
                 "value": "has",
                 "url": "bbn-php\/doc\/method\/cache\/has",
-                "desc": ""
+                "desc": "Checks whether a valid cache exists for the given item."
             },
             {
                 "text": "hash",
                 "value": "hash",
                 "url": "bbn-php\/doc\/method\/cache\/hash",
-                "desc": ""
+                "desc": "Returns the hash of the given item."
             },
             {
                 "text": "info",
@@ -10035,13 +9717,13 @@
                 "text": "is_changed",
                 "value": "is_changed",
                 "url": "bbn-php\/doc\/method\/cache\/is_changed",
-                "desc": ""
+                "desc": "Checks if the value of the item corresponds to the given hash."
             },
             {
                 "text": "is_new",
                 "value": "is_new",
                 "url": "bbn-php\/doc\/method\/cache\/is_new",
-                "desc": ""
+                "desc": "Checks whether or not the given item is more recent than the given timestamp."
             },
             {
                 "text": "items",
@@ -10053,13 +9735,19 @@
                 "text": "make_hash",
                 "value": "make_hash",
                 "url": "bbn-php\/doc\/method\/cache\/make_hash",
-                "desc": ""
+                "desc": "Makes a unique hash out of whatever value which will be used to check if the value has changed."
             },
             {
                 "text": "set",
                 "value": "set",
                 "url": "bbn-php\/doc\/method\/cache\/set",
-                "desc": ""
+                "desc": "Stores the given value in the cache for as long as says the TTL."
+            },
+            {
+                "text": "set_get",
+                "value": "set_get",
+                "url": "bbn-php\/doc\/method\/cache\/set_get",
+                "desc": "Returns the cache for the given item, but if expired or absent creates it before by running the provided function."
             },
             {
                 "text": "stat",
@@ -10071,13 +9759,13 @@
                 "text": "timestamp",
                 "value": "timestamp",
                 "url": "bbn-php\/doc\/method\/cache\/timestamp",
-                "desc": ""
+                "desc": "Returns the timestamp of the given item."
             },
             {
                 "text": "ttl",
                 "value": "ttl",
                 "url": "bbn-php\/doc\/method\/cache\/ttl",
-                "desc": ""
+                "desc": "Returns a length in seconds based on the given parameter, allowing strings such as xl or s to be given as ttl arguments."
             }
         ]
     },
@@ -11565,6 +11253,12 @@
                 "desc": ""
             },
             {
+                "text": "model_exists",
+                "value": "model_exists",
+                "url": "bbn-php\/doc\/method\/mvc\/model_exists",
+                "desc": "Checks whether the given model exists or not."
+            },
+            {
                 "text": "output",
                 "value": "output",
                 "url": "bbn-php\/doc\/method\/mvc\/output",
@@ -11641,6 +11335,12 @@
                 "value": "transform",
                 "url": "bbn-php\/doc\/method\/mvc\/transform",
                 "desc": ""
+            },
+            {
+                "text": "view_exists",
+                "value": "view_exists",
+                "url": "bbn-php\/doc\/method\/mvc\/view_exists",
+                "desc": "Checks whether the given view exists or not."
             }
         ]
     },
@@ -12235,6 +11935,12 @@
                 "value": "is_magic_string",
                 "url": "bbn-php\/doc\/method\/user\/is_magic_string",
                 "desc": "Checks if a given string corresponds to the given hash."
+            },
+            {
+                "text": "is_reset",
+                "value": "is_reset",
+                "url": "bbn-php\/doc\/method\/user\/is_reset",
+                "desc": ""
             },
             {
                 "text": "logout",

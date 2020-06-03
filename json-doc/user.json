@@ -20,7 +20,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/user.php",
     "startLine": 19,
-    "endLine": 1479,
+    "endLine": 1490,
     "contentConstructor": {
         "file": "bbn\\user",
         "returns": null
@@ -35,8 +35,8 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\db $db, array $params = [], array $cfg = [])\n  {\n\n    \/\/ The database connection\n    $this->db = $db;\n    \/\/ The client environment variables\n    $this->user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';\n    $this->ip_address = $_SERVER['REMOTE_ADDR'] ?? '';\n    $this->accept_lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';\n\n    \/\/ Setting up the class configuration\n    $this->_init_class_cfg($cfg);\n\n    \/\/ Creating the session's variables if they don't exist yet\n    $this->_init_session();\n    self::retriever_init($this);\n\n    $f =& $this->class_cfg['fields'];\n\n    if (\\bbn\\x::is_cli() && isset($params['id'])) {\n      $this->id = $params['id'];\n      $this->auth = true;\n    }\n    \/\/ The user logs in\n    elseif ( isset($params[$f['user']], $params[$f['pass']], $params[$f['salt']]) ){\n\n      \/** @todo separate credentials and salt checking *\/\n      if ( $this->get_print($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint']){\n        \/** @todo separate credentials and salt checking *\/\n        $this->_check_credentials($params);\n      }\n      else{\n        $this->set_error(19);\n        $this->session->destroy();\n      }\n    }\n    \/** @todo revise the process: dying is not the solution! *\/\n    \/\/ The user is not known yet\n    elseif (\n      isset($params[$f['key']], $params[$f['id']], $params[$f['pass1']], $params[$f['pass2']], $params[$f['action']]) &&\n      ($params[$f['action']] === 'init_password') &&\n      ($params[$f['pass1']] === $params[$f['pass2']])\n    ){\n      if ( $id = $this->get_id_from_magic_string($params[$f['id']], $params[$f['key']]) ){\n        $this->expire_hotlink($params[$f['id']]);\n        $this->force_password($params[$f['pass2']], $id);\n        $this->session->set([]);\n        \/\/ Reloads the page\n        header('Location: .\/');\n        die();\n      }\n      else{\n        $this->set_error(18);\n      }\n    }\n    else {\n      $this->check_session();\n    }\n  }",
-            "startLine": 202,
+            "code": "function(bbn\\db $db, array $params = [], array $cfg = [])\n  {\n\n    \/\/ The database connection\n    $this->db = $db;\n    \/\/ The client environment variables\n    $this->user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';\n    $this->ip_address = $_SERVER['REMOTE_ADDR'] ?? '';\n    $this->accept_lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';\n\n    \/\/ Setting up the class configuration\n    $this->_init_class_cfg($cfg);\n\n    \/\/ Creating the session's variables if they don't exist yet\n    $this->_init_session();\n    self::retriever_init($this);\n\n    $f =& $this->class_cfg['fields'];\n\n    if (\\bbn\\x::is_cli() && isset($params['id'])) {\n      $this->id = $params['id'];\n      $this->auth = true;\n    }\n    \/\/ The user logs in\n    elseif ( isset($params[$f['user']], $params[$f['pass']], $params[$f['salt']]) ){\n\n      \/** @todo separate credentials and salt checking *\/\n      if ( $this->get_print($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint']){\n        \/** @todo separate credentials and salt checking *\/\n        $this->_check_credentials($params);\n      }\n      else{\n        $this->set_error(19);\n        $this->session->destroy();\n      }\n    }\n    \/** @todo revise the process: dying is not the solution! *\/\n    \/\/ The user is not known yet\n    elseif (\n      isset($params[$f['key']], $params[$f['id']], $params[$f['pass1']], $params[$f['pass2']], $params[$f['action']]) &&\n      ($params[$f['action']] === 'init_password')\n    ){\n      if ( $id = $this->get_id_from_magic_string($params[$f['id']], $params[$f['key']]) ){\n        $this->password_reset = true;\n        if (($params[$f['pass1']] === $params[$f['pass2']])){ \n          $this->expire_hotlink($params[$f['id']]);\n          $this->id = $id;\n          $this->force_password($params[$f['pass2']]);\n          $this->session->set([]);\n        }\n        else{\n          $this->set_error(7);\n        }\n      }\n      else{\n        $this->set_error(18);\n      }\n    }\n    else {\n      $this->check_session();\n    }\n  }",
+            "startLine": 204,
             "doc": {
                 "description": "User constructor.",
                 "params": [
@@ -58,7 +58,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 260,
+            "endLine": 265,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -99,6 +99,31 @@
                 }
             ]
         },
+        "is_reset": {
+            "name": "is_reset",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\user",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->password_reset;\n  }",
+            "startLine": 267,
+            "doc": null,
+            "endLine": 270,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": null,
+            "parent": false,
+            "arguments": []
+        },
         "get_salt": {
             "name": "get_salt",
             "summary": "Returns the salt string kept in session.",
@@ -109,13 +134,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $salt = $this->_get_session('salt');\n    return $salt;\n  }",
-            "startLine": 267,
+            "startLine": 277,
             "doc": {
                 "description": "Returns the salt string kept in session.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 271,
+            "endLine": 281,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -141,13 +166,13 @@
             "visibility": "public",
             "final": false,
             "code": "function($salt)\n  {\n    return $this->get_salt() === $salt;\n  }",
-            "startLine": 278,
+            "startLine": 288,
             "doc": {
                 "description": "Confronts the given string with the salt string kept in session.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 281,
+            "endLine": 291,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -182,7 +207,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($attr = '')\n  {\n    if ( $this->check() ){\n      if ( !$this->cfg ){\n        $this->cfg = $this->session->get('cfg');\n      }\n      if ( empty($attr) ){\n        return $this->cfg;\n      }\n      if ( isset($this->cfg[$attr]) ){\n        return $this->cfg[$attr];\n      }\n    }\n    return null;\n  }",
-            "startLine": 289,
+            "startLine": 299,
             "doc": {
                 "description": "Returns the current user's configuration.",
                 "params": [
@@ -194,7 +219,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 303,
+            "endLine": 313,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -227,13 +252,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->class_cfg;\n  }",
-            "startLine": 310,
+            "startLine": 320,
             "doc": {
                 "description": "Returns the current configuration of this very class.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 313,
+            "endLine": 323,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -258,13 +283,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->path;\n  }",
-            "startLine": 320,
+            "startLine": 330,
             "doc": {
                 "description": "Returns the directory path for the user.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 323,
+            "endLine": 333,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -290,13 +315,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->tmp_path;\n  }",
-            "startLine": 329,
+            "startLine": 339,
             "doc": {
                 "description": "Returns the tmp directory path for the user.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 332,
+            "endLine": 342,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -322,13 +347,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( !empty($this->class_cfg) ){\n      return $this->class_cfg['tables'];\n    }\n    return null;\n  }",
-            "startLine": 338,
+            "startLine": 348,
             "doc": {
                 "description": "Returns the list of tables used by the current class.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 344,
+            "endLine": 354,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -354,7 +379,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($table = '')\n  {\n    if ( !empty($this->class_cfg) ){\n      if ( $table ){\n        return $this->class_cfg['arch'][$table] ?? null;\n      }\n      return $this->class_cfg['arch'];\n    }\n    return null;\n  }",
-            "startLine": 352,
+            "startLine": 362,
             "doc": {
                 "description": "Returns the list of fields of the given table, and if empty for each table.",
                 "params": [
@@ -366,7 +391,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 361,
+            "endLine": 371,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -402,7 +427,7 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $d)\n  {\n    if ( $this->check_session() ){\n      $update = [];\n      foreach ( $d as $key => $val ){\n        if (\n          ($key !== $this->fields['id']) &&\n          ($key !== $this->fields['cfg']) &&\n          ($key !== 'auth') &&\n          ($key !== 'pass') &&\n          \\in_array($key, $this->fields)\n        ){\n          $update[$key] = $val;\n        }\n      }\n      if ( \\count($update) > 0 ){\n        $r = (bool)$this->db->update(\n                $this->class_cfg['tables']['users'],\n                $update,\n                [$this->fields['id'] => $this->id]);\n        \/** @todo Why did I do this?? *\/\n        if ( $r ){\n          $this->set_session(['cfg' => false]);\n          $this->_user_info();\n          return $r;\n        }\n      }\n    }\n    return false;\n  }",
-            "startLine": 369,
+            "startLine": 379,
             "doc": {
                 "description": "Changes the data in the user's table.",
                 "params": [
@@ -415,7 +440,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 398,
+            "endLine": 408,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -449,7 +474,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($st)\n  {\n    return $this->_crypt($st);\n  }",
-            "startLine": 407,
+            "startLine": 417,
             "doc": {
                 "description": "Encrypts the given string to match the password.",
                 "params": [
@@ -461,7 +486,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 410,
+            "endLine": 420,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -496,13 +521,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->_just_login;\n  }",
-            "startLine": 417,
+            "startLine": 427,
             "doc": {
                 "description": "Returns true after the log in moment.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 420,
+            "endLine": 430,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -525,13 +550,13 @@
             "visibility": "public",
             "final": false,
             "code": "function($attr)\n  {\n    if ( $this->session->has(self::$un) ){\n      $args = \\func_get_args();\n      if ( (\\count($args) === 2) && \\is_string($args[0]) ){\n        $attr = [$args[0] => $args[1]];\n      }\n      foreach ( $attr as $key => $val ){\n        if ( \\is_string($key) ){\n          $this->session->set($val, self::$un, $key);\n        }\n      }\n    }\n    return $this;\n  }",
-            "startLine": 427,
+            "startLine": 437,
             "doc": {
                 "description": "Sets the given attribute(s) in the user's session.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 441,
+            "endLine": 451,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -566,13 +591,13 @@
             "visibility": "public",
             "final": false,
             "code": "function($attr)\n  {\n    $args = \\func_get_args();\n    array_unshift($args, self::$un);\n    if ($this->session->has(...$args)) {\n      $this->session->uset(...$args);\n    }\n    return $this;\n  }",
-            "startLine": 448,
+            "startLine": 458,
             "doc": {
                 "description": "Sets the given attribute(s) in the user's session.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 456,
+            "endLine": 466,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -607,7 +632,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($attr = NULL)\n  {\n    if ( $this->session->has(self::$un) ){\n      return $attr ? $this->session->get(self::$un, $attr) : $this->session->get(self::$un);\n    }\n    return null;\n  }",
-            "startLine": 464,
+            "startLine": 474,
             "doc": {
                 "description": "Returns session property from the session's user array.",
                 "params": [
@@ -619,7 +644,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 470,
+            "endLine": 480,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -653,13 +678,13 @@
             "visibility": "public",
             "final": false,
             "code": "function($attr)\n  {\n    return $this->session->has(self::$un, $attr);\n  }",
-            "startLine": 477,
+            "startLine": 487,
             "doc": {
                 "description": "Checks if the given attribute exists in the user's session.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 480,
+            "endLine": 490,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -694,9 +719,9 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $id_session = $this->get_id_session();\n    \/\/die(var_dump($id_session, $this->check()));\n    if ( $id_session && $this->check() ){\n      $p =& $this->class_cfg['arch']['sessions'];\n      $this->db->update($this->class_cfg['tables']['sessions'], [\n        $p['last_activity'] => date('Y-m-d H:i:s')\n      ], [\n        $p['id'] => $id_session\n      ]);\n    }\n    else{\n      $this->set_error(13);\n    }\n    return $this;\n  }",
-            "startLine": 482,
+            "startLine": 492,
             "doc": null,
-            "endLine": 498,
+            "endLine": 508,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -721,7 +746,7 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $id_session = $this->get_id_session();\n    \/\/die(var_dump($id_session, $this->check()));\n    if ( $this->check() ){\n      if ( $id_session ){\n        $p =& $this->class_cfg['arch']['sessions'];\n        \/\/ It is normal this is sometimes not changing as different actions can happen in the same\n        $time = time();\n        if ( empty($this->sess_cfg['last_renew']) || ($time - $this->sess_cfg['last_renew'] >= 2) ){\n          if ( !$this->db->update($this->class_cfg['tables']['sessions'], [\n            $p['id_user'] => $this->id,\n            $p['sess_id'] => $this->session->get_id(),\n            $p['ip_address'] => $this->ip_address,\n            $p['user_agent'] => $this->user_agent,\n            $p['opened'] => 1,\n            $p['last_activity'] => date('Y-m-d H:i:s', $time),\n            $p['cfg'] => json_encode($this->sess_cfg)\n          ], [\n            $p['id'] => $id_session\n          ]) ){\n            x::log($this->id, 'user_login');\n            \/\/die(var_dump($this->session));\n          }\n        }\n        else{\n          x::log(\"Pas besoin\", 'user_login');\n        }\n      }\n      else{\n        $this->set_error(13);\n      }\n    }\n    return $this;\n  }",
-            "startLine": 506,
+            "startLine": 516,
             "doc": {
                 "description": "Saves the session config in the database.",
                 "params": [],
@@ -731,7 +756,7 @@
                     "text": "Use it only when needed!"
                 }
             },
-            "endLine": 540,
+            "endLine": 550,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -756,7 +781,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($with_session = false)\n  {\n    if ( $this->id ){\n      $p =& $this->class_cfg['arch']['sessions'];\n      $this->db->update($this->class_cfg['tables']['sessions'], [\n          $p['ip_address'] => $this->ip_address,\n          $p['user_agent'] => $this->user_agent,\n          $p['opened'] => 0,\n          $p['last_activity'] => date('Y-m-d H:i:s'),\n          $p['cfg'] => json_encode($this->sess_cfg)\n        ],[\n          $p['id_user'] => $this->id,\n          $p['sess_id'] => $this->session->get_id()\n        ]);\n      $this->auth = false;\n      $this->id = null;\n      $this->sess_cfg = null;\n      if ( $with_session ){\n        $this->session->set([]);\n      }\n      else{\n        $this->session->set([], self::$un);\n      }\n    }\n    return $this;\n  }",
-            "startLine": 548,
+            "startLine": 558,
             "doc": {
                 "description": "Closes the session in the database.",
                 "params": [
@@ -769,7 +794,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 573,
+            "endLine": 583,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -805,13 +830,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( !isset($this->cfg) ){\n      x::log(\"Checking attempts without user config\", 'user_login');\n      return false;\n    }\n    if ( isset($this->cfg['num_attempts']) && $this->cfg['num_attempts'] > $this->class_cfg['max_attempts'] ){\n      x::log(\"Checking attempts maxed out!\", 'user_login');\n      return false;\n    }\n    x::log(\"Checking attempts ok\", 'user_login');\n    return true;\n  }",
-            "startLine": 579,
+            "startLine": 589,
             "doc": {
                 "description": "Returns false if the max number of connections attempts has been reached",
                 "params": [],
                 "return": ""
             },
-            "endLine": 591,
+            "endLine": 601,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -841,12 +866,12 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $this->check() ){\n      $this->db->update(\n          $this->class_cfg['tables']['users'],\n          [$this->fields['cfg'] => json_encode($this->cfg)],\n          [$this->fields['id'] => $this->id]);\n    }\n    return $this;\n  }",
-            "startLine": 598,
+            "startLine": 608,
             "doc": {
                 "description": "Saves the user's config in the cfg field of the users' table.\n\nreturn self",
                 "tags": []
             },
-            "endLine": 607,
+            "endLine": 617,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -876,12 +901,12 @@
             "visibility": "public",
             "final": false,
             "code": "function($attr)\n  {\n    if ( null !== $this->cfg ){\n      $args = \\func_get_args();\n      if ( (\\count($args) === 2) && \\is_string($attr) ){\n        \/** @var array $attr *\/\n        $attr = [$args[0] => $args[1]];\n      }\n      foreach ( $attr as $key => $val ){\n        if ( \\is_string($key) ){\n          $this->cfg[$key] = $val;\n        }\n      }\n      $this->set_session(['cfg' => $this->cfg]);\n    }\n    return $this;\n  }",
-            "startLine": 614,
+            "startLine": 624,
             "doc": {
                 "description": "Saves the attribute(s) values into the session config.\n\nreturn self",
                 "tags": []
             },
-            "endLine": 630,
+            "endLine": 640,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -916,7 +941,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($attr)\n  {\n    if ( null !== $this->cfg ){\n      $args = \\func_get_args();\n      if ( \\is_string($attr) ){\n        \/** @var array $attr *\/\n        $attr = [$attr];\n      }\n      foreach ( $attr as $key ){\n        if ( isset($key) ){\n          unset($this->cfg[$key]);\n        }\n      }\n      $this->set_session(['cfg' => $this->cfg]);\n    }\n    return $this;\n  }",
-            "startLine": 638,
+            "startLine": 648,
             "doc": {
                 "description": "Unsets the attribute(s) in the session config.",
                 "params": [
@@ -927,7 +952,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 654,
+            "endLine": 664,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -962,13 +987,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $this->check() ){\n      $this->_user_info();\n      $this->_sess_info();\n    }\n    return $this;\n  }",
-            "startLine": 661,
+            "startLine": 671,
             "doc": {
                 "description": "Regathers informations from the database.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 668,
+            "endLine": 678,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -993,13 +1018,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n  }",
-            "startLine": 675,
+            "startLine": 685,
             "doc": {
                 "description": "Returns true if authenticated false otherwise.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 677,
+            "endLine": 687,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1022,13 +1047,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n      $this->_retrieve_session();\n      return $this->auth;\n    }\n  }",
-            "startLine": 684,
+            "startLine": 694,
             "doc": {
                 "description": "Retrieves user's info from session if needed and checks if authenticated.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 689,
+            "endLine": 699,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1051,13 +1076,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $this->check() ){\n      return $this->id;\n    }\n    return null;\n  }",
-            "startLine": 696,
+            "startLine": 706,
             "doc": {
                 "description": "Returns the user's ID if there is no error.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 702,
+            "endLine": 712,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1083,13 +1108,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $this->check() ){\n      return $this->id_group;\n    }\n    return null;\n  }",
-            "startLine": 709,
+            "startLine": 719,
             "doc": {
                 "description": "Returns the user's group's ID if there is no error.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 715,
+            "endLine": 725,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1115,13 +1140,13 @@
             "visibility": "public",
             "final": false,
             "code": "function($id)\n  {\n    if ( $this->check() ){\n      return $this->db->update($this->class_cfg['tables']['hotlinks'],\n              [$this->class_cfg['arch']['hotlinks']['expire'] => date('Y-m-d H:i:s')],\n              [$this->class_cfg['arch']['hotlinks']['id'] => $id]);\n    }\n    return 0;\n  }",
-            "startLine": 722,
+            "startLine": 732,
             "doc": {
                 "description": "Expires an hotlink by setting the expire column to now.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 730,
+            "endLine": 740,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1155,8 +1180,8 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id, $key)\n  {\n    if ( $val = $this->db->rselect($this->class_cfg['tables']['hotlinks'], [\n      $this->class_cfg['arch']['hotlinks']['magic_string'],\n      $this->class_cfg['arch']['hotlinks']['id_user'],\n    ],[\n      $this->class_cfg['arch']['hotlinks']['id'] => $id\n    ]) ){\n      if ( self::is_magic_string($key, $val[$this->class_cfg['arch']['hotlinks']['magic_string']]) ){\n        return $val['id_user'];\n      }\n    }\n    return null;\n  }",
-            "startLine": 739,
+            "code": "function($id, $key)\n  {\n    if ( $val = $this->db->rselect($this->class_cfg['tables']['hotlinks'], [\n      $this->class_cfg['arch']['hotlinks']['magic_string'],\n      $this->class_cfg['arch']['hotlinks']['id_user'],\n    ],[\n      $this->class_cfg['arch']['hotlinks']['id'] => $id,\n      [$this->class_cfg['arch']['hotlinks']['expire'], '>', date('Y-m-d H:i:s')]\n    ]) ){\n      if ( self::is_magic_string($key, $val[$this->class_cfg['arch']['hotlinks']['magic_string']]) ){\n        return $val['id_user'];\n      }\n    }\n    return null;\n  }",
+            "startLine": 749,
             "doc": {
                 "description": "Retrieves a user's ID from the hotlink's magic string.",
                 "params": [
@@ -1173,7 +1198,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 752,
+            "endLine": 763,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1218,13 +1243,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return (bool)$this->get_session('admin');\n  }",
-            "startLine": 759,
+            "startLine": 770,
             "doc": {
                 "description": "Checks whether the user is an admin or not.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 762,
+            "endLine": 773,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1249,13 +1274,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return (bool)($this->is_admin() || !!$this->get_session('dev'));\n  }",
-            "startLine": 769,
+            "startLine": 780,
             "doc": {
                 "description": "Checks whether the user is an dev(eloper) or not.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 772,
+            "endLine": 783,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1280,7 +1305,7 @@
             "visibility": "public",
             "final": false,
             "code": "function(bbn\\mail $mail = NULL)\n  {\n    $mgr = new user\\manager($this, $mail);\n    return $mgr;\n  }",
-            "startLine": 780,
+            "startLine": 791,
             "doc": {
                 "description": "Gets a bbn\\user\\manager instance.",
                 "params": [
@@ -1292,7 +1317,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 784,
+            "endLine": 795,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1325,13 +1350,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n  }",
-            "startLine": 791,
+            "startLine": 802,
             "doc": {
                 "description": "Checks if an error has been thrown or not.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 793,
+            "endLine": 804,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1382,13 +1407,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->cfg = [];\n    $this->close_session();\n  }",
-            "startLine": 800,
+            "startLine": 811,
             "doc": {
                 "description": "Unauthenticates, resets the config and destroys the session.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 804,
+            "endLine": 815,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1411,13 +1436,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return new mail();\n  }",
-            "startLine": 811,
+            "startLine": 822,
             "doc": {
                 "description": "Returns an instance of the mailer class.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 814,
+            "endLine": 825,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1439,8 +1464,8 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($old_pass, $new_pass)\n  {\n    if ( $this->auth ){\n      $pwt = $this->class_cfg['tables']['passwords'];\n      $pwa = $this->class_cfg['arch']['passwords'];\n      $stored_pass = $this->db->select_one($pwt, $pwa['pass'], [\n        $this->class_cfg['arch']['passwords']['id_user'] => $this->id\n      ], [\n        $this->class_cfg['arch']['passwords']['added'] => 'DESC'\n      ]);\n      if ( $this->_check_password($old_pass, $stored_pass) ){\n        return $this->force_password($new_pass, $this->get_id());\n      }\n    }\n    return false;\n  }",
-            "startLine": 823,
+            "code": "function($old_pass, $new_pass)\n  {\n    if ( $this->auth ){\n      $pwt = $this->class_cfg['tables']['passwords'];\n      $pwa = $this->class_cfg['arch']['passwords'];\n      $stored_pass = $this->db->select_one($pwt, $pwa['pass'], [\n        $this->class_cfg['arch']['passwords']['id_user'] => $this->id\n      ], [\n        $this->class_cfg['arch']['passwords']['added'] => 'DESC'\n      ]);\n      if ( $this->_check_password($old_pass, $stored_pass) ){\n        return $this->force_password($new_pass);\n      }\n    }\n    return false;\n  }",
+            "startLine": 834,
             "doc": {
                 "description": "Change the password in the database after checking the current one.",
                 "params": [
@@ -1459,7 +1484,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 838,
+            "endLine": 849,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1504,22 +1529,22 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($pass, $id)\n  {\n    if ( $this->check() ){\n      return (bool)$this->db->insert($this->class_cfg['tables']['passwords'], [\n        $this->class_cfg['arch']['passwords']['pass'] => $this->_crypt($pass),\n        $this->class_cfg['arch']['passwords']['id_user'] => $id,\n        $this->class_cfg['arch']['passwords']['added'] => date('Y-m-d H:i:s')\n      ]);\n    }\n    return false;\n  }",
-            "startLine": 845,
+            "code": "function($pass)\n  {\n    if ( $this->id ){\n      return (bool)$this->db->insert($this->class_cfg['tables']['passwords'], [\n        $this->class_cfg['arch']['passwords']['pass'] => $this->_crypt($pass),\n        $this->class_cfg['arch']['passwords']['id_user'] => $this->id,\n        $this->class_cfg['arch']['passwords']['added'] => date('Y-m-d H:i:s')\n      ]);\n    }\n    return false;\n  }",
+            "startLine": 856,
             "doc": {
                 "description": "Changes the password in the database.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 855,
+            "endLine": 866,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
             "returns": [
                 "bool"
             ],
@@ -1528,15 +1553,6 @@
                 {
                     "name": "pass",
                     "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "id",
-                    "position": 1,
                     "type": "",
                     "required": true,
                     "has_default": false,
@@ -1555,13 +1571,13 @@
             "visibility": "public",
             "final": false,
             "code": "function($usr = NULL)\n  {\n    if ( $this->auth ){\n      if ( \\is_null($usr) ){\n        $usr = $this->get_session();\n      }\n      else if ( str::is_uid($usr) ){\n        $mgr = $this->get_manager();\n        $usr = $mgr->get_user($usr);\n      }\n      if ( isset($usr[$this->class_cfg['show']]) ){\n        return $usr[$this->class_cfg['show']];\n      }\n    }\n    return null;\n  }",
-            "startLine": 862,
+            "startLine": 873,
             "doc": {
                 "description": "Returns the full name of the given user or the current one.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 877,
+            "endLine": 888,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1597,13 +1613,13 @@
             "visibility": "public",
             "final": false,
             "code": "function($usr = NULL)\n  {\n    if ( $this->auth ){\n      if ( \\is_null($usr) ){\n        $usr = $this->get_session();\n      }\n      else if ( str::is_uid($usr) ){\n        $mgr = $this->get_manager();\n        $usr = $mgr->get_user($usr);\n      }\n      if ( isset($usr[$this->class_cfg['email']]) ){\n        return $usr[$this->class_cfg['email']];\n      }\n    }\n    return null;\n  }",
-            "startLine": 884,
+            "startLine": 895,
             "doc": {
                 "description": "Returns the email of the given user or the current one.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 899,
+            "endLine": 910,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1638,7 +1654,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($file, $name = NULL, $move = true)\n  {\n    if ( $this->auth ){\n      $fs = new file\\system();\n      $path = $this->get_tmp_dir().microtime(true).'\/';\n      if ( $fs->is_file($file) && $fs->create_path($path) ){\n        $dest = $path.($name ?: basename($file));\n        if ( $move ){\n          if ( $fs->move($file, dirname($dest)) && $fs->rename(dirname($dest).'\/'.basename($file), basename($dest))){\n            return $dest;\n          }\n        }\n        else if ( $fs->copy($file, $dest) ){\n          return $dest;\n        }\n      }\n    }\n    return null;\n  }",
-            "startLine": 909,
+            "startLine": 920,
             "doc": {
                 "description": "Adds a file to the tmp folder of the user and returns its path.",
                 "params": [
@@ -1660,7 +1676,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 927,
+            "endLine": 938,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1714,9 +1730,9 @@
             "visibility": "public",
             "final": false,
             "code": "function($st)\n  {\n    if ($enckey = $this->_get_encryption_key()) {\n      return util\\enc::crypt($st, $enckey) ?: null;\n    }\n    return null;\n  }",
-            "startLine": 929,
+            "startLine": 940,
             "doc": null,
-            "endLine": 935,
+            "endLine": 946,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1752,9 +1768,9 @@
             "visibility": "public",
             "final": false,
             "code": "function($st)\n  {\n    if ($enckey = $this->_get_encryption_key()) {\n      return util\\enc::decrypt($st, $enckey) ?: null;\n    }\n    return null;\n  }",
-            "startLine": 937,
+            "startLine": 948,
             "doc": null,
-            "endLine": 943,
+            "endLine": 954,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1790,13 +1806,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return self::get_instance();\n  }",
-            "startLine": 949,
+            "startLine": 960,
             "doc": {
                 "description": "Returns the latest created connection, ie the current user's object.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 952,
+            "endLine": 963,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1822,13 +1838,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return str::genpwd(32, 16);\n  }",
-            "startLine": 958,
+            "startLine": 969,
             "doc": {
                 "description": "Generates a random long string (16-32 chars) used as unique fingerprint.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 961,
+            "endLine": 972,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1853,13 +1869,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $key = self::make_fingerprint();\n    return [\n      'key' => $key,\n      'hash' => hash('sha256', $key)\n    ];\n  }",
-            "startLine": 968,
+            "startLine": 979,
             "doc": {
                 "description": "Returns an array with a key and a magic string used for making hotlinks.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 975,
+            "endLine": 986,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1884,7 +1900,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($key, $hash)\n  {\n    return hash('sha256', $key) === $hash;\n  }",
-            "startLine": 984,
+            "startLine": 995,
             "doc": {
                 "description": "Checks if a given string corresponds to the given hash.",
                 "params": [
@@ -1903,7 +1919,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 987,
+            "endLine": 998,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1949,13 +1965,13 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $this->error ){\n      return [\n        'code' => $this->error,\n        'text' => $this->class_cfg['errors'][$this->error]\n      ];\n    }\n    return null;\n  }",
-            "startLine": 1011,
+            "startLine": 1022,
             "doc": {
                 "description": "Returns the first error in an array with the code and description.",
                 "params": [],
                 "return": ""
             },
-            "endLine": 1020,
+            "endLine": 1031,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2530,7 +2546,7 @@
     },
     "staticProperties": null,
     "constants": null,
-    "numMethods": 57,
+    "numMethods": 58,
     "numProperties": 2,
     "numConstants": 0,
     "numStaticProperties": 0,
@@ -2654,6 +2670,7 @@
         "retriever_exists": true,
         "_just_login": false,
         "_encryption_key": null,
+        "password_reset": false,
         "session": null,
         "error": null,
         "user_agent": null,

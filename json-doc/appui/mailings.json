@@ -11,7 +11,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/appui\/mailings.php",
     "startLine": 13,
-    "endLine": 836,
+    "endLine": 838,
     "contentConstructor": {
         "file": "bbn\\appui\\mailings",
         "returns": null
@@ -608,7 +608,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg)\n  {\n    $notes = $this->_note();\n    if (\n      $this->check()\n      && $notes\n      && bbn\\x::has_props($cfg, ['title', 'content', 'sender'], true)\n      && ($id_type = notes::get_option_id('mailings','types'))\n      && ($id_note = $notes->insert($cfg['title'], $cfg['content'], $id_type))\n      \/\/ Cannot give a date if no recipients selected\n      && (!empty($cfg['recipients']) || empty($cfg['sent']))\n    ){\n      if (empty($cfg['sent'])) {\n        $cfg['sent'] = null;\n      }\n      if ($this->db->insert('bbn_emailings', [\n        'id_note' => $id_note,\n        'version' => 1,\n        'sender' => $cfg['sender'],\n        'recipients' => $cfg['recipients'] ?: null,\n        'sent' => $cfg['sent']\n      ])){\n        $cfg['id'] = $this->db->last_id();\n        if (!empty($cfg['attachments'])) {\n          foreach ( $cfg['attachments'] as $f ){\n            if (is_array($f)) {\n              $notes->add_media_to_note($f['id_media'], $id_note, 1);\n            }\n            else if ( is_file($f) ){\n              \/\/ Add media\n              $notes->add_media($id_note, $f);\n            }\n          }\n        }\n        if (bbn\\x::has_props($cfg, ['recipients', 'sent', 'emails'], true)) {\n          $cfg['res'] = $this->insert_emails($cfg['id'], $cfg['sent'], $cfg['emails'], $cfg['priority'] ?? 5);\n        }\n        return $cfg;\n      }\n    }\n    return null;\n  }",
+            "code": "function(array $cfg)\n  {\n    $notes = $this->_note();\n    if (\n      $this->check()\n      && $notes\n      && bbn\\x::has_props($cfg, ['title', 'content', 'sender'], true)\n      && ($id_type = notes::get_option_id('mailings','types'))\n      && ($id_note = $notes->insert($cfg['title'], $cfg['content'], $id_type))\n      \/\/ Cannot give a date if no recipients selected\n      && (!empty($cfg['recipients']) || empty($cfg['sent']))\n    ){\n      if (empty($cfg['sent'])) {\n        $cfg['sent'] = null;\n      }\n      if ($this->db->insert('bbn_emailings', [\n        'id_note' => $id_note,\n        'version' => 1,\n        'sender' => $cfg['sender'],\n        'recipients' => $cfg['recipients'] ?: null,\n        'sent' => $cfg['sent']\n      ])){\n        $cfg['id'] = $this->db->last_id();\n        $cfg['id_note'] = $id_note;\n        $cfg['version'] = 1;\n        if (!empty($cfg['attachments'])) {\n          foreach ( $cfg['attachments'] as $f ){\n            if (is_array($f)) {\n              $notes->add_media_to_note($f['id_media'], $id_note, 1);\n            }\n            else if ( is_file($f) ){\n              \/\/ Add media\n              $notes->add_media($id_note, $f);\n            }\n          }\n        }\n        if (bbn\\x::has_props($cfg, ['recipients', 'sent', 'emails'], true)) {\n          $cfg['res'] = $this->insert_emails($cfg['id'], $cfg['sent'], $cfg['emails'], $cfg['priority'] ?? 5);\n        }\n        return $cfg;\n      }\n    }\n    return null;\n  }",
             "startLine": 396,
             "doc": {
                 "description": "Adds a new mailing and returns its ID.",
@@ -621,7 +621,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 437,
+            "endLine": 439,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -657,9 +657,9 @@
             "visibility": "public",
             "final": false,
             "code": "function($id_mailing, $date, array $emails, $priority = 5)\n  {\n    if (!empty($date) && \\bbn\\date::validateSQL($date)) {\n      $res = [];\n      foreach ($emails as $item) {\n        if ($this->db->insert_ignore('bbn_emails', [\n            'email' => $item['email'],\n            'id_mailing' => $id_mailing,\n            'priority' => $priority,\n            'status' => 'ready',\n            'delivery' => $date\n          ])\n        ) {\n          $item['id'] = $this->db->last_id();\n          $res[] = $item;\n        }\n      }\n      return $res;\n    }\n    return null;\n  }",
-            "startLine": 439,
+            "startLine": 441,
             "doc": null,
-            "endLine": 459,
+            "endLine": 461,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -722,9 +722,9 @@
             "visibility": "public",
             "final": false,
             "code": "function($id, $cfg)\n  {\n    $notes = $this->_note();\n    $user = bbn\\user::get_instance();\n    $medias = $this->_medias();\n    $res = 0;\n    \n    if (\n      $this->check() &&\n      $user && $notes &&\n      bbn\\x::has_props($cfg, ['title', 'content', 'sender']) &&\n      ($mailing = $this->get_mailing($id))\n    ){\n      $cfg['id'] = $id;\n      if ($this->count_sent($id)) {\n        throw new Error(_(\"Impossible to edit a message already sent or partially sent, you need to duplicate it.\"));\n      }\n      $version = $mailing['version'];\n      if (($cfg['title'] !== $mailing['title']) || ($cfg['content'] !== $mailing['content'])) {\n        $version = $notes->insert_version($mailing['id_note'], $cfg['title'], $cfg['content']);\n      }\n      $this->db->update('bbn_emailings', [\n        'version' => $version,\n        'sender' => $cfg['sender'],\n        'recipients' => $cfg['recipients'] ?: null,\n        'sent' => $cfg['sent']\n      ], [\n        'id' => $id\n      ]);\n      foreach ( $cfg['attachments'] as $f ){\n        \/\/ It exists already, the file is not sent\n        if (is_array($f)) {\n          $idx = empty($mailing['medias']) ? false : \\bbn\\x::find($mailing['medias'], ['name' => $f['name']]);\n          if ($idx !== false) {\n            if ($version === $mailing['version']) {\n              \/\/ If file found in attachments when note is not modified, it is removed from the original array which can then be used for deleting all remaining attachments\n              array_splice($mailing['medias'], $idx, 1);\n            }\n            else if ($notes->add_media_to_note($mailing['medias'][$idx]['id'], $mailing['id_note'], $version)) {\n              $res++;\n            }\n          }\n        }\n        \/\/ The pure path to the file is sent\n        else if ($notes->add_media($mailing['id_note'], $f)) {\n          $res++;\n        }\n      }\n      if ($version === $mailing['version']) {\n        foreach ($mailing['medias'] as $med) {\n          if ($medias->delete($med['id'])) {\n            $res++;\n          }\n        }\n      }\n      else{\n        $res++;\n      }\n      if (!$cfg['sent'] || ($mailing['recipients'] !== $cfg['recipients'])) {\n        $this->delete_all_emails($id);\n      }\n      if (bbn\\x::has_props($cfg, ['recipients', 'sent', 'emails'], true)) {\n        $cfg['res'] = $this->insert_emails($cfg['id'], $cfg['sent'], $cfg['emails'], $cfg['priority'] ?? 5);\n      }\n      return $cfg;\n    }\n    return null;\n  }",
-            "startLine": 461,
+            "startLine": 463,
             "doc": null,
-            "endLine": 528,
+            "endLine": 530,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -769,7 +769,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($id)\n  {\n    \/\/ We do not delete mailings which have been sent\n    if ($this->count_sent($id)) {\n      \/\/return 0;\n    }\n    $success = null;\n    $mailing = $this->get_mailing($id);\n    if ( !empty($mailing['id_note']) ){\n      $notes = $this->_note();\n      \/\/if the notes has media removes media before to remove the note\n      if ($medias = $notes->get_medias($mailing['id_note'])) {\n        foreach ($medias as $media){\n          $notes->remove_media($media['id'], $mailing['id_note']);\n        }\n      }\n\n      \/\/ if there are emails with the given id_mailing\n      if ($this->db->count('bbn_emails', ['id_mailing' => $id])){\n        \/\/it removes the emails ready or cancelled relative to this id_mailing\n        $this->delete_all_emails($id);\n      }\n      if (!$this->db->count('bbn_emails', ['id_mailing' => $id])){\n        \/\/deletes the row\n        $success = $this->db->delete(\"bbn_emailings\", ['id' => $id]);\n        \/\/$notes->remove($mailing['id_note']);\n      }\n    }\n    return $success;\n  }",
-            "startLine": 535,
+            "startLine": 537,
             "doc": {
                 "description": "Deletes the mailing and relative emails.",
                 "params": [
@@ -781,7 +781,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 564,
+            "endLine": 566,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -817,7 +817,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($id, $history = false)\n  {\n    $success = false;\n    if ( $mailing = $this->get_mailing($id) ){\n      if ( !empty($mailing['id_note']) && ($mailing['state'] === 'sent') ){\n        if ( !empty($history) ){\n          $notes = $this->_note();\n          if ( ($medias = $notes->get_medias($mailing['id_note']) )){\n            foreach ( $medias as $media ){\n              $notes->remove_media($media['id'],$mailing['id_note']);\n            }\n          }\n          $notes->remove($mailing['id_note']);  \n          $success = $this->db->delete('bbn_$_uids', ['bbn_uid' => $id]);\n        }\n        else {\n          $success = $this->db->delete('bbn_emailings', ['id' => $id]);\n        }\n      }\n      \n    }\n    \n    return $success;\n  }",
-            "startLine": 573,
+            "startLine": 575,
             "doc": {
                 "description": "Deletes a sent mailing. If $history is true completely delete the row from history.",
                 "params": [
@@ -834,7 +834,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 596,
+            "endLine": 598,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -879,7 +879,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($id_email)\n  {\n    if ( !empty($id_email) ){\n      return $this->db->delete('bbn_emails', ['id' => $id_email]);\n    }\n  }",
-            "startLine": 604,
+            "startLine": 606,
             "doc": {
                 "description": "Undocumented function",
                 "params": [
@@ -892,7 +892,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 609,
+            "endLine": 611,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -929,7 +929,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($id_mailing)\n  {\n    $success = null;\n    $emails = $this->db->rselect_all('bbn_emails', [], ['id_mailing' => $id_mailing]);\n    if ( !empty($emails) ){\n      $n = 0;\n      foreach ( $emails as $e ){\n        if ( ($e['status'] === 'ready') || ($e['status'] === 'cancelled') ){\n          if (  $this->db->delete('bbn_emails', ['id' => $e['id']]) ){\n            $n++;\n          }\n        }\n      }\n      $success = $n;\n    }\n    return $success;\n  }",
-            "startLine": 617,
+            "startLine": 619,
             "doc": {
                 "description": "Deletes all the emails ready or cancelled relative to the given id_mailing.",
                 "params": [
@@ -942,7 +942,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 633,
+            "endLine": 635,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -979,7 +979,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($id_email, $state)\n  {\n    return $this->db->update('bbn_emails', ['status' => $state], [\n      'id' => $id_email,\n    ]);\n  }",
-            "startLine": 643,
+            "startLine": 645,
             "doc": {
                 "description": "Changes the status of the given id email.",
                 "params": [
@@ -997,7 +997,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 648,
+            "endLine": 650,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1042,7 +1042,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($id)\n  {\n    return $this->db->rselect_all('bbn_emails', [], [\n      'id_mailing' => $id\n    ]);\n  }",
-            "startLine": 656,
+            "startLine": 658,
             "doc": {
                 "description": "Returns the array containing all the emails relative to an id_mailing.",
                 "params": [
@@ -1054,7 +1054,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 661,
+            "endLine": 663,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1090,7 +1090,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($id)\n  {\n    if ($this->check()) {\n      return $this->db->count('bbn_emails', [\n        'id_mailing' => $id,\n        ['status', '!=', 'ready'],\n        ['email', '!=', $this->get_test_emails()]\n      ]);\n    }\n    return null;\n  }",
-            "startLine": 669,
+            "startLine": 671,
             "doc": {
                 "description": "Returns the number of emails sent for the given mailing.",
                 "params": [
@@ -1102,7 +1102,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 679,
+            "endLine": 681,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1138,7 +1138,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($id_mailing, $status)\n  {\n    $count = 0;\n    if ( ($emails = $this->get_emails($id_mailing)) ){\n      foreach ( $emails as $e ){\n        \/\/here I've to check if ready or cancelled??\n        if ( $this->change_email_status($e['id'], $status) ){\n          $count ++;\n        };\n      }\n      return $count;\n    }\n  }",
-            "startLine": 688,
+            "startLine": 690,
             "doc": {
                 "description": "Changes the status of the emails relative to the given mailing.",
                 "params": [
@@ -1155,7 +1155,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 700,
+            "endLine": 702,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1199,7 +1199,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($id)\n  {\n    if ( $row = $this->get_mailing($id) ){\n      $id_mailing = $this->add([\n        'title' => $row['title'],\n        'content' => $row['content'],\n        'sender' => $row['sender'],\n        'recipients' => $row['recipients']\n      ]);\n      if ( !empty($row['medias']) && ($row2 = $this->get_mailing($id_mailing)) ){\n        foreach ( $row['medias'] as $r ){\n          $this->notes->add_media_to_note($r['id'], $row2['id_note'], 1);\n        }\n      }\n      return $id_mailing;\n    }\n  }",
-            "startLine": 708,
+            "startLine": 710,
             "doc": {
                 "description": "Copies the email",
                 "params": [
@@ -1211,7 +1211,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 724,
+            "endLine": 726,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1247,7 +1247,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($limit = 10)\n  {\n      'table' => 'bbn_emailings',\n      'fields' => ['id', 'title', 'sent', 'state'],\n      'join' => [\n        [\n          'table' => 'bbn_notes_versions',\n          'on' => [\n            'conditions' => [\n              [\n                'field' => 'bbn_notes_versions.id_note',\n                'exp' => 'bbn_emailings.id_note'\n              ], [\n                'field' => 'bbn_notes_versions.version',\n                'exp' => 'bbn_emailings.version'\n              ]\n            ]\n          ]\n        ]\n      ],\n      'where' => [\n        ['state', '!=', 'sending'],\n        ['sent', 'isnotnull'],\n        ['sent', '<', date('Y-m-d H:i:s')]\n      ],\n      'order' => [\n        'sent' => 'DESC'\n      ],\n      'limit' => $limit\n    ]);\n  }",
-            "startLine": 732,
+            "startLine": 734,
             "doc": {
                 "description": "Get the last mailings rows which aree not sending",
                 "params": [
@@ -1259,7 +1259,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 762,
+            "endLine": 764,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1292,7 +1292,7 @@
             "visibility": "public",
             "final": false,
             "code": "function($limit = 10)\n  {\n      'table' => 'bbn_emailings',\n      'fields' => ['id', 'title', 'sent', 'state'],\n      'join' => [\n        [\n          'table' => 'bbn_notes_versions',\n          'on' => [\n            'conditions' => [\n              [\n                'field' => 'bbn_notes_versions.id_note',\n                'exp' => 'bbn_emailings.id_note'\n              ], [\n                'field' => 'bbn_notes_versions.version',\n                'exp' => 'bbn_emailings.version'\n              ]\n            ]\n          ]\n        ]\n      ],\n      'where' => [\n        ['state', '=', 'ready'],\n        ['sent', 'isnotnull'],\n      ],\n      'order' => [\n        'sent' => 'ASC'\n      ],\n      'limit' => $limit\n    ]);\n  }",
-            "startLine": 770,
+            "startLine": 772,
             "doc": {
                 "description": "Get the next mailings rows to be sent",
                 "params": [
@@ -1304,7 +1304,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 799,
+            "endLine": 801,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1337,7 +1337,7 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n      'table' => 'bbn_emailings',\n      'fields' => ['id', 'title', 'sent', 'state'],\n      'join' => [\n        [\n          'table' => 'bbn_notes_versions',\n          'on' => [\n            'conditions' => [\n              [\n                'field' => 'bbn_notes_versions.id_note',\n                'exp' => 'bbn_emailings.id_note'\n              ], [\n                'field' => 'bbn_notes_versions.version',\n                'exp' => 'bbn_emailings.version'\n              ]\n            ]\n          ]\n        ]\n      ],\n      'where' => [\n        ['state', '=', 'sending']\n      ],\n      'order' => [\n        'sent' => 'DESC'\n      ]\n    ]);\n  }",
-            "startLine": 807,
+            "startLine": 809,
             "doc": {
                 "description": "Get the next mailings rows to be sent",
                 "params": [
@@ -1349,7 +1349,7 @@
                 ],
                 "return": ""
             },
-            "endLine": 834,
+            "endLine": 836,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,

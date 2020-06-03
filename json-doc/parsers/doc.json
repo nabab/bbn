@@ -373,7 +373,9 @@
                 "example": [
                     "text"
                 ],
-                "file": "text",
+                "file": [
+                    "text"
+                ],
                 "ignore": [],
                 "license": [
                     "text"
