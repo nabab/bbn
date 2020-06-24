@@ -26,7 +26,8 @@ class planning {
         'staff_events' => [
           'id_staff' => 'id_staff',
           'id_event' => 'id_event',
-          'note' => 'note'
+          'note' => 'note',
+          'status' => 'status'
         ]
       ]
     ];
@@ -476,7 +477,14 @@ class planning {
     }
     return null;
   }
-  
+
+  /**
+   * Checks if the staff is available on the given period
+   * @param string $id_staff
+   * @param string $start
+   * @param string $end
+   * @return bool
+   */
   public function is_available(string $id_staff, string $start, string $end): bool
   {
     $set = $this->class_cfg['tables']['staff_events'];
@@ -508,12 +516,21 @@ class planning {
         'conditions' => [[
           'field' => $this->db->col_full_name($sef['id_staff'], $set),
           'value' => $id_staff
+        ], [
+          'field' => $this->db->col_full_name($sef['status'], $set),
+          'value' => 'accepted'
         ]]
       ]
     ]);
 
   }
 
+  /**
+   * Checks if the staff event is replaced on the given day
+   * @param string $id_planning
+   * @param string $day
+   * @return bool
+   */
   public function is_replaced(string $id_planning, string $day): bool
   {
     $t =& $this;
