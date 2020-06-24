@@ -24,7 +24,7 @@
     "methods": {
         "__construct": {
             "name": "__construct",
-            "summary": "",
+            "summary": "*",
             "description": "",
             "description_parts": [],
             "file": "bbn\\db\\json",
@@ -33,10 +33,6 @@
             "final": false,
             "code": "function($file)\n  {\n  }",
             "startLine": 30,
-            "doc": {
-                "description": "",
-                "tags": []
-            },
             "endLine": 32,
             "isDeprecated": false,
             "isGenerator": false,
@@ -105,12 +101,43 @@
             "value": "`"
         }
     },
-    "staticProperties": null,
+    "staticProperties": {
+        "operators": [
+            "!=",
+            "=",
+            "<>",
+            "<",
+            "<=",
+            ">",
+            ">=",
+            "like",
+            "clike",
+            "slike",
+            "not",
+            "is",
+            "is not",
+            "in",
+            "between",
+            "not like"
+        ],
+        "numeric_types": [
+            "integer",
+            "int",
+            "smallint",
+            "tinyint",
+            "mediumint",
+            "bigint",
+            "decimal",
+            "numeric",
+            "float",
+            "double"
+        ]
+    },
     "constants": null,
     "numMethods": 1,
     "numProperties": 3,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 2,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [],
@@ -158,5 +185,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\db",
-    "shortName": "json"
+    "shortName": "json",
+    "summary": "Database Class"
 }

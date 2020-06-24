@@ -33,7 +33,6 @@
             "final": false,
             "code": "function(array $cfg)\n  {\n  }",
             "startLine": 93,
-            "doc": null,
             "endLine": 95,
             "isDeprecated": false,
             "isGenerator": false,
@@ -68,7 +67,6 @@
             "final": false,
             "code": "function($cfg = NULL)\n  {\n    if (!defined('_MPDF_TEMP_PATH') && defined('BBN_DATA_PATH')) {\n      define('_MPDF_TEMP_PATH', BBN_DATA_PATH . 'tmp\/');\n    }\n    $this->reset_config($cfg);\n    $this->pdf = new \\Mpdf\\Mpdf($this->cfg);\n    \/\/$this->pdf->SetImportUse();\n    if ( \\is_string($cfg) ){\n      $this->add_page($cfg);\n    }\n  }",
             "startLine": 97,
-            "doc": null,
             "endLine": 108,
             "isDeprecated": false,
             "isGenerator": false,
@@ -103,7 +101,6 @@
             "final": false,
             "code": "function(array $cfg = NULL)\n  {\n      return bbn\\x::merge_arrays($this->cfg, $this->fix_cfg($cfg));\n    }\n    return $this->cfg;\n  }",
             "startLine": 111,
-            "doc": null,
             "endLine": 116,
             "isDeprecated": false,
             "isGenerator": false,
@@ -138,7 +135,6 @@
             "final": false,
             "code": "function($cfg)\n  {\n      $this->cfg = bbn\\x::merge_arrays(self::$default_cfg, $this->fix_cfg($cfg));\n    }\n    else{\n      $this->cfg = self::$default_cfg;\n    }\n    if (\n      empty($this->cfg['tempDir']) &&\n      ($tmp = bbn\\mvc::get_tmp_path()) &&\n      ($path = bbn\\file\\dir::create_path($tmp))\n    ){\n      $this->cfg['tempDir'] = $path;\n    }\n    return $this;\n  }",
             "startLine": 118,
-            "doc": null,
             "endLine": 133,
             "isDeprecated": false,
             "isGenerator": false,
@@ -173,7 +169,6 @@
             "final": false,
             "code": "function($html, $cfg = NULL, $sign = false)\n  {\n      if ( $this->last_cfg !== $cfg ){\n        $this->last_cfg = $cfg;\n        $cfg = $this->get_config($cfg);\n        if ( isset($cfg['template']) && is_file($cfg['template']) ){\n          $src = $this->pdf->SetSourceFile($cfg['template']);\n          $tpl = $this->pdf->importPage($src);\n          $this->pdf->SetPageTemplate($tpl);\n        }\n        else{\n          $this->pdf->DefHTMLHeaderByName('head', $this->cfg['head']);\n          $this->pdf->DefHTMLFooterByName('foot', $this->cfg['foot']);\n        }\n      }\n      $this->pdf->AddPageByArray([\n        'orientation' => $this->cfg['orientation'],\n        'margin-left' => $this->cfg['margin_left'],\n        'margin-right' => $this->cfg['margin_right'],\n        'margin-top' => $this->cfg['margin_top'],\n        'margin-bottom' => $this->cfg['margin_bottom'],\n        'margin-header' => $this->cfg['margin_header'],\n        'margin-footer' => $this->cfg['margin_footer'],\n\t\t\t\t'odd-header-name' => 'head',\n\t\t\t\t'odd-footer-name' => 'foot',\n        'odd-header-value' => 1,\n        'odd-footer-value' => 1\n      ]);\n\t\t\tif ( $sign ){\n\t\t\t\t$this->pdf->WriteHTML($html.$this->cfg['signature']);\n      }\n\t\t\telse{\n\t\t\t\t$this->pdf->WriteHTML($html);\n      }\n\t\t}\n\t\treturn $this;\n  }",
             "startLine": 135,
-            "doc": null,
             "endLine": 171,
             "isDeprecated": false,
             "isGenerator": false,
@@ -226,7 +221,6 @@
             "final": false,
             "code": "function($file)\n  {\n    return $this;\n  }",
             "startLine": 173,
-            "doc": null,
             "endLine": 176,
             "isDeprecated": false,
             "isGenerator": false,
@@ -261,7 +255,6 @@
             "final": false,
             "code": "function($file = 'MyPDF.pdf')\n  {\n\t\t\t$this->pdf->Output($file, \\Mpdf\\Output\\Destination::INLINE);\n      die();\n\t\t}\n  }",
             "startLine": 178,
-            "doc": null,
             "endLine": 183,
             "isDeprecated": false,
             "isGenerator": false,
@@ -296,7 +289,6 @@
             "final": false,
             "code": "function()\n  {\n\t\t\t$pdf = $this->pdf->Output(\"\", \\Mpdf\\Output\\Destination::STRING_RETURN);\n\t\t\treturn chunk_split(base64_encode($pdf));\n\t\t}\n  }",
             "startLine": 185,
-            "doc": null,
             "endLine": 190,
             "isDeprecated": false,
             "isGenerator": false,
@@ -321,7 +313,6 @@
             "final": false,
             "code": "function($filename)\n  {\n      $filename = bbn\\str::parse_path($filename, true);\n      if ( !is_dir(dirname($filename)) ){\n        die(\"Error! No destination directory\");\n      }\n      $this->pdf->Output($filename, \\Mpdf\\Output\\Destination::FILE);\n      return is_file($filename);\n    }\n  }",
             "startLine": 192,
-            "doc": null,
             "endLine": 201,
             "isDeprecated": false,
             "isGenerator": false,
@@ -356,7 +347,6 @@
             "final": false,
             "code": "function($files)\n  {\n      if ( !\\is_array($files) ){\n        $files = [$files];\n      }\n      \/\/$this->pdf->SetImportUse();\n      foreach ( $files as $f ){\n        if ( is_file($f) ){\n          $pagecount = $this->pdf->SetSourceFile($f);\n          for ( $i = 1; $i <= $pagecount; $i++ ){\n            $import_page = $this->pdf->importPage($i);\n            $this->pdf->UseTemplate($import_page);\n            $this->pdf->addPage();\n          }\n        }\n      }\n    }\n    return $this;\n  }",
             "startLine": 203,
-            "doc": null,
             "endLine": 221,
             "isDeprecated": false,
             "isGenerator": false,
@@ -391,7 +381,6 @@
             "final": false,
             "code": "function($file, $page)\n  {\n      \/\/$this->pdf->SetImportUse();\n      if ( is_file($file) ){\n        $pagecount = $this->pdf->SetSourceFile($file);\n        if ( ($page > 0) && ($page < $pagecount) ){\n          $import_page = $this->pdf->importPage($page);\n          $this->pdf->UseTemplate($import_page);\n          $this->pdf->addPage();\n        }\n      }\n    }\n    return $this;\n  }",
             "startLine": 223,
-            "doc": null,
             "endLine": 236,
             "isDeprecated": false,
             "isGenerator": false,
@@ -427,11 +416,11 @@
         "add_fonts": {
             "name": "add_fonts",
             "summary": "Adds custom fonts",
-            "description": "$pdf->add_fonts([\n 'dawningofanewday' => [\n  'R' => BBN_DATA_PATH.'files\/DawningofaNewDay.ttf'\n ]\n]);",
+            "description": "$pdf->add_fonts([\n 'dawningofanewday' => [\n   'R' => BBN_DATA_PATH.'files\/DawningofaNewDay.ttf'\n  ]\n]);",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "$pdf->add_fonts([\n 'dawningofanewday' => [\n  'R' => BBN_DATA_PATH.'files\/DawningofaNewDay.ttf'\n ]\n]);"
+                    "content": "<p>$pdf-&gt;add_fonts([\n'dawningofanewday' =&gt; [\n'R' =&gt; BBN_DATA_PATH.'files\/DawningofaNewDay.ttf'\n]\n]);<\/p>"
                 }
             ],
             "file": "bbn\\file\\pdf",
@@ -440,17 +429,6 @@
             "final": false,
             "code": "function(array $fonts)\n  {\n      die('You must define BBN_LIB_PATH!');\n    }\n    if ( !is_dir(BBN_LIB_PATH . 'mpdf\/mpdf\/ttfonts\/') ){\n      die(\"You don't have the mpdf\/mpdf\/ttfonts directory.\");\n    }\n    foreach ($fonts as $f => $fs) {\n      \/\/ add to available fonts array\n      foreach ( $fs as $i => $v ){\n        if ( !empty($v) ){\n          \/\/ check if file exists in mpdf\/ttfonts directory\n          if ( !is_file(BBN_LIB_PATH . 'mpdf\/mpdf\/ttfonts\/' . basename($v)) ){\n            \\bbn\\file\\dir::copy($v, BBN_LIB_PATH . 'mpdf\/mpdf\/ttfonts\/' . basename($v));\n          }\n          $fs[$i] = basename($v);\n          if ( $i === 'R' ){\n            array_push($this->pdf->available_unifonts, $f);\n          }\n          else {\n            array_push($this->pdf->available_unifonts, $f.$i);\n          }\n        }\n        else {\n          unset($fs[$i]);\n        }\n      }\n      \/\/ add to fontdata array\n      $this->pdf->fontdata[$f] = $fs;\n    }\n    $this->pdf->default_available_fonts = $this->pdf->available_unifonts;\n  }",
             "startLine": 249,
-            "doc": {
-                "description": "Adds custom fonts\n\n$pdf->add_fonts([\n 'dawningofanewday' => [\n  'R' => BBN_DATA_PATH.'files\/DawningofaNewDay.ttf'\n ]\n]);",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$fonts"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 280,
             "isDeprecated": false,
             "isGenerator": false,
@@ -480,12 +458,31 @@
             "visibility": "public"
         }
     },
-    "staticProperties": null,
+    "staticProperties": {
+        "default_cfg": {
+            "mode": "ISO-8859-2",
+            "format": "A4",
+            "default_font_size": 8,
+            "default_font": "Times",
+            "margin_left": 15,
+            "margin_right": 15,
+            "margin_top": 15,
+            "margin_bottom": 15,
+            "margin_header": 10,
+            "margin_footer": 10,
+            "orientation": "P",
+            "head": "<html>\n  <head>\n    <title>PDF Doc<\/title>\n  <\/head>\n  <body>\n    <table width=\"100%\" border=\"0\">\n      <tr>\n        <td width=\"40%\" style=\"vertical-align:top; font-size:0.8em; color:#666\">Your logo here<\/td>\n        <td width=\"60%\">&nbsp;<\/td>\n      <\/tr>\n    <\/table>",
+            "foot": "    <div align=\"center\" style=\"text-align:justify; color:#666; font-size:0.8em\">\n      Your<br>Adress<br>Here\n    <\/div>\n  <\/body>\n<\/html>",
+            "title_tpl": "<div style=\"background-color:#DDD; text-align:center; font-size:large; font-weight:bold; border-bottom-color:#000; border-width:3px; padding:20px; border-style:solid; text-transform:uppercase; margin-bottom:30px\">%s<\/div>",
+            "text_tpl": "<div style=\"text-align:justify; margin-top:30px; margin-bottom:30px\">%s<\/div>",
+            "signature": "<div style=\"text-align:right\">Your signing here<\/div>"
+        }
+    },
     "constants": null,
     "numMethods": 12,
     "numProperties": 1,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 1,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [],
@@ -522,5 +519,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\file",
-    "shortName": "pdf"
+    "shortName": "pdf",
+    "summary": "This class generates PDF with the mPDF class"
 }

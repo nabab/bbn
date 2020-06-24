@@ -30,22 +30,6 @@
             "final": false,
             "code": "function(bbn\\db $db, array $cfg = [])\n  {\n    if (bbn\\mvc::get_data_path() && $db->check()) {\n      \/\/ It must be called from a plugin (appui-cron actually)\n      \/\/$this->path = BBN_DATA_PATH.'plugins\/appui-cron\/';\n      $this->path = bbn\\mvc::get_data_path('appui-cron');\n      $this->db = $db;\n      $this->table = $this->prefix.'cron';\n    }\n  }",
             "startLine": 23,
-            "doc": {
-                "description": "cron constructor.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "bbn\\mvc\\controller",
-                        "name": "$ctrl"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$cfg"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 32,
             "isDeprecated": false,
             "isGenerator": false,
@@ -89,7 +73,6 @@
             "final": false,
             "code": "function()\n  {\n      return (bool)($this->db && $this->db->check());\n  }",
             "startLine": 34,
-            "doc": null,
             "endLine": 37,
             "isDeprecated": false,
             "isGenerator": false,
@@ -113,11 +96,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 56,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 61,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -144,16 +122,6 @@
             "final": false,
             "code": "function($id)\n  {\n    if ( $this->check() && ($data = $this->db->rselect($this->table, [], ['id' => $id])) ){\n      $data['cfg'] = json_decode($data['cfg'], 1);\n      return $data;\n    }\n    return null;\n  }",
             "startLine": 44,
-            "doc": {
-                "description": "Returns the full row as an indexed array for the given CRON ID.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$id"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 51,
             "isDeprecated": false,
             "isGenerator": false,
@@ -191,16 +159,6 @@
             "final": false,
             "code": "function($id_cron)\n  {\n      $this->check()\n      && ($cron = $this->get_cron($id_cron))\n      && ($path = $this->get_log_path($cron))\n      && is_file($path)\n    ){\n      [$pid, $time] = bbn\\x::split(file_get_contents($path), '|');\n      return (($time + $cron['cfg']['timeout']) < time());\n    }\n    return false;\n  }",
             "startLine": 57,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$id_cron"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 68,
             "isDeprecated": false,
             "isGenerator": false,
@@ -235,16 +193,6 @@
             "final": false,
             "code": "function($id_cron)\n  {\n    $res = false;\n    if (\n        $this->check()\n        && ($cron = $this->get_cron($id_cron))\n    ){\n      $enable = false;\n      if ($this->db->is_trigger_enabled()) {\n        $this->db->disable_trigger();\n        $enable = true;\n      }\n      if ( $this->db->update($this->table, [\n        'prev' => date('Y-m-d H:i:s'),\n        'pid' => getmypid()\n      ], [\n        'id' => $id_cron,\n        'pid' => null,\n        'active' => 1\n      ]) ){\n        $res = true;\n      }\n      if ($enable) {\n        $this->db->enable_trigger();\n      }\n    }\n    return $res;\n  }",
             "startLine": 75,
-            "doc": {
-                "description": "Writes in the given CRON row the next start time, the current as previous, and the new running status.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$id_cron"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 102,
             "isDeprecated": false,
             "isGenerator": false,
@@ -281,21 +229,6 @@
             "final": false,
             "code": "function($id_cron, $res = '')\n  {\n    if ($cron = $this->get_cron($id_cron)) {\n      if (!empty($cron['cfg']['frequency'])) {\n        $time = time();\n        $start = date('Y-m-d H:i:s', $time+1);\n        $next = $this->get_next_date($cron['cfg']['frequency'], strtotime($cron['next'] ?: $start));\n        while ($next <= $start) {\n          $next = $this->get_next_date($cron['cfg']['frequency'], strtotime($next));\n        }\n      }\n      $enable = false;\n      $err_mode = $this->db->get_error_mode();\n      $this->db->set_error_mode('continue');\n      if ($this->db->is_trigger_enabled()) {\n        $this->db->disable_trigger();\n        $enable = true;\n      }\n      if ( $this->db->update($this->table, [\n        'next' => $next ?? null,\n        'pid' => null,\n        'active' => isset($next) ? 1 : 0\n      ], [\n        'id' => $id_cron,\n        'pid' => getmypid()\n      ]) ){\n        $res = true;\n      }\n      if ($err_mode !== 'continue') {\n        $this->db->set_error_mode($err_mode);\n      }\n      if ($enable) {\n        $this->db->enable_trigger();\n      }\n    }\n    return $res;\n  }",
             "startLine": 110,
-            "doc": {
-                "description": "Writes in the given CRON row the duration and the new finished status.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$id"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$res"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 146,
             "isDeprecated": false,
             "isGenerator": false,
@@ -339,22 +272,6 @@
             "final": false,
             "code": "function($frequency, $from_time = 0)\n  {\n    if ( \\is_string($frequency) && (\\strlen($frequency) >= 2) ){\n      $time = time();\n      if ( !$from_time ){\n        $from_time = $time;\n      }\n      $letter = bbn\\str::change_case(substr($frequency, 0, 1), 'lower');\n      $number = (int)substr($frequency, 1);\n      $unit = null;\n      if ( $number > 0 ){\n        switch ( $letter ){\n          case 'i':\n            $unit = 60;\n            break;\n          case 'h':\n            $unit = 3600;\n            break;\n          case 'd':\n            $unit = 86400;\n            break;\n          case 'w':\n          default:\n            $unit = 604800;\n            break;\n        }\n        $r = null;\n        if ( null !== $unit ){\n          $step = $unit * $number;\n          $r = $from_time + $step;\n        }\n        if ( $letter === 'm' ){\n          $r = mktime(date('H', $from_time), date('i', $from_time), date('s', $from_time), date('n', $from_time)+$number, date('j', $from_time), date('Y', $from_time));\n        }\n        if ( $letter === 'y' ){\n          $r = mktime(date('H', $from_time), date('i', $from_time), date('s', $from_time), date('n', $from_time)+$number, date('j', $from_time), date('Y', $from_time));\n        }\n        if ( null !== $r ){\n          if ( $r <= $time ){\n            if ($unit) {\n              $diff = $time - $r;\n              $num = floor($diff\/$unit);\n              $r += ($num * $step);\n            }\n            return $this->get_next_date($frequency, $r);\n          }\n          return date('Y-m-d H:i:s', $r);\n        }\n      }\n    }\n    return null;\n  }",
             "startLine": 154,
-            "doc": {
-                "description": "Returns a SQL date for the next event given a frequency and a time to count from (now if 0).",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$frequency"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$from",
-                        "description": "time"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 205,
             "isDeprecated": false,
             "isGenerator": false,
@@ -402,18 +319,6 @@
             "final": false,
             "code": "function($id_cron = NULL)\n  {\n    $conditions = [[\n      'field' => 'next',\n      'operator' => '<',\n      'exp' => 'NOW()'\n    ], [\n      'field' => 'next',\n      'operator' => 'isnotnull'\n    ], [\n      'field' => 'active',\n      'value' => 1\n    ]];\n    if ( bbn\\str::is_uid($id_cron) ){\n      $conditions[] = [\n        'field' => 'id',\n        'value' => $id_cron\n      ];\n    }\n    if ( \n      $this->check() &&\n      ($data = $this->db->rselect([\n        'table' => $this->table,\n        'fields' => [],\n        'where' => [\n          'conditions' => $conditions\n        ],\n        'order' => [[\n          'field' => 'priority',\n          'dir' => 'ASC'\n        ], [\n          'field' => 'next',\n          'dir' => 'ASC'\n        ]]\n      ]))\n    ){\n      \/\/ Dans cfg: timeout, et soit: latency, minute, hour, day of month, day of week, date\n      $data['cfg'] = json_decode($data['cfg'], 1);\n      return $data;\n    }\n    return null;\n  }",
             "startLine": 212,
-            "doc": {
-                "description": "Returns the whole row for the next CRON to be executed from now if there is any.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "null",
-                        "name": "$id",
-                        "description": "cron"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 253,
             "isDeprecated": false,
             "isGenerator": false,
@@ -452,7 +357,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( $this->check() ){\n      return array_map(function($a){\n        $cfg = $a['cfg'] ? json_decode($a['cfg'], true) : [];\n        unset($a['cfg']);\n        return \\bbn\\x::merge_arrays($a, $cfg);\n      }, $this->db->rselect_all([\n        'table' => $this->table,\n        'fields' => [],\n        'where' => [\n          'conditions' => [[\n            'field' => 'active',\n            'value' => 1\n          ], [\n            'field' => 'pid',\n            'operator' => 'isnotnull'\n          ]]\n        ],\n        'order' => [[\n          'field' => 'prev',\n          'dir' => 'ASC'\n        ]]\n      ]));\n    }\n    return null;\n  }",
             "startLine": 255,
-            "doc": null,
             "endLine": 281,
             "isDeprecated": false,
             "isGenerator": false,
@@ -480,7 +384,6 @@
             "final": false,
             "code": "function($limit = 10, $sec = 0)\n  {\n    if ( $limit === 0 ){\n      $limit = 1000;\n    }\n    if ( $this->check() ){\n      return array_map(function($a){\n        $cfg = $a['cfg'] ? json_decode($a['cfg'], true) : [];\n        unset($a['cfg']);\n        return \\bbn\\x::merge_arrays($a, $cfg);\n      }, $this->db->rselect_all([\n        'table' => $this->table,\n        'fields' => [],\n        'where' => [\n          'conditions' => [[\n            'field' => 'active',\n            'value' => 1\n          ], [\n            'field' => 'pid',\n            'operator' => 'isnull'\n          ], [\n            'field' => 'next',\n            'operator' => 'isnotnull'\n          ], [\n            'field' => 'next',\n            'operator' => '<',\n            'exp' => $sec ? \"DATE_ADD(NOW(), INTERVAL $sec SECOND)\" : 'NOW()'\n          ]]\n        ],\n        'order' => [[\n          'field' => 'priority',\n          'dir' => 'ASC'\n        ], [\n          'field' => 'next',\n          'dir' => 'ASC'\n        ]],\n        'limit' => $limit\n      ]));\n    }\n    return null;\n  }",
             "startLine": 283,
-            "doc": null,
             "endLine": 323,
             "isDeprecated": false,
             "isGenerator": false,
@@ -527,16 +430,6 @@
             "final": false,
             "code": "function($id_cron)\n  {\n      'id' => $id_cron,\n      ['pid', 'isnotnull']\n    ]));\n  }",
             "startLine": 329,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$id_cron"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 334,
             "isDeprecated": false,
             "isGenerator": false,
@@ -571,16 +464,6 @@
             "final": false,
             "code": "function($id_cron)\n  {\n  }",
             "startLine": 341,
-            "doc": {
-                "description": "Sets the active column to 1 for the given CRON ID.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$id_cron"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 343,
             "isDeprecated": false,
             "isGenerator": false,
@@ -615,16 +498,6 @@
             "final": false,
             "code": "function($id_cron)\n  {\n  }",
             "startLine": 350,
-            "doc": {
-                "description": "Sets the active column to 0 for the given CRON ID.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$id_cron"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 352,
             "isDeprecated": false,
             "isGenerator": false,
@@ -659,16 +532,6 @@
             "final": false,
             "code": "function($id_cron, $pid)\n  {\n  }",
             "startLine": 359,
-            "doc": {
-                "description": "Sets the active column to 1 for the given CRON ID.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$id_cron"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 361,
             "isDeprecated": false,
             "isGenerator": false,
@@ -712,16 +575,6 @@
             "final": false,
             "code": "function($id_cron)\n  {\n  }",
             "startLine": 368,
-            "doc": {
-                "description": "Sets the active column to 0 for the given CRON ID.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$id_cron"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 370,
             "isDeprecated": false,
             "isGenerator": false,
@@ -756,7 +609,6 @@
             "final": false,
             "code": "function($cfg)\n  {\n    if (\n      defined('BBN_PROJECT')\n      && $this->check()\n      && bbn\\x::has_props($cfg, ['action', 'file', 'priority', 'frequency', 'timeout'], true)\n    ) {\n      $d = [\n        'file' => $cfg['file'],\n        'description' => $cfg['description'] ?? '',\n        'next' => $cfg['next'] ?? date('Y-m-d H:i:s'),\n        'priority' => $cfg['priority'],\n        'cfg' => json_encode([\n          'frequency' => $cfg['frequency'],\n          'timeout' => $cfg['timeout']\n        ]),\n        'project' => BBN_PROJECT,\n        'active' => 1\n      ];\n      if ( $this->db->insert($this->table, $d)) {\n        $d['id'] = $this->db->last_id();\n        return $d;\n      }\n    }\n    return null;\n  }",
             "startLine": 372,
-            "doc": null,
             "endLine": 397,
             "isDeprecated": false,
             "isGenerator": false,
@@ -794,7 +646,6 @@
             "final": false,
             "code": "function($file, $priority = 1, $timeout = 360)\n  {\n    if (defined('BBN_PROJECT') && $this->check()) {\n      $d = [\n        'file' => $file,\n        'description' => _('One shot action'),\n        'next' => date('Y-m-d H:i:s'),\n        'priority' => $priority,\n        'cfg' => json_encode([\n          'frequency' => null,\n          'timeout' => $timeout\n        ]),\n        'project' => BBN_PROJECT,\n        'active' => 1\n      ];\n      if ( $this->db->insert_update($this->table, $d)) {\n        $d['id'] = $this->db->last_id();\n        return $d;\n      }\n    }\n    return null;\n  }",
             "startLine": 399,
-            "doc": null,
             "endLine": 420,
             "isDeprecated": false,
             "isGenerator": false,
@@ -847,7 +698,6 @@
             "final": false,
             "code": "function($id, array $cfg)\n  {\n    if (\n      $this->check()\n      && ($cron = $this->get_cron($id))\n    ) {\n      $d = [\n        'file' => $cfg['file'] ?: $cron['file'],\n        'description' => $cfg['description'] ?: $cron['description'],\n        'next' => $cfg['next'] ?: $cron['next'],\n        'priority' => $cfg['priority'] ?: $cron['priority'],\n        'cfg' => json_encode([\n          'frequency' => $cfg['frequency'] ?: $cron['frequency'],\n          'timeout' => $cfg['timeout'] ?: $cron['timeout']\n        ]),\n        'project' => BBN_PROJECT,\n        'active' => 1\n      ];\n      if ( $this->db->update($this->table, $d, ['id' => $id])) {\n        $d['id'] = $id;\n        return $d;\n      }\n    }\n    return null;\n  }",
             "startLine": 422,
-            "doc": null,
             "endLine": 446,
             "isDeprecated": false,
             "isGenerator": false,
@@ -894,11 +744,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 45,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 50,
             "isDeprecated": false,
             "isGenerator": false,
@@ -920,11 +765,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 45,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 50,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -951,7 +791,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 72,
-            "doc": null,
             "endLine": 74,
             "isDeprecated": false,
             "isGenerator": false,
@@ -973,7 +812,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 72,
-                "doc": null,
                 "endLine": 74,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1000,7 +838,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 76,
-            "doc": null,
             "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1022,7 +859,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 76,
-                "doc": null,
                 "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1049,7 +885,6 @@
             "final": false,
             "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
             "startLine": 80,
-            "doc": null,
             "endLine": 88,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1071,7 +906,6 @@
                 "final": false,
                 "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
                 "startLine": 80,
-                "doc": null,
                 "endLine": 88,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1098,22 +932,6 @@
             "final": false,
             "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
             "startLine": 95,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$name"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$arguments"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 99,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1135,22 +953,6 @@
                 "final": false,
                 "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
                 "startLine": 95,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "string",
-                            "name": "$name"
-                        },
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$arguments"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 99,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1215,11 +1017,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 104,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 106,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1241,11 +1038,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 104,
-                "doc": {
-                    "description": "",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 106,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1272,17 +1064,6 @@
             "final": false,
             "code": "function($debug)\n  {\n  }",
             "startLine": 112,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "boolean",
-                        "name": "$debug"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 114,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1304,17 +1085,6 @@
                 "final": false,
                 "code": "function($debug)\n  {\n  }",
                 "startLine": 112,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "boolean",
-                            "name": "$debug"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 114,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1361,11 +1131,6 @@
             "final": false,
             "code": "function()\n  {\n    return self::$cron_timeout;\n  }",
             "startLine": 57,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 60,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1392,18 +1157,6 @@
             "final": false,
             "code": "function($cron_timeout)\n  {\n    self::$cron_timeout = $cron_timeout;\n  }",
             "startLine": 65,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$cron",
-                        "description": "timeout"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 68,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1441,11 +1194,6 @@
             "final": false,
             "code": "function()\n  {\n    return self::$poll_timeout;\n  }",
             "startLine": 73,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 76,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1472,18 +1220,6 @@
             "final": false,
             "code": "function($poll_timeout)\n  {\n    self::$poll_timeout = $poll_timeout;\n  }",
             "startLine": 81,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$poll",
-                        "description": "timeout"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 84,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1521,11 +1257,6 @@
             "final": false,
             "code": "function()\n  {\n    return self::$user_timeout;\n  }",
             "startLine": 89,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 92,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1552,18 +1283,6 @@
             "final": false,
             "code": "function($user_timeout)\n  {\n    self::$user_timeout = $user_timeout;\n  }",
             "startLine": 97,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$user",
-                        "description": "timeout"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 100,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1601,22 +1320,6 @@
             "final": false,
             "code": "function(array $cfg = [])\n  {\n    $this->path = bbn\\mvc::get_data_path('appui-cron');\n  }",
             "startLine": 108,
-            "doc": {
-                "description": "cron constructor.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "bbn\\mvc\\controller",
-                        "name": "$ctrl"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$cfg"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 111,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1651,11 +1354,6 @@
             "final": false,
             "code": "function()\n  {\n    return $this->path;\n  }",
             "startLine": 117,
-            "doc": {
-                "description": "Returns the $data property.",
-                "params": [],
-                "return": ""
-            },
             "endLine": 120,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1683,7 +1381,6 @@
             "final": false,
             "code": "function($type)\n  {\n  }",
             "startLine": 122,
-            "doc": null,
             "endLine": 124,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1721,7 +1418,6 @@
             "final": false,
             "code": "function(array $cfg)\n  {\n    if ($this->path && (isset($cfg['type']) || isset($cfg['id']))) {\n      return $this->path.'pid\/.'.($cfg['id'] ?? $cfg['type']);\n    }\n    return null;\n  }",
             "startLine": 126,
-            "doc": null,
             "endLine": 132,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1759,7 +1455,6 @@
             "final": false,
             "code": "function(array $cfg, $error = false, $no_path = false)\n  {\n    $path = null;\n    if ($this->path && (isset($cfg['type']) || isset($cfg['id']))) {\n      if ( $error ){\n        $path = $this->path.'error\/'.(isset($cfg['id']) ? 'tasks\/'.$cfg['id'] : $cfg['type']);\n      }\n      else {\n        $path = $this->path.'log\/'.(isset($cfg['id']) ? 'tasks\/'.$cfg['id'] : $cfg['type']);\n      }\n      if ($error || $no_path) {\n        $path .= '\/';\n      }\n      else {\n        $path = \\bbn\\x::make_storage_path($path);\n      }\n    }\n    return $path;\n  }",
             "startLine": 134,
-            "doc": null,
             "endLine": 152,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1815,7 +1510,6 @@
             "final": false,
             "code": "function(array $cfg, $error = false)\n  {\n    $fs = new bbn\\file\\system();\n    if (($path = $this->get_log_path($cfg, $error, true)) && $fs->is_dir($path)) {\n      $fs->cd($path);\n      $dirs = array_reverse($fs->get_files('.\/', true, true, null, 'cts'));\n      $tmp =& $dirs;\n      $tpath = '';\n      for ($i = 0; $i < 4; $i++) {\n        if (!count($tmp)) {\n          break;\n        }\n        else{\n          $ok = false;\n          foreach ($tmp as &$t) {\n            if (!empty($t['num'])) {\n              $tpath .= '\/'.$t['name'];\n              $fs->cd($path.$tpath);\n              $t['expanded'] = true;\n              $t['items'] = array_reverse($fs->get_files('.\/', true, true, null, 'cts'));\n              $tmp =& $t['items'];\n              $ok = true;\n              break;\n            }\n          }\n          if (!$ok) {\n            break;\n          }\n        }\n      }\n      return $dirs;\n    }\n  }",
             "startLine": 154,
-            "doc": null,
             "endLine": 186,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1859,7 +1553,6 @@
             "final": false,
             "code": "function(array $cfg, $error = false, $start = 0, $num = 10)\n  {\n    $fs = new \\bbn\\file\\system();\n    if (($path = $this->get_log_path($cfg, $error, true)) && $fs->is_dir($path)) {\n      $res = [];\n      $fs->cd($path);\n      $years = array_reverse($fs->get_dirs($path));\n      foreach ($years as $y) {\n        $months = array_reverse($fs->get_dirs($y));\n        foreach ($months as $m) {\n          $days = array_reverse($fs->get_dirs($m));\n          foreach ($days as $d) {\n            $nums = array_reverse($fs->get_dirs($d));\n            foreach ($nums as $num) {\n              foreach (array_reverse($fs->get_files($num)) as $f) {\n                if ($start) {\n                  $start--;\n                }\n                if (!$start) {\n                  $res[] = $f;\n                  if (count($res) >= $num) {\n                    return $res;\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n      return $res;\n    }\n    return null;\n  }",
             "startLine": 188,
-            "doc": null,
             "endLine": 220,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1924,7 +1617,6 @@
             "final": false,
             "code": "function(array $cfg, $error = false)\n  {\n    if ($tmp = $this->get_last_logs($cfg, $error, 0, 1)) {\n      return $tmp[0];\n    }\n    return null;\n\n  }",
             "startLine": 222,
-            "doc": null,
             "endLine": 229,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1971,11 +1663,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( $this->check() ){\n      return file_exists($this->get_status_path('active'));\n    }\n    return false;\n  }",
             "startLine": 244,
-            "doc": {
-                "description": "Returns true if the file data_folder\/.active exists, false otherwise.",
-                "params": [],
-                "return": ""
-            },
             "endLine": 250,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2002,11 +1689,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( $this->check() ){\n      return file_exists($this->get_status_path('cron'));\n    }\n    return false;\n  }",
             "startLine": 256,
-            "doc": {
-                "description": "Returns true if the file data_folder\/.cron exists, false otherwise.",
-                "params": [],
-                "return": ""
-            },
             "endLine": 262,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2033,11 +1715,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( $this->check() ){\n      return file_exists($this->get_status_path('poll'));\n    }\n    return false;\n  }",
             "startLine": 268,
-            "doc": {
-                "description": "Returns true if the file data_folder\/.poll exists, false otherwise.",
-                "params": [],
-                "return": ""
-            },
             "endLine": 274,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2055,12 +1732,16 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": {
+        "cron_timeout": 300,
+        "poll_timeout": 600,
+        "user_timeout": 480
+    },
     "constants": null,
     "numMethods": 42,
     "numProperties": 0,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 3,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [
@@ -2093,5 +1774,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\cron",
-    "shortName": "manager"
+    "shortName": "manager",
+    "summary": "Class cron"
 }

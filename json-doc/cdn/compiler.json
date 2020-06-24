@@ -11,7 +11,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/cdn\/compiler.php",
     "startLine": 8,
-    "endLine": 467,
+    "endLine": 476,
     "contentConstructor": {
         "file": "bbn\\cdn\\compiler",
         "returns": null
@@ -26,9 +26,8 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($cfg)\n  {\n    $this->set_prefix();\n    $this->cfg = $cfg;\n  }",
+            "code": "function($cfg)\n  {\n    $this->_set_prefix();\n    $this->cfg = $cfg;\n  }",
             "startLine": 21,
-            "doc": null,
             "endLine": 25,
             "isDeprecated": false,
             "isGenerator": false,
@@ -63,7 +62,6 @@
             "final": false,
             "code": "function($st, $lang)\n  {\n    $st = trim($st);\n    if ( $st ){\n      try {\n        if ( $lang === 'js' ){\n          $tmp = JShrink\\Minifier::minify($st, ['flaggedComments' => false]);\n        }\n        else if ( $lang === 'css' ){\n          $tmp = CssMin::minify($st);\n        }\n      }\n      catch (\\Exception $e){\n        $this->set_error(\"Error during $lang minification with string - {$e->getMessage()}\");\n        \/\/die('Error during $lang minification with string - '.$e->getMessage());\n      }\n    }\n    return $tmp ?: $st;\n  }",
             "startLine": 27,
-            "doc": null,
             "endLine": 45,
             "isDeprecated": false,
             "isGenerator": false,
@@ -107,7 +105,6 @@
             "final": false,
             "code": "function($file, $test = false)\n  {\n      $ext = bbn\\str::file_ext($file[0]);\n      $minified = false;\n      $c = '';\n      foreach ( $file as $f ){\n        $has_content = false;\n        if ( !is_file($this->fpath.$f) ){\n          return false;\n        }\n        foreach ( self::$min_suffixes as $s ){\n          if ( strpos($f, $s.'.') ){\n            $minified = true;\n            if ( $test && file_exists($this->fpath.str_replace($s.'.', '.', $f)) ){\n              $c .= PHP_EOL.file_get_contents($this->fpath.str_replace($s.'.', '.', $f));\n              $has_content = true;\n            }\n            break;\n          }\n        }\n        if ( !$has_content ){\n          $c .= PHP_EOL.file_get_contents($this->fpath.$f);\n        }\n        if ( !empty($c) ){\n          $c = trim($c);\n        }\n      }\n    }\n    else{\n      $ext = bbn\\str::file_ext($file);\n      $minified = false;\n      if ( !is_file($this->fpath.$file) ){\n        return false;\n      }\n      foreach ( self::$min_suffixes as $s ){\n        if ( strpos($file, $s.'.') ){\n          $minified = true;\n          if ( $test && file_exists($this->fpath.str_replace($s.'.', '.', $file)) ){\n            $c = file_get_contents($this->fpath.str_replace($s.'.', '.', $file));\n          }\n          break;\n        }\n      }\n      if ( !isset($c) ){\n        $c = file_get_contents($this->fpath.$file);\n      }\n      if ( \\is_string($c) ){\n        $c = trim($c);\n      }\n    }\n    if ( $c ){\n      switch ( $ext ){\n\n        case 'js':\n          if ( !$test && !$minified ){\n            $c = $this->minify($c, 'js');\n          }\n          break;\n\n        case 'css':\n          if ( !$test && !$minified ){\n            $c = $this->minify($c, 'css');\n          }\n          break;\n\n        case 'coffee':\n          try {\n            $tmp = \\CoffeeScript\\Compiler::compile($c);\n            if ( $tmp && !$test ){\n              $c = $this->minify($c, 'js');\n            }\n          }\n          catch (\\Exception $e){\n            $this->set_error(\"Error during CoffeeScript compilation with file $file: \".$e->getMessage());\n            die(\"Compilation error with file $file : \".$e->getMessage());\n          }\n          break;\n\n        case 'less':\n          $less = new \\lessc();\n          $less->setImportDir([\\dirname($this->fpath.$file)]);\n          if ( is_file(\\dirname($this->fpath.$file).'\/_def.less') ){\n            $c = file_get_contents((\\dirname($this->fpath.$file).'\/_def.less')).$c;\n          }\n          try {\n            $c = $less->compile($c);\n            if ( $c && !$test ){\n              $c = $this->minify($c, 'css');\n            }\n          }\n          catch ( \\Exception $e ){\n            $this->set_error(\"Error during LESS compilation with file $file :\".$e->getMessage());\n            die($e->getMessage());\n          }\n          break;\n\n        case 'scss':\n          try{\n            $scss = new \\Leafo\\ScssPhp\\Compiler();\n            $scss->setImportPaths([\\dirname($this->fpath.$file)]);\n            if ( is_file(\\dirname($this->fpath.$file).'\/_def.scss') ){\n              $c = file_get_contents((\\dirname($this->fpath.$file).'\/_def.scss')).$c;\n            }\n            $c = $scss->compile($c);\n            if ( $c && !$test ){\n              $c = $this->minify($c, 'css');\n            }\n          }\n          catch ( \\Exception $e ){\n            $this->set_error(\"Error during SCSS compilation with file $file :\".$e->getMessage());\n            die($e->getMessage());\n          }\n          break;\n\n        case 'sass':\n          $sass = new \\SassParser([\n            'cache' => false,\n            'syntax' => 'sass'\n          ]);\n          try {\n            $c = $sass->toCss($c, false);\n            if ( $c && !$test ){\n              $c = $this->minify($c, 'css');\n            }\n          }\n          catch ( \\Exception $e ){\n            $this->set_error(\"Error during SASS compilation with file $file :\".$e->getMessage());\n            die($e->getMessage());\n          }\n          break;\n      }\n      if ( !$this->check() ){\n        die(\"File $file \\n{$this->get_error()}\");\n      }\n      return $c;\n    }\n    return false;\n  }",
             "startLine": 47,
-            "doc": null,
             "endLine": 184,
             "isDeprecated": false,
             "isGenerator": false,
@@ -151,7 +148,6 @@
             "final": false,
             "code": "function(array $files, $test = false)\n  {\n    $num_files = \\count($files);\n    if (  $num_files ){\n      $url = $this->furl.'?files=%s&';\n      $params = [];\n      \/\/ The v parameter is passed between requests (to refresh)\n      if ( !empty($this->cfg['params']['v']) ){\n        $params['v'] = $this->cfg['params']['v'];\n      }\n      \/\/ The test parameter also (for minification)\n      if ( $test ){\n        $params['test'] = 1;\n      }\n      $url .= http_build_query($params);\n      $files_json = json_encode($files);\n            $code .= <<<JS\n  .then(function(){\n    return new Promise(function(bbn_resolve, bbn_reject){\n      var files = $files_json,\n          rFiles = [];\n      for ( var i = 0; i < files.length; i++ ){\n        if ( bbnLoadFile(files[i]) ){\n          rFiles.push(files[i]);\n        }\n      }\n      if ( !rFiles.length ){\n        bbn_resolve();\n        return;\n      }\n      var script = document.createElement(\"script\");\n      script.type = \"text\/javascript\";\n      script.src = \"$url\".replace(\"%s\", rFiles.join(\",\"));\n      script.onload = function(){\n        bbn_resolve();\n      };\n      script.onerror = function(){\n        bbn_reject();\n      };\n      document.getElementsByTagName(\"head\")[0].appendChild(script);\n    })\n  })\nJS;\n    }\n    return $code;\n  }",
             "startLine": 186,
-            "doc": null,
             "endLine": 231,
             "isDeprecated": false,
             "isGenerator": false,
@@ -195,7 +191,6 @@
             "final": false,
             "code": "function($css)\n  {\n  }",
             "startLine": 233,
-            "doc": null,
             "endLine": 235,
             "isDeprecated": false,
             "isGenerator": false,
@@ -228,17 +223,16 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $files, $test = false, $prepend_files = [])\n  {\n    $num_files = \\count($files);\n    if ( $num_files ){\n      $dirs = [];\n      $prepended = [];\n      $unprepended = [];\n      for ( $i = 0; $i < $num_files; $i++ ){\n        if ( is_file($this->fpath.$files[$i]) ){\n          if ( isset($prepend_files[$files[$i]]) ){\n            foreach ( $prepend_files[$files[$i]] as $p ){\n              if ( !isset($prepended[$p]) ){\n                $prepended[$p] = [];\n              }\n              $prepended[$p][] = $files[$i];\n            }\n          }\n          else{\n            $unprepended[] = $files[$i];\n          }\n        }\n      }\n      \/\/die(var_dump($files, $num_files, $prepended));\n      foreach ( $prepended as $prep => $arr ){\n        $dir = dirname($arr[0]).'\/';\n        $files_json = [str_replace($dir, '', $prep)];\n        foreach ( $arr as $ar ){\n          $files_json[] = str_replace($dir, '', $ar);\n        }\n        $files_json = json_encode($files_json);\n        $url = $this->furl.'~~~BBN~~~';\n        $params = [];\n        \/\/ The v parameter is passed between requests (to refresh)\n        if ( !empty($this->cfg['params']['v']) ){\n          $params['v'] = $this->cfg['params']['v'];\n        }\n        \/\/ The test parameter also (for minification)\n        if ( $test ){\n          $params['test'] = 1;\n        }\n        $url .= http_build_query($params);\n        $jsdir = $dir === '.' ? '' : $dir.'\/';\n        $code .= <<<JS\n.then(function(){\n  return new Promise(function(bbn_resolve, bbn_reject){\n    var dir = \"$jsdir\",\n        files = $files_json,\n        url = \"$url\",\n        rFiles = [];\n    for ( var i = 0; i < files.length; i++ ){\n      if ( bbnLoadFile(dir + files[i]) ){\n        rFiles.push(files[i]);\n      }\n    }\n    if ( !rFiles.length ){\n      bbn_resolve();\n      return;\n    }\n    var css = document.createElement(\"link\");\n    css.rel = \"stylesheet\";\n    css.href = url.replace('~~~BBN~~~', dir + '?grouped=1&f=' + rFiles.join(\",\") + '&');\n    css.onload = function(){\n      bbn_resolve();\n    };\n    css.onerror = function(){\n      bbn_reject();\n    };\n    document.getElementsByTagName(\"head\")[0].appendChild(css);\n  })\n})\nJS;\n      }\n      foreach ( $unprepended as $file ){\n        $css = $this->get_content($file, false);\n        if ( $this->has_links($css) ){\n          if ( !isset($dirs[\\dirname($file)]) ){\n            $dirs[\\dirname($file)] = [];\n          }\n          $dirs[\\dirname($file)][] = basename($file);\n        }\n        else{\n          if ( !isset($dirs['.']) ){\n            $dirs['.'] = [];\n          }\n          $dirs['.'][] = $file;\n        }\n      }\n      if ( \\count($dirs) ){\n        foreach ( $dirs as $dir => $dfiles ){\n          if ( \\count($dfiles) ){\n            $files_json = json_encode($dfiles);\n\n            $url = $this->furl.'~~~BBN~~~';\n\n            $params = [];\n            \/\/ The v parameter is passed between requests (to refresh)\n            if ( !empty($this->cfg['params']['v']) ){\n              $params['v'] = $this->cfg['params']['v'];\n            }\n            \/\/ The test parameter also (for minification)\n            if ( $test ){\n              $params['test'] = 1;\n            }\n            $url .= http_build_query($params);\n            $jsdir = $dir === '.' ? '' : $dir.'\/';\n            $code .= <<<JS\n            \n  .then(function(){\n    return new Promise(function(bbn_resolve, bbn_reject){\n      var dir = \"$jsdir\",\n          files = $files_json,\n          url = \"$url\",\n          rFiles = [];\n      for ( var i = 0; i < files.length; i++ ){\n        if ( bbnLoadFile(dir + files[i]) ){\n          rFiles.push(files[i]);\n        }\n      }\n      if ( !rFiles.length ){\n        bbn_resolve();\n        return;\n      }\n      var css = document.createElement(\"link\");\n      css.rel = \"stylesheet\";\n      css.href = url.replace('~~~BBN~~~', dir + '?f=' + rFiles.join(\",\") + '&');\n      css.onload = function(){\n        bbn_resolve();\n      };\n      css.onerror = function(){\n        bbn_reject();\n      };\n      document.getElementsByTagName(\"head\")[0].appendChild(css);\n    })\n  })\nJS;\n          }\n        }\n        \/\/$code .= \";\\nreturn promise;\\n})()\";\n        if ( !$test ){\n          $code = $this->minify($code, 'js');\n        }\n      }\n    }\n    return $code;\n  }",
+            "code": "function(array $files, $test = false, $prepend_files = [], $root = '')\n  {\n    $num_files = \\count($files);\n    if ( $num_files ){\n      $dirs = [];\n      $prepended = [];\n      $unprepended = [];\n      for ( $i = 0; $i < $num_files; $i++ ){\n        if ( is_file($this->fpath.$files[$i]) ){\n          if ( isset($prepend_files[$files[$i]]) ){\n            foreach ( $prepend_files[$files[$i]] as $p ){\n              if ( !isset($prepended[$p]) ){\n                $prepended[$p] = [];\n              }\n              $prepended[$p][] = $files[$i];\n            }\n          }\n          else{\n            $unprepended[] = $files[$i];\n          }\n        }\n      }\n      \/\/die(var_dump($files, $num_files, $prepended));\n      foreach ( $prepended as $prep => $arr ){\n        $dir = dirname($arr[0]);\n        $files_json = [str_replace($dir, '', $prep)];\n        foreach ( $arr as $ar ){\n          $files_json[] = str_replace($dir, '', $ar);\n        }\n        \\bbn\\x::log($files_json);\n        $files_json = json_encode($files_json);\n        $url = $this->furl.'~~~BBN~~~';\n        $params = [];\n        \/\/ The v parameter is passed between requests (to refresh)\n        if ( !empty($this->cfg['params']['v']) ){\n          $params['v'] = $this->cfg['params']['v'];\n        }\n        \/\/ The test parameter also (for minification)\n        if ( $test ){\n          $params['test'] = 1;\n        }\n        $url .= http_build_query($params);\n        $jsdir = $dir === '.' ? '' : $dir.'\/';\n        $code .= <<<JS\n.then(function(){\n  return new Promise(function(bbn_resolve, bbn_reject){\n    var dir = \"$jsdir\",\n        files = $files_json,\n        url = \"$url\",\n        rFiles = [];\n    for ( var i = 0; i < files.length; i++ ){\n      if ( bbnLoadFile(dir + files[i]) ){\n        rFiles.push(files[i]);\n      }\n    }\n    if ( !rFiles.length ){\n      bbn_resolve();\n      return;\n    }\n    var css = document.createElement(\"link\");\n    css.rel = \"stylesheet\";\n    css.href = url.replace('~~~BBN~~~', dir + '?grouped=1&f=' + rFiles.join(\",\") + '&');\n    css.onload = function(){\n      bbn_resolve();\n    };\n    css.onerror = function(){\n      bbn_reject();\n    };\n    document.getElementsByTagName(\"head\")[0].appendChild(css);\n  })\n})\nJS;\n      }\n      foreach ( $unprepended as $file ){\n        $css = $this->get_content($file, false);\n        if ( $this->has_links($css) ){\n          if ($root) {\n            if ( !isset($dirs[$root]) ){\n              $dirs[$root] = [];\n            }\n            $dirs[$root][] = substr($file, strlen($root));\n          }\n          else {\n            if ( !isset($dirs[\\dirname($file)]) ){\n              $dirs[\\dirname($file)] = [];\n            }\n            $dirs[\\dirname($file)][] = basename($file);\n          }\n        }\n        else{\n          if ( !isset($dirs['.']) ){\n            $dirs['.'] = [];\n          }\n          $dirs['.'][] = $file;\n        }\n      }\n      if ( \\count($dirs) ){\n        foreach ( $dirs as $dir => $dfiles ){\n          if ( \\count($dfiles) ){\n            $files_json = json_encode($dfiles);\n\n            $url = $this->furl.'~~~BBN~~~';\n\n            $params = [];\n            \/\/ The v parameter is passed between requests (to refresh)\n            if ( !empty($this->cfg['params']['v']) ){\n              $params['v'] = $this->cfg['params']['v'];\n            }\n            \/\/ The test parameter also (for minification)\n            if ( $test ){\n              $params['test'] = 1;\n            }\n            $url .= http_build_query($params);\n            $jsdir = $dir === '.' ? '' : $dir.'\/';\n            $code .= <<<JS\n            \n  .then(function(){\n    return new Promise(function(bbn_resolve, bbn_reject){\n      var dir = \"$jsdir\",\n          files = $files_json,\n          url = \"$url\",\n          rFiles = [];\n      for ( var i = 0; i < files.length; i++ ){\n        if ( bbnLoadFile(dir + files[i]) ){\n          rFiles.push(files[i]);\n        }\n      }\n      if ( !rFiles.length ){\n        bbn_resolve();\n        return;\n      }\n      var css = document.createElement(\"link\");\n      css.rel = \"stylesheet\";\n      css.href = url.replace('~~~BBN~~~', dir + '?f=' + rFiles.join(\",\") + '&');\n      css.onload = function(){\n        bbn_resolve();\n      };\n      css.onerror = function(){\n        bbn_reject();\n      };\n      document.getElementsByTagName(\"head\")[0].appendChild(css);\n    })\n  })\nJS;\n          }\n        }\n        \/\/$code .= \";\\nreturn promise;\\n})()\";\n        if ( !$test ){\n          $code = $this->minify($code, 'js');\n        }\n      }\n    }\n    return $code;\n  }",
             "startLine": 237,
-            "doc": null,
-            "endLine": 381,
+            "endLine": 390,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 3,
+            "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
             "returns": null,
             "parent": false,
@@ -269,6 +263,15 @@
                     "has_default": true,
                     "default": [],
                     "default_name": ""
+                },
+                {
+                    "name": "root",
+                    "position": 3,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
                 }
             ]
         },
@@ -282,9 +285,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($css)\n  {\n    \/\/$css = bbn\\str::escape_squotes($css);\n    $code = bbn\\str::genpwd(25, 20);\n    $head = $code.'2';\n    $style = $code.'3';\n    return <<<JS\n  let $code = `$css`,\n      $head = document.head || document.getElementsByTagName('head')[0],\n      $style = document.createElement('style');\n  $style.type = 'text\/css';\n  if ( $style.styleSheet ){\n    $style.styleSheet.cssText = $code;\n  }\n  else {\n    $style.appendChild(document.createTextNode($code));\n  }\n  return $head.appendChild($style);\nJS;\n\n  }",
-            "startLine": 383,
-            "doc": null,
-            "endLine": 403,
+            "startLine": 392,
+            "endLine": 412,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -317,9 +319,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $files, $test = false)\n  {\n      \/** @var string $insert_precode Will be used in the sprintf on $precode *\/\n      $insert_precode = '';\n      \/** @var string $code Will contain all the code to add to our file *\/\n      $code = '';\n      \/** @var array $codes Will contain the raw content of each files *\/\n      $codes = [];\n      \/\/ Mix of CSS and javascript: the JS adds the CSS to the head before executing\n      foreach ( $files as $f ){\n        if ( $c = $this->get_content($f, $test) ){\n          $e = bbn\\str::file_ext($f);\n          foreach ( self::$types as $type => $exts ){\n            foreach ( $exts as $ext ){\n              if ( $ext === $e ){\n                $mode = $type;\n                break;\n              }\n            }\n          }\n          $codes[$mode ?? $e][] = [\n            'code' => $c,\n            'file' => basename($f),\n            'dir' => \\dirname($f)\n          ];\n        }\n        else{\n          \/\/die(\"I can't find the file $f !\");\n        }\n      }\n      return $codes;\n    }\n  }",
-            "startLine": 405,
-            "doc": null,
-            "endLine": 437,
+            "startLine": 414,
+            "endLine": 446,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -361,9 +362,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($files, $test = false)\n  {\n      \/** @var array $codes Will contain the raw content of each files *\/\n      $codes = [];\n      \/\/ Mix of CSS and javascript: the JS adds the CSS to the head before executing\n      if ( $c = $this->get_content($files, $test) ){\n        $e = bbn\\str::file_ext($files[0]);\n        foreach ( self::$types as $type => $exts ){\n          foreach ( $exts as $ext ){\n            if ( $ext === $e ){\n              $mode = $type;\n              break;\n            }\n          }\n        }\n        $codes[$mode ?? $e][] = [\n          'code' => $c,\n          'file' => basename(end($files)),\n          'dir' => \\dirname(end($files))\n        ];\n      }\n      else{\n        throw new \\Exception(\"Impossible to get content from $f\");\n      }\n      return $codes;\n    }\n  }",
-            "startLine": 439,
-            "doc": null,
-            "endLine": 465,
+            "startLine": 448,
+            "endLine": 474,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -406,11 +406,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 45,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 50,
             "isDeprecated": false,
             "isGenerator": false,
@@ -432,11 +427,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 45,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 50,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -463,11 +453,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 56,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 61,
             "isDeprecated": false,
             "isGenerator": false,
@@ -489,11 +474,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 56,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 61,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -520,7 +500,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 72,
-            "doc": null,
             "endLine": 74,
             "isDeprecated": false,
             "isGenerator": false,
@@ -542,7 +521,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 72,
-                "doc": null,
                 "endLine": 74,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -569,7 +547,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 76,
-            "doc": null,
             "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
@@ -591,7 +568,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 76,
-                "doc": null,
                 "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -618,7 +594,6 @@
             "final": false,
             "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
             "startLine": 80,
-            "doc": null,
             "endLine": 88,
             "isDeprecated": false,
             "isGenerator": false,
@@ -640,7 +615,6 @@
                 "final": false,
                 "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
                 "startLine": 80,
-                "doc": null,
                 "endLine": 88,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -667,22 +641,6 @@
             "final": false,
             "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
             "startLine": 95,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$name"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$arguments"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 99,
             "isDeprecated": false,
             "isGenerator": false,
@@ -704,22 +662,6 @@
                 "final": false,
                 "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
                 "startLine": 95,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "string",
-                            "name": "$name"
-                        },
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$arguments"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 99,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -784,11 +726,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 104,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 106,
             "isDeprecated": false,
             "isGenerator": false,
@@ -810,11 +747,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 104,
-                "doc": {
-                    "description": "",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 106,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -841,17 +773,6 @@
             "final": false,
             "code": "function($debug)\n  {\n  }",
             "startLine": 112,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "boolean",
-                        "name": "$debug"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 114,
             "isDeprecated": false,
             "isGenerator": false,
@@ -873,17 +794,6 @@
                 "final": false,
                 "code": "function($debug)\n  {\n  }",
                 "startLine": 112,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "boolean",
-                            "name": "$debug"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 114,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -945,12 +855,37 @@
             }
         }
     },
-    "staticProperties": null,
+    "staticProperties": {
+        "min_suffixes": [
+            ".min",
+            "-min",
+            ".pack"
+        ],
+        "types": {
+            "js": [
+                "js",
+                "coffee"
+            ],
+            "css": [
+                "css",
+                "less",
+                "sass",
+                "scss"
+            ],
+            "html": [
+                "html",
+                "php"
+            ],
+            "lang": [
+                "lang"
+            ]
+        }
+    },
     "constants": null,
     "numMethods": 17,
     "numProperties": 1,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 2,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [
@@ -1001,5 +936,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\cdn",
-    "shortName": "compiler"
+    "shortName": "compiler",
+    "summary": ""
 }

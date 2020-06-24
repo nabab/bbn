@@ -3,6 +3,34 @@ namespace bbn;
 
 /**
  * (Static) content delivery system through requests using filesystem and internal DB for libraries.
+ * 
+ * ### This class generates in a cache directory a javascript 
+ * or CSS file based on the request received.  
+ * 
+ * The cdn class will be using all the classes in bbn\cdn in order to 
+ * treat a request URL, and return the appropriate content.  
+ * 
+ * - First it will parse the URL and make a first configuration array out of it, 
+ * from which a hash will be calculated
+ * - Then it will serve a cache file if it exists and acreta one otherwise
+ * - Lastly 
+ * 
+ * 
+ * 
+ * Request can have the following forms:
+ * - https://mycdn.net/lib=bbn-vue,jquery
+ * - https://mycdn.net/lib=bbnjs|1.0.1|dark,bbn-vue|2.0.2
+ * - https://mycdn.net/lib/my_library/?dir=true
+ * - https://mycdn.net/lib/my_library/?f=file1.js,file2.js,file3.css
+ * 
+ * @example
+ * ```php
+ * $cdn = new \bbn\cdn($_SERVER['REQUEST_URI']);
+ * $cdn->process();
+ * if ( $cdn->check() ){
+ *   $cdn->output();
+ * }
+ * ```
  *
  * @author Thomas Nabet <thomas.nabet@gmail.com>
  * @copyright BBN Solutions
@@ -16,8 +44,11 @@ class cdn extends models\cls\basic
   use cdn\common;
 
 
-  protected const head_comment = '/* This file has been created by the cdn class from BBN PHP library
- * Please visit http://www.bbn.solutions
+  /**
+   * @var string The header that will be placed in the head of the output of a generated file.
+   */
+  protected const HEAD_COMMENT = '/* This file has been created by the cdn class from BBN PHP library
+ * Please visit https://www.bbn.io
  * To update this script, go to:
  * %s
  * %s
@@ -27,14 +58,14 @@ class cdn extends models\cls\basic
 ';
 
   /**
-   * @var string
+   * @var string Will be added to the HEAD_COMMENT if it is not minified
    */
-  protected const test_st    = 'You can remove the test parameter to the URL to get a minified version';
+  protected const TEST_ST    = 'You can remove the test parameter to the URL to get a minified version';
 
   /**
-   * @var string
+   * @var string Will be added to the HEAD_COMMENT if it is minified
    */
-  protected const no_test_st = 'You can add &test=1 to get an uncompressed version';
+  protected const NO_TEST_ST = 'You can add &test=1 to get an uncompressed version';
 
   /**
    * @var string
@@ -42,42 +73,42 @@ class cdn extends models\cls\basic
   protected $mode;
 
   /**
-   * @var db
+   * @var db A connection to the CDN database
    */
   protected $db;
 
   /**
-   * @var array
+   * @var array The file extensions that can be generated
    */
   protected $extensions = ['js', 'css'];
 
   /**
-   * @var array
+   * @var array A list of the needed files
    */
   protected $files = [];
 
   /**
-   * @var $dir
+   * @var string The directory from which
    */
   protected $dir;
 
   /**
-   * @var null|string
+   * @var string The path to the cache file where the file is generated
    */
   protected $cache_path = 'cache/';
 
   /**
-   * @var int
+   * @var int The maximum duration of the cache in seconds
    */
   protected $cache_length = 3600;
 
   /**
-   * @var $file_mtime
+   * @var int A timestamp of the cache file if it exists
    */
   protected $file_mtime;
 
   /**
-   * @var string
+   * @var string The request received
    */
   protected $request;
 
@@ -92,17 +123,17 @@ class cdn extends models\cls\basic
   protected $url = '';
 
   /**
-   * @var $hash
+   * @var string The unique hash of this configuration, which will be the basename of the file
    */
   protected $hash;
 
   /**
-   * @var $language
+   * @var string The language requested if any
    */
   protected $language;
 
   /**
-   * @var array
+   * @var array A configuration array which will contain all the specs
    */
   protected $cfg;
 
@@ -112,38 +143,42 @@ class cdn extends models\cls\basic
   protected $list;
 
   /**
-   * @var cdn\compiler
+   * @var cdn\compiler The compiler object that will be used for the generation
    */
   protected $cp;
 
   /**
-   * @var string
+   * @var string The generated file's extension
    */
   protected $ext = '';
 
-  public
-    $alert,
-    $code;
+  /**
+   * @var
+   */
+  public $alert;
 
   /**
-   * cdn constructor.
-   * @param string $request The original request
-   * @param string|null $cache If given will point the cache file to serve
-   * @param db|null $db The DB to query fior libraries. If not given will be current instance
+   * @var
    */
-  public function __construct(string $request, string $cache = null, db $db = null)
+  public $code;
+
+  /**
+   * Constructor.
+   * 
+   * If *$db* is not not given the current instance if any will be used.
+   * 
+   * @param string  $request The original request sent to the server
+   * @param db|null $db      The DB connection with the libraries tables
+   */
+  public function __construct(string $request, db $db = null)
   {
+    // Need to be in a bbn environment, this is the absolute path of the server's root directory
     if ( !defined('BBN_PUBLIC') ){
       $this->error('You must define the constant $this->fpath as the root of your public document');
       die('You must define the constant $this->fpath as the root of your public document');
     }
-    $this->set_prefix();
-    if ( $cache && is_dir($this->fpath.$cache) ){
-      if ( substr($cache, -1) !== '/' ){
-        $cache .= '/';
-      }
-      $this->cache_path = $cache;
-    }
+    // @todo Remove?
+    $this->_set_prefix();
     if ( !$db ){
       $db = db::get_instance();
     }
@@ -151,7 +186,6 @@ class cdn extends models\cls\basic
       $this->db = $db;
     }
     $this->request = $request;
-    x::log($request, 'cdn_errors');
     // Creation of a config object
     $config = new cdn\config($request, $this->db);
     // Checking request validity
@@ -173,252 +207,7 @@ class cdn extends models\cls\basic
   }
 
   /**
-   * @param $code
-   * @return string
-   */
-  protected function js_mask(string $code): string
-  {
-    $test = empty($this->cfg['test']) ? 'false' : 'true';
-    return <<<JS
-(function(window){
-  if ( this.bbnAddGlobalScript === undefined ){
-    this.bbnAddGlobalScript = function(fn){
-      return fn();
-    }
-    this.bbnLoadedFiles = [];
-    this.bbnMinified = $test;
-    this.bbnLoadFile = function(file){
-      if ( file.substr(0, 1) === '/' ){
-        file = file.substr(1);
-      }
-      if (
-        (window.bbnLoadedFiles !== undefined) &&
-        (window.bbnLoadedFiles.length !== undefined)
-      ){
-        for ( var j = 0; j < bbnLoadedFiles.length; j++ ){
-          if ( bbnLoadedFiles[j] === file ){
-            return false;
-          }
-        }
-        bbnLoadedFiles.push(file);
-        return true;
-      }
-    };
-  }
-  $code
-  
-})(window);
-
-JS;
-  }
-
-  /**
-   * @param array $codes
-   * @param bool $encapsulated
-   * @return string
-   */
-  protected function get_js(array $codes, $encapsulated = true): string
-  {
-    $code = '';
-    if ( !empty($codes['js']) ){
-      $num = count($codes['js']);
-      $root_url = $this->furl;
-      foreach ( $codes['js'] as $c ){
-        $tmp = $c['code'];
-        if ( empty($this->cfg['nocompil']) ){
-          $tmp = <<<JS
-bbnAddGlobalScript(function(){
-  // $num
-  bbnLoadFile("$c[dir]/$c[file]");
-  var bbn_language = "{$this->cfg['lang']}",
-      bbn_root_dir = "$c[dir]/",
-      bbn_root_url = "$root_url";
-      $tmp
-});
-JS;
-        }
-        if ( !empty($tmp) ){
-          $code .= $tmp.($this->cfg['test'] ? str_repeat(PHP_EOL, 5) : PHP_EOL);
-        }
-      }
-      if ( !empty($this->cfg['content']['css']) ){
-        $code .= <<<JS
-    return (new Promise(function(bbn_resolve, bbn_reject){
-      bbn_resolve()
-    }))
-
-JS;
-
-        $code .= $this->cp->css_links($this->cfg['content']['css'], $this->cfg['test'], $this->cfg['content']['prepend']);
-      }
-      if ( $encapsulated ){
-        $code = $this->js_mask($code);
-      }
-    }
-    return $code;
-  }
-
-  /**
-   * @param array $codes
-   * @return string
-   */
-  protected function get_css(array $codes)
-  {
-    $code = '';
-    if ( !empty($codes['css']) ){
-      foreach ( $codes['css'] as $c ){
-        $code .= $c['code'].($this->cfg['test'] ? str_repeat(PHP_EOL, 5) : PHP_EOL);
-      }
-    }
-    return $code;
-  }
-
-  /**
-   * @param array $codes
-   * @return string
-   */
-  protected function get_components()
-  {
-    $code = '';
-    $codes = [];
-    $c =& $this->cfg;
-    if ( \is_array($c['content']) ){
-      $i = 0;
-      $includes = '';
-      foreach ( $c['content'] as $name => $cp ){
-        foreach ( $cp['js'] as $js ){
-          $ext = str::file_ext($js, true);
-          //x::dump($codes);
-          // A js file with the component name is mandatory
-          if ( $ext[0] === $name ){
-            // Once found only this js file will be used as it should just define the component
-            $jsc = $this->cp->compile([$js], $c['test']);
-            $codes[$i] = [
-              'name' => $name,
-              'js' => $jsc['js'][0]['code']
-            ];
-            if ( !empty($cp['css']) ){
-              $cssc = $this->cp->compile($cp['css'], $c['test']);
-              foreach ( $cssc['css'] as $css ){
-                if ( !isset($css['code']) ){
-                  throw new \Exception("Impossible to get the SCSS code from component ".$cp);
-                  //die(var_dump($css));
-                }
-                if ( $this->cp->has_links($css['code']) ){
-                  $includes .= $this->cp->css_links($cp['css'], $c['test']);
-                  unset($cp['css']);
-                  break;
-                }
-              }
-              if ( isset($cp['css']) ){
-                $codes[$i]['css'] = array_map(function($a){
-                  return $a['code'];
-                }, $cssc['css']);
-              }
-            }
-            if (
-              !empty($c['lang']) &&
-              !empty($cp['lang']) &&
-              \in_array(\dirname($js)."/$name.$c[lang].lang", $cp['lang'], true)
-            ){
-              $lang = file_get_contents($this->fpath.\dirname($js)."/$name.$c[lang].lang");
-              if ( $lang ){
-                //$lang = json_decode($lang, true);
-                $codes[$i]['js'] = "if ( window.bbn ){ bbn.fn.autoExtend('lng', $lang); }".PHP_EOL.$codes[$i]['js'];
-              }
-            }
-
-            // Dependencies links
-            $dep_path = $this->fpath.$jsc['js'][0]['dir'].'/';
-            if ( is_file($dep_path.'bbn.json') ){
-              $json = json_decode(file_get_contents($dep_path.'bbn.json'), true);
-            }
-            else{
-              if ( is_file($dep_path.'bower.json') ){
-                $json = json_decode(file_get_contents($dep_path.'bower.json'), true);
-              }
-            }
-            if ( !empty($json) ){
-              if ( !empty($json['dependencies']) ){
-                $lib = new cdn\library($this->db, $this->cfg['lang'], true);
-                foreach ( $json['dependencies'] as $l => $version ){
-                  $lib->add($l);
-                }
-                if ( $cfg = $lib->get_config() ){
-                  if ( !empty($cfg['css']) ){
-                    $includes .= $this->cp->css_links($cfg['css'], $this->cfg['test']);
-                  }
-                  if ( !empty($cfg['js']) ){
-                    $includes .= $this->cp->js_links($cfg['js'], $this->cfg['test']);
-                  }
-                }
-              }
-              if ( !empty($json['components']) ){
-                /** @todo Add dependent components */
-              }
-            }
-
-
-            // HTML inclusion
-            $html = [];
-            if ( !empty($cp['html']) ){
-              foreach ( $cp['html'] as $f ){
-                if ( $tmp = $this->cp->get_content($f, $c['test']) ){
-                  $component_name = str::file_ext($f, true)[0];
-                  if ( $name !== $component_name ){
-                    $component_name = $name.'-'.$component_name;
-                  }
-                  $html[] = [
-                    'name' => $component_name,
-                    'content' => $tmp
-                  ];
-                }
-              }
-            }
-            if ( !empty($html) ){
-              $codes[$i]['html'] = $html;
-            }
-            $i++;
-            break;
-          }
-        }
-      }
-
-      if ( $codes ){
-        $str = '';
-        foreach ( $codes as $cd ){
-          $str .= "{name: '$cd[name]', script: function(){try{ $cd[js] } catch(e){bbn.fn.log(e.message); throw new Error('Impossible to load component $cd[name]');}}";
-          if ( !empty($cd['css']) ){
-            $str .= ', css: '.json_encode($cd['css']);
-          }
-          if ( !empty($cd['html']) ){
-            $str .= ', html: '.json_encode($cd['html']);
-          }
-          $str .= '},';
-        }
-        $code = <<<JS
-
-(function(){
-  return (new Promise(function(bbn_resolve, bbn_reject){
-    setTimeout(function(){
-      bbn_resolve();
-    })
-  }))
-  $includes
-  .then(function(){
-    return bbnAddGlobalScript(function(){
-      return [$str]
-    })
-  })
-})()
-JS;
-      }
-      return $code;
-    }
-  }
-
-  /**
-   * @return $this
+   * @return self
    */
   public function process()
   {
@@ -453,9 +242,9 @@ JS;
         if ( $code ){
           if (defined('BBN_IS_DEV') && BBN_IS_DEV){
             $code = sprintf(
-              self::head_comment,
+              self::HEAD_COMMENT,
               $this->furl.$this->request,
-              $c['test'] ? self::test_st : self::no_test_st
+              $c['test'] ? self::TEST_ST : self::NO_TEST_ST
             ).$code;
           }
           file_put_contents($c['cache_file'], $code);
@@ -615,4 +404,250 @@ JS;
     }
     die('No cache file '.$file);
   }
+
+  /**
+   * @param $code
+   * @return string
+   */
+  protected function js_mask(string $code): string
+  {
+    $test = empty($this->cfg['test']) ? 'false' : 'true';
+    return <<<JS
+(function(window){
+  if ( this.bbnAddGlobalScript === undefined ){
+    this.bbnAddGlobalScript = function(fn){
+      return fn();
+    }
+    this.bbnLoadedFiles = [];
+    this.bbnMinified = $test;
+    this.bbnLoadFile = function(file){
+      if ( file.substr(0, 1) === '/' ){
+        file = file.substr(1);
+      }
+      if (
+        (window.bbnLoadedFiles !== undefined) &&
+        (window.bbnLoadedFiles.length !== undefined)
+      ){
+        for ( var j = 0; j < bbnLoadedFiles.length; j++ ){
+          if ( bbnLoadedFiles[j] === file ){
+            return false;
+          }
+        }
+        bbnLoadedFiles.push(file);
+        return true;
+      }
+    };
+  }
+  $code
+  
+})(window);
+
+JS;
+  }
+
+  /**
+   * @param array $codes
+   * @param bool $encapsulated
+   * @return string
+   */
+  protected function get_js(array $codes, $encapsulated = true): string
+  {
+    $code = '';
+    if ( !empty($codes['js']) ){
+      $num = count($codes['js']);
+      $root_url = $this->furl;
+      foreach ( $codes['js'] as $c ){
+        $tmp = $c['code'];
+        if ( empty($this->cfg['nocompil']) ){
+          $tmp = <<<JS
+bbnAddGlobalScript(function(){
+  // $num
+  bbnLoadFile("$c[dir]/$c[file]");
+  var bbn_language = "{$this->cfg['lang']}",
+      bbn_root_dir = "$c[dir]/",
+      bbn_root_url = "$root_url";
+      $tmp
+});
+JS;
+        }
+        if ( !empty($tmp) ){
+          $code .= $tmp.($this->cfg['test'] ? str_repeat(PHP_EOL, 5) : PHP_EOL);
+        }
+      }
+      if ( !empty($this->cfg['content']['css']) ){
+        $code .= <<<JS
+    return (new Promise(function(bbn_resolve, bbn_reject){
+      bbn_resolve()
+    }))
+
+JS;
+
+        $code .= $this->cp->css_links($this->cfg['content']['css'], $this->cfg['test'], $this->cfg['content']['prepend']);//, '/'.$c['dir']);
+      }
+      if ( $encapsulated ){
+        $code = $this->js_mask($code);
+      }
+    }
+    return $code;
+  }
+
+  /**
+   * @param array $codes
+   * @return string
+   */
+  protected function get_css(array $codes)
+  {
+    $code = '';
+    if ( !empty($codes['css']) ){
+      foreach ( $codes['css'] as $c ){
+        $code .= $c['code'].($this->cfg['test'] ? str_repeat(PHP_EOL, 5) : PHP_EOL);
+      }
+    }
+    return $code;
+  }
+
+  /**
+   * @param array $codes
+   * @return string
+   */
+  protected function get_components()
+  {
+    $code = '';
+    $codes = [];
+    $c =& $this->cfg;
+    if ( \is_array($c['content']) ){
+      $i = 0;
+      $includes = '';
+      foreach ( $c['content'] as $name => $cp ){
+        foreach ( $cp['js'] as $js ){
+          $ext = str::file_ext($js, true);
+          //x::dump($codes);
+          // A js file with the component name is mandatory
+          if ( $ext[0] === $name ){
+            // Once found only this js file will be used as it should just define the component
+            $jsc = $this->cp->compile([$js], $c['test']);
+            $codes[$i] = [
+              'name' => $name,
+              'js' => $jsc['js'][0]['code']
+            ];
+            if ( !empty($cp['css']) ){
+              $cssc = $this->cp->compile($cp['css'], $c['test']);
+              foreach ( $cssc['css'] as $css ){
+                if ( !isset($css['code']) ){
+                  throw new \Exception("Impossible to get the SCSS code from component ".$cp);
+                  //die(var_dump($css));
+                }
+                if ( $this->cp->has_links($css['code']) ){
+                  $includes .= $this->cp->css_links($cp['css'], $c['test']);
+                  unset($cp['css']);
+                  break;
+                }
+              }
+              if ( isset($cp['css']) ){
+                $codes[$i]['css'] = array_map(function($a){
+                  return $a['code'];
+                }, $cssc['css']);
+              }
+            }
+            if (
+              !empty($c['lang']) &&
+              !empty($cp['lang']) &&
+              \in_array(\dirname($js)."/$name.$c[lang].lang", $cp['lang'], true)
+            ){
+              $lang = file_get_contents($this->fpath.\dirname($js)."/$name.$c[lang].lang");
+              if ( $lang ){
+                //$lang = json_decode($lang, true);
+                $codes[$i]['js'] = "if ( window.bbn ){ bbn.fn.autoExtend('lng', $lang); }".PHP_EOL.$codes[$i]['js'];
+              }
+            }
+
+            // Dependencies links
+            $dep_path = $this->fpath.$jsc['js'][0]['dir'].'/';
+            if ( is_file($dep_path.'bbn.json') ){
+              $json = json_decode(file_get_contents($dep_path.'bbn.json'), true);
+            }
+            else{
+              if ( is_file($dep_path.'bower.json') ){
+                $json = json_decode(file_get_contents($dep_path.'bower.json'), true);
+              }
+            }
+            if ( !empty($json) ){
+              if ( !empty($json['dependencies']) ){
+                $lib = new cdn\library($this->db, $this->cfg['lang'], true);
+                foreach ( $json['dependencies'] as $l => $version ){
+                  $lib->add($l);
+                }
+                if ( $cfg = $lib->get_config() ){
+                  if ( !empty($cfg['css']) ){
+                    $includes .= $this->cp->css_links($cfg['css'], $this->cfg['test']);
+                  }
+                  if ( !empty($cfg['js']) ){
+                    $includes .= $this->cp->js_links($cfg['js'], $this->cfg['test']);
+                  }
+                }
+              }
+              if ( !empty($json['components']) ){
+                /** @todo Add dependent components */
+              }
+            }
+
+
+            // HTML inclusion
+            $html = [];
+            if ( !empty($cp['html']) ){
+              foreach ( $cp['html'] as $f ){
+                if ( $tmp = $this->cp->get_content($f, $c['test']) ){
+                  $component_name = str::file_ext($f, true)[0];
+                  if ( $name !== $component_name ){
+                    $component_name = $name.'-'.$component_name;
+                  }
+                  $html[] = [
+                    'name' => $component_name,
+                    'content' => $tmp
+                  ];
+                }
+              }
+            }
+            if ( !empty($html) ){
+              $codes[$i]['html'] = $html;
+            }
+            $i++;
+            break;
+          }
+        }
+      }
+
+      if ($codes) {
+        $str = '';
+        foreach ( $codes as $cd ){
+          $str .= "{name: '$cd[name]', script: function(){try{ $cd[js] } catch(e){bbn.fn.log(e.message); throw new Error('Impossible to load component $cd[name]');}}";
+          if ( !empty($cd['css']) ){
+            $str .= ', css: '.json_encode($cd['css']);
+          }
+          if ( !empty($cd['html']) ){
+            $str .= ', html: '.json_encode($cd['html']);
+          }
+          $str .= '},';
+        }
+        $code = <<<JAVASCRIPT
+
+(function(){
+  return (new Promise(function(bbn_resolve, bbn_reject){
+    setTimeout(function(){
+      bbn_resolve();
+    })
+  }))
+  $includes
+  .then(function(){
+    return bbnAddGlobalScript(function(){
+      return [$str]
+    })
+  })
+})()
+JAVASCRIPT;
+      }
+      return $code;
+    }
+  }
+
 }

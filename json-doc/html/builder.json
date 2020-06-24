@@ -33,7 +33,6 @@
             "final": false,
             "code": "function(array &$cfg)\n  {\n      $cfg['attr'] = [];\n    }\n    if ( !isset($cfg['attr']['id']) ){\n      $cfg['attr']['id'] = bbn\\str::genpwd(30, 15);\n    }\n  }",
             "startLine": 81,
-            "doc": null,
             "endLine": 88,
             "isDeprecated": false,
             "isGenerator": false,
@@ -68,7 +67,6 @@
             "final": false,
             "code": "function($cat, $item)\n  {\n    if ( bbn\\str::check_name($cat, $item) ){\n      if ( !isset(self::$specs[$cat]) &&\n              is_dir(__DIR__.'\/specs\/'.$cat) ){\n        self::$specs[$cat] = [];\n      }\n      \n      if ( isset(self::$specs[$cat]) ){\n        if ( !isset(self::$specs[$cat][$item]) &&\n                file_exists(__DIR__.'\/specs\/'.$cat.'\/'.$item.'.php') ){\n          self::$specs[$cat][$item] = include_once(__DIR__.'\/specs\/'.$cat.'\/'.$item.'.php');\n        }\n        if ( isset(self::$specs[$cat][$item]) ){\n          return self::$specs[$cat][$item];\n        }\n        self::$specs[$cat][$item] = false;\n      }\n    }\n    return false;\n  }",
             "startLine": 90,
-            "doc": null,
             "endLine": 110,
             "isDeprecated": false,
             "isGenerator": false,
@@ -112,18 +110,6 @@
             "final": false,
             "code": "function(array $cfg = NULL)\n  {\n\t\tif ( \\is_array($cfg) ){\n      $this->parameters = $cfg;\n      $this->_defaults = bbn\\x::merge_arrays($this->_defaults, $cfg);\n\t\t}\n\t\t$this->reset();\n  }",
             "startLine": 121,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$cfg",
-                        "description": "The default config for the elements"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 128,
             "isDeprecated": false,
             "isGenerator": false,
@@ -159,10 +145,6 @@
             "final": false,
             "code": "function()\n  {\n\t\t$this->_current_cfg = [];\n\t\t$this->_cfg = [];\n    $this->_root_element = false;\n    $this->_current_element = false;\n\t\tforeach ( $this->_defaults as $k => $v ){\n\t\t\t$this->_current_cfg[$k] = $v;\n\t\t}\n    return $this;\n  }",
             "startLine": 133,
-            "doc": {
-                "description": "Sets the configuration back to its default value",
-                "tags": []
-            },
             "endLine": 143,
             "isDeprecated": false,
             "isGenerator": false,
@@ -187,7 +169,6 @@
             "final": false,
             "code": "function()\n  {\n    $this->_chainable = 1;\n    return $this;\n  }",
             "startLine": 145,
-            "doc": null,
             "endLine": 149,
             "isDeprecated": false,
             "isGenerator": false,
@@ -212,7 +193,6 @@
             "final": false,
             "code": "function()\n  {\n    $this->_chainable = false;\n    return $this;\n  }",
             "startLine": 151,
-            "doc": null,
             "endLine": 155,
             "isDeprecated": false,
             "isGenerator": false,
@@ -237,11 +217,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( isset($this->_root_element) ){\n      return bbn\\str::make_readable($this->_root_element->get_config());\n    }\n\t\treturn bbn\\str::make_readable($this->_cfg);\n  }",
             "startLine": 162,
-            "doc": {
-                "description": "Returns the current configuration",
-                "params": [],
-                "return": ""
-            },
             "endLine": 168,
             "isDeprecated": false,
             "isGenerator": false,
@@ -266,7 +241,6 @@
             "final": false,
             "code": "function($cfg)\n  {\n    return $this->_chainable ? $this : $cfg;\n  }",
             "startLine": 170,
-            "doc": null,
             "endLine": 173,
             "isDeprecated": false,
             "isGenerator": false,
@@ -301,7 +275,6 @@
             "final": false,
             "code": "function($cfg)\n  {\n    if ( $this->data['db'] && isset($cfg['data']['db']) && \\is_string($cfg['data']['db']) ){\n      $cfg['data']['db'] = $this->data['db'];\n    }\n    foreach ( $cfg as $c ){\n      $this->$c['method']($c['cfg']);\n    }\n    return $this->_chainable ? $this : $this->export_config();\n  }",
             "startLine": 175,
-            "doc": null,
             "endLine": 184,
             "isDeprecated": false,
             "isGenerator": false,
@@ -336,7 +309,6 @@
             "final": false,
             "code": "function($with_js = false)\n  {\n    if ( isset($this->_root_element) ){\n      return $this->_root_element->html($with_js);\n    }\n    return '';\n  }",
             "startLine": 186,
-            "doc": null,
             "endLine": 192,
             "isDeprecated": false,
             "isGenerator": false,
@@ -371,7 +343,6 @@
             "final": false,
             "code": "function($with_ele = 1)\n  {\n    if ( isset($this->_root_element) ){\n      return $this->_root_element->script();\n    }\n    return '';\n  }",
             "startLine": 194,
-            "doc": null,
             "endLine": 200,
             "isDeprecated": false,
             "isGenerator": false,
@@ -406,18 +377,6 @@
             "final": false,
             "code": "function($opt)\n  {\n\t\t$args = \\func_get_args();\n\t\tif ( \\is_array($opt) && isset($opt[0], $this->_defaults[$opt[0]]) ){\n\t\t\t$this->_current_cfg[$opt[0]] = $opt[1];\n\t\t}\n\t\telse if ( isset($args[0], $args[1], $this->_defaults[$args[0]]) ){\n\t\t\t$this->_current_cfg[$args[0]] = $args[1];\n\t\t}\n\t\telse{\n\t\t\tthrow new InvalidArgumentException('This configuration argument is imaginary... Sorry! :)');\n\t\t}\n    return $this;\n  }",
             "startLine": 207,
-            "doc": {
-                "description": "Change an option in the current configuration - Chainable",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "array|string",
-                        "name": "$opt",
-                        "description": "Either an array with the param name and value, or 2 strings in the same order"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 220,
             "isDeprecated": false,
             "isGenerator": false,
@@ -453,7 +412,6 @@
             "final": false,
             "code": "function($ele)\n  {\n    if ( $this->_current_element ){\n      $this->_current_element->append($ele);\n    }\n    return $this;\n  }",
             "startLine": 223,
-            "doc": null,
             "endLine": 229,
             "isDeprecated": false,
             "isGenerator": false,
@@ -488,7 +446,6 @@
             "final": false,
             "code": "function(array $cfg, $force = false)\n  {\n    $this->record('hidden', $cfg);\n    $r = [];\n    $i = 0;\n    foreach ( $cfg as $k => $v ){\n      $r[$i] = $this->input([\n          'field' => 'hidden',\n          'attr' => [\n              'name' => $k,\n              'value' => $v\n          ]\n      ], 1);\n      $this->append($r[$i]);\n      $i++;\n    }\n    return $this->_chainable && !$force ? $this : [$label, $container];\n  }",
             "startLine": 231,
-            "doc": null,
             "endLine": 248,
             "isDeprecated": false,
             "isGenerator": false,
@@ -532,7 +489,6 @@
             "final": false,
             "code": "function($cfg, $force = false)\n  {\n    $this->record('label_input', $cfg);\n    $ele = $this->input($cfg);\n    $label = $this->label($ele->get_config());\n    $container = new element([\n        'tag' => 'div',\n        'attr' => [\n            'class' => self::$field_class\n        ]\n    ]);\n    $container->append($ele);\n\n    $this->append($label)->append($container);\n\n    return $this->_chainable && !$force ? $this : [$label, $container];\n  }",
             "startLine": 249,
-            "doc": null,
             "endLine": 265,
             "isDeprecated": false,
             "isGenerator": false,
@@ -576,7 +532,6 @@
             "final": false,
             "code": "function($cfg, $force = false)\n  {\n    $this->record('central_input', $cfg);\n    $ele = $this->input($cfg);\n    $container = new element([\n        'tag' => 'div',\n        'attr' => [\n            'class' => self::$space_class.' bbn-c'\n        ]\n    ]);\n    $container->append($ele);\n    $this->append($container);\n    return $this->_chainable && !$force ? $this : $container;\n  }",
             "startLine": 267,
-            "doc": null,
             "endLine": 280,
             "isDeprecated": false,
             "isGenerator": false,
@@ -620,7 +575,6 @@
             "final": false,
             "code": "function(array $cfg, $force = false)\n  {\n    $this->record('fake_label', $cfg);\n    $ele = new element($cfg);\n    $label = $this->label($cfg);\n    $container = new element([\n        'tag' => 'div',\n        'attr' => [\n            'class' => self::$field_class\n        ]\n    ]);\n    $container->append($ele);\n    $this->append($label)->append($container);\n    return $this->_chainable && !$force ? $this : [$label, $container];\n  }",
             "startLine": 282,
-            "doc": null,
             "endLine": 296,
             "isDeprecated": false,
             "isGenerator": false,
@@ -664,7 +618,6 @@
             "final": false,
             "code": "function($cfg = NULL, $force = false)\n  {\n    $this->record('space', $cfg);\n    if ( !\\is_null($cfg) ){\n      if ( \\is_string($cfg) ){\n        $cfg = [\n            'text' => $cfg\n        ];\n      }\n    }\n    if ( !\\is_array($cfg) ){\n      $cfg = [];\n    }\n    $cfg['tag'] = 'div';\n    if ( !isset($cfg['attr']) ){\n      $cfg['attr'] = [];\n    }\n    $cfg['attr']['class'] = self::$space_class;\n    if ( !isset($cfg['text']) && !isset($cfg['content']) ){\n      $cfg['content'] = '&nbsp;';\n    }\n    $space = new element($cfg);\n    $this->append($space);\n    return $this->_chainable && !$force ? $this : $space;\n  }",
             "startLine": 298,
-            "doc": null,
             "endLine": 322,
             "isDeprecated": false,
             "isGenerator": false,
@@ -708,7 +661,6 @@
             "final": false,
             "code": "function($cfg, $force = false)\n  {\n    $cont = new element('div');\n    $ele = $this->button($cfg, 1);\n    \/\/ Submit by default!\n    if ( $this->_root_element && !\\is_string($ele->attr('type')) ){\n      $ele->attr('type', 'submit');\n    }\n    $cont->add_class(self::$field_class)->append($ele);\n    $label = $this->label(' ');\n    $this->append($label)->append($cont);\n    return $this->_chainable && !$force ? $this : [$label, $cont];\n  }",
             "startLine": 324,
-            "doc": null,
             "endLine": 336,
             "isDeprecated": false,
             "isGenerator": false,
@@ -752,7 +704,6 @@
             "final": false,
             "code": "function($cfg)\n  {\n    $this->record('form', $cfg);\n    $e = new form($cfg, $force=false);\n    $this->_root_element =& $e;\n    $this->_current_element =& $e;\n    return $this->_chainable && !$force ? $this : $this->_root_element;\n  }",
             "startLine": 338,
-            "doc": null,
             "endLine": 345,
             "isDeprecated": false,
             "isGenerator": false,
@@ -787,7 +738,6 @@
             "final": false,
             "code": "function($title = NULL, $force = false)\n  {\n    $this->record('fieldset', $title);\n    if ( \\is_array($title) ){\n\n      $title['tag'] = 'fieldset';\n      if ( isset($title['legend']) ){\n        $legend_txt = $title['legend'];\n        unset($title['legend']);\n      }\n      $fieldset = new element($title);\n      $fieldset->add_class(\"bbn-section bbn-widget\");\n\n      if ( isset($legend_txt) ){\n        $legend = new element('legend');\n        $legend->text($legend_txt);\n        $fieldset->append($legend);\n      }\n    }\n    else{\n\n      $fieldset = new element('fieldset');\n      $fieldset->add_class(\"bbn-section bbn-widget\");\n\n      if ( !\\is_null($title) ){\n        $legend = new element('legend');\n        $legend->text($title);\n        $fieldset->append($legend);\n      }\n    }\n    if ( $this->_root_element ){\n      $this->_root_element->append($fieldset);\n    }\n    else{\n      $this->_root_element =& $fieldset;\n    }\n    $this->_current_element =& $fieldset;\n    return $this->_chainable && !$force ? $this : $fieldset;\n  }",
             "startLine": 347,
-            "doc": null,
             "endLine": 385,
             "isDeprecated": false,
             "isGenerator": false,
@@ -831,7 +781,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( $this->_current_element->tag === 'fieldset' ){\n      $this->_current_element =& $this->_root_element;\n    }\n    return $this;\n  }",
             "startLine": 387,
-            "doc": null,
             "endLine": 393,
             "isDeprecated": false,
             "isGenerator": false,
@@ -856,7 +805,6 @@
             "final": false,
             "code": "function($cfg)\n  {\n    if ( isset($cfg['null']) && $cfg['null'] ){\n      $label = [\n          'tag' => 'div',\n          'attr' => [\n              'class' => self::$label_class\n          ],\n          'content' => []\n      ];\n      $tmp = [\n          'tag' => 'label',\n          'text' => isset($cfg['label']) ? $cfg['label'] : ' '\n      ];\n      if ( isset($cfg['attr']['id']) ){\n        $tmp['attr'] = [\n            'for' => $cfg['attr']['id']\n        ];\n      }\n      array_push($label['content'], $tmp);\n      \n      $label_content = [\n          'tag' => 'div',\n          'css' => [\n              'display' => 'block',\n              'position' => 'absolute',\n              'right' => '0px',\n              'top' => '3px'\n          ],\n          'content' => [\n              [\n                  'tag' => 'span',\n                  'text' => 'Null?  '\n              ],\n              [\n                  'tag' => 'input',\n                  'attr' => [\n                      'id' => bbn\\str::genpwd(),\n                      'type' => 'checkbox',\n                  ],\n                  'events' => [\n                      'click' => 'function(e){\n                        $(\"#'.$cfg['attr']['id'].'\").prop(\"disabled\", $(this).is(\":checked\"));'.\n                      ( isset($cfg['widget']['name']) ? '\n                        bbn.fn.log(\"'.$cfg['widget']['name'].'\");\n                        try{\n                          $(\"#'.$cfg['attr']['id'].'\").'.$cfg['widget']['name'].'(\"enable\", (!$(this).is(\":checked\")));\n                        }\n                        catch(err){\n                          bbn.fn.log(err);\n                        }' : '' ).\n                      '\n                      }'\n                  ]\n              ]\n          ]\n      ];\n      if ( empty($cfg['attr']['value']) ){\n        $label_content['content'][1]['attr']['checked'] = true;\n      }\n      \n      array_push($label['content'], $label_content);\n    }\n    else{\n      $label = [\n          'tag' => 'label',\n          'text' => (isset($cfg['label']) ? $cfg['label'] : ' '),\n          'attr' => [\n              'class' => self::$label_class\n          ]\n      ];\n      if ( isset($cfg['attr']['id']) ){\n        $label['attr']['for'] = $cfg['attr']['id'];\n      }\n    }\n    return new element($label);\n  }",
             "startLine": 395,
-            "doc": null,
             "endLine": 471,
             "isDeprecated": false,
             "isGenerator": false,
@@ -891,18 +839,6 @@
             "final": false,
             "code": "function($cfg = [])\n  {\n\t\tif ( \\is_array($cfg) && isset($cfg['attr']['name']) ){\n      \n      self::give_id($cfg);\n      if ( isset($cfg['field']) ){\n        $cfg = bbn\\x::merge_arrays(self::specs('fields', $cfg['field']), $cfg);\n      }\n      \n      \/*\n      if ( !isset($cfg['tag']) ){\n        $cfg['tag'] = 'input';\n      }\n      if ( !isset($cfg['attr']['type']) ){\n        $cfg['attr']['type'] = 'text';\n      }\n      *\/\n\n      if ( isset($cfg['data']) ){\n        if ( isset($cfg['data']['sql'], $this->_current_cfg['data']['db']) ){\n          $db =& $this->_current_cfg['data']['db'];\n          if ( !isset($cfg['widget']['options']['dataSource']) ){\n            $cfg['widget']['options']['dataSource'] = [];\n          }\n          $count = ( $r = $db->query($cfg['data']['sql']) ) ? $r->count() : 0;\n          if ( $count <= self::max_values_at_once ){\n            if ( $ds = $db->get_irows($cfg['data']['sql']) ){\n              foreach ( $ds as $d ){\n                if ( \\count($d) > 1 ){\n                  array_push($cfg['widget']['options']['dataSource'], [\n                      'value' => $d[0],\n                      'text' => $d[1]\n                  ]);\n                }\n                else{\n                  array_push($cfg['widget']['options']['dataSource'], $d[0]);\n                }\n              }\n            }\n          }\n          else{\n            $cfg['field'] = 'autocomplete';\n          }\n        }\n        else if ( \\is_array($cfg['data']) && (\\count($cfg['data']) > 0) ){\n          if ( isset($cfg['data'][0]) ){\n            $cfg['widget']['options']['dataSource'] = $cfg['data'];\n          }\n          else{\n            $cfg['widget']['options']['dataSource'] = [];\n            foreach ( $cfg['data'] as $k => $v ){\n              array_push($cfg['widget']['options']['dataSource'], [\n                  'value' => $k,\n                  'text' => $v\n              ]);\n            }\n          }\n        }\n        if ( isset($cfg['widget']['options']['dataSource'][0]['text']) ){\n          $cfg['widget']['options']['dataTextField'] = 'text';\n          $cfg['widget']['options']['dataValueField'] = 'value';\n        }\n\t\t\t}\n\n      if ( \\is_array($cfg) ){\n        \/\/ Size calculation\n        if ( isset($cfg['attr']['maxlength']) && !isset($cfg['attr']['size']) ){\n          if ( $cfg['attr']['maxlength'] <= 20 ){\n            $cfg['attr']['size'] = (int)$cfg['attr']['maxlength'];\n          }\n        }\n        if ( isset($cfg['attr']['size'], $cfg['attr']['minlength']) && $cfg['attr']['size'] < $cfg['attr']['minlength']){\n          $cfg['attr']['size'] = (int)$cfg['attr']['minlength'];\n        }\n        \n        \n\n\n        $cfg = array_filter($cfg, function($a){\n          return !( \\is_array($a) && \\count($a) === 0 );\n        });\n\n      }\n      \n      if ( isset($cfg['null']) && $cfg['null'] ){\n        if ( empty($cfg['attr']['value']) ){\n          $cfg['attr']['value'] = null;\n          $cfg['attr']['disabled'] = true;\n          if ( isset($cfg['widget']) ){\n            if ( !isset($cfg['script']) ){\n              $cfg['script'] = '';\n            }\n            \/*\n            $cfg['script'] .= 'if ( $(\"#'.$cfg['attr']['id'].'\").data(\"'.$cfg['widget']['name'].'\") ){\n              $(\"#'.$cfg['attr']['id'].'\").data(\"'.$cfg['widget']['name'].'\").enable(false);\n            }\n            else if ( $(\"#'.$cfg['attr']['id'].'\").'.$cfg['widget']['name'].' ){\n              $(\"#'.$cfg['attr']['id'].'\").'.$cfg['widget']['name'].'(\"enable\", false);\n            }';\n             * \n             *\/\n          }\n        }\n      }\n      $t = new input($cfg);\n      return $t;\n\t\t}\n\t\treturn false;\n  }",
             "startLine": 478,
-            "doc": {
-                "description": "Generates a whole input configuration array by combining the passed and default configurations",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$cfg",
-                        "description": "The input's config"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 586,
             "isDeprecated": false,
             "isGenerator": false,
@@ -938,7 +874,6 @@
             "final": false,
             "code": "function($cfg, $force = false)\n  {\n    if ( \\is_string($cfg) ){\n      $cfg = [\n          'text' => $cfg\n      ];\n      if ( !isset($cfg['attr']) ){\n        $cfg['attr'] = [];\n      }\n    }\n    if ( !isset($cfg['attr']['class']) ){\n      $cfg['attr']['class'] = self::$button_class;\n    }\n    else{\n      $cfg['attr']['class'] .= ' '.self::$button_class;\n    }\n    self::give_id($cfg);\n    $cfg['tag'] = 'button';\n    $e = new element($cfg);\n    return $this->_chainable && !$force ? $this : $e;\n  }",
             "startLine": 588,
-            "doc": null,
             "endLine": 608,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1012,7 +947,7 @@
                     {
                         "tag": "var",
                         "type": "array",
-                        "description": "Kendo Widgets' function names and config properties\n@todo Think about moving this somewhere so we can change widget API"
+                        "description": "Kendo Widgets' function names and config properties\n @todo Think about moving this somewhere so we can change widget API"
                     }
                 ]
             },
@@ -1060,12 +995,57 @@
             "value": "bbn-button"
         }
     },
-    "staticProperties": null,
-    "constants": null,
+    "staticProperties": {
+        "types": [
+            "text",
+            "password",
+            "radio",
+            "checkbox",
+            "hidden",
+            "file",
+            "color",
+            "date",
+            "datetime",
+            "email",
+            "datetime-local",
+            "email",
+            "month",
+            "number",
+            "range",
+            "search",
+            "tel",
+            "time",
+            "url",
+            "week"
+        ],
+        "widgets": {
+            "calendar": "kendoCalendar",
+            "date": "kendoDatePicker",
+            "autocomplete": "kendoAutoComplete",
+            "dropdown": "kendoDropDownList",
+            "combo": "kendoComboBox",
+            "numeric": "kendoNumericTextBox",
+            "time": "kendoTimePicker",
+            "datetime": "kendoDateTimePicker",
+            "slider": "kendoSlider",
+            "rangeslider": "kendoRangeSlider",
+            "upload": "kendoUpload",
+            "multivalue": "multivalue",
+            "editor": "ckeditor"
+        },
+        "specs": {
+            "widgets": []
+        },
+        "label_class": "bbn-form-label",
+        "space_class": "bbn-line-breaker",
+        "field_class": "bbn-form-field",
+        "button_class": "bbn-button"
+    },
+    "constants": [],
     "numMethods": 25,
     "numProperties": 7,
-    "numConstants": 0,
-    "numStaticProperties": 0,
+    "numConstants": 1,
+    "numStaticProperties": 7,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [],
@@ -1143,5 +1123,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\html",
-    "shortName": "builder"
+    "shortName": "builder",
+    "summary": "This class generates html form elements with a predefined configuration"
 }

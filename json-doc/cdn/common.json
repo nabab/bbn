@@ -37,12 +37,32 @@
             }
         }
     },
-    "staticProperties": null,
+    "staticProperties": {
+        "types": {
+            "js": [
+                "js",
+                "coffee"
+            ],
+            "css": [
+                "css",
+                "less",
+                "sass",
+                "scss"
+            ],
+            "html": [
+                "html",
+                "php"
+            ],
+            "lang": [
+                "lang"
+            ]
+        }
+    },
     "constants": null,
     "numMethods": 0,
     "numProperties": 1,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 1,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [],
@@ -80,5 +100,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\cdn",
-    "shortName": "common"
+    "shortName": "common",
+    "summary": ""
 }

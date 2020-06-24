@@ -11,7 +11,7 @@
     "interfaces": [],
     "fileName": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/bbn\/src\/bbn\/file\/system.php",
     "startLine": 24,
-    "endLine": 1362,
+    "endLine": 1349,
     "contentConstructor": {
         "file": "bbn\\file\\system",
         "returns": null
@@ -27,24 +27,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($type = 'local', array $cfg = [])\n  {\n    switch ( $type ){\n      case 'ssh':\n        if ( $this->_connect_ssh($cfg) ){\n          $this->mode = 'ssh';\n          $this->prefix = 'ssh2.sftp:\/\/'.$this->obj;\n        }\n        break;\n      case 'ftp':\n        if ( $this->_connect_ftp($cfg) ){\n          $this->mode = 'ftp';\n          $this->prefix = 'ftp:\/\/'.$cfg['user'].':'.$this->_get_password($cfg).'@'.$cfg['host'].'\/';\n        }\n        break;\n      case 'nextcloud':\n        if ( isset($cfg['host'], $cfg['user'], $cfg['pass']) ){\n          $this->mode = 'nextcloud';\n          $this->obj = new \\bbn\\api\\nextcloud($cfg);\n        }\n        break;\n      case 'local':\n        $this->mode = $type;\n        $this->current = getcwd();\n        break;\n    }\n  }",
-            "startLine": 679,
-            "doc": {
-                "description": "system constructor.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$type"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$cfg"
-                    }
-                ],
-                "return": ""
-            },
-            "endLine": 705,
+            "startLine": 666,
+            "endLine": 692,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -86,9 +70,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n      @fclose($this->cn);\n    }\n  }",
-            "startLine": 707,
-            "doc": null,
-            "endLine": 711,
+            "startLine": 694,
+            "endLine": 698,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -111,19 +94,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path)\n  {\n    if ( ($path === '.') || ($path === '.\/') ){\n      $path = '';\n    }\n    while ( $path && (substr($path, -1) === '\/') ){\n      $path = substr($path, 0, strlen($path) - 1);\n    }\n    return $path;\n  }",
-            "startLine": 717,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$path"
-                    }
-                ],
-                "return": ""
-            },
-            "endLine": 726,
+            "startLine": 704,
+            "endLine": 713,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -158,19 +130,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path)\n  {\n    $path = $this->clean_path($path);\n    if ( $this->mode === 'nextcloud' ){\n      return $this->obj->get_real_path($path);\n    }\n    else {\n      return $this->prefix.(\n      strpos($path, '\/') === 0 ?\n        $path :\n        (\n          ($this->current ? $this->current.($path ? '\/' : '') : '').\n          (\n          substr($path, -1) === '\/' ?\n            substr($path, 0, -1) :\n            $path\n          )\n        )\n      );\n    }\n  }",
-            "startLine": 732,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$path"
-                    }
-                ],
-                "return": ""
-            },
-            "endLine": 752,
+            "startLine": 719,
+            "endLine": 739,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -205,25 +166,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($file, $is_absolute = true)\n  {\n    \/\/ The full path without the obj prefix, and if it's not absolute we remove the initial slash\n    if ( $this->mode ===  'nextcloud' ){\n      $file = $this->obj->get_system_path($file, $is_absolute);\n    }\n    else {\n      $file = substr($file, strlen($this->prefix) + ($is_absolute ? 0 : 1));\n      if ( !$is_absolute && $this->current ){\n        $file = substr($file, strlen($this->current));\n      }\n    }\n    return $file;\n  }",
-            "startLine": 759,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$file"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "bool",
-                        "name": "$is",
-                        "description": "absolute"
-                    }
-                ],
-                "return": ""
-            },
-            "endLine": 772,
+            "startLine": 746,
+            "endLine": 759,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -268,13 +212,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->mode;\n  }",
-            "startLine": 777,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
-            "endLine": 780,
+            "startLine": 764,
+            "endLine": 767,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -300,13 +239,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->current;\n  }",
-            "startLine": 785,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
-            "endLine": 788,
+            "startLine": 772,
+            "endLine": 775,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -332,13 +266,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n  }",
-            "startLine": 793,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
-            "endLine": 795,
+            "startLine": 780,
+            "endLine": 782,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -361,40 +290,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path = NULL, $including_dirs = false, $hidden = false, $filter = NULL, $detailed = '')\n  {\n    if ( $this->check() && $this->is_dir($path) ){\n      if ( $this->mode !== 'nextcloud' ){\n        $is_absolute = strpos($path, '\/') === 0;\n        $fs =& $this;\n        clearstatcache();\n        $type = $including_dirs ? 'both' : 'file';\n        return array_map(function($a)use($is_absolute, $fs, $detailed){\n          if ( $detailed ){\n            $a['name'] = $fs->get_system_path($a['name'], $is_absolute);\n            return $a;\n          }\n          return $fs->get_system_path($a, $is_absolute);\n        }, $this->_get_items($this->get_real_path($path), $filter ?: $type, $hidden, $detailed));\n      }\n      else {\n        return $this->obj->get_files($path, $including_dirs, $hidden, $filter, $detailed);\n      }\n    }\n    return null;\n  }",
-            "startLine": 805,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string|null",
-                        "name": "$path"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "bool",
-                        "name": "$including",
-                        "description": "dirs"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "bool",
-                        "name": "$hidden"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string|callable|null",
-                        "name": "$filter"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$detailed"
-                    }
-                ],
-                "return": ""
-            },
-            "endLine": 826,
+            "startLine": 792,
+            "endLine": 813,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -467,29 +364,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path = '', $hidden = false, $detailed = '')\n  {\n    if ( $this->check() && $this->is_dir($path) ){\n      $is_absolute = strpos($path, '\/') === 0;\n      $fs =& $this;\n      clearstatcache();\n      return array_map(function ($a) use ($is_absolute, $fs, $detailed){\n        if ( $detailed ){\n          $a['name'] = $fs->get_system_path($a['name'], $is_absolute);\n          return $a;\n        }\n        return $fs->get_system_path($a, $is_absolute);\n      }, $this->_get_items($this->get_real_path($path), 'dir', $hidden, $detailed));\n    }\n    return null;\n  }",
-            "startLine": 833,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$path"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "bool",
-                        "name": "$hidden"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$detailed"
-                    }
-                ],
-                "return": ""
-            },
-            "endLine": 848,
+            "startLine": 820,
+            "endLine": 835,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -543,23 +419,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path)\n  {\n    if ($this->check()) {\n      while ( strpos($path, '..\/') ===  0 ){\n        $tmp = dirname($this->current);\n        if ( $tmp !== $this->current ){\n          $path = substr($path, 3);\n        }\n        else {\n          break;\n        }\n      }\n      if ( isset($tmp) ){\n        $path = $tmp.$path;\n      }\n      if (($p = $this->get_real_path($path)) && \\is_dir($p)) {\n        $this->current = $this->clean_path($path);\n        return true;\n      }\n    }\n    return false;\n  }",
-            "startLine": 855,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$path"
-                    }
-                ],
-                "return": "",
-                "todo": {
-                    "tag": "todo",
-                    "text": "Nextcloud"
-                }
-            },
-            "endLine": 876,
+            "startLine": 842,
+            "endLine": 863,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -594,19 +455,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path)\n  {\n    if ( $this->check() ){\n      clearstatcache();\n      $file = $this->get_real_path($path);\n      if ( $file ){\n        return $this->_exists($file);\n      }\n    }\n    return false;\n  }",
-            "startLine": 882,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$path"
-                    }
-                ],
-                "return": ""
-            },
-            "endLine": 892,
+            "startLine": 869,
+            "endLine": 879,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -641,19 +491,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path)\n  {\n    return $this->check() && $this->_is_file($this->get_real_path($path));\n  }",
-            "startLine": 898,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$path"
-                    }
-                ],
-                "return": ""
-            },
-            "endLine": 901,
+            "startLine": 885,
+            "endLine": 888,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -688,19 +527,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path)\n  {\n    return $this->check() && $this->_is_dir($this->get_real_path($path));\n  }",
-            "startLine": 907,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$path"
-                    }
-                ],
-                "return": ""
-            },
-            "endLine": 910,
+            "startLine": 894,
+            "endLine": 897,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -735,24 +563,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path, $hidden = false, $detailed = '')\n  {\n    if ( $this->check() && $this->is_dir($path) ){\n      clearstatcache();\n      $is_absolute = strpos($path, '\/') === 0;\n      $fs =& $this;\n      return array_map(function($a)use($is_absolute, $fs, $detailed){\n        if ( $detailed ){\n          $a['name'] = $fs->get_system_path($a['name'], $is_absolute);\n          return $a;\n        }\n        return $fs->get_system_path($a, $is_absolute);\n      }, $this->_scand($this->get_real_path($path), null, $hidden, $detailed));\n    }\n    return null;\n  }",
-            "startLine": 917,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$path"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "bool",
-                        "name": "$hidden"
-                    }
-                ],
-                "return": ""
-            },
-            "endLine": 932,
+            "startLine": 904,
+            "endLine": 919,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -806,34 +618,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path = '', $filter = NULL, $hidden = false, $detailed = '')\n  {\n    if ( $this->check() && $this->is_dir($path) ){\n      clearstatcache();\n      $is_absolute = strpos($path, '\/') === 0;\n      $fs =& $this;\n      return array_map(function($a)use($is_absolute, $fs, $detailed){\n        if ( $detailed ){\n          $a['name'] = $fs->get_system_path($a['name'], $is_absolute);\n          return $a;\n        }\n        return $fs->get_system_path($a, $is_absolute);\n      }, $this->_scan($this->get_real_path($path), $filter, $hidden, $detailed));\n    }\n    return null;\n  }",
-            "startLine": 941,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$path"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string|callable|null",
-                        "name": "$filter"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "bool",
-                        "name": "$hidden"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$detailed"
-                    }
-                ],
-                "return": ""
-            },
-            "endLine": 956,
+            "startLine": 928,
+            "endLine": 943,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -896,24 +682,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($dir, $chmod = 493)\n  {\n    if ( $this->check() ){\n      if ( !($real = $this->get_real_path($dir)) ){\n        return false;\n      }\n      clearstatcache();\n      if ( $this->_mkdir($real, $chmod, true) || $this->_is_dir($real)){\n        return $this->get_system_path($real);\n      }\n    }\n    return null;\n  }",
-            "startLine": 963,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$dir"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$chmod"
-                    }
-                ],
-                "return": ""
-            },
-            "endLine": 975,
+            "startLine": 950,
+            "endLine": 962,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -958,29 +728,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($dir, $chmod = 493, $recursive = false)\n  {\n    if ( $this->mode === 'nextcloud' ){\n      return $this->obj->mkdir($dir);\n    }\n    if ( $this->check() ){\n      if ( !$dir ){\n        return false;\n      }\n      clearstatcache();\n      $real = $this->get_real_path($dir);\n      return $this->_mkdir($real, $chmod, $recursive);\n    }\n    return null;\n  }",
-            "startLine": 983,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$dir"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$chmod"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "bool",
-                        "name": "$recursive"
-                    }
-                ],
-                "return": ""
-            },
-            "endLine": 997,
+            "startLine": 970,
+            "endLine": 984,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1034,33 +783,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($file, $content, $append = false)\n  {\n    $path = dirname($file);\n    if ( $this->check() && $this->is_dir($path) ){\n      $real = $this->get_real_path($path).'\/';\n      if ( $append && $this->exists($file) ){\n        return (bool)file_put_contents($real.basename($file), $content, FILE_APPEND);\n      }\n      else{\n        return (bool)file_put_contents($real.basename($file), $content);\n      }\n    }\n    return false;\n  }",
-            "startLine": 1006,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$file"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$content"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "bool",
-                        "name": "$append"
-                    }
-                ],
-                "return": "",
-                "todo": {
-                    "tag": "todo",
-                    "text": "Nextcloud"
-                }
-            },
-            "endLine": 1019,
+            "startLine": 993,
+            "endLine": 1006,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1113,19 +837,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($file)\n  {\n    if ( $this->check() && $this->exists($file) ){\n      if ( $this->mode === 'nextcloud' ){\n        return $this->obj->get_contents($file);\n      }\n      else{\n        $real = $this->get_real_path($file);\n        return file_get_contents($real);\n      }\n    }\n    return null;\n  }",
-            "startLine": 1025,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$file"
-                    }
-                ],
-                "return": ""
-            },
-            "endLine": 1037,
+            "startLine": 1012,
+            "endLine": 1024,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1161,24 +874,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($file, $full = true)\n  {\n    if ( $this->check() && $this->exists($file) ){\n      return $this->_delete($this->get_real_path($file), $full);\n    }\n    return false;\n  }",
-            "startLine": 1044,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$file"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "bool",
-                        "name": "$full"
-                    }
-                ],
-                "return": ""
-            },
-            "endLine": 1050,
+            "startLine": 1031,
+            "endLine": 1037,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1222,34 +919,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($source, $dest, $overwrite = false, bbn\\file\\system $fs = NULL)\n  {\n    if ( $this->check() ){\n      if ( $this->mode !== 'nextcloud' ){\n        $nfs =& $this;\n        if ( $fs ){\n          if ( !$fs->check() ){\n            return false;\n          }\n          $nfs =& $fs;\n        }\n        if ( $this->exists($source) && $nfs->exists(dirname($dest)) ){\n          if ( $nfs->exists($dest) ){\n            $dest_is_dir = $nfs->is_dir($dest);\n            if ( $dest_is_dir && $this->is_file($source) ){\n              $dest .= '\/'.basename($source);\n            }\n            else if (\n              (!$dest_is_dir && !$overwrite) ||\n              ($dest_is_dir && (count($nfs->get_files($dest, true, true)) > 0) && !$overwrite)\n            ){\n              return false;\n            }\n            else{\n              $nfs->delete($dest);\n            }\n          }\n          return $this->_copy($this->get_real_path($source), $nfs->get_real_path($dest));\n        }\n      }\n      else {\n        $this->obj->copy($source, $dest);\n      }\n    }\n    return false;\n  }",
-            "startLine": 1059,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$source"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$dest"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "bool",
-                        "name": "$overwrite"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "system|null",
-                        "name": "$fs"
-                    }
-                ],
-                "return": ""
-            },
-            "endLine": 1094,
+            "startLine": 1046,
+            "endLine": 1081,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1311,28 +982,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($file, $name, $overwrite = false)\n  {\n    if ( $this->exists($file) && (strpos($name, '\/') === false) ){\n      $path = $this->get_real_path(dirname($file));\n      if ( $this->_exists($path.'\/'.$name) && (!$overwrite || !$this->_delete($path.'\/'.$name)) ){\n        return false;\n      }\n      return $this->_rename($path.'\/'.basename($file), $path.'\/'.$name);\n    }\n    return false;\n  }",
-            "startLine": 1102,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$file"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "$name"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "bool",
-                        "name": "$overwrite"
-                    }
-                ],
-                "return": ""
-            },
-            "endLine": 1112,
+            "startLine": 1089,
+            "endLine": 1099,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1385,34 +1036,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($source, $dest, $overwrite = false, bbn\\file\\system $fs = NULL)\n  {\n    if ( $this->check() && $this->exists($source) ){\n      $name = basename($source);\n      if ( $fs ){\n        if (\n          $fs->check() &&\n          $fs->is_dir($dest) &&\n          $this->copy($source, $dest.'\/'.$name, $overwrite, $fs) &&\n          $this->delete($source)\n        ){\n          return true;\n        }\n      }\n      else if ( $this->is_dir($dest) ){\n        if ( $this->exists($dest.'\/'.$name) && (!$overwrite || !$this->delete($dest.'\/'.$name)) ){\n          return false;\n        }\n        return $this->_rename($this->get_real_path($source), $this->get_real_path($dest.'\/'.$name));\n      }\n    }\n    return false;\n  }",
-            "startLine": 1122,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$source"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$dest"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "bool",
-                        "name": "$overwrite"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "system|null",
-                        "name": "$fs"
-                    }
-                ],
-                "return": ""
-            },
-            "endLine": 1144,
+            "startLine": 1109,
+            "endLine": 1131,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1474,19 +1099,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($file)\n  {\n    if ( $this->check() ){\n      if ($this->mode === 'nextcloud') {\n        return $this->obj->get_file($file);\n      }\n      if ( $this->is_file($file) ){\n        return new bbn\\file($this->get_real_path($file));\n      }\n    }\n    return null;\n  }",
-            "startLine": 1150,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$file"
-                    }
-                ],
-                "return": ""
-            },
-            "endLine": 1161,
+            "startLine": 1137,
+            "endLine": 1148,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1522,9 +1136,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($file)\n  {\n    return $this->_download($this->get_real_path($file));\n  }",
-            "startLine": 1163,
-            "doc": null,
-            "endLine": 1166,
+            "startLine": 1150,
+            "endLine": 1153,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1557,9 +1170,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path)\n  {\n    return $this->_filemtime($this->get_real_path($path));\n  }",
-            "startLine": 1168,
-            "doc": null,
-            "endLine": 1171,
+            "startLine": 1155,
+            "endLine": 1158,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1592,9 +1204,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path)\n  {\n    return $this->_filesize($this->get_real_path($path));\n  }",
-            "startLine": 1173,
-            "doc": null,
-            "endLine": 1176,
+            "startLine": 1160,
+            "endLine": 1163,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1630,9 +1241,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path)\n  {\n    if ( $this->check() ){\n      $rpath = $this->get_real_path($path);\n      \n      if ( $this->mode !== 'nextcloud' ){\n        if ( $this->_is_dir($rpath) ){\n          return $this->_dirsize($rpath);\n        }\n      }\n      else{\n        return $this->obj->get_size($rpath);\n      }\n    }\n  }",
-            "startLine": 1190,
-            "doc": null,
-            "endLine": 1204,
+            "startLine": 1177,
+            "endLine": 1191,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1668,9 +1278,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path, $hidden_is_empty = false)\n  {\n    $res = [];\n    if ( $this->is_dir($path) ){\n      foreach ( $this->get_dirs($path) as $d ){\n        if ( $rs = $this->_get_empty_dirs($this->get_real_path($d), $hidden_is_empty) ){\n          foreach ( $rs as $r ){\n            $res[] = $this->get_system_path($r);\n          }\n        }\n      }\n    }\n    return $res;\n  }",
-            "startLine": 1206,
-            "doc": null,
-            "endLine": 1219,
+            "startLine": 1193,
+            "endLine": 1206,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1714,9 +1323,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path, $hidden_is_empty = false)\n  {\n    $num = 0;\n    if ( $this->is_dir($path) ){\n      foreach ( $this->get_dirs($path) as $d ){\n        $num += $this->_delete_empty_dirs($this->get_real_path($d), $hidden_is_empty);\n      }\n    }\n    return $num;\n  }",
-            "startLine": 1221,
-            "doc": null,
-            "endLine": 1230,
+            "startLine": 1208,
+            "endLine": 1217,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1760,43 +1368,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($search, $path, $deep = false, $hidden = false, $filter = 'both')\n  {\n    if ($this->is_dir($path)) {\n      $files = $deep ? $this->scan($path, $filter) : $this->get_files($path, false, $hidden, $filter);\n      $res = [];\n      foreach ($files as $f) {\n        $r = $this->search($search, $f);\n        if ( count($r) ){\n          if (is_array($search)) {\n            foreach ($r as $s => $found) {\n              if (count($found)) {\n                if (!isset($res[$s])) {\n                  $res[$s] = [];\n                }\n                $res[$s][$f] = $found;\n              }\n            }\n\n          }\n          else {\n            $res[$f] = $r;\n          }\n        }\n      }\n      return $res;\n    }\n    else if ($this->is_file($path)) {\n      $content = $this->get_contents($path);\n      $res = [];\n      if (is_array($search)) {\n        foreach ($search as $s) {\n          $idx = 0;\n          $res[$s] = [];\n          while (($n = \\bbn\\x::indexOf($content, $s, $idx)) > -1) {\n            $res[$s][] = $n;\n            $idx = $n+strlen($s);\n          }\n        }\n      }\n      else {\n        $idx = 0;\n        while (($n = \\bbn\\x::indexOf($content, $search, $idx)) > -1) {\n          $res[] = $n;\n          $idx = $n+1;\n        }\n      }\n      return $res;\n    }\n    return null;\n    \n  }",
-            "startLine": 1241,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$search"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$path"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "boolean",
-                        "name": "$deep"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "boolean",
-                        "name": "$hidden"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$filter"
-                    }
-                ],
-                "return": "",
-                "todo": {
-                    "tag": "todo",
-                    "text": "nextcloud"
-                }
-            },
-            "endLine": 1291,
+            "startLine": 1228,
+            "endLine": 1278,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1868,9 +1441,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($path)\n  {\n      return count($s);\n    }\n    return 0;\n  }",
-            "startLine": 1293,
-            "doc": null,
-            "endLine": 1298,
+            "startLine": 1280,
+            "endLine": 1285,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1903,9 +1475,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $files, $path)\n  {\n    $success = false;\n    if ( $this->mode === 'nextcloud' ){\n      return $this->obj->upload($files, $path);   \n    }\n    else if ( $this->mode === 'local' ){\n      return $this->_upload($files, $path);  \n    }\n    else {\n      $success = false;\n    }\n    return $success;\n  }",
-            "startLine": 1300,
-            "doc": null,
-            "endLine": 1313,
+            "startLine": 1287,
+            "endLine": 1300,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1949,9 +1520,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($dir, $exclude = '', $only_dir = false, $filter = NULL, $hidden = false)\n  {\n    $r = [];\n    $dirs = self::get_dirs($dir, $hidden);\n    if ( \\is_array($dirs) ){\n      foreach ( $dirs as $d ){\n        if ( basename($d)!== $exclude){\n          $x = [\n            'name' => $d,\n            'type' => 'dir',\n            'num' => 0,\n            'items' => self::get_tree($d, $exclude, $only_dir, $filter, $hidden)\n          ];\n          $x['num'] = \\count($x['items']);\n        }\n        if ( $filter ){\n          if ( $filter($x) ){\n            $r[] = $x;\n          }\n        }\n        else{\n          $r[] = $x;\n        }\n      }\n      if ( !$only_dir ){\n        $files = self::get_files($dir, false, $hidden);\n        \n        foreach ( $files as $f ){\n          $x = [\n            'name' => $f,\n            'type' => 'file',\n            'ext' => bbn\\str::file_ext($f)\n          ];\n          if ( $filter ){\n            if ( $filter($x) ){\n              $r[] = $x;\n            }\n          }\n          else{\n            $r[] = $x;\n          }\n        }\n      }\n    }\n    return $r;\n  }",
-            "startLine": 1315,
-            "doc": null,
-            "endLine": 1360,
+            "startLine": 1302,
+            "endLine": 1347,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -2021,11 +1591,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 45,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 50,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2047,11 +1612,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 45,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 50,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -2078,11 +1638,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 56,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 61,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2104,11 +1659,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 56,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 61,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -2135,7 +1685,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 72,
-            "doc": null,
             "endLine": 74,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2157,7 +1706,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 72,
-                "doc": null,
                 "endLine": 74,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -2184,7 +1732,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 76,
-            "doc": null,
             "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2206,7 +1753,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 76,
-                "doc": null,
                 "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -2233,7 +1779,6 @@
             "final": false,
             "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
             "startLine": 80,
-            "doc": null,
             "endLine": 88,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2255,7 +1800,6 @@
                 "final": false,
                 "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
                 "startLine": 80,
-                "doc": null,
                 "endLine": 88,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -2282,22 +1826,6 @@
             "final": false,
             "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
             "startLine": 95,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$name"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$arguments"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 99,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2319,22 +1847,6 @@
                 "final": false,
                 "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
                 "startLine": 95,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "string",
-                            "name": "$name"
-                        },
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$arguments"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 99,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -2399,11 +1911,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 104,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 106,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2425,11 +1932,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 104,
-                "doc": {
-                    "description": "",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 106,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -2456,17 +1958,6 @@
             "final": false,
             "code": "function($debug)\n  {\n  }",
             "startLine": 112,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "boolean",
-                        "name": "$debug"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 114,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2488,17 +1979,6 @@
                 "final": false,
                 "code": "function($debug)\n  {\n  }",
                 "startLine": 112,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "boolean",
-                            "name": "$debug"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 114,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -2536,7 +2016,7 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": [],
     "constants": null,
     "numMethods": 43,
     "numProperties": 0,
@@ -2569,5 +2049,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\file",
-    "shortName": "system"
+    "shortName": "system",
+    "summary": "Class system"
 }

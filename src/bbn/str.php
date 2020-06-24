@@ -21,6 +21,13 @@ class str
 {
 
   /**
+   * Markdown parser if needed only one instance is created.
+   *
+   * @var ?\Parsedown
+   */
+  private static $_markdownParser = null;
+
+  /**
    * Converts any type of variable to a string.
    *
    * ```php
@@ -1428,5 +1435,20 @@ class str
     }
     $st = $quote === "'" ? self::escape_squotes($var) : self::escape_dquotes($var);
     return $quote.$st.$quote;
+  }
+
+  /**
+   * Transforms a markdown string into HTML.
+   *
+   * @param string  $st          The markdown string
+   * @param boolean $single_line If true the result will not contain paragraph or block element
+   * @return string The HTML string
+   */
+  public static function markdown2html(string $st, bool $single_line = false): string
+  {
+    if (!self::$_markdownParser) {
+      self::$_markdownParser = new \Parsedown();
+    }
+    return $single_line ? self::$_markdownParser->line($st) : self::$_markdownParser->text($st);
   }
 }

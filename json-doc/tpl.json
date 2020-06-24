@@ -23,7 +23,6 @@
             "final": false,
             "code": "function($st)\n  {\n      $dir = sys_get_temp_dir();\n      if ( !@mkdir($dir.'\/tmp') && !is_dir($dir.'\/tmp') ){\n        die('Impossible to create the template directory in '.$dir);\n      }\n      define('BBN_DATA_PATH', $dir.'\/');\n    }\n    $md5 = md5($st);\n    $file = BBN_DATA_PATH.'tmp\/tpl.'.$md5.'.php';\n    if ( file_exists($file) ){\n      return include($file);\n    }\n    $tpl = LightnCandy::compile($st, [\n      'flags' => LightnCandy::FLAG_MUSTACHELOOKUP |\n        LightnCandy::FLAG_PARENT |\n        LightnCandy::FLAG_HANDLEBARSJS |\n        LightnCandy::FLAG_ERROR_LOG\n    ]);\n    file_put_contents($file, '<?php '.$tpl.'?>');\n    return include($file);\n  }",
             "startLine": 10,
-            "doc": null,
             "endLine": 31,
             "isDeprecated": false,
             "isGenerator": false,
@@ -58,7 +57,6 @@
             "final": false,
             "code": "function($st, $data)\n  {\n      return $tpl($data);\n    }\n    return '';\n  }",
             "startLine": 33,
-            "doc": null,
             "endLine": 38,
             "isDeprecated": false,
             "isGenerator": false,
@@ -93,12 +91,15 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": {
+        "engine": null,
+        "tmp": null
+    },
     "constants": null,
     "numMethods": 2,
     "numProperties": 0,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 2,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [],
@@ -116,5 +117,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn",
-    "shortName": "tpl"
+    "shortName": "tpl",
+    "summary": ""
 }

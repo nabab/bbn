@@ -26,7 +26,6 @@
             "final": false,
             "code": "function()\n  {\n    return self::$_input;\n  }",
             "startLine": 89,
-            "doc": null,
             "endLine": 92,
             "isDeprecated": false,
             "isGenerator": false,
@@ -51,16 +50,6 @@
             "final": false,
             "code": "function($mode)\n  {\n    if (router::is_mode($mode)) {\n      $this->_mode = $mode;\n    }\n    return $this->_mode;\n  }",
             "startLine": 100,
-            "doc": {
-                "description": "Change the output mode (content-type)",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$mode"
-                    }
-                ],
-                "return": "$this->_mode"
-            },
             "endLine": 106,
             "isDeprecated": false,
             "isGenerator": false,
@@ -95,7 +84,6 @@
             "final": false,
             "code": "function($url = false)\n  {\n    if (!self::$_initiated) {\n      self::_initialize();\n      $this->_init();\n    }\n  }",
             "startLine": 151,
-            "doc": null,
             "endLine": 157,
             "isDeprecated": false,
             "isGenerator": false,
@@ -130,7 +118,6 @@
             "final": false,
             "code": "function($path)\n  {\n    $path = bbn\\x::remove_empty(explode('\/', $path));\n    if (\\count($path)) {\n      foreach ($path as $p) {\n        if ($this->_params[0] === $p) {\n          array_shift($this->_params);\n          $this->_url = substr($this->_url, \\strlen($p) + 1);\n        } else {\n          die(\"The prepath $p doesn't seem to correspond to the current path {$this->_url}\");\n        }\n      }\n    }\n    return true;\n  }",
             "startLine": 159,
-            "doc": null,
             "endLine": 173,
             "isDeprecated": false,
             "isGenerator": false,
@@ -165,11 +152,6 @@
             "final": false,
             "code": "function()\n  {\n    if (!isset($this->_cli)) {\n      $this->_cli = bbn\\x::is_cli();\n      if ($this->_cli) {\n        $opt = getopt('', ['cli']);\n        if (isset($opt['cli'])) {\n          $this->_cli = 'direct';\n        }\n      }\n    }\n    return $this->_cli;\n  }",
             "startLine": 180,
-            "doc": {
-                "description": "Returns true if called from CLI\/Cron, false otherwise",
-                "params": [],
-                "return": ""
-            },
             "endLine": 192,
             "isDeprecated": false,
             "isGenerator": false,
@@ -194,7 +176,6 @@
             "final": false,
             "code": "function()\n  {\n    return $this->_url;\n  }",
             "startLine": 194,
-            "doc": null,
             "endLine": 197,
             "isDeprecated": false,
             "isGenerator": false,
@@ -219,7 +200,6 @@
             "final": false,
             "code": "function($url, $post = false, $arguments = NULL)\n  {\n    unset($this->_params);\n    $this->set_params($url . (empty($arguments) ? '' : '\/' . implode('\/', $arguments)));\n    $this->_post = $post ?: null;\n    $this->_init();\n    $this->_url = $url;\n  }",
             "startLine": 199,
-            "doc": null,
             "endLine": 206,
             "isDeprecated": false,
             "isGenerator": false,
@@ -272,7 +252,6 @@
             "final": false,
             "code": "function()\n  {\n    return $this->_mode;\n  }",
             "startLine": 208,
-            "doc": null,
             "endLine": 211,
             "isDeprecated": false,
             "isGenerator": false,
@@ -297,7 +276,6 @@
             "final": false,
             "code": "function()\n  {\n    global $argv;\n    if ($this->is_cli()) {\n      if ($this->is_cli() === 'direct') {\n        array_shift($argv);\n      }\n      $this->_post = [];\n      if (isset($argv[1])) {\n        $this->set_params($argv[1]);\n        if (isset($argv[2])) {\n          if (!isset($argv[3]) && \\bbn\\str::is_json($argv[2])) {\n            $this->_post = json_decode($argv[2], 1);\n          } else {\n            for ($i = 2, $iMax = \\count($argv); $i < $iMax; $i++) {\n              $this->_post[] = $argv[$i];\n            }\n          }\n        }\n      }\n      return $this->_post;\n    }\n  }",
             "startLine": 213,
-            "doc": null,
             "endLine": 235,
             "isDeprecated": false,
             "isGenerator": false,
@@ -322,7 +300,6 @@
             "final": false,
             "code": "function()\n  {\n    if (!isset($this->_get)) {\n      $this->_get = [];\n      if (\\count($_GET) > 0) {\n        $this->_get = array_map(function ($a) {\n          return bbn\\str::correct_types($a);\n        }, $_GET);\n      }\n    }\n    return $this->_get;\n  }",
             "startLine": 237,
-            "doc": null,
             "endLine": 248,
             "isDeprecated": false,
             "isGenerator": false,
@@ -347,7 +324,6 @@
             "final": false,
             "code": "function()\n  {\n    if (!isset($this->_post)) {\n      if (self::$_input && \\bbn\\str::is_json(self::$_input)) {\n        $this->_post = json_decode(self::$_input, 1);\n      } else if (!empty($_POST)) {\n        $this->_post = $_POST;\n      }\n      if (!$this->_post) {\n        $this->_post = [];\n      } else {\n        $this->_has_post = true;\n        $this->_post = bbn\\str::correct_types($this->_post);\n        foreach ($this->_post as $k => $v) {\n          if (\\bbn\\x::indexOf($k, '_bbn_') === 0) {\n            if (!defined(strtoupper(substr($k, 1)))) {\n              define(strtoupper(substr($k, 1)), $v);\n            }\n            unset($this->_post[$k]);\n          }\n        }\n      }\n    }\n    return $this->_post;\n  }",
             "startLine": 280,
-            "doc": null,
             "endLine": 304,
             "isDeprecated": false,
             "isGenerator": false,
@@ -372,7 +348,6 @@
             "final": false,
             "code": "function()\n  {\n    if (!isset($this->_files)) {\n      $this->_files = [];\n      \/\/ Rebuilding the $_FILES array into $this->_files in a more logical structure\n      if (\\count($_FILES) > 0) {\n        \/\/ Some devices send multiple files with the same name\n        $names = [];\n        foreach ($_FILES as $n => $f) {\n          if (\\is_array($f['name'])) {\n            $this->_files[$n] = [];\n            foreach ($f['name'] as $i => $v) {\n              while (\\in_array($v, $names, true)) {\n                if (!isset($j)) {\n                  $j = 0;\n                }\n                $j++;\n                $file = bbn\\str::file_ext($f['name'][$i], true);\n                $v = $file[0] . '_' . $j . '.' . $file[1];\n              }\n              $this->_files[$n][] = [\n                'name' => $v,\n                'tmp_name' => $f['tmp_name'][$i],\n                'type' => $f['type'][$i],\n                'error' => $f['error'][$i],\n                'size' => $f['size'][$i],\n              ];\n              $names[] = $v;\n            }\n          } else {\n            $this->_files[$n] = $f;\n          }\n        }\n      }\n      \/* @todo Maybe something for managing PUT requests\n      else if (!empty(self::$_input) && !bbn\\str::is_json(self::$_input)) {\n        $this->_files[] = [\n          'name' => $v,\n          'tmp_name' => $f['tmp_name'][$i],\n          'type' => $f['type'][$i],\n          'error' => $f['error'][$i],\n          'size' => $f['size'][$i],\n        ];\n      }\n      *\/\n    }\n    return $this->_files;\n  }",
             "startLine": 306,
-            "doc": null,
             "endLine": 353,
             "isDeprecated": false,
             "isGenerator": false,
@@ -397,7 +372,6 @@
             "final": false,
             "code": "function()\n  {\n    return $this->_params;\n  }",
             "startLine": 355,
-            "doc": null,
             "endLine": 358,
             "isDeprecated": false,
             "isGenerator": false,
@@ -413,12 +387,15 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": {
+        "_initiated": true,
+        "_input": "{\"_bbn\":\"public\"}"
+    },
     "constants": null,
     "numMethods": 13,
     "numProperties": 0,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 2,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [],
@@ -431,7 +408,7 @@
     "isSubclassOf": false,
     "defaultProperties": {
         "_initiated": true,
-        "_input": "{\"bbn\":\"public\"}",
+        "_input": "{\"_bbn\":\"public\"}",
         "_has_post": false,
         "_params": null,
         "_mode": null,
@@ -445,5 +422,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\mvc",
-    "shortName": "environment"
+    "shortName": "environment",
+    "summary": ""
 }

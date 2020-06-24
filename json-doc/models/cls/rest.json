@@ -20,18 +20,19 @@
         "__construct": {
             "name": "__construct",
             "summary": "instantiate the class infolegale",
-            "description": "",
-            "description_parts": [],
+            "description": "*",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                }
+            ],
             "file": "bbn\\models\\cls\\rest",
             "static": false,
             "visibility": "public",
             "final": false,
             "code": "function($cfg = NULL)\n  {\n    $this->cache_init();\n    $this->cfg = $cfg;\n    if ($this->cfg['pass']) {\n      $this->authenticate();\n    }\n    else {\n      $this->_authenticated = true;\n    }\n  }",
             "startLine": 23,
-            "doc": {
-                "description": "instantiate the class infolegale",
-                "tags": []
-            },
             "endLine": 33,
             "isDeprecated": false,
             "isGenerator": false,
@@ -66,7 +67,6 @@
             "final": false,
             "code": "function()\n  {\n    return $this->_authenticated;\n  }",
             "startLine": 35,
-            "doc": null,
             "endLine": 38,
             "isDeprecated": false,
             "isGenerator": false,
@@ -90,11 +90,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 56,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 61,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -121,7 +116,6 @@
             "final": false,
             "code": "function($url, $alt_param)\n  {\n    return $this->cfg['url'] ?? null;\n  }",
             "startLine": 45,
-            "doc": null,
             "endLine": 48,
             "isDeprecated": false,
             "isGenerator": false,
@@ -165,11 +159,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 45,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 50,
             "isDeprecated": false,
             "isGenerator": false,
@@ -191,11 +180,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 45,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 50,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -222,7 +206,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 72,
-            "doc": null,
             "endLine": 74,
             "isDeprecated": false,
             "isGenerator": false,
@@ -244,7 +227,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 72,
-                "doc": null,
                 "endLine": 74,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -271,7 +253,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 76,
-            "doc": null,
             "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
@@ -293,7 +274,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 76,
-                "doc": null,
                 "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -320,7 +300,6 @@
             "final": false,
             "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
             "startLine": 80,
-            "doc": null,
             "endLine": 88,
             "isDeprecated": false,
             "isGenerator": false,
@@ -342,7 +321,6 @@
                 "final": false,
                 "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
                 "startLine": 80,
-                "doc": null,
                 "endLine": 88,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -369,22 +347,6 @@
             "final": false,
             "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
             "startLine": 95,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$name"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$arguments"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 99,
             "isDeprecated": false,
             "isGenerator": false,
@@ -406,22 +368,6 @@
                 "final": false,
                 "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
                 "startLine": 95,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "string",
-                            "name": "$name"
-                        },
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$arguments"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 99,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -486,11 +432,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 104,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 106,
             "isDeprecated": false,
             "isGenerator": false,
@@ -512,11 +453,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 104,
-                "doc": {
-                    "description": "",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 106,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -543,17 +479,6 @@
             "final": false,
             "code": "function($debug)\n  {\n  }",
             "startLine": 112,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "boolean",
-                        "name": "$debug"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 114,
             "isDeprecated": false,
             "isGenerator": false,
@@ -575,17 +500,6 @@
                 "final": false,
                 "code": "function($debug)\n  {\n  }",
                 "startLine": 112,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "boolean",
-                            "name": "$debug"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 114,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -623,7 +537,7 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": [],
     "constants": null,
     "numMethods": 10,
     "numProperties": 0,
@@ -655,5 +569,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\models\\cls",
-    "shortName": "rest"
+    "shortName": "rest",
+    "summary": ""
 }

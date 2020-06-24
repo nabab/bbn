@@ -28,17 +28,6 @@
             "final": false,
             "code": "function(bbn\\db $db)\n  {\n    $user = \\bbn\\user::get_instance();\n    $this->id_user = $user ? $user->get_id() : null;\n    if (defined('BBN_EXTERNAL_USER_ID') && ($this->id_user === BBN_EXTERNAL_USER_ID)) {\n      $this->id_user = null;\n    }\n    parent::__construct($db);\n  }",
             "startLine": 207,
-            "doc": {
-                "description": "observer constructor.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "bbn\\db",
-                        "name": "$db"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 215,
             "isDeprecated": false,
             "isGenerator": false,
@@ -60,7 +49,6 @@
                 "final": false,
                 "code": "function(bbn\\db $db)\n  {\n  }",
                 "startLine": 27,
-                "doc": null,
                 "endLine": 29,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -107,16 +95,6 @@
             "final": false,
             "code": "function($id)\n  {\n    if ( $d = $this->get($id) ){\n      $t = new bbn\\util\\timer();\n      $t->start();\n      $res = $this->_exec($d['request'], $d['params']);\n      $duration = (int)ceil($t->stop() * 1000);\n      if ( $res !== $d['result'] ){\n        $this->db->update('bbn_observers', [\n          'result' => $res,\n          'duration' => $duration\n        ], [\n          'id' => $id\n        ]);\n        return false;\n      }\n      return true;\n    }\n  }",
             "startLine": 223,
-            "doc": {
-                "description": "Confronts the current result with the one kept in database.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$id"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 241,
             "isDeprecated": false,
             "isGenerator": false,
@@ -151,17 +129,6 @@
             "final": false,
             "code": "function(array $cfg)\n  {\n    if (\n      $this->id_user &&\n      (null !== $cfg['request']) &&\n      $this->check()\n    ){\n      $t = new bbn\\util\\timer();\n      $t->start();\n      if ( is_string($cfg['request']) ){\n        $params = self::sanitize_params($cfg['params'] ?? []);\n        $request = $cfg['request'];\n      }\n      else if ( is_array($cfg['request']) ){\n        $params = null;\n        $request = $cfg['request'];\n      }\n      else{\n        return null;\n      }\n      $res = $this->_exec($request, $params);\n      $duration = (int)ceil($t->stop() * 1000);\n      if ( is_array($request) ){\n        $request = json_encode($request);\n      }\n      $id_alias = $this->_get_id($request, $params);\n      \/\/die(var_dump($id_alias, $this->db->last(), $request, $params));\n      \/\/ If it is a public observer it will be the id_alias and the main observer\n      if (\n        !$id_alias &&\n        !empty($cfg['public']) &&\n        $this->db->insert('bbn_observers', [\n          'request' => $request,\n          'params' => $params ?: null,\n          'name' => $cfg['name'] ?? null,\n          'duration' => $duration,\n          'id_user' => null,\n          'public' => 1,\n          'result' => $res\n        ])\n      ){\n        $id_alias = $this->db->last_id();\n      }\n      \/\/ Getting the ID of the observer corresponding to current user\n      if ( $id_obs = $this->_get_id_from_user($request, $params) ){\n        \/\/\n        $this->check_result($id_obs);\n        return $id_obs;\n      }\n      else if ( $id_alias ){\n        if ( $this->db->insert('bbn_observers', [\n          'id_user' => $this->id_user,\n          'public' => 0,\n          'id_alias' => $id_alias,\n          'next' => null,\n          'result' => $res\n        ]) ){\n          return $this->db->last_id();\n        }\n      }\n      else{\n        if ( $this->db->insert('bbn_observers', [\n          'request' => $request,\n          'params' => $params ?: null,\n          'name' => $cfg['name'] ?? null,\n          'duration' => $duration,\n          'id_user' => $this->id_user,\n          'public' => 0,\n          'result' => $res\n        ]) ){\n          return $this->db->last_id();\n        }\n      }\n    }\n    return null;\n  }",
             "startLine": 249,
-            "doc": {
-                "description": "Adds a new observer and returns its id or the id of an existing one.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$cfg"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 324,
             "isDeprecated": false,
             "isGenerator": false,
@@ -199,16 +166,6 @@
             "final": false,
             "code": "function($id)\n  {\n    if ( $this->check() ){\n      $d = $this->db->rselect('bbn_observers', [], [\n        'id' => $id\n      ]);\n      if ( !$d['id_alias'] ){\n        return $d;\n      }\n      if ($alias = $this->db->rselect('bbn_observers', [], [\n        'id' => $d['id_alias']\n      ])) {\n        $alias['id'] = $d['id'];\n        $alias['result'] = $d['result'];\n        $alias['id_alias'] = $d['id_alias'];\n        return $alias;\n      }\n    }\n    return null;\n  }",
             "startLine": 332,
-            "doc": {
-                "description": "Returns an observer with its alias properties if there is one (except id and result).",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$id"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 351,
             "isDeprecated": false,
             "isGenerator": false,
@@ -246,16 +203,6 @@
             "final": false,
             "code": "function($id)\n  {\n    if ( $this->check() ){\n      return $this->db->get_one(<<<MYSQL\nSELECT IFNULL(ro.`result`, o.`result`)\nFROM bbn_observers AS o\n  LEFT JOIN bbn_observers AS ro\n    ON ro.id = o.id_alias\nWHERE o.id = ?\nMYSQL\n        ,\n        hex2bin($id));\n    }\n  }",
             "startLine": 359,
-            "doc": {
-                "description": "Returns the result of an observer's request from its UID.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$id"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 372,
             "isDeprecated": false,
             "isGenerator": false,
@@ -290,18 +237,6 @@
             "final": false,
             "code": "function($id_user = NULL)\n  {\n    $field = $id_user ? 'o.id_user' : 'public';\n    $sql = <<<MYSQL\nSELECT o.id, o.id_alias,\nIFNULL(ro.request, o.request) AS request, IFNULL(ro.params, o.params) AS params,\nIFNULL(ro.id_user, o.id_user) AS id_user, IFNULL(ro.public, o.public) AS public,\nIFNULL(ro.frequency, o.frequency) AS frequency, IFNULL(ro.result, o.result) AS result,\nIFNULL(ro.next, o.next) AS next\nFROM bbn_observers AS o\n  LEFT JOIN bbn_observers AS ro\n    ON o.id_alias = ro.id\nWHERE $field = ?\nAND ((o.next < NOW() AND o.next IS NOT NULL)\nOR (ro.next < NOW() AND ro.next IS NOT NULL))\nMYSQL;\n    return $this->db->get_rows($sql, $id_user ? hex2bin($id_user) : 1);\n  }",
             "startLine": 380,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string|null",
-                        "name": "$id",
-                        "description": "user"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 397,
             "isDeprecated": false,
             "isGenerator": false,
@@ -339,17 +274,6 @@
             "final": false,
             "code": "function($id)\n  {\n    if ( property_exists($this, 'user') && $this->check() ){\n      return $this->db->delete('bbn_observers', ['id' => $id, 'id_user' => $this->user]);\n    }\n    return 0;\n  }",
             "startLine": 404,
-            "doc": {
-                "description": "Deletes the given observer for the current user",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 410,
             "isDeprecated": false,
             "isGenerator": false,
@@ -382,7 +306,7 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "results, and returns the observers to be updated (meant to be executed from a cron task), indexed by id_user."
+                    "content": "<p>results, and returns the observers to be updated (meant to be executed from a cron task), indexed by id_user.<\/p>"
                 }
             ],
             "file": "bbn\\appui\\observer",
@@ -391,11 +315,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( $this->check() ){\n      $rows = $this->db->rselect_all([\n        'table' => 'bbn_observers',\n        'fields' => ['id', 'id_user', 'request', 'params', 'result'],\n        'where' => [\n          'conditions' => [\n            [\n              'field' => 'id_alias',\n              'operator' => 'isnull'\n            ], [\n              'field' => 'next',\n              'operator' => '<',\n              'exp' => 'NOW()'\n            ]\n          ]\n        ]\n      ]);\n      $diff = [];\n      foreach ( $rows as $d ){\n        if ($this->check_observer($d)) {\n          \/\/ Aliases are the IDs of the observers aliases of the current row\n          $aliases = $this->db->rselect_all('bbn_observers', ['id', 'id_user', 'request', 'params', 'result'], ['id_alias' => $d['id']]);\n          if ( \\bbn\\str::is_json($d['request']) ){\n            $d['request'] = json_decode($d['request'], true);\n            $real_result = $this->_exec_array($d['request']);\n          }\n          else{\n            $real_result = $this->_exec($d['request'], $d['params']);\n          }\n          \/\/ If the result is different we update the table\n          if ( $real_result !== $d['result'] ){\n            echo '+';\n            $this->db->update('bbn_observers', ['result' => $real_result], ['id' => $d['id']]);\n            \/\/ And if a user is attached to the observer we add it to the result\n            if ( $d['id_user'] ){\n              if ( !isset($diff[$d['id_user']]) ){\n                $diff[$d['id_user']] = [];\n              }\n              $diff[$d['id_user']][] = [\n                'id' => $d['id'],\n                'result' => $real_result\n              ];\n            }\n            \/\/ For each alias we add the entry for the corresponding user...\n            foreach ( $aliases as $a ){\n              \/\/ ...If the result differs\n              if ( $real_result !== $a['result'] ){\n                $this->db->update('bbn_observers', ['result' => $real_result], ['id' => $a['id']]);\n                if ( !isset($diff[$a['id_user']]) ){\n                  $diff[$a['id_user']] = [];\n                }\n                $diff[$a['id_user']][] = [\n                  'id' => $a['id'],\n                  'result' => $real_result\n                ];\n              }\n            }\n          }\n        }\n        \/\/ And we update the next time of execution\n        $this->_update_next($d['id']);\n      }\n      echo '.';\n      $this->delete_old();\n      $this->db->flush();\n      if ( count($diff) ){\n        bbn\\x::dump('Returning diff!', $diff);\n        return $diff;\n      }\n      if ( ob_get_contents() ){\n        ob_end_flush();\n      }\n      return true;\n    }\n    bbn\\x::dump('Canceling observer: '.date('H:i:s Y-m-d'));\n    return false;\n  }",
             "startLine": 458,
-            "doc": {
-                "description": "Checks the observers, execute their requests if interval is reached, it will stop when it finds differences in the\nresults, and returns the observers to be updated (meant to be executed from a cron task), indexed by id_user.",
-                "params": [],
-                "return": ""
-            },
             "endLine": 536,
             "isDeprecated": false,
             "isGenerator": false,
@@ -420,11 +339,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 45,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 50,
             "isDeprecated": false,
             "isGenerator": false,
@@ -446,11 +360,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 45,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 50,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -477,11 +386,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 56,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 61,
             "isDeprecated": false,
             "isGenerator": false,
@@ -503,11 +407,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 56,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 61,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -534,7 +433,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 72,
-            "doc": null,
             "endLine": 74,
             "isDeprecated": false,
             "isGenerator": false,
@@ -556,7 +454,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 72,
-                "doc": null,
                 "endLine": 74,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -583,7 +480,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 76,
-            "doc": null,
             "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
@@ -605,7 +501,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 76,
-                "doc": null,
                 "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -632,7 +527,6 @@
             "final": false,
             "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
             "startLine": 80,
-            "doc": null,
             "endLine": 88,
             "isDeprecated": false,
             "isGenerator": false,
@@ -654,7 +548,6 @@
                 "final": false,
                 "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
                 "startLine": 80,
-                "doc": null,
                 "endLine": 88,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -681,22 +574,6 @@
             "final": false,
             "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
             "startLine": 95,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$name"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$arguments"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 99,
             "isDeprecated": false,
             "isGenerator": false,
@@ -718,22 +595,6 @@
                 "final": false,
                 "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
                 "startLine": 95,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "string",
-                            "name": "$name"
-                        },
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$arguments"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 99,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -798,11 +659,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 104,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 106,
             "isDeprecated": false,
             "isGenerator": false,
@@ -824,11 +680,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 104,
-                "doc": {
-                    "description": "",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 106,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -855,17 +706,6 @@
             "final": false,
             "code": "function($debug)\n  {\n  }",
             "startLine": 112,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "boolean",
-                        "name": "$debug"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 114,
             "isDeprecated": false,
             "isGenerator": false,
@@ -887,17 +727,6 @@
                 "final": false,
                 "code": "function($debug)\n  {\n  }",
                 "startLine": 112,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "boolean",
-                            "name": "$debug"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 114,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -935,12 +764,15 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": {
+        "path": null,
+        "time_done": false
+    },
     "constants": null,
     "numMethods": 16,
     "numProperties": 0,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 2,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [],
@@ -964,5 +796,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\appui",
-    "shortName": "observer"
+    "shortName": "observer",
+    "summary": "Class observer"
 }

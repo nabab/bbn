@@ -20,7 +20,7 @@ class compiler extends bbn\models\cls\basic
 
   public function __construct($cfg)
   {
-    $this->set_prefix();
+    $this->_set_prefix();
     $this->cfg = $cfg;
   }
 
@@ -234,7 +234,7 @@ JS;
     return strpos($css, 'url(') || (strpos($css, '@import') !== false);
   }
 
-  public function css_links(array $files, $test = false, $prepend_files = []){
+  public function css_links(array $files, $test = false, $prepend_files = [], $root = ''){
     $code = '';
     $num_files = \count($files);
     if ( $num_files ){
@@ -258,11 +258,12 @@ JS;
       }
       //die(var_dump($files, $num_files, $prepended));
       foreach ( $prepended as $prep => $arr ){
-        $dir = dirname($arr[0]).'/';
+        $dir = dirname($arr[0]);
         $files_json = [str_replace($dir, '', $prep)];
         foreach ( $arr as $ar ){
           $files_json[] = str_replace($dir, '', $ar);
         }
+        \bbn\x::log($files_json);
         $files_json = json_encode($files_json);
         $url = $this->furl.'~~~BBN~~~';
         $params = [];
@@ -309,10 +310,18 @@ JS;
       foreach ( $unprepended as $file ){
         $css = $this->get_content($file, false);
         if ( $this->has_links($css) ){
-          if ( !isset($dirs[\dirname($file)]) ){
-            $dirs[\dirname($file)] = [];
+          if ($root) {
+            if ( !isset($dirs[$root]) ){
+              $dirs[$root] = [];
+            }
+            $dirs[$root][] = substr($file, strlen($root));
           }
-          $dirs[\dirname($file)][] = basename($file);
+          else {
+            if ( !isset($dirs[\dirname($file)]) ){
+              $dirs[\dirname($file)] = [];
+            }
+            $dirs[\dirname($file)][] = basename($file);
+          }
         }
         else{
           if ( !isset($dirs['.']) ){

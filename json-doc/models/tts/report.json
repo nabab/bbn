@@ -13,12 +13,16 @@
     "contentConstructor": null,
     "methods": null,
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": {
+        "_error": null,
+        "_last_error": null,
+        "_debug": null
+    },
     "constants": null,
     "numMethods": 0,
     "numProperties": 0,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 3,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [],
@@ -37,5 +41,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\models\\tts",
-    "shortName": "report"
+    "shortName": "report",
+    "summary": ""
 }

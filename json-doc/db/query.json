@@ -41,17 +41,6 @@
             "final": false,
             "code": "function(array $values = [])\n  {\n\t\t$this->values = $values;\n\t\t$this->res = null;\n\t\treturn $this;\n  }",
             "startLine": 70,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$values"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 75,
             "isDeprecated": false,
             "isGenerator": false,
@@ -88,17 +77,6 @@
             "final": false,
             "code": "function($args = NULL)\n  {\n\t\tif ( ($this->res === null) || ($args !== null) ){\n\t\t\t$this->res = 1;\n\t\t\tif ( \\is_array($args) ){\n\t\t\t\ttry{\n\t\t\t\t\treturn parent::execute($args);\n\t\t\t\t}\n\t\t\t\tcatch ( \\PDOException $e ){\n\t\t\t\t\t$this->db->error($e);\n\t\t\t\t}\n\t\t\t}\n\t\t\telse if ( $args !== null ){\n\t\t\t\t$args = \\func_get_args();\n\t\t\t\ttry{\n\t\t\t\t\treturn parent::execute(...$args);\n\t\t\t\t}\n\t\t\t\tcatch ( \\PDOException $e ){\n\t\t\t\t\t$this->db->error($e);\n\t\t\t\t}\n\t\t\t}\n\t\t\telse{\n\t\t\t\tif ( $this->values && \\is_array($this->values) && count($this->values) ){\n          foreach ( $this->values as $i => $v ){\n            if ( bbn\\str::is_buid($v) ){\n              $this->bindValue($i+1, $v);\n            }\n            else{\n              if ( \\is_int ($v) ){\n                $param = \\PDO::PARAM_INT;\n              }\n              else if ( \\is_bool($v) ){\n                $param = \\PDO::PARAM_BOOL;\n              }\n              else if ( $v === null ){\n                $param = \\PDO::PARAM_NULL;\n              }\n              else{\n                $param = \\PDO::PARAM_STR;\n              }\n              $this->bindValue($i+1, $v, $param);\n            }\n          }\n        }\n\t\t\t\ttry{\n\t\t\t\t\treturn parent::execute();\n\t\t\t\t}\n\t\t\t\tcatch ( \\PDOException $e ){\n\t\t\t\t\t$this->db->error($e);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn null;\n  }",
             "startLine": 81,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "array|null",
-                        "name": "$args"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 134,
             "isDeprecated": false,
             "isGenerator": false,
@@ -123,7 +101,6 @@
                 "final": false,
                 "code": "",
                 "startLine": false,
-                "doc": null,
                 "endLine": false,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -170,11 +147,6 @@
             "final": false,
             "code": "function()\n  {\n\t\t$this->execute();\n\t\treturn parent::columnCount();\n  }",
             "startLine": 139,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 143,
             "isDeprecated": false,
             "isGenerator": false,
@@ -198,7 +170,6 @@
                 "final": false,
                 "code": "",
                 "startLine": false,
-                "doc": null,
                 "endLine": false,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -225,27 +196,6 @@
             "final": false,
             "code": "function($how = NULL, $orientation = NULL, $offset = NULL)\n  {\n\t  if ( $how === null ){\n\t    $how = \\PDO::FETCH_BOTH;\n    }\n\t\t$this->execute();\n\t\treturn bbn\\str::correct_types(parent::fetch($how, $orientation, $offset));\n  }",
             "startLine": 151,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$how"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$orientation"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$offset"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 158,
             "isDeprecated": false,
             "isGenerator": false,
@@ -267,7 +217,6 @@
                 "final": false,
                 "code": "",
                 "startLine": false,
-                "doc": null,
                 "endLine": false,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -350,30 +299,6 @@
             "final": false,
             "code": "function($fetch_style = 4, $fetch_argument = false, $ctor_args = false)\n  {\n\t\t$this->execute();\n\t\tif ( $ctor_args ){\n\t\t\t$res = parent::fetchAll($fetch_style,$fetch_argument,$ctor_args);\n    }\n\t\telse if ( $fetch_argument ){\n\t\t\t$res = parent::fetchAll($fetch_style,$fetch_argument);\n    }\n\t\telse{\n\t\t\t$res = parent::fetchAll($fetch_style);\n    }\n    return bbn\\str::correct_types($res);\n  }",
             "startLine": 166,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$fetch",
-                        "description": "style"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "bool",
-                        "name": "$fetch",
-                        "description": "argument"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "bool",
-                        "name": "$ctor",
-                        "description": "args"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 179,
             "isDeprecated": false,
             "isGenerator": false,
@@ -395,7 +320,6 @@
                 "final": false,
                 "code": "",
                 "startLine": false,
-                "doc": null,
                 "endLine": false,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -481,18 +405,6 @@
             "final": false,
             "code": "function($column_number = 0)\n  {\n\t\t$this->execute();\n\t\treturn bbn\\str::correct_types(parent::fetchColumn($column_number));\n  }",
             "startLine": 185,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$column",
-                        "description": "number"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 189,
             "isDeprecated": false,
             "isGenerator": false,
@@ -514,7 +426,6 @@
                 "final": false,
                 "code": "",
                 "startLine": false,
-                "doc": null,
                 "endLine": false,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -562,24 +473,6 @@
             "final": false,
             "code": "function($class_name = 'stdClass', $ctor_args = [])\n  {\n\t\t$this->execute();\n\t\treturn bbn\\str::correct_types(parent::fetchObject($class_name,$ctor_args));\n  }",
             "startLine": 196,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$class",
-                        "description": "name"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$ctor",
-                        "description": "args"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 200,
             "isDeprecated": false,
             "isGenerator": false,
@@ -601,7 +494,6 @@
                 "final": false,
                 "code": "",
                 "startLine": false,
-                "doc": null,
                 "endLine": false,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -668,11 +560,6 @@
             "final": false,
             "code": "function()\n  {\n\t\t$this->execute();\n\t\treturn parent::rowCount();\n  }",
             "startLine": 205,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 209,
             "isDeprecated": false,
             "isGenerator": false,
@@ -696,7 +583,6 @@
                 "final": false,
                 "code": "",
                 "startLine": false,
-                "doc": null,
                 "endLine": false,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -723,17 +609,6 @@
             "final": false,
             "code": "function($column = 0)\n  {\n\t\t$this->execute();\n\t\treturn parent::getColumnMeta($column);\n  }",
             "startLine": 215,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$column"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 219,
             "isDeprecated": false,
             "isGenerator": false,
@@ -757,7 +632,6 @@
                 "final": false,
                 "code": "",
                 "startLine": false,
-                "doc": null,
                 "endLine": false,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -804,11 +678,6 @@
             "final": false,
             "code": "function()\n  {\n\t\t$this->execute();\n\t\treturn parent::nextRowset();\n  }",
             "startLine": 224,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 228,
             "isDeprecated": false,
             "isGenerator": false,
@@ -832,7 +701,6 @@
                 "final": false,
                 "code": "",
                 "startLine": false,
-                "doc": null,
                 "endLine": false,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -859,11 +727,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( !$this->write ){\n\t\t\treturn $this->fetch(\\PDO::FETCH_ASSOC) ?: null;\n    }\n\t\treturn null;\n  }",
             "startLine": 233,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 239,
             "isDeprecated": false,
             "isGenerator": false,
@@ -891,11 +754,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( !$this->write ){\n\t\t\t$r = $this->fetchAll(\\PDO::FETCH_ASSOC);\n\t\t\treturn $r === false ? null : $r;\n    }\n\t\treturn null;\n  }",
             "startLine": 244,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 251,
             "isDeprecated": false,
             "isGenerator": false,
@@ -923,11 +781,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( !$this->write ){\n      return $this->fetch(\\PDO::FETCH_NUM) ?: null;\n    }\n    return null;\n  }",
             "startLine": 256,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 262,
             "isDeprecated": false,
             "isGenerator": false,
@@ -955,11 +808,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( !$this->write ){\n      return $this->fetchAll(\\PDO::FETCH_NUM);\n    }\n    return null;\n  }",
             "startLine": 267,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 273,
             "isDeprecated": false,
             "isGenerator": false,
@@ -987,11 +835,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( !$this->write ){\n      $r = [];\n\t\t\t$ds = $this->fetchAll(\\PDO::FETCH_ASSOC);\n\t\t\tforeach ( $ds as $d ){\n\t\t\t\tforeach ( $d as $k => $v ){\n\t\t\t\t\tif ( !isset($r[$k]) ){\n\t\t\t\t\t\t$r[$k] = [];\n          }\n\t\t\t\t\t$r[$k][] = $v;\n\t\t\t\t}\n\t\t\t}\n      return $r;\n    }\n    return null;\n  }",
             "startLine": 278,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 294,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1019,11 +862,6 @@
             "final": false,
             "code": "function()\n  {\n\t\treturn $this->get_object(...\\func_get_args());\n  }",
             "startLine": 299,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 302,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1051,11 +889,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( !$this->write ){\n      return $this->fetch(\\PDO::FETCH_OBJ) ?: null;\n    }\n\t\treturn null;\n  }",
             "startLine": 307,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 313,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1083,11 +916,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( !$this->write ){\n      return $this->fetchAll(\\PDO::FETCH_OBJ);\n    }\n    return null;\n  }",
             "startLine": 318,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 324,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1115,7 +943,6 @@
             "final": false,
             "code": "",
             "startLine": false,
-            "doc": null,
             "endLine": false,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1137,7 +964,6 @@
                 "final": false,
                 "code": "",
                 "startLine": false,
-                "doc": null,
                 "endLine": false,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1256,7 +1082,6 @@
             "final": false,
             "code": "",
             "startLine": false,
-            "doc": null,
             "endLine": false,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1278,7 +1103,6 @@
                 "final": false,
                 "code": "",
                 "startLine": false,
-                "doc": null,
                 "endLine": false,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1397,7 +1221,6 @@
             "final": false,
             "code": "",
             "startLine": false,
-            "doc": null,
             "endLine": false,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1419,7 +1242,6 @@
                 "final": false,
                 "code": "",
                 "startLine": false,
-                "doc": null,
                 "endLine": false,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1502,7 +1324,6 @@
             "final": false,
             "code": "",
             "startLine": false,
-            "doc": null,
             "endLine": false,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1524,7 +1345,6 @@
                 "final": false,
                 "code": "",
                 "startLine": false,
-                "doc": null,
                 "endLine": false,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1551,7 +1371,6 @@
             "final": false,
             "code": "",
             "startLine": false,
-            "doc": null,
             "endLine": false,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1573,7 +1392,6 @@
                 "final": false,
                 "code": "",
                 "startLine": false,
-                "doc": null,
                 "endLine": false,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1600,7 +1418,6 @@
             "final": false,
             "code": "",
             "startLine": false,
-            "doc": null,
             "endLine": false,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1622,7 +1439,6 @@
                 "final": false,
                 "code": "",
                 "startLine": false,
-                "doc": null,
                 "endLine": false,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1687,7 +1503,6 @@
             "final": false,
             "code": "",
             "startLine": false,
-            "doc": null,
             "endLine": false,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1709,7 +1524,6 @@
                 "final": false,
                 "code": "",
                 "startLine": false,
-                "doc": null,
                 "endLine": false,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1756,7 +1570,6 @@
             "final": false,
             "code": "",
             "startLine": false,
-            "doc": null,
             "endLine": false,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1778,7 +1591,6 @@
                 "final": false,
                 "code": "",
                 "startLine": false,
-                "doc": null,
                 "endLine": false,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1843,7 +1655,6 @@
             "final": false,
             "code": "",
             "startLine": false,
-            "doc": null,
             "endLine": false,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1865,7 +1676,6 @@
                 "final": false,
                 "code": "",
                 "startLine": false,
-                "doc": null,
                 "endLine": false,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1892,7 +1702,6 @@
             "final": false,
             "code": "",
             "startLine": false,
-            "doc": null,
             "endLine": false,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1914,7 +1723,6 @@
                 "final": false,
                 "code": "",
                 "startLine": false,
-                "doc": null,
                 "endLine": false,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1941,7 +1749,6 @@
             "final": true,
             "code": "",
             "startLine": false,
-            "doc": null,
             "endLine": false,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1963,7 +1770,6 @@
                 "final": true,
                 "code": "",
                 "startLine": false,
-                "doc": null,
                 "endLine": false,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1990,7 +1796,6 @@
             "final": true,
             "code": "",
             "startLine": false,
-            "doc": null,
             "endLine": false,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2012,7 +1817,6 @@
                 "final": true,
                 "code": "",
                 "startLine": false,
-                "doc": null,
                 "endLine": false,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -2042,7 +1846,7 @@
             }
         }
     },
-    "staticProperties": null,
+    "staticProperties": [],
     "constants": null,
     "numMethods": 30,
     "numProperties": 1,
@@ -2073,5 +1877,6 @@
     "isIterable": true,
     "extensionName": false,
     "namespaceName": "bbn\\db",
-    "shortName": "query"
+    "shortName": "query",
+    "summary": "An extended approach of the PDOStatement object"
 }

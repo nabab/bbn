@@ -33,7 +33,6 @@
             "final": false,
             "code": "function($url, $user = false, $pass = false)\n  {\n\t\t$this->url = $url;\n\t\t$this->user = $user;\n\t\t$this->pass = $pass;\n    $this->hash = md5($url.(string)$user.(string)$pass);\n\t\tif ( function_exists('svn_export') ){\n\t\t\t$this->has_svn = 1;\n\t\t}\n  }",
             "startLine": 76,
-            "doc": null,
             "endLine": 85,
             "isDeprecated": false,
             "isGenerator": false,
@@ -86,7 +85,6 @@
             "final": false,
             "code": "function($to, $rev = '')\n  {\n\t\tif ( is_dir($to) ){\n\t\t\tif ( $this->has_svn ){\n        $this->auth();\n\t\t\t\treturn svn_export($this->url, $to, false);\n\t\t\t}\n\t\t\telse{\n        ob_start();\n\t\t\t\tsystem(\"svn export \".$this->args().\" $to --force\");\n        $st = ob_get_contents();\n        ob_end_clean();\n        return $st;\n\t\t\t}\n\t\t}\n  }",
             "startLine": 87,
-            "doc": null,
             "endLine": 102,
             "isDeprecated": false,
             "isGenerator": false,
@@ -130,7 +128,6 @@
             "final": false,
             "code": "function($path = '\/')\n  {\n    if ( $this->has_svn ){\n      $this->auth();\n      return svn_status($this->url.$path, SVN_NON_RECURSIVE|SVN_ALL);\n    }\n    else{\n      ob_start();\n      system(\"svn info \".$this->args());\n      $st = ob_get_contents();\n      ob_end_clean();\n      bbn\\x::hdump($st);\n      return $this->parseCMD($st);\n    }\n  }",
             "startLine": 104,
-            "doc": null,
             "endLine": 118,
             "isDeprecated": false,
             "isGenerator": false,
@@ -165,7 +162,6 @@
             "final": false,
             "code": "function($path = '\/')\n  {\n    if ( $this->has_svn ){\n      $this->auth();\n      return svn_status($this->url.$path, SVN_NON_RECURSIVE|SVN_ALL);\n    }\n    else{\n      ob_start();\n      header('Content-Type: text\/plain; charset=UTF-8');\n      print(shell_exec(\"svn info --xml \".$this->args()));\n      $st = ob_get_contents();\n      ob_end_clean();\n      $log = new \\SimpleXMLElement($st);\n      if ( isset($log->entry['revision']) ){\n        return (int)$log->entry['revision'];\n      }\n    }\n    \n  }",
             "startLine": 120,
-            "doc": null,
             "endLine": 138,
             "isDeprecated": false,
             "isGenerator": false,
@@ -200,7 +196,6 @@
             "final": false,
             "code": "function($path = '\/', $num = 5)\n  {\n    if ( $this->has_svn ){\n      $this->auth();\n      return svn_log($this->url.$path);\n      \/\/return svn_status($path, SVN_NON_RECURSIVE|SVN_ALL);\n    }\n    else{\n      if ( !$num ){\n        $num = $this->last($this->url.$path);\n      }\n      ob_start();\n      header('Content-Type: text\/plain; charset=UTF-8');\n      print(shell_exec(\"svn log -l $num \".$this->args()));\n      $st = ob_get_contents();\n      ob_end_clean();\n      $log = new \\SimpleXMLElement($st);\n      $r = [];\n      \/\/bbn\\x::hdump($st);\n      foreach ( $log->logentry as $l ){\n        $r[(int)$l['revision']] = [\n          'author' => (string)$l->author,\n          'date' => date('Y-m-d H:i:s', strtotime($l->date)),\n          'msg' => (string)$l->msg\n        ];\n      }\n      return $r;\n    }\n  }",
             "startLine": 140,
-            "doc": null,
             "endLine": 168,
             "isDeprecated": false,
             "isGenerator": false,
@@ -242,12 +237,14 @@
             "visibility": "public"
         }
     },
-    "staticProperties": null,
+    "staticProperties": {
+        "current": ""
+    },
     "constants": null,
     "numMethods": 5,
     "numProperties": 2,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 1,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [],
@@ -270,5 +267,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\version",
-    "shortName": "svn"
+    "shortName": "svn",
+    "summary": "Class for Subversion usage. It will use the PHP SVN functions if available, and will try to use SVN commands through <em>system<\/em> otherwise."
 }

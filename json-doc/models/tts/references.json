@@ -23,7 +23,6 @@
             "final": false,
             "code": "function()\n  {\n    return [\n      'select' => $this->references_select,\n      'join' => $this->references_join\n    ];\n  }",
             "startLine": 52,
-            "doc": null,
             "endLine": 58,
             "isDeprecated": false,
             "isGenerator": false,
@@ -39,7 +38,7 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": [],
     "constants": null,
     "numMethods": 1,
     "numProperties": 0,
@@ -64,5 +63,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\models\\tts",
-    "shortName": "references"
+    "shortName": "references",
+    "summary": ""
 }

@@ -28,7 +28,6 @@
             "final": false,
             "code": "function(bbn\\db $db, $code, array $cfg = NULL)\n  {\n    parent::__construct($db);\n    self::optional_init();\n    if ($this->db->check()\n        && history::is_init()\n        && ($this->id_option = self::get_option_id($code, 'active'))\n        && ($this->ocfg = self::get_option($this->id_option))\n    ) {\n      if ($cfg &&\n          bbn\\x::has_props($cfg, ['type', 'table'], true)\n          && \\bbn\\x::is_string($cfg['type'], $cfg['table'])\n          && ($cfg['type'] = strtolower($cfg['type']))\n          && (\\bbn\\x::indexOf(self::$types, $cfg['type']) > -1)\n          && ($this->hcfg = history::get_table_cfg($cfg['table']))\n      ) {\n        if ((\\bbn\\x::indexOf(['sum', 'avg'], $cfg['type']) > -1) && !isset($cfg['field'])) {\n          throw new \\Error(_(\"The field parameter is mandatory for sum and avg types\"));\n        }\n        $this->dbo = new \\bbn\\appui\\databases($this->db);\n        if (isset($cfg['field'])) {\n          if (!($this->_id_field = $this->dbo->column_id($cfg['field'], $cfg['table']))) {\n            throw new \\Error(_(\"The field parameter must be a known field of the table\"));\n          }\n        }\n        if (($cfg['type'] === 'update') && empty($this->_id_field)) {\n          throw new \\Error(_(\"The field parameter is mandatory for statistics of type update\"));\n        }\n        $this->type = $cfg['type'];\n        $this->cfg = $cfg;\n        if (!empty($cfg['inserter']) && bbn\\str::is_uid($cfg['inserter'])) {\n          $this->inserter = $cfg['inserter'];\n        }\n        if (!empty($cfg['updater']) && bbn\\str::is_uid($cfg['updater'])) {\n          $this->updater = $cfg['updater'];\n        }\n        if (!empty($cfg['deleter']) && bbn\\str::is_uid($cfg['deleter'])) {\n          $this->deleter = $cfg['deleter'];\n        }\n        $req = $this->_set_request_cfg();\n        $this->db_cfg = $this->db->process_cfg($req);\n      }\n    }\n  }",
             "startLine": 50,
-            "doc": null,
             "endLine": 93,
             "isDeprecated": false,
             "isGenerator": false,
@@ -50,7 +49,6 @@
                 "final": false,
                 "code": "function(bbn\\db $db)\n  {\n  }",
                 "startLine": 27,
-                "doc": null,
                 "endLine": 29,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -115,7 +113,6 @@
             "final": false,
             "code": "function()\n  {\n    return !empty($this->id_option) && $this->db_cfg;\n  }",
             "startLine": 95,
-            "doc": null,
             "endLine": 98,
             "isDeprecated": false,
             "isGenerator": false,
@@ -137,11 +134,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 56,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 61,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -168,7 +160,6 @@
             "final": false,
             "code": "function($start, $end = NULL)\n  {\n      if (is_string($start)) {\n        $start = strtotime($start.(strlen($start) === 10 ? ' 00:00:00' : ''));\n      }\n      if (!$start || !is_int($start)) {\n        throw new Error(_('Impossible to read the given start date'));\n      }\n      if (!$this->is_total) {\n        if (!$end || ($end <= $start)) {\n          $end = mktime(23, 59, 59, date('n', $start), date('j', $start), date('Y', $start));\n        }\n        if (!$end || !is_int($end)) {\n          throw new Error(_('Impossible to read the given end date'));\n        }\n      }\n      $vals = [];\n      foreach ($this->db_cfg['values'] as $v) {\n        if (!$this->is_total && ($v === self::$_placeholder.'2')) {\n          $vals[] = $end;\n        }\n        else {\n          $vals[] = $v === self::$_placeholder ? $start : $v;\n        }\n      } \n      $cfg = $this->db_cfg;\n      $cfg['values'] = $vals;\n      return $this->db->select_one($cfg);\n    }\n  }",
             "startLine": 100,
-            "doc": null,
             "endLine": 129,
             "isDeprecated": false,
             "isGenerator": false,
@@ -212,18 +203,6 @@
             "final": false,
             "code": "function($variant = NULL, $start = NULL)\n  {\n    if ($this->check()) {\n      if (!$variant) {\n        $variant = 'default';\n      }\n      if (!($real_start = $this->db->select_one('bbn_statistics', 'MAX(day)', ['id_option' => $this->id_option, 'code' => $variant]))) {\n        if ($start) {\n          $real_start = $start;\n        }\n        elseif (!empty($this->ocfg['start'])) {\n          $real_start = $this->ocfg['start'];\n        }\n        else {\n          $real_start = self::ODATE;\n        }\n      }\n      if (\\bbn\\str::is_date_sql($real_start)) {\n        $num_days = 0;\n        $num = $this->db->count('bbn_statistics', ['id_option' => $this->id_option, 'code' => $variant]);\n        $today = date('Ymd');\n        $last_res = null;\n        $last_date = $real_start;\n        $time = mktime(12, 0, 0, (int)substr($real_start, 5, 2), (int)substr($real_start, 8, 2), (int)substr($real_start, 0, 4));\n        $test = date('Ymd', $time);\n        while ($test <= $today) {\n          $num_days++;\n          $res = $this->run($real_start);\n          if (!$res) {\n            $res = 0;\n          }\n          if (($res !== $last_res) || !$num) {\n            if ($this->db->count('bbn_statistics', [\n              'id_option' => $this->ocfg['id'],\n              'code' => $variant,\n              'day' => $real_start\n            ])) {\n              $this->db->update('bbn_statistics', [\n                'res' => $res\n              ], [\n                'id_option' => $this->ocfg['id'],\n                'code' => $variant,\n                'day' => $real_start\n              ]);\n            }\n            else {\n              $this->db->insert('bbn_statistics', [\n                'id_option' => $this->ocfg['id'],\n                'code' => $variant,\n                'day' => $real_start,\n                'res' => $res\n              ]);\n            }\n            $last_res = $res;\n            $num++;\n          }\n          else {\n            $this->db->update('bbn_statistics', [\n              'day' => $real_start\n            ], [\n              'id_option' => $this->ocfg['id'],\n              'code' => $variant,\n              'day' => $last_date\n            ]);\n          }\n          $last_date = $real_start;\n          $time += 24*3600;\n          $real_start = date('Y-m-d', $time);\n          $test = date('Ymd', $time);\n        }\n        return $num_days;\n      }\n    }\n    return null;\n  }",
             "startLine": 137,
-            "doc": {
-                "description": "Update a statistic in the table bbn_statistics from the start of time",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$start",
-                        "description": "Start of time"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 211,
             "isDeprecated": false,
             "isGenerator": false,
@@ -271,7 +250,6 @@
             "final": false,
             "code": "function($values = 30, $start = NULL, $end = NULL)\n  {\n    if ($this->ocfg) {\n      if (!$end) {\n        $end = date('Y-m-d');\n      }\n      if (!$start) {\n        $start = date('Y-m-d', strtotime($end.' 12:00:00') - ($values*24*3600));\n      }\n      if (bbn\\str::is_date_sql($start, $end)) {\n        $res = [\n          'labels' => [],\n          'series' => []\n        ];\n        \/\/ All the values between start and end\n        $all = $this->db->rselect_all('bbn_statistics', ['day', 'res'], [\n          [\n            'field' => 'id_option',\n            'value' => $this->id_option\n          ], [\n            'field' => 'day',\n            'operator' => '>=',\n            'value' => $start\n          ], [\n            'field' => 'day',\n            'operator' => '<=',\n            'value' => $end\n          ]\n        ], [\n          'day' => 'ASC'\n        ]);\n        \/\/ As the row appears with its last date for value we pick the nextr row if the last row is not the last day\n        $last = count($all) - 1;\n        if (($all[$last]['day'] !== $end) && ($tmp = $this->db->rselect('bbn_statistics', ['day', 'res'], [\n          [\n            'field' => 'id_option',\n            'value' => $this->id_option\n          ], [\n            'field' => 'day',\n            'operator' => '>',\n            'value' => $end\n          ]\n        ], [\n          'day' => 'ASC'\n        ]))) {\n          $all[] = $tmp;\n          $last++;\n        }\n        if (count($all)) {\n          $dcurrent = new \\DateTime($start);\n          $dend = new \\DateTime($end);\n          $num_days = (int)$dend->diff($dcurrent)->format('%a');\n          $diff = $num_days;\n          $interval = (int)floor(($num_days+1) \/ $values);\n          $num = 0;\n          $idx = 0;\n          $didx = 0;\n          $pstart = false;\n          while ($diff >= 0) {\n            $current = $dcurrent->format('Y-m-d');\n            if (!$pstart) {\n              $pstart = $current;\n            }\n            if ($num === $interval) {\n              $num = 0;\n            }\n            if (!$num) {\n              if (!empty($this->ocfg['total']) || ($interval === 1)) {\n                $res['labels'][$didx] = $current;\n              }\n              else {\n                $res['labels'][$didx] = bbn\\date::format($pstart, 's').' - '.bbn\\date::format($current, 's');\n              }\n              if (isset($res['series'][$didx]) && empty($this->ocfg['total'])) {\n                $res['series'][$didx] = $res['series'][$didx] + $all[$idx]['res'];\n              }\n              else {\n                $res['series'][$didx] = $all[$idx]['res'];\n              }\n              $pstart = false;\n              $didx++;\n            }\n            elseif (empty($this->ocfg['total'])) {\n              $res['labels'][$didx] = $current;\n              $res['series'][$didx] += (int)$all[$idx]['res'];\n            }\n            if (!$diff) {\n              break;\n            }\n            if ($current === $all[$idx]['day']) {\n              $idx++;\n            }\n            $dcurrent = $dcurrent->add(date_interval_create_from_date_string('1 days'));\n            $diff = (int)$dend->diff($dcurrent)->format('%a');\n            $num++;\n          }\n        }\n        return $res;\n      }\n    }\n    return null;\n  }",
             "startLine": 213,
-            "doc": null,
             "endLine": 314,
             "isDeprecated": false,
             "isGenerator": false,
@@ -327,7 +305,6 @@
             "final": false,
             "code": "function($values = 30, $start = NULL, $end = NULL)\n  {\n    if ($res = $this->serie($values, $start, $end)) {\n      $res = array_map(function($a){\n\n      }, $res);\n    }\n    return $res;\n  }",
             "startLine": 316,
-            "doc": null,
             "endLine": 324,
             "isDeprecated": false,
             "isGenerator": false,
@@ -383,7 +360,6 @@
             "final": false,
             "code": "function($values = 30, $unit = 'm', $end = NULL, $pstart = NULL)\n  {\n    if ($this->ocfg && $values) {\n      if (!$end) {\n        $end = date('Y-m-d');\n      }\n      if (bbn\\str::is_date_sql($end)) {\n        switch (strtolower($unit)) {\n          case 'y':\n            $funit = 'years';\n            $tmp = date('Y-m-d', mktime(23, 59, 59, 12, 31, substr($end, 0, 4)));\n            if ($end !== $tmp) {\n              $end = date('Y-m-d', mktime(23, 59, 59, 12, 31, (int)substr($end, 0, 4) - 1));\n            }\n            break;\n          case 't':\n            $funit = 'months';\n            $values *= 3;\n          case 'm':\n            $funit = 'months';\n            $month = (int)substr($end, 5, 2);\n            $remain = $month % 3;\n            if ($remain) {\n              $remain = 3 - $remain;\n            }\n            $tmp = date('Y-m-d', mktime(23, 59, 59, $month + 1, 0, substr($end, 0, 4)));\n            if (($end !== $tmp) || $remain) {\n              $end = date('Y-m-d', mktime(23, 59, 59, $month - $remain + 1, 0, (int)substr($end, 0, 4)));\n            }\n            break;\n          case 'w':\n            $funit = 'weeks';\n            \n            break;\n          case 'd':\n            $funit = 'days';\n            break;\n        }\n        if (isset($funit)) {\n          $dend = new \\DateTime($end);\n          $dstart = $dend->sub(date_interval_create_from_date_string(\"$values $funit\"));\n          $start = $dstart->format('Y-m-d');\n          $res = [\n            'labels' => [],\n            'series' => []\n          ];\n          if ($all = $this->db->rselect_all('bbn_statistics', ['day', 'res'], [\n            [\n              'field' => 'id_option',\n              'value' => $this->id_option\n            ], [\n              'field' => 'day',\n              'operator' => '<=',\n              'value' => $end\n            ], [\n              'field' => 'day',\n              'operator' => '>=',\n              'value' => $start\n            ]\n          ], [\n            'day' => 'ASC'\n          ])) {\n            $last = count($all) - 1;\n            if (($all[$last]['day'] !== $end) && ($tmp = $this->db->rselect('bbn_statistics', ['day', 'res'], [\n              [\n                'field' => 'id_option',\n                'value' => $this->id_option\n              ], [\n                'field' => 'day',\n                'operator' => '>',\n                'value' => $end\n              ]\n            ], [\n              'day' => 'ASC'\n            ]))) {\n              $all[] = $tmp;\n              $last++;\n            }\n            $dcurrent = new \\DateTime($start);\n            $num_days = (int)$dend->diff($dcurrent)->format('%a');\n            $diff = $num_days;\n            $interval = (int)floor($num_days \/ $values);\n            $num = 0;\n            $idx = 0;\n            $didx = 0;\n            while ($diff >= 0) {\n              $current = $dcurrent->format('Y-m-d');\n              if ($num === $interval) {\n                $num = 0;\n              }\n              if (!$num) {\n                $res['labels'][$didx] = $current;\n                $res['series'][$didx] = $all[$idx]['res'];\n                $didx++;\n              }\n              else if (empty($this->ocfg['total'])) {\n                $res['labels'][$didx] = $current;\n                $res['series'][$didx] += (int)$all[$idx]['res'];\n              }\n              if (!$diff) {\n                break;\n              }\n              if ($current === $all[$idx]['day']) {\n                $idx++;\n              }\n              $dcurrent = $dcurrent->add(date_interval_create_from_date_string('1 days'));\n              $diff = (int)$dend->diff($dcurrent)->format('%a');\n              $num++;\n            }\n          }\n          return $res;\n        }\n      }\n    }\n    return null;\n  }",
             "startLine": 326,
-            "doc": null,
             "endLine": 441,
             "isDeprecated": false,
             "isGenerator": false,
@@ -448,11 +424,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 45,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 50,
             "isDeprecated": false,
             "isGenerator": false,
@@ -474,11 +445,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 45,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 50,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -505,7 +471,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 72,
-            "doc": null,
             "endLine": 74,
             "isDeprecated": false,
             "isGenerator": false,
@@ -527,7 +492,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 72,
-                "doc": null,
                 "endLine": 74,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -554,7 +518,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 76,
-            "doc": null,
             "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
@@ -576,7 +539,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 76,
-                "doc": null,
                 "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -603,7 +565,6 @@
             "final": false,
             "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
             "startLine": 80,
-            "doc": null,
             "endLine": 88,
             "isDeprecated": false,
             "isGenerator": false,
@@ -625,7 +586,6 @@
                 "final": false,
                 "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
                 "startLine": 80,
-                "doc": null,
                 "endLine": 88,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -652,22 +612,6 @@
             "final": false,
             "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
             "startLine": 95,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$name"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$arguments"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 99,
             "isDeprecated": false,
             "isGenerator": false,
@@ -689,22 +633,6 @@
                 "final": false,
                 "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
                 "startLine": 95,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "string",
-                            "name": "$name"
-                        },
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$arguments"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 99,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -769,11 +697,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 104,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 106,
             "isDeprecated": false,
             "isGenerator": false,
@@ -795,11 +718,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 104,
-                "doc": {
-                    "description": "",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 106,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -826,17 +744,6 @@
             "final": false,
             "code": "function($debug)\n  {\n  }",
             "startLine": 112,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "boolean",
-                        "name": "$debug"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 114,
             "isDeprecated": false,
             "isGenerator": false,
@@ -858,17 +765,6 @@
                 "final": false,
                 "code": "function($debug)\n  {\n  }",
                 "startLine": 112,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "boolean",
-                            "name": "$debug"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 114,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -915,7 +811,6 @@
             "final": false,
             "code": "function()\n  {\n    return self::$option_root_id;\n  }",
             "startLine": 71,
-            "doc": null,
             "endLine": 74,
             "isDeprecated": false,
             "isGenerator": false,
@@ -940,7 +835,6 @@
             "final": false,
             "code": "function()\n  {\n    return self::$option_appui_id;\n  }",
             "startLine": 76,
-            "doc": null,
             "endLine": 79,
             "isDeprecated": false,
             "isGenerator": false,
@@ -965,17 +859,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 87,
-            "doc": {
-                "description": "Returns The option's ID of a category, i.e. direct children of option's root",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$code"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 89,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1000,7 +883,6 @@
             "final": false,
             "code": "function()\n  {\n      return $a !== null;\n    }));\n  }",
             "startLine": 91,
-            "doc": null,
             "endLine": 95,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1025,7 +907,6 @@
             "final": false,
             "code": "function()\n  {\n      $tree['items'] : [];\n  }",
             "startLine": 97,
-            "doc": null,
             "endLine": 100,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1050,7 +931,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 102,
-            "doc": null,
             "endLine": 104,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1075,7 +955,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 106,
-            "doc": null,
             "endLine": 108,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1100,7 +979,6 @@
             "final": false,
             "code": "function()\n  {\n      bbn\\appui\\options::get_instance()->text_value_options($id): [];\n  }",
             "startLine": 110,
-            "doc": null,
             "endLine": 113,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1125,17 +1003,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 121,
-            "doc": {
-                "description": "Returns The option's ID of a category, i.e. direct children of option's root",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$code"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 123,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1160,7 +1027,6 @@
             "final": false,
             "code": "function()\n  {\n      return $a !== null;\n    }));\n  }",
             "startLine": 125,
-            "doc": null,
             "endLine": 129,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1185,7 +1051,6 @@
             "final": false,
             "code": "function()\n  {\n      $tree['items'] : [];\n  }",
             "startLine": 131,
-            "doc": null,
             "endLine": 134,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1210,7 +1075,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 136,
-            "doc": null,
             "endLine": 138,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1235,7 +1099,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 140,
-            "doc": null,
             "endLine": 142,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1260,7 +1123,6 @@
             "final": false,
             "code": "function()\n  {\n      bbn\\appui\\options::get_instance()->text_value_options($id) : [];\n  }",
             "startLine": 144,
-            "doc": null,
             "endLine": 147,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1276,12 +1138,26 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
-    "constants": null,
+    "staticProperties": {
+        "_placeholder": "___BBN_TST___",
+        "types": [
+            "insert",
+            "update",
+            "delete",
+            "restore",
+            "count",
+            "sum",
+            "avg"
+        ],
+        "optional_is_init": false,
+        "option_appui_id": null,
+        "option_root_id": null
+    },
+    "constants": [],
     "numMethods": 28,
     "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 0,
+    "numConstants": 1,
+    "numStaticProperties": 5,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [
@@ -1329,5 +1205,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\appui",
-    "shortName": "statistic"
+    "shortName": "statistic",
+    "summary": ""
 }

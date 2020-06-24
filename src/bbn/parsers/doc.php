@@ -200,7 +200,7 @@ class doc {
 	 */
 	private function clear_text(string $text){
     //return trim(str_replace('   ', ' ', str_replace('  ', ' ', preg_replace('/\n\s+\*\s{0,1}/', PHP_EOL, $text))));
-    return trim(str_replace('   ', ' ', str_replace('  ', ' ', str_replace(PHP_EOL.' ', PHP_EOL, preg_replace('/\n\s*\*{1}/', PHP_EOL, $text)))));
+    return trim(preg_replace('/\n\s*\*{1}? /', PHP_EOL, preg_replace('/\s*\*{1}\s*\n/', PHP_EOL, $text)));
 	}
 
 	/**
@@ -272,7 +272,7 @@ class doc {
             $this->tag_has_desc($res['tag']) &&
             ($desc = substr($text, $d))
           ){
-						$res['description'] = $this->clear_text($desc);
+						$res['description'] = trim($desc);
 					}
 				}
 

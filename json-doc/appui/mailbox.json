@@ -26,7 +26,6 @@
             "final": false,
             "code": "function($cfg)\n  {\n      $this->type = empty($cfg['type']) ? '' : $cfg['type'];\n      $this->host = $cfg['host'];\n      $this->login = $cfg['login'];\n      $this->pass = $cfg['pass'];\n      $this->directory = empty($cfg['dir']) ? '' : $cfg['dir'];\n\n      if ( !empty($cfg['type']) ){\n        switch ( $this->type ){\n          case 'hotmail':\n            $this->port = 995;\n            $this->mbParam = '{pop3.live.com:' . $this->port . '\/pop3\/ssl}';\n            break;\n          case 'gmail':\n            $this->port = 993;\n            $this->mbParam = '{imap.googlemail.com:' . $this->port . '\/imap\/ssl}';\n            break;\n          case 'pop':\n            $this->port = 110;\n            $this->mbParam = '{' . $this->host . ':' . $this->port . '\/pop3}';\n            break;\n          case 'imap':\n            $this->port = 143;\n            $this->mbParam = '{' . $this->host . ':' . $this->port . '\/imap\/tls\/novalidate-cert}';\n            break;\n          case 'local':\n            $this->host = 'localhost';\n            $this->port = 143;\n            \/\/$this->mbParam = '{' . $this->host . ':' . $this->port . '\/imap\/tls\/novalidate-cert}';\n            $this->mbParam = '{' . $this->host . ':' . $this->port . '\/imap\/notls}';\n            break;\n        }\n      }\n      else if ( !empty($cfg['port']) && !empty($cfg['param']) ){\n        $this->port = $cfg['port'];\n        $this->mbParam = '{' . $this->host . ':' . $this->port . '\/' . $cfg['param'] . '}';\n      }\n\n      if ( isset($this->mbParam) ){\n        if ( $this->stream = @imap_open($this->mbParam.$this->directory, $this->login, $this->pass) ){\n          $this->status = 'ok';\n        }\n        else {\n          $this->status = imap_last_error();\n          $msg = [];\n          array_push($msg,'#################################################################');\n          array_push($msg,date('H:i:s d-m-Y').' - Error in the script!');\n          array_push($msg,'User: '.$this->login);\n          array_push($msg,'Parameters: '.$this->mbParam.$this->directory);\n          array_push($msg,'#################################################################');\n          array_push($msg,' ');\n          array_push($msg,'Error message: ');\n          array_push($msg,$this->status);\n          bbn\\x::log(implode(\"\\n\",$msg),'imap');\n        }\n      }\n    }\n  }",
             "startLine": 218,
-            "doc": null,
             "endLine": 276,
             "isDeprecated": false,
             "isGenerator": false,
@@ -61,11 +60,6 @@
             "final": false,
             "code": "function()\n  {\n      if ( $this->imap->Nmsgs > 0 ){\n        $this->last_uid = $this->get_msg_uid($this->imap->Nmsgs);\n        $this->num_msg = $this->imap->Nmsgs;\n      }\n      else {\n        $this->last_uid = 0;\n        $this->num_msg = 0;\n      }\n      return $this->imap;\n    }\n    return false;\n  }",
             "startLine": 283,
-            "doc": {
-                "description": "Gets IMAP essential info (Test: ok)",
-                "params": [],
-                "return": ""
-            },
             "endLine": 296,
             "isDeprecated": false,
             "isGenerator": false,
@@ -82,18 +76,19 @@
         "__destruct": {
             "name": "__destruct",
             "summary": "Closes the imap stream.",
-            "description": "",
-            "description_parts": [],
+            "description": "*",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>*<\/p>"
+                }
+            ],
             "file": "bbn\\appui\\mailbox",
             "static": false,
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n      imap_close($this->stream);\n    }\n  }",
             "startLine": 302,
-            "doc": {
-                "description": "Closes the imap stream.",
-                "tags": []
-            },
             "endLine": 306,
             "isDeprecated": false,
             "isGenerator": false,
@@ -118,18 +113,6 @@
             "final": false,
             "code": "function($mbox)\n  {\n      return imap_createmailbox($this->stream, $this->mbParam. $mbox);\n    }\n    return false;\n  }",
             "startLine": 314,
-            "doc": {
-                "description": "Creates a mailbox (Test: ok)",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$mbox",
-                        "description": "Mailbox name"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 319,
             "isDeprecated": false,
             "isGenerator": false,
@@ -165,18 +148,6 @@
             "final": false,
             "code": "function($mbox)\n  {\n      return imap_deletemailbox($this->stream, $this->mbParam . $mbox);\n    }\n    return false;\n  }",
             "startLine": 327,
-            "doc": {
-                "description": "Deletes a mailbox (Test: ok)",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$mbox",
-                        "description": "Mailbox"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 332,
             "isDeprecated": false,
             "isGenerator": false,
@@ -212,24 +183,6 @@
             "final": false,
             "code": "function($old, $new)\n  {\n      return imap_renamemailbox($this->stream, $this->mbParam. $old, $this->mbParam. $new);\n    }\n    return false;\n  }",
             "startLine": 341,
-            "doc": {
-                "description": "Renames a mailbox (Test: ok)",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$old",
-                        "description": "Old mailbox name"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$new",
-                        "description": "New mailbox name"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 346,
             "isDeprecated": false,
             "isGenerator": false,
@@ -275,11 +228,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 353,
-            "doc": {
-                "description": "Returns an array of all the mailboxes that you have subscribed. (Test: ok)",
-                "params": [],
-                "return": ""
-            },
             "endLine": 355,
             "isDeprecated": false,
             "isGenerator": false,
@@ -304,18 +252,6 @@
             "final": false,
             "code": "function($dir = '')\n  {\n  }",
             "startLine": 363,
-            "doc": {
-                "description": "Returns an array containing the names of the current level mailboxes that you have subscribed. (Test: ok)",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$dir",
-                        "description": "Current mailbox directory"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 365,
             "isDeprecated": false,
             "isGenerator": false,
@@ -342,7 +278,7 @@
         },
         "list_all_mboxes": {
             "name": "list_all_mboxes",
-            "summary": "Returns an array containing the full names of the all mailboxes. (Test: ok)",
+            "summary": "Returns an array containing the full names of the all mailboxes.  (Test: ok)",
             "description": "",
             "description_parts": [],
             "file": "bbn\\appui\\mailbox",
@@ -351,11 +287,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 372,
-            "doc": {
-                "description": "Returns an array containing the full names of the all mailboxes. (Test: ok)",
-                "params": [],
-                "return": ""
-            },
             "endLine": 374,
             "isDeprecated": false,
             "isGenerator": false,
@@ -371,7 +302,7 @@
         },
         "list_curlev_mboxes": {
             "name": "list_curlev_mboxes",
-            "summary": "Returns an array containing the full names of the current level mailboxes. (Test: ok)",
+            "summary": "Returns an array containing the full names of the current level mailboxes.  (Test: ok)",
             "description": "",
             "description_parts": [],
             "file": "bbn\\appui\\mailbox",
@@ -380,18 +311,6 @@
             "final": false,
             "code": "function($dir = '')\n  {\n  }",
             "startLine": 382,
-            "doc": {
-                "description": "Returns an array containing the full names of the current level mailboxes. (Test: ok)",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$dir",
-                        "description": "Current mailbox directory"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 384,
             "isDeprecated": false,
             "isGenerator": false,
@@ -427,11 +346,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 391,
-            "doc": {
-                "description": "Returns an array of objects for all mailboxes containing detailed mailbox information. (Test: ok)",
-                "params": [],
-                "return": ""
-            },
             "endLine": 393,
             "isDeprecated": false,
             "isGenerator": false,
@@ -456,18 +370,6 @@
             "final": false,
             "code": "function($dir = '')\n  {\n  }",
             "startLine": 401,
-            "doc": {
-                "description": "Returns an array of objects for each current level mailboxes containing detailed mailbox information. (Test: ok)",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$dir",
-                        "description": "Mailbox directory"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 403,
             "isDeprecated": false,
             "isGenerator": false,
@@ -503,11 +405,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 410,
-            "doc": {
-                "description": "Returns a sorted array containing the simple names of the all mailboxes. (Test: ok)",
-                "params": [],
-                "return": ""
-            },
             "endLine": 412,
             "isDeprecated": false,
             "isGenerator": false,
@@ -532,18 +429,6 @@
             "final": false,
             "code": "function($dir = '')\n  {\n  }",
             "startLine": 420,
-            "doc": {
-                "description": "Returns a sorted array containing the simple names of the current level mailboxes. (Test: ok)",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$dir",
-                        "description": "Current mailbox directory"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 422,
             "isDeprecated": false,
             "isGenerator": false,
@@ -575,7 +460,7 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "If the given name is not existing it opens the default inbox."
+                    "content": "<p>If the given name is not existing it opens the default inbox.<\/p>"
                 }
             ],
             "file": "bbn\\appui\\mailbox",
@@ -584,18 +469,6 @@
             "final": false,
             "code": "function($mbox)\n  {\n      if ( \\in_array($mbox, $this->get_all_names_mboxes()) ){\n        return imap_reopen($this->stream, $this->mbParam . $mbox);\n      }\n      else {\n        return imap_reopen($this->stream, $mbox);\n      }\n    }\n    return false;\n  }",
             "startLine": 431,
-            "doc": {
-                "description": "Reopens the desired mailbox (you can give it the simple name or the full name). (Test: ok)\nIf the given name is not existing it opens the default inbox.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$mbox",
-                        "description": "Simple\/full mailbox name"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 441,
             "isDeprecated": false,
             "isGenerator": false,
@@ -631,11 +504,6 @@
             "final": false,
             "code": "function()\n  {\n      return imap_mailboxmsginfo($this->stream);\n    }\n    return false;\n  }",
             "startLine": 448,
-            "doc": {
-                "description": "Returns an object containing the current mailbox info. (Test: ok)",
-                "params": [],
-                "return": ""
-            },
             "endLine": 453,
             "isDeprecated": false,
             "isGenerator": false,
@@ -656,7 +524,7 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "Criteria can be one (and only one) of the following:\nSORTDATE - message Date\nSORTARRIVAL - arrival date\nSORTFROM - mailbox in first From address\nSORTSUBJECT - message subject\nSORTTO - mailbox in first To address\nSORTCC - mailbox in first cc address\nSORTSIZE - size of message in octets"
+                    "content": "<p>Criteria can be one (and only one) of the following:\nSORTDATE - message Date\nSORTARRIVAL - arrival date\nSORTFROM - mailbox in first From address\nSORTSUBJECT - message subject\nSORTTO - mailbox in first To address\nSORTCC - mailbox in first cc address\nSORTSIZE - size of message in octets<\/p>"
                 }
             ],
             "file": "bbn\\appui\\mailbox",
@@ -665,24 +533,6 @@
             "final": false,
             "code": "function($criteria, $reverse = 0)\n  {\n      return imap_sort($this->stream, constant(strtoupper($criteria)), $reverse, SE_NOPREFETCH);\n    }\n    return false;\n  }",
             "startLine": 470,
-            "doc": {
-                "description": "Sorts the mailbox. (Test: ok)\nCriteria can be one (and only one) of the following:\nSORTDATE - message Date\nSORTARRIVAL - arrival date\nSORTFROM - mailbox in first From address\nSORTSUBJECT - message subject\nSORTTO - mailbox in first To address\nSORTCC - mailbox in first cc address\nSORTSIZE - size of message in octets",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$criteria",
-                        "description": "Pass it without quote or double quote"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$reverse",
-                        "description": "Set this to 1 for reverse sorting"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 475,
             "isDeprecated": false,
             "isGenerator": false,
@@ -728,17 +578,6 @@
             "final": false,
             "code": "function($msgnum)\n  {\n      return imap_header($this->stream, $msgnum);\n    }\n    return false;\n  }",
             "startLine": 483,
-            "doc": {
-                "description": "Retrieves the header's message info. (Test: ok)",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$msgnum"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 488,
             "isDeprecated": false,
             "isGenerator": false,
@@ -773,17 +612,6 @@
             "final": false,
             "code": "function($msgnum)\n  {\n      return imap_uid($this->stream, $msgnum);\n    }\n    return false;\n  }",
             "startLine": 496,
-            "doc": {
-                "description": "Gets the UID of the message. (Test: ok)",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$msgnum"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 501,
             "isDeprecated": false,
             "isGenerator": false,
@@ -818,18 +646,6 @@
             "final": false,
             "code": "function($msguid)\n  {\n      return imap_msgno($this->stream, $msguid);\n    }\n    return false;\n  }",
             "startLine": 509,
-            "doc": {
-                "description": "Gets the NO of the message. (Test: ok)",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$msguid",
-                        "description": "UID of the message"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 514,
             "isDeprecated": false,
             "isGenerator": false,
@@ -865,18 +681,6 @@
             "final": false,
             "code": "function($msgnum)\n  {\n      return imap_fetchstructure($this->stream, $msgnum);\n    }\n    return false;\n  }",
             "startLine": 522,
-            "doc": {
-                "description": "Fetches the message structure. (Test: ok)",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$msgnum",
-                        "description": "No of the message"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 527,
             "isDeprecated": false,
             "isGenerator": false,
@@ -912,24 +716,6 @@
             "final": false,
             "code": "function($msgnum, $uid = false)\n  {\n      if ( $uid ){\n        return imap_fetchheader($this->stream, $msgnum, FT_UID);\n      }\n      return imap_fetchheader($this->stream, $msgnum);\n    }\n    return false;\n  }",
             "startLine": 536,
-            "doc": {
-                "description": "Fetches the header of the message. (Test: ok)",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$msgnum",
-                        "description": "No of the message"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "int|bool",
-                        "name": "$uid",
-                        "description": "Set true f the msgnum is a UID"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 544,
             "isDeprecated": false,
             "isGenerator": false,
@@ -975,18 +761,6 @@
             "final": false,
             "code": "function($uid)\n  {\n      return imap_delete($this->stream, $this->get_msg_no($uid));\n    }\n    return false;\n  }",
             "startLine": 552,
-            "doc": {
-                "description": "Mark the specified message for deletion from current mailbox. (Text: ok)",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$uid",
-                        "description": "UID of the message"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 557,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1022,24 +796,6 @@
             "final": false,
             "code": "function($uid, $tombox)\n  {\n      return imap_mail_move($this->stream, $uid, $tombox, CP_UID);\n    }\n    return false;\n  }",
             "startLine": 566,
-            "doc": {
-                "description": "Move the specified message to specified mailbox. (Test: ok)",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$uid",
-                        "description": "UID of the message"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$tombox",
-                        "description": "Destination mailbox name"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 571,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1076,7 +832,7 @@
         },
         "expunge": {
             "name": "expunge",
-            "summary": "Deletes all messages marked for deletion by delete_msg(), move_msg() or set_flag(). (Test: ok)",
+            "summary": "Deletes all messages marked for deletion by delete_msg(), move_msg() or set_flag().  (Test: ok)",
             "description": "",
             "description_parts": [],
             "file": "bbn\\appui\\mailbox",
@@ -1085,11 +841,6 @@
             "final": false,
             "code": "function()\n  {\n      return imap_expunge($this->stream);\n    }\n    return false;\n  }",
             "startLine": 578,
-            "doc": {
-                "description": "Deletes all messages marked for deletion by delete_msg(), move_msg() or set_flag(). (Test: ok)",
-                "params": [],
-                "return": ""
-            },
             "endLine": 583,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1114,24 +865,6 @@
             "final": false,
             "code": "function($msgno, $part)\n  {\n      if ( empty($part) ){\n        return imap_body($this->stream, $msgno);\n      }\n      return imap_fetchbody($this->stream, $msgno, $part);\n    }\n    return false;\n  }",
             "startLine": 592,
-            "doc": {
-                "description": "Fetches the body of the message. (Test: ok)",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$msgno",
-                        "description": "No of the message"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string|false",
-                        "name": "$part",
-                        "description": "The part number"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 600,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1173,7 +906,7 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "The flags which you can set are \\\\Seen, \\\\Answered, \\\\Flagged, \\\\Deleted, and \\\\Draft. (Test: ok)"
+                    "content": "<p>The flags which you can set are \\Seen, \\Answered, \\Flagged, \\Deleted, and \\Draft. (Test: ok)<\/p>"
                 }
             ],
             "file": "bbn\\appui\\mailbox",
@@ -1182,30 +915,6 @@
             "final": false,
             "code": "function($seq, $flg, $remove = false)\n  {\n      return $remove ? imap_clearflag_full($this->stream, $seq, $flg) : imap_setflag_full($this->stream, $seq, $flg);\n    }\n    return false;\n  }",
             "startLine": 611,
-            "doc": {
-                "description": "Sets or removes flag\/s on message\/s. (Test: ok)\nThe flags which you can set are \\\\Seen, \\\\Answered, \\\\Flagged, \\\\Deleted, and \\\\Draft. (Test: ok)",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$seq",
-                        "description": "A sequence of message numbers. Ex. \"2,5,6\" or \"2:5:6\""
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$flg",
-                        "description": "The flag\/s. Ex. \"\\\\Seen \\\\Flagged\""
-                    },
-                    {
-                        "tag": "param",
-                        "type": "bool",
-                        "name": "$remove",
-                        "description": "Set this to true to remove flag\/s"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 616,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1253,11 +962,11 @@
         "search": {
             "name": "search",
             "summary": "Search messages. (Test: ok)",
-            "description": "Returns an array of UIDs.\n\nArguments:\nALL - return all messages matching the rest of the criteria\nANSWERED - match messages with the \\\\ANSWERED flag set\nBCC \"string\" - match messages with \"string\" in the Bcc: field\nBEFORE \"date\" - match messages with Date: before \"date\"\nBODY \"string\" - match messages with \"string\" in the body of the message\nCC \"string\" - match messages with \"string\" in the Cc: field\nDELETED - match deleted messages\nFLAGGED - match messages with the \\\\FLAGGED (sometimes referred to as Important or Urgent) flag set\nFROM \"string\" - match messages with \"string\" in the From: field\nKEYWORD \"string\" - match messages with \"string\" as a keyword\nNEW - match new messages\nOLD - match old messages\nON \"date\" - match messages with Date: matching \"date\"\nRECENT - match messages with the \\\\RECENT flag set\nSEEN - match messages that have been read (the \\\\SEEN flag is set)\nSINCE \"date\" - match messages with Date: after \"date\"\nSUBJECT \"string\" - match messages with \"string\" in the Subject:\nTEXT \"string\" - match messages with text \"string\"\nTO \"string\" - match messages with \"string\" in the To:\nUNANSWERED - match messages that have not been answered\nUNDELETED - match messages that are not deleted\nUNFLAGGED - match messages that are not flagged\nUNKEYWORD \"string\" - match messages that do not have the keyword \"string\"\nUNSEEN - match messages which have not been read yet",
+            "description": "Returns an array of UIDs.\nArguments:\nALL - return all messages matching the rest of the criteria\nANSWERED - match messages with the \\\\ANSWERED flag set\nBCC \"string\" - match messages with \"string\" in the Bcc: field\nBEFORE \"date\" - match messages with Date: before \"date\"\nBODY \"string\" - match messages with \"string\" in the body of the message\nCC \"string\" - match messages with \"string\" in the Cc: field\nDELETED - match deleted messages\nFLAGGED - match messages with the \\\\FLAGGED (sometimes referred to as Important or Urgent) flag set\nFROM \"string\" - match messages with \"string\" in the From: field\nKEYWORD \"string\" - match messages with \"string\" as a keyword\nNEW - match new messages\nOLD - match old messages\nON \"date\" - match messages with Date: matching \"date\"\nRECENT - match messages with the \\\\RECENT flag set\nSEEN - match messages that have been read (the \\\\SEEN flag is set)\nSINCE \"date\" - match messages with Date: after \"date\"\nSUBJECT \"string\" - match messages with \"string\" in the Subject:\nTEXT \"string\" - match messages with text \"string\"\nTO \"string\" - match messages with \"string\" in the To:\nUNANSWERED - match messages that have not been answered\nUNDELETED - match messages that are not deleted\nUNFLAGGED - match messages that are not flagged\nUNKEYWORD \"string\" - match messages that do not have the keyword \"string\"\nUNSEEN - match messages which have not been read yet",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "Returns an array of UIDs.\n\nArguments:\nALL - return all messages matching the rest of the criteria\nANSWERED - match messages with the \\\\ANSWERED flag set\nBCC \"string\" - match messages with \"string\" in the Bcc: field\nBEFORE \"date\" - match messages with Date: before \"date\"\nBODY \"string\" - match messages with \"string\" in the body of the message\nCC \"string\" - match messages with \"string\" in the Cc: field\nDELETED - match deleted messages\nFLAGGED - match messages with the \\\\FLAGGED (sometimes referred to as Important or Urgent) flag set\nFROM \"string\" - match messages with \"string\" in the From: field\nKEYWORD \"string\" - match messages with \"string\" as a keyword\nNEW - match new messages\nOLD - match old messages\nON \"date\" - match messages with Date: matching \"date\"\nRECENT - match messages with the \\\\RECENT flag set\nSEEN - match messages that have been read (the \\\\SEEN flag is set)\nSINCE \"date\" - match messages with Date: after \"date\"\nSUBJECT \"string\" - match messages with \"string\" in the Subject:\nTEXT \"string\" - match messages with text \"string\"\nTO \"string\" - match messages with \"string\" in the To:\nUNANSWERED - match messages that have not been answered\nUNDELETED - match messages that are not deleted\nUNFLAGGED - match messages that are not flagged\nUNKEYWORD \"string\" - match messages that do not have the keyword \"string\"\nUNSEEN - match messages which have not been read yet"
+                    "content": "<p>Returns an array of UIDs.\nArguments:\nALL - return all messages matching the rest of the criteria\nANSWERED - match messages with the \\ANSWERED flag set\nBCC &quot;string&quot; - match messages with &quot;string&quot; in the Bcc: field\nBEFORE &quot;date&quot; - match messages with Date: before &quot;date&quot;\nBODY &quot;string&quot; - match messages with &quot;string&quot; in the body of the message\nCC &quot;string&quot; - match messages with &quot;string&quot; in the Cc: field\nDELETED - match deleted messages\nFLAGGED - match messages with the \\FLAGGED (sometimes referred to as Important or Urgent) flag set\nFROM &quot;string&quot; - match messages with &quot;string&quot; in the From: field\nKEYWORD &quot;string&quot; - match messages with &quot;string&quot; as a keyword\nNEW - match new messages\nOLD - match old messages\nON &quot;date&quot; - match messages with Date: matching &quot;date&quot;\nRECENT - match messages with the \\RECENT flag set\nSEEN - match messages that have been read (the \\SEEN flag is set)\nSINCE &quot;date&quot; - match messages with Date: after &quot;date&quot;\nSUBJECT &quot;string&quot; - match messages with &quot;string&quot; in the Subject:\nTEXT &quot;string&quot; - match messages with text &quot;string&quot;\nTO &quot;string&quot; - match messages with &quot;string&quot; in the To:\nUNANSWERED - match messages that have not been answered\nUNDELETED - match messages that are not deleted\nUNFLAGGED - match messages that are not flagged\nUNKEYWORD &quot;string&quot; - match messages that do not have the keyword &quot;string&quot;\nUNSEEN - match messages which have not been read yet<\/p>"
                 }
             ],
             "file": "bbn\\appui\\mailbox",
@@ -1266,17 +975,6 @@
             "final": false,
             "code": "function($criteria)\n  {\n      return imap_search($this->stream, $criteria, SE_UID);\n    }\n    return false;\n  }",
             "startLine": 651,
-            "doc": {
-                "description": "Search messages. (Test: ok)\nReturns an array of UIDs.\n\nArguments:\nALL - return all messages matching the rest of the criteria\nANSWERED - match messages with the \\\\ANSWERED flag set\nBCC \"string\" - match messages with \"string\" in the Bcc: field\nBEFORE \"date\" - match messages with Date: before \"date\"\nBODY \"string\" - match messages with \"string\" in the body of the message\nCC \"string\" - match messages with \"string\" in the Cc: field\nDELETED - match deleted messages\nFLAGGED - match messages with the \\\\FLAGGED (sometimes referred to as Important or Urgent) flag set\nFROM \"string\" - match messages with \"string\" in the From: field\nKEYWORD \"string\" - match messages with \"string\" as a keyword\nNEW - match new messages\nOLD - match old messages\nON \"date\" - match messages with Date: matching \"date\"\nRECENT - match messages with the \\\\RECENT flag set\nSEEN - match messages that have been read (the \\\\SEEN flag is set)\nSINCE \"date\" - match messages with Date: after \"date\"\nSUBJECT \"string\" - match messages with \"string\" in the Subject:\nTEXT \"string\" - match messages with text \"string\"\nTO \"string\" - match messages with \"string\" in the To:\nUNANSWERED - match messages that have not been answered\nUNDELETED - match messages that are not deleted\nUNFLAGGED - match messages that are not flagged\nUNKEYWORD \"string\" - match messages that do not have the keyword \"string\"\nUNSEEN - match messages which have not been read yet",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$criteria"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 656,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1311,24 +1009,6 @@
             "final": false,
             "code": "function($mbox, $msg)\n  {\n      return @imap_append($this->stream, $this->mbParam. $mbox, $msg);\n    }\n    return false;\n  }",
             "startLine": 665,
-            "doc": {
-                "description": "Appends a string message to a specified mailbox. (Test: ok)",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$mbox",
-                        "description": "Destination mailbox name"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$msg",
-                        "description": "Message"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 670,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1374,17 +1054,6 @@
             "final": false,
             "code": "function($msgno)\n  {\n    \/\/ output all the following:\n    $this->htmlmsg = '';\n    $this->plainmsg = '';\n    $this->charset = '';\n    $this->attachments = [];\n    if ( is_dir(BBN_USER_PATH . 'tmp_mail') ){\n      bbn\\file\\dir::delete(BBN_USER_PATH . 'tmp_mail');\n    }\n    \/\/ HEADER\n    $header = $this->get_msg_headerinfo($msgno);\n    \/\/ add code here to get date, from, to, cc, subject...\n    \/\/ BODY STRUCTURE\n    $structure = $this->get_msg_structure($msgno);\n    bbn\\x::log($header,'imap');\n    bbn\\x::log($structure,'imap');\n    if ( !$structure->parts ){  \/\/ simple\n      $this->get_msg_part($msgno, $structure, 0);\n    }\n    else {  \/\/ multipart: cycle through each part\n      foreach ( $structure->parts as $partno0 => $p ){\n        $this->get_msg_part($msgno, $p, $partno0 + 1);\n      }\n    }\n  }",
             "startLine": 677,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$msgno"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 702,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1419,18 +1088,6 @@
             "final": false,
             "code": "function($name)\n  {\n      $names = $this->get_all_names_mboxes();\n      if ( !empty($names) && \\in_array($name, $names) ){\n        return true;\n      }\n    }\n    return false;\n  }",
             "startLine": 710,
-            "doc": {
-                "description": "Check if a mailbox exists",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$name",
-                        "description": "The mailbox name"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 718,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1457,7 +1114,7 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": [],
     "constants": null,
     "numMethods": 31,
     "numProperties": 0,
@@ -1483,5 +1140,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\appui",
-    "shortName": "mailbox"
+    "shortName": "mailbox",
+    "summary": ""
 }

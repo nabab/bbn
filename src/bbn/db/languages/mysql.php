@@ -680,10 +680,20 @@ MYSQL
               }
               break;
             case 'like':
-              $res .= 'LIKE ?';
+              if ( isset($f['exp']) ){
+                $res .= 'LIKE '.$f['exp'];
+              }
+              else {
+                $res .= 'LIKE ?';
+              }
               break;
             case 'not like':
-              $res .= 'NOT LIKE ?';
+              if ( isset($f['exp']) ){
+                $res .= 'NOT LIKE '.$f['exp'];
+              }
+              else {
+                $res .= 'NOT LIKE ?';
+              }
               break;
             case 'eq':
             case 'is':

@@ -26,7 +26,6 @@
             "final": false,
             "code": "function($cfg)\n  {\n      die(\"You must provide the constants BBN_ADMIN_EMAIL and BBN_IS_DEV to use the mail class...\");\n    }\n    if ( !isset($cfg['from']) && isset($cfg['user']) ){\n      $cfg['from'] = $cfg['user'];\n    }\n    if ( !isset($cfg['host'], $cfg['from']) || !str::is_domain($cfg['host']) || !str::is_email($cfg['from'])){\n      die(\"A host name and a \\\"From\\\" eMail address must be provided\");\n    }\n    $this->mailer = new PHPMailer();\n    $this->mailer->CharSet = isset($cfg['charset']) ? $cfg['charset'] : \"UTF-8\";\n    if ( isset($cfg['user'], $cfg['pass']) ){\n      \/\/ SMTP connection will not close after each email sent, reduces SMTP overhead\n      $this->mailer->isSMTP();\n      if ( !empty($cfg['ssl']) ){\n        if ( \\is_array($cfg['ssl']) ){\n          $this->mailer->SMTPOptions = ['ssl' => $cfg['ssl']];\n        }\n        else{\n          $this->mailer->SMTPOptions = [\n            'verify_peer' => false,\n            'verify_peer_name' => false,\n            'verify_host' => false,\n            'allow_self_signed' => false\n          ];\n        }\n      }\n      else{\n        $this->mailer->SMTPSecure = 'tls';\n      }\n      $this->mailer->Host = $cfg['host'];\n      $this->mailer->Port = isset($cfg['port']) ? $cfg['port'] : 587;\n      $this->mailer->SMTPKeepAlive = true;\n      $this->mailer->SMTPDebug = empty($cfg['debug']) ? false : 3;\n      $this->mailer->Debugoutput = 'error_log';\n      $this->mailer->SMTPAuth = true;\n      $this->mailer->Username = $cfg['user'];\n      $this->mailer->Password = $cfg['pass'];\n      if ( !empty($cfg['imap']) ){\n        $this->set_imap($cfg);\n      }\n    }\n    $this->set_from($cfg['from'], isset($cfg['name']) ? $cfg['name'] : 0);\n    $this->set_template(isset($cfg['template']) ? $cfg['template'] : self::get_default_template());\n  }",
             "startLine": 87,
-            "doc": null,
             "endLine": 132,
             "isDeprecated": false,
             "isGenerator": false,
@@ -61,7 +60,6 @@
             "final": false,
             "code": "function($cfg)\n  {\n      die(\"You need to provide user and password for IMAP connection\");\n    }\n    $imap_host = isset($cfg['imap_host']) ? $cfg['imap_host'] : $cfg['host'];\n    $this->imap_user = isset($cfg['imap_user']) ? $cfg['imap_user'] : $cfg['user'];\n    $this->imap_pass = isset($cfg['imap_pass']) ? $cfg['imap_pass'] : $cfg['pass'];\n    $this->imap_sent = isset($cfg['imap_sent']) ? $cfg['imap_sent'] : 'Sent';\n    if ( isset($cfg['imap_port']) ){\n      $imap_port = $cfg['imap_port'];\n    }\n    if ( !empty($cfg['imap_ssl']) ){\n      if ( !isset($cfg['imap_port']) ){\n        $imap_port = 993;\n      }\n      $this->imap_string = \"{\".$imap_host.\":\".$imap_port.\"\/ssl\";\n    }\n    else{\n      if ( !isset($cfg['imap_port']) ){\n        $imap_port = 143;\n      }\n      $this->imap_string = \"{\".$imap_host.\":\".$imap_port.\"\/tls\";\n    }\n    if ( empty($cfg['valid']) ){\n      $this->imap_string .= \"\/novalidate-cert\";\n    }\n    $this->imap_string .= \"}\";\n    return $this;\n  }",
             "startLine": 134,
-            "doc": null,
             "endLine": 162,
             "isDeprecated": false,
             "isGenerator": false,
@@ -96,7 +94,6 @@
             "final": false,
             "code": "function()\n  {\n    return $this;\n  }",
             "startLine": 164,
-            "doc": null,
             "endLine": 167,
             "isDeprecated": false,
             "isGenerator": false,
@@ -121,7 +118,6 @@
             "final": false,
             "code": "function($email, $name = NULL)\n  {\n      die(\"The From eMail address is not valid\");\n    }\n    if ( !$name ){\n      $name = $email;\n    }\n    $this->mailer->setFrom($email, $name);\n    $this->mailer->addReplyTo($email, $name);\n    return $this;\n  }",
             "startLine": 169,
-            "doc": null,
             "endLine": 179,
             "isDeprecated": false,
             "isGenerator": false,
@@ -165,7 +161,6 @@
             "final": false,
             "code": "function($file)\n  {\n      $this->template = file_get_contents($file);\n      $this->path = dirname($file);\n    }\n    else if ( \\is_string($file) ){\n      $this->template = $file;\n      $this->path = BBN_DATA_PATH;\n    }\n    return $this;\n  }",
             "startLine": 181,
-            "doc": null,
             "endLine": 191,
             "isDeprecated": false,
             "isGenerator": false,
@@ -200,7 +195,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 193,
-            "doc": null,
             "endLine": 195,
             "isDeprecated": false,
             "isGenerator": false,
@@ -222,7 +216,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 72,
-                "doc": null,
                 "endLine": 74,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -249,7 +242,6 @@
             "final": false,
             "code": "function($cfg)\n  {\n    $r = false;\n    if ( !defined('BBN_IS_PROD') || !BBN_IS_PROD ){\n      $cfg['to'] = BBN_ADMIN_EMAIL;\n      $cfg['cc'] = '';\n      $cfg['bcc'] = '';\n      $this->mailer->AddAddress(BBN_ADMIN_EMAIL);\n      $valid = 1;\n    }\n    else{\n      foreach ( self::$_dest_fields as $dest_field ){\n        if ( isset($cfg[$dest_field]) ){\n          if ( !\\is_array($cfg[$dest_field]) ){\n            $cfg[$dest_field] = array_map(function($a){\n              return trim($a);\n            }, explode(\";\", $cfg[$dest_field]));\n          }\n          foreach ( $cfg[$dest_field] as $dest ){\n            if ( PHPMailer::validateAddress($dest) ){\n              switch ( $dest_field ){\n                case \"to\":\n                  $this->mailer->AddAddress($dest);\n                  break;\n                case \"cc\":\n                  $this->mailer->AddCC($dest);\n                  break;\n                case \"bcc\":\n                  $this->mailer->AddBCC($dest);\n                  break;\n              }\n              $valid = 1;\n            }\n            else{\n              x::log(\"Adresse email invalide: \".$dest);\n              $valid = false;\n            }\n          }\n        }\n      }\n    }\n    if ( $valid ){\n      $ar = [];\n      if ( isset($cfg['subject']) ){\n        $ar['title'] = $cfg['subject'];\n      }\n      else if ( isset($cfg['title']) ){\n        $ar['title'] = $cfg['title'];\n      }\n      $this->mailer->Subject = isset($ar['title']) ? $ar['title'] : '';\n\n      if ( !isset($cfg['text']) ){\n        $cfg['text'] = '';\n      }\n      if ( isset($cfg['attachments']) ){\n        if ( \\is_string($cfg['attachments']) ){\n          $cfg['attachments'] = [$cfg['attachments']];\n        }\n        foreach ( $cfg['attachments'] as $name => $att ){\n          if ( is_file($att) ){\n            \/\/ 2nd parameter is the file's name in the mail\n            $this->mailer->AddAttachment($att, is_int($name) ? '' : $name);\n          }\n        }\n      }\n      if ( !isset($renderer) ){\n        $renderer = tpl::renderer($this->template);\n      }\n      $ar['url'] = \\defined('BBN_URL') ? BBN_URL : '';\n      $ar['text'] = $cfg['text'];\n      $ar['text'] = $renderer($ar);\n      self::set_content($ar['text']);\n      $this->mailer->msgHTML(self::$_content, $this->path, true);\n      $r = $this->mailer->send();\n      if ( $r && !empty($this->imap_string) ){\n        $mail_string = $this->mailer->getSentMIMEMessage();\n        if ( !is_resource($this->imap) ){\n          $this->imap = \\imap_open($this->imap_string, $this->imap_user, $this->imap_pass);\n        }\n        if ( !is_resource($this->imap) || !\\imap_append($this->imap, $this->imap_string.$this->imap_sent, $mail_string, \"\\\\Seen\") ){\n          $this->log(\\imap_errors());\n        }\n      }\n      if ( !$r ){\n        $this->log(\\imap_last_error());\n      }\n    }\n    $this->mailer->ClearAllRecipients();\n    $this->mailer->ClearAttachments();\n    return $r;\n  }",
             "startLine": 197,
-            "doc": null,
             "endLine": 287,
             "isDeprecated": false,
             "isGenerator": false,
@@ -284,11 +276,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 45,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 50,
             "isDeprecated": false,
             "isGenerator": false,
@@ -310,11 +297,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 45,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 50,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -341,11 +323,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 56,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 61,
             "isDeprecated": false,
             "isGenerator": false,
@@ -367,11 +344,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 56,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 61,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -398,7 +370,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 76,
-            "doc": null,
             "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
@@ -420,7 +391,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 76,
-                "doc": null,
                 "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -447,7 +417,6 @@
             "final": false,
             "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
             "startLine": 80,
-            "doc": null,
             "endLine": 88,
             "isDeprecated": false,
             "isGenerator": false,
@@ -469,7 +438,6 @@
                 "final": false,
                 "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
                 "startLine": 80,
-                "doc": null,
                 "endLine": 88,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -496,22 +464,6 @@
             "final": false,
             "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
             "startLine": 95,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$name"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$arguments"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 99,
             "isDeprecated": false,
             "isGenerator": false,
@@ -533,22 +485,6 @@
                 "final": false,
                 "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
                 "startLine": 95,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "string",
-                            "name": "$name"
-                        },
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$arguments"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 99,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -613,11 +549,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 104,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 106,
             "isDeprecated": false,
             "isGenerator": false,
@@ -639,11 +570,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 104,
-                "doc": {
-                    "description": "",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 106,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -670,17 +596,6 @@
             "final": false,
             "code": "function($debug)\n  {\n  }",
             "startLine": 112,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "boolean",
-                        "name": "$debug"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 114,
             "isDeprecated": false,
             "isGenerator": false,
@@ -702,17 +617,6 @@
                 "final": false,
                 "code": "function($debug)\n  {\n  }",
                 "startLine": 112,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "boolean",
-                            "name": "$debug"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 114,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -754,12 +658,22 @@
             "visibility": "public"
         }
     },
-    "staticProperties": null,
+    "staticProperties": {
+        "_dest_fields": [
+            "to",
+            "cc",
+            "bcc"
+        ],
+        "_default_template": "<!DOCTYPE html><html><head><title>{{title}}<\/title><meta http-equiv=\"Content-Type\"\ncontent=\"text\/html; charset=UTF-8\"><\/head><body><div>{{{text}}}<\/div><\/body><\/html>",
+        "_template_checked": false,
+        "_content": "",
+        "_hash_content": null
+    },
     "constants": null,
     "numMethods": 14,
     "numProperties": 1,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 5,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [],
@@ -796,5 +710,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn",
-    "shortName": "mail"
+    "shortName": "mail",
+    "summary": ""
 }

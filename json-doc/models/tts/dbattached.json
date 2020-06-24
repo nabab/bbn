@@ -23,7 +23,6 @@
             "final": false,
             "code": "function($id)\n  {\n      $this->class_cfg['arch'][$this->class_table]['id'] => $id\n    ]) ? true : false;\n  }",
             "startLine": 17,
-            "doc": null,
             "endLine": 21,
             "isDeprecated": false,
             "isGenerator": false,
@@ -49,7 +48,7 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": [],
     "constants": null,
     "numMethods": 1,
     "numProperties": 0,
@@ -69,5 +68,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\models\\tts",
-    "shortName": "dbattached"
+    "shortName": "dbattached",
+    "summary": ""
 }

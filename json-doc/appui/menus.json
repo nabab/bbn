@@ -29,7 +29,6 @@
             "final": false,
             "code": "function()\n  {\n    $this->pref = bbn\\user\\preferences::get_instance();\n    $this->cache_init();\n    self::optional_init();\n  }",
             "startLine": 25,
-            "doc": null,
             "endLine": 30,
             "isDeprecated": false,
             "isGenerator": false,
@@ -54,17 +53,6 @@
             "final": false,
             "code": "function($path)\n  {\n      \/\/$path = $this->options->from_code($path, self::$option_root_id);\n      $path = self::get_appui_option_id($path);\n    }\n    return bbn\\str::is_uid($path) ? $path : false;\n  }",
             "startLine": 146,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$path"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 152,
             "isDeprecated": false,
             "isGenerator": false,
@@ -99,17 +87,6 @@
             "final": false,
             "code": "function($id)\n  {\n      return $this->options->to_path($id, '', $this->_get_public_root());\n    }\n    return false;\n  }",
             "startLine": 160,
-            "doc": {
-                "description": "Returns the path corresponding to an ID",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 165,
             "isDeprecated": false,
             "isGenerator": false,
@@ -144,7 +121,6 @@
             "final": false,
             "code": "function($id, $prepath = false)\n  {\n      if ( $this->cache_has($id, __FUNCTION__) ){\n        return $this->cache_get($id, __FUNCTION__);\n      }\n      $tree = $this->pref->get_tree($id);\n      $res = $this->_arrange($tree, $prepath);\n      $this->cache_set($id, __FUNCTION__, $res['items'] ?? []);\n      return $res['items'] ?? [];\n    }\n  }",
             "startLine": 167,
-            "doc": null,
             "endLine": 177,
             "isDeprecated": false,
             "isGenerator": false,
@@ -188,7 +164,6 @@
             "final": false,
             "code": "function($id, $prepath = false)\n  {\n      return $this->_adapt($tree, $this->pref, $prepath);\n    }\n  }",
             "startLine": 179,
-            "doc": null,
             "endLine": 183,
             "isDeprecated": false,
             "isGenerator": false,
@@ -232,18 +207,6 @@
             "final": false,
             "code": "function($id)\n  {\n    if (\n      ($bit = $this->pref->get_bit($id, false)) &&\n      ($id_option = $this->from_path('shortcuts')) &&\n      ($c = $this->pref->get_class_cfg())\n    ){\n      if ( $id_menu = $this->pref->get_by_option($id_option) ){\n        $id_menu = $id_menu[$c['arch']['user_options']['id']];\n      }\n      else {\n        $id_menu = $this->pref->add($id_option, [$c['arch']['user_options']['text'] => _('Shortcuts')]);\n      }\n      if (\n        !empty($id_menu) &&\n        ($arch = $c['arch']['user_options_bits'])\n      ){\n        if (\n          ($bits = $this->pref->get_bits($id_menu, false, false)) &&\n          ( \\bbn\\x::find($bits, [$arch['id_option'] => $bit[$arch['id_option']]]) !== false)\n        ){\n          return null;\n        }\n        return $this->pref->add_bit($id_menu, [\n          $arch['id_option'] => $bit[$arch['id_option']],\n          $arch['text'] => $bit[$arch['text']],\n          $arch['cfg'] => $bit[$arch['cfg']],\n          $arch['num'] => $this->pref->next_bit_num($id_menu) ?: 1\n        ]);\n      }\n    }\n    return null;\n  }",
             "startLine": 191,
-            "doc": {
-                "description": "Adds an user'shortcut from a menu",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "The menu item's ID to link"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 223,
             "isDeprecated": false,
             "isGenerator": false,
@@ -282,18 +245,6 @@
             "final": false,
             "code": "function($id)\n  {\n    if ( \\bbn\\str::is_uid($id) ){\n      return $this->pref->delete_bit($id);\n    }\n    return null;\n  }",
             "startLine": 231,
-            "doc": {
-                "description": "Removes an user'shortcut",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "The shortcut's ID"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 237,
             "isDeprecated": false,
             "isGenerator": false,
@@ -332,11 +283,6 @@
             "final": false,
             "code": "function()\n  {\n    if (\n      ($id_option = $this->from_path('shortcuts')) &&\n      ($menu = $this->pref->get_by_option($id_option))\n    ){\n      $links = $this->pref->get_bits($menu['id']);\n      $res = [];\n      foreach ( $links as $link ){\n        if ( ($url = $this->to_path($link['id_option'])) ){\n          $res[] = [\n            'id' => $link['id'],\n            'id_option' => $link['id_option'],\n            'url' => $url,\n            'text' => $link['text'],\n            'icon' => $link['icon'],\n            'num' => $link['num']\n          ];\n        }\n      }\n      return $res;\n    }\n    return null;\n  }",
             "startLine": 244,
-            "doc": {
-                "description": "Gets the user' shortcuts list",
-                "params": [],
-                "return": ""
-            },
             "endLine": 267,
             "isDeprecated": false,
             "isGenerator": false,
@@ -364,18 +310,6 @@
             "final": false,
             "code": "function($id)\n  {\n    return $this->pref->get_id_by_bit($id);\n  }",
             "startLine": 275,
-            "doc": {
-                "description": "Returns the menu's ID form an its item",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "The ID of the menu's item"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 278,
             "isDeprecated": false,
             "isGenerator": false,
@@ -414,16 +348,6 @@
             "final": false,
             "code": "function($id)\n  {\n      if ( $id_menu = $this->get_id_menu($id) ){\n        if ( $this->pref->delete_bit($id) ){\n          $this->delete_cache($id_menu);\n          return true;\n        }\n      }\n      else if ( $this->pref->delete($id) ){\n        $this->options->delete_cache($this->from_path('menus'));\n        return true;\n      }\n    }\n    return false;\n  }",
             "startLine": 285,
-            "doc": {
-                "description": "Removes menu and deletes parent cache",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$id"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 299,
             "isDeprecated": false,
             "isGenerator": false,
@@ -458,27 +382,6 @@
             "final": false,
             "code": "function($id_menu, array $cfg = NULL)\n  {\n    $id = false;\n    if ( \\is_array($id_menu) ){\n      $cfg = $id_menu;\n      $id_opt = $this->from_path('menus');\n    }\n    if ( !empty($cfg) ){\n      $id = \\bbn\\str::is_uid($id_menu) ? $this->pref->add_bit($id_menu, $cfg) : $this->pref->add($id_opt, $cfg);\n    }\n    if ( !empty($id) ){\n      if ( \\bbn\\str::is_uid($id_menu) ){\n        $this->delete_cache($id_menu);\n      }\n      $this->options->delete_cache($id_opt);\n      return $id;\n    }\n    return null;\n  }",
             "startLine": 309,
-            "doc": {
-                "description": "Add menu and delete the chache.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string|array",
-                        "name": "$id",
-                        "description": "parent"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$cfg"
-                    }
-                ],
-                "return": "",
-                "internal": {
-                    "tag": "internal",
-                    "text": "param $id"
-                }
-            },
             "endLine": 327,
             "isDeprecated": false,
             "isGenerator": false,
@@ -526,22 +429,6 @@
             "final": false,
             "code": "function($id, array $cfg)\n  {\n    if (\n      \\bbn\\str::is_uid($id) &&\n      ($id_menu = $this->get_id_menu($id)) &&\n      $this->pref->update_bit($id, $cfg)\n    ){\n      $this->delete_cache($id_menu);\n      return true;\n    }\n    return false;\n  }",
             "startLine": 336,
-            "doc": {
-                "description": "Updates a menu item and deletes the menu cache",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$cfg"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 347,
             "isDeprecated": false,
             "isGenerator": false,
@@ -587,24 +474,6 @@
             "final": false,
             "code": "function($id, $text)\n  {\n    if ( \\bbn\\str::is_uid($id) && $this->pref->set_text($id, $text) ){\n      $this->delete_cache($id);\n      return true;\n    }\n    return false;\n  }",
             "startLine": 356,
-            "doc": {
-                "description": "Sets the menu's text and deletes its chache",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "The menu's ID"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$text",
-                        "description": "The new text tp set"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 363,
             "isDeprecated": false,
             "isGenerator": false,
@@ -652,10 +521,6 @@
             "final": false,
             "code": "function($id_menu)\n  {\n    return $this->cache_delete($id_menu);\n  }",
             "startLine": 368,
-            "doc": {
-                "description": "Clears the menu cache",
-                "tags": []
-            },
             "endLine": 371,
             "isDeprecated": false,
             "isGenerator": false,
@@ -690,11 +555,6 @@
             "final": false,
             "code": "function()\n  {\n    if (\n      ($id_opt = $this->from_path('default')) &&\n      ($all = $this->pref->get_all($id_opt))\n    ){\n      $id = false;\n      foreach ( $all as $a ){\n        if ( !empty($a['id_user']) ){\n          $id = $a['id_alias'];\n          break;\n        }\n        else if ( !empty($a['id_group']) ){\n          $id = $a['id_alias'];\n          break;\n        }\n        else if ( !empty($a['public']) ){\n          $id = $a['id_alias'];\n          break;\n        }\n      }\n      return $id;\n    }\n\treturn null;\n  }",
             "startLine": 378,
-            "doc": {
-                "description": "Gets the user's default menu",
-                "params": [],
-                "return": ""
-            },
             "endLine": 402,
             "isDeprecated": false,
             "isGenerator": false,
@@ -722,24 +582,6 @@
             "final": false,
             "code": "function($k_text = 'text', $k_value = 'value')\n  {\n    $c = $this->pref->get_class_cfg();\n    $pref =& $this->pref;\n    return array_map(function($e) use($c, $k_text, $k_value, $pref){\n      return [\n        $k_text => $e[$c['arch']['user_options']['text']],\n        $k_value => $e[$c['arch']['user_options']['id']],\n        $c['arch']['user_options']['public'] => $e[$c['arch']['user_options']['public']],\n        $c['arch']['user_options']['id_user'] => $e[$c['arch']['user_options']['id_user']],\n        $c['arch']['user_options']['id_group'] => $e[$c['arch']['user_options']['id_group']],\n        'hasItems' => !!count($pref->get_bits($e[$c['arch']['user_options']['id']]))\n      ];\n    }, $this->pref->get_all(self::get_appui_option_id('menus')));\n  }",
             "startLine": 411,
-            "doc": {
-                "description": "Gets the user's menus list (text-value form)",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$k",
-                        "description": "text The key used for the text. Default: 'text'"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$k",
-                        "description": "value The key used for the value. Default 'value'"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 425,
             "isDeprecated": false,
             "isGenerator": false,
@@ -788,24 +630,6 @@
             "final": false,
             "code": "function($id, $name)\n  {\n    if ( \\bbn\\str::is_uid($id) && ($id_menu = $this->add(['text' => $name])) ){\n      if ( ($bits = $this->pref->get_full_bits($id)) && !$this->_clone($id_menu, $bits) ){\n        return null;\n      }\n      return $id_menu;\n    }\n    return null;\n  }",
             "startLine": 436,
-            "doc": {
-                "description": "Clones a menu",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "The menu's ID to clone"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$name",
-                        "description": "The new menu's name"
-                    }
-                ],
-                "return": "The new ID"
-            },
             "endLine": 445,
             "isDeprecated": false,
             "isGenerator": false,
@@ -854,29 +678,6 @@
             "final": false,
             "code": "function($id_menu, $id_menu_to, array $cfg)\n  {\n    if (\n      \\bbn\\str::is_uid($id_menu) &&\n      \\bbn\\str::is_uid($id_menu_to) &&\n      ($bits = $this->pref->get_full_bits($id_menu)) &&\n      ($id = $this->add($id_menu_to, $cfg)) &&\n      $this->_clone($id_menu_to, $bits, $id)\n    ){\n      return $id;\n    }\n    return null;\n  }",
             "startLine": 457,
-            "doc": {
-                "description": "Copies a menu into another one.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "The menu's ID to copy"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "menu_to The target menu's ID"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$cfg"
-                    }
-                ],
-                "return": "The new ID"
-            },
             "endLine": 469,
             "isDeprecated": false,
             "isGenerator": false,
@@ -934,30 +735,6 @@
             "final": false,
             "code": "function($id_bit, $id_menu_to, array $cfg)\n  {\n    if (\n      \\bbn\\str::is_uid($id_bit) &&\n      \\bbn\\str::is_uid($id_menu_to) &&\n      ($bit = $this->pref->get_bit($id_bit)) &&\n      ($id_menu = $this->get_id_menu($id_bit))\n    ){\n      $bit = array_merge($bit, $cfg, [\n        'id_parent' => null,\n        'num' => $this->pref->get_max_bit_num($id_menu_to, null, true)\n      ]);\n      $bits = $this->pref->get_full_bits($id_menu, $id_bit, true);\n      if ( $id = $this->add($id_menu_to, $bit) ){\n        if ( !empty($bits) && !$this->_clone($id_menu_to, $bits, $id) ){\n          return null;\n        }\n        return $id;\n      }\n    }\n    return null;\n  }",
             "startLine": 480,
-            "doc": {
-                "description": "Clones a section\/link to an other menu.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "bit The bit's ID to clone"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "menu_to The menu's ID to clone"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$cfgvaule",
-                        "description": "of bit"
-                    }
-                ],
-                "return": "The new ID"
-            },
             "endLine": 501,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1016,7 +793,6 @@
             "final": false,
             "code": "function($id, $id_parent = NULL, $deep = false)\n  {\n    if (\n      \\bbn\\str::is_uid($id) &&\n      (empty($id_parent) || \\bbn\\str::is_uid($id_parent))\n    ){\n      $fixed = $this->pref->fix_bits_order($id, $id_parent, $deep);\n      if ( $fixed ){\n        $this->delete_cache($id);\n      }\n      return (int)$fixed;\n    }\n    return null;\n  }",
             "startLine": 503,
-            "doc": null,
             "endLine": 516,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1072,24 +848,6 @@
             "final": false,
             "code": "function($id, $pos)\n  {\n    if (\n      \\bbn\\str::is_uid($id) &&\n      $this->pref->order_bit($id, $pos)\n    ){\n      $this->delete_cache($this->get_id_menu($id));\n      return true;\n    }\n    return false;\n  }",
             "startLine": 524,
-            "doc": {
-                "description": "Orders a section\/link.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "The section\/link's ID"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$pos",
-                        "description": "The new position."
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 534,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1137,24 +895,6 @@
             "final": false,
             "code": "function($id, $id_parent = NULL)\n  {\n    if ( $this->pref->move_bit($id, $id_parent) ){\n      $this->delete_cache($this->get_id_menu($id));\n      return true;\n    }\n    return false;\n  }",
             "startLine": 543,
-            "doc": {
-                "description": "Moves a section\/link inside to another one.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "The section\/link's ID."
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string|null",
-                        "name": "$id",
-                        "description": "parent The parent's ID."
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 550,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1202,7 +942,6 @@
             "final": false,
             "code": "function()\n  {\n    $items = self::get_appui_option('menus');\n    $res = [];\n    foreach ( $items as $it ){\n      $res[] = [\n        'text' => $it['text'],\n        'value' => $it['id']\n      ];\n    }\n    return $res;\n  }",
             "startLine": 555,
-            "doc": null,
             "endLine": 566,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1227,7 +966,6 @@
             "final": false,
             "code": "function($id, $prefix = '')\n  {\n  }",
             "startLine": 570,
-            "doc": null,
             "endLine": 572,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1271,11 +1009,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 45,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 50,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1297,11 +1030,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 45,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 50,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1328,11 +1056,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 56,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 61,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1354,11 +1077,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 56,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 61,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1385,7 +1103,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 72,
-            "doc": null,
             "endLine": 74,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1407,7 +1124,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 72,
-                "doc": null,
                 "endLine": 74,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1434,7 +1150,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 76,
-            "doc": null,
             "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1456,7 +1171,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 76,
-                "doc": null,
                 "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1483,7 +1197,6 @@
             "final": false,
             "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
             "startLine": 80,
-            "doc": null,
             "endLine": 88,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1505,7 +1218,6 @@
                 "final": false,
                 "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
                 "startLine": 80,
-                "doc": null,
                 "endLine": 88,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1532,22 +1244,6 @@
             "final": false,
             "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
             "startLine": 95,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$name"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$arguments"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 99,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1569,22 +1265,6 @@
                 "final": false,
                 "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
                 "startLine": 95,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "string",
-                            "name": "$name"
-                        },
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$arguments"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 99,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1649,11 +1329,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 104,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 106,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1675,11 +1350,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 104,
-                "doc": {
-                    "description": "",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 106,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1706,17 +1376,6 @@
             "final": false,
             "code": "function($debug)\n  {\n  }",
             "startLine": 112,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "boolean",
-                        "name": "$debug"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 114,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1738,17 +1397,6 @@
                 "final": false,
                 "code": "function($debug)\n  {\n  }",
                 "startLine": 112,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "boolean",
-                            "name": "$debug"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 114,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1795,7 +1443,6 @@
             "final": false,
             "code": "function()\n  {\n    return self::$option_root_id;\n  }",
             "startLine": 71,
-            "doc": null,
             "endLine": 74,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1820,7 +1467,6 @@
             "final": false,
             "code": "function()\n  {\n    return self::$option_appui_id;\n  }",
             "startLine": 76,
-            "doc": null,
             "endLine": 79,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1845,17 +1491,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 87,
-            "doc": {
-                "description": "Returns The option's ID of a category, i.e. direct children of option's root",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$code"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 89,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1880,7 +1515,6 @@
             "final": false,
             "code": "function()\n  {\n      return $a !== null;\n    }));\n  }",
             "startLine": 91,
-            "doc": null,
             "endLine": 95,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1905,7 +1539,6 @@
             "final": false,
             "code": "function()\n  {\n      $tree['items'] : [];\n  }",
             "startLine": 97,
-            "doc": null,
             "endLine": 100,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1930,7 +1563,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 102,
-            "doc": null,
             "endLine": 104,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1955,7 +1587,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 106,
-            "doc": null,
             "endLine": 108,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1980,7 +1611,6 @@
             "final": false,
             "code": "function()\n  {\n      bbn\\appui\\options::get_instance()->text_value_options($id): [];\n  }",
             "startLine": 110,
-            "doc": null,
             "endLine": 113,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2005,17 +1635,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 121,
-            "doc": {
-                "description": "Returns The option's ID of a category, i.e. direct children of option's root",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$code"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 123,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2040,7 +1659,6 @@
             "final": false,
             "code": "function()\n  {\n      return $a !== null;\n    }));\n  }",
             "startLine": 125,
-            "doc": null,
             "endLine": 129,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2065,7 +1683,6 @@
             "final": false,
             "code": "function()\n  {\n      $tree['items'] : [];\n  }",
             "startLine": 131,
-            "doc": null,
             "endLine": 134,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2090,7 +1707,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 136,
-            "doc": null,
             "endLine": 138,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2115,7 +1731,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 140,
-            "doc": null,
             "endLine": 142,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2140,7 +1755,6 @@
             "final": false,
             "code": "function()\n  {\n      bbn\\appui\\options::get_instance()->text_value_options($id) : [];\n  }",
             "startLine": 144,
-            "doc": null,
             "endLine": 147,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2156,12 +1770,18 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": {
+        "id_public_root": null,
+        "public_root": "permissions|page",
+        "optional_is_init": false,
+        "option_appui_id": null,
+        "option_root_id": null
+    },
     "constants": null,
     "numMethods": 46,
     "numProperties": 0,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 5,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [
@@ -2193,5 +1813,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\appui",
-    "shortName": "menus"
+    "shortName": "menus",
+    "summary": ""
 }

@@ -26,11 +26,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 25,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 27,
             "isDeprecated": false,
             "isGenerator": false,
@@ -55,7 +50,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 29,
-            "doc": null,
             "endLine": 31,
             "isDeprecated": false,
             "isGenerator": false,
@@ -80,7 +74,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 33,
-            "doc": null,
             "endLine": 35,
             "isDeprecated": false,
             "isGenerator": false,
@@ -96,12 +89,15 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": {
+        "retriever_instance": null,
+        "retriever_exists": false
+    },
     "constants": null,
     "numMethods": 3,
     "numProperties": 0,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 2,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [],
@@ -119,5 +115,13 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\models\\tts",
-    "shortName": "retriever"
+    "shortName": "retriever",
+    "summary": "Created by PhpStorm.",
+    "description": "User: BBN\nDate: 01\/11\/2016\nTime: 17:41",
+    "description_parts": [
+        {
+            "type": "text",
+            "content": "<p>User: BBN\nDate: 01\/11\/2016\nTime: 17:41<\/p>"
+        }
+    ]
 }

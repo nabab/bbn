@@ -23,7 +23,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 25,
-            "doc": null,
             "endLine": 27,
             "isDeprecated": false,
             "isGenerator": false,
@@ -48,7 +47,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 29,
-            "doc": null,
             "endLine": 31,
             "isDeprecated": false,
             "isGenerator": false,
@@ -64,12 +62,15 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": {
+        "singleton_instance": null,
+        "singleton_exists": null
+    },
     "constants": null,
     "numMethods": 2,
     "numProperties": 0,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 2,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [],
@@ -87,5 +88,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\models\\tts",
-    "shortName": "singleton"
+    "shortName": "singleton",
+    "summary": ""
 }

@@ -30,22 +30,6 @@
             "final": false,
             "code": "function($s, $key = '')\n  {\n\t  $key = self::_get_key($key);\n\t  return self::encryptOpenssl($s, $key);\n  }",
             "startLine": 57,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$s"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$key"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 61,
             "isDeprecated": false,
             "isGenerator": false,
@@ -91,22 +75,6 @@
             "final": false,
             "code": "function($s, $key = '')\n  {\n    $key = self::_get_key($key);\n    return self::decryptOpenssl($s, $key);\n  }",
             "startLine": 68,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$s"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$key"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 72,
             "isDeprecated": false,
             "isGenerator": false,
@@ -152,30 +120,6 @@
             "final": false,
             "code": "function($textToEncrypt, $secretHash = NULL, $password = '')\n  {\n    if ( !$secretHash ){\n      $secretHash = self::$salt;\n    }\n    if ( $length = openssl_cipher_iv_length(self::$method) ){\n      $iv = substr(md5(self::$prefix.$password), 0, $length);\n      $res = null;\n      try{\n        $res = openssl_encrypt($textToEncrypt, self::$method, $secretHash, true, $iv);\n      }\n      catch ( \\Exception $e ){\n        bbn\\x::log(\"Impossible to decrypt\");\n      }\n      return $res;\n    }\n    return null;\n  }",
             "startLine": 81,
-            "doc": {
-                "description": "Encrypt string using openSSL module",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$text",
-                        "description": "oEncrypt"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$secret",
-                        "description": "ash Any random secure SALT string for your website"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$password",
-                        "description": "User's optional password"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 98,
             "isDeprecated": false,
             "isGenerator": false,
@@ -234,30 +178,6 @@
             "final": false,
             "code": "function($textToDecrypt, $secretHash = NULL, $password = '')\n  {\n    if ( !$secretHash ){\n      $secretHash = self::$salt;\n    }\n    if ( $length = openssl_cipher_iv_length(self::$method) ){\n      $iv = substr(md5(self::$prefix.$password), 0, $length);\n      try {\n        $res = openssl_decrypt($textToDecrypt, self::$method, $secretHash, true, $iv);\n      }\n      catch ( \\Exception $e ){\n        \\bbn\\x::log($e->getMessage());\n      }\n      if ( $res ){\n        return $res;\n      }\n    }\n    return null;\n  }",
             "startLine": 107,
-            "doc": {
-                "description": "Decrypt string using openSSL module",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$text",
-                        "description": "oDecrypt"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$secret",
-                        "description": "ash Any random secure SALT string for your website"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$password",
-                        "description": "User's optional password"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 125,
             "isDeprecated": false,
             "isGenerator": false,
@@ -316,7 +236,6 @@
             "final": false,
             "code": "function($path, $algo = 'sha512', $key_bits = 4096)\n  {\n    $res = false;\n    if ( !is_dir(dirname($path)) || file_exists($path.'_rsa') || !in_array($algo, hash_algos()) ){\n      return false;\n    }\n    $public = $path.'_rsa.pub';\n    $private = $path.'_rsa';\n    $params = [\n      'digest_alg' => $algo,\n      'private_key_bits' => $key_bits,\n      'private_key_type' => OPENSSL_KEYTYPE_RSA\n    ];\n    $rsaKey = openssl_pkey_new($params);\n    openssl_pkey_export($rsaKey, $privKey);\n    $umask = umask(0066);\n    $privKey = openssl_pkey_get_private($rsaKey);\n    if (\n      openssl_pkey_export_to_file($privKey, $private) && \/\/Private Key\n      ($pubKey = self::_sshEncodePublicKey($rsaKey)) && \/\/Public Key\n      file_put_contents($public, $pubKey) \/\/save public key into file\n    ){\n      $res = true;\n    }\n    umask($umask);\n    return $res;\n  }",
             "startLine": 127,
-            "doc": null,
             "endLine": 153,
             "isDeprecated": false,
             "isGenerator": false,
@@ -371,7 +290,6 @@
             "final": false,
             "code": "function($algo = 'sha512', $key_bits = 4096)\n  {\n    $res = null;\n    $params = [\n      'digest_alg' => $algo,\n      'private_key_bits' => $key_bits,\n      'private_key_type' => OPENSSL_KEYTYPE_RSA\n    ];\n    $rsaKey = openssl_pkey_new($params);\n    \/\/openssl_pkey_export($rsaKey, $priv);\n    $umask = umask(0066);\n    $privKey = openssl_pkey_get_private($rsaKey);\n    $pubKey = openssl_pkey_get_details($rsaKey);\n    if (openssl_pkey_export($privKey, $priv)\n        && ($pub = $pubKey['key'])\n    ){\n      $res = [\n        'private' => $priv,\n        'public' => $pub\n      ];\n    }\n    umask($umask);\n    return $res;\n  }",
             "startLine": 155,
-            "doc": null,
             "endLine": 178,
             "isDeprecated": false,
             "isGenerator": false,
@@ -409,12 +327,16 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": {
+        "method": "AES-256-CFB",
+        "salt": "dsjfjsdvcb34YhXZLW",
+        "prefix": "bbn-"
+    },
     "constants": null,
     "numMethods": 6,
     "numProperties": 0,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 3,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [],
@@ -433,5 +355,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\util",
-    "shortName": "enc"
+    "shortName": "enc",
+    "summary": "Encryption Class"
 }

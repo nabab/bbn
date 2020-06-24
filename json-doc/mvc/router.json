@@ -35,18 +35,6 @@
             "final": false,
             "code": "function($mode)\n  {\n    return (bool)\\in_array($mode, self::$_modes, true);\n  }",
             "startLine": 113,
-            "doc": {
-                "description": "Checks whether Yhe given string is a valid mode.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$mode",
-                        "description": "The mode as defined in self::$_modes"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 116,
             "isDeprecated": false,
             "isGenerator": false,
@@ -84,17 +72,6 @@
             "final": false,
             "code": "function($path)\n  {\n    while ( strpos($path, '\/\/') !== false ){\n      $path = str_replace('\/\/', '\/', $path);\n    }\n    $path = trim($path, '\/\\\\ ');\n\n    return $path ?: '.';\n  }",
             "startLine": 125,
-            "doc": {
-                "description": "Removes trailing slashes.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$path"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 133,
             "isDeprecated": false,
             "isGenerator": false,
@@ -131,18 +108,6 @@
             "final": false,
             "code": "function(bbn\\mvc $mvc, array $routes = [])\n  {\n    self::retriever_init($this);\n    $this->_mvc = $mvc;\n    $this->_routes = $routes;\n    $this->_root = $this->_mvc->app_path();\n  }",
             "startLine": 583,
-            "doc": {
-                "description": "This will fetch the route to the controller for a given path. Chainable.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$path",
-                        "description": "The request path <em>(e.g books\/466565 or xml\/books\/48465)<\/em>"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 589,
             "isDeprecated": false,
             "isGenerator": false,
@@ -187,7 +152,6 @@
             "final": false,
             "code": "function($plugin)\n  {\n    if (\n      \\defined('BBN_LOCALE') &&\n      isset($this->_routes['root'][$plugin]['name']) &&\n      is_dir($this->_routes['root'][$plugin]['path'] . '\/src\/locale')\n    ) {\n      \/\/$lang_path = \\dirname($this->_routes['root'][$plugin]['path']).'\/src\/locale';\n      if ($lang_path = \\dirname($this->_routes['root'][$plugin]['path']) . '\/' . $this->_routes['root'][$plugin]['name'] . '\/src\/locale') {\n        $textdomain = $this->_routes['root'][$plugin]['name'] . (is_file($lang_path . '\/index.txt') ? (string) file_get_contents($lang_path . '\/index.txt') : '');\n        bindtextdomain($textdomain, $lang_path);\n        bind_textdomain_codeset($textdomain, 'UTF-8');\n        textdomain($textdomain);\n      }\n    }\n\n    return $this;\n  }",
             "startLine": 591,
-            "doc": null,
             "endLine": 608,
             "isDeprecated": false,
             "isGenerator": false,
@@ -224,7 +188,6 @@
             "final": false,
             "code": "function()\n  {\n    $this->alt_root = false;\n\n    return $this;\n  }",
             "startLine": 610,
-            "doc": null,
             "endLine": 615,
             "isDeprecated": false,
             "isGenerator": false,
@@ -251,7 +214,6 @@
             "final": false,
             "code": "function($path)\n  {\n    if (!$this->check_path($path)) {\n      die(\"The prepath $path is not valid\");\n    }\n    $this->_prepath = $path;\n    if (substr($this->_prepath, -1) !== '\/') {\n      $this->_prepath = $this->_prepath . '\/';\n    }\n    if ($this->_mode) {\n      $this->route($this->_mvc->get_url(), $this->_mode);\n    }\n\n    return true;\n  }",
             "startLine": 617,
-            "doc": null,
             "endLine": 631,
             "isDeprecated": false,
             "isGenerator": false,
@@ -288,7 +250,6 @@
             "final": false,
             "code": "function($with_slash = 1)\n  {\n    if (!empty($this->_prepath)) {\n      return $with_slash ? $this->_prepath : substr($this->_prepath, 0, -1);\n    }\n\n    return '';\n  }",
             "startLine": 633,
-            "doc": null,
             "endLine": 640,
             "isDeprecated": false,
             "isGenerator": false,
@@ -325,7 +286,6 @@
             "final": false,
             "code": "function($name)\n  {\n    foreach ($this->get_plugins() as $n => $p) {\n      if (bbn\\x::indexOf($name, $n . '-') === 0) {\n        return $p;\n      }\n    }\n\n    return null;\n  }",
             "startLine": 642,
-            "doc": null,
             "endLine": 651,
             "isDeprecated": false,
             "isGenerator": false,
@@ -363,7 +323,6 @@
             "final": false,
             "code": "function($name)\n  {\n    if ($p = $this->get_plugin_from_component($name)) {\n      $root = $p['path'] . 'src\/';\n      $prefix = $p['name'] . '-';\n      $plugin = $p['name'];\n      $plugin_url = $p['url'];\n    } else {\n      $prefix = (defined('BBN_APP_PREFIX') ? BBN_APP_PREFIX : BBN_APP_NAME) . '-';\n      $root = $this->app_path();\n      $plugin = null;\n      $plugin_url = null;\n    }\n    if (!empty($root) && (bbn\\x::indexOf($name, $prefix) === 0)) {\n      $local_name = substr($name, strlen($prefix));\n      $parts = explode('-', $local_name);\n      $root .= 'components\/';\n      $path = implode('\/', $parts);\n      $dir = $root . $path;\n      if (!empty($plugin)) {\n        $this->apply_locale($plugin);\n      }\n      if (is_dir($dir)) {\n        $res = [\n          'js' => [],\n          'html' => [],\n          'css' => [],\n        ];\n        $fpath = $root . $path . '\/' . end($parts);\n        foreach ($res as $mode => $c) {\n          foreach (self::$_filetypes[$mode] as $f) {\n            if (is_file($fpath . '.' . $f)) {\n              $res[$mode] = $this->_set_known([\n                'file' => $fpath . '.' . $f,\n                'path' => str_replace('-', '\/', $local_name),\n                'plugin' => $plugin_url,\n                'component' => true,\n                'ext' => $f,\n                'mode' => $mode,\n                'i18n' => $mode === 'js' ? $this->_find_translation($plugin ?? null) : null,\n              ], true);\n              break;\n            }\n          }\n        }\n\n        return $res;\n      }\n    }\n    return null;\n  }",
             "startLine": 653,
-            "doc": null,
             "endLine": 703,
             "isDeprecated": false,
             "isGenerator": false,
@@ -401,7 +360,6 @@
             "final": false,
             "code": "function($path, $mode, $plugin)\n  {\n    if ($root = $this->_get_custom_root($mode, $plugin)) {\n      foreach (self::$_filetypes[$mode] as $t) {\n        if (is_file($root . $path . '.' . $t)) {\n          $file = $root . $path . '.' . $t;\n          break;\n        }\n      }\n      if (!empty($file)) {\n        return $this->_set_known([\n          'file' => $file,\n          'path' => $path,\n          'ext' => $t,\n          'plugin' => $plugin,\n          'mode' => $mode,\n          'i18n' => $t === 'js' ? $this->_find_translation($plugin ?? null) : null,\n        ], true);\n      }\n    }\n    return null;\n  }",
             "startLine": 705,
-            "doc": null,
             "endLine": 726,
             "isDeprecated": false,
             "isGenerator": false,
@@ -457,7 +415,6 @@
             "final": false,
             "code": "function($path, $mode)\n  {\n    if (self::is_mode($mode)) {\n      \/\/ If there is a prepath defined we prepend it to the path\n      if ($this->_prepath && (strpos($path, '\/') !== 0) && (strpos($path, $this->_prepath) !== 0)) {\n        $path = $this->_prepath . $path;\n      }\n      \/\/ We only try to retrieve a file path through a whole URL for controllers\n      if (\\in_array($mode, self::$_controllers, true)) {\n        $this->_mode = $mode;\n        return $this->_find_controller($path, $mode);\n      }\n      return $this->_find_mv($path, $mode);\n    }\n\n    return null;\n  }",
             "startLine": 728,
-            "doc": null,
             "endLine": 744,
             "isDeprecated": false,
             "isGenerator": false,
@@ -504,7 +461,6 @@
             "final": false,
             "code": "function($path, $mode)\n  {\n    \/\/ Only for views and models\n    if (self::is_mode($mode) && !\\in_array($mode, self::$_controllers)) {\n      \/\/ If there is a prepath defined we prepend it to the path\n      if ($this->_prepath &&\n          (strpos($path, '\/') !== 0) &&\n          (strpos($path, $this->_prepath) !== 0)\n      ) {\n        $path = $this->_prepath . $path;\n      }\n\n      \/** @var string $root Where the files will be searched for by default *\/\n      $root = $this->_get_root($mode);\n      $plugin = $this->_find_plugin($path);\n      if ($plugin && ($alt_path = $plugin['url'])) {\n        $alt_root = $this->_get_alt_root($mode, $alt_path);\n      }\n      else if ($alt_root = $this->_get_alt_root($mode)) {\n        $alt_path = $this->alt_root;\n      }\n      $dir = false;\n      foreach (self::$_filetypes[$mode] as $t) {\n        $dir1 = self::parse($root . $path);\n        if (is_dir($dir1) && (strpos($dir1, $root) === 0)) {\n          $dir = $dir1;\n        }\n        else if (\n          $alt_path && ($dir2 = self::parse($alt_root . substr($path, \\strlen($alt_path) + 1))) && (strpos($dir2, $alt_root) === 0) &&\n          is_dir($dir2)\n        ) {\n          $dir = $dir2;\n        }\n        if ($dir) {\n          $res = [];\n          $files = bbn\\file\\dir::get_files($dir);\n          foreach ($files as $f) {\n            if (\\in_array(bbn\\str::file_ext($f), self::$_filetypes[$mode], true)) {\n              $res[] = $path . '\/' . bbn\\str::file_ext($f, true)[0];\n            }\n          }\n\n          return $res;\n        }\n      }\n    }\n\n    return null;\n  }",
             "startLine": 746,
-            "doc": null,
             "endLine": 794,
             "isDeprecated": false,
             "isGenerator": false,
@@ -551,7 +507,6 @@
             "final": false,
             "code": "function()\n  {\n    return $this->_routes;\n  }",
             "startLine": 796,
-            "doc": null,
             "endLine": 799,
             "isDeprecated": false,
             "isGenerator": false,
@@ -578,7 +533,6 @@
             "final": false,
             "code": "function()\n  {\n      $ar = \\func_get_args();\n      bbn\\x::log(\\count($ar) > 1 ? $ar : $ar[0], 'mvc');\n    }\n  }",
             "startLine": 49,
-            "doc": null,
             "endLine": 54,
             "isDeprecated": false,
             "isGenerator": false,
@@ -603,7 +557,6 @@
             "final": false,
             "code": "function($plugin = NULL)\n  {\n    if ( ($this->_plugin || $plugin) && \\defined ('BBN_DATA_PATH') ){\n      return BBN_DATA_PATH.'plugins\/'.$this->plugin_name($plugin ?: $this->_plugin).'\/';\n    }\n    return null;\n  }",
             "startLine": 56,
-            "doc": null,
             "endLine": 62,
             "isDeprecated": false,
             "isGenerator": false,
@@ -641,7 +594,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 64,
-            "doc": null,
             "endLine": 66,
             "isDeprecated": false,
             "isGenerator": false,
@@ -666,7 +618,6 @@
             "final": false,
             "code": "function($plugin)\n  {\n  }",
             "startLine": 68,
-            "doc": null,
             "endLine": 70,
             "isDeprecated": false,
             "isGenerator": false,
@@ -701,7 +652,6 @@
             "final": false,
             "code": "function($plugin = NULL)\n  {\n  }",
             "startLine": 72,
-            "doc": null,
             "endLine": 74,
             "isDeprecated": false,
             "isGenerator": false,
@@ -736,7 +686,6 @@
             "final": false,
             "code": "function($plugin = NULL, $raw = false)\n  {\n  }",
             "startLine": 76,
-            "doc": null,
             "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
@@ -780,7 +729,6 @@
             "final": false,
             "code": "function($plugin = NULL)\n  {\n  }",
             "startLine": 80,
-            "doc": null,
             "endLine": 82,
             "isDeprecated": false,
             "isGenerator": false,
@@ -815,7 +763,6 @@
             "final": false,
             "code": "function($path = NULL)\n  {\n  }",
             "startLine": 84,
-            "doc": null,
             "endLine": 86,
             "isDeprecated": false,
             "isGenerator": false,
@@ -850,7 +797,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 88,
-            "doc": null,
             "endLine": 90,
             "isDeprecated": false,
             "isGenerator": false,
@@ -875,7 +821,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 96,
-            "doc": null,
             "endLine": 98,
             "isDeprecated": false,
             "isGenerator": false,
@@ -900,7 +845,6 @@
             "final": false,
             "code": "function($path, $mode, $root = NULL)\n  {\n  }",
             "startLine": 100,
-            "doc": null,
             "endLine": 102,
             "isDeprecated": false,
             "isGenerator": false,
@@ -953,7 +897,6 @@
             "final": false,
             "code": "function($raw = false)\n  {\n    return \\bbn\\mvc::get_app_path($raw);\n  }",
             "startLine": 104,
-            "doc": null,
             "endLine": 107,
             "isDeprecated": false,
             "isGenerator": false,
@@ -990,7 +933,6 @@
             "final": false,
             "code": "function()\n  {\n    return \\bbn\\mvc::get_lib_path();\n  }",
             "startLine": 109,
-            "doc": null,
             "endLine": 112,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1017,7 +959,6 @@
             "final": false,
             "code": "function($plugin = NULL)\n  {\n    return \\bbn\\mvc::get_data_path().($plugin ? 'plugins\/'.$plugin.'\/' : '');\n  }",
             "startLine": 114,
-            "doc": null,
             "endLine": 117,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1054,7 +995,6 @@
             "final": false,
             "code": "function($plugin = NULL)\n  {\n    return \\bbn\\mvc::get_tmp_path($plugin);\n  }",
             "startLine": 119,
-            "doc": null,
             "endLine": 122,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1091,7 +1031,6 @@
             "final": false,
             "code": "function($plugin = NULL)\n  {\n    return \\bbn\\mvc::get_log_path($plugin);\n  }",
             "startLine": 124,
-            "doc": null,
             "endLine": 127,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1128,7 +1067,6 @@
             "final": false,
             "code": "function($plugin = NULL)\n  {\n    return \\bbn\\mvc::get_cache_path($plugin);\n  }",
             "startLine": 129,
-            "doc": null,
             "endLine": 132,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1165,7 +1103,6 @@
             "final": false,
             "code": "function($plugin = NULL)\n  {\n    return \\bbn\\mvc::get_content_path($plugin);\n  }",
             "startLine": 134,
-            "doc": null,
             "endLine": 137,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1202,7 +1139,6 @@
             "final": false,
             "code": "function($id_user = NULL, $plugin = NULL)\n  {\n    return \\bbn\\mvc::get_user_tmp_path($id_user, $plugin);\n  }",
             "startLine": 139,
-            "doc": null,
             "endLine": 142,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1249,7 +1185,6 @@
             "final": false,
             "code": "function($id_user = NULL, $plugin = NULL)\n  {\n    return \\bbn\\mvc::get_user_data_path($id_user, $plugin);\n  }",
             "startLine": 144,
-            "doc": null,
             "endLine": 147,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1296,11 +1231,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 25,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 27,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1325,7 +1255,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 29,
-            "doc": null,
             "endLine": 31,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1341,12 +1270,97 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": {
+        "_def": "default",
+        "_controllers": [
+            "cli",
+            "dom",
+            "content",
+            "public",
+            "private"
+        ],
+        "_filetypes": {
+            "model": [
+                "php"
+            ],
+            "html": [
+                "html",
+                "php"
+            ],
+            "js": [
+                "js",
+                "coffee"
+            ],
+            "css": [
+                "css",
+                "less",
+                "scss"
+            ]
+        },
+        "_modes": [
+            "image",
+            "file",
+            "cli",
+            "private",
+            "dom",
+            "public",
+            "model",
+            "html",
+            "js",
+            "css"
+        ],
+        "_known": {
+            "cli": [],
+            "dom": [],
+            "public": {
+                "cdn\/publishing\/gen-php": {
+                    "file": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/publishing\/gen-php.php",
+                    "path": "cdn\/publishing\/gen-php",
+                    "root": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/",
+                    "request": "cdn\/publishing\/gen-php",
+                    "mode": "public",
+                    "plugin": "cdn",
+                    "args": [],
+                    "checkers": [
+                        "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/src\/mvc\/public\/_ctrl.php",
+                        "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/_ctrl.php"
+                    ]
+                }
+            },
+            "private": [],
+            "model": {
+                "core\/_definitions": {
+                    "file": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/vendor\/bbn\/appui-core\/src\/mvc\/model\/_definitions.php",
+                    "path": "core\/_definitions",
+                    "plugin": "core",
+                    "ext": "php",
+                    "mode": "model",
+                    "i18n": null,
+                    "checkers": []
+                },
+                "_init": {
+                    "file": "\/home\/thomas\/domains\/apstapp.thomas.lan\/_appui\/src\/mvc\/model\/_init.php",
+                    "path": "_init",
+                    "plugin": false,
+                    "ext": "php",
+                    "mode": "model",
+                    "i18n": null,
+                    "checkers": []
+                }
+            },
+            "html": [],
+            "js": [],
+            "css": [],
+            "component": []
+        },
+        "retriever_instance": {},
+        "retriever_exists": true
+    },
     "constants": null,
     "numMethods": 35,
     "numProperties": 0,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 7,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [
@@ -1455,5 +1469,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\mvc",
-    "shortName": "router"
+    "shortName": "router",
+    "summary": ""
 }

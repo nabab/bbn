@@ -208,19 +208,6 @@ class system extends bbn\models\cls\basic
   {
     if ( $filter ){
       if ( is_string($filter) ){
-        if ( $filter === 'both' ){
-          return true;
-        }
-        if ( $filter === 'dir' ){
-          return is_dir($item);
-        }
-        if ( $filter === 'file' ){
-          return is_file($item);
-        }
-        // If it is an extension we check also that it's a file
-        if (!is_file($item)) {
-          return false;
-        }
         $extensions = array_map(function($a) {
           if (substr($a, 0, 1) !== '.') {
             $a = '.'.$a;
@@ -234,7 +221,7 @@ class system extends bbn\models\cls\basic
         }
         return false;
       }
-      if ( is_callable($filter) ){
+      elseif ( is_callable($filter) ){
         return $filter($item);
       }
     }

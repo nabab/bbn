@@ -29,17 +29,6 @@
             "final": false,
             "code": "function(bbn\\db $db, $cfg = [])\n  {\n    $this->_init_class_cfg($cfg);\n    $this->notes = new \\bbn\\appui\\notes($this->db);\n    $this->options = \\bbn\\appui\\options::get_instance();\n  }",
             "startLine": 113,
-            "doc": {
-                "description": "imessages constructor.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "\\bbn\\db",
-                        "name": "$db"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 118,
             "isDeprecated": false,
             "isGenerator": false,
@@ -61,7 +50,6 @@
                 "final": false,
                 "code": "function(bbn\\db $db)\n  {\n  }",
                 "startLine": 27,
-                "doc": null,
                 "endLine": 29,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -117,16 +105,6 @@
             "final": false,
             "code": "function($imess)\n  {\n    \/\/ Get default page if it isn't set\n    if ( empty($imess['id_option']) ){\n      $perm = new \\bbn\\user\\permissions();\n      $imess['id_option'] = $perm->is(self::BBN_DEFAULT_PERM);\n    }\n    if (\n      !empty($imess['id_option']) &&\n      !empty($imess['title']) &&\n      !empty($imess['content']) &&\n      !empty($this->_id_type()) &&\n      \/\/ Insert the new note\n      ($id_note = $this->notes->insert($imess['title'], $imess['content'], $this->_id_type())) &&\n      \/\/ Insert the new internal message\n      $this->db->insert($cfg['table'], [\n        $cfg['arch']['imessages']['id_note'] => $id_note,\n        $cfg['arch']['imessages']['id_option'] => $imess['id_option'],\n        $cfg['arch']['imessages']['id_user'] => $imess['id_user'] ?: NULL,\n        $cfg['arch']['imessages']['id_group'] => $imess['id_group'] ?: NULL,\n        $cfg['arch']['imessages']['start'] => $imess['start'] ?: NULL,\n        $cfg['arch']['imessages']['end'] => $imess['end'] ?: NULL\n      ])\n    ){\n      return $this->db->last_id();\n    }\n    return false;\n  }",
             "startLine": 126,
-            "doc": {
-                "description": "Inserts a new page's internal message",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$imess"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 153,
             "isDeprecated": false,
             "isGenerator": false,
@@ -161,29 +139,6 @@
             "final": false,
             "code": "function($id_option, $id_user, $simple = true)\n  {\n    \/\/ Current datetime\n    $now = date('Y-m-d H:i:s');\n    \/\/ Get the user's group\n    $id_group = $this->db->select_one('bbn_users', 'id_group', ['id' => $id_user]);\n    \/\/ Get the page's internal messages of the user\n    $messages = $this->db->get_rows(\"\n      SELECT {$cfg['table']}.*\n      FROM {$cfg['tables']['users']}\n        RIGHT JOIN {$cfg['table']}\n\t        ON {$cfg['table']}.{$cfg['arch']['imessages']['id']} = {$cfg['tables']['users']}.{$cfg['arch']['users']['id_imessage']}\n      WHERE (\n        {$cfg['table']}.{$cfg['arch']['imessages']['start']} IS NULL\n        OR {$cfg['table']}.{$cfg['arch']['imessages']['start']} <= ?\n      )\n      AND (\n        {$cfg['table']}.{$cfg['arch']['imessages']['end']} IS NULL\n        OR {$cfg['table']}.{$cfg['arch']['imessages']['end']} > ?\n      )\n      AND (\n        {$cfg['table']}.{$cfg['arch']['imessages']['id_user']} = ?\n        OR {$cfg['table']}.{$cfg['arch']['imessages']['id_group']} = ?\n        OR (\n          {$cfg['table']}.{$cfg['arch']['imessages']['id_user']} IS NULL\n          AND {$cfg['table']}.{$cfg['arch']['imessages']['id_group']} IS NULL\n        )\n      )\n      AND {$cfg['table']}.{$cfg['arch']['imessages']['id_option']} = ?\n      AND (\n        {$cfg['tables']['users']}.{$cfg['arch']['users']['hidden']} IS NULL\n        OR {$cfg['tables']['users']}.{$cfg['arch']['users']['hidden']} = 0\n      )\",\n      $now,\n      $now,\n      hex2bin($id_user),\n      hex2bin($id_group),\n      hex2bin($id_option)\n    );\n    \/\/ Get and return the imessage's content|title from notes archive\n    return $this->from_notes($messages, $simple);\n  }",
             "startLine": 163,
-            "doc": {
-                "description": "Gets the page's internal messages of an user",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "option"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "user"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "bool",
-                        "name": "$simple"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 204,
             "isDeprecated": false,
             "isGenerator": false,
@@ -238,24 +193,6 @@
             "final": false,
             "code": "function($id_imess, $id_user)\n  {\n    if ( !empty($id_imess) && !empty($id_user) ){\n      return !!$this->db->insert_update($cfg['tables']['users'], [\n        $cfg['arch']['users']['id_imessage'] => $id_imess,\n        $cfg['arch']['users']['id_user'] => $id_user,\n        $cfg['arch']['users']['hidden'] => 1,\n        $cfg['arch']['users']['moment'] => date('Y-m-d H:i:s'),\n      ], [\n        $cfg['arch']['users']['id_imessage'] => $id_imess,\n        $cfg['arch']['users']['id_user'] => $id_user\n      ]);\n    }\n    return false;\n  }",
             "startLine": 213,
-            "doc": {
-                "description": "Sets an user's internal message as visible",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "imess"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "user"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 227,
             "isDeprecated": false,
             "isGenerator": false,
@@ -301,24 +238,6 @@
             "final": false,
             "code": "function($id_imess, $id_user)\n  {\n    if ( !empty($id_imess) && !empty($id_user) ){\n      return !!$this->db->update_ignore($cfg['tables']['users'], [\n        $cfg['arch']['users']['id_imessage'] => $id_imess,\n        $cfg['arch']['users']['id_user'] => $id_user,\n        $cfg['arch']['users']['hidden'] => 0,\n        $cfg['arch']['users']['moment'] => date('Y-m-d H:i:s'),\n      ], [\n        $cfg['arch']['users']['id_imessage'] => $id_imess,\n        $cfg['arch']['users']['id_user'] => $id_user\n      ]);\n    }\n    return false;\n  }",
             "startLine": 236,
-            "doc": {
-                "description": "Sets an user's internal message as not visible",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "imess"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "user"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 250,
             "isDeprecated": false,
             "isGenerator": false,
@@ -364,7 +283,6 @@
             "final": false,
             "code": "function($id_option, $simple = true)\n  {\n    $messages = $this->db->get_rows(\"\n      SELECT {$cfg['table']}.*\n      FROM {$cfg['table']}\n      WHERE {$cfg['table']}.{$cfg['arch']['imessages']['id_option']} = ?\",\n      hex2bin($id_option)\n    );\n    \/\/ Get and return the imessage's content|title from notes archive\n    return $this->from_notes($messages, $simple);\n  }",
             "startLine": 252,
-            "doc": null,
             "endLine": 262,
             "isDeprecated": false,
             "isGenerator": false,
@@ -408,18 +326,6 @@
             "final": false,
             "code": "function($id_user)\n  {\n    \/\/ Current datetime\n    $now = date('Y-m-d H:i:s');\n    \/\/ Get the user's group\n    $id_group = $this->db->select_one('bbn_users', 'id_group', ['id' => $id_user]);\n    \/\/ Get all user's internal messages\n    $messages = $this->db->get_rows(\"\n      SELECT {$cfg['table']}.*\n      FROM {$cfg['tables']['users']}\n        RIGHT JOIN {$cfg['table']}\n\t        ON {$cfg['table']}.{$cfg['arch']['imessages']['id_user']} = {$cfg['tables']['users']}.{$cfg['arch']['users']['id_user']}\n\t        AND {$cfg['table']}.{$cfg['arch']['imessages']['id']} = {$cfg['tables']['users']}.{$cfg['arch']['users']['id_imessage']}\n      WHERE (\n        {$cfg['table']}.{$cfg['arch']['imessages']['start']} IS NULL\n        OR {$cfg['table']}.{$cfg['arch']['imessages']['start']} <= ?\n      )\n      AND (\n        {$cfg['table']}.{$cfg['arch']['imessages']['end']} IS NULL\n        OR {$cfg['table']}.{$cfg['arch']['imessages']['end']} > ?\n      )\n      AND (\n        (\n          {$cfg['table']}.{$cfg['arch']['imessages']['id_user']} = ?\n          OR {$cfg['table']}.{$cfg['arch']['imessages']['id_group']} = ?\n        )\n        OR (\n          {$cfg['table']}.{$cfg['arch']['imessages']['id_user']} IS NULL\n          OR {$cfg['table']}.{$cfg['arch']['imessages']['id_group']} IS NULL\n        )\n      )\n      AND (\n        {$cfg['tables']['users']}.{$cfg['arch']['users']['hidden']} IS NULL\n        OR {$cfg['tables']['users']}.{$cfg['arch']['users']['hidden']} = 0\n      )\",\n      $now,\n      $now,\n      hex2bin($id_user),\n      hex2bin($id_group)\n    );\n    \/\/ Get and return the imessage's info from notes archive\n    return $this->from_notes($messages);\n  }",
             "startLine": 271,
-            "doc": {
-                "description": "Gets all user's internal messages",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "user"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 313,
             "isDeprecated": false,
             "isGenerator": false,
@@ -455,11 +361,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 45,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 50,
             "isDeprecated": false,
             "isGenerator": false,
@@ -481,11 +382,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 45,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 50,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -512,11 +408,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 56,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 61,
             "isDeprecated": false,
             "isGenerator": false,
@@ -538,11 +429,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 56,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 61,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -569,7 +455,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 72,
-            "doc": null,
             "endLine": 74,
             "isDeprecated": false,
             "isGenerator": false,
@@ -591,7 +476,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 72,
-                "doc": null,
                 "endLine": 74,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -618,7 +502,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 76,
-            "doc": null,
             "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
@@ -640,7 +523,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 76,
-                "doc": null,
                 "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -667,7 +549,6 @@
             "final": false,
             "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
             "startLine": 80,
-            "doc": null,
             "endLine": 88,
             "isDeprecated": false,
             "isGenerator": false,
@@ -689,7 +570,6 @@
                 "final": false,
                 "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
                 "startLine": 80,
-                "doc": null,
                 "endLine": 88,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -716,22 +596,6 @@
             "final": false,
             "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
             "startLine": 95,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$name"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$arguments"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 99,
             "isDeprecated": false,
             "isGenerator": false,
@@ -753,22 +617,6 @@
                 "final": false,
                 "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
                 "startLine": 95,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "string",
-                            "name": "$name"
-                        },
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$arguments"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 99,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -833,11 +681,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 104,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 106,
             "isDeprecated": false,
             "isGenerator": false,
@@ -859,11 +702,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 104,
-                "doc": {
-                    "description": "",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 106,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -890,17 +728,6 @@
             "final": false,
             "code": "function($debug)\n  {\n  }",
             "startLine": 112,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "boolean",
-                        "name": "$debug"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 114,
             "isDeprecated": false,
             "isGenerator": false,
@@ -922,17 +749,6 @@
                 "final": false,
                 "code": "function($debug)\n  {\n  }",
                 "startLine": 112,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "boolean",
-                            "name": "$debug"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 114,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -979,7 +795,6 @@
             "final": false,
             "code": "function()\n  {\n    return [\n      'select' => $this->references_select,\n      'join' => $this->references_join\n    ];\n  }",
             "startLine": 52,
-            "doc": null,
             "endLine": 58,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1004,16 +819,6 @@
             "final": false,
             "code": "function($id)\n  {\n      $this->class_cfg['arch'][$this->class_table_index]['id'] => $id\n    ]);\n  }",
             "startLine": 59,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$id"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 63,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1048,11 +853,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 69,
-            "doc": {
-                "description": "Return the",
-                "params": [],
-                "return": ""
-            },
             "endLine": 71,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1077,7 +877,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 73,
-            "doc": null,
             "endLine": 75,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1093,12 +892,38 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
-    "constants": null,
+    "staticProperties": {
+        "_defaults": {
+            "table": "bbn_imessages",
+            "tables": {
+                "imessages": "bbn_imessages",
+                "users": "bbn_imessages_users"
+            },
+            "arch": {
+                "imessages": {
+                    "id": "id",
+                    "id_note": "id_note",
+                    "id_option": "id_option",
+                    "id_user": "id_user",
+                    "id_group": "id_group",
+                    "start": "start",
+                    "end": "end"
+                },
+                "users": {
+                    "id_imessage": "id_imessage",
+                    "id_user": "id_user",
+                    "hidden": "hidden",
+                    "moment": "moment"
+                }
+            }
+        },
+        "id_type": false
+    },
+    "constants": [],
     "numMethods": 19,
     "numProperties": 0,
-    "numConstants": 0,
-    "numStaticProperties": 0,
+    "numConstants": 5,
+    "numStaticProperties": 2,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [
@@ -1156,5 +981,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\appui",
-    "shortName": "imessages"
+    "shortName": "imessages",
+    "summary": ""
 }

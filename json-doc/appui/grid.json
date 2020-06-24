@@ -26,30 +26,6 @@
             "final": false,
             "code": "function(bbn\\db $db, array $post, $cfg)\n  {\n    \/\/ We inherit db and cacher properties\n    parent::__construct($db);\n    \/\/ Simple configuration using just a string with the table\n    if ( \\is_string($cfg) ){\n      $cfg = [\n        'tables' => [$cfg]\n      ];\n    }\n    if ( \\is_array($cfg) && $this->db->check() ){\n      \/\/ Preparing a classic config array for DB\n      $db_cfg = [\n        'tables' => $cfg['tables'] ?? ($cfg['table'] ? (\\is_string($cfg['table']) ? [$cfg['table']] : $cfg['table']) : null),\n        'fields' => !empty($cfg['fields']) ? (array)$cfg['fields'] : [],\n        'order' => $post['order'] ?? ($cfg['order'] ?? []),\n        'join' => $cfg['join'] ?? [],\n        'group_by' => $cfg['group_by'] ?? [],\n        'having' => $cfg['having'] ?? [],\n        'limit' => $post['limit'] ?? ($cfg['limit'] ?? 20),\n        'start' => $post['start'] ?? 0,\n        'where' => !empty($post['filters']) && !empty($post['filters']['conditions']) ? $post['filters'] : []\n      ];\n      if ( !empty($post['excel']) ){\n        $this->excel = $post['excel'];\n        if ( !empty($post['fields']) ){\n          $fields = $db_cfg['fields'];\n          $link = [];\n          $db_cfg['fields'] = [];\n          foreach ( $fields as $a => $f ){\n            $field = is_string($a) ? $a : $this->db->col_simple_name($f);\n            if ( in_array($field, $post['fields'], true) ){\n              $link[$field] = $a;\n            }\n          }\n          foreach ( $post['fields'] as $f ){\n            if ( isset($link[$f], $fields[$link[$f]]) ){\n              $db_cfg['fields'][$link[$f]] = $fields[$link[$f]];\n            }\n          }\n        }\n        if (\n          isset($cfg['map'], $cfg['map']['callable']) &&\n          is_callable($cfg['map']['callable'])\n        ){\n          $this->excel['map'] = $cfg['map'];\n        }\n      }\n      \/\/ Adding all the fields if fields is empty\n      if ( empty($db_cfg['tables']) ){\n        $this->log(['NO TABLES!', $db_cfg]);\n      }\n      else if ( empty($db_cfg['fields']) ){\n        foreach ( array_unique(array_values($db_cfg['tables'])) as $t ){\n          foreach ( $this->db->get_fields_list($t) as $f ){\n            if ( !\\in_array($f, $db_cfg['fields'], true) ){\n              $db_cfg['fields'][] = $f;\n            }\n          }\n        }\n      }\n      \/\/ For the server config both properties where and filters are accepted (backward compatibility)\n      if ( empty($cfg['filters']) && !empty($cfg['where']) ){\n        $cfg['filters'] = $cfg['where'];\n      }\n      \/\/ The (pre)filters set server-side are mandatory and are added to the client-side filters if any\n      if ( !empty($cfg['filters']) ){\n        $prefilters = isset($cfg['filters']['conditions']) ? $cfg['filters'] : [\n          'logic' => 'AND',\n          'conditions' => $cfg['filters']\n        ];\n        \/\/ They either become the where or are added as a new root condition\n        $db_cfg['where'] = empty($db_cfg['where']) ? $prefilters : [\n          'logic' => 'AND',\n          'conditions' => [\n            $db_cfg['where'],\n            $prefilters\n          ]\n        ];\n      }\n      $this->cfg = $this->db->process_cfg($db_cfg);\n      $this->original_cfg = $db_cfg;\n      if ( !empty($cfg['query']) ){\n        $this->query = $cfg['query'];\n      }\n      \/\/ A query must exist, custom or generated\n      if ( $this->check() ){\n        if ( array_key_exists('observer', $cfg) && isset($cfg['observer']['request']) ){\n          $this->observer = $cfg['observer'];\n        }\n        if ( bbn\\x::has_prop($cfg, 'count') ){\n          $this->count = $cfg['count'];\n        }\n        else{\n          $db_cfg['count'] = true;\n          $this->count_cfg = $this->db->process_cfg($db_cfg);\n          \/\/die(\\bbn\\x::dump($this->count_cfg));\n        }\n        if ( !empty($cfg['num']) ){\n          $this->num = $cfg['num'];\n        }\n      }\n    }\n    $this->cache_uid = md5(serialize([\n      'tables' => $this->cfg['tables'],\n      'fields' => $this->cfg['fields'],\n      'order' => $this->cfg['order'],\n      'values' => $this->cfg['values'],\n      'join' => $this->cfg['join'],\n      'group_by' => $this->cfg['group_by'],\n      'having' => $this->cfg['having'],\n      'limit' => $this->cfg['limit'],\n      'start' => $this->cfg['start'],\n      'filters' => $this->cfg['filters']\n    ]));\n    $this->chrono = new bbn\\util\\timer();\n  }",
             "startLine": 89,
-            "doc": {
-                "description": "Grid constructor.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "bbn\\db",
-                        "name": "$db",
-                        "description": "The database connection"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$post",
-                        "description": "Mandatory configuration sent by the table component (client side)"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string|array",
-                        "name": "$cfg",
-                        "description": "Original table configuration (server side)"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 205,
             "isDeprecated": false,
             "isGenerator": false,
@@ -71,7 +47,6 @@
                 "final": false,
                 "code": "function(bbn\\db $db)\n  {\n\t\t$this->cacher = bbn\\cache::get_engine();\n\t\t$this->_cache_prefix = str_replace('\\\\', '\/', \\get_class($this)).'\/';\n  }",
                 "startLine": 33,
-                "doc": null,
                 "endLine": 37,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -139,7 +114,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( $this->db->check() ){\n      if ( $this->query ){\n        return $this->query.PHP_EOL.\n          $this->db->get_where($this->cfg).\n          $this->db->get_group_by($this->cfg).\n          $this->db->get_order($this->cfg).\n          $this->db->get_limit($this->cfg);\n      }\n      return $this->cfg['sql'];\n    }\n    return null;\n  }",
             "startLine": 247,
-            "doc": null,
             "endLine": 260,
             "isDeprecated": false,
             "isGenerator": false,
@@ -167,7 +141,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( $this->check() ){\n      $this->chrono->start();\n      if ( $this->query ){\n        $this->sql = $this->get_query();\n        $q = $this->db->query($this->sql, $this->db->get_query_values($this->cfg));\n        $rows = $q->get_rows();\n      }\n      else {\n        $rows = $this->db->rselect_all($this->cfg);\n        $this->sql = $this->cfg['sql'];\n      }\n      $this->query_time = $this->chrono->measure();\n      $this->chrono->stop();\n      return $rows;\n    }\n    return null;\n  }",
             "startLine": 262,
-            "doc": null,
             "endLine": 280,
             "isDeprecated": false,
             "isGenerator": false,
@@ -195,7 +168,6 @@
             "final": false,
             "code": "function($force = false)\n  {\n    if ( $this->num && !$force ){\n      return $this->num;\n    }\n    \/*\n    if ( !$force && ($cache = $this->get_cache()) ){\n      $this->count_time = $cache['time'];\n      $this->num = $cache['num'];\n      return $this->num;\n    }\n    *\/\n    if ( $this->count ){\n      $this->chrono->start();\n      if ( is_string($this->count) ){\n        $this->num = $this->db->get_one(\n          $this->count.PHP_EOL.\n            $this->db->get_where($this->cfg).\n            $this->db->get_group_by($this->cfg),\n          $this->db->get_query_values($this->cfg)\n        );\n      }\n      else if ( is_array($this->count) ){\n        $cfg = $this->count;\n        $cfg['where'] = $this->cfg['where'];\n        $this->num = $this->db->select_one($cfg);\n      }\n      $this->count_time = $this->chrono->measure();\n      $this->chrono->stop();\n      $this->set_cache([\n        'num' => $this->num,\n        'time' => $this->count_time\n      ]);\n      return $this->num ?: 0;\n    }\n    else if ( $this->count_cfg ){\n      \/\/\\bbn\\x::log($this->count_cfg, 'mirko');\n      \/\/die(bbn\\x::dump($this->count_cfg));\n      $this->chrono->start();\n      $this->num = $this->db->select_one($this->count_cfg);\n      $this->count_time = $this->chrono->measure();\n      $this->chrono->stop();\n      $this->set_cache([\n        'num' => $this->num,\n        'time' => $this->count_time\n      ]);\n      return $this->num ?: 0;\n    }\n    return null;\n  }",
             "startLine": 282,
-            "doc": null,
             "endLine": 331,
             "isDeprecated": false,
             "isGenerator": false,
@@ -233,7 +205,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( $this->observer ){\n      $obs = new bbn\\appui\\observer($this->db);\n      if ( $id_obs = $obs->add($this->observer) ){\n        return [\n          'id' => $id_obs,\n          'value' => $obs->get_result($id_obs)\n        ];\n      }\n      return null;\n    }\n  }",
             "startLine": 333,
-            "doc": null,
             "endLine": 345,
             "isDeprecated": false,
             "isGenerator": false,
@@ -261,7 +232,6 @@
             "final": false,
             "code": "function($force = false)\n  {\n    $r = [\n      'data' => [],\n      'total' => 0,\n      'success' => true,\n      'error' => false,\n      'time' => []\n    ];\n    if ( $this->check() ){\n      if ($total = $this->get_total($force)) {\n        if ( $this->cfg['start'] ){\n          $r['start'] = $this->cfg['start'];\n        }\n        if ( $this->cfg['limit'] ){\n          $r['limit'] = $this->cfg['limit'];\n        }\n        if ( $this->observer ){\n          $r['observer'] = $this->get_observer();\n        }\n        $r['total'] = $total;\n        $r['data'] = $this->get_data();\n        $r['time'] = [\n          'query' => $this->query_time,\n          'count' => $this->count_time\n        ];\n      }\n      \/\/unset($this->count_cfg['where']['conditions'][0]['time']);\n      \/\/$this->count_cfg['where']['conditions'][0]['value'] = hex2bin($this->count_cfg['where']['conditions'][0]['value']);\n      \/\/die(bbn\\x::dump($this->db->select_one($this->count_cfg), $this->db->last(), $this->count_cfg, $this->num, $this->db->last_params));\n      if (!BBN_IS_PROD || (($usr = bbn\\user::get_instance()) && $usr->is_admin())) {\n        $r['query'] = $this->db->last();\n        $r['queryValues'] = array_map(function($a){\n          if (\\bbn\\str::is_buid($a)) {\n            return bin2hex($a);\n          }\n          return $a;\n        }, $this->db->get_last_values());\n      }\n      \/\/die(var_dump($r['query']));\n    }\n    if ( !$this->db->check() ){\n      $r['success'] = false;\n      $r['error'] = $this->db->last_error;\n    }\n    return $r;\n  }",
             "startLine": 347,
-            "doc": null,
             "endLine": 393,
             "isDeprecated": false,
             "isGenerator": false,
@@ -298,17 +268,6 @@
             "final": false,
             "code": "function(array $data = [])\n  {\n    $path = \\bbn\\x::make_storage_path(\\bbn\\mvc::get_user_tmp_path()) . 'export_' . date('d-m-Y_H-i-s') . '.xlsx';\n    $cfg = $this->get_excel();\n    $dates = array_values(array_filter($cfg['fields'], function($c){\n      return empty($c['hidden']) && (($c['type'] === 'date') || ($c['type'] === 'datetime'));\n    }));\n    $data = array_map(function($row) use($cfg, $dates){\n      foreach ( $row as $i => $r ){\n        if ( \\is_string($r) ){\n          $row[$i] = strpos($r, '=') === 0 ? ' '.$r : $r;\n        }\n        if ( (($k = \\bbn\\x::find($dates, ['field' => $i])) !== false ) ){\n          if ( !empty($dates[$k]['format']) && !empty($r) ){\n            $r = date($dates[$k]['format'], strtotime($r));\n          }\n          $row[$i] = \\PhpOffice\\PhpSpreadsheet\\Shared\\Date::PHPToExcel($r);\n        }\n        if (\n          (($idx = \\bbn\\x::find($cfg['fields'], ['field' => $i])) === false ) ||\n          !!$cfg['fields'][$idx]['hidden']\n        ){\n          unset($row[$i]);\n        }\n      }\n      return $row;\n    }, $data ?: $this->get_data());\n    $cfg['fields'] = array_values(array_filter($cfg['fields'], function($c){\n      return empty($c['hidden']);\n    }));\n    if ( \\bbn\\x::to_excel($data, $path, true, $cfg) ){\n      return ['file' => $path];\n    }\n    return ['error' => _('Error')];\n  }",
             "startLine": 400,
-            "doc": {
-                "description": "Exports the grid's data or the given data to excel",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$data"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 434,
             "isDeprecated": false,
             "isGenerator": false,
@@ -345,11 +304,6 @@
             "final": false,
             "code": "function()\n  {\n   return $this->excel; \n  }",
             "startLine": 440,
-            "doc": {
-                "description": "Gets the excel property",
-                "params": [],
-                "return": ""
-            },
             "endLine": 443,
             "isDeprecated": false,
             "isGenerator": false,
@@ -376,7 +330,6 @@
             "final": false,
             "code": "function()\n  {\n    return $this->db->check() && ($this->query || $this->cfg['sql']);\n  }",
             "startLine": 445,
-            "doc": null,
             "endLine": 448,
             "isDeprecated": false,
             "isGenerator": false,
@@ -400,11 +353,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 56,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 61,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -431,7 +379,6 @@
             "final": false,
             "code": "function()\n  {\n    return $this->cfg['start'];\n  }",
             "startLine": 450,
-            "doc": null,
             "endLine": 453,
             "isDeprecated": false,
             "isGenerator": false,
@@ -458,7 +405,6 @@
             "final": false,
             "code": "function()\n  {\n    return $this->cfg['limit'];\n  }",
             "startLine": 455,
-            "doc": null,
             "endLine": 458,
             "isDeprecated": false,
             "isGenerator": false,
@@ -485,7 +431,6 @@
             "final": false,
             "code": "function()\n  {\n    return $this->cfg;\n  }",
             "startLine": 460,
-            "doc": null,
             "endLine": 463,
             "isDeprecated": false,
             "isGenerator": false,
@@ -512,7 +457,6 @@
             "final": false,
             "code": "function()\n  {\n\t\treturn $this;\n  }",
             "startLine": 50,
-            "doc": null,
             "endLine": 53,
             "isDeprecated": false,
             "isGenerator": false,
@@ -534,7 +478,6 @@
                 "final": false,
                 "code": "function()\n  {\n\t\treturn $this;\n  }",
                 "startLine": 50,
-                "doc": null,
                 "endLine": 53,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -561,7 +504,6 @@
             "final": false,
             "code": "function($uid)\n  {\n\t\treturn $this;\n  }",
             "startLine": 55,
-            "doc": null,
             "endLine": 58,
             "isDeprecated": false,
             "isGenerator": false,
@@ -583,7 +525,6 @@
                 "final": false,
                 "code": "function($uid)\n  {\n\t\treturn $this;\n  }",
                 "startLine": 55,
-                "doc": null,
                 "endLine": 58,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -630,7 +571,6 @@
             "final": false,
             "code": "function($uid, $method = '', $ttl = 0)\n  {\n  }",
             "startLine": 60,
-            "doc": null,
             "endLine": 62,
             "isDeprecated": false,
             "isGenerator": false,
@@ -652,7 +592,6 @@
                 "final": false,
                 "code": "function($uid, $method = '', $ttl = 0)\n  {\n  }",
                 "startLine": 60,
-                "doc": null,
                 "endLine": 62,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -735,7 +674,6 @@
             "final": false,
             "code": "function($uid, $method = '', $data = NULL, $ttl = 0)\n  {\n\t\treturn $this;\n  }",
             "startLine": 64,
-            "doc": null,
             "endLine": 67,
             "isDeprecated": false,
             "isGenerator": false,
@@ -757,7 +695,6 @@
                 "final": false,
                 "code": "function($uid, $method = '', $data = NULL, $ttl = 0)\n  {\n\t\treturn $this;\n  }",
                 "startLine": 64,
-                "doc": null,
                 "endLine": 67,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -858,7 +795,6 @@
             "final": false,
             "code": "function($fn, $uid, $method = '', $data = NULL, $ttl = 0)\n  {\n\t\tif (!($tmp = $this->cacher->get_raw($cn, $ttl))) {\n\t\t\tif ($data = $fn()) {\n\t\t\t\t$this->cacher->set($cn, $data, $ttl);\n\t\t\t}\n\t\t}\n\t\telse {\n\t\t\t$data = $tmp['value'];\n\t\t}\n\t\treturn $data ?: false;\n  }",
             "startLine": 69,
-            "doc": null,
             "endLine": 80,
             "isDeprecated": false,
             "isGenerator": false,
@@ -880,7 +816,6 @@
                 "final": false,
                 "code": "function($fn, $uid, $method = '', $data = NULL, $ttl = 0)\n  {\n\t\tif (!($tmp = $this->cacher->get_raw($cn, $ttl))) {\n\t\t\tif ($data = $fn()) {\n\t\t\t\t$this->cacher->set($cn, $data, $ttl);\n\t\t\t}\n\t\t}\n\t\telse {\n\t\t\t$data = $tmp['value'];\n\t\t}\n\t\treturn $data ?: false;\n  }",
                 "startLine": 69,
-                "doc": null,
                 "endLine": 80,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -999,7 +934,6 @@
             "final": false,
             "code": "function($uid, $method = '', $ttl = 0)\n  {\n    return $this->cache_get($uid, $method, $ttl) ? true : false;\n  }",
             "startLine": 82,
-            "doc": null,
             "endLine": 85,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1021,7 +955,6 @@
                 "final": false,
                 "code": "function($uid, $method = '', $ttl = 0)\n  {\n    return $this->cache_get($uid, $method, $ttl) ? true : false;\n  }",
                 "startLine": 82,
-                "doc": null,
                 "endLine": 85,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1104,11 +1037,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 45,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 50,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1130,11 +1058,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 45,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 50,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1161,7 +1084,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 72,
-            "doc": null,
             "endLine": 74,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1183,7 +1105,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 72,
-                "doc": null,
                 "endLine": 74,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1210,7 +1131,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 76,
-            "doc": null,
             "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1232,7 +1152,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 76,
-                "doc": null,
                 "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1259,7 +1178,6 @@
             "final": false,
             "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
             "startLine": 80,
-            "doc": null,
             "endLine": 88,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1281,7 +1199,6 @@
                 "final": false,
                 "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
                 "startLine": 80,
-                "doc": null,
                 "endLine": 88,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1308,22 +1225,6 @@
             "final": false,
             "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
             "startLine": 95,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$name"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$arguments"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 99,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1345,22 +1246,6 @@
                 "final": false,
                 "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
                 "startLine": 95,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "string",
-                            "name": "$name"
-                        },
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$arguments"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 99,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1425,11 +1310,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 104,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 106,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1451,11 +1331,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 104,
-                "doc": {
-                    "description": "",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 106,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1482,17 +1357,6 @@
             "final": false,
             "code": "function($debug)\n  {\n  }",
             "startLine": 112,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "boolean",
-                        "name": "$debug"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 114,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1514,17 +1378,6 @@
                 "final": false,
                 "code": "function($debug)\n  {\n  }",
                 "startLine": 112,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "boolean",
-                            "name": "$debug"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 114,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1562,7 +1415,7 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": [],
     "constants": null,
     "numMethods": 25,
     "numProperties": 0,
@@ -1602,5 +1455,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\appui",
-    "shortName": "grid"
+    "shortName": "grid",
+    "summary": ""
 }

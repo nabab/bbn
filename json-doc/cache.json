@@ -32,16 +32,6 @@
             "final": false,
             "code": "function($value)\n  {\n      $value = serialize($value);\n    }\n    return md5($value);\n  }",
             "startLine": 82,
-            "doc": {
-                "description": "Makes a unique hash out of whatever value which will be used to check if the value has changed.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$value"
-                    }
-                ],
-                "return": "The hash"
-            },
             "endLine": 87,
             "isDeprecated": false,
             "isGenerator": false,
@@ -76,11 +66,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 94,
-            "doc": {
-                "description": "Returns the type of cache engine running in the class.",
-                "params": [],
-                "return": "The cache engine"
-            },
             "endLine": 96,
             "isDeprecated": false,
             "isGenerator": false,
@@ -105,17 +90,6 @@
             "final": false,
             "code": "function($ttl)\n  {\n      return $ttl;\n    }\n    if ( \\is_string($ttl) ){\n      switch ( $ttl ){\n        case 'xxs':\n          return 30;\n        case 'xs':\n          return 60;\n        case 's':\n          return 300;\n        case 'm':\n          return 3600;\n        case 'l':\n          return 3600*24;\n        case 'xl':\n          return 3600*24*7;\n        case 'xxl':\n          return 3600*24*30;\n      }\n    }\n    return 0;\n  }",
             "startLine": 104,
-            "doc": {
-                "description": "Returns a length in seconds based on the given parameter, allowing strings such as xl or s to be given as ttl arguments.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string|int",
-                        "name": "$ttl"
-                    }
-                ],
-                "return": "The corresponding length in seconds."
-            },
             "endLine": 127,
             "isDeprecated": false,
             "isGenerator": false,
@@ -150,17 +124,6 @@
             "final": false,
             "code": "function($engine = NULL)\n  {\n    self::_init($engine);\n    return self::$engine;\n  }",
             "startLine": 135,
-            "doc": {
-                "description": "Returns the cache object (and creates one of the given type if it doesn't exist).",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$engine"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 139,
             "isDeprecated": false,
             "isGenerator": false,
@@ -197,17 +160,6 @@
             "final": false,
             "code": "function($engine = NULL)\n  {\n    return self::get_cache($engine);\n  }",
             "startLine": 147,
-            "doc": {
-                "description": "Alias of get_cache.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$engine"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 150,
             "isDeprecated": false,
             "isGenerator": false,
@@ -244,18 +196,6 @@
             "final": false,
             "code": "function($engine = NULL)\n  {\n    if ( self::$is_init ){\n      die(\"Only one cache object can be called. Use static function cache::get_engine()\");\n    }\n\n    if ( function_exists('apc_clear_cache') && (!$engine || ($engine === 'apc')) ){\n      self::_set_type('apc');\n    }\n    else if ( class_exists(\"Memcache\") && (!$engine || ($engine === 'memcache')) ){\n      $this->obj = new \\Memcache();\n      if ( $this->obj->connect(\"127.0.0.1\", 11211) ){\n        self::_set_type('memcache');\n      }\n    }\n    else if ($this->path = mvc::get_cache_path()){\n      file\\dir::create_path($this->path);\n      self::_set_type('files');\n    }\n  }",
             "startLine": 157,
-            "doc": {
-                "description": "Constructor - this is a singleton: it can't be called more then once.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$engine",
-                        "description": "The type of engine to use"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 176,
             "isDeprecated": false,
             "isGenerator": false,
@@ -291,24 +231,6 @@
             "final": false,
             "code": "function($item, $ttl = 0)\n  {\n    \n    if ( self::$type ){\n      switch ( self::$type ){\n        case 'apc':\n          return apc_exists($item);\n        case 'memcache':\n          return $this->obj->get($item) !== $item;\n        case 'files':\n          $file = self::_file($item, $this->path);\n          if ( is_file($file) ){\n            $t = json_decode(file_get_contents($file), true);\n            if ( \n              (!$ttl || !isset($t['ttl']) || ($ttl === $t['ttl']))\n              && (!$t['expire'] || ($t['expire'] > time()))\n            ) {\n              return true;\n            }\n            unlink($file);\n          }\n          return false;\n      }\n    }\n  }",
             "startLine": 185,
-            "doc": {
-                "description": "Checks whether a valid cache exists for the given item.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$item",
-                        "description": "The name of the item"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string|int",
-                        "name": "$ttl",
-                        "description": "The time-to-leave value"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 209,
             "isDeprecated": false,
             "isGenerator": false,
@@ -341,7 +263,7 @@
                     "has_default": true,
                     "default": 0,
                     "default_name": "",
-                    "description": "The time-to-leave value"
+                    "description": "The time-to-live value"
                 }
             ]
         },
@@ -356,18 +278,6 @@
             "final": false,
             "code": "function($item)\n  {\n    if (self::$type) {\n      switch ( self::$type ){\n        case 'apc':\n          return apc_delete($item);\n        case 'memcache':\n          return $this->obj->delete($item);\n        case 'files':\n          $file = self::_file($item, $this->path);\n          if ( is_file($file) ){\n            return !!unlink($file);\n          }\n          return false;\n      }\n    }\n  }",
             "startLine": 217,
-            "doc": {
-                "description": "Removes the given item from the cache.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$item",
-                        "description": "The name of the item"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 233,
             "isDeprecated": false,
             "isGenerator": false,
@@ -405,18 +315,6 @@
             "final": false,
             "code": "function($st = NULL)\n  {\n      $dir = self::_dir($st, $this->path, false);\n      if ( is_dir($dir) ){\n        return !!file\\dir::delete($dir, $dir === $this->path ? false : true);\n      }\n      else if ( is_file($dir.'.bbn.cache') ){\n        return !!unlink($dir.'.bbn.cache');\n      }\n    }\n    else if ( self::$type ){\n      $items = $this->items($st);\n      $res = 0;\n      foreach ( $items as $item ){\n        if ( !$st || strpos($item, $st) === 0 ){\n          switch ( self::$type ){\n            case 'apc':\n              $res += (int)apc_delete($item);\n              break;\n            case 'memcache':\n              $res += (int)$this->obj->delete($item);\n              break;\n          }\n        }\n      }\n      return $res;\n    }\n    return false;\n  }",
             "startLine": 241,
-            "doc": {
-                "description": "Deletes all the cache from the given path or globally if none is given.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$st",
-                        "description": "The path of the items to delete"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 269,
             "isDeprecated": false,
             "isGenerator": false,
@@ -452,11 +350,6 @@
             "final": false,
             "code": "function()\n  {\n    return $this;\n  }",
             "startLine": 276,
-            "doc": {
-                "description": "Deletes all the cache globally.",
-                "params": [],
-                "return": ""
-            },
             "endLine": 279,
             "isDeprecated": false,
             "isGenerator": false,
@@ -481,18 +374,6 @@
             "final": false,
             "code": "function($item)\n  {\n    if ( $r = $this->get_raw($item) ){\n      return $r['timestamp'];\n    }\n    return null;\n  }",
             "startLine": 287,
-            "doc": {
-                "description": "Returns the timestamp of the given item.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$item",
-                        "description": "The name of the item"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 293,
             "isDeprecated": false,
             "isGenerator": false,
@@ -531,18 +412,6 @@
             "final": false,
             "code": "function($item)\n  {\n    if ( $r = $this->get_raw($item) ){\n      return $r['hash'];\n    }\n    return null;\n  }",
             "startLine": 301,
-            "doc": {
-                "description": "Returns the hash of the given item.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$item",
-                        "description": "The name of the item"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 307,
             "isDeprecated": false,
             "isGenerator": false,
@@ -581,24 +450,6 @@
             "final": false,
             "code": "function($item, $time = NULL)\n  {\n    if ( !$time ){\n      return false;\n    }\n    if ( $r = $this->get_raw($item) ){\n      return $r['timestamp'] > $time;\n    }\n    return true;\n  }",
             "startLine": 316,
-            "doc": {
-                "description": "Checks whether or not the given item is more recent than the given timestamp.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$item",
-                        "description": "The name of the item"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "null|int",
-                        "name": "$time",
-                        "description": "The timestamp to which the item's timestamp will be compared"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 325,
             "isDeprecated": false,
             "isGenerator": false,
@@ -646,29 +497,6 @@
             "final": false,
             "code": "function($item, $val, $ttl = 10)\n  {\n    if ( self::$type ){\n      $ttl = self::ttl($ttl);\n      $hash = self::make_hash($val);\n      switch ( self::$type ){\n        case 'apc':\n          return \\apc_store($item, [\n            'timestamp' => microtime(1),\n            'hash' => $hash,\n            'ttl' => $ttl,\n            'value' => $val\n          ], $ttl);\n        case 'memcache':\n          return $this->obj->set($item, [\n            'timestamp' => microtime(1),\n            'hash' => $hash,\n            'ttl' => $ttl,\n            'value' => $val\n          ], false, $ttl);\n        case 'files':\n          $file = self::_file($item, $this->path);\n          if ( $dir = self::_dir($item, $this->path) ){\n            file\\dir::create_path($dir);\n          }\n          $value = [\n            'timestamp' => microtime(1),\n            'hash' => $hash,\n            'expire' => $ttl ? time() + $ttl : 0,\n            'ttl' => $ttl,\n            'value' => $val\n          ];\n          return file_put_contents($file, json_encode($value, JSON_PRETTY_PRINT)) ? true : false;\n      }\n    }\n    return false; \n  }",
             "startLine": 335,
-            "doc": {
-                "description": "Stores the given value in the cache for as long as says the TTL.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$item",
-                        "description": "The name of the item"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "$val",
-                        "description": "The value to be stored in the cache"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$ttl",
-                        "description": "The length in seconds during which the value will be considered as valid"
-                    }
-                ],
-                "return": "Returns true in case of success false otherwise"
-            },
             "endLine": 371,
             "isDeprecated": false,
             "isGenerator": false,
@@ -726,24 +554,6 @@
             "final": false,
             "code": "function($item, $hash)\n  {\n    return $hash !== $this->hash($item);\n  }",
             "startLine": 380,
-            "doc": {
-                "description": "Checks if the value of the item corresponds to the given hash.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$item",
-                        "description": "The name of the item"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$hash",
-                        "description": "A MD5 hash to compare with"
-                    }
-                ],
-                "return": "Returns true if the hashes are different, false otherwise"
-            },
             "endLine": 383,
             "isDeprecated": false,
             "isGenerator": false,
@@ -791,24 +601,6 @@
             "final": false,
             "code": "function($item, $ttl = 0)\n  {\n    if ( $r = $this->get_raw($item, $ttl) ){\n      return $r['value'];\n    }\n    return false;\n  }",
             "startLine": 429,
-            "doc": {
-                "description": "Returns the cache value, false otherwise.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$item",
-                        "description": "The name of the item"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$ttl",
-                        "description": "The cache length"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 435,
             "isDeprecated": false,
             "isGenerator": false,
@@ -854,30 +646,6 @@
             "final": false,
             "code": "function($fn, $item, $ttl = 0)\n  {\n    $tmp = $this->get_raw($item, $ttl);\n    if (!$tmp) {\n      $data = $fn();\n      $this->set($item, $data, $ttl);\n    }\n    else {\n      $data = $tmp['value'];\n    }\n    return $data;\n  }",
             "startLine": 445,
-            "doc": {
-                "description": "Returns the cache for the given item, but if expired or absent creates it before by running the provided function.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$item",
-                        "description": "The name of the item"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "function",
-                        "name": "$fn",
-                        "description": "The function which returns the value for the cache"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$ttl",
-                        "description": "The cache length"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 456,
             "isDeprecated": false,
             "isGenerator": false,
@@ -933,11 +701,6 @@
             "final": false,
             "code": "function()\n  {\n      switch ( self::$type ){\n        case 'apc':\n          return apc_cache_info();\n        case 'memcache':\n          return $this->obj->getStats('slabs');\n        case 'files':\n          return file\\dir::get_files($this->path);\n      }\n    }\n  }",
             "startLine": 461,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 472,
             "isDeprecated": false,
             "isGenerator": false,
@@ -962,11 +725,6 @@
             "final": false,
             "code": "function()\n  {\n      switch ( self::$type ){\n        case 'apc':\n          return apc_cache_info();\n        case 'memcache':\n          return $this->obj->getStats();\n        case 'files':\n          return file\\dir::get_files($this->path);\n      }\n    }\n  }",
             "startLine": 477,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 488,
             "isDeprecated": false,
             "isGenerator": false,
@@ -991,17 +749,6 @@
             "final": false,
             "code": "function($dir = '')\n  {\n      switch ( self::$type ){\n        case 'apc':\n          $all = apc_cache_info();\n          $list = [];\n          foreach ( $all['cache_list'] as $a ){\n            array_push($list, $a['info']);\n          }\n          return $list;\n        case 'memcache':\n          $list = [];\n          $allSlabs = $this->obj->getExtendedStats('slabs');\n          foreach ( $allSlabs as $server => $slabs ){\n            foreach ( $slabs as $slabId => $slabMeta ){\n              $cdump = $this->obj->getExtendedStats('cachedump',(int)$slabId);\n              foreach ( $cdump AS $keys => $arrVal ){\n                foreach ( $arrVal AS $k => $v ){\n                  if ( $k !== 'CLIENT_ERROR' ){\n                    echo array_push($list, $k);\n                  }\n                }\n              }\n            }\n          }\n          return $list;\n        case 'files':\n          $cache =& $this;\n          $list = array_filter(array_map(function($a) use ($dir){\n            return ( $dir ? $dir.'\/' : '' ).basename($a, '.bbn.cache');\n          }, file\\dir::get_files($this->path.($dir ? '\/'.$dir : ''))),\n            function($a) use ($cache){\n            \/\/ Only gives valid cache\n              return $cache->has($a);\n          });\n          $dirs = file\\dir::get_dirs($this->path.($dir ? '\/'.$dir : ''));\n          if ( \\count($dirs) ){\n            foreach ( $dirs as $d ){\n              $res = $this->items($dir ? $dir.'\/'.basename($d) : basename($d));\n              foreach ( $res as $r ){\n                array_push($list, $r);\n              }\n            }\n          }\n          return $list;\n      }\n    }\n  }",
             "startLine": 494,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$dir"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 541,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1027,12 +774,16 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": {
+        "is_init": 1,
+        "type": "files",
+        "engine": {}
+    },
     "constants": null,
     "numMethods": 20,
     "numProperties": 0,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 3,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [],
@@ -1053,5 +804,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn",
-    "shortName": "cache"
+    "shortName": "cache",
+    "summary": "Universal caching class: called once per request, it holds the cache system."
 }

@@ -7,7 +7,7 @@
             "since": "Apr 4, 2011, 23:23:55 +0000",
             "category": "Utilities",
             "license": "http:\/\/www.opensource.org\/licenses\/mit-license.php MIT",
-            "version": "0.2r89\n& @todo Change make_love_with_me to bbn\\str::clean"
+            "version": "0.2r89\n & @todo Change make_love_with_me to bbn\\str::clean"
         }
     },
     "name": "bbn\\api\\paybox",
@@ -33,11 +33,6 @@
             "final": false,
             "code": "function(array $cfg, $price, $email, $ref, $currency = 'EUR')\n  {\n\t\tif ( isset($cfg['site'],$cfg['rang'],$cfg['id'],$cfg['key'],$cfg['pass'])\n\t\t&& is_numeric($price)\n\t\t&& $price > 0\n\t\t&& bbn\\str::is_email($email)\n\t\t&& $this->check_server() )\n\t\t{\n\t\t\tif ( isset(self::$currencies[$currency]) )\n\t\t\t{\n\t\t\t\t$this->currency = self::$currencies[$currency];\n\t\t\t\t$this->price = $price * 100;\n\t\t\t\t$this->email = $email;\n\t\t\t\t$this->binkey = pack(\"H*\",$cfg['key']);\n\t\t\t\t$this->ref = $ref;\n\t\t\t\t$this->cfg = $cfg;\n\t\t\t\t$this->enc = self::$encryptions[array_rand(self::$encryptions)];\n\t\t\t\t$this->time = date('c');\n\t\t\t\t$this->params = [\n\t\t\t\t\t'PBX_SITE' => $this->cfg['site'],\n\t\t\t\t\t'PBX_RANG' => $this->cfg['rang'],\n\t\t\t\t\t'PBX_IDENTIFIANT' => $this->cfg['id'],\n\t\t\t\t\t'PBX_TOTAL' => $this->price,\n\t\t\t\t\t'PBX_DEVISE' => $this->currency,\n\t\t\t\t\t'PBX_CMD' => $this->ref,\n\t\t\t\t\t'PBX_PORTEUR' => $this->email,\n\t\t\t\t\t'PBX_RETOUR' => 'Total:M;nomSession:R;NumAutorisation:A;NumTransaction:T;TypeCarte:C;Erreur:E',\n\t\t\t\t\t'PBX_REPONDRE_A' => self::$url_reponse,\n\t\t\t\t\t'PBX_HASH' => $this->enc,\n\t\t\t\t\t'PBX_TIME' => $this->time\n\t\t\t\t];\n\t\t\t\t$this->process();\n\t\t\t\t$this->online = 1;\n\t\t\t}\n\t\t}\n  }",
             "startLine": 41,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 76,
             "isDeprecated": false,
             "isGenerator": false,
@@ -108,7 +103,6 @@
             "final": false,
             "code": "function($button_title = 'Paiement Paybox')\n  {\n\t\t$form = '';\n\t\tif ( isset($this->server, $this->hmac) )\n\t\t{\n\t\t\t$form .= '<form method=\"post\" action=\"https:\/\/'.$this->server.self::$url.'\">'.PHP_EOL;\n\t\t\tforeach ( $this->params as $k => $p ){\n\t\t\t\t$form .= '<input type=\"hidden\" name=\"'.$k.'\" value=\"'.$p.'\">'.PHP_EOL;\n\t\t\t}\n\t\t\t$form .= '<input type=\"hidden\" name=\"PBX_HMAC\" value=\"'.$this->hmac.'\">'.PHP_EOL;\n\t\t\t$form .= '<input type=\"submit\" value=\"'.$button_title.'\">'.PHP_EOL.'<\/form>';\n\t\t\t\n\t\t}\n\t\treturn $form;\n  }",
             "startLine": 108,
-            "doc": null,
             "endLine": 122,
             "isDeprecated": false,
             "isGenerator": false,
@@ -138,12 +132,31 @@
             "visibility": "public"
         }
     },
-    "staticProperties": null,
+    "staticProperties": {
+        "servers": [
+            "tpeweb.paybox.com",
+            "tpeweb1.paybox.com"
+        ],
+        "url_reponse": "http:\/\/www.atlantica.fr\/paybox",
+        "url": "\/cgi\/MYchoix_pagepaiement.cgi",
+        "currencies": {
+            "EUR": "978",
+            "USD": "840",
+            "CFA": "952"
+        },
+        "encryptions": [
+            "SHA512",
+            "SHA256",
+            "RIPEMD160",
+            "SHA224",
+            "SHA384"
+        ]
+    },
     "constants": null,
     "numMethods": 2,
     "numProperties": 1,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 5,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [],
@@ -192,5 +205,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\api",
-    "shortName": "paybox"
+    "shortName": "paybox",
+    "summary": "A class for Paybox"
 }

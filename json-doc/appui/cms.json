@@ -28,7 +28,6 @@
             "final": false,
             "code": "function(bbn\\db $db, $notes = NULL)\n  {\n\t\t$this->_init_class_cfg();\n\t\t$this->_events = new bbn\\appui\\events($this->db);\n\t\t$this->_options = bbn\\appui\\options::get_instance();\n\t\tif (!self::$_id_event) {\n\t\t\t$id = $this->_options->from_code('publication', 'events', 'appui');\n\t\t\tself::_set_id_event($id);\n\t\t}\n\t\tif ( $notes === null ){\n\t\t\t$this->_notes = new \\bbn\\appui\\notes($this->db);\n\t\t} else {\n\t\t\t$this->_notes = $notes;\n\t\t}\n\t\t\n  }",
             "startLine": 139,
-            "doc": null,
             "endLine": 154,
             "isDeprecated": false,
             "isGenerator": false,
@@ -50,7 +49,6 @@
                 "final": false,
                 "code": "function(bbn\\db $db)\n  {\n  }",
                 "startLine": 27,
-                "doc": null,
                 "endLine": 29,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -106,17 +104,6 @@
             "final": false,
             "code": "function($url)\n  {\n\t\t$res = [];\n\t \t$id_note = $this->db->rselect([\n\t\t\t 'table' => $this->class_cfg['tables']['notes_url'], \n\t\t\t 'fields' => [$this->class_cfg['arch']['notes_url']['id_note']],\n\t\t\t 'where' => [\n\t\t\t\t 'conditions' => [[\n\t\t\t\t\t 'field' => $this->class_cfg['arch']['notes_url']['url'],\n\t\t\t\t\t 'value' => $url\n\t\t\t\t ]]\n\t\t\t\t], \n\t\t\t]\n\t\t)['id_note'];\n\t\tif ( !empty($id_note) && $note = $this->_notes->get($id_note)){\n\t\t\t$res = $note;\n\t\t\t$res['url'] = $this->get_url($id_note);\n\t\t\t$res['start'] = $this->get_start($id_note);\n\t\t\t$res['end'] = $this->get_end($id_note);\n\t\t}\n\t\treturn $res;\n  }",
             "startLine": 161,
-            "doc": {
-                "description": "Returns the note with its url, start and end date of publication.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "String",
-                        "name": "$url"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 182,
             "isDeprecated": false,
             "isGenerator": false,
@@ -153,22 +140,6 @@
             "final": false,
             "code": "function($limit = 50, $start = 0)\n  {\n\t\t$pages = $this->_notes->get_by_type($this->_options->from_code('pages', 'types', 'notes', 'appui'), false,$limit, $start);\n\t\t$tmp = array_map(function($a){\n\t\t\t$a['is_published'] = $this->is_published($a['id_note']);\n\t\t\t$a['url'] = $this->has_url($a['id_note']) ? $this->get_url($a['id_note']) : '';\n\t\t\t$a['type'] = 'pages';\n\t\t\t$a['start'] = $this->get_start($a['id_note']);\n\t\t\t$a['end'] = $this->get_end($a['id_note']);\n\t\t\t$a['files'] = $this->_notes->get_medias($a['id_note']) ?: [];\n\t\t\treturn $a;\n\t\t}, $pages); \n\t\treturn $tmp; \n  }",
             "startLine": 190,
-            "doc": {
-                "description": "Returns all the notes of type 'pages'.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "number",
-                        "name": "$limit"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "number",
-                        "name": "$start"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 203,
             "isDeprecated": false,
             "isGenerator": false,
@@ -214,17 +185,6 @@
             "final": false,
             "code": "function($url)\n  {\n\t\tif ( $id_note = $this->db->select_one([\n\t\t\t'table' => $this->class_cfg['tables']['notes_url'], \n\t\t\t'fields' => [$this->class_cfg['arch']['notes_url']['id_note']],\n\t\t\t'where' => [\n\t\t\t\t'conditions' => [[\n\t\t\t\t\t'field' => $this->class_cfg['arch']['notes_url']['url'],\n\t\t\t\t\t'value' => $url\n\t\t\t\t]]\n\t\t\t]\n\t\t])){\n\t\t\tif ( $this->is_published($id_note) ){\n\t\t\t\treturn $id_note;\n\t\t\t}\n\t\t}\n\t\treturn null;\n  }",
             "startLine": 211,
-            "doc": {
-                "description": "If the given url correspond to a published note returns the id.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$url"
-                    }
-                ],
-                "return": "|| null"
-            },
             "endLine": 228,
             "isDeprecated": false,
             "isGenerator": false,
@@ -262,18 +222,6 @@
             "final": false,
             "code": "function($id_note)\n  {\n\t\tif ( $note = $this->_notes->get($id_note) ){\n\t\t\tif ( $this->get_url($id_note) ){\n\t\t\t\t$this->remove_url($id_note);\n\t\t\t}\n\t\t\tif(\n\t\t\t\t!empty($this->_notes->remove($note['id']))\n\t\t\t){\n\t\t\t\treturn true;\n\t\t\t}\n\t\t}\n\t\treturn false;\n  }",
             "startLine": 237,
-            "doc": {
-                "description": "Deletes the given note and unpublish it if published.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "String",
-                        "name": "$id",
-                        "description": "note"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 250,
             "isDeprecated": false,
             "isGenerator": false,
@@ -311,18 +259,6 @@
             "final": false,
             "code": "function($id_note)\n  {\n\t\tif ( $this->db->select_one(\n\t\t\t$this->class_cfg['tables']['notes_url'], \n\t\t\t$this->class_cfg['arch']['notes_url']['url'], \n\t\t\t[\n\t\t\t\t$this->class_cfg['arch']['notes_url']['id_note'] => $id_note\n\t\t\t])\n\t  ){\n\t\t\treturn true;\n\t\t}\n\t\treturn false;\n  }",
             "startLine": 258,
-            "doc": {
-                "description": "Returns true if the note is linked to an url.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "String",
-                        "name": "$id",
-                        "description": "note"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 270,
             "isDeprecated": false,
             "isGenerator": false,
@@ -361,18 +297,6 @@
             "final": false,
             "code": "function($id_note)\n  {\n\t\tif ( $this->has_url($id_note) ){\n\t\t\treturn $this->db->select_one([\n\t\t\t\t'table' => $this->class_cfg['tables']['notes_url'], \n\t\t\t\t'fields' => [$this->class_cfg['arch']['notes_url']['url']],\n\t\t\t\t'where'  => [\n\t\t\t\t\t'conditions'=>[[\n\t\t\t\t\t\t'field' => $this->class_cfg['arch']['notes_url']['id_note'],\n\t\t\t\t\t\t'value' => $id_note\n\t\t\t\t\t]]\n\t\t\t\t]\t\n\t\t\t]);\n\t\t}\n\t\treturn null;\n  }",
             "startLine": 276,
-            "doc": {
-                "description": "Returns the url of the note.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "String",
-                        "name": "$id",
-                        "description": "note"
-                    }
-                ],
-                "return": "|| null"
-            },
             "endLine": 291,
             "isDeprecated": false,
             "isGenerator": false,
@@ -411,23 +335,6 @@
             "final": false,
             "code": "function($id_note, $url)\n  {\n\t\t$success = false;\n\t\t$idx = \\bbn\\x::find($this->get_full_published(), ['url' => $url]);\n\t\tif ( $this->_notes->get($id_note) && empty($idx) ){\n\t\t\tif ( empty($this->db->rselect([\n\t\t\t\t'table' => $this->class_cfg['tables']['notes_url'], \n\t\t\t\t'fields' => [$this->class_cfg['arch']['notes_url']['url']],\n\t\t\t\t'where' => [\n\t\t\t\t\t'conditions' => [[\n\t\t\t\t\t\t'field' => $this->class_cfg['arch']['notes_url']['id_note'],\n\t\t\t\t\t\t'value' => $id_note\n\t\t\t\t\t]]\n\t\t\t\t]\n\t\t\t\t])['url']) \n\t\t\t){\n\t\t\t\t$success = $this->db->insert(\n\t\t\t\t\t$this->class_cfg['tables']['notes_url'],\n\t\t\t\t\t[\n\t\t\t\t\t\t$this->class_cfg['arch']['notes_url']['url'] => $url,\n\t\t\t\t\t\t$this->class_cfg['arch']['notes_url']['id_note'] => $id_note\n\t\t\t\t\t]\n\t\t\t\t);\n\t\t\t}\telse {\n\t\t\t\t$success = $this->db->update(\n\t\t\t\t\t$this->class_cfg['tables']['notes_url'],\n\t\t\t\t\t[$this->class_cfg['arch']['notes_url']['url'] => $url],\n\t\t\t\t\t[\n\t\t\t\t\t\t$this->class_cfg['arch']['notes_url']['id_note'] => $id_note\n\t\t\t\t\t]\n\t\t\t\t);\n\t\t\t\t\n\t\t\t}\n\t\t}\n\t\telseif ( !empty($idx) ) {\n\t\t\tthrow new \\Exception(_('The url you are trying to insert already belongs to a published note. Unpublish the note or change the url!'));\n\t\t}\n\t\treturn $success;\n  }",
             "startLine": 299,
-            "doc": {
-                "description": "Inserts the url for the note if it doesn't exist a published note with the same url or update the url of the given note.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "String",
-                        "name": "$id",
-                        "description": "note"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "String",
-                        "name": "$url"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 337,
             "isDeprecated": false,
             "isGenerator": false,
@@ -475,18 +382,6 @@
             "final": false,
             "code": "function($id_note)\n  {\n\t\t$success = false;\n\t\tif ( $this->is_published($id_note) ){\n\t\t\t$this->unpublish($id_note);\n\t\t} \n\t\tif ( $this->_notes->get($id_note)){\n\t\t\tif ( $this->db->delete([\n\t\t\t\t'table' => $this->class_cfg['tables']['notes_url'], \n\t\t\t\t'where' => [\n\t\t\t\t\t'conditions' => [[\n\t\t\t\t\t\t'field' => $this->class_cfg['arch']['notes_url']['id_note'], \n\t\t\t\t\t\t'value' => $id_note\n\t\t\t\t\t]]\n\t\t\t\t]])\n\t\t\t){\n\t\t\t\t$success = true;\n\t\t\t}\n\t\t}\n\t\t\n\t\treturn $success;\n  }",
             "startLine": 344,
-            "doc": {
-                "description": "Removes the url corresponding to the given id_note from bbn_notes_url.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "String",
-                        "name": "$id",
-                        "description": "note"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 365,
             "isDeprecated": false,
             "isGenerator": false,
@@ -524,18 +419,6 @@
             "final": false,
             "code": "function($id_note)\n  {\n\t\tif ( $id_event = $this->db->select_one(\n\t\t\t$this->class_cfg['tables']['notes_events'], $this->class_cfg['arch']['notes_events']['id_event'], [\n\t\t\t\t$this->class_cfg['arch']['notes_events']['id_note'] => $id_note\n\t\t])){\n\t\t\tif ( $event = $this->db->rselect([\n\t\t\t\t\t\t'table' => $this->class_cfg['table'], \n\t\t\t\t\t\t'fields' => [],\n\t\t\t\t\t\t'where' => [\n\t\t\t\t\t\t\t'conditions' => [[\n\t\t\t\t\t\t\t\t'field' => $this->fields['id'],\n\t\t\t\t\t\t\t\t'value' => $id_event\n\t\t\t\t\t\t\t]]], \n\t\t\t\t\t\t]\n\t\t\t\t\t)\n\t\t\t){\n\t\t\t\t\/\/if the event is not in bbn_notes_events it inserts the row\n\t\t\t\t$this->_insert_notes_events($id_note, $id_event);\n\t\t\t\t$event['id_note'] = $id_note;\n\t\t\t\treturn $event;\n\t\t\t}\n\t\t}\t\n\t\treturn null;\n  }",
             "startLine": 370,
-            "doc": {
-                "description": "Returns the object event of the given note.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "String",
-                        "name": "$id",
-                        "description": "note"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 394,
             "isDeprecated": false,
             "isGenerator": false,
@@ -571,23 +454,6 @@
             "final": false,
             "code": "function($id_note, array $cfg = [])\n  {\n\t\tif ($this->_check_date($cfg['start'], $cfg['end'])){\n\t\t\t$event = $this->get_event($id_note);\n\t\t\tif ( \n\t\t\t\t(strtotime($cfg['start']) !== strtotime($event['start']) ) || \n\t\t\t\t(strtotime($cfg['end']) !== strtotime($event['end']) )\n\t\t\t){\n\t\t\t\t$cfg['id_type'] = self::$_id_event;\n\t\t\t\treturn $this->_events->edit($event['id'], $cfg);\n\t\t\t} else {\n\t\t\t\treturn true;\n\t\t\t}\n\t\t}\n\t\treturn false;\n  }",
             "startLine": 401,
-            "doc": {
-                "description": "Updates the event relative to the given note.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "String",
-                        "name": "$id",
-                        "description": "note"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "Array",
-                        "name": "$cfg"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 416,
             "isDeprecated": false,
             "isGenerator": false,
@@ -635,18 +501,6 @@
             "final": false,
             "code": "function($id_note)\n  {\n\t\tif ( $event = $this->get_event($id_note) ){\n\t\t\treturn $event['start'];\n\t\t}\n\t\treturn null;\n  }",
             "startLine": 422,
-            "doc": {
-                "description": "If it exists an event linked to the note it returns the start date.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "String",
-                        "name": "$id",
-                        "description": "note"
-                    }
-                ],
-                "return": "|| null"
-            },
             "endLine": 428,
             "isDeprecated": false,
             "isGenerator": false,
@@ -685,18 +539,6 @@
             "final": false,
             "code": "function($id_note)\n  {\n\t\tif ( $event = $this->get_event($id_note) ){\n\t\t\treturn $event['end'];\n\t\t}\n\t\treturn null;\n  }",
             "startLine": 434,
-            "doc": {
-                "description": "If it exists an event linked to the note it returns the end date.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "String",
-                        "name": "$id",
-                        "description": "note"
-                    }
-                ],
-                "return": "|| null"
-            },
             "endLine": 440,
             "isDeprecated": false,
             "isGenerator": false,
@@ -732,23 +574,6 @@
             "final": false,
             "code": "function($id_note, array $cfg = NULL)\n  {\n\t\t\t$title = $note['title'];\n\t\t\tif ( empty($this->get_event($id_note)) ){\n\t\t\t\t\/\/if a type is not given it inserts the event as page\n\t\t\t\tif ( $id_event = $this->_events->insert([\n\t\t\t\t\t'name' => $title,\n\t\t\t\t\t'id_type' => self::$_id_event,\n\t\t\t\t\t'start' => $cfg['start'],\n\t\t\t\t\t'end' => $cfg['end'] ?: null,\n\t\t\t\t]) ){\n\t\t\t\t\treturn $this->_insert_notes_events($id_note, $id_event);\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\treturn $this->update_event($id_note, $cfg);\n\t\t\t}\n\t\t}\n\t\treturn null;\n  }",
             "startLine": 448,
-            "doc": {
-                "description": "Inserts in bbn_events and bbn_notes_events the informations relative to the publication of the given note.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "String",
-                        "name": "$id",
-                        "description": "note"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "Array",
-                        "name": "$cfg"
-                    }
-                ],
-                "return": "|| null"
-            },
             "endLine": 466,
             "isDeprecated": false,
             "isGenerator": false,
@@ -793,11 +618,6 @@
             "final": false,
             "code": "function()\n  {\n\t\t\/\/select all events\n\t\t$events = $this->db->rselect_all($this->class_cfg['table']);\n\t\t$now = strtotime(date('Y-m-d H:i:s'));\n\t\t$res = [];\n\t\tif ( !empty($events) ){\n\t\t\tforeach ($events as $e){\n\t\t\t\t\/\/takes events without end date of with end date > now\n\t\t\t\tif ( \n\t\t\t\t\tarray_key_exists($this->fields['start'], $e) && \n\t\t\t\t\t( is_null($e['end']) || (strtotime($e['end']) > $now) )\n\t\t\t\t){\n\t\t\t\t\t\/\/gets the note correspondant to the id_event and push it in $res\n\t\t\t\t\t$id_note = $this->db->select_one($this->class_cfg['tables']['notes_events'],\n\t\t\t\t\t\t$this->class_cfg['arch']['notes_events']['id_note'], [\n\t\t\t\t\t\t$this->class_cfg['arch']['notes_events']['id_event'] => $e['id']\n\t\t\t\t\t]);\n\t\t\t\t\tif ( $this->has_url($id_note)){\n\t\t\t\t\t\t$note = $this->_notes->get($id_note);\n\t\t\t\t\t\t$note['url'] = $this->get_url($id_note);\n\t\t\t\t\t\t$note['start'] = $this->get_start($id_note);\n\t\t\t\t\t\t$note['end'] = $this->get_end($id_note);\n\t\t\t\t\t\t$res[] = $note;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn $res;\n  }",
             "startLine": 472,
-            "doc": {
-                "description": "Returns all notes that has a link with bbn_events.",
-                "params": [],
-                "return": ""
-            },
             "endLine": 501,
             "isDeprecated": false,
             "isGenerator": false,
@@ -825,11 +645,6 @@
             "final": false,
             "code": "function()\n  {\n\t\tif ( ($full = $this->get_full()) ){\n\t\t  return array_filter($full, function($a){\n\t\t\t\treturn $a['start'] !== null;\n\t\t\t});\n\t\t}\n\t\treturn [];\n  }",
             "startLine": 506,
-            "doc": {
-                "description": "Returns an array containing all the published notes.",
-                "params": [],
-                "return": ""
-            },
             "endLine": 514,
             "isDeprecated": false,
             "isGenerator": false,
@@ -856,18 +671,6 @@
             "final": false,
             "code": "function($id_note)\n  {\n\t\t$now = strtotime(date('Y-m-d H:i:s'));\n\t\tif ( $event = $this->get_event($id_note) ){\n\t\t\tif ( \n\t\t\t\tisset($event['start']) && \n\t\t\t\t( is_null($event['end']) || (strtotime($event['end']) > $now)) &&\n\t\t\t\t$this->has_url($id_note)\n\t\t\t){\n\t\t\t\treturn true;\n\t\t\t}\n\t\t}\n\t\treturn false;\n  }",
             "startLine": 521,
-            "doc": {
-                "description": "If the note has a corresponding event in bbn_events and the date of start is before now, and the date of end if isset is after now and the note has an url it returns true",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "String",
-                        "name": "$id",
-                        "description": "note"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 534,
             "isDeprecated": false,
             "isGenerator": false,
@@ -906,23 +709,6 @@
             "final": false,
             "code": "function($id_note, array $cfg)\n  {\n\t\tif (\n\t\t\t !$this->is_published($id_note) && \n\t\t\t ( $note = $this->_notes->get($id_note) ) \n\t\t){\n\t\t\t\/\/if $url is given it updates the note_url\n\t\t\tif ( !empty($cfg['url'])){\n\t\t\t\ttry {\n\t\t\t\t\t$this->set_url($id_note, $cfg['url']);\n\t\t\t\t}\n\t\t\t\tcatch ( \\Exception $e ){\n\t\t\t\t\treturn [\n\t\t\t\t\t\t'error' => $e->getMessage()\n\t\t\t\t\t];\n\t\t\t\t}\n\t\t\t}\n\t\t\tif ( !empty($this->has_url($id_note)) ){\n\t\t\t\tif ( empty($this->get_event($id_note)) ){\n\t\t\t\t\treturn $this->set_event($id_note, [\n\t\t\t\t\t\t'start' => $cfg['start'] ?: date('Y-m-d H:i:s'), \n\t\t\t\t\t\t'end' => $cfg['end'] ?: null,\n\t\t\t\t\t\t'id_type' => self::$_id_event ?: null\n\t\t\t\t\t]);\n\t\t\t\t} else if ( $this->get_event($id_note) ){\n\t\t\t\t\t\/\/case update\n\t\t\t\t\treturn $this->update_event($id_note, [\n\t\t\t\t\t\t'start' => $cfg['start'] ?: date('Y-m-d H:i:s'), \n\t\t\t\t\t\t'end' => $cfg['end'] ?: null,\n\t\t\t\t\t\t'id_type' => self::$_id_event ?: null\n\t\t\t\t\t]);\n\t\t\t\t}\n\t\t\t} else if ( empty($this->has_url($id_note)) ){\n\t\t\t\treturn false;\n\t\t\t}\n\t\t}\n\t\treturn false;\n  }",
             "startLine": 542,
-            "doc": {
-                "description": "Publish a note.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "String",
-                        "name": "$id",
-                        "description": "note"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "Array",
-                        "name": "$cfg"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 579,
             "isDeprecated": false,
             "isGenerator": false,
@@ -970,18 +756,6 @@
             "final": false,
             "code": "function($id_note)\n  {\n\t\tif ( \n\t\t\t($event = $this->get_event($id_note)) && \n\t\t\t$this->is_published($id_note) \n\t\t){\n\t\t\tif ( $this->update_event(\n\t\t\t\t$id_note, [\n\t\t\t\t\t'start' => null,\n\t\t\t\t\t'end' => null\n\t\t\t\t])\n\t\t  ){\n\t\t\t\treturn $this->_remove_note_events($id_note, $event['id']);\n\t\t\t}\n\t\t}\n\t\treturn false;\n  }",
             "startLine": 586,
-            "doc": {
-                "description": "Unpublish a note.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "String",
-                        "name": "$id",
-                        "description": "note"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 602,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1019,11 +793,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 45,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 50,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1045,11 +814,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 45,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 50,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1076,11 +840,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 56,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 61,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1102,11 +861,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 56,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 61,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1133,7 +887,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 72,
-            "doc": null,
             "endLine": 74,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1155,7 +908,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 72,
-                "doc": null,
                 "endLine": 74,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1182,7 +934,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 76,
-            "doc": null,
             "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1204,7 +955,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 76,
-                "doc": null,
                 "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1231,7 +981,6 @@
             "final": false,
             "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
             "startLine": 80,
-            "doc": null,
             "endLine": 88,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1253,7 +1002,6 @@
                 "final": false,
                 "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
                 "startLine": 80,
-                "doc": null,
                 "endLine": 88,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1280,22 +1028,6 @@
             "final": false,
             "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
             "startLine": 95,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$name"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$arguments"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 99,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1317,22 +1049,6 @@
                 "final": false,
                 "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
                 "startLine": 95,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "string",
-                            "name": "$name"
-                        },
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$arguments"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 99,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1397,11 +1113,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 104,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 106,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1423,11 +1134,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 104,
-                "doc": {
-                    "description": "",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 106,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1454,17 +1160,6 @@
             "final": false,
             "code": "function($debug)\n  {\n  }",
             "startLine": 112,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "boolean",
-                        "name": "$debug"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 114,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1486,17 +1181,6 @@
                 "final": false,
                 "code": "function($debug)\n  {\n  }",
                 "startLine": 112,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "boolean",
-                            "name": "$debug"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 114,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1543,16 +1227,6 @@
             "final": false,
             "code": "function($id)\n  {\n      $this->class_cfg['arch'][$this->class_table_index]['id'] => $id\n    ]);\n  }",
             "startLine": 59,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$id"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 63,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1587,11 +1261,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 69,
-            "doc": {
-                "description": "Return the",
-                "params": [],
-                "return": ""
-            },
             "endLine": 71,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1616,7 +1285,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 73,
-            "doc": null,
             "endLine": 75,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1632,12 +1300,63 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": {
+        "_defaults": {
+            "table": "bbn_events",
+            "tables": {
+                "notes": "bbn_notes",
+                "versions": "bbn_notes_versions",
+                "events": "bbn_events",
+                "notes_url": "bbn_notes_url",
+                "notes_events": "bbn_notes_events"
+            },
+            "arch": {
+                "notes": {
+                    "id": "id",
+                    "id_parent": "id_parent",
+                    "id_alias": "id_alias",
+                    "id_type": "id_type",
+                    "private": "private",
+                    "locked": "locked",
+                    "pinned": "pinned",
+                    "creator": "creator",
+                    "active": "active"
+                },
+                "versions": {
+                    "id_note": "id_note",
+                    "version": "version",
+                    "title": "title",
+                    "content": "content",
+                    "id_user": "id_user",
+                    "creation": "creation"
+                },
+                "events": {
+                    "id": "id",
+                    "id_parent": "id_parent",
+                    "id_type": "id_type",
+                    "start": "start",
+                    "end": "end",
+                    "name": "name",
+                    "recurring": "recurring",
+                    "cfg": "cfg"
+                },
+                "notes_events": {
+                    "id_note": "id_note",
+                    "id_event": "id_event"
+                },
+                "notes_url": {
+                    "id_note": "id_note",
+                    "url": "url"
+                }
+            }
+        },
+        "_id_event": null
+    },
     "constants": null,
     "numMethods": 30,
     "numProperties": 0,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 2,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [
@@ -1717,5 +1436,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\appui",
-    "shortName": "cms"
+    "shortName": "cms",
+    "summary": ""
 }

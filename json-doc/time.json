@@ -30,7 +30,6 @@
             "final": false,
             "code": "function($t)\n  {\n    $this->time = new \\dateTime($t);\n  }",
             "startLine": 21,
-            "doc": null,
             "endLine": 24,
             "isDeprecated": false,
             "isGenerator": false,
@@ -65,11 +64,6 @@
             "final": false,
             "code": "function()\n  {\n    return $this->time;\n  }",
             "startLine": 31,
-            "doc": {
-                "description": "return the property $this->time",
-                "params": [],
-                "return": ""
-            },
             "endLine": 34,
             "isDeprecated": false,
             "isGenerator": false,
@@ -94,17 +88,6 @@
             "final": false,
             "code": "function($format = '')\n  {\n    if ( !empty($format) ){\n      return $this->time->format($format);\n    }\n    else { \n      return $this->time->format('Y-m-d H:i:s');\n    }\n  }",
             "startLine": 72,
-            "doc": {
-                "description": "return the date in the given $format of in 'Y-m-d H:i:s' format if no argument is given to the function",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$format"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 80,
             "isDeprecated": false,
             "isGenerator": false,
@@ -139,24 +122,6 @@
             "final": false,
             "code": "function($date, $comparator)\n  {\n    \/\/check if the argument $date is an instance of this class\n    if ( $date instanceof $this){\n      $tmp = $date;\n    }\n    else {\n      $tmp = new \\bbn\\time($date);\n    }\n    switch ( $comparator ){\n      case $comparator === '>':  \n        return $this->get_time() > $tmp->get_time(); \n        break;\n      case $comparator === '>=':  \n        return $this->get_time() >= $tmp->get_time(); \n        break;\n      case $comparator === '<':  \n        return $this->get_time() < $tmp->get_time(); \n        break;\n      case $comparator === '<=':  \n        return $this->get_time() <= $tmp->get_time(); \n        break;\n      case $comparator === '=':  \n        return $this->get_time() == $tmp->get_time(); \n        break;\n    }\n  }",
             "startLine": 98,
-            "doc": {
-                "description": "Compares two dates",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "String|Object",
-                        "name": "$date",
-                        "description": "the string of the date to compare or an object of this class"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "String",
-                        "name": "$comparator",
-                        "description": "allowed comparators '>','>=', '<','<=', '='"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 124,
             "isDeprecated": false,
             "isGenerator": false,
@@ -202,18 +167,6 @@
             "final": false,
             "code": "function($date)\n  {\n    \/\/check if the argument $date is an instance of this class\n    if ( $date instanceof $this){\n      $tmp = $date;\n    }\n    else {\n      $tmp = new \\bbn\\time($date);\n    }\n    return $this->get_time() < $tmp->get_time(); \n  }",
             "startLine": 132,
-            "doc": {
-                "description": "Return if $this->time is before of the given $date",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "String|Object",
-                        "name": "$date",
-                        "description": "the string of the date to compare or an object of this class"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 142,
             "isDeprecated": false,
             "isGenerator": false,
@@ -249,18 +202,6 @@
             "final": false,
             "code": "function($date)\n  {\n    \/\/check if the argument $date is an instance of this class\n    if ( $date instanceof $this){\n      $tmp = $date;\n    }\n    else {\n      $tmp = new \\bbn\\time($date);\n    }\n    return $this->get_time() > $tmp->get_time(); \n  }",
             "startLine": 151,
-            "doc": {
-                "description": "Return if $this->time is after of the given $date",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "String|Object",
-                        "name": "$date",
-                        "description": "the string of the date to compare or an object of this class"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 161,
             "isDeprecated": false,
             "isGenerator": false,
@@ -296,18 +237,6 @@
             "final": false,
             "code": "function($date)\n  {\n    \/\/check if the argument $date is an instance of this class\n    if ( $date instanceof $this){\n      $tmp = $date;\n    }\n    else {\n      $tmp = new \\bbn\\time($date);\n    }\n    return $this->get_time() == $tmp->get_time(); \n  }",
             "startLine": 170,
-            "doc": {
-                "description": "Return if $this->time is the same of the given $date",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "String|Object",
-                        "name": "$date",
-                        "description": "the string of the date to compare or an object of this class"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 180,
             "isDeprecated": false,
             "isGenerator": false,
@@ -339,7 +268,7 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "If the argument $format is not given it returns the sql format 'Y-m-d H:i:s'"
+                    "content": "<p>If the argument $format is not given it returns the sql format 'Y-m-d H:i:s'<\/p>"
                 }
             ],
             "file": "bbn\\time",
@@ -348,23 +277,6 @@
             "final": false,
             "code": "function($interval, $format = '')\n  {\n    $tmp->time->add($this->get_interval($interval));\n    return $tmp->format($format);\n  }",
             "startLine": 191,
-            "doc": {
-                "description": "Add an the given $interval to $this->time and return a reference to the original object\nIf the argument $format is not given it returns the sql format 'Y-m-d H:i:s'",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$interval"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$format",
-                        "description": "optional"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 195,
             "isDeprecated": false,
             "isGenerator": false,
@@ -405,7 +317,7 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "If the argument $format is not given it returns the sql format 'Y-m-d H:i:s'"
+                    "content": "<p>If the argument $format is not given it returns the sql format 'Y-m-d H:i:s'<\/p>"
                 }
             ],
             "file": "bbn\\time",
@@ -414,23 +326,6 @@
             "final": false,
             "code": "function($interval, $format = '')\n  {\n    $tmp->time->sub($this->get_interval($interval));\n    return $tmp->format($format);\n  }",
             "startLine": 205,
-            "doc": {
-                "description": "Subtract the given $interval to $this->time and return a reference to the original object\nIf the argument $format is not given it returns the sql format 'Y-m-d H:i:s'",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$interval"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$format",
-                        "description": "optional"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 209,
             "isDeprecated": false,
             "isGenerator": false,
@@ -475,21 +370,6 @@
             "final": false,
             "code": "function($modif, $format = '')\n  {\n    $tmp = new \\bbn\\time($this->format());\n    $tmp->time->modify($modif);\n    return $tmp->format($format);\n  }",
             "startLine": 218,
-            "doc": {
-                "description": "Return a reference to $this->time modified of the $modif",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$modif"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$format"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 223,
             "isDeprecated": false,
             "isGenerator": false,
@@ -533,11 +413,6 @@
             "final": false,
             "code": "function()\n  {\n    $y = $this->get_year();\n    return cal_days_in_month(CAL_GREGORIAN, $m, $y);\n  }",
             "startLine": 230,
-            "doc": {
-                "description": "return the end of the month of $this->time",
-                "params": [],
-                "return": ""
-            },
             "endLine": 234,
             "isDeprecated": false,
             "isGenerator": false,
@@ -562,11 +437,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 45,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 50,
             "isDeprecated": false,
             "isGenerator": false,
@@ -588,11 +458,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 45,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 50,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -619,11 +484,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 56,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 61,
             "isDeprecated": false,
             "isGenerator": false,
@@ -645,11 +505,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 56,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 61,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -676,7 +531,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 72,
-            "doc": null,
             "endLine": 74,
             "isDeprecated": false,
             "isGenerator": false,
@@ -698,7 +552,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 72,
-                "doc": null,
                 "endLine": 74,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -725,7 +578,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 76,
-            "doc": null,
             "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
@@ -747,7 +599,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 76,
-                "doc": null,
                 "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -774,7 +625,6 @@
             "final": false,
             "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
             "startLine": 80,
-            "doc": null,
             "endLine": 88,
             "isDeprecated": false,
             "isGenerator": false,
@@ -796,7 +646,6 @@
                 "final": false,
                 "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
                 "startLine": 80,
-                "doc": null,
                 "endLine": 88,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -823,22 +672,6 @@
             "final": false,
             "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
             "startLine": 95,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$name"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$arguments"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 99,
             "isDeprecated": false,
             "isGenerator": false,
@@ -860,22 +693,6 @@
                 "final": false,
                 "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
                 "startLine": 95,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "string",
-                            "name": "$name"
-                        },
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$arguments"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 99,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -940,11 +757,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 104,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 106,
             "isDeprecated": false,
             "isGenerator": false,
@@ -966,11 +778,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 104,
-                "doc": {
-                    "description": "",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 106,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -997,17 +804,6 @@
             "final": false,
             "code": "function($debug)\n  {\n  }",
             "startLine": 112,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "boolean",
-                        "name": "$debug"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 114,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1029,17 +825,6 @@
                 "final": false,
                 "code": "function($debug)\n  {\n  }",
                 "startLine": 112,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "boolean",
-                            "name": "$debug"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 114,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1077,7 +862,7 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": [],
     "constants": null,
     "numMethods": 19,
     "numProperties": 0,
@@ -1104,5 +889,13 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn",
-    "shortName": "time"
+    "shortName": "time",
+    "summary": "Class dealing with date manipulation",
+    "description": "examples: test\/loredana\/time",
+    "description_parts": [
+        {
+            "type": "text",
+            "content": "<p>examples: test\/loredana\/time<\/p>"
+        }
+    ]
 }

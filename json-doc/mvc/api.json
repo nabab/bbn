@@ -23,7 +23,6 @@
             "final": false,
             "code": "function($path = '', $post = false, $arguments = false)\n  {\n  function is_cli();\n  }",
             "startLine": 14,
-            "doc": null,
             "endLine": 14,
             "isDeprecated": false,
             "isGenerator": false,
@@ -76,7 +75,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 16,
-            "doc": null,
             "endLine": 16,
             "isDeprecated": false,
             "isGenerator": false,
@@ -92,7 +90,7 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": [],
     "constants": null,
     "numMethods": 2,
     "numProperties": 0,
@@ -112,5 +110,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\mvc",
-    "shortName": "api"
+    "shortName": "api",
+    "summary": ""
 }

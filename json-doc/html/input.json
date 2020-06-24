@@ -30,7 +30,7 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "Only name and tag are mandatory, then other values depending on the tag"
+                    "content": "<p>Only name and tag are mandatory, then other values depending on the tag<\/p>"
                 }
             ],
             "file": "bbn\\html\\input",
@@ -39,18 +39,6 @@
             "final": false,
             "code": "function($cfg)\n  {\n    \n    if ( \\is_string($cfg) ){\n      $cfg = [\n          'field' => 'text',\n          'attr' => [\n              'name' => $cfg\n          ]\n      ];\n    }\n    \n    parent::__construct($cfg);\n    \n\t\tif ( $this->tag ){\n      \n\t\t\t$mandatory_attr = [];\n      \n      if ( !isset($this->attr['id']) ){\n  \t\t\t$this->attr['id'] = bbn\\str::genpwd(20,15);\n      }\n      \n\t\t\t$this->script = isset($cfg['script']) ? $cfg['script'] : '';\n\t\t\t$this->value = isset($cfg['value']) ? $cfg['value'] : '';\n      \n\t\t\tswitch ( $this->tag )\n\t\t\t{\n\t\t\t\tcase \"input\":\n\t\t\t\t\tarray_push($mandatory_attr, \"type\");\n\t\t\t\t\tbreak;\n\t\t\t\tcase \"textarea\":\n\t\t\t\t\tarray_push($mandatory_attr, \"cols\", \"rows\");\n\t\t\t\t\tbreak;\n\t\t\t\tcase \"select\":\n\t\t\t\t\tarray_push($mandatory_attr, \"attr\");\n\t\t\t\t\tbreak;\n\t\t\t}\n      \n\t\t\tforeach ( $mandatory_attr as $m ){\n\t\t\t\tif ( !isset($this->attr[$m]) ){\n\t\t\t\t\tdie(\"Argument $m is missing in your config... Sorry!\");\n\t\t\t\t}\n\t\t\t}\n\t\t}\n    return $this;\n  }",
             "startLine": 151,
-            "doc": {
-                "description": "This will build a new HTML form element according to the given configuration.\nOnly name and tag are mandatory, then other values depending on the tag",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$cfg",
-                        "description": "The configuration"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 196,
             "isDeprecated": false,
             "isGenerator": false,
@@ -72,11 +60,6 @@
                 "final": false,
                 "code": "function($cfg)\n  {\n    self::_init();\n    if ( \\is_string($cfg) && !empty($cfg) ){\n      \/\/ Looking for classes, IDs, or name (|) in the string\n      preg_match_all(\"\/([\\\\.|\\\\||#]{1})([A-z0-9-]+)\/\", $cfg, $m);\n      $classes = [];\n      $id = false;\n      $name = false;\n      if ( isset($m[0], $m[1], $m[2]) && \\count($m[0]) > 0 ){\n        foreach ( $m[1] as $k => $v ){\n          if ( $v === '.' ){\n            array_push($classes, $m[2][$k]);\n          }\n          else if ( $v === '#' ){\n            $id = $m[2][$k];\n          }\n          else if ( $v === '|' ){\n            $name = $m[2][$k];\n          }\n        }\n      }\n      \/\/ Looking for the tag (mandatory)\n      preg_match_all(\"\/^([A-z0-9-]+)\/\", $cfg, $n);\n      if ( isset($n[0]) && \\count($n[0]) > 0 ){\n        $cfg = ['tag' => $n[0][0]];\n        if ( (\\count($classes) > 0) || $id || $name ){\n          $cfg['attr'] = [];\n          if ( \\count($classes) > 0 ){\n            $cfg['attr']['class'] = implode(\" \", $classes);\n          }\n          if ( $id ){\n            $cfg['attr']['id'] = $id;\n          }\n          if ( $name ){\n            $cfg['attr']['name'] = $name;\n          }\n        }\n      }\n    }\n    $cfg = self::cast($cfg);\n\t\tif ( self::check_config($cfg) ){\n      foreach ( $cfg as $key => $val ){\n        if ( $key === 'tag' ){\n          $this->tag = strtolower($val);\n        }\n        else if ( property_exists(\\get_called_class(), $key) ){\n          $this->$key = $val;\n        }\n      }\n      $this->update();\n    }\n    else{\n      $err[] = self::get_error();\n      if ( isset($cfg['tag']) ){\n        $err[] = 'Tag: '.$cfg['tag'];\n      }\n      if ( isset($cfg['name']) ){\n        $err[] = 'Name: '.$cfg['name'];\n      }\n      var_dump($err);\n    }\n  }",
                 "startLine": 306,
-                "doc": {
-                    "description": "",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 368,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -124,11 +107,6 @@
             "final": false,
             "code": "function($with_script = 1)\n  {\n\t\t$s = $this->html();\n    if ( !empty($s) ){\n\t\t\tif ( BBN_IS_DEV ){\n        $title = str_replace('\"', '', print_r (bbn\\str::make_readable($this->cfg), true));\n\t\t\t}\n\t\t\telse if ( isset($this->attr['title']) ){\n\t\t\t\t$title = $this->attr['title'];\n\t\t\t}\n      else{\n\t\t\t\t$title = isset($this->label) ? $this->label : '';\n\t\t\t}\n      if ( !isset($this->cfg['field']) || $this->cfg['field'] !== 'hidden' ){\n  \t\t\t$s = '<label class=\"bbn-form-label\" title=\"'.$title.'\" for=\"'.$this->attr['id'].'\">'.$this->label.'<\/label><div class=\"bbn-form-field\">'.$s.'<\/div>';\n      }\n\t\t}\n\t\treturn $s;\n  }",
             "startLine": 203,
-            "doc": {
-                "description": "Returns the element with its label and inside a div",
-                "params": [],
-                "return": ""
-            },
             "endLine": 221,
             "isDeprecated": false,
             "isGenerator": false,
@@ -163,18 +141,6 @@
             "final": false,
             "code": "function($cfg)\n  {\n      self::$error = \"The configuration is not a valid array\";\n      return false;\n    }\n    self::$validator->check(bbn\\x::to_object($cfg), static::$schema);\n    self::$error = '';\n    if ( self::$validator->isValid() ){\n      return 1;\n    }\n    foreach ( self::$validator->getErrors() as $error ){\n      self::$error .= sprintf(\"[%s] %s\",$error['property'], $error['message']);\n      var_dump($cfg);\n    }\n    return false;\n  }",
             "startLine": 232,
-            "doc": {
-                "description": "Confront the JSON schema object with the current configuration",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$cfg",
-                        "description": "Configuration"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 247,
             "isDeprecated": false,
             "isGenerator": false,
@@ -196,18 +162,6 @@
                 "final": false,
                 "code": "function($cfg)\n  {\n      self::$error = \"The configuration is not a valid array\";\n      return false;\n    }\n    self::$validator->check(bbn\\x::to_object($cfg), static::$schema);\n    self::$error = '';\n    if ( self::$validator->isValid() ){\n      return 1;\n    }\n    foreach ( self::$validator->getErrors() as $error ){\n      self::$error .= sprintf(\"[%s] %s\",$error['property'], $error['message']);\n      var_dump($cfg);\n    }\n    return false;\n  }",
                 "startLine": 232,
-                "doc": {
-                    "description": "Confront the JSON schema object with the current configuration",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$cfg",
-                            "description": "Configuration"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 247,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -256,11 +210,6 @@
             "final": false,
             "code": "function()\n  {\n    return self::$error;\n  }",
             "startLine": 254,
-            "doc": {
-                "description": "Returns the current error(s)",
-                "params": [],
-                "return": ""
-            },
             "endLine": 257,
             "isDeprecated": false,
             "isGenerator": false,
@@ -282,11 +231,6 @@
                 "final": false,
                 "code": "function()\n  {\n    return self::$error;\n  }",
                 "startLine": 254,
-                "doc": {
-                    "description": "Returns the current error(s)",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 257,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -313,18 +257,6 @@
             "final": false,
             "code": "function($css)\n  {\n      return ' style=\"'.bbn\\str::escape_dquotes($css).'\"';\n    }\n    else if ( \\is_array($css) && \\count($css) > 0 ){\n      $st = '';\n      foreach ( $css as $prop => $val ){\n        $st .= $prop.':'.$val.';';\n      }\n      return ' style=\"'.bbn\\str::escape_dquotes($st).'\"';\n    }\n  }",
             "startLine": 266,
-            "doc": {
-                "description": "Generates style string for a HTML tag",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "array|string",
-                        "name": "$css",
-                        "description": "CSS properties\/values array"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 277,
             "isDeprecated": false,
             "isGenerator": false,
@@ -346,18 +278,6 @@
                 "final": false,
                 "code": "function($css)\n  {\n      return ' style=\"'.bbn\\str::escape_dquotes($css).'\"';\n    }\n    else if ( \\is_array($css) && \\count($css) > 0 ){\n      $st = '';\n      foreach ( $css as $prop => $val ){\n        $st .= $prop.':'.$val.';';\n      }\n      return ' style=\"'.bbn\\str::escape_dquotes($st).'\"';\n    }\n  }",
                 "startLine": 266,
-                "doc": {
-                    "description": "Generates style string for a HTML tag",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "array|string",
-                            "name": "$css",
-                            "description": "CSS properties\/values array"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 277,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -406,7 +326,6 @@
             "final": false,
             "code": "function(array $cfg)\n  {\n      if ( !bbn\\str::is_number($i) ){\n        $this->css[$i] = $k;\n      }\n    }\n    $this->update();\n    return $this;\n  }",
             "startLine": 279,
-            "doc": null,
             "endLine": 287,
             "isDeprecated": false,
             "isGenerator": false,
@@ -428,7 +347,6 @@
                 "final": false,
                 "code": "function(array $cfg)\n  {\n      if ( !bbn\\str::is_number($i) ){\n        $this->css[$i] = $k;\n      }\n    }\n    $this->update();\n    return $this;\n  }",
                 "startLine": 279,
-                "doc": null,
                 "endLine": 287,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -475,7 +393,6 @@
             "final": false,
             "code": "function($class)\n  {\n      $this->attr['class'] = $class;\n    }\n    else{\n      $cls = explode(\" \", $this->attr['class']);\n      if ( !\\in_array($class, $cls) ){\n        $this->attr['class'] .= ' '.$class;\n      }\n    }\n    $this->update();\n    return $this;\n  }",
             "startLine": 289,
-            "doc": null,
             "endLine": 301,
             "isDeprecated": false,
             "isGenerator": false,
@@ -497,7 +414,6 @@
                 "final": false,
                 "code": "function($class)\n  {\n      $this->attr['class'] = $class;\n    }\n    else{\n      $cls = explode(\" \", $this->attr['class']);\n      if ( !\\in_array($class, $cls) ){\n        $this->attr['class'] .= ' '.$class;\n      }\n    }\n    $this->update();\n    return $this;\n  }",
                 "startLine": 289,
-                "doc": null,
                 "endLine": 301,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -544,17 +460,6 @@
             "final": false,
             "code": "function($ele)\n  {\n    $args = \\func_get_args();\n    foreach ( $args as $ele ){\n      if ( !isset($this->content) ){\n        if ( \\is_array($ele) && isset($ele[0]) ){\n          $this->content = $ele;\n        }\n        else{\n          $this->content = \\is_object($ele) ? [$ele] : $ele;\n        }\n      }\n      else if ( \\is_array($this->content) ){\n        if ( \\is_array($ele) ){\n          array_merge($this->content, $ele);\n        }\n        else{\n          array_push($this->content, $ele);\n        }\n      }\n      else if ( \\is_string($this->content) ){\n        if ( \\is_array($ele) ){\n          foreach ( $ele as $e ){\n            $this->content .= $e->html();\n          }\n        }\n        else{\n          $this->content .= \\is_object($ele) ? $ele->html() : $ele;\n        }\n      }\n    }\n    return $this;\n  }",
             "startLine": 403,
-            "doc": {
-                "description": "Add an element to the content, or a string if it's one",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string|bbn\\html\\element",
-                        "name": "$ele"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 435,
             "isDeprecated": false,
             "isGenerator": false,
@@ -576,17 +481,6 @@
                 "final": false,
                 "code": "function($ele)\n  {\n    $args = \\func_get_args();\n    foreach ( $args as $ele ){\n      if ( !isset($this->content) ){\n        if ( \\is_array($ele) && isset($ele[0]) ){\n          $this->content = $ele;\n        }\n        else{\n          $this->content = \\is_object($ele) ? [$ele] : $ele;\n        }\n      }\n      else if ( \\is_array($this->content) ){\n        if ( \\is_array($ele) ){\n          array_merge($this->content, $ele);\n        }\n        else{\n          array_push($this->content, $ele);\n        }\n      }\n      else if ( \\is_string($this->content) ){\n        if ( \\is_array($ele) ){\n          foreach ( $ele as $e ){\n            $this->content .= $e->html();\n          }\n        }\n        else{\n          $this->content .= \\is_object($ele) ? $ele->html() : $ele;\n        }\n      }\n    }\n    return $this;\n  }",
                 "startLine": 403,
-                "doc": {
-                    "description": "Add an element to the content, or a string if it's one",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "string|bbn\\html\\element",
-                            "name": "$ele"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 435,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -633,11 +527,6 @@
             "final": false,
             "code": "function()\n  {\n    $this->update();\n\t\t$tmp = bbn\\x::remove_empty($this->cfg);\n    if ( isset($tmp['content']) && \\is_array($tmp['content']) ){\n      foreach ( $tmp['content'] as $i => $c ){\n        if ( \\is_object($c) ){\n          if (method_exists($c, 'get_config') ){\n            $tmp['content'][$i] = $c->get_config();\n          }\n        }\n      }\n    }\n    return $tmp;\n  }",
             "startLine": 441,
-            "doc": {
-                "description": "Returns the current configuration.",
-                "params": [],
-                "return": "Current configuration"
-            },
             "endLine": 455,
             "isDeprecated": false,
             "isGenerator": false,
@@ -659,11 +548,6 @@
                 "final": false,
                 "code": "function()\n  {\n    $this->update();\n\t\t$tmp = bbn\\x::remove_empty($this->cfg);\n    if ( isset($tmp['content']) && \\is_array($tmp['content']) ){\n      foreach ( $tmp['content'] as $i => $c ){\n        if ( \\is_object($c) ){\n          if (method_exists($c, 'get_config') ){\n            $tmp['content'][$i] = $c->get_config();\n          }\n        }\n      }\n    }\n    return $tmp;\n  }",
                 "startLine": 441,
-                "doc": {
-                    "description": "Returns the current configuration.",
-                    "params": [],
-                    "return": "Current configuration"
-                },
                 "endLine": 455,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -681,7 +565,7 @@
         },
         "get_param": {
             "name": "get_param",
-            "summary": "Returns the current configuration HOW???",
+            "summary": "Returns the current configuration  HOW???",
             "description": "",
             "description_parts": [],
             "file": "bbn\\html\\element",
@@ -690,11 +574,6 @@
             "final": false,
             "code": "function()\n  {\n    return bbn\\str::make_readable($this->get_config());\n  }",
             "startLine": 462,
-            "doc": {
-                "description": "Returns the current configuration HOW???",
-                "params": [],
-                "return": "Current configuration"
-            },
             "endLine": 465,
             "isDeprecated": false,
             "isGenerator": false,
@@ -707,7 +586,7 @@
             "returns": null,
             "parent": {
                 "name": "get_param",
-                "summary": "Returns the current configuration HOW???",
+                "summary": "Returns the current configuration  HOW???",
                 "description": "",
                 "description_parts": [],
                 "file": "bbn\\html\\element",
@@ -716,11 +595,6 @@
                 "final": false,
                 "code": "function()\n  {\n    return bbn\\str::make_readable($this->get_config());\n  }",
                 "startLine": 462,
-                "doc": {
-                    "description": "Returns the current configuration HOW???",
-                    "params": [],
-                    "return": "Current configuration"
-                },
                 "endLine": 465,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -747,11 +621,6 @@
             "final": false,
             "code": "function()\n  {\n    return bbn\\str::export(bbn\\str::make_readable($this->get_config()), 1);\n  }",
             "startLine": 472,
-            "doc": {
-                "description": "Returns the current configuration for PHP",
-                "params": [],
-                "return": "Current configuration"
-            },
             "endLine": 475,
             "isDeprecated": false,
             "isGenerator": false,
@@ -773,11 +642,6 @@
                 "final": false,
                 "code": "function()\n  {\n    return bbn\\str::export(bbn\\str::make_readable($this->get_config()), 1);\n  }",
                 "startLine": 472,
-                "doc": {
-                    "description": "Returns the current configuration for PHP",
-                    "params": [],
-                    "return": "Current configuration"
-                },
                 "endLine": 475,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -804,11 +668,6 @@
             "final": false,
             "code": "function($with_ele = 1)\n  {\n    $this->update();\n\t\t$r = '';\n\t\tif ( isset($this->attr['id']) ){\n      if ( isset($this->cfg['events']) ){\n        foreach ( $this->cfg['events'] as $event => $fn ){\n          $r .= '.'.$event.'('.\n                  ( strpos($fn, 'function') === 0 ? $fn : 'function(e){'.$fn.'}' ).\n                  ')';\n        }\n      }\n      if ( isset($this->cfg['widget'], $this->cfg['widget']['name']) ){\n        $r .= '.'.$this->cfg['widget']['name'].'(';\n        if ( isset($this->cfg['widget']['options']) ){\n          $r .= '{';\n          foreach ( $this->cfg['widget']['options'] as $n => $o ){\n            $r .= '\"'.$n.'\":';\n            if ( \\is_string($o) ){\n              $o = trim($o);\n              if ( (strpos($o, 'function(') === 0) ){\n                $r .= $o;\n              }\n              else{\n                $r .= '\"'.bbn\\str::escape_dquotes($o).'\"';\n              }\n            }\n            else if ( \\is_bool($o) ){\n              $r .= $o ? 'true' : 'false';\n            }\n            else{\n              $r .= json_encode($o);\n            }\n            $r .= ',';\n          }\n          $r .= '}';\n        }\n        $r .= ')';\n      }\n      if ( !empty($this->help) ){\n        \/\/ tooltip\n      }\n      if ( !empty($r) ){\n        if ( $with_ele ){\n          $r = '$(\"#'.$this->attr['id'].'\")'.$r.';'.PHP_EOL;\n        }\n        else{\n          $r = $r.';'.PHP_EOL;\n        }\n      }\n\t\t}\n    if ( !empty($this->script) ){\n      $r .= $this->script.PHP_EOL;\n    }\n    if ( \\is_array($this->content) ){\n      foreach ( $this->content as $c ){\n        if ( \\is_array($c) ){\n          $c = new bbn\\html\\element($c);\n        }\n        if (\\is_object($c) && method_exists($c, 'script') ){\n          $r .= $c->script();\n        }\n      }\n    }\n\t\treturn $r;\n  }",
             "startLine": 482,
-            "doc": {
-                "description": "Returns the javascript coming with the object",
-                "params": [],
-                "return": "javascript string"
-            },
             "endLine": 547,
             "isDeprecated": false,
             "isGenerator": false,
@@ -830,11 +689,6 @@
                 "final": false,
                 "code": "function($with_ele = 1)\n  {\n    $this->update();\n\t\t$r = '';\n\t\tif ( isset($this->attr['id']) ){\n      if ( isset($this->cfg['events']) ){\n        foreach ( $this->cfg['events'] as $event => $fn ){\n          $r .= '.'.$event.'('.\n                  ( strpos($fn, 'function') === 0 ? $fn : 'function(e){'.$fn.'}' ).\n                  ')';\n        }\n      }\n      if ( isset($this->cfg['widget'], $this->cfg['widget']['name']) ){\n        $r .= '.'.$this->cfg['widget']['name'].'(';\n        if ( isset($this->cfg['widget']['options']) ){\n          $r .= '{';\n          foreach ( $this->cfg['widget']['options'] as $n => $o ){\n            $r .= '\"'.$n.'\":';\n            if ( \\is_string($o) ){\n              $o = trim($o);\n              if ( (strpos($o, 'function(') === 0) ){\n                $r .= $o;\n              }\n              else{\n                $r .= '\"'.bbn\\str::escape_dquotes($o).'\"';\n              }\n            }\n            else if ( \\is_bool($o) ){\n              $r .= $o ? 'true' : 'false';\n            }\n            else{\n              $r .= json_encode($o);\n            }\n            $r .= ',';\n          }\n          $r .= '}';\n        }\n        $r .= ')';\n      }\n      if ( !empty($this->help) ){\n        \/\/ tooltip\n      }\n      if ( !empty($r) ){\n        if ( $with_ele ){\n          $r = '$(\"#'.$this->attr['id'].'\")'.$r.';'.PHP_EOL;\n        }\n        else{\n          $r = $r.';'.PHP_EOL;\n        }\n      }\n\t\t}\n    if ( !empty($this->script) ){\n      $r .= $this->script.PHP_EOL;\n    }\n    if ( \\is_array($this->content) ){\n      foreach ( $this->content as $c ){\n        if ( \\is_array($c) ){\n          $c = new bbn\\html\\element($c);\n        }\n        if (\\is_object($c) && method_exists($c, 'script') ){\n          $r .= $c->script();\n        }\n      }\n    }\n\t\treturn $r;\n  }",
                 "startLine": 482,
-                "doc": {
-                    "description": "Returns the javascript coming with the object",
-                    "params": [],
-                    "return": "javascript string"
-                },
                 "endLine": 547,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -881,7 +735,6 @@
             "final": false,
             "code": "function($arr)\n  {\n    $args = \\func_get_args();\n    if ( \\is_array($arr) ){\n      foreach ( $arr as $k => $v ){\n        if ( $k === 'class' ){\n          $this->add_class($v);\n        }\n        else{\n          $this->attr[$k] = $v;\n        }\n      }\n    }\n    else if ( (\\count($args) === 2) && \\is_string($args[0]) && \\is_string($args[1]) ){\n      if ( $args[0] === 'class' ){\n        $this->add_class($args[1]);\n      }\n      else{\n        $this->attr[$args[0]] = $args[1];\n      }\n    }\n    else if ( \\is_string($arr) && isset($this->attr[$arr]) ){\n      return $this->attr[$arr];\n    }\n    return $this;\n  }",
             "startLine": 549,
-            "doc": null,
             "endLine": 574,
             "isDeprecated": false,
             "isGenerator": false,
@@ -903,7 +756,6 @@
                 "final": false,
                 "code": "function($arr)\n  {\n    $args = \\func_get_args();\n    if ( \\is_array($arr) ){\n      foreach ( $arr as $k => $v ){\n        if ( $k === 'class' ){\n          $this->add_class($v);\n        }\n        else{\n          $this->attr[$k] = $v;\n        }\n      }\n    }\n    else if ( (\\count($args) === 2) && \\is_string($args[0]) && \\is_string($args[1]) ){\n      if ( $args[0] === 'class' ){\n        $this->add_class($args[1]);\n      }\n      else{\n        $this->attr[$args[0]] = $args[1];\n      }\n    }\n    else if ( \\is_string($arr) && isset($this->attr[$arr]) ){\n      return $this->attr[$arr];\n    }\n    return $this;\n  }",
                 "startLine": 549,
-                "doc": null,
                 "endLine": 574,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -950,7 +802,6 @@
             "final": false,
             "code": "function($txt = NULL)\n  {\n    if ( !\\is_null($txt) ){\n      $this->text = strip_tags($txt);\n      return $this;\n    }\n    return $this->text;\n  }",
             "startLine": 576,
-            "doc": null,
             "endLine": 583,
             "isDeprecated": false,
             "isGenerator": false,
@@ -972,7 +823,6 @@
                 "final": false,
                 "code": "function($txt = NULL)\n  {\n    if ( !\\is_null($txt) ){\n      $this->text = strip_tags($txt);\n      return $this;\n    }\n    return $this->text;\n  }",
                 "startLine": 576,
-                "doc": null,
                 "endLine": 583,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1019,7 +869,6 @@
             "final": false,
             "code": "function($c = NULL)\n  {\n    if ( \\is_null($c) ){\n      return $this->content;\n    }\n    else if ( \\is_array($c) || \\is_string($c) ){\n      $this->content = $c;\n      return $this;\n    }\n  }",
             "startLine": 585,
-            "doc": null,
             "endLine": 594,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1041,7 +890,6 @@
                 "final": false,
                 "code": "function($c = NULL)\n  {\n    if ( \\is_null($c) ){\n      return $this->content;\n    }\n    else if ( \\is_array($c) || \\is_string($c) ){\n      $this->content = $c;\n      return $this;\n    }\n  }",
                 "startLine": 585,
-                "doc": null,
                 "endLine": 594,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1088,18 +936,6 @@
             "final": false,
             "code": "function($with_js = 1)\n  {\n    $html = '';\n\t\tif ( $this->tag ){\n\t\t\t$this->update();\n      \/\/ TAG\n\t\t\t$html .= '<'.$this->tag;\n\n      foreach ( $this->attr as $key => $val ){\n        if ( \\is_string($key) ){\n          $html .= ' '.htmlspecialchars($key).'=\"';\n          if ( is_numeric($val) ){\n            $html .= $val;\n          }\n          else if (\\is_string($val) ){\n            $html .= htmlspecialchars($val);\n          }\n          $html .= '\"';\n        }\n      }\n\t\t\t\n      if ( \\count($this->css) > 0 ){\n\t\t\t\t$html .= self::css_to_string($this->css);\n\t\t\t}\n      if ( $this->xhtml ){\n        $html .= ' \/';\n      }\n      $html .= '>';\n\n\t\t\t\n\t\t\tif ( !\\in_array($this->tag, self::$self_closing_tags) ){\n\n        if ( isset($this->text) ){\n          $html .= $this->text;\n        }\n        \n        if ( isset($this->content) ){\n          \/\/ @todo: Add the ability to imbricate elements\n          if ( \\is_string($this->content) ){\n            $html .= $this->content;\n          }\n          else if ( \\is_array($this->content) ){\n            foreach ( $this->content as $c ){\n              if ( \\is_array($c) ){\n                $c = new bbn\\html\\element($c);\n              }\n              $html .= $c->html($with_js);\n            }\n          }\n        }\n\t\t\t\t$html .= '<\/'.$this->tag.'>';\n\t\t\t}\n\t\t\t\n\t\t\tif ( isset($this->placeholder) && strpos($this->placeholder,'%s') !== false ){\n\t\t\t\t$html = sprintf($this->placeholder, $html);\n\t\t\t}\n      \n\t\t}\n\t\treturn $html;\n  }",
             "startLine": 601,
-            "doc": {
-                "description": "Returns the corresponding HTML string",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "bool",
-                        "name": "$with",
-                        "description": "js Includes the javascript"
-                    }
-                ],
-                "return": "HTML string"
-            },
             "endLine": 660,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1121,18 +957,6 @@
                 "final": false,
                 "code": "function($with_js = 1)\n  {\n    $html = '';\n\t\tif ( $this->tag ){\n\t\t\t$this->update();\n      \/\/ TAG\n\t\t\t$html .= '<'.$this->tag;\n\n      foreach ( $this->attr as $key => $val ){\n        if ( \\is_string($key) ){\n          $html .= ' '.htmlspecialchars($key).'=\"';\n          if ( is_numeric($val) ){\n            $html .= $val;\n          }\n          else if (\\is_string($val) ){\n            $html .= htmlspecialchars($val);\n          }\n          $html .= '\"';\n        }\n      }\n\t\t\t\n      if ( \\count($this->css) > 0 ){\n\t\t\t\t$html .= self::css_to_string($this->css);\n\t\t\t}\n      if ( $this->xhtml ){\n        $html .= ' \/';\n      }\n      $html .= '>';\n\n\t\t\t\n\t\t\tif ( !\\in_array($this->tag, self::$self_closing_tags) ){\n\n        if ( isset($this->text) ){\n          $html .= $this->text;\n        }\n        \n        if ( isset($this->content) ){\n          \/\/ @todo: Add the ability to imbricate elements\n          if ( \\is_string($this->content) ){\n            $html .= $this->content;\n          }\n          else if ( \\is_array($this->content) ){\n            foreach ( $this->content as $c ){\n              if ( \\is_array($c) ){\n                $c = new bbn\\html\\element($c);\n              }\n              $html .= $c->html($with_js);\n            }\n          }\n        }\n\t\t\t\t$html .= '<\/'.$this->tag.'>';\n\t\t\t}\n\t\t\t\n\t\t\tif ( isset($this->placeholder) && strpos($this->placeholder,'%s') !== false ){\n\t\t\t\t$html = sprintf($this->placeholder, $html);\n\t\t\t}\n      \n\t\t}\n\t\treturn $html;\n  }",
                 "startLine": 601,
-                "doc": {
-                    "description": "Returns the corresponding HTML string",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "bool",
-                            "name": "$with",
-                            "description": "js Includes the javascript"
-                        }
-                    ],
-                    "return": "HTML string"
-                },
                 "endLine": 660,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1181,7 +1005,6 @@
             "final": false,
             "code": "function()\n  {\n    return ['$(\\''.bbn\\str::escape_squotes($this->html()).'\\')',$this->script(false)];\n  }",
             "startLine": 662,
-            "doc": null,
             "endLine": 665,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1203,7 +1026,6 @@
                 "final": false,
                 "code": "function()\n  {\n    return ['$(\\''.bbn\\str::escape_squotes($this->html()).'\\')',$this->script(false)];\n  }",
                 "startLine": 662,
-                "doc": null,
                 "endLine": 665,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1230,7 +1052,6 @@
             "final": false,
             "code": "function()\n  {\n    $this->content = null;\n    $this->html = '';\n    $this->script = '';\n  }",
             "startLine": 667,
-            "doc": null,
             "endLine": 672,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1252,7 +1073,6 @@
                 "final": false,
                 "code": "function()\n  {\n    $this->content = null;\n    $this->html = '';\n    $this->script = '';\n  }",
                 "startLine": 667,
-                "doc": null,
                 "endLine": 672,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1515,12 +1335,39 @@
             ]
         }
     },
-    "staticProperties": null,
+    "staticProperties": {
+        "schema": "{\n\t\"properties\":{\n\t\t\"attr\": {\n\t\t\t\"type\":\"array\",\n\t\t\t\"id\": \"attr\",\n      \"description\": \"Attributes\",\n\t\t\t\"required\":true,\n\t\t\t\"properties\":{\n\t\t\t\t\"maxlength\": {\n\t\t\t\t\t\"type\":\"string\",\n\t\t\t\t\t\"id\": \"id\",\n          \"description\": \"ID\",\n\t\t\t\t\t\"required\":false\n\t\t\t\t},\n\t\t\t\t\"maxlength\": {\n\t\t\t\t\t\"type\":\"integer\",\n\t\t\t\t\t\"id\": \"maxlength\",\n          \"description\": \"Maxlength\",\n\t\t\t\t\t\"required\":false\n\t\t\t\t},\n        \"name\": {\n          \"type\":\"string\",\n          \"id\": \"name\",\n          \"description\": \"Name\",\n          \"required\":true\n        },\n        \"required\": {\n          \"type\": \"boolean\",\n          \"id\": \"required\",\n          \"description\": \"Required\",\n          \"required\":false\n        },\n\t\t\t\t\"type\": {\n\t\t\t\t\t\"type\":\"string\",\n\t\t\t\t\t\"id\": \"type\",\n          \"description\": \"Input type\",\n\t\t\t\t\t\"required\":false\n\t\t\t\t},\n        \"value\": {\n          \"type\":\"string\",\n          \"description\": \"Value\",\n          \"id\": \"value\",\n          \"required\":false\n        }\n\t\t\t}\n\t\t},\n\t\t\"default\": {\n\t\t\t\"type\":\"any\",\n\t\t\t\"id\": \"default\",\n      \"description\": \"Default value\",\n\t\t\t\"required\":false\n\t\t},\n\t\t\"field\": {\n\t\t\t\"type\":\"string\",\n\t\t\t\"id\": \"field\",\n      \"description\": \"Shortcut (??) field\",\n\t\t\t\"required\":false\n\t\t},\n\t\t\"label\": {\n\t\t\t\"type\":\"string\",\n\t\t\t\"id\": \"label\",\n      \"description\": \"Label\",\n\t\t\t\"required\":false\n\t\t},\n\t\t\"lang\": {\n\t\t\t\"type\":\"string\",\n\t\t\t\"id\": \"lang\",\n      \"description\": \"Language\",\n\t\t\t\"required\":false\n\t\t},\n\t\t\"null\": {\n\t\t\t\"type\":\"boolean\",\n\t\t\t\"id\": \"null\",\n      \"description\": \"can be null?\",\n\t\t\t\"required\":false\n\t\t},\n\t\t\"params\": {\n\t\t\t\"type\": [\"array\",\"null\"],\n\t\t\t\"id\": \"params\",\n\t\t\t\"required\":false,\n      \"description\": \"Parameters from BBN\"\n\t\t},\n\t\t\"sql\": {\n\t\t\t\"type\": [\"string\"],\n\t\t\t\"id\": \"sql\",\n\t\t\t\"required\":false,\n      \"description\": \"SQL request\"\n\t\t},\n\t\t\"table\": {\n\t\t\t\"type\":\"string\",\n      \"description\": \"Table\",\n\t\t\t\"id\": \"table\",\n\t\t\t\"required\":false\n\t\t},\n\t}\n}",
+        "self_closing_tags": [
+            "area",
+            "base",
+            "hr",
+            "col",
+            "command",
+            "embed",
+            "hr",
+            "img",
+            "input",
+            "keygen",
+            "link",
+            "meta",
+            "param",
+            "source",
+            "track",
+            "wbr"
+        ],
+        "input_fields": [
+            "input",
+            "textarea",
+            "select"
+        ],
+        "validator": false,
+        "error": null
+    },
     "constants": null,
     "numMethods": 18,
     "numProperties": 11,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 5,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [],
@@ -1581,5 +1428,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\html",
-    "shortName": "input"
+    "shortName": "input",
+    "summary": "HTML Class creating a form INPUT"
 }

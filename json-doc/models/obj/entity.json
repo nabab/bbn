@@ -26,7 +26,6 @@
             "final": false,
             "code": "function(bbn\\db $db, $id)\n  {\n    if ( $this->table_name && $db->count($this->table_name, [$this->id_field => $id]) ){\n      $this->is_checked = true;\n      $this->db = $db;\n    }\n  }",
             "startLine": 17,
-            "doc": null,
             "endLine": 23,
             "isDeprecated": false,
             "isGenerator": false,
@@ -70,7 +69,6 @@
             "final": false,
             "code": "function()\n  {\n    return $this->is_checked;\n  }",
             "startLine": 25,
-            "doc": null,
             "endLine": 28,
             "isDeprecated": false,
             "isGenerator": false,
@@ -88,7 +86,7 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": [],
     "constants": null,
     "numMethods": 2,
     "numProperties": 0,
@@ -113,5 +111,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\models\\obj",
-    "shortName": "entity"
+    "shortName": "entity",
+    "summary": ""
 }

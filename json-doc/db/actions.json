@@ -1,6 +1,6 @@
 {
     "doc": {
-        "description": "DB Interface\n\n\nThese methods have to be implemented on both database and query.\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.",
+        "description": "DB Interface\nThese methods have to be implemented on both database and query.\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.",
         "tags": {
             "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
@@ -30,15 +30,6 @@
             "final": false,
             "code": "function()\n  {\n\t\/**\n\t * Fetches the database and returns an array of several arrays of rows text-indexed\n\t *\n\t * @return false|array\n\t *\/\n\tpublic function get_rows(): ?array;\n\n\t\/**\n\t * Fetches the database and returns an array of a single row num-indexed\n\t *\n\t * @return false|array\n\t *\/\n\tpublic function get_irow(): ?array;\n\n\t\/**\n\t * Fetches the database and returns an array of several arrays of rows num-indexed\n\t *\n\t * @return false|array\n\t *\/\n\tpublic function get_irows(): ?array;\n\n\t\/**\n\t * Fetches the database and returns an array of arrays, one per column, each having each column's values\n\t *\n\t * @return false|array\n\t *\/\n\tpublic function get_by_columns(): ?array;\n\n\t\/**\n\t * Fetches the database and returns an object of a single row, alias of get_object\n\t *\n\t * @return null|\\stdClass\n\t *\/\n\tpublic function get_obj(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an object of a single row\n\t *\n   * @return null|\\stdClass\n\t *\/\n\tpublic function get_object(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an array of objects \n\t *\n\t * @return null|array\n\t *\/\n  }",
             "startLine": 29,
-            "doc": {
-                "description": "Fetches the database and returns an array of a single row text-indexed",
-                "params": [
-                    {
-                        "tag": "param"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 29,
             "isDeprecated": false,
             "isGenerator": false,
@@ -66,11 +57,6 @@
             "final": false,
             "code": "function()\n  {\n\t\/**\n\t * Fetches the database and returns an array of a single row num-indexed\n\t *\n\t * @return false|array\n\t *\/\n\tpublic function get_irow(): ?array;\n\n\t\/**\n\t * Fetches the database and returns an array of several arrays of rows num-indexed\n\t *\n\t * @return false|array\n\t *\/\n\tpublic function get_irows(): ?array;\n\n\t\/**\n\t * Fetches the database and returns an array of arrays, one per column, each having each column's values\n\t *\n\t * @return false|array\n\t *\/\n\tpublic function get_by_columns(): ?array;\n\n\t\/**\n\t * Fetches the database and returns an object of a single row, alias of get_object\n\t *\n\t * @return null|\\stdClass\n\t *\/\n\tpublic function get_obj(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an object of a single row\n\t *\n   * @return null|\\stdClass\n\t *\/\n\tpublic function get_object(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an array of objects \n\t *\n\t * @return null|array\n\t *\/\n  }",
             "startLine": 36,
-            "doc": {
-                "description": "Fetches the database and returns an array of several arrays of rows text-indexed",
-                "params": [],
-                "return": ""
-            },
             "endLine": 36,
             "isDeprecated": false,
             "isGenerator": false,
@@ -98,11 +84,6 @@
             "final": false,
             "code": "function()\n  {\n\t\/**\n\t * Fetches the database and returns an array of several arrays of rows num-indexed\n\t *\n\t * @return false|array\n\t *\/\n\tpublic function get_irows(): ?array;\n\n\t\/**\n\t * Fetches the database and returns an array of arrays, one per column, each having each column's values\n\t *\n\t * @return false|array\n\t *\/\n\tpublic function get_by_columns(): ?array;\n\n\t\/**\n\t * Fetches the database and returns an object of a single row, alias of get_object\n\t *\n\t * @return null|\\stdClass\n\t *\/\n\tpublic function get_obj(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an object of a single row\n\t *\n   * @return null|\\stdClass\n\t *\/\n\tpublic function get_object(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an array of objects \n\t *\n\t * @return null|array\n\t *\/\n  }",
             "startLine": 43,
-            "doc": {
-                "description": "Fetches the database and returns an array of a single row num-indexed",
-                "params": [],
-                "return": ""
-            },
             "endLine": 43,
             "isDeprecated": false,
             "isGenerator": false,
@@ -130,11 +111,6 @@
             "final": false,
             "code": "function()\n  {\n\t\/**\n\t * Fetches the database and returns an array of arrays, one per column, each having each column's values\n\t *\n\t * @return false|array\n\t *\/\n\tpublic function get_by_columns(): ?array;\n\n\t\/**\n\t * Fetches the database and returns an object of a single row, alias of get_object\n\t *\n\t * @return null|\\stdClass\n\t *\/\n\tpublic function get_obj(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an object of a single row\n\t *\n   * @return null|\\stdClass\n\t *\/\n\tpublic function get_object(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an array of objects \n\t *\n\t * @return null|array\n\t *\/\n  }",
             "startLine": 50,
-            "doc": {
-                "description": "Fetches the database and returns an array of several arrays of rows num-indexed",
-                "params": [],
-                "return": ""
-            },
             "endLine": 50,
             "isDeprecated": false,
             "isGenerator": false,
@@ -162,11 +138,6 @@
             "final": false,
             "code": "function()\n  {\n\t\/**\n\t * Fetches the database and returns an object of a single row, alias of get_object\n\t *\n\t * @return null|\\stdClass\n\t *\/\n\tpublic function get_obj(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an object of a single row\n\t *\n   * @return null|\\stdClass\n\t *\/\n\tpublic function get_object(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an array of objects \n\t *\n\t * @return null|array\n\t *\/\n  }",
             "startLine": 57,
-            "doc": {
-                "description": "Fetches the database and returns an array of arrays, one per column, each having each column's values",
-                "params": [],
-                "return": ""
-            },
             "endLine": 57,
             "isDeprecated": false,
             "isGenerator": false,
@@ -194,11 +165,6 @@
             "final": false,
             "code": "function()\n  {\n\t\/**\n\t * Fetches the database and returns an object of a single row\n\t *\n   * @return null|\\stdClass\n\t *\/\n\tpublic function get_object(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an array of objects \n\t *\n\t * @return null|array\n\t *\/\n  }",
             "startLine": 64,
-            "doc": {
-                "description": "Fetches the database and returns an object of a single row, alias of get_object",
-                "params": [],
-                "return": ""
-            },
             "endLine": 64,
             "isDeprecated": false,
             "isGenerator": false,
@@ -226,11 +192,6 @@
             "final": false,
             "code": "function()\n  {\n\t\/**\n\t * Fetches the database and returns an array of objects \n\t *\n\t * @return null|array\n\t *\/\n  }",
             "startLine": 71,
-            "doc": {
-                "description": "Fetches the database and returns an object of a single row",
-                "params": [],
-                "return": ""
-            },
             "endLine": 71,
             "isDeprecated": false,
             "isGenerator": false,
@@ -258,11 +219,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 78,
-            "doc": {
-                "description": "Fetches the database and returns an array of objects",
-                "params": [],
-                "return": ""
-            },
             "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
@@ -281,7 +237,7 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": [],
     "constants": null,
     "numMethods": 8,
     "numProperties": 0,
@@ -301,5 +257,13 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\db",
-    "shortName": "actions"
+    "shortName": "actions",
+    "summary": "DB Interface",
+    "description": "These methods have to be implemented on both database and query.\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.",
+    "description_parts": [
+        {
+            "type": "text",
+            "content": "<p>These methods have to be implemented on both database and query.\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.<\/p>"
+        }
+    ]
 }

@@ -33,11 +33,6 @@
             "final": false,
             "code": "function()\n  {\n    $this->measures = [];\n  }",
             "startLine": 24,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 27,
             "isDeprecated": false,
             "isGenerator": false,
@@ -62,11 +57,6 @@
             "final": false,
             "code": "function($key = 'default')\n  {\n\t\tif ( !isset($this->measures[$key]) ){\n      $this->measures[$key] = [\n        'num' => 0,\n        'sum' => 0,\n        'start' => microtime(1)\n      ];\n    }\n    else{\n      $this->measures[$key]['start'] = microtime(1);\n    }\n  }",
             "startLine": 34,
-            "doc": {
-                "description": "Starts a timer for a given key",
-                "params": [],
-                "return": ""
-            },
             "endLine": 46,
             "isDeprecated": false,
             "isGenerator": false,
@@ -101,11 +91,6 @@
             "final": false,
             "code": "function($key = 'default')\n  {\n    return\n      isset($this->measures[$key], $this->measures[$key]['start']) &&\n      ($this->measures[$key]['start'] > 0);\n  }",
             "startLine": 53,
-            "doc": {
-                "description": "Returns true is the timer has started for the given key",
-                "params": [],
-                "return": ""
-            },
             "endLine": 58,
             "isDeprecated": false,
             "isGenerator": false,
@@ -140,7 +125,6 @@
             "final": false,
             "code": "function($key = 'default')\n  {\n    if ($this->has_started($key)) {\n      $this->measures[$key] = [\n        'num' => 0,\n        'sum' => 0\n      ];\n    }\n  }",
             "startLine": 60,
-            "doc": null,
             "endLine": 68,
             "isDeprecated": false,
             "isGenerator": false,
@@ -175,11 +159,6 @@
             "final": false,
             "code": "function($key = 'default')\n  {\n    if ( $this->has_started($key) ){\n      $this->measures[$key]['num']++;\n      $time = $this->measure($key);\n      $this->measures[$key]['sum'] += $time;\n      unset($this->measures[$key]['start']);\n      return $time;\n    }\n    else{\n      die(\"Missing a start declaration for timer $key\");\n    }\n  }",
             "startLine": 75,
-            "doc": {
-                "description": "Stops a timer for a given key",
-                "params": [],
-                "return": ""
-            },
             "endLine": 87,
             "isDeprecated": false,
             "isGenerator": false,
@@ -214,7 +193,6 @@
             "final": false,
             "code": "function($key = 'default')\n  {\n      return microtime(1) - $this->measures[$key]['start'];\n    }\n  }",
             "startLine": 89,
-            "doc": null,
             "endLine": 93,
             "isDeprecated": false,
             "isGenerator": false,
@@ -249,11 +227,6 @@
             "final": false,
             "code": "function($key = 'default')\n  {\n    if ( isset($this->measures[$key]) ){\n      if ( $this->has_started($key) ){\n        $this->stop($key);\n      }\n      return [\n        'num' => $this->measures[$key]['num'],\n        'total' => number_format($this->measures[$key]['sum'], 10),\n        'average' => number_format($this->measures[$key]['sum'] \/ $this->measures[$key]['num'], 10)\n      ];\n    }\n  }",
             "startLine": 98,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 110,
             "isDeprecated": false,
             "isGenerator": false,
@@ -288,11 +261,6 @@
             "final": false,
             "code": "function()\n  {\n    $r = [];\n    foreach ( $this->measures as $key => $val ){\n      $r[$key] = $this->result($key);\n    }\n    return $r;\n  }",
             "startLine": 115,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 122,
             "isDeprecated": false,
             "isGenerator": false,
@@ -308,7 +276,7 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": [],
     "constants": null,
     "numMethods": 8,
     "numProperties": 0,
@@ -330,5 +298,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\util",
-    "shortName": "timer"
+    "shortName": "timer",
+    "summary": "Encryption Class"
 }

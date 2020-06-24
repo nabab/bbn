@@ -1,6 +1,6 @@
 {
     "doc": {
-        "description": "A few recurrent functions\n\n\nThese functions are basically creating a database reference and logging functions.\nIn order to implement this trait, the following private static variables should be declared:\n\t* $cli\n\t* $info = array()",
+        "description": "A few recurrent functions\nThese functions are basically creating a database reference and logging functions.\nIn order to implement this trait, the following private static variables should be declared:\n *\t* $cli\n *\t* $info = array()",
         "tags": {
             "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
@@ -30,17 +30,6 @@
             "final": false,
             "code": "function($st)\n  {\n\t\tif ( php_sapi_name() == 'cli' && empty($_SERVER['REMOTE_ADDR']) ){\n\t\t\tif ( \\is_string($st) ){\n\t\t\t\techo $st.\"\\n\";\n\t\t\t}\n\t\t\telse{\n\t\t\t\tprint_r($st,1).\"\\n\";\n\t\t\t}\n\t\t}\n\t\telse{\n\t\t\tif ( \\is_string($st) ){\n\t\t\t\tarray_push($this->reports,$st);\n\t\t\t}\n\t\t\telse{\n\t\t\t\tarray_push($this->reports,print_r($st,true));\n\t\t\t}\n\t\t}\n\t\treturn $this;\n  }",
             "startLine": 28,
-            "doc": {
-                "description": "Add information to the $info array",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$st"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 47,
             "isDeprecated": false,
             "isGenerator": false,
@@ -75,7 +64,6 @@
             "final": false,
             "code": "function($file = 'misc')\n  {\n\t\t$i = debug_backtrace();\n\t\tbbn\\x::log(print_r($i, 1));\n  }",
             "startLine": 49,
-            "doc": null,
             "endLine": 53,
             "isDeprecated": false,
             "isGenerator": false,
@@ -110,22 +98,6 @@
             "final": false,
             "code": "function($st = '', $file = 'misc')\n  {\n\t\tif ( \\defined('BBN_DATA_PATH') && is_dir(BBN_DATA_PATH.'logs') ){\n\t\t\t$log_file = BBN_DATA_PATH.'logs\/'.$file.'.log';\n\t\t\t$r = \"[\".date('d\/m\/Y H:i:s').\"]\\t\";\n\t\t\tif ( empty($st) && \\count($this->reports) > 0 ){\n\t\t\t\t$st = implode(\"\\n\\n\", $this->reports);\n\t\t\t\t$this->reports = [];\n\t\t\t}\n\t\t\telse{\n\t\t\t\t$i = debug_backtrace()[0];\n\t\t\t\t$r .= $i['file'].\" - line \".$i['line'];\n\t\t\t}\n\t\t\t$r .= \"\\n\".( \\is_string($st) ? $st : print_r($st, true) ).\"\\n\\n\";\n\t\t\t$s = ( file_exists($log_file) ) ? filesize($log_file) : 0;\n\t\t\tif ( $s > 1048576 ){\n\t\t\t\tfile_put_contents($log_file.'.old',file_get_contents($log_file),FILE_APPEND);\n\t\t\t\tfile_put_contents($log_file,$r);\n\t\t\t}\n\t\t\telse{\n\t\t\t\tfile_put_contents($log_file,$r,FILE_APPEND);\n\t\t\t}\n\t\t}\n\t\treturn $this;\n  }",
             "startLine": 61,
-            "doc": {
-                "description": "Add information to the $info array",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$st"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$file"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 85,
             "isDeprecated": false,
             "isGenerator": false,
@@ -164,7 +136,7 @@
             "visibility": "public"
         }
     },
-    "staticProperties": null,
+    "staticProperties": [],
     "constants": null,
     "numMethods": 3,
     "numProperties": 1,
@@ -186,5 +158,13 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\util",
-    "shortName": "logger"
+    "shortName": "logger",
+    "summary": "A few recurrent functions",
+    "description": "These functions are basically creating a database reference and logging functions.\nIn order to implement this trait, the following private static variables should be declared:\n *\t* $cli\n *\t* $info = array()",
+    "description_parts": [
+        {
+            "type": "text",
+            "content": "<p>These functions are basically creating a database reference and logging functions.\nIn order to implement this trait, the following private static variables should be declared:<\/p>\n<ul>\n<li>\n<ul>\n<li>$cli<\/li>\n<\/ul>\n<\/li>\n<li>\n<ul>\n<li>$info = array()<\/li>\n<\/ul>\n<\/li>\n<\/ul>"
+        }
+    ]
 }

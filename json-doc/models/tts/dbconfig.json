@@ -23,16 +23,6 @@
             "final": false,
             "code": "function($id)\n  {\n      $this->class_cfg['arch'][$this->class_table_index]['id'] => $id\n    ]);\n  }",
             "startLine": 59,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$id"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 63,
             "isDeprecated": false,
             "isGenerator": false,
@@ -67,11 +57,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 69,
-            "doc": {
-                "description": "Return the",
-                "params": [],
-                "return": ""
-            },
             "endLine": 71,
             "isDeprecated": false,
             "isGenerator": false,
@@ -96,7 +81,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 73,
-            "doc": null,
             "endLine": 75,
             "isDeprecated": false,
             "isGenerator": false,
@@ -112,7 +96,7 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": [],
     "constants": null,
     "numMethods": 3,
     "numProperties": 0,
@@ -137,5 +121,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\models\\tts",
-    "shortName": "dbconfig"
+    "shortName": "dbconfig",
+    "summary": ""
 }

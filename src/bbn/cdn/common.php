@@ -17,15 +17,15 @@ trait common
    */
   private $prefix = '';
 
- /**
-  * @var string
-  */
- private $fpath = '';
+  /**
+   * @var string
+   */
+  private $fpath = '';
 
- /**
-  * @var string
-  */
- private $furl = '';
+  /**
+   * @var string
+   */
+  private $furl = '';
 
   static public $types = [
     'js' => ['js', 'coffee'],
@@ -34,7 +34,7 @@ trait common
     'lang' => ['lang']
   ];
 
-  private function set_prefix(){
+  private function _set_prefix(){
     if ( defined('BBN_SHARED_PATH') && (strpos(BBN_SHARED_PATH, '/') === 0) ){
       $this->prefix = substr(BBN_SHARED_PATH, 1);
       $this->furl = '/'.$this->prefix;

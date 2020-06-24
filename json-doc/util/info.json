@@ -1,6 +1,6 @@
 {
     "doc": {
-        "description": "A few recurrent functions\n\n\nThese functions are basically creating a database reference and logging functions.\nIn order to implement this trait, the following private static variables should be declared:\n\t* $cli\n\t* $info = array()",
+        "description": "A few recurrent functions\nThese functions are basically creating a database reference and logging functions.\nIn order to implement this trait, the following private static variables should be declared:\n *\t* $cli\n *\t* $info = array()",
         "tags": {
             "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
@@ -30,17 +30,6 @@
             "final": false,
             "code": "function($st)\n  {\n\t\tif ( !isset(self::$cli) )\n\t\t{\n\t\t\tglobal $argv;\n\t\t\tself::$cli = isset($argv) ? 1 : false;\n\t\t}\n\t\tif ( self::$cli )\n\t\t{\n\t\t\tif ( \\is_string($st) )\n\t\t\t\techo $st.\"\\n\";\n\t\t\telse\n\t\t\t\tvar_dump($st).\"\\n\";\n\t\t}\n\t\telse\n\t\t{\n\t\t\tif ( \\is_string($st) )\n\t\t\t\tarray_push(self::$info,$st);\n\t\t\telse\n\t\t\t\tarray_push(self::$info,print_r($st,true));\n\t\t}\n  }",
             "startLine": 27,
-            "doc": {
-                "description": "Add information to the $info array",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$st"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 48,
             "isDeprecated": false,
             "isGenerator": false,
@@ -75,22 +64,6 @@
             "final": false,
             "code": "function($st, $file = 'misc')\n  {\n\t\tif ( \\defined('BBN_DATA_PATH') ){\n\t\t\t$log_file = BBN_DATA_PATH.'logs\/'.$file.'.log';\n\t\t\t$i = debug_backtrace()[0];\n\t\t\t$r = \"[\".date('d\/m\/Y H:i:s').\"]\\t\".$i['file'].\" - line \".$i['line'].\"\\n\";\n\t\t\tif ( !\\is_string($st) )\n\t\t\t\t$r .= print_r($st,true);\n\t\t\telse\n\t\t\t\t$r .= $st;\n\t\t\t$r .= \"\\n\\n\";\n\t\t\t$s = ( file_exists($log_file) ) ? filesize($log_file) : 0;\n\t\t\tif ( $s > 1048576 )\n\t\t\t{\n\t\t\t\tfile_put_contents($log_file.'.old',file_get_contents($log_file),FILE_APPEND);\n\t\t\t\tfile_put_contents($log_file,$r);\n\t\t\t}\n\t\t\telse\n\t\t\t\tfile_put_contents($log_file,$r,FILE_APPEND);\n\t\t}\n  }",
             "startLine": 56,
-            "doc": {
-                "description": "Add information to the $info array",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$st"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$file"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 76,
             "isDeprecated": false,
             "isGenerator": false,
@@ -125,7 +98,7 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": [],
     "constants": null,
     "numMethods": 2,
     "numProperties": 0,
@@ -145,5 +118,13 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\util",
-    "shortName": "info"
+    "shortName": "info",
+    "summary": "A few recurrent functions",
+    "description": "These functions are basically creating a database reference and logging functions.\nIn order to implement this trait, the following private static variables should be declared:\n *\t* $cli\n *\t* $info = array()",
+    "description_parts": [
+        {
+            "type": "text",
+            "content": "<p>These functions are basically creating a database reference and logging functions.\nIn order to implement this trait, the following private static variables should be declared:<\/p>\n<ul>\n<li>\n<ul>\n<li>$cli<\/li>\n<\/ul>\n<\/li>\n<li>\n<ul>\n<li>$info = array()<\/li>\n<\/ul>\n<\/li>\n<\/ul>"
+        }
+    ]
 }

@@ -1,6 +1,6 @@
 {
     "doc": {
-        "description": "Model View Controller Class\n\n\nThis class will route a request to the according model and\/or view through its controller.\nA model and a view can be automatically associated if located in the same directory branch with the same name than the controller in their respective locations\nA view can be directly imported in the controller through this very class",
+        "description": "Model View Controller Class\nThis class will route a request to the according model and\/or view through its controller.\nA model and a view can be automatically associated if located in the same directory branch with the same name than the controller in their respective locations\nA view can be directly imported in the controller through this very class",
         "tags": {
             "author": "Thomas Nabet <thomas.nabet@gmail.com>",
             "copyright": "BBN Solutions",
@@ -33,7 +33,7 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "They are all created from bbn\\mvc::get_model"
+                    "content": "<p>They are all created from bbn\\mvc::get_model<\/p>"
                 }
             ],
             "file": "bbn\\mvc\\model",
@@ -42,36 +42,6 @@
             "final": false,
             "code": "function(bbn\\db $db, array $info, bbn\\mvc\\controller $ctrl, bbn\\mvc $mvc)\n  {\n\t\tif ( isset($info['path']) && $this->check_path($info['path']) ){\n      if ($db) {\n        parent::__construct($db);\n      }\n      $this->cache_init();\n      $this->_ctrl = $ctrl;\n      $this->_mvc = $mvc;\n\t\t\t$this->inc = &$mvc->inc;\n      if ( is_file($info['file']) ){\n        $this->_path = $info['path'];\n        $this->_file = $info['file'];\n        $this->_checkers = $info['checkers'] ?? [];\n      }\n\t\t}\n\t\telse{\n\t\t\t$this->error(\"The model $info[path] doesn't exist\");\n\t\t}\n  }",
             "startLine": 76,
-            "doc": {
-                "description": "Models are always recreated and reincluded, even if they have from the same path\nThey are all created from bbn\\mvc::get_model",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "null|bbn\\db",
-                        "name": "$db",
-                        "description": "The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books\/466565 or html\/home)<\/em>"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$info",
-                        "description": "The full path to the model's file"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "controller",
-                        "name": "$ctrl",
-                        "description": "The parent controller"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "controller",
-                        "name": "$mvc",
-                        "description": "The parent MVC"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 95,
             "isDeprecated": false,
             "isGenerator": false,
@@ -93,7 +63,6 @@
                 "final": false,
                 "code": "function(bbn\\db $db)\n  {\n  }",
                 "startLine": 27,
-                "doc": null,
                 "endLine": 29,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -171,7 +140,6 @@
             "final": false,
             "code": "function(array $vars = NULL, $check_empty = false)\n  {\n    if (isset($this->data['res'], $this->data['res'])) {\n      if (is_array($vars)) {\n        return bbn\\x::has_props($this->data, $vars, $check_empty);\n      }\n      return true;\n    }\n    return false;\n  }",
             "startLine": 97,
-            "doc": null,
             "endLine": 106,
             "isDeprecated": false,
             "isGenerator": false,
@@ -217,7 +185,6 @@
             "final": false,
             "code": "function($path, $type = 'public')\n  {\n    if ($this->_ctrl && ($this->_ctrl->get_path() === $path)) {\n      if ($type === 'cli') {\n        return $this->mvc->is_cli();\n      }\n      if ($type === $this->_ctrl->mode) {\n        return true;\n      }\n    }\n    return false;\n  }",
             "startLine": 108,
-            "doc": null,
             "endLine": 119,
             "isDeprecated": false,
             "isGenerator": false,
@@ -263,7 +230,6 @@
             "final": false,
             "code": "function()\n  {\n    return $this->_ctrl ? $this->_ctrl->get_path() : false;\n  }",
             "startLine": 121,
-            "doc": null,
             "endLine": 124,
             "isDeprecated": false,
             "isGenerator": false,
@@ -288,7 +254,6 @@
             "final": false,
             "code": "function($var, $check_empty = false)\n  {\n    return bbn\\x::has_prop($this->data, $var, $check_empty);\n  }",
             "startLine": 126,
-            "doc": null,
             "endLine": 129,
             "isDeprecated": false,
             "isGenerator": false,
@@ -334,7 +299,6 @@
             "final": false,
             "code": "function(array $vars, $check_empty = false)\n  {\n    return bbn\\x::has_props($this->data, $vars, $check_empty);\n  }",
             "startLine": 131,
-            "doc": null,
             "endLine": 134,
             "isDeprecated": false,
             "isGenerator": false,
@@ -380,7 +344,6 @@
             "final": false,
             "code": "function($plugin_path)\n  {\n    $this->_ctrl->register_plugin_classes($plugin_path);\n    return $this;\n  }",
             "startLine": 136,
-            "doc": null,
             "endLine": 140,
             "isDeprecated": false,
             "isGenerator": false,
@@ -417,7 +380,6 @@
             "final": false,
             "code": "function(array $data = NULL)\n  {\n      $data = [];\n    }\n    $this->data = $data;\n    if ( $this->_plugin ){\n      $this->apply_locale($this->_plugin);\n    }\n    if ( $this->_checkers ){\n      foreach ( $this->_checkers as $chk ){\n        $d = bbn\\mvc::include_model($chk, $this);\n        if (is_array($d)) {\n          $this->add_data($d);\n        }\n      }\n    }\n    return bbn\\mvc::include_model($this->_file, $this);\n  }",
             "startLine": 143,
-            "doc": null,
             "endLine": 160,
             "isDeprecated": false,
             "isGenerator": false,
@@ -452,7 +414,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 162,
-            "doc": null,
             "endLine": 164,
             "isDeprecated": false,
             "isGenerator": false,
@@ -477,7 +438,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 166,
-            "doc": null,
             "endLine": 168,
             "isDeprecated": false,
             "isGenerator": false,
@@ -502,7 +462,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 170,
-            "doc": null,
             "endLine": 172,
             "isDeprecated": false,
             "isGenerator": false,
@@ -527,7 +486,6 @@
             "final": false,
             "code": "function($path, $data = [], $plugin = NULL, $ttl = 0)\n  {\n  }",
             "startLine": 174,
-            "doc": null,
             "endLine": 176,
             "isDeprecated": false,
             "isGenerator": false,
@@ -589,7 +547,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 178,
-            "doc": null,
             "endLine": 180,
             "isDeprecated": false,
             "isGenerator": false,
@@ -614,7 +571,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 182,
-            "doc": null,
             "endLine": 184,
             "isDeprecated": false,
             "isGenerator": false,
@@ -639,7 +595,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 186,
-            "doc": null,
             "endLine": 188,
             "isDeprecated": false,
             "isGenerator": false,
@@ -664,7 +619,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 190,
-            "doc": null,
             "endLine": 192,
             "isDeprecated": false,
             "isGenerator": false,
@@ -689,11 +643,6 @@
             "final": false,
             "code": "function($name, $obj)\n  {\n    $this->_mvc->add_inc($name, $obj);\n    return $this;\n  }",
             "startLine": 199,
-            "doc": {
-                "description": "Adds a property to the MVC object inc if it has not been declared.",
-                "params": [],
-                "return": ""
-            },
             "endLine": 203,
             "isDeprecated": false,
             "isGenerator": false,
@@ -737,11 +686,6 @@
             "final": false,
             "code": "function($idx = NULL, $check_empty = false)\n  {\n    if ( !\\is_array($this->data) ){\n      return false;\n    }\n    if ( \\is_null($idx) ){\n      return !empty($this->data);\n    }\n    return \\bbn\\x::has_props($this->data, (array)$idx, $check_empty);\n  }",
             "startLine": 210,
-            "doc": {
-                "description": "Checks if data exists or if a specific index exists in the data",
-                "params": [],
-                "return": ""
-            },
             "endLine": 219,
             "isDeprecated": false,
             "isGenerator": false,
@@ -785,17 +729,6 @@
             "final": false,
             "code": "function(array $data)\n  {\n\t\t$this->data = $data;\n\t\treturn $this;\n  }",
             "startLine": 227,
-            "doc": {
-                "description": "Sets the data. Chainable. Should be useless as $this->data is public. Chainable.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$data"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 231,
             "isDeprecated": false,
             "isGenerator": false,
@@ -830,11 +763,6 @@
             "final": false,
             "code": "function(array $data)\n  {\n\t\t$ar = \\func_get_args();\n\t\tforeach ( $ar as $d ){\n\t\t\tif ( \\is_array($d) ){\n\t\t\t\t$this->data = $this->has_data() ? array_merge($this->data,$d) : $d;\n\t\t\t}\n\t\t}\n\t\treturn $this;\n  }",
             "startLine": 238,
-            "doc": {
-                "description": "Merges the existing data if there is with this one. Chainable.",
-                "params": [],
-                "return": ""
-            },
             "endLine": 247,
             "isDeprecated": false,
             "isGenerator": false,
@@ -869,7 +797,6 @@
             "final": false,
             "code": "function(array $data = NULL, $spec = '', $ttl = 10)\n  {\n      $d = $this->get($data);\n      $this->cache_set($this->_cache_name($data, $spec), '', $d, $ttl);\n    }\n  }",
             "startLine": 265,
-            "doc": null,
             "endLine": 270,
             "isDeprecated": false,
             "isGenerator": false,
@@ -922,7 +849,6 @@
             "final": false,
             "code": "function(array $data = NULL, $spec = '')\n  {\n      $this->cache_delete($cn, '');\n    }\n  }",
             "startLine": 272,
-            "doc": null,
             "endLine": 276,
             "isDeprecated": false,
             "isGenerator": false,
@@ -966,7 +892,6 @@
             "final": false,
             "code": "function(array $data = NULL, $spec = '', $ttl = 10)\n  {\n      $model =& $this;\n      return $this->cache_set_get(function() use($model, $data){\n        return $model->get($data);\n\n      }, $cn, '', $ttl);\n    }\n    return false;\n  }",
             "startLine": 278,
-            "doc": null,
             "endLine": 287,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1019,7 +944,6 @@
             "final": false,
             "code": "function($plugin)\n  {\n  }",
             "startLine": 289,
-            "doc": null,
             "endLine": 291,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1054,11 +978,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 45,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 50,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1080,11 +999,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 45,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 50,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1111,11 +1025,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 56,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 61,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1137,11 +1046,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 56,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 61,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1168,7 +1072,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 72,
-            "doc": null,
             "endLine": 74,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1190,7 +1093,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 72,
-                "doc": null,
                 "endLine": 74,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1217,7 +1119,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 76,
-            "doc": null,
             "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1239,7 +1140,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 76,
-                "doc": null,
                 "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1266,7 +1166,6 @@
             "final": false,
             "code": "function()\n  {\n      $ar = \\func_get_args();\n      bbn\\x::log(\\count($ar) > 1 ? $ar : $ar[0], 'mvc');\n    }\n  }",
             "startLine": 49,
-            "doc": null,
             "endLine": 54,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1288,7 +1187,6 @@
                 "final": false,
                 "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
                 "startLine": 80,
-                "doc": null,
                 "endLine": 88,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1315,22 +1213,6 @@
             "final": false,
             "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
             "startLine": 95,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$name"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$arguments"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 99,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1352,22 +1234,6 @@
                 "final": false,
                 "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
                 "startLine": 95,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "string",
-                            "name": "$name"
-                        },
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$arguments"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 99,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1432,11 +1298,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 104,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 106,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1458,11 +1319,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 104,
-                "doc": {
-                    "description": "",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 106,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1489,17 +1345,6 @@
             "final": false,
             "code": "function($debug)\n  {\n  }",
             "startLine": 112,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "boolean",
-                        "name": "$debug"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 114,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1521,17 +1366,6 @@
                 "final": false,
                 "code": "function($debug)\n  {\n  }",
                 "startLine": 112,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "boolean",
-                            "name": "$debug"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 114,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1578,7 +1412,6 @@
             "final": false,
             "code": "function($plugin = NULL)\n  {\n    if ( ($this->_plugin || $plugin) && \\defined ('BBN_DATA_PATH') ){\n      return BBN_DATA_PATH.'plugins\/'.$this->plugin_name($plugin ?: $this->_plugin).'\/';\n    }\n    return null;\n  }",
             "startLine": 56,
-            "doc": null,
             "endLine": 62,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1616,7 +1449,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 64,
-            "doc": null,
             "endLine": 66,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1641,7 +1473,6 @@
             "final": false,
             "code": "function($path = NULL)\n  {\n  }",
             "startLine": 84,
-            "doc": null,
             "endLine": 86,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1676,7 +1507,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 88,
-            "doc": null,
             "endLine": 90,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1701,7 +1531,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 92,
-            "doc": null,
             "endLine": 94,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1726,7 +1555,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 96,
-            "doc": null,
             "endLine": 98,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1751,7 +1579,6 @@
             "final": false,
             "code": "function($path, $mode, $root = NULL)\n  {\n  }",
             "startLine": 100,
-            "doc": null,
             "endLine": 102,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1804,7 +1631,6 @@
             "final": false,
             "code": "function($raw = false)\n  {\n    return \\bbn\\mvc::get_app_path($raw);\n  }",
             "startLine": 104,
-            "doc": null,
             "endLine": 107,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1841,7 +1667,6 @@
             "final": false,
             "code": "function()\n  {\n    return \\bbn\\mvc::get_lib_path();\n  }",
             "startLine": 109,
-            "doc": null,
             "endLine": 112,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1868,7 +1693,6 @@
             "final": false,
             "code": "function($plugin = NULL)\n  {\n    return \\bbn\\mvc::get_data_path().($plugin ? 'plugins\/'.$plugin.'\/' : '');\n  }",
             "startLine": 114,
-            "doc": null,
             "endLine": 117,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1905,7 +1729,6 @@
             "final": false,
             "code": "function($plugin = NULL)\n  {\n    return \\bbn\\mvc::get_tmp_path($plugin);\n  }",
             "startLine": 119,
-            "doc": null,
             "endLine": 122,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1942,7 +1765,6 @@
             "final": false,
             "code": "function($plugin = NULL)\n  {\n    return \\bbn\\mvc::get_log_path($plugin);\n  }",
             "startLine": 124,
-            "doc": null,
             "endLine": 127,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1979,7 +1801,6 @@
             "final": false,
             "code": "function($plugin = NULL)\n  {\n    return \\bbn\\mvc::get_cache_path($plugin);\n  }",
             "startLine": 129,
-            "doc": null,
             "endLine": 132,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2016,7 +1837,6 @@
             "final": false,
             "code": "function($plugin = NULL)\n  {\n    return \\bbn\\mvc::get_content_path($plugin);\n  }",
             "startLine": 134,
-            "doc": null,
             "endLine": 137,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2053,7 +1873,6 @@
             "final": false,
             "code": "function($id_user = NULL, $plugin = NULL)\n  {\n    return \\bbn\\mvc::get_user_tmp_path($id_user, $plugin);\n  }",
             "startLine": 139,
-            "doc": null,
             "endLine": 142,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2100,7 +1919,6 @@
             "final": false,
             "code": "function($id_user = NULL, $plugin = NULL)\n  {\n    return \\bbn\\mvc::get_user_data_path($id_user, $plugin);\n  }",
             "startLine": 144,
-            "doc": null,
             "endLine": 147,
             "isDeprecated": false,
             "isGenerator": false,
@@ -2186,7 +2004,7 @@
             }
         }
     },
-    "staticProperties": null,
+    "staticProperties": [],
     "constants": null,
     "numMethods": 48,
     "numProperties": 3,
@@ -2225,5 +2043,13 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\mvc",
-    "shortName": "model"
+    "shortName": "model",
+    "summary": "Model View Controller Class",
+    "description": "This class will route a request to the according model and\/or view through its controller.\nA model and a view can be automatically associated if located in the same directory branch with the same name than the controller in their respective locations\nA view can be directly imported in the controller through this very class",
+    "description_parts": [
+        {
+            "type": "text",
+            "content": "<p>This class will route a request to the according model and\/or view through its controller.\nA model and a view can be automatically associated if located in the same directory branch with the same name than the controller in their respective locations\nA view can be directly imported in the controller through this very class<\/p>"
+        }
+    ]
 }

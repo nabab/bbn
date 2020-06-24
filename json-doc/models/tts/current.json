@@ -23,18 +23,6 @@
             "final": false,
             "code": "function($id_option)\n  {\n    self::_set_current($id_option);\n  }",
             "startLine": 29,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "option"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 32,
             "isDeprecated": false,
             "isGenerator": false,
@@ -72,11 +60,6 @@
             "final": false,
             "code": "function()\n  {\n    return self::$current;\n  }",
             "startLine": 37,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 40,
             "isDeprecated": false,
             "isGenerator": false,
@@ -95,12 +78,14 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": {
+        "current": null
+    },
     "constants": null,
     "numMethods": 2,
     "numProperties": 0,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 1,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [],
@@ -117,5 +102,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\models\\tts",
-    "shortName": "current"
+    "shortName": "current",
+    "summary": ""
 }

@@ -18,6 +18,12 @@
                         "desc": ""
                     },
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/api\/cloudmin\/__construct",
+                        "desc": "virtualmin constructor."
+                    },
+                    {
                         "text": "generate",
                         "value": "generate",
                         "url": "bbn-php\/doc\/method\/api\/cloudmin\/generate",
@@ -67,6 +73,12 @@
                         "value": "__call",
                         "url": "bbn-php\/doc\/method\/api\/cloudmintest\/__call",
                         "desc": ""
+                    },
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/api\/cloudmintest\/__construct",
+                        "desc": "virtualmin constructor."
                     },
                     {
                         "text": "generate",
@@ -176,6 +188,12 @@
                 "url": "bbn-php\/doc\/class\/api\/nextcloud",
                 "desc": "Instantiate the class nextcloud by connecting the given user to the given url",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/api\/nextcloud\/__construct",
+                        "desc": "Instantiate the class nextcloud by connecting the given user to the given url"
+                    },
                     {
                         "text": "copy",
                         "value": "copy",
@@ -288,6 +306,12 @@
                 "desc": "",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/api\/paybox\/__construct",
+                        "desc": ""
+                    },
+                    {
                         "text": "get_form",
                         "value": "get_form",
                         "url": "bbn-php\/doc\/method\/api\/paybox\/get_form",
@@ -307,6 +331,12 @@
                         "value": "__call",
                         "url": "bbn-php\/doc\/method\/api\/virtualmin\/__call",
                         "desc": ""
+                    },
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/api\/virtualmin\/__construct",
+                        "desc": "virtualmin constructor."
                     },
                     {
                         "text": "delete_cache",
@@ -361,6 +391,12 @@
                 "desc": "Created by PhpStorm.",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/chat\/__construct",
+                        "desc": "chat constructor."
+                    },
+                    {
                         "text": "add_user",
                         "value": "add_user",
                         "url": "bbn-php\/doc\/method\/appui\/chat\/add_user",
@@ -388,7 +424,7 @@
                         "text": "get_active_chats",
                         "value": "get_active_chats",
                         "url": "bbn-php\/doc\/method\/appui\/chat\/get_active_chats",
-                        "desc": ""
+                        "desc": "*"
                     },
                     {
                         "text": "get_chat_by_users",
@@ -466,6 +502,12 @@
                 "desc": "Created by PhpStorm.",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/clipboard\/__construct",
+                        "desc": ""
+                    },
+                    {
                         "text": "add",
                         "value": "add",
                         "url": "bbn-php\/doc\/method\/appui\/clipboard\/add",
@@ -492,6 +534,12 @@
                 "url": "bbn-php\/doc\/class\/appui\/cms",
                 "desc": "Created by PhpStorm.",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/cms\/__construct",
+                        "desc": ""
+                    },
                     {
                         "text": "delete",
                         "value": "delete",
@@ -610,6 +658,12 @@
                 "desc": "",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/dashboard\/__construct",
+                        "desc": "dashboard contrusctor."
+                    },
+                    {
                         "text": "get_order",
                         "value": "get_order",
                         "url": "bbn-php\/doc\/method\/appui\/dashboard\/get_order",
@@ -675,6 +729,12 @@
                 "url": "bbn-php\/doc\/class\/appui\/databases",
                 "desc": "Created by PhpStorm.",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/databases\/__construct",
+                        "desc": "Constructor"
+                    },
                     {
                         "text": "column_id",
                         "value": "column_id",
@@ -994,6 +1054,12 @@
                 "desc": "",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/events\/__construct",
+                        "desc": ""
+                    },
+                    {
                         "text": "add_exception",
                         "value": "add_exception",
                         "url": "bbn-php\/doc\/method\/appui\/events\/add_exception",
@@ -1098,6 +1164,12 @@
                 "url": "bbn-php\/doc\/class\/appui\/grid",
                 "desc": "",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/grid\/__construct",
+                        "desc": "Grid constructor."
+                    },
                     {
                         "text": "check",
                         "value": "check",
@@ -1399,6 +1471,12 @@
                 "desc": "Created by PhpStorm.",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/i18n\/__construct",
+                        "desc": "Initialize the class i18n"
+                    },
+                    {
                         "text": "analyze_file",
                         "value": "analyze_file",
                         "url": "bbn-php\/doc\/method\/appui\/i18n\/analyze_file",
@@ -1545,6 +1623,12 @@
                 "url": "bbn-php\/doc\/class\/appui\/ide",
                 "desc": "Created by BBN Solutions.",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/ide\/__construct",
+                        "desc": "ide constructor."
+                    },
                     {
                         "text": "change_perm_by_real",
                         "value": "change_perm_by_real",
@@ -1867,6 +1951,12 @@
                 "desc": "Created by BBN Solutions.",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/imessages\/__construct",
+                        "desc": "imessages constructor."
+                    },
+                    {
                         "text": "get",
                         "value": "get",
                         "url": "bbn-php\/doc\/method\/appui\/imessages\/get",
@@ -1912,6 +2002,12 @@
                 "desc": "Checks if we are connected  (Test: ok)",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/mailbox\/__construct",
+                        "desc": ""
+                    },
+                    {
                         "text": "append",
                         "value": "append",
                         "url": "bbn-php\/doc\/method\/appui\/mailbox\/append",
@@ -1939,7 +2035,7 @@
                         "text": "expunge",
                         "value": "expunge",
                         "url": "bbn-php\/doc\/method\/appui\/mailbox\/expunge",
-                        "desc": "Deletes all messages marked for deletion by delete_msg(), move_msg() or set_flag(). (Test: ok)"
+                        "desc": "Deletes all messages marked for deletion by delete_msg(), move_msg() or set_flag().  (Test: ok)"
                     },
                     {
                         "text": "get_all_mboxes",
@@ -2023,7 +2119,7 @@
                         "text": "list_all_mboxes",
                         "value": "list_all_mboxes",
                         "url": "bbn-php\/doc\/method\/appui\/mailbox\/list_all_mboxes",
-                        "desc": "Returns an array containing the full names of the all mailboxes. (Test: ok)"
+                        "desc": "Returns an array containing the full names of the all mailboxes.  (Test: ok)"
                     },
                     {
                         "text": "list_all_subscribed",
@@ -2035,7 +2131,7 @@
                         "text": "list_curlev_mboxes",
                         "value": "list_curlev_mboxes",
                         "url": "bbn-php\/doc\/method\/appui\/mailbox\/list_curlev_mboxes",
-                        "desc": "Returns an array containing the full names of the current level mailboxes. (Test: ok)"
+                        "desc": "Returns an array containing the full names of the current level mailboxes.  (Test: ok)"
                     },
                     {
                         "text": "list_curlev_subscribed",
@@ -2094,6 +2190,12 @@
                 "url": "bbn-php\/doc\/class\/appui\/mailings",
                 "desc": "Created by PhpStorm.",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/mailings\/__construct",
+                        "desc": ""
+                    },
                     {
                         "text": "_get_cfg",
                         "value": "_get_cfg",
@@ -2260,6 +2362,12 @@
                 "desc": "Created by PhpStorm.",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/masks\/__construct",
+                        "desc": ""
+                    },
+                    {
                         "text": "count",
                         "value": "count",
                         "url": "bbn-php\/doc\/method\/appui\/masks\/count",
@@ -2334,6 +2442,12 @@
                 "url": "bbn-php\/doc\/class\/appui\/medias",
                 "desc": "",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/medias\/__construct",
+                        "desc": ""
+                    },
                     {
                         "text": "delete",
                         "value": "delete",
@@ -2421,6 +2535,12 @@
                 "url": "bbn-php\/doc\/class\/appui\/menus",
                 "desc": "",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/menus\/__construct",
+                        "desc": ""
+                    },
                     {
                         "text": "add",
                         "value": "add",
@@ -2568,6 +2688,12 @@
                 "url": "bbn-php\/doc\/class\/appui\/notes",
                 "desc": "Created by PhpStorm.",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/notes\/__construct",
+                        "desc": ""
+                    },
                     {
                         "text": "add_media",
                         "value": "add_media",
@@ -2743,6 +2869,12 @@
                 "desc": "Created by PhpStorm.",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/observer\/__construct",
+                        "desc": "observer constructor."
+                    },
+                    {
                         "text": "add",
                         "value": "add",
                         "url": "bbn-php\/doc\/method\/appui\/observer\/add",
@@ -2793,6 +2925,12 @@
                 "url": "bbn-php\/doc\/class\/appui\/options",
                 "desc": "",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/options\/__construct",
+                        "desc": "Constructor"
+                    },
                     {
                         "text": "add",
                         "value": "add",
@@ -3289,6 +3427,12 @@
                 "desc": "",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/pages\/__construct",
+                        "desc": ""
+                    },
+                    {
                         "text": "delete",
                         "value": "delete",
                         "url": "bbn-php\/doc\/method\/appui\/pages\/delete",
@@ -3321,6 +3465,12 @@
                 "url": "bbn-php\/doc\/class\/appui\/passwords",
                 "desc": "",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/passwords\/__construct",
+                        "desc": ""
+                    },
                     {
                         "text": "delete",
                         "value": "delete",
@@ -3366,6 +3516,12 @@
                 "url": "bbn-php\/doc\/class\/appui\/planning",
                 "desc": "",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/planning\/__construct",
+                        "desc": ""
+                    },
                     {
                         "text": "analyze",
                         "value": "analyze",
@@ -3442,6 +3598,12 @@
                 "desc": "Created by PhpStorm.",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/project\/__construct",
+                        "desc": "Construct the class project"
+                    },
+                    {
                         "text": "change_project_lang",
                         "value": "change_project_lang",
                         "url": "bbn-php\/doc\/method\/appui\/project\/change_project_lang",
@@ -3517,7 +3679,7 @@
                         "text": "get_paths",
                         "value": "get_paths",
                         "url": "bbn-php\/doc\/method\/appui\/project\/get_paths",
-                        "desc": "Returns an array containing about the repositories in the project"
+                        "desc": "Returns an array containing about the repositories in  the project"
                     },
                     {
                         "text": "get_primaries_langs",
@@ -3577,6 +3739,12 @@
                 "desc": "",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/statistic\/__construct",
+                        "desc": ""
+                    },
+                    {
                         "text": "check",
                         "value": "check",
                         "url": "bbn-php\/doc\/method\/appui\/statistic\/check",
@@ -3621,6 +3789,12 @@
                 "url": "bbn-php\/doc\/class\/appui\/tasks",
                 "desc": "Created by PhpStorm.",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/appui\/tasks\/__construct",
+                        "desc": ""
+                    },
                     {
                         "text": "actions",
                         "value": "actions",
@@ -4004,6 +4178,12 @@
                 "desc": "",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/cdn\/compiler\/__construct",
+                        "desc": ""
+                    },
+                    {
                         "text": "compile",
                         "value": "compile",
                         "url": "bbn-php\/doc\/method\/cdn\/compiler\/compile",
@@ -4058,25 +4238,31 @@
                 "value": "config",
                 "text": "config",
                 "url": "bbn-php\/doc\/class\/cdn\/config",
-                "desc": "Created by PhpStorm.",
+                "desc": "PHP version 7",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/cdn\/config\/__construct",
+                        "desc": "Constructor."
+                    },
                     {
                         "text": "get",
                         "value": "get",
                         "url": "bbn-php\/doc\/method\/cdn\/config\/get",
-                        "desc": "Returns the configuration array"
+                        "desc": "Returns the configuration array."
                     },
                     {
                         "text": "getDefaultLanguage",
                         "value": "getDefaultLanguage",
                         "url": "bbn-php\/doc\/method\/cdn\/config\/getDefaultLanguage",
-                        "desc": ""
+                        "desc": "Gets the default language of the libraries requested."
                     },
                     {
                         "text": "setDefaultLanguage",
                         "value": "setDefaultLanguage",
                         "url": "bbn-php\/doc\/method\/cdn\/config\/setDefaultLanguage",
-                        "desc": ""
+                        "desc": "Sets the default language of the libraries requested."
                     }
                 ]
             },
@@ -4085,25 +4271,37 @@
                 "value": "library",
                 "text": "library",
                 "url": "bbn-php\/doc\/class\/cdn\/library",
-                "desc": "",
+                "desc": "PHP version 7",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/cdn\/library\/__construct",
+                        "desc": "Constructor."
+                    },
                     {
                         "text": "add",
                         "value": "add",
                         "url": "bbn-php\/doc\/method\/cdn\/library\/add",
-                        "desc": ""
+                        "desc": "Adds a new library to the config."
                     },
                     {
                         "text": "get_config",
                         "value": "get_config",
                         "url": "bbn-php\/doc\/method\/cdn\/library\/get_config",
-                        "desc": ""
+                        "desc": "Creates the configuration and returns it."
+                    },
+                    {
+                        "text": "get_dependencies",
+                        "value": "get_dependencies",
+                        "url": "bbn-php\/doc\/method\/cdn\/library\/get_dependencies",
+                        "desc": "Returns the dependencies from the given library version."
                     },
                     {
                         "text": "info",
                         "value": "info",
                         "url": "bbn-php\/doc\/method\/cdn\/library\/info",
-                        "desc": ""
+                        "desc": "Returns all the informations stored about a library."
                     }
                 ]
             },
@@ -4129,6 +4327,12 @@
                 "url": "bbn-php\/doc\/class\/cron\/launcher",
                 "desc": "Class cron",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/cron\/launcher\/__construct",
+                        "desc": "Constructor"
+                    },
                     {
                         "text": "launch",
                         "value": "launch",
@@ -4156,6 +4360,12 @@
                 "url": "bbn-php\/doc\/class\/cron\/manager",
                 "desc": "Class cron",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/cron\/manager\/__construct",
+                        "desc": "cron constructor."
+                    },
                     {
                         "text": "activate",
                         "value": "activate",
@@ -4267,6 +4477,12 @@
                 "url": "bbn-php\/doc\/class\/cron\/runner",
                 "desc": "Class cron",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/cron\/runner\/__construct",
+                        "desc": "cron constructor."
+                    },
                     {
                         "text": "check",
                         "value": "check",
@@ -4454,6 +4670,12 @@
                         "desc": "",
                         "items": [
                             {
+                                "text": "__construct",
+                                "value": "__construct",
+                                "url": "bbn-php\/doc\/method\/db\/languages\/mysql\/__construct",
+                                "desc": "Constructor"
+                            },
+                            {
                                 "text": "change",
                                 "value": "change",
                                 "url": "bbn-php\/doc\/method\/db\/languages\/mysql\/change",
@@ -4517,7 +4739,7 @@
                                 "text": "delete_user",
                                 "value": "delete_user",
                                 "url": "bbn-php\/doc\/method\/db\/languages\/mysql\/delete_user",
-                                "desc": "There's an error in the query REVOKE ALL PRIVILEGES ON *.*"
+                                "desc": "There's an error in the query REVOKE ALL PRIVILEGES ON *."
                             },
                             {
                                 "text": "disable_keys",
@@ -4732,6 +4954,12 @@
                         "url": "bbn-php\/doc\/class\/db\/languages\/sqlite",
                         "desc": "",
                         "items": [
+                            {
+                                "text": "__construct",
+                                "value": "__construct",
+                                "url": "bbn-php\/doc\/method\/db\/languages\/sqlite\/__construct",
+                                "desc": "Constructor"
+                            },
                             {
                                 "text": "change",
                                 "value": "change",
@@ -5000,7 +5228,14 @@
                 "text": "json",
                 "url": "bbn-php\/doc\/class\/db\/json",
                 "desc": "",
-                "items": []
+                "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/db\/json\/__construct",
+                        "desc": "*"
+                    }
+                ]
             },
             {
                 "type": "classes",
@@ -5009,6 +5244,12 @@
                 "url": "bbn-php\/doc\/class\/db\/query",
                 "desc": "",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/db\/query\/__construct",
+                        "desc": ""
+                    },
                     {
                         "text": "columnCount",
                         "value": "columnCount",
@@ -5620,6 +5861,12 @@
                 "desc": "",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/file\/ftp\/__construct",
+                        "desc": ""
+                    },
+                    {
                         "text": "cdDir",
                         "value": "cdDir",
                         "url": "bbn-php\/doc\/method\/file\/ftp\/cdDir",
@@ -5706,6 +5953,12 @@
                 "url": "bbn-php\/doc\/class\/file\/image",
                 "desc": "",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/file\/image\/__construct",
+                        "desc": "Construct"
+                    },
                     {
                         "text": "autoresize",
                         "value": "autoresize",
@@ -5848,6 +6101,12 @@
                 "desc": "",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/file\/pdf\/__construct",
+                        "desc": ""
+                    },
+                    {
                         "text": "add_css",
                         "value": "add_css",
                         "url": "bbn-php\/doc\/method\/file\/pdf\/add_css",
@@ -5922,6 +6181,12 @@
                 "url": "bbn-php\/doc\/class\/file\/system",
                 "desc": "",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/file\/system\/__construct",
+                        "desc": "system constructor."
+                    },
                     {
                         "text": "cd",
                         "value": "cd",
@@ -6130,6 +6395,12 @@
                 "desc": "Created by PhpStorm.",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/file\/system2\/__construct",
+                        "desc": "system constructor."
+                    },
+                    {
                         "text": "cd",
                         "value": "cd",
                         "url": "bbn-php\/doc\/method\/file\/system2\/cd",
@@ -6320,6 +6591,12 @@
                 "desc": "",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/html\/builder\/__construct",
+                        "desc": ""
+                    },
+                    {
                         "text": "append",
                         "value": "append",
                         "url": "bbn-php\/doc\/method\/html\/builder\/append",
@@ -6471,7 +6748,14 @@
                 "text": "button",
                 "url": "bbn-php\/doc\/class\/html\/button",
                 "desc": "",
-                "items": []
+                "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/html\/button\/__construct",
+                        "desc": "This will build a new HTML form element according to the given configuration."
+                    }
+                ]
             },
             {
                 "type": "classes",
@@ -6480,6 +6764,12 @@
                 "url": "bbn-php\/doc\/class\/html\/element",
                 "desc": "",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/html\/element\/__construct",
+                        "desc": ""
+                    },
                     {
                         "text": "add_class",
                         "value": "add_class",
@@ -6544,7 +6834,7 @@
                         "text": "get_param",
                         "value": "get_param",
                         "url": "bbn-php\/doc\/method\/html\/element\/get_param",
-                        "desc": "Returns the current configuration HOW???"
+                        "desc": "Returns the current configuration  HOW???"
                     },
                     {
                         "text": "html",
@@ -6586,6 +6876,12 @@
                 "desc": "",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/html\/form\/__construct",
+                        "desc": "This will call the initial build for a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path)."
+                    },
+                    {
                         "text": "script",
                         "value": "script",
                         "url": "bbn-php\/doc\/method\/html\/form\/script",
@@ -6600,6 +6896,12 @@
                 "url": "bbn-php\/doc\/class\/html\/input",
                 "desc": "",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/html\/input\/__construct",
+                        "desc": "This will build a new HTML form element according to the given configuration."
+                    },
                     {
                         "text": "html_with_label",
                         "value": "html_with_label",
@@ -6622,6 +6924,12 @@
                 "url": "bbn-php\/doc\/class\/ide\/actions",
                 "desc": "",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/ide\/actions\/__construct",
+                        "desc": ""
+                    },
                     {
                         "text": "close",
                         "value": "close",
@@ -6679,6 +6987,12 @@
                 "url": "bbn-php\/doc\/class\/ide\/directories",
                 "desc": "",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/ide\/directories\/__construct",
+                        "desc": "Constructor."
+                    },
                     {
                         "text": "add",
                         "value": "add",
@@ -6980,6 +7294,12 @@
                         "desc": "",
                         "items": [
                             {
+                                "text": "__construct",
+                                "value": "__construct",
+                                "url": "bbn-php\/doc\/method\/models\/cls\/cache\/__construct",
+                                "desc": ""
+                            },
+                            {
                                 "text": "cache_delete",
                                 "value": "cache_delete",
                                 "url": "bbn-php\/doc\/method\/models\/cls\/cache\/cache_delete",
@@ -7025,6 +7345,12 @@
                         "desc": "",
                         "items": [
                             {
+                                "text": "__construct",
+                                "value": "__construct",
+                                "url": "bbn-php\/doc\/method\/models\/cls\/data\/__construct",
+                                "desc": ""
+                            },
+                            {
                                 "text": "__get",
                                 "value": "__get",
                                 "url": "bbn-php\/doc\/method\/models\/cls\/data\/__get",
@@ -7062,7 +7388,14 @@
                         "text": "db",
                         "url": "bbn-php\/doc\/class\/models\/cls\/db",
                         "desc": "",
-                        "items": []
+                        "items": [
+                            {
+                                "text": "__construct",
+                                "value": "__construct",
+                                "url": "bbn-php\/doc\/method\/models\/cls\/db\/__construct",
+                                "desc": ""
+                            }
+                        ]
                     },
                     {
                         "type": "classes",
@@ -7071,6 +7404,12 @@
                         "url": "bbn-php\/doc\/class\/models\/cls\/rest",
                         "desc": "the session",
                         "items": [
+                            {
+                                "text": "__construct",
+                                "value": "__construct",
+                                "url": "bbn-php\/doc\/method\/models\/cls\/rest\/__construct",
+                                "desc": "instantiate the class infolegale"
+                            },
                             {
                                 "text": "build_url",
                                 "value": "build_url",
@@ -7099,6 +7438,12 @@
                         "url": "bbn-php\/doc\/class\/models\/obj\/entity",
                         "desc": "",
                         "items": [
+                            {
+                                "text": "__construct",
+                                "value": "__construct",
+                                "url": "bbn-php\/doc\/method\/models\/obj\/entity\/__construct",
+                                "desc": ""
+                            },
                             {
                                 "text": "check",
                                 "value": "check",
@@ -7309,6 +7654,12 @@
                         "desc": "Created by PhpStorm.",
                         "items": [
                             {
+                                "text": "__construct",
+                                "value": "__construct",
+                                "url": "bbn-php\/doc\/method\/models\/tts\/retriever\/__construct",
+                                "desc": ""
+                            },
+                            {
                                 "text": "get_instance",
                                 "value": "get_instance",
                                 "url": "bbn-php\/doc\/method\/models\/tts\/retriever\/get_instance",
@@ -7359,6 +7710,12 @@
                 "url": "bbn-php\/doc\/class\/mvc\/controller",
                 "desc": "When reroute is used $reroutes will be used to check we're not in an infinite reroute loop",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/mvc\/controller\/__construct",
+                        "desc": "This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path)."
+                    },
                     {
                         "text": "action",
                         "value": "action",
@@ -7831,6 +8188,12 @@
                 "desc": "Created by PhpStorm.",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/mvc\/environment\/__construct",
+                        "desc": ""
+                    },
+                    {
                         "text": "get_cli",
                         "value": "get_cli",
                         "url": "bbn-php\/doc\/method\/mvc\/environment\/get_cli",
@@ -7911,6 +8274,12 @@
                 "url": "bbn-php\/doc\/class\/mvc\/model",
                 "desc": "Model View Controller Class",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/mvc\/model\/__construct",
+                        "desc": "Models are always recreated and reincluded, even if they have from the same path"
+                    },
                     {
                         "text": "add_data",
                         "value": "add_data",
@@ -8059,6 +8428,12 @@
                 "desc": "Created by PhpStorm.",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/mvc\/output\/__construct",
+                        "desc": ""
+                    },
+                    {
                         "text": "run",
                         "value": "run",
                         "url": "bbn-php\/doc\/method\/mvc\/output\/run",
@@ -8073,6 +8448,12 @@
                 "url": "bbn-php\/doc\/class\/mvc\/router",
                 "desc": "Manages the translations berween the URLs requested and the app filesystem.",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/mvc\/router\/__construct",
+                        "desc": "This will fetch the route to the controller for a given path. Chainable."
+                    },
                     {
                         "text": "apply_locale",
                         "value": "apply_locale",
@@ -8154,6 +8535,12 @@
                 "url": "bbn-php\/doc\/class\/mvc\/view",
                 "desc": "Copyright (C) 2014 BBN",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/mvc\/view\/__construct",
+                        "desc": "This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path)."
+                    },
                     {
                         "text": "check",
                         "value": "check",
@@ -8339,6 +8726,12 @@
                 "desc": "Documentation block parser",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/parsers\/doc\/__construct",
+                        "desc": "__construct"
+                    },
+                    {
                         "text": "get_js",
                         "value": "get_js",
                         "url": "bbn-php\/doc\/method\/parsers\/doc\/get_js",
@@ -8384,6 +8777,12 @@
                 "desc": "Documentation block parser",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/parsers\/docblock\/__construct",
+                        "desc": ""
+                    },
+                    {
                         "text": "get_all_tags",
                         "value": "get_all_tags",
                         "url": "bbn-php\/doc\/method\/parsers\/docblock\/get_all_tags",
@@ -8422,6 +8821,12 @@
                 "url": "bbn-php\/doc\/class\/parsers\/php",
                 "desc": "Construct function",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/parsers\/php\/__construct",
+                        "desc": "Construct function"
+                    },
                     {
                         "text": "addMethods",
                         "value": "addMethods",
@@ -8493,6 +8898,12 @@
                 "desc": "",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/str\/hash\/__construct",
+                        "desc": ""
+                    },
+                    {
                         "text": "add",
                         "value": "add",
                         "url": "bbn-php\/doc\/method\/str\/hash\/add",
@@ -8532,6 +8943,12 @@
                 "url": "bbn-php\/doc\/class\/user\/manager",
                 "desc": "",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/user\/manager\/__construct",
+                        "desc": ""
+                    },
                     {
                         "text": "add",
                         "value": "add",
@@ -8770,6 +9187,12 @@
                 "desc": "",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/user\/permissions\/__construct",
+                        "desc": "permissions constructor."
+                    },
+                    {
                         "text": "add",
                         "value": "add",
                         "url": "bbn-php\/doc\/method\/user\/permissions\/add",
@@ -8874,6 +9297,12 @@
                 "url": "bbn-php\/doc\/class\/user\/preferences",
                 "desc": "",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/user\/preferences\/__construct",
+                        "desc": "preferences constructor."
+                    },
                     {
                         "text": "add",
                         "value": "add",
@@ -8986,7 +9415,7 @@
                         "text": "get_bits_order",
                         "value": "get_bits_order",
                         "url": "bbn-php\/doc\/method\/user\/preferences\/get_bits_order",
-                        "desc": ""
+                        "desc": "*"
                     },
                     {
                         "text": "get_by_bit",
@@ -9256,6 +9685,12 @@
                 "desc": "",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/user\/profile\/__construct",
+                        "desc": "connection constructor."
+                    },
+                    {
                         "text": "check",
                         "value": "check",
                         "url": "bbn-php\/doc\/method\/user\/profile\/check",
@@ -9276,6 +9711,12 @@
                 "url": "bbn-php\/doc\/class\/user\/session",
                 "desc": "",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/user\/session\/__construct",
+                        "desc": ""
+                    },
                     {
                         "text": "destroy",
                         "value": "destroy",
@@ -9409,6 +9850,12 @@
                         "desc": "",
                         "items": [
                             {
+                                "text": "__construct",
+                                "value": "__construct",
+                                "url": "bbn-php\/doc\/method\/util\/code\/parser\/__construct",
+                                "desc": ""
+                            },
+                            {
                                 "text": "get_code",
                                 "value": "get_code",
                                 "url": "bbn-php\/doc\/method\/util\/code\/parser\/get_code",
@@ -9512,6 +9959,12 @@
                 "url": "bbn-php\/doc\/class\/util\/timer",
                 "desc": "",
                 "items": [
+                    {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/util\/timer\/__construct",
+                        "desc": ""
+                    },
                     {
                         "text": "has_started",
                         "value": "has_started",
@@ -9619,6 +10072,12 @@
                 "desc": "",
                 "items": [
                     {
+                        "text": "__construct",
+                        "value": "__construct",
+                        "url": "bbn-php\/doc\/method\/version\/svn\/__construct",
+                        "desc": ""
+                    },
+                    {
                         "text": "export",
                         "value": "export",
                         "url": "bbn-php\/doc\/method\/version\/svn\/export",
@@ -9653,6 +10112,12 @@
         "url": "bbn-php\/doc\/class\/cache",
         "desc": "Universal caching class: called once per request, it holds the cache system.",
         "items": [
+            {
+                "text": "__construct",
+                "value": "__construct",
+                "url": "bbn-php\/doc\/method\/cache\/__construct",
+                "desc": "Constructor - this is a singleton: it can't be called more then once."
+            },
             {
                 "text": "clear",
                 "value": "clear",
@@ -9777,6 +10242,12 @@
         "desc": "(Static) content delivery system through requests using filesystem and internal DB for libraries.",
         "items": [
             {
+                "text": "__construct",
+                "value": "__construct",
+                "url": "bbn-php\/doc\/method\/cdn\/__construct",
+                "desc": "Constructor."
+            },
+            {
                 "text": "check",
                 "value": "check",
                 "url": "bbn-php\/doc\/method\/cdn\/check",
@@ -9798,7 +10269,7 @@
                 "text": "output",
                 "value": "output",
                 "url": "bbn-php\/doc\/method\/cdn\/output",
-                "desc": ""
+                "desc": "*"
             },
             {
                 "text": "process",
@@ -9815,6 +10286,12 @@
         "url": "bbn-php\/doc\/class\/cron",
         "desc": "(Static) content delivery system through requests using filesystem and internal DB for libraries.",
         "items": [
+            {
+                "text": "__construct",
+                "value": "__construct",
+                "url": "bbn-php\/doc\/method\/cron\/__construct",
+                "desc": ""
+            },
             {
                 "text": "check",
                 "value": "check",
@@ -9935,6 +10412,12 @@
         "url": "bbn-php\/doc\/class\/db",
         "desc": "",
         "items": [
+            {
+                "text": "__construct",
+                "value": "__construct",
+                "url": "bbn-php\/doc\/method\/db\/__construct",
+                "desc": "Constructor"
+            },
             {
                 "text": "__toString",
                 "value": "__toString",
@@ -10851,6 +11334,12 @@
         "desc": "",
         "items": [
             {
+                "text": "__construct",
+                "value": "__construct",
+                "url": "bbn-php\/doc\/method\/file\/__construct",
+                "desc": "Constructor."
+            },
+            {
                 "text": "delete",
                 "value": "delete",
                 "url": "bbn-php\/doc\/method\/file\/delete",
@@ -10902,6 +11391,12 @@
         "desc": "Class for sending mails",
         "items": [
             {
+                "text": "__construct",
+                "value": "__construct",
+                "url": "bbn-php\/doc\/method\/mail\/__construct",
+                "desc": ""
+            },
+            {
                 "text": "get_error",
                 "value": "get_error",
                 "url": "bbn-php\/doc\/method\/mail\/get_error",
@@ -10946,6 +11441,12 @@
         "url": "bbn-php\/doc\/class\/mvc",
         "desc": "Model View Controller Class.",
         "items": [
+            {
+                "text": "__construct",
+                "value": "__construct",
+                "url": "bbn-php\/doc\/method\/mvc\/__construct",
+                "desc": "This should be called only once from within the app"
+            },
             {
                 "text": "add_inc",
                 "value": "add_inc",
@@ -11592,6 +12093,12 @@
                 "desc": "Returns the argumented value, replacing not standard objects (not stdClass) by their class name."
             },
             {
+                "text": "markdown2html",
+                "value": "markdown2html",
+                "url": "bbn-php\/doc\/method\/str\/markdown2html",
+                "desc": "Transforms a markdown string into HTML."
+            },
+            {
                 "text": "parse_path",
                 "value": "parse_path",
                 "url": "bbn-php\/doc\/method\/str\/parse_path",
@@ -11642,6 +12149,12 @@
         "url": "bbn-php\/doc\/class\/time",
         "desc": "",
         "items": [
+            {
+                "text": "__construct",
+                "value": "__construct",
+                "url": "bbn-php\/doc\/method\/time\/__construct",
+                "desc": ""
+            },
             {
                 "text": "add",
                 "value": "add",
@@ -11732,6 +12245,12 @@
         "url": "bbn-php\/doc\/class\/user",
         "desc": "",
         "items": [
+            {
+                "text": "__construct",
+                "value": "__construct",
+                "url": "bbn-php\/doc\/method\/user\/__construct",
+                "desc": "User constructor."
+            },
             {
                 "text": "add_to_tmp",
                 "value": "add_to_tmp",

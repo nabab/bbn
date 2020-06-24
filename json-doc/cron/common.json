@@ -23,11 +23,6 @@
             "final": false,
             "code": "function()\n  {\n    return self::$cron_timeout;\n  }",
             "startLine": 57,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 60,
             "isDeprecated": false,
             "isGenerator": false,
@@ -54,18 +49,6 @@
             "final": false,
             "code": "function($cron_timeout)\n  {\n    self::$cron_timeout = $cron_timeout;\n  }",
             "startLine": 65,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$cron",
-                        "description": "timeout"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 68,
             "isDeprecated": false,
             "isGenerator": false,
@@ -103,11 +86,6 @@
             "final": false,
             "code": "function()\n  {\n    return self::$poll_timeout;\n  }",
             "startLine": 73,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 76,
             "isDeprecated": false,
             "isGenerator": false,
@@ -134,18 +112,6 @@
             "final": false,
             "code": "function($poll_timeout)\n  {\n    self::$poll_timeout = $poll_timeout;\n  }",
             "startLine": 81,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$poll",
-                        "description": "timeout"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 84,
             "isDeprecated": false,
             "isGenerator": false,
@@ -183,11 +149,6 @@
             "final": false,
             "code": "function()\n  {\n    return self::$user_timeout;\n  }",
             "startLine": 89,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 92,
             "isDeprecated": false,
             "isGenerator": false,
@@ -214,18 +175,6 @@
             "final": false,
             "code": "function($user_timeout)\n  {\n    self::$user_timeout = $user_timeout;\n  }",
             "startLine": 97,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$user",
-                        "description": "timeout"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 100,
             "isDeprecated": false,
             "isGenerator": false,
@@ -263,22 +212,6 @@
             "final": false,
             "code": "function(array $cfg = [])\n  {\n    $this->path = bbn\\mvc::get_data_path('appui-cron');\n  }",
             "startLine": 108,
-            "doc": {
-                "description": "cron constructor.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "bbn\\mvc\\controller",
-                        "name": "$ctrl"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$cfg"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 111,
             "isDeprecated": false,
             "isGenerator": false,
@@ -313,11 +246,6 @@
             "final": false,
             "code": "function()\n  {\n    return $this->path;\n  }",
             "startLine": 117,
-            "doc": {
-                "description": "Returns the $data property.",
-                "params": [],
-                "return": ""
-            },
             "endLine": 120,
             "isDeprecated": false,
             "isGenerator": false,
@@ -345,7 +273,6 @@
             "final": false,
             "code": "function($type)\n  {\n  }",
             "startLine": 122,
-            "doc": null,
             "endLine": 124,
             "isDeprecated": false,
             "isGenerator": false,
@@ -383,7 +310,6 @@
             "final": false,
             "code": "function(array $cfg)\n  {\n    if ($this->path && (isset($cfg['type']) || isset($cfg['id']))) {\n      return $this->path.'pid\/.'.($cfg['id'] ?? $cfg['type']);\n    }\n    return null;\n  }",
             "startLine": 126,
-            "doc": null,
             "endLine": 132,
             "isDeprecated": false,
             "isGenerator": false,
@@ -421,7 +347,6 @@
             "final": false,
             "code": "function(array $cfg, $error = false, $no_path = false)\n  {\n    $path = null;\n    if ($this->path && (isset($cfg['type']) || isset($cfg['id']))) {\n      if ( $error ){\n        $path = $this->path.'error\/'.(isset($cfg['id']) ? 'tasks\/'.$cfg['id'] : $cfg['type']);\n      }\n      else {\n        $path = $this->path.'log\/'.(isset($cfg['id']) ? 'tasks\/'.$cfg['id'] : $cfg['type']);\n      }\n      if ($error || $no_path) {\n        $path .= '\/';\n      }\n      else {\n        $path = \\bbn\\x::make_storage_path($path);\n      }\n    }\n    return $path;\n  }",
             "startLine": 134,
-            "doc": null,
             "endLine": 152,
             "isDeprecated": false,
             "isGenerator": false,
@@ -477,7 +402,6 @@
             "final": false,
             "code": "function(array $cfg, $error = false)\n  {\n    $fs = new bbn\\file\\system();\n    if (($path = $this->get_log_path($cfg, $error, true)) && $fs->is_dir($path)) {\n      $fs->cd($path);\n      $dirs = array_reverse($fs->get_files('.\/', true, true, null, 'cts'));\n      $tmp =& $dirs;\n      $tpath = '';\n      for ($i = 0; $i < 4; $i++) {\n        if (!count($tmp)) {\n          break;\n        }\n        else{\n          $ok = false;\n          foreach ($tmp as &$t) {\n            if (!empty($t['num'])) {\n              $tpath .= '\/'.$t['name'];\n              $fs->cd($path.$tpath);\n              $t['expanded'] = true;\n              $t['items'] = array_reverse($fs->get_files('.\/', true, true, null, 'cts'));\n              $tmp =& $t['items'];\n              $ok = true;\n              break;\n            }\n          }\n          if (!$ok) {\n            break;\n          }\n        }\n      }\n      return $dirs;\n    }\n  }",
             "startLine": 154,
-            "doc": null,
             "endLine": 186,
             "isDeprecated": false,
             "isGenerator": false,
@@ -521,7 +445,6 @@
             "final": false,
             "code": "function(array $cfg, $error = false, $start = 0, $num = 10)\n  {\n    $fs = new \\bbn\\file\\system();\n    if (($path = $this->get_log_path($cfg, $error, true)) && $fs->is_dir($path)) {\n      $res = [];\n      $fs->cd($path);\n      $years = array_reverse($fs->get_dirs($path));\n      foreach ($years as $y) {\n        $months = array_reverse($fs->get_dirs($y));\n        foreach ($months as $m) {\n          $days = array_reverse($fs->get_dirs($m));\n          foreach ($days as $d) {\n            $nums = array_reverse($fs->get_dirs($d));\n            foreach ($nums as $num) {\n              foreach (array_reverse($fs->get_files($num)) as $f) {\n                if ($start) {\n                  $start--;\n                }\n                if (!$start) {\n                  $res[] = $f;\n                  if (count($res) >= $num) {\n                    return $res;\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n      return $res;\n    }\n    return null;\n  }",
             "startLine": 188,
-            "doc": null,
             "endLine": 220,
             "isDeprecated": false,
             "isGenerator": false,
@@ -586,7 +509,6 @@
             "final": false,
             "code": "function(array $cfg, $error = false)\n  {\n    if ($tmp = $this->get_last_logs($cfg, $error, 0, 1)) {\n      return $tmp[0];\n    }\n    return null;\n\n  }",
             "startLine": 222,
-            "doc": null,
             "endLine": 229,
             "isDeprecated": false,
             "isGenerator": false,
@@ -633,11 +555,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( $this->check() ){\n      return file_exists($this->get_status_path('active'));\n    }\n    return false;\n  }",
             "startLine": 244,
-            "doc": {
-                "description": "Returns true if the file data_folder\/.active exists, false otherwise.",
-                "params": [],
-                "return": ""
-            },
             "endLine": 250,
             "isDeprecated": false,
             "isGenerator": false,
@@ -664,11 +581,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( $this->check() ){\n      return file_exists($this->get_status_path('cron'));\n    }\n    return false;\n  }",
             "startLine": 256,
-            "doc": {
-                "description": "Returns true if the file data_folder\/.cron exists, false otherwise.",
-                "params": [],
-                "return": ""
-            },
             "endLine": 262,
             "isDeprecated": false,
             "isGenerator": false,
@@ -695,11 +607,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( $this->check() ){\n      return file_exists($this->get_status_path('poll'));\n    }\n    return false;\n  }",
             "startLine": 268,
-            "doc": {
-                "description": "Returns true if the file data_folder\/.poll exists, false otherwise.",
-                "params": [],
-                "return": ""
-            },
             "endLine": 274,
             "isDeprecated": false,
             "isGenerator": false,
@@ -717,12 +624,16 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": {
+        "cron_timeout": 300,
+        "poll_timeout": 600,
+        "user_timeout": 480
+    },
     "constants": null,
     "numMethods": 17,
     "numProperties": 0,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 3,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [],
@@ -749,5 +660,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\cron",
-    "shortName": "common"
+    "shortName": "common",
+    "summary": ""
 }

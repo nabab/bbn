@@ -28,7 +28,6 @@
             "final": false,
             "code": "function(bbn\\db $db)\n  {\n    self::optional_init();\n    $this->notes = new notes($this->db);\n    $this->o = bbn\\appui\\options::get_instance();\n  }",
             "startLine": 22,
-            "doc": null,
             "endLine": 27,
             "isDeprecated": false,
             "isGenerator": false,
@@ -50,7 +49,6 @@
                 "final": false,
                 "code": "function(bbn\\db $db)\n  {\n  }",
                 "startLine": 27,
-                "doc": null,
                 "endLine": 29,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -97,7 +95,6 @@
             "final": false,
             "code": "function($id_type = NULL)\n  {\n      return $this->db->count('bbn_notes_masks', ['id_type' => $id_type]);\n    }\n\n    return $this->db->count('bbn_notes_masks');\n  }",
             "startLine": 29,
-            "doc": null,
             "endLine": 35,
             "isDeprecated": false,
             "isGenerator": false,
@@ -132,17 +129,6 @@
             "final": false,
             "code": "function($id)\n  {\n    $mask = $this->db->rselect('bbn_notes_masks', [], ['id_note' => $id]);\n    if ( $data = $this->notes->get($mask['id_note']) ){\n      $data['default'] = $mask['def'];\n      $data['id_type'] = $mask['id_type'];\n      $data['type'] = $this->o->text($mask['id_type']);\n      $data['name'] = $mask['name'];\n      return $data;\n    }\n    return null;\n  }",
             "startLine": 42,
-            "doc": {
-                "description": "Gets the content of a mask based on the provided ID",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 53,
             "isDeprecated": false,
             "isGenerator": false,
@@ -180,7 +166,6 @@
             "final": false,
             "code": "function($id_type = NULL, $simple = true)\n  {\n      $id_type = self::get_option_id($id_type);\n    }\n    $all = $this->db->get_column_values('bbn_notes_masks', 'id_note', $id_type ? [\n      'id_type' => $id_type\n    ] : []);\n    $r = [];\n    foreach ( $all as $a ){\n      $r[] = $this->get($a, $simple);\n    }\n    return $r;\n  }",
             "startLine": 55,
-            "doc": null,
             "endLine": 67,
             "isDeprecated": false,
             "isGenerator": false,
@@ -224,7 +209,6 @@
             "final": false,
             "code": "function($id_type, $fulltext = false)\n  {\n      $id_type = self::get_option_id($id_type);\n    }\n    $all = $this->get_all($id_type);\n    $admin = new bbn\\user\\manager(\\bbn\\user::get_instance());\n    if ( \\is_array($all) ){\n      $res = [];\n      foreach ( $all as $a ){\n        $tmp = [\n          'text' => $a['name'],\n          'value' => $a['id_note']\n        ];\n        if ( $fulltext ){\n          $tmp['fulltext'] = $a['title'].\n            ($a['default'] ? ' ('._('default').')' : '').\n            ' - v'.$a['version'].' '.\n            \\bbn\\date::format($a['creation']).' '._('by').' '.\n            $admin->get_name($a['id_user']);\n        }\n        $res[] = $tmp;\n      }\n      return $res;\n    }\n    return null;\n  }",
             "startLine": 69,
-            "doc": null,
             "endLine": 94,
             "isDeprecated": false,
             "isGenerator": false,
@@ -268,7 +252,6 @@
             "final": false,
             "code": "function($id_type)\n  {\n      $id_type = self::get_option_id($id_type);\n    }\n    if ( $id_note = $this->db->select_one('bbn_notes_masks', 'id_note', [\n      'id_type' => $id_type,\n      'def' => 1\n    ]) ){\n      return $this->get($id_note);\n    }\n    return null;\n  }",
             "startLine": 96,
-            "doc": null,
             "endLine": 107,
             "isDeprecated": false,
             "isGenerator": false,
@@ -303,7 +286,6 @@
             "final": false,
             "code": "function($id_note)\n  {\n    if ( $current ){\n      if ( $old = $this->get_default($current['id_type']) ){\n        if ( $old['id_note'] === $id_note ){\n          return 1;\n        }\n        $this->db->update('bbn_notes_masks', [\n          'def' => 0\n        ], [\n          'id_note' => $old['id_note']\n        ]);\n      }\n      return $this->db->update('bbn_notes_masks', [\n        'def' => 1\n      ], [\n        'id_note' => $id_note\n      ]);\n    }\n  }",
             "startLine": 109,
-            "doc": null,
             "endLine": 128,
             "isDeprecated": false,
             "isGenerator": false,
@@ -338,7 +320,6 @@
             "final": false,
             "code": "function($name, $id_type, $title, $content)\n  {\n    if ( !bbn\\str::is_uid($id_type) ){\n      $id_type = self::get_option_id($id_type);\n    }\n    if (\n      $this->o->exists($id_type) &&\n      ($id_note = $this->notes->insert($title, $content, $this->o->from_code('masks', 'types', 'notes', 'appui')))\n    ){\n      $data = [\n        'id_note' => $id_note,\n        'id_type' => $id_type,\n        'name' => $name\n      ];\n      if ( !$this->count($id_type) ){\n        $data['def'] = 1;\n      }\n      if ( $this->db->insert('bbn_notes_masks', $data) ){\n        return $id_note;\n      }\n    }\n    return null;\n  }",
             "startLine": 130,
-            "doc": null,
             "endLine": 152,
             "isDeprecated": false,
             "isGenerator": false,
@@ -403,7 +384,6 @@
             "final": false,
             "code": "function(array $cfg)\n  {\n      !empty($cfg['id_note']) && \n      !empty($cfg['title']) &&\n      !empty($cfg['content']) &&\n      !empty($cfg['name'])\n    ){\n      $data = [\n        'name' => $cfg['name'],\n        'def' => !empty($cfg['def']) || !empty($cfg['default']) ? 1 : 0\n      ];\n      if ( !empty($cfg['id_type']) ){\n        $data['id_type'] = $cfg['id_type'];\n      }      \n      $update_mask = $this->db->update('bbn_notes_masks', $data, ['id_note' => $cfg['id_note']]);\n      $update_notes = $this->notes->update($cfg['id_note'], $cfg['title'], $cfg['content']);\n      if ( $update_mask || $update_notes ){\n        return true;\n      }\n    }\n    return false;\n  }",
             "startLine": 154,
-            "doc": null,
             "endLine": 175,
             "isDeprecated": false,
             "isGenerator": false,
@@ -438,7 +418,6 @@
             "final": false,
             "code": "function($id_note)\n  {\n      return $this->notes->remove($id_note);\n    }\n  }",
             "startLine": 177,
-            "doc": null,
             "endLine": 181,
             "isDeprecated": false,
             "isGenerator": false,
@@ -473,7 +452,6 @@
             "final": false,
             "code": "function($note, $data)\n  {\n      $note = $this->get($note);\n    }\n    if ( !empty($note['content']) ){\n      return \\bbn\\tpl::render($note['content'], $data);\n    }\n    return null;\n  }",
             "startLine": 183,
-            "doc": null,
             "endLine": 191,
             "isDeprecated": false,
             "isGenerator": false,
@@ -517,7 +495,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 193,
-            "doc": null,
             "endLine": 195,
             "isDeprecated": false,
             "isGenerator": false,
@@ -542,11 +519,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 45,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 50,
             "isDeprecated": false,
             "isGenerator": false,
@@ -568,11 +540,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 45,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 50,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -599,11 +566,6 @@
             "final": false,
             "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
             "startLine": 56,
-            "doc": {
-                "description": "Checks whether the error property has been set (so an error happened).",
-                "params": [],
-                "return": ""
-            },
             "endLine": 61,
             "isDeprecated": false,
             "isGenerator": false,
@@ -625,11 +587,6 @@
                 "final": false,
                 "code": "function()\n  {\n      return false;\n    }\n    return true;\n  }",
                 "startLine": 56,
-                "doc": {
-                    "description": "Checks whether the error property has been set (so an error happened).",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 61,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -656,7 +613,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 72,
-            "doc": null,
             "endLine": 74,
             "isDeprecated": false,
             "isGenerator": false,
@@ -678,7 +634,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 72,
-                "doc": null,
                 "endLine": 74,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -705,7 +660,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 76,
-            "doc": null,
             "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
@@ -727,7 +681,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 76,
-                "doc": null,
                 "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -754,7 +707,6 @@
             "final": false,
             "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
             "startLine": 80,
-            "doc": null,
             "endLine": 88,
             "isDeprecated": false,
             "isGenerator": false,
@@ -776,7 +728,6 @@
                 "final": false,
                 "code": "function()\n  {\n\t\t\t$ar = \\func_get_args();\n\t\t\t$cn = bbn\\str::encode_filename(str_replace('\\\\', '_', \\get_class($this)));\n\t\t\tforeach ( $ar as $a ){\n\t\t\t\tbbn\\x::log($a, $cn);\n\t\t\t}\n\t\t}\n  }",
                 "startLine": 80,
-                "doc": null,
                 "endLine": 88,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -803,22 +754,6 @@
             "final": false,
             "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
             "startLine": 95,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$name"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$arguments"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 99,
             "isDeprecated": false,
             "isGenerator": false,
@@ -840,22 +775,6 @@
                 "final": false,
                 "code": "function($name, $arguments)\n  {\n    $this->log([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]);\n    die(var_dump([\"Wrong method used for the class $class: $name with the following arguments:\", $arguments]));\n  }",
                 "startLine": 95,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "string",
-                            "name": "$name"
-                        },
-                        {
-                            "tag": "param",
-                            "type": "array",
-                            "name": "$arguments"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 99,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -920,11 +839,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 104,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 106,
             "isDeprecated": false,
             "isGenerator": false,
@@ -946,11 +860,6 @@
                 "final": false,
                 "code": "function()\n  {\n  }",
                 "startLine": 104,
-                "doc": {
-                    "description": "",
-                    "params": [],
-                    "return": ""
-                },
                 "endLine": 106,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -977,17 +886,6 @@
             "final": false,
             "code": "function($debug)\n  {\n  }",
             "startLine": 112,
-            "doc": {
-                "description": "",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "boolean",
-                        "name": "$debug"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 114,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1009,17 +907,6 @@
                 "final": false,
                 "code": "function($debug)\n  {\n  }",
                 "startLine": 112,
-                "doc": {
-                    "description": "",
-                    "params": [
-                        {
-                            "tag": "param",
-                            "type": "boolean",
-                            "name": "$debug"
-                        }
-                    ],
-                    "return": ""
-                },
                 "endLine": 114,
                 "isDeprecated": false,
                 "isGenerator": false,
@@ -1066,7 +953,6 @@
             "final": false,
             "code": "function()\n  {\n    return self::$option_root_id;\n  }",
             "startLine": 71,
-            "doc": null,
             "endLine": 74,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1091,7 +977,6 @@
             "final": false,
             "code": "function()\n  {\n    return self::$option_appui_id;\n  }",
             "startLine": 76,
-            "doc": null,
             "endLine": 79,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1116,17 +1001,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 87,
-            "doc": {
-                "description": "Returns The option's ID of a category, i.e. direct children of option's root",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$code"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 89,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1151,7 +1025,6 @@
             "final": false,
             "code": "function()\n  {\n      return $a !== null;\n    }));\n  }",
             "startLine": 91,
-            "doc": null,
             "endLine": 95,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1176,7 +1049,6 @@
             "final": false,
             "code": "function()\n  {\n      $tree['items'] : [];\n  }",
             "startLine": 97,
-            "doc": null,
             "endLine": 100,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1201,7 +1073,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 102,
-            "doc": null,
             "endLine": 104,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1226,7 +1097,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 106,
-            "doc": null,
             "endLine": 108,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1251,7 +1121,6 @@
             "final": false,
             "code": "function()\n  {\n      bbn\\appui\\options::get_instance()->text_value_options($id): [];\n  }",
             "startLine": 110,
-            "doc": null,
             "endLine": 113,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1276,17 +1145,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 121,
-            "doc": {
-                "description": "Returns The option's ID of a category, i.e. direct children of option's root",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$code"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 123,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1311,7 +1169,6 @@
             "final": false,
             "code": "function()\n  {\n      return $a !== null;\n    }));\n  }",
             "startLine": 125,
-            "doc": null,
             "endLine": 129,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1336,7 +1193,6 @@
             "final": false,
             "code": "function()\n  {\n      $tree['items'] : [];\n  }",
             "startLine": 131,
-            "doc": null,
             "endLine": 134,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1361,7 +1217,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 136,
-            "doc": null,
             "endLine": 138,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1386,7 +1241,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 140,
-            "doc": null,
             "endLine": 142,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1411,7 +1265,6 @@
             "final": false,
             "code": "function()\n  {\n      bbn\\appui\\options::get_instance()->text_value_options($id) : [];\n  }",
             "startLine": 144,
-            "doc": null,
             "endLine": 147,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1427,12 +1280,16 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": {
+        "optional_is_init": false,
+        "option_appui_id": null,
+        "option_root_id": null
+    },
     "constants": null,
     "numMethods": 34,
     "numProperties": 0,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 3,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [
@@ -1460,5 +1317,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\appui",
-    "shortName": "masks"
+    "shortName": "masks",
+    "summary": ""
 }

@@ -125,13 +125,14 @@ class php extends bbn\models\cls\basic
   public function analyzeClass(string $cls): ?array
   {
     $rc = new \ReflectionClass($cls);
-    \bbn\x::log([$cls], 'vito');
-    if ( !empty($cls) && is_object($rc) ){
+    if (!empty($cls) && is_object($rc)) {
+      $constructor = $rc->getConstructor();
       $methods = $rc->getMethods(\ReflectionMethod::IS_PUBLIC);
       $props = $rc->getProperties(\ReflectionMethod::IS_PUBLIC);
-      $statprops = $rc->getStaticProperties(\ReflectionMethod::IS_PUBLIC);
-      $constants = $rc->getConstants(\ReflectionMethod::IS_PUBLIC);
-      return [
+      $statprops = $rc->getStaticProperties();
+      $constants = $rc->getConstants();
+      $parent = $rc->getParentClass();
+      $res = [
         'doc' =>  $this->parseClassComments($rc->getDocComment()),
         'name' => $rc->getName(),
         'namespace' => $rc->getNamespaceName(),
@@ -142,9 +143,9 @@ class php extends bbn\models\cls\basic
         'fileName' => $rc->getFileName(),
         'startLine' => $rc->getStartLine(),
         'endLine' => $rc->getEndLine(),
-        'contentConstructor' => !empty($rc->getConstructor()) ?
+        'contentConstructor' => !empty($constructor) ?
           array_filter(
-            $this->analyzeMethod($rc->getConstructor()->name, $rc),
+            $this->analyzeMethod($constructor->name, $rc),
             function($m, $i){
               return in_array($i,['file', 'returns']);
             }, ARRAY_FILTER_USE_BOTH)
@@ -153,10 +154,10 @@ class php extends bbn\models\cls\basic
         'properties' => $props ? $this->orderElement($props, 'properties', $rc) : null,
         'staticProperties' => $statprops,
         'constants' =>  $constants ? $this->orderElement($constants, 'costants', $rc) : null,
-        'numMethods' => count($methods),
-        'numProperties' => count( $props),
-        'numConstants' => count($constants),
-        'numStaticProperties' => count($statprops),
+        'numMethods' => $methods ? count($methods) : 0,
+        'numProperties' => $props ? count($props) : 0,
+        'numConstants' => $constants ? count($constants) : 0,
+        'numStaticProperties' => $statprops ? count($statprops) : 0,
         'interfaces' =>  $rc->getInterfaces(),
         'interfaceNames' =>  $rc->getInterfaceNames(),
         'isInterface' =>  $rc->isInterface(),
@@ -166,7 +167,7 @@ class php extends bbn\models\cls\basic
         'isAbstract' => $rc->isAbstract(),
         'isFinal' => $rc->isFinal(),
         'modifiers' => $rc->getModifiers(),
-        'parentClass' => $rc->getParentClass()->name,
+        'parentClass' => $parent ? $parent->name : null,
         'isSubclassOf' => $rc->isSubclassOf($cls),
         'defaultProperties' => $rc->getDefaultProperties(),
         'isIterable' => $rc->isIterable(),
@@ -176,6 +177,13 @@ class php extends bbn\models\cls\basic
         'namespaceName' => $rc->getNamespaceName(),
         'shortName' => $rc->getShortName()
       ];
+      $comments = $rc->getDocComment();
+      if (($doc = $this->parseClassComments($comments))
+          && ($extracted = $this->_extract_description($doc['description']))
+      ) {
+        $res = \bbn\x::merge_arrays($res, $extracted);
+      }
+      return $res;
     }
   }
 
@@ -637,18 +645,19 @@ class php extends bbn\models\cls\basic
     foreach($rfx->getParameters() as $p){
       $args[] = ($p->isArray() ? 'array ' : ($p->getClass() ? $p->getClass()->name.' ' : ''))
         .($p->isPassedByReference() ? '&' : '').'$'.$p->name;
-      try {
-        if ( $p->isOptional() ){
+      if ($p->isOptional()) {
+        try {
           $default = $p->getDefaultValue();
           if ( $default !== '88888888888888888888888888888888' ){
             $args[$i] .= ' = '.($default === [] ? '[]' : var_export($default,true));
           }
         }
+        catch (\ReflectionException $e) {
+          // No default
+          \bbn\x::log([$rfx->getName(), $e->getMessage()], 'phpParser');
+        }
       }
-      catch ( \ReflectionException $e ){
-        //die(var_dump($e));
-      }
-      $i++;
+    $i++;
     }
     if ($filename = $rfx->getFileName()) {
       $content = file($filename);
@@ -706,16 +715,22 @@ class php extends bbn\models\cls\basic
     return isset($arr) ? $arr : null;
   }
 
+  /**
+   * Return an array of information about a method.
+   *
+   * @param \ReflectionMethod $method The method object
+   * @return array
+   */
   private function _get_method_info(\ReflectionMethod $method) {
     $ret = null;
-    if ( $method->hasReturnType() ){
+    if ($method->hasReturnType()) {
       $type = $method->getReturnType();
       $ret = [(string)$type];
-      if ( $type->allowsNull() ){
+      if ($type->allowsNull()) {
         $ret[] = null;
       }
     }
-    if  ( $method->isPrivate() || $method->isProtected() ){
+    if  ($method->isPrivate() || $method->isProtected()) {
       $method->setAccessible(true);
     }
     $ar = [
@@ -729,7 +744,6 @@ class php extends bbn\models\cls\basic
       'final' => $method->isFinal(),
       'code' => $this->_closureSource($method),
       'startLine' => $method->getStartLine(),
-      'doc' =>  $this->parseMethodComments($method->getDocComment()),
       'endLine' => $method->getEndLine(),
      // 'isClosure' => $method->isClousure(),
       'isDeprecated' => $method->isDeprecated(),
@@ -742,75 +756,93 @@ class php extends bbn\models\cls\basic
       'numberOfRequiredParameters' => $method->getNumberOfRequiredParameters(),
       'returns' => $ret,
       'parent' => false,
-      'arguments' => array_map(function($p){
-        return [
-          'name' => $p->getName(),
-          'position' => $p->getPosition(),
-          'type' => (string)$p->getType(),
-          'required' => !$p->isOptional(),
-          'has_default' => $p->isDefaultValueAvailable(),
-          'default' => $p->isDefaultValueAvailable() ? $p->getDefaultValue() : '',
-          'default_name' => $p->isDefaultValueAvailable() && $p->isDefaultValueConstant() ?
-            $p->getDefaultValueConstantName() : ''
-        ];
-      }, $method->getParameters())
+      'arguments' => array_map(
+        function ($p) {
+          $res = [
+            'name' => $p->getName(),
+            'position' => $p->getPosition(),
+            'type' => (string)$p->getType(),
+            'required' => !$p->isOptional(),
+            'has_default' => $p->isDefaultValueAvailable(),
+            'default' => $p->isDefaultValueAvailable() ? $p->getDefaultValue() : '',
+            'default_name' => $p->isDefaultValueAvailable() && $p->isDefaultValueConstant() ?
+              $p->getDefaultValueConstantName() : ''
+          ];
+          return $res;
+        },
+        $method->getParameters()
+      )
     ];
-    if (!empty($ar['doc']['description'])) {
-      $desc = trim($ar['doc']['description']);
-      $bits = \bbn\x::split($desc, PHP_EOL);
-      if (!empty($bits)) {
-        $ar['summary'] = trim(array_shift($bits));
-        if (!empty($bits)) {
-          $ar['description'] = trim(\bbn\x::join($bits, PHP_EOL));
-          $num_matches = preg_match_all('/```php([^```]+)```/', $ar['description'], $matches, PREG_OFFSET_CAPTURE);
-          $len = strlen($ar['description']);
-          $start = 0;
-          if ($num_matches) {
-            foreach ($matches[0] as $i => $m) {
-              if (isset($m[1])) {
-                if (($i === 0)
-                    && $tmp = trim(substr($ar['description'], $start, $m[1]))
-                ) {
-                  $ar['description_parts'][] = [
-                    'type' => 'text',
-                    'content' => $tmp
-                  ];
-                }
-                $ar['description_parts'][] = [
-                  'type' => 'code',
-                  'content' => trim($matches[1][$i][0])
-                ];
-                $start = $m[1] + strlen($m[0]);
-                $end = isset($matches[0][$i+1]) ? $matches[0][$i+1][1] : $len;
-                if (
-                  ($start < $len)
-                  && ($tmp = trim(substr($ar['description'], $start, $end - $start)))
-                ) {
-                  $ar['description_parts'][] = [
-                    'type' => 'text',
-                    'content' => $tmp
-                  ];
-                }
-              }
-            }
-          }
-          else {
-            $ar['description_parts'][] = [
-              'type' => 'text',
-              'content' => $ar['description']
-            ];
-          }
-        }
-      }
+    $comments = $method->getDocComment();
+    if (($doc = $this->parseMethodComments($comments))
+        && ($extracted = $this->_extract_description($doc['description']))
+    ) {
+      $ar = \bbn\x::merge_arrays($ar, $extracted);
     }
-    if (!empty($ar['doc']['params'])) {
-      foreach ($ar['doc']['params'] as $i => $a) {
+    if ($doc && !empty($doc['params'])) {
+      foreach ($doc['params'] as $i => $a) {
         if (!empty($a['description']) && isset($ar['arguments'][$i])) {
           $ar['arguments'][$i]['description'] = $a['description'];
 
         }
       }
       unset($a);
+    }
+    return $ar;
+  }
+
+  /**
+   * Makes an array of information out of a description string.
+   * 
+   * @param string $desc The description string
+   */
+  private function _extract_description(string $desc): array
+  {
+    $ar = [];
+    $bits = \bbn\x::split($desc, PHP_EOL);
+    if (!empty($bits)) {
+      $ar['summary'] = trim(array_shift($bits));
+      if (!empty($bits)) {
+        $ar['description'] = trim(\bbn\x::join($bits, PHP_EOL));
+        $num_matches = preg_match_all('/```php([^```]+)```/', $ar['description'], $matches, PREG_OFFSET_CAPTURE);
+        $len = strlen($ar['description']);
+        $start = 0;
+        if ($num_matches) {
+          foreach ($matches[0] as $i => $m) {
+            if (isset($m[1])) {
+              if (($i === 0)
+                  && $tmp = trim(substr($ar['description'], $start, $m[1]))
+              ) {
+                $ar['description_parts'][] = [
+                  'type' => 'text',
+                  'content' => \bbn\str::markdown2html($tmp)
+                ];
+              }
+              $ar['description_parts'][] = [
+                'type' => 'code',
+                'content' => trim($matches[1][$i][0])
+              ];
+              $start = $m[1] + strlen($m[0]);
+              $end = isset($matches[0][$i+1]) ? $matches[0][$i+1][1] : $len;
+              if (
+                ($start < $len)
+                && ($tmp = trim(substr($ar['description'], $start, $end - $start)))
+              ) {
+                $ar['description_parts'][] = [
+                  'type' => 'text',
+                  'content' => $tmp
+                ];
+              }
+            }
+          }
+        }
+        else {
+          $ar['description_parts'][] = [
+            'type' => 'text',
+            'content' => \bbn\str::markdown2html($ar['description'])
+          ];
+        }
+      }
     }
     return $ar;
   }

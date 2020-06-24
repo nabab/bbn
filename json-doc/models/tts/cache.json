@@ -13,7 +13,7 @@
     "contentConstructor": null,
     "methods": null,
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": [],
     "constants": null,
     "numMethods": 0,
     "numProperties": 0,
@@ -36,5 +36,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\models\\tts",
-    "shortName": "cache"
+    "shortName": "cache",
+    "summary": ""
 }

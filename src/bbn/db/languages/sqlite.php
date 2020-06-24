@@ -27,10 +27,17 @@ class sqlite implements bbn\db\engines
 	public static $operators = ['!=','=','<>','<','<=','>','>=','like','clike','slike','not','is','is not', 'in','between', 'not like'];
 
 	/** @var array Numeric column types */
-  public static $numeric_types = ['integer', 'numeric', 'real'];
+  public static $numeric_types = ['integer', 'real'];
 
   /** @var array Time and date column types don't exist in SQLite */
   public static $date_types = [];
+
+  public static $types = [
+    'integer',
+    'real',
+    'text',
+    'blob'
+  ];
 
   public static $aggr_functions = [
     'AVG',
@@ -481,10 +488,13 @@ class sqlite implements bbn\db\engines
           $is_uid = false;
           $is_date = false;
           $model = null;
-          if ( isset($cfg['available_fields'][$field]) ){
+          if ($is_having) {
+            $res .= PHP_EOL.str_repeat(' ', $indent).(empty($res) ? '' : "$logic ").$field.' ';
+          }
+          else if ( isset($cfg['available_fields'][$field]) ){
             $table = $cfg['available_fields'][$field];
             $column = $this->col_simple_name($cfg['fields'][$field] ?? $field);
-            if ( isset($cfg['models'][$table]['fields'][$column]) ){
+            if ( $table && $column && isset($cfg['models'][$table]['fields'][$column]) ){
               $model = $cfg['models'][$table]['fields'][$column];
               $res .= PHP_EOL.str_repeat(' ', $indent).(empty($res) ? '' : "$logic ").
                       (!empty($cfg['available_fields'][$field]) ?
@@ -493,9 +503,13 @@ class sqlite implements bbn\db\engines
                       ).' ';
             }
             else{
-              // Remove the alias from where and join but not in having
+              // Remove the alias from where and join but not in having execpt if it's a count
               if ( !$is_having && ($table === false) && isset($cfg['fields'][$field]) ){
                 $field = $cfg['fields'][$field];
+                // Same for exp in case it's an alias
+                if ( !empty($f['exp']) && isset($cfg['fields'][$f['exp']]) ){
+                  $f['exp'] = $cfg['fields'][$f['exp']];
+                }
               }
               $res .= (empty($res) ? '' : PHP_EOL.str_repeat(' ', $indent).$logic.' ').$field.' ';
             }
@@ -525,14 +539,39 @@ class sqlite implements bbn\db\engines
             $res .= (empty($res) ? '' : PHP_EOL.str_repeat(' ', $indent).$logic.' ').$field.' ';
           }
           switch ( strtolower($f['operator']) ){
+            case '=':
+              if ( isset($f['exp']) ){
+                $res .= '= '.$f['exp'];
+              }
+              else {
+                $res .= '= ?';
+              }
+              break;
+            case '!=':
+              if ( isset($f['exp']) ){
+                $res .= '!= '.$f['exp'];
+              }
+              else {
+                $res .= '!= ?';
+              }
+              break;
             case 'like':
-              $res .= 'LIKE ?';
+              if ( isset($f['exp']) ){
+                $res .= 'LIKE '.$f['exp'];
+              }
+              else {
+                $res .= 'LIKE ?';
+              }
               break;
             case 'not like':
-              $res .= 'NOT LIKE ?';
+              if ( isset($f['exp']) ){
+                $res .= 'NOT LIKE '.$f['exp'];
+              }
+              else {
+                $res .= 'NOT LIKE ?';
+              }
               break;
             case 'eq':
-            case '=':
             case 'is':
               if ( isset($f['exp']) ){
                 $res .= '= '.$f['exp'];
@@ -545,7 +584,6 @@ class sqlite implements bbn\db\engines
               }
               break;
             case 'neq':
-            case '!=':
             case 'isnot':
               if ( isset($f['exp']) ){
                 $res .= '!= '.$f['exp'];
@@ -559,6 +597,7 @@ class sqlite implements bbn\db\engines
               break;
 
             case 'doesnotcontains':
+            case 'doesnotcontain':
               $res .= 'NOT LIKE '.($f['exp'] ?? '?');
               break;
 
@@ -610,11 +649,11 @@ class sqlite implements bbn\db\engines
 
             /** @todo Check if it is working with an array */
             case 'isnull':
-              $res .= $is_null ? 'IS NULL' : " = ''";
+              $res .= 'IS NULL';
               break;
 
             case 'isnotnull':
-              $res .= $is_null ? 'IS NOT NULL' : " != ''";
+              $res .= 'IS NOT NULL';
               break;
 
             case 'isempty':
@@ -630,8 +669,11 @@ class sqlite implements bbn\db\engines
               break;
 
             case 'contains':
+              $res .= 'LIKE ?';
+              break;
+
             default:
-              $res .= $is_number ? '= ?' : 'LIKE ?';
+              $res .= '= ?';
               break;
           }
         }
@@ -651,27 +693,81 @@ class sqlite implements bbn\db\engines
    */
   public function get_select(array $cfg): string
   {
+    // 22/06/2020 imported from mysql.php by Mirko
     $res = '';
     if ( \is_array($cfg['tables']) && !empty($cfg['tables']) ){
       $res = 'SELECT ';
       if ( !empty($cfg['count']) ){
-        $indexes = [];
         if ( $cfg['group_by'] ){
+          $indexes = [];
+          $idxs = [];
           foreach ( $cfg['group_by'] as $g ){
+            // Alias
+            if (isset($cfg['fields'][$g])) {
+              $g = $cfg['fields'][$g];
+            }
             if (($t = $cfg['available_fields'][$g])
-            && ($cfn = $this->col_full_name($g, $t, true)) ){
+            && ($cfn = $this->col_full_name($g, $t)) ){
               $indexes[] = $cfn;
+              //$idxs[] = $this->col_simple_name($g, true);
+              // Changed by Mirko
+              $idxs[] = $this->col_simple_name($cfg['aliases'][$g] ?? $g, true);
+            }
+            else {
+              $indexes[] = $g;
+              $idxs[] = $g;
+            }
+          }
+          if (!empty($cfg['having'])) {
+            if (count($indexes) === count($cfg['group_by'])){
+              $res .= 'COUNT(*) FROM ( SELECT ';
+              $tmp = [];
+              if ($extracted_fields = $this->db->extract_fields($cfg, $cfg['having']['conditions'])) {
+                //die(var_dump($extracted_fields));
+                foreach ($extracted_fields as $ef) {
+                  if (!in_array($ef, $indexes)) {
+                    if (!empty($cfg['fields'][$ef])) {
+                      $tmp[$ef] = $cfg['fields'][$ef];
+                    }
+                    else {
+                      $tmp[] = $ef;
+                    }
+                  }
+                }
+              }
+              $cfg['fields'] = $indexes;
+              foreach ($tmp as $k => $v) {
+                if (is_string($k)) {
+                  $cfg['fields'][$k] = $v;
+                }
+                else {
+                  $cfg['fields'][] = $v;
+                }
+
+              }
+            }
+            else{
+              $res .= 'COUNT(*) FROM ( SELECT ';
+            }
+          }
+          else{
+            if (count($indexes) === count($cfg['group_by'])){
+              $res .= 'COUNT(*) FROM ( SELECT ';
+              //$cfg['fields'] = $indexes;
+              // Changed by Mirko
+              $cfg['fields'] = array_combine($idxs, $indexes);
+            }
+            else{
+              $res .= 'COUNT(*) FROM ( SELECT ';
             }
           }
         }
-        if ( count($indexes) ){
-          $res .= 'COUNT(DISTINCT '.bbn\x::join($indexes, ',').')';
-        }
         else{
           $res .= 'COUNT(*)';
+          $cfg['fields'] = [];
         }
       }
-      else if ( !empty($cfg['fields']) ){
+      if ( !empty($cfg['fields']) ){
         $fields_to_put = [];
         // Checking the selected fields
         foreach ( $cfg['fields'] as $alias => $f ){
@@ -687,7 +783,7 @@ class sqlite implements bbn\db\engines
           if ( strpos($f, '(') ){
             $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '').$f.(\is_string($alias) ? ' AS '.$this->escape($alias) : '');
           }
-          else if ( !empty($cfg['available_fields'][$f]) ){
+          else if ( array_key_exists($f, $cfg['available_fields']) ){
             $idx = $cfg['available_fields'][$f];
             $csn = $this->col_simple_name($f);
             $is_uid = false;
@@ -721,7 +817,7 @@ class sqlite implements bbn\db\engines
             $this->db->error("Error! The column '$f' exists on several tables in '".implode(', ', $cfg['tables']));
           }
           else{
-            $this->db->error("Error! The column '$f' doesn't exist in '".implode(', ', $cfg['tables']).' ('.implode(' - ', array_keys($cfg['available_fields'])).')');
+            $this->db->error("Error! The column '$f' doesn't exist in '".implode(', ', $cfg['tables']));
           }
         }
         $res .= implode(', ', $fields_to_put);

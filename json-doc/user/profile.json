@@ -34,32 +34,6 @@
             "final": false,
             "code": "function(bbn\\db $db, bbn\\user $user, array $cfg = [])\n  {\n      $this->id = $tmp['id'];\n      $this->id_group = $tmp['id_group'];\n      $this->id_user = $tmp['id_user'];\n      $this->db = $db;\n      $this->user = $user;\n      $this->cfg = bbn\\x::merge_arrays(self::$_defaults, $cfg);\n    }\n    return $this;\n  }",
             "startLine": 52,
-            "doc": {
-                "description": "connection constructor.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "db",
-                        "name": "$db"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "session",
-                        "name": "$session"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$cfg"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$credentials"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 62,
             "isDeprecated": false,
             "isGenerator": false,
@@ -112,11 +86,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( $this->check() ){\n      return $this->id;\n    }\n  }",
             "startLine": 67,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 72,
             "isDeprecated": false,
             "isGenerator": false,
@@ -141,11 +110,6 @@
             "final": false,
             "code": "function()\n  {\n\t\treturn $this->auth;\n  }",
             "startLine": 77,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 80,
             "isDeprecated": false,
             "isGenerator": false,
@@ -161,12 +125,21 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": {
+        "_defaults": {
+            "table": "bbn_users_profiles",
+            "cols": {
+                "id": "id",
+                "id_group": "id_group",
+                "id_user": "id_user"
+            }
+        }
+    },
     "constants": null,
     "numMethods": 3,
     "numProperties": 0,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 1,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [],
@@ -194,5 +167,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\user",
-    "shortName": "profile"
+    "shortName": "profile",
+    "summary": "A user authentication Class"
 }

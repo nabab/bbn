@@ -31,24 +31,6 @@
             "final": false,
             "code": "function($src = '', $mode = 'vue')\n  {\n    $this->set_tags();\n    $this->set_source($src);\n  }",
             "startLine": 618,
-            "doc": {
-                "description": "__construct",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$src",
-                        "description": "The source code or an absolute file path"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$mode",
-                        "description": "The mode to use"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 622,
             "isDeprecated": false,
             "isGenerator": false,
@@ -94,18 +76,6 @@
             "final": false,
             "code": "function($src)\n  {\n    $this->parsed = [];\n    return $this;\n  }",
             "startLine": 630,
-            "doc": {
-                "description": "Sets the source to parse",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$src",
-                        "description": "The source code or an absolute file path"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 634,
             "isDeprecated": false,
             "isGenerator": false,
@@ -141,18 +111,6 @@
             "final": false,
             "code": "function($mode)\n  {\n      $this->mode = $mode;\n      return $this;\n    }\n    die(_('Error: mode not allowed.'));\n  }",
             "startLine": 642,
-            "doc": {
-                "description": "Sets the mode",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$mode",
-                        "description": "The mode to set"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 648,
             "isDeprecated": false,
             "isGenerator": false,
@@ -188,11 +146,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( isset($matches[0]) ){\n      foreach ( $matches[0] as $match ){\n        preg_match($this->pattern['end'], $this->source, $mat, PREG_OFFSET_CAPTURE, $match[1]);\n        $start = $match[1];\n        $length = isset($mat[0]) ? ($mat[0][1] - $start) + 3 : 0;\n        if ( $db = $this->parse_docblock(substr($this->source, $start, $length)) ){\n          $this->parsed[] = $db;\n        }\n      }\n    }\n    return $this->parsed;\n  }",
             "startLine": 655,
-            "doc": {
-                "description": "Parses the current source",
-                "params": [],
-                "return": ""
-            },
             "endLine": 668,
             "isDeprecated": false,
             "isGenerator": false,
@@ -217,18 +170,6 @@
             "final": false,
             "code": "function($block)\n  {\n    $b = [\n\t\t\t'description' => '',\n\t\t\t'tags' => []\n\t\t];\n    \/\/ Remove start pattern\n    \/\/$block = trim(substr($block, 3));\n\t\t\/\/ Remove end pattern\n\t\t$block = trim(substr($block, 0, strlen($block) - 2));\n\t\t\/\/ Tags\n    $tags = $this->get_tags($block);\n    foreach ( $tags as $i => $tag ){\n\t\t\tif (\n\t\t\t\t(\n\t\t\t\t\tisset($tags[$i+1]) &&\n\t\t\t\t\t($t = $this->parse_tag(substr($block, $tag[1], $tags[$i+1][1] - $tag[1])))\n        ) ||\n\t\t\t\t($t = $this->parse_tag(substr($block, $tag[1])))\n\t\t\t){\n        if ( !empty($t['tag']) && ($t['tag'] === 'ignore') ){\n          return null;\n        }\n\t\t\t\t$b['tags'][] = $t;\n\t\t\t}\n    }\n    \/\/ Get Description\n    $b['description'] = $this->clear_text(isset($tags[0]) ? substr($block, 3, $tags[0][1]-1) : substr($block, 3));\n    return $b;\n  }",
             "startLine": 677,
-            "doc": {
-                "description": "Parses a given docblock",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$block",
-                        "description": "The docblock"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 706,
             "isDeprecated": false,
             "isGenerator": false,
@@ -267,11 +208,6 @@
             "final": false,
             "code": "function()\n  {\n      'description' => $this->get_file(),\n      'methods' => $this->get_methods(),\n      'events' => $this->get_events(),\n      \/\/'todo' => $this->get_todo()\n    ];\n  }",
             "startLine": 713,
-            "doc": {
-                "description": "Gets JavaScript structure",
-                "params": [],
-                "return": ""
-            },
             "endLine": 720,
             "isDeprecated": false,
             "isGenerator": false,
@@ -296,18 +232,6 @@
             "final": false,
             "code": "function($memberof = '')\n  {\n      'description' => $this->get_file($memberof),\n      'methods' => $this->get_methods($memberof),\n      'events' => $this->get_events($memberof),\n      'mixins' => $this->get_mixins($memberof),\n      'props' => $this->get_props($memberof),\n      'data' => $this->get_data($memberof),\n      'computed' => $this->get_computed($memberof),\n      'watch' => $this->get_watch($memberof),\n      'components' => $this->get_components($memberof),\n      \/\/'todo' => $this->get_todo($memberof)\n    ];\n  }",
             "startLine": 728,
-            "doc": {
-                "description": "Gets Vue.js structure",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$memberof",
-                        "description": "The parent tag name"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 741,
             "isDeprecated": false,
             "isGenerator": false,
@@ -334,7 +258,7 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": [],
     "constants": null,
     "numMethods": 7,
     "numProperties": 0,
@@ -621,5 +545,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\parsers",
-    "shortName": "doc"
+    "shortName": "doc",
+    "summary": "Documentation block parser"
 }

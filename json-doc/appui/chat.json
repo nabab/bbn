@@ -28,22 +28,6 @@
             "final": false,
             "code": "function(bbn\\db $db, bbn\\user $user)\n  {\n    if ( defined('BBN_DATA_PATH') && $user->check_session() ){\n      $this->db = $db;\n      $this->user = $user;\n    }\n  }",
             "startLine": 35,
-            "doc": {
-                "description": "chat constructor.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "bbn\\db",
-                        "name": "$db"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "bbn\\user",
-                        "name": "$user"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 41,
             "isDeprecated": false,
             "isGenerator": false,
@@ -87,11 +71,6 @@
             "final": false,
             "code": "function()\n  {\n    return $this->db && $this->user;\n  }",
             "startLine": 46,
-            "doc": {
-                "description": "",
-                "params": [],
-                "return": ""
-            },
             "endLine": 49,
             "isDeprecated": false,
             "isGenerator": false,
@@ -118,22 +97,6 @@
             "final": false,
             "code": "function(array $users, $public = 0)\n  {\n    if ( $this->check() ){\n      $join = '';\n      $where = '';\n      $values = [$this->user->get_id(), $public];\n      foreach ( $users as $i => $u ){\n        $join .= \"JOIN bbn_chats_users AS u$i ON u$i.id_chat = bbn_chats.id\".PHP_EOL;\n        $where .= \"AND u$i.id_user = ?\".PHP_EOL;\n        $values[] = $u;\n      }\n      $sql = <<<SQL\nSELECT id\nFROM bbn_chats\n  $join\nWHERE creator = ?\nAND public = ? \n$where\nSQL;\n      if ( ($id_chat = $this->db->get_one($sql, $values)) && (count($users) === $this->db->count('bbn_chat_users', ['id_chat' => $id_chat])) ){\n        return $id_chat;\n      }\n      if ( $this->db->insert('bbn_chats', [\n        'creator' => $this->user->get_id(),\n        'creation' => date('Y-m-d H:i:s'),\n        'public' => $public ? 1 : 0\n      ]) ){\n        $id_chat = $this->db->last_id();\n        $this->db->insert('bbn_chats_users', [\n          'id_chat' => $id_chat,\n          'id_user' => $this->user->get_id(),\n          'entrance' => microtime(true),\n          'admin' => 1\n        ]);\n        foreach ( $users as $user ){\n          $this->db->insert_ignore('bbn_chats_users', [\n            'id_chat' => $id_chat,\n            'id_user' => $user,\n            'entrance' => microtime(true),\n            'admin' => 0\n          ]);\n        }\n        return $id_chat;\n      }\n    }\n    return null;\n  }",
             "startLine": 58,
-            "doc": {
-                "description": "Creates a new chat with the current userr and another participant.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "array",
-                        "name": "$users"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "int",
-                        "name": "$public"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 104,
             "isDeprecated": false,
             "isGenerator": false,
@@ -180,24 +143,6 @@
             "final": false,
             "code": "function($id_chat, $id_user)\n  {\n    if ( $this->is_admin($id_chat) ){\n      return (bool)$this->db->insert_ignore('bbn_chats_users', [\n        'id_chat' => $id_chat,\n        'id_user' => $id_user,\n        'entrance' => microtime(true),\n        'admin' => 0\n      ]);\n    }\n    return false;\n  }",
             "startLine": 113,
-            "doc": {
-                "description": "Adds the given user to the given chat (if the current user is admin of this chat).",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "chat"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "user"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 124,
             "isDeprecated": false,
             "isGenerator": false,
@@ -245,24 +190,6 @@
             "final": false,
             "code": "function($id_chat, $id_user)\n  {\n    if ( $this->is_admin($id_chat) ){\n      return (bool)$this->db->update_ignore('bbn_chats_users', [\n        'admin' => 1\n      ], [\n        'id_chat' => $id_chat,\n        'id_user' => $id_user,\n      ]);\n    }\n    return false;\n  }",
             "startLine": 133,
-            "doc": {
-                "description": "Makes the given participant an admin of the given chat provided the current user is admin of this chat.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "chat"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "user"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 144,
             "isDeprecated": false,
             "isGenerator": false,
@@ -310,24 +237,6 @@
             "final": false,
             "code": "function($id_chat, $id_user = NULL)\n  {\n    if ( $this->check() ){\n      return (bool)$this->db->count('bbn_chats_users', [\n        'id_chat' => $id_chat,\n        'id_user' => $id_user ?: $this->user->get_id()\n      ]);\n    }\n    return null;\n  }",
             "startLine": 153,
-            "doc": {
-                "description": "Checks whether the given user is participant of the given chat.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "chat"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "user"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 162,
             "isDeprecated": false,
             "isGenerator": false,
@@ -376,16 +285,6 @@
             "final": false,
             "code": "function($id_chat)\n  {\n    if ( $this->check() ){\n      return $this->db->rselect('bbn_chats', [], ['id' => $id_chat]) ?: null;\n    }\n    return null;\n  }",
             "startLine": 170,
-            "doc": {
-                "description": "Gets information about the given chat.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$id_chat"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 176,
             "isDeprecated": false,
             "isGenerator": false,
@@ -423,18 +322,6 @@
             "final": false,
             "code": "function($id_chat)\n  {\n    if ( $this->check() ){\n      return $this->db->get_field_values('bbn_chats_users', 'id_user', ['id_chat' => $id_chat]);\n    }\n    return null;\n  }",
             "startLine": 184,
-            "doc": {
-                "description": "Returns the participants of the given chat as an array of id_user.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "chat"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 190,
             "isDeprecated": false,
             "isGenerator": false,
@@ -473,23 +360,6 @@
             "final": false,
             "code": "function($id_chat, $message)\n  {\n    if ( $this->check() && ($chat = $this->info($id_chat)) && !$chat['blocked'] ){\n      $users = $this->get_participants($id_chat);\n      if ( \\in_array($this->user->get_id(), $users, true) ){\n        $time = microtime(true);\n        $st = bbn\\util\\enc::crypt(json_encode(['time' => $time, 'user' => $this->user->get_id(), 'message' => $message]));\n        $day = date('Y-m-d');\n        foreach ( $users as $user ){\n          $dir = BBN_DATA_PATH.'users\/'.$user.'\/chat\/'.$id_chat.'\/'.$day;\n          if ( bbn\\file\\dir::create_path($dir) ){\n            file_put_contents($dir.'\/'.$time.'.msg', $st);\n          }\n        }\n        return $this->db->update('bbn_chats', ['last_message' => $time], ['id' => $id_chat]);\n      }\n    }\n    return null;\n  }",
             "startLine": 199,
-            "doc": {
-                "description": "Sends a new message from the current user in the given chat.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$id",
-                        "description": "chat"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$message"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 217,
             "isDeprecated": false,
             "isGenerator": false,
@@ -537,16 +407,6 @@
             "final": false,
             "code": "function($id_chat)\n  {\n    if ( $this->check() && ($chat = $this->info($id_chat)) && !$chat['blocked'] ){\n      return (bool)$this->db->count('bbn_chats_users', [\n        'id_chat' => $id_chat,\n        'id_user' => $this->user->get_id(),\n        'admin' => 1\n      ]);\n    }\n    return null;\n  }",
             "startLine": 225,
-            "doc": {
-                "description": "Checks whether the current user is an admin of the given chat or not.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$id_chat"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 235,
             "isDeprecated": false,
             "isGenerator": false,
@@ -584,16 +444,6 @@
             "final": false,
             "code": "function($id_chat)\n  {\n    if ( $this->is_admin($id_chat) ){\n      return (bool)$this->db->update('bbn_chats', ['blocked' => 1], ['id' => $id_chat]);\n    }\n    return false;\n  }",
             "startLine": 243,
-            "doc": {
-                "description": "Close a chat by setting blocked to 1.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$id_chat"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 249,
             "isDeprecated": false,
             "isGenerator": false,
@@ -630,7 +480,6 @@
             "final": false,
             "code": "function()\n  {\n    if ( $this->check() ){\n      return $this->db->get_field_values('bbn_chats_users', 'id_chat', ['id_user' => $this->user->get_id()]);\n    }\n  }",
             "startLine": 251,
-            "doc": null,
             "endLine": 256,
             "isDeprecated": false,
             "isGenerator": false,
@@ -658,7 +507,6 @@
             "final": false,
             "code": "function(array $users)\n  {\n    if ( $this->check() && count($users) ){\n      $cfg = [\n        'tables' => ['bbn_chats'],\n        'fields' => ['bbn_chats.id'],\n        'join' => [],\n        'where' => ['blocked' => 1]\n      ];\n      foreach ( $users as $i => $u ){\n        $cfg['join'][] = [\n          'table' => 'bbn_chats_users',\n          'alias' => 'u'.($i+1),\n          'on' => [\n            'conditions' => [\n              [\n                'field' => 'bbn_chats.id',\n                'exp' => 'u'.($i+1).'.id_chat'\n              ]\n            ]\n          ]\n        ];\n        $cfg['where']['u'.($i+1).'.id_user'] = $u;\n      }\n      $id_chat = false;\n      $ids = $this->db->get_column_values($cfg);\n      if ( count($ids) ){\n        foreach ( $ids as $id ){\n          if ( count($this->get_participants($id)) === (count($users) + 1) ){\n            $id_chat = $id;\n            break;\n          }\n        }\n      }\n      if ( !$id_chat ){\n        $id_chat = $this->create($users);\n      }\n      return $id_chat ?: null;\n    }\n    return null;\n  }",
             "startLine": 259,
-            "doc": null,
             "endLine": 299,
             "isDeprecated": false,
             "isGenerator": false,
@@ -696,26 +544,6 @@
             "final": false,
             "code": "function($id_chat, $last = NULL, $day = NULL)\n  {\n    $res = ['success' => false, 'last' => null, 'messages' => []];\n    if ( $this->check() ){\n      $dir = BBN_DATA_PATH.'users\/'.$this->user->get_id().'\/chat\/'.$id_chat.'\/'.($day ?: date('Y-m-d'));\n      if ( $this->is_participant($id_chat) && is_dir($dir) ){\n        $res['success'] = true;\n        $files = bbn\\file\\dir::get_files($dir);\n        foreach ( $files as $file ){\n          $time = (float)basename($file, '.msg');\n          if ( (!$last || \\bbn\\x::compare_floats($time, $last, '>')) && ($st = file_get_contents($file)) ){\n            $enc = bbn\\util\\enc::crypt('test');\n            $res['messages'][] = json_decode(bbn\\util\\enc::decrypt($st), true);\n          }\n        }\n        if ( isset($time) ){\n          $res['last'] = $time;\n        }\n      }\n    }\n    return $res;\n  }",
             "startLine": 308,
-            "doc": {
-                "description": "Returns messages from the given chat sent after $last.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$id_chat"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "null",
-                        "name": "$last"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "null",
-                        "name": "$day"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 329,
             "isDeprecated": false,
             "isGenerator": false,
@@ -770,20 +598,6 @@
             "final": false,
             "code": "function($id_chat, $day)\n  {\n    return $this->get_messages($id_chat, null, $day);\n  }",
             "startLine": 338,
-            "doc": {
-                "description": "Returns messages from the given chat for a specific day.",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "$id_chat"
-                    },
-                    {
-                        "tag": "param",
-                        "type": "$day"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 341,
             "isDeprecated": false,
             "isGenerator": false,
@@ -818,7 +632,7 @@
         },
         "get_active_chats": {
             "name": "get_active_chats",
-            "summary": "",
+            "summary": "*",
             "description": "",
             "description_parts": [],
             "file": "bbn\\appui\\chat",
@@ -827,10 +641,6 @@
             "final": false,
             "code": "function()\n  {\n      $t =& $this;\n      $d = new \\DateTime();\n      $d->sub(new \\DateInterval('PT20M'));\n      if ( $chats = array_filter($chats, function($c) use($d, $t){\n        return ($m = $t->get_messages($c, $d->getTimestamp())) && !empty($m['messages']);\n      }) ){\n        return array_map(function($c) use($d, $t){\n          return [\n            'id' => $c,\n            'messages' => ($m = $t->get_messages($c)) ? $m['messages'] : [],\n            'partecipants' => $t->get_participants($c),\n            'has_old' => $t->has_old_messages($c, $d->getTimestamp()-1)\n          ];\n        }, $chats);\n      }\n    }\n    return [];\n  }",
             "startLine": 346,
-            "doc": {
-                "description": "",
-                "tags": []
-            },
             "endLine": 365,
             "isDeprecated": false,
             "isGenerator": false,
@@ -855,7 +665,6 @@
             "final": false,
             "code": "function($id_chat, $moment)\n  {\n    if ( $this->check() ){\n      $cdir = BBN_DATA_PATH.'users\/'.$this->user->get_id().'\/chat\/'.$id_chat.'\/';\n      if ( $this->is_participant($id_chat) && is_dir($cdir) ){\n        $dir = $cdir . date('Y-m-d', $moment);\n        $files = \\bbn\\file\\dir::get_files($dir);\n        foreach ( $files as $file ){\n          $time = (float)basename($file, '.msg');\n          if ( \\bbn\\x::compare_floats($time, $moment, '<') && ($st = file_get_contents($file)) ){\n            return true;\n          }\n        }\n        $dirs = \\bbn\\file\\dir::get_dirs($cdir);\n        foreach ( $dirs as $d ){\n          if ( (basename($d) < date('Y-m-d', $moment)) && !empty(\\bbn\\file\\dir::get_files($d)) ){\n            return true;\n          }\n        }\n      }\n    }\n    return false;\n  }",
             "startLine": 367,
-            "doc": null,
             "endLine": 389,
             "isDeprecated": false,
             "isGenerator": false,
@@ -892,7 +701,7 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": [],
     "constants": null,
     "numMethods": 17,
     "numProperties": 0,
@@ -915,5 +724,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\appui",
-    "shortName": "chat"
+    "shortName": "chat",
+    "summary": "Class chat"
 }

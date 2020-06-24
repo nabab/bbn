@@ -23,7 +23,6 @@
             "final": false,
             "code": "function()\n  {\n    return self::$option_root_id;\n  }",
             "startLine": 71,
-            "doc": null,
             "endLine": 74,
             "isDeprecated": false,
             "isGenerator": false,
@@ -48,7 +47,6 @@
             "final": false,
             "code": "function()\n  {\n    return self::$option_appui_id;\n  }",
             "startLine": 76,
-            "doc": null,
             "endLine": 79,
             "isDeprecated": false,
             "isGenerator": false,
@@ -73,17 +71,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 87,
-            "doc": {
-                "description": "Returns The option's ID of a category, i.e. direct children of option's root",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$code"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 89,
             "isDeprecated": false,
             "isGenerator": false,
@@ -108,7 +95,6 @@
             "final": false,
             "code": "function()\n  {\n      return $a !== null;\n    }));\n  }",
             "startLine": 91,
-            "doc": null,
             "endLine": 95,
             "isDeprecated": false,
             "isGenerator": false,
@@ -133,7 +119,6 @@
             "final": false,
             "code": "function()\n  {\n      $tree['items'] : [];\n  }",
             "startLine": 97,
-            "doc": null,
             "endLine": 100,
             "isDeprecated": false,
             "isGenerator": false,
@@ -158,7 +143,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 102,
-            "doc": null,
             "endLine": 104,
             "isDeprecated": false,
             "isGenerator": false,
@@ -183,7 +167,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 106,
-            "doc": null,
             "endLine": 108,
             "isDeprecated": false,
             "isGenerator": false,
@@ -208,7 +191,6 @@
             "final": false,
             "code": "function()\n  {\n      bbn\\appui\\options::get_instance()->text_value_options($id): [];\n  }",
             "startLine": 110,
-            "doc": null,
             "endLine": 113,
             "isDeprecated": false,
             "isGenerator": false,
@@ -233,17 +215,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 121,
-            "doc": {
-                "description": "Returns The option's ID of a category, i.e. direct children of option's root",
-                "params": [
-                    {
-                        "tag": "param",
-                        "type": "string",
-                        "name": "$code"
-                    }
-                ],
-                "return": ""
-            },
             "endLine": 123,
             "isDeprecated": false,
             "isGenerator": false,
@@ -268,7 +239,6 @@
             "final": false,
             "code": "function()\n  {\n      return $a !== null;\n    }));\n  }",
             "startLine": 125,
-            "doc": null,
             "endLine": 129,
             "isDeprecated": false,
             "isGenerator": false,
@@ -293,7 +263,6 @@
             "final": false,
             "code": "function()\n  {\n      $tree['items'] : [];\n  }",
             "startLine": 131,
-            "doc": null,
             "endLine": 134,
             "isDeprecated": false,
             "isGenerator": false,
@@ -318,7 +287,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 136,
-            "doc": null,
             "endLine": 138,
             "isDeprecated": false,
             "isGenerator": false,
@@ -343,7 +311,6 @@
             "final": false,
             "code": "function()\n  {\n  }",
             "startLine": 140,
-            "doc": null,
             "endLine": 142,
             "isDeprecated": false,
             "isGenerator": false,
@@ -368,7 +335,6 @@
             "final": false,
             "code": "function()\n  {\n      bbn\\appui\\options::get_instance()->text_value_options($id) : [];\n  }",
             "startLine": 144,
-            "doc": null,
             "endLine": 147,
             "isDeprecated": false,
             "isGenerator": false,
@@ -384,12 +350,16 @@
         }
     },
     "properties": null,
-    "staticProperties": null,
+    "staticProperties": {
+        "optional_is_init": false,
+        "option_appui_id": null,
+        "option_root_id": null
+    },
     "constants": null,
     "numMethods": 14,
     "numProperties": 0,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 3,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [],
@@ -408,5 +378,6 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\models\\tts",
-    "shortName": "optional"
+    "shortName": "optional",
+    "summary": ""
 }
